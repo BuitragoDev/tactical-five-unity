@@ -1,0 +1,121 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Calendar.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="CalendarRoot" class="calendar-root">
+
+        <!-- ══ SIDEBAR ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard"  class="nav-item" text="INICIO" />
+                <ui:Button name="NavRoster"     class="nav-item" text="PLANTILLA" />
+                <ui:Button name="NavCalendar"   class="nav-item nav-item--active" text="CALENDARIO" />
+                <ui:Button name="NavStandings"  class="nav-item" text="CLASIFICACIÓN" />
+                <ui:Button name="NavPalmares"   class="nav-item" text="PALMARES" />
+                <ui:Button name="NavResults"    class="nav-item" text="RESULTADOS" />
+                <ui:Button name="NavPlayoffs"   class="nav-item" text="PLAYOFFS" />
+                <ui:Button name="NavStats"      class="nav-item" text="ESTADÍSTICAS" />
+                <ui:Button name="NavRecords"    class="nav-item" text="RECORDS" />
+                <ui:Button name="NavMarket"     class="nav-item" text="MERCADO" />
+                <ui:Button name="NavFinances"   class="nav-item" text="FINANZAS" />
+                <ui:Button name="NavSponsors"   class="nav-item" text="PATROCINADORES" />
+                <ui:Button name="NavTV"         class="nav-item" text="TELEVISIÓN" />
+                <ui:Button name="NavArena"      class="nav-item" text="PABELLÓN" />
+                <ui:Button name="NavMessages"   class="nav-item" text="MENSAJES" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-footer">
+                <ui:Button name="BtnReset" class="btn-reset" text="  REINICIAR PARTIDA" />
+                <ui:Label class="sidebar-version" text="v0.1.0 · Alpha" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="calendar-main">
+
+            <!-- TOP HEADER -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+            </ui:VisualElement>
+
+            <!-- CALENDAR CONTENT -->
+            <ui:VisualElement class="calendar-content">
+
+                <!-- Month navigation -->
+                <ui:VisualElement class="calendar-nav">
+                    <ui:Button name="BtnPrevMonth" class="calendar-nav-btn" text="◀" />
+                    <ui:Label name="CurrentMonth" class="calendar-month-label" text="" />
+                    <ui:Button name="BtnNextMonth" class="calendar-nav-btn" text="▶" />
+                </ui:VisualElement>
+
+                <!-- Calendar body: grid left, games right -->
+                <ui:VisualElement class="calendar-body">
+
+                    <!-- Calendar grid -->
+                    <ui:VisualElement class="calendar-grid-container">
+                        <!-- Day headers -->
+                        <ui:VisualElement class="calendar-day-headers">
+                            <ui:Label class="calendar-day-header" text="LUN" />
+                            <ui:Label class="calendar-day-header" text="MAR" />
+                            <ui:Label class="calendar-day-header" text="MIÉ" />
+                            <ui:Label class="calendar-day-header" text="JUE" />
+                            <ui:Label class="calendar-day-header" text="VIE" />
+                            <ui:Label class="calendar-day-header" text="SÁB" />
+                            <ui:Label class="calendar-day-header" text="DOM" />
+                        </ui:VisualElement>
+
+                        <!-- Calendar days -->
+                        <ui:VisualElement name="CalendarDays" class="calendar-days" />
+                    </ui:VisualElement>
+
+                    <!-- Selected day games panel -->
+                    <ui:VisualElement name="SelectedDayPanel" class="selected-day-panel">
+                        <ui:VisualElement class="panel-header">
+                            <ui:Label name="SelectedDayTitle" class="panel-title" text="" />
+                        </ui:VisualElement>
+                        <ui:ScrollView class="selected-day-games-scroll"
+                                       horizontal-scrolling-enabled="false"
+                                       mode="Vertical">
+                            <ui:VisualElement name="SelectedDayGames" class="selected-day-games" />
+                        </ui:ScrollView>
+                        <ui:Label name="NoGamesText" class="no-games-text" text="NO HAY PARTIDOS ESTE DÍA" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

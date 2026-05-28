@@ -1,0 +1,175 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="MainMenu.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
+
+    <ui:VisualElement name="MainMenuRoot" class="main-menu-root">
+
+        <!-- ══ HEADER ══ -->
+        <ui:VisualElement name="Header" class="header">
+            <ui:VisualElement name="LogoWrap" class="logo-wrap">
+                <ui:Label name="LogoIcon"     class="logo-icon"               text="TF" />
+                <ui:Label name="LogoText"     class="logo-text"               text="TACTICAL " />
+                <ui:Label name="LogoTextGold" class="logo-text logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:Button name="BtnLegal" class="btn-legal" text="ⓘ  AVISO LEGAL" />
+        </ui:VisualElement>
+
+        <!-- ══ HERO ══ -->
+        <ui:VisualElement name="Hero" class="hero">
+
+            <!-- Season bar -->
+            <ui:VisualElement name="SeasonBar" class="season-bar">
+                <ui:VisualElement class="season-bar-line" />
+                <ui:VisualElement class="season-bar-inner">
+                    <ui:VisualElement class="season-dot" />
+                    <ui:Label class="season-label" text="TEMPORADA 2025 · 2026" />
+                </ui:VisualElement>
+                <ui:VisualElement class="season-bar-line" />
+            </ui:VisualElement>
+
+            <!-- Título -->
+            <ui:Label name="TitleLine1" class="hero-title-line1" text="TACTICAL" />
+            <ui:Label name="TitleLine2" class="hero-title-line2" text="FIVE" />
+
+            <!-- Divisor -->
+            <ui:VisualElement class="hero-divider">
+                <ui:VisualElement class="divider-line" />
+                <ui:Label class="divider-text" text="ELIGE TU MODO DE JUEGO" />
+                <ui:VisualElement class="divider-line" />
+            </ui:VisualElement>
+
+            <!-- ══ MENU GRID ══ -->
+            <ui:VisualElement name="MenuGrid" class="menu-grid">
+
+                <!-- Liga Manager -->
+                <ui:Button name="BtnManager" class="menu-card card-manager">
+                    <ui:Label class="card-title" text="LIGA&#10;MANAGER" />
+                    <ui:VisualElement class="card-sep" />
+                    <ui:Label class="card-desc"
+                        text="Dirige tu club con estabilidad y visión a largo plazo. Construye un proyecto, gestiona cada temporada y mantente al frente hasta que tú decidas… o la directiva decida por ti." />
+                    <ui:VisualElement name="CtaManager" class="card-cta">
+                        <ui:Label class="cta-label" text="COMENZAR" />
+                        <ui:Label class="cta-arrow" text="→" />
+                    </ui:VisualElement>
+                </ui:Button>
+
+                <!-- Liga ProManager -->
+                <ui:Button name="BtnProManager" class="menu-card card-pro">
+                    <ui:Label class="card-title" text="LIGA&#10;PROMANAGER" />
+                    <ui:VisualElement class="card-sep" />
+                    <ui:Label class="card-desc"
+                        text="Empieza desde abajo y haz que tu carrera hable por ti. Tus resultados abrirán nuevas puertas cada temporada: quédate, progresa… o salta a un desafío mayor." />
+                    <ui:VisualElement name="CtaPro" class="card-cta">
+                        <ui:Label class="cta-label" text="COMENZAR" />
+                        <ui:Label class="cta-arrow" text="→" />
+                    </ui:VisualElement>
+                </ui:Button>
+
+                <!-- Cargar Partida -->
+                <ui:Button name="BtnLoadGame" class="menu-card card-load">
+                    <ui:Label class="card-title" text="CARGAR&#10;PARTIDA" />
+                    <ui:VisualElement class="card-sep" />
+                    <ui:Label class="card-desc"
+                        text="Continúa tu carrera donde la dejaste. Carga una partida guardada o gestiona tus archivos de guardado." />
+                    <ui:VisualElement name="CtaLoad" class="card-cta">
+                        <ui:Label class="cta-label" text="ABRIR" />
+                        <ui:Label class="cta-arrow" text="→" />
+                    </ui:VisualElement>
+                </ui:Button>
+
+                <!-- Editor -->
+                <ui:Button name="BtnEditor" class="menu-card card-editor">
+                    <ui:Label class="card-title" text="EDITOR&#10;BASE DE DATOS" />
+                    <ui:VisualElement class="card-sep" />
+                    <ui:Label class="card-desc"
+                        text="Edita jugadores, equipos, atributos y estadísticas. Crea tu liga personalizada y ajusta cada detalle antes de empezar tu partida." />
+                    <ui:VisualElement name="CtaEditor" class="card-cta">
+                        <ui:Label class="cta-label" text="ABRIR" />
+                        <ui:Label class="cta-arrow" text="→" />
+                    </ui:VisualElement>
+                </ui:Button>
+
+                <!-- Salir del juego -->
+                <ui:Button name="BtnExit" class="menu-card card-exit last">
+                    <ui:Label class="card-title" text="SALIR&#10;DEL JUEGO" />
+                    <ui:VisualElement class="card-sep" />
+                    <ui:Label class="card-desc"
+                        text="Cierra el juego y vuelve al escritorio. Asegúrate de haber guardado tu progreso si lo deseas." />
+                    <ui:VisualElement name="CtaExit" class="card-cta">
+                        <ui:Label class="cta-label" text="SALIR" />
+                        <ui:Label class="cta-arrow" text="→" />
+                    </ui:VisualElement>
+                </ui:Button>
+
+            </ui:VisualElement>
+
+            <!-- ══ STATS STRIP ══ -->
+            <ui:VisualElement name="StatsStrip" class="stats-strip">
+                <ui:VisualElement class="stat-item">
+                    <ui:Label class="stat-val" text="30" />
+                    <ui:Label class="stat-lbl" text="FRANQUICIAS" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-item">
+                    <ui:Label class="stat-val stat-val-accent" text="400+" />
+                    <ui:Label class="stat-lbl" text="JUGADORES REALES" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-item">
+                    <ui:Label class="stat-val" text="82" />
+                    <ui:Label class="stat-lbl" text="PARTIDOS / TEMPORADA" />
+                </ui:VisualElement>
+                <ui:VisualElement class="stat-item last">
+                    <ui:Label class="stat-val stat-val-accent" text="∞" />
+                    <ui:Label class="stat-lbl" text="TEMPORADAS" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ══ FOOTER ══ -->
+        <ui:VisualElement name="Footer" class="footer">
+            <ui:VisualElement class="version-tag">
+                <ui:VisualElement class="version-dot" />
+                <ui:Label class="version-label" text="V0.1.0  ·  ALPHA" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL AVISO LEGAL ══ -->
+        <ui:VisualElement name="ModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="ModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="AVISO LEGAL" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph"
+                        text="Tactical Five es un videojuego de simulación deportiva desarrollado con fines educativos y de entretenimiento personal." />
+                    <ui:Label class="modal-paragraph"
+                        text="Los nombres de equipos, jugadores y logotipos de la NBA son propiedad de sus respectivos dueños. Tactical Five no está afiliado, patrocinado ni respaldado por la NBA, sus equipos ni sus jugadores." />
+                    <ui:Label class="modal-paragraph"
+                        text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." />
+                    <ui:Label class="modal-copyright"
+                        text="© 2025 Tactical Five  ·  Todos los derechos reservados" />
+                </ui:VisualElement>
+                <ui:Button name="BtnCerrar" class="modal-close" text="CERRAR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL SALIR DEL JUEGO ══ -->
+        <ui:VisualElement name="ExitModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="ExitModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph"
+                        text="¿Estás seguro de que quieres salir del juego?" />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="BtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

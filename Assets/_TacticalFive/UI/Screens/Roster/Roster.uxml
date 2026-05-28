@@ -1,0 +1,192 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Roster.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="RosterRoot" class="roster-root">
+
+        <!-- ══ SIDEBAR (reutilizamos del dashboard) ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard"  class="nav-item" text="INICIO" />
+                <ui:Button name="NavRoster"     class="nav-item nav-item--active" text="PLANTILLA" />
+                <ui:Button name="NavCalendar"   class="nav-item" text="CALENDARIO" />
+                <ui:Button name="NavStandings"  class="nav-item" text="CLASIFICACIÓN" />
+                <ui:Button name="NavPalmares"   class="nav-item" text="PALMARES" />
+                <ui:Button name="NavResults"    class="nav-item" text="RESULTADOS" />
+                <ui:Button name="NavPlayoffs"   class="nav-item" text="PLAYOFFS" />
+                <ui:Button name="NavStats"      class="nav-item" text="ESTADÍSTICAS" />
+                <ui:Button name="NavRecords"    class="nav-item" text="RECORDS" />
+                <ui:Button name="NavMarket"     class="nav-item" text="MERCADO" />
+                <ui:Button name="NavFinances"   class="nav-item" text="FINANZAS" />
+                <ui:Button name="NavSponsors"   class="nav-item" text="PATROCINADORES" />
+                <ui:Button name="NavTV"         class="nav-item" text="TELEVISIÓN" />
+                <ui:Button name="NavArena"      class="nav-item" text="PABELLÓN" />
+                <ui:Button name="NavMessages"   class="nav-item" text="MENSAJES" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-footer">
+                <ui:Button name="BtnReset" class="btn-reset" text="↺  REINICIAR PARTIDA" />
+                <ui:Label class="sidebar-version" text="v0.1.0 · Alpha" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="roster-main">
+
+            <!-- TOP HEADER (reutilizamos clases del dashboard) -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+            </ui:VisualElement>
+
+            <!-- SUMMARY BAR -->
+            <ui:VisualElement class="summary-bar">
+                <ui:VisualElement class="summary-item">
+                    <ui:Label name="SummaryPlayers" class="summary-value" text="0" />
+                    <ui:Label class="summary-label" text="JUGADORES" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-item">
+                    <ui:Label name="SummaryOverall" class="summary-value summary-value--gold" text="0" />
+                    <ui:Label class="summary-label" text="OVERALL" />
+                </ui:VisualElement>
+                <ui:VisualElement class="summary-item summary-item-last">
+                    <ui:Label name="SummaryBudget" class="summary-value summary-value--gold" text="" />
+                    <ui:Label class="summary-label" text="PRESUPUESTO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- CONTENT -->
+            <ui:VisualElement class="roster-content">
+
+                <!-- LEFT: lista -->
+                <ui:VisualElement class="roster-list">
+                    <ui:ScrollView name="RosterScroll" class="roster-scroll"
+                                   horizontal-scrolling-enabled="false"
+                                   mode="Vertical">
+                        <ui:VisualElement name="RosterBody" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+                <!-- RIGHT: detalle -->
+                <ui:VisualElement name="PlayerDetail" class="player-detail">
+
+                    <!-- Placeholder -->
+                    <ui:VisualElement name="DetailEmpty" class="detail-empty">
+                        <ui:Label class="detail-empty-text"
+                                  text="SELECCIONA UN JUGADOR" />
+                    </ui:VisualElement>
+
+                    <!-- Panel detalle (oculto hasta selección) -->
+                    <ui:ScrollView name="DetailScroll" class="detail-scroll"
+                                   horizontal-scrolling-enabled="false"
+                                   mode="Vertical">
+                        <ui:VisualElement name="DetailContent">
+
+                            <!-- Cabecera -->
+                            <ui:VisualElement class="detail-top">
+                                <ui:Label name="DetailPosBadge" class="detail-pos-badge" text="" />
+                                <ui:VisualElement class="detail-name-block">
+                                    <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
+                                    <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="detail-ovr-block">
+                                    <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />
+                                    <ui:Label class="detail-ovr-label" text="OVR" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- Salud -->
+                            <ui:VisualElement class="detail-health">
+                                <ui:Label name="DetailHealth" class="detail-health-ok" text="✓ DISPONIBLE" />
+                            </ui:VisualElement>
+
+                            <!-- Atributos -->
+                            <ui:VisualElement name="DetailAttrs" class="detail-attrs" />
+
+                            <!-- Stats temporada -->
+                            <ui:VisualElement name="DetailSeasonStats" class="detail-season-stats">
+                                <ui:VisualElement class="season-stat-card">
+                                    <ui:Label name="StatPts"   class="season-stat-val"   text="0.0" />
+                                    <ui:Label class="season-stat-label" text="PTS" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="season-stat-card">
+                                    <ui:Label name="StatReb"   class="season-stat-val"   text="0.0" />
+                                    <ui:Label class="season-stat-label" text="REB" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="season-stat-card">
+                                    <ui:Label name="StatAst"   class="season-stat-val"   text="0.0" />
+                                    <ui:Label class="season-stat-label" text="AST" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- Footer contrato / potencial -->
+                            <ui:VisualElement class="detail-footer">
+                                <ui:VisualElement class="flex-col">
+                                    <ui:Label class="detail-contract-label" text="CONTRATO" />
+                                    <ui:Label name="DetailContract" class="detail-contract-value" text="" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="flex-col" style="align-items: flex-end;">
+                                    <ui:Label class="detail-potential-label" text="POTENCIAL" />
+                                    <ui:Label name="DetailPotential" class="detail-potential-value" text="" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- Botón despedir -->
+                            <ui:Button name="BtnDismiss" class="btn-dismiss"
+                                       text="✕  DESPEDIR JUGADOR" />
+
+                        </ui:VisualElement>
+                    </ui:ScrollView>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ══ MODAL CONFIRMAR DESPIDO ══ -->
+        <ui:VisualElement name="DismissOverlay" class="dismiss-modal-overlay">
+            <ui:VisualElement name="DismissBox" class="dismiss-modal-box">
+                <ui:Label class="dismiss-modal-title" text="DESPEDIR JUGADOR" />
+                <ui:Label name="DismissText1" class="dismiss-modal-text" text="" />
+                <ui:Label name="DismissText2" class="dismiss-modal-text" text="" />
+                <ui:Label class="dismiss-modal-text dismiss-modal-text--warning"
+                          text="El jugador quedará sin equipo como agente libre." />
+                <ui:VisualElement class="dismiss-modal-buttons">
+                    <ui:Button name="BtnDismissCancel"  class="btn-modal-cancel"  text="CANCELAR" />
+                    <ui:Button name="BtnDismissConfirm" class="btn-modal-confirm" text="CONFIRMAR DESPIDO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

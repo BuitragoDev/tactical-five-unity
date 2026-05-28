@@ -1,0 +1,375 @@
+using UnityEngine;
+using UnityEngine.UIElements;
+using System.Collections.Generic;
+using System.Linq;
+
+public class SelectTeamController : MonoBehaviour
+{
+    private UIDocument _doc;
+    private VisualElement _root;
+
+    // Header
+    private Button _btnBack;
+    private Button _btnContinue;
+    private Label _headerMode;
+
+    // Manager name
+    private TextField _managerInput;
+
+    // Tabs
+    private Button _tabAll;
+    private Button _tabEast;
+    private Button _tabWest;
+
+    // Grid
+    private VisualElement _teamsGrid;
+    private ScrollView _gridScroll;
+
+    // Detail
+    private ScrollView _detailScroll;
+    private VisualElement _detailPlaceholder;
+    private VisualElement _detailPanel;
+    private VisualElement _detailLogo;
+    private Label _detailTeamName;
+    private Label _detailConference;
+    private Label _detailCity;
+    private Label _detailConferenceVal;
+    private Label _detailDivision;
+    private Label _detailOwner;
+    private Label _detailArena;
+    private Label _detailCapacity;
+    private Label _detailBudget;
+    private Label _detailSalaryMargin;
+    private VisualElement _detailReputation;
+    private VisualElement _detailFacilities;
+    private Label _detailAttack;
+    private Label _detailDefense;
+    private Label _detailOverall;
+    private VisualElement _jerseyHome;
+    private VisualElement _jerseyAway;
+
+    // Estado
+    private List<TeamData> _allTeams;
+    private List<TeamData> _worstTeams;
+    private TeamData _selectedTeam;
+
+    // Sprites
+    private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _jerseySprites = new();
+
+    void OnEnable()
+    {
+        _doc = GetComponent<UIDocument>();
+        _root = _doc.rootVisualElement;
+
+        // Forzar root a ocupar toda la pantalla
+        _root.style.position = Position.Absolute;
+        _root.style.left = 0;
+        _root.style.right = 0;
+        _root.style.top = 0;
+        _root.style.bottom = 0;
+        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+
+        CacheReferences();
+        SetupScrollViews();
+        RegisterCallbacks();
+        LoadSprites();
+        LoadTeams();
+
+        // Modo de juego
+        var mode = ScreenManager.Instance.CurrentMode;
+        _headerMode.text = mode == GameMode.ProManager ? "PROMANAGER" : "MANAGER";
+
+        // Estado inicial
+        _detailScroll.style.display = DisplayStyle.None;
+        _detailPlaceholder.style.display = DisplayStyle.Flex;
+        _btnContinue.SetEnabled(false);
+
+        // Listener del nombre del manager
+        _managerInput?.RegisterValueChangedCallback(_ => ValidateContinue());
+
+        ShowFilter("All");
+    }
+
+    void ValidateContinue()
+    {
+        bool hasTeam = _selectedTeam != null;
+        bool hasName = !string.IsNullOrWhiteSpace(_managerInput?.value);
+        _btnContinue.SetEnabled(hasTeam && hasName);
+    }
+
+    void CacheReferences()
+    {
+        _btnBack = _root.Q<Button>("BtnBack");
+        _btnContinue = _root.Q<Button>("BtnContinue");
+        _headerMode = _root.Q<Label>("HeaderMode");
+        _managerInput = _root.Q<TextField>("ManagerNameInput");
+        _tabAll = _root.Q<Button>("TabAll");
+        _tabEast = _root.Q<Button>("TabEast");
+        _tabWest = _root.Q<Button>("TabWest");
+        _gridScroll = _root.Q<ScrollView>("GridScroll");
+        _teamsGrid = _root.Q<VisualElement>("TeamsGrid");
+        _detailScroll = _root.Q<ScrollView>("DetailScroll");
+        _detailPlaceholder = _root.Q<VisualElement>("DetailPlaceholder");
+        _detailPanel = _root.Q<VisualElement>("DetailPanel");
+        _detailLogo = _root.Q<VisualElement>("DetailLogo");
+        _detailTeamName = _root.Q<Label>("DetailTeamName");
+        _detailConference = _root.Q<Label>("DetailConference");
+        _detailCity = _root.Q<Label>("DetailCity");
+        _detailConferenceVal = _root.Q<Label>("DetailConferenceVal");
+        _detailDivision = _root.Q<Label>("DetailDivision");
+        _detailOwner = _root.Q<Label>("DetailOwner");
+        _detailArena = _root.Q<Label>("DetailArena");
+        _detailCapacity = _root.Q<Label>("DetailCapacity");
+        _detailBudget = _root.Q<Label>("DetailBudget");
+        _detailSalaryMargin = _root.Q<Label>("DetailSalaryMargin");
+        _detailReputation = _root.Q<VisualElement>("DetailReputation");
+        _detailFacilities = _root.Q<VisualElement>("DetailFacilities");
+        _detailAttack = _root.Q<Label>("DetailAttack");
+        _detailDefense = _root.Q<Label>("DetailDefense");
+        _detailOverall = _root.Q<Label>("DetailOverall");
+        _jerseyHome = _root.Q<VisualElement>("JerseyHome");
+        _jerseyAway = _root.Q<VisualElement>("JerseyAway");
+    }
+
+    void SetupScrollViews()
+    {
+        // Forzar el contenedor del grid a ser wrap
+        if (_gridScroll != null)
+        {
+            _gridScroll.contentContainer.style.flexDirection = FlexDirection.Row;
+            _gridScroll.contentContainer.style.flexWrap = Wrap.Wrap;
+            _gridScroll.contentContainer.style.alignContent = Align.FlexStart;
+        }
+
+        // Forzar el contenedor del detail a ser columna
+        if (_detailScroll != null)
+        {
+            _detailScroll.contentContainer.style.flexDirection = FlexDirection.Column;
+            _detailScroll.contentContainer.style.flexShrink = 0;
+        }
+    }
+
+    void RegisterCallbacks()
+    {
+        _btnBack?.RegisterCallback<ClickEvent>(_ =>
+            ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+        _btnContinue?.RegisterCallback<ClickEvent>(_ => OnContinue());
+        _tabAll?.RegisterCallback<ClickEvent>(_ => ShowFilter("All"));
+        _tabEast?.RegisterCallback<ClickEvent>(_ => ShowFilter("East"));
+        _tabWest?.RegisterCallback<ClickEvent>(_ => ShowFilter("West"));
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(_btnBack);
+            CursorManager.Instance.RegisterHandCursor(_btnContinue);
+            CursorManager.Instance.RegisterHandCursor(_tabAll);
+            CursorManager.Instance.RegisterHandCursor(_tabEast);
+            CursorManager.Instance.RegisterHandCursor(_tabWest);
+        }
+    }
+
+    void LoadSprites()
+    {
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/120x120/");
+        Debug.Log($"[SelectTeam] Logos cargados: {logos.Length}");
+        foreach (var s in logos)
+            _logoSprites[s.name] = s;
+
+        var jerseys = Resources.LoadAll<Sprite>("Teams/Jerseys/121x170/");
+        Debug.Log($"[SelectTeam] Camisetas cargadas: {jerseys.Length}");
+        foreach (var s in jerseys)
+            _jerseySprites[s.name] = s;
+    }
+
+    void LoadTeams()
+    {
+        _allTeams = DatabaseManager.Instance.GetAllTeams();
+        _worstTeams = DatabaseManager.Instance.GetWorstTeams(5);
+    }
+
+    void ShowFilter(string filter)
+    {
+        SetTabActive(_tabAll, filter == "All");
+        SetTabActive(_tabEast, filter == "East");
+        SetTabActive(_tabWest, filter == "West");
+
+        List<TeamData> filtered = filter == "All"
+            ? _allTeams
+            : _allTeams.FindAll(t => t.conference == filter);
+
+        BuildGrid(filtered);
+    }
+
+    void SetTabActive(Button tab, bool active)
+    {
+        if (active)
+        {
+            if (!tab.ClassListContains("tab-btn--active"))
+                tab.AddToClassList("tab-btn--active");
+        }
+        else
+        {
+            tab.RemoveFromClassList("tab-btn--active");
+        }
+    }
+
+    void BuildGrid(List<TeamData> teams)
+    {
+        _teamsGrid.Clear();
+
+        bool isProManager = ScreenManager.Instance.CurrentMode == GameMode.ProManager;
+
+        foreach (var team in teams)
+        {
+            bool disabled = isProManager && !_worstTeams.Exists(w => w.id == team.id);
+            _teamsGrid.Add(CreateTeamItem(team, disabled));
+        }
+    }
+
+    VisualElement CreateTeamItem(TeamData team, bool disabled)
+    {
+        var item = new VisualElement();
+        item.AddToClassList("team-item");
+
+        if (disabled)
+        {
+            item.AddToClassList("team-item--disabled");
+        }
+        else
+        {
+            item.RegisterCallback<ClickEvent>(_ => OnTeamSelected(team, item));
+            if (CursorManager.Instance != null)
+            {
+                item.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                item.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+            }
+        }
+
+        var logo = new VisualElement();
+        logo.AddToClassList("team-logo");
+        if (_logoSprites.TryGetValue(team.logo, out var sprite))
+            logo.style.backgroundImage = new StyleBackground(sprite);
+
+        item.Add(logo);
+        return item;
+    }
+
+    void OnTeamSelected(TeamData team, VisualElement item)
+    {
+        _selectedTeam = team;
+
+        _teamsGrid.Query<VisualElement>(className: "team-item--selected")
+                  .ForEach(e => e.RemoveFromClassList("team-item--selected"));
+        item.AddToClassList("team-item--selected");
+
+        ShowTeamDetail(team);
+        ValidateContinue();
+    }
+
+    void ShowTeamDetail(TeamData team)
+    {
+        _detailPlaceholder.style.display = DisplayStyle.None;
+        _detailScroll.style.display = DisplayStyle.Flex;
+
+        // Logo
+        if (_logoSprites.TryGetValue(team.logo, out var logoSprite))
+            _detailLogo.style.backgroundImage = new StyleBackground(logoSprite);
+
+        // Textos
+        _detailTeamName.text = team.name.ToUpper();
+        _detailConference.text = $"{team.conference.ToUpper()} · {team.division.ToUpper()}";
+        _detailCity.text = team.city;
+        _detailConferenceVal.text = team.conference == "East" ? "Este" : "Oeste";
+        _detailDivision.text = team.division;
+        _detailOwner.text = team.owner;
+        _detailArena.text = team.arena;
+        _detailCapacity.text = $"{team.capacity:N0}";
+        _detailBudget.text = $"${team.budget / 1_000_000}M";
+
+        // Margen salarial real = Cap - suma de salarios de jugadores del equipo
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        var teamPlayers = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+        long totalPayroll = teamPlayers.Sum(p => p.salary);
+        long margin = salaryCap - totalPayroll;
+
+        _detailSalaryMargin.text = margin >= 0
+            ? $"+${margin / 1_000_000}M"
+            : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        _detailSalaryMargin.style.color = margin >= 0
+            ? new StyleColor(new Color(0.15f, 0.68f, 0.38f))
+            : new StyleColor(new Color(0.75f, 0.22f, 0.17f));
+
+        // Stats
+        _detailAttack.text = team.attack.ToString();
+        _detailDefense.text = team.defense.ToString();
+        _detailOverall.text = team.overall.ToString();
+
+        // Estrellas
+        BuildStars(_detailReputation, team.reputation);
+        BuildStars(_detailFacilities, team.facilities);
+
+        // Camisetas
+        if (_jerseySprites.TryGetValue(team.jersey_home, out var home))
+            _jerseyHome.style.backgroundImage = new StyleBackground(home);
+        if (_jerseySprites.TryGetValue(team.jersey_away, out var away))
+            _jerseyAway.style.backgroundImage = new StyleBackground(away);
+    }
+
+    void BuildStars(VisualElement container, int filled)
+    {
+        container.Clear();
+        for (int i = 1; i <= 5; i++)
+        {
+            var star = new VisualElement();
+            star.AddToClassList("star");
+            if (i <= filled)
+                star.AddToClassList("star--filled");
+            container.Add(star);
+        }
+    }
+
+    void OnContinue()
+    {
+        if (_selectedTeam == null) return;
+
+        string managerName = _managerInput?.value;
+        if (string.IsNullOrWhiteSpace(managerName))
+            managerName = "Manager";
+
+        int activeSlot = DatabaseManager.Instance.ActiveSaveSlot;
+
+        var manager = new ManagerData
+        {
+            name = managerName,
+            team_id = _selectedTeam.id,
+            game_mode = ScreenManager.Instance.CurrentMode == GameMode.ProManager
+                        ? "promanager" : "manager",
+            trust = 50,
+            morale = 50,
+            pressure = 50
+        };
+
+        DatabaseManager.Instance.SaveManager(manager);
+        Debug.Log($"[SelectTeam] Manager '{managerName}' → {_selectedTeam.name} (slot {activeSlot})");
+
+        // Guardar metadatos iniciales
+        GameSaveManager.SaveSlotInfo(new SaveSlotInfo
+        {
+            slotNumber = activeSlot,
+            exists = true,
+            managerName = managerName,
+            teamName = _selectedTeam.name,
+            teamLogo = _selectedTeam.logo,
+            seasonYear = "2025-2026",
+            currentDate = "",
+            lastPlayedRealDate = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+            currentGameDay = 0,
+            gameMode = manager.game_mode
+        });
+
+        ScreenManager.Instance.GoTo(GameScreen.Preseason);
+    }
+}

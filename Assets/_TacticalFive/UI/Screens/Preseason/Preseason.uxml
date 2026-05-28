@@ -1,0 +1,60 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Preseason.uss" />
+
+    <ui:VisualElement name="PreseasonRoot" class="preseason-root">
+
+        <!-- ══ HEADER ══ -->
+        <ui:VisualElement name="Header" class="header">
+            <ui:Button name="BtnBack" class="btn-back" text="← VOLVER" />
+            <ui:VisualElement class="header-title">
+                <ui:Label class="header-title-white" text="PRETEMPORADA" />
+                <ui:Label class="header-title-gold"  text="2025" />
+                <ui:Label class="header-title-white" text="· PARTIDOS AMISTOSOS" />
+            </ui:VisualElement>
+            <ui:Button name="BtnContinue" class="btn-continue" text="CONTINUAR →" />
+        </ui:VisualElement>
+
+        <!-- ══ INFO BAR ══ -->
+        <ui:VisualElement class="info-bar">
+            <ui:VisualElement name="InfoBarLogo" class="info-bar-logo" />
+            <ui:Label name="InfoBarTeam" class="info-bar-team" text="" />
+            <ui:Label class="info-bar-label" text="PARTIDOS ELEGIDOS" />
+            <ui:Label name="InfoBarCount" class="info-bar-value" text="0 / 4" />
+            <ui:Label class="info-bar-label" text="TEMPORADA" />
+            <ui:Label class="info-bar-value" text="SEPTIEMBRE 2025" />
+        </ui:VisualElement>
+
+        <!-- ══ CONTENT ══ -->
+        <ui:VisualElement class="content-area">
+
+            <!-- SLOTS de partidos (fila superior) -->
+            <ui:VisualElement name="SlotsRow" class="slots-row" />
+
+        </ui:VisualElement>
+
+        <!-- ══ BOTTOM: toggle + grid de equipos ══ -->
+        <ui:VisualElement class="bottom-area">
+
+            <!-- Toggle LOCAL / VISITANTE -->
+            <ui:VisualElement class="location-toggle">
+                <ui:Button name="BtnHome" class="toggle-btn toggle-btn--active toggle-btn--left"
+                           text="🏠  LOCAL" />
+                <ui:Button name="BtnAway" class="toggle-btn"
+                           text="✈  VISITANTE" />
+            </ui:VisualElement>
+
+            <!-- Grid de equipos -->
+            <ui:ScrollView name="TeamsScroll" class="teams-scroll"
+                           horizontal-scrolling-enabled="false"
+                           mode="Vertical">
+                <ui:VisualElement name="TeamsGrid" class="teams-grid" />
+            </ui:ScrollView>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

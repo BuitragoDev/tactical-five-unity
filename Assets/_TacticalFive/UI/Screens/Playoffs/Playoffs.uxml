@@ -1,0 +1,124 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Playoffs.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="PlayoffsRoot" class="playoffs-root">
+
+        <!-- ══ SIDEBAR ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard"  class="nav-item" text="INICIO" />
+                <ui:Button name="NavRoster"     class="nav-item" text="PLANTILLA" />
+                <ui:Button name="NavCalendar"   class="nav-item" text="CALENDARIO" />
+                <ui:Button name="NavStandings"  class="nav-item" text="CLASIFICACIÓN" />
+                <ui:Button name="NavPalmares"   class="nav-item" text="PALMARES" />
+                <ui:Button name="NavResults"    class="nav-item" text="RESULTADOS" />
+                <ui:Button name="NavPlayoffs"   class="nav-item nav-item--active" text="PLAYOFFS" />
+                <ui:Button name="NavStats"      class="nav-item" text="ESTADÍSTICAS" />
+                <ui:Button name="NavRecords"    class="nav-item" text="RECORDS" />
+                <ui:Button name="NavMarket"     class="nav-item" text="MERCADO" />
+                <ui:Button name="NavFinances"   class="nav-item" text="FINANZAS" />
+                <ui:Button name="NavSponsors"   class="nav-item" text="PATROCINADORES" />
+                <ui:Button name="NavTV"         class="nav-item" text="TELEVISIÓN" />
+                <ui:Button name="NavArena"      class="nav-item" text="PABELLÓN" />
+                <ui:Button name="NavMessages"   class="nav-item" text="MENSAJES" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-footer">
+                <ui:Button name="BtnReset" class="btn-reset" text="  REINICIAR PARTIDA" />
+                <ui:Label class="sidebar-version" text="v0.1.0 · Alpha" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="playoffs-main">
+
+            <!-- TOP HEADER -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+            </ui:VisualElement>
+
+            <!-- PLAYOFFS CONTENT -->
+            <ui:ScrollView class="playoffs-scroll"
+                           horizontal-scrolling-enabled="false"
+                           mode="Vertical">
+                <ui:VisualElement class="playoffs-content">
+
+                    <!-- Regular season empty state -->
+                    <ui:VisualElement name="RegularSeasonEmpty" class="bracket-empty" style="display: none;">
+                        <ui:Label class="bracket-empty-icon" text="🏀" />
+                        <ui:Label class="bracket-empty-title" text="TEMPORADA REGULAR EN CURSO" />
+                        <ui:Label class="bracket-empty-subtitle" text="El bracket de Playoffs y Play-In estará disponible cuando termine la temporada regular." />
+                    </ui:VisualElement>
+
+                    <!-- Play-In -->
+                    <ui:VisualElement name="PlayInPanel" class="panel panel-playoffs">
+                        <ui:VisualElement class="panel-header">
+                            <ui:Label class="panel-title" text="PLAY-IN TOURNAMENT" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PlayInBody" class="playoffs-bracket" />
+                        <ui:Label name="NoPlayInText" class="no-data-text" text="PLAY-IN NO DISPONIBLE AÚN" />
+                    </ui:VisualElement>
+
+                    <!-- Eastern Conference -->
+                    <ui:VisualElement class="panel panel-playoffs">
+                        <ui:VisualElement class="panel-header">
+                            <ui:Label class="panel-title" text="PLAYOFFS — CONFERENCIA ESTE" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="EastBracket" class="playoffs-bracket" />
+                    </ui:VisualElement>
+
+                    <!-- Western Conference -->
+                    <ui:VisualElement class="panel panel-playoffs">
+                        <ui:VisualElement class="panel-header">
+                            <ui:Label class="panel-title" text="PLAYOFFS — CONFERENCIA OESTE" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="WestBracket" class="playoffs-bracket" />
+                    </ui:VisualElement>
+
+                    <!-- NBA Finals -->
+                    <ui:VisualElement name="FinalsPanel" class="panel panel-playoffs panel-finals">
+                        <ui:VisualElement class="panel-header">
+                            <ui:Label class="panel-title" text="FINALES NBA" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="FinalsBody" class="playoffs-bracket" />
+                        <ui:Label name="NoFinalsText" class="no-data-text" text="FINALES NO DISPONIBLES AÚN" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:ScrollView>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

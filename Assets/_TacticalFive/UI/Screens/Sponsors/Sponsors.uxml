@@ -1,0 +1,96 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Sponsors.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="SponsorsRoot" class="sponsors-root">
+
+        <!-- ══ SIDEBAR ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard"  class="nav-item" text="INICIO" />
+                <ui:Button name="NavRoster"     class="nav-item" text="PLANTILLA" />
+                <ui:Button name="NavCalendar"   class="nav-item" text="CALENDARIO" />
+                <ui:Button name="NavStandings"  class="nav-item" text="CLASIFICACIÓN" />
+                <ui:Button name="NavPalmares"   class="nav-item" text="PALMARES" />
+                <ui:Button name="NavResults"    class="nav-item" text="RESULTADOS" />
+                <ui:Button name="NavPlayoffs"   class="nav-item" text="PLAYOFFS" />
+                <ui:Button name="NavStats"      class="nav-item" text="ESTADÍSTICAS" />
+                <ui:Button name="NavRecords"    class="nav-item" text="RECORDS" />
+                <ui:Button name="NavMarket"     class="nav-item" text="MERCADO" />
+                <ui:Button name="NavFinances"   class="nav-item" text="FINANZAS" />
+                <ui:Button name="NavSponsors"   class="nav-item nav-item--active" text="PATROCINADORES" />
+                <ui:Button name="NavTV"         class="nav-item" text="TELEVISIÓN" />
+                <ui:Button name="NavArena"      class="nav-item" text="PABELLÓN" />
+                <ui:Button name="NavMessages"   class="nav-item" text="MENSAJES" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-footer">
+                <ui:Button name="BtnReset" class="btn-reset" text="  REINICIAR PARTIDA" />
+                <ui:Label class="sidebar-version" text="v0.1.0 · Alpha" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="sponsors-main">
+
+            <!-- TOP HEADER -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+            </ui:VisualElement>
+
+            <!-- SPONSORS CONTENT -->
+            <ui:VisualElement class="sponsors-content">
+
+                <!-- Current sponsor -->
+                <ui:VisualElement class="panel panel-sponsors">
+                    <ui:VisualElement class="panel-header">
+                        <ui:Label class="panel-title" text="PATROCINADOR ACTUAL" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="CurrentSponsorBody" class="sponsors-current" />
+                    <ui:Label name="NoSponsorText" class="no-data-text" text="SIN PATROCINADOR ACTUAL" />
+                </ui:VisualElement>
+
+                <!-- Available sponsors -->
+                <ui:VisualElement class="panel panel-sponsors">
+                    <ui:VisualElement class="panel-header">
+                        <ui:Label class="panel-title" text="PATROCINADORES DISPONIBLES" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="AvailableSponsorsBody" class="sponsors-list" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

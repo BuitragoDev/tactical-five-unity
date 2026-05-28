@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="LoadGame.uss" />
+
+    <ui:VisualElement name="LoadGameRoot" class="loadgame-root">
+
+        <ui:VisualElement class="loadgame-header">
+            <ui:Label class="loadgame-title" text="CARGAR PARTIDA" />
+        </ui:VisualElement>
+
+        <ui:VisualElement name="SlotsContainer" class="slots-container">
+        </ui:VisualElement>
+
+        <ui:VisualElement name="EmptyState" class="empty-state" style="display: none;">
+            <ui:Label class="empty-label" text="No hay partidas guardadas" />
+            <ui:Label class="empty-hint" text="Empieza una nueva partida desde el menu principal" />
+        </ui:VisualElement>
+
+        <ui:VisualElement class="loadgame-footer">
+            <ui:Button name="BtnBack" class="btn-back" text="VOLVER AL MENU" />
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

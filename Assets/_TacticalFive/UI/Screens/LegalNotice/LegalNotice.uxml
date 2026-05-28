@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="LegalNotice.uss" />
+
+    <!-- OVERLAY -->
+    <ui:VisualElement name="ModalOverlay" class="modal-overlay">
+
+        <!-- CAJA -->
+        <ui:VisualElement name="ModalBox" class="modal-box">
+
+            <!-- Título -->
+            <ui:Label class="modal-title" text="AVISO LEGAL" />
+
+            <!-- Cuerpo -->
+            <ui:VisualElement class="modal-body">
+
+                <ui:Label class="modal-paragraph"
+                    text="Tactical Five es un videojuego de simulación deportiva desarrollado con fines educativos y de entretenimiento personal." />
+
+                <ui:Label class="modal-paragraph"
+                    text="Los nombres de equipos, jugadores y logotipos de la NBA son propiedad de sus respectivos dueños. Tactical Five no está afiliado, patrocinado ni respaldado por la NBA, sus equipos ni sus jugadores." />
+
+                <ui:Label class="modal-paragraph"
+                    text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." />
+
+                <ui:Label class="modal-copyright"
+                    text="© 2025 Tactical Five  ·  Todos los derechos reservados" />
+
+            </ui:VisualElement>
+
+            <!-- Botón cerrar -->
+            <ui:Button name="BtnCerrar" class="modal-close" text="CERRAR" />
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

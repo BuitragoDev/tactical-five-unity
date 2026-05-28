@@ -1,0 +1,123 @@
+/* ══════════════════════════════════════════
+   FINANCES — Finances.uss
+   ══════════════════════════════════════════ */
+
+.finances-root {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.finances-main {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.finances-content {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 20px;
+    min-height: 0;
+}
+
+.finances-summary {
+    flex-direction: row;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.finance-card {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    padding: 20px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 2px;
+    margin-right: 12px;
+}
+
+.finance-card-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 12px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(85, 102, 119);
+    margin-bottom: 8px;
+}
+
+.finance-card-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 28px;
+    color: rgb(208, 216, 232);
+}
+
+.finance-card-value--income {
+    color: rgb(39, 174, 96);
+}
+
+.finance-card-value--expense {
+    color: rgb(192, 57, 43);
+}
+
+.finances-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.finances-body {
+    flex-direction: column;
+}
+
+.finance-record-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: rgb(22, 26, 36);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+
+.finance-record-type {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 12px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(85, 102, 119);
+    width: 120px;
+    flex-shrink: 0;
+}
+
+.finance-record-day {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 12px;
+    color: rgb(58, 74, 99);
+    width: 60px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.finance-record-amount {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 14px;
+    flex-grow: 1;
+    -unity-text-align: middle-right;
+}
+
+.finance-record-amount--income {
+    color: rgb(39, 174, 96);
+}
+
+.finance-record-amount--expense {
+    color: rgb(192, 57, 43);
+}

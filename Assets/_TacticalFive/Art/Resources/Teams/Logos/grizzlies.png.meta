@@ -1,0 +1,572 @@
+fileFormatVersion: 2
+guid: f57ffa2c3b3a6f1fc9c25ae8db5c26cd
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7894542205846873998
+    second: grizzlies_0
+  - first:
+      213: -1269821545127740541
+    second: grizzlies_1
+  - first:
+      213: -3121009494058878792
+    second: grizzlies_2
+  - first:
+      213: -4814302420566502579
+    second: grizzlies_3
+  - first:
+      213: 7468353710501170903
+    second: grizzlies_4
+  - first:
+      213: 5097002263836184820
+    second: grizzlies_5
+  - first:
+      213: -8768079071012303249
+    second: grizzlies_6
+  - first:
+      213: 4345192794659053232
+    second: grizzlies_7
+  - first:
+      213: 7627315052014182168
+    second: grizzlies_8
+  - first:
+      213: 982655630861284034
+    second: grizzlies_9
+  - first:
+      213: -5770915871035758331
+    second: grizzlies_10
+  - first:
+      213: -2098276546669342240
+    second: grizzlies_11
+  - first:
+      213: -5226907649242356618
+    second: grizzlies_12
+  - first:
+      213: 4790919786808637052
+    second: grizzlies_13
+  - first:
+      213: -7300281805528701107
+    second: grizzlies_14
+  - first:
+      213: 5568685644294894219
+    second: grizzlies_15
+  - first:
+      213: 6656282007046162845
+    second: grizzlies_16
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: grizzlies_0
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 101
+        width: 84
+        height: 106
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e87e4d32f4c0f8d60800000000000000
+      internalID: 7894542205846873998
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_1
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 197
+        width: 332
+        height: 311
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38bf5825800b06ee0800000000000000
+      internalID: -1269821545127740541
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_2
+      rect:
+        serializedVersion: 2
+        x: 404
+        y: 100
+        width: 55
+        height: 107
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8b8bff5a662ffa4d0800000000000000
+      internalID: -3121009494058878792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_3
+      rect:
+        serializedVersion: 2
+        x: 137
+        y: 100
+        width: 52
+        height: 85
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d4394dca479203db0800000000000000
+      internalID: -4814302420566502579
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_4
+      rect:
+        serializedVersion: 2
+        x: 190
+        y: 100
+        width: 76
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7de8463712ce4a760800000000000000
+      internalID: 7468353710501170903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_5
+      rect:
+        serializedVersion: 2
+        x: 266
+        y: 100
+        width: 54
+        height: 84
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4f0515bcd803cb640800000000000000
+      internalID: 5097002263836184820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_6
+      rect:
+        serializedVersion: 2
+        x: 316
+        y: 99
+        width: 56
+        height: 86
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f6e46c94a86815680800000000000000
+      internalID: -8768079071012303249
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_7
+      rect:
+        serializedVersion: 2
+        x: 372
+        y: 100
+        width: 29
+        height: 85
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0be5d3e23d93d4c30800000000000000
+      internalID: 4345192794659053232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_8
+      rect:
+        serializedVersion: 2
+        x: 94
+        y: 37
+        width: 43
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81f9b49e0aaa9d960800000000000000
+      internalID: 7627315052014182168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_9
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 18
+        width: 41
+        height: 54
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c23606071813ad00800000000000000
+      internalID: 982655630861284034
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_10
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 11
+        width: 23
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 509ef36479699efa0800000000000000
+      internalID: -5770915871035758331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_11
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 5
+        width: 34
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e19d33199c61e2e0800000000000000
+      internalID: -2098276546669342240
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_12
+      rect:
+        serializedVersion: 2
+        x: 243
+        y: 4
+        width: 30
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6742325bf2b4677b0800000000000000
+      internalID: -5226907649242356618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_13
+      rect:
+        serializedVersion: 2
+        x: 282
+        y: 6
+        width: 37
+        height: 48
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c767e18a924cc7240800000000000000
+      internalID: 4790919786808637052
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_14
+      rect:
+        serializedVersion: 2
+        x: 317
+        y: 11
+        width: 26
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d47e63d506030ba90800000000000000
+      internalID: -7300281805528701107
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_15
+      rect:
+        serializedVersion: 2
+        x: 341
+        y: 19
+        width: 43
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b82b30ed612f74d40800000000000000
+      internalID: 5568685644294894219
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: grizzlies_16
+      rect:
+        serializedVersion: 2
+        x: 377
+        y: 37
+        width: 42
+        height: 49
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d998fca083ddf5c50800000000000000
+      internalID: 6656282007046162845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      grizzlies_0: 7894542205846873998
+      grizzlies_1: -1269821545127740541
+      grizzlies_10: -5770915871035758331
+      grizzlies_11: -2098276546669342240
+      grizzlies_12: -5226907649242356618
+      grizzlies_13: 4790919786808637052
+      grizzlies_14: -7300281805528701107
+      grizzlies_15: 5568685644294894219
+      grizzlies_16: 6656282007046162845
+      grizzlies_2: -3121009494058878792
+      grizzlies_3: -4814302420566502579
+      grizzlies_4: 7468353710501170903
+      grizzlies_5: 5097002263836184820
+      grizzlies_6: -8768079071012303249
+      grizzlies_7: 4345192794659053232
+      grizzlies_8: 7627315052014182168
+      grizzlies_9: 982655630861284034
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

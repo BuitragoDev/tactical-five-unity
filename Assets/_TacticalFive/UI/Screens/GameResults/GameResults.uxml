@@ -1,0 +1,117 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Dashboard/Dashboard.uss?fileID=7433441132597879392&amp;guid=4ea72934f300e2fc78940e1d76d7e1a8&amp;type=3#Dashboard"/>
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/GameResults/GameResults.uss?fileID=7433441132597879392&amp;guid=c01632b19231a1c8db8da050270ad2bc&amp;type=3#GameResults"/>
+    <ui:VisualElement name="GameResultsRoot" class="gresults-root">
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label text="TF" class="sidebar-logo-icon"/>
+                <ui:Label text="TACTICAL" class="sidebar-logo-text"/>
+                <ui:Label text="FIVE" class="sidebar-logo-text-gold"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard" text="INICIO" class="nav-item nav-item--active"/>
+                <ui:Button name="NavRoster" text="PLANTILLA" class="nav-item"/>
+                <ui:Button name="NavCalendar" text="CALENDARIO" class="nav-item"/>
+                <ui:Button name="NavStandings" text="CLASIFICACIÓN" class="nav-item"/>
+                <ui:Button name="NavPalmares" text="PALMARES" class="nav-item"/>
+                <ui:Button name="NavResults" text="RESULTADOS" class="nav-item"/>
+                <ui:Button name="NavPlayoffs" text="PLAYOFFS" class="nav-item"/>
+                <ui:Button name="NavStats" text="ESTADÍSTICAS" class="nav-item"/>
+                <ui:Button name="NavRecords" text="RECORDS" class="nav-item"/>
+                <ui:Button name="NavMarket" text="MERCADO" class="nav-item"/>
+                <ui:Button name="NavFinances" text="FINANZAS" class="nav-item"/>
+                <ui:Button name="NavSponsors" text="PATROCINADORES" class="nav-item"/>
+                <ui:Button name="NavTV" text="TELEVISIÓN" class="nav-item"/>
+                <ui:Button name="NavArena" text="PABELLÓN" class="nav-item"/>
+                <ui:Button name="NavMessages" text="MENSAJES" class="nav-item"/>
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-footer">
+                <ui:Button name="BtnReset" text="  REINICIAR PARTIDA" class="btn-reset"/>
+                <ui:Label text="v0.1.0 · Alpha" class="sidebar-version"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement class="gresults-main">
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement class="header-left">
+                    <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
+                    <ui:VisualElement class="header-team-info">
+                        <ui:VisualElement class="header-team-name-row">
+                            <ui:Label name="HeaderTeamName" text="" class="header-team-name"/>
+                            <ui:Label name="HeaderSubtitle" text="(RESULTADOS DE LA JORNADA)" class="header-subtitle"/>
+                        </ui:VisualElement>
+                        <ui:Label name="HeaderManagerName" text="" class="header-manager-name"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="header-right-group">
+                    <ui:VisualElement class="header-season-info">
+                        <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
+                    </ui:VisualElement>
+                    <ui:Label name="HeaderDate" text="" class="header-date-label"/>
+                    <ui:Label name="HeaderGameDay" text="" class="header-game-day-label"/>
+                    <ui:Button name="BtnDashboard" text="DASHBOARD" class="btn-action"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="gresults-scroll">
+                <ui:VisualElement class="gresults-content">
+                    <ui:VisualElement class="gresults-layout">
+                        <ui:VisualElement class="gresults-left">
+                            <ui:VisualElement class="gresults-section-header">
+                                <ui:Label text="RESULTADOS" class="gresults-section-title"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="GamesBody" class="games-body"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="gresults-right">
+                            <ui:VisualElement name="MvpPanel" class="mvp-panel" style="border-left-color: rgb(218, 165, 32); border-right-color: rgb(218, 165, 32); border-top-color: rgb(218, 165, 32); border-bottom-color: rgb(218, 165, 32); border-top-width: 2px; border-right-width: 2px; border-bottom-width: 2px; border-left-width: 2px;">
+                                <ui:VisualElement class="mvp-badge">
+                                    <ui:Label text="★ MVP DE LA JORNADA" class="mvp-badge-text"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="mvp-content">
+                                    <ui:VisualElement class="mvp-player-info">
+                                        <ui:VisualElement name="MvpLogo" class="mvp-team-logo"/>
+                                        <ui:VisualElement class="mvp-player-details">
+                                            <ui:Label name="MvpName" text="ANTHONY&#10;EDWARDS" class="mvp-player-name"/>
+                                            <ui:Label name="MvpTeam" text="Minnesota Timberwolves" class="mvp-player-team" style="-unity-text-align: middle-left;"/>
+                                            <ui:Label name="MvpPos" text="SG" class="mvp-player-pos"/>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="mvp-stats">
+                                        <ui:VisualElement class="mvp-stat">
+                                            <ui:Label name="MvpPts" text="49" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="PTS" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement class="mvp-stat">
+                                            <ui:Label name="MvpReb" text="5" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="REB" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement class="mvp-stat">
+                                            <ui:Label name="MvpAst" text="1" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="AST" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement class="mvp-stat mvp-rating">
+                                            <ui:Label name="MvpVal" text="45" class="mvp-stat-val" style="-unity-text-align: middle-center;"/>
+                                            <ui:Label text="VAL" class="mvp-stat-label" style="-unity-text-align: middle-center;"/>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="Leaderboards" class="leaderboards">
+                                <ui:VisualElement name="LbScorers" class="leaderboard-section" style="margin-bottom: 10px;">
+                                    <ui:Label text="🏀 Máximos Anotadores" class="leaderboard-title"/>
+                                    <ui:VisualElement name="LbScorersBody" class="leaderboard-body"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="LbRebounders" class="leaderboard-section" style="margin-bottom: 10px;">
+                                    <ui:Label text="⛹️ Máximos Reboteadores" class="leaderboard-title"/>
+                                    <ui:VisualElement name="LbReboundersBody" class="leaderboard-body"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="LbAssisters" class="leaderboard-section">
+                                    <ui:Label text="🎯 Máximos Asistentes" class="leaderboard-title"/>
+                                    <ui:VisualElement name="LbAssistersBody" class="leaderboard-body"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
