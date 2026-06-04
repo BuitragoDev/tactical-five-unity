@@ -60,6 +60,7 @@ public class RosterController : MonoBehaviour
     private VisualElement _renewOverlay;
     private VisualElement _renewBox;
     private VisualElement _renewIcon;
+    private Label _renewTitle;
     private Label _renewText1;
     private Label _renewText2;
     private Label _renewText3;
@@ -184,6 +185,7 @@ public class RosterController : MonoBehaviour
         _renewOverlay = _root.Q<VisualElement>("RenewOverlay");
         _renewBox = _root.Q<VisualElement>("RenewBox");
         _renewIcon = _root.Q<VisualElement>("RenewIcon");
+        _renewTitle = _root.Q<Label>("RenewTitle");
         _renewText1 = _root.Q<Label>("RenewText1");
         _renewText2 = _root.Q<Label>("RenewText2");
         _renewText3 = _root.Q<Label>("RenewText3");
@@ -647,6 +649,7 @@ public class RosterController : MonoBehaviour
         float acceptScore = CalculateAcceptScore(_renewOfferSalary, _renewOfferYears);
         _renewText3.text = $"Probabilidad de aceptación: {acceptScore:F0}%";
 
+        SetRenewModalColor(_renewBox, _renewTitle, true);
         _renewOverlay.style.display = DisplayStyle.Flex;
         _renewBox.style.display = DisplayStyle.Flex;
     }
@@ -832,7 +835,7 @@ public class RosterController : MonoBehaviour
     {
         _renewOverlay.style.display = DisplayStyle.None;
         _renewBox.style.display = DisplayStyle.None;
-        ClearRenewModalColor(_renewBox, null);
+        ClearRenewModalColor(_renewBox, _renewTitle);
     }
 
     void OpenRenewBlockModal()
