@@ -239,6 +239,7 @@
         <!-- ══ MODAL COOLDOWN RENOVACIÓN ══ -->
         <ui:VisualElement name="RenewCooldownOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewCooldownBox" class="renew-modal-box">
+                <ui:VisualElement name="RenewCooldownIcon" class="renew-modal-icon"/>
                 <ui:Label name="RenewCooldownTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
                 <ui:Label name="RenewCooldownText" class="renew-modal-text" text="" />
                 <ui:VisualElement class="renew-modal-buttons">
@@ -250,6 +251,7 @@
         <!-- ══ MODAL NO SE PUEDE RENOVAR ══ -->
         <ui:VisualElement name="RenewBlockOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewBlockBox" class="renew-modal-box">
+                <ui:VisualElement name="RenewBlockIcon" class="renew-modal-icon"/>
                 <ui:Label name="RenewBlockTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
                 <ui:Label name="RenewBlockText" class="renew-modal-text" text="" />
                 <ui:VisualElement class="renew-modal-buttons">
@@ -261,6 +263,7 @@
         <!-- ══ MODAL RESULTADO RENOVACIÓN ══ -->
         <ui:VisualElement name="RenewResultOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewResultBox" class="renew-modal-box">
+                <ui:VisualElement name="RenewResultIcon" class="renew-modal-icon"/>
                 <ui:Label name="RenewResultTitle" class="renew-modal-title" text="" />
                 <ui:Label name="RenewResultText1" class="renew-modal-text" text="" />
                 <ui:Label name="RenewResultText2" class="renew-modal-text" text="" />

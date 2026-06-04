@@ -70,6 +70,7 @@ public class RosterController : MonoBehaviour
     // Modal renovación bloqueada (≥3 años)
     private VisualElement _renewBlockOverlay;
     private VisualElement _renewBlockBox;
+    private VisualElement _renewBlockIcon;
     private Label _renewBlockTitle;
     private Label _renewBlockText;
     private Button _btnRenewBlockOk;
@@ -77,6 +78,7 @@ public class RosterController : MonoBehaviour
     // Modal cooldown renovación
     private VisualElement _renewCooldownOverlay;
     private VisualElement _renewCooldownBox;
+    private VisualElement _renewCooldownIcon;
     private Label _renewCooldownTitle;
     private Label _renewCooldownText;
     private Button _btnRenewCooldownOk;
@@ -84,6 +86,7 @@ public class RosterController : MonoBehaviour
     // Modal resultado renovación
     private VisualElement _renewResultOverlay;
     private VisualElement _renewResultBox;
+    private VisualElement _renewResultIcon;
     private Label _renewResultTitle;
     private Label _renewResultText1;
     private Label _renewResultText2;
@@ -195,6 +198,7 @@ public class RosterController : MonoBehaviour
         // Modal renovación bloqueada
         _renewBlockOverlay = _root.Q<VisualElement>("RenewBlockOverlay");
         _renewBlockBox = _root.Q<VisualElement>("RenewBlockBox");
+        _renewBlockIcon = _root.Q<VisualElement>("RenewBlockIcon");
         _renewBlockTitle = _root.Q<Label>("RenewBlockTitle");
         _renewBlockText = _root.Q<Label>("RenewBlockText");
         _btnRenewBlockOk = _root.Q<Button>("BtnRenewBlockOk");
@@ -202,6 +206,7 @@ public class RosterController : MonoBehaviour
         // Modal cooldown renovación
         _renewCooldownOverlay = _root.Q<VisualElement>("RenewCooldownOverlay");
         _renewCooldownBox = _root.Q<VisualElement>("RenewCooldownBox");
+        _renewCooldownIcon = _root.Q<VisualElement>("RenewCooldownIcon");
         _renewCooldownTitle = _root.Q<Label>("RenewCooldownTitle");
         _renewCooldownText = _root.Q<Label>("RenewCooldownText");
         _btnRenewCooldownOk = _root.Q<Button>("BtnRenewCooldownOk");
@@ -209,6 +214,7 @@ public class RosterController : MonoBehaviour
         // Modal resultado renovación
         _renewResultOverlay = _root.Q<VisualElement>("RenewResultOverlay");
         _renewResultBox = _root.Q<VisualElement>("RenewResultBox");
+        _renewResultIcon = _root.Q<VisualElement>("RenewResultIcon");
         _renewResultTitle = _root.Q<Label>("RenewResultTitle");
         _renewResultText1 = _root.Q<Label>("RenewResultText1");
         _renewResultText2 = _root.Q<Label>("RenewResultText2");
@@ -795,6 +801,7 @@ public class RosterController : MonoBehaviour
         if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.Flex;
         if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.Flex;
         SetRenewModalColor(_renewResultBox, _renewResultTitle, positive);
+        SetRenewRejectIcon(_renewResultIcon, !positive);
 
         StartCoroutine(AutoCloseRenewResult());
     }
@@ -810,6 +817,7 @@ public class RosterController : MonoBehaviour
         if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.None;
         if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewResultBox, _renewResultTitle);
+        ClearRenewRejectIcon(_renewResultIcon);
     }
 
     void OpenRenewCooldownModal(int daysLeft)
@@ -822,6 +830,7 @@ public class RosterController : MonoBehaviour
         _renewCooldownOverlay.style.display = DisplayStyle.Flex;
         _renewCooldownBox.style.display = DisplayStyle.Flex;
         SetRenewModalColor(_renewCooldownBox, _renewCooldownTitle, false);
+        SetRenewRejectIcon(_renewCooldownIcon, true);
     }
 
     void CloseRenewCooldownModal()
@@ -829,6 +838,7 @@ public class RosterController : MonoBehaviour
         _renewCooldownOverlay.style.display = DisplayStyle.None;
         _renewCooldownBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewCooldownBox, _renewCooldownTitle);
+        ClearRenewRejectIcon(_renewCooldownIcon);
     }
 
     void CloseRenewModal()
@@ -848,6 +858,7 @@ public class RosterController : MonoBehaviour
         _renewBlockOverlay.style.display = DisplayStyle.Flex;
         _renewBlockBox.style.display = DisplayStyle.Flex;
         SetRenewModalColor(_renewBlockBox, _renewBlockTitle, false);
+        SetRenewRejectIcon(_renewBlockIcon, true);
     }
 
     void CloseRenewBlockModal()
@@ -855,6 +866,7 @@ public class RosterController : MonoBehaviour
         _renewBlockOverlay.style.display = DisplayStyle.None;
         _renewBlockBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewBlockBox, _renewBlockTitle);
+        ClearRenewRejectIcon(_renewBlockIcon);
     }
 
     void SetRenewModalColor(VisualElement box, Label title, bool positive)
@@ -885,6 +897,27 @@ public class RosterController : MonoBehaviour
             title.RemoveFromClassList("renew-modal-title--positive");
             title.RemoveFromClassList("renew-modal-title--negative");
         }
+    }
+
+    void SetRenewRejectIcon(VisualElement iconElem, bool show)
+    {
+        if (iconElem == null) return;
+        if (show)
+        {
+            var tex = Resources.Load<Texture2D>("Icons/rechazar");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
+        else
+        {
+            iconElem.style.backgroundImage = null;
+        }
+    }
+
+    void ClearRenewRejectIcon(VisualElement iconElem)
+    {
+        if (iconElem != null)
+            iconElem.style.backgroundImage = null;
     }
 
     // ── MODAL DESPIDO ─────────────────────────────────────
