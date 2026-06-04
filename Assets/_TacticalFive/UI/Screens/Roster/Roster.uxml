@@ -206,11 +206,11 @@
 
                             <!-- Botón despedir -->
                             <ui:Button name="BtnDismiss" class="btn-dismiss"
-                                       text="✕  DESPEDIR JUGADOR" />
+                                       text="DESPEDIR JUGADOR" />
 
                             <!-- Renovar contrato -->
                             <ui:Button name="BtnRenew" class="btn-renew"
-                                       text="RENUEVA CONTRATO" />
+                                       text="RENOVAR CONTRATO" />
 
                         </ui:VisualElement>
                     </ui:ScrollView>
@@ -224,6 +224,7 @@
         <!-- ══ MODAL RENOVAR CONTRATO ══ -->
         <ui:VisualElement name="RenewOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewBox" class="renew-modal-box">
+                <ui:VisualElement name="RenewIcon" class="renew-modal-icon"/>
                 <ui:Label class="renew-modal-title" text="RENOVAR CONTRATO" />
                 <ui:Label name="RenewText1" class="renew-modal-text" text="" />
                 <ui:Label name="RenewText2" class="renew-modal-text" text="" />

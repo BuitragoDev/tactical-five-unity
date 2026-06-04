@@ -542,7 +542,7 @@
 }
 .renew-modal-box {
     position: absolute;
-    width: 520px;
+    width: 600px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
@@ -557,6 +557,12 @@
     color: rgb(255, 255, 255);
     margin-bottom: 16px;
     -unity-text-align: middle-center;
+}
+.renew-modal-icon {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 .renew-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
@@ -586,7 +592,7 @@
 }
 .dismiss-modal-box {
     position: absolute;
-    width: 520px;
+    width: 600px;
     background-color: rgb(30, 37, 53);
     border-width: 1px;
     border-color: rgb(58, 74, 99);
@@ -651,7 +657,7 @@
 }
 .btn-modal-confirm {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    background-color: rgb(192, 57, 43);
+    background-color: rgb(23, 110, 59);
     border-width: 0;
     color: rgb(255, 255, 255);
     font-size: 18px;
@@ -661,5 +667,5 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-confirm:hover {
-    background-color: rgb(220, 80, 60);
+    background-color: rgb(39, 174, 96);
 }

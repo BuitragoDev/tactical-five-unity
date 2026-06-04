@@ -59,6 +59,7 @@ public class RosterController : MonoBehaviour
     // Modal renovación (oferta)
     private VisualElement _renewOverlay;
     private VisualElement _renewBox;
+    private VisualElement _renewIcon;
     private Label _renewText1;
     private Label _renewText2;
     private Label _renewText3;
@@ -180,6 +181,7 @@ public class RosterController : MonoBehaviour
         // Modal renovación
         _renewOverlay = _root.Q<VisualElement>("RenewOverlay");
         _renewBox = _root.Q<VisualElement>("RenewBox");
+        _renewIcon = _root.Q<VisualElement>("RenewIcon");
         _renewText1 = _root.Q<Label>("RenewText1");
         _renewText2 = _root.Q<Label>("RenewText2");
         _renewText3 = _root.Q<Label>("RenewText3");
@@ -245,6 +247,14 @@ public class RosterController : MonoBehaviour
             var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
             if (tex != null)
                 iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
+
+        // Icono contrato en modal de renovación
+        if (_renewIcon != null)
+        {
+            var contractTex = Resources.Load<Texture2D>("Icons/contrato");
+            if (contractTex != null)
+                _renewIcon.style.backgroundImage = new StyleBackground(contractTex);
         }
     }
 
