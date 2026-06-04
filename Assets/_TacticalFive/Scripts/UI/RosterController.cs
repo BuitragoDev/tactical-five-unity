@@ -801,7 +801,7 @@ public class RosterController : MonoBehaviour
         if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.Flex;
         if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.Flex;
         SetRenewModalColor(_renewResultBox, _renewResultTitle, positive);
-        SetRenewRejectIcon(_renewResultIcon, !positive);
+        SetRenewResultIcon(_renewResultIcon, positive);
 
         StartCoroutine(AutoCloseRenewResult());
     }
@@ -817,7 +817,7 @@ public class RosterController : MonoBehaviour
         if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.None;
         if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewResultBox, _renewResultTitle);
-        ClearRenewRejectIcon(_renewResultIcon);
+        ClearRenewResultIcon(_renewResultIcon);
     }
 
     void OpenRenewCooldownModal(int daysLeft)
@@ -830,7 +830,7 @@ public class RosterController : MonoBehaviour
         _renewCooldownOverlay.style.display = DisplayStyle.Flex;
         _renewCooldownBox.style.display = DisplayStyle.Flex;
         SetRenewModalColor(_renewCooldownBox, _renewCooldownTitle, false);
-        SetRenewRejectIcon(_renewCooldownIcon, true);
+        SetRenewResultIcon(_renewCooldownIcon, false);
     }
 
     void CloseRenewCooldownModal()
@@ -838,7 +838,7 @@ public class RosterController : MonoBehaviour
         _renewCooldownOverlay.style.display = DisplayStyle.None;
         _renewCooldownBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewCooldownBox, _renewCooldownTitle);
-        ClearRenewRejectIcon(_renewCooldownIcon);
+        ClearRenewResultIcon(_renewCooldownIcon);
     }
 
     void CloseRenewModal()
@@ -858,7 +858,7 @@ public class RosterController : MonoBehaviour
         _renewBlockOverlay.style.display = DisplayStyle.Flex;
         _renewBlockBox.style.display = DisplayStyle.Flex;
         SetRenewModalColor(_renewBlockBox, _renewBlockTitle, false);
-        SetRenewRejectIcon(_renewBlockIcon, true);
+        SetRenewResultIcon(_renewBlockIcon, false);
     }
 
     void CloseRenewBlockModal()
@@ -866,7 +866,7 @@ public class RosterController : MonoBehaviour
         _renewBlockOverlay.style.display = DisplayStyle.None;
         _renewBlockBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewBlockBox, _renewBlockTitle);
-        ClearRenewRejectIcon(_renewBlockIcon);
+        ClearRenewResultIcon(_renewBlockIcon);
     }
 
     void SetRenewModalColor(VisualElement box, Label title, bool positive)
@@ -899,22 +899,18 @@ public class RosterController : MonoBehaviour
         }
     }
 
-    void SetRenewRejectIcon(VisualElement iconElem, bool show)
+    void SetRenewResultIcon(VisualElement iconElem, bool positive)
     {
         if (iconElem == null) return;
-        if (show)
-        {
-            var tex = Resources.Load<Texture2D>("Icons/rechazar");
-            if (tex != null)
-                iconElem.style.backgroundImage = new StyleBackground(tex);
-        }
+        string iconName = positive ? "contrato" : "rechazar";
+        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
+        if (tex != null)
+            iconElem.style.backgroundImage = new StyleBackground(tex);
         else
-        {
             iconElem.style.backgroundImage = null;
-        }
     }
 
-    void ClearRenewRejectIcon(VisualElement iconElem)
+    void ClearRenewResultIcon(VisualElement iconElem)
     {
         if (iconElem != null)
             iconElem.style.backgroundImage = null;
