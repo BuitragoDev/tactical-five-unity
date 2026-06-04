@@ -212,21 +212,6 @@
                             <ui:Button name="BtnRenew" class="btn-renew"
                                        text="RENUEVA CONTRATO" />
 
-                            <ui:VisualElement name="RenewForm" class="renew-form">
-                                <ui:VisualElement class="renew-form-row">
-                                    <ui:Label text="SALARIO" class="renew-form-label" />
-                                    <ui:DropdownField name="RenewSalary" class="renew-form-dropdown" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="renew-form-row">
-                                    <ui:Label text="AÑOS" class="renew-form-label" />
-                                    <ui:DropdownField name="RenewYears" class="renew-form-dropdown" />
-                                </ui:VisualElement>
-                                <ui:Button name="BtnSubmitOffer" class="btn-submit-offer"
-                                           text="ENVIAR OFERTA" />
-                            </ui:VisualElement>
-
-                            <ui:Label name="RenewResult" class="renew-result" text="" />
-
                         </ui:VisualElement>
                     </ui:ScrollView>
 
@@ -234,6 +219,31 @@
 
             </ui:VisualElement>
 
+        </ui:VisualElement>
+
+        <!-- ══ MODAL RENOVAR CONTRATO ══ -->
+        <ui:VisualElement name="RenewOverlay" class="renew-modal-overlay">
+            <ui:VisualElement name="RenewBox" class="renew-modal-box">
+                <ui:Label class="renew-modal-title" text="RENOVAR CONTRATO" />
+                <ui:Label name="RenewText1" class="renew-modal-text" text="" />
+                <ui:Label name="RenewText2" class="renew-modal-text" text="" />
+                <ui:Label name="RenewText3" class="renew-modal-text" text="" />
+                <ui:VisualElement class="renew-modal-buttons">
+                    <ui:Button name="BtnRenewCancel"  class="btn-modal-cancel"  text="CANCELAR" />
+                    <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="CONFIRMAR RENOVACIÓN" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL NO SE PUEDE RENOVAR ══ -->
+        <ui:VisualElement name="RenewBlockOverlay" class="renew-modal-overlay">
+            <ui:VisualElement name="RenewBlockBox" class="renew-modal-box">
+                <ui:Label class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
+                <ui:Label name="RenewBlockText" class="renew-modal-text" text="" />
+                <ui:VisualElement class="renew-modal-buttons">
+                    <ui:Button name="BtnRenewBlockOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL CONFIRMAR DESPIDO ══ -->

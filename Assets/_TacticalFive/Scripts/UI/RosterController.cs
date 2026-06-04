@@ -55,13 +55,25 @@ public class RosterController : MonoBehaviour
 
     // Renovar contrato
     private Button _btnRenew;
-    private VisualElement _renewForm;
-    private DropdownField _renewSalary;
-    private DropdownField _renewYears;
-    private Button _btnSubmitOffer;
-    private Label _renewResult;
+
+    // Modal renovación (oferta)
+    private VisualElement _renewOverlay;
+    private VisualElement _renewBox;
+    private Label _renewText1;
+    private Label _renewText2;
+    private Label _renewText3;
+    private Button _btnRenewCancel;
+    private Button _btnRenewConfirm;
+
+    // Modal renovación bloqueada (≥3 años)
+    private VisualElement _renewBlockOverlay;
+    private VisualElement _renewBlockBox;
+    private Label _renewBlockText;
+    private Button _btnRenewBlockOk;
 
     // Datos
+    private int _renewOfferYears;
+    private long _renewOfferSalary;
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
@@ -151,11 +163,21 @@ public class RosterController : MonoBehaviour
 
         // Renovar contrato
         _btnRenew = _root.Q<Button>("BtnRenew");
-        _renewForm = _root.Q<VisualElement>("RenewForm");
-        _renewSalary = _root.Q<DropdownField>("RenewSalary");
-        _renewYears = _root.Q<DropdownField>("RenewYears");
-        _btnSubmitOffer = _root.Q<Button>("BtnSubmitOffer");
-        _renewResult = _root.Q<Label>("RenewResult");
+
+        // Modal renovación
+        _renewOverlay = _root.Q<VisualElement>("RenewOverlay");
+        _renewBox = _root.Q<VisualElement>("RenewBox");
+        _renewText1 = _root.Q<Label>("RenewText1");
+        _renewText2 = _root.Q<Label>("RenewText2");
+        _renewText3 = _root.Q<Label>("RenewText3");
+        _btnRenewCancel = _root.Q<Button>("BtnRenewCancel");
+        _btnRenewConfirm = _root.Q<Button>("BtnRenewConfirm");
+
+        // Modal renovación bloqueada
+        _renewBlockOverlay = _root.Q<VisualElement>("RenewBlockOverlay");
+        _renewBlockBox = _root.Q<VisualElement>("RenewBlockBox");
+        _renewBlockText = _root.Q<Label>("RenewBlockText");
+        _btnRenewBlockOk = _root.Q<Button>("BtnRenewBlockOk");
     }
 
     void SetupScrollViews()
@@ -257,7 +279,9 @@ public class RosterController : MonoBehaviour
 
         // Renovar contrato
         _btnRenew?.RegisterCallback<ClickEvent>(_ => OnRenewClicked());
-        _btnSubmitOffer?.RegisterCallback<ClickEvent>(_ => OnSubmitOffer());
+        _btnRenewCancel?.RegisterCallback<ClickEvent>(_ => CloseRenewModal());
+        _btnRenewConfirm?.RegisterCallback<ClickEvent>(_ => ConfirmRenew());
+        _btnRenewBlockOk?.RegisterCallback<ClickEvent>(_ => CloseRenewBlockModal());
 
         if (CursorManager.Instance != null)
         {
@@ -278,6 +302,8 @@ public class RosterController : MonoBehaviour
         _detailScroll.style.display = DisplayStyle.None;
         _dismissOverlay.style.display = DisplayStyle.None;
         _dismissBox.style.display = DisplayStyle.None;
+        CloseRenewModal();
+        CloseRenewBlockModal();
     }
 
     // ── HEADER ───────────────────────────────────────────
@@ -486,28 +512,10 @@ public class RosterController : MonoBehaviour
         _detailContract.text = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
         _detailPotential.text = p.potential.ToString();
 
-        // Renovar contrato: solo si queda 1 año o menos
+        // Botón renovar siempre visible
         if (_btnRenew != null)
-            _btnRenew.style.display = p.contract_years <= 1 ? DisplayStyle.Flex : DisplayStyle.None;
-        if (_renewForm != null)
-            _renewForm.style.display = DisplayStyle.None;
-        if (_renewResult != null)
-            _renewResult.style.display = DisplayStyle.None;
-
-        // Rellenar dropdowns de renovación
-        SetupRenewDropdowns(p);
+            _btnRenew.style.display = DisplayStyle.Flex;
     }
-
-    void SetupRenewDropdowns(PlayerData p)
-    {
-        if (_renewSalary == null || _renewYears == null) return;
-
-        var salaryChoices = new List<string>();
-        int currentM = (int)(p.salary / 1_000_000);
-        int selectedSalaryIndex = 0;
-        for (int s = 2; s <= 60; s += 2)
-        {
-            salaryChoices.Add($"${s}M/año");
             if (s == currentM) selectedSalaryIndex = salaryChoices.Count - 1;
         }
         _renewSalary.choices = salaryChoices;
@@ -578,26 +586,56 @@ public class RosterController : MonoBehaviour
 
     void OnRenewClicked()
     {
-        if (_btnRenew != null)
-            _btnRenew.style.display = DisplayStyle.None;
-        if (_renewForm != null)
-            _renewForm.style.display = DisplayStyle.Flex;
-        if (_renewResult != null)
-            _renewResult.style.display = DisplayStyle.None;
+        if (_selectedPlayer == null) return;
+
+        // Si tiene 3+ años restantes: modal de bloqueo
+        if (_selectedPlayer.contract_years >= 3)
+        {
+            OpenRenewBlockModal();
+            return;
+        }
+
+        // Calcular oferta automática (lógica Django end_season_renew)
+        _renewOfferYears = CalculateAutoYears(_selectedPlayer.age);
+        _renewOfferSalary = CalculateAutoSalary(_selectedPlayer.salary);
+
+        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
+        string salaryText = $"${_renewOfferSalary / 1_000_000}M/año";
+        string yearsText = $"{_renewOfferYears} año{(_renewOfferYears > 1 ? "s" : "")}";
+
+        _renewText1.text = $"Oferta de renovación para {playerName}";
+        _renewText2.text = $"Salario: {salaryText}  |  Duración: {yearsText}";
+
+        // Calcular probabilidad de aceptación
+        float acceptScore = CalculateAcceptScore(_renewOfferSalary, _renewOfferYears);
+        _renewText3.text = $"Probabilidad de aceptación: {acceptScore:F0}%";
+
+        _renewOverlay.style.display = DisplayStyle.Flex;
+        _renewBox.style.display = DisplayStyle.Flex;
     }
 
-    void OnSubmitOffer()
+    int CalculateAutoYears(int age)
     {
-        if (_selectedPlayer == null || _renewSalary == null || _renewYears == null) return;
+        if (age <= 25) return 5;
+        if (age <= 28) return 4;
+        if (age <= 32) return 3;
+        if (age < 40) return 2;
+        return 1;
+    }
 
-        int salaryM = 2 + _renewSalary.index * 2; // index 0 = $2M, 1 = $4M, ...
-        long salary = salaryM * 1_000_000L;
-        int years = _renewYears.index + 1; // index 0 = 1 year, 1 = 2 years, ...
+    long CalculateAutoSalary(long currentSalary)
+    {
+        long newSalary = (long)(currentSalary * 1.05);
+        newSalary = (long)(Mathf.Round(newSalary / 100_000f) * 100_000);
+        if (newSalary < currentSalary) newSalary = currentSalary;
+        return newSalary;
+    }
 
-        // Calculate acceptance probability
+    float CalculateAcceptScore(long offerSalary, int offerYears)
+    {
         float acceptScore = 50f;
         long currentSalary = _selectedPlayer.salary;
-        float salaryIncrease = currentSalary > 0 ? (float)(salary - currentSalary) / currentSalary : 0f;
+        float salaryIncrease = currentSalary > 0 ? (float)(offerSalary - currentSalary) / currentSalary : 0f;
 
         if (salaryIncrease >= 0.30f) acceptScore += 25f;
         else if (salaryIncrease >= 0.10f) acceptScore += 15f;
@@ -619,22 +657,30 @@ public class RosterController : MonoBehaviour
         else if (gamesPlayed >= 30) acceptScore += 5f;
         else if (gamesPlayed < 10) acceptScore -= 10f;
 
-        if (years >= 4) acceptScore += 10f;
-        else if (years >= 3) acceptScore += 5f;
-        else if (years < 2) acceptScore -= 5f;
+        if (offerYears >= 4) acceptScore += 10f;
+        else if (offerYears >= 3) acceptScore += 5f;
+        else if (offerYears < 2) acceptScore -= 5f;
 
-        acceptScore = Mathf.Max(10f, Mathf.Min(95f, acceptScore));
+        return Mathf.Max(10f, Mathf.Min(95f, acceptScore));
+    }
 
+    void ConfirmRenew()
+    {
+        CloseRenewModal();
+
+        if (_selectedPlayer == null) return;
+
+        float acceptScore = CalculateAcceptScore(_renewOfferSalary, _renewOfferYears);
         bool accepted = Random.Range(1, 101) <= acceptScore;
 
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
-        string salaryText = $"${salaryM}M/año";
-        string yearsText = $"{years} año{(years > 1 ? "s" : "")}";
+        string salaryText = $"${_renewOfferSalary / 1_000_000}M/año";
+        string yearsText = $"{_renewOfferYears} año{(_renewOfferYears > 1 ? "s" : "")}";
 
         if (accepted)
         {
-            _selectedPlayer.salary = salary;
-            _selectedPlayer.contract_years = years;
+            _selectedPlayer.salary = _renewOfferSalary;
+            _selectedPlayer.contract_years = _renewOfferYears;
             DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
             DatabaseManager.Instance.AddMessage(new MessageData
@@ -650,8 +696,6 @@ public class RosterController : MonoBehaviour
                 date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 is_read = 0
             });
-
-            ShowRenewResult(true, $"{playerName} ha aceptado: {salaryText} · {yearsText}");
         }
         else
         {
@@ -668,8 +712,6 @@ public class RosterController : MonoBehaviour
                 date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 is_read = 0
             });
-
-            ShowRenewResult(false, $"{playerName} ha rechazado la oferta.");
         }
 
         // Refresh contract display
@@ -679,18 +721,27 @@ public class RosterController : MonoBehaviour
         BuildRosterList();
     }
 
-    void ShowRenewResult(bool accepted, string text)
+    void CloseRenewModal()
     {
-        if (_renewForm != null)
-            _renewForm.style.display = DisplayStyle.None;
-        if (_renewResult != null)
-        {
-            _renewResult.text = text;
-            _renewResult.RemoveFromClassList("renew-result--accepted");
-            _renewResult.RemoveFromClassList("renew-result--rejected");
-            _renewResult.AddToClassList(accepted ? "renew-result--accepted" : "renew-result--rejected");
-            _renewResult.style.display = DisplayStyle.Flex;
-        }
+        _renewOverlay.style.display = DisplayStyle.None;
+        _renewBox.style.display = DisplayStyle.None;
+    }
+
+    void OpenRenewBlockModal()
+    {
+        if (_selectedPlayer == null) return;
+
+        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
+        _renewBlockText.text = $"{playerName} tiene {_selectedPlayer.contract_years} años de contrato restantes. Solo se pueden renovar contratos con menos de 3 años restantes.";
+
+        _renewBlockOverlay.style.display = DisplayStyle.Flex;
+        _renewBlockBox.style.display = DisplayStyle.Flex;
+    }
+
+    void CloseRenewBlockModal()
+    {
+        _renewBlockOverlay.style.display = DisplayStyle.None;
+        _renewBlockBox.style.display = DisplayStyle.None;
     }
 
     // ── MODAL DESPIDO ─────────────────────────────────────

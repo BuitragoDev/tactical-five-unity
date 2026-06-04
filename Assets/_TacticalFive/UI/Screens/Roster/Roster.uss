@@ -526,22 +526,49 @@
 .btn-submit-offer:hover {
     background-color: rgb(60, 120, 230);
 }
-.renew-result {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    margin: 0 16px 12px 16px;
-    padding: 10px;
-    font-size: 14px;
-    letter-spacing: 1px;
-    -unity-text-align: middle-center;
+
+/* Modales renovación */
+.renew-modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgb(0, 0, 0);
+    opacity: 0.95;
+    align-items: center;
+    justify-content: center;
     display: none;
 }
-.renew-result--accepted {
-    background-color: rgb(20, 50, 30);
-    color: rgb(39, 174, 96);
+.renew-modal-overlay--visible {
+    display: flex;
 }
-.renew-result--rejected {
-    background-color: rgb(50, 20, 20);
-    color: rgb(192, 57, 43);
+.renew-modal-box {
+    position: absolute;
+    width: 520px;
+    background-color: rgb(15, 17, 23);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    padding: 32px;
+    flex-direction: column;
+    align-items: center;
+}
+.renew-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+.renew-modal-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+.renew-modal-buttons {
+    flex-direction: row;
+    margin-top: 24px;
+    gap: 12px;
 }
 
 /* Modal confirmar despido */
