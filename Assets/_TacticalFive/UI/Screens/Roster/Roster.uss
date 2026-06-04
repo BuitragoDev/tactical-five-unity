@@ -560,7 +560,7 @@
 }
 .renew-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     margin-bottom: 8px;
     -unity-text-align: middle-center;

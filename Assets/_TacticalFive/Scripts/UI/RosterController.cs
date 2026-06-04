@@ -71,6 +71,19 @@ public class RosterController : MonoBehaviour
     private Label _renewBlockText;
     private Button _btnRenewBlockOk;
 
+    // Modal cooldown renovación
+    private VisualElement _renewCooldownOverlay;
+    private VisualElement _renewCooldownBox;
+    private Label _renewCooldownText;
+    private Button _btnRenewCooldownOk;
+
+    // Modal resultado renovación
+    private VisualElement _renewResultOverlay;
+    private VisualElement _renewResultBox;
+    private Label _renewResultTitle;
+    private Label _renewResultText1;
+    private Label _renewResultText2;
+
     // Datos
     private int _renewOfferYears;
     private long _renewOfferSalary;
@@ -178,6 +191,19 @@ public class RosterController : MonoBehaviour
         _renewBlockBox = _root.Q<VisualElement>("RenewBlockBox");
         _renewBlockText = _root.Q<Label>("RenewBlockText");
         _btnRenewBlockOk = _root.Q<Button>("BtnRenewBlockOk");
+
+        // Modal cooldown renovación
+        _renewCooldownOverlay = _root.Q<VisualElement>("RenewCooldownOverlay");
+        _renewCooldownBox = _root.Q<VisualElement>("RenewCooldownBox");
+        _renewCooldownText = _root.Q<Label>("RenewCooldownText");
+        _btnRenewCooldownOk = _root.Q<Button>("BtnRenewCooldownOk");
+
+        // Modal resultado renovación
+        _renewResultOverlay = _root.Q<VisualElement>("RenewResultOverlay");
+        _renewResultBox = _root.Q<VisualElement>("RenewResultBox");
+        _renewResultTitle = _root.Q<Label>("RenewResultTitle");
+        _renewResultText1 = _root.Q<Label>("RenewResultText1");
+        _renewResultText2 = _root.Q<Label>("RenewResultText2");
     }
 
     void SetupScrollViews()
@@ -282,6 +308,7 @@ public class RosterController : MonoBehaviour
         _btnRenewCancel?.RegisterCallback<ClickEvent>(_ => CloseRenewModal());
         _btnRenewConfirm?.RegisterCallback<ClickEvent>(_ => ConfirmRenew());
         _btnRenewBlockOk?.RegisterCallback<ClickEvent>(_ => CloseRenewBlockModal());
+        _btnRenewCooldownOk?.RegisterCallback<ClickEvent>(_ => CloseRenewCooldownModal());
 
         if (CursorManager.Instance != null)
         {
@@ -304,6 +331,8 @@ public class RosterController : MonoBehaviour
         _dismissBox.style.display = DisplayStyle.None;
         CloseRenewModal();
         CloseRenewBlockModal();
+        CloseRenewCooldownModal();
+        CloseRenewResultModal();
     }
 
     // ── HEADER ───────────────────────────────────────────
@@ -516,21 +545,6 @@ public class RosterController : MonoBehaviour
         if (_btnRenew != null)
             _btnRenew.style.display = DisplayStyle.Flex;
     }
-            if (s == currentM) selectedSalaryIndex = salaryChoices.Count - 1;
-        }
-        _renewSalary.choices = salaryChoices;
-        _renewSalary.index = selectedSalaryIndex;
-
-        var yearChoices = new List<string>();
-        int selectedYearIndex = 0;
-        for (int y = 1; y <= 5; y++)
-        {
-            yearChoices.Add($"{y} año{(y > 1 ? "s" : "")}");
-            if (y == p.contract_years) selectedYearIndex = yearChoices.Count - 1;
-        }
-        _renewYears.choices = yearChoices;
-        _renewYears.index = selectedYearIndex;
-    }
 
     void BuildAttrBars(PlayerData p)
     {
@@ -587,6 +601,15 @@ public class RosterController : MonoBehaviour
     void OnRenewClicked()
     {
         if (_selectedPlayer == null) return;
+
+        // Verificar cooldown de renovación
+        int currentDay = _season?.current_game_day ?? 0;
+        if (_selectedPlayer.renewal_cooldown_day > currentDay)
+        {
+            int daysLeft = _selectedPlayer.renewal_cooldown_day - currentDay;
+            OpenRenewCooldownModal(daysLeft);
+            return;
+        }
 
         // Si tiene 3+ años restantes: modal de bloqueo
         if (_selectedPlayer.contract_years >= 3)
@@ -670,6 +693,7 @@ public class RosterController : MonoBehaviour
 
         if (_selectedPlayer == null) return;
 
+        int currentDay = _season?.current_game_day ?? 0;
         float acceptScore = CalculateAcceptScore(_renewOfferSalary, _renewOfferYears);
         bool accepted = Random.Range(1, 101) <= acceptScore;
 
@@ -677,11 +701,24 @@ public class RosterController : MonoBehaviour
         string salaryText = $"${_renewOfferSalary / 1_000_000}M/año";
         string yearsText = $"{_renewOfferYears} año{(_renewOfferYears > 1 ? "s" : "")}";
 
+        int cooldownDays;
+        string cooldownText;
+        string resultTitle;
+        string resultLine1;
+        string resultLine2;
+
         if (accepted)
         {
             _selectedPlayer.salary = _renewOfferSalary;
             _selectedPlayer.contract_years = _renewOfferYears;
+            _selectedPlayer.renewal_cooldown_day = currentDay + 365;
             DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
+
+            cooldownDays = 365;
+            cooldownText = "1 año";
+            resultTitle = "CONTRATO RENOVADO";
+            resultLine1 = $"{playerName} ha aceptado la oferta.";
+            resultLine2 = $"Nuevo contrato: {salaryText} · {yearsText}. No podrás renovarle de nuevo hasta dentro de {cooldownText}.";
 
             DatabaseManager.Instance.AddMessage(new MessageData
             {
@@ -689,8 +726,8 @@ public class RosterController : MonoBehaviour
                 sender_type = 0,
                 sender_id = 0,
                 title = $"Contrato renovado: {playerName}",
-                body = $"{playerName} ha aceptado la oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}.",
-                game_day = _season?.current_game_day ?? 0,
+                body = $"{playerName} ha aceptado la oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}. No podrás renovarle de nuevo hasta dentro de {cooldownText}.",
+                game_day = currentDay,
                 game_date = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -699,14 +736,23 @@ public class RosterController : MonoBehaviour
         }
         else
         {
+            _selectedPlayer.renewal_cooldown_day = currentDay + 15;
+            DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
+
+            cooldownDays = 15;
+            cooldownText = "15 días";
+            resultTitle = "OFERTA RECHAZADA";
+            resultLine1 = $"{playerName} ha rechazado la oferta.";
+            resultLine2 = $"Oferta: {salaryText} · {yearsText}. Podrás intentarlo de nuevo dentro de {cooldownText}.";
+
             DatabaseManager.Instance.AddMessage(new MessageData
             {
                 manager_id = _manager.id,
                 sender_type = 0,
                 sender_id = 0,
                 title = $"Oferta rechazada: {playerName}",
-                body = $"{playerName} ha rechazado la oferta de {salaryText} durante {yearsText}.",
-                game_day = _season?.current_game_day ?? 0,
+                body = $"{playerName} ha rechazado la oferta de {salaryText} durante {yearsText}. Podrás intentarlo de nuevo dentro de {cooldownText}.",
+                game_day = currentDay,
                 game_date = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -719,6 +765,49 @@ public class RosterController : MonoBehaviour
 
         // Refresh roster list
         BuildRosterList();
+
+        // Show result modal with auto-close
+        ShowRenewResultModal(resultTitle, resultLine1, resultLine2);
+    }
+
+    void ShowRenewResultModal(string title, string line1, string line2)
+    {
+        if (_renewResultTitle != null) _renewResultTitle.text = title;
+        if (_renewResultText1 != null) _renewResultText1.text = line1;
+        if (_renewResultText2 != null) _renewResultText2.text = line2;
+        if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.Flex;
+        if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.Flex;
+
+        StartCoroutine(AutoCloseRenewResult());
+    }
+
+    System.Collections.IEnumerator AutoCloseRenewResult()
+    {
+        yield return new WaitForSeconds(5f);
+        CloseRenewResultModal();
+    }
+
+    void CloseRenewResultModal()
+    {
+        if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.None;
+        if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.None;
+    }
+
+    void OpenRenewCooldownModal(int daysLeft)
+    {
+        if (_selectedPlayer == null || _renewCooldownText == null) return;
+
+        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
+        _renewCooldownText.text = $"{playerName} no puede ser renovado ahora. Debes esperar {daysLeft} día{(daysLeft != 1 ? "s" : "")} para intentarlo de nuevo.";
+
+        _renewCooldownOverlay.style.display = DisplayStyle.Flex;
+        _renewCooldownBox.style.display = DisplayStyle.Flex;
+    }
+
+    void CloseRenewCooldownModal()
+    {
+        _renewCooldownOverlay.style.display = DisplayStyle.None;
+        _renewCooldownBox.style.display = DisplayStyle.None;
     }
 
     void CloseRenewModal()

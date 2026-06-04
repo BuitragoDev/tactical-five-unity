@@ -94,6 +94,15 @@ public class DatabaseManager : MonoBehaviour
             _db.Execute("ALTER TABLE teams ADD COLUMN objective TEXT");
             Debug.Log("[DB] Migration: added objective to teams");
         }
+
+        // Add renewal_cooldown_day to players if missing
+        var playerCols = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        bool hasRenewalCooldown = playerCols.Any(c => c.name == "renewal_cooldown_day");
+        if (!hasRenewalCooldown)
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN renewal_cooldown_day INTEGER DEFAULT 0");
+            Debug.Log("[DB] Migration: added renewal_cooldown_day to players");
+        }
     }
 
     class ColumnInfo
