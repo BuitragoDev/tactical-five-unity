@@ -87,6 +87,7 @@ public class RosterController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
+        LoadSidebarIcons();
         SetupScrollViews();
         LoadData();
         RegisterCallbacks();
@@ -151,6 +152,38 @@ public class RosterController : MonoBehaviour
             _detailScroll.contentContainer.style.flexDirection = FlexDirection.Column;
     }
 
+    void LoadSidebarIcons()
+    {
+        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        {
+            {"NavDashboardIcon", "inicio"},
+            {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"},
+            {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"},
+            {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"},
+            {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"},
+            {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"},
+            {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"},
+            {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"},
+            {"NavConfigIcon", "configuracion"}
+        };
+
+        foreach (var kv in iconMap)
+        {
+            var iconElem = _root.Q<VisualElement>(kv.Key);
+            if (iconElem == null) continue;
+            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
+    }
+
     void LoadData()
     {
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
@@ -195,6 +228,8 @@ public class RosterController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Arena));
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
+        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+            Debug.Log("[Roster] Abrir configuración — pendiente de implementar"));
 
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Dashboard));
@@ -258,7 +293,7 @@ public class RosterController : MonoBehaviour
             _headerDate.text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
-        _btnAction.text = "← DASHBOARD";
+        _btnAction.text = "DASHBOARD";
     }
 
     // ── SUMMARY ──────────────────────────────────────────
@@ -343,28 +378,29 @@ public class RosterController : MonoBehaviour
         metaLbl.AddToClassList("player-meta");
         metaLbl.text = $"{player.age} años · {player.height_cm / 100f:F2}m";
 
+        var contractLbl = new Label();
+        contractLbl.AddToClassList("player-contract");
+        contractLbl.text = $"{player.contract_years} año{(player.contract_years != 1 ? "s" : "")}";
+        if (player.contract_years <= 1)
+            contractLbl.AddToClassList("player-contract--expiring");
+
         row.Add(numLbl);
         row.Add(nameLbl);
         row.Add(ovrLbl);
         row.Add(metaLbl);
+        row.Add(contractLbl);
 
-        // Icono último año de contrato
-        if (player.contract_years <= 1)
-        {
-            var icon = new Label();
-            icon.AddToClassList("player-icon");
-            icon.text = "⚠";
-            row.Add(icon);
-        }
-
-        // Tag lesión
+        // Columna lesión (imagen o hueco vacío para mantener alineación)
+        var injIcon = new VisualElement();
+        injIcon.AddToClassList("player-injury-icon");
         if (player.injury_days > 0)
         {
-            var injTag = new Label();
-            injTag.AddToClassList("player-injury-tag");
-            injTag.text = $"🏥 {player.injury_days}d";
-            row.Add(injTag);
+            var tex = Resources.Load<Texture2D>($"Icons/lesion");
+            if (tex != null)
+                injIcon.style.backgroundImage = new StyleBackground(tex);
+            injIcon.tooltip = $"{player.injury_type} — {player.injury_days} días de baja";
         }
+        row.Add(injIcon);
 
         // Click
         row.RegisterCallback<ClickEvent>(_ => OnPlayerSelected(player, row));
@@ -407,7 +443,7 @@ public class RosterController : MonoBehaviour
         // Salud
         if (p.injury_days > 0)
         {
-            _detailHealth.text = $"🏥 {p.injury_type} — {p.injury_days} días de baja";
+            _detailHealth.text = $"🏥   {p.injury_type} — {p.injury_days} días de baja";
             _detailHealth.RemoveFromClassList("detail-health-ok");
             _detailHealth.AddToClassList("detail-health-injured");
         }
