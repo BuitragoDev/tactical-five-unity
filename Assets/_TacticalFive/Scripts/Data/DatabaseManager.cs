@@ -1284,6 +1284,18 @@ public class DatabaseManager : MonoBehaviour
                   .ToList();
     }
 
+    public int GetPlayerGamesPlayedInSeason(int playerId, int seasonId)
+    {
+        if (!EnsureDb()) return 0;
+        var gameIds = _db.Table<GameData>()
+                         .Where(g => g.season_id == seasonId && g.is_played == 1)
+                         .Select(g => g.id)
+                         .ToList();
+        return _db.Table<PlayerGameStats>()
+                  .Where(s => s.player_id == playerId && gameIds.Contains(s.game_id))
+                  .Count();
+    }
+
     public List<PlayerData> GetLeagueTopScorers(int managerId, int count = 10)
     {
         var season = GetActiveSeason(GetActiveManager()?.id ?? 0);

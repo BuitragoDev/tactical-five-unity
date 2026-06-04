@@ -53,6 +53,14 @@ public class RosterController : MonoBehaviour
     private Button _btnDismissCancel;
     private Button _btnDismissConfirm;
 
+    // Renovar contrato
+    private Button _btnRenew;
+    private VisualElement _renewForm;
+    private DropdownField _renewSalary;
+    private DropdownField _renewYears;
+    private Button _btnSubmitOffer;
+    private Label _renewResult;
+
     // Datos
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -140,6 +148,14 @@ public class RosterController : MonoBehaviour
         _dismissText2 = _root.Q<Label>("DismissText2");
         _btnDismissCancel = _root.Q<Button>("BtnDismissCancel");
         _btnDismissConfirm = _root.Q<Button>("BtnDismissConfirm");
+
+        // Renovar contrato
+        _btnRenew = _root.Q<Button>("BtnRenew");
+        _renewForm = _root.Q<VisualElement>("RenewForm");
+        _renewSalary = _root.Q<DropdownField>("RenewSalary");
+        _renewYears = _root.Q<DropdownField>("RenewYears");
+        _btnSubmitOffer = _root.Q<Button>("BtnSubmitOffer");
+        _renewResult = _root.Q<Label>("RenewResult");
     }
 
     void SetupScrollViews()
@@ -238,6 +254,10 @@ public class RosterController : MonoBehaviour
         _btnDismiss?.RegisterCallback<ClickEvent>(_ => OpenDismissModal());
         _btnDismissCancel?.RegisterCallback<ClickEvent>(_ => CloseDismissModal());
         _btnDismissConfirm?.RegisterCallback<ClickEvent>(_ => ConfirmDismiss());
+
+        // Renovar contrato
+        _btnRenew?.RegisterCallback<ClickEvent>(_ => OnRenewClicked());
+        _btnSubmitOffer?.RegisterCallback<ClickEvent>(_ => OnSubmitOffer());
 
         if (CursorManager.Instance != null)
         {
@@ -465,6 +485,43 @@ public class RosterController : MonoBehaviour
         // Contrato y potencial
         _detailContract.text = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
         _detailPotential.text = p.potential.ToString();
+
+        // Renovar contrato: solo si queda 1 año o menos
+        if (_btnRenew != null)
+            _btnRenew.style.display = p.contract_years <= 1 ? DisplayStyle.Flex : DisplayStyle.None;
+        if (_renewForm != null)
+            _renewForm.style.display = DisplayStyle.None;
+        if (_renewResult != null)
+            _renewResult.style.display = DisplayStyle.None;
+
+        // Rellenar dropdowns de renovación
+        SetupRenewDropdowns(p);
+    }
+
+    void SetupRenewDropdowns(PlayerData p)
+    {
+        if (_renewSalary == null || _renewYears == null) return;
+
+        var salaryChoices = new List<string>();
+        int currentM = (int)(p.salary / 1_000_000);
+        int selectedSalaryIndex = 0;
+        for (int s = 2; s <= 60; s += 2)
+        {
+            salaryChoices.Add($"${s}M/año");
+            if (s == currentM) selectedSalaryIndex = salaryChoices.Count - 1;
+        }
+        _renewSalary.choices = salaryChoices;
+        _renewSalary.index = selectedSalaryIndex;
+
+        var yearChoices = new List<string>();
+        int selectedYearIndex = 0;
+        for (int y = 1; y <= 5; y++)
+        {
+            yearChoices.Add($"{y} año{(y > 1 ? "s" : "")}");
+            if (y == p.contract_years) selectedYearIndex = yearChoices.Count - 1;
+        }
+        _renewYears.choices = yearChoices;
+        _renewYears.index = selectedYearIndex;
     }
 
     void BuildAttrBars(PlayerData p)
@@ -514,6 +571,125 @@ public class RosterController : MonoBehaviour
             row.Add(barBg);
             row.Add(valLbl);
             _detailAttrs.Add(row);
+        }
+    }
+
+    // ── RENOVAR CONTRATO ──────────────────────────────────
+
+    void OnRenewClicked()
+    {
+        if (_btnRenew != null)
+            _btnRenew.style.display = DisplayStyle.None;
+        if (_renewForm != null)
+            _renewForm.style.display = DisplayStyle.Flex;
+        if (_renewResult != null)
+            _renewResult.style.display = DisplayStyle.None;
+    }
+
+    void OnSubmitOffer()
+    {
+        if (_selectedPlayer == null || _renewSalary == null || _renewYears == null) return;
+
+        int salaryM = 2 + _renewSalary.index * 2; // index 0 = $2M, 1 = $4M, ...
+        long salary = salaryM * 1_000_000L;
+        int years = _renewYears.index + 1; // index 0 = 1 year, 1 = 2 years, ...
+
+        // Calculate acceptance probability
+        float acceptScore = 50f;
+        long currentSalary = _selectedPlayer.salary;
+        float salaryIncrease = currentSalary > 0 ? (float)(salary - currentSalary) / currentSalary : 0f;
+
+        if (salaryIncrease >= 0.30f) acceptScore += 25f;
+        else if (salaryIncrease >= 0.10f) acceptScore += 15f;
+        else if (salaryIncrease >= 0f) acceptScore += 5f;
+        else acceptScore -= Mathf.Abs(salaryIncrease) * 50f;
+
+        if (_selectedPlayer.age >= 32) acceptScore += 10f;
+        else if (_selectedPlayer.age >= 28) acceptScore += 5f;
+        else if (_selectedPlayer.age <= 23) acceptScore -= 5f;
+
+        if (_selectedPlayer.overall >= 85) acceptScore -= 5f;
+        else if (_selectedPlayer.overall < 75) acceptScore += 5f;
+
+        int gamesPlayed = 0;
+        if (_season != null)
+            gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(_selectedPlayer.id, _season.id);
+
+        if (gamesPlayed >= 50) acceptScore += 10f;
+        else if (gamesPlayed >= 30) acceptScore += 5f;
+        else if (gamesPlayed < 10) acceptScore -= 10f;
+
+        if (years >= 4) acceptScore += 10f;
+        else if (years >= 3) acceptScore += 5f;
+        else if (years < 2) acceptScore -= 5f;
+
+        acceptScore = Mathf.Max(10f, Mathf.Min(95f, acceptScore));
+
+        bool accepted = Random.Range(1, 101) <= acceptScore;
+
+        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
+        string salaryText = $"${salaryM}M/año";
+        string yearsText = $"{years} año{(years > 1 ? "s" : "")}";
+
+        if (accepted)
+        {
+            _selectedPlayer.salary = salary;
+            _selectedPlayer.contract_years = years;
+            DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
+
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 0,
+                sender_id = 0,
+                title = $"Contrato renovado: {playerName}",
+                body = $"{playerName} ha aceptado la oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}.",
+                game_day = _season?.current_game_day ?? 0,
+                game_date = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                is_read = 0
+            });
+
+            ShowRenewResult(true, $"{playerName} ha aceptado: {salaryText} · {yearsText}");
+        }
+        else
+        {
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 0,
+                sender_id = 0,
+                title = $"Oferta rechazada: {playerName}",
+                body = $"{playerName} ha rechazado la oferta de {salaryText} durante {yearsText}.",
+                game_day = _season?.current_game_day ?? 0,
+                game_date = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                is_read = 0
+            });
+
+            ShowRenewResult(false, $"{playerName} ha rechazado la oferta.");
+        }
+
+        // Refresh contract display
+        _detailContract.text = $"${_selectedPlayer.salary / 1_000_000}M/año · {_selectedPlayer.contract_years} año{(_selectedPlayer.contract_years != 1 ? "s" : "")}";
+
+        // Refresh roster list
+        BuildRosterList();
+    }
+
+    void ShowRenewResult(bool accepted, string text)
+    {
+        if (_renewForm != null)
+            _renewForm.style.display = DisplayStyle.None;
+        if (_renewResult != null)
+        {
+            _renewResult.text = text;
+            _renewResult.RemoveFromClassList("renew-result--accepted");
+            _renewResult.RemoveFromClassList("renew-result--rejected");
+            _renewResult.AddToClassList(accepted ? "renew-result--accepted" : "renew-result--rejected");
+            _renewResult.style.display = DisplayStyle.Flex;
         }
     }
 

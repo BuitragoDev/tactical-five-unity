@@ -461,6 +461,89 @@
     background-color: rgb(220, 80, 60);
 }
 
+/* Botón renovar contrato */
+.btn-renew {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    margin: 0 16px 12px 16px;
+    padding: 12px;
+    background-color: rgb(212, 160, 23);
+    border-width: 0;
+    color: rgb(0, 0, 0);
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.btn-renew:hover {
+    background-color: rgb(230, 180, 40);
+}
+
+/* Formulario de renovación */
+.renew-form {
+    margin: 0 16px 12px 16px;
+    padding: 12px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    flex-direction: column;
+    display: none;
+}
+.renew-form-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.renew-form-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    width: 80px;
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-align: middle-left;
+}
+.renew-form-dropdown {
+    flex-grow: 1;
+    font-size: 14px;
+    color: rgb(208, 216, 232);
+    background-color: rgb(15, 17, 23);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+}
+.btn-submit-offer {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    margin-top: 8px;
+    padding: 10px;
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.btn-submit-offer:hover {
+    background-color: rgb(60, 120, 230);
+}
+.renew-result {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    margin: 0 16px 12px 16px;
+    padding: 10px;
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    display: none;
+}
+.renew-result--accepted {
+    background-color: rgb(20, 50, 30);
+    color: rgb(39, 174, 96);
+}
+.renew-result--rejected {
+    background-color: rgb(50, 20, 20);
+    color: rgb(192, 57, 43);
+}
+
 /* Modal confirmar despido */
 .dismiss-modal-overlay {
     position: absolute;

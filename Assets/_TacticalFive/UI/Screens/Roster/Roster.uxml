@@ -208,6 +208,25 @@
                             <ui:Button name="BtnDismiss" class="btn-dismiss"
                                        text="✕  DESPEDIR JUGADOR" />
 
+                            <!-- Renovar contrato -->
+                            <ui:Button name="BtnRenew" class="btn-renew"
+                                       text="RENUEVA CONTRATO" />
+
+                            <ui:VisualElement name="RenewForm" class="renew-form">
+                                <ui:VisualElement class="renew-form-row">
+                                    <ui:Label text="SALARIO" class="renew-form-label" />
+                                    <ui:DropdownField name="RenewSalary" class="renew-form-dropdown" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="renew-form-row">
+                                    <ui:Label text="AÑOS" class="renew-form-label" />
+                                    <ui:DropdownField name="RenewYears" class="renew-form-dropdown" />
+                                </ui:VisualElement>
+                                <ui:Button name="BtnSubmitOffer" class="btn-submit-offer"
+                                           text="ENVIAR OFERTA" />
+                            </ui:VisualElement>
+
+                            <ui:Label name="RenewResult" class="renew-result" text="" />
+
                         </ui:VisualElement>
                     </ui:ScrollView>
 
