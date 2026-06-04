@@ -545,9 +545,9 @@
     width: 520px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
-    border-color: rgb(42, 95, 201);
+    border-color: rgb(58, 74, 99);
     border-top-width: 3px;
-    border-top-color: rgb(42, 95, 201);
+    border-top-color: rgb(39, 174, 96);
     padding: 32px;
     flex-direction: column;
     align-items: center;
@@ -571,14 +571,6 @@
 }
 .renew-modal-title--negative {
     color: rgb(192, 57, 43);
-}
-.renew-modal-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 24px;
-    letter-spacing: 2px;
-    color: rgb(39, 174, 96);
-    margin-bottom: 16px;
-    -unity-text-align: middle-center;
 }
 .renew-modal-icon {
     width: 64px;
