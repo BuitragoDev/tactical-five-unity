@@ -21,106 +21,363 @@
 .arena-content {
     flex-direction: column;
     flex-grow: 1;
-    padding: 20px;
+    padding: 24px 30px;
     min-height: 0;
     overflow: auto;
 }
 
-.panel-arena {
+/* ── Top Row (3 panels) ── */
+.arena-top-row {
+    flex-direction: row;
+    width: 100%;
     margin-bottom: 20px;
 }
 
-.arena-info {
+.arena-panel {
     flex-direction: column;
-    padding: 16px;
-}
-
-.arena-detail-row {
-    flex-direction: row;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(28, 33, 48);
-}
-
-.arena-detail-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    color: rgb(85, 102, 119);
-    width: 180px;
-    flex-shrink: 0;
-}
-
-.arena-detail-value {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
-    color: rgb(208, 216, 232);
-    flex-grow: 1;
-}
-
-.arena-upgrades {
-    flex-direction: column;
-}
-
-.upgrade-item {
-    flex-direction: row;
-    align-items: center;
-    padding: 16px;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
-    border-radius: 2px;
-    margin-bottom: 8px;
+    border-radius: 6px;
+    padding: 20px;
+    margin-right: 24px;
+    min-height: 360px;
 }
 
-.upgrade-info {
+.arena-panel--info {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 0;
+    min-width: 280px;
+}
+
+.arena-panel--level {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 0;
+    min-width: 280px;
+}
+
+.arena-panel--image {
+    flex-grow: 1;
+    flex-shrink: 1;
+    width: 0;
+    min-width: 280px;
+    padding: 0;
+    margin-right: 0;
+    overflow: hidden;
+}
+
+/* Panel Headers */
+.arena-panel-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+}
+
+.arena-panel-header-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: rgb(248, 196, 64);
+}
+
+.arena-panel-header-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(248, 196, 64);
+    letter-spacing: 1.5px;
+    -unity-text-transform: upper;
+}
+
+/* ── Arena Info Body ── */
+.arena-info-body {
     flex-direction: column;
     flex-grow: 1;
-    margin-right: 16px;
 }
 
-.upgrade-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
-    color: rgb(208, 216, 232);
-    margin-bottom: 4px;
+.arena-info-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(32, 38, 54);
 }
 
-.upgrade-desc {
+.arena-info-row:last-child {
+    border-bottom-width: 0;
+}
+
+.arena-info-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
-    color: rgb(85, 102, 119);
+    font-size: 18px;
+    color: rgb(120, 130, 150);
+    width: 150px;
+    flex-shrink: 0;
 }
 
-.upgrade-cost {
+.arena-info-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
-    color: rgb(192, 57, 43);
-    width: 100px;
-    flex-shrink: 0;
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    flex-grow: 1;
     -unity-text-align: middle-right;
 }
 
-.btn-upgrade {
+.arena-info-value--green {
+    color: rgb(39, 174, 96);
+}
+
+.arena-tier-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
-    color: rgb(208, 216, 232);
+    color: rgb(22, 26, 36);
     background-color: rgb(248, 196, 64);
+    border-radius: 3px;
+    padding: 3px 10px;
+    -unity-text-align: middle-center;
+    align-self: flex-end;
+}
+
+/* ── Arena Level Body ── */
+.arena-level-body {
+    flex-direction: column;
+    flex-grow: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.arena-stars {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 16px;
+}
+
+.arena-star {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 64px;
+    margin: 0 6px;
+    min-width: 64px;
+    min-height: 64px;
+}
+
+.arena-star--active {
+    color: rgb(248, 196, 64);
+}
+
+.arena-star--inactive {
+    color: rgb(60, 65, 85);
+}
+
+/* Status */
+.arena-status {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.arena-status--idle {
+    background-color: rgb(25, 45, 35);
+    border-width: 1px;
+    border-color: rgb(39, 174, 96);
+}
+
+.arena-status--busy {
+    background-color: rgb(45, 35, 25);
+    border-width: 1px;
+    border-color: rgb(230, 126, 34);
+}
+
+.arena-status-icon {
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.arena-status-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+}
+
+.arena-status-text--idle {
+    color: rgb(39, 174, 96);
+}
+
+.arena-status-text--busy {
+    color: rgb(230, 126, 34);
+}
+
+/* ── Arena Image ── */
+.arena-image {
+    width: 100%;
+    height: 100%;
+    -unity-background-scale-mode: scale-and-crop;
+    border-radius: 5px;
+}
+
+/* ── Upgrades Section ── */
+.arena-upgrades-section {
+    flex-direction: column;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 6px;
+    padding: 20px;
+    flex-grow: 1;
+}
+
+.arena-upgrades-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+}
+
+.arena-upgrades-header-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: rgb(248, 196, 64);
+}
+
+.arena-upgrades-header-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(248, 196, 64);
+    letter-spacing: 1.5px;
+    -unity-text-transform: upper;
+}
+
+/* Warning */
+.renovation-warning {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(45, 35, 25);
+    border-width: 1px;
+    border-color: rgb(230, 126, 34);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+}
+
+.renovation-warning-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    color: rgb(230, 126, 34);
+}
+
+.renovation-warning-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(230, 126, 34);
+}
+
+/* ── Upgrade Cards ── */
+.upgrade-cards-container {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.upgrade-card {
+    flex-direction: column;
+    width: 530px;
+    background-color: rgb(28, 33, 48);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 6px;
+    padding: 20px;
+    margin-right: 24px;
+    margin-bottom: 16px;
+}
+
+.upgrade-card-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+    -unity-text-align: middle-left;
+}
+
+.upgrade-card-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    margin-bottom: 6px;
+}
+
+.upgrade-card-desc {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(120, 130, 150);
+    margin-bottom: 10px;
+}
+
+.upgrade-card-bonus {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(39, 174, 96);
+    margin-bottom: 16px;
+}
+
+.upgrade-card-footer {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.upgrade-card-cost {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+}
+
+.upgrade-card-duration {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(120, 130, 150);
+}
+
+/* Buttons */
+.upgrade-card-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    background-color: rgb(39, 174, 96);
     border-width: 0;
-    border-radius: 2px;
-    padding: 8px 16px;
-    min-width: 100px;
+    border-radius: 4px;
+    padding: 12px 0;
+    width: 100%;
     -unity-text-align: middle-center;
 }
 
-.btn-upgrade:hover {
-    background-color: rgb(255, 210, 80);
+.upgrade-card-btn:hover {
+    background-color: rgb(46, 204, 113);
 }
 
-.btn-upgrade:active {
-    background-color: rgb(230, 175, 50);
+.upgrade-card-btn:active {
+    background-color: rgb(33, 150, 83);
+}
+
+.upgrade-card-btn--disabled {
+    background-color: rgb(50, 55, 70);
+    color: rgb(100, 110, 130);
+}
+
+.upgrade-card-btn--disabled:hover {
+    background-color: rgb(50, 55, 70);
+}
+
+.upgrade-card-btn--no-funds {
+    background-color: rgb(120, 40, 40);
+    color: rgb(200, 150, 150);
 }

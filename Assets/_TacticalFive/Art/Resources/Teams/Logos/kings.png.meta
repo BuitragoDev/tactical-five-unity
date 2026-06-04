@@ -5,6 +5,33 @@ TextureImporter:
   - first:
       213: -75322971114393226
     second: kings_0
+  - first:
+      213: 6116963173620407851
+    second: kings_1
+  - first:
+      213: -4925504283466026101
+    second: kings_2
+  - first:
+      213: -8378328845098386236
+    second: kings_3
+  - first:
+      213: 3785466820640742896
+    second: kings_4
+  - first:
+      213: 5913353307684106758
+    second: kings_5
+  - first:
+      213: -5621964632531529935
+    second: kings_6
+  - first:
+      213: -6333213036087062716
+    second: kings_7
+  - first:
+      213: 1110672624690656154
+    second: kings_8
+  - first:
+      213: 8067706565956226700
+    second: kings_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,10 +143,10 @@ TextureImporter:
       name: kings_0
       rect:
         serializedVersion: 2
-        x: 30
-        y: 0
-        width: 452
-        height: 512
+        x: 12
+        y: 124
+        width: 176
+        height: 73
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +157,204 @@ TextureImporter:
       bones: []
       spriteID: 671bc47282664fef0800000000000000
       internalID: -75322971114393226
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_1
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 80
+        width: 40
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2e5acbe891d3e450800000000000000
+      internalID: 6116963173620407851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_2
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 81
+        width: 17
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b83b75c53f715abb0800000000000000
+      internalID: -4925504283466026101
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_3
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 81
+        width: 38
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4cc70804e423abb80800000000000000
+      internalID: -8378328845098386236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_4
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 81
+        width: 38
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fd9151640ea88430800000000000000
+      internalID: 3785466820640742896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_5
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 81
+        width: 37
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60274e7c083701250800000000000000
+      internalID: 5913353307684106758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_6
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 43
+        width: 43
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 13f062204f4caf1b0800000000000000
+      internalID: -5621964632531529935
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_7
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 3
+        width: 68
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 44f48296c48eb18a0800000000000000
+      internalID: -6333213036087062716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_8
+      rect:
+        serializedVersion: 2
+        x: 59
+        y: 34
+        width: 128
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a93ff681ed6e96f00800000000000000
+      internalID: 1110672624690656154
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: kings_9
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 6
+        width: 94
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8e48ef806046ff60800000000000000
+      internalID: 8067706565956226700
       vertices: []
       indices: 
       edges: []
@@ -149,6 +374,15 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       kings_0: -75322971114393226
+      kings_1: 6116963173620407851
+      kings_2: -4925504283466026101
+      kings_3: -8378328845098386236
+      kings_4: 3785466820640742896
+      kings_5: 5913353307684106758
+      kings_6: -5621964632531529935
+      kings_7: -6333213036087062716
+      kings_8: 1110672624690656154
+      kings_9: 8067706565956226700
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

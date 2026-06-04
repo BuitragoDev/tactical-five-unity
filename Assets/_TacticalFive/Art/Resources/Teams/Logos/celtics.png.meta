@@ -116,10 +116,10 @@ TextureImporter:
       name: celtics_0
       rect:
         serializedVersion: 2
-        x: 30
-        y: 4
-        width: 452
-        height: 502
+        x: 4
+        y: 0
+        width: 192
+        height: 195
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

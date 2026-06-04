@@ -26,6 +26,21 @@ TextureImporter:
   - first:
       213: 8233137685310399227
     second: bulls_7
+  - first:
+      213: 2126471931791022723
+    second: bulls_8
+  - first:
+      213: -2543080983134989618
+    second: bulls_9
+  - first:
+      213: 5096270054874763195
+    second: bulls_10
+  - first:
+      213: 8189949985902888162
+    second: bulls_11
+  - first:
+      213: 326101602757604233
+    second: bulls_12
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -137,10 +152,10 @@ TextureImporter:
       name: bulls_0
       rect:
         serializedVersion: 2
-        x: 40
-        y: 420
-        width: 55
-        height: 76
+        x: 5
+        y: 162
+        width: 25
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +174,10 @@ TextureImporter:
       name: bulls_1
       rect:
         serializedVersion: 2
-        x: 105
-        y: 422
-        width: 69
-        height: 71
+        x: 33
+        y: 163
+        width: 30
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,10 +196,10 @@ TextureImporter:
       name: bulls_2
       rect:
         serializedVersion: 2
-        x: 182
-        y: 422
-        width: 33
-        height: 71
+        x: 65
+        y: 163
+        width: 16
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +218,10 @@ TextureImporter:
       name: bulls_3
       rect:
         serializedVersion: 2
-        x: 221
-        y: 420
-        width: 55
-        height: 76
+        x: 82
+        y: 162
+        width: 25
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -225,10 +240,10 @@ TextureImporter:
       name: bulls_4
       rect:
         serializedVersion: 2
-        x: 283
-        y: 422
-        width: 69
-        height: 71
+        x: 108
+        y: 163
+        width: 31
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -247,10 +262,10 @@ TextureImporter:
       name: bulls_5
       rect:
         serializedVersion: 2
-        x: 357
-        y: 420
-        width: 58
-        height: 76
+        x: 139
+        y: 162
+        width: 27
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,10 +284,10 @@ TextureImporter:
       name: bulls_6
       rect:
         serializedVersion: 2
-        x: 420
-        y: 420
-        width: 64
-        height: 74
+        x: 166
+        y: 162
+        width: 29
+        height: 33
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +306,10 @@ TextureImporter:
       name: bulls_7
       rect:
         serializedVersion: 2
-        x: 42
-        y: 18
-        width: 432
-        height: 402
+        x: 14
+        y: 6
+        width: 163
+        height: 142
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -305,6 +320,116 @@ TextureImporter:
       bones: []
       spriteID: bf2eecf8a1bf14270800000000000000
       internalID: 8233137685310399227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bulls_8
+      rect:
+        serializedVersion: 2
+        x: 31
+        y: 126
+        width: 27
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38a1e3794feb28d10800000000000000
+      internalID: 2126471931791022723
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bulls_9
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 125
+        width: 29
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ec21035d15925bcd0800000000000000
+      internalID: -2543080983134989618
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bulls_10
+      rect:
+        serializedVersion: 2
+        x: 89
+        y: 126
+        width: 23
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bbf454c1d9699b640800000000000000
+      internalID: 5096270054874763195
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bulls_11
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 126
+        width: 24
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e405f5be1c88a170800000000000000
+      internalID: 8189949985902888162
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bulls_12
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 126
+        width: 22
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9837d011eab868400800000000000000
+      internalID: 326101602757604233
       vertices: []
       indices: 
       edges: []
@@ -325,12 +450,17 @@ TextureImporter:
     nameFileIdTable:
       bulls_0: -6334336322350855340
       bulls_1: -4964735162478476251
+      bulls_10: 5096270054874763195
+      bulls_11: 8189949985902888162
+      bulls_12: 326101602757604233
       bulls_2: -457989490810078060
       bulls_3: -4301970627437293180
       bulls_4: 5985031272880725990
       bulls_5: -6737278563918872694
       bulls_6: 3939210801590635186
       bulls_7: 8233137685310399227
+      bulls_8: 2126471931791022723
+      bulls_9: -2543080983134989618
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

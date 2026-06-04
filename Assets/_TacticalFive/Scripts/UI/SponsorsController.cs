@@ -9,9 +9,10 @@ public class SponsorsController : MonoBehaviour
     private VisualElement _root;
 
     private Button _btnAction;
-    private VisualElement _currentSponsorBody;
-    private Label _noSponsorText;
-    private VisualElement _availableSponsorsBody;
+    private VisualElement _currentSponsorBanner;
+    private Label _currentSponsorName;
+    private VisualElement _cardsContainer;
+    private Label _infoMessage;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -39,9 +40,10 @@ public class SponsorsController : MonoBehaviour
     void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
-        _currentSponsorBody = _root.Q<VisualElement>("CurrentSponsorBody");
-        _noSponsorText = _root.Q<Label>("NoSponsorText");
-        _availableSponsorsBody = _root.Q<VisualElement>("AvailableSponsorsBody");
+        _currentSponsorBanner = _root.Q<VisualElement>("CurrentSponsorBanner");
+        _currentSponsorName = _root.Q<Label>("CurrentSponsorName");
+        _cardsContainer = _root.Q<VisualElement>("SponsorsCardsContainer");
+        _infoMessage = _root.Q<Label>("SponsorsInfoMessage");
     }
 
     void LoadData()
@@ -98,8 +100,8 @@ public class SponsorsController : MonoBehaviour
     void Refresh()
     {
         RefreshHeader();
-        BuildCurrentSponsor();
-        BuildAvailableSponsors();
+        BuildCurrentSponsorBanner();
+        BuildCards();
     }
 
     void RefreshHeader()
@@ -132,112 +134,139 @@ public class SponsorsController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
     }
 
-    void BuildCurrentSponsor()
+    void BuildCurrentSponsorBanner()
     {
-        _currentSponsorBody.Clear();
-
-        if (_currentSponsor == null)
+        if (_currentSponsor != null)
         {
-            _noSponsorText.style.display = DisplayStyle.Flex;
+            _currentSponsorBanner.style.display = DisplayStyle.Flex;
+            _currentSponsorName.text = _currentSponsor.name;
+        }
+        else
+        {
+            _currentSponsorBanner.style.display = DisplayStyle.None;
+        }
+    }
+
+    void BuildCards()
+    {
+        _cardsContainer.Clear();
+
+        if (_availableSponsors == null || _availableSponsors.Count == 0)
+        {
+            var emptyLbl = new Label("No hay patrocinadores disponibles.");
+            emptyLbl.AddToClassList("sponsors-info-message");
+            _cardsContainer.Add(emptyLbl);
             return;
         }
 
-        _noSponsorText.style.display = DisplayStyle.None;
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("sponsor-current-name");
-        nameLbl.text = _currentSponsor.name.ToUpper();
-
-        var detailsLbl = new Label();
-        detailsLbl.AddToClassList("sponsor-current-details");
-        detailsLbl.text = $"Tipo: {GetSponsorTypeName(_currentSponsor.sponsor_type)}";
-
-        var valueLbl = new Label();
-        valueLbl.AddToClassList("sponsor-current-value");
-        valueLbl.text = $"${_currentSponsor.value:N0} / temporada";
-
-        _currentSponsorBody.Add(nameLbl);
-        _currentSponsorBody.Add(detailsLbl);
-        _currentSponsorBody.Add(valueLbl);
-    }
-
-    void BuildAvailableSponsors()
-    {
-        _availableSponsorsBody.Clear();
+        bool hasCurrent = _currentSponsor != null;
 
         foreach (var sponsor in _availableSponsors)
         {
-            var item = new VisualElement();
-            item.AddToClassList("sponsor-item");
-
-            var info = new VisualElement();
-            info.AddToClassList("sponsor-info");
-
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("sponsor-name");
-            nameLbl.text = sponsor.name.ToUpper();
-
-            var detailsLbl = new Label();
-            detailsLbl.AddToClassList("sponsor-details");
-            detailsLbl.text = $"Tipo: {GetSponsorTypeName(sponsor.sponsor_type)}";
-
-            info.Add(nameLbl);
-            info.Add(detailsLbl);
-
-            var valueLbl = new Label();
-            valueLbl.AddToClassList("sponsor-value");
-            valueLbl.text = $"${sponsor.value:N0}";
-
-            var signBtn = new Button();
-            signBtn.AddToClassList("btn-sign-sponsor");
-            signBtn.text = "FIRMAR";
-
-            var sponsorCopy = sponsor;
-            signBtn.clicked += () => SignSponsor(sponsorCopy);
-
-            item.Add(info);
-            item.Add(valueLbl);
-            item.Add(signBtn);
-
-            _availableSponsorsBody.Add(item);
+            var card = CreateCard(sponsor, hasCurrent);
+            _cardsContainer.Add(card);
         }
+    }
+
+    VisualElement CreateCard(SponsorData sponsor, bool hasCurrent)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("sponsor-card");
+
+        // Logo
+        var logo = new VisualElement();
+        logo.AddToClassList("sponsor-card-logo");
+        // Load sponsor logo from Resources (strip .png extension for Resources.Load)
+        var logoPath = sponsor.logo?.Replace(".png", "");
+        var sponsorLogo = Resources.Load<Sprite>(logoPath);
+        if (sponsorLogo != null)
+            logo.style.backgroundImage = new StyleBackground(sponsorLogo);
+
+        // If we have a current sponsor and this is not it, show in grayscale
+        if (hasCurrent && _currentSponsor != null && sponsor.id != _currentSponsor.id)
+            logo.AddToClassList("sponsor-card-logo--grayscale");
+
+        card.Add(logo);
+
+        // Name
+        var nameLbl = new Label(sponsor.name.ToUpper());
+        nameLbl.AddToClassList("sponsor-card-name");
+        card.Add(nameLbl);
+
+        // Ingreso Inicial
+        card.Add(CreateCardRow("Ingreso Inicial", $"${sponsor.initial_income:N0}"));
+
+        // Por Partido en Casa
+        card.Add(CreateCardRow("Por Partido en Casa", $"${sponsor.home_game_income:N0}"));
+
+        // Duración
+        card.Add(CreateCardRow("Duración", $"{sponsor.contract_years} año{(sponsor.contract_years > 1 ? "s" : "")}"));
+
+        // Button
+        var btn = new Button();
+        btn.AddToClassList("sponsor-card-btn");
+        bool isContracted = hasCurrent && _currentSponsor != null && _currentSponsor.id == sponsor.id;
+
+        if (isContracted)
+        {
+            btn.text = "CONTRATADO";
+            btn.AddToClassList("sponsor-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
+        else if (hasCurrent)
+        {
+            btn.text = "CONTRATADO";
+            btn.AddToClassList("sponsor-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
+        else
+        {
+            btn.text = "CONTRATAR";
+            var sponsorCopy = sponsor;
+            btn.clicked += () => SignSponsor(sponsorCopy);
+        }
+        card.Add(btn);
+
+        return card;
+    }
+
+    VisualElement CreateCardRow(string label, string value)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("sponsor-card-row");
+
+        var lbl = new Label(label);
+        lbl.AddToClassList("sponsor-card-label");
+
+        var val = new Label(value);
+        val.AddToClassList("sponsor-card-value");
+
+        row.Add(lbl);
+        row.Add(val);
+
+        return row;
     }
 
     void SignSponsor(SponsorData sponsor)
     {
-        if (_currentSponsor != null)
-        {
-            DatabaseManager.Instance.FireSponsor(_currentSponsor.id, _season.id, _myTeam.id);
-        }
+        if (_currentSponsor != null) return; // Can't sign if already have one
 
-        DatabaseManager.Instance.SignSponsor(sponsor.id, _season.id, _myTeam.id);
+        DatabaseManager.Instance.SignSponsor(sponsor.id, _season.id, _myTeam.id, _season.current_game_day);
 
-        var finance = new FinanceRecord
-        {
-            team_id = _myTeam.id,
-            season_id = _season.id,
-            game_day = DatabaseManager.Instance.GetCurrentDay(_manager.id),
-            record_type = 3,
-            amount = sponsor.value,
-            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-        };
-        DatabaseManager.Instance.AddFinanceRecord(finance);
-
+        // Send message
         var msg = new MessageData
         {
             manager_id = _manager.id,
             sender_type = 1,
             sender_id = 0,
             title = $"PATROCINADOR FIRMADO: {sponsor.name.ToUpper()}",
-            body = $"Se ha firmado un nuevo patrocinio con {sponsor.name}.\n\nValor: ${sponsor.value:N0} por temporada.",
+            body = $"Se ha firmado un nuevo patrocinio con {sponsor.name}.\n\nIngreso inicial: ${sponsor.initial_income:N0}",
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             is_read = 0
         };
@@ -245,17 +274,5 @@ public class SponsorsController : MonoBehaviour
 
         LoadData();
         Refresh();
-    }
-
-    string GetSponsorTypeName(int type)
-    {
-        return type switch
-        {
-            1 => "LOCAL",
-            2 => "REGIONAL",
-            3 => "NACIONAL",
-            4 => "INTERNACIONAL",
-            _ => "OTRO"
-        };
     }
 }

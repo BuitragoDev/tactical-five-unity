@@ -1,147 +1,114 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:uie="UnityEditor.UIElements"
-         editor-extension-mode="False">
-
-    <Style src="SelectTeam.uss" />
-
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/SelectTeam/SelectTeam.uss?fileID=7433441132597879392&amp;guid=82b29e8b19665c60bb46d66235574a55&amp;type=3#SelectTeam"/>
     <ui:VisualElement name="SelectTeamRoot" class="select-team-root">
-
-        <!-- ══ HEADER ══ -->
         <ui:VisualElement name="Header" class="header">
-            <ui:Button name="BtnBack" class="btn-back" text="← VOLVER" />
+            <ui:Button name="BtnBack" text="VOLVER" class="btn-back"/>
             <ui:VisualElement class="header-title">
-                <ui:Label class="header-title-white" text="LIGA" />
-                <ui:Label name="HeaderMode" class="header-title-gold" text="MANAGER" />
-                <ui:Label class="header-title-white" text="· SELECCIONAR EQUIPO" />
+                <ui:Label text="LIGA" class="header-title-white"/>
+                <ui:Label name="HeaderMode" text="MANAGER" class="header-title-gold"/>
+                <ui:Label text="· SELECCIONAR EQUIPO" class="header-title-white"/>
             </ui:VisualElement>
-            <ui:Button name="BtnContinue" class="btn-continue" text="CONTINUAR →" />
+            <ui:Button name="BtnContinue" text="CONTINUAR" class="btn-continue"/>
         </ui:VisualElement>
-
-        <!-- ══ MANAGER NAME ══ -->
         <ui:VisualElement class="manager-bar">
-            <ui:Label class="manager-label" text="NOMBRE DEL MANAGER" />
-            <ui:TextField name="ManagerNameInput" class="manager-input"
-                          placeholder-text="Escribe tu nombre..." />
+            <ui:Label text="NOMBRE DEL MANAGER" class="manager-label"/>
+            <ui:TextField name="ManagerNameInput" max-length="30" class="manager-input"/>
         </ui:VisualElement>
-
-        <!-- ══ CONTENT ══ -->
         <ui:VisualElement class="content-area">
-
-            <!-- LEFT -->
             <ui:VisualElement class="left-panel">
-
-                <!-- Tabs -->
                 <ui:VisualElement class="tabs-bar">
-                    <ui:Button name="TabAll"  class="tab-btn tab-btn--active" text="TODOS (30)" />
-                    <ui:Button name="TabEast" class="tab-btn"                 text="ESTE" />
-                    <ui:Button name="TabWest" class="tab-btn"                 text="OESTE" />
+                    <ui:Button name="TabAll" text="TODOS (30)" class="tab-btn tab-btn--active"/>
+                    <ui:Button name="TabEast" text="ESTE" class="tab-btn"/>
+                    <ui:Button name="TabWest" text="OESTE" class="tab-btn"/>
                 </ui:VisualElement>
-
-                <!-- ScrollView con el grid -->
-                <ui:ScrollView name="GridScroll" class="grid-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-                    <ui:VisualElement name="TeamsGrid" class="teams-grid" />
+                <ui:ScrollView name="GridScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="grid-scroll">
+                    <ui:VisualElement name="TeamsGrid" class="teams-grid"/>
                 </ui:ScrollView>
-
             </ui:VisualElement>
-
-            <!-- RIGHT -->
             <ui:VisualElement name="RightPanel" class="right-panel">
-
-                <!-- Placeholder -->
                 <ui:VisualElement name="DetailPlaceholder" class="detail-placeholder">
-                    <ui:Label class="placeholder-text" text="SELECCIONA UN EQUIPO" />
+                    <ui:Label text="SELECCIONA UN EQUIPO" class="placeholder-text"/>
                 </ui:VisualElement>
-
-                <!-- Panel detalles en ScrollView -->
-                <ui:ScrollView name="DetailScroll" class="right-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
+                <ui:ScrollView name="DetailScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="right-scroll">
                     <ui:VisualElement name="DetailPanel" class="detail-panel">
-
                         <ui:VisualElement class="detail-header">
-                            <ui:VisualElement name="DetailLogo" class="detail-logo" />
-                            <ui:VisualElement class="detail-name-wrap">
-                                <ui:Label name="DetailTeamName"   class="detail-team-name"  text="" />
-                                <ui:Label name="DetailConference" class="detail-conference" text="" />
+                            <ui:VisualElement class="detail-col-logo">
+                                <ui:VisualElement name="DetailLogo" class="detail-logo"/>
+                                <ui:VisualElement class="detail-name-wrap">
+                                    <ui:Label name="DetailTeamName" text="" class="detail-team-name"/>
+                                    <ui:Label name="DetailConference" text="" class="detail-conference"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="detail-col-jersey">
+                                <ui:VisualElement name="JerseyHome" class="jersey-img jersey-home"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="detail-col-jersey">
+                                <ui:VisualElement name="JerseyAway" class="jersey-img jersey-away"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
-
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Ciudad" />
-                            <ui:Label name="DetailCity" class="detail-row-value" text="" />
+                            <ui:Label text="Ciudad" class="detail-row-label"/>
+                            <ui:Label name="DetailCity" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Conferencia" />
-                            <ui:Label name="DetailConferenceVal" class="detail-row-value" text="" />
+                            <ui:Label text="Conferencia" class="detail-row-label"/>
+                            <ui:Label name="DetailConferenceVal" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="División" />
-                            <ui:Label name="DetailDivision" class="detail-row-value" text="" />
+                            <ui:Label text="División" class="detail-row-label"/>
+                            <ui:Label name="DetailDivision" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Propietario" />
-                            <ui:Label name="DetailOwner" class="detail-row-value" text="" />
+                            <ui:Label text="Propietario" class="detail-row-label"/>
+                            <ui:Label name="DetailOwner" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Pabellón" />
-                            <ui:Label name="DetailArena" class="detail-row-value" text="" />
+                            <ui:Label text="Pabellón" class="detail-row-label"/>
+                            <ui:Label name="DetailArena" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Aforo" />
-                            <ui:Label name="DetailCapacity" class="detail-row-value" text="" />
+                            <ui:Label text="Aforo" class="detail-row-label"/>
+                            <ui:Label name="DetailCapacity" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Reputación" />
-                            <ui:VisualElement name="DetailReputation" class="stars-wrap" />
+                            <ui:Label text="Reputación" class="detail-row-label"/>
+                            <ui:VisualElement name="DetailReputation" class="stars-wrap"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Instalaciones" />
-                            <ui:VisualElement name="DetailFacilities" class="stars-wrap" />
+                            <ui:Label text="Instalaciones" class="detail-row-label"/>
+                            <ui:VisualElement name="DetailFacilities" class="stars-wrap"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Presupuesto" />
-                            <ui:Label name="DetailBudget" class="detail-row-value" text="" />
+                            <ui:Label text="Presupuesto" class="detail-row-label"/>
+                            <ui:Label name="DetailBudget" text="" class="detail-row-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
-                            <ui:Label class="detail-row-label" text="Margen salarial" />
-                            <ui:Label name="DetailSalaryMargin" class="detail-row-value" text="" />
+                            <ui:Label text="Margen salarial" class="detail-row-label"/>
+                            <ui:Label name="DetailSalaryMargin" text="" class="detail-row-value"/>
                         </ui:VisualElement>
-
                         <ui:VisualElement class="stats-row">
                             <ui:VisualElement class="stat-circle">
                                 <ui:VisualElement class="stat-circle-ring">
-                                    <ui:Label name="DetailAttack" class="stat-circle-value" text="--" />
+                                    <ui:Label name="DetailAttack" text="--" class="stat-circle-value"/>
                                 </ui:VisualElement>
-                                <ui:Label class="stat-circle-label" text="ATAQUE" />
+                                <ui:Label text="ATAQUE" class="stat-circle-label"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="stat-circle">
                                 <ui:VisualElement class="stat-circle-ring stat-circle-ring--defense">
-                                    <ui:Label name="DetailDefense" class="stat-circle-value" text="--" />
+                                    <ui:Label name="DetailDefense" text="--" class="stat-circle-value"/>
                                 </ui:VisualElement>
-                                <ui:Label class="stat-circle-label" text="DEFENSA" />
+                                <ui:Label text="DEFENSA" class="stat-circle-label"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="stat-circle">
                                 <ui:VisualElement class="stat-circle-ring stat-circle-ring--overall">
-                                    <ui:Label name="DetailOverall" class="stat-circle-value" text="--" />
+                                    <ui:Label name="DetailOverall" text="--" class="stat-circle-value"/>
                                 </ui:VisualElement>
-                                <ui:Label class="stat-circle-label" text="OVERALL" />
+                                <ui:Label text="OVERALL" class="stat-circle-label"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
-
-                        <ui:VisualElement class="jerseys-row">
-                            <ui:VisualElement name="JerseyHome" class="jersey-img" />
-                            <ui:VisualElement name="JerseyAway" class="jersey-img" />
-                        </ui:VisualElement>
-
                     </ui:VisualElement>
                 </ui:ScrollView>
-
             </ui:VisualElement>
-
         </ui:VisualElement>
-
     </ui:VisualElement>
-
 </ui:UXML>

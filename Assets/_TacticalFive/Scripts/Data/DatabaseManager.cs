@@ -46,6 +46,7 @@ public class DatabaseManager : MonoBehaviour
 
         _db = new SQLiteConnection(DbPath);
         CreateTables();
+        RunMigrations();
         SeedStaticDataIfNeeded();
 
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
@@ -74,6 +75,37 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<FinalsPlayerStatsData>();
     }
 
+    void RunMigrations()
+    {
+        // Add fan_confidence to managers if missing
+        var managerCols = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");
+        bool hasFanConfidence = managerCols.Any(c => c.name == "fan_confidence");
+        if (!hasFanConfidence)
+        {
+            _db.Execute("ALTER TABLE managers ADD COLUMN fan_confidence INTEGER DEFAULT 50");
+            Debug.Log("[DB] Migration: added fan_confidence to managers");
+        }
+
+        // Add objective to teams if missing
+        var teamCols = _db.Query<ColumnInfo>("PRAGMA table_info(teams)");
+        bool hasObjective = teamCols.Any(c => c.name == "objective");
+        if (!hasObjective)
+        {
+            _db.Execute("ALTER TABLE teams ADD COLUMN objective TEXT");
+            Debug.Log("[DB] Migration: added objective to teams");
+        }
+    }
+
+    class ColumnInfo
+    {
+        public int cid { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public int notnull { get; set; }
+        public object dflt_value { get; set; }
+        public int pk { get; set; }
+    }
+
     void SeedStaticDataIfNeeded()
     {
         if (_db.Table<TeamData>().Count() == 0)
@@ -90,9 +122,25 @@ public class DatabaseManager : MonoBehaviour
 
         if (_db.Table<TvChannelData>().Count() == 0)
             SeedTvChannels();
+        else
+        {
+            // Detect old TV data (all initial_income == 0) and re-seed
+            var tvChannels = _db.Table<TvChannelData>().ToList();
+            if (tvChannels.Count > 0 && tvChannels.All(c => c.initial_income == 0))
+            {
+                _db.DeleteAll<TvChannelData>();
+                SeedTvChannels();
+            }
+        }
 
         if (_db.Table<HistoricalRecordData>().Count() == 0)
             SeedHistoricalRecords();
+
+        if (_db.Table<TeamRecordData>().Count() == 0)
+            SeedTeamRecords();
+
+        if (_db.Table<HistoricalPlayerStatsData>().Count() == 0)
+            SeedHistoricalPlayerStats();
     }
 
     bool EnsureDb()
@@ -228,6 +276,12 @@ public class DatabaseManager : MonoBehaviour
                   .FirstOrDefault();
     }
 
+    public void ClearAllManagers()
+    {
+        if (_db != null)
+            _db.Execute("DELETE FROM managers");
+    }
+
     // ── LEAGUE SETTINGS ───────────────────────────────
 
     public LeagueSettingsData GetLeagueSettings()
@@ -259,46 +313,46 @@ public class DatabaseManager : MonoBehaviour
         var teams = new List<TeamData>
         {
             // ── ESTE — ATLÁNTICO ──
-            new TeamData { name="Boston Celtics",        abbreviation="BOS", city="Boston",        conference="East", division="Atlantic",  arena="TD Garden",               capacity=19156, owner="Wyc Grousbeck",   attack=92, defense=91, overall=92, budget=200_000_000, reputation=5, facilities=5, logo="celtics",   jersey_home="celtics_home",   jersey_away="celtics_away",   salary_margin=-57_000_000 },
-            new TeamData { name="Brooklyn Nets",         abbreviation="BKN", city="Brooklyn",      conference="East", division="Atlantic",  arena="Barclays Center",         capacity=17732, owner="Joe Tsai",         attack=74, defense=72, overall=73, budget=140_000_000, reputation=3, facilities=3, logo="nets",      jersey_home="nets_home",      jersey_away="nets_away",      salary_margin=20_000_000  },
-            new TeamData { name="New York Knicks",       abbreviation="NYK", city="New York",      conference="East", division="Atlantic",  arena="Madison Square Garden",   capacity=19812, owner="James Dolan",      attack=83, defense=82, overall=83, budget=180_000_000, reputation=4, facilities=5, logo="knicks",    jersey_home="knicks_home",    jersey_away="knicks_away",    salary_margin=-30_000_000 },
-            new TeamData { name="Philadelphia 76ers",    abbreviation="PHI", city="Philadelphia",  conference="East", division="Atlantic",  arena="Wells Fargo Center",      capacity=20478, owner="Josh Harris",      attack=80, defense=79, overall=80, budget=170_000_000, reputation=4, facilities=4, logo="76ers",     jersey_home="76ers_home",     jersey_away="76ers_away",     salary_margin=-20_000_000 },
-            new TeamData { name="Toronto Raptors",       abbreviation="TOR", city="Toronto",       conference="East", division="Atlantic",  arena="Scotiabank Arena",        capacity=19800, owner="MLSE",             attack=76, defense=75, overall=76, budget=150_000_000, reputation=3, facilities=4, logo="raptors",   jersey_home="raptors_home",   jersey_away="raptors_away",   salary_margin=10_000_000  },
+            new TeamData { name="Boston Celtics",        abbreviation="BOS", city="Boston",        conference="East", division="Atlantic",  arena="TD Garden",               capacity=19156, owner="Wyc Grousbeck",   attack=92, defense=91, overall=92, budget=200_000_000, reputation=5, facilities=5, logo="celtics",   jersey_home="celtics_home",   jersey_away="celtics_away",   salary_margin=-57_000_000, objective="Campeonato" },
+            new TeamData { name="Brooklyn Nets",         abbreviation="BKN", city="Brooklyn",      conference="East", division="Atlantic",  arena="Barclays Center",         capacity=17732, owner="Joe Tsai",         attack=74, defense=72, overall=73, budget=140_000_000, reputation=3, facilities=3, logo="nets",      jersey_home="nets_home",      jersey_away="nets_away",      salary_margin=20_000_000,  objective="Play-In" },
+            new TeamData { name="New York Knicks",       abbreviation="NYK", city="New York",      conference="East", division="Atlantic",  arena="Madison Square Garden",   capacity=19812, owner="James Dolan",      attack=83, defense=82, overall=83, budget=180_000_000, reputation=4, facilities=5, logo="knicks",    jersey_home="knicks_home",    jersey_away="knicks_away",    salary_margin=-30_000_000, objective="Playoffs" },
+            new TeamData { name="Philadelphia 76ers",    abbreviation="PHI", city="Philadelphia",  conference="East", division="Atlantic",  arena="Wells Fargo Center",      capacity=20478, owner="Josh Harris",      attack=80, defense=79, overall=80, budget=170_000_000, reputation=4, facilities=4, logo="sixers",     jersey_home="76ers_home",     jersey_away="76ers_away",     salary_margin=-20_000_000, objective="Playoffs" },
+            new TeamData { name="Toronto Raptors",       abbreviation="TOR", city="Toronto",       conference="East", division="Atlantic",  arena="Scotiabank Arena",        capacity=19800, owner="MLSE",             attack=76, defense=75, overall=76, budget=150_000_000, reputation=3, facilities=4, logo="raptors",   jersey_home="raptors_home",   jersey_away="raptors_away",   salary_margin=10_000_000,  objective="Play-In" },
 
             // ── ESTE — CENTRAL ──
-            new TeamData { name="Chicago Bulls",         abbreviation="CHI", city="Chicago",       conference="East", division="Central",   arena="United Center",           capacity=20917, owner="Jerry Reinsdorf",  attack=78, defense=76, overall=77, budget=155_000_000, reputation=4, facilities=4, logo="bulls",     jersey_home="bulls_home",     jersey_away="bulls_away",     salary_margin=5_000_000   },
-            new TeamData { name="Cleveland Cavaliers",   abbreviation="CLE", city="Cleveland",     conference="East", division="Central",   arena="Rocket Mortgage Arena",   capacity=19432, owner="Dan Gilbert",      attack=85, defense=86, overall=86, budget=175_000_000, reputation=4, facilities=4, logo="cavaliers", jersey_home="cavaliers_home", jersey_away="cavaliers_away", salary_margin=-40_000_000 },
-            new TeamData { name="Detroit Pistons",       abbreviation="DET", city="Detroit",       conference="East", division="Central",   arena="Little Caesars Arena",    capacity=20491, owner="Tom Gores",        attack=70, defense=69, overall=70, budget=130_000_000, reputation=2, facilities=3, logo="pistons",   jersey_home="pistons_home",   jersey_away="pistons_away",   salary_margin=40_000_000  },
-            new TeamData { name="Indiana Pacers",        abbreviation="IND", city="Indianapolis",  conference="East", division="Central",   arena="Gainbridge Fieldhouse",   capacity=17923, owner="Herb Simon",       attack=82, defense=80, overall=81, budget=165_000_000, reputation=3, facilities=3, logo="pacers",    jersey_home="pacers_home",    jersey_away="pacers_away",    salary_margin=-15_000_000 },
-            new TeamData { name="Milwaukee Bucks",       abbreviation="MIL", city="Milwaukee",     conference="East", division="Central",   arena="Fiserv Forum",            capacity=17341, owner="Marc Lasry",       attack=84, defense=83, overall=84, budget=175_000_000, reputation=4, facilities=4, logo="bucks",     jersey_home="bucks_home",     jersey_away="bucks_away",     salary_margin=-35_000_000 },
+            new TeamData { name="Chicago Bulls",         abbreviation="CHI", city="Chicago",       conference="East", division="Central",   arena="United Center",           capacity=20917, owner="Jerry Reinsdorf",  attack=78, defense=76, overall=77, budget=155_000_000, reputation=4, facilities=4, logo="bulls",     jersey_home="bulls_home",     jersey_away="bulls_away",     salary_margin=5_000_000,   objective="Playoffs" },
+            new TeamData { name="Cleveland Cavaliers",   abbreviation="CLE", city="Cleveland",     conference="East", division="Central",   arena="Rocket Mortgage Arena",   capacity=19432, owner="Dan Gilbert",      attack=85, defense=86, overall=86, budget=175_000_000, reputation=4, facilities=4, logo="cavaliers", jersey_home="cavaliers_home", jersey_away="cavaliers_away", salary_margin=-40_000_000, objective="Playoffs" },
+            new TeamData { name="Detroit Pistons",       abbreviation="DET", city="Detroit",       conference="East", division="Central",   arena="Little Caesars Arena",    capacity=20491, owner="Tom Gores",        attack=70, defense=69, overall=70, budget=130_000_000, reputation=2, facilities=3, logo="pistons",   jersey_home="pistons_home",   jersey_away="pistons_away",   salary_margin=40_000_000,  objective="Zona tranquila" },
+            new TeamData { name="Indiana Pacers",        abbreviation="IND", city="Indianapolis",  conference="East", division="Central",   arena="Gainbridge Fieldhouse",   capacity=17923, owner="Herb Simon",       attack=82, defense=80, overall=81, budget=165_000_000, reputation=3, facilities=3, logo="pacers",    jersey_home="pacers_home",    jersey_away="pacers_away",    salary_margin=-15_000_000, objective="Play-In" },
+            new TeamData { name="Milwaukee Bucks",       abbreviation="MIL", city="Milwaukee",     conference="East", division="Central",   arena="Fiserv Forum",            capacity=17341, owner="Marc Lasry",       attack=84, defense=83, overall=84, budget=175_000_000, reputation=4, facilities=4, logo="bucks",     jersey_home="bucks_home",     jersey_away="bucks_away",     salary_margin=-35_000_000, objective="Playoffs" },
 
             // ── ESTE — SURESTE ──
-            new TeamData { name="Atlanta Hawks",         abbreviation="ATL", city="Atlanta",       conference="East", division="Southeast", arena="State Farm Arena",        capacity=18118, owner="Tony Ressler",     attack=79, defense=76, overall=78, budget=155_000_000, reputation=3, facilities=3, logo="hawks",     jersey_home="hawks_home",     jersey_away="hawks_away",     salary_margin=0           },
-            new TeamData { name="Charlotte Hornets",     abbreviation="CHA", city="Charlotte",     conference="East", division="Southeast", arena="Spectrum Center",         capacity=19077, owner="Gabe Plotkin",     attack=71, defense=70, overall=71, budget=130_000_000, reputation=2, facilities=3, logo="hornets",   jersey_home="hornets_home",   jersey_away="hornets_away",   salary_margin=35_000_000  },
-            new TeamData { name="Miami Heat",            abbreviation="MIA", city="Miami",         conference="East", division="Southeast", arena="Kaseya Center",           capacity=19600, owner="Micky Arison",     attack=81, defense=83, overall=82, budget=170_000_000, reputation=4, facilities=4, logo="heat",      jersey_home="heat_home",      jersey_away="heat_away",      salary_margin=-25_000_000 },
-            new TeamData { name="Orlando Magic",         abbreviation="ORL", city="Orlando",       conference="East", division="Southeast", arena="Kia Center",              capacity=18846, owner="DeVos family",     attack=77, defense=79, overall=78, budget=150_000_000, reputation=3, facilities=3, logo="magic",     jersey_home="magic_home",     jersey_away="magic_away",     salary_margin=15_000_000  },
-            new TeamData { name="Washington Wizards",    abbreviation="WAS", city="Washington",    conference="East", division="Southeast", arena="Capital One Arena",       capacity=20356, owner="Ted Leonsis",      attack=68, defense=67, overall=68, budget=120_000_000, reputation=2, facilities=3, logo="wizards",   jersey_home="wizards_home",   jersey_away="wizards_away",   salary_margin=50_000_000  },
+            new TeamData { name="Atlanta Hawks",         abbreviation="ATL", city="Atlanta",       conference="East", division="Southeast", arena="State Farm Arena",        capacity=18118, owner="Tony Ressler",     attack=79, defense=76, overall=78, budget=155_000_000, reputation=3, facilities=3, logo="hawks",     jersey_home="hawks_home",     jersey_away="hawks_away",     salary_margin=0,           objective="Play-In" },
+            new TeamData { name="Charlotte Hornets",     abbreviation="CHA", city="Charlotte",     conference="East", division="Southeast", arena="Spectrum Center",         capacity=19077, owner="Gabe Plotkin",     attack=71, defense=70, overall=71, budget=130_000_000, reputation=2, facilities=3, logo="hornets",   jersey_home="hornets_home",   jersey_away="hornets_away",   salary_margin=35_000_000,  objective="Zona tranquila" },
+            new TeamData { name="Miami Heat",            abbreviation="MIA", city="Miami",         conference="East", division="Southeast", arena="Kaseya Center",           capacity=19600, owner="Micky Arison",     attack=81, defense=83, overall=82, budget=170_000_000, reputation=4, facilities=4, logo="heat",      jersey_home="heat_home",      jersey_away="heat_away",      salary_margin=-25_000_000, objective="Playoffs" },
+            new TeamData { name="Orlando Magic",         abbreviation="ORL", city="Orlando",       conference="East", division="Southeast", arena="Kia Center",              capacity=18846, owner="DeVos family",     attack=77, defense=79, overall=78, budget=150_000_000, reputation=3, facilities=3, logo="magic",     jersey_home="magic_home",     jersey_away="magic_away",     salary_margin=15_000_000,  objective="Play-In" },
+            new TeamData { name="Washington Wizards",    abbreviation="WAS", city="Washington",    conference="East", division="Southeast", arena="Capital One Arena",       capacity=20356, owner="Ted Leonsis",      attack=68, defense=67, overall=68, budget=120_000_000, reputation=2, facilities=3, logo="wizards",   jersey_home="wizards_home",   jersey_away="wizards_away",   salary_margin=50_000_000,  objective="Zona tranquila" },
 
             // ── OESTE — NOROESTE ──
-            new TeamData { name="Denver Nuggets",        abbreviation="DEN", city="Denver",        conference="West", division="Northwest", arena="Ball Arena",              capacity=19520, owner="Stan Kroenke",     attack=88, defense=84, overall=86, budget=185_000_000, reputation=4, facilities=4, logo="nuggets",   jersey_home="nuggets_home",   jersey_away="nuggets_away",   salary_margin=-57_000_000 },
-            new TeamData { name="Minnesota Timberwolves",abbreviation="MIN", city="Minneapolis",   conference="West", division="Northwest", arena="Target Center",           capacity=18978, owner="Alex Rodriguez",   attack=83, defense=85, overall=84, budget=170_000_000, reputation=3, facilities=3, logo="wolves",    jersey_home="wolves_home",    jersey_away="wolves_away",    salary_margin=-30_000_000 },
-            new TeamData { name="Oklahoma City Thunder",  abbreviation="OKC", city="Oklahoma City", conference="West", division="Northwest", arena="Paycom Center",           capacity=18203, owner="Clay Bennett",     attack=86, defense=84, overall=85, budget=175_000_000, reputation=3, facilities=3, logo="thunder",   jersey_home="thunder_home",   jersey_away="thunder_away",   salary_margin=-45_000_000 },
-            new TeamData { name="Portland Trail Blazers", abbreviation="POR", city="Portland",      conference="West", division="Northwest", arena="Moda Center",             capacity=19393, owner="Jody Allen",       attack=72, defense=71, overall=72, budget=135_000_000, reputation=3, facilities=3, logo="blazers",   jersey_home="blazers_home",   jersey_away="blazers_away",   salary_margin=25_000_000  },
-            new TeamData { name="Utah Jazz",              abbreviation="UTA", city="Salt Lake City", conference="West", division="Northwest", arena="Delta Center",            capacity=18306, owner="Ryan Smith",       attack=73, defense=72, overall=73, budget=140_000_000, reputation=3, facilities=3, logo="jazz",      jersey_home="jazz_home",      jersey_away="jazz_away",      salary_margin=20_000_000  },
+            new TeamData { name="Denver Nuggets",        abbreviation="DEN", city="Denver",        conference="West", division="Northwest", arena="Ball Arena",              capacity=19520, owner="Stan Kroenke",     attack=88, defense=84, overall=86, budget=185_000_000, reputation=4, facilities=4, logo="nuggets",   jersey_home="nuggets_home",   jersey_away="nuggets_away",   salary_margin=-57_000_000, objective="Playoffs" },
+            new TeamData { name="Minnesota Timberwolves",abbreviation="MIN", city="Minneapolis",   conference="West", division="Northwest", arena="Target Center",           capacity=18978, owner="Alex Rodriguez",   attack=83, defense=85, overall=84, budget=170_000_000, reputation=3, facilities=3, logo="wolves",    jersey_home="wolves_home",    jersey_away="wolves_away",    salary_margin=-30_000_000, objective="Play-In" },
+            new TeamData { name="Oklahoma City Thunder",  abbreviation="OKC", city="Oklahoma City", conference="West", division="Northwest", arena="Paycom Center",           capacity=18203, owner="Clay Bennett",     attack=86, defense=84, overall=85, budget=175_000_000, reputation=3, facilities=3, logo="thunder",   jersey_home="thunder_home",   jersey_away="thunder_away",   salary_margin=-45_000_000, objective="Play-In" },
+            new TeamData { name="Portland Trail Blazers", abbreviation="POR", city="Portland",      conference="West", division="Northwest", arena="Moda Center",             capacity=19393, owner="Jody Allen",       attack=72, defense=71, overall=72, budget=135_000_000, reputation=3, facilities=3, logo="blazers",   jersey_home="blazers_home",   jersey_away="blazers_away",   salary_margin=25_000_000,  objective="Play-In" },
+            new TeamData { name="Utah Jazz",              abbreviation="UTA", city="Salt Lake City", conference="West", division="Northwest", arena="Delta Center",            capacity=18306, owner="Ryan Smith",       attack=73, defense=72, overall=73, budget=140_000_000, reputation=3, facilities=3, logo="jazz",      jersey_home="jazz_home",      jersey_away="jazz_away",      salary_margin=20_000_000,  objective="Play-In" },
 
             // ── OESTE — PACÍFICO ──
-            new TeamData { name="Golden State Warriors",  abbreviation="GSW", city="San Francisco", conference="West", division="Pacific",   arena="Chase Center",            capacity=18064, owner="Joe Lacob",        attack=83, defense=80, overall=82, budget=175_000_000, reputation=5, facilities=5, logo="warriors",  jersey_home="warriors_home",  jersey_away="warriors_away",  salary_margin=-40_000_000 },
-            new TeamData { name="Los Angeles Clippers",   abbreviation="LAC", city="Los Angeles",   conference="West", division="Pacific",   arena="Intuit Dome",             capacity=18000, owner="Steve Ballmer",    attack=81, defense=82, overall=82, budget=170_000_000, reputation=4, facilities=5, logo="clippers",  jersey_home="clippers_home",  jersey_away="clippers_away",  salary_margin=-25_000_000 },
-            new TeamData { name="Los Angeles Lakers",     abbreviation="LAL", city="Los Angeles",   conference="West", division="Pacific",   arena="Crypto.com Arena",        capacity=18997, owner="Jeanie Buss",      attack=82, defense=79, overall=81, budget=175_000_000, reputation=5, facilities=5, logo="lakers",    jersey_home="lakers_home",    jersey_away="lakers_away",    salary_margin=-30_000_000 },
-            new TeamData { name="Phoenix Suns",           abbreviation="PHX", city="Phoenix",       conference="West", division="Pacific",   arena="Footprint Center",        capacity=18055, owner="Mat Ishbia",       attack=80, defense=78, overall=79, budget=165_000_000, reputation=3, facilities=4, logo="suns",      jersey_home="suns_home",      jersey_away="suns_away",      salary_margin=-10_000_000 },
-            new TeamData { name="Sacramento Kings",       abbreviation="SAC", city="Sacramento",    conference="West", division="Pacific",   arena="Golden 1 Center",         capacity=17608, owner="Vivek Ranadivé",   attack=79, defense=77, overall=78, budget=155_000_000, reputation=3, facilities=4, logo="kings",     jersey_home="kings_home",     jersey_away="kings_away",     salary_margin=5_000_000   },
+            new TeamData { name="Golden State Warriors",  abbreviation="GSW", city="San Francisco", conference="West", division="Pacific",   arena="Chase Center",            capacity=18064, owner="Joe Lacob",        attack=83, defense=80, overall=82, budget=175_000_000, reputation=5, facilities=5, logo="warriors",  jersey_home="warriors_home",  jersey_away="warriors_away",  salary_margin=-40_000_000, objective="Campeonato" },
+            new TeamData { name="Los Angeles Clippers",   abbreviation="LAC", city="Los Angeles",   conference="West", division="Pacific",   arena="Intuit Dome",             capacity=18000, owner="Steve Ballmer",    attack=81, defense=82, overall=82, budget=170_000_000, reputation=4, facilities=5, logo="clippers",  jersey_home="clippers_home",  jersey_away="clippers_away",  salary_margin=-25_000_000, objective="Playoffs" },
+            new TeamData { name="Los Angeles Lakers",     abbreviation="LAL", city="Los Angeles",   conference="West", division="Pacific",   arena="Crypto.com Arena",        capacity=18997, owner="Jeanie Buss",      attack=82, defense=79, overall=81, budget=175_000_000, reputation=5, facilities=5, logo="lakers",    jersey_home="lakers_home",    jersey_away="lakers_away",    salary_margin=-30_000_000, objective="Campeonato" },
+            new TeamData { name="Phoenix Suns",           abbreviation="PHX", city="Phoenix",       conference="West", division="Pacific",   arena="Footprint Center",        capacity=18055, owner="Mat Ishbia",       attack=80, defense=78, overall=79, budget=165_000_000, reputation=3, facilities=4, logo="suns",      jersey_home="suns_home",      jersey_away="suns_away",      salary_margin=-10_000_000, objective="Play-In" },
+            new TeamData { name="Sacramento Kings",       abbreviation="SAC", city="Sacramento",    conference="West", division="Pacific",   arena="Golden 1 Center",         capacity=17608, owner="Vivek Ranadivé",   attack=79, defense=77, overall=78, budget=155_000_000, reputation=3, facilities=4, logo="kings",     jersey_home="kings_home",     jersey_away="kings_away",     salary_margin=5_000_000,   objective="Play-In" },
 
             // ── OESTE — SUROESTE ──
-            new TeamData { name="Dallas Mavericks",      abbreviation="DAL", city="Dallas",        conference="West", division="Southwest", arena="American Airlines Center", capacity=19200, owner="Patrick Dumont",   attack=87, defense=83, overall=85, budget=180_000_000, reputation=4, facilities=4, logo="mavericks", jersey_home="mavericks_home", jersey_away="mavericks_away", salary_margin=-50_000_000 },
-            new TeamData { name="Houston Rockets",       abbreviation="HOU", city="Houston",       conference="West", division="Southwest", arena="Toyota Center",           capacity=18055, owner="Tilman Fertitta",  attack=75, defense=74, overall=75, budget=145_000_000, reputation=3, facilities=3, logo="rockets",   jersey_home="rockets_home",   jersey_away="rockets_away",   salary_margin=20_000_000  },
-            new TeamData { name="Memphis Grizzlies",     abbreviation="MEM", city="Memphis",       conference="West", division="Southwest", arena="FedExForum",              capacity=17794, owner="Robert Pera",      attack=76, defense=78, overall=77, budget=150_000_000, reputation=3, facilities=3, logo="grizzlies", jersey_home="grizzlies_home", jersey_away="grizzlies_away", salary_margin=10_000_000  },
-            new TeamData { name="New Orleans Pelicans",  abbreviation="NOP", city="New Orleans",   conference="West", division="Southwest", arena="Smoothie King Center",    capacity=17791, owner="Gayle Benson",     attack=77, defense=76, overall=77, budget=150_000_000, reputation=3, facilities=3, logo="pelicans",  jersey_home="pelicans_home",  jersey_away="pelicans_away",  salary_margin=10_000_000  },
-            new TeamData { name="San Antonio Spurs",     abbreviation="SAS", city="San Antonio",   conference="West", division="Southwest", arena="AT&T Center",             capacity=18418, owner="Peter Holt",       attack=71, defense=70, overall=71, budget=130_000_000, reputation=3, facilities=3, logo="spurs",     jersey_home="spurs_home",     jersey_away="spurs_away",     salary_margin=35_000_000  },
+            new TeamData { name="Dallas Mavericks",      abbreviation="DAL", city="Dallas",        conference="West", division="Southwest", arena="American Airlines Center", capacity=19200, owner="Patrick Dumont",   attack=87, defense=83, overall=85, budget=180_000_000, reputation=4, facilities=4, logo="mavericks", jersey_home="mavericks_home", jersey_away="mavericks_away", salary_margin=-50_000_000, objective="Playoffs" },
+            new TeamData { name="Houston Rockets",       abbreviation="HOU", city="Houston",       conference="West", division="Southwest", arena="Toyota Center",           capacity=18055, owner="Tilman Fertitta",  attack=75, defense=74, overall=75, budget=145_000_000, reputation=3, facilities=3, logo="rockets",   jersey_home="rockets_home",   jersey_away="rockets_away",   salary_margin=20_000_000,  objective="Play-In" },
+            new TeamData { name="Memphis Grizzlies",     abbreviation="MEM", city="Memphis",       conference="West", division="Southwest", arena="FedExForum",              capacity=17794, owner="Robert Pera",      attack=76, defense=78, overall=77, budget=150_000_000, reputation=3, facilities=3, logo="grizzlies", jersey_home="grizzlies_home", jersey_away="grizzlies_away", salary_margin=10_000_000,  objective="Play-In" },
+            new TeamData { name="New Orleans Pelicans",  abbreviation="NOP", city="New Orleans",   conference="West", division="Southwest", arena="Smoothie King Center",    capacity=17791, owner="Gayle Benson",     attack=77, defense=76, overall=77, budget=150_000_000, reputation=3, facilities=3, logo="pelicans",  jersey_home="pelicans_home",  jersey_away="pelicans_away",  salary_margin=10_000_000,  objective="Play-In" },
+            new TeamData { name="San Antonio Spurs",     abbreviation="SAS", city="San Antonio",   conference="West", division="Southwest", arena="AT&T Center",             capacity=18418, owner="Peter Holt",       attack=71, defense=70, overall=71, budget=130_000_000, reputation=3, facilities=3, logo="spurs",     jersey_home="spurs_home",     jersey_away="spurs_away",     salary_margin=35_000_000,  objective="Play-In" },
         };
 
         _db.InsertAll(teams);
@@ -417,6 +471,27 @@ public class DatabaseManager : MonoBehaviour
                         && (g.home_team_id == teamId || g.away_team_id == teamId))
                 .OrderBy(g => g.game_date)
                 .FirstOrDefault();
+    }
+
+    public string GetNextGameDateString(int managerId, int teamId)
+    {
+        var season = GetActiveSeason(managerId);
+        if (season == null) return "";
+
+        var nextGame = GetNextGame(managerId, teamId);
+        if (nextGame == null) return "";
+
+        // Calculate date from game_day to avoid DateTime.Parse timezone issues on Linux
+        if (nextGame.game_day > 0)
+        {
+            var seasonStart = new System.DateTime(season.year_start, 10, 22);
+            return seasonStart.AddDays(nextGame.game_day - 1).ToString("dd/MM/yyyy");
+        }
+        else
+        {
+            // For preseason games, parse the stored date (these don't have a game_day mapping)
+            return System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy");
+        }
     }
 
     public GameData GetLastPlayedGame(int managerId, int teamId)
@@ -1008,55 +1083,178 @@ public class DatabaseManager : MonoBehaviour
     {
         var sponsors = new List<SponsorData>
         {
-            new SponsorData { name = "Nike", description = "Official apparel partner", bonus_percent = 10, duration_years = 3, payment = 5000000, requirements = "Win 50+ games", is_active = 0, team_id = 0 },
-            new SponsorData { name = "Gatorade", description = "Official sports drink", bonus_percent = 5, duration_years = 2, payment = 3000000, requirements = "Make playoffs", is_active = 0, team_id = 0 },
-            new SponsorData { name = "State Farm", description = "Insurance partner", bonus_percent = 8, duration_years = 3, payment = 4000000, requirements = "None", is_active = 0, team_id = 0 },
-            new SponsorData { name = "Kia Motors", description = "Official automotive partner", bonus_percent = 12, duration_years = 4, payment = 6000000, requirements = "Win championship", is_active = 0, team_id = 0 },
-            new SponsorData { name = "AT&T", description = "Telecommunications partner", bonus_percent = 7, duration_years = 2, payment = 3500000, requirements = "Top 10 attendance", is_active = 0, team_id = 0 },
-            new SponsorData { name = "American Airlines", description = "Official airline partner", bonus_percent = 6, duration_years = 3, payment = 2500000, requirements = "None", is_active = 0, team_id = 0 },
-            new SponsorData { name = "Spalding", description = "Official basketball partner", bonus_percent = 4, duration_years = 2, payment = 2000000, requirements = "None", is_active = 0, team_id = 0 },
-            new SponsorData { name = "Red Bull", description = "Energy drink partner", bonus_percent = 9, duration_years = 3, payment = 4500000, requirements = "Win 60+ games", is_active = 0, team_id = 0 },
+            new SponsorData { name = "BMW",               logo = "Patrocinadores/1.png",  initial_income = 22000000, home_game_income = 650000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Land Rover",        logo = "Patrocinadores/2.png",  initial_income = 18000000, home_game_income = 550000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Netflix",           logo = "Patrocinadores/3.png",  initial_income = 24000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Starbucks",         logo = "Patrocinadores/4.png",  initial_income = 17000000, home_game_income = 500000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "FedEx",             logo = "Patrocinadores/5.png",  initial_income = 21000000, home_game_income = 620000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "UPS",               logo = "Patrocinadores/6.png",  initial_income = 20000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Burger King",       logo = "Patrocinadores/7.png",  initial_income = 15000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "KFC",               logo = "Patrocinadores/8.png",  initial_income = 15000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Domino's Pizza",    logo = "Patrocinadores/9.png",  initial_income = 16000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Costa Coffee",      logo = "Patrocinadores/10.png", initial_income = 14000000, home_game_income = 420000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Wendy's",           logo = "Patrocinadores/11.png", initial_income = 14500000, home_game_income = 430000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Taco Bell",         logo = "Patrocinadores/12.png", initial_income = 14500000, home_game_income = 430000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Vans",              logo = "Patrocinadores/13.png", initial_income = 16000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "John Deere",        logo = "Patrocinadores/14.png", initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "DG",                logo = "Patrocinadores/15.png", initial_income = 13000000, home_game_income = 390000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Etihad Airways",    logo = "Patrocinadores/16.png", initial_income = 26000000, home_game_income = 780000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Turkish Airlines",  logo = "Patrocinadores/17.png", initial_income = 24000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Apple",             logo = "Patrocinadores/18.png", initial_income = 28000000, home_game_income = 850000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "IKEA",              logo = "Patrocinadores/19.png", initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Mattel",            logo = "Patrocinadores/20.png", initial_income = 15000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Deutsche Bank",     logo = "Patrocinadores/21.png", initial_income = 22000000, home_game_income = 660000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Lloyd's Bank",      logo = "Patrocinadores/22.png", initial_income = 20000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "BBVA",              logo = "Patrocinadores/23.png", initial_income = 19000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Banco Santander",   logo = "Patrocinadores/24.png", initial_income = 23000000, home_game_income = 690000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Cadbury",           logo = "Patrocinadores/25.png", initial_income = 17000000, home_game_income = 510000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "DELL",              logo = "Patrocinadores/26.png", initial_income = 19000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "HP",                logo = "Patrocinadores/27.png", initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Volkswagen",        logo = "Patrocinadores/28.png", initial_income = 22000000, home_game_income = 660000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "IBM",               logo = "Patrocinadores/29.png", initial_income = 21000000, home_game_income = 630000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Pepsi",             logo = "Patrocinadores/30.png", initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
         };
 
         foreach (var s in sponsors)
             _db.Insert(s);
         Debug.Log($"[DB] {sponsors.Count} sponsors insertados.");
+
+        // Select 3 random sponsors for the first season
+        var all = _db.Table<SponsorData>().ToList();
+        if (all.Count >= 3)
+        {
+            var selected = all.OrderBy(_ => UnityEngine.Random.value).Take(3).ToList();
+            foreach (var s in selected)
+            {
+                s.is_active = 1;
+                _db.Update(s);
+            }
+            Debug.Log($"[DB] 3 patrocinadores activos seleccionados: {string.Join(", ", selected.Select(s => s.name))}");
+        }
     }
 
     public void SeedTvChannels()
     {
         var channels = new List<TvChannelData>
         {
-            new TvChannelData { name = "ESPN", description = "National sports network", broadcast_fee = 2000000, viewership_multiplier = 1.5f, is_active = 1 },
-            new TvChannelData { name = "TNT", description = "Turner Sports", broadcast_fee = 1800000, viewership_multiplier = 1.4f, is_active = 1 },
-            new TvChannelData { name = "ABC", description = "Broadcast network", broadcast_fee = 2500000, viewership_multiplier = 1.8f, is_active = 1 },
-            new TvChannelData { name = "NBA TV", description = "Official NBA network", broadcast_fee = 1000000, viewership_multiplier = 1.2f, is_active = 1 },
-            new TvChannelData { name = "Fox Sports", description = "Regional sports network", broadcast_fee = 1500000, viewership_multiplier = 1.3f, is_active = 1 },
+            new TvChannelData { name = "DAZN",      logo = "Televisiones/1.png",   initial_income = 22000000, home_game_income = 650000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2500000, viewership_multiplier = 1.8f },
+            new TvChannelData { name = "TV5",       logo = "Televisiones/2.png",   initial_income = 18000000, home_game_income = 550000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 1200000, viewership_multiplier = 1.2f },
+            new TvChannelData { name = "Disney",    logo = "Televisiones/3.png",   initial_income = 24000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2800000, viewership_multiplier = 1.9f },
+            new TvChannelData { name = "Movistar",  logo = "Televisiones/4.png",   initial_income = 17000000, home_game_income = 500000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2200000, viewership_multiplier = 1.6f },
+            new TvChannelData { name = "NBC",       logo = "Televisiones/5.png",   initial_income = 21000000, home_game_income = 620000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2600000, viewership_multiplier = 1.8f },
+            new TvChannelData { name = "CBS",       logo = "Televisiones/6.png",   initial_income = 20000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2500000, viewership_multiplier = 1.8f },
+            new TvChannelData { name = "ABC",       logo = "Televisiones/7.png",   initial_income = 19000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2400000, viewership_multiplier = 1.7f },
+            new TvChannelData { name = "Sky",       logo = "Televisiones/8.png",   initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2300000, viewership_multiplier = 1.7f },
+            new TvChannelData { name = "CNN",       logo = "Televisiones/9.png",   initial_income = 16000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 1800000, viewership_multiplier = 1.4f },
+            new TvChannelData { name = "ITV",       logo = "Televisiones/10.png",  initial_income = 14000000, home_game_income = 420000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2000000, viewership_multiplier = 1.5f },
+            new TvChannelData { name = "FOX",       logo = "Televisiones/11.png",  initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2200000, viewership_multiplier = 1.6f },
+            new TvChannelData { name = "ESPN",      logo = "Televisiones/12.png",  initial_income = 26000000, home_game_income = 780000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 3000000, viewership_multiplier = 2.0f },
+            new TvChannelData { name = "Hulu",      logo = "Televisiones/13.png",  initial_income = 19000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2100000, viewership_multiplier = 1.5f },
+            new TvChannelData { name = "RL",        logo = "Televisiones/14.png",  initial_income = 10000000, home_game_income = 300000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 1000000, viewership_multiplier = 1.1f },
+            new TvChannelData { name = "Peacock",   logo = "Televisiones/15.png",  initial_income = 17000000, home_game_income = 510000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 1900000, viewership_multiplier = 1.4f }
         };
 
         foreach (var c in channels)
             _db.Insert(c);
         Debug.Log($"[DB] {channels.Count} canales de TV insertados.");
+
+        // Select 3 random TV channels for the first season
+        var all = _db.Table<TvChannelData>().ToList();
+        if (all.Count >= 3)
+        {
+            var selected = all.OrderBy(_ => UnityEngine.Random.value).Take(3).ToList();
+            foreach (var c in selected)
+            {
+                c.is_active = 1;
+                _db.Update(c);
+            }
+            Debug.Log($"[DB] 3 canales de TV activos seleccionados: {string.Join(", ", selected.Select(c => c.name))}");
+        }
     }
 
     public void SeedHistoricalRecords()
     {
         var records = new List<HistoricalRecordData>
         {
-            new HistoricalRecordData { stat_type = "points", player_name = "Michael Jordan", value = 69, game_date = "1990-03-28", team_abbreviation = "CHI" },
-            new HistoricalRecordData { stat_type = "rebounds", player_name = "Wilt Chamberlain", value = 55, game_date = "1960-11-24", team_abbreviation = "PHW" },
-            new HistoricalRecordData { stat_type = "assists", player_name = "John Stockton", value = 28, game_date = "1991-01-15", team_abbreviation = "UTA" },
-            new HistoricalRecordData { stat_type = "steals", player_name = "Larry Kenon", value = 11, game_date = "1976-12-26", team_abbreviation = "NYA" },
-            new HistoricalRecordData { stat_type = "blocks", player_name = "Elmore Smith", value = 17, game_date = "1973-10-28", team_abbreviation = "LAL" },
-            new HistoricalRecordData { stat_type = "fgm", player_name = "Wilt Chamberlain", value = 36, game_date = "1962-03-02", team_abbreviation = "PHW" },
-            new HistoricalRecordData { stat_type = "fg3m", player_name = "Stephen Curry", value = 14, game_date = "2021-04-12", team_abbreviation = "GSW" },
-            new HistoricalRecordData { stat_type = "ftm", player_name = "Dirk Nowitzki", value = 24, game_date = "2004-03-07", team_abbreviation = "DAL" },
-            new HistoricalRecordData { stat_type = "turnovers", player_name = "James Harden", value = 15, game_date = "2019-01-23", team_abbreviation = "HOU" },
+            new HistoricalRecordData { stat_type = "points",     player_name = "Wilt Chamberlain", value = 100, game_date = "1962-03-02", team_abbreviation = "PHW" },
+            new HistoricalRecordData { stat_type = "rebounds",   player_name = "Wilt Chamberlain", value = 55,  game_date = "1960-11-24", team_abbreviation = "PHW" },
+            new HistoricalRecordData { stat_type = "assists",    player_name = "Scott Skiles",     value = 30,  game_date = "1990-12-30", team_abbreviation = "ORL" },
+            new HistoricalRecordData { stat_type = "steals",     player_name = "Kendall Gill",     value = 11,  game_date = "1999-04-03", team_abbreviation = "NJN" },
+            new HistoricalRecordData { stat_type = "blocks",     player_name = "Elmore Smith",     value = 17,  game_date = "1973-10-28", team_abbreviation = "LAL" },
+            new HistoricalRecordData { stat_type = "fgm",        player_name = "Wilt Chamberlain", value = 36,  game_date = "1962-03-02", team_abbreviation = "PHW" },
+            new HistoricalRecordData { stat_type = "fg3m",       player_name = "Klay Thompson",    value = 14,  game_date = "2018-10-29", team_abbreviation = "GSW" },
+            new HistoricalRecordData { stat_type = "ftm",        player_name = "Bam Adebayo",      value = 36,  game_date = "2026-03-10", team_abbreviation = "MIA" },
+            new HistoricalRecordData { stat_type = "turnovers",  player_name = "Jason Kidd",       value = 14,  game_date = "2000-11-17", team_abbreviation = "PHX" },
         };
 
         foreach (var r in records)
             _db.Insert(r);
         Debug.Log($"[DB] {records.Count} records históricos insertados.");
+    }
+
+    public void SeedTeamRecords()
+    {
+        var allTeams = GetAllTeams();
+        int count = 0;
+        foreach (var team in allTeams)
+        {
+            if (TeamRecordSeeder.Data.TryGetValue(team.name, out var entries))
+            {
+                foreach (var e in entries)
+                {
+                    var rec = new TeamRecordData
+                    {
+                        team_id = team.id,
+                        stat_type = e.stat_type,
+                        player_name = e.player_name,
+                        value = e.value,
+                        game_date = e.game_date
+                    };
+                    _db.Insert(rec);
+                    count++;
+                }
+            }
+        }
+        Debug.Log($"[DB] {count} récords de equipo insertados.");
+    }
+
+    public void SeedHistoricalPlayerStats()
+    {
+        var stats = new List<HistoricalPlayerStatsData>();
+        foreach (var d in HistoricalPlayerStatsSeeder.Data)
+        {
+            stats.Add(new HistoricalPlayerStatsData
+            {
+                first_name = d.first,
+                last_name = d.last,
+                position = d.pos,
+                overall = d.ovr,
+                team_name = d.team,
+                team_abbreviation = d.abbr,
+                team_logo = d.logo,
+                games = d.gp,
+                total_points = d.pts,
+                total_rebounds = d.reb,
+                total_assists = d.ast,
+                total_steals = d.stl,
+                total_blocks = d.blk,
+                total_turnovers = 0,
+                total_fgm = d.fgm,
+                total_fga = d.fga,
+                total_fg3m = d.fg3m,
+                total_fg3a = d.fg3a,
+                total_ftm = d.ftm,
+                total_fta = d.fta,
+                total_double_doubles = d.dd,
+                total_triple_doubles = d.td,
+                total_minutes = d.gp * 30,
+                total_rating = d.pts + d.reb + d.ast + d.stl + d.blk
+            });
+        }
+
+        foreach (var s in stats)
+            _db.Insert(s);
+        Debug.Log($"[DB] {stats.Count} estadísticas históricas de jugadores insertadas.");
     }
 
     // ── PLAYER GAME STATS ─────────────────────────────────
@@ -1179,10 +1377,10 @@ public class DatabaseManager : MonoBehaviour
         return result;
     }
 
-    public (PlayerData player, float avgPts, int games) GetPlayerSeasonStats(int playerId, int managerId)
+    public (PlayerData player, float avgPts, float avgReb, float avgAst, float avgStl, float avgBlk, float avgVal, int games) GetPlayerSeasonStats(int playerId, int managerId)
     {
         var season = GetActiveSeason(managerId);
-        if (season == null) return (null, 0, 0);
+        if (season == null) return (null, 0, 0, 0, 0, 0, 0, 0);
 
         var allGames = _db.Table<GameData>()
                           .Where(g => g.manager_id == managerId
@@ -1193,6 +1391,9 @@ public class DatabaseManager : MonoBehaviour
         int totalPoints = 0;
         int totalRebounds = 0;
         int totalAssists = 0;
+        int totalSteals = 0;
+        int totalBlocks = 0;
+        int totalRating = 0;
         int gameCount = 0;
 
         foreach (var game in allGames)
@@ -1204,13 +1405,21 @@ public class DatabaseManager : MonoBehaviour
                 totalPoints += playerStat.points;
                 totalRebounds += playerStat.rebounds;
                 totalAssists += playerStat.assists;
+                totalSteals += playerStat.steals;
+                totalBlocks += playerStat.blocks;
+                totalRating += playerStat.rating;
                 gameCount++;
             }
         }
 
         var player = _db.Table<PlayerData>().Where(p => p.id == playerId).FirstOrDefault();
         float avgPts = gameCount > 0 ? (float)totalPoints / gameCount : 0;
-        return (player, avgPts, gameCount);
+        float avgReb = gameCount > 0 ? (float)totalRebounds / gameCount : 0;
+        float avgAst = gameCount > 0 ? (float)totalAssists / gameCount : 0;
+        float avgStl = gameCount > 0 ? (float)totalSteals / gameCount : 0;
+        float avgBlk = gameCount > 0 ? (float)totalBlocks / gameCount : 0;
+        float avgVal = gameCount > 0 ? (float)totalRating / gameCount : 0;
+        return (player, avgPts, avgReb, avgAst, avgStl, avgBlk, avgVal, gameCount);
     }
 
     // ── SPONSORS ──────────────────────────────────────────
@@ -1247,21 +1456,49 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return new List<SponsorData>();
         return _db.Table<SponsorData>()
-                  .Where(s => s.team_id == 0 || s.team_id == teamId)
+                  .Where(s => s.is_active == 1)
                   .ToList();
     }
 
-    public void SignSponsor(int sponsorId, int seasonId, int teamId)
+    public void SignSponsor(int sponsorId, int seasonId, int teamId, int gameDay = 0)
     {
         if (!EnsureDb()) return;
         var sponsor = GetSponsorById(sponsorId);
-        if (sponsor != null)
+        if (sponsor == null) return;
+
+        // Assign sponsor to team
+        sponsor.team_id = teamId;
+        sponsor.season_id = seasonId;
+        _db.Update(sponsor);
+
+        // Update team settings
+        var settings = GetTeamSettings(teamId);
+        if (settings != null)
         {
-            sponsor.team_id = teamId;
-            sponsor.season_id = seasonId;
-            sponsor.is_active = 1;
-            _db.Update(sponsor);
+            settings.sponsor_id = sponsorId;
+            settings.sponsor_years_remaining = sponsor.contract_years;
+            UpdateTeamSettings(settings);
         }
+
+        // Add initial income to budget
+        var team = GetTeamById(teamId);
+        if (team != null)
+        {
+            team.budget += sponsor.initial_income;
+            UpdateTeam(team);
+        }
+
+        // Create finance record
+        var finance = new FinanceRecord
+        {
+            team_id = teamId,
+            season_id = seasonId,
+            record_type = FinanceRecord.TYPE_SPONSORSHIP,
+            amount = sponsor.initial_income,
+            game_day = gameDay,
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        };
+        _db.Insert(finance);
     }
 
     public void FireSponsor(int sponsorId, int seasonId, int teamId)
@@ -1307,6 +1544,90 @@ public class DatabaseManager : MonoBehaviour
                   .FirstOrDefault();
     }
 
+    public TvChannelData GetActiveTVChannel(int teamId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<TvChannelData>()
+                  .Where(c => c.team_id == teamId && c.is_active == 1)
+                  .FirstOrDefault();
+    }
+
+    public List<TvChannelData> GetAvailableTVChannels(int teamId)
+    {
+        if (!EnsureDb()) return new List<TvChannelData>();
+        var allActive = _db.Table<TvChannelData>()
+                           .Where(c => c.is_active == 1)
+                           .ToList();
+
+        // New games have exactly 3 active channels seeded
+        if (allActive.Count <= 3) return allActive;
+
+        // Old data: more than 3 active. Include signed channel if any,
+        // then fill with others up to 3 total.
+        var signed = allActive.FirstOrDefault(c => c.team_id == teamId);
+        var result = new List<TvChannelData>();
+
+        if (signed != null)
+            result.Add(signed);
+
+        var others = allActive.Where(c => c.team_id != teamId)
+                              .OrderBy(c => c.id)
+                              .Take(3 - result.Count)
+                              .ToList();
+        result.AddRange(others);
+
+        return result;
+    }
+
+    public void SignTVChannel(int channelId, int seasonId, int teamId, int gameDay = 0)
+    {
+        if (!EnsureDb()) return;
+        var channel = GetTVChannelById(channelId);
+        if (channel == null) return;
+
+        // Assign channel to team
+        channel.team_id = teamId;
+        channel.season_id = seasonId;
+        _db.Update(channel);
+
+        // Update team settings
+        var settings = GetTeamSettings(teamId);
+        if (settings != null)
+        {
+            settings.tv_channel_id = channelId;
+            settings.tv_years_remaining = channel.contract_years;
+            UpdateTeamSettings(settings);
+        }
+
+        // Add initial income to budget
+        var team = GetTeamById(teamId);
+        if (team != null)
+        {
+            team.budget += channel.initial_income;
+            UpdateTeam(team);
+        }
+
+        // Create finance record
+        var finance = new FinanceRecord
+        {
+            team_id = teamId,
+            season_id = seasonId,
+            record_type = FinanceRecord.TYPE_TV,
+            amount = channel.initial_income,
+            game_day = gameDay,
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        };
+        _db.Insert(finance);
+    }
+
+    public void FireTVChannel(TvChannelData channel)
+    {
+        if (!EnsureDb()) return;
+        channel.is_active = 0;
+        channel.team_id = 0;
+        _db.Update(channel);
+    }
+
     // ── FINANCE RECORDS ───────────────────────────────────
 
     public void AddFinanceRecord(FinanceRecord record)
@@ -1326,7 +1647,8 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
-                         .Where(r => r.team_id == teamId && r.season_id == seasonId && r.record_type == 1)
+                         .Where(r => r.team_id == teamId && r.season_id == seasonId
+                                  && r.record_type <= FinanceRecord.TYPE_TV)
                          .ToList();
         return records.Sum(r => r.amount);
     }
@@ -1335,7 +1657,18 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
-                         .Where(r => r.team_id == teamId && r.season_id == seasonId && r.record_type == 2)
+                         .Where(r => r.team_id == teamId && r.season_id == seasonId
+                                  && r.record_type >= FinanceRecord.TYPE_RENOVATION)
+                         .ToList();
+        return records.Sum(r => r.amount);
+    }
+
+    public long GetFinanceTotalByType(int teamId, int seasonId, int recordType)
+    {
+        if (!EnsureDb()) return 0;
+        var records = _db.Table<FinanceRecord>()
+                         .Where(r => r.team_id == teamId && r.season_id == seasonId
+                                  && r.record_type == recordType)
                          .ToList();
         return records.Sum(r => r.amount);
     }
@@ -1559,6 +1892,23 @@ public class DatabaseManager : MonoBehaviour
                   .FirstOrDefault();
     }
 
+    public List<SeasonGameRecordData> GetCurrentSeasonRecords(int seasonId)
+    {
+        if (!EnsureDb()) return new List<SeasonGameRecordData>();
+        var all = _db.Table<SeasonGameRecordData>()
+                     .Where(r => r.season_id == seasonId)
+                     .ToList();
+        // Pick highest value per stat_type
+        var result = new List<SeasonGameRecordData>();
+        var seen = new HashSet<string>();
+        foreach (var r in all.OrderByDescending(r => r.value))
+        {
+            if (seen.Add(r.stat_type))
+                result.Add(r);
+        }
+        return result;
+    }
+
     public SeasonGameRecordData GetSeasonGameRecord(int teamId, int seasonId, string statType)
     {
         if (!EnsureDb()) return null;
@@ -1708,6 +2058,12 @@ public class DatabaseManager : MonoBehaviour
             message.is_read = 1;
             _db.Update(message);
         }
+    }
+
+    public void DeleteMessage(int messageId)
+    {
+        if (!EnsureDb()) return;
+        _db.Delete<MessageData>(messageId);
     }
 
     void OnDestroy()

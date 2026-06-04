@@ -5,6 +5,33 @@ TextureImporter:
   - first:
       213: 8918113285392915803
     second: blazers_0
+  - first:
+      213: -3651723046686566184
+    second: blazers_1
+  - first:
+      213: -5904503232155217681
+    second: blazers_2
+  - first:
+      213: -3758240961129874350
+    second: blazers_3
+  - first:
+      213: -3244241813704958259
+    second: blazers_4
+  - first:
+      213: -4094925944873457276
+    second: blazers_5
+  - first:
+      213: 6260733666782719303
+    second: blazers_6
+  - first:
+      213: 6192412001506829632
+    second: blazers_7
+  - first:
+      213: -677946862669588453
+    second: blazers_8
+  - first:
+      213: -3831661343004420768
+    second: blazers_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -117,9 +144,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 7
-        width: 100
-        height: 87
+        y: 15
+        width: 27
+        height: 34
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +157,204 @@ TextureImporter:
       bones: []
       spriteID: b5d598a68c083cb70800000000000000
       internalID: 8918113285392915803
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_1
+      rect:
+        serializedVersion: 2
+        x: 18
+        y: 4
+        width: 22
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8d8d3289c39725dc0800000000000000
+      internalID: -3651723046686566184
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_2
+      rect:
+        serializedVersion: 2
+        x: 26
+        y: 17
+        width: 48
+        height: 79
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe01e30089dfe0ea0800000000000000
+      internalID: -5904503232155217681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_3
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 4
+        width: 20
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 25cf78302cb08dbc0800000000000000
+      internalID: -3758240961129874350
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_4
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 17
+        width: 25
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dce95a852432af2d0800000000000000
+      internalID: -3244241813704958259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_5
+      rect:
+        serializedVersion: 2
+        x: 50
+        y: 4
+        width: 25
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 489694a8c86eb27c0800000000000000
+      internalID: -4094925944873457276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_6
+      rect:
+        serializedVersion: 2
+        x: 74
+        y: 15
+        width: 26
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 74da9e1691892e650800000000000000
+      internalID: 6260733666782719303
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_7
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 6
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0452ea418eddfe550800000000000000
+      internalID: 6192412001506829632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_8
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 6
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b181df99be27796f0800000000000000
+      internalID: -677946862669588453
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: blazers_9
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 4
+        width: 14
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06510ae3f4433dac0800000000000000
+      internalID: -3831661343004420768
       vertices: []
       indices: 
       edges: []
@@ -149,6 +374,15 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       blazers_0: 8918113285392915803
+      blazers_1: -3651723046686566184
+      blazers_2: -5904503232155217681
+      blazers_3: -3758240961129874350
+      blazers_4: -3244241813704958259
+      blazers_5: -4094925944873457276
+      blazers_6: 6260733666782719303
+      blazers_7: 6192412001506829632
+      blazers_8: -677946862669588453
+      blazers_9: -3831661343004420768
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

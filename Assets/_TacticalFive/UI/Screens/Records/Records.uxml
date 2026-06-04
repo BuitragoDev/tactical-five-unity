@@ -68,29 +68,28 @@
             </ui:VisualElement>
 
             <!-- RECORDS CONTENT -->
-            <ui:ScrollView class="records-scroll"
-                           horizontal-scrolling-enabled="false"
-                           mode="Vertical">
-                <ui:VisualElement class="records-content">
+            <ui:VisualElement class="records-content">
 
-                    <!-- Historical records -->
-                    <ui:VisualElement class="panel panel-records">
-                        <ui:VisualElement class="panel-header">
-                            <ui:Label class="panel-title" text="RECORDS HISTÓRICOS NBA" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="HistoricalBody" class="records-table" />
-                    </ui:VisualElement>
-
-                    <!-- Team records -->
-                    <ui:VisualElement class="panel panel-records">
-                        <ui:VisualElement class="panel-header">
-                            <ui:Label class="panel-title" text="RECORDS DEL EQUIPO" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="TeamRecordsBody" class="records-table" />
-                    </ui:VisualElement>
-
+                <!-- Filter tabs -->
+                <ui:VisualElement class="records-tabs">
+                    <ui:Button name="TabTeam"       class="records-tab records-tab--active" text="MI EQUIPO" />
+                    <ui:Button name="TabSeason"     class="records-tab" text="TEMPORADA" />
+                    <ui:Button name="TabHistorical" class="records-tab" text="HISTÓRICO" />
                 </ui:VisualElement>
-            </ui:ScrollView>
+
+                <!-- Records table -->
+                <ui:VisualElement class="records-panel">
+                    <ui:VisualElement class="records-header-row">
+                        <ui:Label class="records-col records-col--stat" text="ESTADÍSTICA" />
+                        <ui:Label class="records-col records-col--value" text="VALOR" />
+                        <ui:Label class="records-col records-col--player" text="JUGADOR" />
+                        <ui:Label name="HeaderTeamCol" class="records-col records-col--team" text="EQUIPO" />
+                        <ui:Label class="records-col records-col--date" text="FECHA" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="RecordsBody" class="records-table" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
 
         </ui:VisualElement>
 

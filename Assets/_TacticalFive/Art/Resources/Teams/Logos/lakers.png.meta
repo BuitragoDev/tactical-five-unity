@@ -116,10 +116,10 @@ TextureImporter:
       name: lakers_0
       rect:
         serializedVersion: 2
-        x: 4
-        y: 99
-        width: 506
-        height: 314
+        x: 7
+        y: 40
+        width: 190
+        height: 119
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

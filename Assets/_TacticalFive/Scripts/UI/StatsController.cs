@@ -3,6 +3,43 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
+public class StatRow
+{
+    public int playerId;
+    public string firstName;
+    public string lastName;
+    public string position;
+    public string teamAbbrev;
+    public int gp;
+    public int totalPts;
+    public int totalReb;
+    public int totalAst;
+    public int totalStl;
+    public int totalBlk;
+    public int totalFgm;
+    public int totalFga;
+    public int totalFg3m;
+    public int totalFg3a;
+    public int totalFtm;
+    public int totalFta;
+    public int totalTov;
+    public float totalMin;
+    public int totalVal;
+    public int totalDd;
+    public int totalTd;
+    public float avgPts;
+    public float avgReb;
+    public float avgAst;
+    public float avgStl;
+    public float avgBlk;
+    public float fgPct;
+    public float fg3Pct;
+    public float ftPct;
+    public float avgMin;
+    public float avgVal;
+    public float avgTov;
+}
+
 public class StatsController : MonoBehaviour
 {
     private UIDocument _doc;
@@ -10,6 +47,7 @@ public class StatsController : MonoBehaviour
 
     private Button _btnAction;
     private VisualElement _statsBody;
+    private VisualElement _tableHeader;
     private Label _panelTitle;
 
     private ManagerData _manager;
@@ -37,6 +75,11 @@ public class StatsController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        // Always reset to default filters when entering the screen
+        _currentStat = "puntos";
+        _currentMode = "season";
+        _currentDisplay = "totals";
+
         CacheReferences();
         LoadData();
         RegisterCallbacks();
@@ -47,7 +90,12 @@ public class StatsController : MonoBehaviour
     {
         _btnAction = _root.Q<Button>("BtnAction");
         _statsBody = _root.Q<VisualElement>("StatsBody");
+        _tableHeader = _root.Q<VisualElement>("TableHeader");
         _panelTitle = _root.Q<Label>("PanelTitle");
+
+        _statTabs.Clear();
+        _filterBtns.Clear();
+        _modeBtns.Clear();
 
         string[] tabNames = { "TabPuntos", "TabRebotes", "TabAsistencias", "TabRobos", "TabTapones",
                               "TabPctTC", "TabPct3P", "TabPctTL", "TabVal", "TabPerdidas",
@@ -167,9 +215,7 @@ public class StatsController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
@@ -203,14 +249,15 @@ public class StatsController : MonoBehaviour
         ShowStats(_currentStat);
     }
 
-    void ShowStats(string stat)
+    // ═══════════════════════════════════════════════════════
+    // SHOW STATS — main entry point
+    // ═══════════════════════════════════════════════════════
+    void UpdateFilterVisuals()
     {
-        _currentStat = stat;
-
+        // Stat tabs
         foreach (var btn in _statTabs)
             btn.RemoveFromClassList("stats-tab--active");
-
-        var statTabName = stat switch
+        var statTabName = _currentStat switch
         {
             "puntos" => "TabPuntos",
             "rebotes" => "TabRebotes",
@@ -229,6 +276,31 @@ public class StatsController : MonoBehaviour
         };
         _root.Q<Button>(statTabName)?.AddToClassList("stats-tab--active");
 
+        // Time filters (season / historical)
+        foreach (var btn in _filterBtns)
+            btn.RemoveFromClassList("filter-btn--active");
+        if (_currentMode == "season")
+            _root.Q<Button>("BtnSeason")?.AddToClassList("filter-btn--active");
+        else
+            _root.Q<Button>("BtnHistorical")?.AddToClassList("filter-btn--active");
+
+        // Mode filters (totals / averages)
+        foreach (var btn in _modeBtns)
+            btn.RemoveFromClassList("mode-btn--active");
+        if (_currentDisplay == "totals")
+            _root.Q<Button>("BtnTotals")?.AddToClassList("mode-btn--active");
+        else
+            _root.Q<Button>("BtnAverages")?.AddToClassList("mode-btn--active");
+    }
+
+    void ShowStats(string stat)
+    {
+        _currentStat = stat;
+
+        // Sync all filter button visuals
+        UpdateFilterVisuals();
+
+        // Panel title
         string statLabel = stat switch
         {
             "puntos" => "PUNTOS",
@@ -251,14 +323,60 @@ public class StatsController : MonoBehaviour
 
         _statsBody.Clear();
 
+        bool useAverages = _currentDisplay == "averages";
         var allPlayers = _allTeams.SelectMany(t => DatabaseManager.Instance.GetPlayersByTeam(t.id)).ToList();
+        List<StatRow> playerAggs;
+
+        if (_currentMode == "historical")
+        {
+            playerAggs = BuildHistoricalMergedStats(allPlayers);
+        }
+        else
+        {
+            playerAggs = BuildSeasonStats(allPlayers);
+        }
+
+        // Calculate averages for everyone
+        foreach (var s in playerAggs)
+        {
+            int g = s.gp;
+            s.avgPts = g > 0 ? (float)s.totalPts / g : 0;
+            s.avgReb = g > 0 ? (float)s.totalReb / g : 0;
+            s.avgAst = g > 0 ? (float)s.totalAst / g : 0;
+            s.avgStl = g > 0 ? (float)s.totalStl / g : 0;
+            s.avgBlk = g > 0 ? (float)s.totalBlk / g : 0;
+            s.avgTov = g > 0 ? (float)s.totalTov / g : 0;
+            s.avgMin = g > 0 ? s.totalMin / g : 0;
+            s.avgVal = g > 0 ? (float)s.totalVal / g : 0;
+            s.fgPct = s.totalFga > 0 ? (float)s.totalFgm / s.totalFga * 100f : 0;
+            s.fg3Pct = s.totalFg3a > 0 ? (float)s.totalFg3m / s.totalFg3a * 100f : 0;
+            s.ftPct = s.totalFta > 0 ? (float)s.totalFtm / s.totalFta * 100f : 0;
+        }
+
+        // Sort
+        var sorted = SortStats(playerAggs, stat, useAverages);
+        var top = sorted.Take(100).ToList();
+
+        // Build dynamic header
+        BuildDynamicHeader(stat, useAverages);
+
+        // Render rows
+        RenderDynamicRows(top, stat, useAverages, allPlayers);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // BUILD SEASON STATS (aggregates from PlayerGameStats)
+    // ═══════════════════════════════════════════════════════
+    List<StatRow> BuildSeasonStats(List<PlayerData> allPlayers)
+    {
         var allStats = new List<PlayerGameStats>();
 
-        if (_currentMode == "season" && _season != null)
+        // Only count regular season games (same as Django)
+        if (_season != null && _manager != null)
         {
             var games = DatabaseManager.Instance.GetSeasonGames(_manager.id, _season.id)
                 .Where(g => g.game_type == "regular").ToList();
-            var gameIds = games.Select(g => g.id).ToHashSet();
+            var gameIds = new HashSet<int>(games.Select(g => g.id));
             foreach (var player in allPlayers)
             {
                 var playerStats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
@@ -267,206 +385,480 @@ public class StatsController : MonoBehaviour
                 allStats.AddRange(playerStats);
             }
         }
-        else
-        {
-            foreach (var player in allPlayers)
+
+        return allStats
+            .GroupBy(s => s.player_id)
+            .Select(g => new StatRow
             {
-                allStats.AddRange(DatabaseManager.Instance.GetPlayerGameStats(player.id));
+                playerId = g.Key,
+                gp = g.Count(),
+                totalPts = g.Sum(s => s.points),
+                totalReb = g.Sum(s => s.rebounds),
+                totalAst = g.Sum(s => s.assists),
+                totalStl = g.Sum(s => s.steals),
+                totalBlk = g.Sum(s => s.blocks),
+                totalFgm = g.Sum(s => s.fgm),
+                totalFga = g.Sum(s => s.fga),
+                totalFg3m = g.Sum(s => s.fg3m),
+                totalFg3a = g.Sum(s => s.fg3a),
+                totalFtm = g.Sum(s => s.ftm),
+                totalFta = g.Sum(s => s.fta),
+                totalTov = g.Sum(s => s.turnovers),
+                totalMin = g.Sum(s => s.minutes),
+                totalVal = g.Sum(s => s.rating),
+                totalDd = g.Sum(s => s.double_double),
+                totalTd = g.Sum(s => s.triple_double),
+            })
+            .ToList();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // BUILD HISTORICAL MERGED STATS (Django-style runtime merge)
+    // ═══════════════════════════════════════════════════════
+    List<StatRow> BuildHistoricalMergedStats(List<PlayerData> allPlayers)
+    {
+        // 1. Get season stats first
+        var seasonStats = BuildSeasonStats(allPlayers);
+
+        // 2. Get all historical stats
+        var histData = DatabaseManager.Instance.GetAllHistoricalPlayerStats();
+
+        // 3. Build dict keyed by (first, last)
+        var histDict = new Dictionary<(string first, string last), HistoricalPlayerStatsData>();
+        foreach (var h in histData)
+        {
+            var key = (h.first_name.ToLower(), h.last_name.ToLower());
+            histDict[key] = h;
+        }
+
+        var result = new List<StatRow>();
+        var mergedKeys = new HashSet<(string, string)>();
+
+        // 4. Merge: for active players, add historical to season
+        foreach (var s in seasonStats)
+        {
+            var player = allPlayers.FirstOrDefault(p => p.id == s.playerId);
+            if (player == null) continue;
+
+            var key = (player.first_name.ToLower(), player.last_name.ToLower());
+            s.firstName = player.first_name;
+            s.lastName = player.last_name;
+            s.position = player.position;
+
+            var team = _allTeams.Find(t => t.id == player.team_id);
+            s.teamAbbrev = team?.abbreviation ?? "FA";
+
+            if (histDict.TryGetValue(key, out var h))
+            {
+                s.gp += h.games;
+                s.totalPts += h.total_points;
+                s.totalReb += h.total_rebounds;
+                s.totalAst += h.total_assists;
+                s.totalStl += h.total_steals;
+                s.totalBlk += h.total_blocks;
+                s.totalFgm += h.total_fgm;
+                s.totalFga += h.total_fga;
+                s.totalFg3m += h.total_fg3m;
+                s.totalFg3a += h.total_fg3a;
+                s.totalFtm += h.total_ftm;
+                s.totalFta += h.total_fta;
+                s.totalTov += h.total_turnovers;
+                s.totalMin += h.games * 36;  // Django estimates 36 min per historical game
+                s.totalVal += h.total_rating;
+                s.totalDd += h.total_double_doubles;
+                s.totalTd += h.total_triple_doubles;
+                mergedKeys.Add(key);
+            }
+            result.Add(s);
+        }
+
+        // 5. Add historical-only players not in current season
+        foreach (var kvp in histDict)
+        {
+            if (!mergedKeys.Contains(kvp.Key))
+            {
+                var h = kvp.Value;
+                result.Add(new StatRow
+                {
+                    playerId = 0,
+                    firstName = h.first_name,
+                    lastName = h.last_name,
+                    position = h.position,
+                    teamAbbrev = h.team_abbreviation ?? "FA",
+                    gp = h.games,
+                    totalPts = h.total_points,
+                    totalReb = h.total_rebounds,
+                    totalAst = h.total_assists,
+                    totalStl = h.total_steals,
+                    totalBlk = h.total_blocks,
+                    totalFgm = h.total_fgm,
+                    totalFga = h.total_fga,
+                    totalFg3m = h.total_fg3m,
+                    totalFg3a = h.total_fg3a,
+                    totalFtm = h.total_ftm,
+                    totalFta = h.total_fta,
+                    totalTov = h.total_turnovers,
+                    totalMin = h.games * 36,
+                    totalVal = h.total_rating,
+                    totalDd = h.total_double_doubles,
+                    totalTd = h.total_triple_doubles,
+                });
             }
         }
 
-        var playerAggs = allStats
-            .GroupBy(s => s.player_id)
-            .Select(g =>
-            {
-                var first = g.First();
-                int gp = g.Count();
-                int totalPts = g.Sum(s => s.points);
-                int totalReb = g.Sum(s => s.rebounds);
-                int totalAst = g.Sum(s => s.assists);
-                int totalStl = g.Sum(s => s.steals);
-                int totalBlk = g.Sum(s => s.blocks);
-                int totalFgm = g.Sum(s => s.fgm);
-                int totalFga = g.Sum(s => s.fga);
-                int totalFg3m = g.Sum(s => s.fg3m);
-                int totalFg3a = g.Sum(s => s.fg3a);
-                int totalFtm = g.Sum(s => s.ftm);
-                int totalFta = g.Sum(s => s.fta);
-                int totalTov = g.Sum(s => s.turnovers);
-                float totalMin = g.Sum(s => s.minutes);
-                int totalVal = g.Sum(s => s.rating);
-                int totalDd = g.Sum(s => s.double_double);
-                int totalTd = g.Sum(s => s.triple_double);
+        return result;
+    }
 
-                float avgPts = gp > 0 ? (float)totalPts / gp : 0;
-                float avgReb = gp > 0 ? (float)totalReb / gp : 0;
-                float avgAst = gp > 0 ? (float)totalAst / gp : 0;
-                float avgStl = gp > 0 ? (float)totalStl / gp : 0;
-                float avgBlk = gp > 0 ? (float)totalBlk / gp : 0;
-                float avgMin = gp > 0 ? totalMin / gp : 0;
-                float avgVal = gp > 0 ? (float)totalVal / gp : 0;
-                float avgTov = gp > 0 ? (float)totalTov / gp : 0;
-                float fgPct = totalFga > 0 ? (float)totalFgm / totalFga * 100f : 0;
-                float fg3Pct = totalFg3a > 0 ? (float)totalFg3m / totalFg3a * 100f : 0;
-                float ftPct = totalFta > 0 ? (float)totalFtm / totalFta * 100f : 0;
-
-                return new
-                {
-                    player_id = g.Key,
-                    gp,
-                    totalPts,
-                    totalReb,
-                    totalAst,
-                    totalStl,
-                    totalBlk,
-                    totalFgm,
-                    totalFga,
-                    totalFg3m,
-                    totalFg3a,
-                    totalFtm,
-                    totalFta,
-                    totalTov,
-                    totalMin,
-                    totalVal,
-                    totalDd,
-                    totalTd,
-                    avgPts,
-                    avgReb,
-                    avgAst,
-                    avgStl,
-                    avgBlk,
-                    fgPct,
-                    fg3Pct,
-                    ftPct,
-                    avgMin,
-                    avgVal,
-                    avgTov
-                };
-            })
-            .ToList();
-
-        bool useAverages = _currentDisplay == "averages";
-
-        var sorted = stat switch
+    // ═══════════════════════════════════════════════════════
+    // SORT STATS
+    // ═══════════════════════════════════════════════════════
+    List<StatRow> SortStats(List<StatRow> rows, string stat, bool useAverages)
+    {
+        return stat switch
         {
             "puntos" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgPts).ToList()
-                : playerAggs.OrderByDescending(x => x.totalPts).ToList(),
+                ? rows.OrderByDescending(x => x.avgPts).ToList()
+                : rows.OrderByDescending(x => x.totalPts).ToList(),
             "rebotes" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgReb).ToList()
-                : playerAggs.OrderByDescending(x => x.totalReb).ToList(),
+                ? rows.OrderByDescending(x => x.avgReb).ToList()
+                : rows.OrderByDescending(x => x.totalReb).ToList(),
             "asistencias" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgAst).ToList()
-                : playerAggs.OrderByDescending(x => x.totalAst).ToList(),
+                ? rows.OrderByDescending(x => x.avgAst).ToList()
+                : rows.OrderByDescending(x => x.totalAst).ToList(),
             "robos" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgStl).ToList()
-                : playerAggs.OrderByDescending(x => x.totalStl).ToList(),
+                ? rows.OrderByDescending(x => x.avgStl).ToList()
+                : rows.OrderByDescending(x => x.totalStl).ToList(),
             "tapones" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgBlk).ToList()
-                : playerAggs.OrderByDescending(x => x.totalBlk).ToList(),
-            "pcttc" => playerAggs.Where(x => x.totalFga >= 10).OrderByDescending(x => x.fgPct).ToList(),
-            "pct3p" => playerAggs.Where(x => x.totalFg3a >= 5).OrderByDescending(x => x.fg3Pct).ToList(),
-            "pcttl" => playerAggs.Where(x => x.totalFta >= 5).OrderByDescending(x => x.ftPct).ToList(),
+                ? rows.OrderByDescending(x => x.avgBlk).ToList()
+                : rows.OrderByDescending(x => x.totalBlk).ToList(),
+            "pcttc" => rows.Where(x => x.totalFga >= 10).OrderByDescending(x => x.fgPct).ToList(),
+            "pct3p" => rows.Where(x => x.totalFg3a >= 5).OrderByDescending(x => x.fg3Pct).ToList(),
+            "pcttl" => rows.Where(x => x.totalFta >= 5).OrderByDescending(x => x.ftPct).ToList(),
             "val" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgVal).ToList()
-                : playerAggs.OrderByDescending(x => x.totalVal).ToList(),
+                ? rows.OrderByDescending(x => x.avgVal).ToList()
+                : rows.OrderByDescending(x => x.totalVal).ToList(),
             "perdidas" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgTov).ToList()
-                : playerAggs.OrderByDescending(x => x.totalTov).ToList(),
+                ? rows.OrderByDescending(x => x.avgTov).ToList()
+                : rows.OrderByDescending(x => x.totalTov).ToList(),
             "minutos" => useAverages
-                ? playerAggs.OrderByDescending(x => x.avgMin).ToList()
-                : playerAggs.OrderByDescending(x => x.totalMin).ToList(),
-            "dd" => playerAggs.OrderByDescending(x => x.totalDd).ToList(),
-            "td" => playerAggs.OrderByDescending(x => x.totalTd).ToList(),
-            _ => playerAggs.OrderByDescending(x => x.totalPts).ToList()
+                ? rows.OrderByDescending(x => x.avgMin).ToList()
+                : rows.OrderByDescending(x => x.totalMin).ToList(),
+            "dd" => rows.OrderByDescending(x => x.totalDd).ToList(),
+            "td" => rows.OrderByDescending(x => x.totalTd).ToList(),
+            _ => rows.OrderByDescending(x => x.totalPts).ToList()
         };
+    }
 
-        var top = sorted.Take(100).ToList();
+    // ═══════════════════════════════════════════════════════
+    // DYNAMIC HEADER BUILDER
+    // ═══════════════════════════════════════════════════════
+    void BuildDynamicHeader(string stat, bool useAverages)
+    {
+        if (_tableHeader == null) return;
+        _tableHeader.Clear();
 
+        _tableHeader.Add(MakeHeaderCell("#", "col-rank", true));
+        _tableHeader.Add(MakeHeaderCell("JUGADOR", "col-player-name", false));
+        _tableHeader.Add(MakeHeaderCell("EQ", "col-team-abbrev", true));
+        _tableHeader.Add(MakeHeaderCell("POS", "col-pos", false));
+        _tableHeader.Add(MakeHeaderCell("PJ", "col-stat", false));
+
+        string suffix = (useAverages && stat != "dd" && stat != "td") ? "/P" : "";
+
+        switch (stat)
+        {
+            case "puntos":
+                _tableHeader.Add(MakeHeaderCell($"PTOS{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("TC%", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("3P%", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("TL%", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "rebotes":
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("ROF", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("RDF", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "asistencias":
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"PER{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "robos":
+                _tableHeader.Add(MakeHeaderCell($"ROB{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "tapones":
+                _tableHeader.Add(MakeHeaderCell($"TAP{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "pcttc":
+                _tableHeader.Add(MakeHeaderCell("TC%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("CONV", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "pct3p":
+                _tableHeader.Add(MakeHeaderCell("3P%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("CONV", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "pcttl":
+                _tableHeader.Add(MakeHeaderCell("TL%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("CONV", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "val":
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("TC%", "col-stat", false));
+                break;
+            case "perdidas":
+                _tableHeader.Add(MakeHeaderCell($"PER{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "minutos":
+                _tableHeader.Add(MakeHeaderCell($"MIN{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "dd":
+                _tableHeader.Add(MakeHeaderCell("DD", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell("PTS", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("REB", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("AST", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("VAL", "col-stat", false));
+                break;
+            case "td":
+                _tableHeader.Add(MakeHeaderCell("TD", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell("PTS", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("REB", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("AST", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("VAL", "col-stat", false));
+                break;
+        }
+    }
+
+    Label MakeHeaderCell(string text, string baseClass, bool isBold)
+    {
+        var lbl = new Label();
+        lbl.AddToClassList(baseClass);
+        lbl.AddToClassList("col-stat--header");
+        if (isBold) lbl.AddToClassList("col-stat--bold");
+        lbl.text = text;
+        return lbl;
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // DYNAMIC ROW RENDERER
+    // ═══════════════════════════════════════════════════════
+    void RenderDynamicRows(List<StatRow> top, string stat, bool useAverages, List<PlayerData> allPlayers)
+    {
         for (int i = 0; i < top.Count; i++)
         {
             var x = top[i];
-            var player = allPlayers.FirstOrDefault(p => p.id == x.player_id);
-            if (player == null) continue;
+            string playerName;
+            string position;
+            string teamAbbrev;
+            bool isMyTeam = false;
 
-            var team = _allTeams.Find(t => t.id == player.team_id);
+            if (x.playerId <= 0)
+            {
+                playerName = $"{x.firstName} {x.lastName}";
+                position = x.position;
+                teamAbbrev = x.teamAbbrev ?? "FA";
+            }
+            else
+            {
+                var player = allPlayers.FirstOrDefault(p => p.id == x.playerId);
+                if (player == null) continue;
+                playerName = $"{player.first_name} {player.last_name}";
+                position = player.position;
+                var team = _allTeams.Find(t => t.id == player.team_id);
+                teamAbbrev = team?.abbreviation ?? "FA";
+                isMyTeam = team != null && team.id == _myTeam.id;
+            }
 
             var row = new VisualElement();
             row.AddToClassList("stats-row");
-            if (team != null && team.id == _myTeam.id)
+            if (isMyTeam)
                 row.AddToClassList("stats-row--my-team");
 
+            // Rank with badge for top 3
+            var rankContainer = new VisualElement();
+            rankContainer.AddToClassList("col-rank");
             var rankLbl = new Label();
-            rankLbl.AddToClassList("col-rank");
             rankLbl.text = (i + 1).ToString();
+            if (i < 3)
+            {
+                rankLbl.AddToClassList("rank-badge-top");
+            }
+            rankLbl.AddToClassList("col-stat--bold");
+            rankContainer.Add(rankLbl);
 
             var nameLbl = new Label();
             nameLbl.AddToClassList("col-player-name");
-            nameLbl.text = $"{player.first_name} {player.last_name}";
+            nameLbl.text = playerName;
 
             var abbrevLbl = new Label();
             abbrevLbl.AddToClassList("col-team-abbrev");
-            abbrevLbl.text = team?.abbreviation ?? "FA";
+            abbrevLbl.text = teamAbbrev;
+            abbrevLbl.AddToClassList("col-stat--bold");
 
             var posLbl = new Label();
             posLbl.AddToClassList("col-pos");
-            posLbl.text = player.position;
+            posLbl.text = position;
 
             var gpLbl = new Label();
             gpLbl.AddToClassList("col-stat");
             gpLbl.text = x.gp.ToString();
 
-            var ptsLbl = new Label();
-            ptsLbl.AddToClassList("col-stat");
-            ptsLbl.text = useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString();
-            if (i == 0 && stat == "puntos") ptsLbl.AddToClassList("col-stat--leader");
+            // Helper to create a stat cell with optional bold + leader
+            Label MakeCell(string value, bool isActiveStat, bool isLeader)
+            {
+                var lbl = new Label();
+                lbl.AddToClassList("col-stat");
+                lbl.text = value;
+                if (isActiveStat) lbl.AddToClassList("col-stat--bold");
+                if (isLeader) lbl.AddToClassList("col-stat--leader");
+                return lbl;
+            }
 
-            var rebLbl = new Label();
-            rebLbl.AddToClassList("col-stat");
-            rebLbl.text = useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString();
-            if (i == 0 && stat == "rebotes") rebLbl.AddToClassList("col-stat--leader");
-
-            var astLbl = new Label();
-            astLbl.AddToClassList("col-stat");
-            astLbl.text = useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString();
-            if (i == 0 && stat == "asistencias") astLbl.AddToClassList("col-stat--leader");
-
-            var fgLbl = new Label();
-            fgLbl.AddToClassList("col-stat");
-            fgLbl.text = x.fgPct.ToString("F1");
-            if (i == 0 && stat == "pcttc") fgLbl.AddToClassList("col-stat--leader");
-
-            var fg3Lbl = new Label();
-            fg3Lbl.AddToClassList("col-stat");
-            fg3Lbl.text = x.fg3Pct.ToString("F1");
-            if (i == 0 && stat == "pct3p") fg3Lbl.AddToClassList("col-stat--leader");
-
-            var ftLbl = new Label();
-            ftLbl.AddToClassList("col-stat");
-            ftLbl.text = x.ftPct.ToString("F1");
-            if (i == 0 && stat == "pcttl") ftLbl.AddToClassList("col-stat--leader");
-
-            var valLbl = new Label();
-            valLbl.AddToClassList("col-stat");
-            valLbl.text = useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString();
-            if (i == 0 && stat == "val") valLbl.AddToClassList("col-stat--leader");
-
-            row.Add(rankLbl);
+            row.Add(rankContainer);
             row.Add(nameLbl);
             row.Add(abbrevLbl);
             row.Add(posLbl);
             row.Add(gpLbl);
-            row.Add(ptsLbl);
-            row.Add(rebLbl);
-            row.Add(astLbl);
-            row.Add(fgLbl);
-            row.Add(fg3Lbl);
-            row.Add(ftLbl);
-            row.Add(valLbl);
 
-            var spacer = new VisualElement();
-            spacer.AddToClassList("col-spacer");
-            row.Add(spacer);
+            // Render columns based on stat type
+            switch (stat)
+            {
+                case "puntos":
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("F1"), false, false));
+                    row.Add(MakeCell(x.fg3Pct.ToString("F1"), false, false));
+                    row.Add(MakeCell(x.ftPct.ToString("F1"), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "rebotes":
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell("—", false, false)); // ROF not tracked
+                    row.Add(MakeCell("—", false, false)); // RDF not tracked
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "asistencias":
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("F1") : x.totalTov.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "robos":
+                    row.Add(MakeCell(useAverages ? x.avgStl.ToString("F1") : x.totalStl.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "tapones":
+                    row.Add(MakeCell(useAverages ? x.avgBlk.ToString("F1") : x.totalBlk.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "pcttc":
+                    row.Add(MakeCell(x.fgPct.ToString("F1"), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell($"{x.totalFgm}/{x.totalFga}", false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "pct3p":
+                    row.Add(MakeCell(x.fg3Pct.ToString("F1"), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell($"{x.totalFg3m}/{x.totalFg3a}", false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "pcttl":
+                    row.Add(MakeCell(x.ftPct.ToString("F1"), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell($"{x.totalFtm}/{x.totalFta}", false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "val":
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("F1"), false, false));
+                    break;
+                case "perdidas":
+                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("F1") : x.totalTov.ToString(), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "minutos":
+                    row.Add(MakeCell(useAverages ? x.avgMin.ToString("F1") : x.totalMin.ToString("F0"), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    break;
+                case "dd":
+                    row.Add(MakeCell(x.totalDd.ToString(), true, i == 0));
+                    row.Add(MakeCell(x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.totalVal.ToString(), false, false));
+                    break;
+                case "td":
+                    row.Add(MakeCell(x.totalTd.ToString(), true, i == 0));
+                    row.Add(MakeCell(x.totalPts.ToString(), false, false));
+                    row.Add(MakeCell(x.totalReb.ToString(), false, false));
+                    row.Add(MakeCell(x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.totalVal.ToString(), false, false));
+                    break;
+            }
 
             _statsBody.Add(row);
         }

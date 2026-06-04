@@ -122,8 +122,7 @@ public class GameResultsController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
-            _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
+        SetLogo(_root.Q<VisualElement>("HeaderTeamLogo"), _myTeam.logo, "80x80");
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
         _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
@@ -135,9 +134,11 @@ public class GameResultsController : MonoBehaviour
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
             _headerGameDay.text = $"Jornada {displayDay}";
 
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+            var gamesToday = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, displayDay);
+            var todayGame = gamesToday.FirstOrDefault();
+            _root.Q<Label>("HeaderDate").text = todayGame != null && season != null
+                ? new System.DateTime(season.year_start, 10, 22).AddDays(todayGame.game_day - 1).ToString("dd/MM/yyyy") : "";
         }
     }
 
@@ -181,7 +182,7 @@ public class GameResultsController : MonoBehaviour
             if (g.home_team_id == _myTeam.id) homeName.AddToClassList("my-team");
             var homeLogo = new VisualElement();
             homeLogo.AddToClassList("game-card-logo");
-            SetLogo(homeLogo, home?.logo);
+            SetLogo(homeLogo, home?.logo, "64x64");
             homeSide.Add(homeName);
             homeSide.Add(homeLogo);
 
@@ -201,7 +202,7 @@ public class GameResultsController : MonoBehaviour
             awaySide.AddToClassList("game-card-team-side");
             var awayLogo = new VisualElement();
             awayLogo.AddToClassList("game-card-logo");
-            SetLogo(awayLogo, away?.logo);
+            SetLogo(awayLogo, away?.logo, "64x64");
             var awayName = new Label { text = away?.name.ToUpper() ?? "" };
             awayName.AddToClassList("game-card-team-name");
             if (g.away_team_id == _myTeam.id) awayName.AddToClassList("my-team");
@@ -233,7 +234,7 @@ public class GameResultsController : MonoBehaviour
             _mvpReb.text = mvp.rebounds.ToString();
             _mvpAst.text = mvp.assists.ToString();
             _mvpVal.text = mvp.rating.ToString();
-            SetLogo(_mvpLogo, mvpTeamData?.logo);
+            SetLogo(_mvpLogo, mvpTeamData?.logo, "64x64");
         }
 
         BuildLeaderboard(_lbScorersBody, allPlayerStats.OrderByDescending(s => s.points).Take(3).ToList(), s => s.points);
@@ -253,6 +254,7 @@ public class GameResultsController : MonoBehaviour
 
             var row = new VisualElement();
             row.AddToClassList("lb-row");
+            if (i == top.Count - 1) row.AddToClassList("lb-row--last");
             if (s.team_id == _myTeam.id) row.AddToClassList("my-player");
 
             var rank = new Label { text = (i + 1).ToString() };
@@ -261,7 +263,7 @@ public class GameResultsController : MonoBehaviour
 
             var logo = new VisualElement();
             logo.AddToClassList("lb-logo");
-            SetLogo(logo, team?.logo);
+            SetLogo(logo, team?.logo, "32x32");
 
             var info = new VisualElement();
             info.AddToClassList("lb-info");
@@ -283,10 +285,21 @@ public class GameResultsController : MonoBehaviour
         }
     }
 
-    void SetLogo(VisualElement elem, string logoName)
+    void SetLogo(VisualElement elem, string logoName, string sizeFolder = null)
     {
         if (elem == null || string.IsNullOrEmpty(logoName)) return;
-        if (_logoSprites.TryGetValue(logoName, out var sprite))
-            elem.style.backgroundImage = new StyleBackground(sprite);
+
+        if (!string.IsNullOrEmpty(sizeFolder))
+        {
+            var sprite = Resources.Load<Sprite>($"Teams/Logos/{sizeFolder}/{logoName}");
+            if (sprite != null)
+            {
+                elem.style.backgroundImage = new StyleBackground(sprite);
+                return;
+            }
+        }
+
+        if (_logoSprites.TryGetValue(logoName, out var fallback))
+            elem.style.backgroundImage = new StyleBackground(fallback);
     }
 }

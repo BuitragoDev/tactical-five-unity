@@ -9,25 +9,52 @@ public class FinancesController : MonoBehaviour
     private VisualElement _root;
 
     private Button _btnAction;
-    private Label _totalIncome;
-    private Label _totalExpenses;
-    private Label _balance;
-    private VisualElement _financeRecordsBody;
+
+    // Summary boxes
+    private Label _summaryBudget;
+    private Label _summaryAnnualPayroll;
+    private Label _summaryMonthlyPayroll;
+    private Label _summaryNetBalance;
+
+    // Tabs
+    private Button _tabTickets;
+    private Button _tabIncome;
+    private Button _tabExpenses;
+    private Button _tabChart;
+
+    // Panels
+    private VisualElement _panelTickets;
+    private VisualElement _panelIncome;
+    private VisualElement _panelExpenses;
+    private VisualElement _panelChart;
+
+    // Ticket config
+    private VisualElement _ticketPriceGrid;
+    private VisualElement _subscriptionPriceGrid;
+
+    // Tables
+    private VisualElement _incomeTable;
+    private Label _totalIncomeValue;
+    private VisualElement _expensesTable;
+    private Label _totalExpensesValue;
+
+    // Chart
+    private VisualElement _chartBars;
+    private VisualElement _chartLabels;
 
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
+    private TeamSettingsData _teamSettings;
     private List<FinanceRecord> _financeRecords;
 
-    private static readonly Dictionary<int, string> TypeLabels = new()
-    {
-        { 1, "TAQUILLA" },
-        { 2, "ABONOS" },
-        { 3, "PATROCINIOS" },
-        { 4, "TELEVISIÓN" },
-        { 5, "REMODELACIÓN" },
-        { 6, "DESPIDO" },
-        { 7, "SUELDOS" }
+    readonly int[] _ticketPrices = { 30, 50, 70, 100, 150, 200, 250, 300, 500 };
+    readonly int[] _subscriptionPrices = { 1000, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300 };
+
+    readonly string[] _monthNames = { "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio" };
+    readonly (int start, int end)[] _monthRanges = {
+        (1, 9), (10, 39), (40, 69), (70, 99), (100, 127),
+        (128, 157), (158, 187), (188, 217), (218, 247), (248, 277)
     };
 
     void OnEnable()
@@ -50,10 +77,32 @@ public class FinancesController : MonoBehaviour
     void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
-        _totalIncome = _root.Q<Label>("TotalIncome");
-        _totalExpenses = _root.Q<Label>("TotalExpenses");
-        _balance = _root.Q<Label>("Balance");
-        _financeRecordsBody = _root.Q<VisualElement>("FinanceRecordsBody");
+
+        _summaryBudget = _root.Q<Label>("SummaryBudget");
+        _summaryAnnualPayroll = _root.Q<Label>("SummaryAnnualPayroll");
+        _summaryMonthlyPayroll = _root.Q<Label>("SummaryMonthlyPayroll");
+        _summaryNetBalance = _root.Q<Label>("SummaryNetBalance");
+
+        _tabTickets = _root.Q<Button>("TabTickets");
+        _tabIncome = _root.Q<Button>("TabIncome");
+        _tabExpenses = _root.Q<Button>("TabExpenses");
+        _tabChart = _root.Q<Button>("TabChart");
+
+        _panelTickets = _root.Q<VisualElement>("PanelTickets");
+        _panelIncome = _root.Q<VisualElement>("PanelIncome");
+        _panelExpenses = _root.Q<VisualElement>("PanelExpenses");
+        _panelChart = _root.Q<VisualElement>("PanelChart");
+
+        _ticketPriceGrid = _root.Q<VisualElement>("TicketPriceGrid");
+        _subscriptionPriceGrid = _root.Q<VisualElement>("SubscriptionPriceGrid");
+
+        _incomeTable = _root.Q<VisualElement>("IncomeTable");
+        _totalIncomeValue = _root.Q<Label>("TotalIncomeValue");
+        _expensesTable = _root.Q<VisualElement>("ExpensesTable");
+        _totalExpensesValue = _root.Q<Label>("TotalExpensesValue");
+
+        _chartBars = _root.Q<VisualElement>("ChartBars");
+        _chartLabels = _root.Q<VisualElement>("ChartLabels");
     }
 
     void LoadData()
@@ -63,6 +112,7 @@ public class FinancesController : MonoBehaviour
 
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        _teamSettings = DatabaseManager.Instance.GetTeamSettings(_myTeam.id);
         _financeRecords = _season != null
             ? DatabaseManager.Instance.GetFinanceRecords(_myTeam.id, _season.id)
             : new List<FinanceRecord>();
@@ -74,6 +124,12 @@ public class FinancesController : MonoBehaviour
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
         _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+
+        _tabTickets.clicked += () => SwitchTab("tickets");
+        _tabIncome.clicked += () => SwitchTab("income");
+        _tabExpenses.clicked += () => SwitchTab("expenses");
+        _tabChart.clicked += () => SwitchTab("chart");
+
     }
 
     void RegisterNavButtons()
@@ -112,7 +168,10 @@ public class FinancesController : MonoBehaviour
     {
         RefreshHeader();
         BuildSummary();
-        BuildRecords();
+        SetupTicketDropdowns();
+        BuildIncomePanel();
+        BuildExpensesPanel();
+        BuildChartPanel();
     }
 
     void RefreshHeader()
@@ -145,56 +204,282 @@ public class FinancesController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
     }
 
+    /* ═══════════════════════════════════════════
+       SUMMARY BOXES
+       ═══════════════════════════════════════════ */
+
     void BuildSummary()
     {
+        if (_myTeam == null || _season == null) return;
+
+        // Budget
+        _summaryBudget.text = $"${_myTeam.budget:N0}";
+
+        // Annual payroll
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        long annualPayroll = players.Sum(p => p.salary);
+        _summaryAnnualPayroll.text = $"${annualPayroll:N0}";
+
+        // Monthly payroll
+        long monthlyPayroll = annualPayroll / 12;
+        _summaryMonthlyPayroll.text = $"${monthlyPayroll:N0}";
+
+        // Net balance
         long income = DatabaseManager.Instance.GetTotalIncome(_myTeam.id, _season.id);
         long expenses = DatabaseManager.Instance.GetTotalExpenses(_myTeam.id, _season.id);
-        long bal = income - expenses;
-
-        _totalIncome.text = $"+${income / 1_000_000}M";
-        _totalExpenses.text = $"-${expenses / 1_000_000}M";
-        _balance.text = bal >= 0 ? $"+${bal / 1_000_000}M" : $"-${Mathf.Abs((int)(bal / 1_000_000))}M";
-        _balance.RemoveFromClassList("finance-card-value--income");
-        _balance.RemoveFromClassList("finance-card-value--expense");
-        _balance.AddToClassList(bal >= 0 ? "finance-card-value--income" : "finance-card-value--expense");
+        long net = income - expenses;
+        _summaryNetBalance.text = net >= 0 ? $"${net:N0}" : $"-${Mathf.Abs((int)net):N0}";
+        _summaryNetBalance.RemoveFromClassList("finance-summary-value--income");
+        _summaryNetBalance.RemoveFromClassList("finance-summary-value--expense");
+        _summaryNetBalance.AddToClassList(net >= 0 ? "finance-summary-value--income" : "finance-summary-value--expense");
     }
 
-    void BuildRecords()
+    /* ═══════════════════════════════════════════
+       TABS
+       ═══════════════════════════════════════════ */
+
+    void SwitchTab(string tab)
     {
-        _financeRecordsBody.Clear();
+        _tabTickets.RemoveFromClassList("finances-tab--active");
+        _tabIncome.RemoveFromClassList("finances-tab--active");
+        _tabExpenses.RemoveFromClassList("finances-tab--active");
+        _tabChart.RemoveFromClassList("finances-tab--active");
 
-        foreach (var record in _financeRecords)
+        _panelTickets.style.display = DisplayStyle.None;
+        _panelIncome.style.display = DisplayStyle.None;
+        _panelExpenses.style.display = DisplayStyle.None;
+        _panelChart.style.display = DisplayStyle.None;
+
+        switch (tab)
         {
-            var row = new VisualElement();
-            row.AddToClassList("finance-record-row");
+            case "tickets":
+                _tabTickets.AddToClassList("finances-tab--active");
+                _panelTickets.style.display = DisplayStyle.Flex;
+                break;
+            case "income":
+                _tabIncome.AddToClassList("finances-tab--active");
+                _panelIncome.style.display = DisplayStyle.Flex;
+                break;
+            case "expenses":
+                _tabExpenses.AddToClassList("finances-tab--active");
+                _panelExpenses.style.display = DisplayStyle.Flex;
+                break;
+            case "chart":
+                _tabChart.AddToClassList("finances-tab--active");
+                _panelChart.style.display = DisplayStyle.Flex;
+                break;
+        }
+    }
 
-            var typeLbl = new Label();
-            typeLbl.AddToClassList("finance-record-type");
-            typeLbl.text = TypeLabels.TryGetValue(record.record_type, out var label) ? label : "OTRO";
+    /* ═══════════════════════════════════════════
+       TICKET CONFIG
+       ═══════════════════════════════════════════ */
 
-            var dayLbl = new Label();
-            dayLbl.AddToClassList("finance-record-day");
-            dayLbl.text = $"Día {record.game_day}";
+    readonly int[] _ticketPriceOptions = { 30, 50, 70, 100, 150, 200, 250, 300, 500 };
+    readonly int[] _subscriptionPriceOptions = { 1000, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300 };
 
-            var amountLbl = new Label();
-            amountLbl.AddToClassList("finance-record-amount");
-            bool isIncome = record.record_type <= 4;
-            amountLbl.AddToClassList(isIncome ? "finance-record-amount--income" : "finance-record-amount--expense");
-            amountLbl.text = isIncome ? $"+${record.amount:N0}" : $"-${record.amount:N0}";
+    Button _selectedTicketBtn;
+    Button _selectedSubBtn;
 
-            row.Add(typeLbl);
-            row.Add(dayLbl);
-            row.Add(amountLbl);
+    void SetupTicketDropdowns()
+    {
+        var settings = _teamSettings ?? new TeamSettingsData { ticket_price = 50, subscription_price = 2100 };
 
-            _financeRecordsBody.Add(row);
+        // Build ticket price grid
+        _ticketPriceGrid.Clear();
+        foreach (var price in _ticketPriceOptions)
+        {
+            var btn = new Button();
+            btn.AddToClassList("price-btn");
+            btn.text = $"${price}";
+            btn.clicked += () => SelectTicketPrice(price, btn);
+            _ticketPriceGrid.Add(btn);
+
+            if (settings.ticket_price == price)
+                SelectTicketPrice(price, btn);
+        }
+
+        // Build subscription price grid
+        _subscriptionPriceGrid.Clear();
+        foreach (var price in _subscriptionPriceOptions)
+        {
+            var btn = new Button();
+            btn.AddToClassList("price-btn");
+            btn.text = $"${price:N0}";
+            btn.clicked += () => SelectSubscriptionPrice(price, btn);
+            _subscriptionPriceGrid.Add(btn);
+
+            if (settings.subscription_price == price)
+                SelectSubscriptionPrice(price, btn);
+        }
+    }
+
+    void SelectTicketPrice(int price, Button btn)
+    {
+        if (_selectedTicketBtn != null)
+            _selectedTicketBtn.RemoveFromClassList("price-btn--selected");
+        _selectedTicketBtn = btn;
+        btn.AddToClassList("price-btn--selected");
+
+        var settings = _teamSettings ?? new TeamSettingsData();
+        settings.ticket_price = price;
+        DatabaseManager.Instance.UpdateTeamSettings(settings);
+    }
+
+    void SelectSubscriptionPrice(int price, Button btn)
+    {
+        if (_selectedSubBtn != null)
+            _selectedSubBtn.RemoveFromClassList("price-btn--selected");
+        _selectedSubBtn = btn;
+        btn.AddToClassList("price-btn--selected");
+
+        var settings = _teamSettings ?? new TeamSettingsData();
+        settings.subscription_price = price;
+        DatabaseManager.Instance.UpdateTeamSettings(settings);
+    }
+
+    /* ═══════════════════════════════════════════
+       INCOME PANEL
+       ═══════════════════════════════════════════ */
+
+    void BuildIncomePanel()
+    {
+        _incomeTable.Clear();
+
+        if (_season == null) return;
+
+        long ticketTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TICKET);
+        long subTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SUBSCRIPTION);
+        long sponsorTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SPONSORSHIP);
+        long tvTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TV);
+        long total = ticketTotal + subTotal + sponsorTotal + tvTotal;
+
+        AddTableRow(_incomeTable, "Taquilla", ticketTotal, true);
+        AddTableRow(_incomeTable, "Abonos", subTotal, true);
+        AddTableRow(_incomeTable, "Patrocinios", sponsorTotal, true);
+        AddTableRow(_incomeTable, "Televisión", tvTotal, true);
+
+        _totalIncomeValue.text = $"${total:N0}";
+    }
+
+    /* ═══════════════════════════════════════════
+       EXPENSES PANEL
+       ═══════════════════════════════════════════ */
+
+    void BuildExpensesPanel()
+    {
+        _expensesTable.Clear();
+
+        if (_season == null) return;
+
+        long salariesTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SALARIES);
+        long renovationTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_RENOVATION);
+        long dismissalTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_DISMISSAL);
+        long total = salariesTotal + renovationTotal + dismissalTotal;
+
+        AddTableRow(_expensesTable, "Sueldos de jugadores", salariesTotal, false);
+        AddTableRow(_expensesTable, "Remodelaciones", renovationTotal, false);
+        AddTableRow(_expensesTable, "Despidos", dismissalTotal, false);
+
+        _totalExpensesValue.text = $"${total:N0}";
+    }
+
+    void AddTableRow(VisualElement table, string label, long value, bool isIncome)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("finances-row");
+
+        var lbl = new Label(label);
+        lbl.AddToClassList("finances-row-label");
+
+        var val = new Label($"${value:N0}");
+        val.AddToClassList("finances-row-value");
+        val.AddToClassList(isIncome ? "finances-row-value--income" : "finances-row-value--expense");
+
+        row.Add(lbl);
+        row.Add(val);
+        table.Add(row);
+    }
+
+    /* ═══════════════════════════════════════════
+       CHART PANEL
+       ═══════════════════════════════════════════ */
+
+    void BuildChartPanel()
+    {
+        _chartBars.Clear();
+        _chartLabels.Clear();
+
+        if (_season == null) return;
+
+        var monthData = new (long income, long expenses, long balance)[10];
+        for (int i = 0; i < 10; i++)
+        {
+            int start = _monthRanges[i].start;
+            int end = _monthRanges[i].end;
+
+            // game_day = 0 counts as October (first month)
+            long inc = _financeRecords
+                .Where(r =>
+                {
+                    int day = r.game_day;
+                    if (day == 0) day = 1; // treat unassigned as day 1 (October)
+                    return day >= start && day <= end && r.record_type <= FinanceRecord.TYPE_TV;
+                })
+                .Sum(r => r.amount);
+
+            long exp = _financeRecords
+                .Where(r =>
+                {
+                    int day = r.game_day;
+                    if (day == 0) day = 1; // treat unassigned as day 1 (October)
+                    return day >= start && day <= end && r.record_type >= FinanceRecord.TYPE_RENOVATION;
+                })
+                .Sum(r => r.amount);
+
+            monthData[i] = (inc, exp, inc - exp);
+        }
+
+        long maxAbs = 1;
+        foreach (var d in monthData)
+            maxAbs = (long)Mathf.Max(maxAbs, Mathf.Abs((int)d.balance));
+
+        for (int i = 0; i < 10; i++)
+        {
+            var (inc, exp, bal) = monthData[i];
+            bool isIncome = bal >= 0;
+            float pct = maxAbs > 0 ? Mathf.Abs((float)bal) / maxAbs : 0f;
+            int barHeight = Mathf.Max(4, (int)(pct * 220));
+
+            // Bar wrapper
+            var wrapper = new VisualElement();
+            wrapper.AddToClassList("chart-bar-wrapper");
+
+            // Month value above bar
+            var valueLbl = new Label($"${Mathf.Abs((int)bal):N0}");
+            valueLbl.AddToClassList("chart-month-value");
+            valueLbl.AddToClassList(isIncome ? "chart-month-value--income" : "chart-month-value--expense");
+            wrapper.Add(valueLbl);
+
+            // Bar
+            var bar = new VisualElement();
+            bar.AddToClassList("chart-bar");
+            bar.AddToClassList(isIncome ? "chart-bar--income" : "chart-bar--expense");
+            bar.style.height = new StyleLength(new Length(barHeight, LengthUnit.Pixel));
+            wrapper.Add(bar);
+
+            _chartBars.Add(wrapper);
+
+            // Month label
+            var monthLbl = new Label(_monthNames[i]);
+            monthLbl.AddToClassList("chart-month-label");
+            _chartLabels.Add(monthLbl);
         }
     }
 }

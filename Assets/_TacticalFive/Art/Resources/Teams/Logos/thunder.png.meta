@@ -26,6 +26,15 @@ TextureImporter:
   - first:
       213: 6234212930732985390
     second: thunder_7
+  - first:
+      213: 3545232895162011317
+    second: thunder_8
+  - first:
+      213: -465903905759503854
+    second: thunder_9
+  - first:
+      213: -5866642135868006507
+    second: thunder_10
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -137,10 +146,10 @@ TextureImporter:
       name: thunder_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 291
-        width: 96
-        height: 150
+        x: 0
+        y: 113
+        width: 40
+        height: 63
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -159,10 +168,10 @@ TextureImporter:
       name: thunder_1
       rect:
         serializedVersion: 2
-        x: 76
-        y: 306
-        width: 93
-        height: 159
+        x: 25
+        y: 119
+        width: 40
+        height: 66
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -181,10 +190,10 @@ TextureImporter:
       name: thunder_2
       rect:
         serializedVersion: 2
-        x: 154
-        y: 325
-        width: 69
-        height: 155
+        x: 57
+        y: 127
+        width: 30
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -203,10 +212,10 @@ TextureImporter:
       name: thunder_3
       rect:
         serializedVersion: 2
-        x: 232
-        y: 330
-        width: 52
-        height: 153
+        x: 88
+        y: 129
+        width: 23
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -225,10 +234,10 @@ TextureImporter:
       name: thunder_4
       rect:
         serializedVersion: 2
-        x: 290
-        y: 325
-        width: 70
-        height: 155
+        x: 112
+        y: 127
+        width: 30
+        height: 64
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -247,10 +256,10 @@ TextureImporter:
       name: thunder_5
       rect:
         serializedVersion: 2
-        x: 349
-        y: 306
-        width: 89
-        height: 155
+        x: 136
+        y: 119
+        width: 38
+        height: 65
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -269,10 +278,10 @@ TextureImporter:
       name: thunder_6
       rect:
         serializedVersion: 2
-        x: 396
-        y: 281
-        width: 105
-        height: 159
+        x: 155
+        y: 109
+        width: 44
+        height: 66
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -291,10 +300,10 @@ TextureImporter:
       name: thunder_7
       rect:
         serializedVersion: 2
-        x: 14
-        y: 29
-        width: 490
-        height: 284
+        x: 1
+        y: 48
+        width: 48
+        height: 26
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -305,6 +314,72 @@ TextureImporter:
       bones: []
       spriteID: e2c8c7651af548650800000000000000
       internalID: 6234212930732985390
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thunder_8
+      rect:
+        serializedVersion: 2
+        x: 33
+        y: 19
+        width: 167
+        height: 105
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5be4922e882333130800000000000000
+      internalID: 3545232895162011317
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thunder_9
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 72
+        width: 47
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 21adcbdbdd6c889f0800000000000000
+      internalID: -465903905759503854
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: thunder_10
+      rect:
+        serializedVersion: 2
+        x: 10
+        y: 7
+        width: 62
+        height: 39
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 59f9f3b6f00859ea0800000000000000
+      internalID: -5866642135868006507
       vertices: []
       indices: 
       edges: []
@@ -325,12 +400,15 @@ TextureImporter:
     nameFileIdTable:
       thunder_0: 9078623318578753597
       thunder_1: 3615452245644252151
+      thunder_10: -5866642135868006507
       thunder_2: 3581108391064161169
       thunder_3: -900783696612406636
       thunder_4: -5493467011564810095
       thunder_5: -4860051986919083974
       thunder_6: 6067708014527163658
       thunder_7: 6234212930732985390
+      thunder_8: 3545232895162011317
+      thunder_9: -465903905759503854
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

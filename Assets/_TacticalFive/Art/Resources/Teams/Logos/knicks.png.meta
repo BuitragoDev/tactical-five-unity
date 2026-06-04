@@ -116,10 +116,10 @@ TextureImporter:
       name: knicks_0
       rect:
         serializedVersion: 2
-        x: 5
-        y: 52
-        width: 503
-        height: 408
+        x: 4
+        y: 21
+        width: 191
+        height: 159
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

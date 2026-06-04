@@ -9,13 +9,26 @@ public class ArenaController : MonoBehaviour
     private VisualElement _root;
 
     private Button _btnAction;
+    private Label _arenaNameHeader;
     private VisualElement _arenaInfoBody;
-    private VisualElement _upgradesBody;
+    private VisualElement _arenaStars;
+    private VisualElement _arenaStatus;
+    private VisualElement _arenaImage;
+    private VisualElement _renovationWarning;
+    private Label _renovationWarningText;
+    private VisualElement _upgradeCardsContainer;
 
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
-    private TeamSettingsData _teamSettings;
+
+    // Renovation config (same as Django)
+    readonly Dictionary<string, (string name, string desc, string icon, int capacityBonus, long cost, int durationWeeks)> _renovationTypes = new()
+    {
+        ["general_seats"] = ("Ampliar Grada General", "Aumenta la capacidad de la grada general", "🏟", 3000, 10_000_000, 3),
+        ["tribune"]       = ("Ampliar Tribuna",       "Ampliación de la tribuna principal",      "👑", 2000, 20_000_000, 5),
+        ["vip_seats"]     = ("Ampliar Grada VIP",     "Nuevos palcos y zona VIP premium",        "💎", 1000, 35_000_000, 8),
+    };
 
     void OnEnable()
     {
@@ -37,8 +50,14 @@ public class ArenaController : MonoBehaviour
     void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
+        _arenaNameHeader = _root.Q<Label>("ArenaNameHeader");
         _arenaInfoBody = _root.Q<VisualElement>("ArenaInfoBody");
-        _upgradesBody = _root.Q<VisualElement>("UpgradesBody");
+        _arenaStars = _root.Q<VisualElement>("ArenaStars");
+        _arenaStatus = _root.Q<VisualElement>("ArenaStatus");
+        _arenaImage = _root.Q<VisualElement>("ArenaImage");
+        _renovationWarning = _root.Q<VisualElement>("RenovationWarning");
+        _renovationWarningText = _root.Q<Label>("RenovationWarningText");
+        _upgradeCardsContainer = _root.Q<VisualElement>("UpgradeCardsContainer");
     }
 
     void LoadData()
@@ -48,7 +67,6 @@ public class ArenaController : MonoBehaviour
 
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        _teamSettings = DatabaseManager.Instance.GetTeamSettings(_myTeam.id);
     }
 
     void RegisterCallbacks()
@@ -95,6 +113,8 @@ public class ArenaController : MonoBehaviour
     {
         RefreshHeader();
         BuildArenaInfo();
+        BuildArenaLevel();
+        BuildArenaImage();
         BuildUpgrades();
     }
 
@@ -128,168 +148,319 @@ public class ArenaController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
     }
 
+    /* ═══════════════════════════════════════════
+       PANEL 1: ARENA INFO
+       ═══════════════════════════════════════════ */
+
     void BuildArenaInfo()
     {
         _arenaInfoBody.Clear();
+        _arenaNameHeader.text = _myTeam.arena?.ToUpper() ?? "PABELLÓN";
 
-        var settings = _teamSettings ?? new TeamSettingsData();
-
-        AddDetailRow(_arenaInfoBody, "NOMBRE", settings.arena_name ?? _myTeam.name);
-        AddDetailRow(_arenaInfoBody, "CAPACIDAD", $"{settings.arena_capacity:N0}");
-        AddDetailRow(_arenaInfoBody, "ASISTENCIA MEDIA", $"{settings.avg_attendance:N0}");
-        AddDetailRow(_arenaInfoBody, "PRECIO ENTRADA", $"${settings.ticket_price:N2}");
-        AddDetailRow(_arenaInfoBody, "NIVEL", $"{GetArenaLevel(settings.arena_level)}");
+        // City
+        AddInfoRow("Ciudad", _myTeam.city);
+        // Base capacity
+        AddInfoRow("Capacidad base", $"{_myTeam.capacity:N0}");
+        // Effective capacity (same as base for now)
+        AddInfoRow("Capacidad efectiva", $"{_myTeam.capacity:N0}", true);
     }
 
-    void BuildUpgrades()
-    {
-        _upgradesBody.Clear();
-
-        var settings = _teamSettings ?? new TeamSettingsData();
-        var currentLevel = settings.arena_level;
-
-        var upgrades = new List<(string name, string desc, int cost, int newLevel)>();
-
-        if (currentLevel < 5)
-        {
-            int cost = GetUpgradeCost(currentLevel);
-            upgrades.Add(($"EXPANDIR PABELLÓN (NIVEL {currentLevel + 1})",
-                $"Aumenta capacidad en 2,000 asientos",
-                cost, currentLevel + 1));
-        }
-
-        if (settings.ticket_price < 200)
-        {
-            upgrades.Add(("AUMENTAR PRECIO ENTRADAS",
-                $"Incrementar precio a ${settings.ticket_price + 10:F2}",
-                0, settings.arena_level));
-        }
-
-        foreach (var (name, desc, cost, newLevel) in upgrades)
-        {
-            var item = new VisualElement();
-            item.AddToClassList("upgrade-item");
-
-            var info = new VisualElement();
-            info.AddToClassList("upgrade-info");
-
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("upgrade-name");
-            nameLbl.text = name;
-
-            var descLbl = new Label();
-            descLbl.AddToClassList("upgrade-desc");
-            descLbl.text = desc;
-
-            info.Add(nameLbl);
-            info.Add(descLbl);
-
-            var costLbl = new Label();
-            costLbl.AddToClassList("upgrade-cost");
-            costLbl.text = cost > 0 ? $"${cost:N0}" : "GRATIS";
-
-            var upgradeBtn = new Button();
-            upgradeBtn.AddToClassList("btn-upgrade");
-            upgradeBtn.text = "MEJORAR";
-
-            var upgradeCopy = (cost, newLevel);
-            upgradeBtn.clicked += () => PerformUpgrade(upgradeCopy.cost, upgradeCopy.newLevel);
-
-            item.Add(info);
-            item.Add(costLbl);
-            item.Add(upgradeBtn);
-
-            _upgradesBody.Add(item);
-        }
-    }
-
-    void AddDetailRow(VisualElement parent, string label, string value)
+    void AddInfoRow(string label, string value, bool green = false)
     {
         var row = new VisualElement();
-        row.AddToClassList("arena-detail-row");
+        row.AddToClassList("arena-info-row");
 
-        var lbl = new Label();
-        lbl.AddToClassList("arena-detail-label");
-        lbl.text = label;
+        var lbl = new Label(label);
+        lbl.AddToClassList("arena-info-label");
 
-        var val = new Label();
-        val.AddToClassList("arena-detail-value");
-        val.text = value;
+        var val = new Label(value);
+        val.AddToClassList("arena-info-value");
+        if (green) val.AddToClassList("arena-info-value--green");
 
         row.Add(lbl);
         row.Add(val);
-
-        parent.Add(row);
+        _arenaInfoBody.Add(row);
     }
 
-    void PerformUpgrade(int cost, int newLevel)
+    void AddTierRow(string label, string tierName, Color tierColor)
     {
-        if (cost > 0 && _myTeam.budget < cost)
-        {
-            Debug.LogWarning("Presupuesto insuficiente para esta mejora");
-            return;
-        }
+        var row = new VisualElement();
+        row.AddToClassList("arena-info-row");
 
-        var settings = _teamSettings ?? new TeamSettingsData();
+        var lbl = new Label(label);
+        lbl.AddToClassList("arena-info-label");
 
-        if (cost > 0)
-        {
-            _myTeam.budget -= cost;
-            DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+        var badge = new Label(tierName);
+        badge.AddToClassList("arena-tier-badge");
+        badge.style.backgroundColor = new StyleColor(tierColor);
+        // Adjust text color for dark tiers
+        if (tierName is "Básico" or "Estándar")
+            badge.style.color = new StyleColor(new Color(0.9f, 0.9f, 0.9f));
 
-            var finance = new FinanceRecord
-            {
-                team_id = _myTeam.id,
-                season_id = _season.id,
-                game_day = DatabaseManager.Instance.GetCurrentDay(_manager.id),
-                record_type = 5,
-                amount = cost,
-                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-            };
-            DatabaseManager.Instance.AddFinanceRecord(finance);
-        }
-
-        settings.arena_level = newLevel;
-        settings.arena_capacity += 2000;
-        settings.arena_name = settings.arena_name ?? _myTeam.name;
-
-        DatabaseManager.Instance.UpdateTeamSettings(settings);
-
-        LoadData();
-        Refresh();
+        row.Add(lbl);
+        row.Add(badge);
+        _arenaInfoBody.Add(row);
     }
 
-    string GetArenaLevel(int level)
+    string GetTierName(int level)
     {
         return level switch
         {
             1 => "BÁSICO",
             2 => "ESTÁNDAR",
-            3 => "AVANZADO",
-            4 => "PREMIUM",
-            5 => "ÉLITE",
+            3 => "PREMIUM",
+            4 => "ÉLITE",
+            5 => "LEGENDARIO",
             _ => "DESCONOCIDO"
         };
     }
 
-    int GetUpgradeCost(int currentLevel)
+    Color GetTierColor(int level)
     {
-        return currentLevel switch
+        return level switch
         {
-            0 => 5_000_000,
-            1 => 10_000_000,
-            2 => 20_000_000,
-            3 => 40_000_000,
-            4 => 80_000_000,
-            _ => 100_000_000
+            1 => new Color(0.55f, 0.45f, 0.33f),   // #8B7355
+            2 => new Color(0.63f, 0.63f, 0.63f),   // #A0A0A0
+            3 => new Color(0.29f, 0.50f, 0.94f),   // #4A80F0
+            4 => new Color(0.83f, 0.63f, 0.09f),   // #D4A017
+            5 => new Color(1.00f, 0.84f, 0.00f),   // #FFD700
+            _ => Color.gray
         };
+    }
+
+    /* ═══════════════════════════════════════════
+       PANEL 2: ARENA LEVEL / STARS
+       ═══════════════════════════════════════════ */
+
+    void BuildArenaLevel()
+    {
+        _arenaStars.Clear();
+        _arenaStatus.Clear();
+
+        // Stars
+        for (int i = 1; i <= 5; i++)
+        {
+            var star = new Label("⭐");
+            star.AddToClassList("arena-star");
+            if (i <= _myTeam.facilities)
+                star.AddToClassList("arena-star--active");
+            else
+                star.AddToClassList("arena-star--inactive");
+            _arenaStars.Add(star);
+        }
+
+        // Status
+        bool underRenovation = IsUnderRenovation();
+        if (underRenovation)
+        {
+            int daysLeft = Mathf.Max(0, _myTeam.arena_renovation_end_day - GetCurrentDay());
+            _arenaStatus.AddToClassList("arena-status--busy");
+
+            var icon = new Label("⏳");
+            icon.AddToClassList("arena-status-icon");
+
+            var text = new Label($"Remodelación en curso: {daysLeft} días");
+            text.AddToClassList("arena-status-text");
+            text.AddToClassList("arena-status-text--busy");
+
+            _arenaStatus.Add(icon);
+            _arenaStatus.Add(text);
+        }
+        else
+        {
+            _arenaStatus.AddToClassList("arena-status--idle");
+
+            var icon = new Label("✓");
+            icon.AddToClassList("arena-status-icon");
+
+            var text = new Label("Sin obras en curso");
+            text.AddToClassList("arena-status-text");
+            text.AddToClassList("arena-status-text--idle");
+
+            _arenaStatus.Add(icon);
+            _arenaStatus.Add(text);
+        }
+
+        // Tier badge (aligned right, below stars/status)
+        var oldBadge = _arenaStatus.parent.Q<VisualElement>("TierBadgeRow");
+        oldBadge?.RemoveFromHierarchy();
+
+        var tierRow = new VisualElement();
+        tierRow.name = "TierBadgeRow";
+        tierRow.style.flexDirection = FlexDirection.Row;
+        tierRow.style.justifyContent = Justify.FlexEnd;
+        tierRow.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
+        tierRow.style.marginTop = 12;
+
+        var badge = new Label(GetTierName(_myTeam.facilities));
+        badge.AddToClassList("arena-tier-badge");
+        badge.style.backgroundColor = new StyleColor(GetTierColor(_myTeam.facilities));
+        if (GetTierName(_myTeam.facilities) is "BÁSICO" or "ESTÁNDAR")
+            badge.style.color = new StyleColor(new Color(0.9f, 0.9f, 0.9f));
+
+        tierRow.Add(badge);
+        _arenaStatus.parent.Add(tierRow);
+    }
+
+    /* ═══════════════════════════════════════════
+       PANEL 3: ARENA IMAGE
+       ═══════════════════════════════════════════ */
+
+    void BuildArenaImage()
+    {
+        var arenaSprite = Resources.Load<Sprite>($"Arenas/{_myTeam.logo}");
+        if (arenaSprite != null)
+            _arenaImage.style.backgroundImage = new StyleBackground(arenaSprite);
+        else
+        {
+            var defaultSprite = Resources.Load<Sprite>("Arenas/default");
+            if (defaultSprite != null)
+                _arenaImage.style.backgroundImage = new StyleBackground(defaultSprite);
+        }
+    }
+
+    /* ═══════════════════════════════════════════
+       BOTTOM: UPGRADE CARDS
+       ═══════════════════════════════════════════ */
+
+    void BuildUpgrades()
+    {
+        _upgradeCardsContainer.Clear();
+
+        bool underRenovation = IsUnderRenovation();
+
+        // Warning banner
+        if (underRenovation)
+        {
+            _renovationWarning.style.display = DisplayStyle.Flex;
+            int daysLeft = Mathf.Max(0, _myTeam.arena_renovation_end_day - GetCurrentDay());
+            _renovationWarningText.text = $"Hay una remodelación en curso. Debes esperar a que termine para iniciar otra.";
+        }
+        else
+        {
+            _renovationWarning.style.display = DisplayStyle.None;
+        }
+
+        // Cards
+        foreach (var kvp in _renovationTypes)
+        {
+            var card = CreateUpgradeCard(kvp.Key, kvp.Value, underRenovation);
+            _upgradeCardsContainer.Add(card);
+        }
+    }
+
+    VisualElement CreateUpgradeCard(string type, (string name, string desc, string icon, int capacityBonus, long cost, int durationWeeks) info, bool underRenovation)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("upgrade-card");
+
+        // Icon
+        var icon = new Label(info.icon);
+        icon.AddToClassList("upgrade-card-icon");
+        card.Add(icon);
+
+        // Name
+        var nameLbl = new Label(info.name);
+        nameLbl.AddToClassList("upgrade-card-name");
+        card.Add(nameLbl);
+
+        // Description
+        var descLbl = new Label(info.desc);
+        descLbl.AddToClassList("upgrade-card-desc");
+        card.Add(descLbl);
+
+        // Bonus
+        var bonusLbl = new Label($"+{info.capacityBonus:N0} asientos");
+        bonusLbl.AddToClassList("upgrade-card-bonus");
+        card.Add(bonusLbl);
+
+        // Footer: cost + duration
+        var footer = new VisualElement();
+        footer.AddToClassList("upgrade-card-footer");
+
+        var costLbl = new Label($"${info.cost:N0}");
+        costLbl.AddToClassList("upgrade-card-cost");
+
+        var durationLbl = new Label($"{info.durationWeeks} semanas");
+        durationLbl.AddToClassList("upgrade-card-duration");
+
+        footer.Add(costLbl);
+        footer.Add(durationLbl);
+        card.Add(footer);
+
+        // Button
+        var btn = new Button();
+        btn.AddToClassList("upgrade-card-btn");
+
+        if (underRenovation)
+        {
+            btn.text = "EN OBRAS";
+            btn.AddToClassList("upgrade-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
+        else if (_myTeam.budget < info.cost)
+        {
+            btn.text = "SIN FONDOS";
+            btn.AddToClassList("upgrade-card-btn--no-funds");
+            btn.SetEnabled(false);
+        }
+        else
+        {
+            btn.text = "INICIAR";
+            btn.clicked += () => StartRenovation(type);
+        }
+        card.Add(btn);
+
+        return card;
+    }
+
+    /* ═══════════════════════════════════════════
+       ACTIONS
+       ═══════════════════════════════════════════ */
+
+    void StartRenovation(string type)
+    {
+        if (!_renovationTypes.TryGetValue(type, out var info)) return;
+        if (IsUnderRenovation()) return;
+        if (_myTeam.budget < info.cost) return;
+
+        int currentDay = GetCurrentDay();
+        int endDay = currentDay + (info.durationWeeks * 7);
+
+        _myTeam.arena_renovation_end_day = endDay;
+        _myTeam.arena_renovation_type = type;
+        _myTeam.arena_renovation_cost = info.cost;
+        DatabaseManager.Instance.UpdateTeam(_myTeam);
+
+        // Message
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            title = $"Remodelación iniciada: {info.name}",
+            body = $"Se ha iniciado la remodelación \"{info.name}\". Duración: {info.durationWeeks} semanas. Finalizará el día {endDay}.",
+            game_day = currentDay,
+            game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(currentDay - 1).ToString("yyyy-MM-dd"),
+            is_read = 0
+        });
+
+        LoadData();
+        Refresh();
+    }
+
+    bool IsUnderRenovation()
+    {
+        return _myTeam != null && _myTeam.arena_renovation_end_day > 0 && GetCurrentDay() < _myTeam.arena_renovation_end_day;
+    }
+
+    int GetCurrentDay()
+    {
+        if (_season == null) return 0;
+        return _season.current_game_day;
     }
 }

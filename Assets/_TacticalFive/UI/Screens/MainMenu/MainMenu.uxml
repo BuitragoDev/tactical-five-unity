@@ -9,12 +9,12 @@
 
         <!-- ══ HEADER ══ -->
         <ui:VisualElement name="Header" class="header">
-            <ui:VisualElement name="LogoWrap" class="logo-wrap">
-                <ui:Label name="LogoIcon"     class="logo-icon"               text="TF" />
-                <ui:Label name="LogoText"     class="logo-text"               text="TACTICAL " />
-                <ui:Label name="LogoTextGold" class="logo-text logo-text-gold" text="FIVE" />
+            <ui:VisualElement class="header-logo-wrap">
+                <ui:Label class="header-logo-icon" text="TF" />
+                <ui:Label class="header-logo-text" text="TACTICAL" />
+                <ui:Label class="header-logo-text-gold" text="FIVE" />
             </ui:VisualElement>
-            <ui:Button name="BtnLegal" class="btn-legal" text="ⓘ  AVISO LEGAL" />
+            <ui:Button name="BtnLegal" class="btn-legal" text="AVISO LEGAL" />
         </ui:VisualElement>
 
         <!-- ══ HERO ══ -->

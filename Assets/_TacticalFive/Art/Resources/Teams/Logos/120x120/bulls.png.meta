@@ -5,6 +5,9 @@ TextureImporter:
   - first:
       213: -6334336322350855340
     second: bulls_0
+  - first:
+      213: -4964735162478476251
+    second: bulls_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,10 +119,10 @@ TextureImporter:
       name: bulls_0
       rect:
         serializedVersion: 2
-        x: 6
-        y: 1
-        width: 111
-        height: 118
+        x: 0
+        y: 95
+        width: 39
+        height: 25
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +133,28 @@ TextureImporter:
       bones: []
       spriteID: 45b4c62fcaae718a0800000000000000
       internalID: -6334336322350855340
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: bulls_1
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 1
+        width: 115
+        height: 119
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 524449c8ca7b91bb0800000000000000
+      internalID: -4964735162478476251
       vertices: []
       indices: 
       edges: []
@@ -149,6 +174,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       bulls_0: -6334336322350855340
+      bulls_1: -4964735162478476251
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

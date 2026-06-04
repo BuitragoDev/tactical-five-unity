@@ -63,7 +63,7 @@
 }
 
 .gresults-section-title {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 600;
     color: #d4a017;
     -unity-text-transform: upper;
@@ -90,6 +90,7 @@
     border-bottom-width: 2px;
     border-bottom-color: #d4a017;
     flex-shrink: 0;
+    min-height: 100px;
 }
 
 .header-left {
@@ -99,8 +100,8 @@
 }
 
 .header-team-logo {
-    width: 52px;
-    height: 52px;
+    width: 80px;
+    height: 80px;
 }
 
 .header-team-info {
@@ -115,7 +116,7 @@
 }
 
 .header-team-name {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: #ffffff;
     text-transform: uppercase;
@@ -124,7 +125,7 @@
 }
 
 .header-subtitle {
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 500;
     color: #d4a017;
     letter-spacing: 2px;
@@ -134,7 +135,7 @@
 }
 
 .header-manager-name {
-    font-size: 14px;
+    font-size: 18px;
     color: #7a8aaa;
 }
 
@@ -151,7 +152,7 @@
 }
 
 .header-season-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #d4a017;
     letter-spacing: 1px;
@@ -159,7 +160,7 @@
 }
 
 .header-date-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
     color: #7a8aaa;
     letter-spacing: 1px;
@@ -172,7 +173,7 @@
 }
 
 .header-game-day-label {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     color: #4a80f0;
     letter-spacing: 1px;
@@ -186,16 +187,18 @@
 }
 
 .btn-action {
-    background-color: #2a5fc9;
-    border-width: 0;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 8px 18px;
-    border-radius: 4px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 24px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    border-radius: 4px;
+    min-width: 150px;
 }
 
 /* ── GAME CARDS ────────────────────── */
@@ -228,8 +231,8 @@
 }
 
 .game-card-logo {
-    width: 40px;
-    height: 40px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
     margin-right: 20px;
 }
@@ -240,7 +243,7 @@
 }
 
 .game-card-team-name {
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 600;
     color: #d0d8e8;
     letter-spacing: 0.5px;
@@ -266,12 +269,12 @@
     border-radius: 4px;
     margin: 0 16px;
     flex-shrink: 0;
-    width: 120px;
+    width: 140px;
 }
 
 .game-card-score-home {
     flex: 1;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     color: #ffffff;
     -unity-text-align: middle-left;
@@ -322,7 +325,7 @@
 }
 
 .mvp-badge-text {
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 700;
     color: #d4a017;
     -unity-text-transform: upper;
@@ -345,8 +348,8 @@
 }
 
 .mvp-team-logo {
-    width: 44px;
-    height: 44px;
+    width: 64px;
+    height: 64px;
     flex-shrink: 0;
     margin-right: 16px;
 }
@@ -358,7 +361,7 @@
 }
 
 .mvp-player-name {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
     color: #ffffff;
     -unity-text-transform: upper;
@@ -368,7 +371,7 @@
 }
 
 .mvp-player-team {
-    font-size: 12px;
+    font-size: 16px;
     color: #7a8aaa;
     margin-top: 2px;
     margin-bottom: 2px;
@@ -376,7 +379,7 @@
 }
 
 .mvp-player-pos {
-    font-size: 11px;
+    font-size: 18px;
     font-weight: 600;
     color: #7a8aaa;
     letter-spacing: 1.5px;
@@ -405,7 +408,7 @@
 }
 
 .mvp-stat-val {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: #ffffff;
     min-width: 30px;
@@ -414,7 +417,7 @@
 }
 
 .mvp-stat-label {
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     color: #7a8aaa;
     letter-spacing: 1.5px;
@@ -446,9 +449,9 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 16px;
-    background-color: rgba(212, 160, 23, 0.06);
+    background-color: #1c2130;
     border-bottom: 1px solid #2a3347;
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 600;
     color: #d4a017;
     -unity-text-transform: upper;
@@ -472,7 +475,7 @@
     border-bottom: 1px solid rgba(42, 51, 71, 0.4);
 }
 
-.lb-row:last-child {
+.lb-row--last {
     border-bottom: none;
 }
 
@@ -483,7 +486,7 @@
 .lb-rank {
     width: 20px;
     text-align: center;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #7a8aaa;
     flex-shrink: 0;
@@ -495,8 +498,8 @@
 }
 
 .lb-logo {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
     margin-right: 6px;
 }
@@ -509,7 +512,7 @@
 }
 
 .lb-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: #d0d8e8;
     letter-spacing: 0.3px;
@@ -520,14 +523,14 @@
 }
 
 .lb-team {
-    font-size: 11px;
+    font-size: 16px;
     color: #7a8aaa;
     letter-spacing: 0.5px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
 }
 
 .lb-value {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
     color: #ffffff;
     flex-shrink: 0;

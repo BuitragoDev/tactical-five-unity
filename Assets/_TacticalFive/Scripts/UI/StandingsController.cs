@@ -20,6 +20,7 @@ public class StandingsController : MonoBehaviour
     private List<GameData> _allGames;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites32 = new();
     private string _currentFilter = "East";
 
     void OnEnable()
@@ -51,6 +52,9 @@ public class StandingsController : MonoBehaviour
     {
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
         foreach (var s in logos) _logoSprites[s.name] = s;
+
+        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        foreach (var s in logos32) _logoSprites32[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -139,9 +143,7 @@ public class StandingsController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
@@ -323,8 +325,10 @@ public class StandingsController : MonoBehaviour
     void SetTeamLogo(VisualElement elem, string logoName)
     {
         if (elem == null || string.IsNullOrEmpty(logoName)) return;
-        if (_logoSprites.TryGetValue(logoName, out var sprite))
+        if (_logoSprites32.TryGetValue(logoName, out var sprite))
             elem.style.backgroundImage = new StyleBackground(sprite);
+        else if (_logoSprites.TryGetValue(logoName, out var fallback))
+            elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
     class StandingRow

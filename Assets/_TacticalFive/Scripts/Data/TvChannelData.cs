@@ -16,4 +16,6 @@ public class TvChannelData
     public string description { get; set; }
     public long broadcast_fee { get; set; }
     public float viewership_multiplier { get; set; }
+    public int team_id { get; set; }
+    public int season_id { get; set; }
 }

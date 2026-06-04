@@ -3,14 +3,13 @@ using SQLite;
 [Table("finance_records")]
 public class FinanceRecord
 {
-    public const int TYPE_INCOME = 1;
-    public const int TYPE_EXPENSE = 2;
-    public const int TYPE_SALARIES = 3;
-    public const int TYPE_SUBSCRIPTION = 4;
-    public const int TYPE_TICKET = 5;
-    public const int TYPE_SPONSORSHIP = 6;
-    public const int TYPE_TV = 7;
-    public const int TYPE_RENOVATION = 8;
+    public const int TYPE_TICKET        = 1;   // Taquilla
+    public const int TYPE_SUBSCRIPTION  = 2;   // Abonos
+    public const int TYPE_SPONSORSHIP   = 3;   // Patrocinios
+    public const int TYPE_TV            = 4;   // Televisión
+    public const int TYPE_RENOVATION    = 5;   // Remodelación
+    public const int TYPE_DISMISSAL     = 6;   // Despido
+    public const int TYPE_SALARIES      = 7;   // Sueldos
 
     [PrimaryKey, AutoIncrement]
     public int id { get; set; }

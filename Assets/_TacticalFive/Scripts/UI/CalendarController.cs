@@ -24,9 +24,11 @@ public class CalendarController : MonoBehaviour
     private List<GameData> _allGames;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites80 = new();
 
     private System.DateTime _currentMonthDate;
     private System.DateTime? _selectedDate;
+    private System.DateTime? _currentGameDate;
 
     private static readonly string[] MonthNames = {
         "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -48,11 +50,8 @@ public class CalendarController : MonoBehaviour
         LoadData();
         RegisterCallbacks();
 
-        if (_season != null)
-            _currentMonthDate = new System.DateTime(_season.year_start, 9, 1);
-        else
-            _currentMonthDate = System.DateTime.Now;
-
+        // Auto-select current game day
+        AutoSelectCurrentDay();
         Refresh();
     }
 
@@ -73,6 +72,9 @@ public class CalendarController : MonoBehaviour
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
+        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
+        foreach (var s in logos80) _logoSprites80[s.name] = s;
+
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
 
@@ -80,6 +82,52 @@ public class CalendarController : MonoBehaviour
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetAllGames(_manager.id);
+    }
+
+    void AutoSelectCurrentDay()
+    {
+        // Try to find the current game day using next unplayed game
+        GameData currentGame = null;
+        if (_manager != null && _myTeam != null)
+        {
+            currentGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
+        }
+
+        // Fallback: last played game
+        if (currentGame == null && _manager != null && _myTeam != null)
+        {
+            currentGame = DatabaseManager.Instance.GetLastPlayedGame(_manager.id, _myTeam.id);
+        }
+
+        if (currentGame != null && !string.IsNullOrEmpty(currentGame.game_date))
+        {
+            if (System.DateTime.TryParse(currentGame.game_date, out var gameDate))
+            {
+                _currentGameDate = gameDate;
+                _currentMonthDate = new System.DateTime(gameDate.Year, gameDate.Month, 1);
+                _selectedDate = gameDate;
+                // Pre-populate the sidebar
+                var dayGames = _allGames.Where(g => g.game_date == currentGame.game_date).ToList();
+                OnDaySelected(gameDate.Day, currentGame.game_date, dayGames, rebuildCalendar: false);
+            }
+            else
+            {
+                DefaultMonth();
+            }
+        }
+        else
+        {
+            DefaultMonth();
+        }
+    }
+
+    void DefaultMonth()
+    {
+        _currentGameDate = null;
+        if (_season != null)
+            _currentMonthDate = new System.DateTime(_season.year_start, 9, 1);
+        else
+            _currentMonthDate = System.DateTime.Now;
     }
 
     void RegisterCallbacks()
@@ -159,9 +207,7 @@ public class CalendarController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
@@ -207,44 +253,20 @@ public class CalendarController : MonoBehaviour
                 var dayStr = $"{year}-{month:D2}-{dayNum:D2}";
                 var dayGames = _allGames.Where(g => g.game_date == dayStr).ToList();
                 bool isMyGame = dayGames.Any(g => g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
-                bool isToday = dayStr == System.DateTime.Now.ToString("yyyy-MM-dd");
-                bool isSelected = _selectedDate.HasValue && _selectedDate.Value.Day == dayNum &&
-                                  _selectedDate.Value.Month == month && _selectedDate.Value.Year == year;
+                bool isToday = _currentGameDate.HasValue && _currentGameDate.Value.Year == year
+                                && _currentGameDate.Value.Month == month
+                                && _currentGameDate.Value.Day == dayNum;
 
                 if (isToday) cell.AddToClassList("calendar-day-cell--today");
-                if (isSelected) cell.AddToClassList("calendar-day-cell--selected");
                 if (isMyGame) cell.AddToClassList("calendar-day-cell--my-game");
-                else if (dayGames.Count > 0) cell.AddToClassList("calendar-day-cell--has-game");
 
-                var numLbl = new Label();
-                numLbl.AddToClassList("calendar-day-number");
-                numLbl.text = dayNum.ToString();
-                cell.Add(numLbl);
-
-                if (dayGames.Count > 0)
+                if (isMyGame)
                 {
-                    var dotsRow = new VisualElement();
-                    dotsRow.AddToClassList("calendar-day-games");
-
-                    var myGame = dayGames.FirstOrDefault(g => g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
-                    var otherGames = dayGames.Where(g => g.home_team_id != _myTeam.id && g.away_team_id != _myTeam.id).Take(2).ToList();
-
-                    if (myGame != null)
-                    {
-                        var dot = new VisualElement();
-                        dot.AddToClassList("calendar-game-dot");
-                        dot.AddToClassList("calendar-game-dot--my-game");
-                        dotsRow.Add(dot);
-                    }
-
-                    foreach (var g in otherGames)
-                    {
-                        var dot = new VisualElement();
-                        dot.AddToClassList("calendar-game-dot");
-                        dotsRow.Add(dot);
-                    }
-
-                    cell.Add(dotsRow);
+                    BuildMyGameCell(cell, dayNum, dayStr, dayGames);
+                }
+                else
+                {
+                    BuildNormalCell(cell, dayNum, dayStr, dayGames);
                 }
 
                 int capturedDay = dayNum;
@@ -260,7 +282,54 @@ public class CalendarController : MonoBehaviour
         }
     }
 
-    void OnDaySelected(int day, string dateStr, List<GameData> games)
+    void BuildMyGameCell(VisualElement cell, int dayNum, string dayStr, List<GameData> dayGames)
+    {
+        cell.style.justifyContent = Justify.Center;
+        cell.style.alignItems = Align.Center;
+        cell.style.paddingTop = 0;
+        cell.style.paddingBottom = 0;
+        cell.style.paddingLeft = 0;
+        cell.style.paddingRight = 0;
+
+        // Day number at top-right
+        var numLbl = new Label();
+        numLbl.AddToClassList("calendar-day-number");
+        numLbl.AddToClassList("calendar-day-number--top-right");
+        numLbl.text = dayNum.ToString();
+        cell.Add(numLbl);
+
+        var myGame = dayGames.FirstOrDefault(g => g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+        if (myGame != null)
+        {
+            // Opponent logo centered, 80x80
+            bool isHome = myGame.home_team_id == _myTeam.id;
+            int oppId = isHome ? myGame.away_team_id : myGame.home_team_id;
+            var oppTeam = _allTeams.Find(t => t.id == oppId);
+
+            var logoContainer = new VisualElement();
+            logoContainer.style.width = 80;
+            logoContainer.style.height = 80;
+            logoContainer.style.flexShrink = 0;
+            logoContainer.style.alignSelf = Align.Center;
+            if (oppTeam != null && _logoSprites80.TryGetValue(oppTeam.logo, out var sprite))
+            {
+                logoContainer.style.backgroundImage = new StyleBackground(sprite);
+                logoContainer.style.unityBackgroundImageTintColor = new StyleColor(new Color(1, 1, 1, 1f));
+            }
+            cell.Add(logoContainer);
+        }
+    }
+
+    void BuildNormalCell(VisualElement cell, int dayNum, string dayStr, List<GameData> dayGames)
+    {
+        var numLbl = new Label();
+        numLbl.AddToClassList("calendar-day-number");
+        numLbl.AddToClassList("calendar-day-number--top-right");
+        numLbl.text = dayNum.ToString();
+        cell.Add(numLbl);
+    }
+
+    void OnDaySelected(int day, string dateStr, List<GameData> games, bool rebuildCalendar = true)
     {
         _selectedDate = new System.DateTime(_currentMonthDate.Year, _currentMonthDate.Month, day);
         _selectedDayTitle.text = $"{day} {MonthNames[_currentMonthDate.Month].ToUpper()}";
@@ -329,7 +398,7 @@ public class CalendarController : MonoBehaviour
                 type.text = g.game_type switch
                 {
                     "preseason" => "AMISTOSO",
-                    "regular" => "LIGA",
+                    "regular" => "REGULAR",
                     "playin" => "PLAY-IN",
                     "playoff" => "PLAYOFF",
                     _ => g.game_type.ToUpper()
@@ -340,7 +409,8 @@ public class CalendarController : MonoBehaviour
             }
         }
 
-        BuildCalendar();
+        if (rebuildCalendar)
+            BuildCalendar();
     }
 
     void OnActionClicked()

@@ -58,9 +58,21 @@ public class DashboardController : MonoBehaviour
     private VisualElement _barTrust;
     private VisualElement _barMorale;
     private VisualElement _barPressure;
+    private VisualElement _barFanConfidence;
     private Label _valTrust;
     private Label _valMorale;
     private Label _valPressure;
+    private Label _valFanConfidence;
+
+    // Estadísticas del equipo
+    private Label _teamObjective;
+    private VisualElement _teamObjectiveStatus;
+    private VisualElement _teamStatsLogo;
+    private Label _teamOverallLabel;
+    private Label _teamOverallRingVal;
+    private Label _teamArenaName;
+    private Label _teamArenaCapacity;
+    private VisualElement _teamReputationStars;
 
     // Datos
     private ManagerData _manager;
@@ -86,6 +98,7 @@ public class DashboardController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
+        LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
         Refresh();
@@ -136,13 +149,57 @@ public class DashboardController : MonoBehaviour
         _tabWest = _root.Q<Button>("TabWest");
         _standingsBody = _root.Q<VisualElement>("StandingsBody");
 
+        // Estadísticas del equipo
+        _teamObjective = _root.Q<Label>("TeamObjective");
+        _teamObjectiveStatus = _root.Q<VisualElement>("TeamObjectiveStatus");
+        _teamStatsLogo = _root.Q<VisualElement>("TeamStatsLogo");
+        _teamOverallLabel = _root.Q<Label>("TeamOverallLabel");
+        _teamOverallRingVal = _root.Q<Label>("TeamOverallRingVal");
+        _teamArenaName = _root.Q<Label>("TeamArenaName");
+        _teamArenaCapacity = _root.Q<Label>("TeamArenaCapacity");
+        _teamReputationStars = _root.Q<VisualElement>("TeamReputationStars");
+
         // Relaciones
         _barTrust = _root.Q<VisualElement>("BarTrust");
         _barMorale = _root.Q<VisualElement>("BarMorale");
         _barPressure = _root.Q<VisualElement>("BarPressure");
+        _barFanConfidence = _root.Q<VisualElement>("BarFanConfidence");
         _valTrust = _root.Q<Label>("ValTrust");
         _valMorale = _root.Q<Label>("ValMorale");
         _valPressure = _root.Q<Label>("ValPressure");
+        _valFanConfidence = _root.Q<Label>("ValFanConfidence");
+    }
+
+    void LoadSidebarIcons()
+    {
+        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        {
+            {"NavDashboardIcon", "inicio"},
+            {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"},
+            {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"},
+            {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"},
+            {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"},
+            {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"},
+            {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"},
+            {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"},
+            {"NavConfigIcon", "configuracion"}
+        };
+
+        foreach (var kv in iconMap)
+        {
+            var iconElem = _root.Q<VisualElement>(kv.Key);
+            if (iconElem == null) continue;
+            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
     }
 
     void LoadData()
@@ -155,6 +212,10 @@ public class DashboardController : MonoBehaviour
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+
+        // Clasificación: mostrar por defecto la conferencia de mi equipo
+        if (_myTeam != null)
+            _currentConf = _myTeam.conference == "East" ? "East" : "West";
 
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
     }
@@ -195,8 +256,8 @@ public class DashboardController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Arena));
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
-
-        _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ => OnReset());
+        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+            Debug.Log("[Dashboard] Abrir configuración — pendiente de implementar"));
 
         if (CursorManager.Instance != null)
         {
@@ -215,6 +276,7 @@ public class DashboardController : MonoBehaviour
         RefreshNextGame();
         RefreshActionButton();
         ShowStandings(_currentConf);
+        RefreshTeamStats();
         RefreshBoard();
         RefreshPlayerStats();
     }
@@ -225,8 +287,7 @@ public class DashboardController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
-            _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
+        SetTeamLogo(_headerTeamLogo, _myTeam.logo, "64x64");
 
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
@@ -261,16 +322,20 @@ public class DashboardController : MonoBehaviour
         if (_season == null) return "";
         try
         {
-            if (_season.current_game_day <= 0)
+            int nextDay = FindNextGameDay();
+            if (nextDay == 0)
+                return new System.DateTime(_season.year_end, 4, 15).ToString("dd/MM/yyyy");
+
+            // For preseason (negative days), get from actual game date
+            if (nextDay < 0)
             {
                 var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
                 if (nextGame != null)
                     return System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy");
-                return new System.DateTime(_season.year_end, 4, 15).ToString("dd/MM/yyyy");
             }
 
             var seasonStart = new System.DateTime(_season.year_start, 10, 22);
-            return seasonStart.AddDays(_season.current_game_day - 1).ToString("dd/MM/yyyy");
+            return seasonStart.AddDays(nextDay - 1).ToString("dd/MM/yyyy");
         }
         catch { return ""; }
     }
@@ -281,14 +346,14 @@ public class DashboardController : MonoBehaviour
     {
         if (_season == null || _myTeam == null)
         {
-            SetActionBtn("CONTINUAR →", "");
+            SetActionBtn("CONTINUAR", "");
             return;
         }
 
         int nextDay = FindNextGameDay();
         if (nextDay == 0)
         {
-            SetActionBtn("CONTINUAR →", "");
+            SetActionBtn("CONTINUAR", "");
             return;
         }
 
@@ -299,17 +364,17 @@ public class DashboardController : MonoBehaviour
 
         if (myTeamPlays)
         {
-            SetActionBtn("DÍA DE PARTIDO →", "btn-action--match");
+            SetActionBtn("DÍA DE PARTIDO", "btn-action--match");
             return;
         }
 
         if (gamesOnNextDay.Count > 0)
         {
-            SetActionBtn("SIMULAR PARTIDOS →", "btn-action--simulate");
+            SetActionBtn("SIMULAR PARTIDOS", "btn-action--simulate");
             return;
         }
 
-        SetActionBtn("CONTINUAR →", "");
+        SetActionBtn("CONTINUAR", "");
     }
 
     void SetActionBtn(string text, string extraClass)
@@ -362,6 +427,14 @@ public class DashboardController : MonoBehaviour
 
                 // Process injuries from this game
                 ProcessGameInjuries(result, game.game_date);
+
+                // Send result message and update fan confidence if my team played
+                bool myTeamInThisGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
+                if (myTeamInThisGame)
+                {
+                    CreateGameResultMessage(game, result);
+                    UpdateFanConfidence(game, result);
+                }
             }
 
             // Update manager stats
@@ -413,7 +486,7 @@ public class DashboardController : MonoBehaviour
 
         // Sort: negatives first (descending: -1, -2, -3), then positives (ascending: 1, 2, 3)
         var preseason = allUnplayed.Where(g => g.game_day < 0).OrderByDescending(g => g.game_day).ToList();
-        var regular   = allUnplayed.Where(g => g.game_day > 0).OrderBy(g => g.game_day).ToList();
+        var regular = allUnplayed.Where(g => g.game_day > 0).OrderBy(g => g.game_day).ToList();
         var sorted = preseason.Concat(regular).ToList();
 
         // If current_game_day is 0 or we haven't played any game yet, return the closest to 0
@@ -524,6 +597,79 @@ public class DashboardController : MonoBehaviour
         };
     }
 
+    int CalculateAttendance(GameData game, TeamData homeTeam)
+    {
+        bool myTeamIsHome = game.home_team_id == _myTeam.id;
+        bool myTeamIsAway = game.away_team_id == _myTeam.id;
+
+        var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        var homeTeamGames = teamGames.Where(g => g.home_team_id == homeTeam.id || g.away_team_id == homeTeam.id).ToList();
+        int wins = homeTeamGames.Count(g =>
+            (g.home_team_id == homeTeam.id && g.home_score > g.away_score) ||
+            (g.away_team_id == homeTeam.id && g.away_score > g.home_score));
+        int totalPlayed = homeTeamGames.Count;
+        float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
+
+        float baseAttendance;
+        float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
+
+        if (myTeamIsHome)
+        {
+            // My home game: fan confidence + rival reputation
+            var rival = DatabaseManager.Instance.GetTeamById(game.away_team_id);
+            float rivalRepFactor = rival != null ? (rival.reputation / 5f) * 0.08f : 0f;
+            baseAttendance = homeTeam.capacity * (
+                0.30f +
+                (_manager.fan_confidence / 100f) * 0.35f +
+                winPct * 0.15f +
+                rivalRepFactor
+            );
+        }
+        else if (myTeamIsAway)
+        {
+            // My away game: home team base + bonus from my reputation as visiting draw
+            float myRepFactor = (_myTeam.reputation / 5f) * 0.06f;
+            baseAttendance = homeTeam.capacity * (
+                0.55f +
+                winPct * 0.30f +
+                myRepFactor
+            );
+        }
+        else
+        {
+            // Other teams' games: standard formula
+            baseAttendance = homeTeam.capacity * (0.55f + winPct * 0.40f);
+        }
+
+        return (int)Mathf.Min(homeTeam.capacity, baseAttendance * randomFactor);
+    }
+
+    void UpdateFanConfidence(GameData game, GameSimulator.GameResult result)
+    {
+        bool isHome = game.home_team_id == _myTeam.id;
+        int myScore = isHome ? result.home_score : result.away_score;
+        int rivalScore = isHome ? result.away_score : result.home_score;
+        bool won = myScore > rivalScore;
+        int margin = Mathf.Abs(myScore - rivalScore);
+
+        int change = 0;
+        if (won)
+        {
+            change = isHome ? 4 : 2;
+            if (margin <= 5) change += 1;  // close exciting win
+            if (margin >= 20) change += 1; // dominant win
+        }
+        else
+        {
+            change = isHome ? -3 : -2;
+            if (margin <= 5) change -= 1;  // close painful loss
+            if (margin >= 20) change -= 1; // embarrassing blowout
+        }
+
+        _manager.fan_confidence = Mathf.Clamp(_manager.fan_confidence + change, 0, 100);
+        DatabaseManager.Instance.SaveManager(_manager);
+    }
+
     void ProcessGameFinances(GameData game, GameSimulator.GameResult result)
     {
         // Only process for home team
@@ -533,18 +679,7 @@ public class DashboardController : MonoBehaviour
         var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
         if (finSettings == null) return;
 
-        // Calculate attendance
-        var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
-        var homeTeamGames = teamGames.Where(g => g.home_team_id == homeTeam.id || g.away_team_id == homeTeam.id).ToList();
-        int wins = homeTeamGames.Count(g =>
-            (g.home_team_id == homeTeam.id && g.home_score > g.away_score) ||
-            (g.away_team_id == homeTeam.id && g.away_score > g.home_score));
-        int totalPlayed = homeTeamGames.Count;
-        float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
-
-        float baseAttendance = homeTeam.capacity * (0.55f + winPct * 0.40f);
-        float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
-        int attendance = (int)Mathf.Min(homeTeam.capacity, baseAttendance * randomFactor);
+        int attendance = CalculateAttendance(game, homeTeam);
 
         long ticketRevenue = (long)(attendance * finSettings.ticket_price);
         homeTeam.budget += ticketRevenue;
@@ -605,6 +740,96 @@ public class DashboardController : MonoBehaviour
                 });
             }
         }
+    }
+
+    void CreateGameResultMessage(GameData game, GameSimulator.GameResult result)
+    {
+        bool isHome = game.home_team_id == _myTeam.id;
+        int myScore = isHome ? result.home_score : result.away_score;
+        int rivalScore = isHome ? result.away_score : result.home_score;
+        bool won = myScore > rivalScore;
+
+        // Rival name
+        var rival = DatabaseManager.Instance.GetTeamById(isHome ? game.away_team_id : game.home_team_id);
+        string rivalName = rival?.name ?? "Rival";
+
+        // Home team and attendance (always shown)
+        var homeTeam = DatabaseManager.Instance.GetTeamById(game.home_team_id);
+        string arenaName = homeTeam?.arena ?? "Pabellón";
+
+        // Read saved attendance from database (calculated by ProcessGameFinances)
+        var attendanceData = DatabaseManager.Instance.GetGameAttendance(game.id);
+        int attendance = attendanceData?.attendance ?? 0;
+
+        // MVP of my team (most points)
+        var myStats = isHome ? result.home_stats : result.away_stats;
+        var mvp = myStats.OrderByDescending(s => s.points).FirstOrDefault();
+        string mvpName = mvp != null ? $"{mvp.name}" : "";
+
+        // Text variants
+        string body;
+        int variant = UnityEngine.Random.Range(0, 5);
+        if (won)
+        {
+            switch (variant)
+            {
+                case 0:
+                    body = $"Gran victoria contra {rivalName} por {myScore}-{rivalScore}.";
+                    break;
+                case 1:
+                    body = $"El equipo se impuso a {rivalName} con un resultado de {myScore}-{rivalScore}.";
+                    break;
+                case 2:
+                    body = $"Buen triunfo ante {rivalName}: {myScore}-{rivalScore}.";
+                    break;
+                case 3:
+                    body = $"Victoria importante frente a {rivalName} ({myScore}-{rivalScore}).";
+                    break;
+                default:
+                    body = $"El {rivalName} sucumbe ante nosotros: {myScore}-{rivalScore}.";
+                    break;
+            }
+        }
+        else
+        {
+            switch (variant)
+            {
+                case 0:
+                    body = $"Derrota ante {rivalName} por {rivalScore}-{myScore}.";
+                    break;
+                case 1:
+                    body = $"El equipo cae contra {rivalName} ({rivalScore}-{myScore}).";
+                    break;
+                case 2:
+                    body = $"Dura derrota frente a {rivalName}: {rivalScore}-{myScore}.";
+                    break;
+                case 3:
+                    body = $"No pudimos con {rivalName}. Resultado: {rivalScore}-{myScore}.";
+                    break;
+                default:
+                    body = $"{rivalName} se lleva la victoria: {rivalScore}-{myScore}.";
+                    break;
+            }
+        }
+
+        body += $"\nPabellón: {arenaName} — Asistencia: {attendance:N0} espectadores.";
+        if (!string.IsNullOrEmpty(mvpName))
+            body += $"\nMVP del partido: {mvpName}.";
+
+        var msg = new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
+            title = $"Resultado: {rivalName} ({myScore}-{rivalScore})",
+            body = body,
+            game_day = game.game_day,
+            game_date = game.game_date,
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            is_read = 0
+        };
+        DatabaseManager.Instance.AddMessage(msg);
     }
 
     void ProcessGameInjuries(GameSimulator.GameResult result, string gameDate)
@@ -772,12 +997,16 @@ public class DashboardController : MonoBehaviour
         var home = _allTeams.Find(t => t.id == last.home_team_id);
         var away = _allTeams.Find(t => t.id == last.away_team_id);
 
-        SetTeamLogo(_lastHomeLog, home?.logo);
-        SetTeamLogo(_lastAwayLog, away?.logo);
+        SetTeamLogo(_lastHomeLog, home?.logo, "64x64");
+        SetTeamLogo(_lastAwayLog, away?.logo, "64x64");
         _lastHomeName.text = home?.name.ToUpper() ?? "";
         _lastAwayName.text = away?.name.ToUpper() ?? "";
         _lastHomeScore.text = last.home_score.ToString();
         _lastAwayScore.text = last.away_score.ToString();
+
+        // Force layout recalculation after scores are set to prevent overflow on first load
+        _lastGameResult?.MarkDirtyRepaint();
+
         try
         {
             _lastGameDate.text = System.DateTime.Parse(last.game_date).ToString("dd/MM/yyyy");
@@ -841,8 +1070,8 @@ public class DashboardController : MonoBehaviour
         var home = _allTeams.Find(t => t.id == next.home_team_id);
         var away = _allTeams.Find(t => t.id == next.away_team_id);
 
-        SetTeamLogo(_nextHomeLog, home?.logo);
-        SetTeamLogo(_nextAwayLog, away?.logo);
+        SetTeamLogo(_nextHomeLog, home?.logo, "64x64");
+        SetTeamLogo(_nextAwayLog, away?.logo, "64x64");
         _nextHomeName.text = home?.name.ToUpper() ?? "";
         _nextAwayName.text = away?.name.ToUpper() ?? "";
         try
@@ -966,15 +1195,22 @@ public class DashboardController : MonoBehaviour
         rankLbl.AddToClassList("col-rank");
         rankLbl.text = row.rank.ToString();
 
-        // Logo
+        // Logo (32x32 desde carpeta específica, con crop)
         var logoElem = new VisualElement();
         logoElem.AddToClassList("col-team-logo");
-        if (team != null) SetTeamLogo(logoElem, team.logo);
+        if (team != null)
+        {
+            var logo32 = Resources.Load<Sprite>($"Teams/Logos/32x32/{team.logo}");
+            if (logo32 != null)
+                logoElem.style.backgroundImage = new StyleBackground(logo32);
+            else
+                SetTeamLogo(logoElem, team.logo);
+        }
 
         // Nombre
         var nameLbl = new Label();
         nameLbl.AddToClassList("col-team-name");
-        nameLbl.text = team?.name.ToUpper() ?? "???";
+        nameLbl.text = team?.name ?? "???";
 
         // PJ
         var gpLbl = new Label();
@@ -1033,33 +1269,53 @@ public class DashboardController : MonoBehaviour
     // ── ESTADISTICAS ───────────────────────────────────────
     void RefreshPlayerStats()
     {
-        // Máximo anotador — mayor atributo de tiro
-        var scorer = _players.OrderByDescending(p => p.shooting).FirstOrDefault();
+        // Cargar estadísticas reales de temporada para cada jugador
+        var seasonStats = _players
+            .Select(p => DatabaseManager.Instance.GetPlayerSeasonStats(p.id, _manager.id))
+            .Where(s => s.games > 0)
+            .ToList();
+
+        // Máximo anotador — mayor promedio de puntos
+        var scorer = seasonStats.OrderByDescending(s => s.avgPts).FirstOrDefault();
         SetStatCard("StatScorer", "StatScorerName", "StatScorerGames",
-            scorer?.shooting.ToString() ?? "--",
-            scorer != null ? $"{scorer.first_name} {scorer.last_name}" : "",
-            "");
+            scorer.games > 0 ? scorer.avgPts.ToString("F1") : "--",
+            scorer.player != null ? $"{scorer.player.first_name} {scorer.player.last_name}" : "",
+            scorer.games > 0 ? $"{scorer.games} partidos jugados" : "");
 
-        // Máximo rebotador — mayor atributo de rebote
-        var rebounder = _players.OrderByDescending(p => p.rebounding).FirstOrDefault();
+        // Máximo rebotador — mayor promedio de rebotes
+        var rebounder = seasonStats.OrderByDescending(s => s.avgReb).FirstOrDefault();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
-            rebounder?.rebounding.ToString() ?? "--",
-            rebounder != null ? $"{rebounder.first_name} {rebounder.last_name}" : "",
-            "");
+            rebounder.games > 0 ? rebounder.avgReb.ToString("F1") : "--",
+            rebounder.player != null ? $"{rebounder.player.first_name} {rebounder.player.last_name}" : "",
+            rebounder.games > 0 ? $"{rebounder.games} partidos jugados" : "");
 
-        // Máximo asistente — mayor atributo de pase
-        var assister = _players.OrderByDescending(p => p.passing).FirstOrDefault();
+        // Máximo asistente — mayor promedio de asistencias
+        var assister = seasonStats.OrderByDescending(s => s.avgAst).FirstOrDefault();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
-            assister?.passing.ToString() ?? "--",
-            assister != null ? $"{assister.first_name} {assister.last_name}" : "",
-            "");
+            assister.games > 0 ? assister.avgAst.ToString("F1") : "--",
+            assister.player != null ? $"{assister.player.first_name} {assister.player.last_name}" : "",
+            assister.games > 0 ? $"{assister.games} partidos jugados" : "");
 
-        // Mejor valoración — mayor overall
-        var rated = _players.OrderByDescending(p => p.overall).FirstOrDefault();
+        // Máximo robador — mayor promedio de robos
+        var stealer = seasonStats.OrderByDescending(s => s.avgStl).FirstOrDefault();
+        SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
+            stealer.games > 0 ? stealer.avgStl.ToString("F1") : "--",
+            stealer.player != null ? $"{stealer.player.first_name} {stealer.player.last_name}" : "",
+            stealer.games > 0 ? $"{stealer.games} partidos jugados" : "");
+
+        // Máximo taponador — mayor promedio de tapones
+        var blocker = seasonStats.OrderByDescending(s => s.avgBlk).FirstOrDefault();
+        SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
+            blocker.games > 0 ? blocker.avgBlk.ToString("F1") : "--",
+            blocker.player != null ? $"{blocker.player.first_name} {blocker.player.last_name}" : "",
+            blocker.games > 0 ? $"{blocker.games} partidos jugados" : "");
+
+        // Mejor valoración — mayor promedio de valoración
+        var rated = seasonStats.OrderByDescending(s => s.avgVal).FirstOrDefault();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
-            rated?.overall.ToString() ?? "--",
-            rated != null ? $"{rated.first_name} {rated.last_name}" : "",
-            "");
+            rated.games > 0 ? rated.avgVal.ToString("F1") : "--",
+            rated.player != null ? $"{rated.player.first_name} {rated.player.last_name}" : "",
+            rated.games > 0 ? $"{rated.games} partidos jugados" : "");
     }
 
     void SetStatCard(string valName, string playerName, string gamesName,
@@ -1074,6 +1330,110 @@ public class DashboardController : MonoBehaviour
         if (gamesLbl != null) gamesLbl.text = games;
     }
 
+    // ── ESTADÍSTICAS DEL EQUIPO ─────────────────────────
+
+    int GetMyTeamConferenceRank()
+    {
+        if (_myTeam == null || _allGames == null) return 0;
+
+        var confTeams = _allTeams.Where(t => t.conference == _myTeam.conference).ToList();
+        var standings = new List<(TeamData team, int wins, int losses, float pct)>();
+
+        foreach (var team in confTeams)
+        {
+            var teamGames = _allGames.Where(g => g.is_played == 1 &&
+                (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
+            int wins = teamGames.Count(g =>
+                (g.home_team_id == team.id && g.home_score > g.away_score) ||
+                (g.away_team_id == team.id && g.away_score > g.home_score));
+            int losses = teamGames.Count - wins;
+            float pct = teamGames.Count > 0 ? (float)wins / teamGames.Count : 0f;
+            standings.Add((team, wins, losses, pct));
+        }
+
+        standings.Sort((a, b) =>
+        {
+            int cmp = b.wins.CompareTo(a.wins);
+            if (cmp != 0) return cmp;
+            return b.pct.CompareTo(a.pct);
+        });
+
+        for (int i = 0; i < standings.Count; i++)
+        {
+            if (standings[i].team.id == _myTeam.id)
+                return i + 1;
+        }
+        return 0;
+    }
+
+    void RefreshTeamStats()
+    {
+        if (_myTeam == null) return;
+
+        // Objetivo de la temporada
+        if (_teamObjective != null)
+            _teamObjective.text = _myTeam.objective ?? "--";
+
+        // Estado del objetivo: calcular según posición en conferencia
+        int rank = GetMyTeamConferenceRank();
+        bool objectiveMet = false;
+        string obj = _myTeam.objective ?? "";
+        if (rank > 0)
+        {
+            if (obj == "Zona tranquila")
+                objectiveMet = rank >= 11;          // 11+ = no entrar a nada
+            else if (obj == "Play-In")
+                objectiveMet = rank <= 10;          // 1-10 = al menos play-in
+            else if (obj == "Playoffs")
+                objectiveMet = rank <= 6;          // 1-6 = en posición de playoffs
+            else if (obj == "Campeonato")
+                objectiveMet = rank <= 2;           // 1-2 = top directo, contender
+        }
+
+        if (_teamObjectiveStatus != null)
+        {
+            string iconName = objectiveMet ? "boton-v" : "boton-x";
+            var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
+            if (tex != null)
+                _teamObjectiveStatus.style.backgroundImage = new StyleBackground(tex);
+        }
+
+        // Logo del equipo (32x32 desde carpeta específica)
+        if (_teamStatsLogo != null)
+        {
+            var logo32 = Resources.Load<Sprite>($"Teams/Logos/32x32/{_myTeam.logo}");
+            if (logo32 != null)
+                _teamStatsLogo.style.backgroundImage = new StyleBackground(logo32);
+            else
+                SetTeamLogo(_teamStatsLogo, _myTeam.logo);
+        }
+
+        // Media equipo (overall)
+        if (_teamOverallLabel != null)
+            _teamOverallLabel.text = $"Media: {_myTeam.overall}";
+        if (_teamOverallRingVal != null)
+            _teamOverallRingVal.text = _myTeam.overall.ToString();
+
+        // Pabellón
+        if (_teamArenaName != null)
+            _teamArenaName.text = _myTeam.arena ?? "Pabellón";
+        if (_teamArenaCapacity != null)
+            _teamArenaCapacity.text = $"{_myTeam.capacity:N0} espectadores";
+
+        // Estrellas de reputación
+        if (_teamReputationStars != null)
+        {
+            _teamReputationStars.Clear();
+            for (int i = 1; i <= 5; i++)
+            {
+                var star = new Label { text = i <= _myTeam.reputation ? "★" : "☆" };
+                star.AddToClassList("team-stat-star");
+                star.style.color = i <= _myTeam.reputation ? new Color(0.84f, 0.63f, 0.09f) : new Color(0.2f, 0.25f, 0.35f);
+                _teamReputationStars.Add(star);
+            }
+        }
+    }
+
     // ── RELACIONES ───────────────────────────────────────
 
     void RefreshBoard()
@@ -1082,6 +1442,7 @@ public class DashboardController : MonoBehaviour
         SetBar(_barTrust, _valTrust, _manager.trust);
         SetBar(_barMorale, _valMorale, _manager.morale);
         SetBar(_barPressure, _valPressure, _manager.pressure);
+        SetBar(_barFanConfidence, _valFanConfidence, _manager.fan_confidence);
     }
 
     void SetBar(VisualElement bar, Label val, int value)
@@ -1101,19 +1462,22 @@ public class DashboardController : MonoBehaviour
 
     // ── HELPERS ──────────────────────────────────────────
 
-    void SetTeamLogo(VisualElement elem, string logoName)
+    void SetTeamLogo(VisualElement elem, string logoName, string sizeFolder = null)
     {
         if (elem == null || string.IsNullOrEmpty(logoName)) return;
-        if (_logoSprites.TryGetValue(logoName, out var sprite))
-            elem.style.backgroundImage = new StyleBackground(sprite);
-    }
 
-    // ── RESET ────────────────────────────────────────────
+        if (!string.IsNullOrEmpty(sizeFolder))
+        {
+            var sprite = Resources.Load<Sprite>($"Teams/Logos/{sizeFolder}/{logoName}");
+            if (sprite != null)
+            {
+                elem.style.backgroundImage = new StyleBackground(sprite);
+                return;
+            }
+        }
 
-    void OnReset()
-    {
-        Debug.Log("[Dashboard] Reiniciar partida — pendiente de implementar");
-        ScreenManager.Instance.GoTo(GameScreen.MainMenu);
+        if (_logoSprites.TryGetValue(logoName, out var fallback))
+            elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
     // ── CLASE AUXILIAR ───────────────────────────────────

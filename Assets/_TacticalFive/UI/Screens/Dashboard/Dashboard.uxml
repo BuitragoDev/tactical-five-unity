@@ -1,262 +1,307 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:uie="UnityEditor.UIElements"
-         editor-extension-mode="False">
-
-    <Style src="Dashboard.uss" />
-
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Dashboard/Dashboard.uss?fileID=7433441132597879392&amp;guid=4ea72934f300e2fc78940e1d76d7e1a8&amp;type=3#Dashboard"/>
     <ui:VisualElement name="DashboardRoot" class="dashboard-root">
-
-        <!-- ══ SIDEBAR ══ -->
         <ui:VisualElement name="Sidebar" class="sidebar">
-
-            <!-- Logo -->
             <ui:VisualElement class="sidebar-logo">
-                <ui:Label class="sidebar-logo-icon" text="TF" />
-                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
-                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+                <ui:Label text="TF" class="sidebar-logo-icon"/>
+                <ui:Label text="TACTICAL" class="sidebar-logo-text"/>
+                <ui:Label text="FIVE" class="sidebar-logo-text-gold"/>
             </ui:VisualElement>
-
-            <!-- Nav -->
             <ui:VisualElement class="sidebar-nav">
-                <ui:Button name="NavDashboard"     class="nav-item nav-item--active" text="INICIO" />
-                <ui:Button name="NavRoster"        class="nav-item" text="PLANTILLA" />
-                <ui:Button name="NavCalendar"      class="nav-item" text="CALENDARIO" />
-                <ui:Button name="NavStandings"     class="nav-item" text="CLASIFICACIÓN" />
-                <ui:Button name="NavPalmares"      class="nav-item" text="PALMARES" />
-                <ui:Button name="NavResults"       class="nav-item" text="RESULTADOS" />
-                <ui:Button name="NavPlayoffs"      class="nav-item" text="PLAYOFFS" />
-                <ui:Button name="NavStats"         class="nav-item" text="ESTADÍSTICAS" />
-                <ui:Button name="NavRecords"       class="nav-item" text="RECORDS" />
-                <ui:Button name="NavMarket"        class="nav-item" text="MERCADO" />
-                <ui:Button name="NavFinances"      class="nav-item" text="FINANZAS" />
-                <ui:Button name="NavSponsors"      class="nav-item" text="PATROCINADORES" />
-                <ui:Button name="NavTV"            class="nav-item" text="TELEVISIÓN" />
-                <ui:Button name="NavArena"         class="nav-item" text="PABELLÓN" />
-                <ui:Button name="NavMessages"      class="nav-item" text="MENSAJES" />
+                <ui:Button name="NavDashboard" class="nav-item nav-item--active">
+                    <ui:VisualElement name="NavDashboardIcon" class="nav-icon"/>
+                    <ui:Label text="Inicio" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavRoster" class="nav-item">
+                    <ui:VisualElement name="NavRosterIcon" class="nav-icon"/>
+                    <ui:Label text="Plantilla" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavCalendar" class="nav-item">
+                    <ui:VisualElement name="NavCalendarIcon" class="nav-icon"/>
+                    <ui:Label text="Calendario" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavStandings" class="nav-item">
+                    <ui:VisualElement name="NavStandingsIcon" class="nav-icon"/>
+                    <ui:Label text="Clasificación" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavPalmares" class="nav-item">
+                    <ui:VisualElement name="NavPalmaresIcon" class="nav-icon"/>
+                    <ui:Label text="Palmarés" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavResults" class="nav-item">
+                    <ui:VisualElement name="NavResultsIcon" class="nav-icon"/>
+                    <ui:Label text="Resultados" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavPlayoffs" class="nav-item">
+                    <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon"/>
+                    <ui:Label text="Playoffs" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavStats" class="nav-item">
+                    <ui:VisualElement name="NavStatsIcon" class="nav-icon"/>
+                    <ui:Label text="Estadísticas" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavRecords" class="nav-item">
+                    <ui:VisualElement name="NavRecordsIcon" class="nav-icon"/>
+                    <ui:Label text="Records" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavMarket" class="nav-item">
+                    <ui:VisualElement name="NavMarketIcon" class="nav-icon"/>
+                    <ui:Label text="Mercado" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavFinances" class="nav-item">
+                    <ui:VisualElement name="NavFinancesIcon" class="nav-icon"/>
+                    <ui:Label text="Finanzas" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavSponsors" class="nav-item">
+                    <ui:VisualElement name="NavSponsorsIcon" class="nav-icon"/>
+                    <ui:Label text="Patrocinadores" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavTV" class="nav-item">
+                    <ui:VisualElement name="NavTVIcon" class="nav-icon"/>
+                    <ui:Label text="Televisión" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavArena" class="nav-item">
+                    <ui:VisualElement name="NavArenaIcon" class="nav-icon"/>
+                    <ui:Label text="Pabellón" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavMessages" class="nav-item">
+                    <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
+                    <ui:Label text="Mensajes" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavConfig" class="nav-item">
+                    <ui:VisualElement name="NavConfigIcon" class="nav-icon"/>
+                    <ui:Label text="Configuración" class="nav-label"/>
+                </ui:Button>
             </ui:VisualElement>
-
-            <!-- Footer -->
-            <ui:VisualElement class="sidebar-footer">
-                <ui:Button name="BtnReset" class="btn-reset" text="↺  REINICIAR PARTIDA" />
-                <ui:Label class="sidebar-version" text="v0.1.0 · Alpha" />
-            </ui:VisualElement>
-
         </ui:VisualElement>
-
-        <!-- ══ MAIN AREA ══ -->
         <ui:VisualElement class="main-area">
-
-            <!-- TOP HEADER -->
             <ui:VisualElement name="TopHeader" class="top-header">
-
-                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
-
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
                 <ui:VisualElement class="header-team-info">
-                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                    <ui:Label name="HeaderTeamName" text="" class="header-team-name"/>
+                    <ui:Label name="HeaderManagerName" text="" class="header-manager-name"/>
                 </ui:VisualElement>
-
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
-                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                    <ui:Label text="PRESUPUESTO" class="header-stat-label"/>
+                    <ui:Label name="HeaderBudget" text="" class="header-stat-value"/>
                 </ui:VisualElement>
-
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
-                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                    <ui:Label text="MASA SALARIAL" class="header-stat-label"/>
+                    <ui:Label name="HeaderPayroll" text="" class="header-stat-value header-stat-value--neutral"/>
                 </ui:VisualElement>
-
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
-                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                    <ui:Label text="MARGEN SALARIAL" class="header-stat-label"/>
+                    <ui:Label name="HeaderMargin" text="" class="header-stat-value"/>
                 </ui:VisualElement>
-
-                <ui:VisualElement class="header-spacer" />
-
+                <ui:VisualElement class="header-spacer"/>
                 <ui:VisualElement class="header-season-info">
-                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
-                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                    <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
+                    <ui:Label name="HeaderDate" text="" class="header-date-label"/>
                 </ui:VisualElement>
-
-                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
-
+                <ui:Button name="BtnAction" text="CONTINUAR" class="btn-action"/>
             </ui:VisualElement>
-
-            <!-- PANELS GRID -->
-            <ui:ScrollView name="ContentScroll" class="content-scroll"
-                           horizontal-scrolling-enabled="false"
-                           mode="Vertical">
-
+            <ui:ScrollView name="ContentScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="content-scroll">
                 <ui:VisualElement class="panels-grid">
-
-                    <!-- FILA 1: Último partido + Próximo partido -->
                     <ui:VisualElement class="panels-row">
-
-                        <!-- Último partido -->
                         <ui:VisualElement name="PanelLastGame" class="panel panel-game">
                             <ui:VisualElement class="panel-header">
-                                <ui:Label class="panel-title" text="ÚLTIMO PARTIDO" />
-                                <ui:Label name="LastGameDate" class="panel-date" text="" />
+                                <ui:Label text="ÚLTIMO PARTIDO" class="panel-title"/>
+                                <ui:Label name="LastGameDate" text="" class="panel-date"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="LastGameBody" class="panel-body">
-                                <ui:Label name="NoLastGame" class="no-games-text"
-                                        text="AÚN NO SE HAN JUGADO PARTIDOS" />
+                                <ui:Label name="NoLastGame" text="AÚN NO SE HAN JUGADO PARTIDOS" class="no-games-text"/>
                                 <ui:VisualElement name="LastGameResult" class="game-result">
                                     <ui:VisualElement name="LastGameHome" class="game-team-block">
-                                        <ui:VisualElement name="LastHomeLog" class="game-team-logo-lg" />
-                                        <ui:Label name="LastHomeName" class="game-team-name-lg" text="" />
+                                        <ui:VisualElement name="LastHomeLog" class="game-team-logo-lg"/>
+                                        <ui:Label name="LastHomeName" text="" class="game-team-name-lg"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="game-score-block">
                                         <ui:VisualElement style="flex-direction: row; align-items: center;">
-                                            <ui:Label name="LastHomeScore" class="game-score-text" text="" />
-                                            <ui:Label class="game-score-sep" text="-" />
-                                            <ui:Label name="LastAwayScore" class="game-score-text" text="" />
+                                            <ui:Label name="LastHomeScore" text="" class="game-score-text"/>
+                                            <ui:Label text="-" class="game-score-sep"/>
+                                            <ui:Label name="LastAwayScore" text="" class="game-score-text"/>
                                         </ui:VisualElement>
-                                        <ui:Label name="LastResultBadge" class="game-result-badge" text="" />
+                                        <ui:Label name="LastResultBadge" text="" class="game-result-badge"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement name="LastGameAway" class="game-team-block">
-                                        <ui:VisualElement name="LastAwayLog" class="game-team-logo-lg" />
-                                        <ui:Label name="LastAwayName" class="game-team-name-lg" text="" />
+                                        <ui:VisualElement name="LastAwayLog" class="game-team-logo-lg"/>
+                                        <ui:Label name="LastAwayName" text="" class="game-team-name-lg"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="LastGameMeta" class="game-meta-row">
-                                    <ui:Label name="LastGameLocation" class="game-meta-location" text="" />
-                                    <ui:Label name="LastGameArena"    class="game-meta-arena"    text="" />
-                                    <ui:Label name="LastGameType"     class="game-meta-type"     text="" />
+                                    <ui:Label name="LastGameLocation" text="" class="game-meta-location"/>
+                                    <ui:Label name="LastGameArena" text="" class="game-meta-arena"/>
+                                    <ui:Label name="LastGameType" text="" class="game-meta-type"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-
-                        <!-- Próximo partido -->
                         <ui:VisualElement name="PanelNextGame" class="panel panel-game">
                             <ui:VisualElement class="panel-header">
-                                <ui:Label class="panel-title" text="PRÓXIMO PARTIDO" />
-                                <ui:Label name="NextGameDate" class="panel-date" text="" />
+                                <ui:Label text="PRÓXIMO PARTIDO" class="panel-title"/>
+                                <ui:Label name="NextGameDate" text="" class="panel-date"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="NextGameBody" class="panel-body">
-                                <ui:Label name="NoNextGame" class="no-games-text"
-                                        text="NO HAY MÁS PARTIDOS PROGRAMADOS" />
+                                <ui:Label name="NoNextGame" text="NO HAY MÁS PARTIDOS PROGRAMADOS" class="no-games-text"/>
                                 <ui:VisualElement name="NextGameResult" class="game-result">
                                     <ui:VisualElement name="NextGameHome" class="game-team-block">
-                                        <ui:VisualElement name="NextHomeLog" class="game-team-logo-lg" />
-                                        <ui:Label name="NextHomeName" class="game-team-name-lg" text="" />
+                                        <ui:VisualElement name="NextHomeLog" class="game-team-logo-lg"/>
+                                        <ui:Label name="NextHomeName" text="" class="game-team-name-lg"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="game-score-block">
-                                        <ui:Label class="game-vs-text" text="VS" />
+                                        <ui:Label text="VS" class="game-vs-text"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement name="NextGameAway" class="game-team-block">
-                                        <ui:VisualElement name="NextAwayLog" class="game-team-logo-lg" />
-                                        <ui:Label name="NextAwayName" class="game-team-name-lg" text="" />
+                                        <ui:VisualElement name="NextAwayLog" class="game-team-logo-lg"/>
+                                        <ui:Label name="NextAwayName" text="" class="game-team-name-lg"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="NextGameMeta" class="game-meta-row">
-                                    <ui:Label name="NextGameLocation" class="game-meta-location" text="" />
-                                    <ui:Label name="NextGameArena"    class="game-meta-arena"    text="" />
-                                    <ui:Label name="NextGameType"     class="game-meta-type"     text="" />
+                                    <ui:Label name="NextGameLocation" text="" class="game-meta-location"/>
+                                    <ui:Label name="NextGameArena" text="" class="game-meta-arena"/>
+                                    <ui:Label name="NextGameType" text="" class="game-meta-type"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-
                     </ui:VisualElement>
-
-                    <!-- FILA 2: Clasificación + Estadísticas + Relaciones -->
                     <ui:VisualElement class="panels-row">
-
-                        <!-- Clasificación -->
                         <ui:VisualElement name="PanelStandings" class="panel panel-standings">
                             <ui:VisualElement class="panel-header">
-                                <ui:Label class="panel-title" text="CLASIFICACIÓN" />
+                                <ui:Label text="CLASIFICACIÓN" class="panel-title"/>
                                 <ui:VisualElement class="conf-tabs">
-                                    <ui:Button name="TabEast" class="conf-tab" text="ESTE" />
-                                    <ui:Button name="TabWest" class="conf-tab conf-tab--active" text="OESTE" />
+                                    <ui:Button name="TabEast" text="ESTE" class="conf-tab"/>
+                                    <ui:Button name="TabWest" text="OESTE" class="conf-tab conf-tab--active"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement class="standings-header-row">
-                                <ui:Label class="col-rank col-stat--header" text="#" />
-                                <ui:Label class="col-team-logo" />
-                                <ui:Label class="col-team-name col-stat--header" text="EQUIPO" />
-                                <ui:Label class="col-stat col-stat--header" text="PJ" />
-                                <ui:Label class="col-stat col-stat--header" text="G" />
-                                <ui:Label class="col-stat col-stat--header" text="P" />
-                                <ui:Label class="col-stat col-stat--header" text="%" />
-                                <ui:Label class="col-streak col-stat--header" text="RACHA" />
+                                <ui:Label text="#" class="col-rank col-stat--header"/>
+                                <ui:Label class="col-team-logo"/>
+                                <ui:Label text="EQUIPO" class="col-team-name col-stat--header"/>
+                                <ui:Label text="PJ" class="col-stat col-stat--header"/>
+                                <ui:Label text="G" class="col-stat col-stat--header"/>
+                                <ui:Label text="P" class="col-stat col-stat--header"/>
+                                <ui:Label text="%" class="col-stat col-stat--header"/>
+                                <ui:Label text="RACHA" class="col-streak col-stat--header"/>
                             </ui:VisualElement>
-                            <ui:VisualElement name="StandingsBody" class="standings-table" />
+                            <ui:VisualElement name="StandingsBody" class="standings-table"/>
                         </ui:VisualElement>
-
-                        <!-- Estadísticas jugadores -->
                         <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats">
                             <ui:VisualElement class="panel-header">
-                                <ui:Label class="panel-title" text="ESTADÍSTICAS DE JUGADORES" />
+                                <ui:Label text="ESTADÍSTICAS DE JUGADORES" class="panel-title"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="panel-body">
                                 <ui:VisualElement class="stats-grid">
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label class="stat-card-label" text="MÁXIMO ANOTADOR" />
-                                        <ui:Label name="StatScorer"      class="stat-card-value"  text="--" />
-                                        <ui:Label name="StatScorerName"  class="stat-card-player" text="" />
-                                        <ui:Label name="StatScorerGames" class="stat-card-games"  text="" />
+                                        <ui:Label text="MÁXIMO ANOTADOR" class="stat-card-label"/>
+                                        <ui:Label name="StatScorer" text="--" class="stat-card-value"/>
+                                        <ui:Label name="StatScorerName" text="" class="stat-card-player"/>
+                                        <ui:Label name="StatScorerGames" text="" class="stat-card-games"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label class="stat-card-label" text="MÁXIMO REBOTADOR" />
-                                        <ui:Label name="StatRebounder"      class="stat-card-value"  text="--" />
-                                        <ui:Label name="StatRebounderName"  class="stat-card-player" text="" />
-                                        <ui:Label name="StatRebounderGames" class="stat-card-games"  text="" />
+                                        <ui:Label text="MÁXIMO REBOTADOR" class="stat-card-label"/>
+                                        <ui:Label name="StatRebounder" text="--" class="stat-card-value"/>
+                                        <ui:Label name="StatRebounderName" text="" class="stat-card-player"/>
+                                        <ui:Label name="StatRebounderGames" text="" class="stat-card-games"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label class="stat-card-label" text="MÁXIMO ASISTENTE" />
-                                        <ui:Label name="StatAssister"      class="stat-card-value"  text="--" />
-                                        <ui:Label name="StatAssisterName"  class="stat-card-player" text="" />
-                                        <ui:Label name="StatAssisterGames" class="stat-card-games"  text="" />
+                                        <ui:Label text="MÁXIMO ASISTENTE" class="stat-card-label"/>
+                                        <ui:Label name="StatAssister" text="--" class="stat-card-value"/>
+                                        <ui:Label name="StatAssisterName" text="" class="stat-card-player"/>
+                                        <ui:Label name="StatAssisterGames" text="" class="stat-card-games"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label class="stat-card-label" text="MEJOR VALORACIÓN" />
-                                        <ui:Label name="StatRated"      class="stat-card-value"  text="--" />
-                                        <ui:Label name="StatRatedName"  class="stat-card-player" text="" />
-                                        <ui:Label name="StatRatedGames" class="stat-card-games"  text="" />
+                                        <ui:Label text="MÁS ROBOS" class="stat-card-label"/>
+                                        <ui:Label name="StatStealer" text="--" class="stat-card-value"/>
+                                        <ui:Label name="StatStealerName" text="" class="stat-card-player"/>
+                                        <ui:Label name="StatStealerGames" text="" class="stat-card-games"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="stat-card">
+                                        <ui:Label text="MÁXIMO TAPONADOR" class="stat-card-label"/>
+                                        <ui:Label name="StatBlocker" text="--" class="stat-card-value"/>
+                                        <ui:Label name="StatBlockerName" text="" class="stat-card-player"/>
+                                        <ui:Label name="StatBlockerGames" text="" class="stat-card-games"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="stat-card">
+                                        <ui:Label text="MEJOR VALORACIÓN" class="stat-card-label"/>
+                                        <ui:Label name="StatRated" text="--" class="stat-card-value"/>
+                                        <ui:Label name="StatRatedName" text="" class="stat-card-player"/>
+                                        <ui:Label name="StatRatedGames" text="" class="stat-card-games"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-
-                        <!-- Relaciones -->
-                        <ui:VisualElement name="PanelBoard" class="panel panel-board">
-                            <ui:VisualElement class="panel-header">
-                                <ui:Label class="panel-title" text="RELACIONES" />
+                        <ui:VisualElement class="right-column">
+                            <ui:VisualElement name="PanelTeamStats" class="panel panel-team-stats">
+                                <ui:VisualElement class="panel-header">
+                                    <ui:Label text="ESTADÍSTICAS DEL EQUIPO" class="panel-title"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="panel-body">
+                                    <ui:VisualElement class="team-stat-row">
+                                        <ui:VisualElement class="team-stat-trophy-icon"/>
+                                        <ui:VisualElement class="team-stat-info">
+                                            <ui:Label text="Objetivo de la temporada" class="team-stat-title"/>
+                                            <ui:Label name="TeamObjective" text="--" class="team-stat-subtitle"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="TeamObjectiveStatus" class="team-stat-status-icon"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="team-stat-row">
+                                        <ui:VisualElement name="TeamStatsLogo" class="team-stat-logo"/>
+                                        <ui:VisualElement class="team-stat-info">
+                                            <ui:Label text="Media equipo" class="team-stat-title"/>
+                                            <ui:Label name="TeamOverallLabel" text="--" class="team-stat-subtitle"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="TeamOverallRing" class="team-stat-ring">
+                                            <ui:Label name="TeamOverallRingVal" text="--" class="team-stat-ring-val"/>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="team-stat-row">
+                                        <ui:VisualElement class="team-stat-arena-icon"/>
+                                        <ui:VisualElement class="team-stat-info">
+                                            <ui:Label name="TeamArenaName" text="Pabellón" class="team-stat-title"/>
+                                            <ui:Label name="TeamArenaCapacity" text="--" class="team-stat-subtitle"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="TeamReputationStars" class="team-stat-stars"/>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement class="panel-body">
-                                <ui:VisualElement class="board-item">
-                                    <ui:Label class="board-label" text="CONFIANZA" />
-                                    <ui:VisualElement class="board-bar-bg">
-                                        <ui:VisualElement name="BarTrust" class="board-bar-fill" />
-                                    </ui:VisualElement>
-                                    <ui:Label name="ValTrust" class="board-value" text="50%" />
+                            <ui:VisualElement name="PanelBoard" class="panel panel-board">
+                                <ui:VisualElement class="panel-header">
+                                    <ui:Label text="RELACIONES" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement class="board-item">
-                                    <ui:Label class="board-label" text="MORAL DEL EQUIPO" />
-                                    <ui:VisualElement class="board-bar-bg">
-                                        <ui:VisualElement name="BarMorale" class="board-bar-fill" />
+                                <ui:VisualElement class="panel-body">
+                                    <ui:VisualElement class="board-item">
+                                        <ui:Label text="Confianza de la Directiva" class="board-label"/>
+                                        <ui:VisualElement class="board-bar-bg">
+                                            <ui:VisualElement name="BarTrust" class="board-bar-fill"/>
+                                        </ui:VisualElement>
+                                        <ui:Label name="ValTrust" text="50%" class="board-value"/>
                                     </ui:VisualElement>
-                                    <ui:Label name="ValMorale" class="board-value" text="50%" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="board-item">
-                                    <ui:Label class="board-label" text="CONFIANZA DE LA PRENSA" />
-                                    <ui:VisualElement class="board-bar-bg">
-                                        <ui:VisualElement name="BarPressure" class="board-bar-fill" />
+                                    <ui:VisualElement class="board-item">
+                                        <ui:Label text="Moral del Equipo" class="board-label"/>
+                                        <ui:VisualElement class="board-bar-bg">
+                                            <ui:VisualElement name="BarMorale" class="board-bar-fill"/>
+                                        </ui:VisualElement>
+                                        <ui:Label name="ValMorale" text="50%" class="board-value"/>
                                     </ui:VisualElement>
-                                    <ui:Label name="ValPressure" class="board-value" text="50%" />
+                                    <ui:VisualElement class="board-item">
+                                        <ui:Label text="Confianza de la Prensa" class="board-label"/>
+                                        <ui:VisualElement class="board-bar-bg">
+                                            <ui:VisualElement name="BarPressure" class="board-bar-fill"/>
+                                        </ui:VisualElement>
+                                        <ui:Label name="ValPressure" text="50%" class="board-value"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="board-item">
+                                        <ui:Label text="Confianza de los Fans" class="board-label"/>
+                                        <ui:VisualElement class="board-bar-bg">
+                                            <ui:VisualElement name="BarFanConfidence" class="board-bar-fill"/>
+                                        </ui:VisualElement>
+                                        <ui:Label name="ValFanConfidence" text="50%" class="board-value"/>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-
                     </ui:VisualElement>
-
                 </ui:VisualElement>
-
             </ui:ScrollView>
-
         </ui:VisualElement>
-
     </ui:VisualElement>
-
 </ui:UXML>

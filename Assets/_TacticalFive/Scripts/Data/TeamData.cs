@@ -23,6 +23,7 @@ public class TeamData
     public string jersey_home              { get; set; }
     public string jersey_away              { get; set; }
     public long   salary_margin            { get; set; }
+    public string objective                { get; set; }
 
     // Arena renovation
     public int    arena_renovation_end_day { get; set; }

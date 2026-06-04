@@ -40,6 +40,7 @@
     border-bottom-width: 2px;
     border-bottom-color: #d4a017;
     flex-shrink: 0;
+    min-height: 100px;
 }
 
 .header-left {
@@ -49,8 +50,8 @@
 }
 
 .header-team-logo {
-    width: 52px;
-    height: 52px;
+    width: 80px;
+    height: 80px;
 }
 
 .header-team-info {
@@ -65,7 +66,7 @@
 }
 
 .header-team-name {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: #ffffff;
     text-transform: uppercase;
@@ -74,7 +75,7 @@
 }
 
 .header-subtitle {
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 500;
     color: #d4a017;
     letter-spacing: 2px;
@@ -84,7 +85,7 @@
 }
 
 .header-manager-name {
-    font-size: 14px;
+    font-size: 18px;
     color: #7a8aaa;
 }
 
@@ -101,7 +102,7 @@
 }
 
 .header-season-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     color: #d4a017;
     letter-spacing: 1px;
@@ -109,7 +110,7 @@
 }
 
 .header-date-label {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 500;
     color: #7a8aaa;
     letter-spacing: 1px;
@@ -122,7 +123,7 @@
 }
 
 .header-game-day-label {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     color: #4a80f0;
     letter-spacing: 1px;
@@ -136,16 +137,18 @@
 }
 
 .btn-action {
-    background-color: #2a5fc9;
-    border-width: 0;
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 8px 18px;
-    border-radius: 4px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 24px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    border-radius: 4px;
+    min-width: 150px;
 }
 
 /* ── MATCH BANNER ──────────────────── */
@@ -156,6 +159,7 @@
     border-color: #2a3347;
     border-radius: 8px;
     padding: 16px 24px;
+    flex-direction: column;
 }
 
 .match-teams {
@@ -175,12 +179,12 @@
 }
 
 .match-team-logo {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
 }
 
 .match-team-name {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 700;
     color: #d0d8e8;
     text-align: center;
@@ -195,7 +199,7 @@
 }
 
 .my-team-badge {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 2px;
     color: #d4a017;
@@ -217,7 +221,7 @@
 }
 
 .score-home, .score-away {
-    font-size: 40px;
+    font-size: 48px;
     font-weight: 700;
     color: #ffffff;
     line-height: 1;
@@ -236,11 +240,13 @@
     align-items: center;
     justify-content: center;
     margin-top: 10px;
+    height: 24px;
 }
 
 .match-venue-label {
-    font-size: 13px;
-    color: #7a8aaa;
+    font-size: 18px;
+    color: #d0d8e8;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
 }
 
 /* ── BOX SCORES ─────────────────────── */
@@ -275,12 +281,12 @@
 }
 
 .box-logo {
-    width: 36px;
-    height: 36px;
+    width: 64px;
+    height: 64px;
 }
 
 .box-team-name {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: 600;
     color: #d0d8e8;
     text-transform: uppercase;

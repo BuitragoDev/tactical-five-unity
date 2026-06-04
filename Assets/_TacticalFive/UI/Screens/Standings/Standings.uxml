@@ -2,8 +2,8 @@
          xmlns:uie="UnityEditor.UIElements"
          editor-extension-mode="False">
 
-    <Style src="Standings.uss" />
     <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="Standings.uss" />
 
     <ui:VisualElement name="StandingsRoot" class="standings-root">
 
@@ -84,7 +84,7 @@
                         <!-- Header row -->
                         <ui:VisualElement class="standings-header-row">
                             <ui:Label class="col-rank col-stat--header" text="#" />
-                            <ui:VisualElement class="col-logo-placeholder" />
+                            <ui:VisualElement class="col-logo-space" />
                             <ui:Label class="col-team-name col-stat--header" text="EQUIPO" />
                             <ui:Label class="col-stat col-stat--header" text="PJ" />
                             <ui:Label class="col-stat col-stat--header" text="G" />

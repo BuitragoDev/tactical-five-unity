@@ -2,8 +2,8 @@
          xmlns:uie="UnityEditor.UIElements"
          editor-extension-mode="False">
 
-    <Style src="Stats.uss" />
     <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="Stats.uss" />
 
     <ui:VisualElement name="StatsRoot" class="stats-root">
 
@@ -105,21 +105,8 @@
                         <ui:Label name="PanelTitle" class="stats-title" text="PUNTOS — LÍDERES DE LA LIGA" />
                     </ui:VisualElement>
                     <ui:VisualElement class="stats-table-wrapper">
-                        <!-- Fixed header (outside scroll) -->
-                        <ui:VisualElement name="TableHeader" class="stats-header-row">
-                            <ui:Label class="col-rank col-stat--header"        text="#" />
-                            <ui:Label class="col-player-name col-stat--header" text="JUGADOR" />
-                            <ui:Label class="col-team-abbrev col-stat--header" text="EQ" />
-                            <ui:Label class="col-pos col-stat--header"         text="POS" />
-                            <ui:Label class="col-stat col-stat--header"        text="PJ" />
-                            <ui:Label class="col-stat col-stat--header"        text="PTOS" />
-                            <ui:Label class="col-stat col-stat--header"        text="REB" />
-                            <ui:Label class="col-stat col-stat--header"        text="AST" />
-                            <ui:Label class="col-stat col-stat--header"        text="TC%" />
-                            <ui:Label class="col-stat col-stat--header"        text="3P%" />
-                            <ui:Label class="col-stat col-stat--header"        text="TL%" />
-                            <ui:Label class="col-stat col-stat--header"        text="VAL" />
-                        </ui:VisualElement>
+                        <!-- Fixed header (outside scroll) — populated dynamically from C# -->
+                        <ui:VisualElement name="TableHeader" class="stats-header-row" />
                         <!-- Scrollable body -->
                         <ui:ScrollView class="stats-scroll"
                                        horizontal-scrolling-enabled="false"

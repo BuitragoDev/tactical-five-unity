@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,7 +9,10 @@ public class LoadGameController : MonoBehaviour
     private VisualElement _root;
     private VisualElement _slotsContainer;
     private VisualElement _emptyState;
+    private VisualElement _slotsArea;
     private Button _btnBack;
+
+    private Dictionary<string, Sprite> _logoSprites = new();
 
     void OnEnable()
     {
@@ -23,11 +25,19 @@ public class LoadGameController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        // Load team logos
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
+        foreach (var s in logos) _logoSprites[s.name] = s;
+
         _slotsContainer = _root.Q<VisualElement>("SlotsContainer");
         _emptyState = _root.Q<VisualElement>("EmptyState");
+        _slotsArea = _root.Q<VisualElement>("SlotsScrollView").parent;
         _btnBack = _root.Q<Button>("BtnBack");
 
         _btnBack?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+
+        // Limpiar DBs huérfanas antes de refrescar
+        GameSaveManager.CleanupAllOrphanDbs();
 
         RefreshSlots();
     }
@@ -37,16 +47,19 @@ public class LoadGameController : MonoBehaviour
         _slotsContainer.Clear();
 
         var allSlots = GameSaveManager.GetAllSlots();
-        var existingSlots = allSlots.Where(s => s.exists).ToList();
+        // Solo slots verdaderamente válidos: exists + managerName + teamName
+        var existingSlots = allSlots
+            .Where(s => s.exists && !string.IsNullOrEmpty(s.managerName) && !string.IsNullOrEmpty(s.teamName))
+            .ToList();
 
         if (existingSlots.Count == 0)
         {
-            _slotsContainer.style.display = DisplayStyle.None;
+            _slotsArea.style.display = DisplayStyle.None;
             _emptyState.style.display = DisplayStyle.Flex;
             return;
         }
 
-        _slotsContainer.style.display = DisplayStyle.Flex;
+        _slotsArea.style.display = DisplayStyle.Flex;
         _emptyState.style.display = DisplayStyle.None;
 
         foreach (var slot in existingSlots)
@@ -61,7 +74,16 @@ public class LoadGameController : MonoBehaviour
         var card = new VisualElement();
         card.AddToClassList("slot-card");
 
-        // Info del slot
+        // Team Logo
+        var logoElem = new VisualElement();
+        logoElem.AddToClassList("slot-team-logo");
+        if (!string.IsNullOrEmpty(slot.teamLogo) && _logoSprites.TryGetValue(slot.teamLogo, out var sprite))
+        {
+            logoElem.style.backgroundImage = new StyleBackground(sprite);
+        }
+        card.Add(logoElem);
+
+        // Info Block
         var info = new VisualElement();
         info.AddToClassList("slot-info");
 
@@ -69,14 +91,20 @@ public class LoadGameController : MonoBehaviour
         managerLbl.AddToClassList("slot-manager");
         info.Add(managerLbl);
 
-        string metaText = $"{slot.teamName}  ·  Temp. {slot.seasonYear}";
+        var teamLbl = new Label { text = slot.teamName ?? "Sin equipo" };
+        teamLbl.AddToClassList("slot-team-name");
+        info.Add(teamLbl);
+
+        string metaText = $"Temporada {slot.seasonYear}";
+        if (slot.currentGameDay > 0)
+            metaText += $"  ·  Día {slot.currentGameDay}";
         var metaLbl = new Label { text = metaText };
         metaLbl.AddToClassList("slot-meta");
         info.Add(metaLbl);
 
         if (!string.IsNullOrEmpty(slot.currentDate))
         {
-            var dateLbl = new Label { text = $"Fecha in-game: {slot.currentDate}" };
+            var dateLbl = new Label { text = $"Fecha: {slot.currentDate}" };
             dateLbl.AddToClassList("slot-date");
             info.Add(dateLbl);
         }
@@ -90,7 +118,7 @@ public class LoadGameController : MonoBehaviour
 
         card.Add(info);
 
-        // Acciones
+        // Actions
         var actions = new VisualElement();
         actions.AddToClassList("slot-actions");
 

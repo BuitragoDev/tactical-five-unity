@@ -5,6 +5,9 @@ TextureImporter:
   - first:
       213: -1740302247458061003
     second: pelicans_0
+  - first:
+      213: 5447588804605288679
+    second: pelicans_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -117,9 +120,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 33
+        y: 48
         width: 120
-        height: 54
+        height: 53
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +133,28 @@ TextureImporter:
       bones: []
       spriteID: 535c272935439d7e0800000000000000
       internalID: -1740302247458061003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_1
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 18
+        width: 94
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e0a4ecb729b99b40800000000000000
+      internalID: 5447588804605288679
       vertices: []
       indices: 
       edges: []
@@ -149,6 +174,7 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       pelicans_0: -1740302247458061003
+      pelicans_1: 5447588804605288679
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

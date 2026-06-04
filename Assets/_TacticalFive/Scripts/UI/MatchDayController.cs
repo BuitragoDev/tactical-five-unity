@@ -136,8 +136,7 @@ public class MatchDayController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
-            _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
+        SetLogo(_root.Q<VisualElement>("HeaderTeamLogo"), _myTeam.logo, "80x80");
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
         _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
@@ -149,9 +148,11 @@ public class MatchDayController : MonoBehaviour
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
             _headerGameDay.text = displayDay < 0 ? "AMISTOSO" : $"Jornada {displayDay}";
 
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+            var gamesToday = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, displayDay);
+            var todayGame = gamesToday.FirstOrDefault();
+            _root.Q<Label>("HeaderDate").text = todayGame != null && season != null
+                ? new System.DateTime(season.year_start, 10, 22).AddDays(todayGame.game_day - 1).ToString("dd/MM/yyyy") : "";
         }
     }
 
@@ -170,8 +171,8 @@ public class MatchDayController : MonoBehaviour
         var away = _allTeams.Find(t => t.id == myGame.away_team_id);
 
         // Banner
-        SetLogo(_homeLogo, home?.logo);
-        SetLogo(_awayLogo, away?.logo);
+        SetLogo(_homeLogo, home?.logo, "80x80");
+        SetLogo(_awayLogo, away?.logo, "80x80");
         _homeName.text = home?.name.ToUpper() ?? "";
         _awayName.text = away?.name.ToUpper() ?? "";
         _homeScore.text = myGame.home_score.ToString();
@@ -179,10 +180,59 @@ public class MatchDayController : MonoBehaviour
 
         // Venue with attendance
         var attendance = DatabaseManager.Instance.GetGameAttendance(myGame.id);
-        string venueText = home?.arena ?? "";
-        if (attendance != null && attendance.attendance > 0)
-            venueText += $" ({attendance.attendance:N0} espectadores)";
-        _venueLabel.text = venueText;
+        string arenaName = home?.arena ?? "Pabellón";
+        int attendanceCount = attendance?.attendance ?? 0;
+
+        // Fallback: calculate if missing in DB (e.g., preseason games)
+        if (attendanceCount == 0 && home != null)
+        {
+            bool myTeamIsHome = myGame.home_team_id == _myTeam.id;
+            bool myTeamIsAway = myGame.away_team_id == _myTeam.id;
+
+            var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+            var homeTeamGames = teamGames.Where(g => g.home_team_id == home.id || g.away_team_id == home.id).ToList();
+            int wins = homeTeamGames.Count(g =>
+                (g.home_team_id == home.id && g.home_score > g.away_score) ||
+                (g.away_team_id == home.id && g.away_score > g.home_score));
+            int totalPlayed = homeTeamGames.Count;
+            float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
+
+            float baseAttendance;
+            float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
+
+            if (myTeamIsHome)
+            {
+                var rival = DatabaseManager.Instance.GetTeamById(myGame.away_team_id);
+                float rivalRepFactor = rival != null ? (rival.reputation / 5f) * 0.08f : 0f;
+                baseAttendance = home.capacity * (
+                    0.30f +
+                    (_manager.fan_confidence / 100f) * 0.35f +
+                    winPct * 0.15f +
+                    rivalRepFactor
+                );
+            }
+            else if (myTeamIsAway)
+            {
+                float myRepFactor = (_myTeam.reputation / 5f) * 0.06f;
+                baseAttendance = home.capacity * (
+                    0.55f +
+                    winPct * 0.30f +
+                    myRepFactor
+                );
+            }
+            else
+            {
+                baseAttendance = home.capacity * (0.55f + winPct * 0.40f);
+            }
+
+            attendanceCount = (int)Mathf.Min(home.capacity, baseAttendance * randomFactor);
+        }
+
+        string attendanceText = attendanceCount > 0
+            ? $" ({attendanceCount:N0} espectadores)"
+            : "";
+        _venueLabel.text = $"{arenaName}{attendanceText}";
+
 
         // My team badges
         bool homeIsMyTeam = myGame.home_team_id == _myTeam.id;
@@ -206,8 +256,8 @@ public class MatchDayController : MonoBehaviour
         // Box headers
         _homeBoxName.text = home?.name.ToUpper() ?? "";
         _awayBoxName.text = away?.name.ToUpper() ?? "";
-        SetLogo(_homeBoxLogo, home?.logo);
-        SetLogo(_awayBoxLogo, away?.logo);
+        SetLogo(_homeBoxLogo, home?.logo, "64x64");
+        SetLogo(_awayBoxLogo, away?.logo, "64x64");
 
         // Player stats - only players with minutes > 0
         var homeStats = DatabaseManager.Instance.GetGamePlayerStats(myGame.id)
@@ -332,10 +382,21 @@ public class MatchDayController : MonoBehaviour
         ScreenManager.Instance.GoTo(hasMoreGames ? GameScreen.GameResults : GameScreen.Dashboard);
     }
 
-    void SetLogo(VisualElement elem, string logoName)
+    void SetLogo(VisualElement elem, string logoName, string sizeFolder = null)
     {
         if (elem == null || string.IsNullOrEmpty(logoName)) return;
-        if (_logoSprites.TryGetValue(logoName, out var sprite))
-            elem.style.backgroundImage = new StyleBackground(sprite);
+
+        if (!string.IsNullOrEmpty(sizeFolder))
+        {
+            var sprite = Resources.Load<Sprite>($"Teams/Logos/{sizeFolder}/{logoName}");
+            if (sprite != null)
+            {
+                elem.style.backgroundImage = new StyleBackground(sprite);
+                return;
+            }
+        }
+
+        if (_logoSprites.TryGetValue(logoName, out var fallback))
+            elem.style.backgroundImage = new StyleBackground(fallback);
     }
 }

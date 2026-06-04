@@ -116,10 +116,10 @@ TextureImporter:
       name: nuggets_0
       rect:
         serializedVersion: 2
-        x: 8
-        y: 6
-        width: 496
-        height: 496
+        x: 4
+        y: 4
+        width: 192
+        height: 192
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

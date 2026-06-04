@@ -20,9 +20,49 @@ public static class GameSaveManager
         return slot;
     }
 
+    /// <summary>
+    /// Elimina el archivo DB de un slot si no tiene metadatos válidos (partida huérfana).
+    /// </summary>
+    public static void CleanupOrphanDb(int slotNumber)
+    {
+        string dbPath = GetSaveDbPath(slotNumber);
+        var slot = GetSlot(slotNumber);
+        bool hasValidMeta = slot != null && slot.exists;
+        if (!hasValidMeta && File.Exists(dbPath))
+        {
+            try { File.Delete(dbPath); } catch { }
+            Debug.Log($"[GameSaveManager] DB huérfana eliminada: slot {slotNumber}");
+        }
+    }
+
     public static string GetSaveDbPath(int slotNumber)
     {
         return Path.Combine(BaseDir, $"save_{slotNumber}.db");
+    }
+
+    /// <summary>
+    /// Elimina todas las DBs huérfanas (archivos .db sin metadatos válidos).
+    /// Llámalo al entrar a la pantalla de Cargar Partida.
+    /// </summary>
+    public static void CleanupAllOrphanDbs()
+    {
+        if (!Directory.Exists(BaseDir)) return;
+        var metaSlots = GetAllSlots();
+        var dbFiles = Directory.GetFiles(BaseDir, "save_*.db");
+        foreach (var dbPath in dbFiles)
+        {
+            string fileName = Path.GetFileNameWithoutExtension(dbPath); // "save_N"
+            if (!fileName.StartsWith("save_")) continue;
+            if (!int.TryParse(fileName.Substring(5), out int slotNum)) continue;
+
+            var slot = metaSlots.FirstOrDefault(s => s.slotNumber == slotNum);
+            bool hasValidMeta = slot != null && slot.exists && !string.IsNullOrEmpty(slot.managerName);
+            if (!hasValidMeta)
+            {
+                try { File.Delete(dbPath); } catch { }
+                Debug.Log($"[GameSaveManager] DB huérfana eliminada: slot {slotNum}");
+            }
+        }
     }
 
     public static List<SaveSlotInfo> GetAllSlots()
@@ -45,7 +85,7 @@ public static class GameSaveManager
             }
         }
 
-        // Sincronizar exists con archivo real y limpiar huérfanos
+        // Limpiar metadatos de slots cuyo archivo DB ya no existe
         var result = new List<SaveSlotInfo>();
         foreach (var slot in slots)
         {
@@ -56,10 +96,8 @@ public static class GameSaveManager
                 // Metadatos desfasados → limpiar
                 slot.exists = false;
             }
-            else if (!slot.exists && fileExists)
-            {
-                slot.exists = true;
-            }
+            // NOTA: NUNCA forzamos exists=true solo porque haya un archivo .db.
+            // Un .db sin metadatos válidos es una partida abandonada (huérfana).
             result.Add(slot);
         }
 

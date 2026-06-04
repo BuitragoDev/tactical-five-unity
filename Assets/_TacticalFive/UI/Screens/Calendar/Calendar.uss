@@ -88,7 +88,7 @@
 .calendar-day-header {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     flex-grow: 1;
-    font-size: 12px;
+    font-size: 13px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
@@ -114,7 +114,7 @@
 
 .calendar-day-cell {
     flex-basis: 14.28%;
-    min-height: 60px;
+    min-height: 120px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -125,6 +125,13 @@
     border-top-width: 0;
     border-left-width: 0;
     padding: 4px;
+    position: relative;
+}
+
+.calendar-day-cell--my-game {
+    background-color: rgb(30, 40, 60);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(212, 160, 23);
 }
 
 .calendar-day-cell--empty {
@@ -139,16 +146,6 @@
 
 .calendar-day-cell--selected {
     background-color: rgb(42, 95, 201);
-}
-
-.calendar-day-cell--has-game {
-    background-color: rgb(28, 33, 48);
-}
-
-.calendar-day-cell--my-game {
-    background-color: rgb(30, 40, 60);
-    border-bottom-width: 2px;
-    border-bottom-color: rgb(212, 160, 23);
 }
 
 .calendar-day-number {
@@ -170,21 +167,11 @@
     color: rgb(212, 160, 23);
 }
 
-.calendar-day-games {
-    flex-direction: row;
-    margin-top: 2px;
-}
-
-.calendar-game-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 3px;
-    background-color: rgb(42, 95, 201);
-    margin: 0 1px;
-}
-
-.calendar-game-dot--my-game {
-    background-color: rgb(212, 160, 23);
+.calendar-day-number--top-right {
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    -unity-text-align: middle-right;
 }
 
 /* Selected day panel (right side) */
@@ -195,7 +182,7 @@
     border-color: rgb(42, 51, 71);
     border-radius: 2px;
     flex-shrink: 0;
-    width: 380px;
+    width: 420px;
     min-height: 0;
 }
 
@@ -273,7 +260,7 @@
 
 .selected-game-type {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);

@@ -70,22 +70,20 @@
             <!-- SPONSORS CONTENT -->
             <ui:VisualElement class="sponsors-content">
 
-                <!-- Current sponsor -->
-                <ui:VisualElement class="panel panel-sponsors">
-                    <ui:VisualElement class="panel-header">
-                        <ui:Label class="panel-title" text="PATROCINADOR ACTUAL" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="CurrentSponsorBody" class="sponsors-current" />
-                    <ui:Label name="NoSponsorText" class="no-data-text" text="SIN PATROCINADOR ACTUAL" />
+                <!-- Current sponsor banner -->
+                <ui:VisualElement name="CurrentSponsorBanner" class="current-sponsor-banner" style="display:none;">
+                    <ui:Label class="current-sponsor-label" text="CONTRATO ACTUAL" />
+                    <ui:Label name="CurrentSponsorName" class="current-sponsor-name" text="" />
                 </ui:VisualElement>
 
-                <!-- Available sponsors -->
-                <ui:VisualElement class="panel panel-sponsors">
-                    <ui:VisualElement class="panel-header">
-                        <ui:Label class="panel-title" text="PATROCINADORES DISPONIBLES" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="AvailableSponsorsBody" class="sponsors-list" />
-                </ui:VisualElement>
+                <!-- Title -->
+                <ui:Label class="sponsors-page-title" text="PATROCINADORES" />
+
+                <!-- Cards container -->
+                <ui:VisualElement name="SponsorsCardsContainer" class="sponsors-cards-container" />
+
+                <!-- Info message -->
+                <ui:Label name="SponsorsInfoMessage" class="sponsors-info-message" text="Los contratos con patrocinadores solo se pueden firmar en el mes de octubre." />
 
             </ui:VisualElement>
 

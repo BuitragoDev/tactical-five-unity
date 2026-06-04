@@ -9,13 +9,16 @@ public class TVController : MonoBehaviour
     private VisualElement _root;
 
     private Button _btnAction;
-    private VisualElement _tvDealsBody;
-    private VisualElement _tvScheduleBody;
+    private VisualElement _currentTVBanner;
+    private Label _currentTVName;
+    private VisualElement _cardsContainer;
+    private Label _infoMessage;
 
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
-    private List<TvChannelData> _tvChannels;
+    private TvChannelData _currentTV;
+    private List<TvChannelData> _availableChannels;
 
     void OnEnable()
     {
@@ -37,8 +40,10 @@ public class TVController : MonoBehaviour
     void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
-        _tvDealsBody = _root.Q<VisualElement>("TVDealsBody");
-        _tvScheduleBody = _root.Q<VisualElement>("TVScheduleBody");
+        _currentTVBanner = _root.Q<VisualElement>("CurrentTVBanner");
+        _currentTVName = _root.Q<Label>("CurrentTVName");
+        _cardsContainer = _root.Q<VisualElement>("TVCardsContainer");
+        _infoMessage = _root.Q<Label>("TVInfoMessage");
     }
 
     void LoadData()
@@ -48,7 +53,8 @@ public class TVController : MonoBehaviour
 
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        _tvChannels = DatabaseManager.Instance.GetTVChannels();
+        _currentTV = DatabaseManager.Instance.GetActiveTVChannel(_myTeam.id);
+        _availableChannels = DatabaseManager.Instance.GetAvailableTVChannels(_myTeam.id);
     }
 
     void RegisterCallbacks()
@@ -94,8 +100,8 @@ public class TVController : MonoBehaviour
     void Refresh()
     {
         RefreshHeader();
-        BuildTVDeals();
-        BuildTVSchedule();
+        BuildCurrentTVBanner();
+        BuildCards();
     }
 
     void RefreshHeader()
@@ -128,96 +134,144 @@ public class TVController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
     }
 
-    void BuildTVDeals()
+    void BuildCurrentTVBanner()
     {
-        _tvDealsBody.Clear();
-
-        foreach (var channel in _tvChannels)
+        if (_currentTV != null)
         {
-            var item = new VisualElement();
-            item.AddToClassList("tv-deal-item");
-
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("tv-channel-name");
-            nameLbl.text = channel.name.ToUpper();
-
-            var typeLbl = new Label();
-            typeLbl.AddToClassList("tv-deal-type");
-            typeLbl.text = GetChannelTypeName(channel.channel_type);
-
-            var valueLbl = new Label();
-            valueLbl.AddToClassList("tv-deal-value");
-            valueLbl.text = $"${channel.value:N0} / temporada";
-
-            item.Add(nameLbl);
-            item.Add(typeLbl);
-            item.Add(valueLbl);
-
-            _tvDealsBody.Add(item);
+            _currentTVBanner.style.display = DisplayStyle.Flex;
+            _currentTVName.text = _currentTV.name;
+        }
+        else
+        {
+            _currentTVBanner.style.display = DisplayStyle.None;
         }
     }
 
-    void BuildTVSchedule()
+    void BuildCards()
     {
-        _tvScheduleBody.Clear();
+        _cardsContainer.Clear();
 
-        var upcomingGames = DatabaseManager.Instance.GetUpcomingGames(_manager.id, _season.current_game_day);
-        var tvGames = upcomingGames.Where(g => g.tv_channel_id > 0).Take(10).ToList();
-
-        if (tvGames.Count == 0)
+        if (_availableChannels == null || _availableChannels.Count == 0)
         {
-            var noGames = new Label();
-            noGames.AddToClassList("no-data-text");
-            noGames.text = "NO HAY PARTIDOS PROGRAMADOS EN TV";
-            _tvScheduleBody.Add(noGames);
+            var emptyLbl = new Label("No hay cadenas de televisión disponibles.");
+            emptyLbl.AddToClassList("tv-info-message");
+            _cardsContainer.Add(emptyLbl);
             return;
         }
 
-        foreach (var game in tvGames)
+        bool hasCurrent = _currentTV != null;
+
+        foreach (var channel in _availableChannels)
         {
-            var item = new VisualElement();
-            item.AddToClassList("tv-schedule-item");
-
-            var dateLbl = new Label();
-            dateLbl.AddToClassList("tv-schedule-date");
-            dateLbl.text = System.DateTime.Parse(game.game_date).ToString("dd/MM");
-
-            var homeTeam = DatabaseManager.Instance.GetTeamById(game.home_team_id);
-            var awayTeam = DatabaseManager.Instance.GetTeamById(game.away_team_id);
-            var matchupLbl = new Label();
-            matchupLbl.AddToClassList("tv-schedule-matchup");
-            matchupLbl.text = $"{awayTeam?.abbreviation.ToUpper()} @ {homeTeam?.abbreviation.ToUpper()}";
-
-            var channel = _tvChannels.FirstOrDefault(c => c.id == game.tv_channel_id);
-            var channelLbl = new Label();
-            channelLbl.AddToClassList("tv-schedule-channel");
-            channelLbl.text = channel?.name.ToUpper() ?? "TBD";
-
-            item.Add(dateLbl);
-            item.Add(matchupLbl);
-            item.Add(channelLbl);
-
-            _tvScheduleBody.Add(item);
+            var card = CreateCard(channel, hasCurrent);
+            _cardsContainer.Add(card);
         }
     }
 
-    string GetChannelTypeName(int type)
+    VisualElement CreateCard(TvChannelData channel, bool hasCurrent)
     {
-        return type switch
+        var card = new VisualElement();
+        card.AddToClassList("tv-card");
+
+        // Logo
+        var logo = new VisualElement();
+        logo.AddToClassList("tv-card-logo");
+        var logoPath = channel.logo?.Replace(".png", "");
+        var channelLogo = Resources.Load<Sprite>(logoPath);
+        if (channelLogo != null)
+            logo.style.backgroundImage = new StyleBackground(channelLogo);
+
+        // If we have a current TV channel and this is not it, show in grayscale
+        if (hasCurrent && _currentTV != null && channel.id != _currentTV.id)
+            logo.AddToClassList("tv-card-logo--grayscale");
+
+        card.Add(logo);
+
+        // Name
+        var nameLbl = new Label(channel.name.ToUpper());
+        nameLbl.AddToClassList("tv-card-name");
+        card.Add(nameLbl);
+
+        // Ingreso Inicial
+        card.Add(CreateCardRow("Ingreso Inicial", $"${channel.initial_income:N0}"));
+
+        // Por Partido en Casa
+        card.Add(CreateCardRow("Por Partido en Casa", $"${channel.home_game_income:N0}"));
+
+        // Duración
+        card.Add(CreateCardRow("Duración", $"{channel.contract_years} año{(channel.contract_years > 1 ? "s" : "")}"));
+
+        // Button
+        var btn = new Button();
+        btn.AddToClassList("tv-card-btn");
+        bool isContracted = hasCurrent && _currentTV != null && channel.id == _currentTV.id;
+
+        if (isContracted)
         {
-            1 => "NACIONAL",
-            2 => "REGIONAL",
-            3 => "INTERNACIONAL",
-            4 => "STREAMING",
-            _ => "OTRO"
+            btn.text = "CONTRATADO";
+            btn.AddToClassList("tv-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
+        else if (hasCurrent)
+        {
+            btn.text = "CONTRATADO";
+            btn.AddToClassList("tv-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
+        else
+        {
+            btn.text = "CONTRATAR";
+            var channelCopy = channel;
+            btn.clicked += () => SignTV(channelCopy);
+        }
+        card.Add(btn);
+
+        return card;
+    }
+
+    VisualElement CreateCardRow(string label, string value)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("tv-card-row");
+
+        var lbl = new Label(label);
+        lbl.AddToClassList("tv-card-label");
+
+        var val = new Label(value);
+        val.AddToClassList("tv-card-value");
+
+        row.Add(lbl);
+        row.Add(val);
+
+        return row;
+    }
+
+    void SignTV(TvChannelData channel)
+    {
+        if (_currentTV != null) return; // Can't sign if already have one
+
+        DatabaseManager.Instance.SignTVChannel(channel.id, _season.id, _myTeam.id, _season.current_game_day);
+
+        // Send message
+        var msg = new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
+            title = $"CADENA TV FIRMADA: {channel.name.ToUpper()}",
+            body = $"Se ha firmado un nuevo contrato con {channel.name}.\n\nIngreso inicial: ${channel.initial_income:N0}",
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            is_read = 0
         };
+        DatabaseManager.Instance.AddMessage(msg);
+
+        LoadData();
+        Refresh();
     }
 }

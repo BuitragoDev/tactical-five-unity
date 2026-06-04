@@ -166,6 +166,7 @@ public class MainMenuController : MonoBehaviour
     void OnManagerClicked()
     {
         int slot = GameSaveManager.FindNextAvailableSlot();
+        GameSaveManager.CleanupOrphanDb(slot);
         DatabaseManager.Instance.InitSaveSlot(slot);
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.Manager);
     }
@@ -173,6 +174,7 @@ public class MainMenuController : MonoBehaviour
     void OnProManagerClicked()
     {
         int slot = GameSaveManager.FindNextAvailableSlot();
+        GameSaveManager.CleanupOrphanDb(slot);
         DatabaseManager.Instance.InitSaveSlot(slot);
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.ProManager);
     }

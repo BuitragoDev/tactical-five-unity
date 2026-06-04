@@ -18,7 +18,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 24px;
-    height: 56px;
+    height: 100px;
     background-color: rgb(22, 26, 36);
     border-bottom-width: 2px;
     border-bottom-color: rgb(212, 160, 23);
@@ -30,7 +30,7 @@
     border-width: 1px;
     border-color: rgb(58, 74, 99);
     color: rgb(208, 216, 232);
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 8px 20px;
@@ -47,14 +47,14 @@
 .header-title-white {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     color: rgb(255, 255, 255);
-    font-size: 20px;
+    font-size: 32px;
     letter-spacing: 3px;
     -unity-text-transform: upper;
 }
 .header-title-gold {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     color: rgb(212, 160, 23);
-    font-size: 20px;
+    font-size: 32px;
     letter-spacing: 3px;
     -unity-text-transform: upper;
     margin-left: 6px;
@@ -65,10 +65,10 @@
     background-color: rgb(42, 95, 201);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 8px 24px;
+    padding: 10px 26px;
     -unity-text-align: middle-center;
 }
 .btn-continue:hover {
@@ -84,7 +84,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    height: 72px;
+    height: 100px;
     padding: 0 40px;
     background-color: rgb(17, 24, 34);
     border-bottom-width: 1px;
@@ -93,7 +93,7 @@
 }
 .manager-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 18px;
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(122, 138, 170);
@@ -102,13 +102,13 @@
 }
 .manager-input {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    width: 320px;
-    height: 42px;
+    width: 400px;
+    height: 50px;
     background-color: rgb(28, 33, 48);
     border-width: 1px;
     border-color: rgb(58, 74, 99);
     color: rgb(208, 216, 232);
-    font-size: 16px;
+    font-size: 24px;
     padding: 8px 12px;
     -unity-text-align: middle-left;
 }
@@ -144,6 +144,8 @@
     flex-direction: row;
     margin-bottom: 12px;
     flex-shrink: 0;
+    justify-content: flex-end;
+    margin-right: 16px;
 }
 .tab-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
@@ -151,11 +153,11 @@
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     color: rgb(122, 138, 170);
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 8px 20px;
-    margin-right: 4px;
+    margin-left: 8px;
     -unity-text-align: middle-center;
 }
 .tab-btn:hover {
@@ -185,8 +187,8 @@
     padding: 4px;
 }
 .team-item {
-    width: 120px;
-    height: 120px;
+    width: 158px;
+    height: 150px;
     margin: 5px;
     align-items: center;
     justify-content: center;
@@ -208,8 +210,8 @@
     opacity: 0.3;
 }
 .team-logo {
-    width: 96px;
-    height: 96px;
+    width: 120px;
+    height: 120px;
 }
 
 /* ── RIGHT PANEL ── */
@@ -255,10 +257,11 @@
     align-items: stretch;
 }
 
-/* Cabecera detalle — logo encima, nombre centrado */
+/* Cabecera detalle — 3 columnas: logo+nombre, camiseta local, camiseta visitante */
 .detail-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
     margin-bottom: 20px;
     padding-bottom: 20px;
     border-bottom-width: 1px;
@@ -267,17 +270,26 @@
     border-left-width: 0;
     border-right-width: 0;
 }
+.detail-col-logo {
+    flex-direction: column;
+    align-items: center;
+    flex-grow: 1;
+}
 .detail-logo {
-    width: 110px;
-    height: 110px;
-    margin-bottom: 14px;
+    width: 120px;
+    height: 120px;
+    margin-bottom: 10px;
     flex-shrink: 0;
-    align-self: center;
 }
 .detail-name-wrap {
     flex-direction: column;
     align-items: center;
-    width: 100%;
+}
+.detail-col-jersey {
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-left: 20px;
 }
 .detail-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
@@ -290,7 +302,7 @@
 }
 .detail-conference {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     letter-spacing: 2px;
     -unity-text-transform: upper;
@@ -312,7 +324,7 @@
 }
 .detail-row-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -321,7 +333,7 @@
 }
 .detail-row-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-right;
     flex-grow: 1;
@@ -359,10 +371,10 @@
     flex-direction: column;
 }
 .stat-circle-ring {
-    width: 72px;
-    height: 72px;
+    width: 80px;
+    height: 80px;
     border-radius: 36px;
-    border-width: 3px;
+    border-width: 5px;
     border-color: rgb(42, 95, 201);
     align-items: center;
     justify-content: center;
@@ -376,13 +388,13 @@
 }
 .stat-circle-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 24px;
+    font-size: 32px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
 }
 .stat-circle-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(122, 138, 170);
@@ -390,13 +402,7 @@
 }
 
 /* Camisetas */
-.jerseys-row {
-    flex-direction: row;
-    justify-content: center;
-    margin-top: 16px;
-}
 .jersey-img {
     width: 121px;
     height: 170px;
-    margin: 0 16px;
 }

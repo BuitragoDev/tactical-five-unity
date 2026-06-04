@@ -5,6 +5,39 @@ TextureImporter:
   - first:
       213: -8508880339788472534
     second: suns_0
+  - first:
+      213: 6127346559953571945
+    second: suns_1
+  - first:
+      213: 7778983160187933316
+    second: suns_2
+  - first:
+      213: -7047185146840602021
+    second: suns_3
+  - first:
+      213: 6623219825880481301
+    second: suns_4
+  - first:
+      213: -2132073635120008903
+    second: suns_5
+  - first:
+      213: -4414044349036660021
+    second: suns_6
+  - first:
+      213: -4153007841160159720
+    second: suns_7
+  - first:
+      213: -2081944862219668890
+    second: suns_8
+  - first:
+      213: 3411026792168498242
+    second: suns_9
+  - first:
+      213: 7305349528287650978
+    second: suns_10
+  - first:
+      213: -3161034872281410635
+    second: suns_11
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,10 +149,10 @@ TextureImporter:
       name: suns_0
       rect:
         serializedVersion: 2
-        x: 9
-        y: 4
-        width: 494
-        height: 501
+        x: 27
+        y: 71
+        width: 162
+        height: 124
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +163,248 @@ TextureImporter:
       bones: []
       spriteID: a2f5a96b9626ae980800000000000000
       internalID: -8508880339788472534
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_1
+      rect:
+        serializedVersion: 2
+        x: 24
+        y: 53
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9609eb17b35b80550800000000000000
+      internalID: 6127346559953571945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_2
+      rect:
+        serializedVersion: 2
+        x: 45
+        y: 53
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4825fb828ff74fb60800000000000000
+      internalID: 7778983160187933316
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_3
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 54
+        width: 13
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5a2820527e533e90800000000000000
+      internalID: -7047185146840602021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_4
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 53
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 51e3eee17576aeb50800000000000000
+      internalID: 6623219825880481301
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_5
+      rect:
+        serializedVersion: 2
+        x: 106
+        y: 53
+        width: 13
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 93132b7335a5962e0800000000000000
+      internalID: -2132073635120008903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_6
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 53
+        width: 9
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bca79d81d0a2eb2c0800000000000000
+      internalID: -4414044349036660021
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_7
+      rect:
+        serializedVersion: 2
+        x: 143
+        y: 53
+        width: 15
+        height: 16
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81e9c3e3f5d8d56c0800000000000000
+      internalID: -4153007841160159720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_8
+      rect:
+        serializedVersion: 2
+        x: 13
+        y: 9
+        width: 40
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 662727dad227b13e0800000000000000
+      internalID: -2081944862219668890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_9
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 9
+        width: 41
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2442b8a8bc6665f20800000000000000
+      internalID: 3411026792168498242
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_10
+      rect:
+        serializedVersion: 2
+        x: 79
+        y: 9
+        width: 41
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a427a9c0b0d16560800000000000000
+      internalID: 7305349528287650978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: suns_11
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 9
+        width: 40
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b35b03188fb124d0800000000000000
+      internalID: -3161034872281410635
       vertices: []
       indices: 
       edges: []
@@ -149,6 +424,17 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       suns_0: -8508880339788472534
+      suns_1: 6127346559953571945
+      suns_10: 7305349528287650978
+      suns_11: -3161034872281410635
+      suns_2: 7778983160187933316
+      suns_3: -7047185146840602021
+      suns_4: 6623219825880481301
+      suns_5: -2132073635120008903
+      suns_6: -4414044349036660021
+      suns_7: -4153007841160159720
+      suns_8: -2081944862219668890
+      suns_9: 3411026792168498242
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -341,6 +341,9 @@ public class SelectTeamController : MonoBehaviour
 
         int activeSlot = DatabaseManager.Instance.ActiveSaveSlot;
 
+        // Borrar managers previos de intentos abandonados
+        DatabaseManager.Instance.ClearAllManagers();
+
         var manager = new ManagerData
         {
             name = managerName,
@@ -349,26 +352,15 @@ public class SelectTeamController : MonoBehaviour
                         ? "promanager" : "manager",
             trust = 50,
             morale = 50,
-            pressure = 50
+            pressure = 50,
+            fan_confidence = 50
         };
 
         DatabaseManager.Instance.SaveManager(manager);
         Debug.Log($"[SelectTeam] Manager '{managerName}' → {_selectedTeam.name} (slot {activeSlot})");
 
-        // Guardar metadatos iniciales
-        GameSaveManager.SaveSlotInfo(new SaveSlotInfo
-        {
-            slotNumber = activeSlot,
-            exists = true,
-            managerName = managerName,
-            teamName = _selectedTeam.name,
-            teamLogo = _selectedTeam.logo,
-            seasonYear = "2025-2026",
-            currentDate = "",
-            lastPlayedRealDate = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-            currentGameDay = 0,
-            gameMode = manager.game_mode
-        });
+        // NOTA: los metadatos de la partida NO se guardan aquí.
+        // La partida solo se "crea" oficialmente al pulsar Continuar en Preseason.
 
         ScreenManager.Instance.GoTo(GameScreen.Preseason);
     }

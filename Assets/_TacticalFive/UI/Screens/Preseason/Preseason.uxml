@@ -8,13 +8,13 @@
 
         <!-- ══ HEADER ══ -->
         <ui:VisualElement name="Header" class="header">
-            <ui:Button name="BtnBack" class="btn-back" text="← VOLVER" />
+            <ui:Button name="BtnBack" class="btn-back" text="VOLVER" />
             <ui:VisualElement class="header-title">
                 <ui:Label class="header-title-white" text="PRETEMPORADA" />
                 <ui:Label class="header-title-gold"  text="2025" />
                 <ui:Label class="header-title-white" text="· PARTIDOS AMISTOSOS" />
             </ui:VisualElement>
-            <ui:Button name="BtnContinue" class="btn-continue" text="CONTINUAR →" />
+            <ui:Button name="BtnContinue" class="btn-continue" text="CONTINUAR" />
         </ui:VisualElement>
 
         <!-- ══ INFO BAR ══ -->

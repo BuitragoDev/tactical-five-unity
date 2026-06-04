@@ -36,6 +36,7 @@ public class PreseasonController : MonoBehaviour
 
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites120 = new();
 
     // Fechas en septiembre
     private readonly string[] _dates = {
@@ -64,7 +65,13 @@ public class PreseasonController : MonoBehaviour
         LoadData();
         RegisterCallbacks();
         BuildTeamsGrid();
+
+        // Reset: cada vez que se muestra Preseason se empieza de cero
+        _games.Clear();
+        _isHome = true;
+        SetLocation(true);
         RefreshSlots();
+        UpdateTeamsGridAvailability();
         UpdateInfoBar();
         UpdateContinueButton();
     }
@@ -84,9 +91,13 @@ public class PreseasonController : MonoBehaviour
 
     void LoadData()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
-        foreach (var s in logos)
+        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
+        foreach (var s in logos80)
             _logoSprites[s.name] = s;
+
+        var logos120 = Resources.LoadAll<Sprite>("Teams/Logos/120x120/");
+        foreach (var s in logos120)
+            _logoSprites120[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
@@ -187,18 +198,34 @@ public class PreseasonController : MonoBehaviour
         num.AddToClassList("game-slot-number--filled");
         num.text = $"PARTIDO {index + 1}";
 
-        // Logo rival
+        // Contenedor de 2 columnas
+        var body = new VisualElement();
+        body.AddToClassList("game-slot-body");
+
+        // ── Columna izquierda: logo + nombre
+        var leftCol = new VisualElement();
+        leftCol.AddToClassList("game-slot-left");
+
         var logo = new VisualElement();
         logo.AddToClassList("game-slot-logo");
-        if (rival != null && _logoSprites.TryGetValue(rival.logo, out var sprite))
+        if (rival != null && _logoSprites120.TryGetValue(rival.logo, out var sprite))
             logo.style.backgroundImage = new StyleBackground(sprite);
 
-        // Nombre rival
         var name = new Label();
         name.AddToClassList("game-slot-rival");
         name.text = rival?.name.ToUpper() ?? "???";
 
-        // Badge local/visitante
+        leftCol.Add(logo);
+        leftCol.Add(name);
+
+        // ── Columna derecha: fecha, badge, botón borrar
+        var rightCol = new VisualElement();
+        rightCol.AddToClassList("game-slot-right");
+
+        var date = new Label();
+        date.AddToClassList("game-slot-date");
+        date.text = _dates[index];
+
         var location = new Label();
         location.AddToClassList("game-slot-location");
         if (game.is_home == 1)
@@ -212,17 +239,11 @@ public class PreseasonController : MonoBehaviour
             location.text = "VISITANTE";
         }
 
-        // Fecha
-        var date = new Label();
-        date.AddToClassList("game-slot-date");
-        date.text = _dates[index];
-
-        // Botón quitar
         var btnRemove = new Button();
         btnRemove.AddToClassList("btn-remove-slot");
-        btnRemove.text = "✕";
+        btnRemove.text = "BORRAR";
         int captured = index;
-        btnRemove.RegisterCallback<ClickEvent>(_ => RemoveGame(captured));
+        btnRemove.clicked += () => RemoveGame(captured);
         if (CursorManager.Instance != null)
         {
             btnRemove.RegisterCallback<MouseEnterEvent>(_ =>
@@ -231,12 +252,15 @@ public class PreseasonController : MonoBehaviour
                 CursorManager.Instance.SetDefaultCursor());
         }
 
+        rightCol.Add(date);
+        rightCol.Add(location);
+        rightCol.Add(btnRemove);
+
+        body.Add(leftCol);
+        body.Add(rightCol);
+
         slot.Add(num);
-        slot.Add(logo);
-        slot.Add(name);
-        slot.Add(location);
-        slot.Add(date);
-        slot.Add(btnRemove);
+        slot.Add(body);
 
         return slot;
     }
@@ -365,6 +389,23 @@ public class PreseasonController : MonoBehaviour
 
     void OnContinue()
     {
+        // === COMMIT: la partida se crea oficialmente al pulsar Continuar en Preseason ===
+        int activeSlot = DatabaseManager.Instance.ActiveSaveSlot;
+        GameSaveManager.SaveSlotInfo(new SaveSlotInfo
+        {
+            slotNumber = activeSlot,
+            exists = true,
+            managerName = _manager.name,
+            teamName = _myTeam.name,
+            teamLogo = _myTeam.logo,
+            seasonYear = "2025-2026",
+            currentDate = "",
+            lastPlayedRealDate = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+            currentGameDay = 0,
+            gameMode = _manager.game_mode
+        });
+        Debug.Log($"[Preseason] Partida creada en slot {activeSlot}: {_manager.name} → {_myTeam.name}");
+
         // 1. Crear temporada si no existe
         var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         if (season == null)
@@ -395,6 +436,22 @@ public class PreseasonController : MonoBehaviour
             DatabaseManager.Instance.UpdateSeason(season);
 
             Debug.Log($"[Preseason] Calendario generado: {count} partidos.");
+
+            // Welcome message (first time only)
+            var welcomeMsg = new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 1,
+                sender_id = 0,
+                title = $"Bienvenido a {_myTeam.name}",
+                body = $"Hola {_manager.name}, bienvenido como nuevo entrenador de {_myTeam.name}. La directiva confía en ti para llevar al equipo lo más alto posible. ¡Buena suerte en esta temporada!",
+                game_day = 0,
+                game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
+                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                is_read = 0
+            };
+            DatabaseManager.Instance.AddMessage(welcomeMsg);
         }
 
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);

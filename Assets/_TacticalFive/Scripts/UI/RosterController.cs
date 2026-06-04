@@ -255,14 +255,7 @@ public class RosterController : MonoBehaviour
         if (_season != null)
         {
             _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
-            try
-            {
-                var next = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-                _headerDate.text = next != null
-                    ? System.DateTime.Parse(next.game_date).ToString("dd/MM/yyyy")
-                    : "";
-            }
-            catch { _headerDate.text = ""; }
+            _headerDate.text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";

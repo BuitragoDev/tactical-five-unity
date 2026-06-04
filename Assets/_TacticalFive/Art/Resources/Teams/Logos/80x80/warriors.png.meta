@@ -116,9 +116,9 @@ TextureImporter:
       name: warriors_0
       rect:
         serializedVersion: 2
-        x: 4
+        x: 5
         y: 0
-        width: 72
+        width: 71
         height: 80
       alignment: 0
       pivot: {x: 0, y: 0}

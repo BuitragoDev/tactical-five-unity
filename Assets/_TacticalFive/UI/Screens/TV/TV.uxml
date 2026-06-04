@@ -70,21 +70,20 @@
             <!-- TV CONTENT -->
             <ui:VisualElement class="tv-content">
 
-                <!-- TV deals -->
-                <ui:VisualElement class="panel panel-tv">
-                    <ui:VisualElement class="panel-header">
-                        <ui:Label class="panel-title" text="ACUERDOS DE TELEVISIÓN" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="TVDealsBody" class="tv-deals" />
+                <!-- Current TV banner -->
+                <ui:VisualElement name="CurrentTVBanner" class="current-tv-banner" style="display:none;">
+                    <ui:Label class="current-tv-label" text="CONTRATO ACTUAL" />
+                    <ui:Label name="CurrentTVName" class="current-tv-name" text="" />
                 </ui:VisualElement>
 
-                <!-- TV schedule -->
-                <ui:VisualElement class="panel panel-tv">
-                    <ui:VisualElement class="panel-header">
-                        <ui:Label class="panel-title" text="PRÓXIMOS PARTIDOS EN TV" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="TVScheduleBody" class="tv-schedule" />
-                </ui:VisualElement>
+                <!-- Title -->
+                <ui:Label class="tv-page-title" text="TELEVISIÓN" />
+
+                <!-- Cards container -->
+                <ui:VisualElement name="TVCardsContainer" class="tv-cards-container" />
+
+                <!-- Info message -->
+                <ui:Label name="TVInfoMessage" class="tv-info-message" text="Los contratos con cadenas de televisión solo se pueden firmar en el mes de octubre." />
 
             </ui:VisualElement>
 

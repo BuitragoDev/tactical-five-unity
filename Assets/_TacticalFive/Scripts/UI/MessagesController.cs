@@ -10,11 +10,6 @@ public class MessagesController : MonoBehaviour
 
     private Button _btnAction;
     private VisualElement _messagesBody;
-    private VisualElement _messageDetail;
-    private Button _btnBackToInbox;
-    private Label _messageSubject;
-    private Label _messageDate;
-    private Label _messageBody;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -42,11 +37,6 @@ public class MessagesController : MonoBehaviour
     {
         _btnAction = _root.Q<Button>("BtnAction");
         _messagesBody = _root.Q<VisualElement>("MessagesBody");
-        _messageDetail = _root.Q<VisualElement>("MessageDetail");
-        _btnBackToInbox = _root.Q<Button>("BtnBackToInbox");
-        _messageSubject = _root.Q<Label>("MessageSubject");
-        _messageDate = _root.Q<Label>("MessageDate");
-        _messageBody = _root.Q<Label>("MessageBody");
     }
 
     void LoadData()
@@ -63,7 +53,6 @@ public class MessagesController : MonoBehaviour
     {
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
-        _btnBackToInbox?.RegisterCallback<ClickEvent>(_ => ShowInbox());
         _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.MainMenu));
     }
@@ -136,9 +125,7 @@ public class MessagesController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
@@ -148,68 +135,80 @@ public class MessagesController : MonoBehaviour
     {
         _messagesBody.Clear();
 
-        foreach (var message in _messages)
+        if (_messages == null || _messages.Count == 0)
         {
-            var item = new VisualElement();
-            item.AddToClassList("message-item");
+            var empty = new VisualElement();
+            empty.AddToClassList("messages-empty");
+            var lbl = new Label("No hay mensajes en la bandeja de entrada.");
+            lbl.AddToClassList("messages-empty-text");
+            empty.Add(lbl);
+            _messagesBody.Add(empty);
+            return;
+        }
+
+        // Sort by date descending (newest first)
+        var sorted = _messages.OrderByDescending(m => m.created_at).ToList();
+
+        foreach (var message in sorted)
+        {
+            var card = CreateMessageCard(message);
+            _messagesBody.Add(card);
+
+            // Mark as read when viewing
             if (message.is_read == 0)
-                item.AddToClassList("message-item--unread");
-
-            var senderLbl = new Label();
-            senderLbl.AddToClassList("message-sender");
-            senderLbl.text = GetSenderName(message.sender_type, message.sender_id);
-
-            var subjectLbl = new Label();
-            subjectLbl.AddToClassList("message-subject-preview");
-            subjectLbl.text = message.title;
-
-            var dateLbl = new Label();
-            dateLbl.AddToClassList("message-date-preview");
-            dateLbl.text = System.DateTime.Parse(message.created_at).ToString("dd/MM");
-
-            item.Add(senderLbl);
-            item.Add(subjectLbl);
-            item.Add(dateLbl);
-
-            var msgCopy = message;
-            item.RegisterCallback<ClickEvent>(_ => OpenMessage(msgCopy));
-
-            _messagesBody.Add(item);
+                DatabaseManager.Instance.MarkMessageRead(message.id);
         }
     }
 
-    void OpenMessage(MessageData message)
+    VisualElement CreateMessageCard(MessageData message)
     {
+        var card = new VisualElement();
+        card.AddToClassList("message-card");
         if (message.is_read == 0)
+            card.AddToClassList("message-card--unread");
+
+        // Header: title + delete button
+        var header = new VisualElement();
+        header.AddToClassList("message-card-header");
+
+        var title = new Label(message.title);
+        title.AddToClassList("message-card-title");
+        header.Add(title);
+
+        var deleteBtn = new Button();
+        deleteBtn.AddToClassList("message-card-delete");
+        deleteBtn.text = "🗑";
+        var msgId = message.id;
+        deleteBtn.clicked += () => DeleteMessage(msgId);
+        header.Add(deleteBtn);
+
+        card.Add(header);
+
+        // Date
+        var date = new Label();
+        date.AddToClassList("message-card-date");
+        try
         {
-            DatabaseManager.Instance.MarkMessageRead(message.id);
+            date.text = System.DateTime.Parse(message.game_date).ToString("dd/MM/yyyy");
         }
+        catch
+        {
+            date.text = message.game_date ?? "";
+        }
+        card.Add(date);
 
-        _messageSubject.text = message.title;
-        _messageDate.text = System.DateTime.Parse(message.created_at).ToString("dd/MM/yyyy HH:mm");
-        _messageBody.text = message.body;
+        // Body
+        var body = new Label(message.body);
+        body.AddToClassList("message-card-body");
+        card.Add(body);
 
-        _messagesBody.style.display = DisplayStyle.None;
-        _messageDetail.style.display = DisplayStyle.Flex;
+        return card;
     }
 
-    void ShowInbox()
+    void DeleteMessage(int messageId)
     {
-        _messagesBody.style.display = DisplayStyle.Flex;
-        _messageDetail.style.display = DisplayStyle.None;
+        DatabaseManager.Instance.DeleteMessage(messageId);
         LoadData();
         BuildMessages();
-    }
-
-    string GetSenderName(int senderType, int senderId)
-    {
-        return senderType switch
-        {
-            1 => "SISTEMA",
-            2 => "GM",
-            3 => "PRENSA",
-            4 => "AGENTE",
-            _ => "DESCONOCIDO"
-        };
     }
 }

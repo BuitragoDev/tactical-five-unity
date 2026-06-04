@@ -2,34 +2,7 @@
     <Style src="project://database/Assets/_TacticalFive/UI/Screens/Dashboard/Dashboard.uss?fileID=7433441132597879392&amp;guid=4ea72934f300e2fc78940e1d76d7e1a8&amp;type=3#Dashboard"/>
     <Style src="project://database/Assets/_TacticalFive/UI/Screens/GameResults/GameResults.uss?fileID=7433441132597879392&amp;guid=c01632b19231a1c8db8da050270ad2bc&amp;type=3#GameResults"/>
     <ui:VisualElement name="GameResultsRoot" class="gresults-root">
-        <ui:VisualElement name="Sidebar" class="sidebar">
-            <ui:VisualElement class="sidebar-logo">
-                <ui:Label text="TF" class="sidebar-logo-icon"/>
-                <ui:Label text="TACTICAL" class="sidebar-logo-text"/>
-                <ui:Label text="FIVE" class="sidebar-logo-text-gold"/>
-            </ui:VisualElement>
-            <ui:VisualElement class="sidebar-nav">
-                <ui:Button name="NavDashboard" text="INICIO" class="nav-item nav-item--active"/>
-                <ui:Button name="NavRoster" text="PLANTILLA" class="nav-item"/>
-                <ui:Button name="NavCalendar" text="CALENDARIO" class="nav-item"/>
-                <ui:Button name="NavStandings" text="CLASIFICACIÓN" class="nav-item"/>
-                <ui:Button name="NavPalmares" text="PALMARES" class="nav-item"/>
-                <ui:Button name="NavResults" text="RESULTADOS" class="nav-item"/>
-                <ui:Button name="NavPlayoffs" text="PLAYOFFS" class="nav-item"/>
-                <ui:Button name="NavStats" text="ESTADÍSTICAS" class="nav-item"/>
-                <ui:Button name="NavRecords" text="RECORDS" class="nav-item"/>
-                <ui:Button name="NavMarket" text="MERCADO" class="nav-item"/>
-                <ui:Button name="NavFinances" text="FINANZAS" class="nav-item"/>
-                <ui:Button name="NavSponsors" text="PATROCINADORES" class="nav-item"/>
-                <ui:Button name="NavTV" text="TELEVISIÓN" class="nav-item"/>
-                <ui:Button name="NavArena" text="PABELLÓN" class="nav-item"/>
-                <ui:Button name="NavMessages" text="MENSAJES" class="nav-item"/>
-            </ui:VisualElement>
-            <ui:VisualElement class="sidebar-footer">
-                <ui:Button name="BtnReset" text="  REINICIAR PARTIDA" class="btn-reset"/>
-                <ui:Label text="v0.1.0 · Alpha" class="sidebar-version"/>
-            </ui:VisualElement>
-        </ui:VisualElement>
+       
         <ui:VisualElement class="gresults-main">
             <ui:VisualElement name="TopHeader" class="top-header">
                 <ui:VisualElement class="header-left">

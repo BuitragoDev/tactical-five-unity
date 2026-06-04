@@ -9,16 +9,20 @@ public class RecordsController : MonoBehaviour
     private VisualElement _root;
 
     private Button _btnAction;
-    private VisualElement _historicalBody;
-    private VisualElement _teamRecordsBody;
+    private Button _tabTeam;
+    private Button _tabSeason;
+    private Button _tabHistorical;
+    private VisualElement _recordsBody;
+    private VisualElement _headerTeamCol;
 
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
-    private List<HistoricalRecordData> _historicalRecords;
-    private List<TeamRecordData> _teamRecords;
+    private List<TeamData> _allTeams;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+
+    private string _currentFilter = "team";
 
     private static readonly Dictionary<string, string> StatLabels = new()
     {
@@ -31,6 +35,11 @@ public class RecordsController : MonoBehaviour
         { "fg3m", "TRIPLES" },
         { "ftm", "TIROS LIBRES" },
         { "turnovers", "PÉRDIDAS" }
+    };
+
+    private static readonly string[] StatOrder = {
+        "points", "rebounds", "assists", "steals", "blocks",
+        "fgm", "fg3m", "ftm", "turnovers"
     };
 
     void OnEnable()
@@ -53,13 +62,16 @@ public class RecordsController : MonoBehaviour
     void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
-        _historicalBody = _root.Q<VisualElement>("HistoricalBody");
-        _teamRecordsBody = _root.Q<VisualElement>("TeamRecordsBody");
+        _tabTeam = _root.Q<Button>("TabTeam");
+        _tabSeason = _root.Q<Button>("TabSeason");
+        _tabHistorical = _root.Q<Button>("TabHistorical");
+        _recordsBody = _root.Q<VisualElement>("RecordsBody");
+        _headerTeamCol = _root.Q<VisualElement>("HeaderTeamCol");
     }
 
     void LoadData()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
@@ -67,8 +79,7 @@ public class RecordsController : MonoBehaviour
 
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        _historicalRecords = DatabaseManager.Instance.GetAllHistoricalRecords();
-        _teamRecords = DatabaseManager.Instance.GetTeamRecords(_myTeam.id);
+        _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
 
     void RegisterCallbacks()
@@ -77,6 +88,10 @@ public class RecordsController : MonoBehaviour
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
         _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+
+        _tabTeam?.RegisterCallback<ClickEvent>(_ => SetFilter("team"));
+        _tabSeason?.RegisterCallback<ClickEvent>(_ => SetFilter("season"));
+        _tabHistorical?.RegisterCallback<ClickEvent>(_ => SetFilter("historical"));
     }
 
     void RegisterNavButtons()
@@ -111,11 +126,24 @@ public class RecordsController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Messages));
     }
 
+    void SetFilter(string filter)
+    {
+        _currentFilter = filter;
+        _tabTeam.RemoveFromClassList("records-tab--active");
+        _tabSeason.RemoveFromClassList("records-tab--active");
+        _tabHistorical.RemoveFromClassList("records-tab--active");
+
+        if (filter == "team") _tabTeam.AddToClassList("records-tab--active");
+        else if (filter == "season") _tabSeason.AddToClassList("records-tab--active");
+        else if (filter == "historical") _tabHistorical.AddToClassList("records-tab--active");
+
+        Refresh();
+    }
+
     void Refresh()
     {
         RefreshHeader();
-        BuildHistoricalRecords();
-        BuildTeamRecords();
+        BuildRecords();
     }
 
     void RefreshHeader()
@@ -144,105 +172,128 @@ public class RecordsController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            _root.Q<Label>("HeaderDate").text = nextGame != null
-                ? System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy") : "";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
         _btnAction.text = "← DASHBOARD";
     }
 
-    void BuildHistoricalRecords()
+    void BuildRecords()
     {
-        _historicalBody.Clear();
+        _recordsBody.Clear();
 
-        foreach (var record in _historicalRecords)
-        {
-            var row = new VisualElement();
-            row.AddToClassList("record-row");
+        _headerTeamCol.style.display = DisplayStyle.Flex;
 
-            var statLbl = new Label();
-            statLbl.AddToClassList("record-stat");
-            statLbl.text = StatLabels.TryGetValue(record.stat_type, out var label) ? label : record.stat_type;
-
-            var valLbl = new Label();
-            valLbl.AddToClassList("record-value");
-            valLbl.text = record.value.ToString();
-
-            var playerLbl = new Label();
-            playerLbl.AddToClassList("record-player");
-            playerLbl.text = record.player_name;
-
-            var teamLbl = new Label();
-            teamLbl.AddToClassList("record-team");
-            teamLbl.text = record.team_abbreviation;
-
-            var dateLbl = new Label();
-            dateLbl.AddToClassList("record-date");
-            try
-            {
-                var dt = System.DateTime.Parse(record.game_date);
-                dateLbl.text = dt.ToString("dd/MM/yyyy");
-            }
-            catch
-            {
-                dateLbl.text = record.game_date;
-            }
-
-            row.Add(statLbl);
-            row.Add(valLbl);
-            row.Add(playerLbl);
-            row.Add(teamLbl);
-            row.Add(dateLbl);
-
-            _historicalBody.Add(row);
-        }
+        if (_currentFilter == "team")
+            BuildTeamRecords();
+        else if (_currentFilter == "season")
+            BuildSeasonRecords();
+        else
+            BuildHistoricalRecords();
     }
 
     void BuildTeamRecords()
     {
-        _teamRecordsBody.Clear();
+        if (_myTeam == null) return;
+        var records = DatabaseManager.Instance.GetTeamRecords(_myTeam.id);
+        var byStat = records.ToDictionary(r => r.stat_type, r => r);
 
-        foreach (var record in _teamRecords)
+        int count = 0;
+        foreach (var stat in StatOrder)
         {
-            var row = new VisualElement();
-            row.AddToClassList("record-row");
+            if (!byStat.TryGetValue(stat, out var rec)) continue;
+            var row = CreateRow(stat, rec.player_name, rec.value.ToString(), rec.game_date, null);
+            _recordsBody.Add(row);
+            count++;
+        }
 
-            var statLbl = new Label();
-            statLbl.AddToClassList("record-stat");
-            statLbl.text = StatLabels.TryGetValue(record.stat_type, out var label) ? label : record.stat_type;
+        if (count == 0) ShowEmpty("No hay récords del equipo todavía.");
+    }
 
-            var valLbl = new Label();
-            valLbl.AddToClassList("record-value");
-            valLbl.text = record.value.ToString();
+    void BuildSeasonRecords()
+    {
+        if (_season == null) return;
+        var records = DatabaseManager.Instance.GetCurrentSeasonRecords(_season.id);
+        var byStat = records.ToDictionary(r => r.stat_type, r => r);
 
-            var playerLbl = new Label();
-            playerLbl.AddToClassList("record-player");
-            playerLbl.text = record.player_name;
+        int count = 0;
+        foreach (var stat in StatOrder)
+        {
+            if (!byStat.TryGetValue(stat, out var rec)) continue;
+            var team = _allTeams?.Find(t => t.id == rec.team_id);
+            var row = CreateRow(stat, rec.player_name, rec.value.ToString(), rec.game_date, team);
+            _recordsBody.Add(row);
+            count++;
+        }
 
+        if (count == 0) ShowEmpty("No hay récords de temporada todavía. Juega partidos para ver récords.");
+    }
+
+    void BuildHistoricalRecords()
+    {
+        var records = DatabaseManager.Instance.GetAllHistoricalRecords();
+        var byStat = records.ToDictionary(r => r.stat_type, r => r);
+
+        foreach (var stat in StatOrder)
+        {
+            if (!byStat.TryGetValue(stat, out var rec)) continue;
+            var team = _allTeams?.Find(t => t.abbreviation == rec.team_abbreviation);
+            var row = CreateRow(stat, rec.player_name, rec.value.ToString(), rec.game_date, team);
+            _recordsBody.Add(row);
+        }
+    }
+
+    VisualElement CreateRow(string statType, string playerName, string value, string gameDate, TeamData team)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("record-row");
+
+        var statLbl = new Label();
+        statLbl.AddToClassList("record-stat");
+        statLbl.text = StatLabels.TryGetValue(statType, out var label) ? label : statType;
+        row.Add(statLbl);
+
+        var valLbl = new Label();
+        valLbl.AddToClassList("record-value");
+        valLbl.text = value;
+        row.Add(valLbl);
+
+        var playerLbl = new Label();
+        playerLbl.AddToClassList("record-player");
+        playerLbl.text = playerName;
+        row.Add(playerLbl);
+
+        {
             var teamLbl = new Label();
             teamLbl.AddToClassList("record-team");
-            teamLbl.text = _myTeam.abbreviation;
-
-            var dateLbl = new Label();
-            dateLbl.AddToClassList("record-date");
-            try
-            {
-                var dt = System.DateTime.Parse(record.game_date);
-                dateLbl.text = dt.ToString("dd/MM/yyyy");
-            }
-            catch
-            {
-                dateLbl.text = record.game_date;
-            }
-
-            row.Add(statLbl);
-            row.Add(valLbl);
-            row.Add(playerLbl);
+            teamLbl.text = team?.name?.ToUpper() ?? _myTeam?.name?.ToUpper() ?? "";
             row.Add(teamLbl);
-            row.Add(dateLbl);
-
-            _teamRecordsBody.Add(row);
         }
+
+        var dateLbl = new Label();
+        dateLbl.AddToClassList("record-date");
+        try
+        {
+            var dt = System.DateTime.Parse(gameDate);
+            dateLbl.text = dt.ToString("dd/MM/yyyy");
+        }
+        catch
+        {
+            dateLbl.text = gameDate;
+        }
+        row.Add(dateLbl);
+
+        return row;
+    }
+
+    void ShowEmpty(string message)
+    {
+        var empty = new VisualElement();
+        empty.AddToClassList("records-empty");
+        var lbl = new Label();
+        lbl.AddToClassList("records-empty-label");
+        lbl.text = message;
+        empty.Add(lbl);
+        _recordsBody.Add(empty);
     }
 }

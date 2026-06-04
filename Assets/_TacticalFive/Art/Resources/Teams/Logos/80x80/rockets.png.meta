@@ -116,10 +116,10 @@ TextureImporter:
       name: rockets_0
       rect:
         serializedVersion: 2
-        x: 6
-        y: 0
-        width: 68
-        height: 80
+        x: 8
+        y: 1
+        width: 65
+        height: 78
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

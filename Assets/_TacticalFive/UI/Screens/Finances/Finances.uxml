@@ -70,28 +70,97 @@
             <!-- FINANCES CONTENT -->
             <ui:VisualElement class="finances-content">
 
-                <!-- Summary cards -->
+                <!-- 4 Summary Boxes -->
                 <ui:VisualElement class="finances-summary">
-                    <ui:VisualElement class="finance-card">
-                        <ui:Label class="finance-card-label" text="INGRESOS TOTALES" />
-                        <ui:Label name="TotalIncome" class="finance-card-value finance-card-value--income" text="$0M" />
+                    <ui:VisualElement class="finance-summary-box">
+                        <ui:Label class="finance-summary-label" text="PRESUPUESTO" />
+                        <ui:Label name="SummaryBudget" class="finance-summary-value" text="" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="finance-card">
-                        <ui:Label class="finance-card-label" text="GASTOS TOTALES" />
-                        <ui:Label name="TotalExpenses" class="finance-card-value finance-card-value--expense" text="$0M" />
+                    <ui:VisualElement class="finance-summary-box">
+                        <ui:Label class="finance-summary-label" text="NÓMINA ANUAL" />
+                        <ui:Label name="SummaryAnnualPayroll" class="finance-summary-value" text="" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="finance-card">
-                        <ui:Label class="finance-card-label" text="BALANCE" />
-                        <ui:Label name="Balance" class="finance-card-value" text="$0M" />
+                    <ui:VisualElement class="finance-summary-box">
+                        <ui:Label class="finance-summary-label" text="NÓMINA MENSUAL" />
+                        <ui:Label name="SummaryMonthlyPayroll" class="finance-summary-value" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="finance-summary-box">
+                        <ui:Label class="finance-summary-label" text="BALANCE NETO" />
+                        <ui:Label name="SummaryNetBalance" class="finance-summary-value" text="" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- Finance records -->
-                <ui:ScrollView class="finances-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-                    <ui:VisualElement name="FinanceRecordsBody" class="finances-body" />
-                </ui:ScrollView>
+                <!-- Tabs -->
+                <ui:VisualElement class="finances-tabs">
+                    <ui:Button name="TabTickets"      class="finances-tab finances-tab--active" text="🎫  TAQUILLA" />
+                    <ui:Button name="TabIncome"       class="finances-tab" text="💰  INGRESOS" />
+                    <ui:Button name="TabExpenses"     class="finances-tab" text="💸  GASTOS" />
+                    <ui:Button name="TabChart"        class="finances-tab" text="📊  GRÁFICO" />
+                </ui:VisualElement>
+
+                <!-- Tab Content: TAQUILLA -->
+                <ui:VisualElement name="PanelTickets" class="finances-panel">
+                    <ui:VisualElement class="finances-panel-header">
+                        <ui:Label class="finances-panel-title" text="CONFIGURACIÓN DE TAQUILLA" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="tickets-config">
+                        <!-- Precio Entrada -->
+                        <ui:VisualElement class="ticket-config-col">
+                            <ui:Label class="ticket-config-label" text="PRECIO ENTRADA INDIVIDUAL" />
+                            <ui:VisualElement name="TicketPriceGrid" class="price-grid" />
+                        </ui:VisualElement>
+                        <!-- Precio Abono -->
+                        <ui:VisualElement class="ticket-config-col">
+                            <ui:Label class="ticket-config-label" text="PRECIO ABONO TEMPORADA" />
+                            <ui:VisualElement name="SubscriptionPriceGrid" class="price-grid" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Tab Content: INGRESOS -->
+                <ui:VisualElement name="PanelIncome" class="finances-panel" style="display:none;">
+                    <ui:VisualElement class="finances-panel-header">
+                        <ui:Label class="finances-panel-title" text="INGRESOS TOTALES" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="IncomeTable" class="finances-table" />
+                    <ui:VisualElement class="finances-total-row">
+                        <ui:Label class="finances-total-label" text="TOTAL INGRESOS" />
+                        <ui:Label name="TotalIncomeValue" class="finances-total-value finances-total-value--income" text="$0" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Tab Content: GASTOS -->
+                <ui:VisualElement name="PanelExpenses" class="finances-panel" style="display:none;">
+                    <ui:VisualElement class="finances-panel-header">
+                        <ui:Label class="finances-panel-title" text="GASTOS TOTALES" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ExpensesTable" class="finances-table" />
+                    <ui:VisualElement class="finances-total-row">
+                        <ui:Label class="finances-total-label" text="TOTAL GASTOS" />
+                        <ui:Label name="TotalExpensesValue" class="finances-total-value finances-total-value--expense" text="$0" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Tab Content: GRÁFICO -->
+                <ui:VisualElement name="PanelChart" class="finances-panel" style="display:none;">
+                    <ui:VisualElement class="finances-panel-header">
+                        <ui:Label class="finances-panel-title" text="BALANCE MENSUAL" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="ChartContainer" class="chart-container">
+                        <ui:VisualElement name="ChartBars" class="chart-bars" />
+                        <ui:VisualElement name="ChartLabels" class="chart-labels" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="chart-legend">
+                        <ui:VisualElement class="chart-legend-item">
+                            <ui:VisualElement class="chart-legend-dot chart-legend-dot--income" />
+                            <ui:Label class="chart-legend-text" text="Superávit" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="chart-legend-item">
+                            <ui:VisualElement class="chart-legend-dot chart-legend-dot--expense" />
+                            <ui:Label class="chart-legend-text" text="Déficit" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
 
             </ui:VisualElement>
 

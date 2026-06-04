@@ -21,101 +21,155 @@
 .sponsors-content {
     flex-direction: column;
     flex-grow: 1;
-    padding: 20px;
+    padding: 30px 40px;
     min-height: 0;
     overflow: auto;
+    align-items: center;
 }
 
-.panel-sponsors {
-    margin-bottom: 20px;
-}
-
-.sponsors-current {
-    flex-direction: column;
-    padding: 16px;
-}
-
-.sponsor-current-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 20px;
-    color: rgb(208, 216, 232);
-    margin-bottom: 8px;
-}
-
-.sponsor-current-details {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
-    color: rgb(85, 102, 119);
-    margin-bottom: 4px;
-}
-
-.sponsor-current-value {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(39, 174, 96);
-}
-
-.sponsors-list {
-    flex-direction: column;
-}
-
-.sponsor-item {
+/* ── Current Sponsor Banner ── */
+.current-sponsor-banner {
     flex-direction: row;
     align-items: center;
-    padding: 16px;
+    justify-content: center;
+    width: 100%;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
-    border-radius: 2px;
-    margin-bottom: 8px;
+    border-radius: 4px;
+    padding: 14px 20px;
+    margin-bottom: 24px;
 }
 
-.sponsor-info {
-    flex-direction: column;
-    flex-grow: 1;
-    margin-right: 16px;
-}
-
-.sponsor-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
-    margin-bottom: 4px;
-}
-
-.sponsor-details {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
-    color: rgb(85, 102, 119);
-}
-
-.sponsor-value {
+.current-sponsor-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 14px;
-    color: rgb(39, 174, 96);
-    width: 100px;
-    flex-shrink: 0;
-    -unity-text-align: middle-right;
+    color: rgb(248, 196, 64);
+    letter-spacing: 2px;
+    margin-right: 12px;
 }
 
-.btn-sign-sponsor {
+.current-sponsor-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
+    font-size: 18px;
     color: rgb(208, 216, 232);
-    background-color: rgb(248, 196, 64);
-    border-width: 0;
-    border-radius: 2px;
-    padding: 8px 16px;
-    min-width: 120px;
+}
+
+/* ── Page Title ── */
+.sponsors-page-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 28px;
+    color: rgb(208, 216, 232);
+    letter-spacing: 2px;
+    margin-bottom: 30px;
+}
+
+/* ── Cards Container ── */
+.sponsors-cards-container {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 40px;
+    width: 100%;
+}
+
+/* ── Sponsor Card ── */
+.sponsor-card {
+    flex-direction: column;
+    width: 360px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 4px;
+    padding: 28px;
+    align-items: center;
+    margin: 0 16px;
+}
+
+.sponsor-card-logo {
+    width: 300px;
+    height: 279px;
+    margin-bottom: 16px;
+    border-radius: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.sponsor-card-logo--grayscale {
+    -unity-background-image-tint-color: rgb(80, 80, 80);
+}
+
+.sponsor-card-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(208, 216, 232);
+    margin-bottom: 20px;
     -unity-text-align: middle-center;
 }
 
-.btn-sign-sponsor:hover {
+.sponsor-card-row {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+}
+
+.sponsor-card-row:last-child {
+    border-bottom-width: 0;
+}
+
+.sponsor-card-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(85, 102, 119);
+}
+
+.sponsor-card-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+}
+
+/* ── Contract Button ── */
+.sponsor-card-btn {
+    margin-top: 20px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(22, 26, 36);
+    background-color: rgb(248, 196, 64);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 12px 0;
+    width: 100%;
+    -unity-text-align: middle-center;
+}
+
+.sponsor-card-btn:hover {
     background-color: rgb(255, 210, 80);
 }
 
-.btn-sign-sponsor:active {
+.sponsor-card-btn:active {
     background-color: rgb(230, 175, 50);
+}
+
+.sponsor-card-btn--disabled {
+    background-color: rgb(60, 60, 60);
+    color: rgb(120, 120, 120);
+}
+
+.sponsor-card-btn--disabled:hover {
+    background-color: rgb(60, 60, 60);
+}
+
+/* ── Info Message ── */
+.sponsors-info-message {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(85, 102, 119);
+    margin-top: 30px;
+    -unity-text-align: middle-center;
 }

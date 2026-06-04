@@ -1,200 +1,147 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:uie="UnityEditor.UIElements"
-         editor-extension-mode="False">
-
-    <Style src="Palmares.uss" />
-    <Style src="../Dashboard/Dashboard.uss" />
-
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Palmares/Palmares.uss?fileID=7433441132597879392&amp;guid=bcb1c02da2808c2d3adecb6499a1fffc&amp;type=3#Palmares"/>
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Dashboard/Dashboard.uss?fileID=7433441132597879392&amp;guid=4ea72934f300e2fc78940e1d76d7e1a8&amp;type=3#Dashboard"/>
     <ui:VisualElement name="PalmaresRoot" class="palmares-root">
-
-        <!-- ══ SIDEBAR ══ -->
         <ui:VisualElement name="Sidebar" class="sidebar">
             <ui:VisualElement class="sidebar-logo">
-                <ui:Label class="sidebar-logo-icon" text="TF" />
-                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
-                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+                <ui:Label text="TF" class="sidebar-logo-icon"/>
+                <ui:Label text="TACTICAL" class="sidebar-logo-text"/>
+                <ui:Label text="FIVE" class="sidebar-logo-text-gold"/>
             </ui:VisualElement>
             <ui:VisualElement class="sidebar-nav">
-                <ui:Button name="NavDashboard"  class="nav-item" text="INICIO" />
-                <ui:Button name="NavRoster"     class="nav-item" text="PLANTILLA" />
-                <ui:Button name="NavCalendar"   class="nav-item" text="CALENDARIO" />
-                <ui:Button name="NavStandings"  class="nav-item" text="CLASIFICACIÓN" />
-                <ui:Button name="NavPalmares"   class="nav-item nav-item--active" text="PALMARES" />
-                <ui:Button name="NavResults"    class="nav-item" text="RESULTADOS" />
-                <ui:Button name="NavPlayoffs"   class="nav-item" text="PLAYOFFS" />
-                <ui:Button name="NavStats"      class="nav-item" text="ESTADÍSTICAS" />
-                <ui:Button name="NavRecords"    class="nav-item" text="RECORDS" />
-                <ui:Button name="NavMarket"     class="nav-item" text="MERCADO" />
-                <ui:Button name="NavFinances"   class="nav-item" text="FINANZAS" />
-                <ui:Button name="NavSponsors"   class="nav-item" text="PATROCINADORES" />
-                <ui:Button name="NavTV"         class="nav-item" text="TELEVISIÓN" />
-                <ui:Button name="NavArena"      class="nav-item" text="PABELLÓN" />
-                <ui:Button name="NavMessages"   class="nav-item" text="MENSAJES" />
+                <ui:Button name="NavDashboard" text="INICIO" class="nav-item"/>
+                <ui:Button name="NavRoster" text="PLANTILLA" class="nav-item"/>
+                <ui:Button name="NavCalendar" text="CALENDARIO" class="nav-item"/>
+                <ui:Button name="NavStandings" text="CLASIFICACIÓN" class="nav-item"/>
+                <ui:Button name="NavPalmares" text="PALMARES" class="nav-item nav-item--active"/>
+                <ui:Button name="NavResults" text="RESULTADOS" class="nav-item"/>
+                <ui:Button name="NavPlayoffs" text="PLAYOFFS" class="nav-item"/>
+                <ui:Button name="NavStats" text="ESTADÍSTICAS" class="nav-item"/>
+                <ui:Button name="NavRecords" text="RECORDS" class="nav-item"/>
+                <ui:Button name="NavMarket" text="MERCADO" class="nav-item"/>
+                <ui:Button name="NavFinances" text="FINANZAS" class="nav-item"/>
+                <ui:Button name="NavSponsors" text="PATROCINADORES" class="nav-item"/>
+                <ui:Button name="NavTV" text="TELEVISIÓN" class="nav-item"/>
+                <ui:Button name="NavArena" text="PABELLÓN" class="nav-item"/>
+                <ui:Button name="NavMessages" text="MENSAJES" class="nav-item"/>
             </ui:VisualElement>
             <ui:VisualElement class="sidebar-footer">
-                <ui:Button name="BtnReset" class="btn-reset" text="  REINICIAR PARTIDA" />
-                <ui:Label class="sidebar-version" text="v0.1.0 · Alpha" />
+                <ui:Button name="BtnReset" text="  REINICIAR PARTIDA" class="btn-reset"/>
+                <ui:Label text="v0.1.0 · Alpha" class="sidebar-version"/>
             </ui:VisualElement>
         </ui:VisualElement>
-
-        <!-- ══ MAIN ══ -->
         <ui:VisualElement class="palmares-main">
-
-            <!-- TOP HEADER -->
             <ui:VisualElement name="TopHeader" class="top-header">
-                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
                 <ui:VisualElement class="header-team-info">
-                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                    <ui:Label name="HeaderTeamName" text="" class="header-team-name"/>
+                    <ui:Label name="HeaderManagerName" text="" class="header-manager-name"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
-                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                    <ui:Label text="PRESUPUESTO" class="header-stat-label"/>
+                    <ui:Label name="HeaderBudget" text="" class="header-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
-                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                    <ui:Label text="MASA SALARIAL" class="header-stat-label"/>
+                    <ui:Label name="HeaderPayroll" text="" class="header-stat-value header-stat-value--neutral"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
-                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                    <ui:Label text="MARGEN SALARIAL" class="header-stat-label"/>
+                    <ui:Label name="HeaderMargin" text="" class="header-stat-value"/>
                 </ui:VisualElement>
-                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-spacer"/>
                 <ui:VisualElement class="header-season-info">
-                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
-                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                    <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
+                    <ui:Label name="HeaderDate" text="" class="header-date-label"/>
                 </ui:VisualElement>
-                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+                <ui:Button name="BtnAction" text="CONTINUAR →" class="btn-action"/>
             </ui:VisualElement>
-
-            <!-- PALMARES CONTENT -->
             <ui:VisualElement class="palmares-content">
-
-                <!-- Tabs -->
-                <ui:VisualElement class="palmares-tabs">
-                    <ui:Button name="TabEquipos" class="palmares-tab" text="EQUIPOS" />
-                    <ui:Button name="TabJugadores" class="palmares-tab" text="JUGADORES" />
-                    <ui:Button name="TabQuintetos" class="palmares-tab" text="QUINTETOS" />
+                <ui:VisualElement class="palmares-tabs" style="border-left-width: 17px; border-top-width: 10px;">
+                    <ui:Button name="TabEquipos" text="EQUIPOS" class="palmares-tab"/>
+                    <ui:Button name="TabJugadores" text="JUGADORES" class="palmares-tab"/>
+                    <ui:Button name="TabQuintetos" text="QUINTETOS" class="palmares-tab"/>
                 </ui:VisualElement>
-
-                <!-- EQUIPOS TAB -->
                 <ui:VisualElement name="TabContentEquipos" class="palmares-tab-content">
-                    <ui:ScrollView class="palmares-scroll"
-                                   horizontal-scrolling-enabled="false"
-                                   mode="Vertical">
+                    <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="palmares-scroll">
                         <ui:VisualElement class="palmares-tab-inner">
-
-                            <!-- Champions -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="CAMPEONES NBA" />
+                                    <ui:Label text="CAMPEONES NBA" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="ChampionsBody" class="palmares-table" />
-                                <ui:Label name="NoChampionsText" class="no-data-text" text="AÚN NO HAY TEMPORADAS FINALIZADAS" />
+                                <ui:VisualElement name="ChampionsBody" class="palmares-table"/>
+                                <ui:Label name="NoChampionsText" text="AÚN NO HAY TEMPORADAS FINALIZADAS" class="no-data-text"/>
                             </ui:VisualElement>
-
-                            <!-- Conference Champions -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="CAMPEONES DE CONFERENCIA" />
+                                    <ui:Label text="CAMPEONES DE CONFERENCIA" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="ConfChampionsBody" class="palmares-table" />
+                                <ui:VisualElement name="ConfChampionsBody" class="palmares-table"/>
                             </ui:VisualElement>
-
-                            <!-- Division Champions -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="CAMPEONES DE DIVISIÓN" />
+                                    <ui:Label text="CAMPEONES DE DIVISIÓN" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="DivChampionsBody" class="palmares-table" />
+                                <ui:VisualElement name="DivChampionsBody" class="palmares-table"/>
                             </ui:VisualElement>
-
                         </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
-
-                <!-- JUGADORES TAB -->
                 <ui:VisualElement name="TabContentJugadores" class="palmares-tab-content" style="display: none;">
-                    <ui:ScrollView class="palmares-scroll"
-                                   horizontal-scrolling-enabled="false"
-                                   mode="Vertical">
+                    <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="palmares-scroll">
                         <ui:VisualElement class="palmares-tab-inner">
-
-                            <!-- MVP -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="MVP" />
+                                    <ui:Label text="MVP" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="MVPBody" class="palmares-table" />
+                                <ui:VisualElement name="MVPBody" class="palmares-table"/>
                             </ui:VisualElement>
-
-                            <!-- Rookie -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="ROOKIE DEL AÑO" />
+                                    <ui:Label text="ROOKIE DEL AÑO" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="RookieBody" class="palmares-table" />
+                                <ui:VisualElement name="RookieBody" class="palmares-table"/>
                             </ui:VisualElement>
-
-                            <!-- Best Defender -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="MEJOR DEFENSOR" />
+                                    <ui:Label text="MEJOR DEFENSOR" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="DefenderBody" class="palmares-table" />
+                                <ui:VisualElement name="DefenderBody" class="palmares-table"/>
                             </ui:VisualElement>
-
-                            <!-- Best Sixth Man -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="MEJOR SEXTO HOMBRE" />
+                                    <ui:Label text="MEJOR SEXTO HOMBRE" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="SixthManBody" class="palmares-table" />
+                                <ui:VisualElement name="SixthManBody" class="palmares-table"/>
                             </ui:VisualElement>
-
-                            <!-- Most Improved -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="JUGADOR MÁS MEJORADO" />
+                                    <ui:Label text="JUGADOR MÁS MEJORADO" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="ImprovedBody" class="palmares-table" />
+                                <ui:VisualElement name="ImprovedBody" class="palmares-table"/>
                             </ui:VisualElement>
-
                         </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
-
-                <!-- QUINTETOS TAB -->
                 <ui:VisualElement name="TabContentQuintetos" class="palmares-tab-content" style="display: none;">
-                    <ui:ScrollView class="palmares-scroll"
-                                   horizontal-scrolling-enabled="false"
-                                   mode="Vertical">
+                    <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="palmares-scroll">
                         <ui:VisualElement class="palmares-tab-inner">
-
-                            <!-- First Team -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="MEJOR QUINTETO" />
+                                    <ui:Label text="MEJOR QUINTETO" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="FirstTeamBody" class="palmares-quinteto" />
+                                <ui:VisualElement name="FirstTeamBody" class="palmares-quinteto"/>
                             </ui:VisualElement>
-
-                            <!-- Second Team -->
                             <ui:VisualElement class="panel panel-palmares">
                                 <ui:VisualElement class="panel-header">
-                                    <ui:Label class="panel-title" text="SEGUNDO MEJOR QUINTETO" />
+                                    <ui:Label text="SEGUNDO MEJOR QUINTETO" class="panel-title"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="SecondTeamBody" class="palmares-quinteto" />
+                                <ui:VisualElement name="SecondTeamBody" class="palmares-quinteto"/>
                             </ui:VisualElement>
-
                         </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
-
             </ui:VisualElement>
-
         </ui:VisualElement>
-
     </ui:VisualElement>
-
 </ui:UXML>

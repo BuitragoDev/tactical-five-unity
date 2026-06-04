@@ -70,20 +70,53 @@
             <!-- ARENA CONTENT -->
             <ui:VisualElement class="arena-content">
 
-                <!-- Arena info -->
-                <ui:VisualElement class="panel panel-arena">
-                    <ui:VisualElement class="panel-header">
-                        <ui:Label class="panel-title" text="PABELLÓN" />
+                <!-- TOP ROW: 3 panels -->
+                <ui:VisualElement class="arena-top-row">
+
+                    <!-- Panel 1: Arena Info -->
+                    <ui:VisualElement class="arena-panel arena-panel--info">
+                        <ui:VisualElement class="arena-panel-header">
+                            <ui:Label class="arena-panel-header-icon" text="🏟" />
+                            <ui:Label name="ArenaNameHeader" class="arena-panel-header-title" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="ArenaInfoBody" class="arena-info-body" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="ArenaInfoBody" class="arena-info" />
+
+                    <!-- Panel 2: Arena Level -->
+                    <ui:VisualElement class="arena-panel arena-panel--level">
+                        <ui:VisualElement class="arena-panel-header">
+                            <ui:Label class="arena-panel-header-icon" text="⭐" />
+                            <ui:Label class="arena-panel-header-title" text="NIVEL DEL PABELLÓN" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="arena-level-body">
+                            <ui:VisualElement name="ArenaStars" class="arena-stars" />
+                            <ui:VisualElement name="ArenaStatus" class="arena-status" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Panel 3: Arena Image -->
+                    <ui:VisualElement class="arena-panel arena-panel--image">
+                        <ui:VisualElement name="ArenaImage" class="arena-image" />
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
-                <!-- Upgrades -->
-                <ui:VisualElement class="panel panel-arena">
-                    <ui:VisualElement class="panel-header">
-                        <ui:Label class="panel-title" text="MEJORAS DISPONIBLES" />
+                <!-- BOTTOM ROW: Upgrades -->
+                <ui:VisualElement class="arena-upgrades-section">
+                    <ui:VisualElement class="arena-upgrades-header">
+                        <ui:Label class="arena-upgrades-header-icon" text="🔧" />
+                        <ui:Label class="arena-upgrades-header-title" text="MEJORAS DISPONIBLES" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="UpgradesBody" class="arena-upgrades" />
+
+                    <!-- Warning message -->
+                    <ui:VisualElement name="RenovationWarning" class="renovation-warning" style="display:none;">
+                        <ui:Label class="renovation-warning-icon" text="⏳" />
+                        <ui:Label name="RenovationWarningText" class="renovation-warning-text" text="" />
+                    </ui:VisualElement>
+
+                    <!-- Upgrade cards -->
+                    <ui:VisualElement name="UpgradeCardsContainer" class="upgrade-cards-container" />
+
                 </ui:VisualElement>
 
             </ui:VisualElement>

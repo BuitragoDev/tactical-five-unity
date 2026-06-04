@@ -5,6 +5,51 @@ TextureImporter:
   - first:
       213: -1740302247458061003
     second: pelicans_0
+  - first:
+      213: 5447588804605288679
+    second: pelicans_1
+  - first:
+      213: -4917370482094922430
+    second: pelicans_2
+  - first:
+      213: 1030400870206381920
+    second: pelicans_3
+  - first:
+      213: 1664752639602763558
+    second: pelicans_4
+  - first:
+      213: 3567613071831132548
+    second: pelicans_5
+  - first:
+      213: 3351142312617750903
+    second: pelicans_6
+  - first:
+      213: 960000286682090489
+    second: pelicans_7
+  - first:
+      213: -387234121879046821
+    second: pelicans_8
+  - first:
+      213: 6649842870283690473
+    second: pelicans_9
+  - first:
+      213: 1672240264106886570
+    second: pelicans_10
+  - first:
+      213: 3496295918192992339
+    second: pelicans_11
+  - first:
+      213: 4407495295098534364
+    second: pelicans_12
+  - first:
+      213: 3406583377118743023
+    second: pelicans_13
+  - first:
+      213: 5885921544170777929
+    second: pelicans_14
+  - first:
+      213: -1595640231185186955
+    second: pelicans_15
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -117,9 +162,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
-        y: 155
-        width: 512
-        height: 202
+        y: 84
+        width: 200
+        height: 80
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +175,336 @@ TextureImporter:
       bones: []
       spriteID: 535c272935439d7e0800000000000000
       internalID: -1740302247458061003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_1
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 51
+        width: 27
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7e0a4ecb729b99b40800000000000000
+      internalID: 5447588804605288679
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_2
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 51
+        width: 25
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 245adb1999df1cbb0800000000000000
+      internalID: -4917370482094922430
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_3
+      rect:
+        serializedVersion: 2
+        x: 81
+        y: 51
+        width: 28
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06f97e4d128bc4e00800000000000000
+      internalID: 1030400870206381920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_4
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 51
+        width: 14
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 627aa6a94b36a1710800000000000000
+      internalID: 1664752639602763558
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_5
+      rect:
+        serializedVersion: 2
+        x: 119
+        y: 51
+        width: 13
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 489e882df25b28130800000000000000
+      internalID: 3567613071831132548
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_6
+      rect:
+        serializedVersion: 2
+        x: 131
+        y: 51
+        width: 16
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 771bc5f9d26a18e20800000000000000
+      internalID: 3351142312617750903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_7
+      rect:
+        serializedVersion: 2
+        x: 145
+        y: 51
+        width: 28
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9fb85f7ac2b925d00800000000000000
+      internalID: 960000286682090489
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_8
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 36
+        width: 13
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b553d782e9440aaf0800000000000000
+      internalID: -387234121879046821
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_9
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 36
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9e16c6fabdcf84c50800000000000000
+      internalID: 6649842870283690473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_10
+      rect:
+        serializedVersion: 2
+        x: 70
+        y: 36
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aa5423909adf43710800000000000000
+      internalID: 1672240264106886570
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_11
+      rect:
+        serializedVersion: 2
+        x: 86
+        y: 36
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 350aa890d96558030800000000000000
+      internalID: 3496295918192992339
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_12
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 36
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cd9bd857e919a2d30800000000000000
+      internalID: 4407495295098534364
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_13
+      rect:
+        serializedVersion: 2
+        x: 114
+        y: 35
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe9c9ea588d964f20800000000000000
+      internalID: 3406583377118743023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_14
+      rect:
+        serializedVersion: 2
+        x: 133
+        y: 35
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94d2e10a57efea150800000000000000
+      internalID: 5885921544170777929
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: pelicans_15
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 36
+        width: 13
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57f72eee9a52bd9e0800000000000000
+      internalID: -1595640231185186955
       vertices: []
       indices: 
       edges: []
@@ -149,6 +524,21 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       pelicans_0: -1740302247458061003
+      pelicans_1: 5447588804605288679
+      pelicans_10: 1672240264106886570
+      pelicans_11: 3496295918192992339
+      pelicans_12: 4407495295098534364
+      pelicans_13: 3406583377118743023
+      pelicans_14: 5885921544170777929
+      pelicans_15: -1595640231185186955
+      pelicans_2: -4917370482094922430
+      pelicans_3: 1030400870206381920
+      pelicans_4: 1664752639602763558
+      pelicans_5: 3567613071831132548
+      pelicans_6: 3351142312617750903
+      pelicans_7: 960000286682090489
+      pelicans_8: -387234121879046821
+      pelicans_9: 6649842870283690473
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

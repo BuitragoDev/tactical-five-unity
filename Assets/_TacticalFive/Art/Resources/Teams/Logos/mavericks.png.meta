@@ -116,10 +116,10 @@ TextureImporter:
       name: mavericks_0
       rect:
         serializedVersion: 2
-        x: 20
-        y: 11
-        width: 473
-        height: 490
+        x: 10
+        y: 4
+        width: 188
+        height: 188
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
