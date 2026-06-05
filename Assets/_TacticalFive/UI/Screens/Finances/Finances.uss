@@ -82,7 +82,7 @@
 }
 
 .finances-tab {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;

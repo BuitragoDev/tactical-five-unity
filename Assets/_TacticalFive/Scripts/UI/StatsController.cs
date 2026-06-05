@@ -81,6 +81,7 @@ public class StatsController : MonoBehaviour
         _currentDisplay = "totals";
 
         CacheReferences();
+        LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
         Refresh();
@@ -124,8 +125,6 @@ public class StatsController : MonoBehaviour
     {
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
-        _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.MainMenu));
 
         string[] statKeys = { "puntos", "rebotes", "asistencias", "robos", "tapones",
                               "pcttc", "pct3p", "pcttl", "val", "perdidas",
@@ -181,6 +180,40 @@ public class StatsController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Arena));
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
+        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+            Debug.Log("[Stats] Abrir configuración — pendiente de implementar"));
+    }
+
+    void LoadSidebarIcons()
+    {
+        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        {
+            {"NavDashboardIcon", "inicio"},
+            {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"},
+            {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"},
+            {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"},
+            {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"},
+            {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"},
+            {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"},
+            {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"},
+            {"NavConfigIcon", "configuracion"}
+        };
+
+        foreach (var kv in iconMap)
+        {
+            var iconElem = _root.Q<VisualElement>(kv.Key);
+            if (iconElem == null) continue;
+            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
     }
 
     void Refresh()
@@ -218,7 +251,7 @@ public class StatsController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
-        _btnAction.text = "← DASHBOARD";
+        _btnAction.text = "DASHBOARD";
     }
 
     void SetMode(string mode)

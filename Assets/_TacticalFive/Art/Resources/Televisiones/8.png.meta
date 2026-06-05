@@ -119,10 +119,10 @@ TextureImporter:
       name: 8_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 89
+        x: 1
+        y: 41
         width: 96
-        height: 113
+        height: 217
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,10 +141,10 @@ TextureImporter:
       name: 8_1
       rect:
         serializedVersion: 2
-        x: 100
-        y: 53
-        width: 198
-        height: 184
+        x: 86
+        y: 7
+        width: 214
+        height: 268
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

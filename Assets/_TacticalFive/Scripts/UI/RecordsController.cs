@@ -54,6 +54,7 @@ public class RecordsController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
+        LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
         Refresh();
@@ -86,8 +87,6 @@ public class RecordsController : MonoBehaviour
     {
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
-        _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.MainMenu));
 
         _tabTeam?.RegisterCallback<ClickEvent>(_ => SetFilter("team"));
         _tabSeason?.RegisterCallback<ClickEvent>(_ => SetFilter("season"));
@@ -124,6 +123,40 @@ public class RecordsController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Arena));
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
+        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+            Debug.Log("[Records] Abrir configuración — pendiente de implementar"));
+    }
+
+    void LoadSidebarIcons()
+    {
+        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        {
+            {"NavDashboardIcon", "inicio"},
+            {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"},
+            {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"},
+            {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"},
+            {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"},
+            {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"},
+            {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"},
+            {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"},
+            {"NavConfigIcon", "configuracion"}
+        };
+
+        foreach (var kv in iconMap)
+        {
+            var iconElem = _root.Q<VisualElement>(kv.Key);
+            if (iconElem == null) continue;
+            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
     }
 
     void SetFilter(string filter)
@@ -175,7 +208,7 @@ public class RecordsController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
-        _btnAction.text = "← DASHBOARD";
+        _btnAction.text = "DASHBOARD";
     }
 
     void BuildRecords()
@@ -266,7 +299,7 @@ public class RecordsController : MonoBehaviour
         {
             var teamLbl = new Label();
             teamLbl.AddToClassList("record-team");
-            teamLbl.text = team?.name?.ToUpper() ?? _myTeam?.name?.ToUpper() ?? "";
+            teamLbl.text = team?.name ?? _myTeam?.name ?? "";
             row.Add(teamLbl);
         }
 

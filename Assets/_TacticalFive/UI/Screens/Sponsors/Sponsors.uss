@@ -43,7 +43,7 @@
 
 .current-sponsor-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 24px;
     color: rgb(248, 196, 64);
     letter-spacing: 2px;
     margin-right: 12px;
@@ -51,14 +51,14 @@
 
 .current-sponsor-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     color: rgb(208, 216, 232);
 }
 
 /* ── Page Title ── */
 .sponsors-page-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 28px;
+    font-size: 48px;
     color: rgb(208, 216, 232);
     letter-spacing: 2px;
     margin-bottom: 30px;
@@ -122,7 +122,7 @@
 
 .sponsor-card-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
 }
 
@@ -136,7 +136,7 @@
 .sponsor-card-btn {
     margin-top: 20px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(22, 26, 36);
@@ -168,7 +168,7 @@
 /* ── Info Message ── */
 .sponsors-info-message {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(85, 102, 119);
     margin-top: 30px;
     -unity-text-align: middle-center;

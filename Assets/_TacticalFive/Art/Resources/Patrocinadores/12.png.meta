@@ -23,6 +23,9 @@ TextureImporter:
   - first:
       213: 4922751796627025505
     second: 12_6
+  - first:
+      213: 1549231732076062709
+    second: 12_7
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -134,10 +137,10 @@ TextureImporter:
       name: 12_0
       rect:
         serializedVersion: 2
-        x: 52
-        y: 92
-        width: 206
-        height: 180
+        x: 8
+        y: 116
+        width: 33
+        height: 46
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -156,10 +159,10 @@ TextureImporter:
       name: 12_1
       rect:
         serializedVersion: 2
-        x: 42
-        y: 48
-        width: 56
-        height: 37
+        x: 65
+        y: 116
+        width: 38
+        height: 46
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,10 +181,10 @@ TextureImporter:
       name: 12_2
       rect:
         serializedVersion: 2
-        x: 82
-        y: 48
-        width: 65
-        height: 36
+        x: 127
+        y: 116
+        width: 33
+        height: 47
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -200,10 +203,10 @@ TextureImporter:
       name: 12_3
       rect:
         serializedVersion: 2
-        x: 140
-        y: 47
-        width: 52
-        height: 37
+        x: 187
+        y: 155
+        width: 33
+        height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -222,10 +225,10 @@ TextureImporter:
       name: 12_4
       rect:
         serializedVersion: 2
-        x: 188
-        y: 47
-        width: 60
-        height: 37
+        x: 246
+        y: 116
+        width: 34
+        height: 46
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -244,10 +247,10 @@ TextureImporter:
       name: 12_5
       rect:
         serializedVersion: 2
-        x: 59
-        y: 4
-        width: 52
-        height: 36
+        x: 280
+        y: 155
+        width: 12
+        height: 8
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -266,10 +269,10 @@ TextureImporter:
       name: 12_6
       rect:
         serializedVersion: 2
-        x: 111
-        y: 4
-        width: 142
-        height: 36
+        x: 187
+        y: 135
+        width: 33
+        height: 9
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -280,6 +283,28 @@ TextureImporter:
       bones: []
       spriteID: 16eae5b5da0215440800000000000000
       internalID: 4922751796627025505
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 12_7
+      rect:
+        serializedVersion: 2
+        x: 187
+        y: 117
+        width: 33
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f728295d0aff7510800000000000000
+      internalID: 1549231732076062709
       vertices: []
       indices: 
       edges: []
@@ -305,6 +330,7 @@ TextureImporter:
       12_4: -2551636932565023143
       12_5: 4257793103239855061
       12_6: 4922751796627025505
+      12_7: 1549231732076062709
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

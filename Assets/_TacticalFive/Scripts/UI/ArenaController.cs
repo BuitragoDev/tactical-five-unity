@@ -26,8 +26,8 @@ public class ArenaController : MonoBehaviour
     readonly Dictionary<string, (string name, string desc, string icon, int capacityBonus, long cost, int durationWeeks)> _renovationTypes = new()
     {
         ["general_seats"] = ("Ampliar Grada General", "Aumenta la capacidad de la grada general", "🏟", 3000, 10_000_000, 3),
-        ["tribune"]       = ("Ampliar Tribuna",       "Ampliación de la tribuna principal",      "👑", 2000, 20_000_000, 5),
-        ["vip_seats"]     = ("Ampliar Grada VIP",     "Nuevos palcos y zona VIP premium",        "💎", 1000, 35_000_000, 8),
+        ["tribune"] = ("Ampliar Tribuna", "Ampliación de la tribuna principal", "👑", 2000, 20_000_000, 5),
+        ["vip_seats"] = ("Ampliar Grada VIP", "Nuevos palcos y zona VIP premium", "💎", 1000, 35_000_000, 8),
     };
 
     void OnEnable()
@@ -42,6 +42,7 @@ public class ArenaController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
+        LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
         Refresh();
@@ -73,8 +74,6 @@ public class ArenaController : MonoBehaviour
     {
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
-        _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.MainMenu));
     }
 
     void RegisterNavButtons()
@@ -107,6 +106,40 @@ public class ArenaController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.TV));
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
+        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+            Debug.Log("[Arena] Abrir configuración — pendiente de implementar"));
+    }
+
+    void LoadSidebarIcons()
+    {
+        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        {
+            {"NavDashboardIcon", "inicio"},
+            {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"},
+            {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"},
+            {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"},
+            {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"},
+            {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"},
+            {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"},
+            {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"},
+            {"NavConfigIcon", "configuracion"}
+        };
+
+        foreach (var kv in iconMap)
+        {
+            var iconElem = _root.Q<VisualElement>(kv.Key);
+            if (iconElem == null) continue;
+            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
     }
 
     void Refresh()
@@ -151,7 +184,7 @@ public class ArenaController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
-        _btnAction.text = "← DASHBOARD";
+        _btnAction.text = "DASHBOARD";
     }
 
     /* ═══════════════════════════════════════════
