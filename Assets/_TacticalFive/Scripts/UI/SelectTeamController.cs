@@ -154,11 +154,11 @@ public class SelectTeamController : MonoBehaviour
     void RegisterCallbacks()
     {
         _btnBack?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.MainMenu));
-        _btnContinue?.RegisterCallback<ClickEvent>(_ => OnContinue());
-        _tabAll?.RegisterCallback<ClickEvent>(_ => ShowFilter("All"));
-        _tabEast?.RegisterCallback<ClickEvent>(_ => ShowFilter("East"));
-        _tabWest?.RegisterCallback<ClickEvent>(_ => ShowFilter("West"));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+        _btnContinue?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnContinue(); });
+        _tabAll?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowFilter("All"); });
+        _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowFilter("East"); });
+        _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowFilter("West"); });
 
         if (CursorManager.Instance != null)
         {
@@ -239,7 +239,7 @@ public class SelectTeamController : MonoBehaviour
         }
         else
         {
-            item.RegisterCallback<ClickEvent>(_ => OnTeamSelected(team, item));
+            item.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnTeamSelected(team, item); });
             if (CursorManager.Instance != null)
             {
                 item.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
@@ -363,5 +363,10 @@ public class SelectTeamController : MonoBehaviour
         // La partida solo se "crea" oficialmente al pulsar Continuar en Preseason.
 
         ScreenManager.Instance.GoTo(GameScreen.Preseason);
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

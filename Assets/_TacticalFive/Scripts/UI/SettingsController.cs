@@ -22,6 +22,16 @@ public class SettingsController : MonoBehaviour
     private Button _btnExit;
     private Button _btnAction;
 
+    private VisualElement _mainMenuModalOverlay;
+    private VisualElement _mainMenuModalBox;
+    private Button _btnMainMenuYes;
+    private Button _btnMainMenuNo;
+
+    private VisualElement _exitModalOverlay;
+    private VisualElement _exitModalBox;
+    private Button _btnExitYes;
+    private Button _btnExitNo;
+
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
@@ -65,6 +75,16 @@ public class SettingsController : MonoBehaviour
         _btnMainMenu  = _root.Q<Button>("BtnMainMenu");
         _btnExit      = _root.Q<Button>("BtnExit");
         _btnAction    = _root.Q<Button>("BtnAction");
+
+        _mainMenuModalOverlay = _root.Q<VisualElement>("MainMenuModalOverlay");
+        _mainMenuModalBox     = _root.Q<VisualElement>("MainMenuModalBox");
+        _btnMainMenuYes       = _root.Q<Button>("BtnMainMenuYes");
+        _btnMainMenuNo        = _root.Q<Button>("BtnMainMenuNo");
+
+        _exitModalOverlay = _root.Q<VisualElement>("ExitModalOverlay");
+        _exitModalBox     = _root.Q<VisualElement>("ExitModalBox");
+        _btnExitYes       = _root.Q<Button>("BtnExitYes");
+        _btnExitNo        = _root.Q<Button>("BtnExitNo");
     }
 
     void LoadData()
@@ -98,61 +118,82 @@ public class SettingsController : MonoBehaviour
             UpdateLabels();
         };
 
-        _btnQualityLow?.RegisterCallback<ClickEvent>(_ => SelectQuality(0));
-        _btnQualityMedium?.RegisterCallback<ClickEvent>(_ => SelectQuality(1));
-        _btnQualityHigh?.RegisterCallback<ClickEvent>(_ => SelectQuality(2));
-        _btnQualityUltra?.RegisterCallback<ClickEvent>(_ => SelectQuality(3));
+        _btnQualityLow?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectQuality(0); });
+        _btnQualityMedium?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectQuality(1); });
+        _btnQualityHigh?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectQuality(2); });
+        _btnQualityUltra?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectQuality(3); });
 
-        _btnMainMenu?.RegisterCallback<ClickEvent>(_ =>
+        _btnMainMenu?.RegisterCallback<ClickEvent>(_ => OpenMainMenuModal());
+        _btnExit?.RegisterCallback<ClickEvent>(_ => OpenExitModal());
+
+        _btnMainMenuYes?.RegisterCallback<ClickEvent>(_ =>
         {
+            PlayClick();
             ScreenManager.Instance.GoTo(GameScreen.MainMenu);
         });
-
-        _btnExit?.RegisterCallback<ClickEvent>(_ =>
+        _btnMainMenuNo?.RegisterCallback<ClickEvent>(_ =>
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-            Application.Quit();
-#endif
+            PlayClick();
+            CloseMainMenuModal();
+        });
+        _mainMenuModalOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _mainMenuModalOverlay)
+                { PlayClick(); CloseMainMenuModal(); }
+        });
+
+        _btnExitYes?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            QuitGame();
+        });
+        _btnExitNo?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseExitModal();
+        });
+        _exitModalOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _exitModalOverlay)
+                { PlayClick(); CloseExitModal(); }
         });
 
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Dashboard));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
     }
 
     void RegisterNavButtons()
     {
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Dashboard));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Roster));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Calendar));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Standings));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Palmares));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Results));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Playoffs));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Playoffs); });
         _root.Q<Button>("NavStats")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Stats));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Stats); });
         _root.Q<Button>("NavRecords")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Records));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Records); });
         _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Market));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Market); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Finances));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Finances); });
         _root.Q<Button>("NavSponsors")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Sponsors));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Sponsors); });
         _root.Q<Button>("NavTV")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.TV));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Arena));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Messages));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
     }
 
     void LoadSidebarIcons()
@@ -267,5 +308,45 @@ public class SettingsController : MonoBehaviour
             if (buttons[i] == null) continue;
             buttons[i].EnableInClassList("settings-quality-btn--active", i == activeIndex);
         }
+    }
+
+    void OpenMainMenuModal()
+    {
+        PlayClick();
+        _mainMenuModalOverlay?.AddToClassList("modal-overlay--visible");
+        _mainMenuModalBox?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseMainMenuModal()
+    {
+        _mainMenuModalOverlay?.RemoveFromClassList("modal-overlay--visible");
+        _mainMenuModalBox?.RemoveFromClassList("modal-box--visible");
+    }
+
+    void OpenExitModal()
+    {
+        PlayClick();
+        _exitModalOverlay?.AddToClassList("modal-overlay--visible");
+        _exitModalBox?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseExitModal()
+    {
+        _exitModalOverlay?.RemoveFromClassList("modal-overlay--visible");
+        _exitModalBox?.RemoveFromClassList("modal-box--visible");
+    }
+
+    void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

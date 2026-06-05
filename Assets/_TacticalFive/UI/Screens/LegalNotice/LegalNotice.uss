@@ -14,7 +14,6 @@
 
 .modal-overlay--visible {
     background-color: rgb(0, 0, 0);
-    opacity: 0.85;
     display: flex;
 }
 
@@ -63,7 +62,7 @@
 
 .modal-paragraph {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 17px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     white-space: normal;
     margin-bottom: 16px;
@@ -81,7 +80,7 @@
 
 .modal-copyright {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(180, 190, 210);
     margin-top: 8px;
     width: 100%;
@@ -90,7 +89,7 @@
 /* ── BOTÓN CERRAR ── */
 .modal-close {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);
@@ -120,7 +119,7 @@
 
 .modal-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);

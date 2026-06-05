@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class AudioManager : MonoBehaviour
 {
@@ -18,6 +19,8 @@ public class AudioManager : MonoBehaviour
     private const string PREF_MUSIC   = "TF_Audio_Music";
     private const string PREF_SFX     = "TF_Audio_SFX";
     private const string PREF_QUALITY = "TF_Graphics_Quality";
+
+    private Dictionary<string, AudioClip> _sfxCache = new();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void Init()
@@ -86,12 +89,19 @@ public class AudioManager : MonoBehaviour
 
     public void PlaySFX(string clipName)
     {
-        AudioClip clip = Resources.Load<AudioClip>($"Audios/{clipName}");
-        if (clip == null)
+        if (sfxSource == null) return;
+
+        if (!_sfxCache.TryGetValue(clipName, out var clip) || clip == null)
         {
-            Debug.LogWarning($"[AudioManager] No se encontró el clip 'Audios/{clipName}'");
-            return;
+            clip = Resources.Load<AudioClip>($"Audios/{clipName}");
+            if (clip == null)
+            {
+                Debug.LogWarning($"[AudioManager] No se encontró el clip 'Audios/{clipName}'");
+                return;
+            }
+            _sfxCache[clipName] = clip;
         }
+
         sfxSource.PlayOneShot(clip);
     }
 
