@@ -1,0 +1,182 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Settings.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="SettingsRoot" class="settings-root">
+
+        <!-- ══ SIDEBAR ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard" class="nav-item">
+                    <ui:VisualElement name="NavDashboardIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Inicio" />
+                </ui:Button>
+                <ui:Button name="NavRoster" class="nav-item">
+                    <ui:VisualElement name="NavRosterIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Plantilla" />
+                </ui:Button>
+                <ui:Button name="NavCalendar" class="nav-item">
+                    <ui:VisualElement name="NavCalendarIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Calendario" />
+                </ui:Button>
+                <ui:Button name="NavStandings" class="nav-item">
+                    <ui:VisualElement name="NavStandingsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Clasificación" />
+                </ui:Button>
+                <ui:Button name="NavPalmares" class="nav-item">
+                    <ui:VisualElement name="NavPalmaresIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Palmarés" />
+                </ui:Button>
+                <ui:Button name="NavResults" class="nav-item">
+                    <ui:VisualElement name="NavResultsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Resultados" />
+                </ui:Button>
+                <ui:Button name="NavPlayoffs" class="nav-item">
+                    <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Playoffs" />
+                </ui:Button>
+                <ui:Button name="NavStats" class="nav-item">
+                    <ui:VisualElement name="NavStatsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Estadísticas" />
+                </ui:Button>
+                <ui:Button name="NavRecords" class="nav-item">
+                    <ui:VisualElement name="NavRecordsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Records" />
+                </ui:Button>
+                <ui:Button name="NavMarket" class="nav-item">
+                    <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Mercado" />
+                </ui:Button>
+                <ui:Button name="NavFinances" class="nav-item">
+                    <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Finanzas" />
+                </ui:Button>
+                <ui:Button name="NavSponsors" class="nav-item">
+                    <ui:VisualElement name="NavSponsorsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Patrocinadores" />
+                </ui:Button>
+                <ui:Button name="NavTV" class="nav-item">
+                    <ui:VisualElement name="NavTVIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Televisión" />
+                </ui:Button>
+                <ui:Button name="NavArena" class="nav-item">
+                    <ui:VisualElement name="NavArenaIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Pabellón" />
+                </ui:Button>
+                <ui:Button name="NavMessages" class="nav-item">
+                    <ui:VisualElement name="NavMessagesIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Mensajes" />
+                </ui:Button>
+                <ui:Button name="NavConfig" class="nav-item nav-item--active">
+                    <ui:VisualElement name="NavConfigIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Configuración" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="settings-main">
+
+            <!-- TOP HEADER -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+            </ui:VisualElement>
+
+            <!-- SETTINGS CONTENT -->
+            <ui:VisualElement class="settings-content">
+
+                <!-- Title -->
+                <ui:VisualElement class="settings-title-row">
+                    <ui:Label class="settings-icon" text="⚙" />
+                    <ui:Label class="settings-title" text="CONFIGURACIÓN" />
+                </ui:VisualElement>
+
+                <ui:ScrollView class="settings-scroll"
+                               horizontal-scrolling-enabled="false"
+                               mode="Vertical">
+                    <ui:VisualElement class="settings-body">
+
+                        <!-- AUDIO -->
+                        <ui:VisualElement class="settings-section">
+                            <ui:Label class="settings-section-title" text="AUDIO" />
+
+                            <ui:VisualElement class="settings-row">
+                                <ui:Label class="settings-label" text="Volumen General" />
+                                <ui:Slider name="SliderMaster" class="settings-slider"
+                                           low-value="0" high-value="1" />
+                                <ui:Label name="LabelMaster" class="settings-value" text="100%" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement class="settings-row">
+                                <ui:Label class="settings-label" text="Música" />
+                                <ui:Slider name="SliderMusic" class="settings-slider"
+                                           low-value="0" high-value="1" />
+                                <ui:Label name="LabelMusic" class="settings-value" text="100%" />
+                            </ui:VisualElement>
+
+                            <ui:VisualElement class="settings-row">
+                                <ui:Label class="settings-label" text="Efectos" />
+                                <ui:Slider name="SliderSFX" class="settings-slider"
+                                           low-value="0" high-value="1" />
+                                <ui:Label name="LabelSFX" class="settings-value" text="100%" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- GRAPHICS -->
+                        <ui:VisualElement class="settings-section">
+                            <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                            <ui:VisualElement class="settings-row">
+                                <ui:Label class="settings-label" text="Calidad" />
+                                <ui:DropdownField name="DropdownQuality" class="settings-dropdown" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- GAME -->
+                        <ui:VisualElement class="settings-section">
+                            <ui:Label class="settings-section-title" text="JUEGO" />
+                            <ui:Button name="BtnMainMenu" class="settings-btn settings-btn--secondary"
+                                       text="VOLVER AL MENÚ PRINCIPAL" />
+                            <ui:Button name="BtnExit" class="settings-btn settings-btn--danger"
+                                       text="SALIR DEL JUEGO" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+                </ui:ScrollView>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

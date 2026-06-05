@@ -95,7 +95,7 @@ public class SponsorsController : MonoBehaviour
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
         _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
-            Debug.Log("[Sponsors] Abrir configuración — pendiente de implementar"));
+            ScreenManager.Instance.GoTo(GameScreen.Settings));
     }
 
     void LoadSidebarIcons()

@@ -124,7 +124,7 @@ public class RecordsController : MonoBehaviour
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
         _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
-            Debug.Log("[Records] Abrir configuración — pendiente de implementar"));
+            ScreenManager.Instance.GoTo(GameScreen.Settings));
     }
 
     void LoadSidebarIcons()

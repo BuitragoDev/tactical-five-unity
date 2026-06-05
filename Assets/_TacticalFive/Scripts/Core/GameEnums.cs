@@ -21,7 +21,8 @@ public enum GameScreen
     Messages,
     MatchDay,
     GameResults,
-    LoadGame
+    LoadGame,
+    Settings
 }
 
 public enum GameMode

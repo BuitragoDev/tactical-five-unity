@@ -27,6 +27,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument matchDayDocument;
     [SerializeField] private UIDocument gameResultsDocument;
     [SerializeField] private UIDocument loadGameDocument;
+    [SerializeField] private UIDocument settingsDocument;
 
     public GameMode CurrentMode { get; private set; } = GameMode.None;
     public GameScreen CurrentScreen { get; private set; } = GameScreen.MainMenu;
@@ -115,6 +116,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.LoadGame:
                 ShowOnly(loadGameDocument);
                 break;
+            case GameScreen.Settings:
+                ShowOnly(settingsDocument);
+                break;
         }
     }
 
@@ -142,6 +146,7 @@ public class ScreenManager : MonoBehaviour
         if (matchDayDocument != null) matchDayDocument.gameObject.SetActive(false);
         if (gameResultsDocument != null) gameResultsDocument.gameObject.SetActive(false);
         if (loadGameDocument != null) loadGameDocument.gameObject.SetActive(false);
+        if (settingsDocument != null) settingsDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }
