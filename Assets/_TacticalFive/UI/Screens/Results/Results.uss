@@ -65,7 +65,7 @@
 
 .results-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 24px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
 }
