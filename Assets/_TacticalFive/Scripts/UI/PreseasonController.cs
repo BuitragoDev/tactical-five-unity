@@ -107,10 +107,10 @@ public class PreseasonController : MonoBehaviour
     void RegisterCallbacks()
     {
         _btnBack?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.SelectTeam));
-        _btnContinue?.RegisterCallback<ClickEvent>(_ => OnContinue());
-        _btnHome?.RegisterCallback<ClickEvent>(_ => SetLocation(true));
-        _btnAway?.RegisterCallback<ClickEvent>(_ => SetLocation(false));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.SelectTeam); });
+        _btnContinue?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnContinue(); });
+        _btnHome?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLocation(true); });
+        _btnAway?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLocation(false); });
 
         if (CursorManager.Instance != null)
         {
@@ -243,7 +243,7 @@ public class PreseasonController : MonoBehaviour
         btnRemove.AddToClassList("btn-remove-slot");
         btnRemove.text = "BORRAR";
         int captured = index;
-        btnRemove.clicked += () => RemoveGame(captured);
+        btnRemove.clicked += () => { PlayClick(); RemoveGame(captured); };
         if (CursorManager.Instance != null)
         {
             btnRemove.RegisterCallback<MouseEnterEvent>(_ =>
@@ -305,7 +305,7 @@ public class PreseasonController : MonoBehaviour
         item.Add(logo);
         item.Add(overall);
 
-        item.RegisterCallback<ClickEvent>(_ => OnTeamSelected(team));
+        item.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnTeamSelected(team); });
 
         if (CursorManager.Instance != null)
         {
@@ -455,5 +455,10 @@ public class PreseasonController : MonoBehaviour
         }
 
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

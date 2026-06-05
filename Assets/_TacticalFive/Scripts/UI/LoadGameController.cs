@@ -34,7 +34,7 @@ public class LoadGameController : MonoBehaviour
         _slotsArea = _root.Q<VisualElement>("SlotsScrollView").parent;
         _btnBack = _root.Q<Button>("BtnBack");
 
-        _btnBack?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+        _btnBack?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
 
         // Limpiar DBs huérfanas antes de refrescar
         GameSaveManager.CleanupAllOrphanDbs();
@@ -124,12 +124,12 @@ public class LoadGameController : MonoBehaviour
 
         var loadBtn = new Button { text = "CARGAR" };
         loadBtn.AddToClassList("btn-load");
-        loadBtn.RegisterCallback<ClickEvent>(_ => OnLoadSlot(slot.slotNumber));
+        loadBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadSlot(slot.slotNumber); });
         actions.Add(loadBtn);
 
         var deleteBtn = new Button { text = "BORRAR" };
         deleteBtn.AddToClassList("btn-delete");
-        deleteBtn.RegisterCallback<ClickEvent>(_ => OnDeleteSlot(slot.slotNumber));
+        deleteBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnDeleteSlot(slot.slotNumber); });
         actions.Add(deleteBtn);
 
         card.Add(actions);
@@ -149,5 +149,10 @@ public class LoadGameController : MonoBehaviour
     {
         GameSaveManager.DeleteSave(slotNumber);
         RefreshSlots();
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

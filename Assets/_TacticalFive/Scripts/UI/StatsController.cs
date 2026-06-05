@@ -124,7 +124,7 @@ public class StatsController : MonoBehaviour
     void RegisterCallbacks()
     {
         RegisterNavButtons();
-        _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
+        _btnAction?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
         string[] statKeys = { "puntos", "rebotes", "asistencias", "robos", "tapones",
                               "pcttc", "pct3p", "pcttl", "val", "perdidas",
@@ -132,56 +132,56 @@ public class StatsController : MonoBehaviour
         for (int i = 0; i < _statTabs.Count && i < statKeys.Length; i++)
         {
             int idx = i;
-            _statTabs[i].RegisterCallback<ClickEvent>(_ => ShowStats(statKeys[idx]));
+            _statTabs[i].RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStats(statKeys[idx]); });
         }
 
         var btnSeason = _root.Q<Button>("BtnSeason");
         var btnHistorical = _root.Q<Button>("BtnHistorical");
         _filterBtns.Add(btnSeason);
         _filterBtns.Add(btnHistorical);
-        btnSeason?.RegisterCallback<ClickEvent>(_ => SetMode("season"));
-        btnHistorical?.RegisterCallback<ClickEvent>(_ => SetMode("historical"));
+        btnSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("season"); });
+        btnHistorical?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("historical"); });
 
         var btnTotals = _root.Q<Button>("BtnTotals");
         var btnAverages = _root.Q<Button>("BtnAverages");
         _modeBtns.Add(btnTotals);
         _modeBtns.Add(btnAverages);
-        btnTotals?.RegisterCallback<ClickEvent>(_ => SetDisplay("totals"));
-        btnAverages?.RegisterCallback<ClickEvent>(_ => SetDisplay("averages"));
+        btnTotals?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetDisplay("totals"); });
+        btnAverages?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetDisplay("averages"); });
     }
 
     void RegisterNavButtons()
     {
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Dashboard));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Roster));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Calendar));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Standings));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Palmares));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Results));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Playoffs));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Playoffs); });
         _root.Q<Button>("NavRecords")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Records));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Records); });
         _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Market));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Market); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Finances));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Finances); });
         _root.Q<Button>("NavSponsors")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Sponsors));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Sponsors); });
         _root.Q<Button>("NavTV")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.TV));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Arena));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Messages));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
         _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Settings));
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
     }
 
     void LoadSidebarIcons()
@@ -906,5 +906,10 @@ public class StatsController : MonoBehaviour
             empty.Add(emptyLbl);
             _statsBody.Add(empty);
         }
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

@@ -4,6 +4,7 @@
 
     <Style src="Settings.uss" />
     <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
 
     <ui:VisualElement name="SettingsRoot" class="settings-root">
 
@@ -188,6 +189,42 @@
 
             </ui:VisualElement>
 
+        </ui:VisualElement>
+
+        <!-- ══ MODAL VOLVER AL MENÚ PRINCIPAL ══ -->
+        <ui:VisualElement name="MainMenuModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="MainMenuModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight"
+                        text="¿Estás seguro de que quieres volver al menú principal?" />
+                    <ui:Label class="modal-paragraph"
+                        text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="BtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL SALIR DEL JUEGO ══ -->
+        <ui:VisualElement name="ExitModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="ExitModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight"
+                        text="¿Estás seguro de que quieres salir del juego?" />
+                    <ui:Label class="modal-paragraph"
+                        text="Se cerrará la aplicación. Asegúrate de haber guardado tu progreso si lo deseas." />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="BtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

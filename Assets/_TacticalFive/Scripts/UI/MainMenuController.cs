@@ -56,28 +56,28 @@ public class MainMenuController : MonoBehaviour
         _btnExitNo        = _root.Q<Button>("BtnExitNo");
 
         // Callbacks botones principales
-        _btnManager?.RegisterCallback<ClickEvent>(_ => OnManagerClicked());
-        _btnProManager?.RegisterCallback<ClickEvent>(_ => OnProManagerClicked());
-        _btnLoadGame?.RegisterCallback<ClickEvent>(_ => OnLoadGameClicked());
-        _btnEditor?.RegisterCallback<ClickEvent>(_ => OnEditorClicked());
-        _btnExit?.RegisterCallback<ClickEvent>(_ => OnExitClicked());
-        _btnLegal?.RegisterCallback<ClickEvent>(_ => OnLegalClicked());
+        _btnManager?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnManagerClicked(); });
+        _btnProManager?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnProManagerClicked(); });
+        _btnLoadGame?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadGameClicked(); });
+        _btnEditor?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnEditorClicked(); });
+        _btnExit?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnExitClicked(); });
+        _btnLegal?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLegalClicked(); });
 
         // Callbacks modal legal
-        _btnCerrar?.RegisterCallback<ClickEvent>(_ => CloseModal());
+        _btnCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseModal(); });
         _modalOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _modalOverlay)
-                CloseModal();
+                { PlayClick(); CloseModal(); }
         });
 
         // Callbacks modal salir
-        _btnExitYes?.RegisterCallback<ClickEvent>(_ => QuitGame());
-        _btnExitNo?.RegisterCallback<ClickEvent>(_ => CloseExitModal());
+        _btnExitYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); QuitGame(); });
+        _btnExitNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseExitModal(); });
         _exitModalOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _exitModalOverlay)
-                CloseExitModal();
+                { PlayClick(); CloseExitModal(); }
         });
 
         // Hover CTA tarjetas
@@ -197,5 +197,10 @@ public class MainMenuController : MonoBehaviour
     void OnLegalClicked()
     {
         OpenModal();
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }
