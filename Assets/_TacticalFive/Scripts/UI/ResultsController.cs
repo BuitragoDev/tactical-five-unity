@@ -11,13 +11,7 @@ public class ResultsController : MonoBehaviour
     private Button _btnAction;
     private Button _btnPrevDate;
     private Button _btnNextDate;
-    private Button _btnCalendar;
     private Label _currentDateLabel;
-    private VisualElement _calendarPicker;
-    private Button _btnCalPrev;
-    private Button _btnCalNext;
-    private Label _calMonthLabel;
-    private VisualElement _calDays;
     private VisualElement _resultsBody;
 
     private ManagerData _manager;
@@ -30,13 +24,6 @@ public class ResultsController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites80 = new();
     private List<string> _gameDates = new();
     private int _currentDateIndex = 0;
-    private bool _calendarOpen = false;
-    private System.DateTime _calendarMonth;
-
-    private static readonly string[] MonthNames = {
-        "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
-    };
 
     void OnEnable()
     {
@@ -61,13 +48,7 @@ public class ResultsController : MonoBehaviour
         _btnAction = _root.Q<Button>("BtnAction");
         _btnPrevDate = _root.Q<Button>("BtnPrevDate");
         _btnNextDate = _root.Q<Button>("BtnNextDate");
-        _btnCalendar = _root.Q<Button>("BtnCalendar");
         _currentDateLabel = _root.Q<Label>("CurrentDateLabel");
-        _calendarPicker = _root.Q<VisualElement>("CalendarPicker");
-        _btnCalPrev = _root.Q<Button>("BtnCalPrev");
-        _btnCalNext = _root.Q<Button>("BtnCalNext");
-        _calMonthLabel = _root.Q<Label>("CalMonthLabel");
-        _calDays = _root.Q<VisualElement>("CalDays");
         _resultsBody = _root.Q<VisualElement>("ResultsBody");
     }
 
@@ -110,10 +91,6 @@ public class ResultsController : MonoBehaviour
         {
             _currentDateIndex = 0;
         }
-
-        _calendarMonth = _season != null
-            ? new System.DateTime(_season.year_start, 10, 1)
-            : System.DateTime.Now;
     }
 
     void RegisterCallbacks()
@@ -121,9 +98,6 @@ public class ResultsController : MonoBehaviour
         RegisterNavButtons();
         _btnPrevDate?.RegisterCallback<ClickEvent>(_ => NavigateDate(-1));
         _btnNextDate?.RegisterCallback<ClickEvent>(_ => NavigateDate(1));
-        _btnCalendar?.RegisterCallback<ClickEvent>(_ => ToggleCalendar());
-        _btnCalPrev?.RegisterCallback<ClickEvent>(_ => ChangeCalendarMonth(-1));
-        _btnCalNext?.RegisterCallback<ClickEvent>(_ => ChangeCalendarMonth(1));
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
     }
 
@@ -225,86 +199,6 @@ public class ResultsController : MonoBehaviour
         catch
         {
             _currentDateLabel.text = _gameDates[_currentDateIndex];
-        }
-    }
-
-    void ToggleCalendar()
-    {
-        _calendarOpen = !_calendarOpen;
-        _calendarPicker.style.display = _calendarOpen ? DisplayStyle.Flex : DisplayStyle.None;
-        if (_calendarOpen)
-        {
-            BuildCalendar();
-        }
-    }
-
-    void ChangeCalendarMonth(int delta)
-    {
-        _calendarMonth = _calendarMonth.AddMonths(delta);
-        BuildCalendar();
-    }
-
-    void BuildCalendar()
-    {
-        _calDays.Clear();
-        _calMonthLabel.text = $"{MonthNames[_calendarMonth.Month]} {_calendarMonth.Year}".ToUpper();
-
-        int year = _calendarMonth.Year;
-        int month = _calendarMonth.Month;
-        int daysInMonth = System.DateTime.DaysInMonth(year, month);
-        int firstDayOfWeek = (int)new System.DateTime(year, month, 1).DayOfWeek;
-        if (firstDayOfWeek == 0) firstDayOfWeek = 7;
-        firstDayOfWeek--;
-
-        int totalCells = firstDayOfWeek + daysInMonth;
-        int rows = (totalCells + 6) / 7;
-
-        for (int i = 0; i < rows * 7; i++)
-        {
-            var cell = new VisualElement();
-            cell.AddToClassList("cal-day-cell");
-
-            int dayNum = i - firstDayOfWeek + 1;
-            if (dayNum < 1 || dayNum > daysInMonth)
-            {
-                cell.AddToClassList("cal-day-cell--empty");
-            }
-            else
-            {
-                var dateStr = $"{year}-{month:D2}-{dayNum:D2}";
-                bool hasGames = _gameDates.Contains(dateStr);
-                bool isMyGame = _allGames.Any(g => g.game_date == dateStr &&
-                    (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
-                bool isSelected = dateStr == _gameDates[_currentDateIndex];
-
-                if (hasGames)
-                {
-                    cell.AddToClassList("cal-day-cell--has-games");
-                    if (isMyGame) cell.AddToClassList("cal-day-cell--my-game");
-                    if (isSelected) cell.AddToClassList("cal-day-cell--selected");
-
-                    int capturedIndex = _gameDates.IndexOf(dateStr);
-                    cell.RegisterCallback<ClickEvent>(_ => SelectCalendarDate(capturedIndex));
-                }
-
-                var numLbl = new Label();
-                numLbl.AddToClassList("cal-day-number");
-                numLbl.text = dayNum.ToString();
-                cell.Add(numLbl);
-            }
-
-            _calDays.Add(cell);
-        }
-    }
-
-    void SelectCalendarDate(int dateIndex)
-    {
-        if (dateIndex >= 0 && dateIndex < _gameDates.Count)
-        {
-            _currentDateIndex = dateIndex;
-            UpdateDateLabel();
-            ShowResults();
-            ToggleCalendar();
         }
     }
 

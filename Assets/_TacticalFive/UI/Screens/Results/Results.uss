@@ -50,97 +50,11 @@
     color: rgb(212, 160, 23);
 }
 
-.results-nav-btn--calendar {
-    width: 32px;
-    height: 32px;
-    font-size: 18px;
-    background-color: transparent;
-}
-
 .results-date-display {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 20px;
     color: rgb(255, 255, 255);
     min-width: 180px;
-    -unity-text-align: middle-center;
-}
-
-.calendar-picker {
-    background-color: rgb(28, 33, 48);
-    border: 1px solid rgb(42, 51, 71);
-    border-radius: 8px;
-    padding: 16px;
-    width: 500px;
-    align-self: center;
-    margin-bottom: 24px;
-    flex-shrink: 0;
-}
-
-.calendar-picker-header {
-    flex-direction: row;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.cal-nav-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    width: 32px;
-    height: 32px;
-    background-color: transparent;
-    border: 1px solid rgb(42, 51, 71);
-    border-radius: 4px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.cal-month-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 20px;
-    color: rgb(212, 160, 23);
-    -unity-text-transform: upper;
-    min-width: 140px;
-    -unity-text-align: middle-center;
-}
-
-.cal-day-headers {
-    flex-direction: row;
-    margin-bottom: 6px;
-}
-
-.cal-day-header {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    flex-grow: 1;
-    font-size: 12px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.cal-days {
-    flex-direction: row;
-    flex-wrap: wrap;
-}
-
-.cal-day-cell {
-    flex-basis: 14.28%;
-    min-height: 36px;
-    align-items: center;
-    justify-content: center;
-    margin: 5px;
-    border-radius: 4px;
-}
-
-.cal-day-cell--has-games {
-    background-color: rgb(42, 51, 71);
-}
-
-.cal-day-cell--selected {
-    background-color: rgb(212, 160, 23);
-}
-
-.cal-day-number {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
-    color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
 }
 
