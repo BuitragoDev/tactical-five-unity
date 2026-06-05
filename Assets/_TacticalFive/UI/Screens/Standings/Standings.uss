@@ -111,6 +111,11 @@
     border-left-color: rgb(42, 95, 201);
 }
 
+.standings-row--my-team .col-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    color: rgb(212, 160, 23);
+}
+
 .standings-row--playoff {
     border-left-width: 3px;
     border-left-color: rgb(39, 174, 96);
