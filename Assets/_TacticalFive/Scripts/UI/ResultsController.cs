@@ -27,6 +27,7 @@ public class ResultsController : MonoBehaviour
     private List<GameData> _allGames;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites80 = new();
     private List<string> _gameDates = new();
     private int _currentDateIndex = 0;
     private bool _calendarOpen = false;
@@ -72,8 +73,11 @@ public class ResultsController : MonoBehaviour
 
     void LoadData()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos) _logoSprites[s.name] = s;
+
+        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
+        foreach (var s in logos80) _logoSprites80[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -168,7 +172,7 @@ public class ResultsController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
+        if (_logoSprites80.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
@@ -363,7 +367,7 @@ public class ResultsController : MonoBehaviour
         card.style.paddingTop = 6;
         card.style.paddingBottom = 6;
         card.style.marginBottom = 16;
-        card.style.width = 900;
+        card.style.width = 1000;
         card.style.alignSelf = Align.Center;
 
         bool isMyGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
@@ -400,8 +404,8 @@ public class ResultsController : MonoBehaviour
         homeSide.Add(homeName);
 
         var homeLogo = new VisualElement();
-        homeLogo.style.width = 64;
-        homeLogo.style.height = 64;
+        homeLogo.style.width = 32;
+        homeLogo.style.height = 32;
         homeLogo.style.flexShrink = 0;
         homeLogo.style.marginLeft = 10;
         if (home != null && _logoSprites.TryGetValue(home.logo, out var hSprite))
@@ -479,8 +483,8 @@ public class ResultsController : MonoBehaviour
         awaySide.style.paddingLeft = 10;
 
         var awayLogo = new VisualElement();
-        awayLogo.style.width = 64;
-        awayLogo.style.height = 64;
+        awayLogo.style.width = 32;
+        awayLogo.style.height = 32;
         awayLogo.style.flexShrink = 0;
         awayLogo.style.marginRight = 10;
         if (away != null && _logoSprites.TryGetValue(away.logo, out var aSprite))
