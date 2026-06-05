@@ -338,7 +338,7 @@ public class CalendarController : MonoBehaviour
     void OnDaySelected(int day, string dateStr, List<GameData> games, bool rebuildCalendar = true)
     {
         _selectedDate = new System.DateTime(_currentMonthDate.Year, _currentMonthDate.Month, day);
-        _selectedDayTitle.text = $"{day} {MonthNames[_currentMonthDate.Month].ToUpper()}";
+        _selectedDayTitle.text = $"{day} {MonthNames[_currentMonthDate.Month].ToUpper()} {_currentMonthDate.Year}";
         _selectedDayGames.Clear();
 
         if (games.Count == 0)
