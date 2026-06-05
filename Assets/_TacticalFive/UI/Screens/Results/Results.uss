@@ -28,6 +28,7 @@
     justify-content: center;
     margin-bottom: 20px;
     gap: 20px;
+    flex-shrink: 0;
 }
 
 .results-nav-btn {
@@ -72,6 +73,7 @@
     width: 300px;
     align-self: center;
     margin-bottom: 24px;
+    flex-shrink: 0;
 }
 
 .calendar-picker-header {
@@ -139,10 +141,6 @@
     font-size: 14px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
-}
-
-.results-scroll {
-    flex-grow: 1;
 }
 
 .results-body {

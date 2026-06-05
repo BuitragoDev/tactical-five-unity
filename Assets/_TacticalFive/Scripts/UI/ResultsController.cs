@@ -347,6 +347,7 @@ public class ResultsController : MonoBehaviour
         var card = new VisualElement();
         card.style.flexDirection = FlexDirection.Row;
         card.style.alignItems = Align.Center;
+        card.style.flexShrink = 0;
         card.style.backgroundColor = new Color(28f/255f, 33f/255f, 48f/255f);
         card.style.borderTopLeftRadius = 8;
         card.style.borderTopRightRadius = 8;

@@ -113,7 +113,9 @@
             </ui:VisualElement>
 
             <!-- RESULTS CONTENT -->
-            <ui:VisualElement class="results-content">
+            <ui:ScrollView name="ResultsContent" class="results-content"
+                           horizontal-scrolling-enabled="false"
+                           mode="Vertical">
 
                 <!-- Date navigator -->
                 <ui:VisualElement class="results-date-nav">
@@ -143,13 +145,9 @@
                 </ui:VisualElement>
 
                 <!-- Results list -->
-                <ui:ScrollView class="results-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-                    <ui:VisualElement name="ResultsBody" class="results-body" />
-                </ui:ScrollView>
+                <ui:VisualElement name="ResultsBody" class="results-body" />
 
-            </ui:VisualElement>
+            </ui:ScrollView>
 
         </ui:VisualElement>
 
