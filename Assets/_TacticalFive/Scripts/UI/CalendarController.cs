@@ -25,6 +25,7 @@ public class CalendarController : MonoBehaviour
 
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites80 = new();
+    private Dictionary<string, Sprite> _logoSprites32 = new();
 
     private System.DateTime _currentMonthDate;
     private System.DateTime? _selectedDate;
@@ -75,6 +76,9 @@ public class CalendarController : MonoBehaviour
 
         var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
         foreach (var s in logos80) _logoSprites80[s.name] = s;
+
+        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        foreach (var s in logos32) _logoSprites32[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -212,7 +216,7 @@ public class CalendarController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetNextGameDateString(_manager.id, _myTeam.id);
         }
 
-        _btnAction.text = "← DASHBOARD";
+        _btnAction.text = "DASHBOARD";
     }
 
     void ChangeMonth(int delta)
@@ -360,7 +364,7 @@ public class CalendarController : MonoBehaviour
 
                 var awayLogo = new VisualElement();
                 awayLogo.AddToClassList("selected-game-team-logo");
-                if (away != null && _logoSprites.TryGetValue(away.logo, out var aSprite))
+                if (away != null && _logoSprites32.TryGetValue(away.logo, out var aSprite))
                     awayLogo.style.backgroundImage = new StyleBackground(aSprite);
                 teamsBlock.Add(awayLogo);
 
@@ -376,7 +380,7 @@ public class CalendarController : MonoBehaviour
 
                 var homeLogo = new VisualElement();
                 homeLogo.AddToClassList("selected-game-team-logo");
-                if (home != null && _logoSprites.TryGetValue(home.logo, out var hSprite))
+                if (home != null && _logoSprites32.TryGetValue(home.logo, out var hSprite))
                     homeLogo.style.backgroundImage = new StyleBackground(hSprite);
                 teamsBlock.Add(homeLogo);
 
