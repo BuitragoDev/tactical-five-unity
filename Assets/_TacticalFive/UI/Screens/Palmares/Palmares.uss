@@ -32,12 +32,13 @@
 .palmares-tabs {
     flex-direction: row;
     margin-bottom: 16px;
+    margin-left: 3px;
     flex-shrink: 0;
 }
 
 .palmares-tab {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 10px 24px;
@@ -46,7 +47,7 @@
     border-color: rgb(42, 51, 71);
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
-    margin-right: 4px;
+    margin-right: 6px;
 }
 
 .palmares-tab:hover {
@@ -105,7 +106,7 @@
 
 .palmares-season {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
     width: 100px;
     flex-shrink: 0;
@@ -119,15 +120,15 @@
 }
 
 .palmares-team-logo {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     margin-right: 10px;
     flex-shrink: 0;
 }
 
 .palmares-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
     flex-grow: 1;
@@ -135,7 +136,7 @@
 
 .palmares-result {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     width: 60px;
     flex-shrink: 0;
@@ -144,7 +145,7 @@
 
 .palmares-mvp {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: rgb(85, 102, 119);
     width: 150px;
     flex-shrink: 0;
@@ -153,7 +154,7 @@
 
 .palmares-mvp-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -162,7 +163,7 @@
 
 .no-data-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(58, 74, 99);
@@ -183,7 +184,7 @@
 
 .award-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
@@ -193,14 +194,14 @@
 
 .award-winner {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
 }
 
 .award-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: rgb(85, 102, 119);
     width: 60px;
     flex-shrink: 0;
@@ -227,7 +228,7 @@
 
 .quinteto-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -248,7 +249,7 @@
 
 .quinteto-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
     flex-grow: 1;
@@ -256,7 +257,7 @@
 
 .quinteto-player-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: rgb(85, 102, 119);
     width: 50px;
     flex-shrink: 0;

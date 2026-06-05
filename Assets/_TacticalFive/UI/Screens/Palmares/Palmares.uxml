@@ -9,25 +9,70 @@
                 <ui:Label text="FIVE" class="sidebar-logo-text-gold"/>
             </ui:VisualElement>
             <ui:VisualElement class="sidebar-nav">
-                <ui:Button name="NavDashboard" text="INICIO" class="nav-item"/>
-                <ui:Button name="NavRoster" text="PLANTILLA" class="nav-item"/>
-                <ui:Button name="NavCalendar" text="CALENDARIO" class="nav-item"/>
-                <ui:Button name="NavStandings" text="CLASIFICACIÓN" class="nav-item"/>
-                <ui:Button name="NavPalmares" text="PALMARES" class="nav-item nav-item--active"/>
-                <ui:Button name="NavResults" text="RESULTADOS" class="nav-item"/>
-                <ui:Button name="NavPlayoffs" text="PLAYOFFS" class="nav-item"/>
-                <ui:Button name="NavStats" text="ESTADÍSTICAS" class="nav-item"/>
-                <ui:Button name="NavRecords" text="RECORDS" class="nav-item"/>
-                <ui:Button name="NavMarket" text="MERCADO" class="nav-item"/>
-                <ui:Button name="NavFinances" text="FINANZAS" class="nav-item"/>
-                <ui:Button name="NavSponsors" text="PATROCINADORES" class="nav-item"/>
-                <ui:Button name="NavTV" text="TELEVISIÓN" class="nav-item"/>
-                <ui:Button name="NavArena" text="PABELLÓN" class="nav-item"/>
-                <ui:Button name="NavMessages" text="MENSAJES" class="nav-item"/>
-            </ui:VisualElement>
-            <ui:VisualElement class="sidebar-footer">
-                <ui:Button name="BtnReset" text="  REINICIAR PARTIDA" class="btn-reset"/>
-                <ui:Label text="v0.1.0 · Alpha" class="sidebar-version"/>
+                <ui:Button name="NavDashboard" class="nav-item">
+                    <ui:VisualElement name="NavDashboardIcon" class="nav-icon"/>
+                    <ui:Label text="Inicio" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavRoster" class="nav-item">
+                    <ui:VisualElement name="NavRosterIcon" class="nav-icon"/>
+                    <ui:Label text="Plantilla" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavCalendar" class="nav-item">
+                    <ui:VisualElement name="NavCalendarIcon" class="nav-icon"/>
+                    <ui:Label text="Calendario" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavStandings" class="nav-item">
+                    <ui:VisualElement name="NavStandingsIcon" class="nav-icon"/>
+                    <ui:Label text="Clasificación" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavPalmares" class="nav-item nav-item--active">
+                    <ui:VisualElement name="NavPalmaresIcon" class="nav-icon"/>
+                    <ui:Label text="Palmarés" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavResults" class="nav-item">
+                    <ui:VisualElement name="NavResultsIcon" class="nav-icon"/>
+                    <ui:Label text="Resultados" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavPlayoffs" class="nav-item">
+                    <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon"/>
+                    <ui:Label text="Playoffs" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavStats" class="nav-item">
+                    <ui:VisualElement name="NavStatsIcon" class="nav-icon"/>
+                    <ui:Label text="Estadísticas" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavRecords" class="nav-item">
+                    <ui:VisualElement name="NavRecordsIcon" class="nav-icon"/>
+                    <ui:Label text="Records" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavMarket" class="nav-item">
+                    <ui:VisualElement name="NavMarketIcon" class="nav-icon"/>
+                    <ui:Label text="Mercado" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavFinances" class="nav-item">
+                    <ui:VisualElement name="NavFinancesIcon" class="nav-icon"/>
+                    <ui:Label text="Finanzas" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavSponsors" class="nav-item">
+                    <ui:VisualElement name="NavSponsorsIcon" class="nav-icon"/>
+                    <ui:Label text="Patrocinadores" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavTV" class="nav-item">
+                    <ui:VisualElement name="NavTVIcon" class="nav-icon"/>
+                    <ui:Label text="Televisión" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavArena" class="nav-item">
+                    <ui:VisualElement name="NavArenaIcon" class="nav-icon"/>
+                    <ui:Label text="Pabellón" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavMessages" class="nav-item">
+                    <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
+                    <ui:Label text="Mensajes" class="nav-label"/>
+                </ui:Button>
+                <ui:Button name="NavConfig" class="nav-item">
+                    <ui:VisualElement name="NavConfigIcon" class="nav-icon"/>
+                    <ui:Label text="Configuración" class="nav-label"/>
+                </ui:Button>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement class="palmares-main">
@@ -54,7 +99,7 @@
                     <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
                     <ui:Label name="HeaderDate" text="" class="header-date-label"/>
                 </ui:VisualElement>
-                <ui:Button name="BtnAction" text="CONTINUAR →" class="btn-action"/>
+                <ui:Button name="BtnAction" text="CONTINUAR" class="btn-action"/>
             </ui:VisualElement>
             <ui:VisualElement class="palmares-content">
                 <ui:VisualElement class="palmares-tabs" style="border-left-width: 17px; border-top-width: 10px;">

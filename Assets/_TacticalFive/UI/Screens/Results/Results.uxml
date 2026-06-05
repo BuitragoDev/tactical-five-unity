@@ -109,7 +109,7 @@
                     <ui:Label name="HeaderSeason" class="header-season-label" text="" />
                     <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
                 </ui:VisualElement>
-                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR" />
             </ui:VisualElement>
 
             <!-- RESULTS CONTENT -->
