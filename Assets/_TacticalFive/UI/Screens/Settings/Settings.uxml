@@ -117,7 +117,6 @@
 
                 <!-- Title -->
                 <ui:VisualElement class="settings-title-row">
-                    <ui:Label class="settings-icon" text="⚙" />
                     <ui:Label class="settings-title" text="CONFIGURACIÓN" />
                 </ui:VisualElement>
 
@@ -132,22 +131,31 @@
 
                             <ui:VisualElement class="settings-row">
                                 <ui:Label class="settings-label" text="Volumen General" />
-                                <ui:Slider name="SliderMaster" class="settings-slider"
-                                           low-value="0" high-value="1" />
+                                <ui:VisualElement name="SliderMaster" class="custom-slider">
+                                    <ui:VisualElement class="custom-slider-track" />
+                                    <ui:VisualElement name="FillMaster" class="custom-slider-fill" />
+                                    <ui:VisualElement name="DraggerMaster" class="custom-slider-dragger" />
+                                </ui:VisualElement>
                                 <ui:Label name="LabelMaster" class="settings-value" text="100%" />
                             </ui:VisualElement>
 
                             <ui:VisualElement class="settings-row">
                                 <ui:Label class="settings-label" text="Música" />
-                                <ui:Slider name="SliderMusic" class="settings-slider"
-                                           low-value="0" high-value="1" />
+                                <ui:VisualElement name="SliderMusic" class="custom-slider">
+                                    <ui:VisualElement class="custom-slider-track" />
+                                    <ui:VisualElement name="FillMusic" class="custom-slider-fill" />
+                                    <ui:VisualElement name="DraggerMusic" class="custom-slider-dragger" />
+                                </ui:VisualElement>
                                 <ui:Label name="LabelMusic" class="settings-value" text="100%" />
                             </ui:VisualElement>
 
                             <ui:VisualElement class="settings-row">
                                 <ui:Label class="settings-label" text="Efectos" />
-                                <ui:Slider name="SliderSFX" class="settings-slider"
-                                           low-value="0" high-value="1" />
+                                <ui:VisualElement name="SliderSFX" class="custom-slider">
+                                    <ui:VisualElement class="custom-slider-track" />
+                                    <ui:VisualElement name="FillSFX" class="custom-slider-fill" />
+                                    <ui:VisualElement name="DraggerSFX" class="custom-slider-dragger" />
+                                </ui:VisualElement>
                                 <ui:Label name="LabelSFX" class="settings-value" text="100%" />
                             </ui:VisualElement>
                         </ui:VisualElement>
@@ -155,9 +163,14 @@
                         <!-- GRAPHICS -->
                         <ui:VisualElement class="settings-section">
                             <ui:Label class="settings-section-title" text="GRÁFICOS" />
-                            <ui:VisualElement class="settings-row">
+                            <ui:VisualElement class="settings-quality-row">
                                 <ui:Label class="settings-label" text="Calidad" />
-                                <ui:DropdownField name="DropdownQuality" class="settings-dropdown" />
+                                <ui:VisualElement class="settings-quality-options">
+                                    <ui:Button name="BtnQualityLow"    class="settings-quality-btn" text="Baja" />
+                                    <ui:Button name="BtnQualityMedium" class="settings-quality-btn" text="Media" />
+                                    <ui:Button name="BtnQualityHigh"   class="settings-quality-btn" text="Alta" />
+                                    <ui:Button name="BtnQualityUltra"  class="settings-quality-btn" text="Ultra" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
 
