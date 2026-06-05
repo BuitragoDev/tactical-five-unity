@@ -20,18 +20,6 @@ TextureImporter:
   - first:
       213: -4881893219409772905
     second: 14_5
-  - first:
-      213: -4687894121768713983
-    second: 14_6
-  - first:
-      213: -1799597369187350353
-    second: 14_7
-  - first:
-      213: -1967430008469538281
-    second: 14_8
-  - first:
-      213: 4384072003004625500
-    second: 14_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -143,10 +131,10 @@ TextureImporter:
       name: 14_0
       rect:
         serializedVersion: 2
-        x: 73
-        y: 93
-        width: 161
-        height: 146
+        x: 6
+        y: 109
+        width: 44
+        height: 61
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -165,10 +153,10 @@ TextureImporter:
       name: 14_1
       rect:
         serializedVersion: 2
-        x: 2
-        y: 41
-        width: 27
-        height: 37
+        x: 48
+        y: 108
+        width: 49
+        height: 50
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -187,10 +175,10 @@ TextureImporter:
       name: 14_2
       rect:
         serializedVersion: 2
-        x: 30
-        y: 41
-        width: 36
-        height: 32
+        x: 99
+        y: 109
+        width: 48
+        height: 49
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -209,10 +197,10 @@ TextureImporter:
       name: 14_3
       rect:
         serializedVersion: 2
-        x: 66
-        y: 41
-        width: 33
-        height: 31
+        x: 148
+        y: 108
+        width: 52
+        height: 50
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -231,10 +219,10 @@ TextureImporter:
       name: 14_4
       rect:
         serializedVersion: 2
-        x: 101
-        y: 41
-        width: 32
-        height: 31
+        x: 195
+        y: 109
+        width: 53
+        height: 48
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -253,10 +241,10 @@ TextureImporter:
       name: 14_5
       rect:
         serializedVersion: 2
-        x: 141
-        y: 41
-        width: 38
-        height: 38
+        x: 243
+        y: 108
+        width: 51
+        height: 50
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -267,94 +255,6 @@ TextureImporter:
       bones: []
       spriteID: 79e31b97bf7004cb0800000000000000
       internalID: -4881893219409772905
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 14_6
-      rect:
-        serializedVersion: 2
-        x: 179
-        y: 41
-        width: 29
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 101855f322141feb0800000000000000
-      internalID: -4687894121768713983
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 14_7
-      rect:
-        serializedVersion: 2
-        x: 209
-        y: 41
-        width: 28
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: fa84cd63abb8607e0800000000000000
-      internalID: -1799597369187350353
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 14_8
-      rect:
-        serializedVersion: 2
-        x: 238
-        y: 41
-        width: 32
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 71abab8c4d842b4e0800000000000000
-      internalID: -1967430008469538281
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 14_9
-      rect:
-        serializedVersion: 2
-        x: 270
-        y: 41
-        width: 28
-        height: 31
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: c5273d8424a57dc30800000000000000
-      internalID: 4384072003004625500
       vertices: []
       indices: 
       edges: []
@@ -379,10 +279,6 @@ TextureImporter:
       14_3: 5012592636484453320
       14_4: -1161698649178992294
       14_5: -4881893219409772905
-      14_6: -4687894121768713983
-      14_7: -1799597369187350353
-      14_8: -1967430008469538281
-      14_9: 4384072003004625500
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

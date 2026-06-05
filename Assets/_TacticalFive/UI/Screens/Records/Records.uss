@@ -35,7 +35,7 @@
 
 .records-tab {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 10px 24px;
@@ -44,7 +44,7 @@
     border-color: rgb(42, 51, 71);
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
-    margin-right: 4px;
+    margin-right: 8px;
 }
 
 .records-tab:hover {
@@ -110,9 +110,9 @@
 }
 
 .records-col--stat {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     width: 140px;
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
     -unity-text-transform: upper;
     -unity-text-align: middle-left;
@@ -120,25 +120,25 @@
 
 .records-col--value {
     width: 70px;
-    font-size: 14px;
+    font-size: 18px;
     -unity-text-align: middle-center;
 }
 
 .records-col--player {
     width: 260px;
-    font-size: 14px;
+    font-size: 18px;
     -unity-text-align: middle-left;
 }
 
 .records-col--team {
     width: 220px;
-    font-size: 14px;
+    font-size: 18px;
     -unity-text-align: middle-left;
 }
 
 .records-col--date {
     width: 110px;
-    font-size: 14px;
+    font-size: 18px;
     -unity-text-align: middle-center;
 }
 
@@ -146,7 +146,7 @@
 
 .record-stat {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
@@ -165,8 +165,8 @@
 }
 
 .record-player {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
     color: rgb(208, 216, 232);
     width: 260px;
     flex-shrink: 0;
@@ -174,8 +174,8 @@
 }
 
 .record-team {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
     color: rgb(122, 138, 170);
     width: 220px;
     flex-shrink: 0;
@@ -184,7 +184,7 @@
 
 .record-date {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(58, 74, 99);
     width: 120px;
     flex-shrink: 0;
@@ -202,7 +202,7 @@
 
 .records-empty-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(58, 74, 99);

@@ -8,6 +8,12 @@ TextureImporter:
   - first:
       213: -6666162448854811074
     second: 10_1
+  - first:
+      213: -8415742079868506637
+    second: 10_2
+  - first:
+      213: -5477375811331969103
+    second: 10_3
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,10 +125,10 @@ TextureImporter:
       name: 10_0
       rect:
         serializedVersion: 2
-        x: 3
-        y: 172
-        width: 42
-        height: 41
+        x: 11
+        y: 93
+        width: 72
+        height: 126
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,10 +147,10 @@ TextureImporter:
       name: 10_1
       rect:
         serializedVersion: 2
-        x: 3
-        y: 65
-        width: 294
-        height: 138
+        x: 95
+        y: 93
+        width: 71
+        height: 76
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -155,6 +161,50 @@ TextureImporter:
       bones: []
       spriteID: e3ef5f452980d73a0800000000000000
       internalID: -6666162448854811074
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 10_2
+      rect:
+        serializedVersion: 2
+        x: 179
+        y: 93
+        width: 26
+        height: 93
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3fd6128ba27453b80800000000000000
+      internalID: -8415742079868506637
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 10_3
+      rect:
+        serializedVersion: 2
+        x: 218
+        y: 39
+        width: 74
+        height: 138
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bfad3058b37cf3b0800000000000000
+      internalID: -5477375811331969103
       vertices: []
       indices: 
       edges: []
@@ -175,6 +225,8 @@ TextureImporter:
     nameFileIdTable:
       10_0: -5099292496197868168
       10_1: -6666162448854811074
+      10_2: -8415742079868506637
+      10_3: -5477375811331969103
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

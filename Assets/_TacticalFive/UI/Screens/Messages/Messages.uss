@@ -43,7 +43,7 @@
 
 .messages-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 22px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(248, 196, 64);
@@ -83,7 +83,7 @@
 
 .message-card-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
 }
@@ -97,28 +97,25 @@
     height: 32px;
     background-color: transparent;
     border-width: 0;
-    color: rgb(85, 102, 119);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    -unity-text-align: middle-center;
     padding: 0;
     margin-left: 8px;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .message-card-delete:hover {
-    color: rgb(192, 57, 43);
+    background-color: transparent;
 }
 
 .message-card-date {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: rgb(85, 102, 119);
     margin-bottom: 8px;
 }
 
 .message-card-body {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 18px;
     color: rgb(150, 160, 180);
     white-space: normal;
 }

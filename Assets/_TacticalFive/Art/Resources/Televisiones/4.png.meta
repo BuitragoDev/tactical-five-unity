@@ -26,9 +26,6 @@ TextureImporter:
   - first:
       213: -1055780868267058655
     second: 4_7
-  - first:
-      213: -8334946893605160405
-    second: 4_8
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -140,10 +137,10 @@ TextureImporter:
       name: 4_0
       rect:
         serializedVersion: 2
-        x: 12
-        y: 70
-        width: 279
-        height: 207
+        x: 1
+        y: 64
+        width: 295
+        height: 215
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -163,9 +160,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 14
-        y: 5
+        y: 4
         width: 59
-        height: 42
+        height: 43
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -230,7 +227,7 @@ TextureImporter:
         serializedVersion: 2
         x: 156
         y: 5
-        width: 11
+        width: 12
         height: 41
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -252,7 +249,7 @@ TextureImporter:
         serializedVersion: 2
         x: 172
         y: 4
-        width: 31
+        width: 30
         height: 43
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -273,9 +270,9 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 206
-        y: 5
-        width: 19
-        height: 48
+        y: 4
+        width: 20
+        height: 49
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -294,9 +291,9 @@ TextureImporter:
       name: 4_7
       rect:
         serializedVersion: 2
-        x: 227
+        x: 228
         y: 4
-        width: 35
+        width: 61
         height: 43
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -308,28 +305,6 @@ TextureImporter:
       bones: []
       spriteID: 12ad942e4ec1951f0800000000000000
       internalID: -1055780868267058655
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: 4_8
-      rect:
-        serializedVersion: 2
-        x: 266
-        y: 5
-        width: 23
-        height: 42
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: b2a3be0f5f1545c80800000000000000
-      internalID: -8334946893605160405
       vertices: []
       indices: 
       edges: []
@@ -356,7 +331,6 @@ TextureImporter:
       4_5: -4683111340605770916
       4_6: -5933289837275991918
       4_7: -1055780868267058655
-      4_8: -8334946893605160405
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
