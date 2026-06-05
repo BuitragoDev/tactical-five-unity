@@ -348,7 +348,7 @@ public class ResultsController : MonoBehaviour
         card.style.flexDirection = FlexDirection.Row;
         card.style.alignItems = Align.Center;
         card.style.flexShrink = 0;
-        card.style.backgroundColor = new Color(28f/255f, 33f/255f, 48f/255f);
+        card.style.backgroundColor = new Color(28f / 255f, 33f / 255f, 48f / 255f);
         card.style.borderTopLeftRadius = 8;
         card.style.borderTopRightRadius = 8;
         card.style.borderBottomLeftRadius = 8;
@@ -357,21 +357,23 @@ public class ResultsController : MonoBehaviour
         card.style.borderRightWidth = 1;
         card.style.borderBottomWidth = 1;
         card.style.borderLeftWidth = 1;
-        card.style.borderTopColor = new Color(42f/255f, 51f/255f, 71f/255f);
+        card.style.borderTopColor = new Color(42f / 255f, 51f / 255f, 71f / 255f);
         card.style.paddingLeft = 24;
         card.style.paddingRight = 24;
-        card.style.paddingTop = 16;
-        card.style.paddingBottom = 16;
+        card.style.paddingTop = 6;
+        card.style.paddingBottom = 6;
         card.style.marginBottom = 16;
+        card.style.width = 900;
+        card.style.alignSelf = Align.Center;
 
         bool isMyGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
         if (isMyGame)
         {
-            card.style.borderTopColor = new Color(212f/255f, 160f/255f, 23f/255f);
-            card.style.borderRightColor = new Color(212f/255f, 160f/255f, 23f/255f);
-            card.style.borderBottomColor = new Color(212f/255f, 160f/255f, 23f/255f);
-            card.style.borderLeftColor = new Color(212f/255f, 160f/255f, 23f/255f);
-            card.style.backgroundColor = new Color(212f/255f, 160f/255f, 23f/255f, 0.04f);
+            card.style.borderTopColor = new Color(212f / 255f, 160f / 255f, 23f / 255f);
+            card.style.borderRightColor = new Color(212f / 255f, 160f / 255f, 23f / 255f);
+            card.style.borderBottomColor = new Color(212f / 255f, 160f / 255f, 23f / 255f);
+            card.style.borderLeftColor = new Color(212f / 255f, 160f / 255f, 23f / 255f);
+            card.style.backgroundColor = new Color(212f / 255f, 160f / 255f, 23f / 255f, 0.04f);
         }
         if (game.is_played != 1)
         {
@@ -394,12 +396,12 @@ public class ResultsController : MonoBehaviour
         homeName.AddToClassList("results-team-name");
         homeName.text = home?.name ?? "???";
         if (isMyGame && game.home_team_id == _myTeam.id)
-            homeName.style.color = new Color(212f/255f, 160f/255f, 23f/255f);
+            homeName.style.color = new Color(212f / 255f, 160f / 255f, 23f / 255f);
         homeSide.Add(homeName);
 
         var homeLogo = new VisualElement();
-        homeLogo.style.width = 40;
-        homeLogo.style.height = 40;
+        homeLogo.style.width = 64;
+        homeLogo.style.height = 64;
         homeLogo.style.flexShrink = 0;
         homeLogo.style.marginLeft = 10;
         if (home != null && _logoSprites.TryGetValue(home.logo, out var hSprite))
@@ -477,8 +479,8 @@ public class ResultsController : MonoBehaviour
         awaySide.style.paddingLeft = 10;
 
         var awayLogo = new VisualElement();
-        awayLogo.style.width = 40;
-        awayLogo.style.height = 40;
+        awayLogo.style.width = 64;
+        awayLogo.style.height = 64;
         awayLogo.style.flexShrink = 0;
         awayLogo.style.marginRight = 10;
         if (away != null && _logoSprites.TryGetValue(away.logo, out var aSprite))
@@ -489,7 +491,7 @@ public class ResultsController : MonoBehaviour
         awayName.AddToClassList("results-team-name");
         awayName.text = away?.name ?? "???";
         if (isMyGame && game.away_team_id == _myTeam.id)
-            awayName.style.color = new Color(212f/255f, 160f/255f, 23f/255f);
+            awayName.style.color = new Color(212f / 255f, 160f / 255f, 23f / 255f);
         awaySide.Add(awayName);
 
         card.Add(awaySide);
