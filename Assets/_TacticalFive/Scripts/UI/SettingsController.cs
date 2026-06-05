@@ -8,13 +8,16 @@ public class SettingsController : MonoBehaviour
     private UIDocument _doc;
     private VisualElement _root;
 
-    private Slider _sliderMaster;
-    private Slider _sliderMusic;
-    private Slider _sliderSFX;
+    private CustomSlider _sliderMaster;
+    private CustomSlider _sliderMusic;
+    private CustomSlider _sliderSFX;
     private Label _labelMaster;
     private Label _labelMusic;
     private Label _labelSFX;
-    private DropdownField _dropdownQuality;
+    private Button _btnQualityLow;
+    private Button _btnQualityMedium;
+    private Button _btnQualityHigh;
+    private Button _btnQualityUltra;
     private Button _btnMainMenu;
     private Button _btnExit;
     private Button _btnAction;
@@ -22,11 +25,6 @@ public class SettingsController : MonoBehaviour
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
-
-    private readonly List<string> _qualityNames = new List<string>
-    {
-        "Baja", "Media", "Alta", "Ultra"
-    };
 
     void OnEnable()
     {
@@ -48,13 +46,22 @@ public class SettingsController : MonoBehaviour
 
     void CacheReferences()
     {
-        _sliderMaster = _root.Q<Slider>("SliderMaster");
-        _sliderMusic  = _root.Q<Slider>("SliderMusic");
-        _sliderSFX    = _root.Q<Slider>("SliderSFX");
+        _sliderMaster = new CustomSlider(_root.Q<VisualElement>("SliderMaster"),
+                                         _root.Q<VisualElement>("FillMaster"),
+                                         _root.Q<VisualElement>("DraggerMaster"));
+        _sliderMusic  = new CustomSlider(_root.Q<VisualElement>("SliderMusic"),
+                                         _root.Q<VisualElement>("FillMusic"),
+                                         _root.Q<VisualElement>("DraggerMusic"));
+        _sliderSFX    = new CustomSlider(_root.Q<VisualElement>("SliderSFX"),
+                                         _root.Q<VisualElement>("FillSFX"),
+                                         _root.Q<VisualElement>("DraggerSFX"));
         _labelMaster  = _root.Q<Label>("LabelMaster");
         _labelMusic   = _root.Q<Label>("LabelMusic");
         _labelSFX     = _root.Q<Label>("LabelSFX");
-        _dropdownQuality = _root.Q<DropdownField>("DropdownQuality");
+        _btnQualityLow    = _root.Q<Button>("BtnQualityLow");
+        _btnQualityMedium = _root.Q<Button>("BtnQualityMedium");
+        _btnQualityHigh   = _root.Q<Button>("BtnQualityHigh");
+        _btnQualityUltra  = _root.Q<Button>("BtnQualityUltra");
         _btnMainMenu  = _root.Q<Button>("BtnMainMenu");
         _btnExit      = _root.Q<Button>("BtnExit");
         _btnAction    = _root.Q<Button>("BtnAction");
@@ -73,29 +80,28 @@ public class SettingsController : MonoBehaviour
     {
         RegisterNavButtons();
 
-        _sliderMaster?.RegisterValueChangedCallback(evt =>
+        _sliderMaster.OnValueChanged = v =>
         {
-            AudioManager.Instance?.SetMasterVolume(evt.newValue);
+            AudioManager.Instance?.SetMasterVolume(v);
             UpdateLabels();
-        });
+        };
 
-        _sliderMusic?.RegisterValueChangedCallback(evt =>
+        _sliderMusic.OnValueChanged = v =>
         {
-            AudioManager.Instance?.SetMusicVolume(evt.newValue);
+            AudioManager.Instance?.SetMusicVolume(v);
             UpdateLabels();
-        });
+        };
 
-        _sliderSFX?.RegisterValueChangedCallback(evt =>
+        _sliderSFX.OnValueChanged = v =>
         {
-            AudioManager.Instance?.SetSFXVolume(evt.newValue);
+            AudioManager.Instance?.SetSFXVolume(v);
             UpdateLabels();
-        });
+        };
 
-        _dropdownQuality?.RegisterValueChangedCallback(evt =>
-        {
-            int idx = _dropdownQuality.index;
-            AudioManager.Instance?.SetQualityLevel(idx);
-        });
+        _btnQualityLow?.RegisterCallback<ClickEvent>(_ => SelectQuality(0));
+        _btnQualityMedium?.RegisterCallback<ClickEvent>(_ => SelectQuality(1));
+        _btnQualityHigh?.RegisterCallback<ClickEvent>(_ => SelectQuality(2));
+        _btnQualityUltra?.RegisterCallback<ClickEvent>(_ => SelectQuality(3));
 
         _btnMainMenu?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -233,9 +239,8 @@ public class SettingsController : MonoBehaviour
         _sliderSFX.SetValueWithoutNotify(am.SFXVolume);
         UpdateLabels();
 
-        _dropdownQuality.choices = _qualityNames;
         int currentQuality = QualitySettings.GetQualityLevel();
-        _dropdownQuality.index = Mathf.Clamp(currentQuality, 0, _qualityNames.Count - 1);
+        UpdateQualityButtons(Mathf.Clamp(currentQuality, 0, 3));
     }
 
     void UpdateLabels()
@@ -245,6 +250,22 @@ public class SettingsController : MonoBehaviour
 
         _labelMaster.text = $"{Mathf.RoundToInt(am.MasterVolume * 100)}%";
         _labelMusic.text  = $"{Mathf.RoundToInt(am.MusicVolume  * 100)}%";
-        _labelSFX.text   = $"{Mathf.RoundToInt(am.SFXVolume    * 100)}%";
+        _labelSFX.text    = $"{Mathf.RoundToInt(am.SFXVolume    * 100)}%";
+    }
+
+    void SelectQuality(int index)
+    {
+        AudioManager.Instance?.SetQualityLevel(index);
+        UpdateQualityButtons(index);
+    }
+
+    void UpdateQualityButtons(int activeIndex)
+    {
+        var buttons = new[] { _btnQualityLow, _btnQualityMedium, _btnQualityHigh, _btnQualityUltra };
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (buttons[i] == null) continue;
+            buttons[i].EnableInClassList("settings-quality-btn--active", i == activeIndex);
+        }
     }
 }

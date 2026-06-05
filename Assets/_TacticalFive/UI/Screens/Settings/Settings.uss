@@ -23,6 +23,7 @@
     flex-grow: 1;
     padding: 24px 30px;
     min-height: 0;
+    align-items: center;
 }
 
 /* Title row */
@@ -33,30 +34,29 @@
     padding-bottom: 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
-}
-
-.settings-icon {
-    font-size: 20px;
-    margin-right: 10px;
-    color: rgb(248, 196, 64);
+    width: 700px;
+    max-width: 100%;
 }
 
 .settings-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(248, 196, 64);
+    color: rgb(255, 255, 255);
 }
 
 /* Scroll area */
 .settings-scroll {
     flex-grow: 1;
     min-height: 0;
+    width: 700px;
+    max-width: 100%;
 }
 
 .settings-body {
     flex-direction: column;
+    align-items: stretch;
 }
 
 /* Section */
@@ -96,25 +96,60 @@
     color: rgb(208, 216, 232);
 }
 
-.settings-slider {
+/* Custom Slider */
+.custom-slider {
+    position: relative;
     flex-grow: 1;
-    height: 20px;
+    height: 24px;
+    min-height: 24px;
+    margin: 0;
     margin-right: 12px;
+    padding: 0;
 }
 
-.settings-slider .unity-base-slider__tracker {
+.custom-slider-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: 4px;
     background-color: rgb(42, 51, 71);
-    border-radius: 4px;
-    height: 6px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-left-radius: 2px;
+    border-bottom-right-radius: 2px;
 }
 
-.settings-slider .unity-base-slider__dragger {
+.custom-slider-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: 4px;
+    width: 0%;
     background-color: rgb(248, 196, 64);
-    border-radius: 50%;
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+
+.custom-slider-dragger {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
     width: 16px;
     height: 16px;
-    border-width: 0;
-    margin-top: -5px;
+    margin-left: -8px;
+    margin-top: -7px;
+    left: 0%;
+    background-color: rgb(248, 196, 64);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .settings-value {
@@ -125,33 +160,66 @@
     -unity-text-align: middle-right;
 }
 
-/* Dropdown */
-.settings-dropdown {
-    width: 200px;
+/* Quality options */
+.settings-quality-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.settings-quality-options {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.settings-quality-btn {
+    width: 70px;
     height: 36px;
+    margin-left: 6px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     border-radius: 4px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    -unity-text-transform: upper;
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.15s;
 }
 
-.settings-dropdown .unity-base-field__label {
-    display: none;
+.settings-quality-btn:hover {
+    background-color: rgb(28, 33, 48);
+    border-color: rgb(58, 74, 99);
+}
+
+.settings-quality-btn--active {
+    background-color: rgb(248, 196, 64);
+    border-color: rgb(248, 196, 64);
+    color: rgb(15, 17, 23);
+}
+
+.settings-quality-btn--active:hover {
+    background-color: rgb(255, 215, 90);
+    border-color: rgb(255, 215, 90);
 }
 
 /* Buttons */
 .settings-btn {
     height: 44px;
+    width: 300px;
+    max-width: 100%;
     border-radius: 4px;
     border-width: 0;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 1px;
+    -unity-text-align: middle-center;
     -unity-text-transform: upper;
     margin-top: 8px;
+    align-self: center;
     transition-property: background-color;
     transition-duration: 0.15s;
 }
