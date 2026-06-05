@@ -49,6 +49,7 @@ public class ResultsController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
+        LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
         Refresh();
@@ -120,8 +121,6 @@ public class ResultsController : MonoBehaviour
         _btnCalPrev?.RegisterCallback<ClickEvent>(_ => ChangeCalendarMonth(-1));
         _btnCalNext?.RegisterCallback<ClickEvent>(_ => ChangeCalendarMonth(1));
         _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
-        _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.MainMenu));
     }
 
     void RegisterNavButtons()
@@ -154,6 +153,8 @@ public class ResultsController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Arena));
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Messages));
+        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+            Debug.Log("[Results] Abrir configuración — pendiente de implementar"));
     }
 
     void Refresh()
@@ -500,5 +501,37 @@ public class ResultsController : MonoBehaviour
         var names = new[] { "", "Ene", "Feb", "Mar", "Abr", "May", "Jun",
                            "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" };
         return names[month];
+    }
+
+    void LoadSidebarIcons()
+    {
+        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        {
+            {"NavDashboardIcon", "inicio"},
+            {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"},
+            {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"},
+            {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"},
+            {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"},
+            {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"},
+            {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"},
+            {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"},
+            {"NavConfigIcon", "configuracion"}
+        };
+
+        foreach (var kv in iconMap)
+        {
+            var iconElem = _root.Q<VisualElement>(kv.Key);
+            if (iconElem == null) continue;
+            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
+            if (tex != null)
+                iconElem.style.backgroundImage = new StyleBackground(tex);
+        }
     }
 }
