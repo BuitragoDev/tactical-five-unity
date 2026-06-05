@@ -3,18 +3,30 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
-public class MessagesController : MonoBehaviour
+public class SettingsController : MonoBehaviour
 {
     private UIDocument _doc;
     private VisualElement _root;
 
+    private Slider _sliderMaster;
+    private Slider _sliderMusic;
+    private Slider _sliderSFX;
+    private Label _labelMaster;
+    private Label _labelMusic;
+    private Label _labelSFX;
+    private DropdownField _dropdownQuality;
+    private Button _btnMainMenu;
+    private Button _btnExit;
     private Button _btnAction;
-    private VisualElement _messagesBody;
 
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
-    private List<MessageData> _messages;
+
+    private readonly List<string> _qualityNames = new List<string>
+    {
+        "Baja", "Media", "Alta", "Ultra"
+    };
 
     void OnEnable()
     {
@@ -36,24 +48,71 @@ public class MessagesController : MonoBehaviour
 
     void CacheReferences()
     {
-        _btnAction = _root.Q<Button>("BtnAction");
-        _messagesBody = _root.Q<VisualElement>("MessagesBody");
+        _sliderMaster = _root.Q<Slider>("SliderMaster");
+        _sliderMusic  = _root.Q<Slider>("SliderMusic");
+        _sliderSFX    = _root.Q<Slider>("SliderSFX");
+        _labelMaster  = _root.Q<Label>("LabelMaster");
+        _labelMusic   = _root.Q<Label>("LabelMusic");
+        _labelSFX     = _root.Q<Label>("LabelSFX");
+        _dropdownQuality = _root.Q<DropdownField>("DropdownQuality");
+        _btnMainMenu  = _root.Q<Button>("BtnMainMenu");
+        _btnExit      = _root.Q<Button>("BtnExit");
+        _btnAction    = _root.Q<Button>("BtnAction");
     }
 
     void LoadData()
     {
-        _manager = DatabaseManager.Instance.GetActiveManager();
+        _manager = DatabaseManager.Instance?.GetActiveManager();
         if (_manager == null) return;
 
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        _messages = DatabaseManager.Instance.GetMessages(_manager.id);
     }
 
     void RegisterCallbacks()
     {
         RegisterNavButtons();
-        _btnAction?.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.Dashboard));
+
+        _sliderMaster?.RegisterValueChangedCallback(evt =>
+        {
+            AudioManager.Instance?.SetMasterVolume(evt.newValue);
+            UpdateLabels();
+        });
+
+        _sliderMusic?.RegisterValueChangedCallback(evt =>
+        {
+            AudioManager.Instance?.SetMusicVolume(evt.newValue);
+            UpdateLabels();
+        });
+
+        _sliderSFX?.RegisterValueChangedCallback(evt =>
+        {
+            AudioManager.Instance?.SetSFXVolume(evt.newValue);
+            UpdateLabels();
+        });
+
+        _dropdownQuality?.RegisterValueChangedCallback(evt =>
+        {
+            int idx = _dropdownQuality.index;
+            AudioManager.Instance?.SetQualityLevel(idx);
+        });
+
+        _btnMainMenu?.RegisterCallback<ClickEvent>(_ =>
+        {
+            ScreenManager.Instance.GoTo(GameScreen.MainMenu);
+        });
+
+        _btnExit?.RegisterCallback<ClickEvent>(_ =>
+        {
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
+        });
+
+        _btnAction?.RegisterCallback<ClickEvent>(_ =>
+            ScreenManager.Instance.GoTo(GameScreen.Dashboard));
     }
 
     void RegisterNavButtons()
@@ -86,13 +145,13 @@ public class MessagesController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.TV));
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             ScreenManager.Instance.GoTo(GameScreen.Arena));
-        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
-            ScreenManager.Instance.GoTo(GameScreen.Settings));
+        _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
+            ScreenManager.Instance.GoTo(GameScreen.Messages));
     }
 
     void LoadSidebarIcons()
     {
-        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        var iconMap = new Dictionary<string, string>
         {
             {"NavDashboardIcon", "inicio"},
             {"NavRosterIcon", "plantilla"},
@@ -125,7 +184,7 @@ public class MessagesController : MonoBehaviour
     void Refresh()
     {
         RefreshHeader();
-        BuildMessages();
+        RefreshSettings();
     }
 
     void RefreshHeader()
@@ -164,86 +223,28 @@ public class MessagesController : MonoBehaviour
         _btnAction.text = "DASHBOARD";
     }
 
-    void BuildMessages()
+    void RefreshSettings()
     {
-        _messagesBody.Clear();
+        var am = AudioManager.Instance;
+        if (am == null) return;
 
-        if (_messages == null || _messages.Count == 0)
-        {
-            var empty = new VisualElement();
-            empty.AddToClassList("messages-empty");
-            var lbl = new Label("No hay mensajes en la bandeja de entrada.");
-            lbl.AddToClassList("messages-empty-text");
-            empty.Add(lbl);
-            _messagesBody.Add(empty);
-            return;
-        }
+        _sliderMaster.SetValueWithoutNotify(am.MasterVolume);
+        _sliderMusic.SetValueWithoutNotify(am.MusicVolume);
+        _sliderSFX.SetValueWithoutNotify(am.SFXVolume);
+        UpdateLabels();
 
-        // Sort by date descending (newest first)
-        var sorted = _messages.OrderByDescending(m => m.created_at).ToList();
-
-        foreach (var message in sorted)
-        {
-            var card = CreateMessageCard(message);
-            _messagesBody.Add(card);
-
-            // Mark as read when viewing
-            if (message.is_read == 0)
-                DatabaseManager.Instance.MarkMessageRead(message.id);
-        }
+        _dropdownQuality.choices = _qualityNames;
+        int currentQuality = QualitySettings.GetQualityLevel();
+        _dropdownQuality.index = Mathf.Clamp(currentQuality, 0, _qualityNames.Count - 1);
     }
 
-    VisualElement CreateMessageCard(MessageData message)
+    void UpdateLabels()
     {
-        var card = new VisualElement();
-        card.AddToClassList("message-card");
-        if (message.is_read == 0)
-            card.AddToClassList("message-card--unread");
+        var am = AudioManager.Instance;
+        if (am == null) return;
 
-        // Header: title + delete button
-        var header = new VisualElement();
-        header.AddToClassList("message-card-header");
-
-        var title = new Label(message.title);
-        title.AddToClassList("message-card-title");
-        header.Add(title);
-
-        var deleteBtn = new Button();
-        deleteBtn.AddToClassList("message-card-delete");
-        var trashTex = Resources.Load<Texture2D>("Icons/papelera");
-        if (trashTex != null)
-            deleteBtn.style.backgroundImage = new StyleBackground(trashTex);
-        var msgId = message.id;
-        deleteBtn.clicked += () => DeleteMessage(msgId);
-        header.Add(deleteBtn);
-
-        card.Add(header);
-
-        // Date
-        var date = new Label();
-        date.AddToClassList("message-card-date");
-        try
-        {
-            date.text = System.DateTime.Parse(message.game_date).ToString("dd/MM/yyyy");
-        }
-        catch
-        {
-            date.text = message.game_date ?? "";
-        }
-        card.Add(date);
-
-        // Body
-        var body = new Label(message.body);
-        body.AddToClassList("message-card-body");
-        card.Add(body);
-
-        return card;
-    }
-
-    void DeleteMessage(int messageId)
-    {
-        DatabaseManager.Instance.DeleteMessage(messageId);
-        LoadData();
-        BuildMessages();
+        _labelMaster.text = $"{Mathf.RoundToInt(am.MasterVolume * 100)}%";
+        _labelMusic.text  = $"{Mathf.RoundToInt(am.MusicVolume  * 100)}%";
+        _labelSFX.text   = $"{Mathf.RoundToInt(am.SFXVolume    * 100)}%";
     }
 }

@@ -167,7 +167,7 @@ public class CalendarController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Messages));
 
         _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
-            Debug.Log("[Calendar] Abrir configuración — pendiente de implementar"));
+            ScreenManager.Instance.GoTo(GameScreen.Settings));
 
         _btnPrevMonth?.RegisterCallback<ClickEvent>(_ => ChangeMonth(-1));
         _btnNextMonth?.RegisterCallback<ClickEvent>(_ => ChangeMonth(1));
