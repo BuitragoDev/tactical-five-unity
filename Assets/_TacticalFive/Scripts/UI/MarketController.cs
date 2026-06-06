@@ -27,6 +27,12 @@ public class MarketController : MonoBehaviour
     private Label _faPlayerName;
     private Label _faNewSalary;
     private Label _faYears;
+    private VisualElement _tradeSuccessOverlay;
+    private VisualElement _tradeSuccessBox;
+    private VisualElement _tradeSuccessIcon;
+    private Label _tradeSuccessTitle;
+    private Label _tradeSuccessText1;
+    private Label _tradeSuccessText2;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -92,6 +98,14 @@ public class MarketController : MonoBehaviour
         _faPlayerName = _root.Q<Label>("FAPlayerName");
         _faNewSalary = _root.Q<Label>("FANewSalary");
         _faYears = _root.Q<Label>("FAYears");
+        _tradeSuccessOverlay = _root.Q<VisualElement>("TradeSuccessOverlay");
+        _tradeSuccessBox = _root.Q<VisualElement>("TradeSuccessBox");
+        _tradeSuccessIcon = _root.Q<VisualElement>("TradeSuccessIcon");
+        _tradeSuccessTitle = _root.Q<Label>("TradeSuccessTitle");
+        _tradeSuccessText1 = _root.Q<Label>("TradeSuccessText1");
+        _tradeSuccessText2 = _root.Q<Label>("TradeSuccessText2");
+
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
     }
 
     void LoadData()
@@ -794,9 +808,11 @@ public class MarketController : MonoBehaviour
             DatabaseManager.Instance.UpdatePlayer(p);
         }
 
-        // Create message
+        // Build names for message and modal
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
+
+        // Create message
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
@@ -811,11 +827,45 @@ public class MarketController : MonoBehaviour
             is_read = 0
         });
 
-        // Refresh
+        // Clear selections
         _selectedMyPlayers.Clear();
         _selectedOtherPlayers.Clear();
-        LoadTradeData();
-        RefreshHeader();
+
+        // Show success modal and navigate to Roster after 5 seconds
+        ShowTradeSuccessModal(myNames, otherNames);
+    }
+
+    void ShowTradeSuccessModal(string myNames, string otherNames)
+    {
+        if (_tradeSuccessTitle != null) _tradeSuccessTitle.text = "¡TRASPASO REALIZADO!";
+        if (_tradeSuccessText1 != null) _tradeSuccessText1.text = $"Has enviado a {myNames} a {_selectedTeam.name}.";
+        if (_tradeSuccessText2 != null) _tradeSuccessText2.text = $"Has recibido a {otherNames}.";
+
+        if (_tradeSuccessIcon != null)
+        {
+            var iconSprite = Resources.Load<Sprite>("Icons/contrato");
+            if (iconSprite != null)
+            {
+                _tradeSuccessIcon.style.backgroundImage = new StyleBackground(iconSprite);
+            }
+            else
+            {
+                _tradeSuccessIcon.style.backgroundImage = new StyleBackground((Sprite)null);
+            }
+        }
+
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.Flex;
+        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.Flex;
+
+        StartCoroutine(AutoCloseTradeSuccess());
+    }
+
+    System.Collections.IEnumerator AutoCloseTradeSuccess()
+    {
+        yield return new WaitForSeconds(5f);
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
+        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.None;
+        ScreenManager.Instance.GoTo(GameScreen.Roster);
     }
 
     // ═══════════════════════════════════════════

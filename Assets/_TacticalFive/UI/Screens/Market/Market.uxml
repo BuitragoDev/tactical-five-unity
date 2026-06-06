@@ -164,7 +164,6 @@
                         <!-- ══ TRADE SUMMARY ══ -->
                         <ui:VisualElement class="market-trade-summary">
                             <ui:VisualElement class="market-summary-title">
-                                <ui:Label class="market-summary-icon" text="📋" />
                                 <ui:Label class="market-summary-title-text" text="RESUMEN DE OFERTA" />
                             </ui:VisualElement>
                             <ui:VisualElement class="market-summary-grid">
@@ -226,7 +225,6 @@
                     </ui:VisualElement>
 
                 </ui:VisualElement>
-            </ui:VisualElement>
 
         </ui:VisualElement>
 
@@ -277,6 +275,16 @@
                         <ui:Label text="ACEPTAR" />
                     </ui:Button>
                 </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Trade Success Modal -->
+        <ui:VisualElement name="TradeSuccessOverlay" class="renew-modal-overlay">
+            <ui:VisualElement name="TradeSuccessBox" class="renew-modal-box renew-modal-box--positive">
+                <ui:VisualElement name="TradeSuccessIcon" class="renew-modal-icon" />
+                <ui:Label name="TradeSuccessTitle" class="renew-modal-title renew-modal-title--positive" text="¡TRASPASO REALIZADO!" />
+                <ui:Label name="TradeSuccessText1" class="renew-modal-text" text="" />
+                <ui:Label name="TradeSuccessText2" class="renew-modal-text" text="" />
             </ui:VisualElement>
         </ui:VisualElement>
 
