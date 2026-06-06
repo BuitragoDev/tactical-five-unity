@@ -281,9 +281,13 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
 }
 
+.game-card-score-home.winner {
+    color: #4ade80;
+}
+
 .game-card-score-sep {
     flex-shrink: 0;
-    font-size: 18px;
+    font-size: 28px;
     font-weight: 400;
     color: #7a8aaa;
     min-width: 14px;
@@ -295,11 +299,15 @@
 
 .game-card-score-away {
     flex: 1;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
     color: #ffffff;
     -unity-text-align: middle-right;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+}
+
+.game-card-score-away.winner {
+    color: #4ade80;
 }
 
 /* ── MVP PANEL ──────────────────────── */

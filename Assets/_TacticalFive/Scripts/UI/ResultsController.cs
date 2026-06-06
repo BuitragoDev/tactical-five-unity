@@ -330,6 +330,8 @@ public class ResultsController : MonoBehaviour
         {
             var hs = new Label();
             hs.AddToClassList("results-score-label");
+            if (game.home_score > game.away_score)
+                hs.AddToClassList("results-score-label--winner");
             hs.style.marginRight = 8;
             hs.text = game.home_score.ToString();
             scoreBox.Add(hs);
@@ -342,6 +344,8 @@ public class ResultsController : MonoBehaviour
 
             var as2 = new Label();
             as2.AddToClassList("results-score-label");
+            if (game.away_score > game.home_score)
+                as2.AddToClassList("results-score-label--winner");
             as2.text = game.away_score.ToString();
             scoreBox.Add(as2);
         }
