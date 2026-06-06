@@ -178,6 +178,8 @@
     border-right-color: rgb(42, 51, 71);
     flex-direction: column;
     overflow: hidden;
+    height: 400px;
+    min-height: 0;
 }
 
 .market-trade-panel:last-child {
@@ -212,9 +214,10 @@
 }
 
 .market-trade-panel-body {
-    height: 300px;
+    flex-grow: 1;
+    flex-shrink: 1;
     min-height: 0;
-    max-height: 300px;
+    overflow: hidden;
 }
 
 .market-trade-panel-content {
@@ -686,6 +689,7 @@
     border-bottom-color: rgb(42, 51, 71);
     background-color: rgb(28, 33, 48);
     min-height: 40px;
+    flex-shrink: 0;
 }
 
 .market-table-header-label {
