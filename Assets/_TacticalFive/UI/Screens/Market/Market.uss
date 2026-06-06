@@ -19,17 +19,10 @@
     overflow: hidden;
 }
 
-.market-scroll {
-    flex-grow: 1;
-    min-height: 0;
-}
-
-.market-scroll > .unity-scroll-view__content-viewport {
-    overflow: hidden;
-}
-
 .market-content {
     flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
     padding: 24px 28px;
     gap: 16px;
 }
