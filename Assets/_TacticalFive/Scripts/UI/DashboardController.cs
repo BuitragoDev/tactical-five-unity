@@ -677,31 +677,37 @@ public class DashboardController : MonoBehaviour
         if (homeTeam == null) return;
 
         var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
-        if (finSettings == null) return;
 
         int attendance = CalculateAttendance(game, homeTeam);
+        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : 0;
+        long ticketRevenue = (long)(attendance * ticketPrice);
 
-        long ticketRevenue = (long)(attendance * finSettings.ticket_price);
-        homeTeam.budget += ticketRevenue;
-        DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
-
-        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-        {
-            team_id = homeTeam.id,
-            season_id = _season.id,
-            record_type = FinanceRecord.TYPE_TICKET,
-            game_day = game.game_day,
-            amount = ticketRevenue
-        });
-
-        // Save attendance
+        // Always save attendance, even if financial settings are missing
         DatabaseManager.Instance.SaveGameAttendance(new GameAttendanceData
         {
             game_id = game.id,
             attendance = attendance,
-            ticket_price = (int)finSettings.ticket_price,
+            ticket_price = ticketPrice,
             revenue = ticketRevenue
         });
+
+        // Skip monetary processing if settings aren't configured
+        if (finSettings == null) return;
+
+        if (ticketRevenue > 0)
+        {
+            homeTeam.budget += ticketRevenue;
+            DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
+
+            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+            {
+                team_id = homeTeam.id,
+                season_id = _season.id,
+                record_type = FinanceRecord.TYPE_TICKET,
+                game_day = game.game_day,
+                amount = ticketRevenue
+            });
+        }
 
         // Sponsor home game income
         if (finSettings.sponsor_id > 0 && finSettings.sponsor_years_remaining > 0)
@@ -760,6 +766,12 @@ public class DashboardController : MonoBehaviour
         // Read saved attendance from database (calculated by ProcessGameFinances)
         var attendanceData = DatabaseManager.Instance.GetGameAttendance(game.id);
         int attendance = attendanceData?.attendance ?? 0;
+
+        // Fallback: calculate if missing (e.g., older saves or preseason games)
+        if (attendance == 0 && homeTeam != null)
+        {
+            attendance = CalculateAttendance(game, homeTeam);
+        }
 
         // MVP of my team (most points)
         var myStats = isHome ? result.home_stats : result.away_stats;

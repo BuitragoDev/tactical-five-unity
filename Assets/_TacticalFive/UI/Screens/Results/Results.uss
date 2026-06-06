@@ -76,6 +76,10 @@
     color: rgb(255, 255, 255);
 }
 
+.results-score-label--winner {
+    color: rgb(74, 222, 128);
+}
+
 .results-score-sep {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 18px;

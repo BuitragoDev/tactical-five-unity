@@ -190,12 +190,18 @@ public class GameResultsController : MonoBehaviour
             score.AddToClassList("game-card-score");
             var hScoreLbl = new Label { text = g.home_score.ToString() };
             hScoreLbl.AddToClassList("game-card-score-home");
+            if (g.home_score > g.away_score)
+                hScoreLbl.AddToClassList("winner");
             score.Add(hScoreLbl);
+
             var sepLbl = new Label { text = "-" };
             sepLbl.AddToClassList("game-card-score-sep");
             score.Add(sepLbl);
+
             var aScoreLbl = new Label { text = g.away_score.ToString() };
             aScoreLbl.AddToClassList("game-card-score-away");
+            if (g.away_score > g.home_score)
+                aScoreLbl.AddToClassList("winner");
             score.Add(aScoreLbl);
 
             var awaySide = new VisualElement();

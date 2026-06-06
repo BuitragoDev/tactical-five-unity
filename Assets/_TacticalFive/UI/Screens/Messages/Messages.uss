@@ -23,6 +23,7 @@
     flex-grow: 1;
     padding: 24px 30px;
     min-height: 0;
+    overflow: hidden;
 }
 
 /* Title row */
@@ -33,6 +34,7 @@
     padding-bottom: 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
+    flex-shrink: 0;
 }
 
 .messages-icon {
@@ -55,6 +57,14 @@
     min-height: 0;
 }
 
+.messages-scroll .unity-scroll-view__content-viewport {
+    overflow: hidden;
+}
+
+.messages-scroll .unity-scroll-view__content-container {
+    flex-grow: 1;
+}
+
 .messages-body {
     flex-direction: column;
 }
@@ -62,6 +72,7 @@
 /* Message Card */
 .message-card {
     flex-direction: column;
+    flex-shrink: 0;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
