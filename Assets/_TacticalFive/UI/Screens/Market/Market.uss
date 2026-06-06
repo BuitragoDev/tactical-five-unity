@@ -169,6 +169,7 @@
 
 .market-trade-panels-grid {
     flex-direction: row;
+    flex-shrink: 0;
 }
 
 .market-trade-panel {
