@@ -212,10 +212,11 @@
 
                     <!-- ══ FREE AGENTS PANEL ══ -->
                     <ui:VisualElement name="FreeAgentsPanel" class="market-fa-panel" style="display: none;">
-                        <ui:VisualElement class="market-trade-panel" style="flex-grow: 1;">
-                            <ui:VisualElement class="market-trade-panel-header">
-                                <ui:Label class="market-trade-panel-name" text="AGENTES LIBRES" />
+                        <ui:VisualElement class="market-fa-panel-inner">
+                            <ui:VisualElement class="market-fa-panel-header">
+                                <ui:Label class="market-fa-panel-name" text="AGENTES LIBRES" />
                             </ui:VisualElement>
+                            <ui:VisualElement name="FreeAgentsTableHeader" class="market-table-header" />
                             <ui:ScrollView class="market-fa-body"
                                            horizontal-scrolling-enabled="false"
                                            mode="Vertical">
@@ -252,7 +253,6 @@
         <ui:VisualElement name="FAConfirmModal" class="market-modal" style="display: none;">
             <ui:VisualElement class="market-modal-content">
                 <ui:VisualElement class="market-modal-header" style="color: rgb(39, 174, 96);">
-                    <ui:Label class="market-modal-icon" text="✅" />
                     <ui:Label class="market-modal-title" text="CONFIRMAR FICHAJE" />
                 </ui:VisualElement>
                 <ui:VisualElement class="market-modal-body">

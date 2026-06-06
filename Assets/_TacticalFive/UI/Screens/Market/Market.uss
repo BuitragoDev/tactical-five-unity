@@ -23,6 +23,7 @@
     flex-direction: column;
     flex-grow: 1;
     min-height: 0;
+    overflow: hidden;
     padding: 24px 28px;
     gap: 16px;
 }
@@ -218,13 +219,46 @@
 }
 
 .market-fa-panel {
+    width: 50%;
+    align-self: flex-start;
+    min-height: 0;
+    margin-top: 16px;
+}
+
+.market-fa-panel-inner {
+    flex-grow: 1;
+    min-height: 0;
+    flex-direction: column;
+    background-color: rgb(28, 33, 48);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.market-fa-panel-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
     flex-shrink: 0;
+}
+
+.market-fa-panel-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
 }
 
 .market-fa-body {
     flex-grow: 1;
     min-height: 0;
-    max-height: 550px;
+    overflow: hidden;
 }
 
 .market-fa-content {
@@ -472,7 +506,7 @@
 .market-fa-row {
     flex-direction: row;
     align-items: center;
-    padding: 10px 16px;
+    padding: 16px 20px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.3);
 }
@@ -482,18 +516,20 @@
 }
 
 .market-fa-col-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
     -unity-text-transform: upper;
+    align-self: center;
+    -unity-text-align: middle-left;
 }
 
 .market-fa-col-pos {
     width: 40px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: rgb(122, 138, 170);
 }
@@ -502,7 +538,7 @@
     width: 40px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: rgb(212, 160, 23);
 }
@@ -511,13 +547,13 @@
     width: 100px;
     -unity-text-align: middle-right;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 500;
     color: rgb(208, 216, 232);
 }
 
 .market-fa-col-action {
-    width: 100px;
+    width: 120px;
     -unity-text-align: middle-center;
 }
 
@@ -526,13 +562,15 @@
     border-width: 0;
     color: rgb(255, 255, 255);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: 1px;
     -unity-text-transform: upper;
-    padding: 5px 12px;
-    border-radius: 3px;
+    padding: 11px 16px;
+    border-radius: 4px;
     cursor: pointer;
+    min-height: 24px;
+    margin-left: 10px;
 }
 
 .market-btn-fa-sign:hover {
@@ -543,7 +581,7 @@
     padding: 40px 20px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
 }
@@ -576,13 +614,9 @@
     border-bottom-color: rgb(42, 51, 71);
 }
 
-.market-modal-icon {
-    font-size: 22px;
-}
-
 .market-modal-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -593,7 +627,8 @@
 }
 
 .market-modal-text {
-    font-size: 14px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
     color: rgb(208, 216, 232);
     line-height: 1.6;
     margin-bottom: 10px;
@@ -604,7 +639,8 @@
 }
 
 .market-modal-highlight {
-    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
     color: rgb(212, 160, 23);
     font-weight: 700;
     margin-bottom: 10px;
@@ -619,7 +655,7 @@
 
 .market-modal-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 600;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
@@ -628,7 +664,8 @@
 }
 
 .market-modal-value {
-    font-size: 14px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
     color: rgb(255, 255, 255);
     font-weight: 600;
 }
@@ -648,7 +685,7 @@
     border-color: rgb(42, 51, 71);
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -665,13 +702,14 @@
     border-width: 0;
     color: rgb(255, 255, 255);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     padding: 10px 20px;
     border-radius: 4px;
     cursor: pointer;
+    margin-left: 15px;
 }
 
 .market-modal-btn-confirm:hover {
@@ -724,8 +762,13 @@
 }
 
 .market-table-header-action {
-    width: 100px;
+    width: 120px;
     -unity-text-align: middle-center;
+}
+
+.market-fa-panel-inner > .market-table-header {
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 /* ── TRADE SUCCESS MODAL (copied from Roster renew modal) ── */

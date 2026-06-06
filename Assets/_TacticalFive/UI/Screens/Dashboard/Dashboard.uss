@@ -639,6 +639,7 @@
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
     margin-top: 4px;
+    min-width: 200px;
 }
 .stat-card-games {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");

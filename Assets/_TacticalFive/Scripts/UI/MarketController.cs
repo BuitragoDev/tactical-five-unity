@@ -18,6 +18,7 @@ public class MarketController : MonoBehaviour
     private VisualElement _myTableHeader;
     private VisualElement _otherTableHeader;
     private VisualElement _freeAgentsBody;
+    private VisualElement _freeAgentsTableHeader;
     private VisualElement _tradeStatus;
     private VisualElement _faRosterFullModal;
     private VisualElement _faConfirmModal;
@@ -74,6 +75,7 @@ public class MarketController : MonoBehaviour
         LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
+        InitTableHeaders();
         Refresh();
     }
 
@@ -89,6 +91,7 @@ public class MarketController : MonoBehaviour
         _myTableHeader = _root.Q<VisualElement>("MyTableHeader");
         _otherTableHeader = _root.Q<VisualElement>("OtherTableHeader");
         _freeAgentsBody = _root.Q<VisualElement>("FreeAgentsBody");
+        _freeAgentsTableHeader = _root.Q<VisualElement>("FreeAgentsTableHeader");
         _tradeStatus = _root.Q<VisualElement>("TradeStatus");
         _faRosterFullModal = _root.Q<VisualElement>("FARosterFullModal");
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
@@ -379,6 +382,10 @@ public class MarketController : MonoBehaviour
         {
             PopulateTableHeader(_otherTableHeader);
         }
+        if (_freeAgentsTableHeader != null && _freeAgentsTableHeader.childCount == 0)
+        {
+            PopulateTableHeader(_freeAgentsTableHeader);
+        }
     }
 
     void PopulateTableHeader(VisualElement header)
@@ -404,6 +411,14 @@ public class MarketController : MonoBehaviour
         salary.AddToClassList("market-table-header-label");
         salary.AddToClassList("market-table-header-salary");
         header.Add(salary);
+
+        if (header == _freeAgentsTableHeader)
+        {
+            var action = new Label("");
+            action.AddToClassList("market-table-header-label");
+            action.AddToClassList("market-table-header-action");
+            header.Add(action);
+        }
     }
 
     void BuildTradeTable()
@@ -467,6 +482,7 @@ public class MarketController : MonoBehaviour
 
         row.RegisterCallback<ClickEvent>(_ =>
         {
+            PlayClick();
             if (selectedSet.Contains(playerId))
                 selectedSet.Remove(playerId);
             else
@@ -763,7 +779,7 @@ public class MarketController : MonoBehaviour
             var confirmBtn = new Button();
             confirmBtn.AddToClassList("market-btn-confirm-trade");
             confirmBtn.text = "CONFIRMAR TRASPASO";
-            confirmBtn.clicked += OnConfirmTrade;
+            confirmBtn.clicked += () => { PlayClick(); OnConfirmTrade(); };
             content.Add(confirmBtn);
 
             box.Add(content);
@@ -884,31 +900,6 @@ public class MarketController : MonoBehaviour
             return;
         }
 
-        // Header
-        var header = new VisualElement();
-        header.AddToClassList("market-table-header");
-        var hName = new Label("JUGADOR");
-        hName.AddToClassList("market-table-header-label");
-        hName.AddToClassList("market-table-header-name");
-        header.Add(hName);
-        var hPos = new Label("POS");
-        hPos.AddToClassList("market-table-header-label");
-        hPos.AddToClassList("market-table-header-pos");
-        header.Add(hPos);
-        var hOvr = new Label("OVR");
-        hOvr.AddToClassList("market-table-header-label");
-        hOvr.AddToClassList("market-table-header-ovr");
-        header.Add(hOvr);
-        var hSalary = new Label("SALARIO");
-        hSalary.AddToClassList("market-table-header-label");
-        hSalary.AddToClassList("market-table-header-salary");
-        header.Add(hSalary);
-        var hAction = new Label("");
-        hAction.AddToClassList("market-table-header-label");
-        hAction.AddToClassList("market-table-header-action");
-        header.Add(hAction);
-        _freeAgentsBody.Add(header);
-
         foreach (var player in _freeAgents)
         {
             var row = new VisualElement();
@@ -968,7 +959,7 @@ public class MarketController : MonoBehaviour
         else if (player.age > 28) years = 3;
         else if (player.age > 25) years = 4;
         else years = 5;
-        _faYears.text = $"{years} año{(years > 1 ? "s" : "")}";
+        _faYears.text = $" {years} año{(years > 1 ? "s" : "")}";
 
         _faConfirmModal.style.display = DisplayStyle.Flex;
     }
