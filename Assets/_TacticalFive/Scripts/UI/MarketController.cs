@@ -39,7 +39,8 @@ public class MarketController : MonoBehaviour
     private bool _isFA = false;
     private PlayerData _pendingFAPlayer;
 
-    private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _headerLogos = new();
+    private Dictionary<string, Sprite> _teamGridLogos = new();
     private HashSet<int> _selectedMyPlayers = new();
     private HashSet<int> _selectedOtherPlayers = new();
 
@@ -90,8 +91,11 @@ public class MarketController : MonoBehaviour
 
     void LoadData()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
-        foreach (var s in logos) _logoSprites[s.name] = s;
+        var headerLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        foreach (var s in headerLogos) _headerLogos[s.name] = s;
+
+        var teamGridLogos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        foreach (var s in teamGridLogos) _teamGridLogos[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -207,7 +211,7 @@ public class MarketController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
+        if (_headerLogos.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
@@ -252,7 +256,7 @@ public class MarketController : MonoBehaviour
 
             var logo = new VisualElement();
             logo.AddToClassList("market-team-chip-logo");
-            if (_logoSprites.TryGetValue(team.logo, out var sprite))
+            if (_teamGridLogos.TryGetValue(team.logo, out var sprite))
                 logo.style.backgroundImage = new StyleBackground(sprite);
             chip.Add(logo);
 
@@ -330,11 +334,11 @@ public class MarketController : MonoBehaviour
         _otherTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id).Count;
 
         // Set team logos and names
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var mySprite))
+        if (_teamGridLogos.TryGetValue(_myTeam.logo, out var mySprite))
             _root.Q<VisualElement>("MyTeamLogo").style.backgroundImage = new StyleBackground(mySprite);
         _root.Q<Label>("MyTeamName").text = _myTeam.name.ToUpper();
 
-        if (_logoSprites.TryGetValue(_selectedTeam.logo, out var otherSprite))
+        if (_teamGridLogos.TryGetValue(_selectedTeam.logo, out var otherSprite))
             _root.Q<VisualElement>("OtherTeamLogo").style.backgroundImage = new StyleBackground(otherSprite);
         _root.Q<Label>("OtherTeamName").text = _selectedTeam.name.ToUpper();
 
