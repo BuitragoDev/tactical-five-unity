@@ -201,7 +201,7 @@
 
 .market-trade-panel-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -239,6 +239,7 @@
     padding: 8px 10px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.3);
+    min-height: 40px;
 }
 
 .market-trade-row:hover {
@@ -250,44 +251,60 @@
 }
 
 .market-trade-checkbox {
-    width: 16px;
-    height: 16px;
-    margin-right: 8px;
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+}
+
+.market-trade-checkbox .unity-toggle__input {
+    border-width: 1px;
+    border-color: rgb(122, 138, 170);
+    border-radius: 3px;
+    background-color: rgb(22, 26, 36);
+}
+
+.market-trade-checkbox .unity-toggle__checkmark {
+    background-color: rgb(212, 160, 23);
+    -unity-background-image-tint-color: rgb(212, 160, 23);
 }
 
 .market-trade-col-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
     -unity-text-transform: upper;
+    align-self: center;
 }
 
 .market-trade-col-pos {
     width: 40px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 600;
     color: rgb(122, 138, 170);
+    align-self: center;
 }
 
 .market-trade-col-ovr {
     width: 40px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 700;
     color: rgb(212, 160, 23);
+    align-self: center;
 }
 
 .market-trade-col-salary {
-    width: 90px;
+    width: 100px;
     -unity-text-align: middle-right;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     font-weight: 500;
     color: rgb(208, 216, 232);
+    align-self: center;
 }
 
 /* ── TRADE SUMMARY ── */
@@ -673,11 +690,12 @@
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     background-color: rgb(28, 33, 48);
+    min-height: 40px;
 }
 
 .market-table-header-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -685,8 +703,8 @@
 }
 
 .market-table-header-spacer {
-    width: 24px;
-    margin-right: 8px;
+    width: 18px;
+    margin-right: 12px;
 }
 
 .market-table-header-name {
@@ -704,7 +722,7 @@
 }
 
 .market-table-header-salary {
-    width: 90px;
+    width: 100px;
     -unity-text-align: middle-right;
 }
 
