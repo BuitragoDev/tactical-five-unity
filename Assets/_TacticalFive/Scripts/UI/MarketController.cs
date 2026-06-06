@@ -377,10 +377,6 @@ public class MarketController : MonoBehaviour
         var header = new VisualElement();
         header.AddToClassList("market-table-header");
 
-        var spacer = new VisualElement();
-        spacer.AddToClassList("market-table-header-spacer");
-        header.Add(spacer);
-
         var name = new Label("JUGADOR");
         name.AddToClassList("market-table-header-label");
         name.AddToClassList("market-table-header-name");
@@ -410,28 +406,23 @@ public class MarketController : MonoBehaviour
         row.AddToClassList("market-trade-row");
         row.userData = player;
 
-        var checkbox = new Toggle();
-        checkbox.AddToClassList("market-trade-checkbox");
-        checkbox.value = isMyTeam ? _selectedMyPlayers.Contains(player.id) : _selectedOtherPlayers.Contains(player.id);
         int playerId = player.id;
         bool myTeam = isMyTeam;
-        checkbox.RegisterCallback<ChangeEvent<bool>>(evt =>
+        var selectedSet = isMyTeam ? _selectedMyPlayers : _selectedOtherPlayers;
+
+        if (selectedSet.Contains(playerId))
+            row.AddToClassList("selected");
+
+        row.RegisterCallback<ClickEvent>(_ =>
         {
-            if (myTeam)
-            {
-                if (evt.newValue) _selectedMyPlayers.Add(playerId);
-                else _selectedMyPlayers.Remove(playerId);
-            }
+            if (selectedSet.Contains(playerId))
+                selectedSet.Remove(playerId);
             else
-            {
-                if (evt.newValue) _selectedOtherPlayers.Add(playerId);
-                else _selectedOtherPlayers.Remove(playerId);
-            }
-            row.EnableInClassList("selected", evt.newValue);
+                selectedSet.Add(playerId);
+            row.EnableInClassList("selected", selectedSet.Contains(playerId));
             UpdateSummary();
             CheckTradeStatus();
         });
-        row.Add(checkbox);
 
         var name = new Label($"{player.first_name} {player.last_name}");
         name.AddToClassList("market-trade-col-name");
