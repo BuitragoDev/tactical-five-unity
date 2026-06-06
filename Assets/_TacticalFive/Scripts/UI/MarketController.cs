@@ -41,6 +41,7 @@ public class MarketController : MonoBehaviour
 
     private Dictionary<string, Sprite> _headerLogos = new();
     private Dictionary<string, Sprite> _teamGridLogos = new();
+    private Dictionary<string, Sprite> _tradePanelLogos = new();
     private HashSet<int> _selectedMyPlayers = new();
     private HashSet<int> _selectedOtherPlayers = new();
 
@@ -91,11 +92,14 @@ public class MarketController : MonoBehaviour
 
     void LoadData()
     {
-        var headerLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var headerLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
         foreach (var s in headerLogos) _headerLogos[s.name] = s;
 
-        var teamGridLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var teamGridLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
         foreach (var s in teamGridLogos) _teamGridLogos[s.name] = s;
+
+        var tradePanelLogos = Resources.LoadAll<Sprite>("Teams/Logos/32x32/");
+        foreach (var s in tradePanelLogos) _tradePanelLogos[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -334,11 +338,11 @@ public class MarketController : MonoBehaviour
         _otherTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id).Count;
 
         // Set team logos and names
-        if (_teamGridLogos.TryGetValue(_myTeam.logo, out var mySprite))
+        if (_tradePanelLogos.TryGetValue(_myTeam.logo, out var mySprite))
             _root.Q<VisualElement>("MyTeamLogo").style.backgroundImage = new StyleBackground(mySprite);
         _root.Q<Label>("MyTeamName").text = _myTeam.name.ToUpper();
 
-        if (_teamGridLogos.TryGetValue(_selectedTeam.logo, out var otherSprite))
+        if (_tradePanelLogos.TryGetValue(_selectedTeam.logo, out var otherSprite))
             _root.Q<VisualElement>("OtherTeamLogo").style.backgroundImage = new StyleBackground(otherSprite);
         _root.Q<Label>("OtherTeamName").text = _selectedTeam.name.ToUpper();
 

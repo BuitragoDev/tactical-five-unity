@@ -129,7 +129,7 @@
 
                     <!-- ══ NEGOTIATE BUTTON ══ -->
                     <ui:Button name="BtnNegotiate" class="market-btn-negotiate" style="display: none;">
-                        <ui:Label class="market-btn-negotiate-icon" text="👥" />
+                        <ui:Label class="market-btn-negotiate-icon" text="" />
                         <ui:Label name="NegotiateBtnText" class="market-btn-negotiate-text" text="NEGOCIAR" />
                     </ui:Button>
 

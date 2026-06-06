@@ -148,7 +148,7 @@
 
 .market-btn-negotiate-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 600;
     letter-spacing: 2px;
     -unity-text-transform: upper;
@@ -163,6 +163,7 @@
     border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
+    margin-top: 12px;
 }
 
 .market-trade-panels-grid {
@@ -183,7 +184,7 @@
 .market-trade-panel-header {
     flex-direction: row;
     align-items: center;
-    gap: 10px;
+    gap: 16px;
     padding: 12px 16px;
     background-color: rgba(212, 160, 23, 0.04);
     border-bottom-width: 1px;
