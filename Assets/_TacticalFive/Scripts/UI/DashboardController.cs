@@ -104,6 +104,15 @@ public class DashboardController : MonoBehaviour
         Refresh();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            PlayClick();
+            OnActionClicked();
+        }
+    }
+
     void CacheReferences()
     {
         // Header

@@ -109,34 +109,183 @@
                     <ui:Label name="HeaderSeason" class="header-season-label" text="" />
                     <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
                 </ui:VisualElement>
-                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR" />
             </ui:VisualElement>
 
             <!-- MARKET CONTENT -->
             <ui:VisualElement class="market-content">
 
-                <!-- Tabs -->
-                <ui:VisualElement class="market-tabs">
-                    <ui:Button name="TabFreeAgents" class="market-tab market-tab--active" text="AGENTES LIBRES" />
-                    <ui:Button name="TabTrades" class="market-tab" text="INTERCAMBIOS" />
+                <!-- ══ TEAM SELECTION ══ -->
+                <ui:VisualElement class="market-section">
+                    <ui:VisualElement class="market-section-title">
+                        <ui:Label class="market-section-icon" text="🛒" />
+                        <ui:Label class="market-section-title-text" text="SELECCIONA UN EQUIPO PARA NEGOCIAR" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="TeamGrid" class="market-team-grid" />
                 </ui:VisualElement>
 
-                <!-- Free agents list -->
-                <ui:VisualElement name="FreeAgentsPanel" class="market-panel">
-                    <ui:ScrollView class="market-scroll"
-                                   horizontal-scrolling-enabled="false"
-                                   mode="Vertical">
-                        <ui:VisualElement name="FreeAgentsBody" class="market-body" />
-                    </ui:ScrollView>
+                    <!-- ══ NEGOTIATE BUTTON ══ -->
+                    <ui:Button name="BtnNegotiate" class="market-btn-negotiate" style="display: none;">
+                        <ui:Label class="market-btn-negotiate-icon" text="" />
+                        <ui:Label name="NegotiateBtnText" class="market-btn-negotiate-text" text="NEGOCIAR" />
+                    </ui:Button>
+
+                    <!-- ══ TRADE PANELS ══ -->
+                    <ui:VisualElement name="TradePanels" class="market-trade-panels" style="display: none;">
+                        <ui:VisualElement class="market-trade-panels-grid">
+                            <!-- My Team Panel -->
+                            <ui:VisualElement class="market-trade-panel">
+                                <ui:VisualElement class="market-trade-panel-header">
+                                    <ui:VisualElement name="MyTeamLogo" class="market-trade-panel-logo" />
+                                    <ui:Label name="MyTeamName" class="market-trade-panel-name" text="" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="MyTableHeader" class="market-table-header" />
+                                <ui:ScrollView class="market-trade-panel-body"
+                                               horizontal-scrolling-enabled="false"
+                                               mode="Vertical">
+                                    <ui:VisualElement name="MyTeamBody" class="market-trade-panel-content" />
+                                </ui:ScrollView>
+                            </ui:VisualElement>
+                            <!-- Other Team Panel -->
+                            <ui:VisualElement class="market-trade-panel">
+                                <ui:VisualElement class="market-trade-panel-header">
+                                    <ui:VisualElement name="OtherTeamLogo" class="market-trade-panel-logo" />
+                                    <ui:Label name="OtherTeamName" class="market-trade-panel-name" text="" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="OtherTableHeader" class="market-table-header" />
+                                <ui:ScrollView class="market-trade-panel-body"
+                                               horizontal-scrolling-enabled="false"
+                                               mode="Vertical">
+                                    <ui:VisualElement name="OtherTeamBody" class="market-trade-panel-content" />
+                                </ui:ScrollView>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <!-- ══ TRADE SUMMARY ══ -->
+                        <ui:VisualElement class="market-trade-summary">
+                            <ui:VisualElement class="market-summary-title">
+                                <ui:Label class="market-summary-title-text" text="RESUMEN DE OFERTA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="market-summary-grid">
+                                <ui:VisualElement class="market-summary-col">
+                                    <ui:Label name="SummaryMyTeamName" class="market-summary-team" text="" />
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Jugadores después" />
+                                        <ui:Label name="SummaryMyPlayerCount" class="market-summary-value" text="0" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Margen salarial" />
+                                        <ui:Label name="SummaryMySalaryMargin" class="market-summary-value market-summary-positive" text="$0" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Salario enviado" />
+                                        <ui:Label name="SummaryMySalaryOut" class="market-summary-value market-summary-negative" text="$0" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Salario recibido" />
+                                        <ui:Label name="SummaryMySalaryIn" class="market-summary-value market-summary-positive" text="$0" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="market-summary-col">
+                                    <ui:Label name="SummaryOtherTeamName" class="market-summary-team" text="" />
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Jugadores después" />
+                                        <ui:Label name="SummaryOtherPlayerCount" class="market-summary-value" text="0" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Margen salarial" />
+                                        <ui:Label name="SummaryOtherSalaryMargin" class="market-summary-value market-summary-positive" text="$0" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Salario enviado" />
+                                        <ui:Label name="SummaryOtherSalaryOut" class="market-summary-value market-summary-negative" text="$0" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-summary-row">
+                                        <ui:Label class="market-summary-label" text="Salario recibido" />
+                                        <ui:Label name="SummaryOtherSalaryIn" class="market-summary-value market-summary-positive" text="$0" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="TradeStatus" class="market-trade-status" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- ══ FREE AGENTS PANEL ══ -->
+                    <ui:VisualElement name="FreeAgentsPanel" class="market-fa-panel" style="display: none;">
+                        <ui:VisualElement class="market-trade-panel" style="flex-grow: 1;">
+                            <ui:VisualElement class="market-trade-panel-header">
+                                <ui:Label class="market-trade-panel-name" text="AGENTES LIBRES" />
+                            </ui:VisualElement>
+                            <ui:ScrollView class="market-fa-body"
+                                           horizontal-scrolling-enabled="false"
+                                           mode="Vertical">
+                                <ui:VisualElement name="FreeAgentsBody" class="market-fa-content" />
+                            </ui:ScrollView>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
-                <!-- Trades panel -->
-                <ui:VisualElement name="TradesPanel" class="market-panel" style="display: none;">
-                    <ui:Label class="no-data-text" text="SISTEMA DE INTERCAMBIOS PRÓXIMAMENTE" />
-                </ui:VisualElement>
+        </ui:VisualElement>
 
+        <!-- ══ MODALS ══ -->
+        <!-- FA Roster Full Modal -->
+        <ui:VisualElement name="FARosterFullModal" class="market-modal" style="display: none;">
+            <ui:VisualElement class="market-modal-content">
+                <ui:VisualElement class="market-modal-header" style="color: rgb(192, 57, 43);">
+                    <ui:Label class="market-modal-icon" text="❌" />
+                    <ui:Label class="market-modal-title" text="PLANTILLA COMPLETA" />
+                </ui:VisualElement>
+                <ui:VisualElement class="market-modal-body">
+                    <ui:Label class="market-modal-text" text="No puedes fichar más jugadores. Tu plantilla ya tiene el máximo de 15 jugadores." />
+                    <ui:Label class="market-modal-text" text="Debes liberar plazas antes de poder fichar." />
+                </ui:VisualElement>
+                <ui:VisualElement class="market-modal-footer">
+                    <ui:Button name="BtnCloseFARosterFull" class="market-modal-btn-confirm" style="background-color: rgb(192, 57, 43);">
+                        <ui:Label text="ENTENDIDO" />
+                    </ui:Button>
+                </ui:VisualElement>
             </ui:VisualElement>
+        </ui:VisualElement>
 
+        <!-- FA Confirm Modal -->
+        <ui:VisualElement name="FAConfirmModal" class="market-modal" style="display: none;">
+            <ui:VisualElement class="market-modal-content">
+                <ui:VisualElement class="market-modal-header" style="color: rgb(39, 174, 96);">
+                    <ui:Label class="market-modal-icon" text="✅" />
+                    <ui:Label class="market-modal-title" text="CONFIRMAR FICHAJE" />
+                </ui:VisualElement>
+                <ui:VisualElement class="market-modal-body">
+                    <ui:Label class="market-modal-text" text="Vas a fichar a" />
+                    <ui:Label name="FAPlayerName" class="market-modal-highlight" text="" />
+                    <ui:VisualElement class="market-modal-row">
+                        <ui:Label class="market-modal-label" text="Salario:" />
+                        <ui:Label name="FANewSalary" class="market-modal-value" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="market-modal-row">
+                        <ui:Label class="market-modal-label" text="Contrato:" />
+                        <ui:Label name="FAYears" class="market-modal-value" text="" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="market-modal-footer">
+                    <ui:Button name="BtnCancelFA" class="market-modal-btn-cancel">
+                        <ui:Label text="CANCELAR" />
+                    </ui:Button>
+                    <ui:Button name="BtnConfirmFA" class="market-modal-btn-confirm" style="background-color: rgb(39, 174, 96);">
+                        <ui:Label text="ACEPTAR" />
+                    </ui:Button>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- Trade Success Modal -->
+        <ui:VisualElement name="TradeSuccessOverlay" class="renew-modal-overlay">
+            <ui:VisualElement name="TradeSuccessBox" class="renew-modal-box renew-modal-box--positive">
+                <ui:VisualElement name="TradeSuccessIcon" class="renew-modal-icon" />
+                <ui:Label name="TradeSuccessTitle" class="renew-modal-title renew-modal-title--positive" text="¡TRASPASO REALIZADO!" />
+                <ui:Label name="TradeSuccessText1" class="renew-modal-text" text="" />
+                <ui:Label name="TradeSuccessText2" class="renew-modal-text" text="" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

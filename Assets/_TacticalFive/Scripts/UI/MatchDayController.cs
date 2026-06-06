@@ -87,6 +87,15 @@ public class MatchDayController : MonoBehaviour
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            PlayClick();
+            OnContinue();
+        }
+    }
+
     void RegisterCallbacks()
     {
         _btnContinue?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnContinue(); });

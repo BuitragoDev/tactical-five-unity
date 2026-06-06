@@ -72,6 +72,15 @@ public class GameResultsController : MonoBehaviour
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
 
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+        }
+    }
+
     void RegisterCallbacks()
     {
         _btnDashboard?.RegisterCallback<ClickEvent>(_ =>
