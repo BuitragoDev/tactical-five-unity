@@ -153,6 +153,16 @@ public class DatabaseManager : MonoBehaviour
 
         if (_db.Table<HistoricalPlayerStatsData>().Count() == 0)
             SeedHistoricalPlayerStats();
+        else
+        {
+            // Detect old historical stats (all total_turnovers == 0) and re-seed
+            var histStats = _db.Table<HistoricalPlayerStatsData>().ToList();
+            if (histStats.Count > 0 && histStats.All(s => s.total_turnovers == 0))
+            {
+                _db.DeleteAll<HistoricalPlayerStatsData>();
+                SeedHistoricalPlayerStats();
+            }
+        }
     }
 
     bool EnsureDb()
@@ -1371,7 +1381,7 @@ public class DatabaseManager : MonoBehaviour
                 total_assists = d.ast,
                 total_steals = d.stl,
                 total_blocks = d.blk,
-                total_turnovers = 0,
+                total_turnovers = d.tov,
                 total_fgm = d.fgm,
                 total_fga = d.fga,
                 total_fg3m = d.fg3m,
