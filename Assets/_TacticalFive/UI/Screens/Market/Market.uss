@@ -184,7 +184,6 @@
 .market-trade-panel-header {
     flex-direction: row;
     align-items: center;
-    gap: 16px;
     padding: 12px 16px;
     background-color: rgba(212, 160, 23, 0.04);
     border-bottom-width: 1px;
@@ -197,6 +196,7 @@
     height: 32px;
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
+    margin-right: 16px;
 }
 
 .market-trade-panel-name {
