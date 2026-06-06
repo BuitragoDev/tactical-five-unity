@@ -124,7 +124,10 @@ public class DatabaseManager : MonoBehaviour
             SeedLeagueSettings();
 
         if (_db.Table<PlayerData>().Count() == 0)
+        {
             SeedPlayers();
+            SeedFreeAgents();
+        }
 
         if (_db.Table<SponsorData>().Count() == 0)
             SeedSponsors();
@@ -1085,6 +1088,142 @@ public class DatabaseManager : MonoBehaviour
         {
             _db.Rollback();
             Debug.LogError($"[DB] Error insertando jugadores: {e.Message}");
+        }
+    }
+
+    public void SeedFreeAgents()
+    {
+        var freeAgents = new System.Collections.Generic.List<PlayerData>();
+
+        // Cada agente libre: (fn, ln, pos, age, nat, h, w, ovr, pot, spd, sht, thr, pas,
+        //                      drb, def, reb, ath, iq, stl, blk, sal, yrs)
+        void AddFA(string fn, string ln, string pos, int age, string nat,
+                   int h, int w, int ovr, int pot, int spd, int sht, int thr, int pas,
+                   int drb, int def, int reb, int ath, int iq, int stl, int blk,
+                   long sal, int yrs)
+        {
+            freeAgents.Add(new PlayerData
+            {
+                team_id = 0,
+                first_name = fn,
+                last_name = ln,
+                position = pos,
+                age = age,
+                nationality = nat,
+                height_cm = h,
+                weight_kg = w,
+                overall = ovr,
+                potential = pot,
+                speed = spd,
+                shooting = sht,
+                three_point = thr,
+                passing = pas,
+                dribbling = drb,
+                defense = def,
+                rebounding = reb,
+                athleticism = ath,
+                iq = iq,
+                steals = stl,
+                blocks = blk,
+                salary = sal,
+                contract_years = yrs,
+                is_rookie = 0,
+                injury_days = 0,
+                injury_type = ""
+            });
+        }
+
+        // ── PG ──
+        AddFA("Dante", "Exum", "PG", 30, "AUS", 196, 90, 74, 76, 82, 68, 58, 76, 74, 72, 50, 64, 72, 66, 22, 3000000, 1);
+        AddFA("Lonzo", "Ball", "PG", 27, "USA", 198, 86, 70, 74, 78, 64, 60, 74, 70, 70, 56, 64, 70, 68, 30, 2000000, 1);
+        AddFA("Patrick", "Beverley", "PG", 38, "USA", 185, 81, 68, 66, 76, 62, 56, 68, 64, 70, 56, 60, 70, 68, 42, 2000000, 1);
+        AddFA("Monte", "Morris", "PG", 30, "USA", 188, 83, 72, 74, 78, 66, 58, 76, 74, 68, 50, 62, 72, 62, 22, 2000000, 1);
+        AddFA("Killian", "Hayes", "PG", 24, "FRA", 195, 88, 68, 76, 78, 60, 50, 72, 70, 70, 52, 60, 68, 56, 20, 2000000, 1);
+        AddFA("Facundo", "Campazzo", "PG", 34, "ARG", 178, 79, 72, 72, 80, 66, 60, 80, 78, 70, 50, 62, 70, 70, 22, 2000000, 1);
+        AddFA("Raul", "Neto", "PG", 33, "BRA", 185, 82, 66, 66, 76, 64, 56, 70, 68, 68, 48, 60, 68, 56, 24, 2000000, 1);
+        AddFA("Ish", "Smith", "PG", 37, "USA", 183, 79, 64, 64, 80, 62, 48, 72, 70, 70, 48, 60, 70, 60, 32, 2000000, 1);
+        AddFA("Tre", "Jones", "PG", 25, "USA", 188, 84, 70, 74, 78, 64, 54, 76, 72, 70, 50, 62, 72, 58, 20, 2000000, 1);
+        AddFA("Bones", "Hyland", "PG", 24, "USA", 188, 84, 72, 78, 84, 72, 66, 70, 74, 62, 48, 60, 70, 52, 18, 2000000, 1);
+        AddFA("Jordan", "McLaughlin", "PG", 29, "USA", 183, 79, 66, 66, 82, 60, 52, 78, 74, 70, 48, 60, 70, 62, 34, 2000000, 1);
+        AddFA("Troy", "Brown", "PG", 26, "USA", 198, 95, 66, 72, 74, 64, 56, 66, 66, 64, 56, 58, 66, 54, 28, 2000000, 1);
+        AddFA("Cameron", "Payne", "PG", 31, "USA", 188, 84, 68, 70, 80, 68, 58, 72, 70, 64, 48, 60, 68, 54, 22, 2000000, 1);
+        AddFA("Wesley", "Matthews", "PG", 38, "USA", 193, 95, 62, 62, 72, 62, 58, 60, 60, 62, 52, 56, 64, 50, 30, 2000000, 1);
+
+        // ── SG ──
+        AddFA("Malik", "Beasley", "SG", 29, "USA", 193, 84, 76, 77, 78, 80, 88, 62, 74, 62, 52, 75, 70, 64, 32, 8000000, 1);
+        AddFA("Cam", "Thomas", "SG", 23, "USA", 196, 93, 84, 92, 76, 88, 84, 68, 80, 70, 60, 72, 82, 69, 36, 10000000, 3);
+        AddFA("Bradley", "Beal", "SG", 32, "USA", 191, 95, 82, 82, 84, 84, 80, 76, 78, 70, 62, 74, 82, 64, 38, 46700000, 2);
+        AddFA("Ben", "Simmons", "PG", 28, "AUS", 208, 99, 78, 76, 88, 60, 44, 84, 80, 84, 72, 88, 78, 82, 30, 8000000, 2);
+        AddFA("Buddy", "Hield", "SG", 32, "USA", 193, 95, 76, 76, 80, 82, 86, 66, 72, 60, 54, 66, 72, 58, 30, 9000000, 2);
+        AddFA("Seth", "Curry", "SG", 35, "USA", 188, 84, 72, 72, 78, 82, 84, 66, 74, 58, 52, 62, 72, 54, 22, 3000000, 1);
+        AddFA("Gary", "Harris", "SG", 30, "USA", 193, 95, 70, 72, 80, 74, 74, 64, 68, 60, 54, 62, 70, 56, 24, 2000000, 1);
+        AddFA("Lonnie", "Walker", "SG", 26, "USA", 196, 93, 72, 76, 84, 74, 72, 64, 70, 58, 50, 60, 70, 50, 24, 2000000, 1);
+        AddFA("Terrence", "Ross", "SG", 34, "USA", 198, 93, 72, 72, 80, 78, 80, 62, 68, 56, 50, 60, 70, 48, 22, 2000000, 1);
+        AddFA("Josh", "Richardson", "SG", 32, "USA", 198, 95, 72, 72, 80, 74, 72, 68, 70, 60, 54, 62, 72, 56, 30, 2000000, 1);
+        AddFA("Timothé", "Luwawu-Cabarrot", "SG", 28, "FRA", 198, 93, 68, 72, 80, 72, 68, 64, 66, 58, 52, 58, 68, 50, 20, 2000000, 1);
+        AddFA("Reggie", "Bullock", "SG", 33, "USA", 198, 95, 70, 70, 78, 76, 80, 62, 66, 56, 52, 60, 70, 48, 20, 2000000, 1);
+        AddFA("Glenn", "Robinson", "SG", 30, "USA", 198, 100, 68, 72, 80, 72, 68, 62, 66, 58, 54, 58, 68, 50, 26, 2000000, 1);
+        AddFA("Alec", "Burks", "SG", 33, "USA", 198, 97, 72, 72, 78, 76, 74, 66, 70, 58, 52, 62, 72, 52, 22, 5000000, 1);
+        AddFA("Cedi", "Osman", "SG", 30, "TUR", 201, 95, 68, 70, 76, 72, 72, 66, 68, 58, 54, 60, 68, 50, 18, 2000000, 1);
+        AddFA("Troy", "Brown", "SG", 26, "USA", 198, 95, 66, 72, 74, 64, 56, 66, 66, 64, 56, 58, 66, 54, 28, 2000000, 1);
+        AddFA("Jaden", "Ivey", "SG", 24, "USA", 190, 88, 79, 87, 88, 72, 74, 80, 86, 68, 58, 87, 72, 75, 45, 14000000, 1);
+        AddFA("Talen", "Horton-Tucker", "SG", 24, "USA", 196, 93, 72, 74, 78, 66, 56, 60, 60, 62, 54, 64, 60, 59, 30, 11500000, 2);
+        AddFA("Hamidou", "Diallo", "SG", 26, "USA", 196, 99, 70, 74, 86, 66, 50, 58, 64, 60, 62, 58, 68, 56, 36, 2000000, 1);
+        AddFA("Tony", "Snell", "SG", 33, "USA", 198, 97, 64, 64, 74, 70, 74, 58, 62, 54, 50, 58, 66, 42, 16, 2000000, 1);
+        AddFA("Rodney", "McGruder", "SG", 33, "USA", 193, 95, 64, 64, 74, 66, 62, 58, 62, 54, 50, 58, 66, 46, 20, 2000000, 1);
+        AddFA("Juan", "Hernangomez", "SG", 30, "ESP", 198, 95, 66, 70, 74, 70, 68, 60, 64, 56, 58, 60, 66, 48, 20, 2000000, 1);
+        AddFA("Terrence", "Mann", "SG", 28, "USA", 196, 95, 68, 72, 80, 70, 64, 64, 66, 58, 54, 60, 68, 52, 22, 2000000, 1);
+        AddFA("Matisse", "Thybulle", "SG", 28, "AUS", 196, 95, 68, 72, 78, 58, 50, 60, 62, 72, 58, 80, 68, 70, 56, 2000000, 1);
+
+        // ── SF ──
+        AddFA("Oshae", "Brissett", "SF", 26, "CAN", 203, 95, 72, 76, 78, 72, 66, 64, 68, 62, 60, 62, 70, 56, 30, 2000000, 1);
+        AddFA("Bojan", "Bogdanovic", "SF", 36, "CRO", 203, 104, 76, 76, 74, 82, 84, 68, 70, 56, 50, 60, 76, 48, 22, 19000000, 2);
+        AddFA("Caleb", "Martin", "SF", 29, "USA", 198, 95, 74, 76, 78, 74, 70, 66, 70, 60, 58, 64, 72, 54, 30, 6800000, 1);
+        AddFA("Troy", "Brown", "SF", 26, "USA", 198, 95, 66, 72, 74, 64, 56, 66, 66, 64, 56, 58, 66, 54, 28, 2000000, 1);
+        AddFA("Justise", "Winslow", "SF", 29, "USA", 198, 104, 66, 72, 74, 58, 42, 68, 68, 66, 62, 60, 70, 56, 36, 2000000, 1);
+        AddFA("Danuel", "House", "SF", 31, "USA", 198, 95, 68, 70, 76, 72, 68, 62, 64, 56, 54, 60, 68, 48, 22, 2000000, 1);
+        AddFA("Kelly", "Oubre", "SF", 29, "USA", 201, 95, 74, 78, 84, 74, 68, 60, 68, 58, 56, 62, 70, 50, 28, 12000000, 1);
+        AddFA("Taurean", "Prince", "SF", 31, "USA", 198, 99, 70, 72, 78, 74, 72, 64, 66, 58, 54, 60, 70, 50, 24, 4500000, 1);
+        AddFA("Rondae", "Hollis-Jefferson", "SF", 30, "USA", 198, 104, 70, 72, 78, 66, 40, 66, 70, 64, 62, 66, 70, 56, 30, 2000000, 1);
+        AddFA("Maurice", "Harkless", "SF", 32, "USA", 203, 99, 66, 66, 74, 66, 58, 60, 62, 58, 60, 58, 68, 48, 28, 2000000, 1);
+        AddFA("James", "Ennis", "SF", 34, "USA", 198, 99, 66, 66, 76, 66, 60, 60, 62, 56, 54, 58, 66, 48, 24, 2000000, 1);
+        AddFA("Justin", "Holiday", "SF", 35, "USA", 198, 95, 66, 66, 74, 70, 68, 62, 64, 56, 54, 58, 66, 48, 28, 2000000, 1);
+        AddFA("Maxwell", "Lewis", "SF", 22, "USA", 201, 95, 64, 76, 74, 64, 60, 58, 62, 54, 50, 56, 66, 50, 18, 2000000, 1);
+        AddFA("Terquavion", "Smith", "SF", 22, "USA", 193, 86, 66, 76, 82, 68, 62, 64, 70, 56, 48, 58, 68, 50, 20, 2000000, 1);
+
+        // ── PF ──
+        AddFA("Chris", "Boucher", "PF", 33, "CAN", 203, 90, 74, 74, 72, 74, 78, 60, 64, 66, 70, 75, 72, 62, 78, 4000000, 1);
+        AddFA("Dario", "Saric", "PF", 31, "CRO", 208, 102, 72, 74, 72, 72, 68, 70, 68, 64, 60, 62, 72, 54, 30, 5000000, 1);
+        AddFA("Orlando", "Robinson", "PF", 24, "USA", 211, 104, 64, 72, 66, 50, 30, 50, 50, 60, 76, 64, 58, 46, 42, 2000000, 1);
+        AddFA("Taj", "Gibson", "PF", 39, "USA", 206, 104, 66, 66, 68, 58, 28, 54, 56, 64, 78, 66, 64, 44, 52, 2000000, 1);
+        AddFA("Patrick", "Williams", "PF", 23, "USA", 201, 95, 72, 80, 76, 68, 58, 58, 62, 62, 60, 64, 72, 52, 38, 9000000, 2);
+        AddFA("Larry", "Nance", "PF", 32, "USA", 206, 104, 70, 72, 74, 64, 46, 62, 64, 64, 76, 68, 68, 50, 48, 11000000, 2);
+        AddFA("John", "Collins", "PF", 27, "USA", 206, 104, 78, 82, 78, 74, 60, 62, 64, 60, 64, 68, 76, 50, 46, 26000000, 2);
+        AddFA("Thaddeus", "Young", "PF", 36, "USA", 203, 100, 68, 68, 72, 64, 40, 64, 68, 62, 64, 62, 70, 54, 56, 2000000, 1);
+        AddFA("Noah", "Vonleh", "PF", 29, "USA", 208, 113, 62, 66, 68, 50, 28, 48, 50, 60, 76, 64, 60, 44, 42, 2000000, 1);
+        AddFA("JaMychal", "Green", "PF", 34, "USA", 203, 102, 66, 66, 68, 62, 50, 56, 58, 62, 72, 64, 64, 48, 36, 2000000, 1);
+        AddFA("Paul", "Reed", "PF", 25, "USA", 203, 100, 70, 76, 74, 60, 38, 58, 60, 62, 76, 68, 64, 48, 56, 2000000, 1);
+
+        // ── C ──
+        AddFA("Mo", "Bamba", "C", 26, "USA", 213, 104, 70, 76, 68, 58, 46, 52, 54, 62, 80, 70, 60, 42, 70, 2000000, 1);
+        AddFA("James", "Wiseman", "C", 24, "USA", 213, 109, 72, 80, 72, 64, 30, 54, 54, 64, 78, 70, 64, 46, 58, 8000000, 2);
+        AddFA("Bruno", "Fernando", "C", 26, "ANG", 206, 109, 66, 72, 70, 52, 24, 50, 50, 60, 78, 68, 60, 44, 48, 2000000, 1);
+        AddFA("Justin", "Minaya", "C", 26, "USA", 203, 102, 62, 70, 68, 54, 32, 50, 50, 60, 74, 64, 58, 42, 44, 2000000, 1);
+        AddFA("Tony", "Bradley", "C", 27, "USA", 211, 113, 66, 72, 68, 56, 24, 48, 48, 60, 76, 66, 60, 42, 50, 2000000, 1);
+        AddFA("Boban", "Marjanovic", "C", 36, "SRB", 224, 131, 66, 66, 60, 56, 30, 50, 50, 56, 82, 64, 56, 40, 44, 2000000, 1);
+
+        _db.BeginTransaction();
+        try
+        {
+            foreach (var fa in freeAgents)
+                _db.Insert(fa);
+            _db.Commit();
+            Debug.Log($"[DB] {freeAgents.Count} agentes libres insertados.");
+        }
+        catch (System.Exception e)
+        {
+            _db.Rollback();
+            Debug.LogError($"[DB] Error insertando agentes libres: {e.Message}");
         }
     }
 
