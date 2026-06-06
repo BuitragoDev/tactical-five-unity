@@ -177,6 +177,7 @@
     border-right-width: 1px;
     border-right-color: rgb(42, 51, 71);
     flex-direction: column;
+    overflow: hidden;
 }
 
 .market-trade-panel:last-child {

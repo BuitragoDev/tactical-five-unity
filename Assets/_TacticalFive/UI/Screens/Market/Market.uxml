@@ -142,6 +142,7 @@
                                     <ui:VisualElement name="MyTeamLogo" class="market-trade-panel-logo" />
                                     <ui:Label name="MyTeamName" class="market-trade-panel-name" text="" />
                                 </ui:VisualElement>
+                                <ui:VisualElement name="MyTableHeader" class="market-table-header" />
                                 <ui:ScrollView class="market-trade-panel-body"
                                                horizontal-scrolling-enabled="false"
                                                mode="Vertical">
@@ -154,6 +155,7 @@
                                     <ui:VisualElement name="OtherTeamLogo" class="market-trade-panel-logo" />
                                     <ui:Label name="OtherTeamName" class="market-trade-panel-name" text="" />
                                 </ui:VisualElement>
+                                <ui:VisualElement name="OtherTableHeader" class="market-table-header" />
                                 <ui:ScrollView class="market-trade-panel-body"
                                                horizontal-scrolling-enabled="false"
                                                mode="Vertical">

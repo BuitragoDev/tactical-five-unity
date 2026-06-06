@@ -15,6 +15,8 @@ public class MarketController : MonoBehaviour
     private VisualElement _teamGrid;
     private VisualElement _myTeamBody;
     private VisualElement _otherTeamBody;
+    private VisualElement _myTableHeader;
+    private VisualElement _otherTableHeader;
     private VisualElement _freeAgentsBody;
     private VisualElement _tradeStatus;
     private VisualElement _faRosterFullModal;
@@ -78,6 +80,8 @@ public class MarketController : MonoBehaviour
         _teamGrid = _root.Q<VisualElement>("TeamGrid");
         _myTeamBody = _root.Q<VisualElement>("MyTeamBody");
         _otherTeamBody = _root.Q<VisualElement>("OtherTeamBody");
+        _myTableHeader = _root.Q<VisualElement>("MyTableHeader");
+        _otherTableHeader = _root.Q<VisualElement>("OtherTableHeader");
         _freeAgentsBody = _root.Q<VisualElement>("FreeAgentsBody");
         _tradeStatus = _root.Q<VisualElement>("TradeStatus");
         _faRosterFullModal = _root.Q<VisualElement>("FARosterFullModal");
@@ -346,8 +350,46 @@ public class MarketController : MonoBehaviour
             _root.Q<VisualElement>("OtherTeamLogo").style.backgroundImage = new StyleBackground(otherSprite);
         _root.Q<Label>("OtherTeamName").text = _selectedTeam.name.ToUpper();
 
+        InitTableHeaders();
         BuildTradeTable();
         UpdateSummary();
+    }
+
+    void InitTableHeaders()
+    {
+        if (_myTableHeader != null && _myTableHeader.childCount == 0)
+        {
+            PopulateTableHeader(_myTableHeader);
+        }
+        if (_otherTableHeader != null && _otherTableHeader.childCount == 0)
+        {
+            PopulateTableHeader(_otherTableHeader);
+        }
+    }
+
+    void PopulateTableHeader(VisualElement header)
+    {
+        header.Clear();
+
+        var name = new Label("JUGADOR");
+        name.AddToClassList("market-table-header-label");
+        name.AddToClassList("market-table-header-name");
+        header.Add(name);
+
+        var pos = new Label("POS");
+        pos.AddToClassList("market-table-header-label");
+        pos.AddToClassList("market-table-header-pos");
+        header.Add(pos);
+
+        var ovr = new Label("OVR");
+        ovr.AddToClassList("market-table-header-label");
+        ovr.AddToClassList("market-table-header-ovr");
+        header.Add(ovr);
+
+        var salary = new Label("SALARIO");
+        salary.AddToClassList("market-table-header-label");
+        salary.AddToClassList("market-table-header-salary");
+        header.Add(salary);
     }
 
     void BuildTradeTable()
@@ -355,16 +397,12 @@ public class MarketController : MonoBehaviour
         _myTeamBody.Clear();
         _otherTeamBody.Clear();
 
-        // Header for my team
-        _myTeamBody.Add(CreateTableHeader());
         foreach (var p in _myPlayers)
         {
             var row = CreateTradeRow(p, true);
             _myTeamBody.Add(row);
         }
 
-        // Header for other team
-        _otherTeamBody.Add(CreateTableHeader());
         foreach (var p in _otherPlayers)
         {
             var row = CreateTradeRow(p, false);
