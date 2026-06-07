@@ -681,14 +681,17 @@ public class DashboardController : MonoBehaviour
 
     void ProcessGameFinances(GameData game, GameSimulator.GameResult result)
     {
+        if (_season == null) return;
+
         // Only process for home team
         var homeTeam = DatabaseManager.Instance.GetTeamById(game.home_team_id);
         if (homeTeam == null) return;
 
         var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
+        const int defaultTicketPrice = 50;
+        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : defaultTicketPrice;
 
         int attendance = CalculateAttendance(game, homeTeam);
-        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : 0;
         long ticketRevenue = (long)(attendance * ticketPrice);
 
         // Always save attendance, even if financial settings are missing
@@ -699,9 +702,6 @@ public class DashboardController : MonoBehaviour
             ticket_price = ticketPrice,
             revenue = ticketRevenue
         });
-
-        // Skip monetary processing if settings aren't configured
-        if (finSettings == null) return;
 
         if (ticketRevenue > 0)
         {
@@ -717,6 +717,9 @@ public class DashboardController : MonoBehaviour
                 amount = ticketRevenue
             });
         }
+
+        // Skip sponsor/TV processing if settings aren't configured
+        if (finSettings == null) return;
 
         // Sponsor home game income
         if (finSettings.sponsor_id > 0 && finSettings.sponsor_years_remaining > 0)

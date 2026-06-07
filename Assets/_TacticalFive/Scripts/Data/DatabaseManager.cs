@@ -221,6 +221,13 @@ public class DatabaseManager : MonoBehaviour
         _db.Update(settings);
     }
 
+    public void SaveTeamSettings(TeamSettingsData settings)
+    {
+        if (!EnsureDb()) return;
+        if (settings.team_id <= 0) return;
+        _db.InsertOrReplace(settings);
+    }
+
     public void UpdateTeamBudget(int teamId, long newBudget)
     {
         if (!EnsureDb()) return;

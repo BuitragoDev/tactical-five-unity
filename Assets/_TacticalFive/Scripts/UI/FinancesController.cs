@@ -114,6 +114,18 @@ public class FinancesController : MonoBehaviour
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         _teamSettings = DatabaseManager.Instance.GetTeamSettings(_myTeam.id);
+
+        if (_teamSettings == null)
+        {
+            _teamSettings = new TeamSettingsData
+            {
+                team_id = _myTeam.id,
+                ticket_price = 50,
+                subscription_price = 2100
+            };
+            DatabaseManager.Instance.SaveTeamSettings(_teamSettings);
+        }
+
         _financeRecords = _season != null
             ? DatabaseManager.Instance.GetFinanceRecords(_myTeam.id, _season.id)
             : new List<FinanceRecord>();
@@ -212,7 +224,7 @@ public class FinancesController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         var logoDict = new Dictionary<string, Sprite>();
         foreach (var s in logos) logoDict[s.name] = s;
 
@@ -361,9 +373,10 @@ public class FinancesController : MonoBehaviour
         _selectedTicketBtn = btn;
         btn.AddToClassList("price-btn--selected");
 
-        var settings = _teamSettings ?? new TeamSettingsData();
+        var settings = _teamSettings ?? new TeamSettingsData { team_id = _myTeam.id };
         settings.ticket_price = price;
-        DatabaseManager.Instance.UpdateTeamSettings(settings);
+        settings.team_id = _myTeam.id;
+        DatabaseManager.Instance.SaveTeamSettings(settings);
     }
 
     void SelectSubscriptionPrice(int price, Button btn)
@@ -373,9 +386,10 @@ public class FinancesController : MonoBehaviour
         _selectedSubBtn = btn;
         btn.AddToClassList("price-btn--selected");
 
-        var settings = _teamSettings ?? new TeamSettingsData();
+        var settings = _teamSettings ?? new TeamSettingsData { team_id = _myTeam.id };
         settings.subscription_price = price;
-        DatabaseManager.Instance.UpdateTeamSettings(settings);
+        settings.team_id = _myTeam.id;
+        DatabaseManager.Instance.SaveTeamSettings(settings);
     }
 
     /* ═══════════════════════════════════════════
