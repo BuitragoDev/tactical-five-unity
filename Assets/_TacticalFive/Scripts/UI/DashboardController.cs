@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -404,7 +405,13 @@ public class DashboardController : MonoBehaviour
         if (_season == null || _isLoading) return;
 
         ShowLoading();
-        _root.schedule.Execute(ProcessGameDay).ExecuteLater(80);
+        StartCoroutine(DelayedProcessGameDay());
+    }
+
+    System.Collections.IEnumerator DelayedProcessGameDay()
+    {
+        yield return new UnityEngine.WaitForEndOfFrame();
+        ProcessGameDay();
     }
 
     void ProcessGameDay()
