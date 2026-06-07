@@ -173,12 +173,12 @@ public class SponsorsController : MonoBehaviour
         _btnAction.text = "DASHBOARD";
     }
 
-    // Sponsors can only be signed in October (game day 1-10, season starts Oct 22)
+    // Sponsors can only be signed in September (preseason) or October (days 1-10)
     bool IsOctober()
     {
         if (_season == null) return false;
         int day = _season.current_game_day;
-        return day >= 1 && day <= 10;
+        return day <= 10;
     }
 
     void BuildCurrentSponsorBanner()
