@@ -19,7 +19,7 @@ public class DashboardController : MonoBehaviour
     private Label _headerDate;
     private Button _btnAction;
     private VisualElement _loadingSpinner;
-    private IScheduledItem _spinScheduler;
+    private IVisualElementScheduledItem _spinScheduler;
     private bool _isLoading;
 
     // Último partido
