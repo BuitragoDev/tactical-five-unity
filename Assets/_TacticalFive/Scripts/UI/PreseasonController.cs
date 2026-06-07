@@ -437,7 +437,12 @@ public class PreseasonController : MonoBehaviour
 
             Debug.Log($"[Preseason] Calendario generado: {count} partidos.");
 
-            // Welcome message (first time only)
+            // Welcome message (first time only) — usar fecha del primer partido del equipo
+            var firstGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
+            string firstGameDate = firstGame != null
+                ? firstGame.game_date
+                : System.DateTime.Now.ToString("yyyy-MM-dd");
+
             var welcomeMsg = new MessageData
             {
                 manager_id = _manager.id,
@@ -445,8 +450,8 @@ public class PreseasonController : MonoBehaviour
                 sender_id = 0,
                 title = $"Bienvenido a {_myTeam.name}",
                 body = $"Hola {_manager.name}, bienvenido como nuevo entrenador de {_myTeam.name}. La directiva confía en ti para llevar al equipo lo más alto posible. ¡Buena suerte en esta temporada!",
-                game_day = 0,
-                game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
+                game_day = firstGame != null ? firstGame.game_day : 0,
+                game_date = firstGameDate,
                 created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                 is_read = 0

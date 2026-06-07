@@ -21,7 +21,7 @@ public class StandingsController : MonoBehaviour
 
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites32 = new();
-    private Dictionary<string, Sprite> _logoSprites80 = new();
+    private Dictionary<string, Sprite> _logoSprites64 = new();
     private string _currentFilter = "East";
 
     void OnEnable()
@@ -58,8 +58,8 @@ public class StandingsController : MonoBehaviour
         var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos32) _logoSprites32[s.name] = s;
 
-        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
-        foreach (var s in logos80) _logoSprites80[s.name] = s;
+        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -126,7 +126,7 @@ public class StandingsController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites80.TryGetValue(_myTeam.logo, out var sprite))
+        if (_logoSprites64.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();

@@ -21,6 +21,7 @@ public class RecordsController : MonoBehaviour
     private List<TeamData> _allTeams;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites64 = new();
 
     private string _currentFilter = "team";
 
@@ -74,6 +75,9 @@ public class RecordsController : MonoBehaviour
     {
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos) _logoSprites[s.name] = s;
+
+        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -183,7 +187,7 @@ public class RecordsController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
+        if (_logoSprites64.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();

@@ -272,7 +272,7 @@ public class RosterController : MonoBehaviour
 
     void LoadData()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();

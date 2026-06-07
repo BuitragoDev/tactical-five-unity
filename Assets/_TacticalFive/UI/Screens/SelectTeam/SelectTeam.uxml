@@ -79,6 +79,10 @@
                             <ui:VisualElement name="DetailFacilities" class="stars-wrap"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">
+                            <ui:Label text="Objetivo temporada" class="detail-row-label"/>
+                            <ui:Label name="DetailObjective" text="" class="detail-row-value"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="detail-row">
                             <ui:Label text="Presupuesto" class="detail-row-label"/>
                             <ui:Label name="DetailBudget" text="" class="detail-row-value"/>
                         </ui:VisualElement>

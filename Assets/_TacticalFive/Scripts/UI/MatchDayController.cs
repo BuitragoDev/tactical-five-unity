@@ -145,7 +145,7 @@ public class MatchDayController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        SetLogo(_root.Q<VisualElement>("HeaderTeamLogo"), _myTeam.logo, "80x80");
+        SetLogo(_root.Q<VisualElement>("HeaderTeamLogo"), _myTeam.logo, "64x64");
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
         _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";

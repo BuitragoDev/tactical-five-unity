@@ -26,6 +26,7 @@ public class CalendarController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites80 = new();
     private Dictionary<string, Sprite> _logoSprites32 = new();
+    private Dictionary<string, Sprite> _logoSprites64 = new();
 
     private System.DateTime _currentMonthDate;
     private System.DateTime? _selectedDate;
@@ -79,6 +80,9 @@ public class CalendarController : MonoBehaviour
 
         var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos32) _logoSprites32[s.name] = s;
+
+        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -191,7 +195,7 @@ public class CalendarController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
+        if (_logoSprites64.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();

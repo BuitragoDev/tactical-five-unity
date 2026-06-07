@@ -42,6 +42,7 @@ public class SelectTeamController : MonoBehaviour
     private Label _detailSalaryMargin;
     private VisualElement _detailReputation;
     private VisualElement _detailFacilities;
+    private Label _detailObjective;
     private Label _detailAttack;
     private Label _detailDefense;
     private Label _detailOverall;
@@ -126,6 +127,7 @@ public class SelectTeamController : MonoBehaviour
         _detailSalaryMargin = _root.Q<Label>("DetailSalaryMargin");
         _detailReputation = _root.Q<VisualElement>("DetailReputation");
         _detailFacilities = _root.Q<VisualElement>("DetailFacilities");
+        _detailObjective = _root.Q<Label>("DetailObjective");
         _detailAttack = _root.Q<Label>("DetailAttack");
         _detailDefense = _root.Q<Label>("DetailDefense");
         _detailOverall = _root.Q<Label>("DetailOverall");
@@ -310,6 +312,9 @@ public class SelectTeamController : MonoBehaviour
         // Estrellas
         BuildStars(_detailReputation, team.reputation);
         BuildStars(_detailFacilities, team.facilities);
+
+        // Objetivo temporada
+        _detailObjective.text = string.IsNullOrEmpty(team.objective) ? "—" : team.objective;
 
         // Camisetas
         if (_jerseySprites.TryGetValue(team.jersey_home, out var home))
