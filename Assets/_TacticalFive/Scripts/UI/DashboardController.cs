@@ -650,7 +650,52 @@ public class DashboardController : MonoBehaviour
             baseAttendance = homeTeam.capacity * (0.55f + winPct * 0.40f);
         }
 
-        return (int)Mathf.Min(homeTeam.capacity, baseAttendance * randomFactor);
+        // Ticket price elasticity: more expensive → fewer attendees
+        // Smooth exponential decay from 1.0 at $30 down to ~0.20 at $500
+        var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
+        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : 50;
+        float priceFactor = Mathf.Clamp(Mathf.Exp(-(ticketPrice - 30f) / 150f), 0.20f, 1.0f);
+
+        // Objective compliance: not on track for the team's season target
+        float objectiveFactor = GetObjectiveComplianceFactor(homeTeam, teamGames);
+
+        return (int)Mathf.Min(homeTeam.capacity, baseAttendance * randomFactor * priceFactor * objectiveFactor);
+    }
+
+    float GetObjectiveComplianceFactor(TeamData homeTeam, List<GameData> teamGames)
+    {
+        if (string.IsNullOrEmpty(homeTeam.objective)) return 1.0f;
+        if (homeTeam.objective == "Zona tranquila") return 1.0f;
+
+        int targetPos = 0;
+        if (homeTeam.objective == "Campeonato") targetPos = 1;
+        else if (homeTeam.objective == "Playoffs") targetPos = 6;
+        else if (homeTeam.objective == "Play-In") targetPos = 10;
+        else return 1.0f;
+
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var conferenceTeams = allTeams.Where(t => t.conference == homeTeam.conference).ToList();
+
+        var ranked = conferenceTeams.Select(t =>
+        {
+            var tGames = teamGames.Where(g => g.home_team_id == t.id || g.away_team_id == t.id).ToList();
+            int w = tGames.Count(g =>
+                (g.home_team_id == t.id && g.home_score > g.away_score) ||
+                (g.away_team_id == t.id && g.away_score > g.home_score));
+            return new { Team = t, Wins = w };
+        })
+        .OrderByDescending(x => x.Wins)
+        .ThenBy(x => x.Team.id)
+        .ToList();
+
+        int currentPos = ranked.FindIndex(x => x.Team.id == homeTeam.id) + 1;
+        if (currentPos <= 0) return 1.0f;
+
+        int gap = currentPos - targetPos;
+        if (gap <= 0) return 1.0f;
+
+        // 1 pos off → 0.90, 5 pos off → 0.50, 10+ pos off → 0.30
+        return Mathf.Clamp(1.0f - gap * 0.06f, 0.30f, 1.0f);
     }
 
     void UpdateFanConfidence(GameData game, GameSimulator.GameResult result)
