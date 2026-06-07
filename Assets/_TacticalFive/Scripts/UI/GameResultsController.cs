@@ -334,6 +334,7 @@ public class GameResultsController : MonoBehaviour
     IEnumerator NavigateToDashboard()
     {
         yield return new WaitForEndOfFrame();
+        yield return new WaitForSecondsRealtime(0.15f);
         HideLoading();
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }
