@@ -607,7 +607,7 @@ public class DatabaseManager : MonoBehaviour
         try
         {
             foreach (var g in games)
-                _db.InsertOrReplace(g);
+                _db.Insert(g);
             _db.Commit();
             Debug.Log($"[DB] {games.Count} partidos Play-In guardados.");
         }
@@ -625,7 +625,7 @@ public class DatabaseManager : MonoBehaviour
         try
         {
             foreach (var g in games)
-                _db.InsertOrReplace(g);
+                _db.Insert(g);
             _db.Commit();
             Debug.Log($"[DB] {games.Count} partidos de Playoff guardados.");
         }
@@ -1887,8 +1887,16 @@ public class DatabaseManager : MonoBehaviour
 
     public void UpdateHistoricalPlayerStatsFromSeason(int seasonId, int managerId)
     {
-        var seasonStats = _db.Table<PlayerGameStats>()
-            .Where(s => _db.Table<GameData>().Any(g => g.id == s.game_id && g.season_id == seasonId && g.is_played == 1))
+        // Load all played game IDs for this season (simple query that SQLite-net can compile)
+        var playedGames = _db.Table<GameData>()
+            .Where(g => g.season_id == seasonId && g.is_played == 1)
+            .ToList();
+        var gameIdSet = new HashSet<int>(playedGames.Select(g => g.id));
+
+        // Load all player game stats and filter/aggregate in memory
+        var allStats = _db.Table<PlayerGameStats>().ToList();
+        var seasonStats = allStats
+            .Where(s => gameIdSet.Contains(s.game_id))
             .GroupBy(s => s.player_id)
             .Select(g => new
             {
