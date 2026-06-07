@@ -216,9 +216,15 @@
 .loading-spinner {
     width: 28px;
     height: 28px;
-    border: 3px solid rgba(122, 138, 170, 0.12);
+    border-top-width: 3px;
+    border-right-width: 3px;
+    border-bottom-width: 3px;
+    border-left-width: 3px;
     border-top-color: rgb(212, 160, 23);
-    border-radius: 50%;
+    border-right-color: rgba(122, 138, 170, 0.12);
+    border-bottom-color: rgba(122, 138, 170, 0.12);
+    border-left-color: rgba(122, 138, 170, 0.12);
+    border-radius: 14px;
     flex-shrink: 0;
     margin: auto 10px auto 0;
 }
