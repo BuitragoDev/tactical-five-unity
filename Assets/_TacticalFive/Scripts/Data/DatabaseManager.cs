@@ -583,6 +583,8 @@ public class DatabaseManager : MonoBehaviour
                 .Where(g => g.manager_id == managerId
                         && g.game_type == "regular"
                         && g.is_played == 1)
+                .OrderBy(g => g.game_day)
+                .ThenBy(g => g.id)
                 .ToList();
     }
 
