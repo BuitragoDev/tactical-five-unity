@@ -937,15 +937,19 @@ public class DashboardController : MonoBehaviour
         try
         {
             string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var gameDate = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1);
+            string monthName = gameDate.ToString("MMMM", new System.Globalization.CultureInfo("es-ES"));
+            monthName = char.ToUpper(monthName[0]) + monthName.Substring(1);
+
             var msg = new MessageData
             {
                 manager_id = _manager.id,
                 sender_type = 1,
                 sender_id = 0,
                 title = "Pago de nóminas",
-                body = $"Se han pagado las nóminas del mes por un total de ${monthlyPayroll:N0}.",
+                body = $"Se han pagado las nóminas del mes de {monthName} por un total de ${monthlyPayroll:N0}.",
                 game_day = gameDay,
-                game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1).ToString("yyyy-MM-dd"),
+                game_date = gameDate.ToString("yyyy-MM-dd"),
                 created_at = now,
                 date_sent = now,
                 is_read = 0
