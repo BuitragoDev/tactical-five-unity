@@ -909,6 +909,8 @@ public class DashboardController : MonoBehaviour
 
     void ProcessMonthlyPayroll(int gameDay)
     {
+        if (_myTeam == null || _season == null || _manager == null) return;
+
         // Payroll on game days ~1, 31, 61, 91, 121, 151, 181 (1st of each month)
         int[] payrollDays = { 1, 31, 61, 91, 121, 151, 181 };
         if (!payrollDays.Contains(gameDay)) return;
@@ -932,15 +934,28 @@ public class DashboardController : MonoBehaviour
             amount = monthlyPayroll
         });
 
-        DatabaseManager.Instance.AddMessage(new MessageData
+        try
         {
-            manager_id = _manager.id,
-            title = "Pago de nóminas",
-            body = $"Se han pagado las nóminas del mes por un total de ${monthlyPayroll:N0}.",
-            game_day = gameDay,
-            game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1).ToString("yyyy-MM-dd"),
-            is_read = 0
-        });
+            string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            var msg = new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 1,
+                sender_id = 0,
+                title = "Pago de nóminas",
+                body = $"Se han pagado las nóminas del mes por un total de ${monthlyPayroll:N0}.",
+                game_day = gameDay,
+                game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1).ToString("yyyy-MM-dd"),
+                created_at = now,
+                date_sent = now,
+                is_read = 0
+            };
+            DatabaseManager.Instance.AddMessage(msg);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Payroll] Error creating message: {ex.Message}\n{ex.StackTrace}");
+        }
     }
 
     void ProcessSubscriptionRevenue(int gameDay)

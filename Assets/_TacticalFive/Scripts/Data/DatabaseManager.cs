@@ -2193,6 +2193,7 @@ public class DatabaseManager : MonoBehaviour
     public void AddMessage(MessageData message)
     {
         _db.Insert(message);
+        Debug.Log($"[DB] AddMessage OK: id={message.id} title='{message.title}' game_day={message.game_day} manager_id={message.manager_id}");
     }
 
     public List<MessageData> GetMessages(int managerId)
