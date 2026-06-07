@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -15,6 +16,9 @@ public class GameResultsController : MonoBehaviour
     private VisualElement _lbScorersBody, _lbReboundersBody, _lbAssistersBody;
     private Button _btnDashboard;
     private Label _headerSubtitle, _headerGameDay;
+    private VisualElement _loadingSpinner;
+    private IVisualElementScheduledItem _spinScheduler;
+    private bool _isLoading;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -57,6 +61,8 @@ public class GameResultsController : MonoBehaviour
         _btnDashboard = _root.Q<Button>("BtnDashboard");
         _headerSubtitle = _root.Q<Label>("HeaderSubtitle");
         _headerGameDay = _root.Q<Label>("HeaderGameDay");
+        _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
+        _loadingSpinner.style.display = DisplayStyle.None;
     }
 
     void LoadData()
@@ -77,14 +83,14 @@ public class GameResultsController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D))
         {
             PlayClick();
-            ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+            GoToDashboard();
         }
     }
 
     void RegisterCallbacks()
     {
         _btnDashboard?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
+            { PlayClick(); GoToDashboard(); });
 
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
@@ -316,6 +322,46 @@ public class GameResultsController : MonoBehaviour
 
         if (_logoSprites.TryGetValue(logoName, out var fallback))
             elem.style.backgroundImage = new StyleBackground(fallback);
+    }
+
+    void GoToDashboard()
+    {
+        if (_isLoading) return;
+        ShowLoading();
+        StartCoroutine(NavigateToDashboard());
+    }
+
+    IEnumerator NavigateToDashboard()
+    {
+        yield return new WaitForEndOfFrame();
+        HideLoading();
+        ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+    }
+
+    void ShowLoading()
+    {
+        if (_isLoading) return;
+        _isLoading = true;
+        _btnDashboard.SetEnabled(false);
+        _loadingSpinner.style.display = DisplayStyle.Flex;
+
+        _spinScheduler = _root.schedule.Execute(() =>
+        {
+            if (_loadingSpinner == null) return;
+            var current = _loadingSpinner.style.rotate;
+            float angle = current.value.angle.value + 15f;
+            if (angle >= 360f) angle -= 360f;
+            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+        }).Every(30);
+    }
+
+    void HideLoading()
+    {
+        _spinScheduler?.Pause();
+        _spinScheduler = null;
+        _loadingSpinner.style.display = DisplayStyle.None;
+        _btnDashboard.SetEnabled(true);
+        _isLoading = false;
     }
 
     void PlayClick()

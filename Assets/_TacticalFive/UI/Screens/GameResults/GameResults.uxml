@@ -21,6 +21,7 @@
                     </ui:VisualElement>
                     <ui:Label name="HeaderDate" text="" class="header-date-label"/>
                     <ui:Label name="HeaderGameDay" text="" class="header-game-day-label"/>
+                    <ui:VisualElement name="LoadingSpinner" class="loading-spinner" />
                     <ui:Button name="BtnDashboard" text="DASHBOARD" class="btn-action"/>
                 </ui:VisualElement>
             </ui:VisualElement>
