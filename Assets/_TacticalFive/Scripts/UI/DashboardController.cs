@@ -406,33 +406,20 @@ public class DashboardController : MonoBehaviour
         if (_season == null || _isLoading) return;
 
         ShowLoading();
-        StartCoroutine(DelayedProcessGameDay());
+        StartCoroutine(ProcessGameDayRoutine());
     }
 
-    System.Collections.IEnumerator DelayedProcessGameDay()
+    System.Collections.IEnumerator ProcessGameDayRoutine()
     {
-        yield return new UnityEngine.WaitForEndOfFrame();
-        yield return new UnityEngine.WaitForSecondsRealtime(0.08f);
-        ProcessGameDay();
-    }
-
-    void ProcessGameDay()
-    {
-        if (_season == null) { HideLoading(); return; }
-
-        // Find the next game day with unplayed games
         int gameDay = FindNextGameDay();
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
             HideLoading();
-            return;
+            yield break;
         }
 
-        // Process injuries (decrease injury days)
         ProcessInjuries();
-
-        // Process renovations
         ProcessRenovations();
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
@@ -453,27 +440,23 @@ public class DashboardController : MonoBehaviour
                 DatabaseManager.Instance.UpdateGame(game);
                 GameResultCache.SimulatedGameIds.Add(game.id);
 
-                // Process finances for this game
                 ProcessGameFinances(game, result);
-
-                // Process injuries from this game
                 ProcessGameInjuries(result, game.game_date);
 
-                // Send result message and update fan confidence if my team played
                 bool myTeamInThisGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
                 if (myTeamInThisGame)
                 {
                     CreateGameResultMessage(game, result);
                     UpdateFanConfidence(game, result);
                 }
+
+                yield return null;
             }
 
-            // Update manager stats
             UpdateManagerStats(gameDay);
         }
 
-        // ── Phase transitions (mirror Django advance_day) ──
-        // Regular / Preseason → Play-In
+        // ── Phase transitions ──
         if (_season.phase == "regular" || _season.phase == "preseason")
         {
             bool allRegularPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
@@ -489,7 +472,6 @@ public class DashboardController : MonoBehaviour
             }
         }
 
-        // Play-In → Playoffs
         if (_season.phase == "playin")
         {
             PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "East");
@@ -508,7 +490,6 @@ public class DashboardController : MonoBehaviour
             }
         }
 
-        // Playoffs → Finished
         if (_season.phase == "playoff")
         {
             PlayoffsGenerator.AdvancePlayoffSeries(_season, _manager.id);
@@ -525,26 +506,20 @@ public class DashboardController : MonoBehaviour
             }
         }
 
-        // Process monthly payroll (1st of each month ~ game day 1, 31, 61, 91, 121, 151, 181)
         ProcessMonthlyPayroll(gameDay);
-
-        // Process subscription revenue (around game day 11 = Nov 1)
         ProcessSubscriptionRevenue(gameDay);
 
-        // Update historical player stats at end of season
         if (_season.phase == "finished")
         {
             DatabaseManager.Instance.UpdateHistoricalPlayerStatsFromSeason(_season.id, _manager.id);
         }
 
-        // Update current_game_day to the day we just played
         _season.current_game_day = gameDay;
         DatabaseManager.Instance.UpdateSeason(_season);
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
         Refresh();
 
-        // Actualizar metadatos de guardado
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
 
         HideLoading();
