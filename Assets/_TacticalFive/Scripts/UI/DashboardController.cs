@@ -130,6 +130,7 @@ public class DashboardController : MonoBehaviour
         _headerDate = _root.Q<Label>("HeaderDate");
         _btnAction = _root.Q<Button>("BtnAction");
         _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
+        _loadingSpinner.style.display = DisplayStyle.None;
 
         // Último partido
         _noLastGame = _root.Q<Label>("NoLastGame");
@@ -411,6 +412,7 @@ public class DashboardController : MonoBehaviour
     System.Collections.IEnumerator DelayedProcessGameDay()
     {
         yield return new UnityEngine.WaitForEndOfFrame();
+        yield return new UnityEngine.WaitForSecondsRealtime(0.08f);
         ProcessGameDay();
     }
 
