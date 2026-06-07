@@ -130,7 +130,15 @@ public class DashboardController : MonoBehaviour
         _headerDate = _root.Q<Label>("HeaderDate");
         _btnAction = _root.Q<Button>("BtnAction");
         _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
-        _loadingSpinner.style.display = DisplayStyle.None;
+        _loadingSpinner.style.display = DisplayStyle.Flex;
+        _spinScheduler = _root.schedule.Execute(() =>
+        {
+            if (_loadingSpinner == null) return;
+            var current = _loadingSpinner.style.rotate;
+            float angle = current.value.angle.value + 15f;
+            if (angle >= 360f) angle -= 360f;
+            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+        }).Every(30);
 
         // Último partido
         _noLastGame = _root.Q<Label>("NoLastGame");
