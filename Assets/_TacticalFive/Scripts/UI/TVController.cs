@@ -142,7 +142,7 @@ public class TVController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         var logoDict = new Dictionary<string, Sprite>();
         foreach (var s in logos) logoDict[s.name] = s;
 
@@ -172,6 +172,14 @@ public class TVController : MonoBehaviour
         }
 
         _btnAction.text = "DASHBOARD";
+    }
+
+    // TV channels can only be signed in October (game day 1-10, season starts Oct 22)
+    bool IsOctober()
+    {
+        if (_season == null) return false;
+        int day = _season.current_game_day;
+        return day >= 1 && day <= 10;
     }
 
     void BuildCurrentTVBanner()
@@ -258,6 +266,12 @@ public class TVController : MonoBehaviour
             btn.AddToClassList("tv-card-btn--disabled");
             btn.SetEnabled(false);
         }
+        else if (!IsOctober())
+        {
+            btn.text = "SOLO OCTUBRE";
+            btn.AddToClassList("tv-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
         else
         {
             btn.text = "CONTRATAR";
@@ -289,6 +303,7 @@ public class TVController : MonoBehaviour
     void SignTV(TvChannelData channel)
     {
         if (_currentTV != null) return; // Can't sign if already have one
+        if (!IsOctober()) return; // TV channels can only be signed in October
 
         DatabaseManager.Instance.SignTVChannel(channel.id, _season.id, _myTeam.id, _season.current_game_day);
 

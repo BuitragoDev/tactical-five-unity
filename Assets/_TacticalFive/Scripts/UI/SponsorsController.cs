@@ -142,7 +142,7 @@ public class SponsorsController : MonoBehaviour
     {
         if (_myTeam == null || _manager == null) return;
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         var logoDict = new Dictionary<string, Sprite>();
         foreach (var s in logos) logoDict[s.name] = s;
 
@@ -164,7 +164,6 @@ public class SponsorsController : MonoBehaviour
         marginLbl.text = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
         marginLbl.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) marginLbl.AddToClassList("header-stat-value--negative");
-
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
@@ -172,6 +171,14 @@ public class SponsorsController : MonoBehaviour
         }
 
         _btnAction.text = "DASHBOARD";
+    }
+
+    // Sponsors can only be signed in October (game day 1-10, season starts Oct 22)
+    bool IsOctober()
+    {
+        if (_season == null) return false;
+        int day = _season.current_game_day;
+        return day >= 1 && day <= 10;
     }
 
     void BuildCurrentSponsorBanner()
@@ -259,6 +266,12 @@ public class SponsorsController : MonoBehaviour
             btn.AddToClassList("sponsor-card-btn--disabled");
             btn.SetEnabled(false);
         }
+        else if (!IsOctober())
+        {
+            btn.text = "SOLO OCTUBRE";
+            btn.AddToClassList("sponsor-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
         else
         {
             btn.text = "CONTRATAR";
@@ -290,6 +303,7 @@ public class SponsorsController : MonoBehaviour
     void SignSponsor(SponsorData sponsor)
     {
         if (_currentSponsor != null) return; // Can't sign if already have one
+        if (!IsOctober()) return; // Sponsors can only be signed in October
 
         DatabaseManager.Instance.SignSponsor(sponsor.id, _season.id, _myTeam.id, _season.current_game_day);
 
