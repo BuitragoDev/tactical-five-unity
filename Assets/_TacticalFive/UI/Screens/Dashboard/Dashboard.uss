@@ -212,6 +212,18 @@
     color: rgb(122, 138, 170);
 }
 
+/* Anillo de carga giratorio */
+.loading-spinner {
+    width: 28px;
+    height: 28px;
+    border: 3px solid rgba(122, 138, 170, 0.12);
+    border-top-color: rgb(212, 160, 23);
+    border-radius: 50%;
+    display: none;
+    flex-shrink: 0;
+    margin: auto 10px auto 0;
+}
+
 /* Botón acción principal */
 .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");

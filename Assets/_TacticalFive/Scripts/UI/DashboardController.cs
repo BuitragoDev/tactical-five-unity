@@ -18,6 +18,9 @@ public class DashboardController : MonoBehaviour
     private Label _headerSeason;
     private Label _headerDate;
     private Button _btnAction;
+    private VisualElement _loadingSpinner;
+    private IScheduledItem _spinScheduler;
+    private bool _isLoading;
 
     // Último partido
     private Label _noLastGame;
@@ -125,6 +128,7 @@ public class DashboardController : MonoBehaviour
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _btnAction = _root.Q<Button>("BtnAction");
+        _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
 
         // Último partido
         _noLastGame = _root.Q<Label>("NoLastGame");
@@ -397,13 +401,22 @@ public class DashboardController : MonoBehaviour
 
     void OnActionClicked()
     {
-        if (_season == null) return;
+        if (_season == null || _isLoading) return;
+
+        ShowLoading();
+        _root.schedule.Execute(ProcessGameDay).ExecuteLater(80);
+    }
+
+    void ProcessGameDay()
+    {
+        if (_season == null) { HideLoading(); return; }
 
         // Find the next game day with unplayed games
         int gameDay = FindNextGameDay();
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
+            HideLoading();
             return;
         }
 
@@ -525,6 +538,8 @@ public class DashboardController : MonoBehaviour
         // Actualizar metadatos de guardado
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
 
+        HideLoading();
+
         if (myTeamPlays)
         {
             Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → MatchDay");
@@ -535,6 +550,32 @@ public class DashboardController : MonoBehaviour
             Debug.Log($"[Dashboard] Día {gameDay} — {gamesToday.Count} partidos → GameResults");
             ScreenManager.Instance.GoTo(GameScreen.GameResults);
         }
+    }
+
+    void ShowLoading()
+    {
+        if (_isLoading) return;
+        _isLoading = true;
+        _btnAction.SetEnabled(false);
+        _loadingSpinner.style.display = DisplayStyle.Flex;
+
+        _spinScheduler = _root.schedule.Execute(() =>
+        {
+            if (_loadingSpinner == null) return;
+            var current = _loadingSpinner.style.rotate;
+            float angle = current.value.angle.value + 15f;
+            if (angle >= 360f) angle -= 360f;
+            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+        }).Every(30);
+    }
+
+    void HideLoading()
+    {
+        _spinScheduler?.Pause();
+        _spinScheduler = null;
+        _loadingSpinner.style.display = DisplayStyle.None;
+        _btnAction.SetEnabled(true);
+        _isLoading = false;
     }
 
     int FindNextGameDay()

@@ -94,6 +94,7 @@
                     <ui:Label name="HeaderMargin" text="" class="header-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer"/>
+                <ui:VisualElement name="LoadingSpinner" class="loading-spinner" />
                 <ui:VisualElement class="header-season-info">
                     <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
                     <ui:Label name="HeaderDate" text="" class="header-date-label"/>
