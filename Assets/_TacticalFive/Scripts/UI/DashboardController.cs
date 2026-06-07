@@ -1030,11 +1030,13 @@ public class DashboardController : MonoBehaviour
             (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
 
         float performanceMult = 1.0f + (wins * 0.05f);
+        // Reputation: 1 star -> 0.70, 5 stars -> 1.30
+        float reputationMult = 0.7f + (_myTeam.reputation / 5f) * 0.6f;
         float randomFactor = 0.85f + UnityEngine.Random.value * 0.30f;
 
         float baseRatio = 0.5f;
         float priceFactor = (2000 - finSettings.subscription_price) / 10000f;
-        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * randomFactor);
+        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * reputationMult * randomFactor);
         numSubscribers = (int)Mathf.Clamp(numSubscribers, 0, _myTeam.capacity);
 
         long subAmount = numSubscribers * finSettings.subscription_price;
@@ -1053,13 +1055,18 @@ public class DashboardController : MonoBehaviour
                 amount = subAmount
             });
 
+            string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             DatabaseManager.Instance.AddMessage(new MessageData
             {
                 manager_id = _manager.id,
-                title = "Ingresos por abonos",
-                body = $"Se han vendido {numSubscribers:N0} abonos esta temporada obteniendo un ingreso total de ${subAmount:N0}.",
+                sender_type = 1,
+                sender_id = 0,
+                title = "Campaña de abonos cerrada",
+                body = $"Se ha cerrado la campaña de abonados de la temporada. Se han vendido {numSubscribers:N0} abonos a un precio de ${finSettings.subscription_price:N0} cada uno, obteniendo un ingreso total de ${subAmount:N0}.",
                 game_day = gameDay,
                 game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1).ToString("yyyy-MM-dd"),
+                created_at = now,
+                date_sent = now,
                 is_read = 0
             });
         }

@@ -336,6 +336,7 @@ public class FinancesController : MonoBehaviour
     void SetupTicketDropdowns()
     {
         var settings = _teamSettings ?? new TeamSettingsData { ticket_price = 50, subscription_price = 2100 };
+        bool campaignClosed = IsSubscriptionCampaignClosed();
 
         // Build ticket price grid
         _ticketPriceGrid.Clear();
@@ -358,12 +359,34 @@ public class FinancesController : MonoBehaviour
             var btn = new Button();
             btn.AddToClassList("price-btn");
             btn.text = $"${price:N0}";
-            btn.clicked += () => { PlayClick(); SelectSubscriptionPrice(price, btn); };
+            if (campaignClosed)
+            {
+                btn.AddToClassList("price-btn--disabled");
+                btn.SetEnabled(false);
+            }
+            else
+            {
+                btn.clicked += () => { PlayClick(); SelectSubscriptionPrice(price, btn); };
+            }
             _subscriptionPriceGrid.Add(btn);
 
             if (settings.subscription_price == price)
-                SelectSubscriptionPrice(price, btn);
+            {
+                _selectedSubBtn = btn;
+                btn.AddToClassList("price-btn--selected");
+                if (campaignClosed)
+                {
+                    btn.text = "CAMPAÑA CERRADA";
+                }
+            }
         }
+    }
+
+    bool IsSubscriptionCampaignClosed()
+    {
+        if (_season == null || _myTeam == null) return false;
+        if (_financeRecords == null) return false;
+        return _financeRecords.Any(r => r.record_type == FinanceRecord.TYPE_SUBSCRIPTION);
     }
 
     void SelectTicketPrice(int price, Button btn)
@@ -381,6 +404,8 @@ public class FinancesController : MonoBehaviour
 
     void SelectSubscriptionPrice(int price, Button btn)
     {
+        if (IsSubscriptionCampaignClosed()) return;
+
         if (_selectedSubBtn != null)
             _selectedSubBtn.RemoveFromClassList("price-btn--selected");
         _selectedSubBtn = btn;
