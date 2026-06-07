@@ -450,6 +450,59 @@ public class DashboardController : MonoBehaviour
             UpdateManagerStats(gameDay);
         }
 
+        // ── Phase transitions (mirror Django advance_day) ──
+        // Regular / Preseason → Play-In
+        if (_season.phase == "regular" || _season.phase == "preseason")
+        {
+            bool allRegularPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => g.manager_id == _manager.id
+                       && g.game_type == "regular"
+                       && g.is_played == 0);
+            if (allRegularPlayed)
+            {
+                PlayoffsGenerator.GeneratePlayIn(_season, _manager.id);
+                _season.phase = "playin";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.Log("[Dashboard] Regular season finished → Play-In generated.");
+            }
+        }
+
+        // Play-In → Playoffs
+        if (_season.phase == "playin")
+        {
+            PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "East");
+            PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "West");
+
+            bool allPlayInPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => g.manager_id == _manager.id
+                       && g.game_type == "playin"
+                       && g.is_played == 0);
+            if (allPlayInPlayed)
+            {
+                PlayoffsGenerator.GeneratePlayoffs(_season, _manager.id);
+                _season.phase = "playoff";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.Log("[Dashboard] Play-In finished → Playoffs generated.");
+            }
+        }
+
+        // Playoffs → Finished
+        if (_season.phase == "playoff")
+        {
+            PlayoffsGenerator.AdvancePlayoffSeries(_season, _manager.id);
+
+            bool allPlayoffPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => g.manager_id == _manager.id
+                       && g.game_type == "playoff"
+                       && g.is_played == 0);
+            if (allPlayoffPlayed)
+            {
+                _season.phase = "finished";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.Log("[Dashboard] Playoffs finished → Season finished.");
+            }
+        }
+
         // Process monthly payroll (1st of each month ~ game day 1, 31, 61, 91, 121, 151, 181)
         ProcessMonthlyPayroll(gameDay);
 

@@ -238,7 +238,7 @@ public class PlayoffsController : MonoBehaviour
     {
         _finalsBody.Clear();
 
-        var finalsGames = _playoffGames.Where(g => g.series_label == "Finals").ToList();
+        var finalsGames = _playoffGames.Where(g => g.series_label == "playoff-r4-finals").ToList();
         if (finalsGames.Count == 0)
         {
             _noFinalsText.style.display = DisplayStyle.Flex;
@@ -247,7 +247,7 @@ public class PlayoffsController : MonoBehaviour
 
         _noFinalsText.style.display = DisplayStyle.None;
 
-        var seriesElem = CreateSeriesBlock("Finals", finalsGames, "Finals");
+        var seriesElem = CreateSeriesBlock("Finals NBA", finalsGames, "Finals");
         _finalsBody.Add(seriesElem);
     }
 

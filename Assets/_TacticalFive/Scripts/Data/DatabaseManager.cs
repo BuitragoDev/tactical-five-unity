@@ -605,7 +605,7 @@ public class DatabaseManager : MonoBehaviour
         try
         {
             foreach (var g in games)
-                _db.Insert(g);
+                _db.InsertOrReplace(g);
             _db.Commit();
             Debug.Log($"[DB] {games.Count} partidos Play-In guardados.");
         }
@@ -623,7 +623,7 @@ public class DatabaseManager : MonoBehaviour
         try
         {
             foreach (var g in games)
-                _db.Insert(g);
+                _db.InsertOrReplace(g);
             _db.Commit();
             Debug.Log($"[DB] {games.Count} partidos de Playoff guardados.");
         }
