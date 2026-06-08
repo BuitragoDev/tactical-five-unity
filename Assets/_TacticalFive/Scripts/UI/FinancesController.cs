@@ -385,7 +385,8 @@ public class FinancesController : MonoBehaviour
     bool IsSubscriptionCampaignClosed()
     {
         if (_season == null) return true;
-        return _season.current_game_day >= 12;
+        var records = DatabaseManager.Instance.GetFinanceRecords(_myTeam.id, _season.id);
+        return records != null && records.Any(r => r.record_type == FinanceRecord.TYPE_SUBSCRIPTION);
     }
 
     void SelectTicketPrice(int price, Button btn)
