@@ -338,20 +338,22 @@ public class DashboardController : MonoBehaviour
         if (_season == null) return "";
         try
         {
-            int nextDay = FindNextGameDay();
-            if (nextDay == 0)
-                return new System.DateTime(_season.year_end, 4, 15).ToString("dd/MM/yyyy");
+            if (_season.current_game_day == 0)
+                return new System.DateTime(_season.year_start, 10, 22).ToString("dd/MM/yyyy");
 
-            // For preseason (negative days), get from actual game date
-            if (nextDay < 0)
+            if (_season.current_game_day < 0)
             {
-                var nextGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-                if (nextGame != null)
-                    return System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy");
+                var lastGame = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Where(g => g.manager_id == _manager.id
+                             && g.is_played == 1
+                             && g.game_day == _season.current_game_day)
+                    .FirstOrDefault();
+                if (lastGame != null)
+                    return System.DateTime.Parse(lastGame.game_date).ToString("dd/MM/yyyy");
             }
 
             var seasonStart = new System.DateTime(_season.year_start, 10, 22);
-            return seasonStart.AddDays(nextDay - 1).ToString("dd/MM/yyyy");
+            return seasonStart.AddDays(_season.current_game_day - 1).ToString("dd/MM/yyyy");
         }
         catch { return ""; }
     }
@@ -525,7 +527,11 @@ public class DashboardController : MonoBehaviour
 
         HideLoading();
 
-        if (myTeamPlays)
+        if (gamesToday.Count == 0)
+        {
+            Debug.Log($"[Dashboard] Día {gameDay} — sin partidos, continúa en Dashboard");
+        }
+        else if (myTeamPlays)
         {
             Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → MatchDay");
             ScreenManager.Instance.GoTo(GameScreen.MatchDay);
@@ -565,30 +571,35 @@ public class DashboardController : MonoBehaviour
 
     int FindNextGameDay()
     {
-        var nextRegular = DatabaseManager.Instance.Db.Table<GameData>()
-            .Where(g => g.manager_id == _manager.id
-                     && g.is_played == 0
-                     && g.game_day > 0)
-            .OrderBy(g => g.game_day)
-            .FirstOrDefault();
-
-        var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
-            .Where(g => g.manager_id == _manager.id
-                     && g.is_played == 0
-                     && g.game_day < 0)
-            .OrderByDescending(g => g.game_day)
-            .FirstOrDefault();
-
-        if (nextPreseason == null && nextRegular == null) return 0;
+        bool anyUnplayed = DatabaseManager.Instance.Db.Table<GameData>()
+            .Any(g => g.manager_id == _manager.id && g.is_played == 0);
+        if (!anyUnplayed) return 0;
 
         if (_season.current_game_day == 0)
-            return nextPreseason?.game_day ?? nextRegular.game_day;
+        {
+            var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
+                .Where(g => g.manager_id == _manager.id
+                         && g.is_played == 0
+                         && g.game_day < 0)
+                .OrderByDescending(g => g.game_day)
+                .FirstOrDefault();
+            if (nextPreseason != null) return nextPreseason.game_day;
+            return 1;
+        }
 
-        // If the current game day is the most recent played, return next unplayed
-        if (nextRegular != null) return nextRegular.game_day;
-        if (nextPreseason != null) return nextPreseason.game_day;
+        if (_season.current_game_day < 0)
+        {
+            var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
+                .Where(g => g.manager_id == _manager.id
+                         && g.is_played == 0
+                         && g.game_day < 0)
+                .OrderByDescending(g => g.game_day)
+                .FirstOrDefault();
+            if (nextPreseason != null) return nextPreseason.game_day;
+            return 1;
+        }
 
-        return 0;
+        return _season.current_game_day + 1;
     }
 
     void ProcessInjuries()

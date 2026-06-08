@@ -506,25 +506,27 @@ public class DatabaseManager : MonoBehaviour
                 .FirstOrDefault();
     }
 
-    public string GetNextGameDateString(int managerId, int teamId)
+    public string GetCurrentDateString(int managerId)
     {
         var season = GetActiveSeason(managerId);
         if (season == null) return "";
 
-        var nextGame = GetNextGame(managerId, teamId);
-        if (nextGame == null) return "";
+        if (season.current_game_day == 0)
+            return new System.DateTime(season.year_start, 10, 22).ToString("dd/MM/yyyy");
 
-        // Calculate date from game_day to avoid DateTime.Parse timezone issues on Linux
-        if (nextGame.game_day > 0)
+        if (season.current_game_day < 0)
         {
-            var seasonStart = new System.DateTime(season.year_start, 10, 22);
-            return seasonStart.AddDays(nextGame.game_day - 1).ToString("dd/MM/yyyy");
+            var lastGame = _db.Table<GameData>()
+                .Where(g => g.manager_id == managerId
+                         && g.is_played == 1
+                         && g.game_day == season.current_game_day)
+                .FirstOrDefault();
+            if (lastGame != null)
+                return System.DateTime.Parse(lastGame.game_date).ToString("dd/MM/yyyy");
         }
-        else
-        {
-            // For preseason games, parse the stored date (these don't have a game_day mapping)
-            return System.DateTime.Parse(nextGame.game_date).ToString("dd/MM/yyyy");
-        }
+
+        var seasonStart = new System.DateTime(season.year_start, 10, 22);
+        return seasonStart.AddDays(season.current_game_day - 1).ToString("dd/MM/yyyy");
     }
 
     public GameData GetLastPlayedGame(int managerId, int teamId)
