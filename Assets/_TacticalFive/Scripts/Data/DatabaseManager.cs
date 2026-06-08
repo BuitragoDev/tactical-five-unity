@@ -512,7 +512,16 @@ public class DatabaseManager : MonoBehaviour
         if (season == null) return "";
 
         if (season.current_game_day == 0)
+        {
+            var firstPre = _db.Table<GameData>()
+                .Where(g => g.manager_id == managerId
+                         && g.game_type == "preseason")
+                .OrderBy(g => g.game_day)
+                .FirstOrDefault();
+            if (firstPre != null)
+                return System.DateTime.Parse(firstPre.game_date).ToString("dd/MM/yyyy");
             return new System.DateTime(season.year_start, 10, 22).ToString("dd/MM/yyyy");
+        }
 
         if (season.current_game_day < 0)
         {

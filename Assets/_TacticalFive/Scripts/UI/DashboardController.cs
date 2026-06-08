@@ -339,7 +339,16 @@ public class DashboardController : MonoBehaviour
         try
         {
             if (_season.current_game_day == 0)
+            {
+                var firstPre = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Where(g => g.manager_id == _manager.id
+                             && g.game_type == "preseason")
+                    .OrderBy(g => g.game_day)
+                    .FirstOrDefault();
+                if (firstPre != null)
+                    return System.DateTime.Parse(firstPre.game_date).ToString("dd/MM/yyyy");
                 return new System.DateTime(_season.year_start, 10, 22).ToString("dd/MM/yyyy");
+            }
 
             if (_season.current_game_day < 0)
             {
