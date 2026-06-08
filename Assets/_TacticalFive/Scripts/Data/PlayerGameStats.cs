@@ -5,8 +5,11 @@ public class PlayerGameStats
 {
     [PrimaryKey, AutoIncrement]
     public int id { get; set; }
+    [Indexed]
     public int game_id { get; set; }
+    [Indexed]
     public int player_id { get; set; }
+    [Indexed]
     public int team_id { get; set; }
     public float minutes { get; set; }
     public int points { get; set; }

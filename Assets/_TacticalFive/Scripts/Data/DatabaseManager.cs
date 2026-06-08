@@ -73,6 +73,10 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<HistoricalPlayerStatsData>();
         _db.CreateTable<GameAttendanceData>();
         _db.CreateTable<FinalsPlayerStatsData>();
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_TeamId ON player_game_stats(team_id)");
     }
 
     void RunMigrations()
@@ -1436,6 +1440,14 @@ public class DatabaseManager : MonoBehaviour
                   .ToList();
     }
 
+    public List<PlayerGameStats> GetGamePlayerStatsBatch(List<int> gameIds)
+    {
+        if (gameIds == null || gameIds.Count == 0) return new List<PlayerGameStats>();
+        return _db.Query<PlayerGameStats>(
+            "SELECT * FROM player_game_stats WHERE game_id IN (" +
+            string.Join(",", gameIds) + ")");
+    }
+
     public int GetPlayerGamesPlayedInSeason(int playerId, int seasonId)
     {
         if (!EnsureDb()) return 0;
@@ -1546,44 +1558,64 @@ public class DatabaseManager : MonoBehaviour
         var season = GetActiveSeason(managerId);
         if (season == null) return (null, 0, 0, 0, 0, 0, 0, 0);
 
-        var allGames = _db.Table<GameData>()
-                          .Where(g => g.manager_id == managerId
-                                   && g.is_played == 1
-                                   && g.game_type == "regular")
-                          .ToList();
+        var row = _db.Query<PlayerSeasonStatsRow>(
+            @"SELECT p.id AS player_id, p.first_name, p.last_name, p.position,
+                     COUNT(*) AS games,
+                     SUM(ps.points) AS total_points,
+                     SUM(ps.rebounds) AS total_rebounds,
+                     SUM(ps.assists) AS total_assists,
+                     SUM(ps.steals) AS total_steals,
+                     SUM(ps.blocks) AS total_blocks,
+                     SUM(ps.rating) AS total_rating
+              FROM player_game_stats ps
+              JOIN player_data p ON ps.player_id = p.id
+              JOIN game_data g ON ps.game_id = g.id
+              WHERE g.manager_id = ?
+                AND g.season_id = ?
+                AND ps.player_id = ?
+                AND g.game_type = 'regular'
+                AND g.is_played = 1
+              GROUP BY ps.player_id",
+            managerId, season.id, playerId).FirstOrDefault();
 
-        int totalPoints = 0;
-        int totalRebounds = 0;
-        int totalAssists = 0;
-        int totalSteals = 0;
-        int totalBlocks = 0;
-        int totalRating = 0;
-        int gameCount = 0;
-
-        foreach (var game in allGames)
+        if (row == null)
         {
-            var stats = GetGamePlayerStats(game.id);
-            var playerStat = stats.FirstOrDefault(s => s.player_id == playerId);
-            if (playerStat != null)
-            {
-                totalPoints += playerStat.points;
-                totalRebounds += playerStat.rebounds;
-                totalAssists += playerStat.assists;
-                totalSteals += playerStat.steals;
-                totalBlocks += playerStat.blocks;
-                totalRating += playerStat.rating;
-                gameCount++;
-            }
+            var player = _db.Table<PlayerData>().Where(p => p.id == playerId).FirstOrDefault();
+            return (player, 0, 0, 0, 0, 0, 0, 0);
         }
 
-        var player = _db.Table<PlayerData>().Where(p => p.id == playerId).FirstOrDefault();
-        float avgPts = gameCount > 0 ? (float)totalPoints / gameCount : 0;
-        float avgReb = gameCount > 0 ? (float)totalRebounds / gameCount : 0;
-        float avgAst = gameCount > 0 ? (float)totalAssists / gameCount : 0;
-        float avgStl = gameCount > 0 ? (float)totalSteals / gameCount : 0;
-        float avgBlk = gameCount > 0 ? (float)totalBlocks / gameCount : 0;
-        float avgVal = gameCount > 0 ? (float)totalRating / gameCount : 0;
-        return (player, avgPts, avgReb, avgAst, avgStl, avgBlk, avgVal, gameCount);
+        float avgPts = row.games > 0 ? (float)row.total_points / row.games : 0;
+        float avgReb = row.games > 0 ? (float)row.total_rebounds / row.games : 0;
+        float avgAst = row.games > 0 ? (float)row.total_assists / row.games : 0;
+        float avgStl = row.games > 0 ? (float)row.total_steals / row.games : 0;
+        float avgBlk = row.games > 0 ? (float)row.total_blocks / row.games : 0;
+        float avgVal = row.games > 0 ? (float)row.total_rating / row.games : 0;
+
+        var p = _db.Table<PlayerData>().Where(p2 => p2.id == playerId).FirstOrDefault();
+        return (p, avgPts, avgReb, avgAst, avgStl, avgBlk, avgVal, row.games);
+    }
+
+    public List<PlayerSeasonStatsRow> GetTeamPlayerSeasonStats(int seasonId, int teamId, int managerId)
+    {
+        return _db.Query<PlayerSeasonStatsRow>(
+            @"SELECT p.id AS player_id, p.first_name, p.last_name, p.position,
+                     COUNT(*) AS games,
+                     SUM(ps.points) AS total_points,
+                     SUM(ps.rebounds) AS total_rebounds,
+                     SUM(ps.assists) AS total_assists,
+                     SUM(ps.steals) AS total_steals,
+                     SUM(ps.blocks) AS total_blocks,
+                     SUM(ps.rating) AS total_rating
+              FROM player_game_stats ps
+              JOIN player_data p ON ps.player_id = p.id
+              JOIN game_data g ON ps.game_id = g.id
+              WHERE g.manager_id = ?
+                AND g.season_id = ?
+                AND ps.team_id = ?
+                AND g.game_type = 'regular'
+                AND g.is_played = 1
+              GROUP BY ps.player_id",
+            managerId, seasonId, teamId);
     }
 
     // ── SPONSORS ──────────────────────────────────────────
@@ -1887,41 +1919,32 @@ public class DatabaseManager : MonoBehaviour
 
     public void UpdateHistoricalPlayerStatsFromSeason(int seasonId, int managerId)
     {
-        // Load all played game IDs for this season (simple query that SQLite-net can compile)
-        var playedGames = _db.Table<GameData>()
-            .Where(g => g.season_id == seasonId && g.is_played == 1)
-            .ToList();
-        var gameIdSet = new HashSet<int>(playedGames.Select(g => g.id));
-
-        // Load all player game stats and filter/aggregate in memory
-        var allStats = _db.Table<PlayerGameStats>().ToList();
-        var seasonStats = allStats
-            .Where(s => gameIdSet.Contains(s.game_id))
-            .GroupBy(s => s.player_id)
-            .Select(g => new
-            {
-                player_id = g.Key,
-                games = g.Count(),
-                total_points = g.Sum(s => s.points),
-                total_rebounds = g.Sum(s => s.rebounds),
-                total_assists = g.Sum(s => s.assists),
-                total_steals = g.Sum(s => s.steals),
-                total_blocks = g.Sum(s => s.blocks),
-                total_turnovers = g.Sum(s => s.turnovers),
-                total_fgm = g.Sum(s => s.fgm),
-                total_fga = g.Sum(s => s.fga),
-                total_fg3m = g.Sum(s => s.fg3m),
-                total_fg3a = g.Sum(s => s.fg3a),
-                total_ftm = g.Sum(s => s.ftm),
-                total_fta = g.Sum(s => s.fta),
-                total_oreb = g.Sum(s => s.oreb),
-                total_dreb = g.Sum(s => s.dreb),
-                total_double_doubles = g.Sum(s => s.double_double),
-                total_triple_doubles = g.Sum(s => s.triple_double),
-                total_minutes = (int)g.Sum(s => s.minutes),
-                total_rating = g.Sum(s => s.rating)
-            })
-            .ToList();
+        var seasonStats = _db.Query<HistoricalStatsAggregateRow>(
+            @"SELECT ps.player_id,
+                     COUNT(*) AS games,
+                     SUM(ps.points) AS total_points,
+                     SUM(ps.rebounds) AS total_rebounds,
+                     SUM(ps.assists) AS total_assists,
+                     SUM(ps.steals) AS total_steals,
+                     SUM(ps.blocks) AS total_blocks,
+                     SUM(ps.turnovers) AS total_turnovers,
+                     SUM(ps.fgm) AS total_fgm,
+                     SUM(ps.fga) AS total_fga,
+                     SUM(ps.fg3m) AS total_fg3m,
+                     SUM(ps.fg3a) AS total_fg3a,
+                     SUM(ps.ftm) AS total_ftm,
+                     SUM(ps.fta) AS total_fta,
+                     SUM(ps.oreb) AS total_oreb,
+                     SUM(ps.dreb) AS total_dreb,
+                     SUM(ps.double_double) AS total_double_doubles,
+                     SUM(ps.triple_double) AS total_triple_doubles,
+                     CAST(SUM(ps.minutes) AS INTEGER) AS total_minutes,
+                     SUM(ps.rating) AS total_rating
+              FROM player_game_stats ps
+              JOIN game_data g ON ps.game_id = g.id
+              WHERE g.season_id = ? AND g.is_played = 1
+              GROUP BY ps.player_id",
+            seasonId);
 
         foreach (var ss in seasonStats)
         {
@@ -2243,4 +2266,43 @@ public class DatabaseManager : MonoBehaviour
     {
         _db?.Close();
     }
+}
+
+public class PlayerSeasonStatsRow
+{
+    public int player_id { get; set; }
+    public string first_name { get; set; }
+    public string last_name { get; set; }
+    public string position { get; set; }
+    public int games { get; set; }
+    public int total_points { get; set; }
+    public int total_rebounds { get; set; }
+    public int total_assists { get; set; }
+    public int total_steals { get; set; }
+    public int total_blocks { get; set; }
+    public int total_rating { get; set; }
+}
+
+public class HistoricalStatsAggregateRow
+{
+    public int player_id { get; set; }
+    public int games { get; set; }
+    public int total_points { get; set; }
+    public int total_rebounds { get; set; }
+    public int total_assists { get; set; }
+    public int total_steals { get; set; }
+    public int total_blocks { get; set; }
+    public int total_turnovers { get; set; }
+    public int total_fgm { get; set; }
+    public int total_fga { get; set; }
+    public int total_fg3m { get; set; }
+    public int total_fg3a { get; set; }
+    public int total_ftm { get; set; }
+    public int total_fta { get; set; }
+    public int total_oreb { get; set; }
+    public int total_dreb { get; set; }
+    public int total_double_doubles { get; set; }
+    public int total_triple_doubles { get; set; }
+    public int total_minutes { get; set; }
+    public int total_rating { get; set; }
 }

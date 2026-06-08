@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using SQLite;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -564,29 +565,30 @@ public class DashboardController : MonoBehaviour
 
     int FindNextGameDay()
     {
-        // Search from current day onwards for the next day with unplayed games
-        var allUnplayed = DatabaseManager.Instance.GetAllGames(_manager.id)
-            .Where(g => g.is_played == 0)
-            .ToList();
+        var nextRegular = DatabaseManager.Instance.Db.Table<GameData>()
+            .Where(g => g.manager_id == _manager.id
+                     && g.is_played == 0
+                     && g.game_day > 0)
+            .OrderBy(g => g.game_day)
+            .FirstOrDefault();
 
-        if (allUnplayed.Count == 0) return 0;
+        var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
+            .Where(g => g.manager_id == _manager.id
+                     && g.is_played == 0
+                     && g.game_day < 0)
+            .OrderByDescending(g => g.game_day)
+            .FirstOrDefault();
 
-        // Sort: negatives first (descending: -1, -2, -3), then positives (ascending: 1, 2, 3)
-        var preseason = allUnplayed.Where(g => g.game_day < 0).OrderByDescending(g => g.game_day).ToList();
-        var regular = allUnplayed.Where(g => g.game_day > 0).OrderBy(g => g.game_day).ToList();
-        var sorted = preseason.Concat(regular).ToList();
+        if (nextPreseason == null && nextRegular == null) return 0;
 
-        // If current_game_day is 0 or we haven't played any game yet, return the closest to 0
         if (_season.current_game_day == 0)
-            return sorted.First().game_day;
+            return nextPreseason?.game_day ?? nextRegular.game_day;
 
-        // Find the current game's position and return the next one
-        var current = sorted.FindIndex(g => g.game_day == _season.current_game_day);
-        if (current >= 0 && current < sorted.Count - 1)
-            return sorted[current + 1].game_day;
+        // If the current game day is the most recent played, return next unplayed
+        if (nextRegular != null) return nextRegular.game_day;
+        if (nextPreseason != null) return nextPreseason.game_day;
 
-        // If current game not found or is the last, return the closest unplayed to 0
-        return sorted.First().game_day;
+        return 0;
     }
 
     void ProcessInjuries()
@@ -1442,53 +1444,46 @@ public class DashboardController : MonoBehaviour
     // ── ESTADISTICAS ───────────────────────────────────────
     void RefreshPlayerStats()
     {
-        // Cargar estadísticas reales de temporada para cada jugador
-        var seasonStats = _players
-            .Select(p => DatabaseManager.Instance.GetPlayerSeasonStats(p.id, _manager.id))
-            .Where(s => s.games > 0)
-            .ToList();
+        if (_season == null || _myTeam == null) return;
 
-        // Máximo anotador — mayor promedio de puntos
-        var scorer = seasonStats.OrderByDescending(s => s.avgPts).FirstOrDefault();
+        var teamStats = DatabaseManager.Instance.GetTeamPlayerSeasonStats(_season.id, _myTeam.id, _manager.id);
+        if (teamStats.Count == 0) return;
+
+        var scorer = teamStats.OrderByDescending(s => (float)s.total_points / s.games).First();
         SetStatCard("StatScorer", "StatScorerName", "StatScorerGames",
-            scorer.games > 0 ? scorer.avgPts.ToString("F1") : "--",
-            scorer.player != null ? $"{scorer.player.first_name} {scorer.player.last_name}" : "",
-            scorer.games > 0 ? $"{scorer.games} partidos jugados" : "");
+            (scorer.total_points / (float)scorer.games).ToString("F1"),
+            $"{scorer.first_name} {scorer.last_name}",
+            $"{scorer.games} partidos jugados");
 
-        // Máximo rebotador — mayor promedio de rebotes
-        var rebounder = seasonStats.OrderByDescending(s => s.avgReb).FirstOrDefault();
+        var rebounder = teamStats.OrderByDescending(s => (float)s.total_rebounds / s.games).First();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
-            rebounder.games > 0 ? rebounder.avgReb.ToString("F1") : "--",
-            rebounder.player != null ? $"{rebounder.player.first_name} {rebounder.player.last_name}" : "",
-            rebounder.games > 0 ? $"{rebounder.games} partidos jugados" : "");
+            (rebounder.total_rebounds / (float)rebounder.games).ToString("F1"),
+            $"{rebounder.first_name} {rebounder.last_name}",
+            $"{rebounder.games} partidos jugados");
 
-        // Máximo asistente — mayor promedio de asistencias
-        var assister = seasonStats.OrderByDescending(s => s.avgAst).FirstOrDefault();
+        var assister = teamStats.OrderByDescending(s => (float)s.total_assists / s.games).First();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
-            assister.games > 0 ? assister.avgAst.ToString("F1") : "--",
-            assister.player != null ? $"{assister.player.first_name} {assister.player.last_name}" : "",
-            assister.games > 0 ? $"{assister.games} partidos jugados" : "");
+            (assister.total_assists / (float)assister.games).ToString("F1"),
+            $"{assister.first_name} {assister.last_name}",
+            $"{assister.games} partidos jugados");
 
-        // Máximo robador — mayor promedio de robos
-        var stealer = seasonStats.OrderByDescending(s => s.avgStl).FirstOrDefault();
+        var stealer = teamStats.OrderByDescending(s => (float)s.total_steals / s.games).First();
         SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
-            stealer.games > 0 ? stealer.avgStl.ToString("F1") : "--",
-            stealer.player != null ? $"{stealer.player.first_name} {stealer.player.last_name}" : "",
-            stealer.games > 0 ? $"{stealer.games} partidos jugados" : "");
+            (stealer.total_steals / (float)stealer.games).ToString("F1"),
+            $"{stealer.first_name} {stealer.last_name}",
+            $"{stealer.games} partidos jugados");
 
-        // Máximo taponador — mayor promedio de tapones
-        var blocker = seasonStats.OrderByDescending(s => s.avgBlk).FirstOrDefault();
+        var blocker = teamStats.OrderByDescending(s => (float)s.total_blocks / s.games).First();
         SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
-            blocker.games > 0 ? blocker.avgBlk.ToString("F1") : "--",
-            blocker.player != null ? $"{blocker.player.first_name} {blocker.player.last_name}" : "",
-            blocker.games > 0 ? $"{blocker.games} partidos jugados" : "");
+            (blocker.total_blocks / (float)blocker.games).ToString("F1"),
+            $"{blocker.first_name} {blocker.last_name}",
+            $"{blocker.games} partidos jugados");
 
-        // Mejor valoración — mayor promedio de valoración
-        var rated = seasonStats.OrderByDescending(s => s.avgVal).FirstOrDefault();
+        var rated = teamStats.OrderByDescending(s => (float)s.total_rating / s.games).First();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
-            rated.games > 0 ? rated.avgVal.ToString("F1") : "--",
-            rated.player != null ? $"{rated.player.first_name} {rated.player.last_name}" : "",
-            rated.games > 0 ? $"{rated.games} partidos jugados" : "");
+            (rated.total_rating / (float)rated.games).ToString("F1"),
+            $"{rated.first_name} {rated.last_name}",
+            $"{rated.games} partidos jugados");
     }
 
     void SetStatCard(string valName, string playerName, string gamesName,

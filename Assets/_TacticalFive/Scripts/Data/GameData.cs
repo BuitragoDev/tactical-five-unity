@@ -5,16 +5,21 @@ public class GameData
 {
     [PrimaryKey, AutoIncrement]
     public int    id           { get; set; }
+    [Indexed]
     public int    season_id    { get; set; }
+    [Indexed]
     public int    game_day     { get; set; }
     public string game_date    { get; set; }
     public int    home_team_id { get; set; }
     public int    away_team_id { get; set; }
     public int    home_score   { get; set; }
     public int    away_score   { get; set; }
+    [Indexed]
     public int    is_played    { get; set; }
+    [Indexed]
     public string game_type    { get; set; }
     public string series_label { get; set; }
+    [Indexed]
     public int    manager_id   { get; set; }
     public int    is_home      { get; set; }
     public int    tv_channel_id { get; set; }

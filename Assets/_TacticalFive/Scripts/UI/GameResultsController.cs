@@ -169,14 +169,16 @@ public class GameResultsController : MonoBehaviour
 
         var allPlayerStats = new List<PlayerGameStats>();
 
+        var allStatsBatch = gamesToday.Count > 0
+            ? DatabaseManager.Instance.GetGamePlayerStatsBatch(gamesToday.Select(g => g.id).ToList())
+            : new List<PlayerGameStats>();
+
         foreach (var g in gamesToday)
         {
             var home = _allTeams.Find(t => t.id == g.home_team_id);
             var away = _allTeams.Find(t => t.id == g.away_team_id);
-            var homeStats = DatabaseManager.Instance.GetGamePlayerStats(g.id)
-                .Where(s => s.team_id == g.home_team_id).ToList();
-            var awayStats = DatabaseManager.Instance.GetGamePlayerStats(g.id)
-                .Where(s => s.team_id == g.away_team_id).ToList();
+            var homeStats = allStatsBatch.Where(s => s.game_id == g.id && s.team_id == g.home_team_id).ToList();
+            var awayStats = allStatsBatch.Where(s => s.game_id == g.id && s.team_id == g.away_team_id).ToList();
             allPlayerStats.AddRange(homeStats);
             allPlayerStats.AddRange(awayStats);
 
