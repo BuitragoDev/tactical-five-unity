@@ -420,7 +420,7 @@ public class PreseasonController : MonoBehaviour
                     ? "promanager" : "manager"
             );
             season.current_date = _games.Count > 0
-                ? _games.OrderByDescending(g => g.game_day).First().game_date
+                ? _games.OrderBy(g => g.game_day).First().game_date
                 : $"{season.year_start}-10-22";
             DatabaseManager.Instance.UpdateSeason(season);
         }
