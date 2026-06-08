@@ -317,24 +317,24 @@ public class PlayoffsController : MonoBehaviour
 
         // Series matchup summary
         var matchup = ComputeSeriesMatchup(games);
-        if (matchup != null)
+        if (matchup.HasValue)
         {
             var matchupRow = new VisualElement();
             matchupRow.AddToClassList("playoff-series-matchup");
 
             var topTeam = new Label();
             topTeam.AddToClassList("playoff-matchup-team");
-            topTeam.text = matchup.topAbbr;
-            if (matchup.topWins > matchup.bottomWins) topTeam.AddToClassList("playoff-matchup-leader");
+            topTeam.text = matchup.Value.topAbbr;
+            if (matchup.Value.topWins > matchup.Value.bottomWins) topTeam.AddToClassList("playoff-matchup-leader");
 
             var score = new Label();
             score.AddToClassList("playoff-matchup-score");
-            score.text = $"{matchup.topWins} - {matchup.bottomWins}";
+            score.text = $"{matchup.Value.topWins} - {matchup.Value.bottomWins}";
 
             var bottomTeam = new Label();
             bottomTeam.AddToClassList("playoff-matchup-team");
-            bottomTeam.text = matchup.bottomAbbr;
-            if (matchup.bottomWins > matchup.topWins) bottomTeam.AddToClassList("playoff-matchup-leader");
+            bottomTeam.text = matchup.Value.bottomAbbr;
+            if (matchup.Value.bottomWins > matchup.Value.topWins) bottomTeam.AddToClassList("playoff-matchup-leader");
 
             matchupRow.Add(topTeam);
             matchupRow.Add(score);
@@ -476,13 +476,13 @@ public class PlayoffsController : MonoBehaviour
         return label;
     }
 
-    (string topAbbr, string bottomAbbr, int topWins, int bottomWins) ComputeSeriesMatchup(List<GameData> games)
+    (string topAbbr, string bottomAbbr, int topWins, int bottomWins)? ComputeSeriesMatchup(List<GameData> games)
     {
-        if (games.Count == 0) return (null, null, 0, 0);
+        if (games.Count == 0) return null;
         var first = games[0];
         var home = _allTeams.Find(t => t.id == first.home_team_id);
         var away = _allTeams.Find(t => t.id == first.away_team_id);
-        if (home == null || away == null) return (null, null, 0, 0);
+        if (home == null || away == null) return null;
 
         int homeWins = 0, awayWins = 0;
         foreach (var g in games)
