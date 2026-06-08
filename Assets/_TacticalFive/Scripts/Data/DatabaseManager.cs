@@ -1569,7 +1569,7 @@ public class DatabaseManager : MonoBehaviour
                      SUM(ps.rating) AS total_rating
               FROM player_game_stats ps
               JOIN PlayerData p ON ps.player_id = p.id
-              JOIN game_data g ON ps.game_id = g.id
+              JOIN games g ON ps.game_id = g.id
               WHERE g.manager_id = ?
                 AND g.season_id = ?
                 AND ps.player_id = ?
@@ -1608,7 +1608,7 @@ public class DatabaseManager : MonoBehaviour
                      SUM(ps.rating) AS total_rating
               FROM player_game_stats ps
               JOIN PlayerData p ON ps.player_id = p.id
-              JOIN game_data g ON ps.game_id = g.id
+              JOIN games g ON ps.game_id = g.id
               WHERE g.manager_id = ?
                 AND g.season_id = ?
                 AND ps.team_id = ?
@@ -1941,7 +1941,7 @@ public class DatabaseManager : MonoBehaviour
                      CAST(SUM(ps.minutes) AS INTEGER) AS total_minutes,
                      SUM(ps.rating) AS total_rating
               FROM player_game_stats ps
-              JOIN game_data g ON ps.game_id = g.id
+              JOIN games g ON ps.game_id = g.id
               WHERE g.season_id = ? AND g.is_played = 1
               GROUP BY ps.player_id",
             seasonId);
