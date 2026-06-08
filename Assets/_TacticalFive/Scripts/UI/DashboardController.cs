@@ -336,6 +336,8 @@ public class DashboardController : MonoBehaviour
     string GetCurrentDateString()
     {
         if (_season == null) return "";
+        if (!string.IsNullOrEmpty(_season.current_date))
+            return System.DateTime.Parse(_season.current_date).ToString("dd/MM/yyyy");
         try
         {
             if (_season.current_game_day == 0)
@@ -527,6 +529,11 @@ public class DashboardController : MonoBehaviour
         }
 
         _season.current_game_day = gameDay;
+        if (!string.IsNullOrEmpty(_season.current_date))
+        {
+            var cur = System.DateTime.Parse(_season.current_date);
+            _season.current_date = cur.AddDays(1).ToString("yyyy-MM-dd");
+        }
         DatabaseManager.Instance.UpdateSeason(_season);
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
@@ -578,25 +585,30 @@ public class DashboardController : MonoBehaviour
         _isLoading = false;
     }
 
+    int DateToGameDay(System.DateTime date)
+    {
+        var seasonStart = new System.DateTime(_season.year_start, 10, 22);
+        if (date >= seasonStart)
+            return (int)(date - seasonStart).TotalDays + 1;
+        else
+            return -(int)(seasonStart - date).TotalDays;
+    }
+
     int FindNextGameDay()
     {
         bool anyUnplayed = DatabaseManager.Instance.Db.Table<GameData>()
             .Any(g => g.manager_id == _manager.id && g.is_played == 0);
         if (!anyUnplayed) return 0;
 
-        if (_season.current_game_day == 0)
+        // New system: use current_date for day-by-day advancement
+        if (!string.IsNullOrEmpty(_season.current_date))
         {
-            var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
-                .Where(g => g.manager_id == _manager.id
-                         && g.is_played == 0
-                         && g.game_day < 0)
-                .OrderByDescending(g => g.game_day)
-                .FirstOrDefault();
-            if (nextPreseason != null) return nextPreseason.game_day;
-            return 1;
+            var currentDate = System.DateTime.Parse(_season.current_date);
+            return DateToGameDay(currentDate);
         }
 
-        if (_season.current_game_day < 0)
+        // Fallback for old saves without current_date
+        if (_season.current_game_day == 0)
         {
             var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
                 .Where(g => g.manager_id == _manager.id

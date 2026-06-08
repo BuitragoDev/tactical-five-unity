@@ -349,11 +349,15 @@ public class PreseasonController : MonoBehaviour
 
         int slotIndex = _games.Count;
 
+        var gameDate = System.DateTime.Parse(_datesDb[slotIndex]);
+        var seasonStart = new System.DateTime(2025, 10, 22);
+        int daysFromStart = (int)(seasonStart - gameDate).TotalDays;
+
         var game = new GameData
         {
             manager_id = _manager.id,
             season_id = 0,
-            game_day = -(slotIndex + 1),
+            game_day = -daysFromStart,
             home_team_id = _isHome ? _myTeam.id : rival.id,
             away_team_id = _isHome ? rival.id : _myTeam.id,
             game_date = _datesDb[slotIndex],
@@ -409,11 +413,17 @@ public class PreseasonController : MonoBehaviour
         // 1. Crear temporada si no existe
         var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         if (season == null)
+        {
             season = DatabaseManager.Instance.CreateSeason(
                 _manager.id,
                 ScreenManager.Instance.CurrentMode == GameMode.ProManager
                     ? "promanager" : "manager"
             );
+            season.current_date = _games.Count > 0
+                ? _games.OrderByDescending(g => g.game_day).First().game_date
+                : $"{season.year_start}-10-22";
+            DatabaseManager.Instance.UpdateSeason(season);
+        }
 
         // 2. Guardar amistosos si los hay
         if (_games.Count > 0)

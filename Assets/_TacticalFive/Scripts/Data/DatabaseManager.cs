@@ -511,6 +511,9 @@ public class DatabaseManager : MonoBehaviour
         var season = GetActiveSeason(managerId);
         if (season == null) return "";
 
+        if (!string.IsNullOrEmpty(season.current_date))
+            return System.DateTime.Parse(season.current_date).ToString("dd/MM/yyyy");
+
         if (season.current_game_day == 0)
         {
             var firstPre = _db.Table<GameData>()

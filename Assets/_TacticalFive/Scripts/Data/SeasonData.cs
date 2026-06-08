@@ -13,4 +13,5 @@ public class SeasonData
     public string phase             { get; set; } // "preseason" | "regular" | "playin" | "playoffs" | "finished"
     public int    manager_id        { get; set; }
     public int    generated        { get; set; } // 0 = no, 1 = sí
+    public string current_date     { get; set; } // "yyyy-MM-dd" — fecha actual del calendario
 }

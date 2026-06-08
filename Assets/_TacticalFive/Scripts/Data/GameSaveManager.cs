@@ -163,7 +163,11 @@ public static class GameSaveManager
         slot.lastPlayedRealDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
 
         // Calcular fecha in-game
-        if (season != null && season.current_game_day > 0)
+        if (season != null && !string.IsNullOrEmpty(season.current_date))
+        {
+            slot.currentDate = DateTime.Parse(season.current_date).ToString("dd/MM/yyyy");
+        }
+        else if (season != null && season.current_game_day > 0)
         {
             var seasonStart = new DateTime(season.year_start, 10, 22);
             var gameDate = seasonStart.AddDays(season.current_game_day - 1);
