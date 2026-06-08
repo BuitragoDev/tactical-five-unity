@@ -209,12 +209,7 @@ public class PlayoffsController : MonoBehaviour
             return home != null && home.conference == "East";
         }).ToList();
 
-        var grouped = eastGames.GroupBy(g => g.series_label);
-        foreach (var series in grouped)
-        {
-            var seriesElem = CreateSeriesBlock(series.Key, series.ToList(), "Playoffs");
-            _eastBracket.Add(seriesElem);
-        }
+        BuildConferenceBracket(_eastBracket, eastGames, "East");
     }
 
     void BuildWestBracket()
@@ -226,11 +221,51 @@ public class PlayoffsController : MonoBehaviour
             return home != null && home.conference == "West";
         }).ToList();
 
-        var grouped = westGames.GroupBy(g => g.series_label);
-        foreach (var series in grouped)
+        BuildConferenceBracket(_westBracket, westGames, "West");
+    }
+
+    void BuildConferenceBracket(VisualElement container, List<GameData> games, string conf)
+    {
+        string confLower = conf.ToLower();
+        var roundNames = new Dictionary<string, string>
         {
-            var seriesElem = CreateSeriesBlock(series.Key, series.ToList(), "Playoffs");
-            _westBracket.Add(seriesElem);
+            { "r1", "Primera Ronda" },
+            { "r2", "Semifinales de Conferencia" },
+            { "r3", "Finales de Conferencia" }
+        };
+
+        foreach (var round in roundNames)
+        {
+            var roundHeader = new Label();
+            roundHeader.AddToClassList("playoff-round-name");
+            roundHeader.text = round.Value;
+            container.Add(roundHeader);
+
+            var roundGames = games.Where(g => g.series_label.Contains($"playoff-{round.Key}-{confLower}")).ToList();
+            var grouped = roundGames.GroupBy(g => g.series_label);
+
+            if (roundGames.Count == 0)
+            {
+                var placeholder = new VisualElement();
+                placeholder.AddToClassList("playoff-placeholder");
+                var placeholderText = new Label();
+                placeholderText.AddToClassList("playoff-placeholder-text");
+                placeholderText.text = round.Key == "r1"
+                    ? "Esperando resultados de la primera ronda..."
+                    : round.Key == "r2"
+                        ? "Esperando resultados de semifinales..."
+                        : "Esperando resultados de finales de conferencia...";
+                placeholder.Add(placeholderText);
+                container.Add(placeholder);
+            }
+            else
+            {
+                foreach (var series in grouped)
+                {
+                    var seriesElem = CreateSeriesBlock(series.Key, series.ToList(), "Playoffs");
+                    container.Add(seriesElem);
+                }
+            }
         }
     }
 
@@ -264,22 +299,47 @@ public class PlayoffsController : MonoBehaviour
 
         var label = new Label();
         label.AddToClassList("playoff-round-label");
-        label.text = seriesLabel;
+        label.text = FormatSeriesLabel(seriesLabel);
 
-        var status = new Label();
-        status.AddToClassList("playoff-series-status");
-        int homeWins = games.Count(g => g.is_played == 1 && g.home_score > g.away_score);
-        int awayWins = games.Count(g => g.is_played == 1 && g.away_score > g.home_score);
-        status.text = $"{homeWins} - {awayWins}";
+        var typeLbl = new Label();
+        typeLbl.AddToClassList("playoff-series-type");
+        typeLbl.text = type == "Playoffs" || type == "Finals" ? "Best of 7" : "Single Game";
 
         header.Add(label);
-        header.Add(status);
+        header.Add(typeLbl);
         block.Add(header);
 
         foreach (var g in games.OrderBy(g => g.game_day))
         {
             var row = CreatePlayoffGameRow(g);
             block.Add(row);
+        }
+
+        // Series matchup summary
+        var matchup = ComputeSeriesMatchup(games);
+        if (matchup != null)
+        {
+            var matchupRow = new VisualElement();
+            matchupRow.AddToClassList("playoff-series-matchup");
+
+            var topTeam = new Label();
+            topTeam.AddToClassList("playoff-matchup-team");
+            topTeam.text = matchup.topAbbr;
+            if (matchup.topWins > matchup.bottomWins) topTeam.AddToClassList("playoff-matchup-leader");
+
+            var score = new Label();
+            score.AddToClassList("playoff-matchup-score");
+            score.text = $"{matchup.topWins} - {matchup.bottomWins}";
+
+            var bottomTeam = new Label();
+            bottomTeam.AddToClassList("playoff-matchup-team");
+            bottomTeam.text = matchup.bottomAbbr;
+            if (matchup.bottomWins > matchup.topWins) bottomTeam.AddToClassList("playoff-matchup-leader");
+
+            matchupRow.Add(topTeam);
+            matchupRow.Add(score);
+            matchupRow.Add(bottomTeam);
+            block.Add(matchupRow);
         }
 
         return block;
@@ -398,5 +458,47 @@ public class PlayoffsController : MonoBehaviour
     void PlayClick()
     {
         AudioManager.Instance?.PlaySFX("click");
+    }
+
+    string FormatSeriesLabel(string label)
+    {
+        if (label.StartsWith("playin-7-8-")) return "7 vs 8";
+        if (label.StartsWith("playin-9-10-")) return "9 vs 10";
+        if (label.StartsWith("playin-elim-")) return "Eliminatoria";
+        if (label == "playoff-r4-finals") return "Final NBA";
+
+        // Remove "playoff-rX-" prefix
+        var parts = label.Split('-');
+        if (parts.Length >= 3 && parts[0] == "playoff")
+        {
+            return string.Join("-", parts.Skip(2));
+        }
+        return label;
+    }
+
+    (string topAbbr, string bottomAbbr, int topWins, int bottomWins) ComputeSeriesMatchup(List<GameData> games)
+    {
+        if (games.Count == 0) return (null, null, 0, 0);
+        var first = games[0];
+        var home = _allTeams.Find(t => t.id == first.home_team_id);
+        var away = _allTeams.Find(t => t.id == first.away_team_id);
+        if (home == null || away == null) return (null, null, 0, 0);
+
+        int homeWins = 0, awayWins = 0;
+        foreach (var g in games)
+        {
+            if (g.is_played != 1) continue;
+            if (g.home_score > g.away_score)
+            {
+                if (g.home_team_id == home.id) homeWins++;
+                else awayWins++;
+            }
+            else
+            {
+                if (g.away_team_id == home.id) homeWins++;
+                else awayWins++;
+            }
+        }
+        return (home.abbreviation, away.abbreviation, homeWins, awayWins);
     }
 }
