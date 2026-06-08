@@ -92,8 +92,8 @@ public static class PlayoffsGenerator
         if (elimExists) return;
 
         // Loser of 7v8 vs Winner of 9v10
-        int loser7v8 = game7v8.home_score > game7v8.away_score ? game7v8.away_team_id : game7v8.home_team_id;
-        int winner9v10 = game9v10.home_score > game9v10.away_score ? game9v10.home_team_id : game9v10.away_team_id;
+        int loser7v8 = game7v8.home_score >= game7v8.away_score ? game7v8.away_team_id : game7v8.home_team_id;
+        int winner9v10 = game9v10.home_score >= game9v10.away_score ? game9v10.home_team_id : game9v10.away_team_id;
 
         int elimDay = game7v8.game_day + 2;
         var elimDate = DateTime.Parse(game7v8.game_date).AddDays(2);
@@ -398,7 +398,7 @@ public static class PlayoffsGenerator
 
         foreach (var g in games)
         {
-            if (g.home_score > g.away_score)
+            if (g.home_score >= g.away_score)
             {
                 if (g.home_team_id == teamA) teamAWins++;
                 else teamBWins++;
@@ -511,10 +511,10 @@ public static class PlayoffsGenerator
             var gameElim = DatabaseManager.Instance.Db.Table<GameData>()
                 .FirstOrDefault(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-elim-{conf.ToLower()}" && g.is_played == 1);
 
-            int seed7 = game7v8 != null && game7v8.home_score > game7v8.away_score ? game7v8.home_team_id :
+            int seed7 = game7v8 != null && game7v8.home_score >= game7v8.away_score ? game7v8.home_team_id :
                         game7v8 != null ? game7v8.away_team_id : 0;
 
-            int seed8 = gameElim != null && gameElim.home_score > gameElim.away_score ? gameElim.home_team_id :
+            int seed8 = gameElim != null && gameElim.home_score >= gameElim.away_score ? gameElim.home_team_id :
                         gameElim != null ? gameElim.away_team_id : 0;
 
             seeds[conf] = top6.Concat(new[] { seed7, seed8 }).ToList();
