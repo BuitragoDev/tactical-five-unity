@@ -209,6 +209,20 @@
     border-color: rgb(255, 210, 80);
 }
 
+.price-btn--disabled {
+    opacity: 0.5;
+    background-color: rgb(20, 24, 34);
+    border-color: rgb(42, 51, 71);
+    color: rgb(85, 102, 119);
+    cursor: default;
+    pointer-events: none;
+}
+
+.price-btn--disabled:hover {
+    background-color: rgb(20, 24, 34);
+    border-color: rgb(42, 51, 71);
+}
+
 /* ══ Table ══ */
 .finances-table {
     flex-direction: column;
