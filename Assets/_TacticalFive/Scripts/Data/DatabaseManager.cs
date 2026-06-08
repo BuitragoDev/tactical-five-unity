@@ -1568,7 +1568,7 @@ public class DatabaseManager : MonoBehaviour
                      SUM(ps.blocks) AS total_blocks,
                      SUM(ps.rating) AS total_rating
               FROM player_game_stats ps
-              JOIN player_data p ON ps.player_id = p.id
+              JOIN PlayerData p ON ps.player_id = p.id
               JOIN game_data g ON ps.game_id = g.id
               WHERE g.manager_id = ?
                 AND g.season_id = ?
@@ -1607,7 +1607,7 @@ public class DatabaseManager : MonoBehaviour
                      SUM(ps.blocks) AS total_blocks,
                      SUM(ps.rating) AS total_rating
               FROM player_game_stats ps
-              JOIN player_data p ON ps.player_id = p.id
+              JOIN PlayerData p ON ps.player_id = p.id
               JOIN game_data g ON ps.game_id = g.id
               WHERE g.manager_id = ?
                 AND g.season_id = ?
