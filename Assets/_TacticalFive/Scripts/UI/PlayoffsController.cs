@@ -27,6 +27,7 @@ public class PlayoffsController : MonoBehaviour
 
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites64 = new();
+    private Dictionary<string, Sprite> _logoSprites32 = new();
 
     void OnEnable()
     {
@@ -66,6 +67,9 @@ public class PlayoffsController : MonoBehaviour
 
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
+
+        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        foreach (var s in logos32) _logoSprites32[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
         if (_manager == null) return;
@@ -319,22 +323,23 @@ public class PlayoffsController : MonoBehaviour
         var matchup = ComputeSeriesMatchup(games);
         if (matchup.HasValue)
         {
+            var m = matchup.Value;
             var matchupRow = new VisualElement();
             matchupRow.AddToClassList("playoff-series-matchup");
 
             var topTeam = new Label();
             topTeam.AddToClassList("playoff-matchup-team");
-            topTeam.text = matchup.Value.topAbbr;
-            if (matchup.Value.topWins > matchup.Value.bottomWins) topTeam.AddToClassList("playoff-matchup-leader");
+            topTeam.text = m.topAbbr;
+            if (m.topWins > m.bottomWins) topTeam.AddToClassList("playoff-matchup-leader");
 
             var score = new Label();
             score.AddToClassList("playoff-matchup-score");
-            score.text = $"{matchup.Value.topWins} - {matchup.Value.bottomWins}";
+            score.text = $"{m.topWins} - {m.bottomWins}";
 
             var bottomTeam = new Label();
             bottomTeam.AddToClassList("playoff-matchup-team");
-            bottomTeam.text = matchup.Value.bottomAbbr;
-            if (matchup.Value.bottomWins > matchup.Value.topWins) bottomTeam.AddToClassList("playoff-matchup-leader");
+            bottomTeam.text = m.bottomAbbr;
+            if (m.bottomWins > m.topWins) bottomTeam.AddToClassList("playoff-matchup-leader");
 
             matchupRow.Add(topTeam);
             matchupRow.Add(score);
@@ -356,38 +361,32 @@ public class PlayoffsController : MonoBehaviour
         var away = _allTeams.Find(t => t.id == game.away_team_id);
 
         var teamsBlock = new VisualElement();
+        teamsBlock.style.flexDirection = FlexDirection.Row;
         teamsBlock.AddToClassList("playoff-game-teams");
 
-        var awayBlock = new VisualElement();
-        awayBlock.AddToClassList("playoff-team-block playoff-team-block--away");
+        // Home: name + logo32
+        var homeBlock = new VisualElement();
+        homeBlock.style.flexDirection = FlexDirection.Row;
+        homeBlock.style.width = 260;
+        homeBlock.AddToClassList("playoff-team-block playoff-team-block--home");
 
-        var awayName = new Label();
-        awayName.AddToClassList("playoff-team-name");
-        awayName.text = away?.abbreviation ?? "???";
-        awayBlock.Add(awayName);
+        var homeName = new Label();
+        homeName.AddToClassList("playoff-team-name");
+        homeName.text = home?.name ?? "???";
+        homeBlock.Add(homeName);
 
-        var awayLogo = new VisualElement();
-        awayLogo.AddToClassList("playoff-team-logo");
-        if (away != null && _logoSprites.TryGetValue(away.logo, out var aSprite))
-            awayLogo.style.backgroundImage = new StyleBackground(aSprite);
-        awayBlock.Add(awayLogo);
+        var homeLogo = new VisualElement();
+        homeLogo.AddToClassList("playoff-team-logo");
+        if (home != null && _logoSprites32.TryGetValue(home.logo, out var hSprite))
+            homeLogo.style.backgroundImage = new StyleBackground(hSprite);
+        homeBlock.Add(homeLogo);
 
-        teamsBlock.Add(awayBlock);
+        teamsBlock.Add(homeBlock);
 
+        // Score: homeScore - awayScore (home team on left)
         var scoreBlock = new VisualElement();
+        scoreBlock.style.width = 80;
         scoreBlock.AddToClassList("playoff-score-block");
-
-        var awayScore = new Label();
-        awayScore.AddToClassList("playoff-score");
-        if (game.is_played == 1 && game.away_score > game.home_score)
-            awayScore.AddToClassList("playoff-score--winner");
-        awayScore.text = game.is_played == 1 ? game.away_score.ToString() : "-";
-        scoreBlock.Add(awayScore);
-
-        var sep = new Label();
-        sep.AddToClassList("playoff-score-sep");
-        sep.text = "-";
-        scoreBlock.Add(sep);
 
         var homeScore = new Label();
         homeScore.AddToClassList("playoff-score");
@@ -396,23 +395,39 @@ public class PlayoffsController : MonoBehaviour
         homeScore.text = game.is_played == 1 ? game.home_score.ToString() : "-";
         scoreBlock.Add(homeScore);
 
+        var sep = new Label();
+        sep.AddToClassList("playoff-score-sep");
+        sep.text = "-";
+        scoreBlock.Add(sep);
+
+        var awayScore = new Label();
+        awayScore.AddToClassList("playoff-score");
+        if (game.is_played == 1 && game.away_score > game.home_score)
+            awayScore.AddToClassList("playoff-score--winner");
+        awayScore.text = game.is_played == 1 ? game.away_score.ToString() : "-";
+        scoreBlock.Add(awayScore);
+
         teamsBlock.Add(scoreBlock);
 
-        var homeBlock = new VisualElement();
-        homeBlock.AddToClassList("playoff-team-block playoff-team-block--home");
+        // Away: logo32 + name
+        var awayBlock = new VisualElement();
+        awayBlock.style.flexDirection = FlexDirection.Row;
+        awayBlock.style.width = 260;
+        awayBlock.AddToClassList("playoff-team-block playoff-team-block--away");
 
-        var homeLogo = new VisualElement();
-        homeLogo.AddToClassList("playoff-team-logo");
-        if (home != null && _logoSprites.TryGetValue(home.logo, out var hSprite))
-            homeLogo.style.backgroundImage = new StyleBackground(hSprite);
-        homeBlock.Add(homeLogo);
+        var awayLogo = new VisualElement();
+        awayLogo.AddToClassList("playoff-team-logo");
+        if (away != null && _logoSprites32.TryGetValue(away.logo, out var aSprite))
+            awayLogo.style.backgroundImage = new StyleBackground(aSprite);
+        awayBlock.Add(awayLogo);
 
-        var homeName = new Label();
-        homeName.AddToClassList("playoff-team-name");
-        homeName.text = home?.abbreviation ?? "???";
-        homeBlock.Add(homeName);
+        var awayName = new Label();
+        awayName.AddToClassList("playoff-team-name");
+        awayName.text = away?.name ?? "???";
+        awayBlock.Add(awayName);
 
-        teamsBlock.Add(homeBlock);
+        teamsBlock.Add(awayBlock);
+
         row.Add(teamsBlock);
 
         var typeLbl = new Label();

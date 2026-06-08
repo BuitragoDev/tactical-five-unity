@@ -112,11 +112,11 @@
                 <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR" />
             </ui:VisualElement>
 
-            <!-- PLAYOFFS CONTENT -->
-            <ui:ScrollView class="playoffs-scroll"
-                           horizontal-scrolling-enabled="false"
-                           mode="Vertical">
-                <ui:VisualElement class="playoffs-content">
+            <!-- PLAYOFFS BODY (clipping container) -->
+            <ui:VisualElement class="playoffs-body">
+                <ui:ScrollView class="playoffs-scroll"
+                               horizontal-scrolling-enabled="false"
+                               mode="Vertical">
 
                     <!-- Regular season empty state -->
                     <ui:VisualElement name="RegularSeasonEmpty" class="bracket-empty" style="display: none;">
@@ -159,8 +159,8 @@
                         <ui:Label name="NoFinalsText" class="no-data-text" text="FINALES NO DISPONIBLES AÚN" />
                     </ui:VisualElement>
 
-                </ui:VisualElement>
-            </ui:ScrollView>
+                </ui:ScrollView>
+            </ui:VisualElement>
 
         </ui:VisualElement>
 

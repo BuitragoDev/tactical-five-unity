@@ -500,7 +500,6 @@ public class DatabaseManager : MonoBehaviour
         return _db.Table<GameData>()
                 .Where(g => g.manager_id == managerId
                         && g.is_played == 0
-                        && g.game_type != "playoff"
                         && (g.home_team_id == teamId || g.away_team_id == teamId))
                 .OrderBy(g => g.game_date)
                 .FirstOrDefault();

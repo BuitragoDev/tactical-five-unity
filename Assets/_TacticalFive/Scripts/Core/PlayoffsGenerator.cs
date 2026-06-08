@@ -75,43 +75,71 @@ public static class PlayoffsGenerator
         return gamesToCreate.Count;
     }
 
-    public static void CreatePlayInEliminator(SeasonData season, int managerId, string conf)
+    public static int CreatePlayInEliminator(SeasonData season, int managerId, string conf)
     {
-        var game7v8 = DatabaseManager.Instance.Db.Table<GameData>()
-            .FirstOrDefault(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-7-8-{conf.ToLower()}" && g.is_played == 1);
+        string confLower = conf.ToLower();
 
-        var game9v10 = DatabaseManager.Instance.Db.Table<GameData>()
-            .FirstOrDefault(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-9-10-{conf.ToLower()}" && g.is_played == 1);
+        // Find all playin games for this conference
+        var confGames = DatabaseManager.Instance.Db.Table<GameData>()
+            .Where(g => g.manager_id == managerId && g.game_type == "playin")
+            .ToList();
 
-        if (game7v8 == null || game9v10 == null) return;
-        if (game7v8.is_played != 1 || game9v10.is_played != 1) return;
+        var game7v8 = confGames.FirstOrDefault(g => g.series_label == $"playin-7-8-{confLower}");
+        var game9v10 = confGames.FirstOrDefault(g => g.series_label == $"playin-9-10-{confLower}");
+
+        if (game7v8 == null || game9v10 == null)
+        {
+            Debug.Log($"[PlayoffsGenerator] CreatePlayInEliminator({conf}): games not found (7v8={game7v8!=null}, 9v10={game9v10!=null})");
+            return 0;
+        }
+        if (game7v8.is_played != 1 || game9v10.is_played != 1)
+        {
+            Debug.Log($"[PlayoffsGenerator] CreatePlayInEliminator({conf}): games not played yet (7v8={game7v8.is_played}, 9v10={game9v10.is_played})");
+            return 0;
+        }
 
         // Check if eliminator already exists
         var elimExists = DatabaseManager.Instance.Db.Table<GameData>()
-            .Any(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-elim-{conf.ToLower()}");
-        if (elimExists) return;
+            .Any(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-elim-{confLower}");
+        if (elimExists)
+        {
+            Debug.Log($"[PlayoffsGenerator] CreatePlayInEliminator({conf}): eliminator already exists");
+            return 0;
+        }
 
-        // Loser of 7v8 vs Winner of 9v10
+        // Loser of 7v8 vs Winner of 9v10 (home wins ties for advancement)
         int loser7v8 = game7v8.home_score >= game7v8.away_score ? game7v8.away_team_id : game7v8.home_team_id;
         int winner9v10 = game9v10.home_score >= game9v10.away_score ? game9v10.home_team_id : game9v10.away_team_id;
 
         int elimDay = game7v8.game_day + 2;
         var elimDate = DateTime.Parse(game7v8.game_date).AddDays(2);
 
-        DatabaseManager.Instance.Db.Insert(new GameData
+        Debug.Log($"[PlayoffsGenerator] Creating eliminator for {conf}: loser7v8={loser7v8} vs winner9v10={winner9v10} at day {elimDay}");
+
+        try
         {
-            season_id = season.id,
-            manager_id = managerId,
-            game_day = elimDay,
-            game_date = elimDate.ToString("yyyy-MM-dd"),
-            home_team_id = loser7v8,
-            away_team_id = winner9v10,
-            is_played = 0,
-            game_type = "playin",
-            series_label = $"playin-elim-{conf.ToLower()}",
-            home_score = 0,
-            away_score = 0
-        });
+            DatabaseManager.Instance.Db.Insert(new GameData
+            {
+                season_id = season.id,
+                manager_id = managerId,
+                game_day = elimDay,
+                game_date = elimDate.ToString("yyyy-MM-dd"),
+                home_team_id = loser7v8,
+                away_team_id = winner9v10,
+                is_played = 0,
+                game_type = "playin",
+                series_label = $"playin-elim-{confLower}",
+                home_score = 0,
+                away_score = 0
+            });
+            Debug.Log($"[PlayoffsGenerator] Eliminator created for {conf} at day {elimDay}");
+            return 1;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[PlayoffsGenerator] Failed to create eliminator for {conf}: {e.Message}");
+            return 0;
+        }
     }
 
     public static int GeneratePlayoffs(SeasonData season, int managerId)
@@ -497,25 +525,30 @@ public static class PlayoffsGenerator
 
     static Dictionary<string, List<int>> GetPlayoffSeeds(SeasonData season, int managerId)
     {
+        // Load ALL playin games at once to avoid multiple DB queries
+        var allPlayin = DatabaseManager.Instance.Db.Table<GameData>()
+            .Where(g => g.manager_id == managerId && g.game_type == "playin")
+            .ToList();
+
         var seeds = new Dictionary<string, List<int>>();
 
         foreach (string conf in new[] { "East", "West" })
         {
+            string confLower = conf.ToLower();
             var standings = GetStandingsForConference(season, managerId, conf);
             var top6 = standings.Take(6).Select(s => s.teamId).ToList();
 
-            // Play-in winners
-            var game7v8 = DatabaseManager.Instance.Db.Table<GameData>()
-                .FirstOrDefault(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-7-8-{conf.ToLower()}" && g.is_played == 1);
+            var game7v8 = allPlayin.FirstOrDefault(g => g.series_label == $"playin-7-8-{confLower}");
+            var gameElim = allPlayin.FirstOrDefault(g => g.series_label == $"playin-elim-{confLower}");
 
-            var gameElim = DatabaseManager.Instance.Db.Table<GameData>()
-                .FirstOrDefault(g => g.manager_id == managerId && g.game_type == "playin" && g.series_label == $"playin-elim-{conf.ToLower()}" && g.is_played == 1);
+            bool sevenPlayed = game7v8 != null && game7v8.is_played == 1;
+            bool elimPlayed = gameElim != null && gameElim.is_played == 1;
 
-            int seed7 = game7v8 != null && game7v8.home_score >= game7v8.away_score ? game7v8.home_team_id :
-                        game7v8 != null ? game7v8.away_team_id : 0;
+            int seed7 = sevenPlayed && game7v8.home_score >= game7v8.away_score ? game7v8.home_team_id :
+                        sevenPlayed ? game7v8.away_team_id : 0;
 
-            int seed8 = gameElim != null && gameElim.home_score >= gameElim.away_score ? gameElim.home_team_id :
-                        gameElim != null ? gameElim.away_team_id : 0;
+            int seed8 = elimPlayed && gameElim.home_score >= gameElim.away_score ? gameElim.home_team_id :
+                        elimPlayed ? gameElim.away_team_id : 0;
 
             seeds[conf] = top6.Concat(new[] { seed7, seed8 }).ToList();
         }
