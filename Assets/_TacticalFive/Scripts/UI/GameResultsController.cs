@@ -147,13 +147,8 @@ public class GameResultsController : MonoBehaviour
         if (_season != null)
         {
             _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _headerGameDay.text = $"Jornada {displayDay}";
-
-            var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-            var gamesToday = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, displayDay);
-            var todayGame = gamesToday.FirstOrDefault();
-            _root.Q<Label>("HeaderDate").text = todayGame != null && season != null
-                ? new System.DateTime(season.year_start, 10, 22).AddDays(todayGame.game_day - 1).ToString("dd/MM/yyyy") : "";
+            _headerGameDay.text = displayDay < 0 ? "AMISTOSO" : $"Jornada {displayDay}";
+            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
     }
 

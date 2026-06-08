@@ -343,7 +343,7 @@ public class DashboardController : MonoBehaviour
                 var firstPre = DatabaseManager.Instance.Db.Table<GameData>()
                     .Where(g => g.manager_id == _manager.id
                              && g.game_type == "preseason")
-                    .OrderBy(g => g.game_day)
+                    .OrderByDescending(g => g.game_day)
                     .FirstOrDefault();
                 if (firstPre != null)
                     return System.DateTime.Parse(firstPre.game_date).ToString("dd/MM/yyyy");
