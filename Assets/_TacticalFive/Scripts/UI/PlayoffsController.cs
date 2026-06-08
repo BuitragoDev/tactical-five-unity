@@ -367,6 +367,7 @@ public class PlayoffsController : MonoBehaviour
         // Home: name + logo32
         var homeBlock = new VisualElement();
         homeBlock.style.flexDirection = FlexDirection.Row;
+        homeBlock.style.width = 260;
         homeBlock.AddToClassList("playoff-team-block playoff-team-block--home");
 
         var homeName = new Label();
@@ -382,21 +383,10 @@ public class PlayoffsController : MonoBehaviour
 
         teamsBlock.Add(homeBlock);
 
-        // Score: awayScore - homeScore
+        // Score: homeScore - awayScore (home team on left)
         var scoreBlock = new VisualElement();
+        scoreBlock.style.width = 80;
         scoreBlock.AddToClassList("playoff-score-block");
-
-        var awayScore = new Label();
-        awayScore.AddToClassList("playoff-score");
-        if (game.is_played == 1 && game.away_score > game.home_score)
-            awayScore.AddToClassList("playoff-score--winner");
-        awayScore.text = game.is_played == 1 ? game.away_score.ToString() : "-";
-        scoreBlock.Add(awayScore);
-
-        var sep = new Label();
-        sep.AddToClassList("playoff-score-sep");
-        sep.text = "-";
-        scoreBlock.Add(sep);
 
         var homeScore = new Label();
         homeScore.AddToClassList("playoff-score");
@@ -405,11 +395,24 @@ public class PlayoffsController : MonoBehaviour
         homeScore.text = game.is_played == 1 ? game.home_score.ToString() : "-";
         scoreBlock.Add(homeScore);
 
+        var sep = new Label();
+        sep.AddToClassList("playoff-score-sep");
+        sep.text = "-";
+        scoreBlock.Add(sep);
+
+        var awayScore = new Label();
+        awayScore.AddToClassList("playoff-score");
+        if (game.is_played == 1 && game.away_score > game.home_score)
+            awayScore.AddToClassList("playoff-score--winner");
+        awayScore.text = game.is_played == 1 ? game.away_score.ToString() : "-";
+        scoreBlock.Add(awayScore);
+
         teamsBlock.Add(scoreBlock);
 
         // Away: logo32 + name
         var awayBlock = new VisualElement();
         awayBlock.style.flexDirection = FlexDirection.Row;
+        awayBlock.style.width = 260;
         awayBlock.AddToClassList("playoff-team-block playoff-team-block--away");
 
         var awayLogo = new VisualElement();

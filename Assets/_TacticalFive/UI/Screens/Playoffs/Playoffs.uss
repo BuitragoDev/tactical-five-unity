@@ -124,8 +124,6 @@
     margin: 0 8px;
 }
 
-
-
 .playoff-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
@@ -133,6 +131,7 @@
     -unity-text-transform: upper;
     flex: 1 1 auto;
     min-width: 0;
+    overflow: hidden;
     -unity-text-align: middle-left;
 }
 
@@ -142,10 +141,14 @@
 
 .playoff-team-block--home {
     justify-content: flex-start;
+    width: 260px;
+    flex: 0 0 260px;
 }
 
 .playoff-team-block--away {
     justify-content: flex-end;
+    width: 260px;
+    flex: 0 0 260px;
 }
 
 .playoff-score-block {
@@ -271,8 +274,8 @@
 .playoff-series-matchup {
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    padding: 6px 12px;
+    justify-content: flex-start;
+    padding: 6px 0px;
     background-color: rgb(15, 20, 28);
     border-top-width: 1px;
     border-top-color: rgb(42, 51, 71);
