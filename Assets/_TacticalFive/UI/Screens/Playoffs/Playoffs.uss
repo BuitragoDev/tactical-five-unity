@@ -14,22 +14,27 @@
 .playoffs-main {
     flex-direction: column;
     flex-grow: 1;
-    min-width: 0;
+}
+
+.playoffs-body {
+    flex-grow: 1;
     min-height: 0;
+    overflow: hidden;
 }
 
 .playoffs-scroll {
     flex-grow: 1;
-    min-height: 0;
 }
-
-.playoffs-content {
+.playoffs-scroll #unity-content-container {
     flex-direction: column;
     padding: 20px;
 }
 
 .panel-playoffs {
     margin-bottom: 16px;
+    flex-shrink: 0;
+    max-width: 900px;
+    margin-left: 0;
 }
 
 .panel-finals {
@@ -70,7 +75,7 @@
 
 .playoff-round-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 14px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
@@ -79,7 +84,7 @@
 
 .playoff-series-status {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 14px;
     color: rgb(212, 160, 23);
 }
 
@@ -99,51 +104,48 @@
 }
 
 .playoff-game-teams {
-    flex-grow: 1;
+    flex: 1 1 auto;
     flex-direction: row;
     align-items: center;
+    min-width: 0;
 }
 
 .playoff-team-block {
     flex-direction: row;
     align-items: center;
+    flex: 0 0 auto;
+    min-width: 0;
+}
+
+.playoff-team-logo {
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
-    width: 140px;
+    margin: 0 8px;
+}
+
+
+
+.playoff-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    -unity-text-transform: upper;
+    flex: 1 1 auto;
+    min-width: 0;
+    -unity-text-align: middle-left;
+}
+
+.playoff-team-block--away .playoff-team-name {
+    -unity-text-align: middle-right;
+}
+
+.playoff-team-block--home {
+    justify-content: flex-start;
 }
 
 .playoff-team-block--away {
     justify-content: flex-end;
-}
-
-.playoff-team-logo {
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-}
-
-.playoff-team-block--away .playoff-team-logo {
-    margin-right: 6px;
-}
-
-.playoff-team-block--home .playoff-team-logo {
-    margin-left: 6px;
-}
-
-.playoff-team-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
-    color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
-}
-
-.playoff-team-block--away .playoff-team-name {
-    margin-right: 6px;
-    -unity-text-align: middle-right;
-}
-
-.playoff-team-block--home .playoff-team-name {
-    margin-left: 6px;
-    -unity-text-align: middle-left;
 }
 
 .playoff-score-block {
@@ -152,11 +154,12 @@
     flex-shrink: 0;
     width: 80px;
     justify-content: center;
+    margin: 0 12px;
 }
 
 .playoff-score {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 24px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
 }
@@ -167,14 +170,14 @@
 
 .playoff-score-sep {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 18px;
     color: rgb(58, 74, 99);
     margin: 0 4px;
 }
 
 .playoff-game-type {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 10px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
@@ -185,7 +188,7 @@
 
 .no-data-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(58, 74, 99);
@@ -226,4 +229,73 @@
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
     max-width: 400px;
+}
+
+/* ── Dynamically created bracket elements ── */
+
+.playoff-round-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(180, 190, 210);
+    padding: 16px 0 8px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.playoff-placeholder {
+    flex-direction: column;
+    padding: 16px;
+    margin-bottom: 12px;
+}
+
+.playoff-placeholder-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 12px;
+    color: rgb(85, 102, 119);
+    -unity-text-align: middle-center;
+}
+
+.playoff-series-type {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(85, 102, 119);
+    flex-shrink: 0;
+}
+
+.playoff-series-matchup {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    background-color: rgb(15, 20, 28);
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
+}
+
+.playoff-matchup-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    -unity-text-transform: upper;
+    color: rgb(140, 155, 180);
+    width: 80px;
+    -unity-text-align: middle-center;
+}
+
+.playoff-matchup-leader {
+    color: rgb(212, 160, 23);
+}
+
+.playoff-matchup-score {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(200, 210, 230);
+    margin: 0 12px;
+    min-width: 40px;
+    -unity-text-align: middle-center;
 }

@@ -488,8 +488,29 @@ public class DashboardController : MonoBehaviour
 
         if (_season.phase == "playin")
         {
-            PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "East");
-            PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "West");
+            // Match Django: create eliminator for each conference (idempotent)
+            int eastElim = PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "East");
+            int westElim = PlayoffsGenerator.CreatePlayInEliminator(_season, _manager.id, "West");
+
+            // Match Django: if eliminator games were just created on the current day, simulate them now
+            if (eastElim > 0 || westElim > 0)
+            {
+                var elimToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
+                if (elimToday.Count > 0)
+                {
+                    foreach (var elimGame in elimToday)
+                    {
+                        var homeP = DatabaseManager.Instance.GetPlayersByTeam(elimGame.home_team_id);
+                        var awayP = DatabaseManager.Instance.GetPlayersByTeam(elimGame.away_team_id);
+                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP);
+                        DatabaseManager.Instance.UpdateGame(elimGame);
+                        ProcessGameFinances(elimGame, elimResult);
+                        yield return null;
+                    }
+                    GameResultCache.LastGameDay = gameDay;
+                    GameResultCache.SimulatedGameIds.AddRange(elimToday.Select(g => g.id));
+                }
+            }
 
             bool allPlayInPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
                 .Any(g => g.manager_id == _manager.id
@@ -497,10 +518,17 @@ public class DashboardController : MonoBehaviour
                        && g.is_played == 0);
             if (allPlayInPlayed)
             {
-                PlayoffsGenerator.GeneratePlayoffs(_season, _manager.id);
-                _season.phase = "playoff";
-                DatabaseManager.Instance.UpdateSeason(_season);
-                Debug.Log("[Dashboard] Play-In finished → Playoffs generated.");
+                int created = PlayoffsGenerator.GeneratePlayoffs(_season, _manager.id);
+                if (created > 0)
+                {
+                    _season.phase = "playoff";
+                    DatabaseManager.Instance.UpdateSeason(_season);
+                    Debug.Log($"[Dashboard] Play-In finished → Playoffs generated ({created} games).");
+                }
+                else
+                {
+                    Debug.LogError("[Dashboard] allPlayInPlayed but GeneratePlayoffs returned 0 games!");
+                }
             }
         }
 

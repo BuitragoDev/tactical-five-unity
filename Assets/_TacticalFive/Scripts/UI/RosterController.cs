@@ -729,7 +729,6 @@ public class RosterController : MonoBehaviour
         string salaryText = $"${_renewOfferSalary / 1_000_000}M/año";
         string yearsText = $"{_renewOfferYears} año{(_renewOfferYears > 1 ? "s" : "")}";
 
-        int cooldownDays;
         string cooldownText;
         string resultTitle;
         string resultLine1;
@@ -742,7 +741,6 @@ public class RosterController : MonoBehaviour
             _selectedPlayer.renewal_cooldown_day = currentDay + 365;
             DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
-            cooldownDays = 365;
             cooldownText = "1 año";
             resultTitle = "CONTRATO RENOVADO";
             resultLine1 = $"{playerName} ha aceptado la oferta.";
@@ -767,7 +765,6 @@ public class RosterController : MonoBehaviour
             _selectedPlayer.renewal_cooldown_day = currentDay + 15;
             DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
-            cooldownDays = 15;
             cooldownText = "15 días";
             resultTitle = "OFERTA RECHAZADA";
             resultLine1 = $"{playerName} ha rechazado la oferta.";
