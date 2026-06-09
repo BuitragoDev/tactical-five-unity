@@ -17,8 +17,8 @@ public class EndSeasonController : MonoBehaviour
 
     // Content
     private Label _seasonTag;
-    private ScrollView _retiringList;
-    private ScrollView _expiringList;
+    private VisualElement _retiringList;
+    private VisualElement _expiringList;
     private Button _btnDraft;
     private Button _btnNextSeason;
     private Button _btnRenewAll;
@@ -52,8 +52,8 @@ public class EndSeasonController : MonoBehaviour
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _seasonTag = _root.Q<Label>("SeasonTag");
-        _retiringList = _root.Q<ScrollView>("RetiringList");
-        _expiringList = _root.Q<ScrollView>("ExpiringList");
+        _retiringList = _root.Q<VisualElement>("RetiringList");
+        _expiringList = _root.Q<VisualElement>("ExpiringList");
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnRenewAll = _root.Q<Button>("BtnRenewAll");
