@@ -2083,26 +2083,59 @@ public class DatabaseManager : MonoBehaviour
             var champTeam = GetTeamById(champId);
             var finalistTeam = GetTeamById(finalistId);
 
-            // Finals MVP: player from champ team with highest total rating in Finals games
-            string finalsMvp = "";
+            // Copy Finals player stats to finals_player_stats table
             var finalsGameIds = finalsGames.Select(g => g.id).ToList();
+            var allFinalsStats = new List<PlayerGameStats>();
             if (finalsGameIds.Count > 0)
             {
-                var finalsStats = _db.Query<PlayerGameStats>(
+                _db.Execute("DELETE FROM finals_player_stats WHERE game_id IN (" +
+                    string.Join(",", finalsGameIds) + ")");
+                allFinalsStats = _db.Query<PlayerGameStats>(
                     "SELECT * FROM player_game_stats WHERE game_id IN (" +
                     string.Join(",", finalsGameIds) + ")");
-                var champStats = finalsStats.Where(s => s.team_id == champId).ToList();
-                if (champStats.Count > 0)
+                foreach (var ps in allFinalsStats)
                 {
-                    var topPlayer = champStats
-                        .GroupBy(s => s.player_id)
-                        .Select(g => new { PlayerId = g.Key, TotalRating = g.Sum(s => s.rating) })
-                        .OrderByDescending(x => x.TotalRating)
-                        .First();
-                    var mvpPlayer = GetPlayerById(topPlayer.PlayerId);
-                    if (mvpPlayer != null)
-                        finalsMvp = $"{mvpPlayer.first_name} {mvpPlayer.last_name}";
+                    _db.Insert(new FinalsPlayerStatsData
+                    {
+                        game_id = ps.game_id,
+                        player_id = ps.player_id,
+                        team_id = ps.team_id,
+                        minutes = ps.minutes,
+                        points = ps.points,
+                        fgm = ps.fgm,
+                        fga = ps.fga,
+                        fg3m = ps.fg3m,
+                        fg3a = ps.fg3a,
+                        ftm = ps.ftm,
+                        fta = ps.fta,
+                        oreb = ps.oreb,
+                        dreb = ps.dreb,
+                        rebounds = ps.rebounds,
+                        assists = ps.assists,
+                        steals = ps.steals,
+                        blocks = ps.blocks,
+                        turnovers = ps.turnovers,
+                        pf = ps.pf,
+                        rating = ps.rating,
+                        double_double = ps.double_double,
+                        triple_double = ps.triple_double
+                    });
                 }
+            }
+
+            // Finals MVP: player from champ team with best average rating
+            string finalsMvp = "";
+            var champStats = allFinalsStats.Where(s => s.team_id == champId).ToList();
+            if (champStats.Count > 0)
+            {
+                var topPlayer = champStats
+                    .GroupBy(s => s.player_id)
+                    .Select(g => new { PlayerId = g.Key, AvgRating = g.Average(s => s.rating) })
+                    .OrderByDescending(x => x.AvgRating)
+                    .First();
+                var mvpPlayer = GetPlayerById(topPlayer.PlayerId);
+                if (mvpPlayer != null)
+                    finalsMvp = $"{mvpPlayer.first_name} {mvpPlayer.last_name}";
             }
 
             _db.Insert(new FinalsRecord
@@ -2149,7 +2182,7 @@ public class DatabaseManager : MonoBehaviour
         if (seasonStats.Count > 0)
         {
             // MVP
-            var mvpCandidates = seasonStats.Where(s => s.games >= 20).ToList();
+            var mvpCandidates = seasonStats.Where(s => s.games >= 65).ToList();
             if (mvpCandidates.Count == 0) mvpCandidates = seasonStats;
             var topMvp = mvpCandidates.OrderByDescending(s => (double)s.total_rating / s.games).First();
             var mvpPlayer = GetPlayerById(topMvp.player_id);
@@ -2168,7 +2201,7 @@ public class DatabaseManager : MonoBehaviour
             string rookieName = "", rookieTeamKeyword = "", rookieRatingStr = "";
             if (rookieCandidates.Count > 0)
             {
-                var rookiesQualified = rookieCandidates.Where(r => r.games >= 15).ToList();
+                var rookiesQualified = rookieCandidates.Where(r => r.games >= 65).ToList();
                 if (rookiesQualified.Count == 0) rookiesQualified = rookieCandidates;
                 var topRookie = rookiesQualified.OrderByDescending(r => (double)r.total_rating / r.games).First();
                 var rookiePlayer = GetPlayerById(topRookie.player_id);
@@ -2209,7 +2242,7 @@ public class DatabaseManager : MonoBehaviour
                     .ToList();
                 if (posPlayers.Count == 0) continue;
 
-                var qualified = posPlayers.Where(x => x.games >= 20).ToList();
+                var qualified = posPlayers.Where(x => x.games >= 65).ToList();
                 if (qualified.Count == 0) qualified = posPlayers;
                 var best = qualified.OrderByDescending(x => (double)x.total_rating / x.games).First();
                 var player = GetPlayerById(best.player_id);
