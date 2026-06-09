@@ -4,6 +4,7 @@
 
     <Style src="MainMenu.uss" />
     <Style src="../LegalNotice/LegalNotice.uss" />
+    <Style src="../Settings/Settings.uss" />
 
     <ui:VisualElement name="MainMenuRoot" class="main-menu-root">
 
@@ -14,7 +15,10 @@
                 <ui:Label class="header-logo-text" text="TACTICAL" />
                 <ui:Label class="header-logo-text-gold" text="FIVE" />
             </ui:VisualElement>
-            <ui:Button name="BtnLegal" class="btn-legal" text="AVISO LEGAL" />
+            <ui:VisualElement class="header-right">
+                <ui:VisualElement name="ConfigIcon" class="config-icon" />
+                <ui:Button name="BtnLegal" class="btn-legal" text="AVISO LEGAL" />
+            </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ HERO ══ -->
@@ -167,6 +171,56 @@
                     <ui:VisualElement class="modal-spacer" />
                     <ui:Button name="BtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
                 </ui:VisualElement>
+            </ui:VisualElement>
+        <!-- ══ MODAL CONFIGURACIÓN ══ -->
+        <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="ConfigModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:VisualElement class="modal-body">
+                    <ui:VisualElement class="settings-section">
+                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
+                                <ui:VisualElement class="custom-slider-track" />
+                                <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
+                                <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
+                            </ui:VisualElement>
+                            <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label class="settings-label" text="Música" />
+                            <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
+                                <ui:VisualElement class="custom-slider-track" />
+                                <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
+                                <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
+                            </ui:VisualElement>
+                            <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
+                                <ui:VisualElement class="custom-slider-track" />
+                                <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
+                                <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                            </ui:VisualElement>
+                            <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-section">
+                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:VisualElement class="settings-quality-row">
+                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:VisualElement class="settings-quality-options">
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
             </ui:VisualElement>
         </ui:VisualElement>
 

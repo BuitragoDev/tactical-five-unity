@@ -63,6 +63,19 @@
     -unity-text-align: middle-left;
     -unity-text-transform: upper;
 }
+.header-right {
+    flex-direction: row;
+    align-items: center;
+}
+.config-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 40px;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/configuracion.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
 .btn-legal {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     background-color: rgb(22, 26, 36);
