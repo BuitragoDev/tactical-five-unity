@@ -35,6 +35,7 @@
                     <ui:VisualElement class="es-panel">
                         <ui:VisualElement class="es-panel-title-row">
                             <ui:Label text="Contratos Expirando (1 año)" class="es-panel-title"/>
+                            <ui:Button name="BtnRenewAll" class="btn-renew-all" text="RENOVAR TODOS"/>
                         </ui:VisualElement>
                         <ui:ScrollView name="ExpiringList" class="es-player-scroll" mode="Vertical"/>
                     </ui:VisualElement>

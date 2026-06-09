@@ -21,6 +21,7 @@ public class EndSeasonController : MonoBehaviour
     private ScrollView _expiringList;
     private Button _btnDraft;
     private Button _btnNextSeason;
+    private Button _btnRenewAll;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -55,6 +56,7 @@ public class EndSeasonController : MonoBehaviour
         _expiringList = _root.Q<ScrollView>("ExpiringList");
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
+        _btnRenewAll = _root.Q<Button>("BtnRenewAll");
     }
 
     void LoadData()
@@ -80,6 +82,8 @@ public class EndSeasonController : MonoBehaviour
             _btnDraft.SetEnabled(false);
             _btnDraft.text = "GENERANDO...";
         });
+
+        _btnRenewAll.RegisterCallback<ClickEvent>(_ => Debug.Log("Renew all clicked"));
     }
 
     void RefreshHeader()
@@ -134,7 +138,7 @@ public class EndSeasonController : MonoBehaviour
     void LoadExpiringPlayers()
     {
         _expiringList.Clear();
-        var players = DatabaseManager.Instance.GetExpiringPlayers(_myTeam.id);
+        var players = DatabaseManager.Instance.GetExpiringPlayers();
         if (players.Count == 0)
         {
             var empty = new Label();
