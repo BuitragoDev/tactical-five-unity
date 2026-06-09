@@ -4,7 +4,6 @@
 
     <Style src="MainMenu.uss" />
     <Style src="../LegalNotice/LegalNotice.uss" />
-    <Style src="../Settings/Settings.uss" />
 
     <ui:VisualElement name="MainMenuRoot" class="main-menu-root">
 
