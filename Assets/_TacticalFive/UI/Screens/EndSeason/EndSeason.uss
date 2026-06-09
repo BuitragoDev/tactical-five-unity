@@ -183,11 +183,13 @@
 }
 
 /* ── PLAYER LIST ── */
-.es-player-scroll {
-    flex-direction: column;
-    height: 400px;
+.es-scroll-wrapper {
+    max-height: 455px;
     flex-grow: 0;
     flex-shrink: 0;
+}
+.es-player-scroll {
+    flex-grow: 1;
 }
 .es-player-row {
     flex-direction: row;
