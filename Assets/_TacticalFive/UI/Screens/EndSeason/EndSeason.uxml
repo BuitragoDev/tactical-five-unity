@@ -30,14 +30,14 @@
                 <ui:VisualElement class="es-lists-col">
                     <ui:VisualElement class="es-panel">
                         <ui:Label text="Jugadores que se Retiran" class="es-panel-title"/>
-                        <ui:VisualElement name="RetiringList" class="es-player-scroll"/>
+                        <ui:ScrollView name="RetiringList" class="es-player-scroll" mode="Vertical"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="es-panel">
                         <ui:VisualElement class="es-panel-title-row">
                             <ui:Label text="Contratos Expirando (1 año)" class="es-panel-title"/>
                             <ui:Button name="BtnRenewAll" class="btn-renew-all" text="RENOVAR TODOS"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="ExpiringList" class="es-player-scroll"/>
+                        <ui:ScrollView name="ExpiringList" class="es-player-scroll" mode="Vertical"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <!-- RIGHT COLUMN -->

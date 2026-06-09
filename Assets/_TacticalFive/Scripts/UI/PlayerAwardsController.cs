@@ -51,7 +51,7 @@ public class PlayerAwardsController : MonoBehaviour
 
         var btnEnd = _root.Q<Button>("BtnEndSeason");
         if (btnEnd != null)
-            btnEnd.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.EndSeason));
+            btnEnd.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.EndSeason); });
     }
 
     void CacheReferences()
@@ -201,5 +201,10 @@ public class PlayerAwardsController : MonoBehaviour
         box.Add(lblLbl);
 
         return box;
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

@@ -52,7 +52,7 @@ public class SeasonSummaryController : MonoBehaviour
 
         var btnAwards = _root.Q<Button>("BtnGoToAwards");
         if (btnAwards != null)
-            btnAwards.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.PlayerAwards));
+            btnAwards.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.PlayerAwards); });
     }
 
     void CacheReferences()
@@ -182,5 +182,10 @@ public class SeasonSummaryController : MonoBehaviour
             elem.style.backgroundImage = new StyleBackground(sprite);
         else if (_logoSprites.TryGetValue(logoName, out var fallback))
             elem.style.backgroundImage = new StyleBackground(fallback);
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }

@@ -17,8 +17,8 @@ public class EndSeasonController : MonoBehaviour
 
     // Content
     private Label _seasonTag;
-    private VisualElement _retiringList;
-    private VisualElement _expiringList;
+    private ScrollView _retiringList;
+    private ScrollView _expiringList;
     private Button _btnDraft;
     private Button _btnNextSeason;
     private Button _btnRenewAll;
@@ -52,8 +52,8 @@ public class EndSeasonController : MonoBehaviour
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _seasonTag = _root.Q<Label>("SeasonTag");
-        _retiringList = _root.Q<VisualElement>("RetiringList");
-        _expiringList = _root.Q<VisualElement>("ExpiringList");
+        _retiringList = _root.Q<ScrollView>("RetiringList");
+        _expiringList = _root.Q<ScrollView>("ExpiringList");
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnRenewAll = _root.Q<Button>("BtnRenewAll");
@@ -75,15 +75,16 @@ public class EndSeasonController : MonoBehaviour
         RefreshHeader();
         RefreshContent();
 
-        _btnNextSeason.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+        _btnNextSeason.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
 
         _btnDraft.RegisterCallback<ClickEvent>(_ =>
         {
+            PlayClick();
             _btnDraft.SetEnabled(false);
             _btnDraft.text = "GENERANDO...";
         });
 
-        _btnRenewAll.RegisterCallback<ClickEvent>(_ => Debug.Log("Renew all clicked"));
+        _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); Debug.Log("Renew all clicked"); });
     }
 
     void RefreshHeader()
@@ -198,5 +199,10 @@ public class EndSeasonController : MonoBehaviour
         }
 
         return row;
+    }
+
+    void PlayClick()
+    {
+        AudioManager.Instance?.PlaySFX("click");
     }
 }
