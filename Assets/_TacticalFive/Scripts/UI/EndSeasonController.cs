@@ -233,6 +233,7 @@ public class EndSeasonController : MonoBehaviour
             DatabaseManager.Instance.UpdatePlayer(p);
         }
         LoadExpiringPlayers();
+        _btnRenewAll.SetEnabled(false);
     }
 
     int CalcRenewYears(int age)
