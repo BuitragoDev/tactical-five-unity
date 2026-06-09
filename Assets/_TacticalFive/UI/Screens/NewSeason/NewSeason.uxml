@@ -1,0 +1,32 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/NewSeason/NewSeason.uss?fileID=7433441132597879392&amp;guid=00000000000000000000000000000000&amp;type=3#NewSeason"/>
+    <ui:VisualElement name="NewSeasonRoot" class="new-season-root">
+        <ui:VisualElement name="TopHeader" class="top-header">
+            <ui:VisualElement class="header-left">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
+                <ui:VisualElement class="header-team-info">
+                    <ui:VisualElement class="header-team-name-row">
+                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
+                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(NUEVA TEMPORADA)"/>
+                    </ui:VisualElement>
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="header-right-group">
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
+                </ui:VisualElement>
+                <ui:Label name="HeaderDate" class="header-date-label" text=""/>
+                <ui:Button name="BtnStartSeason" class="btn-action btn-start-season" text="EMPEZAR TEMPORADA"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ContentArea" class="content-area">
+            <ui:VisualElement class="next-season-header">
+                <ui:Label text="Elige tu Equipo" class="page-title"/>
+                <ui:Label name="GameModeTag" text="" class="season-tag"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="TeamSelection" class="team-selection"/>
+            <ui:Label name="NoteText" class="ns-note" text=""/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

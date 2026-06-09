@@ -31,6 +31,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument seasonSummaryDocument;
     [SerializeField] private UIDocument playerAwardsDocument;
     [SerializeField] private UIDocument endSeasonDocument;
+    [SerializeField] private UIDocument newSeasonDocument;
 
     public GameMode CurrentMode { get; private set; } = GameMode.None;
     public GameScreen CurrentScreen { get; private set; } = GameScreen.MainMenu;
@@ -131,6 +132,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.EndSeason:
                 ShowOnly(endSeasonDocument);
                 break;
+            case GameScreen.NewSeason:
+                ShowOnly(newSeasonDocument);
+                break;
         }
     }
 
@@ -162,6 +166,7 @@ public class ScreenManager : MonoBehaviour
         if (seasonSummaryDocument != null) seasonSummaryDocument.gameObject.SetActive(false);
         if (playerAwardsDocument != null) playerAwardsDocument.gameObject.SetActive(false);
         if (endSeasonDocument != null) endSeasonDocument.gameObject.SetActive(false);
+        if (newSeasonDocument != null) newSeasonDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

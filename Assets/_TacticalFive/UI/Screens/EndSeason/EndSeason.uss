@@ -102,6 +102,10 @@
 .end-season-root .btn-action:hover {
     background-color: rgb(74, 128, 240);
 }
+.end-season-root .btn-action:disabled {
+    opacity: 0.4;
+    background-color: rgb(42, 51, 71);
+}
 
 /* ── CONTENT ── */
 .end-season-root .content-area {
@@ -358,9 +362,9 @@
     margin-right: 6px;
 }
 .draft-team-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
 }
 .draft-player-info {
     flex-direction: row;

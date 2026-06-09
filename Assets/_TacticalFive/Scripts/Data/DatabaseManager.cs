@@ -2715,6 +2715,140 @@ public class DatabaseManager : MonoBehaviour
         _db.Delete<MessageData>(messageId);
     }
 
+    public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId)
+    {
+        var allPlayers = _db.Table<PlayerData>().ToList();
+
+        // 1. Retire players 40+
+        foreach (var p in allPlayers.Where(p => p.age >= 40))
+            _db.Delete(p);
+
+        // 2. Age + attribute changes
+        var remaining = _db.Table<PlayerData>().ToList();
+        foreach (var p in remaining)
+        {
+            p.age += 1;
+
+            if (p.age < 32)
+            {
+                p.overall = Math.Min(p.overall + 2, p.potential);
+                p.speed = Math.Min(99, p.speed + 2);
+                p.shooting = Math.Min(99, p.shooting + 2);
+                p.three_point = Math.Min(99, p.three_point + 2);
+                p.passing = Math.Min(99, p.passing + 2);
+                p.dribbling = Math.Min(99, p.dribbling + 2);
+                p.defense = Math.Min(99, p.defense + 2);
+                p.rebounding = Math.Min(99, p.rebounding + 2);
+                p.athleticism = Math.Min(99, p.athleticism + 2);
+                p.iq = Math.Min(99, p.iq + 2);
+                p.steals = Math.Min(99, p.steals + 2);
+                p.blocks = Math.Min(99, p.blocks + 2);
+            }
+            else
+            {
+                p.overall = Math.Max(0, p.overall - 2);
+                p.speed = Math.Max(0, p.speed - 2);
+                p.shooting = Math.Max(0, p.shooting - 2);
+                p.three_point = Math.Max(0, p.three_point - 2);
+                p.passing = Math.Max(0, p.passing - 2);
+                p.dribbling = Math.Max(0, p.dribbling - 2);
+                p.defense = Math.Max(0, p.defense - 2);
+                p.rebounding = Math.Max(0, p.rebounding - 2);
+                p.athleticism = Math.Max(0, p.athleticism - 2);
+                p.iq = Math.Max(0, p.iq - 2);
+                p.steals = Math.Max(0, p.steals - 2);
+                p.blocks = Math.Max(0, p.blocks - 2);
+            }
+
+            // 3. Decrement contracts
+            p.contract_years -= 1;
+            if (p.contract_years <= 0)
+            {
+                p.contract_years = 0;
+                p.team_id = 0;
+            }
+
+            _db.Update(p);
+        }
+
+        // 4. Clear tables
+        _db.Execute("DELETE FROM player_game_stats");
+        _db.Execute("DELETE FROM finals_player_stats");
+        _db.Execute("DELETE FROM games");
+        _db.Execute("DELETE FROM messages");
+        _db.Execute("DELETE FROM game_attendance");
+        _db.Execute("DELETE FROM finance_records");
+
+        // 5. Fill rosters to 12 for all teams (except the user's new team)
+        var allTeams = GetAllTeams();
+        var freeAgents = _db.Table<PlayerData>()
+            .Where(p => p.team_id == 0 && p.age < 40)
+            .OrderByDescending(p => p.overall)
+            .ToList();
+
+        foreach (var team in allTeams)
+        {
+            if (team.id == newTeamId) continue;
+
+            var roster = GetPlayersByTeam(team.id);
+            int need = 12 - roster.Count;
+            if (need <= 0) continue;
+
+            var posCounts = new Dictionary<string, int>();
+            foreach (string pos in new[] { "PG", "SG", "SF", "PF", "C" })
+                posCounts[pos] = roster.Count(p => p.position == pos);
+
+            for (int i = 0; i < need && freeAgents.Count > 0; i++)
+            {
+                string minPos = posCounts.OrderBy(kv => kv.Value).First().Key;
+
+                PlayerData signed = null;
+                foreach (var fa in freeAgents)
+                {
+                    if (fa.position == minPos)
+                    {
+                        signed = fa;
+                        break;
+                    }
+                }
+                if (signed == null && freeAgents.Count > 0)
+                    signed = freeAgents[0];
+
+                if (signed != null)
+                {
+                    signed.team_id = team.id;
+                    signed.contract_years = Math.Max(1, 4 - signed.age / 10);
+                    _db.Update(signed);
+                    freeAgents.Remove(signed);
+                    posCounts[signed.position] = posCounts.GetValueOrDefault(signed.position) + 1;
+                }
+            }
+        }
+
+        // 6. Deactivate old season
+        var oldSeason = _db.Find<SeasonData>(oldSeasonId);
+        if (oldSeason != null)
+        {
+            oldSeason.is_active = 0;
+            _db.Update(oldSeason);
+        }
+
+        // 7. Create new season
+        int newYearStart = oldSeason != null ? oldSeason.year_start + 1 : 2026;
+        var newSeason = new SeasonData
+        {
+            year_start = newYearStart,
+            year_end = newYearStart + 1,
+            is_active = 1,
+            current_game_day = 0,
+            game_mode = gameMode,
+            phase = "regular",
+            manager_id = managerId,
+            generated = 0
+        };
+        _db.Insert(newSeason);
+    }
+
     void OnDestroy()
     {
         _db?.Close();

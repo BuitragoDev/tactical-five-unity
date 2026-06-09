@@ -79,7 +79,7 @@ public class EndSeasonController : MonoBehaviour
         RefreshHeader();
         RefreshContent();
 
-        _btnNextSeason.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+        _btnNextSeason.SetEnabled(false);
 
         _btnDraft.RegisterCallback<ClickEvent>(_ =>
         {
@@ -91,7 +91,10 @@ public class EndSeasonController : MonoBehaviour
             _btnRenewAll.SetEnabled(false);
             if (_expiringPanel != null) _expiringPanel.style.display = DisplayStyle.None;
             ShowDraftResults(drafted);
+            _btnNextSeason.SetEnabled(true);
         });
+
+        _btnNextSeason.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.NewSeason); });
 
         _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
     }

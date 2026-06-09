@@ -1,0 +1,209 @@
+/* ── ROOT ── */
+.new-season-root {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+/* ── TOP HEADER (same as EndSeason) ── */
+.new-season-root .top-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background-color: rgb(22, 26, 36);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(212, 160, 23);
+    flex-shrink: 0;
+    min-height: 100px;
+}
+.new-season-root .header-left {
+    flex-direction: row;
+    align-items: center;
+}
+.new-season-root .header-team-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+.new-season-root .header-team-info {
+    flex-direction: column;
+}
+.new-season-root .header-team-name-row {
+    flex-direction: row;
+    align-items: baseline;
+}
+.new-season-root .header-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: rgb(255, 255, 255);
+    -unity-text-transform: upper;
+    margin-right: 12px;
+}
+.new-season-root .header-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+}
+.new-season-root .header-manager-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+}
+.new-season-root .header-right-group {
+    flex-direction: row;
+    align-items: center;
+}
+.new-season-root .header-season-info {
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 20px;
+}
+.new-season-root .header-date-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    padding: 0 12px;
+    margin-right: 20px;
+    border-left-width: 1px;
+    border-left-color: rgb(42, 51, 71);
+    border-right-width: 1px;
+    border-right-color: rgb(42, 51, 71);
+}
+.new-season-root .header-season-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 1px;
+}
+
+/* ── BOTÓN ACCIÓN ── */
+.new-season-root .btn-action {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 24px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    border-radius: 4px;
+}
+.new-season-root .btn-action:hover {
+    background-color: rgb(74, 128, 240);
+}
+.new-season-root .btn-start-season {
+    background-color: rgb(39, 174, 96);
+}
+.new-season-root .btn-start-season:hover {
+    background-color: rgb(46, 204, 113);
+}
+
+/* ── CONTENT ── */
+.new-season-root .content-area {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 28px;
+    overflow-y: auto;
+}
+
+/* ── PAGE HEADER ── */
+.new-season-root .next-season-header {
+    align-items: center;
+    margin-bottom: 40px;
+}
+.new-season-root .page-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 36px;
+    letter-spacing: 4px;
+    -unity-text-transform: upper;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+}
+.new-season-root .season-tag {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(212, 160, 23);
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 4px 16px;
+    margin-top: 8px;
+    -unity-text-align: middle-center;
+}
+
+/* ── TEAM SELECTION ── */
+.team-selection {
+    flex-direction: column;
+    width: 100%;
+    max-width: 600px;
+}
+.team-select-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 20px;
+    background-color: rgb(22, 26, 36);
+    border-width: 2px;
+    border-color: rgb(42, 51, 71);
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+.team-select-card:hover {
+    border-color: rgb(58, 74, 99);
+    background-color: rgb(28, 33, 48);
+}
+.team-select-card.selected {
+    border-color: rgb(212, 160, 23);
+    background-color: rgb(30, 37, 53);
+}
+.team-select-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+.team-select-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+.team-select-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: rgb(208, 216, 232);
+}
+.team-select-detail {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    margin-top: 2px;
+}
+.team-select-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.1);
+    padding: 4px 12px;
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    flex-shrink: 0;
+}
+
+/* ── NOTE ── */
+.ns-note {
+    -unity-text-align: middle-center;
+    color: rgb(122, 138, 170);
+    font-size: 14px;
+    margin-top: 8px;
+}
