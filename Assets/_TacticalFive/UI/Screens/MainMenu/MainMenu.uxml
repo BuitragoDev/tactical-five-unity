@@ -171,6 +171,8 @@
                     <ui:Button name="BtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
                 </ui:VisualElement>
             </ui:VisualElement>
+        </ui:VisualElement>
+
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
