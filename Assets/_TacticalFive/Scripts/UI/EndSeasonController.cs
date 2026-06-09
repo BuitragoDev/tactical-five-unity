@@ -121,7 +121,7 @@ public class EndSeasonController : MonoBehaviour
     void LoadRetiringPlayers()
     {
         _retiringList.Clear();
-        var players = DatabaseManager.Instance.GetRetiringPlayers(_myTeam.id);
+        var players = DatabaseManager.Instance.GetRetiringPlayers();
         if (players.Count == 0)
         {
             var empty = new Label();

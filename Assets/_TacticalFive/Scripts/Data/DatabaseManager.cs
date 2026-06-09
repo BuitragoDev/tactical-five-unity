@@ -282,10 +282,10 @@ public class DatabaseManager : MonoBehaviour
                   .ToList();
     }
 
-    public List<PlayerData> GetRetiringPlayers(int teamId)
+    public List<PlayerData> GetRetiringPlayers()
     {
         return _db.Table<PlayerData>()
-                  .Where(p => p.team_id == teamId && p.contract_years <= 1 && p.age >= 30)
+                  .Where(p => p.team_id != 0 && p.contract_years <= 1 && p.age >= 40)
                   .OrderByDescending(p => p.age)
                   .ToList();
     }
