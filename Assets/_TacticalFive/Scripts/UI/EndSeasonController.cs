@@ -213,7 +213,7 @@ public class EndSeasonController : MonoBehaviour
         if (player == null) return;
 
         int years = CalcRenewYears(player.age);
-        long newSalary = CalcRenewSalary(player.salary);
+        long newSalary = CalcRenewSalary(player.salary, player.age);
 
         player.contract_years = years;
         player.salary = newSalary;
@@ -227,7 +227,7 @@ public class EndSeasonController : MonoBehaviour
         {
             if (p.age >= 40) continue;
             int years = CalcRenewYears(p.age);
-            long newSalary = CalcRenewSalary(p.salary);
+            long newSalary = CalcRenewSalary(p.salary, p.age);
             p.contract_years = years;
             p.salary = newSalary;
             DatabaseManager.Instance.UpdatePlayer(p);
@@ -244,9 +244,14 @@ public class EndSeasonController : MonoBehaviour
         return 1;
     }
 
-    long CalcRenewSalary(long currentSalary)
+    long CalcRenewSalary(long currentSalary, int age)
     {
-        long newSalary = (long)(currentSalary * 1.05);
+        double multiplier;
+        if (age <= 25) multiplier = 1.20;
+        else if (age <= 30) multiplier = 1.10;
+        else multiplier = 1.05;
+
+        long newSalary = (long)(currentSalary * multiplier);
         newSalary = (long)(Math.Round(newSalary / 100000.0) * 100000);
         if (newSalary < currentSalary) newSalary = currentSalary;
         return newSalary;
