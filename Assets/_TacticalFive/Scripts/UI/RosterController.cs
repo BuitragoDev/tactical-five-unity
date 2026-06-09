@@ -943,11 +943,45 @@ public class RosterController : MonoBehaviour
     {
         if (_selectedPlayer == null) return;
 
+        long penalty = (long)(_selectedPlayer.salary * _selectedPlayer.contract_years * 0.5f);
+        int currentDay = _season?.current_game_day ?? 0;
+        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
         // Mover jugador a agentes libres (team_id = 0)
         _selectedPlayer.team_id = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
-        Debug.Log($"[Roster] {_selectedPlayer.first_name} {_selectedPlayer.last_name} despedido.");
+        // Descontar penalización del presupuesto
+        _myTeam.budget -= penalty;
+        DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+
+        // Registrar gasto en finanzas
+        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+        {
+            team_id = _myTeam.id,
+            season_id = _season?.id ?? 0,
+            record_type = FinanceRecord.TYPE_DISMISSAL,
+            game_day = currentDay,
+            amount = penalty
+        });
+
+        // Crear mensaje de despido
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = "Jugador despedido",
+            body = $"Se ha despedido a {playerName}. Penalización de ${penalty:N0} descontada del presupuesto.",
+            game_day = currentDay,
+            game_date = now,
+            created_at = now,
+            date_sent = now,
+            is_read = 0
+        });
+
+        Debug.Log($"[Roster] {playerName} despedido. Penalización: ${penalty}.");
 
         CloseDismissModal();
 
