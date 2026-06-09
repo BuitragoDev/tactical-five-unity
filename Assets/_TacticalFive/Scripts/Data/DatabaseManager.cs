@@ -2315,6 +2315,175 @@ public class DatabaseManager : MonoBehaviour
                   .ToList();
     }
 
+    public FinalsMVPDetails GetFinalsMVPDetails(int seasonId, int managerId)
+    {
+        if (!EnsureDb()) return null;
+
+        var finalsGames = _db.Table<GameData>()
+            .Where(g => g.manager_id == managerId
+                     && g.season_id == seasonId
+                     && g.series_label == "playoff-r4-finals"
+                     && g.is_played == 1)
+            .ToList();
+
+        if (finalsGames.Count == 0) return null;
+
+        // Determine champion team
+        var winCount = new Dictionary<int, int>();
+        foreach (var g in finalsGames)
+        {
+            int winner = g.home_score >= g.away_score ? g.home_team_id : g.away_team_id;
+            winCount[winner] = winCount.GetValueOrDefault(winner, 0) + 1;
+        }
+        int champId = winCount.OrderByDescending(kv => kv.Value).First().Key;
+
+        // Get all finals player stats for champion team
+        var finalsGameIds = finalsGames.Select(g => g.id).ToList();
+        var champStats = new List<FinalsPlayerStatsData>();
+        if (finalsGameIds.Count > 0)
+        {
+            champStats = _db.Query<FinalsPlayerStatsData>(
+                "SELECT * FROM finals_player_stats WHERE game_id IN (" +
+                string.Join(",", finalsGameIds) + ") AND team_id = " + champId);
+        }
+
+        if (champStats.Count == 0) return null;
+
+        // Group by player, compute averages, pick best avg rating
+        var topPlayer = champStats
+            .GroupBy(s => s.player_id)
+            .Select(g => new
+            {
+                PlayerId = g.Key,
+                AvgRating = g.Average(s => s.rating),
+                AvgPts = g.Average(s => s.points),
+                AvgReb = g.Average(s => s.rebounds),
+                AvgAst = g.Average(s => s.assists),
+                GamesPlayed = g.Count()
+            })
+            .Where(x => x.GamesPlayed >= 2)
+            .OrderByDescending(x => x.AvgRating)
+            .FirstOrDefault();
+
+        if (topPlayer == null) return null;
+
+        var player = GetPlayerById(topPlayer.PlayerId);
+        if (player == null) return null;
+
+        var champTeam = GetTeamById(champId);
+
+        return new FinalsMVPDetails
+        {
+            PlayerName = $"{player.first_name} {player.last_name}",
+            TeamName = champTeam?.name ?? "",
+            AvgPts = (float)topPlayer.AvgPts,
+            AvgReb = (float)topPlayer.AvgReb,
+            AvgAst = (float)topPlayer.AvgAst
+        };
+    }
+
+    // ── PLAYER AWARDS ────────────────────────────────────
+
+    public PlayerAwardInfo GetRegularSeasonMVP(int seasonId, int managerId)
+    {
+        return QueryTopPlayer(seasonId, managerId, null, 65);
+    }
+
+    public PlayerAwardInfo GetRookieOfYear(int seasonId, int managerId)
+    {
+        return QueryTopPlayer(seasonId, managerId, true, 65);
+    }
+
+    public List<PlayerAwardInfo> GetAllStarTeam(int seasonId, int managerId)
+    {
+        return GetBestPerPosition(seasonId, managerId, null, 65);
+    }
+
+    public List<PlayerAwardInfo> GetAllRookieTeam(int seasonId, int managerId)
+    {
+        return GetBestPerPosition(seasonId, managerId, true, 65);
+    }
+
+    PlayerAwardInfo QueryTopPlayer(int seasonId, int managerId, bool? rookieOnly, int minGames)
+    {
+        if (!EnsureDb()) return null;
+        string rookieFilter = rookieOnly == true ? "AND p.is_rookie = 1" : "";
+        string sql = $@"
+            SELECT p.id, p.first_name, p.last_name, p.position, t.name AS team_name, t.logo AS team_logo,
+                   COUNT(*) AS games,
+                   AVG(ps.points) AS avg_pts,
+                   AVG(ps.rebounds) AS avg_reb,
+                   AVG(ps.assists) AS avg_ast,
+                   AVG(ps.rating) AS avg_rating
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN players p ON ps.player_id = p.id
+            JOIN teams t ON p.team_id = t.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.manager_id = ? {rookieFilter}
+            GROUP BY ps.player_id
+            HAVING games >= ?
+            ORDER BY avg_rating DESC
+            LIMIT 1";
+        var row = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, minGames).FirstOrDefault();
+        if (row == null) return null;
+            return new PlayerAwardInfo
+            {
+                PlayerName = $"{row.first_name} {row.last_name}",
+                TeamName = row.team_name ?? "",
+                TeamKeyword = row.team_logo ?? "",
+                Position = row.position ?? "",
+                AvgPts = (float)row.avg_pts,
+                AvgReb = (float)row.avg_reb,
+                AvgAst = (float)row.avg_ast,
+                AvgRating = (float)row.avg_rating
+            };
+    }
+
+    List<PlayerAwardInfo> GetBestPerPosition(int seasonId, int managerId, bool? rookieOnly, int minGames)
+    {
+        if (!EnsureDb()) return new List<PlayerAwardInfo>();
+        string rookieFilter = rookieOnly == true ? "AND p.is_rookie = 1" : "";
+        var result = new List<PlayerAwardInfo>();
+        string[] positions = { "PG", "SG", "SF", "PF", "C" };
+        foreach (var pos in positions)
+        {
+            string sql = $@"
+                SELECT p.id, p.first_name, p.last_name, p.position, t.name AS team_name, t.logo AS team_logo,
+                       COUNT(*) AS games,
+                       AVG(ps.points) AS avg_pts,
+                       AVG(ps.rebounds) AS avg_reb,
+                       AVG(ps.assists) AS avg_ast,
+                       AVG(ps.rating) AS avg_rating
+                FROM player_game_stats ps
+                JOIN games g ON ps.game_id = g.id
+                JOIN players p ON ps.player_id = p.id
+                JOIN teams t ON p.team_id = t.id
+                WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+                  AND g.manager_id = ? AND p.position = ? {rookieFilter}
+                GROUP BY ps.player_id
+                HAVING games >= ?
+                ORDER BY avg_rating DESC
+                LIMIT 1";
+            var row = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, pos, minGames).FirstOrDefault();
+            if (row != null)
+            {
+                result.Add(new PlayerAwardInfo
+                {
+                    PlayerName = $"{row.first_name} {row.last_name}",
+                    TeamName = row.team_name ?? "",
+                    TeamKeyword = row.team_logo ?? "",
+                    Position = row.position ?? "",
+                    AvgPts = (float)row.avg_pts,
+                    AvgReb = (float)row.avg_reb,
+                    AvgAst = (float)row.avg_ast,
+                    AvgRating = (float)row.avg_rating
+                });
+            }
+        }
+        return result;
+    }
+
     // ── RECORDS TRACKING ──────────────────────────────────
 
     public List<HistoricalRecordData> GetAllHistoricalRecords()
@@ -2549,6 +2718,21 @@ public class PlayerSeasonStatsRow
     public int total_steals { get; set; }
     public int total_blocks { get; set; }
     public int total_rating { get; set; }
+}
+
+public class PlayerAwardQueryRow
+{
+    public int id { get; set; }
+    public string first_name { get; set; }
+    public string last_name { get; set; }
+    public string position { get; set; }
+    public string team_name { get; set; }
+    public string team_logo { get; set; }
+    public int games { get; set; }
+    public double avg_pts { get; set; }
+    public double avg_reb { get; set; }
+    public double avg_ast { get; set; }
+    public double avg_rating { get; set; }
 }
 
 public class HistoricalStatsAggregateRow

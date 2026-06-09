@@ -1,0 +1,78 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/PlayerAwards/PlayerAwards.uss?fileID=7433441132597879392&amp;guid=d84a42483e87475d908d9da695768c14&amp;type=3#PlayerAwards"/>
+    <ui:VisualElement name="PlayerAwardsRoot" class="player-awards-root">
+        <ui:VisualElement name="TopHeader" class="top-header">
+            <ui:VisualElement class="header-left">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
+                <ui:VisualElement class="header-team-info">
+                    <ui:VisualElement class="header-team-name-row">
+                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
+                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(PREMIOS DE JUGADORES)"/>
+                    </ui:VisualElement>
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="header-right-group">
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
+                </ui:VisualElement>
+                <ui:Label name="HeaderDate" class="header-date-label" text=""/>
+                <ui:Button name="BtnEndSeason" class="btn-action" text="FIN DE TEMPORADA"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ContentArea" class="content-area">
+            <ui:VisualElement class="summary-header">
+                <ui:Label text="Premios de Jugadores" class="summary-title"/>
+                <ui:Label name="SeasonTag" text="" class="season-tag"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="AwardsRow" class="awards-row">
+                <ui:VisualElement name="MvpCard" class="award-card mvp-card">
+                    <ui:Label text="MVP de la Temporada" class="award-label"/>
+                    <ui:VisualElement name="MvpPlayerLogo" class="award-player-logo"/>
+                    <ui:Label name="MvpPlayerName" text="" class="award-player-name"/>
+                    <ui:VisualElement class="award-stat-row">
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="MvpPts" text="--" class="award-stat-val"/>
+                            <ui:Label text="PTS" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="MvpReb" text="--" class="award-stat-val"/>
+                            <ui:Label text="REB" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="MvpAst" text="--" class="award-stat-val"/>
+                            <ui:Label text="AST" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="RookieCard" class="award-card rookie-card">
+                    <ui:Label text="Rookie del Año" class="award-label"/>
+                    <ui:VisualElement name="RookiePlayerLogo" class="award-player-logo"/>
+                    <ui:Label name="RookiePlayerName" text="" class="award-player-name"/>
+                    <ui:VisualElement class="award-stat-row">
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="RookiePts" text="--" class="award-stat-val"/>
+                            <ui:Label text="PTS" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="RookieReb" text="--" class="award-stat-val"/>
+                            <ui:Label text="REB" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="RookieAst" text="--" class="award-stat-val"/>
+                            <ui:Label text="AST" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="QuintetSection" class="award-section">
+                <ui:Label text="Mejor Quinteto de la Temporada" class="section-title"/>
+                <ui:VisualElement name="QuintetGrid" class="quintet-grid"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="RookieSection" class="award-section">
+                <ui:Label text="Mejor Quinteto de Rookies" class="section-title"/>
+                <ui:VisualElement name="RookieGrid" class="quintet-grid"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

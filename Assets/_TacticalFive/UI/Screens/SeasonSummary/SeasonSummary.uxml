@@ -1,0 +1,58 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/SeasonSummary/SeasonSummary.uss?fileID=7433441132597879392&amp;guid=6c6e2a5efd354f488c2edf58c97f435c&amp;type=3#SeasonSummary"/>
+    <ui:VisualElement name="SeasonSummaryRoot" class="season-summary-root">
+        <ui:VisualElement name="TopHeader" class="top-header">
+            <ui:VisualElement class="header-left">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
+                <ui:VisualElement class="header-team-info">
+                    <ui:VisualElement class="header-team-name-row">
+                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
+                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(RESUMEN DE TEMPORADA)"/>
+                    </ui:VisualElement>
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="header-right-group">
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
+                </ui:VisualElement>
+                <ui:Label name="HeaderDate" class="header-date-label" text=""/>
+                <ui:Button name="BtnGoToAwards" class="btn-action" text="IR A PREMIOS"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ContentArea" class="content-area">
+            <ui:VisualElement class="summary-header">
+                <ui:Label text="Campeón de la NBA" class="summary-title"/>
+                <ui:Label name="SeasonTag" text="" class="season-tag"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="ChampionCard" class="champion-card">
+                <ui:VisualElement name="ChampionLogo" class="champion-logo"/>
+                <ui:Label name="ChampionName" text="" class="champion-name"/>
+                <ui:VisualElement name="FinalsResultRow" class="finals-result-row">
+                    <ui:Label text="Resultado Finales" class="result-label"/>
+                    <ui:Label name="FinalsResult" text="" class="result-score"/>
+                    <ui:Label name="FinalsLoser" text="" class="result-loser"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="FinalsMVPCard" class="finals-mvp-card">
+                <ui:Label text="MVP de las Finales" class="mvp-label"/>
+                <ui:Label name="MvpName" text="" class="mvp-name"/>
+                <ui:Label name="MvpTeam" text="" class="mvp-team"/>
+                <ui:VisualElement name="MvpStatsRow" class="mvp-stat-row">
+                    <ui:VisualElement class="mvp-stat-box">
+                        <ui:Label name="MvpPts" text="--" class="stat-val"/>
+                        <ui:Label text="PTS" class="stat-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mvp-stat-box">
+                        <ui:Label name="MvpReb" text="--" class="stat-val"/>
+                        <ui:Label text="REB" class="stat-label"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mvp-stat-box">
+                        <ui:Label name="MvpAst" text="--" class="stat-val"/>
+                        <ui:Label text="AST" class="stat-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

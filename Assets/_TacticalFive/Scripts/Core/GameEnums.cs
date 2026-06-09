@@ -22,7 +22,9 @@ public enum GameScreen
     MatchDay,
     GameResults,
     LoadGame,
-    Settings
+    Settings,
+    SeasonSummary,
+    PlayerAwards
 }
 
 public enum GameMode

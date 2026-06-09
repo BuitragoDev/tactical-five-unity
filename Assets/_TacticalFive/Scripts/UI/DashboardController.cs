@@ -420,6 +420,12 @@ public class DashboardController : MonoBehaviour
     {
         if (_season == null || _isLoading) return;
 
+        if (_season.phase == "finished")
+        {
+            ScreenManager.Instance.GoTo(GameScreen.SeasonSummary);
+            return;
+        }
+
         ShowLoading();
         StartCoroutine(ProcessGameDayRoutine());
     }
@@ -1374,6 +1380,8 @@ public class DashboardController : MonoBehaviour
             teamId = t.id,
             wins = 0,
             losses = 0,
+            pf = 0,
+            pa = 0,
             games = new List<bool>()
         });
 
@@ -1386,6 +1394,8 @@ public class DashboardController : MonoBehaviour
                 bool homeWon = g.home_score > g.away_score;
                 data[g.home_team_id].wins += homeWon ? 1 : 0;
                 data[g.home_team_id].losses += homeWon ? 0 : 1;
+                data[g.home_team_id].pf += g.home_score;
+                data[g.home_team_id].pa += g.away_score;
                 data[g.home_team_id].games.Add(homeWon);
             }
             if (confIds.Contains(g.away_team_id))
@@ -1393,6 +1403,8 @@ public class DashboardController : MonoBehaviour
                 bool awayWon = g.away_score > g.home_score;
                 data[g.away_team_id].wins += awayWon ? 1 : 0;
                 data[g.away_team_id].losses += awayWon ? 0 : 1;
+                data[g.away_team_id].pf += g.away_score;
+                data[g.away_team_id].pa += g.home_score;
                 data[g.away_team_id].games.Add(awayWon);
             }
         }
@@ -1403,7 +1415,9 @@ public class DashboardController : MonoBehaviour
             float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
             float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
             if (pctB != pctA) return pctB.CompareTo(pctA);
-            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
+            int diffA = a.pf - a.pa;
+            int diffB = b.pf - b.pa;
+            if (diffB != diffA) return diffB.CompareTo(diffA);
             return b.wins.CompareTo(a.wins);
         });
 
@@ -1718,6 +1732,8 @@ public class DashboardController : MonoBehaviour
         public int rank;
         public int wins;
         public int losses;
+        public int pf;
+        public int pa;
         public List<bool> games;
     }
 
