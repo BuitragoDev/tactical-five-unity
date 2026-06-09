@@ -23,6 +23,7 @@ public class EndSeasonController : MonoBehaviour
     private Button _btnNextSeason;
     private Button _btnRenewAll;
     private VisualElement _expiringPanel;
+    private VisualElement _draftResults;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -59,6 +60,7 @@ public class EndSeasonController : MonoBehaviour
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnRenewAll = _root.Q<Button>("BtnRenewAll");
         _expiringPanel = _root.Q<VisualElement>("ExpiringPanel");
+        _draftResults = _root.Q<VisualElement>("DraftResults");
     }
 
     void LoadData()
@@ -84,10 +86,11 @@ public class EndSeasonController : MonoBehaviour
             PlayClick();
             _btnDraft.SetEnabled(false);
             _btnDraft.text = "GENERANDO...";
-            DraftGenerator.GenerateDraft(_season, _manager.id);
+            var drafted = DraftGenerator.GenerateDraft(_season, _manager.id);
             _btnDraft.text = "DRAFT COMPLETADO";
             _btnRenewAll.SetEnabled(false);
             if (_expiringPanel != null) _expiringPanel.style.display = DisplayStyle.None;
+            ShowDraftResults(drafted);
         });
 
         _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
@@ -262,6 +265,109 @@ public class EndSeasonController : MonoBehaviour
         newSalary = (long)(Math.Round(newSalary / 100000.0) * 100000);
         if (newSalary < currentSalary) newSalary = currentSalary;
         return newSalary;
+    }
+
+    void ShowDraftResults(List<PlayerData> drafted)
+    {
+        _draftResults.Clear();
+        for (int i = 0; i < drafted.Count; i++)
+        {
+            var p = drafted[i];
+            _draftResults.Add(BuildDraftPick(i + 1, p));
+        }
+    }
+
+    VisualElement BuildDraftPick(int pickNum, PlayerData p)
+    {
+        var pick = new VisualElement();
+        pick.AddToClassList("draft-pick");
+
+        var header = new VisualElement();
+        header.AddToClassList("draft-pick-header");
+
+        var numLbl = new Label();
+        numLbl.AddToClassList("draft-pick-num");
+        numLbl.text = $"#{pickNum}";
+        header.Add(numLbl);
+
+        var team = DatabaseManager.Instance.GetTeamById(p.team_id);
+        var teamRow = new VisualElement();
+        teamRow.AddToClassList("draft-team-row");
+
+        var teamLogo = new VisualElement();
+        teamLogo.AddToClassList("draft-team-logo");
+        if (team != null && _logo32.TryGetValue(team.logo, out var sprite))
+            teamLogo.style.backgroundImage = new StyleBackground(sprite);
+        teamRow.Add(teamLogo);
+
+        var teamName = new Label();
+        teamName.AddToClassList("draft-team-name");
+        teamName.text = team?.name ?? "";
+        teamRow.Add(teamName);
+
+        header.Add(teamRow);
+        pick.Add(header);
+
+        var info = new VisualElement();
+        info.AddToClassList("draft-player-info");
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("draft-player-name");
+        nameLbl.text = $"{p.first_name} {p.last_name}";
+        info.Add(nameLbl);
+
+        var posLbl = new Label();
+        posLbl.AddToClassList("draft-player-pos");
+        posLbl.text = p.position;
+        info.Add(posLbl);
+
+        var detailLbl = new Label();
+        detailLbl.AddToClassList("draft-player-detail");
+        detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {p.nationality}";
+        info.Add(detailLbl);
+
+        var ovrLbl = new Label();
+        ovrLbl.AddToClassList("draft-player-ovr");
+        ovrLbl.text = $"OVR: {p.overall}";
+        info.Add(ovrLbl);
+
+        pick.Add(info);
+
+        var attrs = new VisualElement();
+        attrs.AddToClassList("draft-player-attrs");
+
+        attrs.Add(MakeAttr("VEL", p.speed));
+        attrs.Add(MakeAttr("TIR", p.shooting));
+        attrs.Add(MakeAttr("3PT", p.three_point));
+        attrs.Add(MakeAttr("PAS", p.passing));
+        attrs.Add(MakeAttr("MAN", p.dribbling));
+        attrs.Add(MakeAttr("DEF", p.defense));
+        attrs.Add(MakeAttr("REB", p.rebounding));
+        attrs.Add(MakeAttr("ATL", p.athleticism));
+        attrs.Add(MakeAttr("IQ", p.iq));
+        attrs.Add(MakeAttr("ROB", p.steals));
+        attrs.Add(MakeAttr("TAP", p.blocks));
+
+        pick.Add(attrs);
+        return pick;
+    }
+
+    VisualElement MakeAttr(string label, int value)
+    {
+        var box = new VisualElement();
+        box.AddToClassList("draft-attr");
+
+        var lbl = new Label();
+        lbl.AddToClassList("draft-attr-lbl");
+        lbl.text = label;
+        box.Add(lbl);
+
+        var val = new Label();
+        val.AddToClassList("draft-attr-val");
+        val.text = value.ToString();
+        box.Add(val);
+
+        return box;
     }
 
     void PlayClick()
