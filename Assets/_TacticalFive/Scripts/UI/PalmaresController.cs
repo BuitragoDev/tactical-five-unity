@@ -18,21 +18,16 @@ public class PalmaresController : MonoBehaviour
     private VisualElement _tabContentQuintetos;
 
     // Equipos
-    private VisualElement _championsBody;
-    private Label _noChampionsText;
-    private VisualElement _confChampionsBody;
-    private VisualElement _divChampionsBody;
+    private VisualElement _titlesRankingBody;
+    private VisualElement _finalsHistoryBody;
 
     // Jugadores
-    private VisualElement _mvpBody;
-    private VisualElement _rookieBody;
-    private VisualElement _defenderBody;
-    private VisualElement _sixthManBody;
-    private VisualElement _improvedBody;
+    private VisualElement _mvpRankingBody;
+    private VisualElement _awardsHistoryBody;
 
     // Quintetos
-    private VisualElement _firstTeamBody;
-    private VisualElement _secondTeamBody;
+    private VisualElement _quintetAppearancesBody;
+    private VisualElement _quintetHistoryBody;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -40,7 +35,7 @@ public class PalmaresController : MonoBehaviour
     private List<TeamData> _allTeams;
     private List<SeasonRecord> _seasonRecords;
 
-    private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites32 = new();
     private Dictionary<string, Sprite> _logoSprites64 = new();
 
     void OnEnable()
@@ -65,7 +60,6 @@ public class PalmaresController : MonoBehaviour
     {
         _btnAction = _root.Q<Button>("BtnAction");
 
-        // Tabs
         _tabEquipos = _root.Q<Button>("TabEquipos");
         _tabJugadores = _root.Q<Button>("TabJugadores");
         _tabQuintetos = _root.Q<Button>("TabQuintetos");
@@ -74,28 +68,20 @@ public class PalmaresController : MonoBehaviour
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
         _tabContentQuintetos = _root.Q<VisualElement>("TabContentQuintetos");
 
-        // Equipos
-        _championsBody = _root.Q<VisualElement>("ChampionsBody");
-        _noChampionsText = _root.Q<Label>("NoChampionsText");
-        _confChampionsBody = _root.Q<VisualElement>("ConfChampionsBody");
-        _divChampionsBody = _root.Q<VisualElement>("DivChampionsBody");
+        _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
+        _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
 
-        // Jugadores
-        _mvpBody = _root.Q<VisualElement>("MVPBody");
-        _rookieBody = _root.Q<VisualElement>("RookieBody");
-        _defenderBody = _root.Q<VisualElement>("DefenderBody");
-        _sixthManBody = _root.Q<VisualElement>("SixthManBody");
-        _improvedBody = _root.Q<VisualElement>("ImprovedBody");
+        _mvpRankingBody = _root.Q<VisualElement>("MVPRankingBody");
+        _awardsHistoryBody = _root.Q<VisualElement>("AwardsHistoryBody");
 
-        // Quintetos
-        _firstTeamBody = _root.Q<VisualElement>("FirstTeamBody");
-        _secondTeamBody = _root.Q<VisualElement>("SecondTeamBody");
+        _quintetAppearancesBody = _root.Q<VisualElement>("QuintetAppearancesBody");
+        _quintetHistoryBody = _root.Q<VisualElement>("QuintetHistoryBody");
     }
 
     void LoadData()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
-        foreach (var s in logos) _logoSprites[s.name] = s;
+        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        foreach (var s in logos32) _logoSprites32[s.name] = s;
 
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
@@ -175,19 +161,17 @@ public class PalmaresController : MonoBehaviour
             case "equipos":
                 _tabEquipos.AddToClassList("palmares-tab--active");
                 _tabContentEquipos.style.display = DisplayStyle.Flex;
-                BuildChampions();
-                BuildConfChampions();
-                BuildDivChampions();
+                BuildEquiposTab();
                 break;
             case "jugadores":
                 _tabJugadores.AddToClassList("palmares-tab--active");
                 _tabContentJugadores.style.display = DisplayStyle.Flex;
-                BuildPlayerAwards();
+                BuildJugadoresTab();
                 break;
             case "quintetos":
                 _tabQuintetos.AddToClassList("palmares-tab--active");
                 _tabContentQuintetos.style.display = DisplayStyle.Flex;
-                BuildQuintetos();
+                BuildQuintetosTab();
                 break;
         }
     }
@@ -224,282 +208,370 @@ public class PalmaresController : MonoBehaviour
         _btnAction.text = "DASHBOARD";
     }
 
-    // ══ EQUIPOS ══════════════════════════════════════════
-
-    void BuildChampions()
-    {
-        _championsBody.Clear();
-        _noChampionsText.style.display = DisplayStyle.None;
-
-        AddTestChampionRows();
-    }
-
-    void AddTestChampionRows()
-    {
-        _noChampionsText.style.display = DisplayStyle.None;
-
-        var bulls = _allTeams.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams.Find(t => t.name.Contains("Lakers"));
-
-        _championsBody.Add(CreateChampionRow("2024-2025", bulls, "4-2"));
-        _championsBody.Add(CreateChampionRow("2023-2024", lakers, "4-3"));
-    }
-
-    VisualElement CreateChampionRow(string seasonStr, TeamData champion, string result)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("palmares-row");
-        if (champion != null && champion.id == _myTeam.id)
-            row.AddToClassList("palmares-row--my-team");
-
-        var seasonLbl = new Label();
-        seasonLbl.AddToClassList("palmares-season");
-        seasonLbl.text = seasonStr;
-
-        var trophy = new Label();
-        trophy.AddToClassList("palmares-trophy");
-        trophy.text = "🏆";
-
-        var logoElem = new VisualElement();
-        logoElem.AddToClassList("palmares-team-logo");
-        if (champion != null && _logoSprites.TryGetValue(champion.logo, out var sp))
-            logoElem.style.backgroundImage = new StyleBackground(sp);
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("palmares-team-name");
-        nameLbl.text = champion?.name.ToUpper() ?? "???";
-
-        var resultLbl = new Label();
-        resultLbl.AddToClassList("palmares-result");
-        resultLbl.text = result;
-
-        row.Add(seasonLbl);
-        row.Add(trophy);
-        row.Add(logoElem);
-        row.Add(nameLbl);
-        row.Add(resultLbl);
-
-        return row;
-    }
-
-    void BuildConfChampions()
-    {
-        _confChampionsBody.Clear();
-
-        foreach (var record in _seasonRecords)
-        {
-            var seasonStr = GetSeasonString(record.season_id);
-
-            // East
-            if (record.east_champion_id > 0)
-            {
-                var team = _allTeams.Find(t => t.id == record.east_champion_id);
-                _confChampionsBody.Add(CreateTeamAwardRow(seasonStr, "ESTE", team));
-            }
-
-            // West
-            if (record.west_champion_id > 0)
-            {
-                var team = _allTeams.Find(t => t.id == record.west_champion_id);
-                _confChampionsBody.Add(CreateTeamAwardRow(seasonStr, "OESTE", team));
-            }
-        }
-    }
-
-    void BuildDivChampions()
-    {
-        _divChampionsBody.Clear();
-
-        foreach (var record in _seasonRecords)
-        {
-            var seasonStr = GetSeasonString(record.season_id);
-
-            var divIds = new[] {
-                record.div1_champion_id, record.div2_champion_id,
-                record.div3_champion_id, record.div4_champion_id,
-                record.div5_champion_id, record.div6_champion_id
-            };
-
-            foreach (var divId in divIds)
-            {
-                if (divId > 0)
-                {
-                    var team = _allTeams.Find(t => t.id == divId);
-                    var divName = team?.division ?? "";
-                    _divChampionsBody.Add(CreateTeamAwardRow(seasonStr, divName, team));
-                }
-            }
-        }
-    }
-
-    VisualElement CreateTeamAwardRow(string season, string label, TeamData team)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("palmares-row");
-        if (team != null && team.id == _myTeam.id)
-            row.AddToClassList("palmares-row--my-team");
-
-        var seasonLbl = new Label();
-        seasonLbl.AddToClassList("palmares-season");
-        seasonLbl.text = season;
-
-        var labelLbl = new Label();
-        labelLbl.AddToClassList("award-label");
-        labelLbl.text = label;
-
-        var logoElem = new VisualElement();
-        logoElem.AddToClassList("palmares-team-logo");
-        if (team != null && _logoSprites.TryGetValue(team.logo, out var sp))
-            logoElem.style.backgroundImage = new StyleBackground(sp);
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("palmares-team-name");
-        nameLbl.text = team?.name.ToUpper() ?? "???";
-
-        row.Add(seasonLbl);
-        row.Add(labelLbl);
-        row.Add(logoElem);
-        row.Add(nameLbl);
-
-        return row;
-    }
-
-    // ══ JUGADORES ══════════════════════════════════════════
-
-    void BuildPlayerAwards()
-    {
-        BuildAwardList(_mvpBody, "MVP TEMPORADA", _seasonRecords.Select(r => r.season_mvp_id).ToList());
-        BuildAwardList(_rookieBody, "ROOKIE DEL AÑO", _seasonRecords.Select(r => r.rookie_of_year_id).ToList());
-        BuildAwardList(_defenderBody, "MEJOR DEFENSOR", _seasonRecords.Select(r => r.best_defender_id).ToList());
-        BuildAwardList(_sixthManBody, "MEJOR SEXTO HOMBRE", _seasonRecords.Select(r => r.sixth_man_id).ToList());
-        BuildAwardList(_improvedBody, "MÁS MEJORADO", _seasonRecords.Select(r => r.most_improved_id).ToList());
-    }
-
-    void BuildAwardList(VisualElement body, string awardType, List<int> playerIds)
-    {
-        body.Clear();
-
-        for (int i = 0; i < _seasonRecords.Count && i < playerIds.Count; i++)
-        {
-            var record = _seasonRecords[i];
-            var playerId = playerIds[i];
-            var seasonStr = GetSeasonString(record.season_id);
-
-            var row = new VisualElement();
-            row.AddToClassList("palmares-row");
-
-            var seasonLbl = new Label();
-            seasonLbl.AddToClassList("palmares-season");
-            seasonLbl.text = seasonStr;
-
-            var awardLbl = new Label();
-            awardLbl.AddToClassList("award-label");
-            awardLbl.text = awardType;
-
-            var player = DatabaseManager.Instance.GetPlayerById(playerId);
-
-            var winnerLbl = new Label();
-            winnerLbl.AddToClassList("award-winner");
-            winnerLbl.text = player != null ? $"{player.first_name} {player.last_name}" : "—";
-
-            var teamLbl = new Label();
-            teamLbl.AddToClassList("award-team");
-            if (player != null)
-            {
-                var team = _allTeams.Find(t => t.id == player.team_id);
-                teamLbl.text = team?.abbreviation ?? "";
-            }
-
-            row.Add(seasonLbl);
-            row.Add(awardLbl);
-            row.Add(winnerLbl);
-            row.Add(teamLbl);
-
-            body.Add(row);
-        }
-    }
-
-    // ══ QUINTETOS ══════════════════════════════════════════
-
-    void BuildQuintetos()
-    {
-        _firstTeamBody.Clear();
-        _secondTeamBody.Clear();
-
-        foreach (var record in _seasonRecords)
-        {
-            var seasonStr = GetSeasonString(record.season_id);
-
-            // First team
-            var firstTeamIds = new[] {
-                record.first_team_pg, record.first_team_sg,
-                record.first_team_sf, record.first_team_pf, record.first_team_c
-            };
-            var positions = new[] { "PG", "SG", "SF", "PF", "C" };
-
-            for (int i = 0; i < 5; i++)
-            {
-                if (firstTeamIds[i] > 0)
-                {
-                    var player = DatabaseManager.Instance.GetPlayerById(firstTeamIds[i]);
-                    _firstTeamBody.Add(CreateQuintetoRow(seasonStr, positions[i], player));
-                }
-            }
-
-            // Second team
-            var secondTeamIds = new[] {
-                record.second_team_pg, record.second_team_sg,
-                record.second_team_sf, record.second_team_pf, record.second_team_c
-            };
-
-            for (int i = 0; i < 5; i++)
-            {
-                if (secondTeamIds[i] > 0)
-                {
-                    var player = DatabaseManager.Instance.GetPlayerById(secondTeamIds[i]);
-                    _secondTeamBody.Add(CreateQuintetoRow(seasonStr, positions[i], player));
-                }
-            }
-        }
-    }
-
-    VisualElement CreateQuintetoRow(string season, string pos, PlayerData player)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("quinteto-row");
-
-        var posLbl = new Label();
-        posLbl.AddToClassList("quinteto-pos");
-        posLbl.text = pos;
-
-        var logoElem = new VisualElement();
-        logoElem.AddToClassList("quinteto-player-logo");
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("quinteto-player-name");
-        nameLbl.text = player != null ? $"{player.first_name} {player.last_name}" : "—";
-
-        var teamLbl = new Label();
-        teamLbl.AddToClassList("quinteto-player-team");
-        if (player != null)
-        {
-            var team = _allTeams.Find(t => t.id == player.team_id);
-            teamLbl.text = team?.abbreviation ?? "";
-        }
-
-        row.Add(posLbl);
-        row.Add(logoElem);
-        row.Add(nameLbl);
-        row.Add(teamLbl);
-
-        return row;
-    }
+    // ══ HELPERS ═══════════════════════════════════════════
 
     string GetSeasonString(int seasonId)
     {
-        // For now, try to find from records or return generic
         return $"{2025}-{2026}";
     }
+
+    // ══ EQUIPOS TAB ══════════════════════════════════════
+
+    void BuildEquiposTab()
+    {
+        BuildTitlesRanking();
+        BuildFinalsHistory();
+    }
+
+    void BuildTitlesRanking()
+    {
+        _titlesRankingBody.Clear();
+
+        // Test data: simulate team championship counts
+        var testData = new List<(TeamData team, int count)>();
+        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
+        var celtics = _allTeams?.Find(t => t.name.Contains("Celtics"));
+
+        if (bulls != null) testData.Add((bulls, 6));
+        if (lakers != null) testData.Add((lakers, 17));
+        if (celtics != null) testData.Add((celtics, 18));
+
+        // Sort by count descending
+        testData = testData.OrderByDescending(t => t.count).ToList();
+
+        if (testData.Count == 0)
+        {
+            var noData = new Label();
+            noData.AddToClassList("no-data-cell");
+            noData.text = "Aún no hay campeonatos registrados";
+            _titlesRankingBody.Add(noData);
+            return;
+        }
+
+        for (int i = 0; i < testData.Count; i++)
+        {
+            var (team, count) = testData[i];
+            _titlesRankingBody.Add(CreateChampRow(i + 1, team, count));
+        }
+    }
+
+    VisualElement CreateChampRow(int rank, TeamData team, int count)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("champ-row");
+
+        var rankLbl = new Label();
+        rankLbl.AddToClassList("champ-rank");
+        rankLbl.text = rank.ToString();
+
+        var logo = new VisualElement();
+        logo.AddToClassList("champ-logo");
+        if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+            logo.style.backgroundImage = new StyleBackground(sp);
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("champ-name");
+        nameLbl.text = team?.name ?? "???";
+
+        var countLbl = new Label();
+        countLbl.AddToClassList("champ-count");
+        countLbl.text = count.ToString();
+
+        row.Add(rankLbl);
+        row.Add(logo);
+        row.Add(nameLbl);
+        row.Add(countLbl);
+
+        return row;
+    }
+
+    void BuildFinalsHistory()
+    {
+        _finalsHistoryBody.Clear();
+
+        // Test data
+        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
+        var celtics = _allTeams?.Find(t => t.name.Contains("Celtics"));
+
+        AddFinalsRow("2024-2025", bulls, lakers, "4-2", "Michael Jordan");
+        AddFinalsRow("2023-2024", lakers, celtics, "4-3", "LeBron James");
+    }
+
+    void AddFinalsRow(string season, TeamData champ, TeamData finalist, string result, string mvpName)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("palmares-data-row");
+
+        // Season
+        var seasonLbl = new Label();
+        seasonLbl.AddToClassList("td-season");
+        seasonLbl.text = season;
+        row.Add(seasonLbl);
+
+        // Champion (cell-with-logo)
+        row.Add(CreateCellWithLogo(champ, "td-champ"));
+
+        // Finalist (cell-with-logo)
+        row.Add(CreateCellWithLogo(finalist, "td-finalist"));
+
+        // Result
+        var resultLbl = new Label();
+        resultLbl.AddToClassList("td-result");
+        resultLbl.text = result;
+        row.Add(resultLbl);
+
+        // MVP
+        var mvpLbl = new Label();
+        mvpLbl.AddToClassList("td-mvp");
+        mvpLbl.text = mvpName;
+        row.Add(mvpLbl);
+
+        _finalsHistoryBody.Add(row);
+    }
+
+    VisualElement CreateCellWithLogo(TeamData team, string cellClass)
+    {
+        var cell = new VisualElement();
+        cell.AddToClassList("cell-with-logo");
+
+        var logo = new VisualElement();
+        logo.AddToClassList("mini-logo");
+        if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+            logo.style.backgroundImage = new StyleBackground(sp);
+        cell.Add(logo);
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList(cellClass);
+        nameLbl.text = team?.name ?? "-";
+        cell.Add(nameLbl);
+
+        return cell;
+    }
+
+    // ══ JUGADORES TAB ════════════════════════════════════
+
+    void BuildJugadoresTab()
+    {
+        BuildMVPRanking();
+        BuildAwardsHistory();
+    }
+
+    void BuildMVPRanking()
+    {
+        _mvpRankingBody.Clear();
+
+        // Test data
+        var testMvps = new List<(string name, TeamData team, int count)>();
+        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
+
+        testMvps.Add(("Michael Jordan", bulls, 5));
+        testMvps.Add(("LeBron James", lakers, 4));
+
+        testMvps = testMvps.OrderByDescending(m => m.count).ToList();
+
+        for (int i = 0; i < testMvps.Count; i++)
+        {
+            var (name, team, count) = testMvps[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label();
+            rankLbl.AddToClassList("champ-rank");
+            rankLbl.text = (i + 1).ToString();
+            row.Add(rankLbl);
+
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label();
+            nameLbl.AddToClassList("champ-name");
+            nameLbl.text = name;
+            row.Add(nameLbl);
+
+            var countLbl = new Label();
+            countLbl.AddToClassList("champ-count");
+            countLbl.text = count.ToString();
+            row.Add(countLbl);
+
+            _mvpRankingBody.Add(row);
+        }
+
+        if (testMvps.Count == 0)
+        {
+            var noData = new Label();
+            noData.AddToClassList("no-data-cell");
+            noData.text = "Aún no hay MVPs registrados";
+            _mvpRankingBody.Add(noData);
+        }
+    }
+
+    void BuildAwardsHistory()
+    {
+        _awardsHistoryBody.Clear();
+
+        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
+
+        AddAwardsRow("2024-2025", "Michael Jordan", bulls, "29.5", "Magic Johnson", lakers, "12.3");
+        AddAwardsRow("2023-2024", "LeBron James", lakers, "27.8", "Larry Bird", null, "11.2");
+    }
+
+    void AddAwardsRow(string season, string mvpName, TeamData mvpTeam, string mvpRating,
+                      string rookieName, TeamData rookieTeam, string rookieRating)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("palmares-data-row");
+
+        var seasonLbl = new Label();
+        seasonLbl.AddToClassList("td-season");
+        seasonLbl.text = season;
+        row.Add(seasonLbl);
+
+        // MVP cell
+        row.Add(CreatePlayerCell(mvpName, mvpTeam, "td-mvp"));
+
+        // MVP rating
+        var mvpRatingLbl = new Label();
+        mvpRatingLbl.AddToClassList("td-rating");
+        mvpRatingLbl.text = mvpRating;
+        row.Add(mvpRatingLbl);
+
+        // Rookie cell
+        row.Add(CreatePlayerCell(rookieName, rookieTeam, "td-rookie"));
+
+        // Rookie rating
+        var rookieRatingLbl = new Label();
+        rookieRatingLbl.AddToClassList("td-rating");
+        rookieRatingLbl.text = rookieRating;
+        row.Add(rookieRatingLbl);
+
+        _awardsHistoryBody.Add(row);
+    }
+
+    VisualElement CreatePlayerCell(string playerName, TeamData team, string cellClass)
+    {
+        var cell = new VisualElement();
+        cell.AddToClassList("cell-with-logo");
+
+        var logo = new VisualElement();
+        logo.AddToClassList("mini-logo");
+        if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+            logo.style.backgroundImage = new StyleBackground(sp);
+        cell.Add(logo);
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList(cellClass);
+        nameLbl.text = playerName;
+        cell.Add(nameLbl);
+
+        return cell;
+    }
+
+    // ══ QUINTETOS TAB ════════════════════════════════════
+
+    void BuildQuintetosTab()
+    {
+        BuildQuintetAppearances();
+        BuildQuintetHistory();
+    }
+
+    void BuildQuintetAppearances()
+    {
+        _quintetAppearancesBody.Clear();
+
+        var testAppearances = new List<(string name, TeamData team, int count)>();
+        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
+
+        testAppearances.Add(("Michael Jordan", bulls, 11));
+        testAppearances.Add(("LeBron James", lakers, 13));
+
+        testAppearances = testAppearances.OrderByDescending(a => a.count).ToList();
+
+        for (int i = 0; i < testAppearances.Count; i++)
+        {
+            var (name, team, count) = testAppearances[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label();
+            rankLbl.AddToClassList("champ-rank");
+            rankLbl.text = (i + 1).ToString();
+            row.Add(rankLbl);
+
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label();
+            nameLbl.AddToClassList("champ-name");
+            nameLbl.text = name;
+            row.Add(nameLbl);
+
+            var countLbl = new Label();
+            countLbl.AddToClassList("champ-count");
+            countLbl.text = count.ToString();
+            row.Add(countLbl);
+
+            _quintetAppearancesBody.Add(row);
+        }
+
+        if (testAppearances.Count == 0)
+        {
+            var noData = new Label();
+            noData.AddToClassList("no-data-cell");
+            noData.text = "Aún no hay quintetos registrados";
+            _quintetAppearancesBody.Add(noData);
+        }
+    }
+
+    void BuildQuintetHistory()
+    {
+        _quintetHistoryBody.Clear();
+
+        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
+        var celtics = _allTeams?.Find(t => t.name.Contains("Celtics"));
+
+        AddQuintetRow("2024-2025",
+            ("Michael Jordan", bulls), ("Magic Johnson", lakers),
+            ("Larry Bird", celtics), ("Tim Duncan", null), ("Shaquille O'Neal", lakers));
+        AddQuintetRow("2023-2024",
+            ("LeBron James", lakers), ("Kobe Bryant", lakers),
+            ("Kevin Durant", null), ("Karl Malone", null), ("Hakeem Olajuwon", null));
+    }
+
+    void AddQuintetRow(string season,
+        (string name, TeamData team) pg, (string name, TeamData team) sg,
+        (string name, TeamData team) sf, (string name, TeamData team) pf,
+        (string name, TeamData team) c)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("palmares-data-row");
+
+        var seasonLbl = new Label();
+        seasonLbl.AddToClassList("td-season");
+        seasonLbl.text = season;
+        row.Add(seasonLbl);
+
+        row.Add(CreatePlayerCell(pg.name, pg.team, "td-quintet-pos"));
+        row.Add(CreatePlayerCell(sg.name, sg.team, "td-quintet-pos"));
+        row.Add(CreatePlayerCell(sf.name, sf.team, "td-quintet-pos"));
+        row.Add(CreatePlayerCell(pf.name, pf.team, "td-quintet-pos"));
+        row.Add(CreatePlayerCell(c.name, c.team, "td-quintet-pos"));
+
+        _quintetHistoryBody.Add(row);
+    }
+
+    // ══ SIDEBAR / MISC ═══════════════════════════════════
 
     void LoadSidebarIcons()
     {

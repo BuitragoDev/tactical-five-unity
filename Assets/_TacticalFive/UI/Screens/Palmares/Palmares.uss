@@ -18,11 +18,6 @@
     min-height: 0;
 }
 
-.palmares-scroll {
-    flex-grow: 1;
-    min-height: 0;
-}
-
 .palmares-content {
     flex-direction: column;
     flex-grow: 1;
@@ -67,199 +62,307 @@
     min-height: 0;
 }
 
-.palmares-tab-inner {
-    flex-direction: column;
+/* ══ SPLIT LAYOUT ══ */
+
+.palmares-split {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
     padding: 0 20px 20px 20px;
+    gap: 20px;
 }
 
-.palmares-scroll {
+.palmares-left {
+    flex: 0 0 25%;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 16px;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.palmares-right {
+    flex: 1 1 75%;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 16px;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.palmares-left-scroll {
     flex-grow: 1;
     min-height: 0;
 }
 
-.panel-palmares {
-    margin-bottom: 16px;
+.palmares-right-scroll {
+    flex-grow: 1;
+    min-height: 0;
 }
+
+.palmares-section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 15px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+}
+
+/* ══ LEFT: CHAMPS LIST (RANKING) ══ */
+
+.champs-list {
+    flex-direction: column;
+    gap: 4px;
+}
+
+.champ-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background-color: rgb(17, 24, 34);
+    border-width: 1px;
+    border-color: transparent;
+    transition-property: border-color;
+    transition-duration: 0.15s;
+}
+
+.champ-row:hover {
+    border-color: rgb(85, 102, 119);
+}
+
+.champ-rank {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(85, 102, 119);
+    min-width: 20px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.champ-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+}
+
+.champ-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(208, 216, 232);
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.champ-count {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    min-width: 24px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+/* ══ RIGHT: TABLE ══ */
 
 .palmares-table {
     flex-direction: column;
-    padding: 12px 18px;
+    width: 100%;
 }
 
-.palmares-row {
+.palmares-table-header {
     flex-direction: row;
-    align-items: center;
-    padding: 10px 12px;
-    background-color: rgb(17, 24, 34);
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
+    padding-bottom: 0;
+    flex-shrink: 0;
 }
 
-.palmares-row--my-team {
-    background-color: rgb(20, 28, 48);
-    border-left-width: 3px;
-    border-left-color: rgb(212, 160, 23);
-}
-
-.palmares-season {
+.palmares-table-header > Label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(212, 160, 23);
+    font-size: 12px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(85, 102, 119);
+    padding: 8px 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.palmares-table-body {
+    flex-direction: column;
+}
+
+.palmares-table-body > .palmares-data-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(42, 51, 71, 0.5);
+    transition-property: background-color;
+    transition-duration: 0.1s;
+}
+
+.palmares-table-body > .palmares-data-row:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.palmares-table-body > .palmares-data-row > Label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(208, 216, 232);
+    padding: 0 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+.palmares-table-body > .palmares-data-row > .mini-logo {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* --- Column widths: Equipos tab --- */
+
+#TabContentEquipos .th-season,
+#TabContentEquipos .td-season {
     width: 100px;
     flex-shrink: 0;
+}
+
+#TabContentEquipos .th-champ,
+#TabContentEquipos .td-champ {
+    flex: 1;
+}
+
+#TabContentEquipos .th-finalist,
+#TabContentEquipos .td-finalist {
+    flex: 1;
+}
+
+#TabContentEquipos .th-result,
+#TabContentEquipos .td-result {
+    width: 100px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+#TabContentEquipos .th-mvp,
+#TabContentEquipos .td-mvp {
+    flex: 1;
+}
+
+.td-season {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf") !important;
+    color: rgb(85, 102, 119) !important;
+    letter-spacing: 1px;
+    white-space: nowrap !important;
+}
+
+.td-result {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf") !important;
+    color: rgb(212, 160, 23) !important;
+    -unity-text-align: middle-center;
+    white-space: nowrap !important;
+}
+
+/* --- Column widths: Jugadores tab --- */
+
+#TabContentJugadores .th-season,
+#TabContentJugadores .td-season {
+    width: 100px;
+    flex-shrink: 0;
+}
+
+#TabContentJugadores .th-mvp,
+#TabContentJugadores .td-mvp {
+    flex: 1;
+}
+
+#TabContentJugadores .th-rating,
+#TabContentJugadores .td-rating {
+    width: 100px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+#TabContentJugadores .th-rookie,
+#TabContentJugadores .td-rookie {
+    flex: 1;
+}
+
+.td-rating {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf") !important;
+    color: rgb(85, 102, 119) !important;
+    -unity-text-align: middle-center;
+    white-space: nowrap !important;
+}
+
+/* --- Column widths: Quintetos tab --- */
+
+#TabContentQuintetos .th-season,
+#TabContentQuintetos .td-season {
+    width: 100px;
+    flex-shrink: 0;
+}
+
+#TabContentQuintetos .th-quintet-pos,
+#TabContentQuintetos .td-quintet-pos {
+    flex: 1;
     -unity-text-align: middle-left;
 }
 
-.palmares-trophy {
-    font-size: 16px;
-    margin-right: 8px;
+/* Data row cell with logo + name */
+.cell-with-logo {
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+    padding: 0 12px;
+    overflow: hidden;
+}
+
+.cell-with-logo > .mini-logo {
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
-}
-
-.palmares-team-logo {
-    width: 32px;
-    height: 32px;
-    margin-right: 10px;
-    flex-shrink: 0;
-}
-
-.palmares-team-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
-    flex-grow: 1;
-}
-
-.palmares-result {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(122, 138, 170);
-    width: 60px;
-    flex-shrink: 0;
-    -unity-text-align: middle-center;
-}
-
-.palmares-mvp {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(85, 102, 119);
-    width: 150px;
-    flex-shrink: 0;
-    -unity-text-align: middle-right;
-}
-
-.palmares-mvp-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    color: rgb(212, 160, 23);
     margin-right: 6px;
 }
 
-.no-data-text {
+.cell-with-logo > Label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
+    font-size: 13px;
+    color: rgb(208, 216, 232);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+}
+
+/* No data */
+.no-data-cell {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
     color: rgb(58, 74, 99);
     -unity-text-align: middle-center;
     padding: 24px;
-}
-
-.awards-header {
-    flex-direction: row;
-    padding: 8px 12px;
-    background-color: rgb(17, 24, 34);
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
-}
-
-.award-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    color: rgb(85, 102, 119);
-    width: 120px;
-    flex-shrink: 0;
-}
-
-.award-winner {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
     flex-grow: 1;
 }
 
-.award-team {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(85, 102, 119);
-    width: 60px;
-    flex-shrink: 0;
-    -unity-text-align: middle-right;
+/* Hide scrollbar */
+.palmares-left-scroll .unity-scroll-view__vertical-scroller,
+.palmares-right-scroll .unity-scroll-view__vertical-scroller {
+    display: none;
 }
 
-/* Quintetos */
-.palmares-quinteto {
-    flex-direction: column;
-    padding: 16px;
-}
-
-.quinteto-row {
-    flex-direction: row;
-    align-items: center;
-    padding: 12px 16px;
-    background-color: rgb(17, 24, 34);
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
-}
-
-.quinteto-pos {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    color: rgb(212, 160, 23);
-    width: 40px;
-    flex-shrink: 0;
-    -unity-text-align: middle-center;
-}
-
-.quinteto-player-logo {
-    width: 32px;
-    height: 32px;
-    margin-right: 10px;
-    margin-left: 12px;
-    flex-shrink: 0;
-    border-radius: 16px;
-    background-color: rgb(28, 33, 48);
-}
-
-.quinteto-player-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
-    flex-grow: 1;
-}
-
-.quinteto-player-team {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(85, 102, 119);
-    width: 50px;
-    flex-shrink: 0;
-    -unity-text-align: middle-right;
-}
+/* Sidebar / header from Dashboard.uss are inherited */
