@@ -139,11 +139,15 @@
 .end-season-split {
     flex-direction: row;
     flex-grow: 1;
+    overflow: hidden;
+    min-height: 0;
 }
 .es-lists-col {
     flex: 1;
     flex-direction: column;
     margin-right: 24px;
+    overflow: hidden;
+    min-height: 0;
 }
 .es-draft-col {
     flex: 1;
@@ -158,12 +162,18 @@
     padding: 16px;
     margin-bottom: 20px;
     overflow: hidden;
+    flex-direction: column;
+    min-height: 0;
+}
+.es-panel:last-child {
+    margin-bottom: 0;
 }
 .es-panel-title-row {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 12px;
+    flex-shrink: 0;
 }
 .es-panel-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
@@ -175,6 +185,7 @@
     padding-bottom: 8px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
+    flex-shrink: 0;
 }
 .es-panel-title-row .es-panel-title {
     margin-bottom: 0;
@@ -184,9 +195,10 @@
 
 /* ── PLAYER LIST ── */
 .es-scroll-wrapper {
-    max-height: 455px;
-    flex-grow: 0;
-    flex-shrink: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    min-height: 0;
 }
 .es-player-scroll {
     flex-grow: 1;
