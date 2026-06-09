@@ -3,6 +3,7 @@
          editor-extension-mode="False">
 
     <Style src="LoadGame.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
 
     <ui:VisualElement name="LoadGameRoot" class="loadgame-root">
 
@@ -38,6 +39,24 @@
             <ui:Label class="empty-icon" text="📁" />
             <ui:Label class="empty-label" text="NO HAY PARTIDAS GUARDADAS" />
             <ui:Label class="empty-hint" text="Empieza una nueva partida desde el menu principal" />
+        </ui:VisualElement>
+
+        <!-- ══ MODAL BORRAR PARTIDA ══ -->
+        <ui:VisualElement name="DeleteModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="DeleteModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="BORRAR PARTIDA" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph"
+                        text="¿Estás seguro de que quieres borrar esta partida?" />
+                    <ui:Label class="modal-paragraph"
+                        text="Esta acción no se puede deshacer y todos los datos de la partida se perderán." />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnDeleteNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="BtnDeleteYes" class="modal-btn modal-btn--danger" text="SÍ, BORRAR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

@@ -966,6 +966,9 @@ public class RosterController : MonoBehaviour
             amount = penalty
         });
 
+        long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
+        long netBalance = remainingSalary - penalty;
+
         // Crear mensaje de despido
         DatabaseManager.Instance.AddMessage(new MessageData
         {
@@ -973,7 +976,12 @@ public class RosterController : MonoBehaviour
             sender_type = 0,
             sender_id = 0,
             title = "Jugador despedido",
-            body = $"Se ha despedido a {playerName}. Penalización de ${penalty:N0} descontada del presupuesto.",
+            body = $"El club ha decidido rescindir el contrato de {playerName} con efecto inmediato.\n\n" +
+                   $"La operación supone una penalización económica de {penalty:N0} €, que ha sido cargada a las cuentas del club.\n\n" +
+                   $"La salida del jugador libera una plaza en la plantilla y su salario dejará de computar a partir de esta fecha.\n\n" +
+                   $"Coste de rescisión: {penalty:N0} €\n" +
+                   $"Ahorro salarial restante: {remainingSalary:N0} €\n" +
+                   $"Balance neto de la operación: {netBalance:N0} €",
             game_day = currentDay,
             game_date = now,
             created_at = now,

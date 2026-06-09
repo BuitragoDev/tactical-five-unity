@@ -297,6 +297,12 @@
     -unity-text-align: middle-center;
 }
 
+/* ══ MODAL OVERRIDE ══ */
+
+.loadgame-root > .modal-overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
 .btn-back-empty:hover {
     background-color: rgb(28, 33, 48);
     color: rgb(208, 216, 232);

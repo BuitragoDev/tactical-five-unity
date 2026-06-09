@@ -12,6 +12,13 @@ public class LoadGameController : MonoBehaviour
     private VisualElement _slotsArea;
     private Button _btnBack;
 
+    private VisualElement _deleteModalOverlay;
+    private VisualElement _deleteModalBox;
+    private Button _btnDeleteYes;
+    private Button _btnDeleteNo;
+
+    private int _pendingDeleteSlot = -1;
+
     private Dictionary<string, Sprite> _logoSprites = new();
 
     void OnEnable()
@@ -35,6 +42,36 @@ public class LoadGameController : MonoBehaviour
         _btnBack = _root.Q<Button>("BtnBack");
 
         _btnBack?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+
+        // Modal borrar partida
+        _deleteModalOverlay = _root.Q<VisualElement>("DeleteModalOverlay");
+        _deleteModalBox = _root.Q<VisualElement>("DeleteModalBox");
+        _btnDeleteYes = _root.Q<Button>("BtnDeleteYes");
+        _btnDeleteNo = _root.Q<Button>("BtnDeleteNo");
+
+        _btnDeleteYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmDelete(); });
+        _btnDeleteNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseDeleteModal(); });
+        _deleteModalOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _deleteModalOverlay)
+                { PlayClick(); CloseDeleteModal(); }
+        });
+
+        // Escape para cerrar modal
+        _root.focusable = true;
+        _root.Focus();
+        _root.RegisterCallback<KeyDownEvent>(e =>
+        {
+            if (e.keyCode == KeyCode.Escape && _deleteModalOverlay?.style.display == DisplayStyle.Flex)
+                CloseDeleteModal();
+        });
+
+        // Cursores
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(_btnDeleteYes);
+            CursorManager.Instance.RegisterHandCursor(_btnDeleteNo);
+        }
 
         // Limpiar DBs huérfanas antes de refrescar
         GameSaveManager.CleanupAllOrphanDbs();
@@ -147,7 +184,28 @@ public class LoadGameController : MonoBehaviour
 
     void OnDeleteSlot(int slotNumber)
     {
-        GameSaveManager.DeleteSave(slotNumber);
+        _pendingDeleteSlot = slotNumber;
+        OpenDeleteModal();
+    }
+
+    void OpenDeleteModal()
+    {
+        _deleteModalOverlay.style.display = DisplayStyle.Flex;
+        _deleteModalBox.style.display = DisplayStyle.Flex;
+    }
+
+    void CloseDeleteModal()
+    {
+        _deleteModalOverlay.style.display = DisplayStyle.None;
+        _deleteModalBox.style.display = DisplayStyle.None;
+        _pendingDeleteSlot = -1;
+    }
+
+    void ConfirmDelete()
+    {
+        if (_pendingDeleteSlot >= 0)
+            GameSaveManager.DeleteSave(_pendingDeleteSlot);
+        CloseDeleteModal();
         RefreshSlots();
     }
 
