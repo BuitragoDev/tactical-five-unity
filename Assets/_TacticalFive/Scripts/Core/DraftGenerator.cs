@@ -92,7 +92,7 @@ public static class DraftGenerator
         var standings = GetFinalStandings(season, managerId);
         if (standings.Count < 30) return new List<PlayerData>();
 
-        var draftOrder = standings.OrderByDescending(s => s.wins).Take(30).ToList();
+        var draftOrder = standings.OrderBy(s => s.wins).Take(30).ToList();
         var draftedPlayers = new List<PlayerData>();
 
         for (int pick = 0; pick < 30; pick++)
