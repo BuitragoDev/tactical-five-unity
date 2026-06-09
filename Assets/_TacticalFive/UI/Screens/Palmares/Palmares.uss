@@ -228,11 +228,18 @@
 }
 
 .palmares-table-body > .palmares-data-row > .mini-logo {
-    width: 18px;
-    height: 18px;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
-    margin-right: 6px;
+    margin-right: 10px;
     vertical-align: middle;
+}
+
+.cell-with-logo > .mini-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-right: 10px;
 }
 
 /* --- Column widths: Equipos tab --- */
