@@ -227,15 +227,7 @@
     white-space: normal;
 }
 
-.palmares-table-body > .palmares-data-row > .mini-logo {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-    margin-right: 10px;
-    vertical-align: middle;
-}
-
-.cell-with-logo > .mini-logo {
+.mini-logo {
     width: 32px;
     height: 32px;
     flex-shrink: 0;
@@ -342,13 +334,6 @@
     flex: 1;
     padding: 0 12px;
     overflow: hidden;
-}
-
-.cell-with-logo > .mini-logo {
-    width: 18px;
-    height: 18px;
-    flex-shrink: 0;
-    margin-right: 6px;
 }
 
 .cell-with-logo > Label {
