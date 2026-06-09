@@ -47,7 +47,9 @@
                 <!-- RIGHT COLUMN -->
                 <ui:VisualElement class="es-draft-col">
                     <ui:Button name="BtnDraft" class="btn-draft" text="EMPEZAR DRAFT"/>
-                    <ui:ScrollView name="DraftResults" class="draft-results-container" mode="Vertical"/>
+                    <ui:VisualElement class="draft-results-wrapper">
+                        <ui:ScrollView name="DraftResults" class="draft-results-container" mode="Vertical"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

@@ -269,6 +269,7 @@ public class EndSeasonController : MonoBehaviour
 
     void ShowDraftResults(List<PlayerData> drafted)
     {
+        _draftResults.contentContainer.style.flexDirection = FlexDirection.Column;
         _draftResults.Clear();
         for (int i = 0; i < drafted.Count; i++)
         {
