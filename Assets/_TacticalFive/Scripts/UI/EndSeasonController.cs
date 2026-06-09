@@ -84,7 +84,7 @@ public class EndSeasonController : MonoBehaviour
             _btnDraft.text = "GENERANDO...";
         });
 
-        _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); Debug.Log("Renew all clicked"); });
+        _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
     }
 
     void RefreshHeader()
@@ -187,7 +187,13 @@ public class EndSeasonController : MonoBehaviour
             var renewBtn = new Button();
             renewBtn.AddToClassList("btn-renew");
             renewBtn.text = "Renovar";
-            renewBtn.RegisterCallback<ClickEvent>(_ => Debug.Log($"Renew {p.first_name} {p.last_name}"));
+            int capturedId = p.id;
+            renewBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                RenewPlayer(capturedId);
+                row.RemoveFromHierarchy();
+            });
             row.Add(renewBtn);
         }
         else
@@ -199,6 +205,51 @@ public class EndSeasonController : MonoBehaviour
         }
 
         return row;
+    }
+
+    void RenewPlayer(int playerId)
+    {
+        var player = DatabaseManager.Instance.GetPlayerById(playerId);
+        if (player == null) return;
+
+        int years = CalcRenewYears(player.age);
+        long newSalary = CalcRenewSalary(player.salary);
+
+        player.contract_years = years;
+        player.salary = newSalary;
+        DatabaseManager.Instance.UpdatePlayer(player);
+    }
+
+    void RenewAll()
+    {
+        var players = DatabaseManager.Instance.GetExpiringPlayers();
+        foreach (var p in players)
+        {
+            if (p.age >= 40) continue;
+            int years = CalcRenewYears(p.age);
+            long newSalary = CalcRenewSalary(p.salary);
+            p.contract_years = years;
+            p.salary = newSalary;
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+        LoadExpiringPlayers();
+    }
+
+    int CalcRenewYears(int age)
+    {
+        if (age <= 25) return 5;
+        if (age <= 28) return 4;
+        if (age <= 32) return 3;
+        if (age < 40) return 2;
+        return 1;
+    }
+
+    long CalcRenewSalary(long currentSalary)
+    {
+        long newSalary = (long)(currentSalary * 1.05);
+        newSalary = (long)(Math.Round(newSalary / 100000.0) * 100000);
+        if (newSalary < currentSalary) newSalary = currentSalary;
+        return newSalary;
     }
 
     void PlayClick()
