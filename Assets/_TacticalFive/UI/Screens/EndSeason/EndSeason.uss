@@ -157,6 +157,7 @@
     border-color: rgb(42, 51, 71);
     padding: 16px;
     margin-bottom: 20px;
+    overflow: hidden;
 }
 .es-panel-title-row {
     flex-direction: row;
