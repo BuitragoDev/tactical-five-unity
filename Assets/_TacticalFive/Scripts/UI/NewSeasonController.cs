@@ -255,8 +255,8 @@ public class NewSeasonController : MonoBehaviour
             _manager.id
         );
 
-        // Navigate to Dashboard
-        ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+        // Navigate to Preseason to set up friendly games
+        ScreenManager.Instance.GoTo(GameScreen.Preseason);
     }
 
     void PlayClick()

@@ -38,15 +38,9 @@ public class PreseasonController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites120 = new();
 
-    // Fechas en septiembre
-    private readonly string[] _dates = {
-        "05 SEP 2025", "08 SEP 2025",
-        "11 SEP 2025", "14 SEP 2025"
-    };
-    private readonly string[] _datesDb = {
-        "2025-09-05", "2025-09-08",
-        "2025-09-11", "2025-09-14"
-    };
+    // Inicializado dinámicamente en LoadData según el año de la temporada
+    private string[] _dates = new string[4];
+    private string[] _datesDb = new string[4];
 
     void OnEnable()
     {
@@ -102,6 +96,18 @@ public class PreseasonController : MonoBehaviour
         _manager = DatabaseManager.Instance.GetActiveManager();
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _allTeams = DatabaseManager.Instance.GetAllTeams();
+
+        // Inicializar fechas de pretemporada según el año de la temporada activa
+        var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        int yearStart = season?.year_start ?? 2025;
+        _dates = new string[4];
+        _datesDb = new string[4];
+        for (int i = 0; i < 4; i++)
+        {
+            int day = 5 + i * 3; // 05, 08, 11, 14
+            _datesDb[i] = $"{yearStart}-09-{day:D2}";
+            _dates[i] = $"{day:D2} SEP {yearStart}";
+        }
     }
 
     void RegisterCallbacks()
@@ -350,7 +356,7 @@ public class PreseasonController : MonoBehaviour
         int slotIndex = _games.Count;
 
         var gameDate = System.DateTime.Parse(_datesDb[slotIndex]);
-        var seasonStart = new System.DateTime(2025, 10, 22);
+        var seasonStart = new System.DateTime(gameDate.Year, 10, 22);
         int daysFromStart = (int)(seasonStart - gameDate).TotalDays;
 
         var game = new GameData
@@ -395,6 +401,8 @@ public class PreseasonController : MonoBehaviour
     {
         // === COMMIT: la partida se crea oficialmente al pulsar Continuar en Preseason ===
         int activeSlot = DatabaseManager.Instance.ActiveSaveSlot;
+        var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        string seasonYear = season != null ? $"{season.year_start}-{season.year_end}" : "2025-2026";
         GameSaveManager.SaveSlotInfo(new SaveSlotInfo
         {
             slotNumber = activeSlot,
@@ -402,7 +410,7 @@ public class PreseasonController : MonoBehaviour
             managerName = _manager.name,
             teamName = _myTeam.name,
             teamLogo = _myTeam.logo,
-            seasonYear = "2025-2026",
+            seasonYear = seasonYear,
             currentDate = "",
             lastPlayedRealDate = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
             currentGameDay = 0,
@@ -410,9 +418,9 @@ public class PreseasonController : MonoBehaviour
         });
         Debug.Log($"[Preseason] Partida creada en slot {activeSlot}: {_manager.name} → {_myTeam.name}");
 
-        // 1. Crear temporada si no existe
-        var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        if (season == null)
+        // 1. Crear temporada si no existe (primera partida)
+        bool isNewGame = season == null;
+        if (isNewGame)
         {
             season = DatabaseManager.Instance.CreateSeason(
                 _manager.id,
@@ -447,26 +455,29 @@ public class PreseasonController : MonoBehaviour
 
             Debug.Log($"[Preseason] Calendario generado: {count} partidos.");
 
-            // Welcome message (first time only) — usar fecha del primer partido del equipo
-            var firstGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-            string firstGameDate = firstGame != null
-                ? firstGame.game_date
-                : System.DateTime.Now.ToString("yyyy-MM-dd");
-
-            var welcomeMsg = new MessageData
+            // Welcome message only for brand new games, not subsequent seasons
+            if (isNewGame)
             {
-                manager_id = _manager.id,
-                sender_type = 1,
-                sender_id = 0,
-                title = $"Bienvenido a {_myTeam.name}",
-                body = $"Hola {_manager.name}, bienvenido como nuevo entrenador de {_myTeam.name}. La directiva confía en ti para llevar al equipo lo más alto posible. ¡Buena suerte en esta temporada!",
-                game_day = firstGame != null ? firstGame.game_day : 0,
-                game_date = firstGameDate,
-                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                is_read = 0
-            };
-            DatabaseManager.Instance.AddMessage(welcomeMsg);
+                var firstGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
+                string firstGameDate = firstGame != null
+                    ? firstGame.game_date
+                    : System.DateTime.Now.ToString("yyyy-MM-dd");
+
+                var welcomeMsg = new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 1,
+                    sender_id = 0,
+                    title = $"Bienvenido a {_myTeam.name}",
+                    body = $"Hola {_manager.name}, bienvenido como nuevo entrenador de {_myTeam.name}. La directiva confía en ti para llevar al equipo lo más alto posible. ¡Buena suerte en esta temporada!",
+                    game_day = firstGame != null ? firstGame.game_day : 0,
+                    game_date = firstGameDate,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    is_read = 0
+                };
+                DatabaseManager.Instance.AddMessage(welcomeMsg);
+            }
         }
 
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);

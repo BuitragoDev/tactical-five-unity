@@ -417,15 +417,23 @@ public class DatabaseManager : MonoBehaviour
     // ── SEASON ────────────────────────────────────────────
     public SeasonData CreateSeason(int managerId, string gameMode)
     {
+        // Find the max year_start from existing seasons, default to 2025
+        var lastSeason = _db.Table<SeasonData>()
+            .OrderByDescending(s => s.year_start)
+            .FirstOrDefault();
+        int yearStart = lastSeason != null ? lastSeason.year_start + 1 : 2025;
+
         var season = new SeasonData
         {
-            year_start = 2025,
-            year_end = 2026,
+            year_start = yearStart,
+            year_end = yearStart + 1,
             is_active = 1,
             current_game_day = 0,
             game_mode = gameMode,
             phase = "preseason",
-            manager_id = managerId
+            manager_id = managerId,
+            generated = 0,
+            current_date = $"{yearStart}-09-05"
         };
         _db.Insert(season);
         return season;
@@ -2717,6 +2725,11 @@ public class DatabaseManager : MonoBehaviour
 
     public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId)
     {
+        // 0. Archive historical stats BEFORE clearing tables
+        var oldSeason = _db.Find<SeasonData>(oldSeasonId);
+        if (oldSeason != null)
+            UpdateHistoricalPlayerStatsFromSeason(oldSeasonId, managerId);
+
         var allPlayers = _db.Table<PlayerData>().ToList();
 
         // 1. Retire players 40+
@@ -2771,7 +2784,43 @@ public class DatabaseManager : MonoBehaviour
             _db.Update(p);
         }
 
-        // 4. Clear tables
+        // 4. Decrement sponsor/TV contracts for all teams
+        foreach (var team in GetAllTeams())
+        {
+            var settings = GetTeamSettings(team.id);
+            if (settings == null) continue;
+
+            bool changed = false;
+            if (settings.sponsor_years_remaining > 0)
+            {
+                settings.sponsor_years_remaining -= 1;
+                if (settings.sponsor_years_remaining <= 0)
+                {
+                    settings.sponsor_id = 0;
+                    // Fire the sponsor so it becomes available again
+                    var activeSponsor = GetActiveSponsor(team.id);
+                    if (activeSponsor != null)
+                        FireSponsor(activeSponsor);
+                }
+                changed = true;
+            }
+            if (settings.tv_years_remaining > 0)
+            {
+                settings.tv_years_remaining -= 1;
+                if (settings.tv_years_remaining <= 0)
+                {
+                    settings.tv_channel_id = 0;
+                    var activeChannel = GetActiveTVChannel(team.id);
+                    if (activeChannel != null)
+                        FireTVChannel(activeChannel);
+                }
+                changed = true;
+            }
+            if (changed)
+                UpdateTeamSettings(settings);
+        }
+
+        // 5. Clear tables
         _db.Execute("DELETE FROM player_game_stats");
         _db.Execute("DELETE FROM finals_player_stats");
         _db.Execute("DELETE FROM games");
@@ -2779,17 +2828,18 @@ public class DatabaseManager : MonoBehaviour
         _db.Execute("DELETE FROM game_attendance");
         _db.Execute("DELETE FROM finance_records");
 
-        // 5. Fill rosters to 12 for all teams (except the user's new team)
+        // 6. Fill rosters to 12 for all teams (except the user's new team)
         var allTeams = GetAllTeams();
         var freeAgents = _db.Table<PlayerData>()
             .Where(p => p.team_id == 0 && p.age < 40)
             .OrderByDescending(p => p.overall)
             .ToList();
 
-        foreach (var team in allTeams)
-        {
-            if (team.id == newTeamId) continue;
+        // Sort teams: fill user's new team last to maximize free agent pool for AI
+        var teamsToFill = allTeams.Where(t => t.id != newTeamId).ToList();
 
+        foreach (var team in teamsToFill)
+        {
             var roster = GetPlayersByTeam(team.id);
             int need = 12 - roster.Count;
             if (need <= 0) continue;
@@ -2825,15 +2875,93 @@ public class DatabaseManager : MonoBehaviour
             }
         }
 
-        // 6. Deactivate old season
-        var oldSeason = _db.Find<SeasonData>(oldSeasonId);
+        // Now fill user's team to 12 if needed
+        {
+            var userRoster = GetPlayersByTeam(newTeamId);
+            int need = 12 - userRoster.Count;
+            if (need > 0)
+            {
+                var posCounts = new Dictionary<string, int>();
+                foreach (string pos in new[] { "PG", "SG", "SF", "PF", "C" })
+                    posCounts[pos] = userRoster.Count(p => p.position == pos);
+
+                for (int i = 0; i < need && freeAgents.Count > 0; i++)
+                {
+                    string minPos = posCounts.OrderBy(kv => kv.Value).First().Key;
+
+                    PlayerData signed = null;
+                    foreach (var fa in freeAgents)
+                    {
+                        if (fa.position == minPos)
+                        {
+                            signed = fa;
+                            break;
+                        }
+                    }
+                    if (signed == null && freeAgents.Count > 0)
+                        signed = freeAgents[0];
+
+                    if (signed != null)
+                    {
+                        signed.team_id = newTeamId;
+                        signed.contract_years = Math.Max(1, 4 - signed.age / 10);
+                        _db.Update(signed);
+                        freeAgents.Remove(signed);
+                        posCounts[signed.position] = posCounts.GetValueOrDefault(signed.position) + 1;
+                    }
+                }
+            }
+        }
+
+        // 7. Increase salary cap by 5%
+        var leagueSettings = GetLeagueSettings();
+        if (leagueSettings != null)
+        {
+            leagueSettings.salary_cap = (long)(leagueSettings.salary_cap * 1.05);
+            leagueSettings.luxury_tax = (long)(leagueSettings.luxury_tax * 1.05);
+            leagueSettings.apron = (long)(leagueSettings.apron * 1.05);
+            leagueSettings.repeater_apron = (long)(leagueSettings.repeater_apron * 1.05);
+            leagueSettings.mid_level = (long)(leagueSettings.mid_level * 1.05);
+            leagueSettings.bi_annual = (long)(leagueSettings.bi_annual * 1.05);
+            leagueSettings.minimum_salary = (long)(leagueSettings.minimum_salary * 1.05);
+            _db.Update(leagueSettings);
+        }
+
+        // 8. Deactivate old season
         if (oldSeason != null)
         {
             oldSeason.is_active = 0;
             _db.Update(oldSeason);
         }
 
-        // 7. Create new season
+        // 9. Assign random sponsors/TV to teams without one
+        var availableSponsors = _db.Table<SponsorData>().Where(s => s.is_active == 1).ToList();
+        var availableChannels = _db.Table<TvChannelData>().Where(c => c.is_active == 1).ToList();
+
+        foreach (var team in allTeams)
+        {
+            var settings = GetTeamSettings(team.id);
+            if (settings == null) continue;
+
+            if (settings.sponsor_id == 0 && availableSponsors.Count > 0)
+            {
+                var rngSp = new System.Random();
+                var pick = availableSponsors[rngSp.Next(availableSponsors.Count)];
+                SignSponsor(pick.id, 0, team.id);
+                // Re-read available sponsors (the signed one is now assigned)
+                availableSponsors = _db.Table<SponsorData>().Where(s => s.is_active == 1).ToList();
+            }
+
+            if (settings.tv_channel_id == 0 && availableChannels.Count > 0)
+            {
+                var rngTv = new System.Random();
+                var pick = availableChannels[rngTv.Next(availableChannels.Count)];
+                SignTVChannel(pick.id, 0, team.id);
+                availableChannels = _db.Table<TvChannelData>().Where(c => c.is_active == 1).ToList();
+            }
+        }
+
+        // 10. Create new season (preseason)
         int newYearStart = oldSeason != null ? oldSeason.year_start + 1 : 2026;
         var newSeason = new SeasonData
         {
@@ -2841,8 +2969,9 @@ public class DatabaseManager : MonoBehaviour
             year_end = newYearStart + 1,
             is_active = 1,
             current_game_day = 0,
+            current_date = $"{newYearStart}-09-05",
             game_mode = gameMode,
-            phase = "regular",
+            phase = "preseason",
             manager_id = managerId,
             generated = 0
         };
