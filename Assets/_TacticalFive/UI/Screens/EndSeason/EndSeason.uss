@@ -198,7 +198,7 @@
     flex-grow: 1;
     flex-shrink: 1;
     overflow: hidden;
-    min-height: 0;
+    min-height: 200px;
 }
 .es-player-scroll {
     flex-grow: 1;
