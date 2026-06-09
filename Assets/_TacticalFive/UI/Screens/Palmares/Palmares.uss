@@ -73,23 +73,26 @@
 }
 
 .palmares-left {
-    flex: 0 0 25%;
+    flex: 0 0 20%;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     padding: 16px;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
+    margin-right: 20px;
 }
 
 .palmares-right {
-    flex: 1 1 75%;
+    flex: 1 1 80%;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     padding: 16px;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
 }
 
 .palmares-left-scroll {
@@ -97,9 +100,16 @@
     min-height: 0;
 }
 
-.palmares-right-scroll {
+.palmares-scroll-wrapper {
     flex-grow: 1;
     min-height: 0;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.palmares-right-scroll {
+    flex-grow: 1;
+    height: 100%;
 }
 
 .palmares-section-title {
@@ -126,8 +136,9 @@
     flex-direction: row;
     align-items: center;
     gap: 8px;
-    padding: 8px 10px;
-    background-color: rgb(17, 24, 34);
+    height: 40px;
+    padding: 0 10px;
+    flex-shrink: 0;
     border-width: 1px;
     border-color: transparent;
     transition-property: border-color;
@@ -194,7 +205,9 @@
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
-    padding: 8px 12px;
+    height: 48px;
+    padding: 0 12px;
+    -unity-text-align: middle-left;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -206,7 +219,10 @@
 .palmares-table-body > .palmares-data-row {
     flex-direction: row;
     align-items: center;
-    padding: 10px 0;
+    height: 48px;
+    padding: 0;
+    flex-shrink: 0;
+    overflow: hidden;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.5);
     transition-property: background-color;
@@ -224,7 +240,7 @@
     padding: 0 12px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: normal;
+    white-space: nowrap;
 }
 
 .mini-logo {
@@ -342,7 +358,7 @@
     color: rgb(208, 216, 232);
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: normal;
+    white-space: nowrap;
 }
 
 /* No data */

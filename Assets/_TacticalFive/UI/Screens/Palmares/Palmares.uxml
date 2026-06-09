@@ -119,18 +119,18 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
                             <ui:Label class="palmares-section-title" text="HISTORIAL DE FINALES" />
-                            <ui:ScrollView name="FinalsHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
-                                <ui:VisualElement class="palmares-table">
-                                    <ui:VisualElement class="palmares-table-header">
-                                        <ui:Label class="th-season" text="TEMPORADA" />
-                                        <ui:Label class="th-champ" text="CAMPEÓN" />
-                                        <ui:Label class="th-finalist" text="FINALISTA" />
-                                        <ui:Label class="th-result" text="RESULTADO" />
-                                        <ui:Label class="th-mvp" text="MVP FINALES" />
-                                    </ui:VisualElement>
+                            <ui:VisualElement class="palmares-table-header">
+                                <ui:Label class="th-season" text="TEMPORADA" />
+                                <ui:Label class="th-champ" text="CAMPEÓN" />
+                                <ui:Label class="th-finalist" text="FINALISTA" />
+                                <ui:Label class="th-result" text="RESULTADO" />
+                                <ui:Label class="th-mvp" text="MVP FINALES" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="palmares-scroll-wrapper">
+                                <ui:ScrollView name="FinalsHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
                                     <ui:VisualElement name="FinalsHistoryBody" class="palmares-table-body" />
-                                </ui:VisualElement>
-                            </ui:ScrollView>
+                                </ui:ScrollView>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -146,18 +146,18 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
                             <ui:Label class="palmares-section-title" text="HISTORIAL DE PREMIOS" />
-                            <ui:ScrollView name="AwardsHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
-                                <ui:VisualElement class="palmares-table">
-                                    <ui:VisualElement class="palmares-table-header">
-                                        <ui:Label class="th-season" text="TEMPORADA" />
-                                        <ui:Label class="th-mvp" text="MVP TEMPORADA" />
-                                        <ui:Label class="th-rating" text="VAL. MEDIA" />
-                                        <ui:Label class="th-rookie" text="ROOKIE DEL AÑO" />
-                                        <ui:Label class="th-rating" text="VAL. MEDIA" />
-                                    </ui:VisualElement>
+                            <ui:VisualElement class="palmares-table-header">
+                                <ui:Label class="th-season" text="TEMPORADA" />
+                                <ui:Label class="th-mvp" text="MVP TEMPORADA" />
+                                <ui:Label class="th-rating" text="VAL. MEDIA" />
+                                <ui:Label class="th-rookie" text="ROOKIE DEL AÑO" />
+                                <ui:Label class="th-rating" text="VAL. MEDIA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="palmares-scroll-wrapper">
+                                <ui:ScrollView name="AwardsHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
                                     <ui:VisualElement name="AwardsHistoryBody" class="palmares-table-body" />
-                                </ui:VisualElement>
-                            </ui:ScrollView>
+                                </ui:ScrollView>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -173,19 +173,19 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
                             <ui:Label class="palmares-section-title" text="HISTORIAL DE QUINTETOS" />
-                            <ui:ScrollView name="QuintetHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
-                                <ui:VisualElement class="palmares-table">
-                                    <ui:VisualElement class="palmares-table-header">
-                                        <ui:Label class="th-season" text="TEMPORADA" />
-                                        <ui:Label class="th-quintet-pos" text="PG" />
-                                        <ui:Label class="th-quintet-pos" text="SG" />
-                                        <ui:Label class="th-quintet-pos" text="SF" />
-                                        <ui:Label class="th-quintet-pos" text="PF" />
-                                        <ui:Label class="th-quintet-pos" text="C" />
-                                    </ui:VisualElement>
+                            <ui:VisualElement class="palmares-table-header">
+                                <ui:Label class="th-season" text="TEMPORADA" />
+                                <ui:Label class="th-quintet-pos" text="PG" />
+                                <ui:Label class="th-quintet-pos" text="SG" />
+                                <ui:Label class="th-quintet-pos" text="SF" />
+                                <ui:Label class="th-quintet-pos" text="PF" />
+                                <ui:Label class="th-quintet-pos" text="C" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="palmares-scroll-wrapper">
+                                <ui:ScrollView name="QuintetHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
                                     <ui:VisualElement name="QuintetHistoryBody" class="palmares-table-body" />
-                                </ui:VisualElement>
-                            </ui:ScrollView>
+                                </ui:ScrollView>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

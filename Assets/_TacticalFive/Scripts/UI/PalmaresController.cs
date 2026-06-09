@@ -17,15 +17,10 @@ public class PalmaresController : MonoBehaviour
     private VisualElement _tabContentJugadores;
     private VisualElement _tabContentQuintetos;
 
-    // Equipos
     private VisualElement _titlesRankingBody;
     private VisualElement _finalsHistoryBody;
-
-    // Jugadores
     private VisualElement _mvpRankingBody;
     private VisualElement _awardsHistoryBody;
-
-    // Quintetos
     private VisualElement _quintetAppearancesBody;
     private VisualElement _quintetHistoryBody;
 
@@ -50,10 +45,22 @@ public class PalmaresController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
+        SetupScrollViews();
         LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
         Refresh();
+    }
+
+    void SetupScrollViews()
+    {
+        var scrolls = new[] { "TitlesRankingScroll", "FinalsHistoryScroll", "MVPRankingScroll", "AwardsHistoryScroll", "QuintetAppearancesScroll", "QuintetHistoryScroll" };
+        foreach (var name in scrolls)
+        {
+            var sv = _root.Q<ScrollView>(name);
+            if (sv != null)
+                sv.contentContainer.style.flexGrow = 0;
+        }
     }
 
     void CacheReferences()
@@ -70,10 +77,8 @@ public class PalmaresController : MonoBehaviour
 
         _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
         _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
-
         _mvpRankingBody = _root.Q<VisualElement>("MVPRankingBody");
         _awardsHistoryBody = _root.Q<VisualElement>("AwardsHistoryBody");
-
         _quintetAppearancesBody = _root.Q<VisualElement>("QuintetAppearancesBody");
         _quintetHistoryBody = _root.Q<VisualElement>("QuintetHistoryBody");
     }
@@ -208,14 +213,58 @@ public class PalmaresController : MonoBehaviour
         _btnAction.text = "DASHBOARD";
     }
 
-    // ══ HELPERS ═══════════════════════════════════════════
+    // ══ DATA ══════════════════════════════════════════════
 
-    string GetSeasonString(int seasonId)
+    TeamData FindTeam(string keyword)
     {
-        return $"{2025}-{2026}";
+        return _allTeams?.Find(t => t.name.Contains(keyword));
     }
 
     // ══ EQUIPOS TAB ══════════════════════════════════════
+
+    struct FinalsRow
+    {
+        public string season;
+        public string champName;
+        public string champKeyword;
+        public string finalistName;
+        public string finalistKeyword;
+        public string result;
+        public string mvp;
+    }
+
+    List<FinalsRow> GetFinalsData()
+    {
+        return new List<FinalsRow>
+        {
+            new FinalsRow { season = "1999-00", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Indiana Pacers",  finalistKeyword = "Pacers",   result = "4-2", mvp = "Shaquille O'Neal" },
+            new FinalsRow { season = "2000-01", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Philadelphia 76ers", finalistKeyword = "76ers",  result = "4-1", mvp = "Shaquille O'Neal" },
+            new FinalsRow { season = "2001-02", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "New Jersey Nets", finalistKeyword = "Nets",     result = "4-0", mvp = "Shaquille O'Neal" },
+            new FinalsRow { season = "2002-03", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "New Jersey Nets", finalistKeyword = "Nets",     result = "4-2", mvp = "Tim Duncan" },
+            new FinalsRow { season = "2003-04", champName = "Detroit Pistons",      champKeyword = "Pistons",   finalistName = "Los Angeles Lakers", finalistKeyword = "Lakers", result = "4-1", mvp = "Chauncey Billups" },
+            new FinalsRow { season = "2004-05", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "Detroit Pistons", finalistKeyword = "Pistons",  result = "4-3", mvp = "Tim Duncan" },
+            new FinalsRow { season = "2005-06", champName = "Miami Heat",           champKeyword = "Heat",      finalistName = "Dallas Mavericks", finalistKeyword = "Mavericks", result = "4-2", mvp = "Dwyane Wade" },
+            new FinalsRow { season = "2006-07", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-0", mvp = "Tony Parker" },
+            new FinalsRow { season = "2007-08", champName = "Boston Celtics",       champKeyword = "Celtics",   finalistName = "Los Angeles Lakers", finalistKeyword = "Lakers",  result = "4-2", mvp = "Paul Pierce" },
+            new FinalsRow { season = "2008-09", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Orlando Magic",  finalistKeyword = "Magic",    result = "4-1", mvp = "Kobe Bryant" },
+            new FinalsRow { season = "2009-10", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Boston Celtics", finalistKeyword = "Celtics",  result = "4-3", mvp = "Kobe Bryant" },
+            new FinalsRow { season = "2010-11", champName = "Dallas Mavericks",     champKeyword = "Mavericks", finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-2", mvp = "Dirk Nowitzki" },
+            new FinalsRow { season = "2011-12", champName = "Miami Heat",           champKeyword = "Heat",      finalistName = "Oklahoma City Thunder", finalistKeyword = "Thunder", result = "4-1", mvp = "LeBron James" },
+            new FinalsRow { season = "2012-13", champName = "Miami Heat",           champKeyword = "Heat",      finalistName = "San Antonio Spurs", finalistKeyword = "Spurs",   result = "4-3", mvp = "LeBron James" },
+            new FinalsRow { season = "2013-14", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-1", mvp = "Kawhi Leonard" },
+            new FinalsRow { season = "2014-15", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-2", mvp = "Andre Iguodala" },
+            new FinalsRow { season = "2015-16", champName = "Cleveland Cavaliers",  champKeyword = "Cavaliers", finalistName = "Golden State Warriors", finalistKeyword = "Warriors", result = "4-3", mvp = "LeBron James" },
+            new FinalsRow { season = "2016-17", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-1", mvp = "Kevin Durant" },
+            new FinalsRow { season = "2017-18", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-0", mvp = "Kevin Durant" },
+            new FinalsRow { season = "2018-19", champName = "Toronto Raptors",      champKeyword = "Raptors",   finalistName = "Golden State Warriors", finalistKeyword = "Warriors", result = "4-2", mvp = "Kawhi Leonard" },
+            new FinalsRow { season = "2019-20", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-2", mvp = "LeBron James" },
+            new FinalsRow { season = "2020-21", champName = "Milwaukee Bucks",      champKeyword = "Bucks",     finalistName = "Phoenix Suns",   finalistKeyword = "Suns",     result = "4-2", mvp = "Giannis Antetokounmpo" },
+            new FinalsRow { season = "2021-22", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Boston Celtics", finalistKeyword = "Celtics",  result = "4-2", mvp = "Stephen Curry" },
+            new FinalsRow { season = "2022-23", champName = "Denver Nuggets",       champKeyword = "Nuggets",   finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-1", mvp = "Nikola Jokic" },
+            new FinalsRow { season = "2023-24", champName = "Boston Celtics",       champKeyword = "Celtics",   finalistName = "Dallas Mavericks", finalistKeyword = "Mavericks", result = "4-1", mvp = "Jaylen Brown" },
+            new FinalsRow { season = "2024-25", champName = "Oklahoma City Thunder", champKeyword = "Thunder",  finalistName = "Indiana Pacers",  finalistKeyword = "Pacers",   result = "4-3", mvp = "Shai Gilgeous-Alexander" },
+        };
+    }
 
     void BuildEquiposTab()
     {
@@ -227,111 +276,367 @@ public class PalmaresController : MonoBehaviour
     {
         _titlesRankingBody.Clear();
 
-        // Test data: simulate team championship counts
-        var testData = new List<(TeamData team, int count)>();
-        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
-        var celtics = _allTeams?.Find(t => t.name.Contains("Celtics"));
+        var finalsData = GetFinalsData();
+        var champCounts = new Dictionary<string, (int count, TeamData team)>();
 
-        if (bulls != null) testData.Add((bulls, 6));
-        if (lakers != null) testData.Add((lakers, 17));
-        if (celtics != null) testData.Add((celtics, 18));
-
-        // Sort by count descending
-        testData = testData.OrderByDescending(t => t.count).ToList();
-
-        if (testData.Count == 0)
+        foreach (var f in finalsData)
         {
-            var noData = new Label();
-            noData.AddToClassList("no-data-cell");
-            noData.text = "Aún no hay campeonatos registrados";
-            _titlesRankingBody.Add(noData);
+            var team = FindTeam(f.champKeyword);
+            string key = team?.name ?? f.champName;
+            if (!champCounts.ContainsKey(key))
+                champCounts[key] = (0, team);
+            var cur = champCounts[key];
+            champCounts[key] = (cur.count + 1, cur.team);
+        }
+
+        var sorted = champCounts.OrderByDescending(kv => kv.Value.count).ToList();
+
+        if (sorted.Count == 0)
+        {
+            var emptyLbl = new Label { text = "Aún no hay campeonatos registrados" };
+            emptyLbl.AddToClassList("no-data-cell");
+            _titlesRankingBody.Add(emptyLbl);
             return;
         }
 
-        for (int i = 0; i < testData.Count; i++)
+        for (int i = 0; i < sorted.Count; i++)
         {
-            var (team, count) = testData[i];
-            _titlesRankingBody.Add(CreateChampRow(i + 1, team, count));
+            var kv = sorted[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label { text = (i + 1).ToString() };
+            rankLbl.AddToClassList("champ-rank");
+            row.Add(rankLbl);
+
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (kv.Value.team != null && _logoSprites32.TryGetValue(kv.Value.team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label { text = kv.Key };
+            nameLbl.AddToClassList("champ-name");
+            row.Add(nameLbl);
+
+            var countLbl = new Label { text = kv.Value.count.ToString() };
+            countLbl.AddToClassList("champ-count");
+            row.Add(countLbl);
+
+            _titlesRankingBody.Add(row);
         }
-    }
-
-    VisualElement CreateChampRow(int rank, TeamData team, int count)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("champ-row");
-
-        var rankLbl = new Label();
-        rankLbl.AddToClassList("champ-rank");
-        rankLbl.text = rank.ToString();
-
-        var logo = new VisualElement();
-        logo.AddToClassList("champ-logo");
-        if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
-            logo.style.backgroundImage = new StyleBackground(sp);
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("champ-name");
-        nameLbl.text = team?.name ?? "???";
-
-        var countLbl = new Label();
-        countLbl.AddToClassList("champ-count");
-        countLbl.text = count.ToString();
-
-        row.Add(rankLbl);
-        row.Add(logo);
-        row.Add(nameLbl);
-        row.Add(countLbl);
-
-        return row;
     }
 
     void BuildFinalsHistory()
     {
         _finalsHistoryBody.Clear();
 
-        // Test data
-        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
-        var celtics = _allTeams?.Find(t => t.name.Contains("Celtics"));
+        var finalsData = GetFinalsData();
+        finalsData.Reverse();
 
-        AddFinalsRow("2024-2025", bulls, lakers, "4-2", "Michael Jordan");
-        AddFinalsRow("2023-2024", lakers, celtics, "4-3", "LeBron James");
+        foreach (var f in finalsData)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("palmares-data-row");
+
+            var seasonLbl = new Label { text = f.season };
+            seasonLbl.AddToClassList("td-season");
+            row.Add(seasonLbl);
+
+            row.Add(CreateCellWithLogo(FindTeam(f.champKeyword), "td-champ", f.champName));
+            row.Add(CreateCellWithLogo(FindTeam(f.finalistKeyword), "td-finalist", f.finalistName));
+
+            var resultLbl = new Label { text = f.result };
+            resultLbl.AddToClassList("td-result");
+            row.Add(resultLbl);
+
+            var mvpLbl = new Label { text = f.mvp };
+            mvpLbl.AddToClassList("td-mvp");
+            row.Add(mvpLbl);
+
+            _finalsHistoryBody.Add(row);
+        }
     }
 
-    void AddFinalsRow(string season, TeamData champ, TeamData finalist, string result, string mvpName)
+    // ══ JUGADORES TAB ════════════════════════════════════
+
+    struct AwardsRow
     {
-        var row = new VisualElement();
-        row.AddToClassList("palmares-data-row");
-
-        // Season
-        var seasonLbl = new Label();
-        seasonLbl.AddToClassList("td-season");
-        seasonLbl.text = season;
-        row.Add(seasonLbl);
-
-        // Champion (cell-with-logo)
-        row.Add(CreateCellWithLogo(champ, "td-champ"));
-
-        // Finalist (cell-with-logo)
-        row.Add(CreateCellWithLogo(finalist, "td-finalist"));
-
-        // Result
-        var resultLbl = new Label();
-        resultLbl.AddToClassList("td-result");
-        resultLbl.text = result;
-        row.Add(resultLbl);
-
-        // MVP
-        var mvpLbl = new Label();
-        mvpLbl.AddToClassList("td-mvp");
-        mvpLbl.text = mvpName;
-        row.Add(mvpLbl);
-
-        _finalsHistoryBody.Add(row);
+        public string season;
+        public string mvp;
+        public string mvpTeamKeyword;
+        public string mvpRating;
+        public string rookie;
+        public string rookieTeamKeyword;
+        public string rookieRating;
     }
 
-    VisualElement CreateCellWithLogo(TeamData team, string cellClass)
+    List<AwardsRow> GetAwardsData()
+    {
+        return new List<AwardsRow>
+        {
+            new AwardsRow { season = "1999-00", mvp = "Shaquille O'Neal", mvpTeamKeyword = "Lakers", mvpRating = "29.7", rookie = "Elton Brand / Steve Francis", rookieTeamKeyword = "", rookieRating = "20.1 / 18.0" },
+            new AwardsRow { season = "2000-01", mvp = "Allen Iverson", mvpTeamKeyword = "76ers", mvpRating = "31.1", rookie = "Mike Miller", rookieTeamKeyword = "Magic", rookieRating = "11.9" },
+            new AwardsRow { season = "2001-02", mvp = "Tim Duncan", mvpTeamKeyword = "Spurs", mvpRating = "25.5", rookie = "Pau Gasol", rookieTeamKeyword = "Grizzlies", rookieRating = "17.6" },
+            new AwardsRow { season = "2002-03", mvp = "Tim Duncan", mvpTeamKeyword = "Spurs", mvpRating = "23.3", rookie = "Amar'e Stoudemire", rookieTeamKeyword = "Suns", rookieRating = "13.5" },
+            new AwardsRow { season = "2003-04", mvp = "Kevin Garnett", mvpTeamKeyword = "Timberwolves", mvpRating = "24.2", rookie = "LeBron James", rookieTeamKeyword = "Cavaliers", rookieRating = "20.9" },
+            new AwardsRow { season = "2004-05", mvp = "Steve Nash", mvpTeamKeyword = "Suns", mvpRating = "15.5", rookie = "Emeka Okafor", rookieTeamKeyword = "Hornets", rookieRating = "15.1" },
+            new AwardsRow { season = "2005-06", mvp = "Steve Nash", mvpTeamKeyword = "Suns", mvpRating = "18.8", rookie = "Chris Paul", rookieTeamKeyword = "Hornets", rookieRating = "16.1" },
+            new AwardsRow { season = "2006-07", mvp = "Dirk Nowitzki", mvpTeamKeyword = "Mavericks", mvpRating = "24.6", rookie = "Brandon Roy", rookieTeamKeyword = "Trail Blazers", rookieRating = "16.8" },
+            new AwardsRow { season = "2007-08", mvp = "Kobe Bryant", mvpTeamKeyword = "Lakers", mvpRating = "28.3", rookie = "Kevin Durant", rookieTeamKeyword = "Thunder", rookieRating = "20.3" },
+            new AwardsRow { season = "2008-09", mvp = "LeBron James", mvpTeamKeyword = "Cavaliers", mvpRating = "28.4", rookie = "Derrick Rose", rookieTeamKeyword = "Bulls", rookieRating = "16.8" },
+            new AwardsRow { season = "2009-10", mvp = "LeBron James", mvpTeamKeyword = "Cavaliers", mvpRating = "29.7", rookie = "Tyreke Evans", rookieTeamKeyword = "Kings", rookieRating = "20.1" },
+            new AwardsRow { season = "2010-11", mvp = "Derrick Rose", mvpTeamKeyword = "Bulls", mvpRating = "25.0", rookie = "Blake Griffin", rookieTeamKeyword = "Clippers", rookieRating = "22.5" },
+            new AwardsRow { season = "2011-12", mvp = "LeBron James", mvpTeamKeyword = "Heat", mvpRating = "27.1", rookie = "Kyrie Irving", rookieTeamKeyword = "Cavaliers", rookieRating = "18.5" },
+            new AwardsRow { season = "2012-13", mvp = "LeBron James", mvpTeamKeyword = "Heat", mvpRating = "26.8", rookie = "Damian Lillard", rookieTeamKeyword = "Trail Blazers", rookieRating = "19.0" },
+            new AwardsRow { season = "2013-14", mvp = "Kevin Durant", mvpTeamKeyword = "Thunder", mvpRating = "32.0", rookie = "Michael Carter-Williams", rookieTeamKeyword = "76ers", rookieRating = "16.7" },
+            new AwardsRow { season = "2014-15", mvp = "Stephen Curry", mvpTeamKeyword = "Warriors", mvpRating = "23.8", rookie = "Andrew Wiggins", rookieTeamKeyword = "Timberwolves", rookieRating = "16.9" },
+            new AwardsRow { season = "2015-16", mvp = "Stephen Curry", mvpTeamKeyword = "Warriors", mvpRating = "30.1", rookie = "Karl-Anthony Towns", rookieTeamKeyword = "Timberwolves", rookieRating = "18.3" },
+            new AwardsRow { season = "2016-17", mvp = "Russell Westbrook", mvpTeamKeyword = "Thunder", mvpRating = "31.6", rookie = "Malcolm Brogdon", rookieTeamKeyword = "Bucks", rookieRating = "10.2" },
+            new AwardsRow { season = "2017-18", mvp = "James Harden", mvpTeamKeyword = "Rockets", mvpRating = "30.4", rookie = "Ben Simmons", rookieTeamKeyword = "76ers", rookieRating = "15.8" },
+            new AwardsRow { season = "2018-19", mvp = "Giannis Antetokounmpo", mvpTeamKeyword = "Bucks", mvpRating = "27.7", rookie = "Luka Doncic", rookieTeamKeyword = "Mavericks", rookieRating = "21.2" },
+            new AwardsRow { season = "2019-20", mvp = "Giannis Antetokounmpo", mvpTeamKeyword = "Bucks", mvpRating = "29.5", rookie = "Ja Morant", rookieTeamKeyword = "Grizzlies", rookieRating = "17.8" },
+            new AwardsRow { season = "2020-21", mvp = "Nikola Jokic", mvpTeamKeyword = "Nuggets", mvpRating = "26.4", rookie = "LaMelo Ball", rookieTeamKeyword = "Hornets", rookieRating = "15.7" },
+            new AwardsRow { season = "2021-22", mvp = "Nikola Jokic", mvpTeamKeyword = "Nuggets", mvpRating = "27.1", rookie = "Scottie Barnes", rookieTeamKeyword = "Raptors", rookieRating = "15.3" },
+            new AwardsRow { season = "2022-23", mvp = "Joel Embiid", mvpTeamKeyword = "76ers", mvpRating = "33.1", rookie = "Paolo Banchero", rookieTeamKeyword = "Magic", rookieRating = "20.0" },
+            new AwardsRow { season = "2023-24", mvp = "Nikola Jokic", mvpTeamKeyword = "Nuggets", mvpRating = "26.4", rookie = "Victor Wembanyama", rookieTeamKeyword = "Spurs", rookieRating = "21.4" },
+            new AwardsRow { season = "2024-25", mvp = "Shai Gilgeous-Alexander", mvpTeamKeyword = "Thunder", mvpRating = "32.7", rookie = "Stephon Castle", rookieTeamKeyword = "Spurs", rookieRating = "14.7" },
+        };
+    }
+
+    void BuildJugadoresTab()
+    {
+        BuildMVPRanking();
+        BuildAwardsHistory();
+    }
+
+    void BuildMVPRanking()
+    {
+        _mvpRankingBody.Clear();
+
+        var awardsData = GetAwardsData();
+        var mvpCounts = new Dictionary<string, (int count, string teamKeyword)>();
+
+        foreach (var a in awardsData)
+        {
+            if (!mvpCounts.ContainsKey(a.mvp))
+                mvpCounts[a.mvp] = (0, a.mvpTeamKeyword);
+            var cur = mvpCounts[a.mvp];
+            mvpCounts[a.mvp] = (cur.count + 1, cur.teamKeyword);
+        }
+
+        var sorted = mvpCounts.OrderByDescending(kv => kv.Value.count).ToList();
+
+        if (sorted.Count == 0)
+        {
+            var emptyLbl = new Label { text = "Aún no hay MVPs registrados" };
+            emptyLbl.AddToClassList("no-data-cell");
+            _mvpRankingBody.Add(emptyLbl);
+            return;
+        }
+
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var kv = sorted[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label { text = (i + 1).ToString() };
+            rankLbl.AddToClassList("champ-rank");
+            row.Add(rankLbl);
+
+            var team = string.IsNullOrEmpty(kv.Value.teamKeyword) ? null : FindTeam(kv.Value.teamKeyword);
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label { text = kv.Key };
+            nameLbl.AddToClassList("champ-name");
+            row.Add(nameLbl);
+
+            var countLbl = new Label { text = kv.Value.count.ToString() };
+            countLbl.AddToClassList("champ-count");
+            row.Add(countLbl);
+
+            _mvpRankingBody.Add(row);
+        }
+    }
+
+    void BuildAwardsHistory()
+    {
+        _awardsHistoryBody.Clear();
+
+        var awardsData = GetAwardsData();
+        awardsData.Reverse();
+
+        foreach (var a in awardsData)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("palmares-data-row");
+
+            var seasonLbl = new Label { text = a.season };
+            seasonLbl.AddToClassList("td-season");
+            row.Add(seasonLbl);
+
+            row.Add(CreatePlayerCell(a.mvp, string.IsNullOrEmpty(a.mvpTeamKeyword) ? null : FindTeam(a.mvpTeamKeyword), "td-mvp"));
+
+            var mvpRatingLbl = new Label { text = a.mvpRating };
+            mvpRatingLbl.AddToClassList("td-rating");
+            row.Add(mvpRatingLbl);
+
+            row.Add(CreatePlayerCell(a.rookie, string.IsNullOrEmpty(a.rookieTeamKeyword) ? null : FindTeam(a.rookieTeamKeyword), "td-rookie"));
+
+            var rookieRatingLbl = new Label { text = a.rookieRating };
+            rookieRatingLbl.AddToClassList("td-rating");
+            row.Add(rookieRatingLbl);
+
+            _awardsHistoryBody.Add(row);
+        }
+    }
+
+    // ══ QUINTETOS TAB ════════════════════════════════════
+
+    struct QuintetRow
+    {
+        public string season;
+        public string pg;  public string pgTeam;
+        public string sg;  public string sgTeam;
+        public string sf;  public string sfTeam;
+        public string pf;  public string pfTeam;
+        public string c;   public string cTeam;
+    }
+
+    List<QuintetRow> GetQuintetData()
+    {
+        return new List<QuintetRow>
+        {
+            new QuintetRow { season = "1999-00", pg = "Jason Kidd", pgTeam = "Suns", sg = "Gary Payton", sgTeam = "Thunder", sf = "Kevin Garnett", sfTeam = "Timberwolves", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
+            new QuintetRow { season = "2000-01", pg = "Allen Iverson", pgTeam = "76ers", sg = "Jason Kidd", sgTeam = "Suns", sf = "Chris Webber", sfTeam = "Kings", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
+            new QuintetRow { season = "2001-02", pg = "Jason Kidd", pgTeam = "Nets", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Tracy McGrady", sfTeam = "Magic", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
+            new QuintetRow { season = "2002-03", pg = "Tracy McGrady", pgTeam = "Magic", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Kevin Garnett", sfTeam = "Timberwolves", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
+            new QuintetRow { season = "2003-04", pg = "Jason Kidd", pgTeam = "Nets", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Kevin Garnett", sfTeam = "Timberwolves", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
+            new QuintetRow { season = "2004-05", pg = "Steve Nash", pgTeam = "Suns", sg = "Allen Iverson", sgTeam = "76ers", sf = "Dirk Nowitzki", sfTeam = "Mavericks", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Heat" },
+            new QuintetRow { season = "2005-06", pg = "Steve Nash", pgTeam = "Suns", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Dirk Nowitzki", pfTeam = "Mavericks", c = "Shaquille O'Neal", cTeam = "Heat" },
+            new QuintetRow { season = "2006-07", pg = "Steve Nash", pgTeam = "Suns", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Dirk Nowitzki", sfTeam = "Mavericks", pf = "Tim Duncan", pfTeam = "Spurs", c = "Amar'e Stoudemire", cTeam = "Suns" },
+            new QuintetRow { season = "2007-08", pg = "Chris Paul", pgTeam = "Hornets", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kevin Garnett", pfTeam = "Celtics", c = "Dwight Howard", cTeam = "Magic" },
+            new QuintetRow { season = "2008-09", pg = "Dwyane Wade", pgTeam = "Heat", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Dirk Nowitzki", pfTeam = "Mavericks", c = "Dwight Howard", cTeam = "Magic" },
+            new QuintetRow { season = "2009-10", pg = "Dwyane Wade", pgTeam = "Heat", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kevin Durant", pfTeam = "Thunder", c = "Dwight Howard", cTeam = "Magic" },
+            new QuintetRow { season = "2010-11", pg = "Derrick Rose", pgTeam = "Bulls", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Dwight Howard", cTeam = "Magic" },
+            new QuintetRow { season = "2011-12", pg = "Chris Paul", pgTeam = "Clippers", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Dwight Howard", cTeam = "Magic" },
+            new QuintetRow { season = "2012-13", pg = "Chris Paul", pgTeam = "Clippers", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Tim Duncan", cTeam = "Spurs" },
+            new QuintetRow { season = "2013-14", pg = "Chris Paul", pgTeam = "Clippers", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Joakim Noah", cTeam = "Bulls" },
+            new QuintetRow { season = "2014-15", pg = "Stephen Curry", pgTeam = "Warriors", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Anthony Davis", pfTeam = "Pelicans", c = "Marc Gasol", cTeam = "Grizzlies" },
+            new QuintetRow { season = "2015-16", pg = "Stephen Curry", pgTeam = "Warriors", sg = "Russell Westbrook", sgTeam = "Thunder", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kawhi Leonard", pfTeam = "Spurs", c = "DeAndre Jordan", cTeam = "Clippers" },
+            new QuintetRow { season = "2016-17", pg = "Russell Westbrook", pgTeam = "Thunder", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kawhi Leonard", pfTeam = "Spurs", c = "Anthony Davis", cTeam = "Pelicans" },
+            new QuintetRow { season = "2017-18", pg = "Damian Lillard", pgTeam = "Trail Blazers", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kevin Durant", pfTeam = "Warriors", c = "Anthony Davis", cTeam = "Pelicans" },
+            new QuintetRow { season = "2018-19", pg = "Stephen Curry", pgTeam = "Warriors", sg = "James Harden", sgTeam = "Rockets", sf = "Giannis Antetokounmpo", sfTeam = "Bucks", pf = "Paul George", pfTeam = "Thunder", c = "Nikola Jokic", cTeam = "Nuggets" },
+            new QuintetRow { season = "2019-20", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Lakers", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Anthony Davis", cTeam = "Lakers" },
+            new QuintetRow { season = "2020-21", pg = "Stephen Curry", pgTeam = "Warriors", sg = "Luka Doncic", sgTeam = "Mavericks", sf = "Kawhi Leonard", sfTeam = "Clippers", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
+            new QuintetRow { season = "2021-22", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "Devin Booker", sgTeam = "Suns", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
+            new QuintetRow { season = "2022-23", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "Shai Gilgeous-Alexander", sgTeam = "Thunder", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Joel Embiid", cTeam = "76ers" },
+            new QuintetRow { season = "2023-24", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "Shai Gilgeous-Alexander", sgTeam = "Thunder", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
+            new QuintetRow { season = "2024-25", pg = "Donovan Mitchell", pgTeam = "Cavaliers", sg = "Shai Gilgeous-Alexander", sgTeam = "Thunder", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
+        };
+    }
+
+    void BuildQuintetosTab()
+    {
+        BuildQuintetAppearances();
+        BuildQuintetHistory();
+    }
+
+    void BuildQuintetAppearances()
+    {
+        _quintetAppearancesBody.Clear();
+
+        var quintetData = GetQuintetData();
+        var appearanceCounts = new Dictionary<string, (int count, string teamKeyword)>();
+
+        foreach (var q in quintetData)
+        {
+            var players = new[] {
+                (q.pg, q.pgTeam), (q.sg, q.sgTeam),
+                (q.sf, q.sfTeam), (q.pf, q.pfTeam), (q.c, q.cTeam)
+            };
+            foreach (var (name, team) in players)
+            {
+                if (!appearanceCounts.ContainsKey(name))
+                    appearanceCounts[name] = (0, team);
+                var cur = appearanceCounts[name];
+                appearanceCounts[name] = (cur.count + 1, cur.teamKeyword);
+            }
+        }
+
+        var sorted = appearanceCounts.OrderByDescending(kv => kv.Value.count).ThenBy(kv => kv.Key).ToList();
+
+        if (sorted.Count == 0)
+        {
+            var emptyLbl = new Label { text = "Aún no hay quintetos registrados" };
+            emptyLbl.AddToClassList("no-data-cell");
+            _quintetAppearancesBody.Add(emptyLbl);
+            return;
+        }
+
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var kv = sorted[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label { text = (i + 1).ToString() };
+            rankLbl.AddToClassList("champ-rank");
+            row.Add(rankLbl);
+
+            var team = string.IsNullOrEmpty(kv.Value.teamKeyword) ? null : FindTeam(kv.Value.teamKeyword);
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label { text = kv.Key };
+            nameLbl.AddToClassList("champ-name");
+            row.Add(nameLbl);
+
+            var countLbl = new Label { text = kv.Value.count.ToString() };
+            countLbl.AddToClassList("champ-count");
+            row.Add(countLbl);
+
+            _quintetAppearancesBody.Add(row);
+        }
+    }
+
+    void BuildQuintetHistory()
+    {
+        _quintetHistoryBody.Clear();
+
+        var quintetData = GetQuintetData();
+        quintetData.Reverse();
+
+        foreach (var q in quintetData)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("palmares-data-row");
+
+            var seasonLbl = new Label { text = q.season };
+            seasonLbl.AddToClassList("td-season");
+            row.Add(seasonLbl);
+
+            row.Add(CreatePlayerCell(q.pg, string.IsNullOrEmpty(q.pgTeam) ? null : FindTeam(q.pgTeam), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.sg, string.IsNullOrEmpty(q.sgTeam) ? null : FindTeam(q.sgTeam), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.sf, string.IsNullOrEmpty(q.sfTeam) ? null : FindTeam(q.sfTeam), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.pf, string.IsNullOrEmpty(q.pfTeam) ? null : FindTeam(q.pfTeam), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.c, string.IsNullOrEmpty(q.cTeam) ? null : FindTeam(q.cTeam), "td-quintet-pos"));
+
+            _quintetHistoryBody.Add(row);
+        }
+    }
+
+    // ══ HELPERS ═══════════════════════════════════════════
+
+    VisualElement CreateCellWithLogo(TeamData team, string cellClass, string fallbackName)
     {
         var cell = new VisualElement();
         cell.AddToClassList("cell-with-logo");
@@ -344,114 +649,10 @@ public class PalmaresController : MonoBehaviour
 
         var nameLbl = new Label();
         nameLbl.AddToClassList(cellClass);
-        nameLbl.text = team?.name ?? "-";
+        nameLbl.text = fallbackName;
         cell.Add(nameLbl);
 
         return cell;
-    }
-
-    // ══ JUGADORES TAB ════════════════════════════════════
-
-    void BuildJugadoresTab()
-    {
-        BuildMVPRanking();
-        BuildAwardsHistory();
-    }
-
-    void BuildMVPRanking()
-    {
-        _mvpRankingBody.Clear();
-
-        // Test data
-        var testMvps = new List<(string name, TeamData team, int count)>();
-        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
-
-        testMvps.Add(("Michael Jordan", bulls, 5));
-        testMvps.Add(("LeBron James", lakers, 4));
-
-        testMvps = testMvps.OrderByDescending(m => m.count).ToList();
-
-        for (int i = 0; i < testMvps.Count; i++)
-        {
-            var (name, team, count) = testMvps[i];
-            var row = new VisualElement();
-            row.AddToClassList("champ-row");
-
-            var rankLbl = new Label();
-            rankLbl.AddToClassList("champ-rank");
-            rankLbl.text = (i + 1).ToString();
-            row.Add(rankLbl);
-
-            var logo = new VisualElement();
-            logo.AddToClassList("champ-logo");
-            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
-                logo.style.backgroundImage = new StyleBackground(sp);
-            row.Add(logo);
-
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("champ-name");
-            nameLbl.text = name;
-            row.Add(nameLbl);
-
-            var countLbl = new Label();
-            countLbl.AddToClassList("champ-count");
-            countLbl.text = count.ToString();
-            row.Add(countLbl);
-
-            _mvpRankingBody.Add(row);
-        }
-
-        if (testMvps.Count == 0)
-        {
-            var noData = new Label();
-            noData.AddToClassList("no-data-cell");
-            noData.text = "Aún no hay MVPs registrados";
-            _mvpRankingBody.Add(noData);
-        }
-    }
-
-    void BuildAwardsHistory()
-    {
-        _awardsHistoryBody.Clear();
-
-        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
-
-        AddAwardsRow("2024-2025", "Michael Jordan", bulls, "29.5", "Magic Johnson", lakers, "12.3");
-        AddAwardsRow("2023-2024", "LeBron James", lakers, "27.8", "Larry Bird", null, "11.2");
-    }
-
-    void AddAwardsRow(string season, string mvpName, TeamData mvpTeam, string mvpRating,
-                      string rookieName, TeamData rookieTeam, string rookieRating)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("palmares-data-row");
-
-        var seasonLbl = new Label();
-        seasonLbl.AddToClassList("td-season");
-        seasonLbl.text = season;
-        row.Add(seasonLbl);
-
-        // MVP cell
-        row.Add(CreatePlayerCell(mvpName, mvpTeam, "td-mvp"));
-
-        // MVP rating
-        var mvpRatingLbl = new Label();
-        mvpRatingLbl.AddToClassList("td-rating");
-        mvpRatingLbl.text = mvpRating;
-        row.Add(mvpRatingLbl);
-
-        // Rookie cell
-        row.Add(CreatePlayerCell(rookieName, rookieTeam, "td-rookie"));
-
-        // Rookie rating
-        var rookieRatingLbl = new Label();
-        rookieRatingLbl.AddToClassList("td-rating");
-        rookieRatingLbl.text = rookieRating;
-        row.Add(rookieRatingLbl);
-
-        _awardsHistoryBody.Add(row);
     }
 
     VisualElement CreatePlayerCell(string playerName, TeamData team, string cellClass)
@@ -473,126 +674,18 @@ public class PalmaresController : MonoBehaviour
         return cell;
     }
 
-    // ══ QUINTETOS TAB ════════════════════════════════════
-
-    void BuildQuintetosTab()
-    {
-        BuildQuintetAppearances();
-        BuildQuintetHistory();
-    }
-
-    void BuildQuintetAppearances()
-    {
-        _quintetAppearancesBody.Clear();
-
-        var testAppearances = new List<(string name, TeamData team, int count)>();
-        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
-
-        testAppearances.Add(("Michael Jordan", bulls, 11));
-        testAppearances.Add(("LeBron James", lakers, 13));
-
-        testAppearances = testAppearances.OrderByDescending(a => a.count).ToList();
-
-        for (int i = 0; i < testAppearances.Count; i++)
-        {
-            var (name, team, count) = testAppearances[i];
-            var row = new VisualElement();
-            row.AddToClassList("champ-row");
-
-            var rankLbl = new Label();
-            rankLbl.AddToClassList("champ-rank");
-            rankLbl.text = (i + 1).ToString();
-            row.Add(rankLbl);
-
-            var logo = new VisualElement();
-            logo.AddToClassList("champ-logo");
-            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
-                logo.style.backgroundImage = new StyleBackground(sp);
-            row.Add(logo);
-
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("champ-name");
-            nameLbl.text = name;
-            row.Add(nameLbl);
-
-            var countLbl = new Label();
-            countLbl.AddToClassList("champ-count");
-            countLbl.text = count.ToString();
-            row.Add(countLbl);
-
-            _quintetAppearancesBody.Add(row);
-        }
-
-        if (testAppearances.Count == 0)
-        {
-            var noData = new Label();
-            noData.AddToClassList("no-data-cell");
-            noData.text = "Aún no hay quintetos registrados";
-            _quintetAppearancesBody.Add(noData);
-        }
-    }
-
-    void BuildQuintetHistory()
-    {
-        _quintetHistoryBody.Clear();
-
-        var bulls = _allTeams?.Find(t => t.name.Contains("Bulls"));
-        var lakers = _allTeams?.Find(t => t.name.Contains("Lakers"));
-        var celtics = _allTeams?.Find(t => t.name.Contains("Celtics"));
-
-        AddQuintetRow("2024-2025",
-            ("Michael Jordan", bulls), ("Magic Johnson", lakers),
-            ("Larry Bird", celtics), ("Tim Duncan", null), ("Shaquille O'Neal", lakers));
-        AddQuintetRow("2023-2024",
-            ("LeBron James", lakers), ("Kobe Bryant", lakers),
-            ("Kevin Durant", null), ("Karl Malone", null), ("Hakeem Olajuwon", null));
-    }
-
-    void AddQuintetRow(string season,
-        (string name, TeamData team) pg, (string name, TeamData team) sg,
-        (string name, TeamData team) sf, (string name, TeamData team) pf,
-        (string name, TeamData team) c)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("palmares-data-row");
-
-        var seasonLbl = new Label();
-        seasonLbl.AddToClassList("td-season");
-        seasonLbl.text = season;
-        row.Add(seasonLbl);
-
-        row.Add(CreatePlayerCell(pg.name, pg.team, "td-quintet-pos"));
-        row.Add(CreatePlayerCell(sg.name, sg.team, "td-quintet-pos"));
-        row.Add(CreatePlayerCell(sf.name, sf.team, "td-quintet-pos"));
-        row.Add(CreatePlayerCell(pf.name, pf.team, "td-quintet-pos"));
-        row.Add(CreatePlayerCell(c.name, c.team, "td-quintet-pos"));
-
-        _quintetHistoryBody.Add(row);
-    }
-
-    // ══ SIDEBAR / MISC ═══════════════════════════════════
-
     void LoadSidebarIcons()
     {
-        var iconMap = new System.Collections.Generic.Dictionary<string, string>
+        var iconMap = new Dictionary<string, string>
         {
-            {"NavDashboardIcon", "inicio"},
-            {"NavRosterIcon", "plantilla"},
-            {"NavCalendarIcon", "calendario"},
-            {"NavStandingsIcon", "clasificacion"},
-            {"NavPalmaresIcon", "palmares"},
-            {"NavResultsIcon", "resultados"},
-            {"NavPlayoffsIcon", "playoff"},
-            {"NavStatsIcon", "estadisticas"},
-            {"NavRecordsIcon", "records"},
-            {"NavMarketIcon", "mercado"},
-            {"NavFinancesIcon", "finanzas"},
-            {"NavSponsorsIcon", "patrocinador"},
-            {"NavTVIcon", "television"},
-            {"NavArenaIcon", "pabellon"},
-            {"NavMessagesIcon", "mensajes"},
-            {"NavConfigIcon", "configuracion"}
+            {"NavDashboardIcon", "inicio"}, {"NavRosterIcon", "plantilla"},
+            {"NavCalendarIcon", "calendario"}, {"NavStandingsIcon", "clasificacion"},
+            {"NavPalmaresIcon", "palmares"}, {"NavResultsIcon", "resultados"},
+            {"NavPlayoffsIcon", "playoff"}, {"NavStatsIcon", "estadisticas"},
+            {"NavRecordsIcon", "records"}, {"NavMarketIcon", "mercado"},
+            {"NavFinancesIcon", "finanzas"}, {"NavSponsorsIcon", "patrocinador"},
+            {"NavTVIcon", "television"}, {"NavArenaIcon", "pabellon"},
+            {"NavMessagesIcon", "mensajes"}, {"NavConfigIcon", "configuracion"}
         };
 
         foreach (var kv in iconMap)
