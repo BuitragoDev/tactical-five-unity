@@ -232,7 +232,7 @@ public class PalmaresController : MonoBehaviour
 
         if (_seasonRecords.Count == 0)
         {
-            _noChampionsText.style.display = DisplayStyle.Flex;
+            AddTestChampionRows();
             return;
         }
 
@@ -243,40 +243,57 @@ public class PalmaresController : MonoBehaviour
             var champion = _allTeams.Find(t => t.id == record.champion_id);
             var seasonStr = GetSeasonString(record.season_id);
 
-            var row = new VisualElement();
-            row.AddToClassList("palmares-row");
-            if (champion != null && champion.id == _myTeam.id)
-                row.AddToClassList("palmares-row--my-team");
-
-            var seasonLbl = new Label();
-            seasonLbl.AddToClassList("palmares-season");
-            seasonLbl.text = seasonStr;
-
-            var trophy = new Label();
-            trophy.AddToClassList("palmares-trophy");
-            trophy.text = "🏆";
-
-            var logoElem = new VisualElement();
-            logoElem.AddToClassList("palmares-team-logo");
-            if (champion != null && _logoSprites.TryGetValue(champion.logo, out var sp))
-                logoElem.style.backgroundImage = new StyleBackground(sp);
-
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("palmares-team-name");
-            nameLbl.text = champion?.name.ToUpper() ?? "???";
-
-            var resultLbl = new Label();
-            resultLbl.AddToClassList("palmares-result");
-            resultLbl.text = record.finals_result;
-
-            row.Add(seasonLbl);
-            row.Add(trophy);
-            row.Add(logoElem);
-            row.Add(nameLbl);
-            row.Add(resultLbl);
-
+            var row = CreateChampionRow(seasonStr, champion, record.finals_result);
             _championsBody.Add(row);
         }
+    }
+
+    void AddTestChampionRows()
+    {
+        _noChampionsText.style.display = DisplayStyle.None;
+
+        var bulls = _allTeams.Find(t => t.name.Contains("Bulls"));
+        var lakers = _allTeams.Find(t => t.name.Contains("Lakers"));
+
+        _championsBody.Add(CreateChampionRow("2024-2025", bulls, "4-2"));
+        _championsBody.Add(CreateChampionRow("2023-2024", lakers, "4-3"));
+    }
+
+    VisualElement CreateChampionRow(string seasonStr, TeamData champion, string result)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("palmares-row");
+        if (champion != null && champion.id == _myTeam.id)
+            row.AddToClassList("palmares-row--my-team");
+
+        var seasonLbl = new Label();
+        seasonLbl.AddToClassList("palmares-season");
+        seasonLbl.text = seasonStr;
+
+        var trophy = new Label();
+        trophy.AddToClassList("palmares-trophy");
+        trophy.text = "🏆";
+
+        var logoElem = new VisualElement();
+        logoElem.AddToClassList("palmares-team-logo");
+        if (champion != null && _logoSprites.TryGetValue(champion.logo, out var sp))
+            logoElem.style.backgroundImage = new StyleBackground(sp);
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("palmares-team-name");
+        nameLbl.text = champion?.name.ToUpper() ?? "???";
+
+        var resultLbl = new Label();
+        resultLbl.AddToClassList("palmares-result");
+        resultLbl.text = result;
+
+        row.Add(seasonLbl);
+        row.Add(trophy);
+        row.Add(logoElem);
+        row.Add(nameLbl);
+        row.Add(resultLbl);
+
+        return row;
     }
 
     void BuildConfChampions()
