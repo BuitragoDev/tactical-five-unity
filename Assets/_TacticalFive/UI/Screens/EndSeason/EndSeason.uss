@@ -167,7 +167,7 @@
 }
 .es-panel-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 15px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -185,7 +185,9 @@
 /* ── PLAYER LIST ── */
 .es-player-scroll {
     flex-direction: column;
-    max-height: 455px;
+    height: 400px;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 .es-player-row {
     flex-direction: row;

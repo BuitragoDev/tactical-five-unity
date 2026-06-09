@@ -120,6 +120,7 @@ public class EndSeasonController : MonoBehaviour
 
     void LoadRetiringPlayers()
     {
+        _retiringList.contentContainer.style.flexDirection = FlexDirection.Column;
         _retiringList.Clear();
         var players = DatabaseManager.Instance.GetRetiringPlayers(_myTeam.id);
         if (players.Count == 0)
@@ -138,6 +139,7 @@ public class EndSeasonController : MonoBehaviour
 
     void LoadExpiringPlayers()
     {
+        _expiringList.contentContainer.style.flexDirection = FlexDirection.Column;
         _expiringList.Clear();
         var players = DatabaseManager.Instance.GetExpiringPlayers();
         if (players.Count == 0)
