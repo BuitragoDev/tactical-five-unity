@@ -40,6 +40,7 @@ public class MatchDayController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        AudioManager.Instance?.PlayMusic("backgroundGameDay");
         CacheReferences();
         LoadData();
         RegisterCallbacks();

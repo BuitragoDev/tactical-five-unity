@@ -57,14 +57,14 @@ public class AudioManager : MonoBehaviour
 
         // Intentar reproducir inmediatamente en Awake, no esperar a Start
         Debug.Log("[AudioManager] Awake — intentando cargar música...");
-        TryPlayMusic("backgroundMusic");
+        TryPlayMusic("backgroundMenu");
     }
 
     void Start()
     {
         Debug.Log("[AudioManager] Start — musicSource.isPlaying=" + musicSource.isPlaying);
         if (!musicSource.isPlaying)
-            PlayMusic("backgroundMusic");
+            PlayMusic("backgroundMenu");
     }
 
     void TryPlayMusic(string clipName)
