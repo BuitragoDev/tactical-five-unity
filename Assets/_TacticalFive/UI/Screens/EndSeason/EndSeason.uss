@@ -152,6 +152,8 @@
 .es-draft-col {
     flex: 1;
     flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
 }
 
 /* ── PANELS ── */
@@ -307,6 +309,7 @@
     padding: 14px 28px;
     -unity-text-align: middle-center;
     border-radius: 4px;
+    flex-shrink: 0;
 }
 .btn-draft:hover {
     background-color: rgb(240, 192, 64);
@@ -336,7 +339,7 @@
 }
 .draft-pick-num {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
     min-width: 36px;
     flex-shrink: 0;
@@ -346,14 +349,14 @@
     align-items: center;
 }
 .draft-team-logo {
-    width: 20px;
-    height: 20px;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
     margin-right: 6px;
 }
 .draft-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
 }
 .draft-player-info {
@@ -364,13 +367,13 @@
 }
 .draft-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     margin-right: 8px;
 }
 .draft-player-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     background-color: rgb(42, 95, 201);
     color: rgb(255, 255, 255);
     padding: 2px 8px;
@@ -379,7 +382,7 @@
 }
 .draft-player-detail {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     margin-right: 8px;
 }
@@ -405,12 +408,12 @@
 }
 .draft-attr-lbl {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
 }
 .draft-attr-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
 }
