@@ -217,7 +217,10 @@ public class PalmaresController : MonoBehaviour
 
     TeamData FindTeam(string keyword)
     {
-        return _allTeams?.Find(t => t.name.Contains(keyword));
+        if (string.IsNullOrEmpty(keyword)) return null;
+        return _allTeams?.Find(t =>
+            t.name.IndexOf(keyword, System.StringComparison.OrdinalIgnoreCase) >= 0 ||
+            string.Equals(t.logo, keyword, System.StringComparison.OrdinalIgnoreCase));
     }
 
     // ══ EQUIPOS TAB ══════════════════════════════════════

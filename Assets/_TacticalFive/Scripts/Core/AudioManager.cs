@@ -69,6 +69,11 @@ public class AudioManager : MonoBehaviour
 
     void TryPlayMusic(string clipName)
     {
+        if (musicSource.isPlaying && musicSource.clip != null && musicSource.clip.name == clipName)
+        {
+            Debug.Log($"[AudioManager] '{clipName}' ya está sonando, no se reinicia.");
+            return;
+        }
         AudioClip clip = Resources.Load<AudioClip>($"Audios/{clipName}");
         if (clip == null)
         {
