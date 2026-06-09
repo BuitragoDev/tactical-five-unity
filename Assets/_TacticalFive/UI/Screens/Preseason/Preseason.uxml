@@ -11,7 +11,7 @@
             <ui:Button name="BtnBack" class="btn-back" text="VOLVER" />
             <ui:VisualElement class="header-title">
                 <ui:Label class="header-title-white" text="PRETEMPORADA" />
-                <ui:Label class="header-title-gold"  text="2025" />
+                <ui:Label name="HeaderYear" class="header-title-gold"  text="" />
                 <ui:Label class="header-title-white" text="· PARTIDOS AMISTOSOS" />
             </ui:VisualElement>
             <ui:Button name="BtnContinue" class="btn-continue" text="CONTINUAR" />
@@ -24,7 +24,7 @@
             <ui:Label class="info-bar-label" text="PARTIDOS ELEGIDOS" />
             <ui:Label name="InfoBarCount" class="info-bar-value" text="0 / 4" />
             <ui:Label class="info-bar-label" text="TEMPORADA" />
-            <ui:Label class="info-bar-value" text="SEPTIEMBRE 2025" />
+                <ui:Label name="InfoBarSeason" class="info-bar-value" text="" />
         </ui:VisualElement>
 
         <!-- ══ CONTENT ══ -->

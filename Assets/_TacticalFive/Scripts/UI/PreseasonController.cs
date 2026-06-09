@@ -11,11 +11,13 @@ public class PreseasonController : MonoBehaviour
     // Header
     private Button _btnBack;
     private Button _btnContinue;
+    private Label _headerYear;
 
     // Info bar
     private VisualElement _infoBarLogo;
     private Label _infoBarTeam;
     private Label _infoBarCount;
+    private Label _infoBarSeason;
 
     // Slots
     private VisualElement _slotsRow;
@@ -74,9 +76,11 @@ public class PreseasonController : MonoBehaviour
     {
         _btnBack = _root.Q<Button>("BtnBack");
         _btnContinue = _root.Q<Button>("BtnContinue");
+        _headerYear = _root.Q<Label>("HeaderYear");
         _infoBarLogo = _root.Q<VisualElement>("InfoBarLogo");
         _infoBarTeam = _root.Q<Label>("InfoBarTeam");
         _infoBarCount = _root.Q<Label>("InfoBarCount");
+        _infoBarSeason = _root.Q<Label>("InfoBarSeason");
         _slotsRow = _root.Q<VisualElement>("SlotsRow");
         _btnHome = _root.Q<Button>("BtnHome");
         _btnAway = _root.Q<Button>("BtnAway");
@@ -100,6 +104,10 @@ public class PreseasonController : MonoBehaviour
         // Inicializar fechas de pretemporada según el año de la temporada activa
         var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         int yearStart = season?.year_start ?? 2025;
+
+        if (_headerYear != null) _headerYear.text = yearStart.ToString();
+        if (_infoBarSeason != null) _infoBarSeason.text = $"SEPTIEMBRE {yearStart}";
+
         _dates = new string[4];
         _datesDb = new string[4];
         for (int i = 0; i < 4; i++)
