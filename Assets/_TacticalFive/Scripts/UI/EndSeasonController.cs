@@ -22,6 +22,7 @@ public class EndSeasonController : MonoBehaviour
     private Button _btnDraft;
     private Button _btnNextSeason;
     private Button _btnRenewAll;
+    private VisualElement _expiringPanel;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -57,6 +58,7 @@ public class EndSeasonController : MonoBehaviour
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnRenewAll = _root.Q<Button>("BtnRenewAll");
+        _expiringPanel = _root.Q<VisualElement>("ExpiringPanel");
     }
 
     void LoadData()
@@ -82,6 +84,10 @@ public class EndSeasonController : MonoBehaviour
             PlayClick();
             _btnDraft.SetEnabled(false);
             _btnDraft.text = "GENERANDO...";
+            DraftGenerator.GenerateDraft(_season, _manager.id);
+            _btnDraft.text = "DRAFT COMPLETADO";
+            _btnRenewAll.SetEnabled(false);
+            if (_expiringPanel != null) _expiringPanel.style.display = DisplayStyle.None;
         });
 
         _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
