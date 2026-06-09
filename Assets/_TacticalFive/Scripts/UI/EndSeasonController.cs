@@ -23,7 +23,7 @@ public class EndSeasonController : MonoBehaviour
     private Button _btnNextSeason;
     private Button _btnRenewAll;
     private VisualElement _expiringPanel;
-    private VisualElement _draftResults;
+    private ScrollView _draftResults;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -60,7 +60,7 @@ public class EndSeasonController : MonoBehaviour
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnRenewAll = _root.Q<Button>("BtnRenewAll");
         _expiringPanel = _root.Q<VisualElement>("ExpiringPanel");
-        _draftResults = _root.Q<VisualElement>("DraftResults");
+        _draftResults = _root.Q<ScrollView>("DraftResults");
     }
 
     void LoadData()
