@@ -51,7 +51,7 @@ public class PlayerAwardsController : MonoBehaviour
 
         var btnEnd = _root.Q<Button>("BtnEndSeason");
         if (btnEnd != null)
-            btnEnd.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.MainMenu));
+            btnEnd.RegisterCallback<ClickEvent>(_ => ScreenManager.Instance.GoTo(GameScreen.EndSeason));
     }
 
     void CacheReferences()

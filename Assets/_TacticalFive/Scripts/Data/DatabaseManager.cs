@@ -282,6 +282,22 @@ public class DatabaseManager : MonoBehaviour
                   .ToList();
     }
 
+    public List<PlayerData> GetRetiringPlayers(int teamId)
+    {
+        return _db.Table<PlayerData>()
+                  .Where(p => p.team_id == teamId && p.contract_years <= 1 && p.age >= 35)
+                  .OrderByDescending(p => p.age)
+                  .ToList();
+    }
+
+    public List<PlayerData> GetExpiringPlayers(int teamId)
+    {
+        return _db.Table<PlayerData>()
+                  .Where(p => p.team_id == teamId && p.contract_years == 1 && p.age < 35)
+                  .OrderByDescending(p => p.salary)
+                  .ToList();
+    }
+
     public void UpdatePlayer(PlayerData player)
     {
         _db.Update(player);

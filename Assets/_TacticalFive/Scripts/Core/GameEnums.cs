@@ -24,7 +24,8 @@ public enum GameScreen
     LoadGame,
     Settings,
     SeasonSummary,
-    PlayerAwards
+    PlayerAwards,
+    EndSeason
 }
 
 public enum GameMode
