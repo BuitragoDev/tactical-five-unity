@@ -73,6 +73,9 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<HistoricalPlayerStatsData>();
         _db.CreateTable<GameAttendanceData>();
         _db.CreateTable<FinalsPlayerStatsData>();
+        _db.CreateTable<FinalsRecord>();
+        _db.CreateTable<AwardsRecord>();
+        _db.CreateTable<QuintetRecord>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -167,6 +170,9 @@ public class DatabaseManager : MonoBehaviour
                 SeedHistoricalPlayerStats();
             }
         }
+
+        if (_db.Table<FinalsRecord>().Count() == 0)
+            SeedPalmaresData();
     }
 
     bool EnsureDb()
@@ -1426,6 +1432,37 @@ public class DatabaseManager : MonoBehaviour
         Debug.Log($"[DB] {stats.Count} estadísticas históricas de jugadores insertadas.");
     }
 
+    void SeedPalmaresData()
+    {
+        foreach (var r in PalmaresSeeder.FinalsData)
+            _db.Insert(r);
+        foreach (var r in PalmaresSeeder.AwardsData)
+            _db.Insert(r);
+        foreach (var r in PalmaresSeeder.QuintetData)
+            _db.Insert(r);
+        Debug.Log($"[DB] {PalmaresSeeder.FinalsData.Count} finales, {PalmaresSeeder.AwardsData.Count} premios, {PalmaresSeeder.QuintetData.Count} quintetos insertados.");
+    }
+
+    // ── PALMARES ────────────────────────────────────────
+
+    public List<FinalsRecord> GetFinalsRecords()
+    {
+        if (!EnsureDb()) return new List<FinalsRecord>();
+        return _db.Table<FinalsRecord>().ToList();
+    }
+
+    public List<AwardsRecord> GetAwardsRecords()
+    {
+        if (!EnsureDb()) return new List<AwardsRecord>();
+        return _db.Table<AwardsRecord>().ToList();
+    }
+
+    public List<QuintetRecord> GetQuintetRecords()
+    {
+        if (!EnsureDb()) return new List<QuintetRecord>();
+        return _db.Table<QuintetRecord>().ToList();
+    }
+
     // ── PLAYER GAME STATS ─────────────────────────────────
 
     public void DeletePlayerGameStatsForGame(int gameId)
@@ -2010,6 +2047,191 @@ public class DatabaseManager : MonoBehaviour
 
             SaveHistoricalPlayerStats(hist);
         }
+    }
+
+    public void SaveSeasonEndRecords(int seasonId, int managerId)
+    {
+        var season = GetActiveSeason(managerId);
+        if (season == null) return;
+        string seasonLabel = $"{season.year_start}-{season.year_end.ToString().Substring(2)}";
+        Debug.Log($"[DB] Saving season-end records for {seasonLabel}...");
+
+        // ── Finals Record ──
+        var finalsGames = _db.Table<GameData>()
+            .Where(g => g.manager_id == managerId
+                     && g.season_id == seasonId
+                     && g.series_label == "playoff-r4-finals"
+                     && g.is_played == 1)
+            .ToList();
+
+        if (finalsGames.Count > 0)
+        {
+            int teamA = finalsGames[0].home_team_id;
+            int teamB = finalsGames[0].away_team_id;
+            var winCount = new Dictionary<int, int>();
+            foreach (var g in finalsGames)
+            {
+                int winner = g.home_score >= g.away_score ? g.home_team_id : g.away_team_id;
+                winCount[winner] = winCount.GetValueOrDefault(winner, 0) + 1;
+            }
+
+            int champId = winCount.OrderByDescending(kv => kv.Value).First().Key;
+            int finalistId = champId == teamA ? teamB : teamA;
+            int champWins = winCount[champId];
+            int finalistWins = winCount.GetValueOrDefault(finalistId, 0);
+
+            var champTeam = GetTeamById(champId);
+            var finalistTeam = GetTeamById(finalistId);
+
+            // Finals MVP: player from champ team with highest total rating in Finals games
+            string finalsMvp = "";
+            var finalsGameIds = finalsGames.Select(g => g.id).ToList();
+            if (finalsGameIds.Count > 0)
+            {
+                var finalsStats = _db.Query<PlayerGameStats>(
+                    "SELECT * FROM player_game_stats WHERE game_id IN (" +
+                    string.Join(",", finalsGameIds) + ")");
+                var champStats = finalsStats.Where(s => s.team_id == champId).ToList();
+                if (champStats.Count > 0)
+                {
+                    var topPlayer = champStats
+                        .GroupBy(s => s.player_id)
+                        .Select(g => new { PlayerId = g.Key, TotalRating = g.Sum(s => s.rating) })
+                        .OrderByDescending(x => x.TotalRating)
+                        .First();
+                    var mvpPlayer = GetPlayerById(topPlayer.PlayerId);
+                    if (mvpPlayer != null)
+                        finalsMvp = $"{mvpPlayer.first_name} {mvpPlayer.last_name}";
+                }
+            }
+
+            _db.Insert(new FinalsRecord
+            {
+                season = seasonLabel,
+                champ_name = champTeam?.name ?? "",
+                champ_keyword = champTeam?.logo ?? "",
+                finalist_name = finalistTeam?.name ?? "",
+                finalist_keyword = finalistTeam?.logo ?? "",
+                result = $"{champWins}-{finalistWins}",
+                mvp = finalsMvp
+            });
+            Debug.Log($"[DB] FinalsRecord saved: {champTeam?.name} {champWins}-{finalistWins} over {finalistTeam?.name}");
+        }
+
+        // ── Season awards & All-NBA quintets (regular season) ──
+        var seasonStats = _db.Query<HistoricalStatsAggregateRow>(
+            @"SELECT ps.player_id,
+                     COUNT(*) AS games,
+                     SUM(ps.points) AS total_points,
+                     SUM(ps.rebounds) AS total_rebounds,
+                     SUM(ps.assists) AS total_assists,
+                     SUM(ps.steals) AS total_steals,
+                     SUM(ps.blocks) AS total_blocks,
+                     SUM(ps.turnovers) AS total_turnovers,
+                     SUM(ps.fgm) AS total_fgm,
+                     SUM(ps.fga) AS total_fga,
+                     SUM(ps.fg3m) AS total_fg3m,
+                     SUM(ps.fg3a) AS total_fg3a,
+                     SUM(ps.ftm) AS total_ftm,
+                     SUM(ps.fta) AS total_fta,
+                     SUM(ps.oreb) AS total_oreb,
+                     SUM(ps.dreb) AS total_dreb,
+                     SUM(ps.double_double) AS total_double_doubles,
+                     SUM(ps.triple_double) AS total_triple_doubles,
+                     CAST(SUM(ps.minutes) AS INTEGER) AS total_minutes,
+                     SUM(ps.rating) AS total_rating
+              FROM player_game_stats ps
+              JOIN games g ON ps.game_id = g.id
+              WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              GROUP BY ps.player_id",
+            seasonId);
+
+        if (seasonStats.Count > 0)
+        {
+            // MVP
+            var mvpCandidates = seasonStats.Where(s => s.games >= 20).ToList();
+            if (mvpCandidates.Count == 0) mvpCandidates = seasonStats;
+            var topMvp = mvpCandidates.OrderByDescending(s => (double)s.total_rating / s.games).First();
+            var mvpPlayer = GetPlayerById(topMvp.player_id);
+            var mvpTeam = mvpPlayer != null ? GetTeamById(mvpPlayer.team_id) : null;
+            string mvpName = mvpPlayer != null ? $"{mvpPlayer.first_name} {mvpPlayer.last_name}" : "";
+            string mvpRatingStr = ((double)topMvp.total_rating / Math.Max(1, topMvp.games)).ToString("F1");
+
+            // Rookie of the Year
+            var rookieCandidates = seasonStats
+                .Where(s =>
+                {
+                    var p = GetPlayerById(s.player_id);
+                    return p != null && p.is_rookie == 1;
+                })
+                .ToList();
+            string rookieName = "", rookieTeamKeyword = "", rookieRatingStr = "";
+            if (rookieCandidates.Count > 0)
+            {
+                var rookiesQualified = rookieCandidates.Where(r => r.games >= 15).ToList();
+                if (rookiesQualified.Count == 0) rookiesQualified = rookieCandidates;
+                var topRookie = rookiesQualified.OrderByDescending(r => (double)r.total_rating / r.games).First();
+                var rookiePlayer = GetPlayerById(topRookie.player_id);
+                var rookieTeam = rookiePlayer != null ? GetTeamById(rookiePlayer.team_id) : null;
+                rookieName = rookiePlayer != null ? $"{rookiePlayer.first_name} {rookiePlayer.last_name}" : "";
+                rookieTeamKeyword = rookieTeam?.logo ?? "";
+                rookieRatingStr = ((double)topRookie.total_rating / Math.Max(1, topRookie.games)).ToString("F1");
+            }
+
+            _db.Insert(new AwardsRecord
+            {
+                season = seasonLabel,
+                mvp = mvpName,
+                mvp_team_keyword = mvpTeam?.logo ?? "",
+                mvp_rating = mvpRatingStr,
+                rookie = rookieName,
+                rookie_team_keyword = rookieTeamKeyword,
+                rookie_rating = rookieRatingStr
+            });
+            Debug.Log($"[DB] AwardsRecord saved: MVP={mvpName}, ROY={rookieName}");
+
+            // All-NBA Quintets
+            string[] positions = { "PG", "SG", "SF", "PF", "C" };
+            var posValues = new Dictionary<string, (string name, string team)>
+            {
+                { "PG", ("", "") }, { "SG", ("", "") }, { "SF", ("", "") },
+                { "PF", ("", "") }, { "C",  ("", "") }
+            };
+
+            foreach (string pos in positions)
+            {
+                var posPlayers = seasonStats
+                    .Where(s =>
+                    {
+                        var p = GetPlayerById(s.player_id);
+                        return p != null && p.position == pos;
+                    })
+                    .ToList();
+                if (posPlayers.Count == 0) continue;
+
+                var qualified = posPlayers.Where(x => x.games >= 20).ToList();
+                if (qualified.Count == 0) qualified = posPlayers;
+                var best = qualified.OrderByDescending(x => (double)x.total_rating / x.games).First();
+                var player = GetPlayerById(best.player_id);
+                var team = player != null ? GetTeamById(player.team_id) : null;
+                string fullName = player != null ? $"{player.first_name} {player.last_name}" : "";
+                string teamKw = team?.logo ?? "";
+                posValues[pos] = (fullName, teamKw);
+            }
+
+            _db.Insert(new QuintetRecord
+            {
+                season = seasonLabel,
+                pg = posValues["PG"].name, pg_team = posValues["PG"].team,
+                sg = posValues["SG"].name, sg_team = posValues["SG"].team,
+                sf = posValues["SF"].name, sf_team = posValues["SF"].team,
+                pf = posValues["PF"].name, pf_team = posValues["PF"].team,
+                c  = posValues["C"].name,  c_team  = posValues["C"].team
+            });
+            Debug.Log($"[DB] QuintetRecord saved for {seasonLabel}");
+        }
+
+        Debug.Log($"[DB] Season-end records complete for {seasonLabel}");
     }
 
     // ── GAME ATTENDANCE ───────────────────────────────────

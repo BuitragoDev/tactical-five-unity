@@ -222,67 +222,24 @@ public class PalmaresController : MonoBehaviour
 
     // ══ EQUIPOS TAB ══════════════════════════════════════
 
-    struct FinalsRow
-    {
-        public string season;
-        public string champName;
-        public string champKeyword;
-        public string finalistName;
-        public string finalistKeyword;
-        public string result;
-        public string mvp;
-    }
-
-    List<FinalsRow> GetFinalsData()
-    {
-        return new List<FinalsRow>
-        {
-            new FinalsRow { season = "1999-00", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Indiana Pacers",  finalistKeyword = "Pacers",   result = "4-2", mvp = "Shaquille O'Neal" },
-            new FinalsRow { season = "2000-01", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Philadelphia 76ers", finalistKeyword = "76ers",  result = "4-1", mvp = "Shaquille O'Neal" },
-            new FinalsRow { season = "2001-02", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "New Jersey Nets", finalistKeyword = "Nets",     result = "4-0", mvp = "Shaquille O'Neal" },
-            new FinalsRow { season = "2002-03", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "New Jersey Nets", finalistKeyword = "Nets",     result = "4-2", mvp = "Tim Duncan" },
-            new FinalsRow { season = "2003-04", champName = "Detroit Pistons",      champKeyword = "Pistons",   finalistName = "Los Angeles Lakers", finalistKeyword = "Lakers", result = "4-1", mvp = "Chauncey Billups" },
-            new FinalsRow { season = "2004-05", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "Detroit Pistons", finalistKeyword = "Pistons",  result = "4-3", mvp = "Tim Duncan" },
-            new FinalsRow { season = "2005-06", champName = "Miami Heat",           champKeyword = "Heat",      finalistName = "Dallas Mavericks", finalistKeyword = "Mavericks", result = "4-2", mvp = "Dwyane Wade" },
-            new FinalsRow { season = "2006-07", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-0", mvp = "Tony Parker" },
-            new FinalsRow { season = "2007-08", champName = "Boston Celtics",       champKeyword = "Celtics",   finalistName = "Los Angeles Lakers", finalistKeyword = "Lakers",  result = "4-2", mvp = "Paul Pierce" },
-            new FinalsRow { season = "2008-09", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Orlando Magic",  finalistKeyword = "Magic",    result = "4-1", mvp = "Kobe Bryant" },
-            new FinalsRow { season = "2009-10", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Boston Celtics", finalistKeyword = "Celtics",  result = "4-3", mvp = "Kobe Bryant" },
-            new FinalsRow { season = "2010-11", champName = "Dallas Mavericks",     champKeyword = "Mavericks", finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-2", mvp = "Dirk Nowitzki" },
-            new FinalsRow { season = "2011-12", champName = "Miami Heat",           champKeyword = "Heat",      finalistName = "Oklahoma City Thunder", finalistKeyword = "Thunder", result = "4-1", mvp = "LeBron James" },
-            new FinalsRow { season = "2012-13", champName = "Miami Heat",           champKeyword = "Heat",      finalistName = "San Antonio Spurs", finalistKeyword = "Spurs",   result = "4-3", mvp = "LeBron James" },
-            new FinalsRow { season = "2013-14", champName = "San Antonio Spurs",    champKeyword = "Spurs",     finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-1", mvp = "Kawhi Leonard" },
-            new FinalsRow { season = "2014-15", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-2", mvp = "Andre Iguodala" },
-            new FinalsRow { season = "2015-16", champName = "Cleveland Cavaliers",  champKeyword = "Cavaliers", finalistName = "Golden State Warriors", finalistKeyword = "Warriors", result = "4-3", mvp = "LeBron James" },
-            new FinalsRow { season = "2016-17", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-1", mvp = "Kevin Durant" },
-            new FinalsRow { season = "2017-18", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Cleveland Cavaliers", finalistKeyword = "Cavaliers", result = "4-0", mvp = "Kevin Durant" },
-            new FinalsRow { season = "2018-19", champName = "Toronto Raptors",      champKeyword = "Raptors",   finalistName = "Golden State Warriors", finalistKeyword = "Warriors", result = "4-2", mvp = "Kawhi Leonard" },
-            new FinalsRow { season = "2019-20", champName = "Los Angeles Lakers",   champKeyword = "Lakers",    finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-2", mvp = "LeBron James" },
-            new FinalsRow { season = "2020-21", champName = "Milwaukee Bucks",      champKeyword = "Bucks",     finalistName = "Phoenix Suns",   finalistKeyword = "Suns",     result = "4-2", mvp = "Giannis Antetokounmpo" },
-            new FinalsRow { season = "2021-22", champName = "Golden State Warriors", champKeyword = "Warriors", finalistName = "Boston Celtics", finalistKeyword = "Celtics",  result = "4-2", mvp = "Stephen Curry" },
-            new FinalsRow { season = "2022-23", champName = "Denver Nuggets",       champKeyword = "Nuggets",   finalistName = "Miami Heat",     finalistKeyword = "Heat",     result = "4-1", mvp = "Nikola Jokic" },
-            new FinalsRow { season = "2023-24", champName = "Boston Celtics",       champKeyword = "Celtics",   finalistName = "Dallas Mavericks", finalistKeyword = "Mavericks", result = "4-1", mvp = "Jaylen Brown" },
-            new FinalsRow { season = "2024-25", champName = "Oklahoma City Thunder", champKeyword = "Thunder",  finalistName = "Indiana Pacers",  finalistKeyword = "Pacers",   result = "4-3", mvp = "Shai Gilgeous-Alexander" },
-        };
-    }
-
     void BuildEquiposTab()
     {
-        BuildTitlesRanking();
-        BuildFinalsHistory();
+        var finalsData = DatabaseManager.Instance.GetFinalsRecords();
+        finalsData.Reverse();
+        BuildTitlesRanking(finalsData);
+        BuildFinalsHistory(finalsData);
     }
 
-    void BuildTitlesRanking()
+    void BuildTitlesRanking(List<FinalsRecord> finalsData)
     {
         _titlesRankingBody.Clear();
 
-        var finalsData = GetFinalsData();
         var champCounts = new Dictionary<string, (int count, TeamData team)>();
 
         foreach (var f in finalsData)
         {
-            var team = FindTeam(f.champKeyword);
-            string key = team?.name ?? f.champName;
+            var team = FindTeam(f.champ_keyword);
+            string key = team?.name ?? f.champ_name;
             if (!champCounts.ContainsKey(key))
                 champCounts[key] = (0, team);
             var cur = champCounts[key];
@@ -327,12 +284,9 @@ public class PalmaresController : MonoBehaviour
         }
     }
 
-    void BuildFinalsHistory()
+    void BuildFinalsHistory(List<FinalsRecord> finalsData)
     {
         _finalsHistoryBody.Clear();
-
-        var finalsData = GetFinalsData();
-        finalsData.Reverse();
 
         foreach (var f in finalsData)
         {
@@ -343,8 +297,8 @@ public class PalmaresController : MonoBehaviour
             seasonLbl.AddToClassList("td-season");
             row.Add(seasonLbl);
 
-            row.Add(CreateCellWithLogo(FindTeam(f.champKeyword), "td-champ", f.champName));
-            row.Add(CreateCellWithLogo(FindTeam(f.finalistKeyword), "td-finalist", f.finalistName));
+            row.Add(CreateCellWithLogo(FindTeam(f.champ_keyword), "td-champ", f.champ_name));
+            row.Add(CreateCellWithLogo(FindTeam(f.finalist_keyword), "td-finalist", f.finalist_name));
 
             var resultLbl = new Label { text = f.result };
             resultLbl.AddToClassList("td-result");
@@ -360,67 +314,24 @@ public class PalmaresController : MonoBehaviour
 
     // ══ JUGADORES TAB ════════════════════════════════════
 
-    struct AwardsRow
-    {
-        public string season;
-        public string mvp;
-        public string mvpTeamKeyword;
-        public string mvpRating;
-        public string rookie;
-        public string rookieTeamKeyword;
-        public string rookieRating;
-    }
-
-    List<AwardsRow> GetAwardsData()
-    {
-        return new List<AwardsRow>
-        {
-            new AwardsRow { season = "1999-00", mvp = "Shaquille O'Neal", mvpTeamKeyword = "Lakers", mvpRating = "29.7", rookie = "Elton Brand / Steve Francis", rookieTeamKeyword = "", rookieRating = "20.1 / 18.0" },
-            new AwardsRow { season = "2000-01", mvp = "Allen Iverson", mvpTeamKeyword = "76ers", mvpRating = "31.1", rookie = "Mike Miller", rookieTeamKeyword = "Magic", rookieRating = "11.9" },
-            new AwardsRow { season = "2001-02", mvp = "Tim Duncan", mvpTeamKeyword = "Spurs", mvpRating = "25.5", rookie = "Pau Gasol", rookieTeamKeyword = "Grizzlies", rookieRating = "17.6" },
-            new AwardsRow { season = "2002-03", mvp = "Tim Duncan", mvpTeamKeyword = "Spurs", mvpRating = "23.3", rookie = "Amar'e Stoudemire", rookieTeamKeyword = "Suns", rookieRating = "13.5" },
-            new AwardsRow { season = "2003-04", mvp = "Kevin Garnett", mvpTeamKeyword = "Timberwolves", mvpRating = "24.2", rookie = "LeBron James", rookieTeamKeyword = "Cavaliers", rookieRating = "20.9" },
-            new AwardsRow { season = "2004-05", mvp = "Steve Nash", mvpTeamKeyword = "Suns", mvpRating = "15.5", rookie = "Emeka Okafor", rookieTeamKeyword = "Hornets", rookieRating = "15.1" },
-            new AwardsRow { season = "2005-06", mvp = "Steve Nash", mvpTeamKeyword = "Suns", mvpRating = "18.8", rookie = "Chris Paul", rookieTeamKeyword = "Hornets", rookieRating = "16.1" },
-            new AwardsRow { season = "2006-07", mvp = "Dirk Nowitzki", mvpTeamKeyword = "Mavericks", mvpRating = "24.6", rookie = "Brandon Roy", rookieTeamKeyword = "Trail Blazers", rookieRating = "16.8" },
-            new AwardsRow { season = "2007-08", mvp = "Kobe Bryant", mvpTeamKeyword = "Lakers", mvpRating = "28.3", rookie = "Kevin Durant", rookieTeamKeyword = "Thunder", rookieRating = "20.3" },
-            new AwardsRow { season = "2008-09", mvp = "LeBron James", mvpTeamKeyword = "Cavaliers", mvpRating = "28.4", rookie = "Derrick Rose", rookieTeamKeyword = "Bulls", rookieRating = "16.8" },
-            new AwardsRow { season = "2009-10", mvp = "LeBron James", mvpTeamKeyword = "Cavaliers", mvpRating = "29.7", rookie = "Tyreke Evans", rookieTeamKeyword = "Kings", rookieRating = "20.1" },
-            new AwardsRow { season = "2010-11", mvp = "Derrick Rose", mvpTeamKeyword = "Bulls", mvpRating = "25.0", rookie = "Blake Griffin", rookieTeamKeyword = "Clippers", rookieRating = "22.5" },
-            new AwardsRow { season = "2011-12", mvp = "LeBron James", mvpTeamKeyword = "Heat", mvpRating = "27.1", rookie = "Kyrie Irving", rookieTeamKeyword = "Cavaliers", rookieRating = "18.5" },
-            new AwardsRow { season = "2012-13", mvp = "LeBron James", mvpTeamKeyword = "Heat", mvpRating = "26.8", rookie = "Damian Lillard", rookieTeamKeyword = "Trail Blazers", rookieRating = "19.0" },
-            new AwardsRow { season = "2013-14", mvp = "Kevin Durant", mvpTeamKeyword = "Thunder", mvpRating = "32.0", rookie = "Michael Carter-Williams", rookieTeamKeyword = "76ers", rookieRating = "16.7" },
-            new AwardsRow { season = "2014-15", mvp = "Stephen Curry", mvpTeamKeyword = "Warriors", mvpRating = "23.8", rookie = "Andrew Wiggins", rookieTeamKeyword = "Timberwolves", rookieRating = "16.9" },
-            new AwardsRow { season = "2015-16", mvp = "Stephen Curry", mvpTeamKeyword = "Warriors", mvpRating = "30.1", rookie = "Karl-Anthony Towns", rookieTeamKeyword = "Timberwolves", rookieRating = "18.3" },
-            new AwardsRow { season = "2016-17", mvp = "Russell Westbrook", mvpTeamKeyword = "Thunder", mvpRating = "31.6", rookie = "Malcolm Brogdon", rookieTeamKeyword = "Bucks", rookieRating = "10.2" },
-            new AwardsRow { season = "2017-18", mvp = "James Harden", mvpTeamKeyword = "Rockets", mvpRating = "30.4", rookie = "Ben Simmons", rookieTeamKeyword = "76ers", rookieRating = "15.8" },
-            new AwardsRow { season = "2018-19", mvp = "Giannis Antetokounmpo", mvpTeamKeyword = "Bucks", mvpRating = "27.7", rookie = "Luka Doncic", rookieTeamKeyword = "Mavericks", rookieRating = "21.2" },
-            new AwardsRow { season = "2019-20", mvp = "Giannis Antetokounmpo", mvpTeamKeyword = "Bucks", mvpRating = "29.5", rookie = "Ja Morant", rookieTeamKeyword = "Grizzlies", rookieRating = "17.8" },
-            new AwardsRow { season = "2020-21", mvp = "Nikola Jokic", mvpTeamKeyword = "Nuggets", mvpRating = "26.4", rookie = "LaMelo Ball", rookieTeamKeyword = "Hornets", rookieRating = "15.7" },
-            new AwardsRow { season = "2021-22", mvp = "Nikola Jokic", mvpTeamKeyword = "Nuggets", mvpRating = "27.1", rookie = "Scottie Barnes", rookieTeamKeyword = "Raptors", rookieRating = "15.3" },
-            new AwardsRow { season = "2022-23", mvp = "Joel Embiid", mvpTeamKeyword = "76ers", mvpRating = "33.1", rookie = "Paolo Banchero", rookieTeamKeyword = "Magic", rookieRating = "20.0" },
-            new AwardsRow { season = "2023-24", mvp = "Nikola Jokic", mvpTeamKeyword = "Nuggets", mvpRating = "26.4", rookie = "Victor Wembanyama", rookieTeamKeyword = "Spurs", rookieRating = "21.4" },
-            new AwardsRow { season = "2024-25", mvp = "Shai Gilgeous-Alexander", mvpTeamKeyword = "Thunder", mvpRating = "32.7", rookie = "Stephon Castle", rookieTeamKeyword = "Spurs", rookieRating = "14.7" },
-        };
-    }
-
     void BuildJugadoresTab()
     {
-        BuildMVPRanking();
-        BuildAwardsHistory();
+        var awardsData = DatabaseManager.Instance.GetAwardsRecords();
+        awardsData.Reverse();
+        BuildMVPRanking(awardsData);
+        BuildAwardsHistory(awardsData);
     }
 
-    void BuildMVPRanking()
+    void BuildMVPRanking(List<AwardsRecord> awardsData)
     {
         _mvpRankingBody.Clear();
 
-        var awardsData = GetAwardsData();
         var mvpCounts = new Dictionary<string, (int count, string teamKeyword)>();
 
         foreach (var a in awardsData)
         {
             if (!mvpCounts.ContainsKey(a.mvp))
-                mvpCounts[a.mvp] = (0, a.mvpTeamKeyword);
+                mvpCounts[a.mvp] = (0, a.mvp_team_keyword);
             var cur = mvpCounts[a.mvp];
             mvpCounts[a.mvp] = (cur.count + 1, cur.teamKeyword);
         }
@@ -464,12 +375,9 @@ public class PalmaresController : MonoBehaviour
         }
     }
 
-    void BuildAwardsHistory()
+    void BuildAwardsHistory(List<AwardsRecord> awardsData)
     {
         _awardsHistoryBody.Clear();
-
-        var awardsData = GetAwardsData();
-        awardsData.Reverse();
 
         foreach (var a in awardsData)
         {
@@ -480,15 +388,15 @@ public class PalmaresController : MonoBehaviour
             seasonLbl.AddToClassList("td-season");
             row.Add(seasonLbl);
 
-            row.Add(CreatePlayerCell(a.mvp, string.IsNullOrEmpty(a.mvpTeamKeyword) ? null : FindTeam(a.mvpTeamKeyword), "td-mvp"));
+            row.Add(CreatePlayerCell(a.mvp, string.IsNullOrEmpty(a.mvp_team_keyword) ? null : FindTeam(a.mvp_team_keyword), "td-mvp"));
 
-            var mvpRatingLbl = new Label { text = a.mvpRating };
+            var mvpRatingLbl = new Label { text = a.mvp_rating };
             mvpRatingLbl.AddToClassList("td-rating");
             row.Add(mvpRatingLbl);
 
-            row.Add(CreatePlayerCell(a.rookie, string.IsNullOrEmpty(a.rookieTeamKeyword) ? null : FindTeam(a.rookieTeamKeyword), "td-rookie"));
+            row.Add(CreatePlayerCell(a.rookie, string.IsNullOrEmpty(a.rookie_team_keyword) ? null : FindTeam(a.rookie_team_keyword), "td-rookie"));
 
-            var rookieRatingLbl = new Label { text = a.rookieRating };
+            var rookieRatingLbl = new Label { text = a.rookie_rating };
             rookieRatingLbl.AddToClassList("td-rating");
             row.Add(rookieRatingLbl);
 
@@ -498,67 +406,25 @@ public class PalmaresController : MonoBehaviour
 
     // ══ QUINTETOS TAB ════════════════════════════════════
 
-    struct QuintetRow
-    {
-        public string season;
-        public string pg;  public string pgTeam;
-        public string sg;  public string sgTeam;
-        public string sf;  public string sfTeam;
-        public string pf;  public string pfTeam;
-        public string c;   public string cTeam;
-    }
-
-    List<QuintetRow> GetQuintetData()
-    {
-        return new List<QuintetRow>
-        {
-            new QuintetRow { season = "1999-00", pg = "Jason Kidd", pgTeam = "Suns", sg = "Gary Payton", sgTeam = "Thunder", sf = "Kevin Garnett", sfTeam = "Timberwolves", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
-            new QuintetRow { season = "2000-01", pg = "Allen Iverson", pgTeam = "76ers", sg = "Jason Kidd", sgTeam = "Suns", sf = "Chris Webber", sfTeam = "Kings", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
-            new QuintetRow { season = "2001-02", pg = "Jason Kidd", pgTeam = "Nets", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Tracy McGrady", sfTeam = "Magic", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
-            new QuintetRow { season = "2002-03", pg = "Tracy McGrady", pgTeam = "Magic", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Kevin Garnett", sfTeam = "Timberwolves", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
-            new QuintetRow { season = "2003-04", pg = "Jason Kidd", pgTeam = "Nets", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Kevin Garnett", sfTeam = "Timberwolves", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Lakers" },
-            new QuintetRow { season = "2004-05", pg = "Steve Nash", pgTeam = "Suns", sg = "Allen Iverson", sgTeam = "76ers", sf = "Dirk Nowitzki", sfTeam = "Mavericks", pf = "Tim Duncan", pfTeam = "Spurs", c = "Shaquille O'Neal", cTeam = "Heat" },
-            new QuintetRow { season = "2005-06", pg = "Steve Nash", pgTeam = "Suns", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Dirk Nowitzki", pfTeam = "Mavericks", c = "Shaquille O'Neal", cTeam = "Heat" },
-            new QuintetRow { season = "2006-07", pg = "Steve Nash", pgTeam = "Suns", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "Dirk Nowitzki", sfTeam = "Mavericks", pf = "Tim Duncan", pfTeam = "Spurs", c = "Amar'e Stoudemire", cTeam = "Suns" },
-            new QuintetRow { season = "2007-08", pg = "Chris Paul", pgTeam = "Hornets", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kevin Garnett", pfTeam = "Celtics", c = "Dwight Howard", cTeam = "Magic" },
-            new QuintetRow { season = "2008-09", pg = "Dwyane Wade", pgTeam = "Heat", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Dirk Nowitzki", pfTeam = "Mavericks", c = "Dwight Howard", cTeam = "Magic" },
-            new QuintetRow { season = "2009-10", pg = "Dwyane Wade", pgTeam = "Heat", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kevin Durant", pfTeam = "Thunder", c = "Dwight Howard", cTeam = "Magic" },
-            new QuintetRow { season = "2010-11", pg = "Derrick Rose", pgTeam = "Bulls", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Dwight Howard", cTeam = "Magic" },
-            new QuintetRow { season = "2011-12", pg = "Chris Paul", pgTeam = "Clippers", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Dwight Howard", cTeam = "Magic" },
-            new QuintetRow { season = "2012-13", pg = "Chris Paul", pgTeam = "Clippers", sg = "Kobe Bryant", sgTeam = "Lakers", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Tim Duncan", cTeam = "Spurs" },
-            new QuintetRow { season = "2013-14", pg = "Chris Paul", pgTeam = "Clippers", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Heat", pf = "Kevin Durant", pfTeam = "Thunder", c = "Joakim Noah", cTeam = "Bulls" },
-            new QuintetRow { season = "2014-15", pg = "Stephen Curry", pgTeam = "Warriors", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Anthony Davis", pfTeam = "Pelicans", c = "Marc Gasol", cTeam = "Grizzlies" },
-            new QuintetRow { season = "2015-16", pg = "Stephen Curry", pgTeam = "Warriors", sg = "Russell Westbrook", sgTeam = "Thunder", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kawhi Leonard", pfTeam = "Spurs", c = "DeAndre Jordan", cTeam = "Clippers" },
-            new QuintetRow { season = "2016-17", pg = "Russell Westbrook", pgTeam = "Thunder", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kawhi Leonard", pfTeam = "Spurs", c = "Anthony Davis", cTeam = "Pelicans" },
-            new QuintetRow { season = "2017-18", pg = "Damian Lillard", pgTeam = "Trail Blazers", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Cavaliers", pf = "Kevin Durant", pfTeam = "Warriors", c = "Anthony Davis", cTeam = "Pelicans" },
-            new QuintetRow { season = "2018-19", pg = "Stephen Curry", pgTeam = "Warriors", sg = "James Harden", sgTeam = "Rockets", sf = "Giannis Antetokounmpo", sfTeam = "Bucks", pf = "Paul George", pfTeam = "Thunder", c = "Nikola Jokic", cTeam = "Nuggets" },
-            new QuintetRow { season = "2019-20", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "James Harden", sgTeam = "Rockets", sf = "LeBron James", sfTeam = "Lakers", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Anthony Davis", cTeam = "Lakers" },
-            new QuintetRow { season = "2020-21", pg = "Stephen Curry", pgTeam = "Warriors", sg = "Luka Doncic", sgTeam = "Mavericks", sf = "Kawhi Leonard", sfTeam = "Clippers", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
-            new QuintetRow { season = "2021-22", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "Devin Booker", sgTeam = "Suns", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
-            new QuintetRow { season = "2022-23", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "Shai Gilgeous-Alexander", sgTeam = "Thunder", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Joel Embiid", cTeam = "76ers" },
-            new QuintetRow { season = "2023-24", pg = "Luka Doncic", pgTeam = "Mavericks", sg = "Shai Gilgeous-Alexander", sgTeam = "Thunder", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
-            new QuintetRow { season = "2024-25", pg = "Donovan Mitchell", pgTeam = "Cavaliers", sg = "Shai Gilgeous-Alexander", sgTeam = "Thunder", sf = "Jayson Tatum", sfTeam = "Celtics", pf = "Giannis Antetokounmpo", pfTeam = "Bucks", c = "Nikola Jokic", cTeam = "Nuggets" },
-        };
-    }
-
     void BuildQuintetosTab()
     {
-        BuildQuintetAppearances();
-        BuildQuintetHistory();
+        var quintetData = DatabaseManager.Instance.GetQuintetRecords();
+        quintetData.Reverse();
+        BuildQuintetAppearances(quintetData);
+        BuildQuintetHistory(quintetData);
     }
 
-    void BuildQuintetAppearances()
+    void BuildQuintetAppearances(List<QuintetRecord> quintetData)
     {
         _quintetAppearancesBody.Clear();
 
-        var quintetData = GetQuintetData();
         var appearanceCounts = new Dictionary<string, (int count, string teamKeyword)>();
 
         foreach (var q in quintetData)
         {
             var players = new[] {
-                (q.pg, q.pgTeam), (q.sg, q.sgTeam),
-                (q.sf, q.sfTeam), (q.pf, q.pfTeam), (q.c, q.cTeam)
+                (q.pg, q.pg_team), (q.sg, q.sg_team),
+                (q.sf, q.sf_team), (q.pf, q.pf_team), (q.c, q.c_team)
             };
             foreach (var (name, team) in players)
             {
@@ -608,12 +474,9 @@ public class PalmaresController : MonoBehaviour
         }
     }
 
-    void BuildQuintetHistory()
+    void BuildQuintetHistory(List<QuintetRecord> quintetData)
     {
         _quintetHistoryBody.Clear();
-
-        var quintetData = GetQuintetData();
-        quintetData.Reverse();
 
         foreach (var q in quintetData)
         {
@@ -624,11 +487,11 @@ public class PalmaresController : MonoBehaviour
             seasonLbl.AddToClassList("td-season");
             row.Add(seasonLbl);
 
-            row.Add(CreatePlayerCell(q.pg, string.IsNullOrEmpty(q.pgTeam) ? null : FindTeam(q.pgTeam), "td-quintet-pos"));
-            row.Add(CreatePlayerCell(q.sg, string.IsNullOrEmpty(q.sgTeam) ? null : FindTeam(q.sgTeam), "td-quintet-pos"));
-            row.Add(CreatePlayerCell(q.sf, string.IsNullOrEmpty(q.sfTeam) ? null : FindTeam(q.sfTeam), "td-quintet-pos"));
-            row.Add(CreatePlayerCell(q.pf, string.IsNullOrEmpty(q.pfTeam) ? null : FindTeam(q.pfTeam), "td-quintet-pos"));
-            row.Add(CreatePlayerCell(q.c, string.IsNullOrEmpty(q.cTeam) ? null : FindTeam(q.cTeam), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.pg, string.IsNullOrEmpty(q.pg_team) ? null : FindTeam(q.pg_team), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.sg, string.IsNullOrEmpty(q.sg_team) ? null : FindTeam(q.sg_team), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.sf, string.IsNullOrEmpty(q.sf_team) ? null : FindTeam(q.sf_team), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.pf, string.IsNullOrEmpty(q.pf_team) ? null : FindTeam(q.pf_team), "td-quintet-pos"));
+            row.Add(CreatePlayerCell(q.c, string.IsNullOrEmpty(q.c_team) ? null : FindTeam(q.c_team), "td-quintet-pos"));
 
             _quintetHistoryBody.Add(row);
         }

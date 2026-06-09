@@ -555,6 +555,7 @@ public class DashboardController : MonoBehaviour
         if (_season.phase == "finished")
         {
             DatabaseManager.Instance.UpdateHistoricalPlayerStatsFromSeason(_season.id, _manager.id);
+            DatabaseManager.Instance.SaveSeasonEndRecords(_season.id, _manager.id);
         }
 
         _season.current_game_day = gameDay;
