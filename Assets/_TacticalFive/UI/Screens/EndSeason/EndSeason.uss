@@ -310,6 +310,7 @@
     -unity-text-align: middle-center;
     border-radius: 4px;
     flex-shrink: 0;
+    margin-bottom: 16px;
 }
 .btn-draft:hover {
     background-color: rgb(240, 192, 64);
@@ -318,8 +319,8 @@
 /* ── DRAFT RESULTS ── */
 .draft-results-container {
     flex-grow: 1;
+    flex-basis: 0;
     min-height: 0;
-    margin-top: 16px;
 }
 .draft-pick {
     flex-direction: column;
