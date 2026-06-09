@@ -101,12 +101,12 @@ public class PalmaresController : MonoBehaviour
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         _manager = DatabaseManager.Instance.GetActiveManager();
+        _allTeams = DatabaseManager.Instance.GetAllTeams();
         if (_manager == null) return;
 
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        _allTeams = DatabaseManager.Instance.GetAllTeams();
-        _seasonRecords = DatabaseManager.Instance.GetAllSeasonRecords(_season.id);
+        _seasonRecords = DatabaseManager.Instance.GetAllSeasonRecords(_season?.id ?? 0);
     }
 
     void RegisterCallbacks()
@@ -229,23 +229,9 @@ public class PalmaresController : MonoBehaviour
     void BuildChampions()
     {
         _championsBody.Clear();
-
-        if (_seasonRecords.Count == 0)
-        {
-            AddTestChampionRows();
-            return;
-        }
-
         _noChampionsText.style.display = DisplayStyle.None;
 
-        foreach (var record in _seasonRecords)
-        {
-            var champion = _allTeams.Find(t => t.id == record.champion_id);
-            var seasonStr = GetSeasonString(record.season_id);
-
-            var row = CreateChampionRow(seasonStr, champion, record.finals_result);
-            _championsBody.Add(row);
-        }
+        AddTestChampionRows();
     }
 
     void AddTestChampionRows()
