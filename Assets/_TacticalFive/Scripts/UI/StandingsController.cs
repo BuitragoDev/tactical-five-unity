@@ -192,20 +192,25 @@ public class StandingsController : MonoBehaviour
         }
 
         // Fill cards
-        FillStatCard(_cardBestAttackLogo, _cardBestAttackTeam, _cardBestAttackValue,
+        FillStatCardWithUnit(_cardBestAttackLogo, _cardBestAttackTeam, _cardBestAttackValue,
             bestAttack, bestAttack != null ? GetAvgPoints(bestAttack) : "-", true);
 
-        FillStatCard(_cardBestDefenseLogo, _cardBestDefenseTeam, _cardBestDefenseValue,
+        FillStatCardWithUnit(_cardBestDefenseLogo, _cardBestDefenseTeam, _cardBestDefenseValue,
             bestDefense, bestDefense != null ? GetAvgPointsAgainst(bestDefense) : "-", true);
 
         FillStatCard(_cardBestStreakLogo, _cardBestStreakTeam, _cardBestStreakValue,
-            bestStreakTeam, bestStreakTeam != null ? $"{bestStreakCount}V" : "-", false);
+            bestStreakTeam, bestStreakTeam != null ? $"{bestStreakCount}V" : "-");
 
         FillStatCard(_cardWorstStreakLogo, _cardWorstStreakTeam, _cardWorstStreakValue,
-            worstStreakTeam, worstStreakTeam != null ? $"{worstStreakCount}D" : "-", false);
+            worstStreakTeam, worstStreakTeam != null ? $"{worstStreakCount}D" : "-");
     }
 
-    void FillStatCard(VisualElement logoElem, Label teamLbl, Label valueLbl, StandingRow row, string valueText, bool showUnit = false)
+    void FillStatCard(VisualElement logoElem, Label teamLbl, Label valueLbl, StandingRow row, string valueText)
+    {
+        FillStatCardWithUnit(logoElem, teamLbl, valueLbl, row, valueText, false);
+    }
+
+    void FillStatCardWithUnit(VisualElement logoElem, Label teamLbl, Label valueLbl, StandingRow row, string valueText, bool showUnit)
     {
         if (row == null)
         {
@@ -235,7 +240,6 @@ public class StandingsController : MonoBehaviour
             rowContainer.style.alignItems = Align.Center;
             rowContainer.style.justifyContent = Justify.Center;
 
-            // Move value label into the container
             valueLbl.RemoveFromHierarchy();
 
             var unitLbl = new Label();
