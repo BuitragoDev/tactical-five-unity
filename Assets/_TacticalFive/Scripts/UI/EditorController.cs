@@ -681,7 +681,7 @@ public class EditorController : MonoBehaviour
         {
             var filtered = new string(evt.newValue.Where(c => char.IsLetter(c) || c == ' ').ToArray());
             if (filtered != evt.newValue)
-                field.value = filtered;
+                field.value = filtered.Length > 0 ? filtered : evt.previousValue;
         });
     }
 
@@ -691,7 +691,7 @@ public class EditorController : MonoBehaviour
         {
             var filtered = new string(evt.newValue.Where(char.IsDigit).ToArray());
             if (filtered != evt.newValue)
-                field.value = filtered;
+                field.value = filtered.Length > 0 ? filtered : evt.previousValue;
         });
     }
 
