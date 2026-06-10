@@ -96,7 +96,7 @@ public class EditorController : MonoBehaviour
         _root.Add(_dropdownOverlay);
 
         _toast = new VisualElement();
-        _toast.AddToClassList("editor-toast");
+        _toast.AddToClassList("editor-modal-overlay");
         _root.Add(_toast);
     }
 
@@ -957,18 +957,34 @@ public class EditorController : MonoBehaviour
     {
         _toast.Clear();
         _toast.style.display = DisplayStyle.Flex;
-        if (isError)
-            _toast.AddToClassList("editor-toast--error");
-        else
-            _toast.RemoveFromClassList("editor-toast--error");
-        var label = new Label(message);
-        label.AddToClassList("editor-toast-label");
-        _toast.Add(label);
+
+        var box = new VisualElement();
+        box.AddToClassList("editor-modal-box");
+        if (isError) box.AddToClassList("editor-modal-box--error");
+        _toast.Add(box);
+
+        var icon = new VisualElement();
+        icon.AddToClassList("editor-modal-icon");
+        var iconName = isError ? "Icons/boton-x" : "Icons/boton-v";
+        var tex = Resources.Load<Texture2D>(iconName);
+        if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
+        box.Add(icon);
+
+        var titleText = isError ? "ERROR" : "GUARDADO";
+        var title = new Label(titleText);
+        title.AddToClassList("editor-modal-title");
+        title.AddToClassList(isError ? "editor-modal-title--error" : "editor-modal-title--success");
+        box.Add(title);
+
+        var text = new Label(message);
+        text.AddToClassList("editor-modal-text");
+        box.Add(text);
+
         _root.schedule.Execute(() =>
         {
             _toast.style.display = DisplayStyle.None;
             _toast.Clear();
-        }).ExecuteLater(4000);
+        }).ExecuteLater(4600);
     }
 
     void PlayClick()
