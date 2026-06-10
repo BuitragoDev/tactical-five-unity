@@ -409,7 +409,6 @@
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
     flex-direction: column;
-    overflow: auto;
 }
 
 .custom-dropdown__item {

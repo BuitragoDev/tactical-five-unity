@@ -798,9 +798,11 @@ public class EditorController : MonoBehaviour
         arrow.AddToClassList("custom-dropdown__arrow");
         trigger.Add(arrow);
 
-        var list = new VisualElement();
+        var list = new ScrollView();
         list.AddToClassList("custom-dropdown__list");
         list.style.display = DisplayStyle.None;
+        list.mode = ScrollViewMode.Vertical;
+        list.verticalScrollingVisibility = ScrollingVisibility.Auto;
 
         var dd = new CustomDropdown
         {
