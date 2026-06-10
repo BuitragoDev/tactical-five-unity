@@ -57,6 +57,11 @@ public class EditorController : MonoBehaviour
     private List<string> _availableLogos = new();
     private List<string> _availableJerseys = new();
 
+    void OnDisable()
+    {
+        DatabaseManager.Instance?.CloseTemplateSession();
+    }
+
     void OnEnable()
     {
         _doc = GetComponent<UIDocument>();
@@ -144,9 +149,8 @@ public class EditorController : MonoBehaviour
     {
         if (DatabaseManager.Instance.Db == null)
         {
-            _allTeams = new List<TeamData>();
-            _allPlayers = new List<PlayerData>();
-            return;
+            DatabaseManager.Instance.EnsureTemplateDb();
+            DatabaseManager.Instance.InitTemplateSession();
         }
 
         _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();

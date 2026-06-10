@@ -12,6 +12,10 @@ public class DatabaseManager : MonoBehaviour
     private SQLiteConnection _db;
     public SQLiteConnection Db => _db;
     private int _activeSaveSlot = 0;
+    private bool _isTemplateSession = false;
+
+    public string TemplateDbPath =>
+        Path.Combine(Application.persistentDataPath, "TacticalFive", "template.db");
 
     public int ActiveSaveSlot => _activeSaveSlot;
 
@@ -47,9 +51,75 @@ public class DatabaseManager : MonoBehaviour
         _db = new SQLiteConnection(DbPath);
         CreateTables();
         RunMigrations();
-        SeedStaticDataIfNeeded();
+
+        if (File.Exists(TemplateDbPath))
+        {
+            CloneFromTemplate();
+            SeedStaticDataIfNeeded();
+        }
+        else
+        {
+            SeedStaticDataIfNeeded();
+        }
 
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
+    }
+
+    public void EnsureTemplateDb()
+    {
+        if (File.Exists(TemplateDbPath)) return;
+
+        var oldDb = _db;
+        _db = new SQLiteConnection(TemplateDbPath);
+        CreateTables();
+        RunMigrations();
+        SeedStaticDataIfNeeded();
+        _db.Close();
+        _db = oldDb;
+        Debug.Log($"[DB] Template database created: {TemplateDbPath}");
+    }
+
+    public void InitTemplateSession()
+    {
+        if (_db != null)
+        {
+            try { _db.Close(); } catch { }
+            _db = null;
+        }
+        _db = new SQLiteConnection(TemplateDbPath);
+        RunMigrations();
+        _isTemplateSession = true;
+        Debug.Log("[DB] Template session started");
+    }
+
+    public void CloseTemplateSession()
+    {
+        if (!_isTemplateSession) return;
+        if (_db != null)
+        {
+            try { _db.Close(); } catch { }
+            _db = null;
+        }
+        _isTemplateSession = false;
+        Debug.Log("[DB] Template session closed");
+    }
+
+    void CloneFromTemplate()
+    {
+        var template = new SQLiteConnection(TemplateDbPath);
+        _db.InsertAll(template.Table<TeamData>().ToList());
+        _db.InsertAll(template.Table<PlayerData>().ToList());
+        _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
+        _db.InsertAll(template.Table<SponsorData>().ToList());
+        _db.InsertAll(template.Table<TvChannelData>().ToList());
+        _db.InsertAll(template.Table<HistoricalRecordData>().ToList());
+        _db.InsertAll(template.Table<TeamRecordData>().ToList());
+        _db.InsertAll(template.Table<HistoricalPlayerStatsData>().ToList());
+        _db.InsertAll(template.Table<FinalsRecord>().ToList());
+        _db.InsertAll(template.Table<AwardsRecord>().ToList());
+        _db.InsertAll(template.Table<QuintetRecord>().ToList());
+        template.Close();
+        Debug.Log("[DB] Static data cloned from template");
     }
 
     void CreateTables()
