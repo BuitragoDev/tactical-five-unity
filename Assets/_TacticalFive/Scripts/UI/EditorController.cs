@@ -142,6 +142,13 @@ public class EditorController : MonoBehaviour
 
     void LoadData()
     {
+        if (DatabaseManager.Instance.Db == null)
+        {
+            int slot = GameSaveManager.FindNextAvailableSlot();
+            GameSaveManager.CleanupOrphanDb(slot);
+            DatabaseManager.Instance.InitSaveSlot(slot);
+        }
+
         _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();
         _allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>().ToList() ?? new List<PlayerData>();
 
@@ -158,7 +165,11 @@ public class EditorController : MonoBehaviour
     {
         RegisterNavButtons();
 
-        _btnAction?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+        var actionBtn = _root.Q<Button>("BtnAction");
+        if (actionBtn != null)
+            actionBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+        else
+            Debug.LogError("[Editor] BtnAction not found in UXML!");
 
         _btnTeams?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SwitchTab("teams"); });
         _btnPlayers?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SwitchTab("players"); });
