@@ -364,16 +364,22 @@ public class EditorController : MonoBehaviour
 
         AddSectionTitle(leftCol, "INFORMACIÓN BÁSICA");
         _teamNameInput = AddInput(leftCol, "Nombre", t.name);
+        SetLettersOnly(_teamNameInput);
         _teamAbbrInput = AddInput(leftCol, "Abreviatura", t.abbreviation);
+        SetLettersOnly(_teamAbbrInput);
         _teamCityInput = AddInput(leftCol, "Ciudad", t.city);
+        SetLettersOnly(_teamCityInput);
         _teamConferenceDropdown = AddDropdown(leftCol, "Conferencia", new[] { "East", "West" }, t.conference);
         _teamDivisionDropdown = AddDropdown(leftCol, "División", new[] { "Atlantic", "Central", "Southeast", "Northwest", "Pacific", "Southwest" }, t.division);
         AddDivider(leftCol);
 
         AddSectionTitle(leftCol, "PABELLÓN");
         _teamArenaInput = AddInput(leftCol, "Nombre", t.arena);
+        SetLettersOnly(_teamArenaInput);
         _teamCapacityInput = AddInput(leftCol, "Capacidad", t.capacity.ToString());
+        SetDigitsOnly(_teamCapacityInput);
         _teamOwnerInput = AddInput(leftCol, "Propietario", t.owner);
+        SetLettersOnly(_teamOwnerInput);
         AddDivider(leftCol);
 
         // ── RIGHT COLUMN ──
@@ -393,6 +399,7 @@ public class EditorController : MonoBehaviour
 
         AddSectionTitle(rightCol, "FINANZAS");
         _teamBudgetInput = AddInput(rightCol, "Presupuesto", t.budget.ToString());
+        SetDigitsOnly(_teamBudgetInput);
         _teamObjectiveDropdown = AddDropdown(rightCol, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
 
         columnsRow.Add(leftCol);
@@ -666,6 +673,26 @@ public class EditorController : MonoBehaviour
         row.Add(field);
         parent.Add(row);
         return field;
+    }
+
+    void SetLettersOnly(TextField field)
+    {
+        field.RegisterValueChangedCallback(evt =>
+        {
+            var filtered = new string(evt.newValue.Where(c => char.IsLetter(c) || c == ' ').ToArray());
+            if (filtered != evt.newValue)
+                field.value = filtered;
+        });
+    }
+
+    void SetDigitsOnly(TextField field)
+    {
+        field.RegisterValueChangedCallback(evt =>
+        {
+            var filtered = new string(evt.newValue.Where(char.IsDigit).ToArray());
+            if (filtered != evt.newValue)
+                field.value = filtered;
+        });
     }
 
     CustomDropdown AddDropdown(VisualElement parent, string labelText, string[] choices, string selected)
