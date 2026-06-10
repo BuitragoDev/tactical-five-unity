@@ -193,10 +193,10 @@ public class StandingsController : MonoBehaviour
 
         // Fill cards
         FillStatCard(_cardBestAttackLogo, _cardBestAttackTeam, _cardBestAttackValue,
-            bestAttack, bestAttack != null ? GetAvgPoints(bestAttack) : "-");
+            bestAttack, bestAttack != null ? GetAvgPoints(bestAttack) + " PTS" : "-");
 
         FillStatCard(_cardBestDefenseLogo, _cardBestDefenseTeam, _cardBestDefenseValue,
-            bestDefense, bestDefense != null ? GetAvgPointsAgainst(bestDefense) : "-");
+            bestDefense, bestDefense != null ? GetAvgPointsAgainst(bestDefense) + " PTS" : "-");
 
         FillStatCard(_cardBestStreakLogo, _cardBestStreakTeam, _cardBestStreakValue,
             bestStreakTeam, bestStreakTeam != null ? $"{bestStreakCount}V" : "-");
