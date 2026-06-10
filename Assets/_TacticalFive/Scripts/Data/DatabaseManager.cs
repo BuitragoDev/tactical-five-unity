@@ -1741,14 +1741,21 @@ public class DatabaseManager : MonoBehaviour
         sponsor.season_id = seasonId;
         _db.Update(sponsor);
 
-        // Update team settings
+        // Update team settings (create if missing)
         var settings = GetTeamSettings(teamId);
-        if (settings != null)
+        if (settings == null)
         {
-            settings.sponsor_id = sponsorId;
-            settings.sponsor_years_remaining = sponsor.contract_years;
-            UpdateTeamSettings(settings);
+            settings = new TeamSettingsData
+            {
+                team_id = teamId,
+                ticket_price = 50,
+                subscription_price = 2100
+            };
+            _db.Insert(settings);
         }
+        settings.sponsor_id = sponsorId;
+        settings.sponsor_years_remaining = sponsor.contract_years;
+        UpdateTeamSettings(settings);
 
         // Add initial income to budget
         var team = GetTeamById(teamId);
@@ -1860,14 +1867,21 @@ public class DatabaseManager : MonoBehaviour
         channel.season_id = seasonId;
         _db.Update(channel);
 
-        // Update team settings
+        // Update team settings (create if missing)
         var settings = GetTeamSettings(teamId);
-        if (settings != null)
+        if (settings == null)
         {
-            settings.tv_channel_id = channelId;
-            settings.tv_years_remaining = channel.contract_years;
-            UpdateTeamSettings(settings);
+            settings = new TeamSettingsData
+            {
+                team_id = teamId,
+                ticket_price = 50,
+                subscription_price = 2100
+            };
+            _db.Insert(settings);
         }
+        settings.tv_channel_id = channelId;
+        settings.tv_years_remaining = channel.contract_years;
+        UpdateTeamSettings(settings);
 
         // Add initial income to budget
         var team = GetTeamById(teamId);
