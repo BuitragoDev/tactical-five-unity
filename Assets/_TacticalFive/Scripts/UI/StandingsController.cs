@@ -193,19 +193,19 @@ public class StandingsController : MonoBehaviour
 
         // Fill cards
         FillStatCard(_cardBestAttackLogo, _cardBestAttackTeam, _cardBestAttackValue,
-            bestAttack, bestAttack != null ? GetAvgPoints(bestAttack) + " PTS" : "-");
+            bestAttack, bestAttack != null ? GetAvgPoints(bestAttack) : "-", true);
 
         FillStatCard(_cardBestDefenseLogo, _cardBestDefenseTeam, _cardBestDefenseValue,
-            bestDefense, bestDefense != null ? GetAvgPointsAgainst(bestDefense) + " PTS" : "-");
+            bestDefense, bestDefense != null ? GetAvgPointsAgainst(bestDefense) : "-", true);
 
         FillStatCard(_cardBestStreakLogo, _cardBestStreakTeam, _cardBestStreakValue,
-            bestStreakTeam, bestStreakTeam != null ? $"{bestStreakCount}V" : "-");
+            bestStreakTeam, bestStreakTeam != null ? $"{bestStreakCount}V" : "-", false);
 
         FillStatCard(_cardWorstStreakLogo, _cardWorstStreakTeam, _cardWorstStreakValue,
-            worstStreakTeam, worstStreakTeam != null ? $"{worstStreakCount}D" : "-");
+            worstStreakTeam, worstStreakTeam != null ? $"{worstStreakCount}D" : "-", false);
     }
 
-    void FillStatCard(VisualElement logoElem, Label teamLbl, Label valueLbl, StandingRow row, string valueText)
+    void FillStatCard(VisualElement logoElem, Label teamLbl, Label valueLbl, StandingRow row, string valueText, bool showUnit = false)
     {
         if (row == null)
         {
@@ -222,6 +222,30 @@ public class StandingsController : MonoBehaviour
                 logoElem.style.backgroundImage = new StyleBackground(sprite);
         }
         valueLbl.text = valueText;
+
+        var parent = valueLbl.parent;
+        var oldRow = parent?.Q<VisualElement>(valueLbl.name + "_row");
+        if (oldRow != null) oldRow.RemoveFromHierarchy();
+
+        if (showUnit)
+        {
+            var rowContainer = new VisualElement();
+            rowContainer.name = valueLbl.name + "_row";
+            rowContainer.style.flexDirection = FlexDirection.Row;
+            rowContainer.style.alignItems = Align.Center;
+            rowContainer.style.justifyContent = Justify.Center;
+
+            // Move value label into the container
+            valueLbl.RemoveFromHierarchy();
+
+            var unitLbl = new Label();
+            unitLbl.AddToClassList("stat-card-unit");
+            unitLbl.text = "PTS";
+
+            rowContainer.Add(valueLbl);
+            rowContainer.Add(unitLbl);
+            parent?.Add(rowContainer);
+        }
     }
 
     string GetAvgPoints(StandingRow row)
