@@ -269,7 +269,7 @@ public class EditorController : MonoBehaviour
         DatabaseManager.Instance.InitTemplateSession();
         LoadData();
         Refresh();
-        Debug.Log("[Editor] Base de datos restablecida a valores de serie.");
+        ShowToast("Base de datos restablecida correctamente");
     }
 
     void SwitchTab(string tab)
