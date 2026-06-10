@@ -98,9 +98,15 @@
     width: 280px;
     flex-shrink: 0;
     flex-direction: column;
+    min-height: 0;
     border-right-width: 1px;
     border-right-color: rgb(42, 51, 71);
     background-color: rgb(17, 24, 34);
+}
+
+.editor-scroll-wrapper {
+    flex-grow: 1;
+    min-height: 0;
 }
 
 .editor-filter-input {
@@ -154,7 +160,8 @@
 .editor-list-item {
     flex-direction: row;
     align-items: center;
-    padding: 14px 14px;
+    min-height: 60px;
+    padding: 0 14px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
     cursor: pointer;
