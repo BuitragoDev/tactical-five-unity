@@ -52,6 +52,26 @@ public class DatabaseManager : MonoBehaviour
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
     }
 
+    public void InitCustomDb(string dbPath)
+    {
+        if (_db != null)
+        {
+            try { _db.Close(); } catch { }
+            _db = null;
+        }
+
+        string dir = Path.GetDirectoryName(dbPath);
+        if (!Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        _db = new SQLiteConnection(dbPath);
+        CreateTables();
+        RunMigrations();
+        SeedStaticDataIfNeeded();
+
+        Debug.Log($"[DB] Base de datos personalizada inicializada: {dbPath}");
+    }
+
     void CreateTables()
     {
         _db.CreateTable<TeamData>();
@@ -300,6 +320,7 @@ public class DatabaseManager : MonoBehaviour
 
     public void UpdatePlayer(PlayerData player)
     {
+        if (!EnsureDb()) return;
         _db.Update(player);
     }
 

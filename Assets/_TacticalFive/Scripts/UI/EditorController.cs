@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 public class EditorController : MonoBehaviour
@@ -144,9 +145,11 @@ public class EditorController : MonoBehaviour
     {
         if (DatabaseManager.Instance.Db == null)
         {
-            int slot = GameSaveManager.FindNextAvailableSlot();
-            GameSaveManager.CleanupOrphanDb(slot);
-            DatabaseManager.Instance.InitSaveSlot(slot);
+            string editorDbPath = Path.Combine(Application.temporaryCachePath, "TacticalFive", "editor_temp.db");
+            string dir = Path.GetDirectoryName(editorDbPath);
+            if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+            if (File.Exists(editorDbPath)) File.Delete(editorDbPath);
+            DatabaseManager.Instance.InitCustomDb(editorDbPath);
         }
 
         _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();
