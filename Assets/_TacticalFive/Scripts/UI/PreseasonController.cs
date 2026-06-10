@@ -103,7 +103,7 @@ public class PreseasonController : MonoBehaviour
 
         // Inicializar fechas de pretemporada según el año de la temporada activa
         var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        int yearStart = season?.year_start ?? 2025;
+        int yearStart = season?.year_start ?? 2026;
 
         if (_headerYear != null) _headerYear.text = yearStart.ToString();
         if (_infoBarSeason != null) _infoBarSeason.text = $"SEPTIEMBRE {yearStart}";
@@ -410,7 +410,7 @@ public class PreseasonController : MonoBehaviour
         // === COMMIT: la partida se crea oficialmente al pulsar Continuar en Preseason ===
         int activeSlot = DatabaseManager.Instance.ActiveSaveSlot;
         var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        string seasonYear = season != null ? $"{season.year_start}-{season.year_end}" : "2025-2026";
+        string seasonYear = season != null ? $"{season.year_start}-{season.year_end}" : "2026-2027";
         GameSaveManager.SaveSlotInfo(new SaveSlotInfo
         {
             slotNumber = activeSlot,

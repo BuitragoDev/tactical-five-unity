@@ -28,7 +28,7 @@
                 <ui:VisualElement class="season-bar-line" />
                 <ui:VisualElement class="season-bar-inner">
                     <ui:VisualElement class="season-dot" />
-                    <ui:Label class="season-label" text="TEMPORADA 2025 · 2026" />
+                    <ui:Label class="season-label" text="TEMPORADA 2026 · 2027" />
                 </ui:VisualElement>
                 <ui:VisualElement class="season-bar-line" />
             </ui:VisualElement>
@@ -151,7 +151,7 @@
                     <ui:Label class="modal-paragraph"
                         text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." />
                     <ui:Label class="modal-copyright"
-                        text="© 2025 Tactical Five  ·  Todos los derechos reservados" />
+                        text="© 2026 Tactical Five  ·  Todos los derechos reservados" />
                 </ui:VisualElement>
                 <ui:Button name="BtnCerrar" class="modal-close" text="CERRAR" />
             </ui:VisualElement>

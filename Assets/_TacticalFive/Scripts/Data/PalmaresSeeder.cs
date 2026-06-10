@@ -58,7 +58,7 @@ public static class PalmaresSeeder
         new FinalsRecord { season = "2021-22", champ_name = "Golden State Warriors", champ_keyword = "Warriors", finalist_name = "Boston Celtics", finalist_keyword = "Celtics",  result = "4-2", mvp = "Stephen Curry" },
         new FinalsRecord { season = "2022-23", champ_name = "Denver Nuggets",       champ_keyword = "Nuggets",   finalist_name = "Miami Heat",     finalist_keyword = "Heat",     result = "4-1", mvp = "Nikola Jokic" },
         new FinalsRecord { season = "2023-24", champ_name = "Boston Celtics",       champ_keyword = "Celtics",   finalist_name = "Dallas Mavericks", finalist_keyword = "Mavericks", result = "4-1", mvp = "Jaylen Brown" },
-        new FinalsRecord { season = "2024-25", champ_name = "Oklahoma City Thunder", champ_keyword = "Thunder",  finalist_name = "Indiana Pacers",  finalist_keyword = "Pacers",   result = "4-3", mvp = "Shai Gilgeous-Alexander" },
+        new FinalsRecord { season = "2025-26", champ_name = "Oklahoma City Thunder", champ_keyword = "Thunder",  finalist_name = "Indiana Pacers",  finalist_keyword = "Pacers",   result = "4-3", mvp = "Shai Gilgeous-Alexander" },
     };
 
     public static List<AwardsRecord> AwardsData => new()
@@ -117,7 +117,7 @@ public static class PalmaresSeeder
         new AwardsRecord { season = "2021-22", mvp = "Nikola Jokic", mvp_team_keyword = "Nuggets", mvp_rating = "27.1", rookie = "Scottie Barnes", rookie_team_keyword = "Raptors", rookie_rating = "15.3" },
         new AwardsRecord { season = "2022-23", mvp = "Joel Embiid", mvp_team_keyword = "76ers", mvp_rating = "33.1", rookie = "Paolo Banchero", rookie_team_keyword = "Magic", rookie_rating = "20.0" },
         new AwardsRecord { season = "2023-24", mvp = "Nikola Jokic", mvp_team_keyword = "Nuggets", mvp_rating = "26.4", rookie = "Victor Wembanyama", rookie_team_keyword = "Spurs", rookie_rating = "21.4" },
-        new AwardsRecord { season = "2024-25", mvp = "Shai Gilgeous-Alexander", mvp_team_keyword = "Thunder", mvp_rating = "32.7", rookie = "Stephon Castle", rookie_team_keyword = "Spurs", rookie_rating = "14.7" },
+        new AwardsRecord { season = "2025-26", mvp = "Shai Gilgeous-Alexander", mvp_team_keyword = "Thunder", mvp_rating = "32.7", rookie = "Stephon Castle", rookie_team_keyword = "Spurs", rookie_rating = "14.7" },
     };
 
     public static List<QuintetRecord> QuintetData => new()
@@ -176,6 +176,6 @@ public static class PalmaresSeeder
         new QuintetRecord { season = "2021-22", pg = "Luka Doncic", pg_team = "Mavericks", sg = "Devin Booker", sg_team = "Suns", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Nikola Jokic", c_team = "Nuggets" },
         new QuintetRecord { season = "2022-23", pg = "Luka Doncic", pg_team = "Mavericks", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Joel Embiid", c_team = "76ers" },
         new QuintetRecord { season = "2023-24", pg = "Luka Doncic", pg_team = "Mavericks", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Nikola Jokic", c_team = "Nuggets" },
-        new QuintetRecord { season = "2024-25", pg = "Donovan Mitchell", pg_team = "Cavaliers", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Nikola Jokic", c_team = "Nuggets" },
+        new QuintetRecord { season = "2025-26", pg = "Donovan Mitchell", pg_team = "Cavaliers", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Nikola Jokic", c_team = "Nuggets" },
     };
 }

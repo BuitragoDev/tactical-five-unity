@@ -492,7 +492,7 @@ public class DatabaseManager : MonoBehaviour
         var lastSeason = _db.Table<SeasonData>()
             .OrderByDescending(s => s.year_start)
             .FirstOrDefault();
-        int yearStart = lastSeason != null ? lastSeason.year_start + 1 : 2025;
+        int yearStart = lastSeason != null ? lastSeason.year_start + 1 : 2026;
 
         var season = new SeasonData
         {
@@ -3072,7 +3072,7 @@ public class DatabaseManager : MonoBehaviour
         }
 
         // 10. Create new season (preseason)
-        int newYearStart = oldSeason != null ? oldSeason.year_start + 1 : 2026;
+        int newYearStart = oldSeason != null ? oldSeason.year_start + 1 : 2027;
         var newSeason = new SeasonData
         {
             year_start = newYearStart,

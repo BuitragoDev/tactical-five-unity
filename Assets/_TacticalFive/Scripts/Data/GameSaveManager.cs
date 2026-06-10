@@ -157,7 +157,7 @@ public static class GameSaveManager
         slot.managerName = manager?.name ?? "Manager";
         slot.teamName = team?.name ?? "Sin equipo";
         slot.teamLogo = team?.logo ?? "";
-        slot.seasonYear = season != null ? $"{season.year_start}-{season.year_end}" : "2025-2026";
+        slot.seasonYear = season != null ? $"{season.year_start}-{season.year_end}" : "2026-2027";
         slot.currentGameDay = season?.current_game_day ?? 0;
         slot.gameMode = manager?.game_mode ?? "manager";
         slot.lastPlayedRealDate = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
