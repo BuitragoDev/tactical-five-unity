@@ -69,7 +69,6 @@ public class EditorController : MonoBehaviour
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
         CacheReferences();
-        LoadSidebarIcons();
         LoadImages();
         LoadData();
         RegisterCallbacks();
@@ -172,21 +171,6 @@ public class EditorController : MonoBehaviour
 
     void RegisterNavButtons()
     {
-        _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
-        _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
-        _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
-        _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
-        _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
-        _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
-        _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Playoffs); });
-        _root.Q<Button>("NavStats")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Stats); });
-        _root.Q<Button>("NavRecords")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Records); });
-        _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Market); });
-        _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Finances); });
-        _root.Q<Button>("NavSponsors")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Sponsors); });
-        _root.Q<Button>("NavTV")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
-        _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
-        _root.Q<Button>("NavSettings")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
     }
 
     void Refresh()
