@@ -544,13 +544,13 @@ public class EditorController : MonoBehaviour
         SetLettersOnly(_playerLName);
         _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
         _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
-        SetDigitsOnly(_playerAge);
+        SetDigitsOnly(_playerAge, 2);
         _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
         SetAbbreviationInput(_playerNat);
         _playerHt = AddInput(leftCol, "Altura (cm)", p.height_cm.ToString());
-        SetDigitsOnly(_playerHt);
+        SetDigitsOnly(_playerHt, 3);
         _playerWt = AddInput(leftCol, "Peso (kg)", p.weight_kg.ToString());
-        SetDigitsOnly(_playerWt);
+        SetDigitsOnly(_playerWt, 3);
 
         var teamChoices = new List<string> { "0 - AGENTE LIBRE" };
         teamChoices.AddRange(_allTeams.Select(t => $"{t.id} - {t.name}"));
@@ -563,7 +563,7 @@ public class EditorController : MonoBehaviour
         _playerSalary = AddInput(leftCol, "Salario", p.salary.ToString());
         SetDigitsOnly(_playerSalary);
         _playerContract = AddInput(leftCol, "Años", p.contract_years.ToString());
-        SetDigitsOnly(_playerContract);
+        SetDigitsOnly(_playerContract, 1);
 
         // ── RIGHT COLUMN ──
         var rightCol = new VisualElement();
@@ -579,29 +579,29 @@ public class EditorController : MonoBehaviour
         rightCol.Add(ovrRow);
 
         _playerPot = AddInput(rightCol, "Potencial", p.potential.ToString());
-        SetDigitsOnly(_playerPot);
+        SetDigitsOnly(_playerPot, 2);
         _playerSpeed = AddInput(rightCol, "Velocidad", p.speed.ToString());
-        SetDigitsOnly(_playerSpeed);
+        SetDigitsOnly(_playerSpeed, 2);
         _playerShooting = AddInput(rightCol, "Tiro", p.shooting.ToString());
-        SetDigitsOnly(_playerShooting);
+        SetDigitsOnly(_playerShooting, 2);
         _player3pt = AddInput(rightCol, "Triple", p.three_point.ToString());
-        SetDigitsOnly(_player3pt);
+        SetDigitsOnly(_player3pt, 2);
         _playerPassing = AddInput(rightCol, "Pase", p.passing.ToString());
-        SetDigitsOnly(_playerPassing);
+        SetDigitsOnly(_playerPassing, 2);
         _playerDribbling = AddInput(rightCol, "Regate", p.dribbling.ToString());
-        SetDigitsOnly(_playerDribbling);
+        SetDigitsOnly(_playerDribbling, 2);
         _playerDefense = AddInput(rightCol, "Defensa", p.defense.ToString());
-        SetDigitsOnly(_playerDefense);
+        SetDigitsOnly(_playerDefense, 2);
         _playerRebounding = AddInput(rightCol, "Rebote", p.rebounding.ToString());
-        SetDigitsOnly(_playerRebounding);
+        SetDigitsOnly(_playerRebounding, 2);
         _playerAthleticism = AddInput(rightCol, "Atletismo", p.athleticism.ToString());
-        SetDigitsOnly(_playerAthleticism);
+        SetDigitsOnly(_playerAthleticism, 2);
         _playerIq = AddInput(rightCol, "IQ", p.iq.ToString());
-        SetDigitsOnly(_playerIq);
+        SetDigitsOnly(_playerIq, 2);
         _playerSteals = AddInput(rightCol, "Robos", p.steals.ToString());
-        SetDigitsOnly(_playerSteals);
+        SetDigitsOnly(_playerSteals, 2);
         _playerBlocks = AddInput(rightCol, "Tapones", p.blocks.ToString());
-        SetDigitsOnly(_playerBlocks);
+        SetDigitsOnly(_playerBlocks, 2);
 
         columnsRow.Add(leftCol);
         columnsRow.Add(rightCol);
@@ -714,7 +714,7 @@ public class EditorController : MonoBehaviour
         });
     }
 
-    void SetDigitsOnly(TextField field)
+    void SetDigitsOnly(TextField field, int maxLength = 0)
     {
         field.RegisterCallback<KeyDownEvent>(evt =>
         {
@@ -728,8 +728,14 @@ public class EditorController : MonoBehaviour
         field.RegisterValueChangedCallback(evt =>
         {
             var filtered = new string(evt.newValue.Where(char.IsDigit).ToArray());
+            if (maxLength > 0 && filtered.Length > maxLength)
+                filtered = filtered.Substring(0, maxLength);
             if (filtered != evt.newValue)
+            {
+                int cursor = field.cursorIndex;
                 field.value = filtered.Length > 0 ? filtered : evt.previousValue;
+                field.cursorIndex = cursor < field.text.Length ? cursor : field.text.Length;
+            }
         });
     }
 
