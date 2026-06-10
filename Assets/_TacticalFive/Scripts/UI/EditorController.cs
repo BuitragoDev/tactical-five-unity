@@ -546,7 +546,7 @@ public class EditorController : MonoBehaviour
         _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
         SetDigitsOnly(_playerAge);
         _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
-        SetLettersOnly(_playerNat);
+        SetAbbreviationInput(_playerNat);
         _playerHt = AddInput(leftCol, "Altura (cm)", p.height_cm.ToString());
         SetDigitsOnly(_playerHt);
         _playerWt = AddInput(leftCol, "Peso (kg)", p.weight_kg.ToString());
