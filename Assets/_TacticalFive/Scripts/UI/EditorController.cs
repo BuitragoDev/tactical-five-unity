@@ -542,20 +542,23 @@ public class EditorController : MonoBehaviour
     // ══════════════════════════════════════
 
     void BuildImagePicker(VisualElement parent, string currentVal, List<string> options,
-        Dictionary<string, Sprite> sprites, ref VisualElement preview, ref VisualElement grid,
+        Dictionary<string, Sprite> sprites, ref VisualElement previewRef, ref VisualElement gridRef,
         System.Action<string> onSelect)
     {
         var row = new VisualElement();
         row.AddToClassList("editor-image-row");
 
-        preview = new VisualElement();
-        preview.AddToClassList("editor-image-preview");
+        previewRef = new VisualElement();
+        previewRef.AddToClassList("editor-image-preview");
         if (!string.IsNullOrEmpty(currentVal) && sprites.TryGetValue(currentVal, out var ps))
-            preview.style.backgroundImage = new StyleBackground(ps);
-        row.Add(preview);
+            previewRef.style.backgroundImage = new StyleBackground(ps);
+        row.Add(previewRef);
 
-        grid = new VisualElement();
-        grid.AddToClassList("editor-image-grid");
+        gridRef = new VisualElement();
+        gridRef.AddToClassList("editor-image-grid");
+
+        var localGrid = gridRef;
+        var localPreview = previewRef;
 
         foreach (var img in options)
         {
@@ -569,16 +572,16 @@ public class EditorController : MonoBehaviour
             var captured = img;
             opt.RegisterCallback<ClickEvent>(_ =>
             {
-                foreach (var c in grid.Children())
+                foreach (var c in localGrid.Children())
                     c.RemoveFromClassList("editor-image-option--selected");
                 opt.AddToClassList("editor-image-option--selected");
                 if (sprites.TryGetValue(captured, out var sel))
-                    preview.style.backgroundImage = new StyleBackground(sel);
+                    localPreview.style.backgroundImage = new StyleBackground(sel);
                 onSelect?.Invoke(captured);
             });
-            grid.Add(opt);
+            localGrid.Add(opt);
         }
-        row.Add(grid);
+        row.Add(localGrid);
         parent.Add(row);
     }
 
