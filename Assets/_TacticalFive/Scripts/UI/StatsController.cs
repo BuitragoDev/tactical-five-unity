@@ -60,6 +60,8 @@ public class StatsController : MonoBehaviour
     private string _currentMode = "season";
     private string _currentDisplay = "totals";
 
+    private static readonly System.Globalization.CultureInfo _spanishCI = new("es-ES");
+
     private List<Button> _statTabs = new();
     private List<Button> _filterBtns = new();
     private List<Button> _modeBtns = new();
@@ -801,7 +803,7 @@ public class StatsController : MonoBehaviour
 
             var gpLbl = new Label();
             gpLbl.AddToClassList("col-stat");
-            gpLbl.text = x.gp.ToString();
+            gpLbl.text = x.gp.ToString("N0", _spanishCI);
 
             // Helper to create a stat cell with optional bold + leader
             Label MakeCell(string value, bool isActiveStat, bool isLeader)
@@ -824,101 +826,101 @@ public class StatsController : MonoBehaviour
             switch (stat)
             {
                 case "puntos":
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(x.fgPct.ToString("F1"), false, false));
-                    row.Add(MakeCell(x.fg3Pct.ToString("F1"), false, false));
-                    row.Add(MakeCell(x.ftPct.ToString("F1"), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", _spanishCI), false, false));
+                    row.Add(MakeCell(x.fg3Pct.ToString("N1", _spanishCI), false, false));
+                    row.Add(MakeCell(x.ftPct.ToString("N1", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "rebotes":
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell("—", false, false)); // ROF not tracked
                     row.Add(MakeCell("—", false, false)); // RDF not tracked
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "asistencias":
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("F1") : x.totalTov.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("N1", _spanishCI) : x.totalTov.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "robos":
-                    row.Add(MakeCell(useAverages ? x.avgStl.ToString("F1") : x.totalStl.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgStl.ToString("N1", _spanishCI) : x.totalStl.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "tapones":
-                    row.Add(MakeCell(useAverages ? x.avgBlk.ToString("F1") : x.totalBlk.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgBlk.ToString("N1", _spanishCI) : x.totalBlk.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pcttc":
-                    row.Add(MakeCell(x.fgPct.ToString("F1"), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell($"{x.totalFgm}/{x.totalFga}", false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pct3p":
-                    row.Add(MakeCell(x.fg3Pct.ToString("F1"), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.fg3Pct.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell($"{x.totalFg3m}/{x.totalFg3a}", false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pcttl":
-                    row.Add(MakeCell(x.ftPct.ToString("F1"), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
+                    row.Add(MakeCell(x.ftPct.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell($"{x.totalFtm}/{x.totalFta}", false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "val":
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(x.fgPct.ToString("F1"), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", _spanishCI), false, false));
                     break;
                 case "perdidas":
-                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("F1") : x.totalTov.ToString(), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("N1", _spanishCI) : x.totalTov.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "minutos":
-                    row.Add(MakeCell(useAverages ? x.avgMin.ToString("F1") : x.totalMin.ToString("F0"), true, i == 0));
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("F1") : x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("F1") : x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("F1") : x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("F1") : x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgMin.ToString("N1", _spanishCI) : x.totalMin.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "dd":
-                    row.Add(MakeCell(x.totalDd.ToString(), true, i == 0));
-                    row.Add(MakeCell(x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(x.totalDd.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "td":
-                    row.Add(MakeCell(x.totalTd.ToString(), true, i == 0));
-                    row.Add(MakeCell(x.totalPts.ToString(), false, false));
-                    row.Add(MakeCell(x.totalReb.ToString(), false, false));
-                    row.Add(MakeCell(x.totalAst.ToString(), false, false));
-                    row.Add(MakeCell(x.totalVal.ToString(), false, false));
+                    row.Add(MakeCell(x.totalTd.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
             }
 
