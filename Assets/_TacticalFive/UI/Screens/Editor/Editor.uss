@@ -173,7 +173,7 @@
 
 .editor-list-item-sub {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(85, 102, 119);
     -unity-text-align: middle-right;
     margin-left: 8px;
@@ -398,9 +398,6 @@
 
 .custom-dropdown__list {
     position: absolute;
-    top: 38px;
-    left: 0;
-    right: 0;
     background-color: rgb(28, 33, 48);
     border-width: 1px;
     border-color: rgb(42, 51, 71);

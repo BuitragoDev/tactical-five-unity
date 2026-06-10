@@ -798,11 +798,9 @@ public class EditorController : MonoBehaviour
         arrow.AddToClassList("custom-dropdown__arrow");
         trigger.Add(arrow);
 
-        var list = new ScrollView();
+        var list = new VisualElement();
         list.AddToClassList("custom-dropdown__list");
         list.style.display = DisplayStyle.None;
-        list.mode = ScrollViewMode.Vertical;
-        list.verticalScrollingVisibility = ScrollingVisibility.Auto;
 
         var dd = new CustomDropdown
         {
@@ -862,13 +860,26 @@ public class EditorController : MonoBehaviour
 
         var triggerBounds = dd.Trigger.worldBound;
         list.style.position = Position.Absolute;
-        list.style.left = triggerBounds.xMin;
-        list.style.top = triggerBounds.yMax;
-        list.style.width = triggerBounds.width;
+
+        // Temporarily show the list off-screen to let layout compute its size
+        list.style.left = -9999;
+        list.style.top = -9999;
         list.style.display = DisplayStyle.Flex;
 
-        float spaceBelow = _root.worldBound.height - triggerBounds.yMax;
-        list.style.maxHeight = Mathf.Max(spaceBelow, 80);
+        _root.schedule.Execute(() =>
+        {
+            float listHeight = list.resolvedStyle.height;
+            float top = triggerBounds.yCenter - listHeight / 2f;
+            if (top < 0) top = 0;
+            if (top + listHeight > _root.worldBound.height)
+                top = _root.worldBound.height - listHeight;
+            float left = triggerBounds.xMax + 4;
+            if (left + list.resolvedStyle.width > _root.worldBound.width)
+                left = triggerBounds.xMin - list.resolvedStyle.width - 4;
+            if (left < 0) left = 0;
+            list.style.left = left;
+            list.style.top = top;
+        }).ExecuteLater(30);
 
         _root.RegisterCallbackOnce<PointerDownEvent>(OnPointerDownAnywhere);
     }
