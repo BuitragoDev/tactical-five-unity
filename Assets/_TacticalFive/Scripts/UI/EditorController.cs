@@ -677,6 +677,15 @@ public class EditorController : MonoBehaviour
 
     void SetLettersOnly(TextField field)
     {
+        field.RegisterCallback<KeyDownEvent>(evt =>
+        {
+            if (evt.character == '\0' || char.IsControl(evt.character)) return;
+            if (!char.IsLetter(evt.character) && evt.character != ' ')
+            {
+                evt.StopPropagation();
+                evt.PreventDefault();
+            }
+        }, TrickleDown.TrickleDown);
         field.RegisterValueChangedCallback(evt =>
         {
             var filtered = new string(evt.newValue.Where(c => char.IsLetter(c) || c == ' ').ToArray());
@@ -687,6 +696,15 @@ public class EditorController : MonoBehaviour
 
     void SetDigitsOnly(TextField field)
     {
+        field.RegisterCallback<KeyDownEvent>(evt =>
+        {
+            if (evt.character == '\0' || char.IsControl(evt.character)) return;
+            if (!char.IsDigit(evt.character))
+            {
+                evt.StopPropagation();
+                evt.PreventDefault();
+            }
+        }, TrickleDown.TrickleDown);
         field.RegisterValueChangedCallback(evt =>
         {
             var filtered = new string(evt.newValue.Where(char.IsDigit).ToArray());
