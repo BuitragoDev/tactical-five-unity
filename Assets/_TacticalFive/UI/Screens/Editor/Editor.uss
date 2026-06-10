@@ -99,6 +99,7 @@
     flex-shrink: 0;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
     border-right-width: 1px;
     border-right-color: rgb(42, 51, 71);
     background-color: rgb(17, 24, 34);
