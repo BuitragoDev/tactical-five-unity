@@ -366,7 +366,7 @@ public class EditorController : MonoBehaviour
         _teamNameInput = AddInput(leftCol, "Nombre", t.name);
         SetLettersOnly(_teamNameInput);
         _teamAbbrInput = AddInput(leftCol, "Abreviatura", t.abbreviation);
-        SetLettersOnly(_teamAbbrInput);
+        SetAbbreviationInput(_teamAbbrInput);
         _teamCityInput = AddInput(leftCol, "Ciudad", t.city);
         SetLettersOnly(_teamCityInput);
         _teamConferenceDropdown = AddDropdown(leftCol, "Conferencia", new[] { "East", "West" }, t.conference);
@@ -730,6 +730,31 @@ public class EditorController : MonoBehaviour
             var filtered = new string(evt.newValue.Where(char.IsDigit).ToArray());
             if (filtered != evt.newValue)
                 field.value = filtered.Length > 0 ? filtered : evt.previousValue;
+        });
+    }
+
+    void SetAbbreviationInput(TextField field)
+    {
+        field.RegisterCallback<KeyDownEvent>(evt =>
+        {
+            if (evt.character == '\0' || char.IsControl(evt.character)) return;
+            if (!char.IsLetter(evt.character))
+            {
+                evt.StopPropagation();
+                evt.PreventDefault();
+            }
+        }, TrickleDown.TrickleDown);
+        field.RegisterValueChangedCallback(evt =>
+        {
+            var upper = evt.newValue.ToUpper();
+            var filtered = new string(upper.Where(char.IsLetter).ToArray());
+            if (filtered.Length > 3) filtered = filtered.Substring(0, 3);
+            if (filtered != evt.newValue)
+            {
+                int cursor = field.cursorIndex;
+                field.value = filtered.Length > 0 ? filtered : evt.previousValue;
+                field.cursorIndex = Math.Min(cursor, field.text.Length);
+            }
         });
     }
 
