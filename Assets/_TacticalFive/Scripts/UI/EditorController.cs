@@ -869,7 +869,7 @@ public class EditorController : MonoBehaviour
         _root.schedule.Execute(() =>
         {
             float listHeight = list.resolvedStyle.height;
-            float top = triggerBounds.yCenter - listHeight / 2f;
+            float top = (triggerBounds.yMin + triggerBounds.yMax) / 2f - listHeight / 2f;
             if (top < 0) top = 0;
             if (top + listHeight > _root.worldBound.height)
                 top = _root.worldBound.height - listHeight;
