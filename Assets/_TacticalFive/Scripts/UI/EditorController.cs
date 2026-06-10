@@ -61,6 +61,7 @@ public class EditorController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites = new();
     private VisualElement _dropdownOverlay;
     private CustomDropdown _openDropdown;
+    private VisualElement _toast;
 
     void OnDisable()
     {
@@ -93,6 +94,10 @@ public class EditorController : MonoBehaviour
         _dropdownOverlay.style.bottom = 0;
         _dropdownOverlay.pickingMode = PickingMode.Ignore;
         _root.Add(_dropdownOverlay);
+
+        _toast = new VisualElement();
+        _toast.AddToClassList("editor-toast");
+        _root.Add(_toast);
     }
 
     void CacheReferences()
@@ -457,7 +462,7 @@ public class EditorController : MonoBehaviour
         t.objective = _teamObjectiveDropdown.Value;
 
         DatabaseManager.Instance.UpdateTeam(t);
-        Debug.Log($"[Editor] Equipo guardado: {t.name}");
+        ShowToast("Equipo guardado correctamente");
     }
 
     // ══════════════════════════════════════
@@ -656,7 +661,7 @@ public class EditorController : MonoBehaviour
         int.TryParse(_playerContract.value, out int yrs); p.contract_years = yrs;
 
         DatabaseManager.Instance.UpdatePlayer(p);
-        Debug.Log($"[Editor] Jugador guardado: {p.first_name} {p.last_name}");
+        ShowToast("Jugador guardado correctamente");
         BuildPlayerList();
     }
 
@@ -946,6 +951,24 @@ public class EditorController : MonoBehaviour
         if (!string.IsNullOrEmpty(name)) btn.name = name;
         btn.RegisterCallback<ClickEvent>(_ => { PlayClick(); action(); });
         parent.Add(btn);
+    }
+
+    void ShowToast(string message, bool isError = false)
+    {
+        _toast.Clear();
+        _toast.style.display = DisplayStyle.Flex;
+        if (isError)
+            _toast.AddToClassList("editor-toast--error");
+        else
+            _toast.RemoveFromClassList("editor-toast--error");
+        var label = new Label(message);
+        label.AddToClassList("editor-toast-label");
+        _toast.Add(label);
+        _root.schedule.Execute(() =>
+        {
+            _toast.style.display = DisplayStyle.None;
+            _toast.Clear();
+        }).ExecuteLater(4000);
     }
 
     void PlayClick()

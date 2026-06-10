@@ -165,7 +165,7 @@
 
 .editor-list-item-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-left;
     flex-grow: 1;
@@ -239,6 +239,7 @@
     border-color: rgb(42, 51, 71);
     padding: 12px 10px;
     flex-grow: 1;
+    min-width: 300px;
     max-width: 300px;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
@@ -293,13 +294,13 @@
     border-width: 0;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
-    margin-top: 12px;
+    margin: 8px 16px;
     align-self: flex-start;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    min-width: 100%;
+    min-width: 98%;
     min-height: 50px;
 }
 
@@ -414,7 +415,7 @@
     color: rgb(208, 216, 232);
     background-color: rgb(28, 33, 48);
     border-width: 0;
-    padding: 8px 16px;
+    padding: 4px 16px;
     -unity-text-align: middle-left;
     cursor: pointer;
 }
@@ -443,6 +444,39 @@
 
 .custom-filter-dropdown .custom-dropdown__list {
     top: 38px;
+}
+
+/* ══ TOAST ══ */
+
+.editor-toast {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    right: 0;
+    background-color: rgb(24, 118, 63);
+    padding: 12px 28px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+    display: none;
+    align-self: center;
+    flex-direction: row;
+    justify-content: center;
+    margin-left: 100px;
+    margin-right: 100px;
+}
+
+.editor-toast--error {
+    background-color: rgb(180, 50, 50);
+}
+
+.editor-toast-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    white-space: normal;
 }
 
 
