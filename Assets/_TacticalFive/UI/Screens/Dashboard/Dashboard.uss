@@ -336,7 +336,7 @@
 }
 .panel-date {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(85, 102, 119);
 }
