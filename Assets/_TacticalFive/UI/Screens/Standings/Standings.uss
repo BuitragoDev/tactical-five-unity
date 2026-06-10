@@ -33,12 +33,12 @@
     flex-basis: 0;
     min-height: 0;
     overflow-y: auto;
-    margin-top: 21px;
+    margin-top: 13px;
 }
 
 .standings-right-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -88,16 +88,16 @@
 
 .stat-card-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 24px;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
 }
 
 .stat-card-unit {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
-    color: rgb(122, 138, 170);
-    margin-left: 4px;
+    color: rgb(212, 160, 23);
+    margin-left: 10px;
 }
 
 .standings-content {

@@ -244,7 +244,7 @@ public class StandingsController : MonoBehaviour
 
             var unitLbl = new Label();
             unitLbl.AddToClassList("stat-card-unit");
-            unitLbl.text = "PTS";
+            unitLbl.text = "PTS/P.";
 
             rowContainer.Add(valueLbl);
             rowContainer.Add(unitLbl);
