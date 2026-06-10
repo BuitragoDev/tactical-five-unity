@@ -154,7 +154,7 @@
 .editor-list-item {
     flex-direction: row;
     align-items: center;
-    padding: 10px 14px;
+    padding: 14px 14px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
     cursor: pointer;
@@ -187,8 +187,8 @@
 }
 
 .editor-list-item-logo {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     margin-right: 10px;
     flex-shrink: 0;
 }
