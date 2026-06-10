@@ -18,6 +18,87 @@
     min-height: 0;
 }
 
+.standings-split {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.standings-left {
+    flex-direction: column;
+    flex-grow: 3;
+    flex-basis: 0;
+    padding: 20px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.standings-right {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-basis: 0;
+    padding: 20px 20px 20px 0;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.standings-right-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+    margin-bottom: 12px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.stat-card {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 14px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.stat-card-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 12px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(58, 74, 99);
+    margin-bottom: 10px;
+    -unity-text-align: middle-center;
+}
+
+.stat-card-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+
+.stat-card-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(208, 216, 232);
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.stat-card-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(212, 160, 23);
+    -unity-text-align: middle-center;
+}
+
 .standings-content {
     flex-direction: column;
     flex-grow: 1;

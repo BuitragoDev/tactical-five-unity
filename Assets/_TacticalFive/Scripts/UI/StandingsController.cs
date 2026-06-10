@@ -13,6 +13,20 @@ public class StandingsController : MonoBehaviour
     private Button _tabWest;
     private VisualElement _standingsBody;
 
+    // Right panel stat cards
+    private VisualElement _cardBestAttackLogo;
+    private VisualElement _cardBestDefenseLogo;
+    private VisualElement _cardBestStreakLogo;
+    private VisualElement _cardWorstStreakLogo;
+    private Label _cardBestAttackTeam;
+    private Label _cardBestDefenseTeam;
+    private Label _cardBestStreakTeam;
+    private Label _cardWorstStreakTeam;
+    private Label _cardBestAttackValue;
+    private Label _cardBestDefenseValue;
+    private Label _cardBestStreakValue;
+    private Label _cardWorstStreakValue;
+
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
@@ -48,6 +62,19 @@ public class StandingsController : MonoBehaviour
         _tabEast = _root.Q<Button>("TabEast");
         _tabWest = _root.Q<Button>("TabWest");
         _standingsBody = _root.Q<VisualElement>("StandingsBody");
+
+        _cardBestAttackLogo = _root.Q<VisualElement>("CardBestAttackLogo");
+        _cardBestDefenseLogo = _root.Q<VisualElement>("CardBestDefenseLogo");
+        _cardBestStreakLogo = _root.Q<VisualElement>("CardBestStreakLogo");
+        _cardWorstStreakLogo = _root.Q<VisualElement>("CardWorstStreakLogo");
+        _cardBestAttackTeam = _root.Q<Label>("CardBestAttackTeam");
+        _cardBestDefenseTeam = _root.Q<Label>("CardBestDefenseTeam");
+        _cardBestStreakTeam = _root.Q<Label>("CardBestStreakTeam");
+        _cardWorstStreakTeam = _root.Q<Label>("CardWorstStreakTeam");
+        _cardBestAttackValue = _root.Q<Label>("CardBestAttackValue");
+        _cardBestDefenseValue = _root.Q<Label>("CardBestDefenseValue");
+        _cardBestStreakValue = _root.Q<Label>("CardBestStreakValue");
+        _cardWorstStreakValue = _root.Q<Label>("CardWorstStreakValue");
     }
 
     void LoadData()
@@ -120,6 +147,107 @@ public class StandingsController : MonoBehaviour
     {
         RefreshHeader();
         ShowStandings(_currentFilter);
+        RefreshStatCards();
+    }
+
+    void RefreshStatCards()
+    {
+        // Build standings for ALL teams (no conference filter)
+        var allStandings = BuildStandings(_allTeams);
+
+        // Best attack: highest points per game
+        var bestAttack = allStandings.OrderByDescending(s =>
+        {
+            int gp = s.wins + s.losses;
+            return gp > 0 ? (float)s.pf / gp : 0f;
+        }).FirstOrDefault();
+
+        // Best defense: lowest points against per game
+        var bestDefense = allStandings.OrderBy(s =>
+        {
+            int gp = s.wins + s.losses;
+            return gp > 0 ? (float)s.pa / gp : float.MaxValue;
+        }).FirstOrDefault();
+
+        // Best/worst current streak
+        StandingRow bestStreakTeam = null;
+        StandingRow worstStreakTeam = null;
+        int bestStreakCount = 0;
+        int worstStreakCount = 0;
+
+        foreach (var row in allStandings)
+        {
+            var (count, type) = GetCurrentStreak(row.games);
+            if (type == "win" && count > bestStreakCount)
+            {
+                bestStreakCount = count;
+                bestStreakTeam = row;
+            }
+            if (type == "loss" && count > worstStreakCount)
+            {
+                worstStreakCount = count;
+                worstStreakTeam = row;
+            }
+        }
+
+        // Fill cards
+        FillStatCard(_cardBestAttackLogo, _cardBestAttackTeam, _cardBestAttackValue,
+            bestAttack, bestAttack != null ? GetAvgPoints(bestAttack) : "-");
+
+        FillStatCard(_cardBestDefenseLogo, _cardBestDefenseTeam, _cardBestDefenseValue,
+            bestDefense, bestDefense != null ? GetAvgPointsAgainst(bestDefense) : "-");
+
+        FillStatCard(_cardBestStreakLogo, _cardBestStreakTeam, _cardBestStreakValue,
+            bestStreakTeam, bestStreakTeam != null ? $"{bestStreakCount}V" : "-");
+
+        FillStatCard(_cardWorstStreakLogo, _cardWorstStreakTeam, _cardWorstStreakValue,
+            worstStreakTeam, worstStreakTeam != null ? $"{worstStreakCount}D" : "-");
+    }
+
+    void FillStatCard(VisualElement logoElem, Label teamLbl, Label valueLbl, StandingRow row, string valueText)
+    {
+        if (row == null)
+        {
+            teamLbl.text = "";
+            valueLbl.text = valueText;
+            return;
+        }
+
+        var team = _allTeams.Find(t => t.id == row.teamId);
+        if (team != null)
+        {
+            teamLbl.text = team.name.ToUpper();
+            if (logoElem != null && _logoSprites64.TryGetValue(team.logo, out var sprite))
+                logoElem.style.backgroundImage = new StyleBackground(sprite);
+        }
+        valueLbl.text = valueText;
+    }
+
+    string GetAvgPoints(StandingRow row)
+    {
+        int gp = row.wins + row.losses;
+        if (gp == 0) return "-";
+        return (row.pf / (float)gp).ToString("F1");
+    }
+
+    string GetAvgPointsAgainst(StandingRow row)
+    {
+        int gp = row.wins + row.losses;
+        if (gp == 0) return "-";
+        return (row.pa / (float)gp).ToString("F1");
+    }
+
+    (int count, string type) GetCurrentStreak(List<bool> games)
+    {
+        if (games == null || games.Count == 0) return (0, "none");
+        bool last = games[games.Count - 1];
+        int count = 0;
+        for (int i = games.Count - 1; i >= 0; i--)
+        {
+            if (games[i] == last) count++;
+            else break;
+        }
+        return (count, last ? "win" : "loss");
     }
 
     void RefreshHeader()

@@ -113,37 +113,69 @@
             </ui:VisualElement>
 
             <!-- STANDINGS CONTENT -->
-            <ui:VisualElement class="standings-content">
+            <ui:VisualElement class="standings-split">
 
-                <!-- Conference tabs -->
-                <ui:VisualElement class="standings-tabs">
-                    <ui:Button name="TabEast" class="standings-tab" text="CONFERENCIA ESTE" />
-                    <ui:Button name="TabWest" class="standings-tab" text="CONFERENCIA OESTE" />
+                <!-- LEFT: standings table (75%) -->
+                <ui:VisualElement class="standings-left">
+                    <!-- Conference tabs -->
+                    <ui:VisualElement class="standings-tabs">
+                        <ui:Button name="TabEast" class="standings-tab" text="CONFERENCIA ESTE" />
+                        <ui:Button name="TabWest" class="standings-tab" text="CONFERENCIA OESTE" />
+                    </ui:VisualElement>
+
+                    <!-- Standings table -->
+                    <ui:ScrollView class="standings-scroll"
+                                   horizontal-scrolling-enabled="false"
+                                   mode="Vertical">
+                        <ui:VisualElement class="standings-table-container">
+                            <!-- Header row -->
+                            <ui:VisualElement class="standings-header-row">
+                                <ui:Label class="col-rank col-stat--header" text="#" />
+                                <ui:VisualElement class="col-logo-space" />
+                                <ui:Label class="col-team-name col-stat--header" text="EQUIPO" />
+                                <ui:Label class="col-stat col-stat--header" text="PJ" />
+                                <ui:Label class="col-stat col-stat--header" text="G" />
+                                <ui:Label class="col-stat col-stat--header" text="P" />
+                                <ui:Label class="col-stat col-stat--header" text="%" />
+                                <ui:Label class="col-diff col-stat--header" text="DIF" />
+                                <ui:Label class="col-streak col-stat--header" text="RACHA" />
+                                <ui:Label class="col-last10 col-stat--header" text="ÚLT 10" />
+                            </ui:VisualElement>
+
+                            <!-- Body -->
+                            <ui:VisualElement name="StandingsBody" class="standings-table" />
+                        </ui:VisualElement>
+                    </ui:ScrollView>
                 </ui:VisualElement>
 
-                <!-- Standings table -->
-                <ui:ScrollView class="standings-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-                    <ui:VisualElement class="standings-table-container">
-                        <!-- Header row -->
-                        <ui:VisualElement class="standings-header-row">
-                            <ui:Label class="col-rank col-stat--header" text="#" />
-                            <ui:VisualElement class="col-logo-space" />
-                            <ui:Label class="col-team-name col-stat--header" text="EQUIPO" />
-                            <ui:Label class="col-stat col-stat--header" text="PJ" />
-                            <ui:Label class="col-stat col-stat--header" text="G" />
-                            <ui:Label class="col-stat col-stat--header" text="P" />
-                            <ui:Label class="col-stat col-stat--header" text="%" />
-                            <ui:Label class="col-diff col-stat--header" text="DIF" />
-                            <ui:Label class="col-streak col-stat--header" text="RACHA" />
-                            <ui:Label class="col-last10 col-stat--header" text="ÚLT 10" />
-                        </ui:VisualElement>
-
-                        <!-- Body -->
-                        <ui:VisualElement name="StandingsBody" class="standings-table" />
+                <!-- RIGHT: stat cards (25%) -->
+                <ui:VisualElement class="standings-right">
+                    <ui:Label class="standings-right-title" text="LIDERES DE LA TEMPORADA" />
+                    <ui:VisualElement name="CardBestAttack" class="stat-card">
+                        <ui:Label class="stat-card-title" text="MEJOR ATAQUE" />
+                        <ui:VisualElement name="CardBestAttackLogo" class="stat-card-logo" />
+                        <ui:Label name="CardBestAttackTeam" class="stat-card-team" text="" />
+                        <ui:Label name="CardBestAttackValue" class="stat-card-value" text="" />
                     </ui:VisualElement>
-                </ui:ScrollView>
+                    <ui:VisualElement name="CardBestDefense" class="stat-card">
+                        <ui:Label class="stat-card-title" text="MEJOR DEFENSA" />
+                        <ui:VisualElement name="CardBestDefenseLogo" class="stat-card-logo" />
+                        <ui:Label name="CardBestDefenseTeam" class="stat-card-team" text="" />
+                        <ui:Label name="CardBestDefenseValue" class="stat-card-value" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="CardBestStreak" class="stat-card">
+                        <ui:Label class="stat-card-title" text="MEJOR RACHA" />
+                        <ui:VisualElement name="CardBestStreakLogo" class="stat-card-logo" />
+                        <ui:Label name="CardBestStreakTeam" class="stat-card-team" text="" />
+                        <ui:Label name="CardBestStreakValue" class="stat-card-value" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="CardWorstStreak" class="stat-card">
+                        <ui:Label class="stat-card-title" text="PEOR RACHA" />
+                        <ui:VisualElement name="CardWorstStreakLogo" class="stat-card-logo" />
+                        <ui:Label name="CardWorstStreakTeam" class="stat-card-team" text="" />
+                        <ui:Label name="CardWorstStreakValue" class="stat-card-value" text="" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
 
             </ui:VisualElement>
 
