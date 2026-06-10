@@ -247,7 +247,7 @@
 
 .col-stat {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    width: 150px;
+    width: 140px;
     font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;

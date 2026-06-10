@@ -289,7 +289,7 @@
 
 .upgrade-card {
     flex-direction: column;
-    width: 530px;
+    width: 500px;
     background-color: rgb(28, 33, 48);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
