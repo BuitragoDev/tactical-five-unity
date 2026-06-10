@@ -539,12 +539,18 @@ public class EditorController : MonoBehaviour
 
         AddSectionTitle(leftCol, "INFORMACIÓN BÁSICA");
         _playerFName = AddInput(leftCol, "Nombre", p.first_name);
+        SetLettersOnly(_playerFName);
         _playerLName = AddInput(leftCol, "Apellido", p.last_name);
+        SetLettersOnly(_playerLName);
         _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
         _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
+        SetDigitsOnly(_playerAge);
         _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
+        SetLettersOnly(_playerNat);
         _playerHt = AddInput(leftCol, "Altura (cm)", p.height_cm.ToString());
+        SetDigitsOnly(_playerHt);
         _playerWt = AddInput(leftCol, "Peso (kg)", p.weight_kg.ToString());
+        SetDigitsOnly(_playerWt);
 
         var teamChoices = new List<string> { "0 - AGENTE LIBRE" };
         teamChoices.AddRange(_allTeams.Select(t => $"{t.id} - {t.name}"));
@@ -555,7 +561,9 @@ public class EditorController : MonoBehaviour
 
         AddSectionTitle(leftCol, "CONTRATO");
         _playerSalary = AddInput(leftCol, "Salario", p.salary.ToString());
+        SetDigitsOnly(_playerSalary);
         _playerContract = AddInput(leftCol, "Años", p.contract_years.ToString());
+        SetDigitsOnly(_playerContract);
 
         // ── RIGHT COLUMN ──
         var rightCol = new VisualElement();
@@ -571,17 +579,29 @@ public class EditorController : MonoBehaviour
         rightCol.Add(ovrRow);
 
         _playerPot = AddInput(rightCol, "Potencial", p.potential.ToString());
+        SetDigitsOnly(_playerPot);
         _playerSpeed = AddInput(rightCol, "Velocidad", p.speed.ToString());
+        SetDigitsOnly(_playerSpeed);
         _playerShooting = AddInput(rightCol, "Tiro", p.shooting.ToString());
+        SetDigitsOnly(_playerShooting);
         _player3pt = AddInput(rightCol, "Triple", p.three_point.ToString());
+        SetDigitsOnly(_player3pt);
         _playerPassing = AddInput(rightCol, "Pase", p.passing.ToString());
+        SetDigitsOnly(_playerPassing);
         _playerDribbling = AddInput(rightCol, "Regate", p.dribbling.ToString());
+        SetDigitsOnly(_playerDribbling);
         _playerDefense = AddInput(rightCol, "Defensa", p.defense.ToString());
+        SetDigitsOnly(_playerDefense);
         _playerRebounding = AddInput(rightCol, "Rebote", p.rebounding.ToString());
+        SetDigitsOnly(_playerRebounding);
         _playerAthleticism = AddInput(rightCol, "Atletismo", p.athleticism.ToString());
+        SetDigitsOnly(_playerAthleticism);
         _playerIq = AddInput(rightCol, "IQ", p.iq.ToString());
+        SetDigitsOnly(_playerIq);
         _playerSteals = AddInput(rightCol, "Robos", p.steals.ToString());
+        SetDigitsOnly(_playerSteals);
         _playerBlocks = AddInput(rightCol, "Tapones", p.blocks.ToString());
+        SetDigitsOnly(_playerBlocks);
 
         columnsRow.Add(leftCol);
         columnsRow.Add(rightCol);
