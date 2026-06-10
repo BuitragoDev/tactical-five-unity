@@ -14,7 +14,8 @@
             <ui:VisualElement name="TopHeader" class="top-header">
                 <ui:Label class="editor-header-title" text="EDITOR DE BASE DE DATOS" />
                 <ui:VisualElement class="header-spacer" />
-                <ui:Button name="BtnAction" class="btn-action" text="VOLVER AL MENÚ" />
+                <ui:Button name="BtnReset" class="btn-action btn-action--reset" text="RESETEAR" />
+                <ui:Button name="BtnAction" class="btn-action" text="VOLVER AL MENÚ" style="border-radius:4px; min-width:200px; margin-left:30px;" />
             </ui:VisualElement>
 
             <!-- CONTENT -->
@@ -54,8 +55,20 @@
                                     <ui:VisualElement name="PlayerList" class="editor-list" />
                                 </ui:ScrollView>
                             </ui:VisualElement>
-                            <ui:DropdownField name="PlayerTeamFilter" class="editor-filter-dropdown" index="0" />
-                            <ui:DropdownField name="PlayerPosFilter" class="editor-filter-dropdown" index="0" />
+                            <ui:VisualElement name="PlayerTeamFilter" class="custom-filter-dropdown">
+                                <ui:Button class="custom-dropdown__trigger" name="PlayerTeamFilterTrigger">
+                                    <ui:Label class="custom-dropdown__value" name="PlayerTeamFilterValue" text="TODOS" />
+                                    <ui:Label class="custom-dropdown__arrow" text="▾" />
+                                </ui:Button>
+                                <ui:VisualElement class="custom-dropdown__list" name="PlayerTeamFilterList" style="display: none;" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="PlayerPosFilter" class="custom-filter-dropdown">
+                                <ui:Button class="custom-dropdown__trigger" name="PlayerPosFilterTrigger">
+                                    <ui:Label class="custom-dropdown__value" name="PlayerPosFilterValue" text="TODOS" />
+                                    <ui:Label class="custom-dropdown__arrow" text="▾" />
+                                </ui:Button>
+                                <ui:VisualElement class="custom-dropdown__list" name="PlayerPosFilterList" style="display: none;" />
+                            </ui:VisualElement>
                             <ui:TextField name="PlayerSearch" class="editor-filter-input" placeholder="Buscar jugador..." />
                         </ui:VisualElement>
                         <ui:VisualElement class="editor-detail-panel">

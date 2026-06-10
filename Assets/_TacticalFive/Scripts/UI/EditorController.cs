@@ -5,9 +5,18 @@ using System.Linq;
 
 public class EditorController : MonoBehaviour
 {
+    class CustomDropdown
+    {
+        public VisualElement Root;
+        public Button Trigger;
+        public VisualElement List;
+        public Label ValueLabel;
+        public string Value => ValueLabel?.text ?? "";
+    }
     private UIDocument _doc;
     private VisualElement _root;
     private Button _btnAction;
+    private Button _btnReset;
 
     // Tabs
     private Button _btnTeams, _btnPlayers;
@@ -24,16 +33,11 @@ public class EditorController : MonoBehaviour
     private TextField _teamNameInput, _teamAbbrInput, _teamCityInput;
     private TextField _teamArenaInput, _teamCapacityInput, _teamOwnerInput;
     private TextField _teamBudgetInput, _teamAttackInput, _teamDefenseInput, _teamOverallDisplay;
-    private DropdownField _teamConferenceDropdown, _teamDivisionDropdown;
-    private DropdownField _teamReputationDropdown, _teamFacilitiesDropdown, _teamObjectiveDropdown;
-
-    // Logo/jersey
-    private VisualElement _logoPreview, _homeJerseyPreview, _awayJerseyPreview;
-    private VisualElement _logoGrid, _homeJerseyGrid, _awayJerseyGrid;
-    private string _selectedLogo, _selectedHomeJersey, _selectedAwayJersey;
+    private CustomDropdown _teamConferenceDropdown, _teamDivisionDropdown;
+    private CustomDropdown _teamReputationDropdown, _teamFacilitiesDropdown, _teamObjectiveDropdown;
 
     // Player list
-    private DropdownField _playerTeamFilter, _playerPosFilter;
+    private CustomDropdown _playerTeamFilter, _playerPosFilter;
     private TextField _playerSearch;
     private VisualElement _playerList;
     private PlayerData _selectedPlayer;
@@ -42,7 +46,7 @@ public class EditorController : MonoBehaviour
     // Player detail fields
     private VisualElement _playerDetail;
     private TextField _playerFName, _playerLName;
-    private DropdownField _playerPosDropdown, _playerTeamDropdown;
+    private CustomDropdown _playerPosDropdown, _playerTeamDropdown;
     private TextField _playerAge, _playerNat, _playerHt, _playerWt;
     private TextField _playerPot;
     private TextField _playerSpeed, _playerShooting, _player3pt, _playerPassing;
@@ -51,11 +55,10 @@ public class EditorController : MonoBehaviour
     private TextField _playerSalary, _playerContract;
     private Label _playerOverallDisplay;
 
-    // Image cache
+    // Image cache (team list logos only)
     private Dictionary<string, Sprite> _logoSprites = new();
-    private Dictionary<string, Sprite> _jerseySprites = new();
-    private List<string> _availableLogos = new();
-    private List<string> _availableJerseys = new();
+    private VisualElement _dropdownOverlay;
+    private CustomDropdown _openDropdown;
 
     void OnDisable()
     {
@@ -78,11 +81,22 @@ public class EditorController : MonoBehaviour
         LoadData();
         RegisterCallbacks();
         Refresh();
+
+        // Root-level overlay so dropdown lists render above everything
+        _dropdownOverlay = new VisualElement();
+        _dropdownOverlay.style.position = Position.Absolute;
+        _dropdownOverlay.style.left = 0;
+        _dropdownOverlay.style.right = 0;
+        _dropdownOverlay.style.top = 0;
+        _dropdownOverlay.style.bottom = 0;
+        _dropdownOverlay.pickingMode = PickingMode.Ignore;
+        _root.Add(_dropdownOverlay);
     }
 
     void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
+        _btnReset = _root.Q<Button>("BtnReset");
         _btnTeams = _root.Q<Button>("BtnTeams");
         _btnPlayers = _root.Q<Button>("BtnPlayers");
         _teamPanel = _root.Q<VisualElement>("EditorTeamPanel");
@@ -92,11 +106,67 @@ public class EditorController : MonoBehaviour
         _teamList = _root.Q<VisualElement>("TeamList");
         _teamDetail = _root.Q<VisualElement>("TeamDetail");
 
-        _playerTeamFilter = _root.Q<DropdownField>("PlayerTeamFilter");
-        _playerPosFilter = _root.Q<DropdownField>("PlayerPosFilter");
+        _playerTeamFilter = WrapFilterDropdown("PlayerTeamFilter");
+        _playerPosFilter = WrapFilterDropdown("PlayerPosFilter");
         _playerSearch = _root.Q<TextField>("PlayerSearch");
         _playerList = _root.Q<VisualElement>("PlayerList");
         _playerDetail = _root.Q<VisualElement>("PlayerDetail");
+    }
+
+    CustomDropdown WrapFilterDropdown(string name)
+    {
+        var root = _root.Q<VisualElement>(name);
+        var trigger = root.Q<Button>(className: "custom-dropdown__trigger");
+        var list = root.Q<VisualElement>(className: "custom-dropdown__list");
+        var value = root.Q<Label>(className: "custom-dropdown__value");
+
+        var dd = new CustomDropdown
+        {
+            Root = root,
+            Trigger = trigger,
+            List = list,
+            ValueLabel = value
+        };
+
+        trigger.clicked += () =>
+        {
+            if (_openDropdown == dd)
+                CloseAllDropdowns();
+            else
+                OpenDropdown(dd);
+        };
+
+        return dd;
+    }
+
+    void SetFilterDropdownItems(CustomDropdown dd, string[] items, int selectedIndex)
+    {
+        dd.List.Clear();
+        for (int i = 0; i < items.Length; i++)
+        {
+            var text = items[i];
+            var item = new Button();
+            item.AddToClassList("custom-dropdown__item");
+            item.text = text;
+            if (i == selectedIndex)
+            {
+                item.AddToClassList("custom-dropdown__item--selected");
+                dd.ValueLabel.text = text;
+            }
+
+            var captured = i;
+            item.clicked += () =>
+            {
+                dd.ValueLabel.text = text;
+                CloseAllDropdowns();
+                foreach (var b in dd.List.Query<Button>(className: "custom-dropdown__item").ToList())
+                    b.RemoveFromClassList("custom-dropdown__item--selected");
+                item.AddToClassList("custom-dropdown__item--selected");
+                FilterPlayerList();
+            };
+
+            dd.List.Add(item);
+        }
     }
 
     void LoadSidebarIcons()
@@ -131,18 +201,7 @@ public class EditorController : MonoBehaviour
     void LoadImages()
     {
         foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/64x64"))
-        {
             _logoSprites[s.name] = s;
-            _availableLogos.Add(s.name);
-        }
-        _availableLogos.Sort();
-
-        foreach (var s in Resources.LoadAll<Sprite>("Teams/Jerseys/121x170"))
-        {
-            _jerseySprites[s.name] = s;
-            _availableJerseys.Add(s.name);
-        }
-        _availableJerseys.Sort();
     }
 
     void LoadData()
@@ -158,11 +217,9 @@ public class EditorController : MonoBehaviour
 
         var teamChoices = new List<string> { "TODOS" };
         teamChoices.AddRange(_allTeams.Select(t => $"{t.abbreviation} - {t.name}"));
-        _playerTeamFilter.choices = teamChoices;
-        _playerTeamFilter.index = 0;
+        SetFilterDropdownItems(_playerTeamFilter, teamChoices.ToArray(), 0);
 
-        _playerPosFilter.choices = new List<string> { "TODOS", "PG", "SG", "SF", "PF", "C" };
-        _playerPosFilter.index = 0;
+        SetFilterDropdownItems(_playerPosFilter, new[] { "TODOS", "PG", "SG", "SF", "PF", "C" }, 0);
     }
 
     void RegisterCallbacks()
@@ -175,12 +232,11 @@ public class EditorController : MonoBehaviour
         else
             Debug.LogError("[Editor] BtnAction not found in UXML!");
 
+        _btnReset?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ResetToDefaults(); });
         _btnTeams?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SwitchTab("teams"); });
         _btnPlayers?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SwitchTab("players"); });
 
         _teamFilter?.RegisterValueChangedCallback(_ => FilterTeamList());
-        _playerTeamFilter?.RegisterValueChangedCallback(_ => FilterPlayerList());
-        _playerPosFilter?.RegisterValueChangedCallback(_ => FilterPlayerList());
         _playerSearch?.RegisterValueChangedCallback(_ => FilterPlayerList());
     }
 
@@ -191,6 +247,20 @@ public class EditorController : MonoBehaviour
     void Refresh()
     {
         SwitchTab("teams");
+    }
+
+    void ResetToDefaults()
+    {
+        DatabaseManager.Instance.CloseTemplateSession();
+
+        if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
+            System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
+
+        DatabaseManager.Instance.EnsureTemplateDb();
+        DatabaseManager.Instance.InitTemplateSession();
+        LoadData();
+        Refresh();
+        Debug.Log("[Editor] Base de datos restablecida a valores de serie.");
     }
 
     void SwitchTab(string tab)
@@ -283,63 +353,75 @@ public class EditorController : MonoBehaviour
         var t = _selectedTeam;
         AddDetailTitle(_teamDetail, $"EDITANDO: {t.name.ToUpper()}");
 
-        AddSectionTitle(_teamDetail, "INFORMACIÓN BÁSICA");
-        _teamNameInput = AddInput(_teamDetail, "Nombre", t.name);
-        _teamAbbrInput = AddInput(_teamDetail, "Abreviatura", t.abbreviation);
-        _teamCityInput = AddInput(_teamDetail, "Ciudad", t.city);
-        _teamConferenceDropdown = AddDropdown(_teamDetail, "Conferencia", new[] { "East", "West" }, t.conference);
-        _teamDivisionDropdown = AddDropdown(_teamDetail, "División", new[] { "Atlantic", "Central", "Southeast", "Northwest", "Pacific", "Southwest" }, t.division);
-        AddDivider(_teamDetail);
+        RecalcTeamRatingsFromPlayers(t);
 
-        AddSectionTitle(_teamDetail, "PABELLÓN");
-        _teamArenaInput = AddInput(_teamDetail, "Nombre", t.arena);
-        _teamCapacityInput = AddInput(_teamDetail, "Capacidad", t.capacity.ToString());
-        _teamOwnerInput = AddInput(_teamDetail, "Propietario", t.owner);
-        AddDivider(_teamDetail);
+        var columnsRow = new VisualElement();
+        columnsRow.AddToClassList("editor-columns-row");
 
-        AddSectionTitle(_teamDetail, "VALORACIONES");
-        _teamAttackInput = AddInput(_teamDetail, "Ataque", t.attack.ToString());
-        _teamDefenseInput = AddInput(_teamDetail, "Defensa", t.defense.ToString());
-        _teamOverallDisplay = AddInput(_teamDetail, "Overall", t.overall.ToString());
+        // ── LEFT COLUMN ──
+        var leftCol = new VisualElement();
+        leftCol.AddToClassList("editor-column");
+
+        AddSectionTitle(leftCol, "INFORMACIÓN BÁSICA");
+        _teamNameInput = AddInput(leftCol, "Nombre", t.name);
+        _teamAbbrInput = AddInput(leftCol, "Abreviatura", t.abbreviation);
+        _teamCityInput = AddInput(leftCol, "Ciudad", t.city);
+        _teamConferenceDropdown = AddDropdown(leftCol, "Conferencia", new[] { "East", "West" }, t.conference);
+        _teamDivisionDropdown = AddDropdown(leftCol, "División", new[] { "Atlantic", "Central", "Southeast", "Northwest", "Pacific", "Southwest" }, t.division);
+        AddDivider(leftCol);
+
+        AddSectionTitle(leftCol, "PABELLÓN");
+        _teamArenaInput = AddInput(leftCol, "Nombre", t.arena);
+        _teamCapacityInput = AddInput(leftCol, "Capacidad", t.capacity.ToString());
+        _teamOwnerInput = AddInput(leftCol, "Propietario", t.owner);
+        AddDivider(leftCol);
+
+        AddSectionTitle(leftCol, "FINANZAS");
+        _teamBudgetInput = AddInput(leftCol, "Presupuesto", t.budget.ToString());
+        _teamObjectiveDropdown = AddDropdown(leftCol, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
+
+        // ── RIGHT COLUMN ──
+        var rightCol = new VisualElement();
+        rightCol.AddToClassList("editor-column");
+
+        AddSectionTitle(rightCol, "VALORACIONES");
+        _teamAttackInput = AddInput(rightCol, "Ataque", t.attack.ToString());
+        _teamAttackInput.isReadOnly = true;
+        _teamDefenseInput = AddInput(rightCol, "Defensa", t.defense.ToString());
+        _teamDefenseInput.isReadOnly = true;
+        _teamOverallDisplay = AddInput(rightCol, "Overall", t.overall.ToString());
         _teamOverallDisplay.isReadOnly = true;
-        _teamReputationDropdown = AddDropdown(_teamDetail, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
-        _teamFacilitiesDropdown = AddDropdown(_teamDetail, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
-        AddDivider(_teamDetail);
+        _teamReputationDropdown = AddDropdown(rightCol, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
+        _teamFacilitiesDropdown = AddDropdown(rightCol, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
 
-        AddSectionTitle(_teamDetail, "FINANZAS");
-        _teamBudgetInput = AddInput(_teamDetail, "Presupuesto", t.budget.ToString());
-        _teamObjectiveDropdown = AddDropdown(_teamDetail, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
-        AddDivider(_teamDetail);
+        columnsRow.Add(leftCol);
+        columnsRow.Add(rightCol);
+        _teamDetail.Add(columnsRow);
 
-        AddSectionTitle(_teamDetail, "LOGO DEL EQUIPO");
-        BuildImagePicker(_teamDetail, t.logo, _availableLogos, _logoSprites,
-            ref _logoPreview, ref _logoGrid, v => { _selectedLogo = v; t.logo = v; RecalcTeamOverall(); });
-
-        AddDivider(_teamDetail);
-        AddSectionTitle(_teamDetail, "CAMISETA LOCAL");
-        BuildImagePicker(_teamDetail, t.jersey_home,
-            _availableJerseys.Where(j => j.EndsWith("_home")).ToList(), _jerseySprites,
-            ref _homeJerseyPreview, ref _homeJerseyGrid, v => { _selectedHomeJersey = v; t.jersey_home = v; });
-
-        AddDivider(_teamDetail);
-        AddSectionTitle(_teamDetail, "CAMISETA VISITANTE");
-        BuildImagePicker(_teamDetail, t.jersey_away,
-            _availableJerseys.Where(j => j.EndsWith("_away")).ToList(), _jerseySprites,
-            ref _awayJerseyPreview, ref _awayJerseyGrid, v => { _selectedAwayJersey = v; t.jersey_away = v; });
-
-        AddDivider(_teamDetail);
         AddSaveBtn(_teamDetail, "GUARDAR EQUIPO", SaveTeam);
     }
 
-    void RecalcTeamOverall()
+    void RecalcTeamRatingsFromPlayers(TeamData team)
     {
-        if (_selectedTeam == null) return;
-        int.TryParse(_teamAttackInput?.value, out int a);
-        int.TryParse(_teamDefenseInput?.value, out int d);
-        int ov = (a + d) / 2;
-        _selectedTeam.overall = ov;
-        if (_teamOverallDisplay != null)
-            _teamOverallDisplay.value = ov.ToString();
+        var teamPlayers = _allPlayers.Where(p => p.team_id == team.id).ToList();
+        if (teamPlayers.Count == 0)
+        {
+            team.attack = 0;
+            team.defense = 0;
+            team.overall = 0;
+            return;
+        }
+
+        float attackSum = 0, defenseSum = 0;
+        foreach (var p in teamPlayers)
+        {
+            attackSum += p.shooting + p.three_point + p.passing + p.dribbling + p.speed;
+            defenseSum += p.defense + p.rebounding + p.steals + p.blocks + p.athleticism;
+        }
+        int count = teamPlayers.Count;
+        team.attack = Mathf.RoundToInt(attackSum / (5f * count));
+        team.defense = Mathf.RoundToInt(defenseSum / (5f * count));
+        team.overall = (team.attack + team.defense) / 2;
     }
 
     void SaveTeam()
@@ -349,21 +431,15 @@ public class EditorController : MonoBehaviour
         t.name = _teamNameInput.value;
         t.abbreviation = _teamAbbrInput.value;
         t.city = _teamCityInput.value;
-        t.conference = _teamConferenceDropdown.value;
-        t.division = _teamDivisionDropdown.value;
+        t.conference = _teamConferenceDropdown.Value;
+        t.division = _teamDivisionDropdown.Value;
         t.arena = _teamArenaInput.value;
         int.TryParse(_teamCapacityInput.value, out int cap); t.capacity = cap;
         t.owner = _teamOwnerInput.value;
-        int.TryParse(_teamAttackInput.value, out int atk); t.attack = atk;
-        int.TryParse(_teamDefenseInput.value, out int def); t.defense = def;
-        t.overall = (atk + def) / 2;
         long.TryParse(_teamBudgetInput.value, out long bud); t.budget = bud;
-        int.TryParse(_teamReputationDropdown.value, out int rep); t.reputation = rep;
-        int.TryParse(_teamFacilitiesDropdown.value, out int fac); t.facilities = fac;
-        t.objective = _teamObjectiveDropdown.value;
-        if (!string.IsNullOrEmpty(_selectedLogo)) t.logo = _selectedLogo;
-        if (!string.IsNullOrEmpty(_selectedHomeJersey)) t.jersey_home = _selectedHomeJersey;
-        if (!string.IsNullOrEmpty(_selectedAwayJersey)) t.jersey_away = _selectedAwayJersey;
+        int.TryParse(_teamReputationDropdown.Value, out int rep); t.reputation = rep;
+        int.TryParse(_teamFacilitiesDropdown.Value, out int fac); t.facilities = fac;
+        t.objective = _teamObjectiveDropdown.Value;
 
         DatabaseManager.Instance.UpdateTeam(t);
         Debug.Log($"[Editor] Equipo guardado: {t.name}");
@@ -378,8 +454,8 @@ public class EditorController : MonoBehaviour
         _playerList.Clear();
         _selectedPlayer = null;
 
-        string teamFilter = _playerTeamFilter?.value ?? "TODOS";
-        string posFilter = _playerPosFilter?.value ?? "TODOS";
+        string teamFilter = _playerTeamFilter?.Value ?? "TODOS";
+        string posFilter = _playerPosFilter?.Value ?? "TODOS";
         string search = _playerSearch?.value?.ToLower() ?? "";
 
         int? teamId = null;
@@ -500,13 +576,13 @@ public class EditorController : MonoBehaviour
 
         p.first_name = _playerFName.value;
         p.last_name = _playerLName.value;
-        p.position = _playerPosDropdown.value;
+        p.position = _playerPosDropdown.Value;
         int.TryParse(_playerAge.value, out int age); p.age = age;
         p.nationality = _playerNat.value;
         int.TryParse(_playerHt.value, out int ht); p.height_cm = ht;
         int.TryParse(_playerWt.value, out int wt); p.weight_kg = wt;
 
-        int.TryParse(_playerTeamDropdown.value.Split(" - ")[0], out int tid);
+        int.TryParse(_playerTeamDropdown.Value.Split(" - ")[0], out int tid);
         p.team_id = tid;
 
         int.TryParse(_playerPot.value, out int pot); p.potential = pot;
@@ -534,54 +610,6 @@ public class EditorController : MonoBehaviour
         DatabaseManager.Instance.UpdatePlayer(p);
         Debug.Log($"[Editor] Jugador guardado: {p.first_name} {p.last_name}");
         BuildPlayerList();
-    }
-
-    // ══════════════════════════════════════
-    // IMAGE PICKER
-    // ══════════════════════════════════════
-
-    void BuildImagePicker(VisualElement parent, string currentVal, List<string> options,
-        Dictionary<string, Sprite> sprites, ref VisualElement previewRef, ref VisualElement gridRef,
-        System.Action<string> onSelect)
-    {
-        var row = new VisualElement();
-        row.AddToClassList("editor-image-row");
-
-        previewRef = new VisualElement();
-        previewRef.AddToClassList("editor-image-preview");
-        if (!string.IsNullOrEmpty(currentVal) && sprites.TryGetValue(currentVal, out var ps))
-            previewRef.style.backgroundImage = new StyleBackground(ps);
-        row.Add(previewRef);
-
-        gridRef = new VisualElement();
-        gridRef.AddToClassList("editor-image-grid");
-
-        var localGrid = gridRef;
-        var localPreview = previewRef;
-
-        foreach (var img in options)
-        {
-            var opt = new VisualElement();
-            opt.AddToClassList("editor-image-option");
-            if (sprites.TryGetValue(img, out var spr))
-                opt.style.backgroundImage = new StyleBackground(spr);
-            if (img == currentVal)
-                opt.AddToClassList("editor-image-option--selected");
-
-            var captured = img;
-            opt.RegisterCallback<ClickEvent>(_ =>
-            {
-                foreach (var c in localGrid.Children())
-                    c.RemoveFromClassList("editor-image-option--selected");
-                opt.AddToClassList("editor-image-option--selected");
-                if (sprites.TryGetValue(captured, out var sel))
-                    localPreview.style.backgroundImage = new StyleBackground(sel);
-                onSelect?.Invoke(captured);
-            });
-            localGrid.Add(opt);
-        }
-        row.Add(localGrid);
-        parent.Add(row);
     }
 
     // ══════════════════════════════════════
@@ -626,26 +654,150 @@ public class EditorController : MonoBehaviour
         return field;
     }
 
-    DropdownField AddDropdown(VisualElement parent, string labelText, string[] choices, string selected)
+    CustomDropdown AddDropdown(VisualElement parent, string labelText, string[] choices, string selected)
     {
-        int idx = System.Array.IndexOf(choices, selected);
-        if (idx < 0) idx = 0;
-
         var row = new VisualElement();
         row.AddToClassList("editor-field-row");
 
         var lbl = new Label(labelText);
         lbl.AddToClassList("editor-field-label");
-
-        var field = new DropdownField();
-        field.choices = new List<string>(choices);
-        field.index = idx;
-        field.AddToClassList("editor-field-dropdown");
-
         row.Add(lbl);
-        row.Add(field);
+
+        var dd = BuildCustomDropdown(choices, selected);
+        row.Add(dd.Root);
         parent.Add(row);
-        return field;
+        return dd;
+    }
+
+    CustomDropdown BuildCustomDropdown(string[] choices, string selected)
+    {
+        int idx = System.Array.IndexOf(choices, selected);
+        if (idx < 0) idx = 0;
+
+        var root = new VisualElement();
+        root.AddToClassList("custom-dropdown");
+
+        var trigger = new Button();
+        trigger.AddToClassList("custom-dropdown__trigger");
+
+        var valueLabel = new Label(choices[idx]);
+        valueLabel.AddToClassList("custom-dropdown__value");
+        trigger.Add(valueLabel);
+
+        var arrow = new Label("▾");
+        arrow.AddToClassList("custom-dropdown__arrow");
+        trigger.Add(arrow);
+
+        var list = new VisualElement();
+        list.AddToClassList("custom-dropdown__list");
+        list.style.display = DisplayStyle.None;
+
+        var dd = new CustomDropdown
+        {
+            Root = root,
+            Trigger = trigger,
+            List = list,
+            ValueLabel = valueLabel
+        };
+
+        foreach (var c in choices)
+            AddDropdownItem(dd, c);
+
+        trigger.clicked += () =>
+        {
+            if (_openDropdown == dd)
+                CloseAllDropdowns();
+            else
+                OpenDropdown(dd);
+        };
+
+        root.Add(trigger);
+        root.Add(list);
+        return dd;
+    }
+
+    void AddDropdownItem(CustomDropdown dd, string text)
+    {
+        var item = new Button();
+        item.AddToClassList("custom-dropdown__item");
+        item.text = text;
+        if (text == dd.ValueLabel.text)
+            item.AddToClassList("custom-dropdown__item--selected");
+
+        item.clicked += () =>
+        {
+            dd.ValueLabel.text = text;
+            CloseAllDropdowns();
+            foreach (var b in dd.List.Query<Button>(className: "custom-dropdown__item").ToList())
+                b.RemoveFromClassList("custom-dropdown__item--selected");
+            item.AddToClassList("custom-dropdown__item--selected");
+            dd.Root.Focus();
+        };
+
+        dd.List.Add(item);
+    }
+
+    void OpenDropdown(CustomDropdown dd)
+    {
+        CloseAllDropdowns();
+        if (dd == null) return;
+
+        _openDropdown = dd;
+        var list = dd.List;
+
+        list.RemoveFromHierarchy();
+        _dropdownOverlay.Add(list);
+
+        var triggerBounds = dd.Trigger.worldBound;
+        list.style.position = Position.Absolute;
+        list.style.left = triggerBounds.xMin;
+        list.style.top = triggerBounds.yMax;
+        list.style.width = triggerBounds.width;
+        list.style.display = DisplayStyle.Flex;
+
+        _root.RegisterCallbackOnce<PointerDownEvent>(OnPointerDownAnywhere);
+    }
+
+    void CloseAllDropdowns()
+    {
+        if (_openDropdown != null)
+        {
+            var list = _openDropdown.List;
+            list.RemoveFromHierarchy();
+            list.style.position = Position.Relative;
+            list.style.left = StyleKeyword.Null;
+            list.style.top = StyleKeyword.Null;
+            list.style.width = StyleKeyword.Null;
+            list.style.display = DisplayStyle.None;
+            _openDropdown.Root.Add(list);
+            _openDropdown = null;
+        }
+    }
+
+    void OnPointerDownAnywhere(PointerDownEvent evt)
+    {
+        if (_openDropdown == null) return;
+
+        var target = evt.target as VisualElement;
+        if (target != null && IsChildOf(target, _openDropdown.List))
+            return;
+        if (target != null && target == _openDropdown.Trigger)
+            return;
+        if (target != null && IsChildOf(target, _openDropdown.Trigger))
+            return;
+
+        CloseAllDropdowns();
+    }
+
+    static bool IsChildOf(VisualElement child, VisualElement parent)
+    {
+        var current = child;
+        while (current != null)
+        {
+            if (current == parent) return true;
+            current = current.parent;
+        }
+        return false;
     }
 
     void AddSaveBtn(VisualElement parent, string text, System.Action action)
