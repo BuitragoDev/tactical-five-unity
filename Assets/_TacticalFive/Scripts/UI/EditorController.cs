@@ -376,10 +376,6 @@ public class EditorController : MonoBehaviour
         _teamOwnerInput = AddInput(leftCol, "Propietario", t.owner);
         AddDivider(leftCol);
 
-        AddSectionTitle(leftCol, "FINANZAS");
-        _teamBudgetInput = AddInput(leftCol, "Presupuesto", t.budget.ToString());
-        _teamObjectiveDropdown = AddDropdown(leftCol, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
-
         // ── RIGHT COLUMN ──
         var rightCol = new VisualElement();
         rightCol.AddToClassList("editor-column");
@@ -393,6 +389,11 @@ public class EditorController : MonoBehaviour
         _teamOverallDisplay.isReadOnly = true;
         _teamReputationDropdown = AddDropdown(rightCol, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
         _teamFacilitiesDropdown = AddDropdown(rightCol, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
+        AddDivider(rightCol);
+
+        AddSectionTitle(rightCol, "FINANZAS");
+        _teamBudgetInput = AddInput(rightCol, "Presupuesto", t.budget.ToString());
+        _teamObjectiveDropdown = AddDropdown(rightCol, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
 
         columnsRow.Add(leftCol);
         columnsRow.Add(rightCol);
