@@ -753,7 +753,7 @@ public class EditorController : MonoBehaviour
             {
                 int cursor = field.cursorIndex;
                 field.value = filtered.Length > 0 ? filtered : evt.previousValue;
-                field.cursorIndex = Math.Min(cursor, field.text.Length);
+                field.cursorIndex = System.Math.Min(cursor, field.text.Length);
             }
         });
     }
