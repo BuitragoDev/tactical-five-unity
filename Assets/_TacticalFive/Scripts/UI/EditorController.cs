@@ -30,6 +30,7 @@ public class EditorController : MonoBehaviour
 
     // Team detail fields
     private VisualElement _teamDetail;
+    private VisualElement _teamDetailPanel;
     private TextField _teamNameInput, _teamAbbrInput, _teamCityInput;
     private TextField _teamArenaInput, _teamCapacityInput, _teamOwnerInput;
     private TextField _teamBudgetInput, _teamAttackInput, _teamDefenseInput, _teamOverallDisplay;
@@ -45,6 +46,7 @@ public class EditorController : MonoBehaviour
 
     // Player detail fields
     private VisualElement _playerDetail;
+    private VisualElement _playerDetailPanel;
     private TextField _playerFName, _playerLName;
     private CustomDropdown _playerPosDropdown, _playerTeamDropdown;
     private TextField _playerAge, _playerNat, _playerHt, _playerWt;
@@ -105,12 +107,14 @@ public class EditorController : MonoBehaviour
         _teamFilter = _root.Q<TextField>("TeamFilter");
         _teamList = _root.Q<VisualElement>("TeamList");
         _teamDetail = _root.Q<VisualElement>("TeamDetail");
+        _teamDetailPanel = _teamPanel.Q<VisualElement>(className: "editor-detail-panel");
 
         _playerTeamFilter = WrapFilterDropdown("PlayerTeamFilter");
         _playerPosFilter = WrapFilterDropdown("PlayerPosFilter");
         _playerSearch = _root.Q<TextField>("PlayerSearch");
         _playerList = _root.Q<VisualElement>("PlayerList");
         _playerDetail = _root.Q<VisualElement>("PlayerDetail");
+        _playerDetailPanel = _playerPanel.Q<VisualElement>(className: "editor-detail-panel");
     }
 
     CustomDropdown WrapFilterDropdown(string name)
@@ -406,7 +410,10 @@ public class EditorController : MonoBehaviour
         columnsRow.Add(rightCol);
         _teamDetail.Add(columnsRow);
 
-        AddSaveBtn(_teamDetail, "GUARDAR EQUIPO", SaveTeam);
+        // Save button outside scroll view, fixed at bottom of panel
+        var oldBtn = _teamDetailPanel.Q<Button>("SaveBtn");
+        oldBtn?.RemoveFromHierarchy();
+        AddSaveBtn(_teamDetailPanel, "GUARDAR EQUIPO", SaveTeam, "SaveBtn");
     }
 
     void RecalcTeamRatingsFromPlayers(TeamData team)
@@ -607,7 +614,7 @@ public class EditorController : MonoBehaviour
         columnsRow.Add(rightCol);
         _playerDetail.Add(columnsRow);
 
-        AddSaveBtn(_playerDetail, "GUARDAR JUGADOR", SavePlayer);
+        AddSaveBtn(_playerDetailPanel, "GUARDAR JUGADOR", SavePlayer, "SaveBtn");
     }
 
     void SavePlayer()
@@ -926,11 +933,17 @@ public class EditorController : MonoBehaviour
         return false;
     }
 
-    void AddSaveBtn(VisualElement parent, string text, System.Action action)
+    void AddSaveBtn(VisualElement parent, string text, System.Action action, string name = "")
     {
+        if (!string.IsNullOrEmpty(name))
+        {
+            var old = parent.Q<Button>(name);
+            old?.RemoveFromHierarchy();
+        }
         var btn = new Button();
         btn.AddToClassList("editor-save-btn");
         btn.text = text;
+        if (!string.IsNullOrEmpty(name)) btn.name = name;
         btn.RegisterCallback<ClickEvent>(_ => { PlayClick(); action(); });
         parent.Add(btn);
     }
