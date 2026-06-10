@@ -152,6 +152,7 @@ public class StandingsController : MonoBehaviour
 
     void RefreshStatCards()
     {
+        if (_allTeams == null || _allTeams.Count == 0) return;
         // Build standings for ALL teams (no conference filter)
         var allStandings = BuildStandings(_allTeams);
 

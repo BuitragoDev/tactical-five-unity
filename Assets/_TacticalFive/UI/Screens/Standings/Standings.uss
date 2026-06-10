@@ -18,27 +18,19 @@
     min-height: 0;
 }
 
-.standings-split {
-    flex-direction: row;
-    flex-grow: 1;
-    min-height: 0;
-    overflow: hidden;
-}
-
 .standings-left {
     flex-direction: column;
     flex-grow: 3;
     flex-basis: 0;
-    padding: 20px;
     min-height: 0;
     overflow: hidden;
+    margin-right: 16px;
 }
 
 .standings-right {
     flex-direction: column;
     flex-grow: 1;
     flex-basis: 0;
-    padding: 20px 20px 20px 0;
     min-height: 0;
     overflow-y: auto;
 }
@@ -100,7 +92,7 @@
 }
 
 .standings-content {
-    flex-direction: column;
+    flex-direction: row;
     flex-grow: 1;
     padding: 20px;
     min-height: 0;

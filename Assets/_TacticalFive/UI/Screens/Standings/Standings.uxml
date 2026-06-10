@@ -113,7 +113,7 @@
             </ui:VisualElement>
 
             <!-- STANDINGS CONTENT -->
-            <ui:VisualElement class="standings-split">
+            <ui:VisualElement class="standings-content">
 
                 <!-- LEFT: standings table (75%) -->
                 <ui:VisualElement class="standings-left">
