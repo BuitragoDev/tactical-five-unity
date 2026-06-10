@@ -630,7 +630,10 @@ public class EditorController : MonoBehaviour
         int.TryParse(_playerHt.value, out int ht); p.height_cm = ht;
         int.TryParse(_playerWt.value, out int wt); p.weight_kg = wt;
 
-        int.TryParse(_playerTeamDropdown.Value.Split(" - ")[0], out int tid);
+        string ddVal = _playerTeamDropdown?.Value ?? "NULL";
+        Debug.Log($"[Editor] Team dropdown value: '{ddVal}'");
+        int.TryParse(ddVal.Split(" - ")[0], out int tid);
+        Debug.Log($"[Editor] Parsed team_id: {tid} (was {p.team_id})");
         p.team_id = tid;
 
         int.TryParse(_playerPot.value, out int pot); p.potential = pot;
