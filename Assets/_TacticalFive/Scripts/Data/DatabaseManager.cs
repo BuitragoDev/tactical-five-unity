@@ -2750,42 +2750,67 @@ public class DatabaseManager : MonoBehaviour
         foreach (var p in allPlayers.Where(p => p.age >= 40))
             _db.Delete(p);
 
-        // 2. Age + attribute changes
+        // 2. Age + attribute changes (progression/regression by career phase)
         var remaining = _db.Table<PlayerData>().ToList();
         foreach (var p in remaining)
         {
             p.age += 1;
 
-            if (p.age < 32)
+            // Base change by age group
+            int baseChange;
+            if (p.age <= 22) baseChange = 4;       // Crecimiento rápido
+            else if (p.age <= 27) baseChange = 1;  // Prime temprano
+            else if (p.age <= 30) baseChange = 0;  // Prime tardío
+            else if (p.age <= 34) baseChange = -3; // Declive suave
+            else baseChange = -5;                   // Declive fuerte
+
+            // Position priority attributes (get +1 extra)
+            var priorityAttrs = new HashSet<string>();
+            switch (p.position)
             {
-                p.overall = Math.Min(p.overall + 2, p.potential);
-                p.speed = Math.Min(99, p.speed + 2);
-                p.shooting = Math.Min(99, p.shooting + 2);
-                p.three_point = Math.Min(99, p.three_point + 2);
-                p.passing = Math.Min(99, p.passing + 2);
-                p.dribbling = Math.Min(99, p.dribbling + 2);
-                p.defense = Math.Min(99, p.defense + 2);
-                p.rebounding = Math.Min(99, p.rebounding + 2);
-                p.athleticism = Math.Min(99, p.athleticism + 2);
-                p.iq = Math.Min(99, p.iq + 2);
-                p.steals = Math.Min(99, p.steals + 2);
-                p.blocks = Math.Min(99, p.blocks + 2);
+                case "PG":
+                    priorityAttrs = new HashSet<string> { "passing", "dribbling", "speed", "iq", "three_point" };
+                    break;
+                case "SG":
+                    priorityAttrs = new HashSet<string> { "shooting", "three_point", "speed", "dribbling", "steals" };
+                    break;
+                case "SF":
+                    priorityAttrs = new HashSet<string> { "shooting", "defense", "athleticism", "speed", "rebounding" };
+                    break;
+                case "PF":
+                    priorityAttrs = new HashSet<string> { "defense", "rebounding", "blocks", "athleticism" };
+                    break;
+                case "C":
+                    priorityAttrs = new HashSet<string> { "rebounding", "blocks", "defense", "iq", "athleticism" };
+                    break;
             }
-            else
+
+            int Apply(string name, int current)
             {
-                p.overall = Math.Max(0, p.overall - 2);
-                p.speed = Math.Max(0, p.speed - 2);
-                p.shooting = Math.Max(0, p.shooting - 2);
-                p.three_point = Math.Max(0, p.three_point - 2);
-                p.passing = Math.Max(0, p.passing - 2);
-                p.dribbling = Math.Max(0, p.dribbling - 2);
-                p.defense = Math.Max(0, p.defense - 2);
-                p.rebounding = Math.Max(0, p.rebounding - 2);
-                p.athleticism = Math.Max(0, p.athleticism - 2);
-                p.iq = Math.Max(0, p.iq - 2);
-                p.steals = Math.Max(0, p.steals - 2);
-                p.blocks = Math.Max(0, p.blocks - 2);
+                int change = baseChange;
+                if (priorityAttrs.Contains(name)) change += 1;
+                change += UnityEngine.Random.Range(-1, 2);
+                return Math.Max(0, Math.Min(99, current + change));
             }
+
+            p.speed = Apply("speed", p.speed);
+            p.shooting = Apply("shooting", p.shooting);
+            p.three_point = Apply("three_point", p.three_point);
+            p.passing = Apply("passing", p.passing);
+            p.dribbling = Apply("dribbling", p.dribbling);
+            p.defense = Apply("defense", p.defense);
+            p.rebounding = Apply("rebounding", p.rebounding);
+            p.athleticism = Apply("athleticism", p.athleticism);
+            p.iq = Apply("iq", p.iq);
+            p.steals = Apply("steals", p.steals);
+            p.blocks = Apply("blocks", p.blocks);
+
+            // Recalculate overall as average of all attributes, capped by potential
+            int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
+                      p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
+            p.overall = (int)System.Math.Round(sum / 11f);
+            if (p.overall > p.potential)
+                p.overall = p.potential;
 
             // 3. Decrement contracts
             p.contract_years -= 1;
