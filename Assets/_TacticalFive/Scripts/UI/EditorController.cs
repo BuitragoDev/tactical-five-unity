@@ -523,49 +523,62 @@ public class EditorController : MonoBehaviour
         var p = _selectedPlayer;
         AddDetailTitle(_playerDetail, $"EDITANDO: {p.first_name} {p.last_name}");
 
-        AddSectionTitle(_playerDetail, "INFORMACIÓN BÁSICA");
-        _playerFName = AddInput(_playerDetail, "Nombre", p.first_name);
-        _playerLName = AddInput(_playerDetail, "Apellido", p.last_name);
-        _playerPosDropdown = AddDropdown(_playerDetail, "Posición", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
-        _playerAge = AddInput(_playerDetail, "Edad", p.age.ToString());
-        _playerNat = AddInput(_playerDetail, "Nacionalidad", p.nationality);
-        _playerHt = AddInput(_playerDetail, "Altura (cm)", p.height_cm.ToString());
-        _playerWt = AddInput(_playerDetail, "Peso (kg)", p.weight_kg.ToString());
+        var columnsRow = new VisualElement();
+        columnsRow.AddToClassList("editor-columns-row");
+
+        // ── LEFT COLUMN ──
+        var leftCol = new VisualElement();
+        leftCol.AddToClassList("editor-column");
+
+        AddSectionTitle(leftCol, "INFORMACIÓN BÁSICA");
+        _playerFName = AddInput(leftCol, "Nombre", p.first_name);
+        _playerLName = AddInput(leftCol, "Apellido", p.last_name);
+        _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
+        _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
+        _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
+        _playerHt = AddInput(leftCol, "Altura (cm)", p.height_cm.ToString());
+        _playerWt = AddInput(leftCol, "Peso (kg)", p.weight_kg.ToString());
 
         var teamChoices = new List<string> { "0 - AGENTE LIBRE" };
         teamChoices.AddRange(_allTeams.Select(t => $"{t.id} - {t.name}"));
         var teamAbbr = _allTeams.Find(t => t.id == p.team_id);
         var teamDefault = p.team_id == 0 ? "0 - AGENTE LIBRE" : $"{p.team_id} - {teamAbbr?.name ?? ""}";
-        _playerTeamDropdown = AddDropdown(_playerDetail, "Equipo", teamChoices.ToArray(), teamDefault);
-        AddDivider(_playerDetail);
+        _playerTeamDropdown = AddDropdown(leftCol, "Equipo", teamChoices.ToArray(), teamDefault);
+        AddDivider(leftCol);
 
-        AddSectionTitle(_playerDetail, "VALORACIONES");
+        AddSectionTitle(leftCol, "CONTRATO");
+        _playerSalary = AddInput(leftCol, "Salario", p.salary.ToString());
+        _playerContract = AddInput(leftCol, "Años", p.contract_years.ToString());
+
+        // ── RIGHT COLUMN ──
+        var rightCol = new VisualElement();
+        rightCol.AddToClassList("editor-column");
+
+        AddSectionTitle(rightCol, "VALORACIONES");
         _playerOverallDisplay = new Label($"Overall: {p.overall}  /  Potencial: {p.potential}");
         _playerOverallDisplay.AddToClassList("editor-field-display");
         var ovrRow = new VisualElement();
         ovrRow.AddToClassList("editor-field-row");
         ovrRow.style.paddingLeft = 140;
         ovrRow.Add(_playerOverallDisplay);
-        _playerDetail.Add(ovrRow);
+        rightCol.Add(ovrRow);
 
-        _playerPot = AddInput(_playerDetail, "Potencial", p.potential.ToString());
-        _playerSpeed = AddInput(_playerDetail, "Velocidad", p.speed.ToString());
-        _playerShooting = AddInput(_playerDetail, "Tiro", p.shooting.ToString());
-        _player3pt = AddInput(_playerDetail, "Triple", p.three_point.ToString());
-        _playerPassing = AddInput(_playerDetail, "Pase", p.passing.ToString());
-        _playerDribbling = AddInput(_playerDetail, "Regate", p.dribbling.ToString());
-        _playerDefense = AddInput(_playerDetail, "Defensa", p.defense.ToString());
-        _playerRebounding = AddInput(_playerDetail, "Rebote", p.rebounding.ToString());
-        _playerAthleticism = AddInput(_playerDetail, "Atletismo", p.athleticism.ToString());
-        _playerIq = AddInput(_playerDetail, "IQ", p.iq.ToString());
-        _playerSteals = AddInput(_playerDetail, "Robos", p.steals.ToString());
-        _playerBlocks = AddInput(_playerDetail, "Tapones", p.blocks.ToString());
-        AddDivider(_playerDetail);
+        _playerPot = AddInput(rightCol, "Potencial", p.potential.ToString());
+        _playerSpeed = AddInput(rightCol, "Velocidad", p.speed.ToString());
+        _playerShooting = AddInput(rightCol, "Tiro", p.shooting.ToString());
+        _player3pt = AddInput(rightCol, "Triple", p.three_point.ToString());
+        _playerPassing = AddInput(rightCol, "Pase", p.passing.ToString());
+        _playerDribbling = AddInput(rightCol, "Regate", p.dribbling.ToString());
+        _playerDefense = AddInput(rightCol, "Defensa", p.defense.ToString());
+        _playerRebounding = AddInput(rightCol, "Rebote", p.rebounding.ToString());
+        _playerAthleticism = AddInput(rightCol, "Atletismo", p.athleticism.ToString());
+        _playerIq = AddInput(rightCol, "IQ", p.iq.ToString());
+        _playerSteals = AddInput(rightCol, "Robos", p.steals.ToString());
+        _playerBlocks = AddInput(rightCol, "Tapones", p.blocks.ToString());
 
-        AddSectionTitle(_playerDetail, "CONTRATO");
-        _playerSalary = AddInput(_playerDetail, "Salario", p.salary.ToString());
-        _playerContract = AddInput(_playerDetail, "Años", p.contract_years.ToString());
-        AddDivider(_playerDetail);
+        columnsRow.Add(leftCol);
+        columnsRow.Add(rightCol);
+        _playerDetail.Add(columnsRow);
 
         AddSaveBtn(_playerDetail, "GUARDAR JUGADOR", SavePlayer);
     }
