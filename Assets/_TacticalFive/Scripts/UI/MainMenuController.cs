@@ -319,7 +319,7 @@ public class MainMenuController : MonoBehaviour
 
     void OnEditorClicked()
     {
-        ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.Editor);
+        ScreenManager.Instance.GoTo(GameScreen.Editor);
     }
 
     void OnExitClicked()
