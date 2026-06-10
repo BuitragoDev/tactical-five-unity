@@ -32,12 +32,12 @@
                     <!-- ===== TEAMS TAB ===== -->
                     <ui:VisualElement name="EditorTeamPanel" class="editor-team-panel editor-tab-panel">
                         <ui:VisualElement class="editor-list-panel">
-                            <ui:TextField name="TeamFilter" class="editor-filter-input" placeholder="Buscar equipo..." />
                             <ui:VisualElement class="editor-scroll-wrapper">
                                 <ui:ScrollView class="editor-list-scroll">
                                     <ui:VisualElement name="TeamList" class="editor-list" />
                                 </ui:ScrollView>
                             </ui:VisualElement>
+                            <ui:TextField name="TeamFilter" class="editor-filter-input" placeholder="Buscar equipo..." />
                         </ui:VisualElement>
                         <ui:VisualElement class="editor-detail-panel">
                             <ui:ScrollView class="editor-detail-scroll">
@@ -49,14 +49,14 @@
                     <!-- ===== PLAYERS TAB ===== -->
                     <ui:VisualElement name="EditorPlayerPanel" class="editor-player-panel editor-tab-panel" style="display: none;">
                         <ui:VisualElement class="editor-list-panel">
-                            <ui:DropdownField name="PlayerTeamFilter" class="editor-filter-dropdown" index="0" />
-                            <ui:DropdownField name="PlayerPosFilter" class="editor-filter-dropdown" index="0" />
-                            <ui:TextField name="PlayerSearch" class="editor-filter-input" placeholder="Buscar jugador..." />
                             <ui:VisualElement class="editor-scroll-wrapper">
                                 <ui:ScrollView class="editor-list-scroll">
                                     <ui:VisualElement name="PlayerList" class="editor-list" />
                                 </ui:ScrollView>
                             </ui:VisualElement>
+                            <ui:DropdownField name="PlayerTeamFilter" class="editor-filter-dropdown" index="0" />
+                            <ui:DropdownField name="PlayerPosFilter" class="editor-filter-dropdown" index="0" />
+                            <ui:TextField name="PlayerSearch" class="editor-filter-input" placeholder="Buscar jugador..." />
                         </ui:VisualElement>
                         <ui:VisualElement class="editor-detail-panel">
                             <ui:ScrollView class="editor-detail-scroll">
