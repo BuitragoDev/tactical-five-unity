@@ -865,6 +865,9 @@ public class EditorController : MonoBehaviour
         list.style.width = triggerBounds.width;
         list.style.display = DisplayStyle.Flex;
 
+        float spaceBelow = _root.worldBound.height - triggerBounds.yMax;
+        list.style.maxHeight = Mathf.Max(spaceBelow, 80);
+
         _root.RegisterCallbackOnce<PointerDownEvent>(OnPointerDownAnywhere);
     }
 
