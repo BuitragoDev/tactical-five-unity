@@ -137,10 +137,13 @@ public class StatsController : MonoBehaviour
 
         var btnSeason = _root.Q<Button>("BtnSeason");
         var btnHistorical = _root.Q<Button>("BtnHistorical");
+        var btnMyTeam = _root.Q<Button>("BtnMyTeam");
         _filterBtns.Add(btnSeason);
         _filterBtns.Add(btnHistorical);
+        _filterBtns.Add(btnMyTeam);
         btnSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("season"); });
         btnHistorical?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("historical"); });
+        btnMyTeam?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("team"); });
 
         var btnTotals = _root.Q<Button>("BtnTotals");
         var btnAverages = _root.Q<Button>("BtnAverages");
@@ -219,6 +222,23 @@ public class StatsController : MonoBehaviour
     void Refresh()
     {
         RefreshHeader();
+
+        // Dynamic season label
+        if (_season != null)
+        {
+            var btnSeason = _root.Q<Button>("BtnSeason");
+            if (btnSeason != null)
+                btnSeason.text = $"TEMPORADA {_season.year_start}-{_season.year_end}";
+        }
+
+        // Team name on filter button
+        if (_myTeam != null)
+        {
+            var btnMyTeam = _root.Q<Button>("BtnMyTeam");
+            if (btnMyTeam != null)
+                btnMyTeam.text = _myTeam.name.ToUpper();
+        }
+
         ShowStats(_currentStat);
     }
 
@@ -263,8 +283,10 @@ public class StatsController : MonoBehaviour
         }
         if (mode == "season")
             _root.Q<Button>("BtnSeason")?.AddToClassList("filter-btn--active");
-        else
+        else if (mode == "historical")
             _root.Q<Button>("BtnHistorical")?.AddToClassList("filter-btn--active");
+        else
+            _root.Q<Button>("BtnMyTeam")?.AddToClassList("filter-btn--active");
         ShowStats(_currentStat);
     }
 
@@ -309,13 +331,15 @@ public class StatsController : MonoBehaviour
         };
         _root.Q<Button>(statTabName)?.AddToClassList("stats-tab--active");
 
-        // Time filters (season / historical)
+        // Time filters (season / historical / team)
         foreach (var btn in _filterBtns)
             btn.RemoveFromClassList("filter-btn--active");
         if (_currentMode == "season")
             _root.Q<Button>("BtnSeason")?.AddToClassList("filter-btn--active");
-        else
+        else if (_currentMode == "historical")
             _root.Q<Button>("BtnHistorical")?.AddToClassList("filter-btn--active");
+        else
+            _root.Q<Button>("BtnMyTeam")?.AddToClassList("filter-btn--active");
 
         // Mode filters (totals / averages)
         foreach (var btn in _modeBtns)
@@ -363,6 +387,11 @@ public class StatsController : MonoBehaviour
         if (_currentMode == "historical")
         {
             playerAggs = BuildHistoricalMergedStats(allPlayers);
+        }
+        else if (_currentMode == "team")
+        {
+            var teamPlayers = allPlayers.Where(p => p.team_id == _myTeam.id).ToList();
+            playerAggs = BuildSeasonStats(teamPlayers);
         }
         else
         {

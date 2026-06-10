@@ -135,8 +135,9 @@
                 <!-- Filter row -->
                 <ui:VisualElement name="FilterRow" class="filter-row">
                     <ui:VisualElement class="filter-group">
-                        <ui:Button name="BtnSeason" class="filter-btn filter-btn--active" text="TEMPORADA 2025-2026" />
+                        <ui:Button name="BtnSeason" class="filter-btn filter-btn--active" text="TEMPORADA" />
                         <ui:Button name="BtnHistorical" class="filter-btn" text="HISTÓRICO" />
+                        <ui:Button name="BtnMyTeam" class="filter-btn" text="MI EQUIPO" />
                     </ui:VisualElement>
                     <ui:VisualElement class="filter-group">
                         <ui:Button name="BtnTotals" class="filter-btn mode-btn--active" text="TOTALES" />
