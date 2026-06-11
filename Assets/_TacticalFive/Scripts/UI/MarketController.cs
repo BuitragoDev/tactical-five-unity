@@ -47,6 +47,7 @@ public class MarketController : MonoBehaviour
     private TeamData _selectedTeam;
     private bool _isFA = false;
     private PlayerData _pendingFAPlayer;
+    private Dictionary<int, int> _faCooldowns = new();
 
     private Dictionary<string, Sprite> _headerLogos = new();
     private Dictionary<string, Sprite> _teamGridLogos = new();
@@ -892,7 +893,12 @@ public class MarketController : MonoBehaviour
     {
         _freeAgentsBody.Clear();
 
-        if (_freeAgents == null || _freeAgents.Count == 0)
+        var expired = _faCooldowns.Where(kv => kv.Value <= _season.current_game_day).Select(kv => kv.Key).ToList();
+        foreach (var pid in expired) _faCooldowns.Remove(pid);
+
+        var visible = _freeAgents?.Where(p => !_faCooldowns.ContainsKey(p.id)).ToList();
+
+        if (visible == null || visible.Count == 0)
         {
             var empty = new Label("No hay agentes libres disponibles");
             empty.AddToClassList("market-empty-fa");
@@ -900,7 +906,7 @@ public class MarketController : MonoBehaviour
             return;
         }
 
-        foreach (var player in _freeAgents)
+        foreach (var player in visible)
         {
             var row = new VisualElement();
             row.AddToClassList("market-fa-row");
@@ -969,39 +975,111 @@ public class MarketController : MonoBehaviour
         if (_pendingFAPlayer == null) return;
 
         var player = _pendingFAPlayer;
-        var newSalary = player.salary + 2_000_000;
-
-        int years;
-        if (player.age > 35) years = 1;
-        else if (player.age > 32) years = 2;
-        else if (player.age > 28) years = 3;
-        else if (player.age > 25) years = 4;
-        else years = 5;
-
-        player.team_id = _myTeam.id;
-        player.salary = newSalary;
-        player.contract_years = years;
-        DatabaseManager.Instance.UpdatePlayer(player);
-
-        DatabaseManager.Instance.AddMessage(new MessageData
-        {
-            manager_id = _manager.id,
-            sender_type = 1,
-            sender_id = 0,
-            title = $"Fichaje: {player.first_name} {player.last_name}",
-            body = $"{player.first_name} {player.last_name} ha firmado con tu equipo. Contrato: ${newSalary:N0}/año durante {years} año{(years > 1 ? "s" : "")}.",
-            game_day = _season?.current_game_day ?? 0,
-            game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
-            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
-        });
-
         _faConfirmModal.style.display = DisplayStyle.None;
         _pendingFAPlayer = null;
-        _freeAgents = DatabaseManager.Instance.GetFreeAgents();
-        BuildFreeAgents();
-        RefreshHeader();
+
+        float chance = Mathf.Clamp(_myTeam.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
+        bool accepted = Random.Range(0f, 100f) < chance;
+
+        if (accepted)
+        {
+            var newSalary = player.salary + 2_000_000;
+
+            int years;
+            if (player.age > 35) years = 1;
+            else if (player.age > 32) years = 2;
+            else if (player.age > 28) years = 3;
+            else if (player.age > 25) years = 4;
+            else years = 5;
+
+            player.team_id = _myTeam.id;
+            player.salary = newSalary;
+            player.contract_years = years;
+            DatabaseManager.Instance.UpdatePlayer(player);
+
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 1,
+                sender_id = 0,
+                title = $"Fichaje: {player.first_name} {player.last_name}",
+                body = $"{player.first_name} {player.last_name} ha firmado con tu equipo. Contrato: ${newSalary:N0}/año durante {years} año{(years > 1 ? "s" : "")}.",
+                game_day = _season?.current_game_day ?? 0,
+                game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
+                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                is_read = 0
+            });
+
+            ShowFAResultModal(true, $"{player.first_name} {player.last_name}");
+
+            _freeAgents = DatabaseManager.Instance.GetFreeAgents();
+            BuildFreeAgents();
+            RefreshHeader();
+        }
+        else
+        {
+            _faCooldowns[player.id] = _season.current_game_day + 14;
+            ShowFAResultModal(false, $"{player.first_name} {player.last_name}");
+            BuildFreeAgents();
+        }
+    }
+
+    void ShowFAResultModal(bool success, string playerName)
+    {
+        if (_tradeSuccessTitle != null)
+        {
+            _tradeSuccessTitle.text = success ? "¡FICHAJE REALIZADO!" : "¡FICHAJE RECHAZADO!";
+            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--positive");
+            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--negative");
+            _tradeSuccessTitle.AddToClassList(success ? "renew-modal-title--positive" : "renew-modal-title--negative");
+        }
+        if (_tradeSuccessText1 != null)
+            _tradeSuccessText1.text = success
+                ? $"{playerName} ha aceptado tu oferta."
+                : $"{playerName} ha rechazado tu oferta.";
+        if (_tradeSuccessText2 != null)
+            _tradeSuccessText2.text = success
+                ? "Revisa tu plantilla para ver los detalles."
+                : "No podrás volver a intentarlo hasta dentro de 14 días.";
+
+        if (_tradeSuccessBox != null)
+        {
+            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--positive");
+            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--negative");
+            _tradeSuccessBox.AddToClassList(success ? "renew-modal-box--positive" : "renew-modal-box--negative");
+        }
+
+        if (_tradeSuccessIcon != null)
+        {
+            var iconName = success ? "contrato" : "rechazar";
+            var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
+            _tradeSuccessIcon.style.backgroundImage = tex != null ? new StyleBackground(tex) : null;
+        }
+
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.Flex;
+        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.Flex;
+
+        StartCoroutine(AutoCloseFAResult());
+    }
+
+    System.Collections.IEnumerator AutoCloseFAResult()
+    {
+        yield return new WaitForSeconds(4f);
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
+        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.None;
+        if (_tradeSuccessTitle != null)
+        {
+            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--positive");
+            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--negative");
+        }
+        if (_tradeSuccessBox != null)
+        {
+            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--positive");
+            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--negative");
+        }
+        if (_tradeSuccessIcon != null)
+            _tradeSuccessIcon.style.backgroundImage = null;
     }
 
     void ShowFreeAgents()
