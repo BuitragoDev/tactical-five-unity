@@ -318,8 +318,9 @@ public class DashboardController : MonoBehaviour
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
         _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
-        _headerBudget.RemoveFromClassList("header-stat-value--negative");
-        if (_myTeam.budget < 0) _headerBudget.AddToClassList("header-stat-value--negative");
+        _headerBudget.style.color = _myTeam.budget < 0
+            ? new StyleColor(new Color32(192, 57, 43, 255))
+            : new StyleColor(new Color32(39, 174, 96, 255));
 
         // Masa salarial real
         long totalPayroll = _players.Sum(p => p.salary);
