@@ -151,7 +151,11 @@ public class ResultsController : MonoBehaviour
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
         _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
-        _root.Q<Label>("HeaderBudget").text = $"${_myTeam.budget / 1_000_000}M";
+        var budgetLabel = _root.Q<Label>("HeaderBudget");
+        budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
+        budgetLabel.style.color = _myTeam.budget < 0
+            ? new StyleColor(new Color32(192, 57, 43, 255))
+            : new StyleColor(new Color32(39, 174, 96, 255));
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long totalPayroll = players.Sum(p => p.salary);
