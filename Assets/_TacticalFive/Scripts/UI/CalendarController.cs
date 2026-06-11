@@ -262,7 +262,8 @@ public class CalendarController : MonoBehaviour
             {
                 var dayStr = $"{year}-{month:D2}-{dayNum:D2}";
                 var dayGames = _allGames.Where(g => g.game_date == dayStr).ToList();
-                bool isMyGame = dayGames.Any(g => g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+                bool hasAllStar = dayGames.Any(g => g.game_type == "allstar");
+                bool isMyGame = dayGames.Any(g => g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id) || hasAllStar;
                 bool isToday = _currentGameDate.HasValue && _currentGameDate.Value.Year == year
                                 && _currentGameDate.Value.Month == month
                                 && _currentGameDate.Value.Day == dayNum;
@@ -328,6 +329,20 @@ public class CalendarController : MonoBehaviour
             }
             cell.Add(logoContainer);
         }
+        else if (dayGames.Any(g => g.game_type == "allstar"))
+        {
+            var logoContainer = new VisualElement();
+            logoContainer.style.width = 80;
+            logoContainer.style.height = 80;
+            logoContainer.style.flexShrink = 0;
+            logoContainer.style.alignSelf = Align.Center;
+            if (_logoSprites80.TryGetValue("all-star-game", out var asSprite))
+            {
+                logoContainer.style.backgroundImage = new StyleBackground(asSprite);
+                logoContainer.style.unityBackgroundImageTintColor = new StyleColor(new Color(1, 1, 1, 1f));
+            }
+            cell.Add(logoContainer);
+        }
     }
 
     void BuildNormalCell(VisualElement cell, int dayNum, string dayStr, List<GameData> dayGames)
@@ -357,43 +372,64 @@ public class CalendarController : MonoBehaviour
                 var row = new VisualElement();
                 row.AddToClassList("selected-game-row");
                 bool isMyGame = g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id;
-                if (isMyGame) row.AddToClassList("selected-game-row--my-game");
+                if (isMyGame || g.game_type == "allstar") row.AddToClassList("selected-game-row--my-game");
                 if (g.is_played == 1) row.AddToClassList("selected-game-row--played");
 
-                var home = _allTeams.Find(t => t.id == g.home_team_id);
-                var away = _allTeams.Find(t => t.id == g.away_team_id);
+                if (g.game_type == "allstar")
+                {
+                    var teamsBlock = new VisualElement();
+                    teamsBlock.AddToClassList("selected-game-teams");
 
-                var teamsBlock = new VisualElement();
-                teamsBlock.AddToClassList("selected-game-teams");
+                    var logo = new VisualElement();
+                    logo.AddToClassList("selected-game-team-logo");
+                    if (_logoSprites32.TryGetValue("all-star-game", out var asSprite))
+                        logo.style.backgroundImage = new StyleBackground(asSprite);
+                    teamsBlock.Add(logo);
 
-                var awayLogo = new VisualElement();
-                awayLogo.AddToClassList("selected-game-team-logo");
-                if (away != null && _logoSprites32.TryGetValue(away.logo, out var aSprite))
-                    awayLogo.style.backgroundImage = new StyleBackground(aSprite);
-                teamsBlock.Add(awayLogo);
+                    var name = new Label();
+                    name.AddToClassList("selected-game-team-name");
+                    name.text = "ALL-STAR GAME";
+                    teamsBlock.Add(name);
 
-                var awayName = new Label();
-                awayName.AddToClassList("selected-game-team-name");
-                awayName.text = away?.abbreviation ?? "???";
-                teamsBlock.Add(awayName);
+                    row.Add(teamsBlock);
+                }
+                else
+                {
+                    var home = _allTeams.Find(t => t.id == g.home_team_id);
+                    var away = _allTeams.Find(t => t.id == g.away_team_id);
 
-                var vs = new Label();
-                vs.AddToClassList("selected-game-vs");
-                vs.text = "@";
-                teamsBlock.Add(vs);
+                    var teamsBlock = new VisualElement();
+                    teamsBlock.AddToClassList("selected-game-teams");
 
-                var homeLogo = new VisualElement();
-                homeLogo.AddToClassList("selected-game-team-logo");
-                if (home != null && _logoSprites32.TryGetValue(home.logo, out var hSprite))
-                    homeLogo.style.backgroundImage = new StyleBackground(hSprite);
-                teamsBlock.Add(homeLogo);
+                    var awayLogo = new VisualElement();
+                    awayLogo.AddToClassList("selected-game-team-logo");
+                    if (away != null && _logoSprites32.TryGetValue(away.logo, out var aSprite))
+                        awayLogo.style.backgroundImage = new StyleBackground(aSprite);
+                    teamsBlock.Add(awayLogo);
 
-                var homeName = new Label();
-                homeName.AddToClassList("selected-game-team-name");
-                homeName.text = home?.abbreviation ?? "???";
-                teamsBlock.Add(homeName);
+                    var awayName = new Label();
+                    awayName.AddToClassList("selected-game-team-name");
+                    awayName.text = away?.abbreviation ?? "???";
+                    teamsBlock.Add(awayName);
 
-                row.Add(teamsBlock);
+                    var vs = new Label();
+                    vs.AddToClassList("selected-game-vs");
+                    vs.text = "@";
+                    teamsBlock.Add(vs);
+
+                    var homeLogo = new VisualElement();
+                    homeLogo.AddToClassList("selected-game-team-logo");
+                    if (home != null && _logoSprites32.TryGetValue(home.logo, out var hSprite))
+                        homeLogo.style.backgroundImage = new StyleBackground(hSprite);
+                    teamsBlock.Add(homeLogo);
+
+                    var homeName = new Label();
+                    homeName.AddToClassList("selected-game-team-name");
+                    homeName.text = home?.abbreviation ?? "???";
+                    teamsBlock.Add(homeName);
+
+                    row.Add(teamsBlock);
+                }
 
                 if (g.is_played == 1)
                 {

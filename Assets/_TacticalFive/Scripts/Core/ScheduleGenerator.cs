@@ -130,6 +130,31 @@ public static class ScheduleGenerator
 
         DatabaseManager.Instance.SaveRegularSeasonGames(games);
         Debug.Log($"[Schedule] {games.Count} partidos de temporada regular generados.");
+
+        // All-Star Game (sábado de la segunda semana de febrero)
+        var feb8 = new DateTime(season.year_start + 1, 2, 8);
+        int daysToSat = ((int)DayOfWeek.Saturday - (int)feb8.DayOfWeek + 7) % 7;
+        var allStarDate = feb8.AddDays(daysToSat);
+        int allStarDay = (int)(allStarDate - seasonStart).TotalDays;
+
+        var allStarGame = new GameData
+        {
+            season_id    = season.id,
+            manager_id   = season.manager_id,
+            game_day     = allStarDay + 1,
+            game_date    = allStarDate.ToString("yyyy-MM-dd"),
+            home_team_id = 0,
+            away_team_id = 0,
+            is_played    = 0,
+            game_type    = "allstar",
+            series_label = "",
+            home_score   = 0,
+            away_score   = 0,
+            is_home      = 0
+        };
+        DatabaseManager.Instance.SaveRegularSeasonGames(new List<GameData> { allStarGame });
+        Debug.Log($"[Schedule] All-Star Game creado: {allStarDate:yyyy-MM-dd}");
+
         return games.Count;
     }
 
