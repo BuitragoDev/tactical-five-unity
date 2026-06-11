@@ -965,7 +965,7 @@ public class EditorController : MonoBehaviour
 
         var icon = new VisualElement();
         icon.AddToClassList("editor-modal-icon");
-        var iconName = isError ? "Icons/boton-x" : "Icons/boton-v";
+        var iconName = isError ? "Icons/boton-x" : "Icons/boton-v-64px";
         var tex = Resources.Load<Texture2D>(iconName);
         if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
         box.Add(icon);

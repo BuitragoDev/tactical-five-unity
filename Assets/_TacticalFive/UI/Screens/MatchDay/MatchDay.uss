@@ -345,11 +345,11 @@
 
 .box-row {
     flex-direction: row;
-    padding: 8px;
+    padding: 4px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.3);
     align-items: center;
-    min-height: 40px;
+    min-height: 36px;
 }
 
 .box-row.my-player {

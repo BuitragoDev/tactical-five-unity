@@ -175,99 +175,144 @@ public class MatchDayController : MonoBehaviour
         var gamesToday = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, gameDay);
         var myGame = gamesToday.FirstOrDefault(g =>
             g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+        if (myGame == null)
+            myGame = gamesToday.FirstOrDefault(g => g.game_type == "allstar");
         if (myGame == null) return;
 
-        var home = _allTeams.Find(t => t.id == myGame.home_team_id);
-        var away = _allTeams.Find(t => t.id == myGame.away_team_id);
+        bool isAllStar = myGame.game_type == "allstar";
+        var home = !isAllStar ? _allTeams.Find(t => t.id == myGame.home_team_id) : null;
+        var away = !isAllStar ? _allTeams.Find(t => t.id == myGame.away_team_id) : null;
 
         // Banner
-        SetLogo(_homeLogo, home?.logo, "80x80");
-        SetLogo(_awayLogo, away?.logo, "80x80");
-        _homeName.text = home?.name.ToUpper() ?? "";
-        _awayName.text = away?.name.ToUpper() ?? "";
+        if (isAllStar)
+        {
+            SetLogo(_homeLogo, "all-star-game", "80x80");
+            SetLogo(_awayLogo, "all-star-game", "80x80");
+            _homeName.text = "ESTE";
+            _awayName.text = "OESTE";
+        }
+        else
+        {
+            SetLogo(_homeLogo, home?.logo, "80x80");
+            SetLogo(_awayLogo, away?.logo, "80x80");
+            _homeName.text = home?.name.ToUpper() ?? "";
+            _awayName.text = away?.name.ToUpper() ?? "";
+        }
         _homeScore.text = myGame.home_score.ToString();
         _awayScore.text = myGame.away_score.ToString();
 
         // Venue with attendance
-        var attendance = DatabaseManager.Instance.GetGameAttendance(myGame.id);
-        string arenaName = home?.arena ?? "Pabellón";
-        int attendanceCount = attendance?.attendance ?? 0;
-
-        // Fallback: calculate if missing in DB (e.g., preseason games)
-        if (attendanceCount == 0 && home != null)
+        if (isAllStar)
         {
-            bool myTeamIsHome = myGame.home_team_id == _myTeam.id;
-            bool myTeamIsAway = myGame.away_team_id == _myTeam.id;
+            _venueLabel.text = "All-Star Arena (50,000 espectadores)";
+        }
+        else
+        {
+            var attendance = DatabaseManager.Instance.GetGameAttendance(myGame.id);
+            string arenaName = home?.arena ?? "Pabellón";
+            int attendanceCount = attendance?.attendance ?? 0;
 
-            var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
-            var homeTeamGames = teamGames.Where(g => g.home_team_id == home.id || g.away_team_id == home.id).ToList();
-            int wins = homeTeamGames.Count(g =>
-                (g.home_team_id == home.id && g.home_score > g.away_score) ||
-                (g.away_team_id == home.id && g.away_score > g.home_score));
-            int totalPlayed = homeTeamGames.Count;
-            float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
-
-            float baseAttendance;
-            float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
-
-            if (myTeamIsHome)
+            if (attendanceCount == 0 && home != null)
             {
-                var rival = DatabaseManager.Instance.GetTeamById(myGame.away_team_id);
-                float rivalRepFactor = rival != null ? (rival.reputation / 5f) * 0.08f : 0f;
-                baseAttendance = home.capacity * (
-                    0.30f +
-                    (_manager.fan_confidence / 100f) * 0.35f +
-                    winPct * 0.15f +
-                    rivalRepFactor
-                );
-            }
-            else if (myTeamIsAway)
-            {
-                float myRepFactor = (_myTeam.reputation / 5f) * 0.06f;
-                baseAttendance = home.capacity * (
-                    0.55f +
-                    winPct * 0.30f +
-                    myRepFactor
-                );
-            }
-            else
-            {
-                baseAttendance = home.capacity * (0.55f + winPct * 0.40f);
+                bool myTeamIsHome = myGame.home_team_id == _myTeam.id;
+                bool myTeamIsAway = myGame.away_team_id == _myTeam.id;
+
+                var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+                var homeTeamGames = teamGames.Where(g => g.home_team_id == home.id || g.away_team_id == home.id).ToList();
+                int wins = homeTeamGames.Count(g =>
+                    (g.home_team_id == home.id && g.home_score > g.away_score) ||
+                    (g.away_team_id == home.id && g.away_score > g.home_score));
+                int totalPlayed = homeTeamGames.Count;
+                float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
+
+                float baseAttendance;
+                float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
+
+                if (myTeamIsHome)
+                {
+                    var rival = DatabaseManager.Instance.GetTeamById(myGame.away_team_id);
+                    float rivalRepFactor = rival != null ? (rival.reputation / 5f) * 0.08f : 0f;
+                    baseAttendance = home.capacity * (
+                        0.30f +
+                        (_manager.fan_confidence / 100f) * 0.35f +
+                        winPct * 0.15f +
+                        rivalRepFactor
+                    );
+                }
+                else if (myTeamIsAway)
+                {
+                    float myRepFactor = (_myTeam.reputation / 5f) * 0.06f;
+                    baseAttendance = home.capacity * (
+                        0.55f +
+                        winPct * 0.30f +
+                        myRepFactor
+                    );
+                }
+                else
+                {
+                    baseAttendance = home.capacity * (0.55f + winPct * 0.40f);
+                }
+
+                attendanceCount = (int)Mathf.Min(home.capacity, baseAttendance * randomFactor);
             }
 
-            attendanceCount = (int)Mathf.Min(home.capacity, baseAttendance * randomFactor);
+            string attendanceText = attendanceCount > 0
+                ? $" ({attendanceCount:N0} espectadores)"
+                : "";
+            _venueLabel.text = $"{arenaName}{attendanceText}";
         }
 
-        string attendanceText = attendanceCount > 0
-            ? $" ({attendanceCount:N0} espectadores)"
-            : "";
-        _venueLabel.text = $"{arenaName}{attendanceText}";
-
-
         // My team badges
-        bool homeIsMyTeam = myGame.home_team_id == _myTeam.id;
-        _homeMyTeamBadge.style.display = homeIsMyTeam ? DisplayStyle.Flex : DisplayStyle.None;
-        _awayMyTeamBadge.style.display = !homeIsMyTeam ? DisplayStyle.Flex : DisplayStyle.None;
+        if (isAllStar)
+        {
+            _homeMyTeamBadge.style.display = DisplayStyle.None;
+            _awayMyTeamBadge.style.display = DisplayStyle.None;
+        }
+        else
+        {
+            bool homeIsMyTeam = myGame.home_team_id == _myTeam.id;
+            _homeMyTeamBadge.style.display = homeIsMyTeam ? DisplayStyle.Flex : DisplayStyle.None;
+            _awayMyTeamBadge.style.display = !homeIsMyTeam ? DisplayStyle.Flex : DisplayStyle.None;
+        }
 
         // Highlight my team name in gold
         var homeTeamBlock = _root.Q<VisualElement>("HomeTeamBlock");
         var awayTeamBlock = _root.Q<VisualElement>("AwayTeamBlock");
-        if (homeIsMyTeam)
+        if (!isAllStar)
         {
-            homeTeamBlock.AddToClassList("my-team");
-            awayTeamBlock.RemoveFromClassList("my-team");
+            bool homeIsMyTeam = myGame.home_team_id == _myTeam.id;
+            if (homeIsMyTeam)
+            {
+                homeTeamBlock.AddToClassList("my-team");
+                awayTeamBlock.RemoveFromClassList("my-team");
+            }
+            else
+            {
+                awayTeamBlock.AddToClassList("my-team");
+                homeTeamBlock.RemoveFromClassList("my-team");
+            }
         }
         else
         {
-            awayTeamBlock.AddToClassList("my-team");
             homeTeamBlock.RemoveFromClassList("my-team");
+            awayTeamBlock.RemoveFromClassList("my-team");
         }
 
         // Box headers
-        _homeBoxName.text = home?.name.ToUpper() ?? "";
-        _awayBoxName.text = away?.name.ToUpper() ?? "";
-        SetLogo(_homeBoxLogo, home?.logo, "64x64");
-        SetLogo(_awayBoxLogo, away?.logo, "64x64");
+        if (isAllStar)
+        {
+            _homeBoxName.text = "ESTE";
+            _awayBoxName.text = "OESTE";
+            SetLogo(_homeBoxLogo, "all-star-game", "64x64");
+            SetLogo(_awayBoxLogo, "all-star-game", "64x64");
+        }
+        else
+        {
+            _homeBoxName.text = home?.name.ToUpper() ?? "";
+            _awayBoxName.text = away?.name.ToUpper() ?? "";
+            SetLogo(_homeBoxLogo, home?.logo, "64x64");
+            SetLogo(_awayBoxLogo, away?.logo, "64x64");
+        }
 
         // Player stats - only players with minutes > 0
         var homeStats = DatabaseManager.Instance.GetGamePlayerStats(myGame.id)

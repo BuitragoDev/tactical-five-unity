@@ -391,8 +391,9 @@ public class DashboardController : MonoBehaviour
 
         bool myTeamPlays = gamesOnNextDay.Any(g =>
             g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+        bool hasAllStar = gamesOnNextDay.Any(g => g.game_type == "allstar");
 
-        if (myTeamPlays)
+        if (myTeamPlays || hasAllStar)
         {
             SetActionBtn("DÍA DE PARTIDO", "btn-action--match");
             return;
@@ -447,6 +448,7 @@ public class DashboardController : MonoBehaviour
 
         bool myTeamPlays = gamesToday.Any(g =>
             g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+        bool hasAllStar = gamesToday.Any(g => g.game_type == "allstar");
 
         if (gamesToday.Count > 0)
         {
@@ -596,9 +598,12 @@ public class DashboardController : MonoBehaviour
         {
             Debug.Log($"[Dashboard] Día {gameDay} — sin partidos, continúa en Dashboard");
         }
-        else if (myTeamPlays)
+        else if (myTeamPlays || hasAllStar)
         {
-            Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → MatchDay");
+            if (hasAllStar)
+                Debug.Log($"[Dashboard] Día {gameDay} — All-Star Game → MatchDay");
+            else
+                Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → MatchDay");
             ScreenManager.Instance.GoTo(GameScreen.MatchDay);
         }
         else
@@ -653,9 +658,17 @@ public class DashboardController : MonoBehaviour
         if (!string.IsNullOrEmpty(_season.current_date))
         {
             var currentDate = System.DateTime.Parse(_season.current_date);
-            // Skip All-Star break (second week of February — no games scheduled)
-            if (currentDate.Month == 2 && currentDate.Day >= 8 && currentDate.Day <= 14)
+
+            // Only skip the Feb break if there are no unplayed games on that date
+            // (the All-Star game is scheduled during the break, Feb 13)
+            bool hasUnplayedToday = DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => g.manager_id == _manager.id
+                       && g.game_date == _season.current_date
+                       && g.is_played == 0);
+
+            if (!hasUnplayedToday && currentDate.Month == 2 && currentDate.Day >= 8 && currentDate.Day <= 14)
                 currentDate = new System.DateTime(currentDate.Year, 2, 15);
+
             return DateToGameDay(currentDate);
         }
 

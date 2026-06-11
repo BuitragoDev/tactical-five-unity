@@ -175,8 +175,9 @@ public class GameResultsController : MonoBehaviour
 
         foreach (var g in gamesToday)
         {
-            var home = _allTeams.Find(t => t.id == g.home_team_id);
-            var away = _allTeams.Find(t => t.id == g.away_team_id);
+            bool isAllStar = g.game_type == "allstar";
+            var home = !isAllStar ? _allTeams.Find(t => t.id == g.home_team_id) : null;
+            var away = !isAllStar ? _allTeams.Find(t => t.id == g.away_team_id) : null;
             var homeStats = allStatsBatch.Where(s => s.game_id == g.id && s.team_id == g.home_team_id).ToList();
             var awayStats = allStatsBatch.Where(s => s.game_id == g.id && s.team_id == g.away_team_id).ToList();
             allPlayerStats.AddRange(homeStats);
@@ -194,12 +195,12 @@ public class GameResultsController : MonoBehaviour
             var homeSide = new VisualElement();
             homeSide.AddToClassList("game-card-team-side");
             homeSide.AddToClassList("team-side-first");
-            var homeName = new Label { text = home?.name.ToUpper() ?? "" };
+            var homeName = new Label { text = isAllStar ? "CONFERENCIA\nESTE" : (home?.name.ToUpper() ?? "") };
             homeName.AddToClassList("game-card-team-name");
             if (g.home_team_id == _myTeam.id) homeName.AddToClassList("my-team");
             var homeLogo = new VisualElement();
             homeLogo.AddToClassList("game-card-logo");
-            SetLogo(homeLogo, home?.logo, "64x64");
+            SetLogo(homeLogo, isAllStar ? "all-star-game" : home?.logo, "64x64");
             homeSide.Add(homeName);
             homeSide.Add(homeLogo);
 
@@ -225,8 +226,8 @@ public class GameResultsController : MonoBehaviour
             awaySide.AddToClassList("game-card-team-side");
             var awayLogo = new VisualElement();
             awayLogo.AddToClassList("game-card-logo");
-            SetLogo(awayLogo, away?.logo, "64x64");
-            var awayName = new Label { text = away?.name.ToUpper() ?? "" };
+            SetLogo(awayLogo, isAllStar ? "all-star-game" : away?.logo, "64x64");
+            var awayName = new Label { text = isAllStar ? "CONFERENCIA\nOESTE" : (away?.name.ToUpper() ?? "") };
             awayName.AddToClassList("game-card-team-name");
             if (g.away_team_id == _myTeam.id) awayName.AddToClassList("my-team");
             awaySide.Add(awayLogo);
@@ -273,7 +274,7 @@ public class GameResultsController : MonoBehaviour
             var s = top[i];
             var player = DatabaseManager.Instance.GetPlayerById(s.player_id);
             if (player == null) continue;
-            var team = _allTeams.Find(t => t.id == s.team_id);
+            var team = _allTeams.Find(t => t.id == s.team_id) ?? _allTeams.Find(t => t.id == player.team_id);
 
             var row = new VisualElement();
             row.AddToClassList("lb-row");
