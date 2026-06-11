@@ -116,6 +116,7 @@ public class DashboardController : MonoBehaviour
         LoadData();
         RegisterCallbacks();
         Refresh();
+        CheckBudgetWarning();
     }
 
     void Update()
@@ -499,6 +500,7 @@ public class DashboardController : MonoBehaviour
                 {
                     CreateGameResultMessage(game, result);
                     UpdateFanConfidence(game, result);
+                    CheckBudgetAfterGame();
                 }
 
                 yield return null;
@@ -652,6 +654,103 @@ public class DashboardController : MonoBehaviour
         _loadingSpinner.style.display = DisplayStyle.None;
         _btnAction.SetEnabled(true);
         _isLoading = false;
+    }
+
+    void CheckBudgetAfterGame()
+    {
+        if (_myTeam.budget < 0)
+        {
+            _manager.budget_red_warnings++;
+            GameResultCache.PendingBudgetWarning = true;
+        }
+        else
+        {
+            _manager.budget_red_warnings = 0;
+        }
+        DatabaseManager.Instance.SaveManager(_manager);
+    }
+
+    void CheckBudgetWarning()
+    {
+        if (!GameResultCache.PendingBudgetWarning) return;
+        GameResultCache.PendingBudgetWarning = false;
+
+        if (_manager.budget_red_warnings >= 3)
+            ShowBudgetFiredModal();
+        else
+            ShowBudgetWarningModal(_manager.budget_red_warnings);
+    }
+
+    void ShowBudgetWarningModal(int num)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--warning");
+        _firedOverlay.Add(box);
+
+        var icon = new VisualElement();
+        icon.AddToClassList("fired-modal-icon");
+        box.Add(icon);
+
+        var title = new Label("AVISO FINANCIERO");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fired-modal-title--warning");
+        box.Add(title);
+
+        var text = new Label(
+            $"El presupuesto del club está en números rojos.\n\n" +
+            $"Aviso {num} de 3."
+        );
+        text.AddToClassList("fired-modal-text");
+        box.Add(text);
+
+        var btn = new Button();
+        btn.text = "CONTINUAR";
+        btn.AddToClassList("fired-modal-btn");
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        box.Add(btn);
+    }
+
+    void ShowBudgetFiredModal()
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        _firedOverlay.Add(box);
+
+        var icon = new VisualElement();
+        icon.AddToClassList("fired-modal-icon");
+        box.Add(icon);
+
+        var title = new Label("DESPIDO");
+        title.AddToClassList("fired-modal-title");
+        box.Add(title);
+
+        var text = new Label(
+            "La directiva ha decidido prescindir de tus servicios\n" +
+            "debido a la mala gestión financiera del club."
+        );
+        text.AddToClassList("fired-modal-text");
+        box.Add(text);
+
+        var btn = new Button();
+        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.AddToClassList("fired-modal-btn");
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.MainMenu);
+        });
+        box.Add(btn);
     }
 
     void ShowFiredModal()

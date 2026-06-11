@@ -12,4 +12,5 @@ public class ManagerData
     public int    morale         { get; set; }
     public int    pressure       { get; set; }
     public int    fan_confidence { get; set; }
+    public int    budget_red_warnings { get; set; }
 }

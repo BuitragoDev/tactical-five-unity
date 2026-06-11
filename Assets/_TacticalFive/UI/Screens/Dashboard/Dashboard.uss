@@ -878,3 +878,11 @@
     padding: 12px 32px;
     cursor: pointer;
 }
+
+.fired-modal-box--warning {
+    border-top-color: rgb(212, 160, 23);
+}
+
+.fired-modal-title--warning {
+    color: rgb(212, 160, 23);
+}

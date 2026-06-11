@@ -182,6 +182,15 @@ public class DatabaseManager : MonoBehaviour
             _db.Execute("ALTER TABLE players ADD COLUMN renewal_cooldown_day INTEGER DEFAULT 0");
             Debug.Log("[DB] Migration: added renewal_cooldown_day to players");
         }
+
+        // Add budget_red_warnings to managers if missing
+        var managerCols2 = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");
+        bool hasBudgetWarnings = managerCols2.Any(c => c.name == "budget_red_warnings");
+        if (!hasBudgetWarnings)
+        {
+            _db.Execute("ALTER TABLE managers ADD COLUMN budget_red_warnings INTEGER DEFAULT 0");
+            Debug.Log("[DB] Migration: added budget_red_warnings to managers");
+        }
     }
 
     class ColumnInfo
