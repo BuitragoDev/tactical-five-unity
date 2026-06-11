@@ -117,17 +117,24 @@ public static class GameSimulator
         game.q4_home = qsArr.Length > 3 ? qsArr[3].Item1 : 0;
         game.q4_away = qsArr.Length > 3 ? qsArr[3].Item2 : 0;
 
-        // Guardar estadísticas para TODOS los tipos de partido
+        // Guardar estadísticas para TODOS los tipos de partido excepto All-Star
         // (la pantalla Stats filtra solo temporada regular)
-        DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
-        foreach (var ps in homePS)
-            DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.home_team_id));
-        foreach (var ps in awayPS)
-            DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.away_team_id));
+        if (game.game_type != "allstar")
+        {
+            DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
+            foreach (var ps in homePS)
+                DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.home_team_id));
+            foreach (var ps in awayPS)
+                DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.away_team_id));
 
-        // Check and update records
-        DatabaseManager.Instance.CheckAndUpdateRecords(game, homePS, game.home_team_id);
-        DatabaseManager.Instance.CheckAndUpdateRecords(game, awayPS, game.away_team_id);
+            // Check and update records
+            DatabaseManager.Instance.CheckAndUpdateRecords(game, homePS, game.home_team_id);
+            DatabaseManager.Instance.CheckAndUpdateRecords(game, awayPS, game.away_team_id);
+        }
+        else
+        {
+            DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
+        }
 
         var homeInjuries = CheckInjuries(homePS);
         var awayInjuries = CheckInjuries(awayPS);

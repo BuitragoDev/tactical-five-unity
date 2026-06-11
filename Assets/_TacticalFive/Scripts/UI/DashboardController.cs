@@ -455,13 +455,26 @@ public class DashboardController : MonoBehaviour
 
             foreach (var game in gamesToday)
             {
-                var homePlayers = DatabaseManager.Instance.GetPlayersByTeam(game.home_team_id);
-                var awayPlayers = DatabaseManager.Instance.GetPlayersByTeam(game.away_team_id);
+                List<PlayerData> homePlayers, awayPlayers;
+
+                if (game.game_type == "allstar")
+                {
+                    homePlayers = BuildAllStarRoster("East");
+                    awayPlayers = BuildAllStarRoster("West");
+                }
+                else
+                {
+                    homePlayers = DatabaseManager.Instance.GetPlayersByTeam(game.home_team_id);
+                    awayPlayers = DatabaseManager.Instance.GetPlayersByTeam(game.away_team_id);
+                }
+
                 var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers);
                 DatabaseManager.Instance.UpdateGame(game);
                 GameResultCache.SimulatedGameIds.Add(game.id);
 
-                ProcessGameFinances(game, result);
+                if (game.game_type != "allstar")
+                    ProcessGameFinances(game, result);
+
                 ProcessGameInjuries(result, game.game_date);
 
                 bool myTeamInThisGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
@@ -1725,6 +1738,37 @@ public class DashboardController : MonoBehaviour
 
         if (_logoSprites.TryGetValue(logoName, out var fallback))
             elem.style.backgroundImage = new StyleBackground(fallback);
+    }
+
+    List<PlayerData> BuildAllStarRoster(string conference)
+    {
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var conferenceTeamIds = allTeams
+            .Where(t => t.conference == conference)
+            .Select(t => t.id)
+            .ToHashSet();
+
+        var allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>()
+            .Where(p => p.team_id != 0 && p.injury_days == 0)
+            .ToList();
+
+        var candidates = allPlayers
+            .Where(p => conferenceTeamIds.Contains(p.team_id))
+            .ToList();
+
+        var roster = new List<PlayerData>();
+        string[] positions = { "PG", "SG", "SF", "PF", "C" };
+
+        foreach (var pos in positions)
+        {
+            var selected = candidates
+                .Where(p => p.position == pos)
+                .OrderByDescending(p => p.overall)
+                .Take(3);
+            roster.AddRange(selected);
+        }
+
+        return roster;
     }
 
     // ── CLASE AUXILIAR ───────────────────────────────────
