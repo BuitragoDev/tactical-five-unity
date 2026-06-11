@@ -270,28 +270,28 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement class="panel-body">
                                     <ui:VisualElement class="board-item">
-                                        <ui:Label text="Confianza de la Directiva" class="board-label"/>
+                                        <ui:Label text="CONFIANZA DE LA DIRECTIVA" class="board-label"/>
                                         <ui:VisualElement class="board-bar-bg">
                                             <ui:VisualElement name="BarTrust" class="board-bar-fill"/>
                                         </ui:VisualElement>
                                         <ui:Label name="ValTrust" text="50%" class="board-value"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="board-item">
-                                        <ui:Label text="Moral del Equipo" class="board-label"/>
+                                        <ui:Label text="MORAL DEL EQUIPO" class="board-label"/>
                                         <ui:VisualElement class="board-bar-bg">
                                             <ui:VisualElement name="BarMorale" class="board-bar-fill"/>
                                         </ui:VisualElement>
                                         <ui:Label name="ValMorale" text="50%" class="board-value"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="board-item">
-                                        <ui:Label text="Confianza de la Prensa" class="board-label"/>
+                                        <ui:Label text="PRESIÓN DE LA PRENSA" class="board-label"/>
                                         <ui:VisualElement class="board-bar-bg">
                                             <ui:VisualElement name="BarPressure" class="board-bar-fill"/>
                                         </ui:VisualElement>
                                         <ui:Label name="ValPressure" text="50%" class="board-value"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="board-item">
-                                        <ui:Label text="Confianza de los Fans" class="board-label"/>
+                                        <ui:Label text="CONFIANZA DE LOS FANS" class="board-label"/>
                                         <ui:VisualElement class="board-bar-bg">
                                             <ui:VisualElement name="BarFanConfidence" class="board-bar-fill"/>
                                         </ui:VisualElement>

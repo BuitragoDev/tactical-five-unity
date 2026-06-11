@@ -126,7 +126,7 @@
                     </ui:VisualElement>
 
                     <!-- Play-In -->
-                    <ui:VisualElement name="PlayInPanel" class="panel panel-playoffs">
+                    <ui:VisualElement name="PlayInPanel" class="panel panel-playoffs" style="border-color: rgb(212, 160, 23);">
                         <ui:VisualElement class="panel-header">
                             <ui:Label class="panel-title" text="PLAY-IN TOURNAMENT" />
                         </ui:VisualElement>
@@ -135,7 +135,7 @@
                     </ui:VisualElement>
 
                     <!-- Eastern Conference -->
-                    <ui:VisualElement class="panel panel-playoffs">
+                    <ui:VisualElement class="panel panel-playoffs"  style="border-color: rgb(8, 134, 138);">
                         <ui:VisualElement class="panel-header">
                             <ui:Label class="panel-title" text="PLAYOFFS — CONFERENCIA ESTE" />
                         </ui:VisualElement>
@@ -143,7 +143,7 @@
                     </ui:VisualElement>
 
                     <!-- Western Conference -->
-                    <ui:VisualElement class="panel panel-playoffs">
+                    <ui:VisualElement class="panel panel-playoffs"  style="border-color: rgb(8, 138, 82);">
                         <ui:VisualElement class="panel-header">
                             <ui:Label class="panel-title" text="PLAYOFFS — CONFERENCIA OESTE" />
                         </ui:VisualElement>
@@ -151,7 +151,7 @@
                     </ui:VisualElement>
 
                     <!-- NBA Finals -->
-                    <ui:VisualElement name="FinalsPanel" class="panel panel-playoffs panel-finals">
+                    <ui:VisualElement name="FinalsPanel" class="panel panel-playoffs panel-finals"  style="border-color: rgb(212, 160, 23);">
                         <ui:VisualElement class="panel-header">
                             <ui:Label class="panel-title" text="FINALES NBA" />
                         </ui:VisualElement>

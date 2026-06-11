@@ -182,7 +182,7 @@
     border-color: rgb(42, 51, 71);
     border-radius: 2px;
     flex-shrink: 0;
-    width: 450px;
+    width: 490px;
     min-height: 0;
 }
 
@@ -254,7 +254,7 @@
     color: rgb(255, 255, 255);
     margin-left: 10px;
     flex-shrink: 0;
-    width: 55px;
+    width: 75px;
     -unity-text-align: middle-center;
 }
 
