@@ -817,3 +817,64 @@
     color: rgb(208, 216, 232);
     -unity-text-align: middle-right;
 }
+
+/* ══ FIRED MODAL ══ */
+
+.fired-modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+.fired-modal-box {
+    width: 520px;
+    background-color: rgb(15, 17, 23);
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    border-top-width: 3px;
+    border-top-color: rgb(192, 57, 43);
+    padding: 32px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fired-modal-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 8px;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/boton-x.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.fired-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 36px;
+    letter-spacing: 4px;
+    color: rgb(192, 57, 43);
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+
+.fired-modal-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(179, 190, 214);
+    -unity-text-align: middle-center;
+    margin-bottom: 24px;
+    white-space: normal;
+}
+
+.fired-modal-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    background-color: rgb(192, 57, 43);
+    color: white;
+    border-width: 0;
+    border-radius: 4px;
+    padding: 12px 32px;
+    cursor: pointer;
+}

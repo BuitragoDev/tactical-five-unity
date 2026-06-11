@@ -90,6 +90,9 @@ public class DashboardController : MonoBehaviour
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
 
+    // Fired modal
+    private VisualElement _firedOverlay;
+
     void OnEnable()
     {
         _doc = GetComponent<UIDocument>();
@@ -101,6 +104,11 @@ public class DashboardController : MonoBehaviour
         _root.style.top = 0; _root.style.bottom = 0;
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+
+        // Fired overlay (hidden by default via USS)
+        _firedOverlay = new VisualElement();
+        _firedOverlay.AddToClassList("fired-modal-overlay");
+        _root.Add(_firedOverlay);
 
         AudioManager.Instance?.PlayMusic("backgroundMenu");
         CacheReferences();
@@ -423,7 +431,14 @@ public class DashboardController : MonoBehaviour
 
         if (_season.phase == "finished")
         {
-            ScreenManager.Instance.GoTo(GameScreen.SeasonSummary);
+            if (_manager.trust < 10)
+            {
+                ShowFiredModal();
+            }
+            else
+            {
+                ScreenManager.Instance.GoTo(GameScreen.SeasonSummary);
+            }
             return;
         }
 
@@ -637,6 +652,41 @@ public class DashboardController : MonoBehaviour
         _loadingSpinner.style.display = DisplayStyle.None;
         _btnAction.SetEnabled(true);
         _isLoading = false;
+    }
+
+    void ShowFiredModal()
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        _firedOverlay.Add(box);
+
+        var icon = new VisualElement();
+        icon.AddToClassList("fired-modal-icon");
+        box.Add(icon);
+
+        var title = new Label("DESPIDO");
+        title.AddToClassList("fired-modal-title");
+        box.Add(title);
+
+        var text = new Label(
+            "La directiva ha decidido prescindir de tus servicios.\n\n" +
+            "Los resultados de la temporada no han cumplido las expectativas mínimas."
+        );
+        text.AddToClassList("fired-modal-text");
+        box.Add(text);
+
+        var btn = new Button();
+        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.AddToClassList("fired-modal-btn");
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.MainMenu);
+        });
+        box.Add(btn);
     }
 
     int DateToGameDay(System.DateTime date)
