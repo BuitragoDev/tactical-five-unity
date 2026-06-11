@@ -640,6 +640,9 @@ public class DashboardController : MonoBehaviour
         if (!string.IsNullOrEmpty(_season.current_date))
         {
             var currentDate = System.DateTime.Parse(_season.current_date);
+            // Skip All-Star break (second week of February — no games scheduled)
+            if (currentDate.Month == 2 && currentDate.Day >= 8 && currentDate.Day <= 14)
+                currentDate = new System.DateTime(currentDate.Year, 2, 15);
             return DateToGameDay(currentDate);
         }
 
@@ -1625,7 +1628,7 @@ public class DashboardController : MonoBehaviour
         if (rank > 0)
         {
             if (obj == "Zona tranquila")
-                objectiveMet = rank >= 11;          // 11+ = no entrar a nada
+                objectiveMet = rank <= 12;          // 11+ = no entrar a nada
             else if (obj == "Play-In")
                 objectiveMet = rank <= 10;          // 1-10 = al menos play-in
             else if (obj == "Playoffs")

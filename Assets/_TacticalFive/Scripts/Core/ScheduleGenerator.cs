@@ -74,7 +74,7 @@ public static class ScheduleGenerator
 
         foreach (var (homePk, awayPk) in matchups)
         {
-            int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount);
+            int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount, seasonStart);
             if (day >= 0)
             {
                 scheduled.Add((day, homePk, awayPk));
@@ -91,6 +91,10 @@ public static class ScheduleGenerator
         {
             for (int d = 0; d < totalDays; d++)
             {
+                var date = seasonStart.AddDays(d);
+                if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
+                    continue;
+
                 if (!teamDaySet[homePk].Contains(d) && !teamDaySet[awayPk].Contains(d))
                 {
                     scheduled.Add((d, homePk, awayPk));
@@ -148,13 +152,18 @@ public static class ScheduleGenerator
 
     static int FindDay(int homePk, int awayPk, int totalDays,
         Dictionary<int, HashSet<int>> teamDaySet,
-        Dictionary<int, int> dayGamesCount)
+        Dictionary<int, int> dayGamesCount,
+        DateTime seasonStart)
     {
         int bestDay   = -1;
         int bestScore = -1000;
 
         for (int d = 0; d < totalDays; d++)
         {
+            var date = seasonStart.AddDays(d);
+            if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
+                continue;
+
             if (teamDaySet[homePk].Contains(d) || teamDaySet[awayPk].Contains(d))
                 continue;
             if (dayGamesCount.GetValueOrDefault(d, 0) >= 15)
