@@ -82,21 +82,21 @@
 }
 
 .player-row-name {
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     -unity-text-transform: upper;
     flex: 1;
 }
 .player-row-pos {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     width: 30px;
     -unity-text-align: middle-center;
 }
 .player-row-age {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     width: 30px;
@@ -104,7 +104,7 @@
     margin-right: 10px;
 }
 .player-row-ovr {
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     width: 30px;
@@ -114,18 +114,18 @@
 
 .btn-scout {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    background-color: rgb(39, 174, 96);
+    background-color: rgb(8, 63, 31);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 13px;
+    font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 6px 14px;
+    padding: 12px 14px;
     border-radius: 4px;
     -unity-text-align: middle-center;
 }
 .btn-scout:hover {
-    background-color: rgb(46, 204, 113);
+    background-color: rgb(10, 69, 35);
 }
 .btn-scout--disabled {
     background-color: rgb(60, 63, 68);
@@ -216,7 +216,7 @@
 }
 
 .scout-attr {
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(160, 170, 190);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     width: 20%;
@@ -232,20 +232,19 @@
 }
 
 .scout-slot-salary {
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    margin-top: 6px;
 }
 
 .scout-slot-contract {
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
 }
 
 .scout-empty-text {
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(80, 90, 110);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     padding: 20px 0;
@@ -329,4 +328,61 @@
 }
 .btn-fire:hover {
     background-color: rgb(90, 19, 11);
+}
+
+/* ── SCOUT FULL MODAL ── */
+
+.cartera-modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+}
+
+.cartera-modal-box {
+    width: 480px;
+    background-color: rgb(15, 17, 23);
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    border-top-width: 3px;
+    border-top-color: rgb(212, 160, 23);
+    padding: 28px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.cartera-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: rgb(212, 160, 23);
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+
+.cartera-modal-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(179, 190, 214);
+    -unity-text-align: middle-center;
+    margin-bottom: 12px;
+    white-space: normal;
+}
+
+.cartera-modal-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(39, 174, 96);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 3px;
+    -unity-text-transform: upper;
+    padding: 10px 0;
+    width: 200px;
+    -unity-text-align: middle-center;
+    margin-top: 20px;
+}
+.cartera-modal-btn:hover {
+    background-color: rgb(46, 204, 113);
 }

@@ -268,7 +268,7 @@ public class LoansController : MonoBehaviour
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "PANEL PRINCIPAL";
+        _btnAction.text = "DASHBOARD";
     }
 
     void BuildFinancialStaff()

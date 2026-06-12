@@ -242,7 +242,7 @@ public class CarteraController : MonoBehaviour
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
         _headerScoutCount.text = $"{_scouts.Count(s => s.completed == 1)}/{MAX_SCOUTS}";
-        _btnAction.text = "PANEL PRINCIPAL";
+        _btnAction.text = "DASHBOARD";
 
         if (_season != null)
         {
@@ -389,7 +389,8 @@ public class CarteraController : MonoBehaviour
         {
             var scoutBtn = new Button();
             int activeCount = _scouts.Count(s => s.completed == 0);
-            bool canScout = _ojeador != null && activeCount < MAX_SCOUTS;
+            bool hasOjeador = _ojeador != null;
+            bool slotsFull = activeCount >= MAX_SCOUTS;
 
             var alreadyScouting = _scouts.Any(s => s.player_id == _selectedPlayer.id);
             if (alreadyScouting)
@@ -398,21 +399,25 @@ public class CarteraController : MonoBehaviour
                 scoutBtn.text = "YA EN CARTERA";
                 scoutBtn.SetEnabled(false);
             }
-            else if (!canScout)
+            else if (!hasOjeador)
             {
                 scoutBtn.AddToClassList("btn-scout--disabled");
-                scoutBtn.text = _ojeador == null ? "SIN OJEADOR" : "CARTERA LLENA";
+                scoutBtn.text = "SIN OJEADOR";
                 scoutBtn.SetEnabled(false);
             }
             else
             {
                 scoutBtn.AddToClassList("btn-scout");
-                scoutBtn.text = "OJEAR";
+                scoutBtn.text = $"OJEAR A {_selectedPlayer.first_name.ToUpper()} {_selectedPlayer.last_name.ToUpper()}";
+
                 var captured = _selectedPlayer;
                 scoutBtn.RegisterCallback<ClickEvent>(_ =>
                 {
                     PlayClick();
-                    StartScout(captured);
+                    if (slotsFull)
+                        ShowScoutFullModal();
+                    else
+                        StartScout(captured);
                 });
             }
 
@@ -570,16 +575,24 @@ public class CarteraController : MonoBehaviour
 
                     slot.Add(attrs);
 
+                    var infoRow = new VisualElement();
+                    infoRow.style.flexDirection = FlexDirection.Row;
+                    infoRow.style.marginTop = 6;
+
                     var salaryLbl = new Label();
                     salaryLbl.AddToClassList("scout-slot-salary");
-                    salaryLbl.text = $"Salario: {FormatSalary(player.salary)}";
-                    slot.Add(salaryLbl);
+                    salaryLbl.style.flexGrow = 1;
+                    salaryLbl.text = $"<color=#7a8aaa>Salario:</color> <color=#d0d8e8>{FormatSalary(player.salary)}</color>";
+                    infoRow.Add(salaryLbl);
 
                     var contractLbl = new Label();
                     contractLbl.AddToClassList("scout-slot-contract");
+                    contractLbl.style.flexGrow = 1;
                     string yearPlural = player.contract_years != 1 ? "s" : "";
-                    contractLbl.text = $"Contrato: {player.contract_years} a\u00f1o{yearPlural}";
-                    slot.Add(contractLbl);
+                    contractLbl.text = $"<color=#7a8aaa>Contrato:</color> <color=#d0d8e8>{player.contract_years} a\u00f1o{yearPlural}</color>";
+                    infoRow.Add(contractLbl);
+
+                    slot.Add(infoRow);
                 }
                 else
                 {
@@ -640,6 +653,55 @@ public class CarteraController : MonoBehaviour
     string FormatSalary(long amount)
     {
         return "$" + amount.ToString("N0").Replace(',', '.');
+    }
+
+    VisualElement _scoutFullOverlay;
+
+    void ShowScoutFullModal()
+    {
+        if (_scoutFullOverlay != null) return;
+
+        var overlay = new VisualElement();
+        overlay.AddToClassList("cartera-modal-overlay");
+        overlay.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == overlay)
+                CloseScoutFullModal();
+        });
+
+        var box = new VisualElement();
+        box.AddToClassList("cartera-modal-box");
+
+        var title = new Label();
+        title.AddToClassList("cartera-modal-title");
+        title.text = "CARTERA LLENA";
+        box.Add(title);
+
+        var msg = new Label();
+        msg.AddToClassList("cartera-modal-text");
+        msg.text = "No hay m\u00e1s espacio para ojeadores.\nRetira alg\u00fan jugador de la cartera para poder ojear a m\u00e1s.";
+        box.Add(msg);
+
+        var okBtn = new Button();
+        okBtn.AddToClassList("cartera-modal-btn");
+        okBtn.text = "ENTENDIDO";
+        okBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseScoutFullModal(); });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(okBtn);
+        box.Add(okBtn);
+
+        overlay.Add(box);
+        _root.Add(overlay);
+        _scoutFullOverlay = overlay;
+    }
+
+    void CloseScoutFullModal()
+    {
+        if (_scoutFullOverlay != null)
+        {
+            _root.Remove(_scoutFullOverlay);
+            _scoutFullOverlay = null;
+        }
     }
 
     void PlayClick()
