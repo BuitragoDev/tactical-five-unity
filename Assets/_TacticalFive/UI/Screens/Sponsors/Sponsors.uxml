@@ -70,6 +70,14 @@
                     <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Finanzas" />
                 </ui:Button>
+                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
+                    <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
+                        <ui:Label text="Decisiones" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuPrestamos" class="nav-submenu-item">
+                        <ui:Label text="Préstamos Bancarios" class="nav-submenu-label"/>
+                    </ui:Button>
+                </ui:VisualElement>
                 <ui:Button name="NavSponsors" class="nav-item nav-item--active">
                     <ui:VisualElement name="NavSponsorsIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Patrocinadores" />

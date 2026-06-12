@@ -15,6 +15,7 @@ public enum GameScreen
     Records,
     Market,
     Finances,
+    Loans,
     Sponsors,
     TV,
     Arena,

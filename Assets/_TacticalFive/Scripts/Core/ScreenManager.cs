@@ -20,6 +20,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument recordsDocument;
     [SerializeField] private UIDocument marketDocument;
     [SerializeField] private UIDocument financesDocument;
+    [SerializeField] private UIDocument loansDocument;
     [SerializeField] private UIDocument sponsorsDocument;
     [SerializeField] private UIDocument tvDocument;
     [SerializeField] private UIDocument arenaDocument;
@@ -102,6 +103,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Finances:
                 ShowOnly(financesDocument);
                 break;
+            case GameScreen.Loans:
+                ShowOnly(loansDocument);
+                break;
             case GameScreen.Sponsors:
                 ShowOnly(sponsorsDocument);
                 break;
@@ -167,6 +171,7 @@ public class ScreenManager : MonoBehaviour
         if (recordsDocument != null) recordsDocument.gameObject.SetActive(false);
         if (marketDocument != null) marketDocument.gameObject.SetActive(false);
         if (financesDocument != null) financesDocument.gameObject.SetActive(false);
+        if (loansDocument != null) loansDocument.gameObject.SetActive(false);
         if (sponsorsDocument != null) sponsorsDocument.gameObject.SetActive(false);
         if (tvDocument != null) tvDocument.gameObject.SetActive(false);
         if (arenaDocument != null) arenaDocument.gameObject.SetActive(false);
