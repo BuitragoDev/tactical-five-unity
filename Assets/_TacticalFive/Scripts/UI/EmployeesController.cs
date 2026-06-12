@@ -495,8 +495,6 @@ public class EmployeesController : MonoBehaviour
             salaryLbl.text = FormatSalary(emp.salary);
             info.Add(salaryLbl);
 
-            card.Add(info);
-
             var fireBtn = new Button();
             fireBtn.AddToClassList("btn-fire");
             fireBtn.text = "DESPEDIR";
@@ -509,7 +507,9 @@ public class EmployeesController : MonoBehaviour
                 fireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
                     CursorManager.Instance.SetDefaultCursor());
             }
-            card.Add(fireBtn);
+            info.Add(fireBtn);
+
+            card.Add(info);
             _myStaffBody.Add(card);
         }
     }
