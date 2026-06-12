@@ -103,6 +103,19 @@
 .nav-item--active .nav-label {
     color: rgb(255, 255, 255);
 }
+.nav-arrow {
+    font-size: 10px;
+    color: rgb(122, 138, 170);
+    margin-left: auto;
+    -unity-text-align: middle-right;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+}
+.nav-item:hover .nav-arrow {
+    color: rgb(208, 216, 232);
+}
+.nav-item--active .nav-arrow {
+    color: rgb(255, 255, 255);
+}
 .nav-item:hover {
     background-color: rgb(22, 26, 36);
 }

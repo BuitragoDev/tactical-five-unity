@@ -15,6 +15,7 @@
                 <ui:Button name="NavRoster" class="nav-item">
                     <ui:VisualElement name="NavRosterIcon" class="nav-icon"/>
                     <ui:Label text="Plantilla" class="nav-label"/>
+                    <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
                 <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
                     <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
@@ -62,6 +63,7 @@
                 <ui:Button name="NavFinances" class="nav-item">
                     <ui:VisualElement name="NavFinancesIcon" class="nav-icon"/>
                     <ui:Label text="Finanzas" class="nav-label"/>
+                    <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
                 <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
                     <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">

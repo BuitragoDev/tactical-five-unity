@@ -118,7 +118,7 @@
 
 .section-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -161,7 +161,7 @@
 
 .med-staff-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
 }
