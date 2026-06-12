@@ -24,6 +24,7 @@ public enum GameScreen
     LoadGame,
     Settings,
     Employees,
+    Injured,
     SeasonSummary,
     PlayerAwards,
     EndSeason,

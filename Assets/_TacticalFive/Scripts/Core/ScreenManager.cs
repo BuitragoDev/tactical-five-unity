@@ -29,6 +29,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument loadGameDocument;
     [SerializeField] private UIDocument settingsDocument;
     [SerializeField] private UIDocument employeesDocument;
+    [SerializeField] private UIDocument injuredDocument;
     [SerializeField] private UIDocument seasonSummaryDocument;
     [SerializeField] private UIDocument playerAwardsDocument;
     [SerializeField] private UIDocument endSeasonDocument;
@@ -128,6 +129,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Employees:
                 ShowOnly(employeesDocument);
                 break;
+            case GameScreen.Injured:
+                ShowOnly(injuredDocument);
+                break;
             case GameScreen.SeasonSummary:
                 ShowOnly(seasonSummaryDocument);
                 break;
@@ -172,6 +176,7 @@ public class ScreenManager : MonoBehaviour
         if (loadGameDocument != null) loadGameDocument.gameObject.SetActive(false);
         if (settingsDocument != null) settingsDocument.gameObject.SetActive(false);
         if (employeesDocument != null) employeesDocument.gameObject.SetActive(false);
+        if (injuredDocument != null) injuredDocument.gameObject.SetActive(false);
         if (seasonSummaryDocument != null) seasonSummaryDocument.gameObject.SetActive(false);
         if (playerAwardsDocument != null) playerAwardsDocument.gameObject.SetActive(false);
         if (endSeasonDocument != null) endSeasonDocument.gameObject.SetActive(false);
