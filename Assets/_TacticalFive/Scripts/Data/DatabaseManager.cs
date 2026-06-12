@@ -3121,12 +3121,9 @@ public class DatabaseManager : MonoBehaviour
         {
             emp.contract_years -= 1;
             if (emp.contract_years <= 0)
-            {
-                emp.contract_years = 0;
-                emp.team_id = 0;
-                emp.candidate_day = 0;
-            }
-            _db.Update(emp);
+                _db.Delete(emp);
+            else
+                _db.Update(emp);
         }
 
         // 4. Decrement sponsor/TV contracts for all teams
