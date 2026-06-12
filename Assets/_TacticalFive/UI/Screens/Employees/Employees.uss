@@ -321,6 +321,24 @@
     background-color: rgb(46, 204, 113);
 }
 
+.btn-fire {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(192, 57, 43);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 8px 0;
+    -unity-text-align: middle-center;
+    width: 100%;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+.btn-fire:hover {
+    background-color: rgb(231, 76, 60);
+}
+
 /* ── MODAL STARS ── */
 
 .hire-modal-stars {

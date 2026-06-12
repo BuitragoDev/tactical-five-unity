@@ -45,6 +45,8 @@ public class EmployeesController : MonoBehaviour
     private List<EmployeeData> _myStaff;
     private List<EmployeeData> _candidates;
     private EmployeeData _selectedCandidate;
+    private EmployeeData _selectedFireEmployee;
+    private bool _isFiring;
 
     private Dictionary<string, Sprite> _logoSprites = new();
     private Texture2D _starTex;
@@ -494,6 +496,20 @@ public class EmployeesController : MonoBehaviour
             info.Add(salaryLbl);
 
             card.Add(info);
+
+            var fireBtn = new Button();
+            fireBtn.AddToClassList("btn-fire");
+            fireBtn.text = "DESPEDIR";
+            var captured = emp;
+            fireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnFireClicked(captured); });
+            if (CursorManager.Instance != null)
+            {
+                fireBtn.RegisterCallback<MouseEnterEvent>(_ =>
+                    CursorManager.Instance.SetCursor(CursorManager.CursorType.Hand));
+                fireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
+                    CursorManager.Instance.SetCursor(CursorManager.CursorType.Default));
+            }
+            card.Add(fireBtn);
             _myStaffBody.Add(card);
         }
     }
@@ -649,6 +665,30 @@ public class EmployeesController : MonoBehaviour
         _hireOverlay.style.display = DisplayStyle.Flex;
     }
 
+    void OnFireClicked(EmployeeData emp)
+    {
+        _selectedFireEmployee = emp;
+        _isFiring = true;
+
+        string posLabel = PositionLabels.TryGetValue(emp.position, out var lbl) ? lbl : emp.position;
+        string name = $"{emp.first_name} {emp.last_name}";
+        string salaryText = FormatSalary(emp.salary);
+        string yearPlural = emp.contract_years != 1 ? "s" : "";
+        string yearsText = $"{emp.contract_years} a\u00f1o{yearPlural}";
+
+        _hireTitle.text = "DESPEDIR EMPLEADO";
+        _hireText1.text = $"¿Estás seguro de que quieres despedir a {name}?";
+        _hireText2.text = $"Puesto: {posLabel}";
+        _hireText3.text = $"Salario: {salaryText} \u00b7 Contrato: {yearsText}";
+
+        var modalStars = _hireOverlay.Q<VisualElement>("HireModalStars");
+        if (modalStars != null)
+            modalStars.RemoveFromHierarchy();
+
+        _btnHireConfirm.text = "DESPEDIR";
+        _hireOverlay.style.display = DisplayStyle.Flex;
+    }
+
     void CloseHireModal()
     {
         var oldStars = _hireOverlay.Q<VisualElement>("HireModalStars");
@@ -656,10 +696,19 @@ public class EmployeesController : MonoBehaviour
             oldStars.RemoveFromHierarchy();
         _hireOverlay.style.display = DisplayStyle.None;
         _selectedCandidate = null;
+        _selectedFireEmployee = null;
+        _isFiring = false;
+        _btnHireConfirm.text = "CONTRATAR";
     }
 
     void ConfirmHire()
     {
+        if (_isFiring)
+        {
+            ConfirmFire();
+            return;
+        }
+
         if (_selectedCandidate == null) return;
 
         _hireOverlay.style.display = DisplayStyle.None;
@@ -737,6 +786,47 @@ public class EmployeesController : MonoBehaviour
         // Refresh
         Refresh();
         ShowHireResult(true, name, posLabel);
+    }
+
+    void ConfirmFire()
+    {
+        if (_selectedFireEmployee == null) return;
+
+        _hireOverlay.style.display = DisplayStyle.None;
+
+        int currentDay = _season?.current_game_day ?? 0;
+        string name = $"{_selectedFireEmployee.first_name} {_selectedFireEmployee.last_name}";
+        string posLabel = PositionLabels.TryGetValue(_selectedFireEmployee.position, out var lbl) ? lbl : _selectedFireEmployee.position;
+
+        DatabaseManager.Instance.DeleteEmployee(_selectedFireEmployee.id);
+        _myStaff.Remove(_selectedFireEmployee);
+
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = "Empleado despedido",
+            body = $"Se ha despedido a {name} ({posLabel}).",
+            game_day = currentDay,
+            game_date = now,
+            created_at = now,
+            date_sent = now,
+            is_read = 0
+        });
+
+        Debug.Log($"[Employees] {name} despedido.");
+
+        _isFiring = false;
+        _btnHireConfirm.text = "CONTRATAR";
+        _selectedFireEmployee = null;
+
+        Refresh();
+
+        _hireResultTitle.text = "EMPLEADO DESPEDIDO";
+        _hireResultText.text = $"{name} ya no trabaja para tu equipo.";
+        _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
 
     void RefillCandidates(string position, int currentDay)
