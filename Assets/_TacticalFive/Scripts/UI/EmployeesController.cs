@@ -378,7 +378,8 @@ public class EmployeesController : MonoBehaviour
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        long totalPayroll = _myStaff.Sum(e => e.salary);
+        var teamPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        long totalPayroll = teamPlayers.Sum(p => p.salary) + _myStaff.Sum(e => e.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
         _headerPayroll.RemoveFromClassList("header-stat-value--negative");
         if (totalPayroll > 0)
@@ -386,7 +387,7 @@ public class EmployeesController : MonoBehaviour
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
-        long margin = salaryCap - _myStaff.Sum(e => e.salary);
+        long margin = salaryCap - totalPayroll;
 
         _headerMargin.text = margin >= 0
             ? $"+${margin / 1_000_000}M"

@@ -335,8 +335,9 @@ public class DashboardController : MonoBehaviour
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        // Masa salarial real
-        long totalPayroll = _players.Sum(p => p.salary);
+        // Masa salarial real (jugadores + empleados)
+        var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+        long totalPayroll = _players.Sum(p => p.salary) + teamEmployees.Sum(e => e.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         // Margen salarial real = Cap - Masa salarial
