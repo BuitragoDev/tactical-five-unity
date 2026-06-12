@@ -296,7 +296,12 @@ public class EmployeesController : MonoBehaviour
             _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Employees);
         });
-        _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); });
+        _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+            ScreenManager.Instance.GoTo(GameScreen.Injured);
+        });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>

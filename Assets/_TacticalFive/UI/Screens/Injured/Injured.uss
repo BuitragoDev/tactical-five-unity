@@ -302,6 +302,7 @@
 
 .injured-row-injury {
     flex: 1;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 14px;
     color: rgb(192, 57, 43);
     -unity-text-align: middle-left;
@@ -309,6 +310,7 @@
 
 .injured-row-days {
     width: 80px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 14px;
     color: rgb(192, 57, 43);
     -unity-text-align: middle-center;
