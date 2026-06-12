@@ -473,7 +473,9 @@ public class RosterController : MonoBehaviour
         nameLbl.AddToClassList("player-name");
         if (player.injury_days > 0)
             nameLbl.AddToClassList("player-name--injured");
-        nameLbl.text = $"{player.first_name} {player.last_name}";
+        nameLbl.text = player.is_rookie == 1
+            ? $"{player.first_name} {player.last_name} (R)"
+            : $"{player.first_name} {player.last_name}";
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-ovr");
@@ -542,7 +544,7 @@ public class RosterController : MonoBehaviour
         // Cabecera
         _detailPosBadge.text = p.position;
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
-        _detailPlayerMeta.text = $"{p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg";
+        _detailPlayerMeta.text = $"{p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
         _detailOvr.text = p.overall.ToString();
 
         // Salud
