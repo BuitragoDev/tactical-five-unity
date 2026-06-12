@@ -228,7 +228,7 @@ public class SettingsController : MonoBehaviour
             {"NavTVIcon", "television"},
             {"NavArenaIcon", "pabellon"},
             {"NavMessagesIcon", "mensajes"},
-            {"NavConfigIcon", "configuracion"}
+
         };
 
         foreach (var kv in iconMap)

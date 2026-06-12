@@ -120,7 +120,7 @@ public class ArenaController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
     }
 
@@ -143,7 +143,7 @@ public class ArenaController : MonoBehaviour
             {"NavTVIcon", "television"},
             {"NavArenaIcon", "pabellon"},
             {"NavMessagesIcon", "mensajes"},
-            {"NavConfigIcon", "configuracion"}
+
         };
 
         foreach (var kv in iconMap)

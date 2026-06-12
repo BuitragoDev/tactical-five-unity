@@ -100,7 +100,7 @@ public class MessagesController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
-        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
     }
 
@@ -123,7 +123,7 @@ public class MessagesController : MonoBehaviour
             {"NavTVIcon", "television"},
             {"NavArenaIcon", "pabellon"},
             {"NavMessagesIcon", "mensajes"},
-            {"NavConfigIcon", "configuracion"}
+
         };
 
         foreach (var kv in iconMap)

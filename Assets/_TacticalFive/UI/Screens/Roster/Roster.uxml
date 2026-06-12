@@ -86,10 +86,7 @@
                     <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
                     <ui:Label text="Mensajes" class="nav-label"/>
                 </ui:Button>
-                <ui:Button name="NavConfig" class="nav-item">
-                    <ui:VisualElement name="NavConfigIcon" class="nav-icon"/>
-                    <ui:Label text="Configuración" class="nav-label"/>
-                </ui:Button>
+
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -116,6 +113,7 @@
                     <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
                 <ui:VisualElement class="header-season-info">
                     <ui:Label name="HeaderSeason" class="header-season-label" text="" />
                     <ui:Label name="HeaderDate"   class="header-date-label"   text="" />

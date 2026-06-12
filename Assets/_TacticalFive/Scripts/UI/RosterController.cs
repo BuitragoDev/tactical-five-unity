@@ -249,7 +249,7 @@ public class RosterController : MonoBehaviour
             {"NavTVIcon", "television"},
             {"NavArenaIcon", "pabellon"},
             {"NavMessagesIcon", "mensajes"},
-            {"NavConfigIcon", "configuracion"}
+
         };
 
         foreach (var kv in iconMap)
@@ -327,7 +327,7 @@ public class RosterController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        _root.Q<Button>("NavConfig")?.RegisterCallback<ClickEvent>(_ =>
+        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
 
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
