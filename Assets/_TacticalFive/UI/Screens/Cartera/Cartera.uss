@@ -29,7 +29,7 @@
 .cartera-left {
     flex-direction: column;
     flex: 1;
-    margin-right: 20px;
+    margin-right: 10px;
     min-width: 0;
 }
 
@@ -136,8 +136,8 @@
 
 .cartera-right {
     flex-direction: column;
-    width: 380px;
-    flex-shrink: 0;
+    flex: 1;
+    margin-left: 20px;
 }
 
 /* Ojeador card */
@@ -251,9 +251,9 @@
     -unity-text-align: middle-center;
 }
 
-/* ── STAFF CARD (reused from Injured/Loans) ── */
+/* ── STAFF CARD (matching Loans.uss fin-staff-*) ── */
 
-.med-staff-card {
+.fin-staff-card {
     flex-direction: row;
     align-items: center;
     background-color: rgb(22, 26, 36);
@@ -263,64 +263,53 @@
     min-width: 320px;
 }
 
-.med-staff-icon {
-    width: 40px;
-    height: 40px;
+.fin-staff-icon {
+    width: 64px;
+    height: 64px;
     margin-right: 14px;
     flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
 }
 
-.med-staff-info {
+.fin-staff-info {
     flex-direction: column;
     flex-grow: 1;
 }
 
-.med-staff-name {
+.fin-staff-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 24px;
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
 }
 
-.med-staff-empty {
+.fin-staff-star {
+    width: 18px;
+    height: 18px;
+    margin-right: 2px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.fin-staff-star--empty {
+    opacity: 0.25;
+}
+
+.fin-staff-interest {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    margin-top: 4px;
+}
+
+.fin-staff-empty {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
     color: rgb(122, 138, 170);
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     padding: 16px 18px;
     min-width: 320px;
-}
-
-.med-staff-star {
-    font-size: 18px;
-    color: rgb(212, 160, 23);
-    margin-right: 2px;
-}
-.med-staff-star--empty {
-    opacity: 0.25;
-}
-
-.med-staff-stars {
-    flex-direction: row;
-    margin-top: 4px;
-}
-
-.med-staff-salary {
-    font-size: 14px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    margin-top: 4px;
-}
-
-.fin-staff-position {
-    font-size: 16px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    letter-spacing: 2px;
-    margin-top: 2px;
 }
 
 .btn-fire {

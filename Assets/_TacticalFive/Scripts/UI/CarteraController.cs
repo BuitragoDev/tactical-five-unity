@@ -33,6 +33,8 @@ public class CarteraController : MonoBehaviour
 
     private Dictionary<string, Sprite> _logoSprites = new();
     private StyleBackground _empleadoBg;
+    private Texture2D _starTex;
+    private StyleBackground _starBg;
 
     void OnEnable()
     {
@@ -77,6 +79,10 @@ public class CarteraController : MonoBehaviour
         var tex = Resources.Load<Texture2D>("Icons/empleado");
         if (tex != null)
             _empleadoBg = new StyleBackground(tex);
+
+        _starTex = Resources.Load<Texture2D>("Icons/star_24px");
+        if (_starTex != null)
+            _starBg = new StyleBackground(_starTex);
 
         var iconMap = new Dictionary<string, string>
         {
@@ -249,47 +255,46 @@ public class CarteraController : MonoBehaviour
         if (_ojeador == null)
         {
             var emptyLbl = new Label();
-            emptyLbl.AddToClassList("med-staff-empty");
+            emptyLbl.AddToClassList("fin-staff-empty");
             emptyLbl.text = "No tienes Ojeador contratado.";
             _ojeadorBody.Add(emptyLbl);
             return;
         }
 
         var card = new VisualElement();
-        card.AddToClassList("med-staff-card");
+        card.AddToClassList("fin-staff-card");
 
         var icon = new VisualElement();
-        icon.AddToClassList("med-staff-icon");
+        icon.AddToClassList("fin-staff-icon");
         if (_empleadoBg != null)
             icon.style.backgroundImage = _empleadoBg;
         card.Add(icon);
 
         var info = new VisualElement();
-        info.AddToClassList("med-staff-info");
+        info.AddToClassList("fin-staff-info");
 
         var nameLbl = new Label();
-        nameLbl.AddToClassList("med-staff-name");
+        nameLbl.AddToClassList("fin-staff-name");
         nameLbl.text = $"{_ojeador.first_name} {_ojeador.last_name}".ToUpper();
         info.Add(nameLbl);
 
-        var posLbl = new Label();
-        posLbl.AddToClassList("fin-staff-position");
-        posLbl.text = "OJEADOR";
-        info.Add(posLbl);
-
-        var starsRow = new VisualElement();
-        starsRow.AddToClassList("med-staff-stars");
+        var repRow = new VisualElement();
+        repRow.style.flexDirection = FlexDirection.Row;
+        repRow.style.marginTop = 4;
         for (int i = 0; i < 5; i++)
         {
-            var star = new Label();
-            star.AddToClassList(i < _ojeador.reputation ? "med-staff-star" : "med-staff-star--empty");
-            star.text = "\u2605";
-            starsRow.Add(star);
+            var star = new VisualElement();
+            star.AddToClassList("fin-staff-star");
+            if (i >= _ojeador.reputation)
+                star.AddToClassList("fin-staff-star--empty");
+            if (_starTex != null)
+                star.style.backgroundImage = _starBg;
+            repRow.Add(star);
         }
-        info.Add(starsRow);
+        info.Add(repRow);
 
         var salaryLbl = new Label();
-        salaryLbl.AddToClassList("med-staff-salary");
+        salaryLbl.AddToClassList("fin-staff-interest");
         salaryLbl.text = FormatSalary(_ojeador.salary);
         info.Add(salaryLbl);
 
