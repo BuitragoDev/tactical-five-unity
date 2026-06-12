@@ -423,7 +423,8 @@ public class LoansController : MonoBehaviour
 
         var payBtn = new Button();
         payBtn.AddToClassList("btn-pay");
-        payBtn.text = "DEVOLVER";
+        long totalPay = loan.monthly_payment * loan.remaining_months;
+        payBtn.text = $"DEVOLVER {FormatLoanAmount(totalPay)}";
         payBtn.userData = loan;
         payBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnPayLoan(loan); });
         if (CursorManager.Instance != null)
