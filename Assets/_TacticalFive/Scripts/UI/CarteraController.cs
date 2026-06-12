@@ -36,6 +36,8 @@ public class CarteraController : MonoBehaviour
     private Texture2D _starTex;
     private StyleBackground _starBg;
 
+    private const int MAX_SCOUTS = 3;
+
     void OnEnable()
     {
         _doc = GetComponent<UIDocument>();
@@ -239,7 +241,7 @@ public class CarteraController : MonoBehaviour
 
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerScoutCount.text = $"{_scouts.Count(s => s.completed == 1)}/5";
+        _headerScoutCount.text = $"{_scouts.Count(s => s.completed == 1)}/{MAX_SCOUTS}";
 
         if (_season != null)
         {
@@ -353,7 +355,9 @@ public class CarteraController : MonoBehaviour
 
             // First player in the pair
             var row1 = BuildPlayerRow(players[i]);
+            row1.style.flexBasis = 0;
             row1.style.flexGrow = 1;
+            row1.style.flexShrink = 1;
             row1.style.marginRight = 4;
             wrapper.Add(row1);
 
@@ -361,14 +365,18 @@ public class CarteraController : MonoBehaviour
             if (i + 1 < players.Count)
             {
                 var row2 = BuildPlayerRow(players[i + 1]);
+                row2.style.flexBasis = 0;
                 row2.style.flexGrow = 1;
+                row2.style.flexShrink = 1;
                 wrapper.Add(row2);
             }
             else
             {
                 // Empty placeholder for odd count so columns stay aligned
                 var placeholder = new VisualElement();
+                placeholder.style.flexBasis = 0;
                 placeholder.style.flexGrow = 1;
+                placeholder.style.flexShrink = 1;
                 wrapper.Add(placeholder);
             }
 
@@ -380,7 +388,7 @@ public class CarteraController : MonoBehaviour
         {
             var scoutBtn = new Button();
             int activeCount = _scouts.Count(s => s.completed == 0);
-            bool canScout = _ojeador != null && activeCount < 5;
+            bool canScout = _ojeador != null && activeCount < MAX_SCOUTS;
 
             var alreadyScouting = _scouts.Any(s => s.player_id == _selectedPlayer.id);
             if (alreadyScouting)
@@ -460,13 +468,13 @@ public class CarteraController : MonoBehaviour
         if (_season == null || _ojeador == null) return;
 
         int activeCount = _scouts.Count(s => s.completed == 0);
-        if (activeCount >= 5) return;
+        if (activeCount >= MAX_SCOUTS) return;
 
         int scoutDays = GetScoutDays(_ojeador.reputation);
         int endDay = _season.current_game_day + scoutDays;
 
         int slot = 0;
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < MAX_SCOUTS; i++)
         {
             if (!_scouts.Any(s => s.slot == i))
             {
@@ -495,7 +503,7 @@ public class CarteraController : MonoBehaviour
     {
         _scoutSlots.Clear();
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < MAX_SCOUTS; i++)
         {
             var scout = _scouts.FirstOrDefault(s => s.slot == i);
             var slot = new VisualElement();
