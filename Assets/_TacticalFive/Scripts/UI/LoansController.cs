@@ -39,7 +39,7 @@ public class LoansController : MonoBehaviour
     private StyleBackground _starBg;
     private StyleBackground _empleadoBg;
 
-    private const long MIN_AMOUNT = 100_000;
+    private const long MIN_AMOUNT = 500_000;
     private const long MAX_AMOUNT = 50_000_000;
     private const long AMOUNT_STEP = 500_000;
     private const int MIN_MONTHS = 1;
