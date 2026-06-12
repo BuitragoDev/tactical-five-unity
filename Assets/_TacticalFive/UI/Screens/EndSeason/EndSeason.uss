@@ -454,7 +454,7 @@
     display: none;
 }
 .lottery-box {
-    width: 700px;
+    width: 800px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
     border-color: rgb(58, 74, 99);
@@ -544,4 +544,26 @@
 }
 .lottery-close-btn:hover {
     background-color: rgb(74, 128, 240);
+}
+
+.lottery-draft-row {
+    min-height: 64px;
+}
+
+.lottery-draft-row .lottery-rank {
+    color: rgb(212, 160, 23);
+}
+
+.lottery-draft-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    margin-bottom: 2px;
+    white-space: normal;
+}
+
+.lottery-draft-player {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
 }

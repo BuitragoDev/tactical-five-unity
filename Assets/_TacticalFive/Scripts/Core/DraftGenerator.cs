@@ -5,6 +5,13 @@ using UnityEngine;
 
 public static class DraftGenerator
 {
+    public class DraftPickResult
+    {
+        public int PickNumber { get; set; }
+        public TeamData Team { get; set; }
+        public PlayerData Player { get; set; }
+    }
+
     private static readonly string[] FirstNames = {
         "James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph",
         "Thomas", "Charles", "Christopher", "Daniel", "Matthew", "Anthony", "Mark",
@@ -76,7 +83,7 @@ public static class DraftGenerator
         ["C"]  = (108, 125),
     };
 
-    public static List<PlayerData> GenerateDraft(SeasonData season, int managerId)
+    public static List<DraftPickResult> GenerateDraft(SeasonData season, int managerId)
     {
         // Reset is_rookie for all existing players
         var allPlayers = DatabaseManager.Instance.GetAllTeams().SelectMany(t =>
@@ -88,17 +95,71 @@ public static class DraftGenerator
             DatabaseManager.Instance.UpdatePlayer(p);
         }
 
-        // Get final standings (worst team picks first)
+        // Get final standings (best → worst)
         var standings = GetFinalStandings(season, managerId);
-        if (standings.Count < 30) return new List<PlayerData>();
+        if (standings.Count < 30) return new List<DraftPickResult>();
 
-        var draftOrder = standings.OrderBy(s => s.wins).Take(30).ToList();
-        var draftedPlayers = new List<PlayerData>();
+        // All teams sorted worst-first
+        var teamsById = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);
+        var allTeamsOrdered = standings
+            .OrderBy(s => s.wins)
+            .ThenByDescending(s => s.losses)
+            .Select(s => teamsById[s.teamId])
+            .Where(t => t != null)
+            .ToList();
+
+        if (allTeamsOrdered.Count < 30) return new List<DraftPickResult>();
+
+        // Lottery teams (14 worst) and non-lottery teams (16 best)
+        var lotteryTeams = allTeamsOrdered.Take(14).ToList();
+        var nonLotteryTeams = allTeamsOrdered.Skip(14).ToList();
+
+        // Lottery odds (NBA 2024+): 14.0% top 3, descending to 0.5%
+        double[] odds = {
+            0.140, 0.140, 0.140, 0.125, 0.105,
+            0.090, 0.075, 0.060, 0.045, 0.030,
+            0.020, 0.015, 0.010, 0.005
+        };
+
+        // Build draft order: picks 1-14 via weighted lottery, 15-30 by record
+        var draftOrder = new List<TeamData>[30];
+        var available = new List<TeamData>(lotteryTeams);
+        var usedOdds = odds.Take(lotteryTeams.Count).ToList();
+
+        for (int pick = 0; pick < 14; pick++)
+        {
+            var pool = new List<TeamData>();
+            for (int j = 0; j < available.Count; j++)
+            {
+                int entries = (int)(usedOdds[j] * 1000);
+                for (int e = 0; e < entries; e++)
+                    pool.Add(available[j]);
+            }
+
+            int idx = UnityEngine.Random.Range(0, pool.Count);
+            var winner = pool[idx];
+            draftOrder[pick] = new List<TeamData> { winner };
+            int removedIdx = available.IndexOf(winner);
+            available.RemoveAt(removedIdx);
+            usedOdds.RemoveAt(removedIdx);
+        }
+
+        // Picks 15-30: non-lottery teams in worst-first order
+        for (int pick = 14; pick < 30; pick++)
+        {
+            int idx = pick - 14;
+            if (idx < nonLotteryTeams.Count)
+                draftOrder[pick] = new List<TeamData> { nonLotteryTeams[idx] };
+        }
+
+        // Generate players in draft order
+        var draftedPlayers = new List<DraftPickResult>();
 
         for (int pick = 0; pick < 30; pick++)
         {
-            var team = draftOrder[pick];
-            
+            var team = draftOrder[pick]?.FirstOrDefault();
+            if (team == null) continue;
+
             // Pick 1 = ~80 avg, Pick 30 = ~60 avg
             float baseAvg = 75 - (pick * (15f / 29f));
 
@@ -133,7 +194,7 @@ public static class DraftGenerator
 
             var player = new PlayerData
             {
-                team_id = team.teamId,
+                team_id = team.id,
                 first_name = firstName,
                 last_name = lastName,
                 position = position,
@@ -162,7 +223,12 @@ public static class DraftGenerator
             };
 
             DatabaseManager.Instance.Db.Insert(player);
-            draftedPlayers.Add(player);
+            draftedPlayers.Add(new DraftPickResult
+            {
+                PickNumber = pick + 1,
+                Team = team,
+                Player = player
+            });
         }
 
         return draftedPlayers;

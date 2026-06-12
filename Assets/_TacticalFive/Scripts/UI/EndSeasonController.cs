@@ -99,6 +99,7 @@ public class EndSeasonController : MonoBehaviour
             _btnRenewAll.SetEnabled(false);
             if (_expiringPanel != null) _expiringPanel.style.display = DisplayStyle.None;
             ShowDraftResults(drafted);
+            ShowDraftLotteryModal(drafted);
             _btnNextSeason.SetEnabled(true);
         });
 
@@ -280,18 +281,17 @@ public class EndSeasonController : MonoBehaviour
         return newSalary;
     }
 
-    void ShowDraftResults(List<PlayerData> drafted)
+    void ShowDraftResults(List<DraftGenerator.DraftPickResult> drafted)
     {
         _draftResults.contentContainer.style.flexDirection = FlexDirection.Column;
         _draftResults.Clear();
-        for (int i = 0; i < drafted.Count; i++)
+        foreach (var r in drafted)
         {
-            var p = drafted[i];
-            _draftResults.Add(BuildDraftPick(i + 1, p));
+            _draftResults.Add(BuildDraftPick(r));
         }
     }
 
-    VisualElement BuildDraftPick(int pickNum, PlayerData p)
+    VisualElement BuildDraftPick(DraftGenerator.DraftPickResult r)
     {
         var pick = new VisualElement();
         pick.AddToClassList("draft-pick");
@@ -301,10 +301,10 @@ public class EndSeasonController : MonoBehaviour
 
         var numLbl = new Label();
         numLbl.AddToClassList("draft-pick-num");
-        numLbl.text = $"#{pickNum}";
+        numLbl.text = $"#{r.PickNumber}";
         header.Add(numLbl);
 
-        var team = DatabaseManager.Instance.GetTeamById(p.team_id);
+        var team = r.Team;
         var teamRow = new VisualElement();
         teamRow.AddToClassList("draft-team-row");
 
@@ -322,6 +322,7 @@ public class EndSeasonController : MonoBehaviour
         header.Add(teamRow);
         pick.Add(header);
 
+        var p = r.Player;
         var info = new VisualElement();
         info.AddToClassList("draft-player-info");
 
@@ -387,6 +388,90 @@ public class EndSeasonController : MonoBehaviour
     void PlayClick()
     {
         AudioManager.Instance?.PlaySFX("click");
+    }
+
+    void ShowDraftLotteryModal(List<DraftGenerator.DraftPickResult> drafted)
+    {
+        if (drafted == null || drafted.Count < 14) return;
+
+        _lotteryOverlay.Clear();
+        _lotteryOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("lottery-box");
+        _lotteryOverlay.Add(box);
+
+        var title = new Label($"DRAFT {_season.year_end} — PRIMERA RONDA");
+        title.AddToClassList("lottery-title");
+        box.Add(title);
+
+        var subtitle = new Label("Resultado del sorteo de la lotería");
+        subtitle.AddToClassList("lottery-subtitle");
+        box.Add(subtitle);
+
+        var grid = new VisualElement();
+        grid.AddToClassList("lottery-grid");
+        box.Add(grid);
+
+        var col1 = new VisualElement();
+        col1.AddToClassList("lottery-column");
+        var col2 = new VisualElement();
+        col2.AddToClassList("lottery-column");
+        grid.Add(col1);
+        grid.Add(col2);
+
+        for (int i = 0; i < 14 && i < drafted.Count; i++)
+        {
+            var r = drafted[i];
+            var target = i < 7 ? col1 : col2;
+            target.Add(BuildDraftLotteryRow(r));
+        }
+
+        var closeBtn = new Button();
+        closeBtn.text = "CERRAR";
+        closeBtn.AddToClassList("lottery-close-btn");
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _lotteryOverlay.style.display = DisplayStyle.None;
+        });
+        box.Add(closeBtn);
+    }
+
+    VisualElement BuildDraftLotteryRow(DraftGenerator.DraftPickResult r)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("lottery-row");
+        row.AddToClassList("lottery-draft-row");
+
+        var pickLabel = $"{(r.PickNumber == 1 ? "1st" : r.PickNumber == 2 ? "2nd" : r.PickNumber == 3 ? "3rd" : r.PickNumber + "th")}";
+
+        var rankLbl = new Label($"#{pickLabel}");
+        rankLbl.AddToClassList("lottery-rank");
+        rankLbl.style.minWidth = 40;
+        row.Add(rankLbl);
+
+        var logo = new VisualElement();
+        logo.AddToClassList("lottery-logo");
+        if (_logo32.TryGetValue(r.Team.logo, out var sprite))
+            logo.style.backgroundImage = new StyleBackground(sprite);
+        row.Add(logo);
+
+        var infoCol = new VisualElement();
+        infoCol.style.flexDirection = FlexDirection.Column;
+        infoCol.style.flexGrow = 1;
+        row.Add(infoCol);
+
+        var teamNameLbl = new Label($"Con la {pickLabel} elección,  {r.Team.name}  ha seleccionado a:");
+        teamNameLbl.AddToClassList("lottery-draft-team");
+        infoCol.Add(teamNameLbl);
+
+        var p = r.Player;
+        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {p.position}  ·  OVR: {p.overall}");
+        playerLbl.AddToClassList("lottery-draft-player");
+        infoCol.Add(playerLbl);
+
+        return row;
     }
 
     void ShowLotteryModal()
