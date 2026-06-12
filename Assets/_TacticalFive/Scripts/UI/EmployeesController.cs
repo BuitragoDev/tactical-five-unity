@@ -216,14 +216,15 @@ public class EmployeesController : MonoBehaviour
             {
                 for (int i = 0; i < 3; i++)
                 {
+                    int rep = Random.Range(1, 6);
                     var emp = new EmployeeData
                     {
                         team_id = 0,
                         position = pos,
                         first_name = GenerateFirstName(pos),
                         last_name = GenerateLastName(),
-                        reputation = Random.Range(1, 6),
-                        salary = GenerateSalary(pos, reputation),
+                        reputation = rep,
+                        salary = GenerateSalary(pos, rep),
                         contract_years = Random.Range(1, 4),
                         candidate_day = currentDay
                     };
@@ -705,14 +706,15 @@ public class EmployeesController : MonoBehaviour
         int toAdd = 3 - _candidates.Count(c => c.position == position);
         for (int i = 0; i < toAdd; i++)
         {
+            int rep = Random.Range(1, 6);
             var emp = new EmployeeData
             {
                 team_id = 0,
                 position = position,
                 first_name = GenerateFirstName(position),
                 last_name = GenerateLastName(),
-                reputation = Random.Range(1, 6),
-                salary = GenerateSalary(position, reputation),
+                reputation = rep,
+                salary = GenerateSalary(position, rep),
                 contract_years = Random.Range(1, 4),
                 candidate_day = currentDay
             };
