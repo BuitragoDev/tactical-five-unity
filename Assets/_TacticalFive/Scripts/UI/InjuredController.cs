@@ -386,12 +386,12 @@ public class InjuredController : MonoBehaviour
             ? $"La lesi\u00f3n se ha reducido de {oldDays} a {player.injury_days} d\u00edas."
             : $"El jugador ya est\u00e1 recuperado.";
 
+        ReloadData();
+        Refresh();
+
         _treatmentResultTitle.text = "TRATAMIENTO COMPLETADO";
         _treatmentResultText.text = $"{playerName} ha recibido tratamiento m\u00e9dico.\n{reductionText}";
         _treatmentResultOverlay.style.display = DisplayStyle.Flex;
-
-        ReloadData();
-        Refresh();
     }
 
     void CloseTreatmentResult()
