@@ -154,7 +154,7 @@
     width: 32px;
     height: 32px;
     margin-right: 14px;
-    margin-top: -2px;
+    margin-top: -65px;
     flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
 }
