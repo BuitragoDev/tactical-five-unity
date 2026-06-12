@@ -22,6 +22,8 @@ public class EndSeasonController : MonoBehaviour
     private Button _btnDraft;
     private Button _btnNextSeason;
     private Button _btnRenewAll;
+    private Button _btnLottery;
+    private VisualElement _lotteryOverlay;
     private VisualElement _expiringPanel;
     private ScrollView _draftResults;
 
@@ -42,6 +44,10 @@ public class EndSeasonController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        _lotteryOverlay = new VisualElement();
+        _lotteryOverlay.AddToClassList("lottery-overlay");
+        _root.Add(_lotteryOverlay);
+
         CacheReferences();
         LoadData();
     }
@@ -59,6 +65,7 @@ public class EndSeasonController : MonoBehaviour
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnRenewAll = _root.Q<Button>("BtnRenewAll");
+        _btnLottery = _root.Q<Button>("BtnLottery");
         _expiringPanel = _root.Q<VisualElement>("ExpiringPanel");
         _draftResults = _root.Q<ScrollView>("DraftResults");
     }
@@ -97,6 +104,8 @@ public class EndSeasonController : MonoBehaviour
         _btnNextSeason.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.NewSeason); });
 
         _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
+
+        _btnLottery.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowLotteryModal(); });
     }
 
     void RefreshHeader()
@@ -377,5 +386,112 @@ public class EndSeasonController : MonoBehaviour
     void PlayClick()
     {
         AudioManager.Instance?.PlaySFX("click");
+    }
+
+    void ShowLotteryModal()
+    {
+        _lotteryOverlay.Clear();
+        _lotteryOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("lottery-box");
+        _lotteryOverlay.Add(box);
+
+        var title = new Label("LOTERÍA DEL DRAFT");
+        title.AddToClassList("lottery-title");
+        box.Add(title);
+
+        var subtitle = new Label($"Probabilidades para el Draft {_season.year_end}");
+        subtitle.AddToClassList("lottery-subtitle");
+        box.Add(subtitle);
+
+        var teams = BuildLotteryOrder();
+        var grid = new VisualElement();
+        grid.AddToClassList("lottery-grid");
+        box.Add(grid);
+
+        var col1 = new VisualElement();
+        col1.AddToClassList("lottery-column");
+        var col2 = new VisualElement();
+        col2.AddToClassList("lottery-column");
+        grid.Add(col1);
+        grid.Add(col2);
+
+        for (int i = 0; i < teams.Count; i++)
+        {
+            var target = i < 7 ? col1 : col2;
+            target.Add(BuildLotteryRow(i + 1, teams[i].team, teams[i].pct));
+        }
+
+        var closeBtn = new Button();
+        closeBtn.text = "CERRAR";
+        closeBtn.AddToClassList("lottery-close-btn");
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _lotteryOverlay.style.display = DisplayStyle.None;
+        });
+        box.Add(closeBtn);
+    }
+
+    VisualElement BuildLotteryRow(int rank, TeamData team, string pct)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("lottery-row");
+
+        var rankLbl = new Label($"#{rank}");
+        rankLbl.AddToClassList("lottery-rank");
+        row.Add(rankLbl);
+
+        var logo = new VisualElement();
+        logo.AddToClassList("lottery-logo");
+        if (_logo32.TryGetValue(team.logo, out var sprite))
+            logo.style.backgroundImage = new StyleBackground(sprite);
+        row.Add(logo);
+
+        var nameLbl = new Label(team.name);
+        nameLbl.AddToClassList("lottery-name");
+        row.Add(nameLbl);
+
+        var pctLbl = new Label(pct);
+        pctLbl.AddToClassList("lottery-pct");
+        row.Add(pctLbl);
+
+        return row;
+    }
+
+    List<(TeamData team, string pct)> BuildLotteryOrder()
+    {
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+
+        var standings = allTeams.Select(t =>
+        {
+            var teamGames = allGames.Where(g =>
+                (g.home_team_id == t.id || g.away_team_id == t.id) && g.is_played == 1).ToList();
+            int wins = teamGames.Count(g =>
+                (g.home_team_id == t.id && g.home_score > g.away_score) ||
+                (g.away_team_id == t.id && g.away_score > g.home_score));
+            int total = teamGames.Count;
+            float winPct = total > 0 ? (float)wins / total : 0f;
+            return new { Team = t, Wins = wins, Total = total, WinPct = winPct };
+        })
+        .OrderBy(s => s.WinPct)
+        .ThenBy(s => s.Wins)
+        .Take(14)
+        .ToList();
+
+        double[] odds = {
+            0.140, 0.140, 0.140, 0.125, 0.105,
+            0.090, 0.075, 0.060, 0.045, 0.030,
+            0.020, 0.015, 0.010, 0.005
+        };
+
+        var result = new List<(TeamData, string)>();
+        for (int i = 0; i < standings.Count && i < odds.Length; i++)
+        {
+            result.Add((standings[i].Team, $"{odds[i] * 100:F1}%"));
+        }
+        return result;
     }
 }

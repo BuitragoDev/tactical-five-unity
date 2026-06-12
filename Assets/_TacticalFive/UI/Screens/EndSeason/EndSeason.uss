@@ -424,3 +424,124 @@
     font-size: 18px;
     color: rgb(208, 216, 232);
 }
+
+/* ══ LOTTERY BUTTON ══ */
+.btn-lottery {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(192, 57, 43);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 24px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    border-radius: 4px;
+    margin-right: 16px;
+}
+.btn-lottery:hover {
+    background-color: rgb(220, 80, 66);
+}
+
+/* ══ LOTTERY MODAL ══ */
+.lottery-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+.lottery-box {
+    width: 700px;
+    background-color: rgb(15, 17, 23);
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    border-top-width: 3px;
+    border-top-color: rgb(212, 160, 23);
+    padding: 32px;
+    flex-direction: column;
+    align-items: center;
+}
+.lottery-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 4px;
+    color: rgb(212, 160, 23);
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+.lottery-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    margin-bottom: 24px;
+    -unity-text-align: middle-center;
+}
+.lottery-grid {
+    flex-direction: row;
+    width: 100%;
+}
+.lottery-column {
+    flex: 1;
+    flex-direction: column;
+}
+.lottery-column:first-child {
+    margin-right: 24px;
+}
+.lottery-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    margin-bottom: 4px;
+    min-height: 44px;
+}
+.lottery-rank {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    min-width: 30px;
+    flex-shrink: 0;
+}
+.lottery-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+.lottery-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.lottery-pct {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    min-width: 50px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+.lottery-close-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 32px;
+    border-radius: 4px;
+    margin-top: 24px;
+}
+.lottery-close-btn:hover {
+    background-color: rgb(74, 128, 240);
+}
