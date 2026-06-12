@@ -104,7 +104,6 @@
 
 .loans-container {
     flex-direction: column;
-    gap: 12px;
 }
 
 .loan-slot {
@@ -113,6 +112,7 @@
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     padding: 18px;
+    margin-bottom: 12px;
 }
 
 .loan-slot--active {
