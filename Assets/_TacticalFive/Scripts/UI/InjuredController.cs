@@ -328,12 +328,12 @@ public class InjuredController : MonoBehaviour
 
             var injuryLbl = new Label();
             injuryLbl.AddToClassList("injured-row-injury");
-            injuryLbl.text = player.injury_type;
+            injuryLbl.text = string.IsNullOrEmpty(player.injury_type) ? "LESI\u00d3N" : player.injury_type;
             row.Add(injuryLbl);
 
             var daysLbl = new Label();
             daysLbl.AddToClassList("injured-row-days");
-            daysLbl.text = player.injury_days.ToString();
+            daysLbl.text = $"{player.injury_days} d\u00eda{(player.injury_days != 1 ? "s" : "")}";
             row.Add(daysLbl);
 
             var treatBtn = new Button();
