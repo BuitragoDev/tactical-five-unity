@@ -103,16 +103,17 @@
 }
 
 .loans-container {
-    flex-direction: column;
+    flex-direction: row;
 }
 
 .loan-slot {
+    flex: 1;
     flex-direction: column;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
-    padding: 18px;
-    margin-bottom: 12px;
+    padding: 14px;
+    margin-right: 12px;
 }
 
 .loan-slot--active {
