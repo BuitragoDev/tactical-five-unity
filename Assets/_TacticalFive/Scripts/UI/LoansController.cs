@@ -536,11 +536,8 @@ public class LoansController : MonoBehaviour
 
     void StepMonths(int slotIndex, int dir)
     {
-        _slotMonths[slotIndex] = Mathf.Clamp(
-            _slotMonths[slotIndex] + dir,
-            MIN_MONTHS,
-            MAX_MONTHS
-        );
+        int val = _slotMonths[slotIndex] + dir;
+        _slotMonths[slotIndex] = val < MIN_MONTHS ? MIN_MONTHS : (val > MAX_MONTHS ? MAX_MONTHS : val);
         RefreshLoanSlot(slotIndex);
     }
 
