@@ -529,12 +529,8 @@ public class LoansController : MonoBehaviour
 
     void StepAmount(int slotIndex, int dir)
     {
-        long step = AMOUNT_STEP * dir;
-        _slotAmounts[slotIndex] = Mathf.Clamp(
-            _slotAmounts[slotIndex] + step,
-            MIN_AMOUNT,
-            MAX_AMOUNT
-        );
+        long val = _slotAmounts[slotIndex] + AMOUNT_STEP * dir;
+        _slotAmounts[slotIndex] = val < MIN_AMOUNT ? MIN_AMOUNT : (val > MAX_AMOUNT ? MAX_AMOUNT : val);
         RefreshLoanSlot(slotIndex);
     }
 
