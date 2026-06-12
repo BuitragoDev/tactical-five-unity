@@ -866,6 +866,7 @@ public class DashboardController : MonoBehaviour
                 {
                     p.injury_days = 0;
                     p.injury_type = "";
+                    p.treated = 0;
                 }
                 DatabaseManager.Instance.UpdatePlayer(p);
             }

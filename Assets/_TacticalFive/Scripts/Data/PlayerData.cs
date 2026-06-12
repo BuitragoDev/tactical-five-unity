@@ -31,5 +31,6 @@ public class PlayerData
     public int is_rookie { get; set; }
     public int injury_days { get; set; }
     public string injury_type { get; set; }
+    public int treated { get; set; }
     public int renewal_cooldown_day { get; set; }
 }

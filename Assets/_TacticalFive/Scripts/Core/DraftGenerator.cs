@@ -217,6 +217,7 @@ public static class DraftGenerator
                 blocks = attrs["blocks"],
                 injury_days = 0,
                 injury_type = "",
+                treated = 0,
                 salary = (int)salary,
                 contract_years = 4,
                 is_rookie = 1

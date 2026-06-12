@@ -336,10 +336,11 @@ public class InjuredController : MonoBehaviour
             daysLbl.text = $"{player.injury_days} d\u00eda{(player.injury_days != 1 ? "s" : "")}";
             row.Add(daysLbl);
 
+            bool alreadyTreated = player.treated == 1;
             var treatBtn = new Button();
             treatBtn.AddToClassList("btn-treat");
-            treatBtn.text = "TRATAR";
-            if (!hasMedico)
+            treatBtn.text = alreadyTreated ? "TRATADO" : "TRATAR";
+            if (!hasMedico || alreadyTreated)
             {
                 treatBtn.AddToClassList("btn-treat--disabled");
                 treatBtn.SetEnabled(false);
@@ -368,29 +369,29 @@ public class InjuredController : MonoBehaviour
     {
         if (_medico == null) return;
 
-        int reduction = _medico.reputation switch
+        float pct = _medico.reputation switch
         {
-            5 => Random.Range(4, 8),
-            4 => Random.Range(3, 6),
-            3 => Random.Range(2, 5),
-            2 => Random.Range(1, 3),
-            _ => Random.Range(1, 2)
+            5 => Random.Range(0.25f, 0.40f),
+            4 => Random.Range(0.20f, 0.32f),
+            3 => Random.Range(0.15f, 0.25f),
+            2 => Random.Range(0.10f, 0.18f),
+            _ => Random.Range(0.05f, 0.12f),
         };
 
         int oldDays = player.injury_days;
-        player.injury_days = Mathf.Max(0, player.injury_days - reduction);
+        int newDays = Mathf.CeilToInt(player.injury_days * (1f - pct));
+        player.injury_days = Mathf.Clamp(newDays, 1, player.injury_days);
+        player.treated = 1;
         DatabaseManager.Instance.UpdatePlayer(player);
 
         string playerName = $"{player.first_name} {player.last_name}";
-        string reductionText = oldDays - player.injury_days > 0
-            ? $"La lesi\u00f3n se ha reducido de {oldDays} a {player.injury_days} d\u00edas."
-            : $"El jugador ya est\u00e1 recuperado.";
+        string reductionText = $"{playerName} ha recibido tratamiento m\u00e9dico.\nSus d\u00edas de baja se reducen de {oldDays} a {player.injury_days}.";
 
         ReloadData();
         Refresh();
 
         _treatmentResultTitle.text = "TRATAMIENTO COMPLETADO";
-        _treatmentResultText.text = $"{playerName} ha recibido tratamiento m\u00e9dico.\n{reductionText}";
+        _treatmentResultText.text = reductionText;
         _treatmentResultOverlay.style.display = DisplayStyle.Flex;
     }
 
