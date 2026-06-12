@@ -120,7 +120,21 @@ public class MatchDayController : MonoBehaviour
         _root.Q<Button>("NavRecords")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Records); });
         _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Market); });
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("MarketSubmenu");
+            if (submenu != null)
+                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+        });
+
+        _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+            ScreenManager.Instance.GoTo(GameScreen.Market);
+        });
+        _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); });
+        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
