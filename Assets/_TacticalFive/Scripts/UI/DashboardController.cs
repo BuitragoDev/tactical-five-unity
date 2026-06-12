@@ -1817,7 +1817,7 @@ public class DashboardController : MonoBehaviour
 
         if (_teamObjectiveStatus != null)
         {
-            string iconName = objectiveMet ? "boton-v" : "boton-x";
+            string iconName = objectiveMet ? "boton-v-64px" : "boton-x-64px";
             var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
             if (tex != null)
                 _teamObjectiveStatus.style.backgroundImage = new StyleBackground(tex);
