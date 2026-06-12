@@ -113,12 +113,12 @@
                     <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
-                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
                 <ui:VisualElement class="header-season-info">
                     <ui:Label name="HeaderSeason" class="header-season-label" text="" />
                     <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
             <!-- ARENA CONTENT -->

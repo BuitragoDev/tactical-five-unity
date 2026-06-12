@@ -102,13 +102,13 @@
                     <ui:Label name="HeaderMargin" text="" class="header-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer"/>
-                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
                 <ui:VisualElement class="header-season-info">
                     <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
                     <ui:Label name="HeaderDate" text="" class="header-date-label"/>
                 </ui:VisualElement>
                 <ui:VisualElement name="LoadingSpinner" class="loading-spinner" />
                 <ui:Button name="BtnAction" text="CONTINUAR" class="btn-action"/>
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
             <ui:ScrollView name="ContentScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="content-scroll">
                 <ui:VisualElement class="panels-grid">
