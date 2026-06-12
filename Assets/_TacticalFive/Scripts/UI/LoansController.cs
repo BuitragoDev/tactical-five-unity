@@ -41,7 +41,7 @@ public class LoansController : MonoBehaviour
 
     private const long MIN_AMOUNT = 100_000;
     private const long MAX_AMOUNT = 50_000_000;
-    private const long AMOUNT_STEP = 100_000;
+    private const long AMOUNT_STEP = 500_000;
     private const int MIN_MONTHS = 1;
     private const int MAX_MONTHS = 24;
 
