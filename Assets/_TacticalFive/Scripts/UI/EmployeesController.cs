@@ -505,9 +505,9 @@ public class EmployeesController : MonoBehaviour
             if (CursorManager.Instance != null)
             {
                 fireBtn.RegisterCallback<MouseEnterEvent>(_ =>
-                    CursorManager.Instance.SetCursor(CursorManager.CursorType.Hand));
+                    CursorManager.Instance.SetHandCursor());
                 fireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
-                    CursorManager.Instance.SetCursor(CursorManager.CursorType.Default));
+                    CursorManager.Instance.SetDefaultCursor());
             }
             card.Add(fireBtn);
             _myStaffBody.Add(card);
