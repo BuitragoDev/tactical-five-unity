@@ -1324,6 +1324,30 @@ public class DashboardController : MonoBehaviour
             amount = monthlyPayroll
         });
 
+        // Employee monthly salaries
+        var existingEmployeePayroll = DatabaseManager.Instance.GetFinanceRecord(
+            _myTeam.id, _season.id, FinanceRecord.TYPE_EMPLOYEE_SALARY, gameDay);
+        if (existingEmployeePayroll == null)
+        {
+            var employees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+            long monthlyEmployeePayroll = employees.Sum(e => e.salary) / 12;
+
+            if (monthlyEmployeePayroll > 0)
+            {
+                _myTeam.budget -= monthlyEmployeePayroll;
+                DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+
+                DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+                {
+                    team_id = _myTeam.id,
+                    season_id = _season.id,
+                    record_type = FinanceRecord.TYPE_EMPLOYEE_SALARY,
+                    game_day = gameDay,
+                    amount = monthlyEmployeePayroll
+                });
+            }
+        }
+
         try
         {
             string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

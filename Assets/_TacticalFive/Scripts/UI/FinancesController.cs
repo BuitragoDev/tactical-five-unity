@@ -469,11 +469,13 @@ public class FinancesController : MonoBehaviour
         if (_season == null) return;
 
         long salariesTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SALARIES);
+        long empSalaryTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_EMPLOYEE_SALARY);
         long renovationTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_RENOVATION);
         long dismissalTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_DISMISSAL);
-        long total = salariesTotal + renovationTotal + dismissalTotal;
+        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal;
 
         AddTableRow(_expensesTable, "Sueldos de jugadores", salariesTotal, false);
+        AddTableRow(_expensesTable, "Sueldos empleados", empSalaryTotal, false);
         AddTableRow(_expensesTable, "Remodelaciones", renovationTotal, false);
         AddTableRow(_expensesTable, "Despidos", dismissalTotal, false);
 

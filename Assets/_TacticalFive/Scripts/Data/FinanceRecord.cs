@@ -9,7 +9,8 @@ public class FinanceRecord
     public const int TYPE_TV            = 4;   // Televisión
     public const int TYPE_RENOVATION    = 5;   // Remodelación
     public const int TYPE_DISMISSAL     = 6;   // Despido
-    public const int TYPE_SALARIES      = 7;   // Sueldos
+    public const int TYPE_SALARIES      = 7;   // Sueldos de jugadores
+    public const int TYPE_EMPLOYEE_SALARY = 8;   // Sueldos de empleados
 
     [PrimaryKey, AutoIncrement]
     public int id { get; set; }
