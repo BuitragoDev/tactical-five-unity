@@ -47,8 +47,8 @@
 }
 
 .fin-staff-icon {
-    width: 40px;
-    height: 40px;
+    width: 64px;
+    height: 64px;
     margin-right: 14px;
     flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
@@ -82,6 +82,15 @@
     font-size: 14px;
     color: rgb(212, 160, 23);
     margin-top: 4px;
+}
+
+.section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 3px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+    margin-bottom: 12px;
 }
 
 .fin-staff-empty {

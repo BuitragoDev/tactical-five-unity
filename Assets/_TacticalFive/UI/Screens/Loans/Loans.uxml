@@ -75,7 +75,7 @@
                         <ui:Label text="Decisiones" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuPrestamos" class="nav-submenu-item nav-submenu-item--active">
-                        <ui:Label text="Pr\u00e9stamos Bancarios" class="nav-submenu-label"/>
+                        <ui:Label text="Préstamos Bancarios" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:Button name="NavSponsors" class="nav-item">
@@ -108,7 +108,7 @@
                     <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="PR\u00c9STAMOS" />
+                    <ui:Label class="header-stat-label" text="PRÉSTAMOS" />
                     <ui:Label name="HeaderLoanCount" class="header-stat-value" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
@@ -131,6 +131,7 @@
 
                 <!-- LOAN SLOTS -->
                 <ui:VisualElement name="LoansSection" class="loans-section">
+                    <ui:Label class="section-title" text="PR\u00c9STAMOS ACTIVOS" />
                     <ui:VisualElement name="LoansContainer" class="loans-container" />
 
                 </ui:VisualElement>
