@@ -113,7 +113,7 @@
     flex-direction: column;
     background-color: rgb(8, 10, 14);
 }
-.nav-item--expanded + .nav-submenu {
+.nav-submenu--visible {
     display: flex;
 }
 .nav-submenu-item {

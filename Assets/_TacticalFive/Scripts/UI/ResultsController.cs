@@ -108,14 +108,14 @@ public class ResultsController : MonoBehaviour
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            var btn = _root.Q<Button>("NavRoster");
-            if (btn != null)
-                btn.EnableInClassList("nav-item--expanded", !btn.ClassListContains("nav-item--expanded"));
+            var submenu = _root.Q<VisualElement>("RosterSubmenu");
+            if (submenu != null)
+                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
         });
         _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            _root.Q<Button>("NavRoster")?.RemoveFromClassList("nav-item--expanded");
+            _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Roster);
         });
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); });
