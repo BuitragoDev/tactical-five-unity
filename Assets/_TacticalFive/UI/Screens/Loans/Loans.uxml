@@ -131,7 +131,7 @@
 
                 <!-- LOAN SLOTS -->
                 <ui:VisualElement name="LoansSection" class="loans-section">
-                    <ui:Label class="section-title" text="PR\u00c9STAMOS ACTIVOS" />
+                    <ui:Label class="section-title" text="PRÉSTAMOS ACTIVOS" />
                     <ui:VisualElement name="LoansContainer" class="loans-container" />
 
                 </ui:VisualElement>
