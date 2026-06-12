@@ -222,8 +222,8 @@ public class EmployeesController : MonoBehaviour
                         position = pos,
                         first_name = GenerateFirstName(pos),
                         last_name = GenerateLastName(),
-                        salary = GenerateSalary(pos),
                         reputation = Random.Range(1, 6),
+                        salary = GenerateSalary(pos, reputation),
                         contract_years = Random.Range(1, 4),
                         candidate_day = currentDay
                     };
@@ -244,7 +244,7 @@ public class EmployeesController : MonoBehaviour
         return LastNames[Random.Range(0, LastNames.Length)];
     }
 
-    long GenerateSalary(string position)
+    long GenerateSalary(string position, int reputation)
     {
         long min = position switch
         {
@@ -267,8 +267,9 @@ public class EmployeesController : MonoBehaviour
             _ => 2_000_000
         };
         long step = 100_000;
-        long raw = (long)Random.Range((int)(min / step), (int)(max / step) + 1);
-        return raw * step;
+        float t = (reputation - 1) / 4f;
+        long raw = min + (long)((max - min) * t);
+        return (raw / step) * step;
     }
 
     void RegisterCallbacks()
@@ -710,8 +711,8 @@ public class EmployeesController : MonoBehaviour
                 position = position,
                 first_name = GenerateFirstName(position),
                 last_name = GenerateLastName(),
-                salary = GenerateSalary(position),
                 reputation = Random.Range(1, 6),
+                salary = GenerateSalary(position, reputation),
                 contract_years = Random.Range(1, 4),
                 candidate_day = currentDay
             };
