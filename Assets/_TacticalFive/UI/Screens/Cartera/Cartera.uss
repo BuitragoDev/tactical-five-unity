@@ -40,8 +40,8 @@
 }
 
 .team-logo-btn {
-    width: 40px;
-    height: 40px;
+    width: 64px;
+    height: 64px;
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     background-color: rgb(22, 26, 36);
@@ -178,7 +178,7 @@
 }
 
 .scout-slot-name {
-    font-size: 16px;
+    font-size: 24px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     -unity-text-transform: upper;
@@ -186,7 +186,7 @@
 }
 
 .scout-slot-pos {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     margin-left: 8px;
@@ -195,14 +195,14 @@
 }
 
 .scout-slot-age {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     margin-left: 8px;
 }
 
 .scout-slot-timer {
-    font-size: 13px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     letter-spacing: 1px;
@@ -219,8 +219,9 @@
     font-size: 13px;
     color: rgb(160, 170, 190);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    width: 33%;
+    width: 20%;
     margin-bottom: 2px;
+    min-width: 0;
 }
 .scout-attr-label {
     color: rgb(122, 138, 170);
@@ -231,20 +232,20 @@
 }
 
 .scout-slot-salary {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     margin-top: 6px;
 }
 
 .scout-slot-contract {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
 }
 
 .scout-empty-text {
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(80, 90, 110);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     padding: 20px 0;
@@ -260,7 +261,7 @@
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     padding: 14px 18px;
-    min-width: 320px;
+    width: 400px;
 }
 
 .fin-staff-icon {
@@ -314,18 +315,18 @@
 
 .btn-fire {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    background-color: rgb(192, 57, 43);
+    background-color: rgb(116, 34, 24);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 8px 0;
+    padding: 4px 0;
     -unity-text-align: middle-center;
     width: 100%;
     border-radius: 4px;
     margin-top: 8px;
 }
 .btn-fire:hover {
-    background-color: rgb(231, 76, 60);
+    background-color: rgb(90, 19, 11);
 }

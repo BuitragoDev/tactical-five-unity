@@ -237,7 +237,7 @@ public class LoansController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
 
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Finances); });
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(_btnAction);
@@ -268,7 +268,7 @@ public class LoansController : MonoBehaviour
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "FINANZAS";
+        _btnAction.text = "PANEL PRINCIPAL";
     }
 
     void BuildFinancialStaff()

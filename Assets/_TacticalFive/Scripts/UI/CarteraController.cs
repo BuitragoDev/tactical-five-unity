@@ -209,7 +209,7 @@ public class CarteraController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
 
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Market); });
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
         if (CursorManager.Instance != null)
         {
@@ -242,6 +242,7 @@ public class CarteraController : MonoBehaviour
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
         _headerScoutCount.text = $"{_scouts.Count(s => s.completed == 1)}/{MAX_SCOUTS}";
+        _btnAction.text = "PANEL PRINCIPAL";
 
         if (_season != null)
         {
