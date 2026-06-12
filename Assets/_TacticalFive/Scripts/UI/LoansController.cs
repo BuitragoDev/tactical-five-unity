@@ -492,7 +492,8 @@ public class LoansController : MonoBehaviour
         slot.Add(monthsRow);
 
         // Monthly payment display
-        long monthly = CalculateMonthlyPayment(_slotAmounts[slotIndex], _slotMonths[slotIndex]);
+        float rate = GetInterestRate();
+        long monthly = CalculateMonthlyPayment(_slotAmounts[slotIndex], _slotMonths[slotIndex], rate);
 
         var paymentRow = new VisualElement();
         paymentRow.AddToClassList("loan-payment-row");
