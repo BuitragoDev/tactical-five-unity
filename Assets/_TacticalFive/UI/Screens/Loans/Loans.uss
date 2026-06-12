@@ -77,6 +77,13 @@
     opacity: 0.25;
 }
 
+.fin-staff-interest {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(212, 160, 23);
+    margin-top: 4px;
+}
+
 .fin-staff-empty {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 16px;

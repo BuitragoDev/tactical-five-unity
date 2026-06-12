@@ -291,6 +291,12 @@ public class LoansController : MonoBehaviour
             }
             info.Add(repRow);
 
+            var interestLbl = new Label();
+            interestLbl.AddToClassList("fin-staff-interest");
+            float rate = GetInterestRate() * 100;
+            interestLbl.text = $"Inter\u00e9s: {rate:F1}%";
+            info.Add(interestLbl);
+
             card.Add(info);
             _finStaffBody.Add(card);
         }
@@ -381,6 +387,15 @@ public class LoansController : MonoBehaviour
         remainingLbl.text = $"Restante: {loan.remaining_months} meses";
         remainingRow.Add(remainingLbl);
         slot.Add(remainingRow);
+
+        var interestRow = new VisualElement();
+        interestRow.AddToClassList("loan-months-row");
+
+        var interestLbl = new Label();
+        interestLbl.AddToClassList("loan-spin-label");
+        interestLbl.text = $"Inter\u00e9s: {loan.interest_rate * 100:F1}%";
+        interestRow.Add(interestLbl);
+        slot.Add(interestRow);
 
         // Payment
         var paymentRow = new VisualElement();
@@ -558,14 +573,28 @@ public class LoansController : MonoBehaviour
         var payVal = _loansContainer.Q<Label>($"LoanPayVal_{slotIndex}");
         if (payVal != null)
         {
-            long monthly = CalculateMonthlyPayment(_slotAmounts[slotIndex], _slotMonths[slotIndex]);
+            float rate = GetInterestRate();
+            long monthly = CalculateMonthlyPayment(_slotAmounts[slotIndex], _slotMonths[slotIndex], rate);
             payVal.text = FormatLoanAmount(monthly);
         }
     }
 
-    long CalculateMonthlyPayment(long amount, int months)
+    float GetInterestRate()
     {
-        return (amount + months - 1) / months;
+        return _financiero == null ? 0.18f : _financiero.reputation switch
+        {
+            5 => Random.Range(0.02f, 0.04f),
+            4 => Random.Range(0.04f, 0.06f),
+            3 => Random.Range(0.06f, 0.09f),
+            2 => Random.Range(0.09f, 0.13f),
+            _ => Random.Range(0.13f, 0.18f),
+        };
+    }
+
+    long CalculateMonthlyPayment(long amount, int months, float rate)
+    {
+        double total = amount * (1.0 + rate);
+        return (long)System.Math.Ceiling(total / months);
     }
 
     void OnContractLoan(int slotIndex)
@@ -574,7 +603,8 @@ public class LoansController : MonoBehaviour
 
         long amount = _slotAmounts[slotIndex];
         int months = _slotMonths[slotIndex];
-        long monthly = CalculateMonthlyPayment(amount, months);
+        float rate = GetInterestRate();
+        long monthly = CalculateMonthlyPayment(amount, months, rate);
 
         var loan = new LoanData
         {
@@ -583,6 +613,7 @@ public class LoansController : MonoBehaviour
             amount = amount,
             months = months,
             monthly_payment = monthly,
+            interest_rate = rate,
             remaining_months = months,
             is_active = 1,
         };
@@ -610,7 +641,7 @@ public class LoansController : MonoBehaviour
             sender_type = 0,
             sender_id = 0,
             title = "Pr\u00e9stamo bancario concedido",
-            body = $"Se ha concedido un pr\u00e9stamo de {FormatLoanAmount(amount)} a {months} meses con una cuota mensual de {FormatLoanAmount(monthly)}.",
+            body = $"Se ha concedido un pr\u00e9stamo de {FormatLoanAmount(amount)} a {months} meses al {rate*100:F1}% de inter\u00e9s. Cuota mensual: {FormatLoanAmount(monthly)}.",
             game_day = _season?.current_game_day ?? 0,
             game_date = now,
             created_at = now,

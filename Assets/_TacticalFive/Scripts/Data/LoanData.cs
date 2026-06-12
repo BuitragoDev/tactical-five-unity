@@ -10,6 +10,7 @@ public class LoanData
     public long amount { get; set; }
     public int months { get; set; }
     public long monthly_payment { get; set; }
+    public double interest_rate { get; set; }
     public int remaining_months { get; set; }
     public int is_active { get; set; }
 }
