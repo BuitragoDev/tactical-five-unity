@@ -146,15 +146,15 @@
 
 .btn-spin {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    background-color: rgb(42, 51, 71);
-    border-width: 0;
-    color: rgb(208, 216, 232);
     font-size: 20px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
     width: 36px;
     height: 36px;
-    -unity-text-align: middle-center;
-    padding: 0;
+    background-color: rgb(42, 51, 71);
     flex-shrink: 0;
+    border-width: 0;
+    padding: 0;
 }
 
 .btn-spin:hover {

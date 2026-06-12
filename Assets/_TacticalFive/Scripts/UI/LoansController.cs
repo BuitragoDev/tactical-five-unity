@@ -426,8 +426,9 @@ public class LoansController : MonoBehaviour
         var amountRow = new VisualElement();
         amountRow.AddToClassList("loan-amount-row");
 
-        var btnDecAmt = new Button();
+        var btnDecAmt = new Label();
         btnDecAmt.AddToClassList("btn-spin");
+        btnDecAmt.focusable = true;
         btnDecAmt.text = "\u25C0";
         SetupLongPress(btnDecAmt, () => StepAmount(slotIndex, -1));
         SetupCursor(btnDecAmt);
@@ -439,8 +440,9 @@ public class LoansController : MonoBehaviour
         amtLabel.text = FormatLoanAmount(_slotAmounts[slotIndex]);
         amountRow.Add(amtLabel);
 
-        var btnIncAmt = new Button();
+        var btnIncAmt = new Label();
         btnIncAmt.AddToClassList("btn-spin");
+        btnIncAmt.focusable = true;
         btnIncAmt.text = "\u25B6";
         SetupLongPress(btnIncAmt, () => StepAmount(slotIndex, 1));
         SetupCursor(btnIncAmt);
@@ -451,8 +453,9 @@ public class LoansController : MonoBehaviour
         var monthsRow = new VisualElement();
         monthsRow.AddToClassList("loan-months-row");
 
-        var btnDecMon = new Button();
+        var btnDecMon = new Label();
         btnDecMon.AddToClassList("btn-spin");
+        btnDecMon.focusable = true;
         btnDecMon.text = "\u25C0";
         SetupLongPress(btnDecMon, () => StepMonths(slotIndex, -1));
         SetupCursor(btnDecMon);
@@ -464,8 +467,9 @@ public class LoansController : MonoBehaviour
         monLabel.text = $"{_slotMonths[slotIndex]} meses";
         monthsRow.Add(monLabel);
 
-        var btnIncMon = new Button();
+        var btnIncMon = new Label();
         btnIncMon.AddToClassList("btn-spin");
+        btnIncMon.focusable = true;
         btnIncMon.text = "\u25B6";
         SetupLongPress(btnIncMon, () => StepMonths(slotIndex, 1));
         SetupCursor(btnIncMon);
@@ -518,12 +522,12 @@ public class LoansController : MonoBehaviour
         slot.Add(actionsRow);
     }
 
-    void SetupCursor(Button btn)
+    void SetupCursor(VisualElement el)
     {
         if (CursorManager.Instance == null) return;
-        btn.RegisterCallback<MouseEnterEvent>(_ =>
+        el.RegisterCallback<MouseEnterEvent>(_ =>
             CursorManager.Instance.SetHandCursor());
-        btn.RegisterCallback<MouseLeaveEvent>(_ =>
+        el.RegisterCallback<MouseLeaveEvent>(_ =>
             CursorManager.Instance.SetDefaultCursor());
     }
 
@@ -665,26 +669,34 @@ public class LoansController : MonoBehaviour
         Refresh();
     }
 
-    void SetupLongPress(Button btn, System.Action onStep)
+    void SetupLongPress(VisualElement el, System.Action onStep)
     {
         IVisualElementScheduledItem scheduled = null;
 
-        btn.RegisterCallback<PointerDownEvent>(_ =>
+        el.RegisterCallback<PointerDownEvent>(_ =>
         {
+            PlayClick();
+            scheduled?.Pause();
             onStep();
-            scheduled = btn.schedule.Execute(() => onStep()).Every(80).StartingIn(350);
+            scheduled = el.schedule.Execute(() => onStep()).Every(80).StartingIn(350);
         });
 
-        btn.RegisterCallback<PointerUpEvent>(_ =>
+        el.RegisterCallback<PointerUpEvent>(_ =>
         {
-            scheduled?.Pause();
-            scheduled = null;
+            if (scheduled != null)
+            {
+                scheduled.Pause();
+                scheduled = null;
+            }
         });
 
-        btn.RegisterCallback<PointerCaptureOutEvent>(_ =>
+        el.RegisterCallback<PointerCaptureOutEvent>(_ =>
         {
-            scheduled?.Pause();
-            scheduled = null;
+            if (scheduled != null)
+            {
+                scheduled.Pause();
+                scheduled = null;
+            }
         });
     }
 
