@@ -57,8 +57,11 @@ public static class GameSimulator
             return new GameResult
             {
                 game = game,
-                home_score = homeScore, away_score = awayScore,
-                quarters = qs, home_stats = homePS, away_stats = awayPS,
+                home_score = homeScore,
+                away_score = awayScore,
+                quarters = qs,
+                home_stats = homePS,
+                away_stats = awayPS,
                 home_team_stats = CalcTeamStats(homePS),
                 away_team_stats = CalcTeamStats(awayPS)
             };
@@ -138,9 +141,11 @@ public static class GameSimulator
         var result = new GameResult
         {
             game = game,
-            home_score = homeTotal, away_score = awayTotal,
+            home_score = homeTotal,
+            away_score = awayTotal,
             quarters = quarters,
-            home_stats = homePS, away_stats = awayPS,
+            home_stats = homePS,
+            away_stats = awayPS,
             home_team_stats = CalcTeamStats(homePS),
             away_team_stats = CalcTeamStats(awayPS),
             injuries = homeInjuries.Concat(awayInjuries).ToList()
@@ -176,10 +181,14 @@ public static class GameSimulator
             team_id = teamId,
             minutes = ps.minutes,
             points = ps.points,
-            fgm = ps.fgm, fga = ps.fga,
-            fg3m = ps.fg3m, fg3a = ps.fg3a,
-            ftm = ps.ftm, fta = ps.fta,
-            oreb = ps.oreb, dreb = ps.dreb,
+            fgm = ps.fgm,
+            fga = ps.fga,
+            fg3m = ps.fg3m,
+            fg3a = ps.fg3a,
+            ftm = ps.ftm,
+            fta = ps.fta,
+            oreb = ps.oreb,
+            dreb = ps.dreb,
             rebounds = ps.oreb + ps.dreb,
             assists = ps.assists,
             steals = ps.steals,
@@ -376,8 +385,12 @@ public static class GameSimulator
     {
         float base3pt = p.position switch
         {
-            "PG" => 0.36f, "SG" => 0.42f, "SF" => 0.35f,
-            "PF" => 0.30f, "C" => 0.14f, _ => 0.30f
+            "PG" => 0.36f,
+            "SG" => 0.42f,
+            "SF" => 0.35f,
+            "PF" => 0.30f,
+            "C" => 0.14f,
+            _ => 0.30f
         };
         float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f, 0.10f, 0.55f);
         return UnityEngine.Random.value < adj ? "3" : "2";
@@ -549,13 +562,40 @@ public static class GameSimulator
 
     static (string type, int minDays, int maxDays, int weight)[] INJURY_TYPES =
     {
-        ("Esguince leve", 3, 7, 40),
-        ("Distensión muscular", 5, 10, 30),
-        ("Esguince moderado", 8, 14, 25),
-        ("Contusión ósea", 10, 21, 15),
-        ("Fractura por estrés", 21, 35, 5),
-        ("Rotura de ligamentos", 28, 42, 3),
-        ("Rotura de menisco", 35, 56, 2),
+        // Muy comunes
+        ("Sobrecarga muscular", 1, 3, 60),
+        ("Calambres musculares", 1, 2, 55),
+        ("Golpe / contusión leve", 1, 4, 50),
+        ("Esguince leve de tobillo", 3, 7, 40),
+        ("Distensión muscular", 5, 10, 35),
+        ("Tendinitis leve", 4, 8, 30),
+        ("Lumbalgia", 3, 8, 28),
+
+        // Comunes
+        ("Esguince moderado de tobillo", 8, 14, 25),
+        ("Contusión ósea", 10, 21, 20),
+        ("Tendinitis rotuliana", 7, 14, 18),
+        ("Fascitis plantar", 7, 15, 15),
+        ("Esguince de muñeca", 7, 14, 15),
+        ("Lesión en el gemelo", 10, 18, 14),
+        ("Contractura muscular", 5, 12, 14),
+
+        // Poco frecuentes
+        ("Rotura fibrilar leve", 14, 21, 12),
+        ("Subluxación de dedo", 10, 18, 10),
+        ("Esguince grave de tobillo", 14, 28, 8),
+        ("Luxación de hombro", 21, 35, 7),
+        ("Fractura por estrés", 21, 35, 6),
+        ("Rotura fibrilar grave", 21, 42, 5),
+
+        // Graves
+        ("Rotura parcial de ligamentos", 28, 49, 4),
+        ("Rotura de ligamentos", 42, 90, 3),
+        ("Rotura de menisco", 35, 70, 3),
+        ("Fractura de mano", 30, 60, 2),
+        ("Fractura de muñeca", 45, 75, 2),
+        ("Rotura del tendón de Aquiles", 120, 240, 1),
+        ("Rotura del ligamento cruzado anterior", 180, 300, 1),
     };
 
     static (string type, int minDays, int maxDays, int weight) PickInjury()
