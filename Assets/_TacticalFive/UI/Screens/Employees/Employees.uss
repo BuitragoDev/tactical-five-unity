@@ -134,11 +134,11 @@
 
 .staff-grid {
     flex-direction: row;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .staff-card {
-    flex: 1;
+    width: 270px;
     flex-direction: row;
     align-items: center;
     background-color: rgb(22, 26, 36);
@@ -147,6 +147,7 @@
     padding: 16px 12px;
     margin-left: 4px;
     margin-right: 4px;
+    margin-bottom: 8px;
 }
 
 .staff-card-icon {
