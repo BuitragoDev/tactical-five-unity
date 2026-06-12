@@ -346,45 +346,33 @@ public class CarteraController : MonoBehaviour
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id);
 
-        foreach (var p in players)
+        for (int i = 0; i < players.Count; i += 2)
         {
-            var row = new VisualElement();
-            row.AddToClassList("player-row");
-            if (_selectedPlayer != null && _selectedPlayer.id == p.id)
-                row.AddToClassList("player-row--selected");
+            var wrapper = new VisualElement();
+            wrapper.style.flexDirection = FlexDirection.Row;
 
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("player-row-name");
-            nameLbl.text = $"{p.first_name} {p.last_name}".ToUpper();
-            row.Add(nameLbl);
+            // First player in the pair
+            var row1 = BuildPlayerRow(players[i]);
+            row1.style.flexGrow = 1;
+            row1.style.marginRight = 4;
+            wrapper.Add(row1);
 
-            var posLbl = new Label();
-            posLbl.AddToClassList("player-row-pos");
-            posLbl.text = p.position;
-            row.Add(posLbl);
-
-            var ageLbl = new Label();
-            ageLbl.AddToClassList("player-row-age");
-            ageLbl.text = p.age.ToString();
-            row.Add(ageLbl);
-
-            var ovrLbl = new Label();
-            ovrLbl.AddToClassList("player-row-ovr");
-            ovrLbl.text = p.overall.ToString();
-            row.Add(ovrLbl);
-
-            var captured = p;
-            row.RegisterCallback<ClickEvent>(_ =>
+            // Second player in the pair (if exists)
+            if (i + 1 < players.Count)
             {
-                PlayClick();
-                _selectedPlayer = captured;
-                BuildPlayerList(); // refresh selection highlight
-            });
+                var row2 = BuildPlayerRow(players[i + 1]);
+                row2.style.flexGrow = 1;
+                wrapper.Add(row2);
+            }
+            else
+            {
+                // Empty placeholder for odd count so columns stay aligned
+                var placeholder = new VisualElement();
+                placeholder.style.flexGrow = 1;
+                wrapper.Add(placeholder);
+            }
 
-            if (CursorManager.Instance != null)
-                CursorManager.Instance.RegisterHandCursor(row);
-
-            _playerList.Add(row);
+            _playerList.Add(wrapper);
         }
 
         // Ojear button below player list if a player is selected
@@ -424,6 +412,47 @@ public class CarteraController : MonoBehaviour
 
             _playerList.Add(scoutBtn);
         }
+    }
+
+    VisualElement BuildPlayerRow(PlayerData p)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("player-row");
+        if (_selectedPlayer != null && _selectedPlayer.id == p.id)
+            row.AddToClassList("player-row--selected");
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("player-row-name");
+        nameLbl.text = $"{p.first_name} {p.last_name}".ToUpper();
+        row.Add(nameLbl);
+
+        var posLbl = new Label();
+        posLbl.AddToClassList("player-row-pos");
+        posLbl.text = p.position;
+        row.Add(posLbl);
+
+        var ageLbl = new Label();
+        ageLbl.AddToClassList("player-row-age");
+        ageLbl.text = p.age.ToString();
+        row.Add(ageLbl);
+
+        var ovrLbl = new Label();
+        ovrLbl.AddToClassList("player-row-ovr");
+        ovrLbl.text = p.overall.ToString();
+        row.Add(ovrLbl);
+
+        var captured = p;
+        row.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _selectedPlayer = captured;
+            BuildPlayerList();
+        });
+
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(row);
+
+        return row;
     }
 
     void StartScout(PlayerData player)
