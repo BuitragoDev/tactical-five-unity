@@ -134,7 +134,7 @@
 }
 .nav-submenu-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     -unity-text-align: middle-left;
