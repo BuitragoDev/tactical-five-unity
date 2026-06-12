@@ -39,6 +39,8 @@ public class LoansController : MonoBehaviour
     private StyleBackground _starBg;
     private StyleBackground _empleadoBg;
 
+    private float _currentRate;
+
     private const long MIN_AMOUNT = 500_000;
     private const long MAX_AMOUNT = 50_000_000;
     private const long AMOUNT_STEP = 500_000;
@@ -131,6 +133,7 @@ public class LoansController : MonoBehaviour
 
         var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         _financiero = staff.FirstOrDefault(e => e.position == "FINANCIERO");
+        _currentRate = GetInterestRate();
 
         // Initialize editor values for inactive slots
         for (int i = 0; i < 4; i++)
@@ -293,7 +296,7 @@ public class LoansController : MonoBehaviour
 
             var interestLbl = new Label();
             interestLbl.AddToClassList("fin-staff-interest");
-            float rate = GetInterestRate() * 100;
+            float rate = _currentRate * 100;
             interestLbl.text = $"Inter\u00e9s: {rate:F1}%";
             info.Add(interestLbl);
 
@@ -445,6 +448,7 @@ public class LoansController : MonoBehaviour
         btnDecAmt.AddToClassList("btn-spin");
         btnDecAmt.focusable = true;
         btnDecAmt.text = "\u25C0";
+        btnDecAmt.name = $"BtnDecAmt_{slotIndex}";
         SetupLongPress(btnDecAmt, () => StepAmount(slotIndex, -1));
         SetupCursor(btnDecAmt);
         amountRow.Add(btnDecAmt);
@@ -459,6 +463,7 @@ public class LoansController : MonoBehaviour
         btnIncAmt.AddToClassList("btn-spin");
         btnIncAmt.focusable = true;
         btnIncAmt.text = "\u25B6";
+        btnIncAmt.name = $"BtnIncAmt_{slotIndex}";
         SetupLongPress(btnIncAmt, () => StepAmount(slotIndex, 1));
         SetupCursor(btnIncAmt);
         amountRow.Add(btnIncAmt);
@@ -472,6 +477,7 @@ public class LoansController : MonoBehaviour
         btnDecMon.AddToClassList("btn-spin");
         btnDecMon.focusable = true;
         btnDecMon.text = "\u25C0";
+        btnDecMon.name = $"BtnDecMon_{slotIndex}";
         SetupLongPress(btnDecMon, () => StepMonths(slotIndex, -1));
         SetupCursor(btnDecMon);
         monthsRow.Add(btnDecMon);
@@ -486,13 +492,14 @@ public class LoansController : MonoBehaviour
         btnIncMon.AddToClassList("btn-spin");
         btnIncMon.focusable = true;
         btnIncMon.text = "\u25B6";
+        btnIncMon.name = $"BtnIncMon_{slotIndex}";
         SetupLongPress(btnIncMon, () => StepMonths(slotIndex, 1));
         SetupCursor(btnIncMon);
         monthsRow.Add(btnIncMon);
         slot.Add(monthsRow);
 
         // Monthly payment display
-        float rate = GetInterestRate();
+        float rate = _currentRate;
         long monthly = CalculateMonthlyPayment(_slotAmounts[slotIndex], _slotMonths[slotIndex], rate);
 
         var paymentRow = new VisualElement();
@@ -574,10 +581,25 @@ public class LoansController : MonoBehaviour
         var payVal = _loansContainer.Q<Label>($"LoanPayVal_{slotIndex}");
         if (payVal != null)
         {
-            float rate = GetInterestRate();
+            float rate = _currentRate;
             long monthly = CalculateMonthlyPayment(_slotAmounts[slotIndex], _slotMonths[slotIndex], rate);
             payVal.text = FormatLoanAmount(monthly);
         }
+
+        ToggleSpinDisabled($"BtnDecAmt_{slotIndex}", _slotAmounts[slotIndex] <= MIN_AMOUNT);
+        ToggleSpinDisabled($"BtnIncAmt_{slotIndex}", _slotAmounts[slotIndex] >= MAX_AMOUNT);
+        ToggleSpinDisabled($"BtnDecMon_{slotIndex}", _slotMonths[slotIndex] <= MIN_MONTHS);
+        ToggleSpinDisabled($"BtnIncMon_{slotIndex}", _slotMonths[slotIndex] >= MAX_MONTHS);
+    }
+
+    void ToggleSpinDisabled(string name, bool disabled)
+    {
+        var el = _loansContainer.Q<Label>(name);
+        if (el == null) return;
+        if (disabled)
+            el.AddToClassList("btn-spin--disabled");
+        else
+            el.RemoveFromClassList("btn-spin--disabled");
     }
 
     float GetInterestRate()
@@ -604,7 +626,7 @@ public class LoansController : MonoBehaviour
 
         long amount = _slotAmounts[slotIndex];
         int months = _slotMonths[slotIndex];
-        float rate = GetInterestRate();
+        float rate = _currentRate;
         long monthly = CalculateMonthlyPayment(amount, months, rate);
 
         var loan = new LoanData
