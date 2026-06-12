@@ -127,6 +127,7 @@ public class DatabaseManager : MonoBehaviour
     void CreateTables()
     {
         _db.CreateTable<TeamData>();
+        _db.CreateTable<LoanData>();
         _db.CreateTable<ManagerData>();
         _db.CreateTable<LeagueSettingsData>();
         _db.CreateTable<GameData>();
@@ -432,6 +433,37 @@ public class DatabaseManager : MonoBehaviour
     public void DeleteEmployeeCandidates()
     {
         _db.Execute("DELETE FROM employees WHERE team_id = 0");
+    }
+
+    // ── LOANS ────────────────────────────────────────
+
+    public List<LoanData> GetLoansByTeam(int teamId)
+    {
+        return _db.Table<LoanData>()
+                  .Where(l => l.team_id == teamId)
+                  .OrderBy(l => l.slot)
+                  .ToList();
+    }
+
+    public LoanData GetLoanBySlot(int teamId, int slot)
+    {
+        return _db.Table<LoanData>()
+                  .FirstOrDefault(l => l.team_id == teamId && l.slot == slot);
+    }
+
+    public void InsertLoan(LoanData loan)
+    {
+        _db.Insert(loan);
+    }
+
+    public void UpdateLoan(LoanData loan)
+    {
+        _db.Update(loan);
+    }
+
+    public void DeleteLoan(int id)
+    {
+        _db.Delete<LoanData>(id);
     }
 
     // ── MANAGER ────────────────────────────────────────

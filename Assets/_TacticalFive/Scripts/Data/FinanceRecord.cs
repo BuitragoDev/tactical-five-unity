@@ -11,6 +11,7 @@ public class FinanceRecord
     public const int TYPE_DISMISSAL     = 6;   // Despido
     public const int TYPE_SALARIES      = 7;   // Sueldos de jugadores
     public const int TYPE_EMPLOYEE_SALARY = 8;   // Sueldos de empleados
+    public const int TYPE_LOAN = 9;               // Préstamo bancario
 
     [PrimaryKey, AutoIncrement]
     public int id { get; set; }

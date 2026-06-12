@@ -1,0 +1,144 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="../Loans/Loans.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="LoansRoot" class="loans-root">
+
+        <!-- ══ SIDEBAR ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard" class="nav-item">
+                    <ui:VisualElement name="NavDashboardIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Inicio" />
+                </ui:Button>
+                <ui:Button name="NavRoster" class="nav-item">
+                    <ui:VisualElement name="NavRosterIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Plantilla" />
+                </ui:Button>
+                <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
+                    <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
+                        <ui:Label text="Jugadores" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuEmpleados" class="nav-submenu-item">
+                        <ui:Label text="Empleados" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
+                        <ui:Label text="Lesionados" class="nav-submenu-label"/>
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:Button name="NavCalendar" class="nav-item">
+                    <ui:VisualElement name="NavCalendarIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Calendario" />
+                </ui:Button>
+                <ui:Button name="NavStandings" class="nav-item">
+                    <ui:VisualElement name="NavStandingsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Clasificación" />
+                </ui:Button>
+                <ui:Button name="NavPalmares" class="nav-item">
+                    <ui:VisualElement name="NavPalmaresIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Palmarés" />
+                </ui:Button>
+                <ui:Button name="NavResults" class="nav-item">
+                    <ui:VisualElement name="NavResultsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Resultados" />
+                </ui:Button>
+                <ui:Button name="NavPlayoffs" class="nav-item">
+                    <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Playoffs" />
+                </ui:Button>
+                <ui:Button name="NavStats" class="nav-item">
+                    <ui:VisualElement name="NavStatsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Estadísticas" />
+                </ui:Button>
+                <ui:Button name="NavRecords" class="nav-item">
+                    <ui:VisualElement name="NavRecordsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Records" />
+                </ui:Button>
+                <ui:Button name="NavMarket" class="nav-item">
+                    <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Mercado" />
+                </ui:Button>
+                <ui:Button name="NavFinances" class="nav-item nav-item--active">
+                    <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Finanzas" />
+                </ui:Button>
+                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
+                    <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
+                        <ui:Label text="Decisiones" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuPrestamos" class="nav-submenu-item nav-submenu-item--active">
+                        <ui:Label text="Pr\u00e9stamos Bancarios" class="nav-submenu-label"/>
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:Button name="NavSponsors" class="nav-item">
+                    <ui:VisualElement name="NavSponsorsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Patrocinadores" />
+                </ui:Button>
+                <ui:Button name="NavTV" class="nav-item">
+                    <ui:VisualElement name="NavTVIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Televisión" />
+                </ui:Button>
+                <ui:Button name="NavArena" class="nav-item">
+                    <ui:VisualElement name="NavArenaIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Pabellón" />
+                </ui:Button>
+                <ui:Button name="NavMessages" class="nav-item">
+                    <ui:VisualElement name="NavMessagesIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Mensajes" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="loans-main">
+
+            <!-- TOP HEADER -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PR\u00c9STAMOS" />
+                    <ui:Label name="HeaderLoanCount" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="FINANZAS" />
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- CONTENT -->
+            <ui:VisualElement class="loans-content">
+
+                <!-- FINANCIAL STAFF -->
+                <ui:VisualElement name="FinanceStaffSection" class="fin-staff-section">
+                    <ui:Label class="section-title" text="DIRECTOR FINANCIERO" />
+                    <ui:VisualElement name="FinStaffBody" class="fin-staff-body" />
+                </ui:VisualElement>
+
+                <!-- LOAN SLOTS -->
+                <ui:VisualElement name="LoansSection" class="loans-section">
+                    <ui:VisualElement name="LoansContainer" class="loans-container" />
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>
