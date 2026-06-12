@@ -23,6 +23,7 @@ public enum GameScreen
     GameResults,
     LoadGame,
     Settings,
+    Employees,
     SeasonSummary,
     PlayerAwards,
     EndSeason,

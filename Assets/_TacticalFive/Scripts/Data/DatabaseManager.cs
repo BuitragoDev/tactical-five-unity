@@ -132,6 +132,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<GameData>();
         _db.CreateTable<SeasonData>();
         _db.CreateTable<PlayerData>();
+        _db.CreateTable<EmployeeData>();
         _db.CreateTable<PlayerGameStats>();
         _db.CreateTable<FinanceRecord>();
         _db.CreateTable<SeasonRecord>();
@@ -394,6 +395,43 @@ public class DatabaseManager : MonoBehaviour
 
         var players = GetPlayersByTeam(manager.team_id);
         return players.Take(count).ToList();
+    }
+
+    // ── EMPLOYEE ────────────────────────────────────────
+
+    public List<EmployeeData> GetEmployeesByTeam(int teamId)
+    {
+        return _db.Table<EmployeeData>()
+                  .Where(e => e.team_id == teamId)
+                  .ToList();
+    }
+
+    public List<EmployeeData> GetEmployeeCandidates()
+    {
+        return _db.Table<EmployeeData>()
+                  .Where(e => e.team_id == 0)
+                  .OrderBy(e => e.position)
+                  .ToList();
+    }
+
+    public void InsertEmployee(EmployeeData emp)
+    {
+        _db.Insert(emp);
+    }
+
+    public void UpdateEmployee(EmployeeData emp)
+    {
+        _db.Update(emp);
+    }
+
+    public void DeleteEmployee(int id)
+    {
+        _db.Delete<EmployeeData>(id);
+    }
+
+    public void DeleteEmployeeCandidates()
+    {
+        _db.Execute("DELETE FROM employees WHERE team_id = 0");
     }
 
     // ── MANAGER ────────────────────────────────────────

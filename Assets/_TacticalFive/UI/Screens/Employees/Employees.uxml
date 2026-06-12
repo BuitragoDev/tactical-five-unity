@@ -1,0 +1,169 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Employees.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+
+    <ui:VisualElement name="EmployeesRoot" class="employees-root">
+
+        <!-- ══ SIDEBAR ══ -->
+        <ui:VisualElement name="Sidebar" class="sidebar">
+            <ui:VisualElement class="sidebar-logo">
+                <ui:Label class="sidebar-logo-icon" text="TF" />
+                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
+                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
+            </ui:VisualElement>
+            <ui:VisualElement class="sidebar-nav">
+                <ui:Button name="NavDashboard" class="nav-item">
+                    <ui:VisualElement name="NavDashboardIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Inicio" />
+                </ui:Button>
+                <ui:Button name="NavRoster" class="nav-item">
+                    <ui:VisualElement name="NavRosterIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Plantilla" />
+                </ui:Button>
+                <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
+                    <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
+                        <ui:Label text="Jugadores" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuEmpleados" class="nav-submenu-item nav-submenu-item--active">
+                        <ui:Label text="Empleados" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
+                        <ui:Label text="Lesionados" class="nav-submenu-label"/>
+                    </ui:Button>
+                </ui:VisualElement>
+                <ui:Button name="NavCalendar" class="nav-item">
+                    <ui:VisualElement name="NavCalendarIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Calendario" />
+                </ui:Button>
+                <ui:Button name="NavStandings" class="nav-item">
+                    <ui:VisualElement name="NavStandingsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Clasificación" />
+                </ui:Button>
+                <ui:Button name="NavPalmares" class="nav-item">
+                    <ui:VisualElement name="NavPalmaresIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Palmarés" />
+                </ui:Button>
+                <ui:Button name="NavResults" class="nav-item">
+                    <ui:VisualElement name="NavResultsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Resultados" />
+                </ui:Button>
+                <ui:Button name="NavPlayoffs" class="nav-item">
+                    <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Playoffs" />
+                </ui:Button>
+                <ui:Button name="NavStats" class="nav-item">
+                    <ui:VisualElement name="NavStatsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Estadísticas" />
+                </ui:Button>
+                <ui:Button name="NavRecords" class="nav-item">
+                    <ui:VisualElement name="NavRecordsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Records" />
+                </ui:Button>
+                <ui:Button name="NavMarket" class="nav-item">
+                    <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Mercado" />
+                </ui:Button>
+                <ui:Button name="NavFinances" class="nav-item">
+                    <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Finanzas" />
+                </ui:Button>
+                <ui:Button name="NavSponsors" class="nav-item">
+                    <ui:VisualElement name="NavSponsorsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Patrocinadores" />
+                </ui:Button>
+                <ui:Button name="NavTV" class="nav-item">
+                    <ui:VisualElement name="NavTVIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Televisión" />
+                </ui:Button>
+                <ui:Button name="NavArena" class="nav-item">
+                    <ui:VisualElement name="NavArenaIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Pabellón" />
+                </ui:Button>
+                <ui:Button name="NavMessages" class="nav-item">
+                    <ui:VisualElement name="NavMessagesIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Mensajes" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="employees-main">
+
+            <!-- TOP HEADER -->
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="DASHBOARD" />
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- CONTENT -->
+            <ui:VisualElement class="employees-content">
+
+                <!-- YOUR STAFF -->
+                <ui:VisualElement class="staff-section">
+                    <ui:Label class="staff-section-title" text="TU PERSONAL" />
+                    <ui:VisualElement name="MyStaffBody" class="staff-grid" />
+                </ui:VisualElement>
+
+                <!-- MARKET -->
+                <ui:VisualElement class="market-section">
+                    <ui:Label class="market-section-title" text="MERCADO DE PERSONAL" />
+                    <ui:VisualElement name="MarketBody" class="market-grid" />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ══ MODAL CONTRATAR ══ -->
+        <ui:VisualElement name="HireOverlay" class="hire-modal-overlay">
+            <ui:VisualElement name="HireBox" class="hire-modal-box">
+                <ui:Label name="HireTitle" class="hire-modal-title" text="CONTRATAR EMPLEADO" />
+                <ui:Label name="HireText1" class="hire-modal-text" text="" />
+                <ui:Label name="HireText2" class="hire-modal-text" text="" />
+                <ui:Label name="HireText3" class="hire-modal-text" text="" />
+                <ui:VisualElement class="hire-modal-buttons">
+                    <ui:Button name="BtnHireCancel"  class="btn-modal-cancel" text="CANCELAR" />
+                    <ui:Button name="BtnHireConfirm" class="btn-modal-confirm" text="CONTRATAR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL RESULTADO ══ -->
+        <ui:VisualElement name="HireResultOverlay" class="hire-modal-overlay">
+            <ui:VisualElement name="HireResultBox" class="hire-modal-box">
+                <ui:Label name="HireResultTitle" class="hire-modal-title" text="" />
+                <ui:Label name="HireResultText"  class="hire-modal-text"  text="" />
+                <ui:VisualElement class="hire-modal-buttons">
+                    <ui:Button name="BtnHireResultOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

@@ -156,7 +156,7 @@ public class CalendarController : MonoBehaviour
             _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Roster);
         });
-        _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); });
+        _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
