@@ -17,6 +17,17 @@
                     <ui:VisualElement name="NavRosterIcon" class="nav-icon"/>
                     <ui:Label text="Plantilla" class="nav-label"/>
                 </ui:Button>
+                <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
+                    <ui:Button name="SubmenuJugadores" class="nav-submenu-item nav-submenu-item--active">
+                        <ui:Label text="Jugadores" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuEmpleados" class="nav-submenu-item">
+                        <ui:Label text="Empleados" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
+                        <ui:Label text="Lesionados" class="nav-submenu-label"/>
+                    </ui:Button>
+                </ui:VisualElement>
                 <ui:Button name="NavCalendar" class="nav-item">
                     <ui:VisualElement name="NavCalendarIcon" class="nav-icon"/>
                     <ui:Label text="Calendario" class="nav-label"/>

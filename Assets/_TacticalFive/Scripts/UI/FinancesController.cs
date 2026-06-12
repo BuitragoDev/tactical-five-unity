@@ -149,7 +149,20 @@ public class FinancesController : MonoBehaviour
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
+        {
+            PlayClick();
+            var btn = _root.Q<Button>("NavRoster");
+            if (btn != null)
+                btn.EnableInClassList("nav-item--expanded", !btn.ClassListContains("nav-item--expanded"));
+        });
+        _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<Button>("NavRoster")?.RemoveFromClassList("nav-item--expanded");
+            ScreenManager.Instance.GoTo(GameScreen.Roster);
+        });
+        _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); });
+        _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
