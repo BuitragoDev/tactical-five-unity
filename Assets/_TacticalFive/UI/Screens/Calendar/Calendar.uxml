@@ -24,7 +24,7 @@
                     <ui:Label class="nav-label" text="Plantilla" />
                 </ui:Button>
                 <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuJugadores" class="nav-submenu-item nav-submenu-item--active">
+                    <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
                         <ui:Label text="Jugadores" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuEmpleados" class="nav-submenu-item">

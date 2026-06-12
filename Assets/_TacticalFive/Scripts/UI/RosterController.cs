@@ -364,6 +364,7 @@ public class RosterController : MonoBehaviour
         RefreshHeader();
         RefreshSummary();
         BuildRosterList();
+        _root.Q<Button>("SubmenuJugadores")?.AddToClassList("nav-submenu-item--active");
 
         _detailEmpty.style.display = DisplayStyle.Flex;
         _detailScroll.style.display = DisplayStyle.None;
