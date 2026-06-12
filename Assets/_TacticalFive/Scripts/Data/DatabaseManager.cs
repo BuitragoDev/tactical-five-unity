@@ -134,6 +134,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<SeasonData>();
         _db.CreateTable<PlayerData>();
         _db.CreateTable<EmployeeData>();
+        _db.CreateTable<ScoutData>();
         _db.CreateTable<PlayerGameStats>();
         _db.CreateTable<FinanceRecord>();
         _db.CreateTable<SeasonRecord>();
@@ -357,6 +358,11 @@ public class DatabaseManager : MonoBehaviour
                   .ToList();
     }
 
+    public PlayerData GetPlayer(int id)
+    {
+        return _db.Table<PlayerData>().FirstOrDefault(p => p.id == id);
+    }
+
     public List<PlayerData> GetPlayersByTeam(int teamId)
     {
         return _db.Table<PlayerData>()
@@ -464,6 +470,37 @@ public class DatabaseManager : MonoBehaviour
     public void DeleteLoan(int id)
     {
         _db.Delete<LoanData>(id);
+    }
+
+    // ── SCOUTS ────────────────────────────────────────
+
+    public List<ScoutData> GetScoutsByTeam(int teamId)
+    {
+        return _db.Table<ScoutData>()
+                  .Where(s => s.team_id == teamId)
+                  .OrderBy(s => s.slot)
+                  .ToList();
+    }
+
+    public ScoutData GetScoutBySlot(int teamId, int slot)
+    {
+        return _db.Table<ScoutData>()
+                  .FirstOrDefault(s => s.team_id == teamId && s.slot == slot);
+    }
+
+    public void InsertScout(ScoutData scout)
+    {
+        _db.Insert(scout);
+    }
+
+    public void UpdateScout(ScoutData scout)
+    {
+        _db.Update(scout);
+    }
+
+    public void DeleteScout(int id)
+    {
+        _db.Delete<ScoutData>(id);
     }
 
     // ── MANAGER ────────────────────────────────────────

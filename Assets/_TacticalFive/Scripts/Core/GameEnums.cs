@@ -26,6 +26,7 @@ public enum GameScreen
     Settings,
     Employees,
     Injured,
+    Cartera,
     SeasonSummary,
     PlayerAwards,
     EndSeason,

@@ -297,7 +297,7 @@ public class DashboardController : MonoBehaviour
             _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Market);
         });
-        _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); });
+        _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Cartera); });
         _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -506,6 +506,7 @@ public class DashboardController : MonoBehaviour
         }
 
         ProcessInjuries();
+        ProcessScouts();
         ProcessRenovations();
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
@@ -902,6 +903,19 @@ public class DashboardController : MonoBehaviour
                 }
                 DatabaseManager.Instance.UpdatePlayer(p);
             }
+        }
+    }
+
+    void ProcessScouts()
+    {
+        if (_season == null) return;
+        var scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id)
+            .Where(s => s.completed == 0 && _season.current_game_day >= s.end_day)
+            .ToList();
+        foreach (var s in scouts)
+        {
+            s.completed = 1;
+            DatabaseManager.Instance.UpdateScout(s);
         }
     }
 

@@ -1,0 +1,342 @@
+/* ══════════════════════════════════════════
+   CARTERA — Cartera.uss
+   ══════════════════════════════════════════ */
+
+.cartera-root {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.cartera-main {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.cartera-content {
+    flex-direction: row;
+    flex-grow: 1;
+    padding: 20px 24px;
+    overflow-y: auto;
+}
+
+/* ── LEFT COLUMN ── */
+
+.cartera-left {
+    flex-direction: column;
+    flex: 1;
+    margin-right: 20px;
+    min-width: 0;
+}
+
+.team-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+}
+
+.team-logo-btn {
+    width: 40px;
+    height: 40px;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    background-color: rgb(22, 26, 36);
+    margin: 3px;
+    padding: 4px;
+    border-radius: 4px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.team-logo-btn:hover {
+    border-color: rgb(212, 160, 23);
+    background-color: rgb(28, 32, 44);
+}
+.team-logo-btn--selected {
+    border-color: rgb(212, 160, 23);
+    background-color: rgb(35, 40, 55);
+}
+
+.player-list {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 200px;
+}
+
+.player-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 10px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    margin-bottom: 4px;
+}
+.player-row:hover {
+    background-color: rgb(28, 32, 44);
+}
+.player-row--selected {
+    border-color: rgb(212, 160, 23);
+}
+
+.player-row-name {
+    font-size: 15px;
+    color: rgb(208, 216, 232);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-text-transform: upper;
+    flex: 1;
+}
+.player-row-pos {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    width: 30px;
+    -unity-text-align: middle-center;
+}
+.player-row-age {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    width: 30px;
+    -unity-text-align: middle-center;
+    margin-right: 10px;
+}
+.player-row-ovr {
+    font-size: 15px;
+    color: rgb(212, 160, 23);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    width: 30px;
+    -unity-text-align: middle-center;
+    margin-right: 10px;
+}
+
+.btn-scout {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(39, 174, 96);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 13px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 6px 14px;
+    border-radius: 4px;
+    -unity-text-align: middle-center;
+}
+.btn-scout:hover {
+    background-color: rgb(46, 204, 113);
+}
+.btn-scout--disabled {
+    background-color: rgb(60, 63, 68);
+    color: rgb(100, 100, 100);
+}
+
+/* ── RIGHT COLUMN ── */
+
+.cartera-right {
+    flex-direction: column;
+    width: 380px;
+    flex-shrink: 0;
+}
+
+/* Ojeador card */
+
+.ojeador-body {
+    flex-direction: column;
+}
+
+/* Scout slots */
+
+.scout-slots {
+    flex-direction: column;
+}
+
+.scout-slot {
+    flex-direction: column;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 14px;
+    margin-bottom: 8px;
+}
+.scout-slot--completed {
+    border-color: rgb(39, 174, 96);
+}
+.scout-slot--scouting {
+    border-color: rgb(212, 160, 23);
+}
+.scout-slot--empty {
+    border-color: rgb(42, 51, 71);
+    opacity: 0.5;
+}
+
+.scout-slot-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.scout-slot-name {
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-text-transform: upper;
+    flex: 1;
+}
+
+.scout-slot-pos {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    margin-left: 8px;
+    width: 30px;
+    -unity-text-align: middle-center;
+}
+
+.scout-slot-age {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    margin-left: 8px;
+}
+
+.scout-slot-timer {
+    font-size: 13px;
+    color: rgb(212, 160, 23);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    letter-spacing: 1px;
+    margin-top: 4px;
+}
+
+.scout-slot-attributes {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.scout-attr {
+    font-size: 13px;
+    color: rgb(160, 170, 190);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    width: 33%;
+    margin-bottom: 2px;
+}
+.scout-attr-label {
+    color: rgb(122, 138, 170);
+}
+.scout-attr-val {
+    color: rgb(208, 216, 232);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+}
+
+.scout-slot-salary {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    margin-top: 6px;
+}
+
+.scout-slot-contract {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+}
+
+.scout-empty-text {
+    font-size: 14px;
+    color: rgb(80, 90, 110);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    padding: 20px 0;
+    -unity-text-align: middle-center;
+}
+
+/* ── STAFF CARD (reused from Injured/Loans) ── */
+
+.med-staff-card {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 14px 18px;
+    min-width: 320px;
+}
+
+.med-staff-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 14px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.med-staff-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.med-staff-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(208, 216, 232);
+    -unity-text-transform: upper;
+}
+
+.med-staff-empty {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 16px 18px;
+    min-width: 320px;
+}
+
+.med-staff-star {
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    margin-right: 2px;
+}
+.med-staff-star--empty {
+    opacity: 0.25;
+}
+
+.med-staff-stars {
+    flex-direction: row;
+    margin-top: 4px;
+}
+
+.med-staff-salary {
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    margin-top: 4px;
+}
+
+.fin-staff-position {
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    letter-spacing: 2px;
+    margin-top: 2px;
+}
+
+.btn-fire {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(192, 57, 43);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 14px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 8px 0;
+    -unity-text-align: middle-center;
+    width: 100%;
+    border-radius: 4px;
+    margin-top: 8px;
+}
+.btn-fire:hover {
+    background-color: rgb(231, 76, 60);
+}
