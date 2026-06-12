@@ -398,7 +398,7 @@ public class RosterController : MonoBehaviour
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
-        long margin = salaryCap - totalPayroll;
+        long margin = salaryCap - _players.Sum(p => p.salary);
 
         _headerMargin.text = margin >= 0
             ? $"+${margin / 1_000_000}M"

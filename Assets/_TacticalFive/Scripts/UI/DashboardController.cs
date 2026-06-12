@@ -340,10 +340,10 @@ public class DashboardController : MonoBehaviour
         long totalPayroll = _players.Sum(p => p.salary) + teamEmployees.Sum(e => e.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
-        // Margen salarial real = Cap - Masa salarial
+        // Margen salarial = Cap - solo jugadores
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
-        long margin = salaryCap - totalPayroll;
+        long margin = salaryCap - _players.Sum(p => p.salary);
 
         _headerMargin.text = margin >= 0
             ? $"+${margin / 1_000_000}M"
