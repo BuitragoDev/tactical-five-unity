@@ -385,7 +385,10 @@ public class CarteraController : MonoBehaviour
             }
             else
             {
-                // Empty placeholder for odd count so columns stay aligned
+                // Single player on odd row — add right margin to wrapper so
+                // the available flex width matches 2-player rows, keeping
+                // player content widths identical
+                wrapper.style.marginRight = 4;
                 var placeholder = new VisualElement();
                 placeholder.style.flexBasis = 0;
                 placeholder.style.flexGrow = 1;
