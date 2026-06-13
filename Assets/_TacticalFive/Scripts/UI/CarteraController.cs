@@ -126,7 +126,18 @@ public class CarteraController : MonoBehaviour
         var employees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         _ojeador = employees.FirstOrDefault(e => e.position == "OJEADOR");
 
-        _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
+        try
+        {
+            _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
+        }
+        catch
+        {
+            DatabaseManager.Instance.Db.CreateTable<ScoutData>();
+            _scouts = new();
+        }
+
+        _selectedTeam = null;
+        _selectedPlayer = null;
     }
 
     void RegisterCallbacks()
@@ -614,18 +625,7 @@ public class CarteraController : MonoBehaviour
                     {
                         PlayClick();
                         DatabaseManager.Instance.DeleteScout(captured.id);
-        try
-        {
-            _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
-        }
-        catch
-        {
-            DatabaseManager.Instance.Db.CreateTable<ScoutData>();
-            _scouts = new();
-        }
-
-        _selectedTeam = null;
-        _selectedPlayer = null;
+                        _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
                         Refresh();
                     });
                     if (CursorManager.Instance != null)
