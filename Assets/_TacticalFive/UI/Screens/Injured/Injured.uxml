@@ -28,6 +28,9 @@
                     <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
                         <ui:Label text="Jugadores" class="nav-submenu-label"/>
                     </ui:Button>
+                    <ui:Button name="SubmenuEntrenamiento" class="nav-submenu-item">
+                        <ui:Label text="Entrenamiento" class="nav-submenu-label"/>
+                    </ui:Button>
                     <ui:Button name="SubmenuEmpleados" class="nav-submenu-item">
                         <ui:Label text="Empleados" class="nav-submenu-label"/>
                     </ui:Button>
@@ -39,6 +42,10 @@
                     <ui:VisualElement name="NavCalendarIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Calendario" />
                 </ui:Button>
+                <ui:Button name="NavResults" class="nav-item">
+                    <ui:VisualElement name="NavResultsIcon" class="nav-icon" />
+                    <ui:Label class="nav-label" text="Resultados" />
+                </ui:Button>
                 <ui:Button name="NavStandings" class="nav-item">
                     <ui:VisualElement name="NavStandingsIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Clasificación" />
@@ -46,11 +53,16 @@
                 <ui:Button name="NavPalmares" class="nav-item">
                     <ui:VisualElement name="NavPalmaresIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Palmarés" />
+                    <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:Button name="NavResults" class="nav-item">
-                    <ui:VisualElement name="NavResultsIcon" class="nav-icon" />
-                    <ui:Label class="nav-label" text="Resultados" />
-                </ui:Button>
+                <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu">
+                    <ui:Button name="SubmenuPalmares" class="nav-submenu-item">
+                        <ui:Label text="Palmarés" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuRecords" class="nav-submenu-item">
+                        <ui:Label text="Records" class="nav-submenu-label"/>
+                    </ui:Button>
+                </ui:VisualElement>
                 <ui:Button name="NavPlayoffs" class="nav-item">
                     <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Playoffs" />
@@ -59,10 +71,7 @@
                     <ui:VisualElement name="NavStatsIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Estadísticas" />
                 </ui:Button>
-                <ui:Button name="NavRecords" class="nav-item">
-                    <ui:VisualElement name="NavRecordsIcon" class="nav-icon" />
-                    <ui:Label class="nav-label" text="Records" />
-                </ui:Button>
+
                 <ui:Button name="NavMarket" class="nav-item">
                     <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Mercado" />
@@ -91,15 +100,13 @@
                     <ui:Button name="SubmenuPrestamos" class="nav-submenu-item">
                         <ui:Label text="Préstamos Bancarios" class="nav-submenu-label"/>
                     </ui:Button>
+                    <ui:Button name="SubmenuSponsors" class="nav-submenu-item">
+                        <ui:Label text="Patrocinadores" class="nav-submenu-label"/>
+                    </ui:Button>
+                    <ui:Button name="SubmenuTV" class="nav-submenu-item">
+                        <ui:Label text="Televisión" class="nav-submenu-label"/>
+                    </ui:Button>
                 </ui:VisualElement>
-                <ui:Button name="NavSponsors" class="nav-item">
-                    <ui:VisualElement name="NavSponsorsIcon" class="nav-icon" />
-                    <ui:Label class="nav-label" text="Patrocinadores" />
-                </ui:Button>
-                <ui:Button name="NavTV" class="nav-item">
-                    <ui:VisualElement name="NavTVIcon" class="nav-icon" />
-                    <ui:Label class="nav-label" text="Televisión" />
-                </ui:Button>
                 <ui:Button name="NavArena" class="nav-item">
                     <ui:VisualElement name="NavArenaIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Pabellón" />

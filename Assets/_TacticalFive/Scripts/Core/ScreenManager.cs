@@ -159,6 +159,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Historial:
                 ShowOnly(historialDocument);
                 break;
+            case GameScreen.Training:
+                ShowOnly(rosterDocument);
+                break;
         }
     }
 

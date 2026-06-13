@@ -32,7 +32,8 @@ public enum GameScreen
     EndSeason,
     NewSeason,
     Editor,
-    Historial
+    Historial,
+    Training
 }
 
 public enum GameMode
