@@ -252,7 +252,7 @@ public class CarteraController : MonoBehaviour
 
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerScoutCount.text = $"{_scouts.Count(s => s.completed == 1)}/{MAX_SCOUTS}";
+        _headerScoutCount.text = $"{_scouts.Count}/{MAX_SCOUTS}";
         _btnAction.text = "DASHBOARD";
 
         if (_season != null)
