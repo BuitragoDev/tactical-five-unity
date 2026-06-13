@@ -623,6 +623,9 @@ public class CarteraController : MonoBehaviour
             DatabaseManager.Instance.Db.CreateTable<ScoutData>();
             _scouts = new();
         }
+
+        _selectedTeam = null;
+        _selectedPlayer = null;
                         Refresh();
                     });
                     if (CursorManager.Instance != null)
