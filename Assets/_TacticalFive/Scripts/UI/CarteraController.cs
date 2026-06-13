@@ -388,9 +388,8 @@ public class CarteraController : MonoBehaviour
         if (_selectedPlayer != null)
         {
             var scoutBtn = new Button();
-            int activeCount = _scouts.Count(s => s.completed == 0);
             bool hasOjeador = _ojeador != null;
-            bool slotsFull = activeCount >= MAX_SCOUTS;
+            bool slotsFull = _scouts.Count >= MAX_SCOUTS;
 
             var alreadyScouting = _scouts.Any(s => s.player_id == _selectedPlayer.id);
             if (alreadyScouting)
@@ -473,8 +472,7 @@ public class CarteraController : MonoBehaviour
     {
         if (_season == null || _ojeador == null) return;
 
-        int activeCount = _scouts.Count(s => s.completed == 0);
-        if (activeCount >= MAX_SCOUTS) return;
+        if (_scouts.Count >= MAX_SCOUTS) return;
 
         int scoutDays = GetScoutDays(_ojeador.reputation);
         int endDay = _season.current_game_day + scoutDays;
