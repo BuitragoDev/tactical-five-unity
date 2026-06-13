@@ -240,6 +240,9 @@
 .header-stat-value--neutral {
     color: rgb(208, 216, 232);
 }
+.header-stat-value--gold {
+    color: rgb(212, 160, 23);
+}
 
 .header-spacer {
     flex-grow: 1;
@@ -367,7 +370,7 @@
     flex-basis: 0;
     margin-right: 0;
 }
-.panel-team-stats {
+.right-column > .panel-team-stats {
     margin-bottom: 16px;
 }
 
@@ -737,6 +740,7 @@
    PANEL ESTADÍSTICAS DEL EQUIPO
    ══════════════════════════════════════════ */
 .panel-team-stats {
+    min-height: 320px;
 }
 .team-stat-row {
     flex-direction: row;
@@ -817,10 +821,11 @@
     color: rgb(192, 57, 43);
 }
 .team-stat-status-icon {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
+    margin-right: 5px;
 }
 .team-stat-ring {
     width: 42px;
@@ -851,38 +856,49 @@
    ══════════════════════════════════════════ */
 .panel-board {
 }
-.board-item {
+.board-columns {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    padding: 6px 0;
+}
+.board-col {
     flex-direction: column;
-    margin-bottom: 14px;
+    align-items: center;
+    flex-grow: 1;
 }
-.board-label {
+.board-circle {
+    width: 96px;
+    height: 96px;
+    border-radius: 28px;
+    border-width: 3px;
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.15);
+    align-items: center;
+    justify-content: center;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+.board-circle-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    color: rgb(122, 138, 170);
-    margin-bottom: 12px;
-}
-.board-bar-bg {
-    height: 6px;
-    background-color: rgb(28, 33, 48);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 4px;
-}
-.board-bar-fill {
-    height: 6px;
-    border-radius: 3px;
-    background-color: rgb(212, 160, 23);
-}
-.board-bar-fill--green  { background-color: rgb(39, 174, 96); }
-.board-bar-fill--gold   { background-color: rgb(212, 160, 23); }
-.board-bar-fill--red    { background-color: rgb(192, 57, 43); }
-.board-value {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     color: rgb(208, 216, 232);
-    -unity-text-align: middle-right;
+    -unity-text-align: middle-center;
+}
+.board-col-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+.board-col-sep {
+    width: 1px;
+    height: 136px;
+    background-color: rgb(42, 51, 71);
+    flex-shrink: 0;
 }
 
 /* ══ FIRED MODAL ══ */

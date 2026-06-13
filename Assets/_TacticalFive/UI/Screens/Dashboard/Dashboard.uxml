@@ -124,7 +124,7 @@
                     <ui:Label name="HeaderMargin" text="" class="header-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label text="QUÍMICA" class="header-stat-label"/>
+                    <ui:Label text="QUÍMICA DE EQUIPO" class="header-stat-label"/>
                     <ui:Label name="HeaderChemistry" text="" class="header-stat-value"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer"/>
@@ -290,6 +290,16 @@
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="team-stat-row">
+                                        <ui:VisualElement name="TeamChemistryIcon" class="team-stat-logo"/>
+                                        <ui:VisualElement class="team-stat-info">
+                                            <ui:Label text="Química equipo" class="team-stat-title"/>
+                                            <ui:Label name="TeamChemistryLabel" text="--" class="team-stat-subtitle"/>
+                                        </ui:VisualElement>
+                                        <ui:VisualElement name="TeamChemistryRing" class="team-stat-ring">
+                                            <ui:Label name="TeamChemistryRingVal" text="--" class="team-stat-ring-val"/>
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="team-stat-row">
                                         <ui:VisualElement class="team-stat-arena-icon"/>
                                         <ui:VisualElement class="team-stat-info">
                                             <ui:Label name="TeamArenaName" text="Pabellón" class="team-stat-title"/>
@@ -304,33 +314,34 @@
                                     <ui:Label text="RELACIONES" class="panel-title"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="panel-body">
-                                    <ui:VisualElement class="board-item">
-                                        <ui:Label text="CONFIANZA DE LA DIRECTIVA" class="board-label"/>
-                                        <ui:VisualElement class="board-bar-bg">
-                                            <ui:VisualElement name="BarTrust" class="board-bar-fill"/>
+                                    <ui:VisualElement class="board-columns">
+                                        <ui:VisualElement class="board-col">
+                                            <ui:VisualElement name="CircleTrust" class="board-circle">
+                                                <ui:Label name="ValTrust" class="board-circle-val" text="50%" />
+                                            </ui:VisualElement>
+                                            <ui:Label class="board-col-label" text="CONFIANZA DIRECTIVA" />
                                         </ui:VisualElement>
-                                        <ui:Label name="ValTrust" text="50%" class="board-value"/>
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="board-item">
-                                        <ui:Label text="MORAL DEL EQUIPO" class="board-label"/>
-                                        <ui:VisualElement class="board-bar-bg">
-                                            <ui:VisualElement name="BarMorale" class="board-bar-fill"/>
+                                        <ui:VisualElement class="board-col-sep" />
+                                        <ui:VisualElement class="board-col">
+                                            <ui:VisualElement name="CircleMorale" class="board-circle">
+                                                <ui:Label name="ValMorale" class="board-circle-val" text="50%" />
+                                            </ui:VisualElement>
+                                            <ui:Label class="board-col-label" text="MORAL DEL EQUIPO" />
                                         </ui:VisualElement>
-                                        <ui:Label name="ValMorale" text="50%" class="board-value"/>
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="board-item">
-                                        <ui:Label text="PRESIÓN DE LA PRENSA" class="board-label"/>
-                                        <ui:VisualElement class="board-bar-bg">
-                                            <ui:VisualElement name="BarPressure" class="board-bar-fill"/>
+                                        <ui:VisualElement class="board-col-sep" />
+                                        <ui:VisualElement class="board-col">
+                                            <ui:VisualElement name="CirclePressure" class="board-circle">
+                                                <ui:Label name="ValPressure" class="board-circle-val" text="50%" />
+                                            </ui:VisualElement>
+                                            <ui:Label class="board-col-label" text="PRESIÓN PRENSA" />
                                         </ui:VisualElement>
-                                        <ui:Label name="ValPressure" text="50%" class="board-value"/>
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="board-item">
-                                        <ui:Label text="CONFIANZA DE LOS FANS" class="board-label"/>
-                                        <ui:VisualElement class="board-bar-bg">
-                                            <ui:VisualElement name="BarFanConfidence" class="board-bar-fill"/>
+                                        <ui:VisualElement class="board-col-sep" />
+                                        <ui:VisualElement class="board-col">
+                                            <ui:VisualElement name="CircleFanConfidence" class="board-circle">
+                                                <ui:Label name="ValFanConfidence" class="board-circle-val" text="50%" />
+                                            </ui:VisualElement>
+                                            <ui:Label class="board-col-label" text="CONFIANZA FANS" />
                                         </ui:VisualElement>
-                                        <ui:Label name="ValFanConfidence" text="50%" class="board-value"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>

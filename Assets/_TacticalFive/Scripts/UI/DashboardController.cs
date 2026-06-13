@@ -74,6 +74,10 @@ public class DashboardController : MonoBehaviour
     private VisualElement _teamObjectiveStatus;
     private VisualElement _teamStatsLogo;
     private Label _teamOverallLabel;
+    private Label _teamChemistryLabel;
+    private VisualElement _teamChemistryRing;
+    private Label _teamChemistryRingVal;
+    private VisualElement _teamChemistryIcon;
     private Label _teamOverallRingVal;
     private Label _teamArenaName;
     private Label _teamArenaCapacity;
@@ -180,16 +184,20 @@ public class DashboardController : MonoBehaviour
         _teamObjectiveStatus = _root.Q<VisualElement>("TeamObjectiveStatus");
         _teamStatsLogo = _root.Q<VisualElement>("TeamStatsLogo");
         _teamOverallLabel = _root.Q<Label>("TeamOverallLabel");
+        _teamChemistryLabel = _root.Q<Label>("TeamChemistryLabel");
+        _teamChemistryRing = _root.Q<VisualElement>("TeamChemistryRing");
+        _teamChemistryRingVal = _root.Q<Label>("TeamChemistryRingVal");
+        _teamChemistryIcon = _root.Q<VisualElement>("TeamChemistryIcon");
         _teamOverallRingVal = _root.Q<Label>("TeamOverallRingVal");
         _teamArenaName = _root.Q<Label>("TeamArenaName");
         _teamArenaCapacity = _root.Q<Label>("TeamArenaCapacity");
         _teamReputationStars = _root.Q<VisualElement>("TeamReputationStars");
 
         // Relaciones
-        _barTrust = _root.Q<VisualElement>("BarTrust");
-        _barMorale = _root.Q<VisualElement>("BarMorale");
-        _barPressure = _root.Q<VisualElement>("BarPressure");
-        _barFanConfidence = _root.Q<VisualElement>("BarFanConfidence");
+        _barTrust = _root.Q<VisualElement>("CircleTrust");
+        _barMorale = _root.Q<VisualElement>("CircleMorale");
+        _barPressure = _root.Q<VisualElement>("CirclePressure");
+        _barFanConfidence = _root.Q<VisualElement>("CircleFanConfidence");
         _valTrust = _root.Q<Label>("ValTrust");
         _valMorale = _root.Q<Label>("ValMorale");
         _valPressure = _root.Q<Label>("ValPressure");
@@ -381,7 +389,17 @@ public class DashboardController : MonoBehaviour
             ? $"+${margin / 1_000_000}M"
             : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
         _headerMargin.text = marginText;
-        _root.Q<Label>("HeaderChemistry").text = chemistry.ToString();
+        var chemLabel = _root.Q<Label>("HeaderChemistry");
+        if (chemLabel != null)
+        {
+            chemLabel.text = chemistry.ToString();
+            chemLabel.RemoveFromClassList("header-stat-value--gold");
+            chemLabel.RemoveFromClassList("header-stat-value--negative");
+            if (chemistry < 40)
+                chemLabel.AddToClassList("header-stat-value--negative");
+            else if (chemistry < 70)
+                chemLabel.AddToClassList("header-stat-value--gold");
+        }
 
         _headerMargin.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0)
@@ -2220,6 +2238,33 @@ public class DashboardController : MonoBehaviour
         if (_teamOverallRingVal != null)
             _teamOverallRingVal.text = _myTeam.overall.ToString();
 
+        // Química equipo
+        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        if (_teamChemistryLabel != null)
+            _teamChemistryLabel.text = $"Química: {chemistry}";
+        if (_teamChemistryIcon != null)
+        {
+            var tex = Resources.Load<Texture2D>("Icons/quimica");
+            if (tex != null)
+                _teamChemistryIcon.style.backgroundImage = new StyleBackground(tex);
+        }
+        if (_teamChemistryRingVal != null)
+            _teamChemistryRingVal.text = chemistry.ToString();
+        if (_teamChemistryRing != null)
+        {
+            Color ringColor;
+            if (chemistry >= 70)
+                ringColor = new Color32(39, 174, 96, 255);
+            else if (chemistry >= 40)
+                ringColor = new Color32(212, 160, 23, 255);
+            else
+                ringColor = new Color32(192, 57, 43, 255);
+            _teamChemistryRing.style.borderTopColor = new StyleColor(ringColor);
+            _teamChemistryRing.style.borderBottomColor = new StyleColor(ringColor);
+            _teamChemistryRing.style.borderLeftColor = new StyleColor(ringColor);
+            _teamChemistryRing.style.borderRightColor = new StyleColor(ringColor);
+        }
+
         // Pabellón
         if (_teamArenaName != null)
             _teamArenaName.text = _myTeam.arena ?? "Pabellón";
@@ -2245,23 +2290,39 @@ public class DashboardController : MonoBehaviour
     void RefreshBoard()
     {
         if (_manager == null) return;
-        SetBar(_barTrust, _valTrust, _manager.trust);
-        SetBar(_barMorale, _valMorale, _manager.morale);
-        SetBar(_barPressure, _valPressure, _manager.pressure);
-        SetBar(_barFanConfidence, _valFanConfidence, _manager.fan_confidence);
+        SetCircle(_barTrust, _valTrust, _manager.trust);
+        SetCircle(_barMorale, _valMorale, _manager.morale);
+        SetCircle(_barPressure, _valPressure, _manager.pressure);
+        SetCircle(_barFanConfidence, _valFanConfidence, _manager.fan_confidence);
     }
 
-    void SetBar(VisualElement bar, Label val, int value)
+    void SetCircle(VisualElement circle, Label val, int value)
     {
-        if (bar == null || val == null) return;
+        if (circle == null || val == null) return;
         float pct = Mathf.Clamp01(value / 100f);
-        bar.style.width = new StyleLength(new Length(pct * 100f, LengthUnit.Percent));
 
-        bar.RemoveFromClassList("board-bar-fill--green");
-        bar.RemoveFromClassList("board-bar-fill--gold");
-        bar.RemoveFromClassList("board-bar-fill--red");
-        bar.AddToClassList(value >= 80 ? "board-bar-fill--green" :
-                           value >= 50 ? "board-bar-fill--gold" : "board-bar-fill--red");
+        Color bgColor, borderColor;
+        if (value >= 70)
+        {
+            bgColor = new Color32(39, 174, 96, 40);
+            borderColor = new Color32(39, 174, 96, 255);
+        }
+        else if (value >= 40)
+        {
+            bgColor = new Color32(212, 160, 23, 40);
+            borderColor = new Color32(212, 160, 23, 255);
+        }
+        else
+        {
+            bgColor = new Color32(192, 57, 43, 40);
+            borderColor = new Color32(192, 57, 43, 255);
+        }
+
+        circle.style.backgroundColor = new StyleColor(bgColor);
+        circle.style.borderTopColor = new StyleColor(borderColor);
+        circle.style.borderBottomColor = new StyleColor(borderColor);
+        circle.style.borderLeftColor = new StyleColor(borderColor);
+        circle.style.borderRightColor = new StyleColor(borderColor);
 
         val.text = $"{value}%";
     }

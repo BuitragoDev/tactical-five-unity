@@ -332,7 +332,17 @@ public class MarketController : MonoBehaviour
         string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
         marginLbl.text = marginText;
-        _root.Q<Label>("HeaderChemistry").text = chemistry.ToString();
+        var chemLabel = _root.Q<Label>("HeaderChemistry");
+        if (chemLabel != null)
+        {
+            chemLabel.text = chemistry.ToString();
+            chemLabel.RemoveFromClassList("header-stat-value--gold");
+            chemLabel.RemoveFromClassList("header-stat-value--negative");
+            if (chemistry < 40)
+                chemLabel.AddToClassList("header-stat-value--negative");
+            else if (chemistry < 70)
+                chemLabel.AddToClassList("header-stat-value--gold");
+        }
         marginLbl.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) marginLbl.AddToClassList("header-stat-value--negative");
 

@@ -436,7 +436,17 @@ public class RosterController : MonoBehaviour
             : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
         _headerMargin.text = marginText;
-        _root.Q<Label>("HeaderChemistry").text = chemistry.ToString();
+        var chemLabel = _root.Q<Label>("HeaderChemistry");
+        if (chemLabel != null)
+        {
+            chemLabel.text = chemistry.ToString();
+            chemLabel.RemoveFromClassList("header-stat-value--gold");
+            chemLabel.RemoveFromClassList("header-stat-value--negative");
+            if (chemistry < 40)
+                chemLabel.AddToClassList("header-stat-value--negative");
+            else if (chemistry < 70)
+                chemLabel.AddToClassList("header-stat-value--gold");
+        }
 
         _headerMargin.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
