@@ -20,6 +20,7 @@ public class MarketController : MonoBehaviour
     private VisualElement _freeAgentsBody;
     private VisualElement _freeAgentsTableHeader;
     private VisualElement _tradeStatus;
+    private VisualElement _marketClosedOverlay;
     private VisualElement _faRosterFullModal;
     private VisualElement _faConfirmModal;
     private Button _btnCloseFARosterFull;
@@ -94,6 +95,7 @@ public class MarketController : MonoBehaviour
         _freeAgentsBody = _root.Q<VisualElement>("FreeAgentsBody");
         _freeAgentsTableHeader = _root.Q<VisualElement>("FreeAgentsTableHeader");
         _tradeStatus = _root.Q<VisualElement>("TradeStatus");
+        _marketClosedOverlay = _root.Q<VisualElement>("MarketClosedOverlay");
         _faRosterFullModal = _root.Q<VisualElement>("FARosterFullModal");
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
         _btnCloseFARosterFull = _root.Q<Button>("BtnCloseFARosterFull");
@@ -267,6 +269,16 @@ public class MarketController : MonoBehaviour
     {
         _root.Q<Button>("SubmenuOfertas")?.AddToClassList("nav-submenu-item--active");
         RefreshHeader();
+
+        bool windowOpen = IsTransferWindowOpen();
+        _teamGrid.style.display = windowOpen ? DisplayStyle.Flex : DisplayStyle.None;
+        _btnNegotiate.style.display = DisplayStyle.None;
+        _tradePanels.style.display = DisplayStyle.None;
+        _freeAgentsPanel.style.display = DisplayStyle.None;
+        _marketClosedOverlay.style.display = windowOpen ? DisplayStyle.None : DisplayStyle.Flex;
+
+        if (!windowOpen) return;
+
         BuildTeamGrid();
         if (_isFA)
         {
@@ -276,6 +288,20 @@ public class MarketController : MonoBehaviour
         {
             ShowNegotiateButton();
         }
+    }
+
+    bool IsTransferWindowOpen()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date))
+            return true;
+
+        if (System.DateTime.TryParse(_season.current_date, out var date))
+        {
+            var openDate = new System.DateTime(_season.year_start, 9, 1);
+            var closeDate = new System.DateTime(_season.year_end, 2, 8);
+            return date >= openDate && date <= closeDate;
+        }
+        return true;
     }
 
     void RefreshHeader()

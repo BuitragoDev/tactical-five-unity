@@ -716,6 +716,44 @@
     opacity: 0.9;
 }
 
+/* ── TRANSFER WINDOW CLOSED ── */
+.market-closed-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.85);
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+}
+.market-closed-overlay-box {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 40px;
+}
+.market-closed-overlay-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 48px;
+    -unity-text-align: middle-center;
+    color: rgb(192, 57, 43);
+}
+.market-closed-overlay-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: rgb(192, 57, 43);
+    -unity-text-transform: upper;
+    -unity-text-align: middle-center;
+}
+.market-closed-overlay-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    max-width: 500px;
+}
+
 /* ── TABLE HEADERS ── */
 .market-table-header {
     flex-direction: row;

@@ -650,6 +650,19 @@ public class DashboardController : MonoBehaviour
         {
             var cur = System.DateTime.Parse(_season.current_date);
             _season.current_date = cur.AddDays(1).ToString("yyyy-MM-dd");
+            var newDate = System.DateTime.Parse(_season.current_date);
+            if (newDate.Month == 2 && newDate.Day == 1 && newDate.Year == _season.year_end)
+            {
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    title = "Última semana de traspasos",
+                    body = "El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.",
+                    game_day = _season.current_game_day,
+                    game_date = _season.current_date,
+                    is_read = 0
+                });
+            }
         }
         DatabaseManager.Instance.UpdateSeason(_season);
 

@@ -256,6 +256,15 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
+                    <!-- ══ TRANSFER WINDOW CLOSED OVERLAY ══ -->
+                    <ui:VisualElement name="MarketClosedOverlay" class="market-closed-overlay" style="display: none;">
+                        <ui:VisualElement class="market-closed-overlay-box">
+                            <ui:Label class="market-closed-overlay-icon" text="🚫" />
+                            <ui:Label class="market-closed-overlay-title" text="PERIODO DE TRASPASOS FINALIZADO" />
+                            <ui:Label class="market-closed-overlay-text" text="El plazo de traspasos ha finalizado. No puedes realizar operaciones hasta la próxima temporada." />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
         </ui:VisualElement>

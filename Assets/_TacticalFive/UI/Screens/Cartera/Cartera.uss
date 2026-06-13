@@ -213,7 +213,7 @@
 .scout-slot-timer {
     font-size: 18px;
     color: rgb(212, 160, 23);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     letter-spacing: 1px;
     margin-top: 4px;
 }
@@ -225,7 +225,7 @@
 }
 
 .scout-attr {
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(160, 170, 190);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     width: 15%;
@@ -241,7 +241,7 @@
 }
 
 .scout-slot-salary {
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
 }
