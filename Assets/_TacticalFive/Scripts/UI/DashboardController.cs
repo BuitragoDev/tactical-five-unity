@@ -376,9 +376,12 @@ public class DashboardController : MonoBehaviour
         long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
         long margin = salaryCap - _players.Sum(p => p.salary);
 
-        _headerMargin.text = margin >= 0
+        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        string marginText = margin >= 0
             ? $"+${margin / 1_000_000}M"
             : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        _headerMargin.text = marginText;
+        _root.Q<Label>("HeaderChemistry").text = chemistry.ToString();
 
         _headerMargin.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0)
@@ -536,7 +539,11 @@ public class DashboardController : MonoBehaviour
                     awayPlayers = DatabaseManager.Instance.GetPlayersByTeam(game.away_team_id);
                 }
 
-                var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers);
+                int homeChem = DatabaseManager.Instance.GetTeamChemistry(game.home_team_id);
+                int awayChem = DatabaseManager.Instance.GetTeamChemistry(game.away_team_id);
+                bool isMyHomeGame = game.home_team_id == _myTeam.id;
+
+                var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem, isMyHomeGame);
                 DatabaseManager.Instance.UpdateGame(game);
                 GameResultCache.SimulatedGameIds.Add(game.id);
 
@@ -553,7 +560,21 @@ public class DashboardController : MonoBehaviour
                     CheckBudgetAfterGame();
                 }
 
+                // Recalculate morale for all players in this game
+                bool homeWon = game.home_score > game.away_score;
+                UpdatePlayersMoraleAfterGame(result.home_stats, game.home_team_id, homeWon);
+                UpdatePlayersMoraleAfterGame(result.away_stats, game.away_team_id, !homeWon);
+
                 yield return null;
+            }
+
+            // Recalculate team chemistry for all teams involved today
+            foreach (var game in gamesToday)
+            {
+                int chem = DatabaseManager.Instance.CalculateTeamChemistry(game.home_team_id, gameDay);
+                DatabaseManager.Instance.UpdateTeamChemistry(game.home_team_id, chem);
+                chem = DatabaseManager.Instance.CalculateTeamChemistry(game.away_team_id, gameDay);
+                DatabaseManager.Instance.UpdateTeamChemistry(game.away_team_id, chem);
             }
 
             UpdateManagerStats(gameDay);
@@ -591,13 +612,26 @@ public class DashboardController : MonoBehaviour
                     {
                         var homeP = DatabaseManager.Instance.GetPlayersByTeam(elimGame.home_team_id);
                         var awayP = DatabaseManager.Instance.GetPlayersByTeam(elimGame.away_team_id);
-                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP);
+                        int elimHomeChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.home_team_id);
+                        int elimAwayChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.away_team_id);
+                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem, elimGame.home_team_id == _myTeam.id);
                         DatabaseManager.Instance.UpdateGame(elimGame);
                         ProcessGameFinances(elimGame, elimResult);
+                        UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
+                        UpdatePlayersMoraleAfterGame(elimResult.away_stats, elimGame.away_team_id, elimGame.away_score > elimGame.home_score);
                         yield return null;
                     }
                     GameResultCache.LastGameDay = gameDay;
                     GameResultCache.SimulatedGameIds.AddRange(elimToday.Select(g => g.id));
+
+                    // Recalculate chemistry for Play-In teams
+                    foreach (var elimGame in elimToday)
+                    {
+                        int chem = DatabaseManager.Instance.CalculateTeamChemistry(elimGame.home_team_id, gameDay);
+                        DatabaseManager.Instance.UpdateTeamChemistry(elimGame.home_team_id, chem);
+                        chem = DatabaseManager.Instance.CalculateTeamChemistry(elimGame.away_team_id, gameDay);
+                        DatabaseManager.Instance.UpdateTeamChemistry(elimGame.away_team_id, chem);
+                    }
                 }
             }
 
@@ -1314,6 +1348,38 @@ public class DashboardController : MonoBehaviour
 
         // 1 pos off → 0.90, 5 pos off → 0.50, 10+ pos off → 0.30
         return Mathf.Clamp(1.0f - gap * 0.06f, 0.30f, 1.0f);
+    }
+
+    void UpdatePlayersMoraleAfterGame(List<GameSimulator.PlayerStatSnapshot> stats, int teamId, bool teamWon)
+    {
+        // Get last 10 games for this team to calculate win%
+        var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id)
+            .Where(g => (g.home_team_id == teamId || g.away_team_id == teamId) && g.is_played == 1)
+            .OrderByDescending(g => g.game_day).Take(10).ToList();
+        int winsInLast10 = teamGames.Count(g =>
+            (g.home_team_id == teamId && g.home_score > g.away_score) ||
+            (g.away_team_id == teamId && g.away_score > g.home_score));
+        float winPct = teamGames.Count > 0 ? (float)winsInLast10 / teamGames.Count : 0.5f;
+
+        foreach (var ps in stats)
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
+            if (player == null) continue;
+
+            // Get average rating of last 5 games
+            var last5Stats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
+                .OrderByDescending(s => s.game_id).Take(5).ToList();
+            float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
+
+            int baseMorale = 50;
+            int winBonus = Mathf.RoundToInt(winPct * 30);    // max +15 (at 50% win)
+            int formBonus = Mathf.RoundToInt((avgRating - 15) * 2); // -10 a +10
+            int contractPenalty = player.contract_years == 1 ? -5 : 0;
+            int injuryPenalty = player.injury_days > 0 ? -10 : 0;
+
+            int newMorale = Mathf.Clamp(baseMorale + winBonus + formBonus + contractPenalty + injuryPenalty, 0, 100);
+            DatabaseManager.Instance.UpdatePlayerMorale(player.id, newMorale);
+        }
     }
 
     void UpdateFanConfidence(GameData game, GameSimulator.GameResult result)

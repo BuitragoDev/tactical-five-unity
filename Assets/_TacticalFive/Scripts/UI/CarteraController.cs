@@ -580,6 +580,7 @@ public class CarteraController : MonoBehaviour
                     AddAttr(attrs, "IQ", player.iq.ToString());
                     AddAttr(attrs, "Robos", player.steals.ToString());
                     AddAttr(attrs, "Tapones", player.blocks.ToString());
+                    AddAttr(attrs, "Moral", player.morale.ToString());
 
                     slot.Add(attrs);
 

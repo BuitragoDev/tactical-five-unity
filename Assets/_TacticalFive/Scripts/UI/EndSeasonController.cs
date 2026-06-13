@@ -362,6 +362,7 @@ public class EndSeasonController : MonoBehaviour
         attrs.Add(MakeAttr("IQ", p.iq));
         attrs.Add(MakeAttr("ROB", p.steals));
         attrs.Add(MakeAttr("TAP", p.blocks));
+        attrs.Add(MakeAttr("MOR", p.morale));
 
         pick.Add(attrs);
         return pick;

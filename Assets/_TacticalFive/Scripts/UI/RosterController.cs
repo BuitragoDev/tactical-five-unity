@@ -431,9 +431,12 @@ public class RosterController : MonoBehaviour
         long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
         long margin = salaryCap - _players.Sum(p => p.salary);
 
-        _headerMargin.text = margin >= 0
+        string marginText = margin >= 0
             ? $"+${margin / 1_000_000}M"
             : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        _headerMargin.text = marginText;
+        _root.Q<Label>("HeaderChemistry").text = chemistry.ToString();
 
         _headerMargin.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
@@ -511,10 +514,6 @@ public class RosterController : MonoBehaviour
         if (player.injury_days > 0)
             row.AddToClassList("player-row--injured");
 
-        var numLbl = new Label();
-        numLbl.AddToClassList("player-num");
-        numLbl.text = num.ToString("D2");
-
         var nameLbl = new Label();
         nameLbl.AddToClassList("player-name");
         if (player.injury_days > 0)
@@ -537,7 +536,19 @@ public class RosterController : MonoBehaviour
         if (player.contract_years <= 1)
             contractLbl.AddToClassList("player-contract--expiring");
 
-        row.Add(numLbl);
+        // Morale dot
+        var moraleDot = new VisualElement();
+        moraleDot.AddToClassList("morale-dot");
+        Color dotColor;
+        if (player.morale >= 70)
+            dotColor = new Color32(39, 174, 96, 255);
+        else if (player.morale >= 40)
+            dotColor = new Color32(212, 160, 23, 255);
+        else
+            dotColor = new Color32(192, 57, 43, 255);
+        moraleDot.style.backgroundColor = new StyleColor(dotColor);
+        row.Add(moraleDot);
+
         row.Add(nameLbl);
         row.Add(ovrLbl);
         row.Add(metaLbl);
@@ -641,6 +652,7 @@ public class RosterController : MonoBehaviour
             ("IQ",        p.iq),
             ("ROBOS",     p.steals),
             ("TAPONES",   p.blocks),
+            ("MORAL",     p.morale),
         };
 
         foreach (var (label, val) in attrs)
@@ -762,6 +774,10 @@ public class RosterController : MonoBehaviour
         if (offerYears >= 4) acceptScore += 10f;
         else if (offerYears >= 3) acceptScore += 5f;
         else if (offerYears < 2) acceptScore -= 5f;
+
+        int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        float chemistryMod = (teamChem - 50) * 0.3f;
+        acceptScore += chemistryMod;
 
         return Mathf.Max(10f, Mathf.Min(95f, acceptScore));
     }

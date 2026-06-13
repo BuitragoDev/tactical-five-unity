@@ -250,7 +250,10 @@ public class RecordsController : MonoBehaviour
         long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
         long margin = salaryCap - totalPayroll;
         var marginLbl = _root.Q<Label>("HeaderMargin");
-        marginLbl.text = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        marginLbl.text = marginText;
+        _root.Q<Label>("HeaderChemistry").text = chemistry.ToString();
         marginLbl.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) marginLbl.AddToClassList("header-stat-value--negative");
 

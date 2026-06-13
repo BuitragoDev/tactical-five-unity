@@ -37,7 +37,8 @@ public static class GameSimulator
         public List<(int player_id, string type, int days)> injuries = new();
     }
 
-    public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers)
+    public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
+        int homeChemistry = 50, int awayChemistry = 50, bool isHome = false)
     {
         var homePS = homePlayers.Where(p => p.injury_days == 0).OrderByDescending(p => p.overall).Select(InitPS).ToList();
         var awayPS = awayPlayers.Where(p => p.injury_days == 0).OrderByDescending(p => p.overall).Select(InitPS).ToList();
@@ -67,8 +68,16 @@ public static class GameSimulator
             };
         }
 
-        int homeR = (int)homePlayers.Average(p => p.overall);
-        int awayR = (int)awayPlayers.Average(p => p.overall);
+        int homeR = (int)homePlayers.Average(p => Mathf.Clamp(p.overall + (p.morale - 50) * 0.1f, 0, 99));
+        int awayR = (int)awayPlayers.Average(p => Mathf.Clamp(p.overall + (p.morale - 50) * 0.1f, 0, 99));
+
+        // Apply chemistry bonus
+        float homeChemBonus = (homeChemistry - 50) * 0.15f;
+        float awayChemBonus = (awayChemistry - 50) * 0.10f;
+        float homeCourtBonus = isHome ? 1.5f : 0;
+
+        homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus), 0, 99);
+        awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus), 0, 99);
         float pace = Mathf.Clamp(98 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f), 92, 104);
 
         var quarters = new List<(int, int)>();

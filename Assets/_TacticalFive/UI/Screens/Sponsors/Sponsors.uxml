@@ -134,6 +134,10 @@
                     <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
                     <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
                 </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="QUÍMICA" />
+                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
+                </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
                 <ui:VisualElement class="header-season-info">
                     <ui:Label name="HeaderSeason" class="header-season-label" text="" />

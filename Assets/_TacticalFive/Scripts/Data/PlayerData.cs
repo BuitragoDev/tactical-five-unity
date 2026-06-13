@@ -33,4 +33,5 @@ public class PlayerData
     public string injury_type { get; set; }
     public int treated { get; set; }
     public int renewal_cooldown_day { get; set; }
+    public int morale { get; set; } = 50;
 }

@@ -30,4 +30,5 @@ public class TeamData
     public string arena_renovation_type    { get; set; }
     public int    arena_renovation_count   { get; set; }
     public long   arena_renovation_cost    { get; set; }
+    public int team_chemistry { get; set; } = 50;
 }

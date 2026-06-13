@@ -197,6 +197,15 @@ public class DatabaseManager : MonoBehaviour
             _db.Execute("ALTER TABLE managers ADD COLUMN budget_red_warnings INTEGER DEFAULT 0");
             Debug.Log("[DB] Migration: added budget_red_warnings to managers");
         }
+
+        // Add morale to players if missing
+        var playerCols2 = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        bool hasMorale = playerCols2.Any(c => c.name == "morale");
+        if (!hasMorale)
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN morale INTEGER DEFAULT 50");
+            Debug.Log("[DB] Migration: added morale to players");
+        }
     }
 
     class ColumnInfo
@@ -341,6 +350,61 @@ public class DatabaseManager : MonoBehaviour
         if (!EnsureDb()) return;
         _db.Update(team);
     }
+
+    // ── CHEMISTRY HELPERS ──────────────────────────────────
+    public int GetTeamChemistry(int teamId)
+    {
+        var team = GetTeamById(teamId);
+        return team?.team_chemistry ?? 50;
+    }
+
+    public void UpdateTeamChemistry(int teamId, int chemistry)
+    {
+        var team = GetTeamById(teamId);
+        if (team == null) return;
+        team.team_chemistry = Mathf.Clamp(chemistry, 0, 100);
+        UpdateTeam(team);
+    }
+
+    public void UpdatePlayerMorale(int playerId, int morale)
+    {
+        var player = _db.Table<PlayerData>().FirstOrDefault(p => p.id == playerId);
+        if (player == null) return;
+        player.morale = Mathf.Clamp(morale, 0, 100);
+        _db.Update(player);
+    }
+
+    public int GetPlayerMorale(int playerId)
+    {
+        var player = _db.Table<PlayerData>().FirstOrDefault(p => p.id == playerId);
+        return player?.morale ?? 50;
+    }
+
+    public int CalculateTeamChemistry(int teamId, int currentGameDay)
+    {
+        var players = GetPlayersByTeam(teamId);
+        if (players.Count == 0) return 50;
+
+        int avgMorale = (int)players.Average(p => p.morale);
+
+        // Roster stability: check if any trade involving this team in last 30 days
+        int stability = 1;
+        int tradeThreshold = currentGameDay - 30;
+        var recentTrades = _db.Table<TradeData>()
+            .Where(t => (t.team_id_from == teamId || t.team_id_to == teamId)
+                     && t.game_day > tradeThreshold)
+            .ToList();
+        if (recentTrades.Count > 0)
+            stability = 0;
+
+        var team = GetTeamById(teamId);
+        int facilities = team?.facilities ?? 3;
+        int facilitiesBonus = Mathf.RoundToInt((facilities / 5f) * 3);
+
+        return Mathf.Clamp(avgMorale + stability * 2 + facilitiesBonus, 0, 100);
+    }
+
+    // ── END CHEMISTRY HELPERS ──────────────────────────────
 
     // Los 5 peores equipos por overall (para ProManager)
     public List<TeamData> GetWorstTeams(int count = 5)
@@ -603,6 +667,8 @@ public class DatabaseManager : MonoBehaviour
         };
 
         _db.InsertAll(teams);
+        _db.Execute("UPDATE teams SET team_chemistry = 50 WHERE team_chemistry IS NULL OR team_chemistry = 0");
+        _db.Execute("UPDATE players SET morale = 50 WHERE morale IS NULL OR morale = 0");
         Debug.Log($"[DB] {teams.Count} equipos insertados.");
     }
 

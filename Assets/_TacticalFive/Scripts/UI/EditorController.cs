@@ -54,6 +54,7 @@ public class EditorController : MonoBehaviour
     private TextField _playerSpeed, _playerShooting, _player3pt, _playerPassing;
     private TextField _playerDribbling, _playerDefense, _playerRebounding;
     private TextField _playerAthleticism, _playerIq, _playerSteals, _playerBlocks;
+    private TextField _playerMorale;
     private TextField _playerSalary, _playerContract;
     private Label _playerOverallDisplay;
 
@@ -614,6 +615,8 @@ public class EditorController : MonoBehaviour
         SetDigitsOnly(_playerSteals, 2);
         _playerBlocks = AddInput(rightCol, "Tapones", p.blocks.ToString());
         SetDigitsOnly(_playerBlocks, 2);
+        _playerMorale = AddInput(rightCol, "Moral", p.morale.ToString());
+        SetDigitsOnly(_playerMorale, 2);
 
         columnsRow.Add(leftCol);
         columnsRow.Add(rightCol);
@@ -651,6 +654,7 @@ public class EditorController : MonoBehaviour
         int.TryParse(_playerIq.value, out int iq); p.iq = Mathf.Clamp(iq, 0, 99);
         int.TryParse(_playerSteals.value, out int stl); p.steals = Mathf.Clamp(stl, 0, 99);
         int.TryParse(_playerBlocks.value, out int blk); p.blocks = Mathf.Clamp(blk, 0, 99);
+        int.TryParse(_playerMorale.value, out int mor); p.morale = Mathf.Clamp(mor, 0, 99);
 
         int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
                   p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
