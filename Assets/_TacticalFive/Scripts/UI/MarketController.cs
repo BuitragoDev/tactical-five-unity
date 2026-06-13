@@ -22,6 +22,7 @@ public class MarketController : MonoBehaviour
     private VisualElement _tradeStatus;
     private VisualElement _marketClosedOverlay;
     private VisualElement _faRosterFullModal;
+    private Label _faRosterFullText;
     private VisualElement _faConfirmModal;
     private Button _btnCloseFARosterFull;
     private Button _btnCancelFA;
@@ -97,6 +98,7 @@ public class MarketController : MonoBehaviour
         _tradeStatus = _root.Q<VisualElement>("TradeStatus");
         _marketClosedOverlay = _root.Q<VisualElement>("MarketClosedOverlay");
         _faRosterFullModal = _root.Q<VisualElement>("FARosterFullModal");
+        _faRosterFullText = _root.Q<Label>("FARosterFullText");
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
         _btnCloseFARosterFull = _root.Q<Button>("BtnCloseFARosterFull");
         _btnCancelFA = _root.Q<Button>("BtnCancelFA");
@@ -201,7 +203,7 @@ public class MarketController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Market);
         });
         _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Cartera); });
-        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); });
+        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Historial); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -645,161 +647,24 @@ public class MarketController : MonoBehaviour
 
         if (mySelected.Count == 0 && otherSelected.Count == 0) return;
 
-        var errors = ValidateTrade(mySelected, otherSelected);
+        var otherPayroll = _otherPlayers.Sum(p => p.salary);
+
+        var errors = TradeHelper.ValidateTrade(
+            mySelected, otherSelected,
+            _myTotalRosterCount, _otherTotalRosterCount,
+            _selectedTeam.name, otherPayroll);
+
         if (errors.Count > 0)
         {
             ShowTradeInvalid(errors);
             return;
         }
 
-        var result = EvaluateTrade(mySelected, otherSelected);
+        var result = TradeHelper.EvaluateTrade(
+            mySelected, otherSelected,
+            _selectedTeam.name, _otherTotalRosterCount, otherPayroll);
+
         ShowTradeResult(result);
-    }
-
-    List<string> ValidateTrade(List<PlayerData> mySelected, List<PlayerData> otherSelected)
-    {
-        var errors = new List<string>();
-
-        var mySalaryOut = mySelected.Sum(p => p.salary);
-        var otherSalaryOut = otherSelected.Sum(p => p.salary);
-
-        var myAfter = _myTotalRosterCount - mySelected.Count + otherSelected.Count;
-        var otherAfter = _otherTotalRosterCount - otherSelected.Count + mySelected.Count;
-
-        if (myAfter < 10) errors.Add($"Tu equipo tendría solo {myAfter} jugadores (mínimo 10)");
-        if (myAfter > 15) errors.Add($"Tu equipo tendría {myAfter} jugadores (máximo 15)");
-        if (otherAfter < 10) errors.Add($"{_selectedTeam.name} tendría solo {otherAfter} jugadores (mínimo 10)");
-        if (otherAfter > 15) errors.Add($"{_selectedTeam.name} tendría {otherAfter} jugadores (máximo 15)");
-
-        var otherPayroll = _otherPlayers.Sum(p => p.salary) - otherSalaryOut + mySalaryOut;
-
-        if (otherPayroll > SECOND_APRON)
-        {
-            if (mySelected.Count > 1)
-                errors.Add($"{_selectedTeam.name} está en el segundo apron. No pueden agregar salarios de múltiples jugadores.");
-            if (otherSalaryOut < mySalaryOut)
-                errors.Add($"{_selectedTeam.name} está en el segundo apron. Solo pueden recibir salario igual o menor al que envían.");
-        }
-        else if (otherPayroll > FIRST_APRON)
-        {
-            var maxReceive = otherSalaryOut * 1.10;
-            if (mySalaryOut > maxReceive + 250_000)
-                errors.Add($"{_selectedTeam.name} está en el primer apron. Solo pueden recibir hasta el 110% del salario enviado.");
-        }
-        else
-        {
-            long maxReceive;
-            if (otherSalaryOut < 7_500_000)
-                maxReceive = otherSalaryOut * 2 + 250_000;
-            else if (otherSalaryOut < 29_000_000)
-                maxReceive = otherSalaryOut + 7_500_000;
-            else
-                maxReceive = (long)(otherSalaryOut * 1.25 + 250_000);
-
-            if (mySalaryOut > maxReceive + 250_000)
-                errors.Add($"{_selectedTeam.name} no puede recibir más de ${maxReceive:N0}.");
-        }
-
-        return errors;
-    }
-
-    TradeResult EvaluateTrade(List<PlayerData> mySelected, List<PlayerData> otherSelected)
-    {
-        var mySalaryOut = mySelected.Sum(p => p.salary);
-        var otherSalaryOut = otherSelected.Sum(p => p.salary);
-
-        var otherBestOvr = otherSelected.Count > 0 ? otherSelected.Max(p => p.overall) : 0;
-        var myBestOvr = mySelected.Count > 0 ? mySelected.Max(p => p.overall) : 0;
-        var otherAvgOvr = otherSelected.Count > 0 ? otherSelected.Average(p => p.overall) : 0;
-        var myAvgOvr = mySelected.Count > 0 ? mySelected.Average(p => p.overall) : 0;
-        var myTotalOvr = mySelected.Sum(p => p.overall);
-        var otherTotalOvr = otherSelected.Sum(p => p.overall);
-
-        var otherCurrentPayroll = _otherPlayers.Sum(p => p.salary);
-
-        int acceptScore = 0;
-
-        // Player quality comparison
-        if (otherBestOvr >= 90)
-        {
-            if (myBestOvr >= 90) acceptScore += 40 + (myBestOvr - otherBestOvr) * 3;
-            else if (myBestOvr >= 85) acceptScore += 15 + (myBestOvr - otherBestOvr) * 2;
-            else acceptScore -= 50;
-        }
-        else if (otherBestOvr >= 85)
-        {
-            if (myBestOvr >= 85) acceptScore += 30 + (myBestOvr - otherBestOvr) * 2;
-            else if (myBestOvr >= 80) acceptScore += 10;
-            else acceptScore -= 30;
-        }
-        else if (otherBestOvr >= 80)
-        {
-            if (myBestOvr >= 80) acceptScore += 20;
-            else if (myBestOvr >= 75) acceptScore += 5;
-            else acceptScore -= 15;
-        }
-        else
-        {
-            if (myAvgOvr >= otherAvgOvr) acceptScore += 10;
-            else acceptScore -= 10;
-        }
-
-        // Total OVR comparison
-        acceptScore += Mathf.Clamp(myTotalOvr - otherTotalOvr, -20, 20);
-
-        // Financial situation
-        if (otherCurrentPayroll > SECOND_APRON)
-        {
-            if (mySalaryOut > otherSalaryOut) acceptScore += 30;
-            else acceptScore -= 20;
-        }
-        else if (otherCurrentPayroll > FIRST_APRON)
-        {
-            if (mySalaryOut > otherSalaryOut) acceptScore += 20;
-            else acceptScore -= 10;
-        }
-        else if (otherCurrentPayroll > LUXURY_TAX)
-        {
-            if (mySalaryOut > otherSalaryOut) acceptScore += 15;
-            else if (mySalaryOut < otherSalaryOut) acceptScore -= 5;
-        }
-        else
-        {
-            if (mySalaryOut > otherSalaryOut) acceptScore += 5;
-            else if (mySalaryOut < otherSalaryOut) acceptScore -= 5;
-        }
-
-        // Team needs
-        var otherAfter = _otherPlayers.Count - otherSelected.Count + mySelected.Count;
-        if (otherAfter <= 12) acceptScore += 15;
-        else if (otherAfter <= 14) acceptScore += 5;
-
-        // Age factor
-        if (mySelected.Count > 0 && otherSelected.Count > 0)
-        {
-            var myAvgAge = mySelected.Average(p => p.age);
-            var otherAvgAge = otherSelected.Average(p => p.age);
-            if (myAvgAge < otherAvgAge - 3) acceptScore += 10;
-            else if (myAvgAge > otherAvgAge + 3) acceptScore -= 5;
-        }
-
-        // Randomness
-        acceptScore += Random.Range(-5, 6);
-
-        acceptScore = Mathf.Clamp(acceptScore, 0, 100);
-
-        var threshold = 50;
-        if (otherCurrentPayroll > SECOND_APRON) threshold = 40;
-        else if (otherCurrentPayroll > FIRST_APRON) threshold = 45;
-
-        return new TradeResult
-        {
-            WouldAccept = acceptScore >= threshold,
-            AcceptScore = acceptScore,
-            Threshold = threshold,
-            MySelected = mySelected,
-            OtherSelected = otherSelected
-        };
     }
 
     void ShowTradeInvalid(List<string> errors)
@@ -898,6 +763,34 @@ public class MarketController : MonoBehaviour
         {
             p.team_id = _myTeam.id;
             DatabaseManager.Instance.UpdatePlayer(p);
+        }
+
+        // Record trade history
+        foreach (var p in mySelected)
+        {
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season?.id ?? 0,
+                game_day = _season?.current_game_day ?? 0,
+                game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
+                team_id_from = _myTeam.id,
+                team_id_to = _selectedTeam.id,
+                player_id = p.id,
+                trade_type = "trade"
+            });
+        }
+        foreach (var p in otherSelected)
+        {
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season?.id ?? 0,
+                game_day = _season?.current_game_day ?? 0,
+                game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
+                team_id_from = _selectedTeam.id,
+                team_id_to = _myTeam.id,
+                player_id = p.id,
+                trade_type = "trade"
+            });
         }
 
         // Build names for message and modal
@@ -1022,8 +915,10 @@ public class MarketController : MonoBehaviour
         if (player == null) return;
 
         var myPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        if (myPlayers.Count >= 15)
+        if (myPlayers.Count >= TradeHelper.MAX_ROSTER)
         {
+            if (_faRosterFullText != null)
+                _faRosterFullText.text = $"No puedes fichar más jugadores. Tu plantilla ya tiene el máximo de {TradeHelper.MAX_ROSTER} jugadores.";
             _faRosterFullModal.style.display = DisplayStyle.Flex;
             return;
         }
@@ -1071,6 +966,18 @@ public class MarketController : MonoBehaviour
             player.salary = newSalary;
             player.contract_years = years;
             DatabaseManager.Instance.UpdatePlayer(player);
+
+            // Record trade history
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season?.id ?? 0,
+                game_day = _season?.current_game_day ?? 0,
+                game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
+                team_id_from = 0,
+                team_id_to = _myTeam.id,
+                player_id = player.id,
+                trade_type = "free_agent"
+            });
 
             DatabaseManager.Instance.AddMessage(new MessageData
             {
@@ -1170,12 +1077,4 @@ public class MarketController : MonoBehaviour
         AudioManager.Instance?.PlaySFX("click");
     }
 
-    class TradeResult
-    {
-        public bool WouldAccept;
-        public int AcceptScore;
-        public int Threshold;
-        public List<PlayerData> MySelected;
-        public List<PlayerData> OtherSelected;
-    }
 }

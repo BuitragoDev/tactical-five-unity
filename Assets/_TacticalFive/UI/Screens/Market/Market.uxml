@@ -278,7 +278,7 @@
                     <ui:Label class="market-modal-title" text="PLANTILLA COMPLETA" />
                 </ui:VisualElement>
                 <ui:VisualElement class="market-modal-body">
-                    <ui:Label class="market-modal-text" text="No puedes fichar más jugadores. Tu plantilla ya tiene el máximo de 15 jugadores." />
+                    <ui:Label name="FARosterFullText" class="market-modal-text" text="" />
                     <ui:Label class="market-modal-text" text="Debes liberar plazas antes de poder fichar." />
                 </ui:VisualElement>
                 <ui:VisualElement class="market-modal-footer">

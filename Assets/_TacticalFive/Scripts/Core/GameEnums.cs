@@ -31,7 +31,8 @@ public enum GameScreen
     PlayerAwards,
     EndSeason,
     NewSeason,
-    Editor
+    Editor,
+    Historial
 }
 
 public enum GameMode

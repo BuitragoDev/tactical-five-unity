@@ -109,6 +109,7 @@ public class DatabaseManager : MonoBehaviour
     void CloneFromTemplate()
     {
         var template = new SQLiteConnection(TemplateDbPath);
+        template.CreateTable<TradeData>();
         _db.InsertAll(template.Table<TeamData>().ToList());
         _db.InsertAll(template.Table<PlayerData>().ToList());
         _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
@@ -120,6 +121,7 @@ public class DatabaseManager : MonoBehaviour
         _db.InsertAll(template.Table<FinalsRecord>().ToList());
         _db.InsertAll(template.Table<AwardsRecord>().ToList());
         _db.InsertAll(template.Table<QuintetRecord>().ToList());
+        _db.InsertAll(template.Table<TradeData>().ToList());
         template.Close();
         Debug.Log("[DB] Static data cloned from template");
     }
@@ -151,6 +153,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<FinalsRecord>();
         _db.CreateTable<AwardsRecord>();
         _db.CreateTable<QuintetRecord>();
+        _db.CreateTable<TradeData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -1300,7 +1303,7 @@ public class DatabaseManager : MonoBehaviour
         Add("PHI", "Paul", "George", "SF", 36, "USA", 206, 100, 88, 88, 84, 86, 86, 74, 80, 88, 60, 86, 84, 88, 18, 35000000, 2, false);
         Add("PHI", "Kelly", "Oubre Jr.", "SF", 30, "USA", 198, 95, 80, 82, 84, 80, 76, 70, 74, 80, 56, 80, 78, 78, 20, 12000000, 2, false);
         Add("PHI", "Quentin", "Grimes", "SG", 26, "USA", 196, 92, 82, 84, 82, 82, 82, 70, 76, 76, 54, 78, 80, 76, 18, 9000000, 3, false);
-        Add("PHI", "Kelly", "Lowry", "PG", 40, "USA", 183, 88, 78, 78, 70, 76, 78, 88, 88, 70, 40, 72, 82, 78, 8, 8000000, 1, false);
+        Add("PHI", "Kyle", "Lowry", "PG", 40, "USA", 183, 88, 78, 78, 70, 76, 78, 88, 88, 70, 40, 72, 82, 78, 8, 8000000, 1, false);
         Add("PHI", "VJ", "Edgecombe", "SG", 20, "BAH", 193, 90, 80, 92, 90, 82, 78, 74, 78, 70, 52, 80, 78, 74, 20, 6000000, 4, false);
         Add("PHI", "Justin", "Edwards", "SF", 22, "USA", 201, 95, 78, 88, 82, 78, 74, 68, 72, 78, 58, 80, 76, 76, 18, 3000000, 4, false);
         Add("PHI", "Dominick", "Barlow", "PF", 23, "USA", 206, 102, 76, 86, 78, 74, 66, 70, 72, 80, 72, 82, 76, 78, 22, 2500000, 3, false);
@@ -3098,6 +3101,31 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return;
         _db.Delete<MessageData>(messageId);
+    }
+
+    // ── TRADES ─────────────────────────────────────────────
+
+    public void InsertTrade(TradeData trade)
+    {
+        _db.Insert(trade);
+        Debug.Log($"[DB] InsertTrade OK: id={trade.id} player={trade.player_id} {trade.team_id_from}->{trade.team_id_to}");
+    }
+
+    public List<TradeData> GetTradesBySeason(int seasonId)
+    {
+        if (!EnsureDb()) return new List<TradeData>();
+        return _db.Table<TradeData>()
+                  .Where(t => t.season_id == seasonId)
+                  .OrderByDescending(t => t.game_day)
+                  .ToList();
+    }
+
+    public bool HasTeamTradedThisSeason(int teamId, int seasonId)
+    {
+        if (!EnsureDb()) return false;
+        return _db.Table<TradeData>()
+                  .Where(t => t.season_id == seasonId && (t.team_id_from == teamId || t.team_id_to == teamId))
+                  .Count() > 0;
     }
 
     public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId)

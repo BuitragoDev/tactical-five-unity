@@ -298,7 +298,7 @@ public class DashboardController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Market);
         });
         _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Cartera); });
-        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); });
+        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Historial); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -508,6 +508,7 @@ public class DashboardController : MonoBehaviour
         ProcessInjuries();
         ProcessScouts();
         ProcessRenovations();
+        ProcessAITransfers(gameDay);
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
 
@@ -943,6 +944,217 @@ public class DashboardController : MonoBehaviour
             {
                 ApplyRenovation(team);
             }
+        }
+    }
+
+    // ═══════════════════════════════════════════
+    //  AI TRANSFERS
+    // ═══════════════════════════════════════════
+
+    void ProcessAITransfers(int gameDay)
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
+
+        // Only run every ~14 game days
+        int lastDay = PlayerPrefs.GetInt("LastAITradeDay", -999);
+        if (gameDay - lastDay < 14) return;
+
+        // Check if in transfer window (1 Sep year_start to 8 Feb year_end)
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return;
+        var openDate = new System.DateTime(_season.year_start, 9, 1);
+        var closeDate = new System.DateTime(_season.year_end, 2, 8);
+        if (date < openDate || date > closeDate) return;
+
+        PlayerPrefs.SetInt("LastAITradeDay", gameDay);
+
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var seasonId = _season.id;
+        var freeAgentsAll = DatabaseManager.Instance.GetFreeAgents();
+
+        foreach (var team in allTeams)
+        {
+            if (team.id == _myTeam.id) continue;
+
+            if (DatabaseManager.Instance.HasTeamTradedThisSeason(team.id, seasonId)) continue;
+
+            if (Random.Range(0f, 1f) > 0.25f) continue;
+
+            var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+            if (roster.Count < 10) continue;
+
+            // If roster critically low (< 12), increase chance of FA signing
+            bool needsRosterFill = roster.Count < 12;
+
+            var weakestPos = GetWeakestPosition(roster);
+            if (weakestPos == null) continue;
+
+            bool traded = TryFindAITrade(team, roster, weakestPos, seasonId, gameDay);
+
+            if (!traded && needsRosterFill)
+                TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
+
+            if (!traded && !needsRosterFill && Random.Range(0f, 1f) < 0.4f)
+                TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
+        }
+    }
+
+    string GetWeakestPosition(List<PlayerData> roster)
+    {
+        if (roster == null || roster.Count == 0) return null;
+
+        var positions = new[] { "PG", "SG", "SF", "PF", "C" };
+        string weakest = null;
+        float lowestAvg = float.MaxValue;
+
+        foreach (var pos in positions)
+        {
+            var atPos = roster.Where(p => p.position == pos && p.injury_days == 0).ToList();
+            if (atPos.Count == 0) return pos;
+            float avg = (float)atPos.Average(p => p.overall);
+            if (avg < lowestAvg)
+            {
+                lowestAvg = avg;
+                weakest = pos;
+            }
+        }
+        return weakest;
+    }
+
+    bool TryFindAITrade(TeamData teamA, List<PlayerData> rosterA, string targetPos,
+                        int seasonId, int gameDay)
+    {
+        var allTeams = DatabaseManager.Instance.GetAllTeams()
+            .Where(t => t.id != _myTeam.id && t.id != teamA.id)
+            .OrderBy(_ => Random.Range(0, 1000))
+            .ToList();
+
+        foreach (var teamB in allTeams)
+        {
+            if (DatabaseManager.Instance.HasTeamTradedThisSeason(teamB.id, seasonId)) continue;
+
+            // Find best player on teamB at targetPos
+            var bTargetPlayers = DatabaseManager.Instance.GetPlayersByTeam(teamB.id)
+                .Where(p => p.position == targetPos && p.injury_days == 0)
+                .OrderByDescending(p => p.overall)
+                .ToList();
+            if (bTargetPlayers.Count == 0) continue;
+            // Don't take their best player (> 85 OVR) to keep it realistic
+            var playerB = bTargetPlayers.FirstOrDefault(p => p.overall <= 85);
+            if (playerB == null) playerB = bTargetPlayers.Last();
+
+            // Find teamA's weakest position for teamB
+            var rosterB = DatabaseManager.Instance.GetPlayersByTeam(teamB.id);
+            var bWeakPos = GetWeakestPosition(rosterB);
+            if (bWeakPos == null) continue;
+
+            // Find a player on teamA at bWeakPos that we can offer
+            var aOfferPlayers = rosterA
+                .Where(p => p.position == bWeakPos && p.injury_days == 0 && p.id != playerB.id)
+                .OrderBy(p => p.overall)
+                .ToList();
+            if (aOfferPlayers.Count == 0) continue;
+            // Don't trade away our best player (> 85 OVR)
+            var playerA = aOfferPlayers.FirstOrDefault(p => p.overall <= 85);
+            if (playerA == null) playerA = aOfferPlayers.First();
+
+            var aSelected = new List<PlayerData> { playerA };
+            var bSelected = new List<PlayerData> { playerB };
+
+            // Validate trade from teamB's perspective
+            var bPayroll = rosterB.Sum(p => p.salary);
+            var errors = TradeHelper.ValidateTrade(
+                aSelected, bSelected,
+                rosterA.Count, rosterB.Count,
+                teamB.name, bPayroll);
+
+            if (errors.Count > 0) continue;
+
+            // Check if teamB would accept
+            var result = TradeHelper.EvaluateTrade(
+                aSelected, bSelected,
+                teamB.name, rosterB.Count, bPayroll);
+
+            if (!result.WouldAccept) continue;
+
+            // Execute trade
+            playerA.team_id = teamB.id;
+            playerB.team_id = teamA.id;
+            DatabaseManager.Instance.UpdatePlayer(playerA);
+            DatabaseManager.Instance.UpdatePlayer(playerB);
+
+            // Log both sides
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = teamA.id,
+                team_id_to = teamB.id,
+                player_id = playerA.id,
+                trade_type = "trade",
+                partner_player_id = playerB.id
+            });
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = teamB.id,
+                team_id_to = teamA.id,
+                player_id = playerB.id,
+                trade_type = "trade",
+                partner_player_id = playerA.id
+            });
+
+            Debug.Log($"[AI Trade] {teamA.name} ↔ {teamB.name}: {playerA.first_name} {playerA.last_name} for {playerB.first_name} {playerB.last_name}");
+            return true;
+        }
+        return false;
+    }
+
+    void TrySignFreeAgent(TeamData team, List<PlayerData> roster, string targetPos,
+                          List<PlayerData> freeAgents, int seasonId, int gameDay)
+    {
+        if (roster.Count >= TradeHelper.MAX_ROSTER) return;
+
+        var candidates = freeAgents
+            .Where(p => p.position == targetPos && p.salary <= team.budget)
+            .OrderByDescending(p => p.overall)
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            // Try any position if no match at targetPos
+            candidates = freeAgents
+                .Where(p => p.salary <= team.budget)
+                .OrderByDescending(p => p.overall)
+                .ToList();
+        }
+
+        foreach (var player in candidates)
+        {
+            int chance = (int)Mathf.Clamp(team.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
+            if (Random.Range(0, 100) >= chance) continue;
+
+            player.team_id = team.id;
+            int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
+            player.salary += 2_000_000;
+            player.contract_years = years;
+            DatabaseManager.Instance.UpdatePlayer(player);
+
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = 0,
+                team_id_to = team.id,
+                player_id = player.id,
+                trade_type = "free_agent"
+            });
+
+            Debug.Log($"[AI FA] {team.name} signed {player.first_name} {player.last_name} ({player.position}, {player.overall} OVR)");
+            break;
         }
     }
 
