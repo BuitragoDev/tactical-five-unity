@@ -660,6 +660,8 @@ public class DashboardController : MonoBehaviour
                     body = "El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.",
                     game_day = _season.current_game_day,
                     game_date = _season.current_date,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     is_read = 0
                 });
             }
@@ -993,6 +995,8 @@ public class DashboardController : MonoBehaviour
             body = $"La remodelación \"{info.name}\" ha finalizado. Se han añadido {info.capacityBonus} asientos. Coste total: ${team.arena_renovation_cost:N0}.",
             game_day = _season.current_game_day,
             game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(_season.current_game_day - 1).ToString("yyyy-MM-dd"),
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             is_read = 0
         });
     }
@@ -1320,6 +1324,8 @@ public class DashboardController : MonoBehaviour
                         body = $"{player.first_name} {player.last_name} ha sufrido {inj.type}. Estará de baja {inj.days} días.",
                         game_day = _season.current_game_day,
                         game_date = gameDate,
+                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         is_read = 0
                     });
                 }
