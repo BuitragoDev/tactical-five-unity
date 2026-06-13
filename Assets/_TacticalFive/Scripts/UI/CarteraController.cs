@@ -365,36 +365,31 @@ public class CarteraController : MonoBehaviour
             var wrapper = new VisualElement();
             wrapper.style.flexDirection = FlexDirection.Row;
 
-            // First player in the pair
-            var row1 = BuildPlayerRow(players[i]);
-            row1.style.flexBasis = 0;
-            row1.style.flexGrow = 1;
-            row1.style.flexShrink = 1;
-            wrapper.Add(row1);
+            float flexBasis = 0;
+            float flexGrow = 1;
+            float flexShrink = 1;
 
-            // Second player in the pair (if exists)
+            // Left column
+            var col1 = new VisualElement();
+            col1.style.flexBasis = flexBasis;
+            col1.style.flexGrow = flexGrow;
+            col1.style.flexShrink = flexShrink;
+            col1.Add(BuildPlayerRow(players[i]));
+            wrapper.Add(col1);
+
+            // 4px gap between columns
+            var gap = new VisualElement();
+            gap.style.width = 4;
+            wrapper.Add(gap);
+
+            // Right column (player or empty)
+            var col2 = new VisualElement();
+            col2.style.flexBasis = flexBasis;
+            col2.style.flexGrow = flexGrow;
+            col2.style.flexShrink = flexShrink;
             if (i + 1 < players.Count)
-            {
-                var row2 = BuildPlayerRow(players[i + 1]);
-                row2.style.flexBasis = 0;
-                row2.style.flexGrow = 1;
-                row2.style.flexShrink = 1;
-                wrapper.Add(row2);
-                // Gap between columns — only apply when both exist so odd rows stay equal
-                row1.style.marginRight = 4;
-            }
-            else
-            {
-                // Single player on odd row — add right margin to wrapper so
-                // the available flex width matches 2-player rows, keeping
-                // player content widths identical
-                wrapper.style.marginRight = 4;
-                var placeholder = new VisualElement();
-                placeholder.style.flexBasis = 0;
-                placeholder.style.flexGrow = 1;
-                placeholder.style.flexShrink = 1;
-                wrapper.Add(placeholder);
-            }
+                col2.Add(BuildPlayerRow(players[i + 1]));
+            wrapper.Add(col2);
 
             _playerList.Add(wrapper);
         }
