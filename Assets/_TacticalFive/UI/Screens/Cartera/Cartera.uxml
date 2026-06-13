@@ -134,7 +134,7 @@
             <ui:VisualElement class="cartera-content">
                 <!-- LEFT COLUMN -->
                 <ui:VisualElement class="cartera-left">
-                    <ui:Label class="section-title" text="EQUIPOS" />
+                    <ui:Label class="section-title" text="SELECCIONA UN EQUIPO" />
                     <ui:VisualElement name="TeamList" class="team-list" />
                     <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 12px;" />
                     <ui:VisualElement name="PlayerList" class="player-list" />

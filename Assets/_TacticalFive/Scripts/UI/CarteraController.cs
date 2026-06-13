@@ -352,11 +352,11 @@ public class CarteraController : MonoBehaviour
 
         if (_selectedTeam == null)
         {
-            _selectedTeamLabel.text = "";
+            _selectedTeamLabel.text = "Selecciona un equipo para ver sus jugadores";
             return;
         }
 
-        _selectedTeamLabel.text = _selectedTeam.name.ToUpper();
+        _selectedTeamLabel.text = "SELECCIONA UN JUGADOR PARA OJEAR";
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id);
 
@@ -614,8 +614,7 @@ public class CarteraController : MonoBehaviour
                     slot.Add(timerLbl);
                 }
 
-                // Remove button (for active scouts)
-                if (scout.completed == 1)
+                // Remove button
                 {
                     var removeBtn = new Button();
                     removeBtn.AddToClassList("btn-fire");
