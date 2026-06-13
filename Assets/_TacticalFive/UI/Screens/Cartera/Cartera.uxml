@@ -105,7 +105,6 @@
                     <ui:VisualElement name="NavMessagesIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Mensajes" />
                 </ui:Button>
-                <ui:VisualElement name="ConfigIcon" class="header-config-icon" style="position: absolute; bottom: 12px; left: 12px;" />
             </ui:VisualElement>
         </ui:VisualElement>
 

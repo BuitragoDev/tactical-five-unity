@@ -616,7 +616,15 @@ public class CarteraController : MonoBehaviour
                     {
                         PlayClick();
                         DatabaseManager.Instance.DeleteScout(captured.id);
-                        _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
+        try
+        {
+            _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
+        }
+        catch
+        {
+            DatabaseManager.Instance.Db.CreateTable<ScoutData>();
+            _scouts = new();
+        }
                         Refresh();
                     });
                     if (CursorManager.Instance != null)
