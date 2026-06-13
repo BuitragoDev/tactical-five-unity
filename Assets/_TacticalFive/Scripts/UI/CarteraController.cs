@@ -370,7 +370,6 @@ public class CarteraController : MonoBehaviour
             row1.style.flexBasis = 0;
             row1.style.flexGrow = 1;
             row1.style.flexShrink = 1;
-            row1.style.marginRight = 4;
             wrapper.Add(row1);
 
             // Second player in the pair (if exists)
@@ -381,6 +380,8 @@ public class CarteraController : MonoBehaviour
                 row2.style.flexGrow = 1;
                 row2.style.flexShrink = 1;
                 wrapper.Add(row2);
+                // Gap between columns — only apply when both exist so odd rows stay equal
+                row1.style.marginRight = 4;
             }
             else
             {
