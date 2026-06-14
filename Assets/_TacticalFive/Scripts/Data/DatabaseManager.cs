@@ -208,6 +208,29 @@ public class DatabaseManager : MonoBehaviour
             _db.Execute("ALTER TABLE players ADD COLUMN morale INTEGER DEFAULT 50");
             Debug.Log("[DB] Migration: added morale to players");
         }
+
+        // Recalculate overall for all players from their 11 attributes (fix seed data mismatch)
+        string migrationKey = $"OverallMigration_{_activeSaveSlot}";
+        if (PlayerPrefs.GetInt(migrationKey, 0) == 0)
+        {
+            var allPlayers = _db.Table<PlayerData>().ToList();
+            foreach (var p in allPlayers)
+            {
+                int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling
+                        + p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
+                int calc = (int)System.Math.Round(sum / 11f);
+                if (calc > p.potential)
+                    calc = p.potential;
+                if (p.overall != calc)
+                {
+                    p.overall = calc;
+                    _db.Update(p);
+                }
+            }
+            PlayerPrefs.SetInt(migrationKey, 1);
+            PlayerPrefs.Save();
+            Debug.Log("[DB] Migration: recalculated overall for all players");
+        }
     }
 
     class ColumnInfo
@@ -1036,6 +1059,8 @@ public class DatabaseManager : MonoBehaviour
                  long sal, int yrs, bool rookie)
         {
             int teamId = teamByAbbr.TryGetValue(abbr, out var id) ? id : 0;
+            int calcOvr = (int)System.Math.Round((spd + sht + thr + pas + drb + def + reb + ath + iq + stl + blk) / 11f);
+            if (calcOvr > pot) calcOvr = pot;
             players.Add(new PlayerData
             {
                 team_id = teamId,
@@ -1046,7 +1071,7 @@ public class DatabaseManager : MonoBehaviour
                 nationality = nat,
                 height_cm = h,
                 weight_kg = w,
-                overall = ovr,
+                overall = calcOvr,
                 potential = pot,
                 speed = spd,
                 shooting = sht,

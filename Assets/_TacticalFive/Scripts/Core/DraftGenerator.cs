@@ -181,8 +181,9 @@ public static class DraftGenerator
                 attrs[attr] = value;
             }
 
-            int overall = (int)attrs.Values.Average();
+            int overall = (int)System.Math.Round(attrs.Values.Average());
             int potential = Mathf.Min(99, overall + UnityEngine.Random.Range(3, 13));
+            if (overall > potential) overall = potential;
 
             string nationality = UnityEngine.Random.value < 0.9f ? "USA" : GetRandomNationality();
 
