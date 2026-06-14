@@ -182,8 +182,8 @@
                             <ui:ScrollView name="TrainingAttrScroll" class="training-attr-scroll">
                                 <ui:VisualElement name="TrainingAttrBody" class="training-attr-body" />
                             </ui:ScrollView>
-                            <ui:Button name="BtnAutoTrain" class="training-btn-auto" text="AUTO" />
                         </ui:VisualElement>
+                        <ui:Button name="BtnAutoTrain" class="training-btn-auto" text="AUTO" />
                         <!-- Empty state -->
                         <ui:Label name="TrainingEmpty" class="training-empty" text="SELECCIONA UN JUGADOR" />
                     </ui:VisualElement>
