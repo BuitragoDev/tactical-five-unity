@@ -529,6 +529,7 @@ public class DashboardController : MonoBehaviour
 
         ProcessInjuries();
         ProcessScouts();
+        ProcessTraining();
         ProcessRenovations();
         ProcessAITransfers(gameDay);
 
@@ -985,6 +986,36 @@ public class DashboardController : MonoBehaviour
         {
             s.completed = 1;
             DatabaseManager.Instance.UpdateScout(s);
+        }
+    }
+
+    void ProcessTraining()
+    {
+        if (_season == null) return;
+        var trainings = DatabaseManager.Instance.GetTeamTraining(_myTeam.id)
+            .Where(t => _season.current_game_day >= t.start_day + t.duration)
+            .ToList();
+        foreach (var t in trainings)
+        {
+            DatabaseManager.Instance.CompleteTrainingAndApply(t);
+            var player = DatabaseManager.Instance.GetPlayerById(t.player_id);
+            string attrName = t.attribute.Replace("_", " ").ToUpper();
+            if (player != null)
+            {
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 0,
+                    sender_id = 0,
+                    title = "Entrenamiento completado",
+                    body = $"{player.first_name} {player.last_name} ha completado el entrenamiento de {attrName} y ha mejorado su rendimiento.",
+                    game_day = _season.current_game_day,
+                    game_date = _season.current_date,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    is_read = 0
+                });
+            }
         }
     }
 

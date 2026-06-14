@@ -11,6 +11,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument preseasonDocument;
     [SerializeField] private UIDocument dashboardDocument;
     [SerializeField] private UIDocument rosterDocument;
+    [SerializeField] private UIDocument trainingDocument;
     [SerializeField] private UIDocument calendarDocument;
     [SerializeField] private UIDocument standingsDocument;
     [SerializeField] private UIDocument palmaresDocument;
@@ -160,7 +161,7 @@ public class ScreenManager : MonoBehaviour
                 ShowOnly(historialDocument);
                 break;
             case GameScreen.Training:
-                ShowOnly(rosterDocument);
+                ShowOnly(trainingDocument);
                 break;
         }
     }
@@ -200,6 +201,7 @@ public class ScreenManager : MonoBehaviour
         if (newSeasonDocument != null) newSeasonDocument.gameObject.SetActive(false);
         if (editorDocument != null) editorDocument.gameObject.SetActive(false);
         if (historialDocument != null) historialDocument.gameObject.SetActive(false);
+        if (trainingDocument != null) trainingDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

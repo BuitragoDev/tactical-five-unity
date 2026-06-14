@@ -110,6 +110,7 @@ public class DatabaseManager : MonoBehaviour
     {
         var template = new SQLiteConnection(TemplateDbPath);
         template.CreateTable<TradeData>();
+        template.CreateTable<TrainingData>();
         _db.InsertAll(template.Table<TeamData>().ToList());
         _db.InsertAll(template.Table<PlayerData>().ToList());
         _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
@@ -154,6 +155,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<AwardsRecord>();
         _db.CreateTable<QuintetRecord>();
         _db.CreateTable<TradeData>();
+        _db.CreateTable<TrainingData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -405,6 +407,65 @@ public class DatabaseManager : MonoBehaviour
     }
 
     // ── END CHEMISTRY HELPERS ──────────────────────────────
+
+    // ── TRAINING HELPERS ───────────────────────────────────
+    public List<TrainingData> GetTeamTraining(int teamId)
+    {
+        return _db.Table<TrainingData>()
+                  .Where(t => t.team_id == teamId && t.completed == 0)
+                  .ToList();
+    }
+
+    public TrainingData GetPlayerActiveTraining(int playerId)
+    {
+        return _db.Table<TrainingData>()
+                  .Where(t => t.player_id == playerId && t.completed == 0)
+                  .FirstOrDefault();
+    }
+
+    public void InsertTraining(TrainingData training)
+    {
+        _db.Insert(training);
+    }
+
+    public void CompleteTraining(int id)
+    {
+        var t = _db.Table<TrainingData>().FirstOrDefault(x => x.id == id);
+        if (t != null)
+        {
+            t.completed = 1;
+            _db.Update(t);
+        }
+    }
+
+    public void CompleteTrainingAndApply(TrainingData t)
+    {
+        ApplyTrainingEffect(t);
+        t.completed = 1;
+        _db.Update(t);
+    }
+
+    void ApplyTrainingEffect(TrainingData t)
+    {
+        var player = GetPlayerById(t.player_id);
+        if (player == null) return;
+
+        var prop = typeof(PlayerData).GetProperty(t.attribute);
+        if (prop == null) return;
+
+        int val = (int)prop.GetValue(player);
+        val = Mathf.Min(val + 2, 99);
+        prop.SetValue(player, val);
+
+        // Recalculate overall as average of all attributes + potential factor
+        int sum = player.shooting + player.three_point + player.passing + player.dribbling
+                + player.defense + player.rebounding + player.speed + player.athleticism
+                + player.steals + player.blocks;
+        player.overall = Mathf.RoundToInt((sum / 10f) * 0.85f + player.potential * 0.15f);
+
+        _db.Update(player);
+    }
+    // ── END TRAINING HELPERS ───────────────────────────────
 
     // Los 5 peores equipos por overall (para ProManager)
     public List<TeamData> GetWorstTeams(int count = 5)
@@ -1084,7 +1145,7 @@ public class DatabaseManager : MonoBehaviour
         Add("CHI", "Zach", "Collins", "C", 29, "USA", 211, 113, 78, 78, 64, 72, 66, 72, 66, 74, 80, 70, 78, 54, 52, 18000000, 2, false);
         Add("CHI", "Nick", "Richards", "C", 28, "JAM", 213, 111, 77, 77, 68, 64, 24, 50, 46, 72, 86, 76, 70, 48, 74, 5000000, 2, false);
         Add("CHI", "Tre", "Jones", "PG", 26, "USA", 185, 83, 83, 82, 78, 72, 66, 82, 80, 70, 48, 72, 82, 72, 18, 9000000, 2, false);
-        Add("CHI", "Rob", "Dillingham", "PG", 21, "USA", 188, 79, 91, 93, 92, 84, 80, 86, 90, 54, 38, 76, 74, 54, 14, 6500000, 4, false);
+        Add("CHI", "Rob", "Dillingham", "PG", 21, "USA", 188, 79, 82, 93, 82, 84, 80, 86, 90, 54, 38, 76, 74, 54, 14, 6500000, 4, false);
         Add("CHI", "Noa", "Essengue", "PF", 19, "FRA", 208, 97, 77, 92, 80, 68, 60, 64, 70, 76, 72, 84, 72, 70, 46, 6500000, 4, false);
         Add("CHI", "Leonard", "Miller", "PF", 22, "CAN", 208, 98, 77, 89, 78, 70, 58, 64, 68, 74, 76, 84, 72, 66, 42, 2800000, 3, false);
         Add("CHI", "Jalen", "Smith", "C", 26, "USA", 208, 98, 77, 80, 68, 72, 68, 60, 60, 72, 80, 72, 72, 52, 58, 9000000, 2, false);
