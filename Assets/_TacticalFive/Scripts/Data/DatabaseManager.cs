@@ -457,11 +457,13 @@ public class DatabaseManager : MonoBehaviour
         val = Mathf.Min(val + 2, 99);
         prop.SetValue(player, val);
 
-        // Recalculate overall as average of all attributes + potential factor
+        // Recalculate overall as average of all attributes, capped by potential
         int sum = player.shooting + player.three_point + player.passing + player.dribbling
                 + player.defense + player.rebounding + player.speed + player.athleticism
-                + player.steals + player.blocks;
-        player.overall = Mathf.RoundToInt((sum / 10f) * 0.85f + player.potential * 0.15f);
+                + player.iq + player.steals + player.blocks;
+        player.overall = (int)System.Math.Round(sum / 11f);
+        if (player.overall > player.potential)
+            player.overall = player.potential;
 
         _db.Update(player);
     }
