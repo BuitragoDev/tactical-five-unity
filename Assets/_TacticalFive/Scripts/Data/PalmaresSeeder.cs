@@ -59,7 +59,7 @@ public static class PalmaresSeeder
         new FinalsRecord { season = "2022-23", champ_name = "Denver Nuggets",       champ_keyword = "Nuggets",   finalist_name = "Miami Heat",     finalist_keyword = "Heat",     result = "4-1", mvp = "Nikola Jokic" },
         new FinalsRecord { season = "2023-24", champ_name = "Boston Celtics",       champ_keyword = "Celtics",   finalist_name = "Dallas Mavericks", finalist_keyword = "Mavericks", result = "4-1", mvp = "Jaylen Brown" },
         new FinalsRecord { season = "2024-25", champ_name = "Oklahoma City Thunder", champ_keyword = "Thunder",  finalist_name = "Indiana Pacers",  finalist_keyword = "Pacers",   result = "4-3", mvp = "Shai Gilgeous-Alexander" },
-        new FinalsRecord { season = "2025-26", champ_name = "New York Knicks", champ_keyword = "Knicks",  finalist_name = "San Antonio Spurs",  finalist_keyword = "Spurs",   result = "4-2", mvp = "Jalen Brunson" },
+        new FinalsRecord { season = "2025-26", champ_name = "New York Knicks", champ_keyword = "Knicks",  finalist_name = "San Antonio Spurs",  finalist_keyword = "Spurs",   result = "4-1", mvp = "Jalen Brunson" },
     };
 
     public static List<AwardsRecord> AwardsData => new()

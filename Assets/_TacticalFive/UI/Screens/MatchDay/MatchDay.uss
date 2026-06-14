@@ -158,7 +158,7 @@
     border-width: 1px;
     border-color: #2a3347;
     border-radius: 8px;
-    padding: 16px 24px;
+    padding: 4px 24px;
     flex-direction: column;
 }
 
@@ -308,7 +308,7 @@
 }
 
 .box-table-header .col-stat--header {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1px;
     text-align: center;
@@ -349,7 +349,7 @@
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.3);
     align-items: center;
-    min-height: 36px;
+    min-height: 30px;
 }
 
 .box-row.my-player {
@@ -371,7 +371,7 @@
 }
 
 .player-pos {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     color: #7a8aaa;
     background-color: #161a24;
@@ -393,7 +393,7 @@
 }
 
 .player-name {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 500;
     color: #d0d8e8;
     letter-spacing: 0.5px;
