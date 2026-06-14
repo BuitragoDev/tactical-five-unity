@@ -33,9 +33,10 @@ public class TrainingController : MonoBehaviour
     private Label _trainingPlayerName;
     private Label _trainingPlayerMeta;
 
-    // Modal
+    // Modal + auto
     private VisualElement _noAsistenteOverlay;
     private Button _btnNoAsistenteOk;
+    private Button _btnAutoTrain;
 
     // Data
     private ManagerData _manager;
@@ -146,6 +147,7 @@ public class TrainingController : MonoBehaviour
 
         _noAsistenteOverlay = _root.Q<VisualElement>("NoAsistenteOverlay");
         _btnNoAsistenteOk = _root.Q<Button>("BtnNoAsistenteOk");
+        _btnAutoTrain = _root.Q<Button>("BtnAutoTrain");
 
         _trainingPlayerInfo = _root.Q<VisualElement>("TrainingPlayerInfo");
         _trainingPlayerName = _root.Q<Label>("TrainingPlayerName");
@@ -304,8 +306,13 @@ public class TrainingController : MonoBehaviour
             _noAsistenteOverlay.RemoveFromClassList("training-modal-overlay--visible");
         });
 
+        _btnAutoTrain?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnAutoAssign(); });
+
         if (CursorManager.Instance != null)
+        {
             CursorManager.Instance.RegisterHandCursor(_btnAction);
+            CursorManager.Instance.RegisterHandCursor(_btnAutoTrain);
+        }
     }
 
     void Refresh()
@@ -680,6 +687,72 @@ public class TrainingController : MonoBehaviour
         _activeTraining = DatabaseManager.Instance.GetTeamTraining(_myTeam.id);
         BuildPlayerList();
         OnPlayerSelected(player, _trainingBody.Query<VisualElement>(className: "training-row--selected").First());
+    }
+
+    void OnAutoAssign()
+    {
+        if (_asistente == null)
+        {
+            _noAsistenteOverlay.AddToClassList("training-modal-overlay--visible");
+            return;
+        }
+
+        var trainableAttrs = new[] { "shooting", "three_point", "passing", "dribbling", "defense",
+                                     "rebounding", "speed", "athleticism", "steals", "blocks" };
+        int duration = GetTrainingDuration(_asistente.reputation);
+        int count = 0;
+
+        foreach (var player in _players)
+        {
+            string weakest = null;
+            int minVal = 100;
+            foreach (var attr in trainableAttrs)
+            {
+                int val = (int)typeof(PlayerData).GetProperty(attr).GetValue(player);
+                if (val < minVal)
+                {
+                    minVal = val;
+                    weakest = attr;
+                }
+            }
+
+            if (weakest == null || minVal >= 99) continue;
+
+            var existing = _activeTraining.FirstOrDefault(t => t.player_id == player.id);
+            if (existing != null)
+            {
+                existing.attribute = weakest;
+                existing.start_day = _currentGameDay;
+                existing.duration = duration;
+                DatabaseManager.Instance.Db.Update(existing);
+            }
+            else
+            {
+                var training = new TrainingData
+                {
+                    player_id = player.id,
+                    team_id = _myTeam.id,
+                    attribute = weakest,
+                    start_day = _currentGameDay,
+                    duration = duration,
+                    completed = 0,
+                };
+                DatabaseManager.Instance.InsertTraining(training);
+            }
+            count++;
+        }
+
+        Debug.Log($"[Training] Auto-asignados {count} entrenamientos");
+
+        _activeTraining = DatabaseManager.Instance.GetTeamTraining(_myTeam.id);
+        BuildPlayerList();
+
+        if (_selectedPlayer != null)
+        {
+            var row = _trainingBody.Query<VisualElement>(className: "training-row--selected").First();
+            if (row != null)
+                OnPlayerSelected(_selectedPlayer, row);
+        }
     }
 
     int GetTrainingDuration(int reputation)
