@@ -689,6 +689,33 @@ public class TrainingController : MonoBehaviour
         OnPlayerSelected(player, _trainingBody.Query<VisualElement>(className: "training-row--selected").First());
     }
 
+    private static readonly Dictionary<string, string[]> PrimaryAttrs = new()
+    {
+        { "PG", new[] { "passing", "dribbling", "three_point", "speed", "shooting" } },
+        { "SG", new[] { "shooting", "three_point", "speed", "dribbling" } },
+        { "SF", new[] { "shooting", "three_point", "defense", "speed", "athleticism" } },
+        { "PF", new[] { "defense", "rebounding", "shooting", "blocks", "athleticism" } },
+        { "C",  new[] { "rebounding", "blocks", "defense", "shooting", "athleticism" } },
+    };
+
+    private static readonly Dictionary<string, string[]> SecondaryAttrs = new()
+    {
+        { "PG", new[] { "defense", "steals", "athleticism" } },
+        { "SG", new[] { "passing", "defense", "steals", "athleticism" } },
+        { "SF", new[] { "passing", "dribbling", "rebounding", "steals" } },
+        { "PF", new[] { "three_point", "passing", "speed" } },
+        { "C",  new[] { "passing", "speed" } },
+    };
+
+    private static readonly Dictionary<string, string[]> ExcludedAttrs = new()
+    {
+        { "PG", new[] { "rebounding", "blocks" } },
+        { "SG", new[] { "rebounding", "blocks" } },
+        { "SF", new[] { "blocks" } },
+        { "PF", new[] { "dribbling", "steals" } },
+        { "C",  new[] { "three_point", "dribbling", "steals" } },
+    };
+
     void OnAutoAssign()
     {
         if (_asistente == null)
@@ -697,31 +724,30 @@ public class TrainingController : MonoBehaviour
             return;
         }
 
-        var trainableAttrs = new[] { "shooting", "three_point", "passing", "dribbling", "defense",
-                                     "rebounding", "speed", "athleticism", "steals", "blocks" };
         int duration = GetTrainingDuration(_asistente.reputation);
         int count = 0;
 
         foreach (var player in _players)
         {
-            string weakest = null;
-            int minVal = 100;
-            foreach (var attr in trainableAttrs)
-            {
-                int val = (int)typeof(PlayerData).GetProperty(attr).GetValue(player);
-                if (val < minVal)
-                {
-                    minVal = val;
-                    weakest = attr;
-                }
-            }
+            string pos = player.position;
+            var allTrainable = new[] { "shooting", "three_point", "passing", "dribbling", "defense",
+                                       "rebounding", "speed", "athleticism", "steals", "blocks" };
 
-            if (weakest == null || minVal >= 99) continue;
+            // Try primary attributes first
+            string attr = PickLowest(player, pos, PrimaryAttrs, null, 0);
+            // If all primaries ≥ 80, try secondary
+            if (attr == null)
+                attr = PickLowest(player, pos, SecondaryAttrs, null, 80);
+            // If secondaries also ≥ 80, try everything except excluded
+            if (attr == null)
+                attr = PickLowest(player, null, null, ExcludedAttrs.TryGetValue(pos, out var exc) ? exc : null, 99);
+
+            if (attr == null) continue;
 
             var existing = _activeTraining.FirstOrDefault(t => t.player_id == player.id);
             if (existing != null)
             {
-                existing.attribute = weakest;
+                existing.attribute = attr;
                 existing.start_day = _currentGameDay;
                 existing.duration = duration;
                 DatabaseManager.Instance.Db.Update(existing);
@@ -732,7 +758,7 @@ public class TrainingController : MonoBehaviour
                 {
                     player_id = player.id,
                     team_id = _myTeam.id,
-                    attribute = weakest,
+                    attribute = attr,
                     start_day = _currentGameDay,
                     duration = duration,
                     completed = 0,
@@ -753,6 +779,38 @@ public class TrainingController : MonoBehaviour
             if (row != null)
                 OnPlayerSelected(_selectedPlayer, row);
         }
+    }
+
+    string PickLowest(PlayerData player, string pos, Dictionary<string, string[]> groupMap, string[] excluded, int fallbackThreshold)
+    {
+        string[] pool;
+        if (groupMap != null && pos != null && groupMap.TryGetValue(pos, out var p))
+            pool = p;
+        else if (excluded != null)
+            pool = new[] { "shooting", "three_point", "passing", "dribbling", "defense",
+                           "rebounding", "speed", "athleticism", "steals", "blocks" }
+                   .Where(a => !excluded.Contains(a)).ToArray();
+        else
+            return null;
+
+        string weakest = null;
+        int minVal = 100;
+        bool allAboveThreshold = true;
+        foreach (var attr in pool)
+        {
+            int val = (int)typeof(PlayerData).GetProperty(attr).GetValue(player);
+            if (val < fallbackThreshold)
+                allAboveThreshold = false;
+            if (val < minVal)
+            {
+                minVal = val;
+                weakest = attr;
+            }
+        }
+        // If all attributes in this pool are ≥ fallbackThreshold, return null to try next pool
+        if (allAboveThreshold)
+            return null;
+        return weakest;
     }
 
     int GetTrainingDuration(int reputation)
