@@ -22,6 +22,9 @@
                     <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
                         <ui:Label text="Jugadores" class="nav-submenu-label"/>
                     </ui:Button>
+                    <ui:Button name="SubmenuQuinteto" class="nav-submenu-item">
+                        <ui:Label text="Quinteto" class="nav-submenu-label"/>
+                    </ui:Button>
                     <ui:Button name="SubmenuEntrenamiento" class="nav-submenu-item">
                         <ui:Label text="Entrenamiento" class="nav-submenu-label"/>
                     </ui:Button>
@@ -30,6 +33,9 @@
                     </ui:Button>
                     <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
                         <ui:Label text="Lesionados" class="nav-submenu-label"/>
+                    </ui:Button>
+                                    <ui:Button name="SubmenuVestuario" class="nav-submenu-item">
+                        <ui:Label text="Vestuario" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
                 <ui:Button name="NavCalendar" class="nav-item">

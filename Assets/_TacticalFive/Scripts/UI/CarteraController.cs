@@ -156,6 +156,8 @@ public class CarteraController : MonoBehaviour
         });
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
+        _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
+_root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -226,7 +228,7 @@ public class CarteraController : MonoBehaviour
 
         if (CursorManager.Instance != null)
         {
-            foreach (var name in new[] { "NavDashboard", "NavRoster", "SubmenuJugadores", "SubmenuEntrenamiento", "SubmenuEmpleados", "SubmenuLesionados", "NavCalendar", "NavResults", "NavStandings", "NavPalmares", "SubmenuPalmares", "SubmenuRecords", "NavPlayoffs", "NavStats", "NavMarket", "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial", "NavFinances", "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV", "NavArena", "NavMessages", "ConfigIcon", "BtnAction" })
+            foreach (var name in new[] { "NavDashboard", "NavRoster", "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento", "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario", "NavCalendar", "NavResults", "NavStandings", "NavPalmares", "SubmenuPalmares", "SubmenuRecords", "NavPlayoffs", "NavStats", "NavMarket", "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial", "NavFinances", "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV", "NavArena", "NavMessages", "ConfigIcon", "BtnAction" })
             {
                 var btn = _root.Q<Button>(name);
                 if (btn != null)

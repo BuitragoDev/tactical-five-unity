@@ -273,6 +273,8 @@ public class DashboardController : MonoBehaviour
         });
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
+        _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
+_root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -584,6 +586,14 @@ public class DashboardController : MonoBehaviour
                 bool homeWon = game.home_score > game.away_score;
                 UpdatePlayersMoraleAfterGame(result.home_stats, game.home_team_id, homeWon);
                 UpdatePlayersMoraleAfterGame(result.away_stats, game.away_team_id, !homeWon);
+
+                // Evolve relationships for teams in this game
+                DatabaseManager.Instance.UpdateRelationshipsAfterGame(
+                    game.home_team_id, game.id, homeWon,
+                    result.home_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
+                DatabaseManager.Instance.UpdateRelationshipsAfterGame(
+                    game.away_team_id, game.id, !homeWon,
+                    result.away_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
 
                 yield return null;
             }

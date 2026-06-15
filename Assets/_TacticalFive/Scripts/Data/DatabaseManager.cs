@@ -111,6 +111,8 @@ public class DatabaseManager : MonoBehaviour
         var template = new SQLiteConnection(TemplateDbPath);
         template.CreateTable<TradeData>();
         template.CreateTable<TrainingData>();
+        template.CreateTable<PlayerPersonalityData>();
+        template.CreateTable<PlayerRelationshipData>();
         _db.InsertAll(template.Table<TeamData>().ToList());
         _db.InsertAll(template.Table<PlayerData>().ToList());
         _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
@@ -156,6 +158,8 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<QuintetRecord>();
         _db.CreateTable<TradeData>();
         _db.CreateTable<TrainingData>();
+        _db.CreateTable<PlayerPersonalityData>();
+        _db.CreateTable<PlayerRelationshipData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -3508,6 +3512,14 @@ public class DatabaseManager : MonoBehaviour
             }
         }
 
+        // Seed relationships for user's team
+        var userPlayers = GetPlayersByTeam(newTeamId);
+        if (userPlayers.Count >= 2)
+        {
+            SeedTeamPersonalities(newTeamId, userPlayers);
+            SeedTeamRelationships(newTeamId, userPlayers);
+        }
+
         // 7. Increase salary cap by 5%
         var leagueSettings = GetLeagueSettings();
         if (leagueSettings != null)
@@ -3571,6 +3583,161 @@ public class DatabaseManager : MonoBehaviour
             generated = 0
         };
         _db.Insert(newSeason);
+    }
+
+    public PlayerPersonalityData GetPlayerPersonality(int playerId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<PlayerPersonalityData>()
+                  .Where(p => p.player_id == playerId)
+                  .FirstOrDefault();
+    }
+
+    public List<PlayerPersonalityData> GetTeamPersonalities(int teamId)
+    {
+        if (!EnsureDb()) return new List<PlayerPersonalityData>();
+        return _db.Table<PlayerPersonalityData>()
+                  .Where(p => p.team_id == teamId)
+                  .ToList();
+    }
+
+    public void InsertOrUpdatePersonality(PlayerPersonalityData personality)
+    {
+        if (!EnsureDb()) return;
+        var existing = GetPlayerPersonality(personality.player_id);
+        if (existing != null)
+        {
+            personality.id = existing.id;
+            _db.Update(personality);
+        }
+        else
+        {
+            _db.Insert(personality);
+        }
+    }
+
+    public List<PlayerRelationshipData> GetTeamRelationships(int teamId)
+    {
+        if (!EnsureDb()) return new List<PlayerRelationshipData>();
+        return _db.Table<PlayerRelationshipData>()
+                  .Where(r => r.team_id == teamId)
+                  .ToList();
+    }
+
+    public PlayerRelationshipData GetRelationship(int playerAId, int playerBId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<PlayerRelationshipData>()
+                  .Where(r => (r.player_a_id == playerAId && r.player_b_id == playerBId)
+                           || (r.player_a_id == playerBId && r.player_b_id == playerAId))
+                  .FirstOrDefault();
+    }
+
+    public void InsertOrUpdateRelationship(PlayerRelationshipData relationship)
+    {
+        if (!EnsureDb()) return;
+        var existing = GetRelationship(relationship.player_a_id, relationship.player_b_id);
+        if (existing != null)
+        {
+            relationship.id = existing.id;
+            _db.Update(relationship);
+        }
+        else
+        {
+            _db.Insert(relationship);
+        }
+    }
+
+    static readonly string[] PersonalityTypes = {
+        "Líder", "Mentor", "Estrella", "Guerrero", "Tranquilo", "Intenso", "Profesional", "Novato"
+    };
+
+    static readonly (string t1, string t2, int compatMod)[][] PersonalityTraits = {
+        new[] {("Carismático", "Motivador", 15), ("Comunicativo", "Exigente", 10)},        // Líder
+        new[] {("Paciente", "Generoso", 12), ("Sabio", "Protector", 10)},                   // Mentor
+        new[] {("Orgulloso", "Exigente", 0), ("Carismático", "Sensible", -5)},              // Estrella
+        new[] {("Resiliente", "Competitivo", 10), ("Disciplinado", "Feroz", 8)},            // Guerrero
+        new[] {("Respetuoso", "Estable", 8), ("Pacífico", "Constante", 5)},                 // Tranquilo
+        new[] {("Apasionado", "Explosivo", 0), ("Competitivo", "Impulsivo", -8)},           // Intenso
+        new[] {("Disciplinado", "Constante", 12), ("Responsable", "Puntual", 10)},          // Profesional
+        new[] {("Entusiasta", "Respetuoso", 10), ("Hambriento", "Inquieto", 5)}             // Novato
+    };
+
+    public void SeedTeamPersonalities(int teamId, List<PlayerData> players)
+    {
+        if (!EnsureDb()) return;
+        var rng = new System.Random();
+        foreach (var p in players)
+        {
+            if (GetPlayerPersonality(p.id) != null) continue;
+            int typeIdx = rng.Next(PersonalityTypes.Length);
+            var traitPair = PersonalityTraits[typeIdx][rng.Next(2)];
+            var data = new PlayerPersonalityData
+            {
+                player_id = p.id,
+                team_id = teamId,
+                personality_type = PersonalityTypes[typeIdx],
+                trait_1 = traitPair.t1,
+                trait_2 = traitPair.t2,
+                compatibility_modifier = traitPair.compatMod
+            };
+            _db.Insert(data);
+        }
+    }
+
+    public void SeedTeamRelationships(int teamId, List<PlayerData> players)
+    {
+        if (!EnsureDb()) return;
+        var rng = new System.Random();
+        for (int i = 0; i < players.Count; i++)
+        {
+            for (int j = i + 1; j < players.Count; j++)
+            {
+                if (GetRelationship(players[i].id, players[j].id) != null) continue;
+                int compatMod = 0;
+                var pA = GetPlayerPersonality(players[i].id);
+                var pB = GetPlayerPersonality(players[j].id);
+                if (pA != null && pB != null)
+                    compatMod = (pA.compatibility_modifier + pB.compatibility_modifier) / 2;
+                int bond = Mathf.Clamp(50 + compatMod + rng.Next(-12, 13), 1, 99);
+                _db.Insert(new PlayerRelationshipData
+                {
+                    team_id = teamId,
+                    player_a_id = players[i].id,
+                    player_b_id = players[j].id,
+                    bond = bond
+                });
+            }
+        }
+    }
+
+    public void EnsureTeamRelationshipsSeeded(int teamId)
+    {
+        var players = GetPlayersByTeam(teamId);
+        if (players.Count < 2) return;
+        SeedTeamPersonalities(teamId, players);
+        SeedTeamRelationships(teamId, players);
+    }
+
+    public void UpdateRelationshipsAfterGame(int teamId, int gameId, bool isWin, List<int> playedPlayerIds)
+    {
+        var rels = GetTeamRelationships(teamId);
+        if (rels.Count == 0) return;
+        var rng = new System.Random();
+        foreach (var rel in rels)
+        {
+            bool aPlayed = playedPlayerIds.Contains(rel.player_a_id);
+            bool bPlayed = playedPlayerIds.Contains(rel.player_b_id);
+            int delta;
+            if (aPlayed && bPlayed)
+                delta = isWin ? rng.Next(1, 4) : rng.Next(0, 2);
+            else if (aPlayed || bPlayed)
+                delta = rng.Next(-1, 1);
+            else
+                delta = rng.Next(-2, 0);
+            rel.bond = Mathf.Clamp(rel.bond + delta, 1, 99);
+            _db.Update(rel);
+        }
     }
 
     void OnDestroy()

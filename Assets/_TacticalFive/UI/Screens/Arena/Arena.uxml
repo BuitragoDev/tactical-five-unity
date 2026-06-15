@@ -34,6 +34,9 @@
                     <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
                         <ui:Label text="Lesionados" class="nav-submenu-label"/>
                     </ui:Button>
+                                    <ui:Button name="SubmenuVestuario" class="nav-submenu-item">
+                        <ui:Label text="Vestuario" class="nav-submenu-label"/>
+                    </ui:Button>
                 </ui:VisualElement>
                 <ui:Button name="NavCalendar" class="nav-item">
                     <ui:VisualElement name="NavCalendarIcon" class="nav-icon" />

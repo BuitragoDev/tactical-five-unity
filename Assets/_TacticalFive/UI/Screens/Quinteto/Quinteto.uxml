@@ -2,10 +2,10 @@
          xmlns:uie="UnityEditor.UIElements"
          editor-extension-mode="False">
 
-    <Style src="Messages.uss" />
+    <Style src="Quinteto.uss" />
     <Style src="../Dashboard/Dashboard.uss" />
 
-    <ui:VisualElement name="MessagesRoot" class="messages-root">
+    <ui:VisualElement name="QuintetoRoot" class="quinteto-root">
 
         <!-- ══ SIDEBAR ══ -->
         <ui:VisualElement name="Sidebar" class="sidebar">
@@ -19,16 +19,16 @@
                     <ui:VisualElement name="NavDashboardIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Inicio" />
                 </ui:Button>
-                <ui:Button name="NavRoster" class="nav-item">
+                <ui:Button name="NavRoster" class="nav-item nav-item--active">
                     <ui:VisualElement name="NavRosterIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Plantilla" />
-                    <ui:Label text="▼" class="nav-arrow" />
+                    <ui:Label text="&#x25BC;" class="nav-arrow" />
                 </ui:Button>
                 <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
                     <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
                         <ui:Label text="Jugadores" class="nav-submenu-label"/>
                     </ui:Button>
-                    <ui:Button name="SubmenuQuinteto" class="nav-submenu-item">
+                    <ui:Button name="SubmenuQuinteto" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Quinteto" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuEntrenamiento" class="nav-submenu-item">
@@ -40,7 +40,7 @@
                     <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
                         <ui:Label text="Lesionados" class="nav-submenu-label"/>
                     </ui:Button>
-                                    <ui:Button name="SubmenuVestuario" class="nav-submenu-item">
+                    <ui:Button name="SubmenuVestuario" class="nav-submenu-item">
                         <ui:Label text="Vestuario" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
@@ -59,7 +59,7 @@
                 <ui:Button name="NavPalmares" class="nav-item">
                     <ui:VisualElement name="NavPalmaresIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Palmarés" />
-                    <ui:Label text="▼" class="nav-arrow" />
+                    <ui:Label text="&#x25BC;" class="nav-arrow" />
                 </ui:Button>
                 <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu">
                     <ui:Button name="SubmenuPalmares" class="nav-submenu-item">
@@ -81,7 +81,7 @@
                 <ui:Button name="NavMarket" class="nav-item">
                     <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Mercado" />
-                    <ui:Label text="▼" class="nav-arrow" />
+                    <ui:Label text="&#x25BC;" class="nav-arrow" />
                 </ui:Button>
                 <ui:VisualElement name="MarketSubmenu" class="nav-submenu">
                     <ui:Button name="SubmenuOfertas" class="nav-submenu-item">
@@ -97,7 +97,7 @@
                 <ui:Button name="NavFinances" class="nav-item">
                     <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Finanzas" />
-                    <ui:Label text="▼" class="nav-arrow" />
+                    <ui:Label text="&#x25BC;" class="nav-arrow" />
                 </ui:Button>
                 <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
                     <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
@@ -117,65 +117,37 @@
                     <ui:VisualElement name="NavArenaIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Pabellón" />
                 </ui:Button>
-                <ui:Button name="NavMessages" class="nav-item nav-item--active">
+                <ui:Button name="NavMessages" class="nav-item">
                     <ui:VisualElement name="NavMessagesIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Mensajes" />
                 </ui:Button>
-
+            </ui:VisualElement>
+            <ui:VisualElement name="ConfigIcon" class="sidebar-config">
+                <ui:Label text="&#x2699;" class="sidebar-config-icon" />
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- ══ MAIN ══ -->
-        <ui:VisualElement class="messages-main">
+        <!-- ══ MAIN CONTENT ══ -->
+        <ui:VisualElement name="QuintetoMain" class="quinteto-main">
 
-            <!-- TOP HEADER -->
+            <!-- Top header -->
             <ui:VisualElement name="TopHeader" class="top-header">
                 <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
-                <ui:VisualElement class="header-team-info">
-                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
+                <ui:VisualElement class="header-info">
+                    <ui:Label name="HeaderTeamName" class="header-team-name" text="EQUIPO" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="Manager: Juan" />
                 </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
-                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                <ui:VisualElement class="header-stats">
+                    <ui:Label name="HeaderChemistry" class="header-chemistry" text="0%" />
+                    <ui:Label name="HeaderSeason" class="header-season" text="Temporada 2024-2025" />
+                    <ui:Label name="HeaderDate" class="header-date" text="01/01/2024" />
                 </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
-                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
-                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
-                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-spacer" />
-                <ui:VisualElement class="header-season-info">
-                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
-                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
-                </ui:VisualElement>
-                <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
-                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+                <ui:Button name="BtnAction" class="header-action-btn" text="DASHBOARD" />
             </ui:VisualElement>
 
-            <!-- MESSAGES CONTENT -->
-            <ui:VisualElement class="messages-content">
-
-                <!-- Title -->
-                <ui:VisualElement class="messages-title-row">
-                    <ui:Label class="messages-icon" text="📫" />
-                    <ui:Label class="messages-title" text="BANDEJA DE ENTRADA" />
-                </ui:VisualElement>
-
-                <!-- Message list -->
-                <ui:ScrollView class="messages-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-                    <ui:VisualElement name="MessagesBody" class="messages-body" />
-                </ui:ScrollView>
-
+            <!-- Content -->
+            <ui:VisualElement name="QuintetoContent" class="quinteto-content">
+                <ui:Label text="QUINTETO INICIAL" class="quinteto-title" />
             </ui:VisualElement>
 
         </ui:VisualElement>

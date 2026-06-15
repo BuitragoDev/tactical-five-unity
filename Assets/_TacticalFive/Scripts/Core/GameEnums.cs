@@ -33,7 +33,9 @@ public enum GameScreen
     NewSeason,
     Editor,
     Historial,
-    Training
+    Training,
+    Vestuario,
+    Quinteto
 }
 
 public enum GameMode
