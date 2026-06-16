@@ -241,13 +241,13 @@
     border-right-width: 0;
     flex-shrink: 0;
 }
-.detail-pos-badge {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(255, 255, 255);
+.detail-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 36px;
     background-color: rgb(42, 95, 201);
-    padding: 4px 10px;
-    -unity-text-align: middle-center;
+    background-size: cover;
+    background-position: center;
     flex-shrink: 0;
     margin-right: 12px;
 }

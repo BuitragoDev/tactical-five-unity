@@ -205,7 +205,7 @@
 
                             <!-- Cabecera -->
                             <ui:VisualElement class="detail-top">
-                                <ui:Label name="DetailPosBadge" class="detail-pos-badge" text="" />
+                                <ui:VisualElement name="DetailPhoto" class="detail-photo" />
                                 <ui:VisualElement class="detail-name-block">
                                     <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
                                     <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />

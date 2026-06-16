@@ -171,6 +171,8 @@
     height: 32px;
     border-radius: 16px;
     background-color: rgb(42, 95, 201);
+    background-size: cover;
+    background-position: center;
     flex-shrink: 0;
     margin-right: 8px;
 }

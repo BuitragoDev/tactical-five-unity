@@ -472,6 +472,15 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
             if (!string.IsNullOrEmpty(colorClass))
                 avatar.AddToClassList(colorClass);
         }
+        Texture2D tex = null;
+        if (!string.IsNullOrEmpty(player.photo))
+            tex = Resources.Load<Texture2D>($"PlayerPhotos/{player.photo}");
+        else
+            tex = Resources.Load<Texture2D>($"PlayerPhotos/{player.id}");
+        if (tex == null)
+            tex = Resources.Load<Texture2D>("PlayerPhotos/default");
+        if (tex != null)
+            avatar.style.backgroundImage = new StyleBackground(tex);
         container.Add(avatar);
 
         var nameLbl = new Label();

@@ -246,6 +246,15 @@ public class DatabaseManager : MonoBehaviour
             _db.Execute("ALTER TABLE team_lineup ADD COLUMN slot_index INTEGER DEFAULT -1");
             Debug.Log("[DB] Migration: added slot_index to team_lineup");
         }
+
+        // Add photo to players if missing
+        var playerCols3 = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        bool hasPhoto = playerCols3.Any(c => c.name == "photo");
+        if (!hasPhoto)
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN photo TEXT DEFAULT ''");
+            Debug.Log("[DB] Migration: added photo to players");
+        }
     }
 
     class ColumnInfo

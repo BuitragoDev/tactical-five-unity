@@ -687,8 +687,9 @@
    PANEL ESTADÍSTICAS JUGADORES
    ══════════════════════════════════════════ */
 .panel-player-stats {
-    flex-grow: 1;
-    flex-basis: 0;
+    flex-grow: 3;
+    flex-basis: 650px;
+    max-width: 650px;
 }
 .stats-grid {
     flex-direction: row;
@@ -696,8 +697,6 @@
 }
 .stat-card {
     width: 50%;
-    flex-direction: column;
-    align-items: center;
     padding: 16px 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
@@ -705,6 +704,40 @@
     border-top-width: 0;
     border-left-width: 0;
 }
+
+.stat-card-two-column {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.stat-card-left {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 90px;
+    margin-right: 16px;
+}
+
+.stat-card-photo-wrapper {
+    width: 88px;
+    height: 88px;
+    border-radius: 54px;
+    background-color: rgb(42, 95, 201);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-card-right {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+}
+
 .stat-card-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 18px;
@@ -720,13 +753,19 @@
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
 }
-.stat-card-player {
+.stat-card-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+.stat-card-player-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
-    margin-top: 4px;
-    min-width: 200px;
 }
 .stat-card-games {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
@@ -740,7 +779,7 @@
    PANEL ESTADÍSTICAS DEL EQUIPO
    ══════════════════════════════════════════ */
 .panel-team-stats {
-    min-height: 320px;
+    min-height: 390px;
 }
 .team-stat-row {
     flex-direction: row;
@@ -895,7 +934,7 @@
     white-space: normal;
 }
 .board-col-sep {
-    width: 1px;
+    width: 0px;
     height: 136px;
     background-color: rgb(42, 51, 71);
     flex-shrink: 0;

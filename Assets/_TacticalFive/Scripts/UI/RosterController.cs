@@ -31,7 +31,7 @@ public class RosterController : MonoBehaviour
     private VisualElement _detailEmpty;
     private ScrollView _detailScroll;
     private VisualElement _detailContent;
-    private Label _detailPosBadge;
+    private VisualElement _detailPhoto;
     private Label _detailPlayerName;
     private Label _detailPlayerMeta;
     private Label _detailOvr;
@@ -161,7 +161,7 @@ public class RosterController : MonoBehaviour
         _detailEmpty = _root.Q<VisualElement>("DetailEmpty");
         _detailScroll = _root.Q<ScrollView>("DetailScroll");
         _detailContent = _root.Q<VisualElement>("DetailContent");
-        _detailPosBadge = _root.Q<Label>("DetailPosBadge");
+        _detailPhoto = _root.Q<VisualElement>("DetailPhoto");
         _detailPlayerName = _root.Q<Label>("DetailPlayerName");
         _detailPlayerMeta = _root.Q<Label>("DetailPlayerMeta");
         _detailOvr = _root.Q<Label>("DetailOvr");
@@ -617,10 +617,25 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         _detailScroll.style.display = DisplayStyle.Flex;
 
         // Cabecera
-        _detailPosBadge.text = p.position;
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
-        _detailPlayerMeta.text = $"{p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
+        _detailPlayerMeta.text = $"{p.position} · {p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
         _detailOvr.text = p.overall.ToString();
+
+        // Foto
+        if (_detailPhoto != null)
+        {
+            Texture2D tex = null;
+            if (!string.IsNullOrEmpty(p.photo))
+                tex = Resources.Load<Texture2D>($"PlayerPhotos/{p.photo}");
+            else
+                tex = Resources.Load<Texture2D>($"PlayerPhotos/{p.id}");
+            if (tex == null)
+                tex = Resources.Load<Texture2D>("PlayerPhotos/default");
+            if (tex != null)
+                _detailPhoto.style.backgroundImage = new StyleBackground(tex);
+            else
+                _detailPhoto.style.backgroundImage = StyleKeyword.None;
+        }
 
         // Salud
         if (p.injury_days > 0)

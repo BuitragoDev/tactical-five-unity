@@ -34,4 +34,5 @@ public class PlayerData
     public int treated { get; set; }
     public int renewal_cooldown_day { get; set; }
     public int morale { get; set; } = 50;
+    public string photo { get; set; }
 }

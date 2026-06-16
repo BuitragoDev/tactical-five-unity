@@ -2417,50 +2417,76 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         var scorer = teamStats.OrderByDescending(s => (float)s.total_points / s.games).First();
         SetStatCard("StatScorer", "StatScorerName", "StatScorerGames",
             (scorer.total_points / (float)scorer.games).ToString("F1"),
-            $"{scorer.first_name} {scorer.last_name}",
-            $"{scorer.games} partidos jugados");
+            $"{scorer.first_name}\n{scorer.last_name}",
+            $"{scorer.games} partidos jugados",
+            scorer.player_id);
 
         var rebounder = teamStats.OrderByDescending(s => (float)s.total_rebounds / s.games).First();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
             (rebounder.total_rebounds / (float)rebounder.games).ToString("F1"),
-            $"{rebounder.first_name} {rebounder.last_name}",
-            $"{rebounder.games} partidos jugados");
+            $"{rebounder.first_name}\n{rebounder.last_name}",
+            $"{rebounder.games} partidos jugados",
+            rebounder.player_id);
 
         var assister = teamStats.OrderByDescending(s => (float)s.total_assists / s.games).First();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
             (assister.total_assists / (float)assister.games).ToString("F1"),
-            $"{assister.first_name} {assister.last_name}",
-            $"{assister.games} partidos jugados");
+            $"{assister.first_name}\n{assister.last_name}",
+            $"{assister.games} partidos jugados",
+            assister.player_id);
 
         var stealer = teamStats.OrderByDescending(s => (float)s.total_steals / s.games).First();
         SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
             (stealer.total_steals / (float)stealer.games).ToString("F1"),
-            $"{stealer.first_name} {stealer.last_name}",
-            $"{stealer.games} partidos jugados");
+            $"{stealer.first_name}\n{stealer.last_name}",
+            $"{stealer.games} partidos jugados",
+            stealer.player_id);
 
         var blocker = teamStats.OrderByDescending(s => (float)s.total_blocks / s.games).First();
         SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
             (blocker.total_blocks / (float)blocker.games).ToString("F1"),
-            $"{blocker.first_name} {blocker.last_name}",
-            $"{blocker.games} partidos jugados");
+            $"{blocker.first_name}\n{blocker.last_name}",
+            $"{blocker.games} partidos jugados",
+            blocker.player_id);
 
         var rated = teamStats.OrderByDescending(s => (float)s.total_rating / s.games).First();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
             (rated.total_rating / (float)rated.games).ToString("F1"),
-            $"{rated.first_name} {rated.last_name}",
-            $"{rated.games} partidos jugados");
+            $"{rated.first_name}\n{rated.last_name}",
+            $"{rated.games} partidos jugados",
+            rated.player_id);
     }
 
     void SetStatCard(string valName, string playerName, string gamesName,
-                     string val, string player, string games)
+                     string val, string player, string games, int playerId = 0)
     {
         var valLbl = _root.Q<Label>(valName);
         var playerLbl = _root.Q<Label>(playerName);
         var gamesLbl = _root.Q<Label>(gamesName);
+        var photoName = valName + "Photo";
+        var photo = _root.Q<VisualElement>(photoName);
 
         if (valLbl != null) valLbl.text = val;
         if (playerLbl != null) playerLbl.text = player;
         if (gamesLbl != null) gamesLbl.text = games;
+
+        if (photo != null && playerId > 0)
+        {
+            var p = _players.FirstOrDefault(pl => pl.id == playerId)
+                     ?? DatabaseManager.Instance.GetPlayer(playerId);
+
+            if (p != null)
+            {
+                Texture2D tex = Resources.Load<Texture2D>(
+                    !string.IsNullOrEmpty(p.photo)
+                        ? $"PlayerPhotos/{p.photo}"
+                        : $"PlayerPhotos/{p.id}");
+                if (tex == null)
+                    tex = Resources.Load<Texture2D>("PlayerPhotos/default");
+                if (tex != null)
+                    photo.style.backgroundImage = new StyleBackground(tex);
+            }
+        }
     }
 
     // ── ESTADÍSTICAS DEL EQUIPO ─────────────────────────

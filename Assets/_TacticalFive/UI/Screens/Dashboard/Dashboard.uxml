@@ -239,40 +239,94 @@
                             <ui:VisualElement class="panel-body">
                                 <ui:VisualElement class="stats-grid">
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label text="MÁXIMO ANOTADOR" class="stat-card-label"/>
-                                        <ui:Label name="StatScorer" text="--" class="stat-card-value"/>
-                                        <ui:Label name="StatScorerName" text="" class="stat-card-player"/>
-                                        <ui:Label name="StatScorerGames" text="" class="stat-card-games"/>
+                                        <ui:VisualElement class="stat-card-two-column">
+                                            <ui:VisualElement class="stat-card-left">
+                                                <ui:VisualElement class="stat-card-photo-wrapper">
+                                                    <ui:VisualElement name="StatScorerPhoto" class="stat-card-photo" />
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                            <ui:VisualElement class="stat-card-right">
+                                                <ui:Label text="MÁXIMO ANOTADOR" class="stat-card-label"/>
+                                                <ui:Label name="StatScorer" text="--" class="stat-card-value"/>
+                                                <ui:Label name="StatScorerName" text="" class="stat-card-player-label"/>
+                                                <ui:Label name="StatScorerGames" text="" class="stat-card-games"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label text="MÁXIMO REBOTADOR" class="stat-card-label"/>
-                                        <ui:Label name="StatRebounder" text="--" class="stat-card-value"/>
-                                        <ui:Label name="StatRebounderName" text="" class="stat-card-player"/>
-                                        <ui:Label name="StatRebounderGames" text="" class="stat-card-games"/>
+                                        <ui:VisualElement class="stat-card-two-column">
+                                            <ui:VisualElement class="stat-card-left">
+                                                <ui:VisualElement class="stat-card-photo-wrapper">
+                                                    <ui:VisualElement name="StatRebounderPhoto" class="stat-card-photo" />
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                            <ui:VisualElement class="stat-card-right">
+                                                <ui:Label text="MÁXIMO REBOTADOR" class="stat-card-label"/>
+                                                <ui:Label name="StatRebounder" text="--" class="stat-card-value"/>
+                                                <ui:Label name="StatRebounderName" text="" class="stat-card-player-label"/>
+                                                <ui:Label name="StatRebounderGames" text="" class="stat-card-games"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label text="MÁXIMO ASISTENTE" class="stat-card-label"/>
-                                        <ui:Label name="StatAssister" text="--" class="stat-card-value"/>
-                                        <ui:Label name="StatAssisterName" text="" class="stat-card-player"/>
-                                        <ui:Label name="StatAssisterGames" text="" class="stat-card-games"/>
+                                        <ui:VisualElement class="stat-card-two-column">
+                                            <ui:VisualElement class="stat-card-left">
+                                                <ui:VisualElement class="stat-card-photo-wrapper">
+                                                    <ui:VisualElement name="StatAssisterPhoto" class="stat-card-photo" />
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                            <ui:VisualElement class="stat-card-right">
+                                                <ui:Label text="MÁXIMO ASISTENTE" class="stat-card-label"/>
+                                                <ui:Label name="StatAssister" text="--" class="stat-card-value"/>
+                                                <ui:Label name="StatAssisterName" text="" class="stat-card-player-label"/>
+                                                <ui:Label name="StatAssisterGames" text="" class="stat-card-games"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label text="MÁS ROBOS" class="stat-card-label"/>
-                                        <ui:Label name="StatStealer" text="--" class="stat-card-value"/>
-                                        <ui:Label name="StatStealerName" text="" class="stat-card-player"/>
-                                        <ui:Label name="StatStealerGames" text="" class="stat-card-games"/>
+                                        <ui:VisualElement class="stat-card-two-column">
+                                            <ui:VisualElement class="stat-card-left">
+                                                <ui:VisualElement class="stat-card-photo-wrapper">
+                                                    <ui:VisualElement name="StatStealerPhoto" class="stat-card-photo" />
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                            <ui:VisualElement class="stat-card-right">
+                                                <ui:Label text="MÁS ROBOS" class="stat-card-label"/>
+                                                <ui:Label name="StatStealer" text="--" class="stat-card-value"/>
+                                                <ui:Label name="StatStealerName" text="" class="stat-card-player-label"/>
+                                                <ui:Label name="StatStealerGames" text="" class="stat-card-games"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label text="MÁXIMO TAPONADOR" class="stat-card-label"/>
-                                        <ui:Label name="StatBlocker" text="--" class="stat-card-value"/>
-                                        <ui:Label name="StatBlockerName" text="" class="stat-card-player"/>
-                                        <ui:Label name="StatBlockerGames" text="" class="stat-card-games"/>
+                                        <ui:VisualElement class="stat-card-two-column">
+                                            <ui:VisualElement class="stat-card-left">
+                                                <ui:VisualElement class="stat-card-photo-wrapper">
+                                                    <ui:VisualElement name="StatBlockerPhoto" class="stat-card-photo" />
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                            <ui:VisualElement class="stat-card-right">
+                                                <ui:Label text="MÁXIMO TAPONADOR" class="stat-card-label"/>
+                                                <ui:Label name="StatBlocker" text="--" class="stat-card-value"/>
+                                                <ui:Label name="StatBlockerName" text="" class="stat-card-player-label"/>
+                                                <ui:Label name="StatBlockerGames" text="" class="stat-card-games"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="stat-card">
-                                        <ui:Label text="MEJOR VALORACIÓN" class="stat-card-label"/>
-                                        <ui:Label name="StatRated" text="--" class="stat-card-value"/>
-                                        <ui:Label name="StatRatedName" text="" class="stat-card-player"/>
-                                        <ui:Label name="StatRatedGames" text="" class="stat-card-games"/>
+                                        <ui:VisualElement class="stat-card-two-column">
+                                            <ui:VisualElement class="stat-card-left">
+                                                <ui:VisualElement class="stat-card-photo-wrapper">
+                                                    <ui:VisualElement name="StatRatedPhoto" class="stat-card-photo" />
+                                                </ui:VisualElement>
+                                            </ui:VisualElement>
+                                            <ui:VisualElement class="stat-card-right">
+                                                <ui:Label text="MEJOR VALORACIÓN" class="stat-card-label"/>
+                                                <ui:Label name="StatRated" text="--" class="stat-card-value"/>
+                                                <ui:Label name="StatRatedName" text="" class="stat-card-player-label"/>
+                                                <ui:Label name="StatRatedGames" text="" class="stat-card-games"/>
+                                            </ui:VisualElement>
+                                        </ui:VisualElement>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>

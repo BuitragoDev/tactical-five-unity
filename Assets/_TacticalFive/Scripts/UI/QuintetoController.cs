@@ -586,6 +586,15 @@ public class QuintetoController : MonoBehaviour
 
         var avatar = new VisualElement();
         avatar.AddToClassList("player-card-avatar");
+        Texture2D tex = null;
+        if (!string.IsNullOrEmpty(player.photo))
+            tex = Resources.Load<Texture2D>($"PlayerPhotos/{player.photo}");
+        else
+            tex = Resources.Load<Texture2D>($"PlayerPhotos/{player.id}");
+        if (tex == null)
+            tex = Resources.Load<Texture2D>("PlayerPhotos/default");
+        if (tex != null)
+            avatar.style.backgroundImage = new StyleBackground(tex);
         card.Add(avatar);
 
         var info = new VisualElement();
