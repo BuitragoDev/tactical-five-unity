@@ -356,6 +356,10 @@
     background-color: transparent;
 }
 
+.box-row--starter .player-name {
+    color: rgb(212, 160, 23);
+}
+
 .box-row .col-player {
     flex-grow: 1;
     flex-shrink: 1;
@@ -371,7 +375,7 @@
 }
 
 .player-pos {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #7a8aaa;
     background-color: #161a24;
@@ -384,7 +388,7 @@
 }
 
 .mvp-star {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #d4a017;
     margin-right: 4px;
@@ -393,7 +397,7 @@
 }
 
 .player-name {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: #d0d8e8;
     letter-spacing: 0.5px;

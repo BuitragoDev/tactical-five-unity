@@ -83,7 +83,7 @@
 
 .court-card-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 24px;
     color: rgb(220, 220, 220);
     -unity-text-align: middle-center;
 }

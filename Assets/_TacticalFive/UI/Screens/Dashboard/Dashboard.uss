@@ -998,7 +998,6 @@
 
 .injured-modal-btn-group {
     flex-direction: row;
-    gap: 12px;
     align-self: stretch;
 }
 
@@ -1015,9 +1014,12 @@
     cursor: pointer;
     flex-grow: 1;
     -unity-text-align: middle-center;
+    margin-right: 6px;
 }
 
 .injured-modal-btn--primary {
     background-color: rgb(192, 57, 43);
     border-color: rgb(192, 57, 43);
+    margin-right: 0;
+    margin-left: 6px;
 }

@@ -15,6 +15,9 @@ public class QuintetoController : MonoBehaviour
     private Label _headerChemistry;
     private Label _headerSeason;
     private Label _headerDate;
+    private Label _headerBudget;
+    private Label _headerPayroll;
+    private Label _headerMargin;
     private Button _btnAction;
 
     private VisualElement _startersList;
@@ -84,6 +87,9 @@ public class QuintetoController : MonoBehaviour
         _headerChemistry = _root.Q<Label>("HeaderChemistry");
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
+        _headerBudget = _root.Q<Label>("HeaderBudget");
+        _headerPayroll = _root.Q<Label>("HeaderPayroll");
+        _headerMargin = _root.Q<Label>("HeaderMargin");
         _btnAction = _root.Q<Button>("BtnAction");
 
         _startersList = _root.Q<VisualElement>("StartersList");
@@ -311,6 +317,26 @@ public class QuintetoController : MonoBehaviour
             _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
+
+        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
+        _headerBudget.style.color = _myTeam.budget < 0
+            ? new StyleColor(new Color32(192, 57, 43, 255))
+            : new StyleColor(new Color32(39, 174, 96, 255));
+
+        var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+        long totalPayroll = _players.Sum(p => p.salary) + teamEmployees.Sum(e => e.salary);
+        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long margin = salaryCap - _players.Sum(p => p.salary);
+
+        string marginText = margin >= 0
+            ? $"+${margin / 1_000_000}M"
+            : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        _headerMargin.text = marginText;
+        _headerMargin.RemoveFromClassList("header-stat-value--negative");
+        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
 
         int chem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
         _headerChemistry.text = $"{chem}%";

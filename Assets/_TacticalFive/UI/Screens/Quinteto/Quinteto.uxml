@@ -130,19 +130,36 @@
         <!-- ══ MAIN CONTENT ══ -->
         <ui:VisualElement name="QuintetoMain" class="quinteto-main">
 
-            <!-- Top header -->
+            <!-- TOP HEADER (reutilizamos clases del dashboard) -->
             <ui:VisualElement name="TopHeader" class="top-header">
                 <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
-                <ui:VisualElement class="header-info">
-                    <ui:Label name="HeaderTeamName" class="header-team-name" text="EQUIPO" />
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="Manager: Juan" />
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                 </ui:VisualElement>
-                <ui:VisualElement class="header-stats">
-                    <ui:Label name="HeaderChemistry" class="header-chemistry" text="0%" />
-                    <ui:Label name="HeaderSeason" class="header-season" text="Temporada 2024-2025" />
-                    <ui:Label name="HeaderDate" class="header-date" text="01/01/2024" />
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
                 </ui:VisualElement>
-                <ui:Button name="BtnAction" class="header-action-btn" text="DASHBOARD" />
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
+                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
+                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" class="btn-action" text="DASHBOARD" />
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
             <!-- Lineup content -->
@@ -176,7 +193,6 @@
                         </ui:VisualElement>
 
                         <ui:VisualElement class="lineup-col-section">
-                            <ui:Label class="lineup-col-title" text="CAMPO" />
                             <ui:VisualElement name="CourtContainer" class="court-container" />
                         </ui:VisualElement>
 

@@ -360,11 +360,12 @@ public class MatchDayController : MonoBehaviour
         var mvp = allStats.OrderByDescending(s => s.rating).FirstOrDefault();
         int mvpPlayerId = mvp?.player_id ?? -1;
 
-        BuildBoxTable(_homeBoxBody, _homeBoxFooter, homeStats, true, myGame, mvpPlayerId);
-        BuildBoxTable(_awayBoxBody, _awayBoxFooter, awayStats, false, myGame, mvpPlayerId);
+        var starters = GameResultCache.GameStarters.GetValueOrDefault(myGame.id) ?? new HashSet<int>();
+        BuildBoxTable(_homeBoxBody, _homeBoxFooter, homeStats, true, myGame, mvpPlayerId, starters);
+        BuildBoxTable(_awayBoxBody, _awayBoxFooter, awayStats, false, myGame, mvpPlayerId, starters);
     }
 
-    void BuildBoxTable(VisualElement body, VisualElement footer, List<PlayerGameStats> stats, bool isHome, GameData game, int mvpPlayerId)
+    void BuildBoxTable(VisualElement body, VisualElement footer, List<PlayerGameStats> stats, bool isHome, GameData game, int mvpPlayerId, HashSet<int> starters)
     {
         body.Clear();
 
@@ -379,6 +380,8 @@ public class MatchDayController : MonoBehaviour
                 ? game.home_team_id == _myTeam.id
                 : game.away_team_id == _myTeam.id;
             if (isMyTeam) row.AddToClassList("my-player");
+            if (starters.Contains(s.player_id))
+                row.AddToClassList("box-row--starter");
 
             var player = DatabaseManager.Instance.GetPlayerById(s.player_id);
             var playerContainer = new VisualElement();
