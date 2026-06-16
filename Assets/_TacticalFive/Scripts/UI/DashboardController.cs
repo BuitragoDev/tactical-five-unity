@@ -96,6 +96,10 @@ public class DashboardController : MonoBehaviour
     // Fired modal
     private VisualElement _firedOverlay;
 
+    // Injured lineup modal
+    private bool _injuredModalResolved;
+    private bool _injuredModalGoToQuinteto;
+
     void OnEnable()
     {
         _doc = GetComponent<UIDocument>();
@@ -519,6 +523,42 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         StartCoroutine(ProcessGameDayRoutine());
     }
 
+    List<PlayerData> GetActivePlayers(int teamId)
+    {
+        if (teamId == _myTeam.id)
+        {
+            var lineup = DatabaseManager.Instance.GetTeamLineup(teamId);
+            if (lineup.Count > 0)
+            {
+                var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(teamId);
+                var lineupByPlayer = lineup.ToDictionary(l => l.player_id);
+
+                var startersWithIdx = new List<(PlayerData p, int sortIdx)>();
+                var bench = new List<PlayerData>();
+
+                foreach (var p in allPlayers)
+                {
+                    if (p.injury_days > 0) continue;
+                    if (!lineupByPlayer.TryGetValue(p.id, out var ls)) continue;
+                    if (ls.slot == 0)
+                        startersWithIdx.Add((p, ls.slot_index >= 0 ? ls.slot_index : 999));
+                    else if (ls.slot == 1)
+                        bench.Add(p);
+                }
+
+                var orderedStarters = startersWithIdx.OrderBy(s => s.sortIdx).Select(s => s.p).ToList();
+                var active = orderedStarters.Concat(bench).Take(12).ToList();
+                if (active.Count > 0) return active;
+            }
+        }
+
+        return DatabaseManager.Instance.GetPlayersByTeam(teamId)
+            .Where(p => p.injury_days == 0)
+            .OrderByDescending(p => p.overall)
+            .Take(12)
+            .ToList();
+    }
+
     System.Collections.IEnumerator ProcessGameDayRoutine()
     {
         int gameDay = FindNextGameDay();
@@ -541,6 +581,24 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
         bool hasAllStar = gamesToday.Any(g => g.game_type == "allstar");
 
+        if (myTeamPlays)
+        {
+            var injured = GetInjuredActiveLineupPlayers();
+            if (injured.Count > 0)
+            {
+                _injuredModalResolved = false;
+                _injuredModalGoToQuinteto = false;
+                ShowInjuredLineupModal(injured);
+                yield return new WaitUntil(() => _injuredModalResolved);
+                if (_injuredModalGoToQuinteto)
+                {
+                    HideLoading();
+                    ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                    yield break;
+                }
+            }
+        }
+
         if (gamesToday.Count > 0)
         {
             GameResultCache.Clear();
@@ -557,8 +615,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 }
                 else
                 {
-                    homePlayers = DatabaseManager.Instance.GetPlayersByTeam(game.home_team_id);
-                    awayPlayers = DatabaseManager.Instance.GetPlayersByTeam(game.away_team_id);
+                    homePlayers = GetActivePlayers(game.home_team_id);
+                    awayPlayers = GetActivePlayers(game.away_team_id);
                 }
 
                 int homeChem = DatabaseManager.Instance.GetTeamChemistry(game.home_team_id);
@@ -640,8 +698,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 {
                     foreach (var elimGame in elimToday)
                     {
-                        var homeP = DatabaseManager.Instance.GetPlayersByTeam(elimGame.home_team_id);
-                        var awayP = DatabaseManager.Instance.GetPlayersByTeam(elimGame.away_team_id);
+                        var homeP = GetActivePlayers(elimGame.home_team_id);
+                        var awayP = GetActivePlayers(elimGame.away_team_id);
                         int elimHomeChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.home_team_id);
                         int elimAwayChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.away_team_id);
                         var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem, elimGame.home_team_id == _myTeam.id);
@@ -880,6 +938,134 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             ScreenManager.Instance.GoTo(GameScreen.MainMenu);
         });
         box.Add(btn);
+    }
+
+    List<(LineupData li, PlayerData p)> GetInjuredActiveLineupPlayers()
+    {
+        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        if (lineup.Count == 0) return new List<(LineupData, PlayerData)>();
+
+        var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var playerMap = allPlayers.ToDictionary(p => p.id);
+
+        return lineup
+            .Where(l => l.slot <= 1)
+            .Select(l => (li: l, p: playerMap.GetValueOrDefault(l.player_id)))
+            .Where(x => x.p != null && x.p.injury_days > 0)
+            .ToList();
+    }
+
+    void ShowInjuredLineupModal(List<(LineupData li, PlayerData p)> injured)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--warning");
+        _firedOverlay.Add(box);
+
+        var title = new Label("JUGADORES LESIONADOS");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fired-modal-title--warning");
+        box.Add(title);
+
+        var text = new Label("Tienes jugadores lesionados convocados.\nResuelve antes del partido:");
+        text.AddToClassList("injured-modal-text");
+        box.Add(text);
+
+        var list = new VisualElement();
+        list.AddToClassList("injured-modal-list");
+        foreach (var (li, p) in injured)
+        {
+            var slotLabel = li.slot == 0 ? "TITULAR" : "BANQUILLO";
+            var row = new Label($"{p.first_name} {p.last_name} — {p.position} ({slotLabel})");
+            row.AddToClassList("injured-modal-player-row");
+            list.Add(row);
+        }
+        box.Add(list);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        var manualBtn = new Button();
+        manualBtn.text = "CAMBIAR MANUALMENTE";
+        manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _injuredModalGoToQuinteto = true;
+            _injuredModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(manualBtn);
+
+        var autoBtn = new Button();
+        autoBtn.text = "CAMBIAR AUTOMÁTICAMENTE";
+        autoBtn.AddToClassList("injured-modal-btn");
+        autoBtn.AddToClassList("injured-modal-btn--primary");
+        autoBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            AutoFixInjuredLineup();
+            _injuredModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(autoBtn);
+
+        box.Add(btnGroup);
+    }
+
+    void AutoFixInjuredLineup()
+    {
+        var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var playerMap = allPlayers.ToDictionary(p => p.id);
+        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+
+        var injuredActive = lineup.Where(l => l.slot <= 1 && playerMap.TryGetValue(l.player_id, out var p) && p.injury_days > 0).ToList();
+        if (injuredActive.Count == 0) return;
+
+        var lineupIds = new HashSet<int>(lineup.Select(l => l.player_id));
+        var promotable = lineup
+            .Where(l => l.slot == 2 && playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0)
+            .Select(l => playerMap[l.player_id])
+            .ToList();
+        var unassigned = allPlayers
+            .Where(p => p.injury_days == 0 && !lineupIds.Contains(p.id))
+            .OrderByDescending(p => p.overall)
+            .ToList();
+
+        var candidates = new List<PlayerData>();
+        candidates.AddRange(promotable);
+        candidates.AddRange(unassigned);
+
+        var usedInFix = new HashSet<int>();
+        foreach (var li in injuredActive.OrderBy(l => l.slot).ThenBy(l => l.slot_index))
+        {
+            var injuredPlayer = playerMap[li.player_id];
+            int maxInactiveIdx = lineup
+                .Where(l => l.slot == 2 && l.player_id != li.player_id)
+                .DefaultIfEmpty()
+                .Max(l => l?.slot_index ?? -1) + 1;
+            DatabaseManager.Instance.SetPlayerSlot(li.player_id, _myTeam.id, 2, maxInactiveIdx);
+
+            PlayerData replacement = null;
+            if (li.slot == 0)
+            {
+                replacement = candidates.FirstOrDefault(c => !usedInFix.Contains(c.id) && c.position == injuredPlayer.position)
+                    ?? candidates.FirstOrDefault(c => !usedInFix.Contains(c.id));
+            }
+            else
+            {
+                replacement = candidates.FirstOrDefault(c => !usedInFix.Contains(c.id));
+            }
+
+            if (replacement != null)
+            {
+                usedInFix.Add(replacement.id);
+                DatabaseManager.Instance.SetPlayerSlot(replacement.id, _myTeam.id, li.slot, li.slot_index);
+            }
+        }
     }
 
     void ShowFiredModal()

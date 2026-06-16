@@ -145,9 +145,106 @@
                 <ui:Button name="BtnAction" class="header-action-btn" text="DASHBOARD" />
             </ui:VisualElement>
 
-            <!-- Content -->
-            <ui:VisualElement name="QuintetoContent" class="quinteto-content">
-                <ui:Label text="QUINTETO INICIAL" class="quinteto-title" />
+            <!-- Lineup content -->
+            <ui:VisualElement name="LineupContent" class="lineup-content">
+
+                <!-- Left column + right panel -->
+                <ui:VisualElement name="LineupColumns" class="lineup-columns">
+
+                    <!-- Column 1: Starters + Court, 400px -->
+                    <ui:VisualElement class="lineup-col lineup-col--left">
+
+                        <ui:VisualElement class="lineup-col-section">
+                            <ui:Label class="lineup-col-title" text="TITULARES" />
+                            <ui:VisualElement name="StartersList" class="lineup-col-list">
+                                <ui:VisualElement name="StarterSlotPG" class="starter-slot" data-pos="PG">
+                                    <ui:Label class="starter-slot-label" text="PG" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="StarterSlotSG" class="starter-slot" data-pos="SG">
+                                    <ui:Label class="starter-slot-label" text="SG" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="StarterSlotSF" class="starter-slot" data-pos="SF">
+                                    <ui:Label class="starter-slot-label" text="SF" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="StarterSlotPF" class="starter-slot" data-pos="PF">
+                                    <ui:Label class="starter-slot-label" text="PF" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="StarterSlotC" class="starter-slot" data-pos="C">
+                                    <ui:Label class="starter-slot-label" text="C" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="lineup-col-section">
+                            <ui:Label class="lineup-col-title" text="CAMPO" />
+                            <ui:VisualElement name="CourtContainer" class="court-container" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+
+                    <!-- Column 2: Bench + Inactive, 400px -->
+                    <ui:VisualElement class="lineup-col lineup-col--mid">
+
+                        <ui:VisualElement class="lineup-col-section">
+                            <ui:Label class="lineup-col-title" text="BANQUILLO" />
+                            <ui:VisualElement name="BenchList" class="lineup-col-list lineup-col-list--drop" />
+                        </ui:VisualElement>
+
+                        <ui:VisualElement class="lineup-col-section">
+                            <ui:Label class="lineup-col-title" text="NO CONVOCADOS" />
+                            <ui:VisualElement name="InactiveList" class="lineup-col-list lineup-col-list--drop" />
+                        </ui:VisualElement>
+
+                    </ui:VisualElement>
+
+                    <!-- Right panel: player detail on hover -->
+                    <ui:VisualElement class="lineup-col lineup-col--right-panel">
+                        <ui:VisualElement name="DetailEmpty" class="detail-empty">
+                            <ui:Label class="detail-empty-text" text="PASA EL RATÓN SOBRE UN JUGADOR" />
+                        </ui:VisualElement>
+                        <ui:ScrollView name="DetailScroll" class="detail-scroll"
+                                       horizontal-scrolling-enabled="false" mode="Vertical">
+                            <ui:VisualElement name="DetailContent">
+                                <ui:VisualElement class="detail-top">
+                                    <ui:Label name="DetailPosBadge" class="detail-pos-badge" text="" />
+                                    <ui:VisualElement class="detail-name-block">
+                                        <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
+                                        <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="detail-ovr-block">
+                                        <ui:Label name="DetailOvr" class="detail-ovr-val" text="" />
+                                        <ui:Label class="detail-ovr-label" text="OVR" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="DetailAttrs" class="detail-attrs" />
+                                <ui:VisualElement name="DetailSeasonStats" class="detail-season-stats">
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatPts" class="season-stat-val" text="0.0" />
+                                        <ui:Label class="season-stat-label" text="PTS" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatReb" class="season-stat-val" text="0.0" />
+                                        <ui:Label class="season-stat-label" text="REB" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatAst" class="season-stat-val" text="0.0" />
+                                        <ui:Label class="season-stat-label" text="AST" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatStl" class="season-stat-val" text="0.0" />
+                                        <ui:Label class="season-stat-label" text="STL" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatBlk" class="season-stat-val" text="0.0" />
+                                        <ui:Label class="season-stat-label" text="BLK" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
             </ui:VisualElement>
 
         </ui:VisualElement>

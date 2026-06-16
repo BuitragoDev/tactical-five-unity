@@ -40,8 +40,8 @@ public static class GameSimulator
     public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
         int homeChemistry = 50, int awayChemistry = 50, bool isHome = false)
     {
-        var homePS = homePlayers.Where(p => p.injury_days == 0).OrderByDescending(p => p.overall).Select(InitPS).ToList();
-        var awayPS = awayPlayers.Where(p => p.injury_days == 0).OrderByDescending(p => p.overall).Select(InitPS).ToList();
+        var homePS = homePlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
+        var awayPS = awayPlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
 
         if (homePS.Count < 2 || awayPS.Count < 2)
         {

@@ -113,6 +113,7 @@ public class DatabaseManager : MonoBehaviour
         template.CreateTable<TrainingData>();
         template.CreateTable<PlayerPersonalityData>();
         template.CreateTable<PlayerRelationshipData>();
+        template.CreateTable<LineupData>();
         _db.InsertAll(template.Table<TeamData>().ToList());
         _db.InsertAll(template.Table<PlayerData>().ToList());
         _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
@@ -160,6 +161,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<TrainingData>();
         _db.CreateTable<PlayerPersonalityData>();
         _db.CreateTable<PlayerRelationshipData>();
+        _db.CreateTable<LineupData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -234,6 +236,15 @@ public class DatabaseManager : MonoBehaviour
             PlayerPrefs.SetInt(migrationKey, 1);
             PlayerPrefs.Save();
             Debug.Log("[DB] Migration: recalculated overall for all players");
+        }
+
+        // Add slot_index to team_lineup if missing
+        var lineupCols = _db.Query<ColumnInfo>("PRAGMA table_info(team_lineup)");
+        bool hasSlotIndex = lineupCols.Any(c => c.name == "slot_index");
+        if (!hasSlotIndex)
+        {
+            _db.Execute("ALTER TABLE team_lineup ADD COLUMN slot_index INTEGER DEFAULT -1");
+            Debug.Log("[DB] Migration: added slot_index to team_lineup");
         }
     }
 
@@ -3519,6 +3530,7 @@ public class DatabaseManager : MonoBehaviour
             SeedTeamPersonalities(newTeamId, userPlayers);
             SeedTeamRelationships(newTeamId, userPlayers);
         }
+        AutoSeedLineup(newTeamId, userPlayers);
 
         // 7. Increase salary cap by 5%
         var leagueSettings = GetLeagueSettings();
@@ -3737,6 +3749,149 @@ public class DatabaseManager : MonoBehaviour
                 delta = rng.Next(-2, 0);
             rel.bond = Mathf.Clamp(rel.bond + delta, 1, 99);
             _db.Update(rel);
+        }
+    }
+
+    public List<LineupData> GetTeamLineup(int teamId)
+    {
+        if (!EnsureDb()) return new List<LineupData>();
+        return _db.Table<LineupData>()
+                  .Where(l => l.team_id == teamId)
+                  .ToList();
+    }
+
+    public LineupData GetPlayerLineupSlot(int playerId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<LineupData>()
+                  .Where(l => l.player_id == playerId)
+                  .FirstOrDefault();
+    }
+
+    public List<LineupData> GetStarters(int teamId)
+    {
+        return GetTeamLineup(teamId).Where(l => l.slot == 0).ToList();
+    }
+
+    public List<LineupData> GetBench(int teamId)
+    {
+        return GetTeamLineup(teamId).Where(l => l.slot == 1).ToList();
+    }
+
+    public List<LineupData> GetInactive(int teamId)
+    {
+        return GetTeamLineup(teamId).Where(l => l.slot == 2).ToList();
+    }
+
+    public void SetPlayerSlot(int playerId, int teamId, int slot)
+    {
+        if (!EnsureDb()) return;
+        var existing = GetPlayerLineupSlot(playerId);
+        if (existing != null)
+        {
+            existing.slot = slot;
+            existing.slot_index = -1;
+            _db.Update(existing);
+        }
+        else
+        {
+            _db.Insert(new LineupData
+            {
+                player_id = playerId,
+                team_id = teamId,
+                slot = slot,
+                slot_index = -1
+            });
+        }
+    }
+
+    public void SetPlayerSlot(int playerId, int teamId, int slot, int slotIndex)
+    {
+        if (!EnsureDb()) return;
+        var existing = GetPlayerLineupSlot(playerId);
+        if (existing != null)
+        {
+            existing.slot = slot;
+            existing.slot_index = slotIndex;
+            _db.Update(existing);
+        }
+        else
+        {
+            _db.Insert(new LineupData
+            {
+                player_id = playerId,
+                team_id = teamId,
+                slot = slot,
+                slot_index = slotIndex
+            });
+        }
+    }
+
+    public void AutoSeedLineup(int teamId, List<PlayerData> players)
+    {
+        if (!EnsureDb()) return;
+        if (players.Count == 0) return;
+
+        // Remove any existing lineup for this team
+        var existing = GetTeamLineup(teamId);
+        foreach (var e in existing)
+            _db.Delete(e);
+
+        var posOrder = new[] { "PG", "SG", "SF", "PF", "C" };
+
+        // Assign best player at each position as starter
+        var assigned = new HashSet<int>();
+        for (int si = 0; si < posOrder.Length; si++)
+        {
+            var best = players
+                .Where(p => p.position == posOrder[si] && !assigned.Contains(p.id))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                _db.Insert(new LineupData
+                {
+                    player_id = best.id,
+                    team_id = teamId,
+                    slot = 0,
+                    slot_index = si
+                });
+                assigned.Add(best.id);
+            }
+        }
+
+        // Fill bench with the next best unassigned players (up to 7 bench = 12 total active)
+        var remaining = players
+            .Where(p => !assigned.Contains(p.id))
+            .OrderByDescending(p => p.overall)
+            .ToList();
+
+        int maxActive = 12;
+        int benchSlots = Mathf.Min(remaining.Count, maxActive - assigned.Count);
+        for (int i = 0; i < benchSlots; i++)
+        {
+            _db.Insert(new LineupData
+            {
+                player_id = remaining[i].id,
+                team_id = teamId,
+                slot = 1,
+                slot_index = i
+            });
+            assigned.Add(remaining[i].id);
+        }
+
+        // Rest are inactive
+        int inactIdx = 0;
+        foreach (var p in remaining.Skip(benchSlots))
+        {
+            _db.Insert(new LineupData
+            {
+                player_id = p.id,
+                team_id = teamId,
+                slot = 2,
+                slot_index = inactIdx
+            });
+            inactIdx++;
         }
     }
 

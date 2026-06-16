@@ -238,6 +238,14 @@
                                     <ui:Label name="StatAst"   class="season-stat-val"   text="0.0" />
                                     <ui:Label class="season-stat-label" text="AST" />
                                 </ui:VisualElement>
+                                <ui:VisualElement class="season-stat-card">
+                                    <ui:Label name="StatStl"   class="season-stat-val"   text="0.0" />
+                                    <ui:Label class="season-stat-label" text="STL" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="season-stat-card">
+                                    <ui:Label name="StatBlk"   class="season-stat-val"   text="0.0" />
+                                    <ui:Label class="season-stat-label" text="BLK" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
 
                             <!-- Footer contrato / potencial -->

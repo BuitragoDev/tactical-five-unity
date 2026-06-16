@@ -969,3 +969,55 @@
 .fired-modal-title--warning {
     color: rgb(212, 160, 23);
 }
+
+/* ══ INJURED LINEUP MODAL ══ */
+
+.injured-modal-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(179, 190, 214);
+    -unity-text-align: middle-center;
+    margin-bottom: 8px;
+    white-space: normal;
+}
+
+.injured-modal-list {
+    margin: 8px 0 16px 0;
+    padding: 8px 16px;
+    background-color: rgb(25, 20, 20);
+    border-radius: 4px;
+    align-self: stretch;
+}
+
+.injured-modal-player-row {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(192, 57, 43);
+    padding: 2px 0;
+}
+
+.injured-modal-btn-group {
+    flex-direction: row;
+    gap: 12px;
+    align-self: stretch;
+}
+
+.injured-modal-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    background-color: rgb(42, 51, 71);
+    color: white;
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    border-radius: 4px;
+    padding: 12px 16px;
+    cursor: pointer;
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+}
+
+.injured-modal-btn--primary {
+    background-color: rgb(192, 57, 43);
+    border-color: rgb(192, 57, 43);
+}

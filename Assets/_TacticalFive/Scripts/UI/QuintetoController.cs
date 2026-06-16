@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class QuintetoController : MonoBehaviour
 {
@@ -15,11 +17,46 @@ public class QuintetoController : MonoBehaviour
     private Label _headerDate;
     private Button _btnAction;
 
+    private VisualElement _startersList;
+    private VisualElement _benchList;
+    private VisualElement _inactiveList;
+    private VisualElement _courtContainer;
+
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
+    private List<PlayerData> _players;
+    private List<LineupData> _lineup;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+
+    private PlayerData _selectedPlayer;
+    private VisualElement _selectedCard;
+
+    private VisualElement _detailEmpty;
+    private ScrollView _detailScroll;
+    private VisualElement _detailContent;
+    private Label _detailPosBadge;
+    private Label _detailPlayerName;
+    private Label _detailPlayerMeta;
+    private Label _detailOvr;
+    private VisualElement _detailAttrs;
+    private Label _statPts;
+    private Label _statReb;
+    private Label _statAst;
+    private Label _statStl;
+    private Label _statBlk;
+
+    static readonly string[] PosOrder = { "PG", "SG", "SF", "PF", "C" };
+
+    static readonly Dictionary<string, (float x, float y)> CourtPositions = new()
+    {
+        {"PG", (50f, 80f)},
+        {"SF", (20f, 52f)},
+        {"SG", (75f, 62f)},
+        {"PF", (25f, 25f)},
+        {"C",  (60f, 15f)},
+    };
 
     void OnEnable()
     {
@@ -48,6 +85,25 @@ public class QuintetoController : MonoBehaviour
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _btnAction = _root.Q<Button>("BtnAction");
+
+        _startersList = _root.Q<VisualElement>("StartersList");
+        _benchList = _root.Q<VisualElement>("BenchList");
+        _inactiveList = _root.Q<VisualElement>("InactiveList");
+        _courtContainer = _root.Q<VisualElement>("CourtContainer");
+
+        _detailEmpty = _root.Q<VisualElement>("DetailEmpty");
+        _detailScroll = _root.Q<ScrollView>("DetailScroll");
+        _detailContent = _root.Q<VisualElement>("DetailContent");
+        _detailPosBadge = _root.Q<Label>("DetailPosBadge");
+        _detailPlayerName = _root.Q<Label>("DetailPlayerName");
+        _detailPlayerMeta = _root.Q<Label>("DetailPlayerMeta");
+        _detailOvr = _root.Q<Label>("DetailOvr");
+        _detailAttrs = _root.Q<VisualElement>("DetailAttrs");
+        _statPts = _root.Q<Label>("StatPts");
+        _statReb = _root.Q<Label>("StatReb");
+        _statAst = _root.Q<Label>("StatAst");
+        _statStl = _root.Q<Label>("StatStl");
+        _statBlk = _root.Q<Label>("StatBlk");
     }
 
     void LoadSidebarIcons()
@@ -86,6 +142,7 @@ public class QuintetoController : MonoBehaviour
         _manager = DatabaseManager.Instance.GetActiveManager();
         _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
     }
 
     void RegisterCallbacks()
@@ -215,6 +272,28 @@ public class QuintetoController : MonoBehaviour
     {
         RefreshHeader();
         _root.Q<Button>("SubmenuQuinteto")?.AddToClassList("nav-submenu-item--active");
+        EnsureLineupSeeded();
+        _selectedPlayer = null;
+        _selectedCard = null;
+        HidePlayerDetail();
+        BuildLineup();
+    }
+
+    void EnsureLineupSeeded()
+    {
+        var existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        if (existing.Count == 0)
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
+        else
+        {
+            var assigned = new HashSet<int>(existing.Select(l => l.player_id));
+            foreach (var p in _players)
+            {
+                if (!assigned.Contains(p.id))
+                    DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2);
+            }
+        }
+        _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
     }
 
     void RefreshHeader()
@@ -233,7 +312,332 @@ public class QuintetoController : MonoBehaviour
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
+        int chem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        _headerChemistry.text = $"{chem}%";
+        _headerChemistry.style.color = chem >= 70 ? new StyleColor(new Color(39f / 255, 174f / 255, 96f / 255)) :
+                                         chem >= 40 ? new StyleColor(new Color(212f / 255, 160f / 255, 23f / 255)) :
+                                         new StyleColor(new Color(192f / 255, 57f / 255, 43f / 255));
+
         _btnAction.text = "DASHBOARD";
+    }
+
+    void BuildLineup()
+    {
+        _benchList.Clear();
+        _inactiveList.Clear();
+
+        var lineupByPlayer = _lineup.ToDictionary(l => l.player_id);
+        var starterPlayers = new List<PlayerData>();
+        var benchPlayers = new List<PlayerData>();
+        var inactivePlayers = new List<PlayerData>();
+
+        foreach (var p in _players)
+        {
+            if (!lineupByPlayer.TryGetValue(p.id, out var ls))
+            {
+                inactivePlayers.Add(p);
+                continue;
+            }
+            if (ls.slot == 0)
+                starterPlayers.Add(p);
+            else if (ls.slot == 1)
+                benchPlayers.Add(p);
+            else
+                inactivePlayers.Add(p);
+        }
+
+        starterPlayers = starterPlayers
+            .OrderBy(p =>
+            {
+                var ls = lineupByPlayer[p.id];
+                if (ls.slot_index >= 0 && ls.slot_index < PosOrder.Length)
+                    return (0, ls.slot_index);
+                int fallbackIdx = Array.IndexOf(PosOrder, p.position);
+                return (1, fallbackIdx >= 0 ? fallbackIdx : 999);
+            })
+            .ToList();
+
+        for (int i = 0; i < PosOrder.Length; i++)
+        {
+            var slot = _startersList.Q<VisualElement>($"StarterSlot{PosOrder[i]}");
+            if (slot == null) continue;
+
+            slot.Clear();
+            slot.AddToClassList("starter-slot");
+
+            var label = new Label();
+            label.AddToClassList("starter-slot-label");
+            label.text = PosOrder[i];
+            slot.Add(label);
+
+            if (i < starterPlayers.Count)
+            {
+                var card = CreatePlayerCard(starterPlayers[i], 0);
+                slot.Add(card);
+                slot.RemoveFromClassList("starter-slot--empty");
+
+                var ls = lineupByPlayer[starterPlayers[i].id];
+                if (ls.slot_index != i)
+                    DatabaseManager.Instance.SetPlayerSlot(starterPlayers[i].id, _myTeam.id, 0, i);
+            }
+            else
+            {
+                slot.AddToClassList("starter-slot--empty");
+            }
+        }
+
+        benchPlayers = benchPlayers
+            .OrderBy(p =>
+            {
+                var ls = lineupByPlayer[p.id];
+                return ls.slot_index >= 0 ? ls.slot_index : 999;
+            })
+            .ThenByDescending(p => p.overall)
+            .ToList();
+
+        for (int bi = 0; bi < benchPlayers.Count; bi++)
+        {
+            var p = benchPlayers[bi];
+            var card = CreatePlayerCard(p, 1);
+            _benchList.Add(card);
+            var ls = lineupByPlayer[p.id];
+            if (ls.slot_index != bi)
+                DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 1, bi);
+        }
+
+        inactivePlayers = inactivePlayers
+            .OrderBy(p =>
+            {
+                var ls = lineupByPlayer[p.id];
+                return ls.slot_index >= 0 ? ls.slot_index : 999;
+            })
+            .ThenByDescending(p => p.overall)
+            .ToList();
+
+        for (int ii = 0; ii < inactivePlayers.Count; ii++)
+        {
+            var p = inactivePlayers[ii];
+            var card = CreatePlayerCard(p, 2);
+            _inactiveList.Add(card);
+            var ls = lineupByPlayer[p.id];
+            if (ls.slot_index != ii)
+                DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2, ii);
+        }
+
+        BuildCourtView();
+    }
+
+    void BuildCourtView()
+    {
+        _courtContainer.Clear();
+
+        var courtImg = Resources.Load<Texture2D>("Icons/pista_basket");
+        if (courtImg != null)
+            _courtContainer.style.backgroundImage = new StyleBackground(courtImg);
+
+        for (int i = 0; i < PosOrder.Length; i++)
+        {
+            var pos = PosOrder[i];
+            if (!CourtPositions.TryGetValue(pos, out var posPct)) continue;
+
+            var slot = _startersList.Q<VisualElement>($"StarterSlot{pos}");
+            string displayName = pos;
+
+            if (slot != null && slot.childCount > 1 && slot[1].userData is (PlayerData pd, int))
+                displayName = $"{pd.first_name} {pd.last_name}";
+
+            var courtCard = new VisualElement();
+            courtCard.AddToClassList("court-card");
+            courtCard.style.left = new Length(posPct.x, LengthUnit.Percent);
+            courtCard.style.top = new Length(posPct.y, LengthUnit.Percent);
+
+            var nameLbl = new Label();
+            nameLbl.AddToClassList("court-card-name");
+            nameLbl.text = displayName;
+            courtCard.Add(nameLbl);
+
+            _courtContainer.Add(courtCard);
+        }
+    }
+
+    void ShowPlayerDetail(PlayerData p)
+    {
+        _detailEmpty.style.display = DisplayStyle.None;
+        _detailScroll.style.display = DisplayStyle.Flex;
+
+        _detailPosBadge.text = p.position;
+        _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
+        _detailPlayerMeta.text = $"{PlayerAge(p)} años · {p.nationality}";
+        _detailOvr.text = p.overall.ToString();
+
+        BuildAttrBars(p);
+
+        var s = DatabaseManager.Instance.GetPlayerSeasonStats(p.id, _manager.id);
+        _statPts.text = s.avgPts.ToString("F1");
+        _statReb.text = s.avgReb.ToString("F1");
+        _statAst.text = s.avgAst.ToString("F1");
+        _statStl.text = s.avgStl.ToString("F1");
+        _statBlk.text = s.avgBlk.ToString("F1");
+    }
+
+    void HidePlayerDetail()
+    {
+        _detailEmpty.style.display = DisplayStyle.Flex;
+        _detailScroll.style.display = DisplayStyle.None;
+    }
+
+    int PlayerAge(PlayerData p)
+    {
+        return p.age;
+    }
+
+    void BuildAttrBars(PlayerData p)
+    {
+        _detailAttrs.Clear();
+
+        var attrs = new[]
+        {
+            ("TIRO",      p.shooting),
+            ("TRIPLE",    p.three_point),
+            ("PASE",      p.passing),
+            ("BOTE",      p.dribbling),
+            ("DEFENSA",   p.defense),
+            ("REBOTE",    p.rebounding),
+            ("VELOCIDAD", p.speed),
+            ("ATLETISMO", p.athleticism),
+            ("IQ",        p.iq),
+            ("ROBOS",     p.steals),
+            ("TAPONES",   p.blocks),
+            ("MORAL",     p.morale),
+        };
+
+        foreach (var (label, val) in attrs)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("attr-row");
+
+            var lbl = new Label();
+            lbl.AddToClassList("attr-label");
+            lbl.text = label;
+
+            var barBg = new VisualElement();
+            barBg.AddToClassList("attr-bar-bg");
+
+            var barFill = new VisualElement();
+            barFill.AddToClassList("attr-bar-fill");
+            if (val < 50) barFill.AddToClassList("attr-bar-fill--low");
+            else if (val < 70) barFill.AddToClassList("attr-bar-fill--mid");
+
+            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
+            barBg.Add(barFill);
+
+            var valLbl = new Label();
+            valLbl.AddToClassList("attr-val");
+            valLbl.text = val.ToString();
+
+            row.Add(lbl);
+            row.Add(barBg);
+            row.Add(valLbl);
+            _detailAttrs.Add(row);
+        }
+    }
+
+    VisualElement CreatePlayerCard(PlayerData player, int slot)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("player-card");
+        card.userData = (player, slot);
+
+        switch (slot)
+        {
+            case 0: card.AddToClassList("player-card--starter"); break;
+            case 1: card.AddToClassList("player-card--bench"); break;
+            case 2: card.AddToClassList("player-card--inactive"); break;
+        }
+
+        if (player.injury_days > 0)
+            card.AddToClassList("player-card--injured");
+
+        var avatar = new VisualElement();
+        avatar.AddToClassList("player-card-avatar");
+        card.Add(avatar);
+
+        var info = new VisualElement();
+        info.AddToClassList("player-card-info");
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("player-card-name");
+        nameLbl.text = $"{player.first_name} {player.last_name}";
+        info.Add(nameLbl);
+
+        var meta = new VisualElement();
+        meta.AddToClassList("player-card-meta");
+
+        var posLbl = new Label();
+        posLbl.AddToClassList("player-card-pos");
+        posLbl.text = $"{player.position} - ";
+        meta.Add(posLbl);
+
+        var ovrLbl = new Label();
+        ovrLbl.AddToClassList("player-card-ovr");
+        ovrLbl.text = $" {player.overall} OVR";
+        meta.Add(ovrLbl);
+
+        info.Add(meta);
+        card.Add(info);
+
+        card.RegisterCallback<PointerDownEvent>(_ =>
+        {
+            PlayClick();
+
+            if (_selectedPlayer == null)
+            {
+                _selectedPlayer = player;
+                _selectedCard = card;
+                card.AddToClassList("player-card--selected");
+            }
+            else if (_selectedPlayer.id == player.id)
+            {
+                _selectedCard?.RemoveFromClassList("player-card--selected");
+                _selectedPlayer = null;
+                _selectedCard = null;
+            }
+            else
+            {
+                var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
+                var tgtLineup = _lineup.FirstOrDefault(l => l.player_id == player.id);
+                if (srcLineup != null && tgtLineup != null)
+                {
+                    int srcSlot = srcLineup.slot;
+                    int tgtSlot = tgtLineup.slot;
+                    int srcIdx = srcLineup.slot_index;
+                    int tgtIdx = tgtLineup.slot_index;
+
+                    if (srcSlot == tgtSlot)
+                    {
+                        DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, srcSlot, tgtIdx);
+                        DatabaseManager.Instance.SetPlayerSlot(player.id, _myTeam.id, tgtSlot, srcIdx);
+                    }
+                    else
+                    {
+                        DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, tgtSlot, tgtSlot == 0 ? tgtIdx : -1);
+                        DatabaseManager.Instance.SetPlayerSlot(player.id, _myTeam.id, srcSlot, srcSlot == 0 ? srcIdx : -1);
+                    }
+                }
+
+                _selectedCard?.RemoveFromClassList("player-card--selected");
+                _selectedPlayer = null;
+                _selectedCard = null;
+
+                _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+                BuildLineup();
+            }
+        });
+
+        card.RegisterCallback<PointerEnterEvent>(_ => ShowPlayerDetail(player));
+        card.RegisterCallback<PointerLeaveEvent>(_ => HidePlayerDetail());
+
+        return card;
     }
 
     void PlayClick()

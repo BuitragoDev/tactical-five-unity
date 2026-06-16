@@ -41,6 +41,8 @@ public class RosterController : MonoBehaviour
     private Label _statPts;
     private Label _statReb;
     private Label _statAst;
+    private Label _statStl;
+    private Label _statBlk;
     private Label _detailContract;
     private Label _detailPotential;
     private Button _btnDismiss;
@@ -169,6 +171,8 @@ public class RosterController : MonoBehaviour
         _statPts = _root.Q<Label>("StatPts");
         _statReb = _root.Q<Label>("StatReb");
         _statAst = _root.Q<Label>("StatAst");
+        _statStl = _root.Q<Label>("StatStl");
+        _statBlk = _root.Q<Label>("StatBlk");
         _detailContract = _root.Q<Label>("DetailContract");
         _detailPotential = _root.Q<Label>("DetailPotential");
         _btnDismiss = _root.Q<Button>("BtnDismiss");
@@ -635,10 +639,13 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         // Atributos
         BuildAttrBars(p);
 
-        // Stats temporada (por ahora vacías)
-        _statPts.text = "0.0";
-        _statReb.text = "0.0";
-        _statAst.text = "0.0";
+        // Stats temporada
+        var s = DatabaseManager.Instance.GetPlayerSeasonStats(p.id, _manager.id);
+        _statPts.text = s.avgPts.ToString("F1");
+        _statReb.text = s.avgReb.ToString("F1");
+        _statAst.text = s.avgAst.ToString("F1");
+        _statStl.text = s.avgStl.ToString("F1");
+        _statBlk.text = s.avgBlk.ToString("F1");
 
         // Contrato y potencial
         _detailContract.text = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
