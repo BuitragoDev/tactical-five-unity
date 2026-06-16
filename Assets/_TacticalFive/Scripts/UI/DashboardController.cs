@@ -2477,12 +2477,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
 
             if (p != null)
             {
-                Texture2D tex = Resources.Load<Texture2D>(
-                    !string.IsNullOrEmpty(p.photo)
-                        ? $"PlayerPhotos/{p.photo}"
-                        : $"PlayerPhotos/{p.id}");
-                if (tex == null)
-                    tex = Resources.Load<Texture2D>("PlayerPhotos/default");
+                Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
                 if (tex != null)
                     photo.style.backgroundImage = new StyleBackground(tex);
             }

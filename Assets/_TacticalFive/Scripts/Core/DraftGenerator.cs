@@ -219,13 +219,13 @@ public static class DraftGenerator
                 injury_days = 0,
                 injury_type = "",
                 treated = 0,
-                photo = "default",
                 salary = (int)salary,
                 contract_years = 4,
                 is_rookie = 1
             };
 
             DatabaseManager.Instance.Db.Insert(player);
+            PlayerPhotoHelper.CreateRookiePhoto(player.id);
             draftedPlayers.Add(new DraftPickResult
             {
                 PickNumber = pick + 1,
