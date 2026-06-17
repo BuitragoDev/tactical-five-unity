@@ -276,6 +276,23 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             emptyLbl.AddToClassList("fin-staff-empty");
             emptyLbl.text = "No tienes Ojeador contratado.";
             _ojeadorBody.Add(emptyLbl);
+
+            var hireBtn = new Button();
+            hireBtn.AddToClassList("btn-hire");
+            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                ScreenManager.Instance.GoTo(GameScreen.Employees);
+            });
+            if (CursorManager.Instance != null)
+            {
+                hireBtn.RegisterCallback<MouseEnterEvent>(_ =>
+                    CursorManager.Instance.SetHandCursor());
+                hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
+                    CursorManager.Instance.SetDefaultCursor());
+            }
+            _ojeadorBody.Add(hireBtn);
             return;
         }
 

@@ -327,6 +327,23 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             emptyLbl.AddToClassList("fin-staff-empty");
             emptyLbl.text = "A\u00fan no se ha contratado ning\u00fan director financiero.";
             _finStaffBody.Add(emptyLbl);
+
+            var hireBtn = new Button();
+            hireBtn.AddToClassList("btn-hire");
+            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                ScreenManager.Instance.GoTo(GameScreen.Employees);
+            });
+            if (CursorManager.Instance != null)
+            {
+                hireBtn.RegisterCallback<MouseEnterEvent>(_ =>
+                    CursorManager.Instance.SetHandCursor());
+                hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
+                    CursorManager.Instance.SetDefaultCursor());
+            }
+            _finStaffBody.Add(hireBtn);
         }
     }
 
@@ -340,6 +357,23 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             emptyLbl.AddToClassList("loan-empty");
             emptyLbl.text = "Contrata un director financiero para gestionar pr\u00e9stamos.";
             _loansContainer.Add(emptyLbl);
+
+            var hireBtn = new Button();
+            hireBtn.AddToClassList("btn-hire");
+            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                ScreenManager.Instance.GoTo(GameScreen.Employees);
+            });
+            if (CursorManager.Instance != null)
+            {
+                hireBtn.RegisterCallback<MouseEnterEvent>(_ =>
+                    CursorManager.Instance.SetHandCursor());
+                hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
+                    CursorManager.Instance.SetDefaultCursor());
+            }
+            _loansContainer.Add(hireBtn);
             return;
         }
 

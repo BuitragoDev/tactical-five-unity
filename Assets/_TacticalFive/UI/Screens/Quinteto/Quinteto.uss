@@ -215,7 +215,7 @@
 }
 
 .player-card--starter {
-    background-color: rgb(35, 40, 35);
+    background-color: rgb(29, 45, 29);
     border-color: rgb(60, 80, 60);
 }
 

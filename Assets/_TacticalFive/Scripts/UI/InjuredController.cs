@@ -310,6 +310,23 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             emptyLbl.AddToClassList("med-staff-empty");
             emptyLbl.text = "A\u00fan no se ha contratado ning\u00fan jefe de servicios m\u00e9dicos.";
             _medStaffBody.Add(emptyLbl);
+
+            var hireBtn = new Button();
+            hireBtn.AddToClassList("btn-hire");
+            hireBtn.text = "IR A EMPLEADOS";
+            hireBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                ScreenManager.Instance.GoTo(GameScreen.Employees);
+            });
+            if (CursorManager.Instance != null)
+            {
+                hireBtn.RegisterCallback<MouseEnterEvent>(_ =>
+                    CursorManager.Instance.SetHandCursor());
+                hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
+                    CursorManager.Instance.SetDefaultCursor());
+            }
+            _medStaffBody.Add(hireBtn);
         }
     }
 

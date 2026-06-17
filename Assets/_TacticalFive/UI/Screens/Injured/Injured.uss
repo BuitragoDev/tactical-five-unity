@@ -405,3 +405,22 @@
 .btn-modal-ok:hover {
     background-color: rgb(58, 74, 99);
 }
+
+.btn-hire {
+    width: 100%;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    background-color: rgb(42, 95, 201);
+    color: white;
+    border-width: 0;
+    border-radius: 4px;
+    padding: 10px;
+    cursor: pointer;
+    -unity-text-align: middle-center;
+    margin-top: 8px;
+}
+
+.btn-hire:hover {
+    background-color: rgb(52, 115, 231);
+}
