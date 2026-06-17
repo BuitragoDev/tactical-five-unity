@@ -357,31 +357,10 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
 
         if (_financiero == null)
         {
-            var emptyPanel = new VisualElement();
-            emptyPanel.AddToClassList("loan-empty");
-
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("loan-empty-text");
             emptyLbl.text = "Contrata un director financiero para gestionar pr\u00e9stamos.";
-            emptyPanel.Add(emptyLbl);
-
-            var hireBtn = new Button();
-            hireBtn.AddToClassList("btn-hire");
-            hireBtn.text = "IR A EMPLEADOS";
-            hireBtn.RegisterCallback<ClickEvent>(_ =>
-            {
-                PlayClick();
-                ScreenManager.Instance.GoTo(GameScreen.Employees);
-            });
-            if (CursorManager.Instance != null)
-            {
-                hireBtn.RegisterCallback<MouseEnterEvent>(_ =>
-                    CursorManager.Instance.SetHandCursor());
-                hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
-                    CursorManager.Instance.SetDefaultCursor());
-            }
-            emptyPanel.Add(hireBtn);
-            _loansContainer.Add(emptyPanel);
+            _loansContainer.Add(emptyLbl);
             return;
         }
 
