@@ -69,8 +69,10 @@ public class LoadGameController : MonoBehaviour
         // Cursores
         if (CursorManager.Instance != null)
         {
+            CursorManager.Instance.RegisterHandCursor(_btnBack);
             CursorManager.Instance.RegisterHandCursor(_btnDeleteYes);
             CursorManager.Instance.RegisterHandCursor(_btnDeleteNo);
+            CursorManager.Instance.RegisterHandCursor(_deleteModalOverlay);
         }
 
         // Limpiar DBs huérfanas antes de refrescar
@@ -162,11 +164,21 @@ public class LoadGameController : MonoBehaviour
         var loadBtn = new Button { text = "CARGAR" };
         loadBtn.AddToClassList("btn-load");
         loadBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadSlot(slot.slotNumber); });
+        if (CursorManager.Instance != null)
+        {
+            loadBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+            loadBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+        }
         actions.Add(loadBtn);
 
         var deleteBtn = new Button { text = "BORRAR" };
         deleteBtn.AddToClassList("btn-delete");
         deleteBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnDeleteSlot(slot.slotNumber); });
+        if (CursorManager.Instance != null)
+        {
+            deleteBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+            deleteBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+        }
         actions.Add(deleteBtn);
 
         card.Add(actions);
