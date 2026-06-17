@@ -523,13 +523,10 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
 
         if (_asistente != null)
         {
-            var card = new VisualElement();
-            card.AddToClassList("training-staff-card");
-
             var icon = new VisualElement();
             icon.AddToClassList("training-staff-icon");
             icon.style.backgroundImage = _empleadoBg;
-            card.Add(icon);
+            _asistenteCard.Add(icon);
 
             var info = new VisualElement();
             info.AddToClassList("training-staff-info");
@@ -559,8 +556,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             interestLbl.text = $"Duración del entrenamiento: {durationDays} días";
             info.Add(interestLbl);
 
-            card.Add(info);
-            _asistenteCard.Add(card);
+            _asistenteCard.Add(info);
         }
         else
         {
