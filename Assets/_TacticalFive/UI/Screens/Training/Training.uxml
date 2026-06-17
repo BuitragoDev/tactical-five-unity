@@ -159,6 +159,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="training-title-box">
+                <ui:Label text="ENTRENAMIENTO DE JUGADORES" class="training-title-box-label" />
+            </ui:VisualElement>
+
             <!-- CONTENT: TWO PANELS -->
             <ui:VisualElement class="training-content">
 
