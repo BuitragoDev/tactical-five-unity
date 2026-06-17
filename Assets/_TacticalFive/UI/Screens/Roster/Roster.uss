@@ -209,8 +209,8 @@
     flex-shrink: 0;
 }
 .player-injury-icon {
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     margin-left: 8px;
     flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;

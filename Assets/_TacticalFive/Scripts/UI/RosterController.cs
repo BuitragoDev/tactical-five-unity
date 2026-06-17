@@ -128,6 +128,7 @@ public class RosterController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        CursorManager.Instance?.SetDefaultCursor();
         CacheReferences();
         LoadSidebarIcons();
         SetupScrollViews();
@@ -314,7 +315,7 @@ public class RosterController : MonoBehaviour
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
         _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-_root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
+        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -402,7 +403,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         _dismissOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _dismissOverlay)
-                { PlayClick(); CloseDismissModal(); }
+            { PlayClick(); CloseDismissModal(); }
         });
 
         // Renovar contrato
@@ -418,6 +419,29 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             CursorManager.Instance.RegisterHandCursor(_btnDismiss);
             CursorManager.Instance.RegisterHandCursor(_btnDismissCancel);
             CursorManager.Instance.RegisterHandCursor(_btnDismissConfirm);
+            CursorManager.Instance.RegisterHandCursor(_btnRenew);
+            CursorManager.Instance.RegisterHandCursor(_btnRenewCancel);
+            CursorManager.Instance.RegisterHandCursor(_btnRenewConfirm);
+            CursorManager.Instance.RegisterHandCursor(_btnRenewBlockOk);
+            CursorManager.Instance.RegisterHandCursor(_btnRenewCooldownOk);
+            CursorManager.Instance.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
+
+            var navNames = new[] {
+                "NavDashboard", "NavRoster", "NavCalendar", "NavStandings",
+                "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
+                "NavMarket", "NavFinances", "NavArena", "NavMessages",
+                "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
+                "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario",
+                "SubmenuPalmares", "SubmenuRecords",
+                "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
+                "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV"
+            };
+            foreach (var name in navNames)
+            {
+                var el = _root.Q<VisualElement>(name);
+                if (el != null)
+                    CursorManager.Instance.RegisterHandCursor(el);
+            }
         }
     }
 
