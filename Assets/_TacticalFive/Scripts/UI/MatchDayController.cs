@@ -40,6 +40,7 @@ public class MatchDayController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        CursorManager.Instance?.SetDefaultCursor();
         AudioManager.Instance?.PlayMusic("backgroundGameDay");
         CacheReferences();
         LoadData();
@@ -119,12 +120,21 @@ public class MatchDayController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Stats); });
         _root.Q<Button>("NavRecords")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Records); });
+        var allSubmenus = new[] {
+            _root.Q<VisualElement>("MarketSubmenu"),
+            _root.Q<VisualElement>("FinanceSubmenu")
+        };
+
         _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("MarketSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
 
         _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ =>
@@ -139,8 +149,12 @@ public class MatchDayController : MonoBehaviour
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("FinanceSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuDecisiones")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -165,6 +179,24 @@ public class MatchDayController : MonoBehaviour
 
         _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+
+        if (CursorManager.Instance != null)
+        {
+            var btnNames = new[] {
+                "BtnContinue", "NavDashboard", "NavRoster", "NavCalendar",
+                "NavStandings", "NavPalmares", "NavResults", "NavPlayoffs",
+                "NavStats", "NavRecords", "NavMarket", "NavFinances",
+                "NavSponsors", "NavTV", "NavArena", "NavMessages", "BtnReset",
+                "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
+                "SubmenuDecisiones", "SubmenuPrestamos"
+            };
+            foreach (var name in btnNames)
+            {
+                var el = _root.Q<VisualElement>(name);
+                if (el != null)
+                    CursorManager.Instance.RegisterHandCursor(el);
+            }
+        }
     }
 
     void Refresh()
