@@ -117,6 +117,8 @@ public class MainMenuController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_btnCerrar);
             CursorManager.Instance.RegisterHandCursor(_btnExitYes);
             CursorManager.Instance.RegisterHandCursor(_btnExitNo);
+            CursorManager.Instance.RegisterHandCursor(_modalOverlay);
+            CursorManager.Instance.RegisterHandCursor(_exitModalOverlay);
         }
 
         // Escape para cerrar modales
@@ -195,6 +197,11 @@ public class MainMenuController : MonoBehaviour
         {
             CursorManager.Instance.RegisterHandCursor(configIcon);
             CursorManager.Instance.RegisterHandCursor(_btnConfigCerrar);
+            CursorManager.Instance.RegisterHandCursor(_configModalOverlay);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityLow);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityMedium);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityHigh);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
         }
     }
 

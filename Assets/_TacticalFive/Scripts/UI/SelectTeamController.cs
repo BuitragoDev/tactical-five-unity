@@ -31,7 +31,6 @@ public class SelectTeamController : MonoBehaviour
     private VisualElement _detailPanel;
     private VisualElement _detailLogo;
     private Label _detailTeamName;
-    private Label _detailConference;
     private Label _detailCity;
     private Label _detailConferenceVal;
     private Label _detailDivision;
@@ -116,7 +115,6 @@ public class SelectTeamController : MonoBehaviour
         _detailPanel = _root.Q<VisualElement>("DetailPanel");
         _detailLogo = _root.Q<VisualElement>("DetailLogo");
         _detailTeamName = _root.Q<Label>("DetailTeamName");
-        _detailConference = _root.Q<Label>("DetailConference");
         _detailCity = _root.Q<Label>("DetailCity");
         _detailConferenceVal = _root.Q<Label>("DetailConferenceVal");
         _detailDivision = _root.Q<Label>("DetailDivision");
@@ -281,7 +279,6 @@ public class SelectTeamController : MonoBehaviour
 
         // Textos
         _detailTeamName.text = team.name.ToUpper();
-        _detailConference.text = $"{team.conference.ToUpper()} · {team.division.ToUpper()}";
         _detailCity.text = team.city;
         _detailConferenceVal.text = team.conference == "East" ? "Este" : "Oeste";
         _detailDivision.text = team.division;

@@ -23,7 +23,7 @@
             <ui:Label name="InfoBarTeam" class="info-bar-team" text="" />
             <ui:Label class="info-bar-label" text="PARTIDOS ELEGIDOS" />
             <ui:Label name="InfoBarCount" class="info-bar-value" text="0 / 4" />
-            <ui:Label class="info-bar-label" text="TEMPORADA" />
+            <ui:Label class="info-bar-label" text="CONCENTRACIÓN" />
                 <ui:Label name="InfoBarSeason" class="info-bar-value" text="" />
         </ui:VisualElement>
 

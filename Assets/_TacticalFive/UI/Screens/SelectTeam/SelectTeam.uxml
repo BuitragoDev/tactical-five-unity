@@ -36,7 +36,6 @@
                                 <ui:VisualElement name="DetailLogo" class="detail-logo"/>
                                 <ui:VisualElement class="detail-name-wrap">
                                     <ui:Label name="DetailTeamName" text="" class="detail-team-name"/>
-                                    <ui:Label name="DetailConference" text="" class="detail-conference"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement class="detail-col-jersey">

@@ -135,7 +135,7 @@
         <ui:VisualElement name="Footer" class="footer">
             <ui:VisualElement class="version-tag">
                 <ui:VisualElement class="version-dot" />
-                <ui:Label class="version-label" text="V0.1.0  ·  ALPHA" />
+                <ui:Label class="version-label" text="v0.9.0 · Beta" />
             </ui:VisualElement>
         </ui:VisualElement>
 

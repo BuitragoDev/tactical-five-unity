@@ -357,8 +357,8 @@
     align-items: center;
 }
 .version-dot {
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     border-radius: 4px;
     background-color: rgb(39, 174, 96);
     margin-right: 10px;
@@ -366,7 +366,7 @@
 }
 .version-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(122, 138, 170);
