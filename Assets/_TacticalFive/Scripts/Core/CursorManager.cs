@@ -23,6 +23,10 @@ public class CursorManager : MonoBehaviour
 
     void Start()
     {
+        if (cursorDefault == null)
+            cursorDefault = Resources.Load<Texture2D>("Icons/cursor_default");
+        if (cursorHand == null)
+            cursorHand = Resources.Load<Texture2D>("Icons/cursor_hand");
         SetDefaultCursor();
     }
 
