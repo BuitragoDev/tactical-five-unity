@@ -287,12 +287,23 @@ public class RosterController : MonoBehaviour
         // Sidebar navegación
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
+        var allSubmenus = new[] {
+            _root.Q<VisualElement>("RosterSubmenu"),
+            _root.Q<VisualElement>("PalmaresSubmenu"),
+            _root.Q<VisualElement>("MarketSubmenu"),
+            _root.Q<VisualElement>("FinanceSubmenu")
+        };
+
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("RosterSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -313,8 +324,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("PalmaresSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("SubmenuRecords")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Records); });
@@ -329,8 +344,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("MarketSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
 
         _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ =>
@@ -345,8 +364,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("FinanceSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuDecisiones")?.RegisterCallback<ClickEvent>(_ =>
         {
