@@ -306,10 +306,13 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         }
         else
         {
+            var emptyPanel = new VisualElement();
+            emptyPanel.AddToClassList("med-staff-empty");
+
             var emptyLbl = new Label();
-            emptyLbl.AddToClassList("med-staff-empty");
+            emptyLbl.AddToClassList("med-staff-empty-text");
             emptyLbl.text = "A\u00fan no se ha contratado ning\u00fan jefe de servicios m\u00e9dicos.";
-            _medStaffBody.Add(emptyLbl);
+            emptyPanel.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
@@ -326,7 +329,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
                     CursorManager.Instance.SetDefaultCursor());
             }
-            _medStaffBody.Add(hireBtn);
+            emptyPanel.Add(hireBtn);
+            _medStaffBody.Add(emptyPanel);
         }
     }
 

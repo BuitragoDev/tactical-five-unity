@@ -272,10 +272,13 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
 
         if (_ojeador == null)
         {
+            var emptyPanel = new VisualElement();
+            emptyPanel.AddToClassList("fin-staff-empty");
+
             var emptyLbl = new Label();
-            emptyLbl.AddToClassList("fin-staff-empty");
+            emptyLbl.AddToClassList("fin-staff-empty-text");
             emptyLbl.text = "No tienes Ojeador contratado.";
-            _ojeadorBody.Add(emptyLbl);
+            emptyPanel.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
@@ -292,7 +295,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
                     CursorManager.Instance.SetDefaultCursor());
             }
-            _ojeadorBody.Add(hireBtn);
+            emptyPanel.Add(hireBtn);
+            _ojeadorBody.Add(emptyPanel);
             return;
         }
 

@@ -323,10 +323,13 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         }
         else
         {
+            var emptyPanel = new VisualElement();
+            emptyPanel.AddToClassList("fin-staff-empty");
+
             var emptyLbl = new Label();
-            emptyLbl.AddToClassList("fin-staff-empty");
+            emptyLbl.AddToClassList("fin-staff-empty-text");
             emptyLbl.text = "A\u00fan no se ha contratado ning\u00fan director financiero.";
-            _finStaffBody.Add(emptyLbl);
+            emptyPanel.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
@@ -343,7 +346,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
                     CursorManager.Instance.SetDefaultCursor());
             }
-            _finStaffBody.Add(hireBtn);
+            emptyPanel.Add(hireBtn);
+            _finStaffBody.Add(emptyPanel);
         }
     }
 
@@ -353,10 +357,13 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
 
         if (_financiero == null)
         {
+            var emptyPanel = new VisualElement();
+            emptyPanel.AddToClassList("loan-empty");
+
             var emptyLbl = new Label();
-            emptyLbl.AddToClassList("loan-empty");
+            emptyLbl.AddToClassList("loan-empty-text");
             emptyLbl.text = "Contrata un director financiero para gestionar pr\u00e9stamos.";
-            _loansContainer.Add(emptyLbl);
+            emptyPanel.Add(emptyLbl);
 
             var hireBtn = new Button();
             hireBtn.AddToClassList("btn-hire");
@@ -373,7 +380,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
                     CursorManager.Instance.SetDefaultCursor());
             }
-            _loansContainer.Add(hireBtn);
+            emptyPanel.Add(hireBtn);
+            _loansContainer.Add(emptyPanel);
             return;
         }
 
