@@ -75,7 +75,6 @@ public class LoadGameController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_btnBack);
             CursorManager.Instance.RegisterHandCursor(_btnDeleteYes);
             CursorManager.Instance.RegisterHandCursor(_btnDeleteNo);
-            CursorManager.Instance.RegisterHandCursor(_deleteModalOverlay);
         }
 
         // Limpiar DBs huérfanas antes de refrescar

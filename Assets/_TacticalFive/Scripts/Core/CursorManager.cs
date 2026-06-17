@@ -19,10 +19,7 @@ public class CursorManager : MonoBehaviour
         }
         Instance = this;
         DontDestroyOnLoad(gameObject);
-    }
 
-    void Start()
-    {
         if (cursorDefault == null)
             cursorDefault = Resources.Load<Texture2D>("Icons/cursor_default");
         if (cursorHand == null)
