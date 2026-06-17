@@ -367,8 +367,7 @@ public class QuintetoController : MonoBehaviour
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-        long totalPayroll = _players.Sum(p => p.salary) + teamEmployees.Sum(e => e.salary);
+        long totalPayroll = _players.Sum(p => p.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();

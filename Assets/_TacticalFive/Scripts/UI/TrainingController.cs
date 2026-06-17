@@ -245,7 +245,7 @@ public class TrainingController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Injured);
         });
         _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-_root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
+        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -384,8 +384,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-        long totalPayroll = _players.Sum(p => p.salary) + teamEmployees.Sum(e => e.salary);
+        long totalPayroll = _players.Sum(p => p.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
@@ -403,7 +402,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         var chemLabel = _root.Q<Label>("HeaderChemistry");
         if (chemLabel != null)
         {
-            chemLabel.text = chemistry.ToString();
+            chemLabel.text = $"{chemistry.ToString()}%";
             chemLabel.RemoveFromClassList("header-stat-value--gold");
             chemLabel.RemoveFromClassList("header-stat-value--negative");
             if (chemistry < 40)

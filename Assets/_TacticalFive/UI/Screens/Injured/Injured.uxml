@@ -135,8 +135,20 @@
                     <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="LESIONADOS" />
-                    <ui:Label name="HeaderInjuredCount" class="header-stat-value header-stat-value--negative" text="" />
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
+                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
                 <ui:VisualElement class="header-season-info">
@@ -150,10 +162,18 @@
             <!-- CONTENT -->
             <ui:VisualElement class="injured-content">
 
+                <!-- TITLE BOX -->
+                <ui:VisualElement class="injured-title-box">
+                    <ui:Label class="injured-title-box-label" text="JUGADORES LESIONADOS" />
+                </ui:VisualElement>
+
                 <!-- MEDICAL STAFF -->
                 <ui:VisualElement name="MedicalStaffSection" class="med-staff-section">
                     <ui:Label class="section-title" text="JEFE DE SERVICIOS MÉDICOS" />
-                    <ui:VisualElement name="MedStaffBody" class="med-staff-body" />
+                    <ui:VisualElement name="MedStaffBody" class="med-staff-body">
+                        <ui:VisualElement name="MedStaffCard" class="med-staff-card" />
+                        <ui:VisualElement name="MedStaffEmpty" class="med-staff-empty" style="display: none;" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- INJURED PLAYERS -->

@@ -134,6 +134,18 @@
                     <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
                     <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
                     <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
                 </ui:VisualElement>
@@ -148,6 +160,11 @@
 
             <!-- CONTENT -->
             <ui:VisualElement class="vestuario-content">
+
+                <!-- TITLE BOX -->
+                <ui:VisualElement class="vestuario-title-box">
+                    <ui:Label text="RELACIONES DEL VESTUARIO" class="vestuario-title-box-label" />
+                </ui:VisualElement>
 
                 <!-- VESTUARIO OVERVIEW -->
                 <ui:VisualElement name="VestuarioOverview" class="vestuario-overview">

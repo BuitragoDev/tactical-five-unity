@@ -24,6 +24,25 @@
     overflow: hidden;
 }
 
+/* ══ TITLE BOX ══ */
+
+.vestuario-title-box {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 0 16px;
+    padding: 10px 18px;
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    background-color: rgba(42, 95, 201, 0.08);
+}
+.vestuario-title-box-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: rgb(208, 216, 232);
+    text-transform: uppercase;
+}
+
 /* ══ OVERVIEW SECTION ══ */
 
 .vestuario-overview {
@@ -275,6 +294,9 @@
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
     letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    -unity-text-overflow: ellipsis;
 }
 
 .relation-player-pos {
@@ -282,6 +304,10 @@
     font-size: 18px;
     color: rgb(122, 138, 170);
     margin-left: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    -unity-text-overflow: ellipsis;
+    flex-shrink: 0;
 }
 
 .relation-bond-area {

@@ -478,8 +478,7 @@ public class RosterController : MonoBehaviour
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-        long totalPayroll = _players.Sum(p => p.salary) + teamEmployees.Sum(e => e.salary);
+        long totalPayroll = _players.Sum(p => p.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
@@ -494,7 +493,7 @@ public class RosterController : MonoBehaviour
         var chemLabel = _root.Q<Label>("HeaderChemistry");
         if (chemLabel != null)
         {
-            chemLabel.text = chemistry.ToString();
+            chemLabel.text = $"{chemistry.ToString()}%";
             chemLabel.RemoveFromClassList("header-stat-value--gold");
             chemLabel.RemoveFromClassList("header-stat-value--negative");
             if (chemistry < 40)

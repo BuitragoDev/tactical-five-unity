@@ -12,6 +12,9 @@ public class VestuarioController : MonoBehaviour
     private VisualElement _headerTeamLogo;
     private Label _headerTeamName;
     private Label _headerManagerName;
+    private Label _headerBudget;
+    private Label _headerPayroll;
+    private Label _headerMargin;
     private Label _headerChemistry;
     private Label _headerSeason;
     private Label _headerDate;
@@ -55,6 +58,7 @@ public class VestuarioController : MonoBehaviour
         LoadData();
         RegisterCallbacks();
         Refresh();
+        CursorManager.Instance?.SetDefaultCursor();
     }
 
     void CacheReferences()
@@ -62,6 +66,9 @@ public class VestuarioController : MonoBehaviour
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
         _headerManagerName = _root.Q<Label>("HeaderManagerName");
+        _headerBudget = _root.Q<Label>("HeaderBudget");
+        _headerPayroll = _root.Q<Label>("HeaderPayroll");
+        _headerMargin = _root.Q<Label>("HeaderMargin");
         _headerChemistry = _root.Q<Label>("HeaderChemistry");
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
@@ -120,14 +127,25 @@ public class VestuarioController : MonoBehaviour
 
     void RegisterCallbacks()
     {
+        var allSubmenus = new[] {
+            _root.Q<VisualElement>("RosterSubmenu"),
+            _root.Q<VisualElement>("PalmaresSubmenu"),
+            _root.Q<VisualElement>("MarketSubmenu"),
+            _root.Q<VisualElement>("FinanceSubmenu")
+        };
+
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("RosterSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -168,8 +186,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("PalmaresSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
@@ -186,8 +208,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("MarketSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -203,8 +229,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("FinanceSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuDecisiones")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -232,8 +262,24 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.RegisterHandCursor(_btnAction);
+        if (CursorManager.Instance == null) return;
+        var cursor = CursorManager.Instance;
+        cursor.RegisterHandCursor(_root.Q<Button>("NavDashboard"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavRoster"));
+        foreach (var btn in _root.Query<Button>(null, "nav-submenu-item").Build())
+            cursor.RegisterHandCursor(btn);
+        cursor.RegisterHandCursor(_root.Q<Button>("NavCalendar"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavStandings"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavPalmares"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavResults"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavPlayoffs"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavStats"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavMarket"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavFinances"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavArena"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavMessages"));
+        cursor.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
+        cursor.RegisterHandCursor(_btnAction);
     }
 
     void Refresh()
@@ -246,6 +292,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         BuildPersonalitiesLegend();
         BuildPersonalitiesList();
         BuildRelationsList();
+        _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuVestuario")?.AddToClassList("nav-submenu-item--active");
     }
 
@@ -258,6 +305,33 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
         _headerTeamName.text = _myTeam.name.ToUpper();
         _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
+        _headerBudget.style.color = _myTeam.budget < 0
+            ? new StyleColor(new Color32(192, 57, 43, 255))
+            : new StyleColor(new Color32(39, 174, 96, 255));
+
+        long totalPayroll = _players.Sum(p => p.salary);
+        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long margin = salaryCap - _players.Sum(p => p.salary);
+
+        string marginText = margin >= 0
+            ? $"+${margin / 1_000_000}M"
+            : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        _headerMargin.text = marginText;
+        _headerChemistry.text = $"{chemistry}%";
+        _headerChemistry.RemoveFromClassList("header-stat-value--gold");
+        _headerChemistry.RemoveFromClassList("header-stat-value--negative");
+        if (chemistry < 40)
+            _headerChemistry.AddToClassList("header-stat-value--negative");
+        else if (chemistry < 70)
+            _headerChemistry.AddToClassList("header-stat-value--gold");
+
+        _headerMargin.RemoveFromClassList("header-stat-value--negative");
+        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
 
         if (_season != null)
         {
