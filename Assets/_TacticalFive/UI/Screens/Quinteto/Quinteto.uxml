@@ -122,7 +122,7 @@
                     <ui:Label class="nav-label" text="Mensajes" />
                 </ui:Button>
             </ui:VisualElement>
-            <ui:VisualElement name="ConfigIcon" class="sidebar-config">
+            <ui:VisualElement name="SidebarConfigIcon" class="sidebar-config">
                 <ui:Label text="&#x2699;" class="sidebar-config-icon" />
             </ui:VisualElement>
         </ui:VisualElement>

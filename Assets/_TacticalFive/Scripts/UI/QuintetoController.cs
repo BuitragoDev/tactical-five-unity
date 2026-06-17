@@ -659,6 +659,9 @@ public class QuintetoController : MonoBehaviour
         info.Add(meta);
         card.Add(info);
 
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(card);
+
         card.RegisterCallback<PointerDownEvent>(_ =>
         {
             PlayClick();
