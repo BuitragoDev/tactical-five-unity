@@ -397,6 +397,13 @@
     border-right-width: 0;
     flex-shrink: 0;
 }
+.panel-more-btn {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
 .panel-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 16px;

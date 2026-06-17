@@ -235,6 +235,19 @@ public class DashboardController : MonoBehaviour
             if (tex != null)
                 iconElem.style.backgroundImage = new StyleBackground(tex);
         }
+
+        // Panel "more" buttons
+        var moreTex = Resources.Load<Texture2D>("Icons/mas");
+        if (moreTex != null)
+        {
+            var moreBtns = new[] { "BtnLastGameMore", "BtnNextGameMore", "BtnStandingsMore", "BtnPlayerStatsMore" };
+            foreach (var name in moreBtns)
+            {
+                var el = _root.Q<VisualElement>(name);
+                if (el != null)
+                    el.style.backgroundImage = new StyleBackground(moreTex);
+            }
+        }
     }
 
     void LoadData()
@@ -368,6 +381,21 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
 
+        // Panel "more" buttons
+        var moreActions = new (string name, GameScreen screen)[]
+        {
+            ("BtnLastGameMore", GameScreen.Results),
+            ("BtnNextGameMore", GameScreen.Results),
+            ("BtnStandingsMore", GameScreen.Standings),
+            ("BtnPlayerStatsMore", GameScreen.Stats),
+        };
+        foreach (var (name, screen) in moreActions)
+        {
+            var btn = _root.Q<VisualElement>(name);
+            if (btn == null) continue;
+            btn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(screen); });
+        }
+
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(_btnAction);
@@ -383,7 +411,8 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario",
                 "SubmenuPalmares", "SubmenuRecords",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
-                "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV"
+                "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
+                "BtnLastGameMore", "BtnNextGameMore", "BtnStandingsMore", "BtnPlayerStatsMore"
             };
             foreach (var name in navNames)
             {

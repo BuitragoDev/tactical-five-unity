@@ -153,6 +153,7 @@
                     <ui:VisualElement class="panels-row">
                         <ui:VisualElement name="PanelLastGame" class="panel panel-game">
                             <ui:VisualElement class="panel-header">
+                                <ui:VisualElement name="BtnLastGameMore" class="panel-more-btn" />
                                 <ui:Label text="ÚLTIMO PARTIDO" class="panel-title"/>
                                 <ui:Label name="LastGameDate" text="" class="panel-date"/>
                             </ui:VisualElement>
@@ -185,6 +186,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement name="PanelNextGame" class="panel panel-game">
                             <ui:VisualElement class="panel-header">
+                                <ui:VisualElement name="BtnNextGameMore" class="panel-more-btn" />
                                 <ui:Label text="PRÓXIMO PARTIDO" class="panel-title"/>
                                 <ui:Label name="NextGameDate" text="" class="panel-date"/>
                             </ui:VisualElement>
@@ -214,6 +216,7 @@
                     <ui:VisualElement class="panels-row">
                         <ui:VisualElement name="PanelStandings" class="panel panel-standings">
                             <ui:VisualElement class="panel-header">
+                                <ui:VisualElement name="BtnStandingsMore" class="panel-more-btn" />
                                 <ui:Label text="CLASIFICACIÓN" class="panel-title"/>
                                 <ui:VisualElement class="conf-tabs">
                                     <ui:Button name="TabEast" text="ESTE" class="conf-tab"/>
@@ -234,6 +237,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats">
                             <ui:VisualElement class="panel-header">
+                                <ui:VisualElement name="BtnPlayerStatsMore" class="panel-more-btn" />
                                 <ui:Label text="ESTADÍSTICAS DE JUGADORES" class="panel-title"/>
                             </ui:VisualElement>
                             <ui:VisualElement class="panel-body">
