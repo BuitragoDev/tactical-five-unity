@@ -39,7 +39,7 @@ public class CursorManager : MonoBehaviour
 
     public void RegisterHandCursor(VisualElement element)
     {
-        element.RegisterCallback<MouseEnterEvent>(_ => SetHandCursor());
-        element.RegisterCallback<MouseLeaveEvent>(_ => SetDefaultCursor());
+        element.RegisterCallback<MouseEnterEvent>(_ => SetHandCursor(), TrickleDown.TrickleDown);
+        element.RegisterCallback<MouseLeaveEvent>(_ => SetDefaultCursor(), TrickleDown.TrickleDown);
     }
 }
