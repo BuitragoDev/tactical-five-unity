@@ -24,7 +24,7 @@
                     <ui:Label class="nav-label" text="Plantilla" />
                     <ui:Label text="&#x25BC;" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="RosterSubmenu" class="nav-submenu">
+                <ui:VisualElement name="RosterSubmenu" class="nav-submenu nav-submenu--visible">
                     <ui:Button name="SubmenuJugadores" class="nav-submenu-item">
                         <ui:Label text="Jugadores" class="nav-submenu-label"/>
                     </ui:Button>
@@ -160,6 +160,11 @@
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="DASHBOARD" />
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="quinteto-title-box">
+                <ui:Label text="QUINTETO" class="quinteto-title-box-label" />
             </ui:VisualElement>
 
             <!-- Lineup content -->
