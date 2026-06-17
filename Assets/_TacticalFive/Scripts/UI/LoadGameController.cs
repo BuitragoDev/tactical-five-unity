@@ -32,6 +32,9 @@ public class LoadGameController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        // Reset cursor al entrar (evita que se quede como mano de la pantalla anterior)
+        CursorManager.Instance?.SetDefaultCursor();
+
         // Load team logos
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
         foreach (var s in logos) _logoSprites[s.name] = s;
@@ -202,6 +205,7 @@ public class LoadGameController : MonoBehaviour
 
     void OpenDeleteModal()
     {
+        CursorManager.Instance?.SetDefaultCursor();
         _deleteModalOverlay.style.display = DisplayStyle.Flex;
         _deleteModalBox.style.display = DisplayStyle.Flex;
     }

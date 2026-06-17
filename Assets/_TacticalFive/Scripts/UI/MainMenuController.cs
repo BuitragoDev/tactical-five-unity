@@ -50,6 +50,7 @@ public class MainMenuController : MonoBehaviour
         _root.style.width  = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
+        CursorManager.Instance?.SetDefaultCursor();
         AudioManager.Instance?.PlayMusic("backgroundMenu");
 
         InitConfigModal();
@@ -207,6 +208,7 @@ public class MainMenuController : MonoBehaviour
 
     void OpenConfigModal()
     {
+        CursorManager.Instance?.SetDefaultCursor();
         var am = AudioManager.Instance;
         if (am != null)
         {
@@ -272,6 +274,7 @@ public class MainMenuController : MonoBehaviour
 
     void OpenModal()
     {
+        CursorManager.Instance?.SetDefaultCursor();
         _modalOverlay.style.display = DisplayStyle.Flex;
         _modalBox.style.display     = DisplayStyle.Flex;
     }
@@ -284,6 +287,7 @@ public class MainMenuController : MonoBehaviour
 
     void OpenExitModal()
     {
+        CursorManager.Instance?.SetDefaultCursor();
         _exitModalOverlay.style.display = DisplayStyle.Flex;
         _exitModalBox.style.display     = DisplayStyle.Flex;
     }
