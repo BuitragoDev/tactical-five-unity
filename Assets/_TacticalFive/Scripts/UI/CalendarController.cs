@@ -56,6 +56,7 @@ public class CalendarController : MonoBehaviour
         // Auto-select current game day
         AutoSelectCurrentDay();
         Refresh();
+        CursorManager.Instance?.SetDefaultCursor();
     }
 
     void CacheReferences()
@@ -95,34 +96,33 @@ public class CalendarController : MonoBehaviour
 
     void AutoSelectCurrentDay()
     {
-        // Try to find the current game day using next unplayed game
-        GameData currentGame = null;
-        if (_manager != null && _myTeam != null)
-        {
-            currentGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-        }
+        // Get actual current date from database (for "today" highlight)
+        string currentDateStr = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+        bool hasCurrentDate = !string.IsNullOrEmpty(currentDateStr)
+                              && System.DateTime.TryParseExact(currentDateStr, "dd/MM/yyyy",
+                                  System.Globalization.CultureInfo.InvariantCulture,
+                                  System.Globalization.DateTimeStyles.None, out var currentDate);
+        if (hasCurrentDate)
+            _currentGameDate = currentDate;
 
-        // Fallback: last played game
-        if (currentGame == null && _manager != null && _myTeam != null)
-        {
-            currentGame = DatabaseManager.Instance.GetLastPlayedGame(_manager.id, _myTeam.id);
-        }
+        // Select the next unplayed game (or fallback to current date)
+        GameData nextGame = _manager != null && _myTeam != null
+            ? DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id)
+            : null;
 
-        if (currentGame != null && !string.IsNullOrEmpty(currentGame.game_date))
+        if (nextGame != null && System.DateTime.TryParse(nextGame.game_date, out var gameDate))
         {
-            if (System.DateTime.TryParse(currentGame.game_date, out var gameDate))
-            {
-                _currentGameDate = gameDate;
-                _currentMonthDate = new System.DateTime(gameDate.Year, gameDate.Month, 1);
-                _selectedDate = gameDate;
-                // Pre-populate the sidebar
-                var dayGames = _allGames.Where(g => g.game_date == currentGame.game_date).ToList();
-                OnDaySelected(gameDate.Day, currentGame.game_date, dayGames, rebuildCalendar: false);
-            }
-            else
-            {
-                DefaultMonth();
-            }
+            _currentMonthDate = new System.DateTime(gameDate.Year, gameDate.Month, 1);
+            _selectedDate = gameDate;
+            var dayGames = _allGames.Where(g => g.game_date == nextGame.game_date).ToList();
+            OnDaySelected(gameDate.Day, nextGame.game_date, dayGames, rebuildCalendar: false);
+        }
+        else if (hasCurrentDate)
+        {
+            _currentMonthDate = new System.DateTime(currentDate.Year, currentDate.Month, 1);
+            _selectedDate = currentDate;
+            var dayGames = _allGames.Where(g => g.game_date == currentDateStr).ToList();
+            OnDaySelected(currentDate.Day, currentDateStr, dayGames, rebuildCalendar: false);
         }
         else
         {
@@ -141,14 +141,25 @@ public class CalendarController : MonoBehaviour
 
     void RegisterCallbacks()
     {
+        var allSubmenus = new[] {
+            _root.Q<VisualElement>("RosterSubmenu"),
+            _root.Q<VisualElement>("PalmaresSubmenu"),
+            _root.Q<VisualElement>("MarketSubmenu"),
+            _root.Q<VisualElement>("FinanceSubmenu")
+        };
+
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("RosterSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -159,7 +170,7 @@ public class CalendarController : MonoBehaviour
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
         _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-_root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
+        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
@@ -167,8 +178,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("PalmaresSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("SubmenuRecords")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Records); });
@@ -183,8 +198,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("MarketSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
 
         _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ =>
@@ -199,8 +218,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         {
             PlayClick();
             var submenu = _root.Q<VisualElement>("FinanceSubmenu");
-            if (submenu != null)
-                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
         });
         _root.Q<Button>("SubmenuDecisiones")?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -228,12 +251,25 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         _btnNextMonth?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeMonth(1); });
         _btnAction?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnActionClicked(); });
 
-        if (CursorManager.Instance != null)
-        {
-            CursorManager.Instance.RegisterHandCursor(_btnPrevMonth);
-            CursorManager.Instance.RegisterHandCursor(_btnNextMonth);
-            CursorManager.Instance.RegisterHandCursor(_btnAction);
-        }
+        if (CursorManager.Instance == null) return;
+        var cursor = CursorManager.Instance;
+        cursor.RegisterHandCursor(_root.Q<Button>("NavDashboard"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavRoster"));
+        foreach (var btn in _root.Query<Button>(null, "nav-submenu-item").Build())
+            cursor.RegisterHandCursor(btn);
+        cursor.RegisterHandCursor(_root.Q<Button>("NavStandings"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavPalmares"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavResults"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavPlayoffs"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavStats"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavMarket"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavFinances"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavArena"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavMessages"));
+        cursor.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
+        cursor.RegisterHandCursor(_btnAction);
+        cursor.RegisterHandCursor(_btnPrevMonth);
+        cursor.RegisterHandCursor(_btnNextMonth);
     }
 
     void Refresh()
@@ -271,7 +307,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
         var chemLabel = _root.Q<Label>("HeaderChemistry");
         if (chemLabel != null)
         {
-            chemLabel.text = chemistry.ToString();
+            chemLabel.text = $"{chemistry.ToString()}%";
             chemLabel.RemoveFromClassList("header-stat-value--gold");
             chemLabel.RemoveFromClassList("header-stat-value--negative");
             if (chemistry < 40)
@@ -335,8 +371,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
                 bool isToday = _currentGameDate.HasValue && _currentGameDate.Value.Year == year
                                 && _currentGameDate.Value.Month == month
                                 && _currentGameDate.Value.Day == dayNum;
+                bool isSelected = _selectedDate.HasValue && _selectedDate.Value.Year == year
+                                  && _selectedDate.Value.Month == month
+                                  && _selectedDate.Value.Day == dayNum;
 
                 if (isToday) cell.AddToClassList("calendar-day-cell--today");
+                if (isSelected) cell.AddToClassList("calendar-day-cell--selected");
                 if (isMyGame) cell.AddToClassList("calendar-day-cell--my-game");
 
                 if (isMyGame)

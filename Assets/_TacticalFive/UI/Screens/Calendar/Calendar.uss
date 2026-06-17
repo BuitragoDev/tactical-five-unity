@@ -25,6 +25,25 @@
     min-height: 0;
 }
 
+/* ══ TITLE BOX ══ */
+
+.calendar-title-box {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 0 16px;
+    padding: 10px 18px;
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    background-color: rgba(42, 95, 201, 0.08);
+}
+.calendar-title-box-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: rgb(208, 216, 232);
+    text-transform: uppercase;
+}
+
 /* Month navigation */
 .calendar-nav {
     flex-direction: row;
