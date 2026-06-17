@@ -117,6 +117,7 @@ public class DashboardController : MonoBehaviour
         _firedOverlay.AddToClassList("fired-modal-overlay");
         _root.Add(_firedOverlay);
 
+        CursorManager.Instance?.SetDefaultCursor();
         AudioManager.Instance?.PlayMusic("backgroundMenu");
         CacheReferences();
         LoadSidebarIcons();
