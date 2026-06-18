@@ -163,6 +163,36 @@
     -unity-text-align: middle-center;
 }
 
+/* ══ BENCH & INACTIVE SLOTS ══ */
+
+.bench-slot, .inactive-slot {
+    flex-direction: row;
+    align-items: center;
+    min-height: 56px;
+    padding: 6px 10px;
+    background-color: rgb(28, 28, 28);
+    border: 1px solid rgb(50, 50, 50);
+    border-radius: 4px;
+    margin-bottom: 4px;
+}
+.bench-slot--empty, .inactive-slot--empty {
+    border-style: dashed;
+    border-color: rgb(60, 60, 60);
+    background-color: rgba(255, 255, 255, 0.02);
+    justify-content: center;
+}
+.bench-slot--empty:hover, .inactive-slot--empty:hover {
+    background-color: rgba(42, 95, 201, 0.12);
+}
+.bench-slot-label, .inactive-slot-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: rgb(70, 70, 70);
+    -unity-text-align: middle-center;
+    width: 100%;
+}
+
 /* ══ PLAYER CARDS ══ */
 
 .player-card {

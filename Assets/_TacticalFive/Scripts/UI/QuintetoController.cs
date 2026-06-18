@@ -50,6 +50,8 @@ public class QuintetoController : MonoBehaviour
     private Label _statStl;
     private Label _statBlk;
 
+    const int BENCH_SLOTS = 7;
+    const int INACTIVE_SLOTS = 5;
     static readonly string[] PosOrder = { "PG", "SG", "SF", "PF", "C" };
 
     static readonly Dictionary<string, (float x, float y)> CourtPositions = new()
@@ -333,9 +335,18 @@ public class QuintetoController : MonoBehaviour
     {
         var existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
         if (existing.Count == 0)
+        {
             DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
+        }
         else
         {
+            var currentIds = new HashSet<int>(_players.Select(p => p.id));
+            foreach (var e in existing)
+            {
+                if (!currentIds.Contains(e.player_id))
+                    DatabaseManager.Instance.DeleteLineupEntry(e.id);
+            }
+            existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
             var assigned = new HashSet<int>(existing.Select(l => l.player_id));
             foreach (var p in _players)
             {
@@ -452,6 +463,7 @@ public class QuintetoController : MonoBehaviour
             else
             {
                 slot.AddToClassList("starter-slot--empty");
+                MakeSlotClickable(slot, 0, i);
             }
         }
 
@@ -464,14 +476,31 @@ public class QuintetoController : MonoBehaviour
             .ThenByDescending(p => p.overall)
             .ToList();
 
-        for (int bi = 0; bi < benchPlayers.Count; bi++)
+        for (int bi = 0; bi < BENCH_SLOTS; bi++)
         {
-            var p = benchPlayers[bi];
-            var card = CreatePlayerCard(p, 1);
-            _benchList.Add(card);
-            var ls = lineupByPlayer[p.id];
-            if (ls.slot_index != bi)
-                DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 1, bi);
+            var slot = new VisualElement();
+            slot.AddToClassList("bench-slot");
+
+            if (bi < benchPlayers.Count)
+            {
+                var p = benchPlayers[bi];
+                var card = CreatePlayerCard(p, 1);
+                slot.Add(card);
+                var ls = lineupByPlayer[p.id];
+                if (ls.slot_index != bi)
+                    DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 1, bi);
+            }
+            else
+            {
+                slot.AddToClassList("bench-slot--empty");
+                var slotLabel = new Label();
+                slotLabel.AddToClassList("bench-slot-label");
+                slotLabel.text = "+";
+                slot.Add(slotLabel);
+                MakeSlotClickable(slot, 1, bi);
+            }
+
+            _benchList.Add(slot);
         }
 
         inactivePlayers = inactivePlayers
@@ -483,17 +512,59 @@ public class QuintetoController : MonoBehaviour
             .ThenByDescending(p => p.overall)
             .ToList();
 
-        for (int ii = 0; ii < inactivePlayers.Count; ii++)
+        for (int ii = 0; ii < INACTIVE_SLOTS; ii++)
         {
-            var p = inactivePlayers[ii];
-            var card = CreatePlayerCard(p, 2);
-            _inactiveList.Add(card);
-            var ls = lineupByPlayer[p.id];
-            if (ls.slot_index != ii)
-                DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2, ii);
+            var slot = new VisualElement();
+            slot.AddToClassList("inactive-slot");
+
+            if (ii < inactivePlayers.Count)
+            {
+                var p = inactivePlayers[ii];
+                var card = CreatePlayerCard(p, 2);
+                slot.Add(card);
+                var ls = lineupByPlayer[p.id];
+                if (ls.slot_index != ii)
+                    DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2, ii);
+            }
+            else
+            {
+                slot.AddToClassList("inactive-slot--empty");
+                var slotLabel = new Label();
+                slotLabel.AddToClassList("inactive-slot-label");
+                slotLabel.text = "+";
+                slot.Add(slotLabel);
+                MakeSlotClickable(slot, 2, ii);
+            }
+
+            _inactiveList.Add(slot);
         }
 
         BuildCourtView();
+    }
+
+    void MakeSlotClickable(VisualElement slot, int targetSlot, int targetSlotIndex)
+    {
+        slot.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (evt.target != slot) return;
+            if (_selectedPlayer == null) return;
+            PlayClick();
+
+            var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
+            if (srcLineup == null) return;
+
+            DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
+
+            _selectedCard?.RemoveFromClassList("player-card--selected");
+            _selectedPlayer = null;
+            _selectedCard = null;
+
+            _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+            BuildLineup();
+        });
+
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(slot);
     }
 
     void BuildCourtView()

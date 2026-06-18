@@ -3792,6 +3792,14 @@ public class DatabaseManager : MonoBehaviour
         return GetTeamLineup(teamId).Where(l => l.slot == 2).ToList();
     }
 
+    public void DeleteLineupEntry(int id)
+    {
+        if (!EnsureDb()) return;
+        var entry = _db.Table<LineupData>().FirstOrDefault(l => l.id == id);
+        if (entry != null)
+            _db.Delete(entry);
+    }
+
     public void SetPlayerSlot(int playerId, int teamId, int slot)
     {
         if (!EnsureDb()) return;
@@ -3889,9 +3897,10 @@ public class DatabaseManager : MonoBehaviour
             assigned.Add(remaining[i].id);
         }
 
-        // Rest are inactive
+        // Rest are inactive (capped at 5)
         int inactIdx = 0;
-        foreach (var p in remaining.Skip(benchSlots))
+        const int maxInactive = 5;
+        foreach (var p in remaining.Skip(benchSlots).Take(maxInactive))
         {
             _db.Insert(new LineupData
             {
