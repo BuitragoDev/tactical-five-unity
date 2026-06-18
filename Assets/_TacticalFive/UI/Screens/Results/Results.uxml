@@ -160,6 +160,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="results-title-box">
+                <ui:Label text="RESULTADOS" class="results-title-box-label" />
+            </ui:VisualElement>
+
             <!-- RESULTS CONTENT -->
             <ui:ScrollView name="ResultsContent" class="results-content"
                            horizontal-scrolling-enabled="false"
