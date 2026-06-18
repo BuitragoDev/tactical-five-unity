@@ -160,6 +160,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="standings-title-box">
+                <ui:Label text="CLASIFICACIÓN" class="standings-title-box-label" />
+            </ui:VisualElement>
+
             <!-- STANDINGS CONTENT -->
             <ui:VisualElement class="standings-content">
 
