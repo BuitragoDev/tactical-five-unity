@@ -34,6 +34,7 @@ public class QuintetoController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites = new();
 
     private PlayerData _selectedPlayer;
+    private VisualElement _selectedSlot;
 
     private VisualElement _detailEmpty;
     private ScrollView _detailScroll;
@@ -325,6 +326,7 @@ public class QuintetoController : MonoBehaviour
         _root.Q<Button>("SubmenuQuinteto")?.AddToClassList("nav-submenu-item--active");
         EnsureLineupSeeded();
         _selectedPlayer = null;
+        _selectedSlot = null;
         HidePlayerDetail();
         BuildLineup();
     }
@@ -346,10 +348,17 @@ public class QuintetoController : MonoBehaviour
             }
             existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
             var assigned = new HashSet<int>(existing.Select(l => l.player_id));
+            int nextInactIdx = existing.Where(l => l.slot == 2).Select(l => l.slot_index).DefaultIfEmpty(-1).Max() + 1;
             foreach (var p in _players)
             {
                 if (!assigned.Contains(p.id))
-                    DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2);
+                {
+                    if (nextInactIdx < INACTIVE_SLOTS)
+                    {
+                        DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2, nextInactIdx);
+                        nextInactIdx++;
+                    }
+                }
             }
         }
         _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
@@ -404,37 +413,6 @@ public class QuintetoController : MonoBehaviour
         _benchList.Clear();
         _inactiveList.Clear();
 
-        var lineupByPlayer = _lineup.ToDictionary(l => l.player_id);
-        var starterPlayers = new List<PlayerData>();
-        var benchPlayers = new List<PlayerData>();
-        var inactivePlayers = new List<PlayerData>();
-
-        foreach (var p in _players)
-        {
-            if (!lineupByPlayer.TryGetValue(p.id, out var ls))
-            {
-                inactivePlayers.Add(p);
-                continue;
-            }
-            if (ls.slot == 0)
-                starterPlayers.Add(p);
-            else if (ls.slot == 1)
-                benchPlayers.Add(p);
-            else
-                inactivePlayers.Add(p);
-        }
-
-        starterPlayers = starterPlayers
-            .OrderBy(p =>
-            {
-                var ls = lineupByPlayer[p.id];
-                if (ls.slot_index >= 0 && ls.slot_index < PosOrder.Length)
-                    return (0, ls.slot_index);
-                int fallbackIdx = Array.IndexOf(PosOrder, p.position);
-                return (1, fallbackIdx >= 0 ? fallbackIdx : 999);
-            })
-            .ToList();
-
         for (int i = 0; i < PosOrder.Length; i++)
         {
             var slot = _startersList.Q<VisualElement>($"StarterSlot{PosOrder[i]}");
@@ -448,15 +426,13 @@ public class QuintetoController : MonoBehaviour
             label.text = PosOrder[i];
             slot.Add(label);
 
-            if (i < starterPlayers.Count)
+            var ls = _lineup.FirstOrDefault(l => l.slot == 0 && l.slot_index == i);
+            var p = ls != null ? _players.FirstOrDefault(pl => pl.id == ls.player_id) : null;
+            if (p != null)
             {
-                var card = CreatePlayerCard(starterPlayers[i], 0);
+                var card = CreatePlayerCard(p, 0);
                 slot.Add(card);
                 slot.RemoveFromClassList("starter-slot--empty");
-
-                var ls = lineupByPlayer[starterPlayers[i].id];
-                if (ls.slot_index != i)
-                    DatabaseManager.Instance.SetPlayerSlot(starterPlayers[i].id, _myTeam.id, 0, i);
             }
             else
             {
@@ -465,28 +441,17 @@ public class QuintetoController : MonoBehaviour
             slot.Add(CreateTransferButton(0, i));
         }
 
-        benchPlayers = benchPlayers
-            .OrderBy(p =>
-            {
-                var ls = lineupByPlayer[p.id];
-                return ls.slot_index >= 0 ? ls.slot_index : 999;
-            })
-            .ThenByDescending(p => p.overall)
-            .ToList();
-
         for (int bi = 0; bi < BENCH_SLOTS; bi++)
         {
             var slot = new VisualElement();
             slot.AddToClassList("bench-slot");
 
-            if (bi < benchPlayers.Count)
+            var ls = _lineup.FirstOrDefault(l => l.slot == 1 && l.slot_index == bi);
+            var p = ls != null ? _players.FirstOrDefault(pl => pl.id == ls.player_id) : null;
+            if (p != null)
             {
-                var p = benchPlayers[bi];
                 var card = CreatePlayerCard(p, 1);
                 slot.Add(card);
-                var ls = lineupByPlayer[p.id];
-                if (ls.slot_index != bi)
-                    DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 1, bi);
             }
             else
             {
@@ -497,28 +462,17 @@ public class QuintetoController : MonoBehaviour
             _benchList.Add(slot);
         }
 
-        inactivePlayers = inactivePlayers
-            .OrderBy(p =>
-            {
-                var ls = lineupByPlayer[p.id];
-                return ls.slot_index >= 0 ? ls.slot_index : 999;
-            })
-            .ThenByDescending(p => p.overall)
-            .ToList();
-
         for (int ii = 0; ii < INACTIVE_SLOTS; ii++)
         {
             var slot = new VisualElement();
             slot.AddToClassList("inactive-slot");
 
-            if (ii < inactivePlayers.Count)
+            var ls = _lineup.FirstOrDefault(l => l.slot == 2 && l.slot_index == ii);
+            var p = ls != null ? _players.FirstOrDefault(pl => pl.id == ls.player_id) : null;
+            if (p != null)
             {
-                var p = inactivePlayers[ii];
                 var card = CreatePlayerCard(p, 2);
                 slot.Add(card);
-                var ls = lineupByPlayer[p.id];
-                if (ls.slot_index != ii)
-                    DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2, ii);
             }
             else
             {
@@ -546,49 +500,51 @@ public class QuintetoController : MonoBehaviour
         {
             PlayClick();
 
-            // Find which player is in this target slot
             var tgtLineup = _lineup.FirstOrDefault(l => l.slot == targetSlot && l.slot_index == targetSlotIndex);
             var tgtPlayer = tgtLineup != null ? _players.FirstOrDefault(p => p.id == tgtLineup.player_id) : null;
-            if (tgtPlayer == null) return;
 
+            if (tgtPlayer == null)
+            {
+                if (_selectedPlayer != null)
+                {
+                    _selectedSlot?.RemoveFromClassList("slot--selected");
+                    DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
+                    _selectedPlayer = null;
+                    _selectedSlot = null;
+                    _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+                    BuildLineup();
+                }
+                return;
+            }
+
+            var slotEl = btn.parent;
             if (_selectedPlayer == null)
             {
-                // Select this player
                 _selectedPlayer = tgtPlayer;
-                var card = FindPlayerCard(tgtPlayer);
-                if (card != null) card.AddToClassList("player-card--selected");
+                _selectedSlot = slotEl;
+                slotEl.AddToClassList("slot--selected");
             }
             else if (_selectedPlayer.id == tgtPlayer.id)
             {
-                // Deselect
-                var card = FindPlayerCard(tgtPlayer);
-                if (card != null) card.RemoveFromClassList("player-card--selected");
+                slotEl.RemoveFromClassList("slot--selected");
                 _selectedPlayer = null;
+                _selectedSlot = null;
             }
             else
             {
-                // Swap selected with this player
+                _selectedSlot?.RemoveFromClassList("slot--selected");
                 var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
-                if (srcLineup == null) return;
-
-                int srcSlot = srcLineup.slot;
-                int tgtSlot = tgtLineup.slot;
-                int srcIdx = srcLineup.slot_index;
-                int tgtIdx = tgtLineup.slot_index;
-
-                if (srcSlot == tgtSlot)
+                if (srcLineup != null)
                 {
-                    DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, srcSlot, tgtIdx);
-                    DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, tgtSlot, srcIdx);
-                }
-                else
-                {
-                    DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, tgtSlot, tgtSlot == 0 ? tgtIdx : -1);
-                    DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, srcSlot, srcSlot == 0 ? srcIdx : -1);
+                    int srcSlot = srcLineup.slot;
+                    int srcIdx = srcLineup.slot_index;
+
+                    DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
+                    DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, srcSlot, srcIdx);
                 }
 
                 _selectedPlayer = null;
-
+                _selectedSlot = null;
                 _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
                 BuildLineup();
             }
@@ -597,31 +553,6 @@ public class QuintetoController : MonoBehaviour
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(btn);
         return btn;
-    }
-
-    VisualElement FindPlayerCard(PlayerData player)
-    {
-        foreach (var pos in PosOrder)
-        {
-            var slot = _startersList.Q<VisualElement>($"StarterSlot{pos}");
-            if (slot == null) continue;
-            var card = slot.Q<VisualElement>(null, "player-card");
-            if (card != null && card.userData is (PlayerData pd, int) && pd.id == player.id)
-                return card;
-        }
-        foreach (var slot in _benchList.Children())
-        {
-            var card = slot.Q<VisualElement>(null, "player-card");
-            if (card != null && card.userData is (PlayerData pd, int) && pd.id == player.id)
-                return card;
-        }
-        foreach (var slot in _inactiveList.Children())
-        {
-            var card = slot.Q<VisualElement>(null, "player-card");
-            if (card != null && card.userData is (PlayerData pd, int) && pd.id == player.id)
-                return card;
-        }
-        return null;
     }
 
     void BuildCourtView()

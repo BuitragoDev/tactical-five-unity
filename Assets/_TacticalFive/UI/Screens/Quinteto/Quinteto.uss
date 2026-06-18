@@ -198,7 +198,7 @@
 .slot-transfer-btn {
     width: 28px;
     height: 28px;
-    padding: 0;
+    padding: 4px 4px;
     background-color: rgb(42, 95, 201);
     border-radius: 4px;
     border-width: 0;
@@ -206,7 +206,7 @@
     align-self: center;
     margin-left: auto;
     margin-right: 4px;
-    background-size: contain;
+    background-size: 24px 24px;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -225,10 +225,6 @@
     border-radius: 4px;
     flex-shrink: 0;
     margin-bottom: 8px;
-}
-
-.starter-slot > .player-card {
-    flex-grow: 1;
 }
 
 .player-card:hover {
@@ -299,12 +295,11 @@
     opacity: 0.7;
 }
 
-.player-card--selected {
+.slot--selected {
     border-color: rgb(10, 146, 10);
     border-width: 2px;
 }
-
-.player-card--selected .player-card-name {
+.slot--selected .player-card-name {
     color: rgb(200, 255, 200);
 }
 
