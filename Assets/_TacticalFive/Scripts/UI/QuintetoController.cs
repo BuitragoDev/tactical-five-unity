@@ -596,6 +596,7 @@ public class QuintetoController : MonoBehaviour
         autoBtn.text = "CONVOCATORIA AUTOM\u00c1TICA";
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
+            PlayClick();
             DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
             _selectedPlayer = null;
             _selectedSlot = null;
