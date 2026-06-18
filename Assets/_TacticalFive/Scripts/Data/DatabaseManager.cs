@@ -3900,11 +3900,32 @@ public class DatabaseManager : MonoBehaviour
             assigned.Add(remaining[i].id);
         }
 
-        // Rest are inactive (capped at 5)
+        // Inactive slots: forced-inactive players first, then remaining (capped at 5 total)
         int inactIdx = 0;
         const int maxInactive = 5;
-        foreach (var p in remaining.Skip(benchSlots).Take(maxInactive))
+
+        if (forceInactiveIds != null)
         {
+            var candidates = forceInactiveIds
+                .Select(pid => players.FirstOrDefault(p => p.id == pid))
+                .Where(p => p != null);
+            foreach (var p in candidates)
+            {
+                if (inactIdx >= maxInactive) break;
+                _db.Insert(new LineupData
+                {
+                    player_id = p.id,
+                    team_id = teamId,
+                    slot = 2,
+                    slot_index = inactIdx
+                });
+                inactIdx++;
+            }
+        }
+
+        foreach (var p in remaining.Skip(benchSlots))
+        {
+            if (inactIdx >= maxInactive) break;
             _db.Insert(new LineupData
             {
                 player_id = p.id,
@@ -3913,26 +3934,6 @@ public class DatabaseManager : MonoBehaviour
                 slot_index = inactIdx
             });
             inactIdx++;
-        }
-
-        // Force-inactive players get the last inactive slots
-        if (forceInactiveIds != null)
-        {
-            foreach (var pid in forceInactiveIds)
-            {
-                var p = players.FirstOrDefault(x => x.id == pid);
-                if (p == null) continue;
-                if (assigned.Contains(pid)) continue;
-                if (inactIdx >= maxInactive) break;
-                _db.Insert(new LineupData
-                {
-                    player_id = pid,
-                    team_id = teamId,
-                    slot = 2,
-                    slot_index = inactIdx
-                });
-                inactIdx++;
-            }
         }
     }
 
