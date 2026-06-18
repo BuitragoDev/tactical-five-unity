@@ -318,8 +318,10 @@
     color: rgb(200, 255, 200);
 }
 
-.player-card--injured {
+.slot--injured {
     background-color: rgb(60, 20, 20);
+}
+.slot--injured > .player-card {
     border-color: rgb(120, 30, 30);
 }
 

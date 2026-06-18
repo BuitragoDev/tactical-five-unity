@@ -419,6 +419,7 @@ public class QuintetoController : MonoBehaviour
             if (slot == null) continue;
 
             slot.Clear();
+            slot.RemoveFromClassList("slot--injured");
             slot.AddToClassList("starter-slot");
 
             var label = new Label();
@@ -433,6 +434,7 @@ public class QuintetoController : MonoBehaviour
                 var card = CreatePlayerCard(p, 0);
                 slot.Add(card);
                 slot.RemoveFromClassList("starter-slot--empty");
+                if (p.injury_days > 0) slot.AddToClassList("slot--injured");
             }
             else
             {
@@ -452,6 +454,7 @@ public class QuintetoController : MonoBehaviour
             {
                 var card = CreatePlayerCard(p, 1);
                 slot.Add(card);
+                if (p.injury_days > 0) slot.AddToClassList("slot--injured");
             }
             else
             {
@@ -473,6 +476,7 @@ public class QuintetoController : MonoBehaviour
             {
                 var card = CreatePlayerCard(p, 2);
                 slot.Add(card);
+                if (p.injury_days > 0) slot.AddToClassList("slot--injured");
             }
             else
             {
@@ -706,8 +710,7 @@ public class QuintetoController : MonoBehaviour
             case 2: card.AddToClassList("player-card--inactive"); break;
         }
 
-        if (player.injury_days > 0)
-            card.AddToClassList("player-card--injured");
+        // injured class goes on the parent slot, not the card
 
         var avatar = new VisualElement();
         avatar.AddToClassList("player-card-avatar");
