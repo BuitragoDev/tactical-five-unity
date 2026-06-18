@@ -160,6 +160,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="playoffs-title-box">
+                <ui:Label text="CUADRO ELIMINATORIAS DE PLAYOFF" class="playoffs-title-box-label" />
+            </ui:VisualElement>
+
             <!-- PLAYOFFS BODY (clipping container) -->
             <ui:VisualElement class="playoffs-body">
                 <ui:ScrollView class="playoffs-scroll"
