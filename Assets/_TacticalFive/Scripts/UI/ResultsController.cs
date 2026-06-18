@@ -102,7 +102,7 @@ public class ResultsController : MonoBehaviour
 
         if (CursorManager.Instance != null)
         {
-            CursorManager.Instance.ResetCursor();
+            CursorManager.Instance.SetDefaultCursor();
             RegisterHandCursors();
         }
     }
