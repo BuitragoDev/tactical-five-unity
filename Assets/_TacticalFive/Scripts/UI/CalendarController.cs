@@ -29,7 +29,6 @@ public class CalendarController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites64 = new();
 
     private System.DateTime _currentMonthDate;
-    private System.DateTime? _selectedDate;
     private System.DateTime? _currentGameDate;
 
     private static readonly string[] MonthNames = {
@@ -98,10 +97,11 @@ public class CalendarController : MonoBehaviour
     {
         // Get actual current date from database (for "today" highlight)
         string currentDateStr = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+        System.DateTime currentDate = default;
         bool hasCurrentDate = !string.IsNullOrEmpty(currentDateStr)
                               && System.DateTime.TryParseExact(currentDateStr, "dd/MM/yyyy",
                                   System.Globalization.CultureInfo.InvariantCulture,
-                                  System.Globalization.DateTimeStyles.None, out var currentDate);
+                                  System.Globalization.DateTimeStyles.None, out currentDate);
         if (hasCurrentDate)
             _currentGameDate = currentDate;
 
@@ -110,19 +110,17 @@ public class CalendarController : MonoBehaviour
             ? DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id)
             : null;
 
-        if (nextGame != null && System.DateTime.TryParse(nextGame.game_date, out var gameDate))
-        {
-            _currentMonthDate = new System.DateTime(gameDate.Year, gameDate.Month, 1);
-            _selectedDate = gameDate;
-            var dayGames = _allGames.Where(g => g.game_date == nextGame.game_date).ToList();
-            OnDaySelected(gameDate.Day, nextGame.game_date, dayGames, rebuildCalendar: false);
-        }
-        else if (hasCurrentDate)
+        if (hasCurrentDate)
         {
             _currentMonthDate = new System.DateTime(currentDate.Year, currentDate.Month, 1);
-            _selectedDate = currentDate;
             var dayGames = _allGames.Where(g => g.game_date == currentDateStr).ToList();
-            OnDaySelected(currentDate.Day, currentDateStr, dayGames, rebuildCalendar: false);
+            OnDaySelected(currentDate.Day, currentDateStr, dayGames);
+        }
+        else if (nextGame != null && System.DateTime.TryParse(nextGame.game_date, out var gameDate))
+        {
+            _currentMonthDate = new System.DateTime(gameDate.Year, gameDate.Month, 1);
+            var dayGames = _allGames.Where(g => g.game_date == nextGame.game_date).ToList();
+            OnDaySelected(gameDate.Day, nextGame.game_date, dayGames);
         }
         else
         {
@@ -330,7 +328,6 @@ public class CalendarController : MonoBehaviour
     void ChangeMonth(int delta)
     {
         _currentMonthDate = _currentMonthDate.AddMonths(delta);
-        _selectedDate = null;
         BuildCalendar();
         _selectedDayGames.Clear();
         _noGamesText.style.display = DisplayStyle.Flex;
@@ -371,12 +368,8 @@ public class CalendarController : MonoBehaviour
                 bool isToday = _currentGameDate.HasValue && _currentGameDate.Value.Year == year
                                 && _currentGameDate.Value.Month == month
                                 && _currentGameDate.Value.Day == dayNum;
-                bool isSelected = _selectedDate.HasValue && _selectedDate.Value.Year == year
-                                  && _selectedDate.Value.Month == month
-                                  && _selectedDate.Value.Day == dayNum;
 
                 if (isToday) cell.AddToClassList("calendar-day-cell--today");
-                if (isSelected) cell.AddToClassList("calendar-day-cell--selected");
                 if (isMyGame) cell.AddToClassList("calendar-day-cell--my-game");
 
                 if (isMyGame)
@@ -462,9 +455,8 @@ public class CalendarController : MonoBehaviour
         cell.Add(numLbl);
     }
 
-    void OnDaySelected(int day, string dateStr, List<GameData> games, bool rebuildCalendar = true)
+    void OnDaySelected(int day, string dateStr, List<GameData> games)
     {
-        _selectedDate = new System.DateTime(_currentMonthDate.Year, _currentMonthDate.Month, day);
         _selectedDayTitle.text = $"{day} / {MonthNames[_currentMonthDate.Month].ToUpper()} / {_currentMonthDate.Year}";
         _selectedDayGames.Clear();
 
@@ -562,9 +554,6 @@ public class CalendarController : MonoBehaviour
                 _selectedDayGames.Add(row);
             }
         }
-
-        if (rebuildCalendar)
-            BuildCalendar();
     }
 
     void OnActionClicked()

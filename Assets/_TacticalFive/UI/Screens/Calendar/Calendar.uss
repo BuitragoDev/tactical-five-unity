@@ -163,10 +163,6 @@
     border-left-color: rgb(212, 160, 23);
 }
 
-.calendar-day-cell--selected {
-    background-color: rgb(42, 95, 201);
-}
-
 .calendar-day-number {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
@@ -175,10 +171,6 @@
 }
 
 .calendar-day-cell--today .calendar-day-number {
-    color: rgb(255, 255, 255);
-}
-
-.calendar-day-cell--selected .calendar-day-number {
     color: rgb(255, 255, 255);
 }
 
