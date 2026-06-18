@@ -141,7 +141,7 @@
 .starter-slot {
     flex-direction: row;
     align-items: center;
-    min-height: 56px;
+    min-height: 58px;
     padding: 6px 10px;
     background-color: rgb(28, 28, 28);
     border: 1px solid rgb(50, 50, 50);
@@ -168,7 +168,7 @@
 .bench-slot, .inactive-slot {
     flex-direction: row;
     align-items: center;
-    min-height: 56px;
+    min-height: 48px;
     padding: 6px 10px;
     background-color: rgb(28, 28, 28);
     border: 1px solid rgb(50, 50, 50);
@@ -211,6 +211,23 @@
     background-repeat: no-repeat;
 }
 .slot-transfer-btn:hover {
+    background-color: rgb(60, 120, 240);
+}
+
+.auto-lineup-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: rgb(208, 216, 232);
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 10px 16px;
+    align-self: center;
+    margin-top: 12px;
+    white-space: nowrap;
+}
+.auto-lineup-btn:hover {
     background-color: rgb(60, 120, 240);
 }
 

@@ -586,6 +586,25 @@ public class QuintetoController : MonoBehaviour
 
             _courtContainer.Add(courtCard);
         }
+
+        // Remove old auto button if any
+        _courtContainer.parent.Q<Button>("AutoLineupBtn")?.RemoveFromHierarchy();
+
+        var autoBtn = new Button();
+        autoBtn.name = "AutoLineupBtn";
+        autoBtn.AddToClassList("auto-lineup-btn");
+        autoBtn.text = "CONVOCATORIA AUTOM\u00c1TICA";
+        autoBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
+            _selectedPlayer = null;
+            _selectedSlot = null;
+            _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+            BuildLineup();
+        });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(autoBtn);
+        _courtContainer.parent.Add(autoBtn);
     }
 
     void ShowPlayerDetail(PlayerData p)
