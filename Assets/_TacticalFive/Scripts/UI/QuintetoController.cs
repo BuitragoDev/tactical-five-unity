@@ -463,8 +463,8 @@ public class QuintetoController : MonoBehaviour
             else
             {
                 slot.AddToClassList("starter-slot--empty");
-                MakeSlotClickable(slot, 0, i);
             }
+            slot.Add(CreateTransferButton(0, i));
         }
 
         benchPlayers = benchPlayers
@@ -493,12 +493,8 @@ public class QuintetoController : MonoBehaviour
             else
             {
                 slot.AddToClassList("bench-slot--empty");
-                var slotLabel = new Label();
-                slotLabel.AddToClassList("bench-slot-label");
-                slotLabel.text = "+";
-                slot.Add(slotLabel);
-                MakeSlotClickable(slot, 1, bi);
             }
+            slot.Add(CreateTransferButton(1, bi));
 
             _benchList.Add(slot);
         }
@@ -529,12 +525,8 @@ public class QuintetoController : MonoBehaviour
             else
             {
                 slot.AddToClassList("inactive-slot--empty");
-                var slotLabel = new Label();
-                slotLabel.AddToClassList("inactive-slot-label");
-                slotLabel.text = "+";
-                slot.Add(slotLabel);
-                MakeSlotClickable(slot, 2, ii);
             }
+            slot.Add(CreateTransferButton(2, ii));
 
             _inactiveList.Add(slot);
         }
@@ -542,18 +534,37 @@ public class QuintetoController : MonoBehaviour
         BuildCourtView();
     }
 
-    void MakeSlotClickable(VisualElement slot, int targetSlot, int targetSlotIndex)
+    Button CreateTransferButton(int targetSlot, int targetSlotIndex)
     {
-        slot.RegisterCallback<PointerDownEvent>(evt =>
+        var btn = new Button();
+        btn.AddToClassList("slot-transfer-btn");
+        btn.text = "\u21C4";
+
+        btn.RegisterCallback<ClickEvent>(_ =>
         {
-            if (evt.target != slot) return;
             if (_selectedPlayer == null) return;
             PlayClick();
 
             var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
             if (srcLineup == null) return;
 
-            DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
+            var tgtPlayer = _players.FirstOrDefault(p =>
+            {
+                var ls = _lineup.FirstOrDefault(l => l.player_id == p.id);
+                return ls != null && ls.slot == targetSlot && ls.slot_index == targetSlotIndex;
+            });
+
+            if (tgtPlayer != null && tgtPlayer.id != _selectedPlayer.id)
+            {
+                int srcSlot = srcLineup.slot;
+                int srcIdx = srcLineup.slot_index;
+                DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
+                DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, srcSlot, srcIdx);
+            }
+            else if (tgtPlayer == null)
+            {
+                DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
+            }
 
             _selectedCard?.RemoveFromClassList("player-card--selected");
             _selectedPlayer = null;
@@ -564,7 +575,8 @@ public class QuintetoController : MonoBehaviour
         });
 
         if (CursorManager.Instance != null)
-            CursorManager.Instance.RegisterHandCursor(slot);
+            CursorManager.Instance.RegisterHandCursor(btn);
+        return btn;
     }
 
     void BuildCourtView()
