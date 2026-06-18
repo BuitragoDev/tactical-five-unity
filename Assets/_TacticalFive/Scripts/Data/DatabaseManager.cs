@@ -3844,7 +3844,7 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    public void AutoSeedLineup(int teamId, List<PlayerData> players)
+    public void AutoSeedLineup(int teamId, List<PlayerData> players, HashSet<int> forceInactiveIds = null)
     {
         if (!EnsureDb()) return;
         if (players.Count == 0) return;
@@ -3854,10 +3854,13 @@ public class DatabaseManager : MonoBehaviour
         foreach (var e in existing)
             _db.Delete(e);
 
+        var assigned = new HashSet<int>();
+        if (forceInactiveIds != null)
+            assigned.UnionWith(forceInactiveIds);
+
         var posOrder = new[] { "PG", "SG", "SF", "PF", "C" };
 
         // Assign best player at each position as starter
-        var assigned = new HashSet<int>();
         for (int si = 0; si < posOrder.Length; si++)
         {
             var best = players
@@ -3910,6 +3913,26 @@ public class DatabaseManager : MonoBehaviour
                 slot_index = inactIdx
             });
             inactIdx++;
+        }
+
+        // Force-inactive players get the last inactive slots
+        if (forceInactiveIds != null)
+        {
+            foreach (var pid in forceInactiveIds)
+            {
+                var p = players.FirstOrDefault(x => x.id == pid);
+                if (p == null) continue;
+                if (assigned.Contains(pid)) continue;
+                if (inactIdx >= maxInactive) break;
+                _db.Insert(new LineupData
+                {
+                    player_id = pid,
+                    team_id = teamId,
+                    slot = 2,
+                    slot_index = inactIdx
+                });
+                inactIdx++;
+            }
         }
     }
 

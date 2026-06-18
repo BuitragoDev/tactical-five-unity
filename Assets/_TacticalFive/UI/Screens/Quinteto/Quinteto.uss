@@ -216,7 +216,7 @@
 
 .auto-lineup-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 24px;
     letter-spacing: 2px;
     color: rgb(208, 216, 232);
     background-color: rgb(42, 95, 201);
@@ -226,6 +226,8 @@
     align-self: center;
     margin-top: 12px;
     white-space: nowrap;
+    width: 500px;
+    -unity-text-align: middle-center;
 }
 .auto-lineup-btn:hover {
     background-color: rgb(60, 120, 240);

@@ -597,7 +597,10 @@ public class QuintetoController : MonoBehaviour
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
+            var injuredIds = new HashSet<int>(_players
+                .Where(p => p.injury_days > 0)
+                .Select(p => p.id));
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players, injuredIds);
             _selectedPlayer = null;
             _selectedSlot = null;
             _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
