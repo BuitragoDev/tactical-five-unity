@@ -220,7 +220,6 @@
     flex-direction: row;
     align-items: center;
     padding: 2px 10px;
-    background-color: rgb(30, 30, 30);
     border: 2px solid rgb(45, 45, 45);
     border-radius: 4px;
     flex-shrink: 0;
@@ -280,17 +279,14 @@
 }
 
 .player-card--starter {
-    background-color: rgb(29, 45, 29);
     border-color: rgb(60, 80, 60);
 }
 
 .player-card--bench {
-    background-color: rgb(30, 30, 35);
     border-color: rgb(45, 50, 55);
 }
 
 .player-card--inactive {
-    background-color: rgb(28, 28, 28);
     border-color: rgb(40, 40, 40);
     opacity: 0.7;
 }
