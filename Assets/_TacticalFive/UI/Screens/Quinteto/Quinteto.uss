@@ -199,16 +199,16 @@
     width: 28px;
     height: 28px;
     padding: 0;
-    font-size: 16px;
     background-color: rgb(42, 95, 201);
-    border-radius: 2px;
+    border-radius: 4px;
     border-width: 0;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
     flex-shrink: 0;
     align-self: center;
     margin-left: auto;
     margin-right: 4px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 .slot-transfer-btn:hover {
     background-color: rgb(60, 120, 240);

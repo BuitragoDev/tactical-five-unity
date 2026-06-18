@@ -34,7 +34,6 @@ public class QuintetoController : MonoBehaviour
     private Dictionary<string, Sprite> _logoSprites = new();
 
     private PlayerData _selectedPlayer;
-    private VisualElement _selectedCard;
 
     private VisualElement _detailEmpty;
     private ScrollView _detailScroll;
@@ -326,7 +325,6 @@ public class QuintetoController : MonoBehaviour
         _root.Q<Button>("SubmenuQuinteto")?.AddToClassList("nav-submenu-item--active");
         EnsureLineupSeeded();
         _selectedPlayer = null;
-        _selectedCard = null;
         HidePlayerDetail();
         BuildLineup();
     }
@@ -538,45 +536,92 @@ public class QuintetoController : MonoBehaviour
     {
         var btn = new Button();
         btn.AddToClassList("slot-transfer-btn");
-        btn.text = "\u21C4";
+        var tex = Resources.Load<Texture2D>("Icons/intercambio");
+        if (tex != null)
+            btn.style.backgroundImage = new StyleBackground(tex);
+        else
+            btn.text = "\u21C4";
 
         btn.RegisterCallback<ClickEvent>(_ =>
         {
-            if (_selectedPlayer == null) return;
             PlayClick();
 
-            var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
-            if (srcLineup == null) return;
+            // Find which player is in this target slot
+            var tgtLineup = _lineup.FirstOrDefault(l => l.slot == targetSlot && l.slot_index == targetSlotIndex);
+            var tgtPlayer = tgtLineup != null ? _players.FirstOrDefault(p => p.id == tgtLineup.player_id) : null;
+            if (tgtPlayer == null) return;
 
-            var tgtPlayer = _players.FirstOrDefault(p =>
+            if (_selectedPlayer == null)
             {
-                var ls = _lineup.FirstOrDefault(l => l.player_id == p.id);
-                return ls != null && ls.slot == targetSlot && ls.slot_index == targetSlotIndex;
-            });
+                // Select this player
+                _selectedPlayer = tgtPlayer;
+                var card = FindPlayerCard(tgtPlayer);
+                if (card != null) card.AddToClassList("player-card--selected");
+            }
+            else if (_selectedPlayer.id == tgtPlayer.id)
+            {
+                // Deselect
+                var card = FindPlayerCard(tgtPlayer);
+                if (card != null) card.RemoveFromClassList("player-card--selected");
+                _selectedPlayer = null;
+            }
+            else
+            {
+                // Swap selected with this player
+                var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
+                if (srcLineup == null) return;
 
-            if (tgtPlayer != null && tgtPlayer.id != _selectedPlayer.id)
-            {
                 int srcSlot = srcLineup.slot;
+                int tgtSlot = tgtLineup.slot;
                 int srcIdx = srcLineup.slot_index;
-                DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
-                DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, srcSlot, srcIdx);
-            }
-            else if (tgtPlayer == null)
-            {
-                DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
-            }
+                int tgtIdx = tgtLineup.slot_index;
 
-            _selectedCard?.RemoveFromClassList("player-card--selected");
-            _selectedPlayer = null;
-            _selectedCard = null;
+                if (srcSlot == tgtSlot)
+                {
+                    DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, srcSlot, tgtIdx);
+                    DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, tgtSlot, srcIdx);
+                }
+                else
+                {
+                    DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, tgtSlot, tgtSlot == 0 ? tgtIdx : -1);
+                    DatabaseManager.Instance.SetPlayerSlot(tgtPlayer.id, _myTeam.id, srcSlot, srcSlot == 0 ? srcIdx : -1);
+                }
 
-            _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
-            BuildLineup();
+                _selectedPlayer = null;
+
+                _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+                BuildLineup();
+            }
         });
 
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(btn);
         return btn;
+    }
+
+    VisualElement FindPlayerCard(PlayerData player)
+    {
+        foreach (var pos in PosOrder)
+        {
+            var slot = _startersList.Q<VisualElement>($"StarterSlot{pos}");
+            if (slot == null) continue;
+            var card = slot.Q<VisualElement>(null, "player-card");
+            if (card != null && card.userData is (PlayerData pd, int) && pd.id == player.id)
+                return card;
+        }
+        foreach (var slot in _benchList.Children())
+        {
+            var card = slot.Q<VisualElement>(null, "player-card");
+            if (card != null && card.userData is (PlayerData pd, int) && pd.id == player.id)
+                return card;
+        }
+        foreach (var slot in _inactiveList.Children())
+        {
+            var card = slot.Q<VisualElement>(null, "player-card");
+            if (card != null && card.userData is (PlayerData pd, int) && pd.id == player.id)
+                return card;
+        }
+        return null;
     }
 
     void BuildCourtView()
@@ -740,57 +785,6 @@ public class QuintetoController : MonoBehaviour
 
         info.Add(meta);
         card.Add(info);
-
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.RegisterHandCursor(card);
-
-        card.RegisterCallback<PointerDownEvent>(_ =>
-        {
-            PlayClick();
-
-            if (_selectedPlayer == null)
-            {
-                _selectedPlayer = player;
-                _selectedCard = card;
-                card.AddToClassList("player-card--selected");
-            }
-            else if (_selectedPlayer.id == player.id)
-            {
-                _selectedCard?.RemoveFromClassList("player-card--selected");
-                _selectedPlayer = null;
-                _selectedCard = null;
-            }
-            else
-            {
-                var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
-                var tgtLineup = _lineup.FirstOrDefault(l => l.player_id == player.id);
-                if (srcLineup != null && tgtLineup != null)
-                {
-                    int srcSlot = srcLineup.slot;
-                    int tgtSlot = tgtLineup.slot;
-                    int srcIdx = srcLineup.slot_index;
-                    int tgtIdx = tgtLineup.slot_index;
-
-                    if (srcSlot == tgtSlot)
-                    {
-                        DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, srcSlot, tgtIdx);
-                        DatabaseManager.Instance.SetPlayerSlot(player.id, _myTeam.id, tgtSlot, srcIdx);
-                    }
-                    else
-                    {
-                        DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, tgtSlot, tgtSlot == 0 ? tgtIdx : -1);
-                        DatabaseManager.Instance.SetPlayerSlot(player.id, _myTeam.id, srcSlot, srcSlot == 0 ? srcIdx : -1);
-                    }
-                }
-
-                _selectedCard?.RemoveFromClassList("player-card--selected");
-                _selectedPlayer = null;
-                _selectedCard = null;
-
-                _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
-                BuildLineup();
-            }
-        });
 
         card.RegisterCallback<PointerEnterEvent>(_ => ShowPlayerDetail(player));
         card.RegisterCallback<PointerLeaveEvent>(_ => HidePlayerDetail());
