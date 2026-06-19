@@ -1112,6 +1112,7 @@ public class DatabaseManager : MonoBehaviour
                 salary = sal,
                 contract_years = yrs,
                 is_rookie = rookie ? 1 : 0,
+                seasons_with_team = Math.Max(1, 5 - yrs),
                 injury_days = 0,
                 injury_type = "",
                 treated = 0
@@ -1654,6 +1655,7 @@ public class DatabaseManager : MonoBehaviour
                 salary = sal,
                 contract_years = yrs,
                 is_rookie = 0,
+                seasons_with_team = 0,
                 injury_days = 0,
                 injury_type = "",
                 treated = 0
@@ -3412,12 +3414,29 @@ public class DatabaseManager : MonoBehaviour
             if (p.overall > p.potential)
                 p.overall = p.potential;
 
+            // Save old team for seasons_with_team tracking
+            int oldTeamId = p.team_id;
+
             // 3. Decrement contracts
             p.contract_years -= 1;
             if (p.contract_years <= 0)
             {
                 p.contract_years = 0;
                 p.team_id = 0;
+            }
+
+            // Track team changes for seasons_with_team
+            if (p.team_id == 0)
+            {
+                // Free agent — keep current seasons_with_team
+            }
+            else if (oldTeamId == p.team_id)
+            {
+                p.seasons_with_team += 1;  // Same team
+            }
+            else
+            {
+                p.seasons_with_team = 1;   // New team (traded, or FA signed)
             }
 
             _db.Update(p);
@@ -3518,6 +3537,7 @@ public class DatabaseManager : MonoBehaviour
                 {
                     signed.team_id = team.id;
                     signed.contract_years = Math.Max(1, 4 - signed.age / 10);
+                    signed.seasons_with_team = 1;
                     _db.Update(signed);
                     freeAgents.Remove(signed);
                     posCounts[signed.position] = posCounts.GetValueOrDefault(signed.position) + 1;
@@ -3555,6 +3575,7 @@ public class DatabaseManager : MonoBehaviour
                     {
                         signed.team_id = newTeamId;
                         signed.contract_years = Math.Max(1, 4 - signed.age / 10);
+                        signed.seasons_with_team = 1;
                         _db.Update(signed);
                         freeAgents.Remove(signed);
                         posCounts[signed.position] = posCounts.GetValueOrDefault(signed.position) + 1;

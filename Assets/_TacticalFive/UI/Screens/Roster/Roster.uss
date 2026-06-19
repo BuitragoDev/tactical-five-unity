@@ -601,7 +601,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
-    margin-bottom: 8px;
+    margin-bottom: 18px;
     -unity-text-align: middle-center;
 }
 .renew-modal-buttons {
@@ -640,6 +640,12 @@
     color: rgb(212, 160, 23);
     font-size: 20px;
     margin-top: 8px;
+}
+.renew-modal-text--warning {
+    color: rgb(212, 160, 23);
+    font-size: 18px;
+    margin-top: 4px;
+    -unity-text-align: middle-center;
 }
 
 /* Modal confirmar despido */

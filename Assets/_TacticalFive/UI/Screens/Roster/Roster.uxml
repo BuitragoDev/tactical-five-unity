@@ -297,6 +297,7 @@
                     <ui:IntegerField name="RenewYearsField" class="renew-form-field" />
                 </ui:VisualElement>
                 <ui:Label name="RenewText2" class="renew-modal-text" text="" />
+                <ui:Label name="RenewWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
                 <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
                 <ui:VisualElement class="renew-modal-buttons">
                     <ui:Button name="BtnRenewCancel"  class="btn-modal-cancel"  text="CERRAR" />

@@ -72,6 +72,8 @@ public class RosterController : MonoBehaviour
     private Label _renewPendingText;
     private VisualElement _renewFormRowSalary;
     private VisualElement _renewFormRowYears;
+    private Label _renewWarningText;
+    private long _renewMaxSalary;
     private bool _offerSent;
 
     // Modal renovación bloqueada (≥3 años)
@@ -208,6 +210,7 @@ public class RosterController : MonoBehaviour
         _renewPendingText = _root.Q<Label>("RenewPendingText");
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
         _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
+        _renewWarningText = _root.Q<Label>("RenewWarningText");
 
         // Modal renovación bloqueada
         _renewBlockOverlay = _root.Q<VisualElement>("RenewBlockOverlay");
@@ -426,7 +429,11 @@ public class RosterController : MonoBehaviour
         if (_renewSalaryField != null)
         {
             _renewSalaryField.maxLength = 8;
-            _renewSalaryField.RegisterValueChangedCallback(_ => UpdateAcceptScoreDisplay());
+            _renewSalaryField.RegisterValueChangedCallback(_ =>
+            {
+                UpdateAcceptScoreDisplay();
+                UpdateCapWarning();
+            });
             _renewSalaryField.RegisterCallback<FocusOutEvent>(_ => ValidateSalaryField());
         }
         if (_renewYearsField != null)
@@ -812,6 +819,10 @@ public class RosterController : MonoBehaviour
         // Resetear estado
         _offerSent = false;
 
+        // Calcular límites Bird Rights
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        _renewMaxSalary = CalculateMaxOfferSalary(_selectedPlayer, leagueSettings);
+
         // Mostrar formulario, ocultar pending
         if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.Flex;
         if (_renewFormRowYears != null) _renewFormRowYears.style.display = DisplayStyle.Flex;
@@ -824,9 +835,12 @@ public class RosterController : MonoBehaviour
             _btnRenewConfirm.text = "ENVIAR OFERTA";
         }
 
-        // Poner valores por defecto (cálculo automático)
+        // Poner valores por defecto (cálculo automático), clamp al máximo Bird Rights
         if (_renewSalaryField != null)
-            _renewSalaryField.value = (int)CalculateAutoSalary(_selectedPlayer.salary);
+        {
+            long autoSalary = CalculateAutoSalary(_selectedPlayer.salary);
+            _renewSalaryField.value = (int)(autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary);
+        }
         if (_renewYearsField != null)
             _renewYearsField.value = CalculateAutoYears(_selectedPlayer.age);
 
@@ -834,6 +848,9 @@ public class RosterController : MonoBehaviour
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
         if (_renewText1 != null)
             _renewText1.text = $"Oferta de renovación para {playerName}";
+
+        // Mostrar advertencia de lujo si aplica
+        UpdateCapWarning();
 
         UpdateAcceptScoreDisplay();
 
@@ -898,12 +915,70 @@ public class RosterController : MonoBehaviour
         return CalculateAcceptScore(_selectedPlayer, offerSalary, offerYears, gamesPlayed, teamChem);
     }
 
+    long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings)
+    {
+        if (settings == null) return 60_000_000;
+
+        // Max salary by NBA experience (approximation: age - 22)
+        int exp = Mathf.Max(0, player.age - 22);
+        long maxByExp;
+        if (exp <= 6) maxByExp = (long)(settings.salary_cap * 0.25);
+        else if (exp <= 9) maxByExp = (long)(settings.salary_cap * 0.30);
+        else maxByExp = (long)(settings.salary_cap * 0.35);
+
+        // Bird Rights tiers
+        if (player.seasons_with_team >= 3)
+            return maxByExp;  // Full Bird — max salary by experience
+
+        if (player.seasons_with_team == 2)
+        {
+            // Early Bird — 175% of current or 105% of league average salary
+            long earlyBird = player.salary * 175 / 100;
+            long avgPct = (long)(settings.salary_cap * 105 / 1000);
+            if (avgPct > earlyBird) earlyBird = avgPct;
+            return maxByExp < earlyBird ? maxByExp : earlyBird;
+        }
+
+        // Non-Bird — 120% of current salary
+        long nonBird = player.salary * 120 / 100;
+        return maxByExp < nonBird ? maxByExp : nonBird;
+    }
+
+    string GetBirdRightsTier(PlayerData player)
+    {
+        if (player.seasons_with_team >= 3) return "COMPLETOS";
+        if (player.seasons_with_team == 2) return "EARLY";
+        return "SIN BIRD";
+    }
+
+    void UpdateCapWarning()
+    {
+        if (_renewWarningText == null || _selectedPlayer == null || _renewSalaryField == null || _players == null) return;
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        if (leagueSettings == null) return;
+
+        long totalPayroll = _players.Sum(p => p.salary);
+        long newTotal = totalPayroll - _selectedPlayer.salary + _renewSalaryField.value;
+
+        if (newTotal > leagueSettings.luxury_tax)
+        {
+            long overage = newTotal - leagueSettings.luxury_tax;
+            _renewWarningText.text = $"AVISO: Salario total (${newTotal / 1_000_000}M) supera el límite salarial en ${overage / 1_000_000}M";
+            _renewWarningText.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            _renewWarningText.style.display = DisplayStyle.None;
+        }
+    }
+
     void ValidateSalaryField()
     {
-        if (_renewSalaryField == null) return;
+        if (_renewSalaryField == null || _renewMaxSalary <= 0) return;
         int val = _renewSalaryField.value;
         if (val < 1000000) val = 1000000;
-        else if (val > 60000000) val = 60000000;
+        else if (val > _renewMaxSalary) val = (int)_renewMaxSalary;
         else val = (int)(Mathf.Round(val / 100_000f) * 100_000);
         if (val != _renewSalaryField.value)
             _renewSalaryField.value = val;
@@ -1019,8 +1094,10 @@ public class RosterController : MonoBehaviour
         if (_renewOverlay != null) _renewOverlay.style.display = DisplayStyle.None;
         if (_renewBox != null) _renewBox.style.display = DisplayStyle.None;
         if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.None;
+        if (_renewWarningText != null) _renewWarningText.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewBox, _renewTitle);
         _offerSent = false;
+        _renewMaxSalary = 0;
     }
 
     void UpdateAcceptScoreDisplay()

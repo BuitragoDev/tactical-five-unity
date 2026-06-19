@@ -33,6 +33,7 @@ public class PlayerData
     public string injury_type { get; set; }
     public int treated { get; set; }
     public int renewal_cooldown_day { get; set; }
+    public int seasons_with_team { get; set; } = 1;
     public int morale { get; set; } = 50;
     public string photo { get; set; }
 }
