@@ -141,7 +141,7 @@
 .starter-slot {
     flex-direction: row;
     align-items: center;
-    min-height: 58px;
+    max-height: 60px;
     padding: 6px 10px;
     background-color: rgb(28, 28, 28);
     border: 1px solid rgb(50, 50, 50);
@@ -168,7 +168,7 @@
 .bench-slot, .inactive-slot {
     flex-direction: row;
     align-items: center;
-    min-height: 48px;
+    max-height: 60px;
     padding: 6px 10px;
     background-color: rgb(28, 28, 28);
     border: 1px solid rgb(50, 50, 50);

@@ -61,11 +61,11 @@
                     <ui:Label class="nav-label" text="Palmarés" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu">
+                <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu nav-submenu--visible">
                     <ui:Button name="SubmenuPalmares" class="nav-submenu-item">
                         <ui:Label text="Palmarés" class="nav-submenu-label"/>
                     </ui:Button>
-                    <ui:Button name="SubmenuRecords" class="nav-submenu-item">
+                    <ui:Button name="SubmenuRecords" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Records" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
@@ -158,6 +158,11 @@
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- RECORDS TITLE BOX -->
+            <ui:VisualElement class="records-title-box">
+                <ui:Label class="records-title-box-label" text="RÉCORDS HISTÓRICOS" />
             </ui:VisualElement>
 
             <!-- RECORDS CONTENT -->

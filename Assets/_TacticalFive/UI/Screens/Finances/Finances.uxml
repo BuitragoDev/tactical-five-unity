@@ -94,13 +94,13 @@
                         <ui:Label text="Historial" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
-                <ui:Button name="NavFinances" class="nav-item nav-item--active">
+                <ui:Button name="NavFinances" class="nav-item">
                     <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Finanzas" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
+                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu nav-submenu--visible">
+                    <ui:Button name="SubmenuDecisiones" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Decisiones" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuPrestamos" class="nav-submenu-item">
@@ -158,6 +158,11 @@
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR →" />
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="finances-title-box">
+                <ui:Label class="finances-title-box-label" text="DECISIONES ECONÓMICAS" />
             </ui:VisualElement>
 
             <!-- FINANCES CONTENT -->

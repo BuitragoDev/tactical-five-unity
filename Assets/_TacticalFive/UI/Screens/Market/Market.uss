@@ -11,6 +11,23 @@
     top: 0; left: 0; right: 0; bottom: 0;
 }
 
+.market-title-box {
+    flex-direction: row;
+    align-items: center;
+    margin: 16px 24px 0;
+    padding: 10px 18px;
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    background-color: rgba(42, 95, 201, 0.08);
+}
+.market-title-box-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: rgb(208, 216, 232);
+    text-transform: uppercase;
+}
+
 .market-main {
     flex-direction: column;
     flex-grow: 1;
@@ -285,7 +302,7 @@
 
 .market-trade-col-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
     -unity-text-transform: upper;
@@ -296,7 +313,7 @@
     width: 40px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: rgb(122, 138, 170);
     align-self: center;
@@ -306,7 +323,7 @@
     width: 40px;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: rgb(212, 160, 23);
     align-self: center;
@@ -316,7 +333,7 @@
     width: 100px;
     -unity-text-align: middle-right;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     color: rgb(208, 216, 232);
     align-self: center;
@@ -339,7 +356,7 @@
 
 .market-summary-title-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 600;
     letter-spacing: 1.5px;
     -unity-text-transform: upper;
@@ -367,7 +384,7 @@
 
 .market-summary-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -387,7 +404,7 @@
 
 .market-summary-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: rgb(255, 255, 255);
     flex-shrink: 0;
@@ -400,7 +417,7 @@
 
 .market-summary-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 600;
     color: rgb(255, 255, 255);
     flex-shrink: 0;

@@ -19,7 +19,7 @@
                     <ui:VisualElement name="NavDashboardIcon" class="nav-icon"/>
                     <ui:Label text="Inicio" class="nav-label"/>
                 </ui:Button>
-                <ui:Button name="NavRoster" class="nav-item nav-item--active">
+                <ui:Button name="NavRoster" class="nav-item">
                     <ui:VisualElement name="NavRosterIcon" class="nav-icon"/>
                     <ui:Label text="Plantilla" class="nav-label"/>
                     <ui:Label text="▼" class="nav-arrow" />

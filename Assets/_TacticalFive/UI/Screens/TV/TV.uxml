@@ -99,7 +99,7 @@
                     <ui:Label class="nav-label" text="Finanzas" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
+                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu nav-submenu--visible">
                     <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
                         <ui:Label text="Decisiones" class="nav-submenu-label"/>
                     </ui:Button>
@@ -109,7 +109,7 @@
                     <ui:Button name="SubmenuSponsors" class="nav-submenu-item">
                         <ui:Label text="Patrocinadores" class="nav-submenu-label"/>
                     </ui:Button>
-                    <ui:Button name="SubmenuTV" class="nav-submenu-item">
+                    <ui:Button name="SubmenuTV" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Televisión" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
@@ -160,6 +160,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="tv-title-box">
+                <ui:Label class="tv-title-box-label" text="TELEVISIÓN" />
+            </ui:VisualElement>
+
             <!-- TV CONTENT -->
             <ui:VisualElement class="tv-content">
 
@@ -168,9 +173,6 @@
                     <ui:Label class="current-tv-label" text="CONTRATO ACTUAL" />
                     <ui:Label name="CurrentTVName" class="current-tv-name" text="" />
                 </ui:VisualElement>
-
-                <!-- Title -->
-                <ui:Label class="tv-page-title" text="TELEVISIÓN" />
 
                 <!-- Cards container -->
                 <ui:VisualElement name="TVCardsContainer" class="tv-cards-container" />

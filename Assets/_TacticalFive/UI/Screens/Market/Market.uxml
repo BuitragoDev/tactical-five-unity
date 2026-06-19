@@ -78,13 +78,13 @@
                     <ui:Label class="nav-label" text="Estadísticas" />
                 </ui:Button>
 
-                <ui:Button name="NavMarket" class="nav-item nav-item--active">
+                <ui:Button name="NavMarket" class="nav-item">
                     <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Mercado" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="MarketSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuOfertas" class="nav-submenu-item">
+                <ui:VisualElement name="MarketSubmenu" class="nav-submenu nav-submenu--visible">
+                    <ui:Button name="SubmenuOfertas" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Ofertas" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuCartera" class="nav-submenu-item">
@@ -158,6 +158,11 @@
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="CONTINUAR" />
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- MARKET TITLE BOX -->
+            <ui:VisualElement class="market-title-box">
+                <ui:Label class="market-title-box-label" text="MERCADO DE JUGADORES" />
             </ui:VisualElement>
 
             <!-- MARKET CONTENT -->

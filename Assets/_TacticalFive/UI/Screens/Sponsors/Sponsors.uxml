@@ -99,14 +99,14 @@
                     <ui:Label class="nav-label" text="Finanzas" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
+                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu nav-submenu--visible">
                     <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
                         <ui:Label text="Decisiones" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuPrestamos" class="nav-submenu-item">
                         <ui:Label text="Préstamos Bancarios" class="nav-submenu-label"/>
                     </ui:Button>
-                    <ui:Button name="SubmenuSponsors" class="nav-submenu-item">
+                    <ui:Button name="SubmenuSponsors" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Patrocinadores" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuTV" class="nav-submenu-item">
@@ -160,6 +160,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="sponsors-title-box">
+                <ui:Label class="sponsors-title-box-label" text="PATROCINADORES" />
+            </ui:VisualElement>
+
             <!-- SPONSORS CONTENT -->
             <ui:VisualElement class="sponsors-content">
 
@@ -168,9 +173,6 @@
                     <ui:Label class="current-sponsor-label" text="CONTRATO ACTUAL" />
                     <ui:Label name="CurrentSponsorName" class="current-sponsor-name" text="" />
                 </ui:VisualElement>
-
-                <!-- Title -->
-                <ui:Label class="sponsors-page-title" text="PATROCINADORES" />
 
                 <!-- Cards container -->
                 <ui:VisualElement name="SponsorsCardsContainer" class="sponsors-cards-container" />

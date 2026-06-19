@@ -245,10 +245,10 @@
 
 .bracket-empty-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
-    max-width: 400px;
+    max-width: 600px;
 }
 
 /* ── Dynamically created bracket elements ── */

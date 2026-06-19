@@ -179,6 +179,6 @@ public static class PalmaresSeeder
         new QuintetRecord { season = "2022-23", pg = "Luka Doncic", pg_team = "Mavericks", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Joel Embiid", c_team = "76ers" },
         new QuintetRecord { season = "2023-24", pg = "Luka Doncic", pg_team = "Mavericks", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Nikola Jokic", c_team = "Nuggets" },
         new QuintetRecord { season = "2024-25", pg = "Donovan Mitchell", pg_team = "Cavaliers", sg = "Shai Gilgeous-Alexander", sg_team = "Thunder", sf = "Jayson Tatum", sf_team = "Celtics", pf = "Giannis Antetokounmpo", pf_team = "Bucks", c = "Nikola Jokic", c_team = "Nuggets" },
-        new QuintetRecord { season = "2025-26", pg = "Shai Gilgeous-Alexander", pg_team = "Thunder", sg = "Cade Cunningham", sg_team = "Pistons", sf = "luka Doncic", sf_team = "Lakers", pf = "Victor Wembanyama", pf_team = "Spurs", c = "Nikola Jokic", c_team = "Nuggets" },
+        new QuintetRecord { season = "2025-26", pg = "Shai Gilgeous-Alexander", pg_team = "Thunder", sg = "Cade Cunningham", sg_team = "Pistons", sf = "Luka Doncic", sf_team = "Lakers", pf = "Victor Wembanyama", pf_team = "Spurs", c = "Nikola Jokic", c_team = "Nuggets" },
     };
 }

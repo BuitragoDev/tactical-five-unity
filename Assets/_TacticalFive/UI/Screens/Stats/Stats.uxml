@@ -160,6 +160,11 @@
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
 
+            <!-- STATS TITLE BOX -->
+            <ui:VisualElement class="stats-title-box">
+                <ui:Label class="stats-title-box-label" text="ESTADÍSTICAS DE JUGADORES" />
+            </ui:VisualElement>
+
             <!-- STATS CONTENT -->
             <ui:VisualElement class="stats-content">
 

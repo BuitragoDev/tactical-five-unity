@@ -21,10 +21,30 @@
 .tv-content {
     flex-direction: column;
     flex-grow: 1;
-    padding: 30px 40px;
+    padding: 16px 40px 30px 40px;
     min-height: 0;
     overflow: auto;
     align-items: center;
+}
+
+/* ── TITLE BOX ── */
+
+.tv-title-box {
+    flex-direction: row;
+    align-items: center;
+    margin: 16px 24px 0;
+    padding: 10px 18px;
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    background-color: rgba(42, 95, 201, 0.08);
+    align-self: stretch;
+}
+.tv-title-box-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: rgb(208, 216, 232);
+    text-transform: uppercase;
 }
 
 /* ── Current TV Banner ── */
@@ -53,15 +73,6 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 24px;
     color: rgb(208, 216, 232);
-}
-
-/* ── Page Title ── */
-.tv-page-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 48px;
-    color: rgb(208, 216, 232);
-    letter-spacing: 2px;
-    margin-bottom: 30px;
 }
 
 /* ── Cards Container ── */

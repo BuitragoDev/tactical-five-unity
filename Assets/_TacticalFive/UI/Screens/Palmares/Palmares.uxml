@@ -50,13 +50,13 @@
                     <ui:VisualElement name="NavStandingsIcon" class="nav-icon"/>
                     <ui:Label text="Clasificación" class="nav-label"/>
                 </ui:Button>
-                <ui:Button name="NavPalmares" class="nav-item nav-item--active">
+                <ui:Button name="NavPalmares" class="nav-item">
                     <ui:VisualElement name="NavPalmaresIcon" class="nav-icon"/>
                     <ui:Label text="Palmarés" class="nav-label"/>
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuPalmares" class="nav-submenu-item">
+                <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu nav-submenu--visible">
+                    <ui:Button name="SubmenuPalmares" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Palmarés" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuRecords" class="nav-submenu-item">
@@ -149,6 +149,11 @@
                 <ui:Button name="BtnAction" text="CONTINUAR" class="btn-action"/>
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
             </ui:VisualElement>
+            <!-- PALMARES TITLE BOX -->
+            <ui:VisualElement class="palmares-title-box">
+                <ui:Label class="palmares-title-box-label" text="PALMARÉS HISTÓRICO DE EQUIPOS" />
+            </ui:VisualElement>
+
             <ui:VisualElement class="palmares-content">
                 <ui:VisualElement class="palmares-tabs" style="border-left-width: 17px; border-top-width: 10px;">
                     <ui:Button name="TabEquipos" text="EQUIPOS" class="palmares-tab"/>

@@ -80,11 +80,11 @@
                     <ui:Label class="nav-label" text="Mercado" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="MarketSubmenu" class="nav-submenu">
+                <ui:VisualElement name="MarketSubmenu" class="nav-submenu nav-submenu--visible">
                     <ui:Button name="SubmenuOfertas" class="nav-submenu-item">
                         <ui:Label text="Ofertas" class="nav-submenu-label"/>
                     </ui:Button>
-                    <ui:Button name="SubmenuCartera" class="nav-submenu-item">
+                    <ui:Button name="SubmenuCartera" class="nav-submenu-item nav-submenu-item--active">
                         <ui:Label text="Cartera" class="nav-submenu-label"/>
                     </ui:Button>
                     <ui:Button name="SubmenuHistorial" class="nav-submenu-item">
@@ -131,8 +131,20 @@
                     <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="CARTERA" />
-                    <ui:Label name="HeaderScoutCount" class="header-stat-value" text="0/5" />
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
+                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
                 <ui:VisualElement class="header-season-info">
@@ -141,6 +153,11 @@
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="MERCADO" />
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="cartera-title-box">
+                <ui:Label class="cartera-title-box-label" text="CARTERA DE JUGADORES" />
             </ui:VisualElement>
 
             <!-- CONTENT -->

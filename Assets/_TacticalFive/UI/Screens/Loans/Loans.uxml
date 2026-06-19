@@ -94,12 +94,12 @@
                         <ui:Label text="Historial" class="nav-submenu-label"/>
                     </ui:Button>
                 </ui:VisualElement>
-                <ui:Button name="NavFinances" class="nav-item nav-item--active">
+                <ui:Button name="NavFinances" class="nav-item">
                     <ui:VisualElement name="NavFinancesIcon" class="nav-icon" />
                     <ui:Label class="nav-label" text="Finanzas" />
                     <ui:Label text="▼" class="nav-arrow" />
                 </ui:Button>
-                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
+                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu nav-submenu--visible">
                     <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
                         <ui:Label text="Decisiones" class="nav-submenu-label"/>
                     </ui:Button>
@@ -135,8 +135,20 @@
                     <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="PRÉSTAMOS" />
-                    <ui:Label name="HeaderLoanCount" class="header-stat-value" text="" />
+                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
+                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
+                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
+                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
+                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
                 </ui:VisualElement>
                 <ui:VisualElement class="header-spacer" />
                 <ui:VisualElement class="header-season-info">
@@ -145,6 +157,11 @@
                 </ui:VisualElement>
                 <ui:Button name="BtnAction" class="btn-action" text="FINANZAS" />
                 <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
+
+            <!-- TITLE BOX -->
+            <ui:VisualElement class="loans-title-box">
+                <ui:Label class="loans-title-box-label" text="PRÉSTAMOS BANCARIOS" />
             </ui:VisualElement>
 
             <!-- CONTENT -->
