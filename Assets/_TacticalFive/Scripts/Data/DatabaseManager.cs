@@ -162,6 +162,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<PlayerPersonalityData>();
         _db.CreateTable<PlayerRelationshipData>();
         _db.CreateTable<LineupData>();
+        _db.CreateTable<OfferData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -3279,6 +3280,36 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return;
         _db.Delete<MessageData>(messageId);
+    }
+
+    // ── OFFERS ──────────────────────────────────────────────
+
+    public void AddOffer(OfferData offer)
+    {
+        if (!EnsureDb()) return;
+        _db.Insert(offer);
+        Debug.Log($"[DB] AddOffer OK: player={offer.player_id} salary={offer.offer_salary} years={offer.offer_years}");
+    }
+
+    public List<OfferData> GetMaturedUnprocessedOffers(int managerId, int currentDay)
+    {
+        if (!EnsureDb()) return new List<OfferData>();
+        var all = _db.Table<OfferData>().Where(o => o.manager_id == managerId).ToList();
+        Debug.Log($"[DB] GetMaturedUnprocessedOffers: total offers for manager={managerId}: {all.Count}");
+        foreach (var o in all)
+            Debug.Log($"[DB]   offer id={o.id} player={o.player_id} day_sent={o.day_sent} processed={o.processed} currentDay={currentDay} mature={currentDay >= o.day_sent + 7}");
+        return all.Where(o => o.processed == 0 && currentDay >= o.day_sent + 7).ToList();
+    }
+
+    public void MarkOfferProcessed(int offerId)
+    {
+        if (!EnsureDb()) return;
+        var offer = _db.Table<OfferData>().FirstOrDefault(o => o.id == offerId);
+        if (offer != null)
+        {
+            offer.processed = 1;
+            _db.Update(offer);
+        }
     }
 
     // ── TRADES ─────────────────────────────────────────────

@@ -288,11 +288,19 @@
                 <ui:VisualElement name="RenewIcon" class="renew-modal-icon"/>
                 <ui:Label name="RenewTitle" class="renew-modal-title" text="RENOVAR CONTRATO" />
                 <ui:Label name="RenewText1" class="renew-modal-text" text="" />
+                <ui:VisualElement name="RenewFormRowSalary" class="renew-form-row">
+                    <ui:Label class="renew-form-label" text="SALARIO ($)" />
+                    <ui:IntegerField name="RenewSalaryField" class="renew-form-field" />
+                </ui:VisualElement>
+                <ui:VisualElement name="RenewFormRowYears" class="renew-form-row">
+                    <ui:Label class="renew-form-label" text="DURACIÓN (años)" />
+                    <ui:IntegerField name="RenewYearsField" class="renew-form-field" />
+                </ui:VisualElement>
                 <ui:Label name="RenewText2" class="renew-modal-text" text="" />
-                <ui:Label name="RenewText3" class="renew-modal-text" text="" />
+                <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
                 <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewCancel"  class="btn-modal-cancel"  text="CANCELAR" />
-                    <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="CONFIRMAR RENOVACIÓN" />
+                    <ui:Button name="BtnRenewCancel"  class="btn-modal-cancel"  text="CERRAR" />
+                    <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="ENVIAR OFERTA" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

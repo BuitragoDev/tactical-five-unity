@@ -610,6 +610,38 @@
     gap: 12px;
 }
 
+.renew-form-row {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+}
+.renew-form-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
+    width: 120px;
+    flex-shrink: 0;
+}
+.renew-form-field {
+    flex-grow: 1;
+    height: 36px;
+    font-size: 18px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    color: rgb(208, 216, 232);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    padding: 4px 8px;
+    -unity-text-align: middle-left;
+}
+.renew-modal-text--pending {
+    color: rgb(212, 160, 23);
+    font-size: 20px;
+    margin-top: 8px;
+}
+
 /* Modal confirmar despido */
 .dismiss-modal-overlay {
     position: absolute;

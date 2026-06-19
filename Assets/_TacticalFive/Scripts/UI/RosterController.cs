@@ -65,9 +65,14 @@ public class RosterController : MonoBehaviour
     private Label _renewTitle;
     private Label _renewText1;
     private Label _renewText2;
-    private Label _renewText3;
     private Button _btnRenewCancel;
     private Button _btnRenewConfirm;
+    private IntegerField _renewSalaryField;
+    private IntegerField _renewYearsField;
+    private Label _renewPendingText;
+    private VisualElement _renewFormRowSalary;
+    private VisualElement _renewFormRowYears;
+    private bool _offerSent;
 
     // Modal renovación bloqueada (≥3 años)
     private VisualElement _renewBlockOverlay;
@@ -196,9 +201,13 @@ public class RosterController : MonoBehaviour
         _renewTitle = _root.Q<Label>("RenewTitle");
         _renewText1 = _root.Q<Label>("RenewText1");
         _renewText2 = _root.Q<Label>("RenewText2");
-        _renewText3 = _root.Q<Label>("RenewText3");
         _btnRenewCancel = _root.Q<Button>("BtnRenewCancel");
         _btnRenewConfirm = _root.Q<Button>("BtnRenewConfirm");
+        _renewSalaryField = _root.Q<IntegerField>("RenewSalaryField");
+        _renewYearsField = _root.Q<IntegerField>("RenewYearsField");
+        _renewPendingText = _root.Q<Label>("RenewPendingText");
+        _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
+        _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
 
         // Modal renovación bloqueada
         _renewBlockOverlay = _root.Q<VisualElement>("RenewBlockOverlay");
@@ -409,9 +418,25 @@ public class RosterController : MonoBehaviour
         // Renovar contrato
         _btnRenew?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnRenewClicked(); });
         _btnRenewCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseRenewModal(); });
-        _btnRenewConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmRenew(); });
+        _btnRenewConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SendOffer(); });
         _btnRenewBlockOk?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseRenewBlockModal(); });
         _btnRenewCooldownOk?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseRenewCooldownModal(); });
+
+        // Recalcular probabilidad al cambiar valores del formulario + validación
+        if (_renewSalaryField != null)
+        {
+            _renewSalaryField.maxLength = 8;
+            _renewSalaryField.RegisterValueChangedCallback(_ => UpdateAcceptScoreDisplay());
+            _renewSalaryField.RegisterCallback<FocusOutEvent>(_ => ValidateSalaryField());
+        }
+        if (_renewYearsField != null)
+        {
+            _renewYearsField.RegisterValueChangedCallback(_ =>
+            {
+                ClampYearsField();
+                UpdateAcceptScoreDisplay();
+            });
+        }
 
         if (CursorManager.Instance != null)
         {
@@ -784,24 +809,36 @@ public class RosterController : MonoBehaviour
             return;
         }
 
-        // Calcular oferta automática (lógica Django end_season_renew)
-        _renewOfferYears = CalculateAutoYears(_selectedPlayer.age);
-        _renewOfferSalary = CalculateAutoSalary(_selectedPlayer.salary);
+        // Resetear estado
+        _offerSent = false;
 
+        // Mostrar formulario, ocultar pending
+        if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.Flex;
+        if (_renewFormRowYears != null) _renewFormRowYears.style.display = DisplayStyle.Flex;
+        if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.None;
+        if (_renewText1 != null) _renewText1.style.display = DisplayStyle.Flex;
+        if (_renewText2 != null) _renewText2.style.display = DisplayStyle.Flex;
+        if (_btnRenewConfirm != null)
+        {
+            _btnRenewConfirm.SetEnabled(true);
+            _btnRenewConfirm.text = "ENVIAR OFERTA";
+        }
+
+        // Poner valores por defecto (cálculo automático)
+        if (_renewSalaryField != null)
+            _renewSalaryField.value = (int)CalculateAutoSalary(_selectedPlayer.salary);
+        if (_renewYearsField != null)
+            _renewYearsField.value = CalculateAutoYears(_selectedPlayer.age);
+
+        ClearRenewModalColor(_renewBox, _renewTitle);
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
-        string salaryText = $"${_renewOfferSalary / 1_000_000}M/año";
-        string yearsText = $"{_renewOfferYears} año{(_renewOfferYears > 1 ? "s" : "")}";
+        if (_renewText1 != null)
+            _renewText1.text = $"Oferta de renovación para {playerName}";
 
-        _renewText1.text = $"Oferta de renovación para {playerName}";
-        _renewText2.text = $"Salario: {salaryText}  |  Duración: {yearsText}";
+        UpdateAcceptScoreDisplay();
 
-        // Calcular probabilidad de aceptación
-        float acceptScore = CalculateAcceptScore(_renewOfferSalary, _renewOfferYears);
-        _renewText3.text = $"Probabilidad de aceptación: {acceptScore:F0}%";
-
-        SetRenewModalColor(_renewBox, _renewTitle, true);
-        _renewOverlay.style.display = DisplayStyle.Flex;
-        _renewBox.style.display = DisplayStyle.Flex;
+        if (_renewOverlay != null) _renewOverlay.style.display = DisplayStyle.Flex;
+        if (_renewBox != null) _renewBox.style.display = DisplayStyle.Flex;
     }
 
     int CalculateAutoYears(int age)
@@ -821,121 +858,112 @@ public class RosterController : MonoBehaviour
         return newSalary;
     }
 
+    public static float CalculateAcceptScore(PlayerData player, long offerSalary, int offerYears, int gamesPlayed, int teamChemistry)
+    {
+        float score = 50f;
+        float salaryIncrease = player.salary > 0 ? (float)(offerSalary - player.salary) / player.salary : 0f;
+
+        if (salaryIncrease >= 0.30f) score += 25f;
+        else if (salaryIncrease >= 0.10f) score += 15f;
+        else if (salaryIncrease >= 0f) score += 5f;
+        else score -= Mathf.Abs(salaryIncrease) * 50f;
+
+        if (player.age >= 32) score += 10f;
+        else if (player.age >= 28) score += 5f;
+        else if (player.age <= 23) score -= 5f;
+
+        if (player.overall >= 85) score -= 5f;
+        else if (player.overall < 75) score += 5f;
+
+        if (gamesPlayed >= 50) score += 10f;
+        else if (gamesPlayed >= 30) score += 5f;
+        else if (gamesPlayed < 10) score -= 10f;
+
+        if (offerYears >= 4) score += 10f;
+        else if (offerYears >= 3) score += 5f;
+        else if (offerYears < 2) score -= 5f;
+
+        float chemistryMod = (teamChemistry - 50) * 0.3f;
+        score += chemistryMod;
+
+        return Mathf.Max(10f, Mathf.Min(95f, score));
+    }
+
     float CalculateAcceptScore(long offerSalary, int offerYears)
     {
-        float acceptScore = 50f;
-        long currentSalary = _selectedPlayer.salary;
-        float salaryIncrease = currentSalary > 0 ? (float)(offerSalary - currentSalary) / currentSalary : 0f;
-
-        if (salaryIncrease >= 0.30f) acceptScore += 25f;
-        else if (salaryIncrease >= 0.10f) acceptScore += 15f;
-        else if (salaryIncrease >= 0f) acceptScore += 5f;
-        else acceptScore -= Mathf.Abs(salaryIncrease) * 50f;
-
-        if (_selectedPlayer.age >= 32) acceptScore += 10f;
-        else if (_selectedPlayer.age >= 28) acceptScore += 5f;
-        else if (_selectedPlayer.age <= 23) acceptScore -= 5f;
-
-        if (_selectedPlayer.overall >= 85) acceptScore -= 5f;
-        else if (_selectedPlayer.overall < 75) acceptScore += 5f;
-
         int gamesPlayed = 0;
         if (_season != null)
             gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(_selectedPlayer.id, _season.id);
-
-        if (gamesPlayed >= 50) acceptScore += 10f;
-        else if (gamesPlayed >= 30) acceptScore += 5f;
-        else if (gamesPlayed < 10) acceptScore -= 10f;
-
-        if (offerYears >= 4) acceptScore += 10f;
-        else if (offerYears >= 3) acceptScore += 5f;
-        else if (offerYears < 2) acceptScore -= 5f;
-
         int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        float chemistryMod = (teamChem - 50) * 0.3f;
-        acceptScore += chemistryMod;
-
-        return Mathf.Max(10f, Mathf.Min(95f, acceptScore));
+        return CalculateAcceptScore(_selectedPlayer, offerSalary, offerYears, gamesPlayed, teamChem);
     }
 
-    void ConfirmRenew()
+    void ValidateSalaryField()
     {
-        CloseRenewModal();
+        if (_renewSalaryField == null) return;
+        int val = _renewSalaryField.value;
+        if (val < 1000000) val = 1000000;
+        else if (val > 60000000) val = 60000000;
+        else val = (int)(Mathf.Round(val / 100_000f) * 100_000);
+        if (val != _renewSalaryField.value)
+            _renewSalaryField.value = val;
+    }
 
-        if (_selectedPlayer == null) return;
+    void ClampYearsField()
+    {
+        if (_renewYearsField == null) return;
+        int val = _renewYearsField.value;
+        int clamped = Mathf.Clamp(val, 1, 5);
+        if (clamped != val)
+            _renewYearsField.value = clamped;
+    }
 
+    void SendOffer()
+    {
+        if (_selectedPlayer == null || _offerSent || _renewSalaryField == null || _renewYearsField == null) return;
+
+        // Validar y normalizar campos antes de enviar
+        ValidateSalaryField();
+        ClampYearsField();
+
+        // Leer valores de los campos
+        _renewOfferSalary = _renewSalaryField.value;
+        _renewOfferYears = _renewYearsField.value;
+
+        // Validar
+        if (_renewOfferSalary <= 0 || _renewOfferYears < 1 || _renewOfferYears > 5)
+            return;
+
+        _offerSent = true;
+
+        // Guardar oferta en BD
         int currentDay = _season?.current_game_day ?? 0;
-        float acceptScore = CalculateAcceptScore(_renewOfferSalary, _renewOfferYears);
-        bool accepted = Random.Range(1, 101) <= acceptScore;
-
-        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
-        string salaryText = $"${_renewOfferSalary / 1_000_000}M/año";
-        string yearsText = $"{_renewOfferYears} año{(_renewOfferYears > 1 ? "s" : "")}";
-
-        string cooldownText;
-        string resultTitle;
-        string resultLine1;
-        string resultLine2;
-
-        if (accepted)
+        var offer = new OfferData
         {
-            _selectedPlayer.salary = _renewOfferSalary;
-            _selectedPlayer.contract_years = _renewOfferYears;
-            _selectedPlayer.renewal_cooldown_day = currentDay + 365;
-            DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
+            manager_id = _manager.id,
+            player_id = _selectedPlayer.id,
+            offer_salary = _renewOfferSalary,
+            offer_years = _renewOfferYears,
+            day_sent = currentDay,
+            status = "pending",
+            processed = 0
+        };
+        DatabaseManager.Instance.AddOffer(offer);
+        Debug.Log($"[Roster] Oferta guardada: player={_selectedPlayer.id} salary={_renewOfferSalary} years={_renewOfferYears} day_sent={currentDay}");
 
-            cooldownText = "1 año";
-            resultTitle = "CONTRATO RENOVADO";
-            resultLine1 = $"{playerName} ha aceptado la oferta.";
-            resultLine2 = $"Nuevo contrato: {salaryText} · {yearsText}. No podrás renovarle de nuevo hasta dentro de {cooldownText}.";
+        // Ocultar formulario, mostrar pending
+        if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.None;
+        if (_renewFormRowYears != null) _renewFormRowYears.style.display = DisplayStyle.None;
+        if (_renewText1 != null) _renewText1.style.display = DisplayStyle.None;
+        if (_renewText2 != null) _renewText2.style.display = DisplayStyle.None;
+        if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.Flex;
 
-            DatabaseManager.Instance.AddMessage(new MessageData
-            {
-                manager_id = _manager.id,
-                sender_type = 0,
-                sender_id = 0,
-                title = $"Contrato renovado: {playerName}",
-                body = $"{playerName} ha aceptado la oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}. No podrás renovarle de nuevo hasta dentro de {cooldownText}.",
-                game_day = currentDay,
-                game_date = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                is_read = 0
-            });
-        }
-        else
+        // Deshabilitar botón enviar oferta
+        if (_btnRenewConfirm != null)
         {
-            _selectedPlayer.renewal_cooldown_day = currentDay + 15;
-            DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
-
-            cooldownText = "15 días";
-            resultTitle = "OFERTA RECHAZADA";
-            resultLine1 = $"{playerName} ha rechazado la oferta.";
-            resultLine2 = $"Oferta: {salaryText} · {yearsText}. Podrás intentarlo de nuevo dentro de {cooldownText}.";
-
-            DatabaseManager.Instance.AddMessage(new MessageData
-            {
-                manager_id = _manager.id,
-                sender_type = 0,
-                sender_id = 0,
-                title = $"Oferta rechazada: {playerName}",
-                body = $"{playerName} ha rechazado la oferta de {salaryText} durante {yearsText}. Podrás intentarlo de nuevo dentro de {cooldownText}.",
-                game_day = currentDay,
-                game_date = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                is_read = 0
-            });
+            _btnRenewConfirm.SetEnabled(false);
+            _btnRenewConfirm.text = "ENVIADA";
         }
-
-        // Refresh contract display
-        _detailContract.text = $"${_selectedPlayer.salary / 1_000_000}M/año · {_selectedPlayer.contract_years} año{(_selectedPlayer.contract_years != 1 ? "s" : "")}";
-
-        // Refresh roster list
-        BuildRosterList();
-
-        // Show result modal with auto-close
-        ShowRenewResultModal(resultTitle, resultLine1, resultLine2, accepted);
     }
 
     void ShowRenewResultModal(string title, string line1, string line2, bool positive)
@@ -988,9 +1016,25 @@ public class RosterController : MonoBehaviour
 
     void CloseRenewModal()
     {
-        _renewOverlay.style.display = DisplayStyle.None;
-        _renewBox.style.display = DisplayStyle.None;
+        if (_renewOverlay != null) _renewOverlay.style.display = DisplayStyle.None;
+        if (_renewBox != null) _renewBox.style.display = DisplayStyle.None;
+        if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewBox, _renewTitle);
+        _offerSent = false;
+    }
+
+    void UpdateAcceptScoreDisplay()
+    {
+        if (_selectedPlayer == null || _renewSalaryField == null || _renewYearsField == null || _renewText2 == null) return;
+        int years = _renewYearsField.value;
+        long salary = _renewSalaryField.value;
+        if (salary <= 0 || years < 1)
+        {
+            _renewText2.text = "";
+            return;
+        }
+        float score = CalculateAcceptScore(salary, years);
+        _renewText2.text = $"Probabilidad de aceptación: {score:F0}%";
     }
 
     void OpenRenewBlockModal()

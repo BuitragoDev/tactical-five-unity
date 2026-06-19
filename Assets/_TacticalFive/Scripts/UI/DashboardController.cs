@@ -125,6 +125,7 @@ public class DashboardController : MonoBehaviour
         RegisterCallbacks();
         Refresh();
         CheckBudgetWarning();
+        ProcessMaturedOffers();
     }
 
     void Update()
@@ -875,6 +876,7 @@ public class DashboardController : MonoBehaviour
 
         if (gamesToday.Count == 0)
         {
+            ProcessMaturedOffers();
             Debug.Log($"[Dashboard] Día {gameDay} — sin partidos, continúa en Dashboard");
         }
         else if (myTeamPlays || hasAllStar)
@@ -941,6 +943,164 @@ public class DashboardController : MonoBehaviour
             ShowBudgetFiredModal();
         else
             ShowBudgetWarningModal(_manager.budget_red_warnings);
+    }
+
+    void ProcessMaturedOffers()
+    {
+        if (_season == null || _manager == null || _myTeam == null)
+        {
+            Debug.Log($"[Dashboard] ProcessMaturedOffers: skip null refs season={_season != null} manager={_manager != null} myTeam={_myTeam != null}");
+            return;
+        }
+
+        Debug.Log($"[Dashboard] ProcessMaturedOffers: checking offers manager={_manager.id} current_day={_season.current_game_day}");
+        var offers = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day);
+        Debug.Log($"[Dashboard] ProcessMaturedOffers: found {offers.Count} matured offers");
+        if (offers.Count == 0) return;
+
+        string resultSummary = "";
+        int acceptedCount = 0;
+        int rejectedCount = 0;
+        string nowStr = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        foreach (var offer in offers)
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(offer.player_id);
+            if (player == null) continue;
+
+            int gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(player.id, _season.id);
+            int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+            float acceptScore = RosterController.CalculateAcceptScore(player, offer.offer_salary, offer.offer_years, gamesPlayed, teamChem);
+            bool accepted = Random.Range(1, 101) <= acceptScore;
+
+            string playerName = $"{player.first_name} {player.last_name}";
+            string salaryText = $"${offer.offer_salary / 1_000_000}M/año";
+            string yearsText = $"{offer.offer_years} año{(offer.offer_years > 1 ? "s" : "")}";
+
+            if (accepted)
+            {
+                acceptedCount++;
+                player.salary = offer.offer_salary;
+                player.contract_years = offer.offer_years;
+                player.renewal_cooldown_day = offer.day_sent + 365;
+                DatabaseManager.Instance.UpdatePlayer(player);
+
+                resultSummary += $"✓ {playerName}: CONTRATO RENOVADO — {salaryText} · {yearsText}\n";
+
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 0,
+                    sender_id = 0,
+                    title = $"Contrato renovado: {playerName}",
+                    body = $"{playerName} ha aceptado tu oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}.",
+                    game_day = _season.current_game_day,
+                    game_date = nowStr,
+                    created_at = nowStr,
+                    date_sent = nowStr,
+                    is_read = 0
+                });
+            }
+            else
+            {
+                rejectedCount++;
+                player.renewal_cooldown_day = offer.day_sent + 15;
+                DatabaseManager.Instance.UpdatePlayer(player);
+
+                resultSummary += $"✗ {playerName}: OFERTA RECHAZADA — {salaryText} · {yearsText}\n";
+
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 0,
+                    sender_id = 0,
+                    title = $"Oferta rechazada: {playerName}",
+                    body = $"{playerName} ha rechazado tu oferta de {salaryText} durante {yearsText}.",
+                    game_day = _season.current_game_day,
+                    game_date = nowStr,
+                    created_at = nowStr,
+                    date_sent = nowStr,
+                    is_read = 0
+                });
+            }
+
+            DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+        }
+
+        string title;
+        int resultType;
+        if (rejectedCount == 0)
+        {
+            title = acceptedCount > 1 ? "CONTRATOS RENOVADOS" : "CONTRATO RENOVADO";
+            resultType = 1;
+        }
+        else if (acceptedCount == 0)
+        {
+            title = rejectedCount > 1 ? "OFERTAS RECHAZADAS" : "OFERTA RECHAZADA";
+            resultType = -1;
+        }
+        else
+        {
+            title = "OFERTAS RESUELTAS";
+            resultType = 0;
+        }
+
+        string text = acceptedCount + rejectedCount > 1
+            ? $"Se han procesado {acceptedCount + rejectedCount} ofertas de renovación.\n\n{resultSummary}"
+            : resultSummary;
+
+        ShowOfferResultModal(title, text, resultType);
+    }
+
+    void ShowOfferResultModal(string title, string text, int resultType)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        if (resultType == 0)
+            box.AddToClassList("fired-modal-box--warning");
+        else if (resultType == 1)
+            box.AddToClassList("fired-modal-box--positive");
+        _firedOverlay.Add(box);
+
+        var icon = new VisualElement();
+        icon.AddToClassList("fired-modal-icon");
+        var iconTex = Resources.Load<Texture2D>("Icons/boton-i-64px");
+        if (iconTex != null)
+            icon.style.backgroundImage = new StyleBackground(iconTex);
+        box.Add(icon);
+
+        var titleLabel = new Label(title);
+        titleLabel.AddToClassList("fired-modal-title");
+        if (resultType == 0)
+            titleLabel.AddToClassList("fired-modal-title--warning");
+        else if (resultType == 1)
+            titleLabel.AddToClassList("fired-modal-title--positive");
+        box.Add(titleLabel);
+
+        var textLabel = new Label(text);
+        textLabel.AddToClassList("fired-modal-text");
+        textLabel.style.whiteSpace = WhiteSpace.Normal;
+        box.Add(textLabel);
+
+        var btn = new Button();
+        btn.text = "CONTINUAR";
+        btn.AddToClassList("fired-modal-btn");
+        if (resultType == 0)
+            btn.AddToClassList("fired-modal-btn--warning");
+        else if (resultType == 1)
+            btn.AddToClassList("fired-modal-btn--positive");
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        box.Add(btn);
+
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(btn);
     }
 
     void ShowBudgetWarningModal(int num)

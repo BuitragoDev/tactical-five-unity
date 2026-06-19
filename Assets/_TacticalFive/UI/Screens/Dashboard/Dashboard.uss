@@ -1020,6 +1020,20 @@
     color: rgb(212, 160, 23);
 }
 
+.fired-modal-box--positive {
+    border-top-color: rgb(39, 174, 96);
+}
+.fired-modal-title--positive {
+    color: rgb(39, 174, 96);
+}
+.fired-modal-btn--positive {
+    background-color: rgb(39, 174, 96);
+}
+.fired-modal-btn--warning {
+    background-color: rgb(212, 160, 23);
+    color: rgb(0, 0, 0);
+}
+
 /* ══ INJURED LINEUP MODAL ══ */
 
 .injured-modal-text {
