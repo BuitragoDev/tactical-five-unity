@@ -982,7 +982,7 @@ public class DashboardController : MonoBehaviour
                 acceptedCount++;
                 player.salary = offer.offer_salary;
                 player.contract_years = offer.offer_years;
-                player.renewal_cooldown_day = offer.day_sent + 365;
+                player.renewal_cooldown_day = _season.current_game_day + 365;
                 DatabaseManager.Instance.UpdatePlayer(player);
 
                 resultSummary += $"✓ {playerName}: CONTRATO RENOVADO — {salaryText} · {yearsText}\n";
@@ -1004,7 +1004,7 @@ public class DashboardController : MonoBehaviour
             else
             {
                 rejectedCount++;
-                player.renewal_cooldown_day = offer.day_sent + 15;
+                player.renewal_cooldown_day = _season.current_game_day + 15;
                 DatabaseManager.Instance.UpdatePlayer(player);
 
                 resultSummary += $"✗ {playerName}: OFERTA RECHAZADA — {salaryText} · {yearsText}\n";
