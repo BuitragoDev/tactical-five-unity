@@ -819,9 +819,10 @@ public class RosterController : MonoBehaviour
         // Resetear estado
         _offerSent = false;
 
-        // Calcular límites Bird Rights
+        // Calcular límites Bird Rights + cap space
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        _renewMaxSalary = CalculateMaxOfferSalary(_selectedPlayer, leagueSettings);
+        long totalPayroll = _players != null ? _players.Sum(p => p.salary) : 0;
+        _renewMaxSalary = CalculateMaxOfferSalary(_selectedPlayer, leagueSettings, totalPayroll);
 
         // Mostrar formulario, ocultar pending
         if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.Flex;
@@ -915,7 +916,7 @@ public class RosterController : MonoBehaviour
         return CalculateAcceptScore(_selectedPlayer, offerSalary, offerYears, gamesPlayed, teamChem);
     }
 
-    long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings)
+    long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll)
     {
         if (settings == null) return 60_000_000;
 
@@ -926,22 +927,26 @@ public class RosterController : MonoBehaviour
         else if (exp <= 9) maxByExp = (long)(settings.salary_cap * 0.30);
         else maxByExp = (long)(settings.salary_cap * 0.35);
 
-        // Bird Rights tiers
+        // Bird Rights max
+        long birdMax;
         if (player.seasons_with_team >= 3)
-            return maxByExp;  // Full Bird — max salary by experience
-
-        if (player.seasons_with_team == 2)
+            birdMax = maxByExp;
+        else if (player.seasons_with_team == 2)
         {
-            // Early Bird — 175% of current or 105% of league average salary
-            long earlyBird = player.salary * 175 / 100;
+            birdMax = player.salary * 175 / 100;
             long avgPct = (long)(settings.salary_cap * 105 / 1000);
-            if (avgPct > earlyBird) earlyBird = avgPct;
-            return maxByExp < earlyBird ? maxByExp : earlyBird;
+            if (avgPct > birdMax) birdMax = avgPct;
         }
+        else
+            birdMax = player.salary * 120 / 100;
 
-        // Non-Bird — 120% of current salary
-        long nonBird = player.salary * 120 / 100;
-        return maxByExp < nonBird ? maxByExp : nonBird;
+        // Cap space max: you can use available cap room + player's current salary slot
+        long capSpace = settings.salary_cap - totalPayroll;
+        long capSpaceMax = player.salary + (capSpace > 0 ? capSpace : 0);
+
+        // Actual max = higher of Bird Rights and cap space, capped by experience max
+        long rawMax = birdMax > capSpaceMax ? birdMax : capSpaceMax;
+        return maxByExp < rawMax ? maxByExp : rawMax;
     }
 
     string GetBirdRightsTier(PlayerData player)
