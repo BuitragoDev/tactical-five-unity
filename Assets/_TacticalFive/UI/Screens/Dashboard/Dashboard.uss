@@ -1087,3 +1087,37 @@
     margin-right: 0;
     margin-left: 6px;
 }
+
+/* ══ TRADE OFFER MODAL ══ */
+
+.trade-offer-modal-box {
+    width: 540px;
+}
+
+.trade-offer-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 8px;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/boton-i-64px.png");
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.trade-offer-sublabel {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-left;
+    align-self: flex-start;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.trade-offer-player-row {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-left;
+    align-self: flex-start;
+    padding-left: 16px;
+    margin-bottom: 4px;
+}

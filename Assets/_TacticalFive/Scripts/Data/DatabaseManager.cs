@@ -114,6 +114,7 @@ public class DatabaseManager : MonoBehaviour
         template.CreateTable<PlayerPersonalityData>();
         template.CreateTable<PlayerRelationshipData>();
         template.CreateTable<LineupData>();
+        template.CreateTable<TradeOfferData>();
         _db.InsertAll(template.Table<TeamData>().ToList());
         _db.InsertAll(template.Table<PlayerData>().ToList());
         _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
@@ -163,6 +164,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<PlayerRelationshipData>();
         _db.CreateTable<LineupData>();
         _db.CreateTable<OfferData>();
+        _db.CreateTable<TradeOfferData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -3324,6 +3326,34 @@ public class DatabaseManager : MonoBehaviour
         if (offer != null)
         {
             offer.processed = 1;
+            _db.Update(offer);
+        }
+    }
+
+    // ── TRADE OFFERS ──────────────────────────────────────
+
+    public void AddTradeOffer(TradeOfferData offer)
+    {
+        if (!EnsureDb()) return;
+        _db.Insert(offer);
+        Debug.Log($"[DB] AddTradeOffer OK: out={offer.player_id_out} in={offer.player_id_in}");
+    }
+
+    public List<TradeOfferData> GetPendingTradeOffers(int managerId)
+    {
+        if (!EnsureDb()) return new List<TradeOfferData>();
+        return _db.Table<TradeOfferData>()
+            .Where(o => o.manager_id == managerId && o.processed == 0)
+            .ToList();
+    }
+
+    public void MarkTradeOfferProcessed(int offerId, int status)
+    {
+        if (!EnsureDb()) return;
+        var offer = _db.Table<TradeOfferData>().FirstOrDefault(o => o.id == offerId);
+        if (offer != null)
+        {
+            offer.processed = status;
             _db.Update(offer);
         }
     }
