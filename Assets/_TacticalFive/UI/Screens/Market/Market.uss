@@ -594,6 +594,12 @@
     background-color: rgb(46, 204, 113);
 }
 
+.market-btn-fa-sign:disabled {
+    background-color: rgb(100, 100, 100);
+    cursor: default;
+    opacity: 0.85;
+}
+
 .market-empty-fa {
     padding: 40px 20px;
     -unity-text-align: middle-center;
@@ -614,12 +620,10 @@
 }
 
 .market-modal-content {
-    background-color: rgb(28, 33, 48);
+    background-color: rgb(15, 17, 23);
     border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 12px;
-    max-width: 480px;
-    width: 90%;
+    border-color: rgb(58, 74, 99);
+    width: 520px;
 }
 
 .market-modal-header {
@@ -640,7 +644,9 @@
 }
 
 .market-modal-body {
-    padding: 20px;
+    padding: 32px;
+    flex-direction: column;
+    align-items: center;
 }
 
 .market-modal-text {
@@ -666,25 +672,17 @@
 .market-modal-row {
     flex-direction: row;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 8px;
+    width: 100%;
+    margin-bottom: 12px;
 }
 
 .market-modal-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
-    font-weight: 600;
-    color: rgb(122, 138, 170);
+    font-size: 16px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
-    min-width: 60px;
-}
-
-.market-modal-value {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(255, 255, 255);
-    font-weight: 600;
+    color: rgb(122, 138, 170);
+    width: 120px;
+    flex-shrink: 0;
 }
 
 .market-modal-footer {
@@ -696,42 +694,54 @@
     justify-content: flex-end;
 }
 
-.market-modal-btn-cancel {
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    color: rgb(208, 216, 232);
+.btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(30, 37, 53);
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    color: rgb(122, 138, 170);
     font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    margin-right: 10px;
+    -unity-text-align: middle-center;
 }
-
-.market-modal-btn-cancel:hover {
-    background-color: rgb(42, 51, 71);
+.btn-modal-cancel:hover {
+    border-color: rgb(122, 138, 170);
+    color: rgb(208, 216, 232);
 }
-
-.market-modal-btn-confirm {
+.btn-modal-confirm {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(23, 110, 59);
     border-width: 0;
     color: rgb(255, 255, 255);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    padding: 10px 20px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-left: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    -unity-text-align: middle-center;
+}
+.btn-modal-confirm:hover {
+    background-color: rgb(39, 174, 96);
 }
 
-.market-modal-btn-confirm:hover {
-    opacity: 0.9;
+.btn-modal-danger {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(155, 30, 30);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 18px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 24px;
+    -unity-text-align: middle-center;
 }
+.btn-modal-danger:hover {
+    background-color: rgb(192, 57, 43);
+}
+
+
 
 /* ── TRANSFER WINDOW CLOSED ── */
 .market-closed-overlay {
@@ -862,7 +872,7 @@
     font-size: 22px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     -unity-text-align: middle-center;
 }
 .renew-modal-title--positive {
@@ -881,6 +891,94 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
-    margin-bottom: 8px;
+    margin-top: 8px;
+    margin-bottom: 18px;
     -unity-text-align: middle-center;
+}
+.renew-modal-text--warning {
+    color: rgb(212, 160, 23);
+    font-size: 18px;
+    margin-top: 4px;
+    -unity-text-align: middle-center;
+}
+.renew-modal-text--info {
+    color: rgb(122, 138, 170);
+    font-size: 18px;
+    margin-top: 6px;
+    -unity-text-align: middle-center;
+}
+.renew-modal-text--pending {
+    color: rgb(212, 160, 23);
+    font-size: 20px;
+    margin-top: 8px;
+}
+.renew-modal-buttons {
+    flex-direction: row;
+    margin-top: 24px;
+    gap: 12px;
+}
+.renew-form-row {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 12px;
+}
+.renew-form-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
+    width: 120px;
+    flex-shrink: 0;
+}
+.renew-form-field {
+    flex-grow: 1;
+    height: 36px;
+    font-size: 18px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    color: rgb(208, 216, 232);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    padding: 4px 8px;
+    -unity-text-align: middle-left;
+}
+
+/* ── Spinner (increment/decrement buttons + label) ── */
+.renew-spinner-row {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+.renew-spin-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    padding: 0 4px;
+}
+
+.btn-spin {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 20px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    width: 36px;
+    height: 36px;
+    background-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+    border-width: 0;
+    padding: 0;
+}
+
+.btn-spin:hover {
+    background-color: rgb(58, 74, 99);
+}
+
+.btn-spin--disabled {
+    background-color: rgb(30, 34, 46);
+    color: rgb(80, 90, 110);
 }

@@ -647,6 +647,12 @@
     margin-top: 4px;
     -unity-text-align: middle-center;
 }
+.renew-modal-text--info {
+    color: rgb(122, 138, 170);
+    font-size: 18px;
+    margin-top: 6px;
+    -unity-text-align: middle-center;
+}
 
 /* Modal confirmar despido */
 .dismiss-modal-overlay {
@@ -739,4 +745,43 @@
 }
 .btn-modal-confirm:hover {
     background-color: rgb(39, 174, 96);
+}
+
+/* ── Spinner (increment/decrement buttons + label) ── */
+.renew-spinner-row {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+.renew-spin-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    padding: 0 4px;
+}
+
+.btn-spin {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 20px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    width: 36px;
+    height: 36px;
+    background-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+    border-width: 0;
+    padding: 0;
+}
+
+.btn-spin:hover {
+    background-color: rgb(58, 74, 99);
+}
+
+.btn-spin--disabled {
+    background-color: rgb(30, 34, 46);
+    color: rgb(80, 90, 110);
 }

@@ -67,13 +67,20 @@ public class RosterController : MonoBehaviour
     private Label _renewText2;
     private Button _btnRenewCancel;
     private Button _btnRenewConfirm;
-    private IntegerField _renewSalaryField;
-    private IntegerField _renewYearsField;
+    private Label _renewSalaryValue;
+    private Label _renewSalaryDec;
+    private Label _renewSalaryInc;
+    private Label _renewYearsValue;
+    private Label _renewYearsDec;
+    private Label _renewYearsInc;
     private Label _renewPendingText;
     private VisualElement _renewFormRowSalary;
     private VisualElement _renewFormRowYears;
     private Label _renewWarningText;
+    private Label _renewMaxInfo;
     private long _renewMaxSalary;
+    private long _renewSalary;
+    private int _renewYears;
     private bool _offerSent;
 
     // Modal renovación bloqueada (≥3 años)
@@ -205,12 +212,17 @@ public class RosterController : MonoBehaviour
         _renewText2 = _root.Q<Label>("RenewText2");
         _btnRenewCancel = _root.Q<Button>("BtnRenewCancel");
         _btnRenewConfirm = _root.Q<Button>("BtnRenewConfirm");
-        _renewSalaryField = _root.Q<IntegerField>("RenewSalaryField");
-        _renewYearsField = _root.Q<IntegerField>("RenewYearsField");
+        _renewSalaryValue = _root.Q<Label>("RenewSalaryValue");
+        _renewSalaryDec = _root.Q<Label>("RenewSalaryDec");
+        _renewSalaryInc = _root.Q<Label>("RenewSalaryInc");
+        _renewYearsValue = _root.Q<Label>("RenewYearsValue");
+        _renewYearsDec = _root.Q<Label>("RenewYearsDec");
+        _renewYearsInc = _root.Q<Label>("RenewYearsInc");
         _renewPendingText = _root.Q<Label>("RenewPendingText");
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
         _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
         _renewWarningText = _root.Q<Label>("RenewWarningText");
+        _renewMaxInfo = _root.Q<Label>("RenewMaxInfo");
 
         // Modal renovación bloqueada
         _renewBlockOverlay = _root.Q<VisualElement>("RenewBlockOverlay");
@@ -425,25 +437,11 @@ public class RosterController : MonoBehaviour
         _btnRenewBlockOk?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseRenewBlockModal(); });
         _btnRenewCooldownOk?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseRenewCooldownModal(); });
 
-        // Recalcular probabilidad al cambiar valores del formulario + validación
-        if (_renewSalaryField != null)
-        {
-            _renewSalaryField.maxLength = 8;
-            _renewSalaryField.RegisterValueChangedCallback(_ =>
-            {
-                UpdateAcceptScoreDisplay();
-                UpdateCapWarning();
-            });
-            _renewSalaryField.RegisterCallback<FocusOutEvent>(_ => ValidateSalaryField());
-        }
-        if (_renewYearsField != null)
-        {
-            _renewYearsField.RegisterValueChangedCallback(_ =>
-            {
-                ClampYearsField();
-                UpdateAcceptScoreDisplay();
-            });
-        }
+        // Spinner buttons (long-press para incrementar/decrementar)
+        SetupRenewLongPress(_renewSalaryDec, () => StepRenewSalary(-1));
+        SetupRenewLongPress(_renewSalaryInc, () => StepRenewSalary(1));
+        SetupRenewLongPress(_renewYearsDec, () => StepRenewYears(-1));
+        SetupRenewLongPress(_renewYearsInc, () => StepRenewYears(1));
 
         if (CursorManager.Instance != null)
         {
@@ -454,6 +452,10 @@ public class RosterController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_btnRenew);
             CursorManager.Instance.RegisterHandCursor(_btnRenewCancel);
             CursorManager.Instance.RegisterHandCursor(_btnRenewConfirm);
+            RegisterRenewSpinnerCursor(_renewSalaryDec);
+            RegisterRenewSpinnerCursor(_renewSalaryInc);
+            RegisterRenewSpinnerCursor(_renewYearsDec);
+            RegisterRenewSpinnerCursor(_renewYearsInc);
             CursorManager.Instance.RegisterHandCursor(_btnRenewBlockOk);
             CursorManager.Instance.RegisterHandCursor(_btnRenewCooldownOk);
             CursorManager.Instance.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
@@ -836,14 +838,12 @@ public class RosterController : MonoBehaviour
             _btnRenewConfirm.text = "ENVIAR OFERTA";
         }
 
-        // Poner valores por defecto (cálculo automático), clamp al máximo Bird Rights
-        if (_renewSalaryField != null)
-        {
-            long autoSalary = CalculateAutoSalary(_selectedPlayer.salary);
-            _renewSalaryField.value = (int)(autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary);
-        }
-        if (_renewYearsField != null)
-            _renewYearsField.value = CalculateAutoYears(_selectedPlayer.age);
+        // Poner valores por defecto
+        long autoSalary = CalculateAutoSalary(_selectedPlayer.salary);
+        _renewSalary = autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary;
+        _renewSalary = (long)(Mathf.Round(_renewSalary / 100_000f) * 100_000);
+        _renewYears = CalculateAutoYears(_selectedPlayer.age);
+        RefreshRenewSpinners();
 
         ClearRenewModalColor(_renewBox, _renewTitle);
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
@@ -853,6 +853,7 @@ public class RosterController : MonoBehaviour
         // Mostrar advertencia de lujo si aplica
         UpdateCapWarning();
 
+        UpdateRenewMaxInfo();
         UpdateAcceptScoreDisplay();
 
         if (_renewOverlay != null) _renewOverlay.style.display = DisplayStyle.Flex;
@@ -916,37 +917,71 @@ public class RosterController : MonoBehaviour
         return CalculateAcceptScore(_selectedPlayer, offerSalary, offerYears, gamesPlayed, teamChem);
     }
 
-    long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll)
+    public struct MaxOfferBreakdown
     {
-        if (settings == null) return 60_000_000;
+        public long finalMax;
+        public long maxByExp;
+        public long birdMax;
+        public long capSpaceMax;
+        public string birdTierName;
+        public string bindingReason;
+    }
 
-        // Max salary by NBA experience (approximation: age - 22)
+    public static MaxOfferBreakdown GetMaxOfferBreakdown(PlayerData player, LeagueSettingsData settings, long totalPayroll)
+    {
+        var result = new MaxOfferBreakdown();
+
+        if (settings == null)
+        {
+            result.finalMax = 60_000_000;
+            result.birdTierName = "—";
+            result.bindingReason = "Sin configuración de liga";
+            return result;
+        }
+
         int exp = Mathf.Max(0, player.age - 22);
-        long maxByExp;
-        if (exp <= 6) maxByExp = (long)(settings.salary_cap * 0.25);
-        else if (exp <= 9) maxByExp = (long)(settings.salary_cap * 0.30);
-        else maxByExp = (long)(settings.salary_cap * 0.35);
+        if (exp <= 6) result.maxByExp = (long)(settings.salary_cap * 0.25);
+        else if (exp <= 9) result.maxByExp = (long)(settings.salary_cap * 0.30);
+        else result.maxByExp = (long)(settings.salary_cap * 0.35);
 
-        // Bird Rights max
-        long birdMax;
         if (player.seasons_with_team >= 3)
-            birdMax = maxByExp;
+        {
+            result.birdTierName = "COMPLETOS";
+            result.birdMax = result.maxByExp;
+        }
         else if (player.seasons_with_team == 2)
         {
-            birdMax = player.salary * 175 / 100;
+            result.birdTierName = "EARLY";
+            result.birdMax = player.salary * 175 / 100;
             long avgPct = (long)(settings.salary_cap * 105 / 1000);
-            if (avgPct > birdMax) birdMax = avgPct;
+            if (avgPct > result.birdMax) result.birdMax = avgPct;
         }
         else
-            birdMax = player.salary * 120 / 100;
+        {
+            result.birdTierName = "SIN BIRD";
+            result.birdMax = player.salary * 120 / 100;
+        }
 
-        // Cap space max: you can use available cap room + player's current salary slot
         long capSpace = settings.salary_cap - totalPayroll;
-        long capSpaceMax = player.salary + (capSpace > 0 ? capSpace : 0);
+        result.capSpaceMax = player.salary + (capSpace > 0 ? capSpace : 0);
 
-        // Actual max = higher of Bird Rights and cap space, capped by experience max
-        long rawMax = birdMax > capSpaceMax ? birdMax : capSpaceMax;
-        return maxByExp < rawMax ? maxByExp : rawMax;
+        long rawMax = result.birdMax > result.capSpaceMax ? result.birdMax : result.capSpaceMax;
+        result.finalMax = result.maxByExp < rawMax ? result.maxByExp : rawMax;
+
+        // Determine binding reason
+        if (result.finalMax == result.maxByExp && result.maxByExp <= rawMax)
+            result.bindingReason = $"Máx. por experiencia ({result.maxByExp:N0})";
+        else if (result.birdMax >= result.capSpaceMax)
+            result.bindingReason = $"Bird Rights {result.birdTierName} ({result.birdMax:N0})";
+        else
+            result.bindingReason = $"Espacio salarial ({result.capSpaceMax:N0})";
+
+        return result;
+    }
+
+    public static long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll)
+    {
+        return GetMaxOfferBreakdown(player, settings, totalPayroll).finalMax;
     }
 
     string GetBirdRightsTier(PlayerData player)
@@ -958,18 +993,18 @@ public class RosterController : MonoBehaviour
 
     void UpdateCapWarning()
     {
-        if (_renewWarningText == null || _selectedPlayer == null || _renewSalaryField == null || _players == null) return;
+        if (_renewWarningText == null || _selectedPlayer == null || _players == null) return;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         if (leagueSettings == null) return;
 
         long totalPayroll = _players.Sum(p => p.salary);
-        long newTotal = totalPayroll - _selectedPlayer.salary + _renewSalaryField.value;
+        long newTotal = totalPayroll - _selectedPlayer.salary + _renewSalary;
 
         if (newTotal > leagueSettings.luxury_tax)
         {
             long overage = newTotal - leagueSettings.luxury_tax;
-            _renewWarningText.text = $"AVISO: Salario total (${newTotal / 1_000_000}M) supera el límite salarial en ${overage / 1_000_000}M";
+            _renewWarningText.text = $"AVISO: Salario total (${newTotal / 1_000_000}M) supera el límite de lujo en ${overage / 1_000_000}M";
             _renewWarningText.style.display = DisplayStyle.Flex;
         }
         else
@@ -978,41 +1013,33 @@ public class RosterController : MonoBehaviour
         }
     }
 
-    void ValidateSalaryField()
+    void UpdateRenewMaxInfo()
     {
-        if (_renewSalaryField == null || _renewMaxSalary <= 0) return;
-        int val = _renewSalaryField.value;
-        if (val < 1000000) val = 1000000;
-        else if (val > _renewMaxSalary) val = (int)_renewMaxSalary;
-        else val = (int)(Mathf.Round(val / 100_000f) * 100_000);
-        if (val != _renewSalaryField.value)
-            _renewSalaryField.value = val;
-    }
+        if (_renewMaxInfo == null || _selectedPlayer == null || _players == null) return;
 
-    void ClampYearsField()
-    {
-        if (_renewYearsField == null) return;
-        int val = _renewYearsField.value;
-        int clamped = Mathf.Clamp(val, 1, 5);
-        if (clamped != val)
-            _renewYearsField.value = clamped;
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        if (settings == null) return;
+
+        long totalPayroll = _players.Sum(p => p.salary);
+        var breakdown = GetMaxOfferBreakdown(_selectedPlayer, settings, totalPayroll);
+
+        _renewMaxInfo.text = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
+        _renewMaxInfo.style.display = DisplayStyle.Flex;
     }
 
     void SendOffer()
     {
-        if (_selectedPlayer == null || _offerSent || _renewSalaryField == null || _renewYearsField == null) return;
+        if (_selectedPlayer == null || _offerSent) return;
 
-        // Validar y normalizar campos antes de enviar
-        ValidateSalaryField();
-        ClampYearsField();
+        // Asegurar que los valores están dentro de límites
+        if (_renewSalary < 1000000) _renewSalary = 1000000;
+        else if (_renewSalary > _renewMaxSalary) _renewSalary = _renewMaxSalary;
+        if (_renewYears < 1) _renewYears = 1;
+        else if (_renewYears > 5) _renewYears = 5;
 
-        // Leer valores de los campos
-        _renewOfferSalary = _renewSalaryField.value;
-        _renewOfferYears = _renewYearsField.value;
-
-        // Validar
-        if (_renewOfferSalary <= 0 || _renewOfferYears < 1 || _renewOfferYears > 5)
-            return;
+        _renewOfferSalary = _renewSalary;
+        _renewOfferYears = _renewYears;
+        RefreshRenewSpinners();
 
         _offerSent = true;
 
@@ -1094,6 +1121,86 @@ public class RosterController : MonoBehaviour
         ClearRenewResultIcon(_renewCooldownIcon);
     }
 
+    // ── Spinner helpers ─────────────────────────────────────
+
+    void StepRenewSalary(int dir)
+    {
+        long val = _renewSalary + 500_000 * dir;
+        _renewSalary = val < 1_000_000 ? 1_000_000 : (val > _renewMaxSalary ? _renewMaxSalary : val);
+        RefreshRenewSpinners();
+        UpdateCapWarning();
+        UpdateAcceptScoreDisplay();
+    }
+
+    void StepRenewYears(int dir)
+    {
+        int val = _renewYears + dir;
+        _renewYears = val < 1 ? 1 : (val > 5 ? 5 : val);
+        RefreshRenewSpinners();
+        UpdateAcceptScoreDisplay();
+    }
+
+    void RefreshRenewSpinners()
+    {
+        if (_renewSalaryValue != null)
+            _renewSalaryValue.text = $"${_renewSalary:N0}";
+        if (_renewYearsValue != null)
+            _renewYearsValue.text = $"{_renewYears} año{(_renewYears > 1 ? "s" : "")}";
+
+        ToggleRenewSpinDisabled(_renewSalaryDec, _renewSalary <= 1_000_000);
+        ToggleRenewSpinDisabled(_renewSalaryInc, _renewSalary >= _renewMaxSalary);
+        ToggleRenewSpinDisabled(_renewYearsDec, _renewYears <= 1);
+        ToggleRenewSpinDisabled(_renewYearsInc, _renewYears >= 5);
+    }
+
+    void ToggleRenewSpinDisabled(Label el, bool disabled)
+    {
+        if (el == null) return;
+        if (disabled)
+            el.AddToClassList("btn-spin--disabled");
+        else
+            el.RemoveFromClassList("btn-spin--disabled");
+    }
+
+    void SetupRenewLongPress(VisualElement el, System.Action onStep)
+    {
+        if (el == null) return;
+
+        IVisualElementScheduledItem scheduled = null;
+
+        el.RegisterCallback<PointerDownEvent>(_ =>
+        {
+            PlayClick();
+            scheduled?.Pause();
+            onStep();
+            scheduled = el.schedule.Execute(() => onStep()).Every(80).StartingIn(350);
+        });
+
+        el.RegisterCallback<PointerUpEvent>(_ =>
+        {
+            if (scheduled != null)
+            {
+                scheduled.Pause();
+                scheduled = null;
+            }
+        });
+
+        el.RegisterCallback<PointerCaptureOutEvent>(_ =>
+        {
+            if (scheduled != null)
+            {
+                scheduled.Pause();
+                scheduled = null;
+            }
+        });
+    }
+
+    void RegisterRenewSpinnerCursor(Label el)
+    {
+        if (el != null && CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(el);
+    }
+
     void CloseRenewModal()
     {
         if (_renewOverlay != null) _renewOverlay.style.display = DisplayStyle.None;
@@ -1107,15 +1214,13 @@ public class RosterController : MonoBehaviour
 
     void UpdateAcceptScoreDisplay()
     {
-        if (_selectedPlayer == null || _renewSalaryField == null || _renewYearsField == null || _renewText2 == null) return;
-        int years = _renewYearsField.value;
-        long salary = _renewSalaryField.value;
-        if (salary <= 0 || years < 1)
+        if (_selectedPlayer == null || _renewText2 == null) return;
+        if (_renewSalary <= 0 || _renewYears < 1)
         {
             _renewText2.text = "";
             return;
         }
-        float score = CalculateAcceptScore(salary, years);
+        float score = CalculateAcceptScore(_renewSalary, _renewYears);
         _renewText2.text = $"Probabilidad de aceptación: {score:F0}%";
     }
 

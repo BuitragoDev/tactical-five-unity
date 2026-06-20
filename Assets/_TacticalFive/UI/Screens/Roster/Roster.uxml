@@ -290,14 +290,23 @@
                 <ui:Label name="RenewText1" class="renew-modal-text" text="" />
                 <ui:VisualElement name="RenewFormRowSalary" class="renew-form-row">
                     <ui:Label class="renew-form-label" text="SALARIO ($)" />
-                    <ui:IntegerField name="RenewSalaryField" class="renew-form-field" />
+                    <ui:VisualElement class="renew-spinner-row">
+                        <ui:Label name="RenewSalaryDec" class="btn-spin" text="◀" />
+                        <ui:Label name="RenewSalaryValue" class="renew-spin-label" text="" />
+                        <ui:Label name="RenewSalaryInc" class="btn-spin" text="▶" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="RenewFormRowYears" class="renew-form-row">
                     <ui:Label class="renew-form-label" text="DURACIÓN (años)" />
-                    <ui:IntegerField name="RenewYearsField" class="renew-form-field" />
+                    <ui:VisualElement class="renew-spinner-row">
+                        <ui:Label name="RenewYearsDec" class="btn-spin" text="◀" />
+                        <ui:Label name="RenewYearsValue" class="renew-spin-label" text="" />
+                        <ui:Label name="RenewYearsInc" class="btn-spin" text="▶" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Label name="RenewText2" class="renew-modal-text" text="" />
                 <ui:Label name="RenewWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
+                <ui:Label name="RenewMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
                 <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
                 <ui:VisualElement class="renew-modal-buttons">
                     <ui:Button name="BtnRenewCancel"  class="btn-modal-cancel"  text="CERRAR" />

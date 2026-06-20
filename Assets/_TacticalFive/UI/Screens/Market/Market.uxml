@@ -293,49 +293,48 @@
 
         <!-- ══ MODALS ══ -->
         <!-- FA Roster Full Modal -->
-        <ui:VisualElement name="FARosterFullModal" class="market-modal" style="display: none;">
-            <ui:VisualElement class="market-modal-content">
-                <ui:VisualElement class="market-modal-header" style="color: rgb(192, 57, 43);">
-                    <ui:Label class="market-modal-icon" text="❌" />
-                    <ui:Label class="market-modal-title" text="PLANTILLA COMPLETA" />
-                </ui:VisualElement>
-                <ui:VisualElement class="market-modal-body">
-                    <ui:Label name="FARosterFullText" class="market-modal-text" text="" />
-                    <ui:Label class="market-modal-text" text="Debes liberar plazas antes de poder fichar." />
-                </ui:VisualElement>
-                <ui:VisualElement class="market-modal-footer">
-                    <ui:Button name="BtnCloseFARosterFull" class="market-modal-btn-confirm" style="background-color: rgb(192, 57, 43);">
-                        <ui:Label text="ENTENDIDO" />
-                    </ui:Button>
+        <ui:VisualElement name="FARosterFullModal" class="renew-modal-overlay" style="display: none;">
+            <ui:VisualElement class="renew-modal-box renew-modal-box--negative">
+                <ui:VisualElement name="FARosterFullIcon" class="renew-modal-icon"/>
+                <ui:Label class="renew-modal-title renew-modal-title--negative" text="PLANTILLA COMPLETA" />
+                <ui:Label name="FARosterFullText" class="renew-modal-text" text="" />
+                <ui:Label class="renew-modal-text" text="Debes liberar plazas antes de poder fichar." />
+                <ui:VisualElement class="renew-modal-buttons">
+                    <ui:Button name="BtnCloseFARosterFull" class="btn-modal-danger" text="ENTENDIDO" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- FA Confirm Modal -->
-        <ui:VisualElement name="FAConfirmModal" class="market-modal" style="display: none;">
-            <ui:VisualElement class="market-modal-content">
-                <ui:VisualElement class="market-modal-header" style="color: rgb(39, 174, 96);">
-                    <ui:Label class="market-modal-title" text="CONFIRMAR FICHAJE" />
-                </ui:VisualElement>
-                <ui:VisualElement class="market-modal-body">
-                    <ui:Label class="market-modal-text" text="Vas a fichar a" />
-                    <ui:Label name="FAPlayerName" class="market-modal-highlight" text="" />
-                    <ui:VisualElement class="market-modal-row">
-                        <ui:Label class="market-modal-label" text="Salario:" />
-                        <ui:Label name="FANewSalary" class="market-modal-value" text="" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="market-modal-row">
-                        <ui:Label class="market-modal-label" text="Contrato:" />
-                        <ui:Label name="FAYears" class="market-modal-value" text="" />
+        <!-- ══ MODAL OFERTA AGENTE LIBRE ══ -->
+        <ui:VisualElement name="FAConfirmModal" class="renew-modal-overlay">
+            <ui:VisualElement name="FABox" class="renew-modal-box">
+                <ui:VisualElement name="FAIcon" class="renew-modal-icon"/>
+                <ui:Label name="FATitle" class="renew-modal-title" text="OFERTA DE CONTRATO" />
+                <ui:Label name="FAText1" class="renew-modal-text" text="" />
+                <ui:VisualElement name="FAFormRowSalary" class="renew-form-row">
+                    <ui:Label class="renew-form-label" text="SALARIO ($)" />
+                    <ui:VisualElement class="renew-spinner-row">
+                        <ui:Label name="FASalaryDec" class="btn-spin" text="◀" />
+                        <ui:Label name="FASalaryValue" class="renew-spin-label" text="" />
+                        <ui:Label name="FASalaryInc" class="btn-spin" text="▶" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="market-modal-footer">
-                    <ui:Button name="BtnCancelFA" class="market-modal-btn-cancel">
-                        <ui:Label text="CANCELAR" />
-                    </ui:Button>
-                    <ui:Button name="BtnConfirmFA" class="market-modal-btn-confirm" style="background-color: rgb(39, 174, 96);">
-                        <ui:Label text="ACEPTAR" />
-                    </ui:Button>
+                <ui:VisualElement name="FAFormRowYears" class="renew-form-row">
+                    <ui:Label class="renew-form-label" text="DURACIÓN (años)" />
+                    <ui:VisualElement class="renew-spinner-row">
+                        <ui:Label name="FAYearsDec" class="btn-spin" text="◀" />
+                        <ui:Label name="FAYearsValue" class="renew-spin-label" text="" />
+                        <ui:Label name="FAYearsInc" class="btn-spin" text="▶" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label name="FAText2" class="renew-modal-text" text="" />
+                <ui:Label name="FAWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
+                <ui:Label name="FAMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
+                <ui:Label name="FAPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
+                <ui:VisualElement class="renew-modal-buttons">
+                    <ui:Button name="BtnCancelFA" class="btn-modal-cancel" text="CERRAR" />
+                    <ui:Button name="BtnConfirmFA" class="btn-modal-confirm" text="ENVIAR OFERTA" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

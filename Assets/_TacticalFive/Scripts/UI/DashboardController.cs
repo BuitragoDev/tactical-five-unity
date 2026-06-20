@@ -963,6 +963,10 @@ public class DashboardController : MonoBehaviour
         int rejectedCount = 0;
         string nowStr = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+        bool hasRenewal = false;
+        bool hasSigning = false;
+        int batchSigningsAccepted = 0;
+
         foreach (var offer in offers)
         {
             var player = DatabaseManager.Instance.GetPlayerById(offer.player_id);
@@ -977,51 +981,147 @@ public class DashboardController : MonoBehaviour
             string salaryText = $"${offer.offer_salary / 1_000_000}M/año";
             string yearsText = $"{offer.offer_years} año{(offer.offer_years > 1 ? "s" : "")}";
 
-            if (accepted)
+            if (offer.offer_type == 1)
             {
-                acceptedCount++;
-                player.salary = offer.offer_salary;
-                player.contract_years = offer.offer_years;
-                player.renewal_cooldown_day = _season.current_game_day + 365;
-                DatabaseManager.Instance.UpdatePlayer(player);
-
-                resultSummary += $"✓ {playerName}: CONTRATO RENOVADO — {salaryText} · {yearsText}\n";
-
-                DatabaseManager.Instance.AddMessage(new MessageData
+                // FREE AGENT SIGNING
+                hasSigning = true;
+                if (accepted)
                 {
-                    manager_id = _manager.id,
-                    sender_type = 0,
-                    sender_id = 0,
-                    title = $"Contrato renovado: {playerName}",
-                    body = $"{playerName} ha aceptado tu oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}.",
-                    game_day = _season.current_game_day,
-                    game_date = nowStr,
-                    created_at = nowStr,
-                    date_sent = nowStr,
-                    is_read = 0
-                });
+                    // Verificar límite de plantilla (jugadores actuales + ya aceptados en este lote)
+                    var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+                    if (roster.Count + batchSigningsAccepted >= TradeHelper.MAX_ROSTER)
+                    {
+                        rejectedCount++;
+                        player.renewal_cooldown_day = _season.current_game_day + 14;
+                        DatabaseManager.Instance.UpdatePlayer(player);
+
+                        resultSummary += $"✗ {playerName}: FICHAJE RECHAZADO (plantilla completa) — {salaryText} · {yearsText}\n";
+
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 1,
+                            sender_id = 0,
+                            title = $"Fichaje rechazado: {playerName}",
+                            body = $"Tu oferta a {playerName} ha sido rechazada porque tu plantilla está completa ({TradeHelper.MAX_ROSTER} jugadores).",
+                            game_day = _season.current_game_day,
+                            game_date = nowStr,
+                            created_at = nowStr,
+                            date_sent = nowStr,
+                            is_read = 0
+                        });
+                        DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                        continue;
+                    }
+
+                    acceptedCount++;
+                    batchSigningsAccepted++;
+                    player.team_id = _myTeam.id;
+                    player.salary = offer.offer_salary;
+                    player.contract_years = offer.offer_years;
+                    player.seasons_with_team = 1;
+                    DatabaseManager.Instance.UpdatePlayer(player);
+
+                    DatabaseManager.Instance.InsertTrade(new TradeData
+                    {
+                        season_id = _season?.id ?? 0,
+                        game_day = _season?.current_game_day ?? 0,
+                        game_date = _season?.current_date ?? nowStr,
+                        team_id_from = 0,
+                        team_id_to = _myTeam.id,
+                        player_id = player.id,
+                        trade_type = "free_agent"
+                    });
+
+                    resultSummary += $"✓ {playerName}: FICHAJE REALIZADO — {salaryText} · {yearsText}\n";
+
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = 0,
+                        title = $"Fichaje: {playerName}",
+                        body = $"{playerName} ha firmado con tu equipo. Contrato: {salaryText} durante {yearsText}.",
+                        game_day = _season.current_game_day,
+                        game_date = nowStr,
+                        created_at = nowStr,
+                        date_sent = nowStr,
+                        is_read = 0
+                    });
+                }
+                else
+                {
+                    rejectedCount++;
+                    player.renewal_cooldown_day = _season.current_game_day + 14;
+                    DatabaseManager.Instance.UpdatePlayer(player);
+
+                    resultSummary += $"✗ {playerName}: FICHAJE RECHAZADO — {salaryText} · {yearsText}\n";
+
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = 0,
+                        title = $"Fichaje rechazado: {playerName}",
+                        body = $"{playerName} ha rechazado tu oferta de {salaryText} durante {yearsText}. Podrás intentarlo de nuevo dentro de 14 días.",
+                        game_day = _season.current_game_day,
+                        game_date = nowStr,
+                        created_at = nowStr,
+                        date_sent = nowStr,
+                        is_read = 0
+                    });
+                }
             }
             else
             {
-                rejectedCount++;
-                player.renewal_cooldown_day = _season.current_game_day + 15;
-                DatabaseManager.Instance.UpdatePlayer(player);
-
-                resultSummary += $"✗ {playerName}: OFERTA RECHAZADA — {salaryText} · {yearsText}\n";
-
-                DatabaseManager.Instance.AddMessage(new MessageData
+                // RENEWAL (offer_type == 0)
+                hasRenewal = true;
+                if (accepted)
                 {
-                    manager_id = _manager.id,
-                    sender_type = 0,
-                    sender_id = 0,
-                    title = $"Oferta rechazada: {playerName}",
-                    body = $"{playerName} ha rechazado tu oferta de {salaryText} durante {yearsText}.",
-                    game_day = _season.current_game_day,
-                    game_date = nowStr,
-                    created_at = nowStr,
-                    date_sent = nowStr,
-                    is_read = 0
-                });
+                    acceptedCount++;
+                    player.salary = offer.offer_salary;
+                    player.contract_years = offer.offer_years;
+                    player.renewal_cooldown_day = _season.current_game_day + 365;
+                    DatabaseManager.Instance.UpdatePlayer(player);
+
+                    resultSummary += $"✓ {playerName}: CONTRATO RENOVADO — {salaryText} · {yearsText}\n";
+
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 0,
+                        sender_id = 0,
+                        title = $"Contrato renovado: {playerName}",
+                        body = $"{playerName} ha aceptado tu oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}.",
+                        game_day = _season.current_game_day,
+                        game_date = nowStr,
+                        created_at = nowStr,
+                        date_sent = nowStr,
+                        is_read = 0
+                    });
+                }
+                else
+                {
+                    rejectedCount++;
+                    player.renewal_cooldown_day = _season.current_game_day + 15;
+                    DatabaseManager.Instance.UpdatePlayer(player);
+
+                    resultSummary += $"✗ {playerName}: OFERTA RECHAZADA — {salaryText} · {yearsText}\n";
+
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 0,
+                        sender_id = 0,
+                        title = $"Oferta rechazada: {playerName}",
+                        body = $"{playerName} ha rechazado tu oferta de {salaryText} durante {yearsText}.",
+                        game_day = _season.current_game_day,
+                        game_date = nowStr,
+                        created_at = nowStr,
+                        date_sent = nowStr,
+                        is_read = 0
+                    });
+                }
             }
 
             DatabaseManager.Instance.MarkOfferProcessed(offer.id);
@@ -1031,12 +1131,26 @@ public class DashboardController : MonoBehaviour
         int resultType;
         if (rejectedCount == 0)
         {
-            title = acceptedCount > 1 ? "CONTRATOS RENOVADOS" : "CONTRATO RENOVADO";
+            if (acceptedCount == 1)
+            {
+                title = hasSigning && !hasRenewal ? "FICHAJE REALIZADO" : hasRenewal && !hasSigning ? "CONTRATO RENOVADO" : "OFERTA ACEPTADA";
+            }
+            else
+            {
+                title = hasSigning && !hasRenewal ? "FICHAJES REALIZADOS" : hasRenewal && !hasSigning ? "CONTRATOS RENOVADOS" : "OFERTAS ACEPTADAS";
+            }
             resultType = 1;
         }
         else if (acceptedCount == 0)
         {
-            title = rejectedCount > 1 ? "OFERTAS RECHAZADAS" : "OFERTA RECHAZADA";
+            if (rejectedCount == 1)
+            {
+                title = hasSigning && !hasRenewal ? "FICHAJE RECHAZADO" : hasRenewal && !hasSigning ? "OFERTA RECHAZADA" : "OFERTAS RECHAZADAS";
+            }
+            else
+            {
+                title = hasSigning && !hasRenewal ? "FICHAJES RECHAZADOS" : "OFERTAS RECHAZADAS";
+            }
             resultType = -1;
         }
         else
@@ -1046,7 +1160,7 @@ public class DashboardController : MonoBehaviour
         }
 
         string text = acceptedCount + rejectedCount > 1
-            ? $"Se han procesado {acceptedCount + rejectedCount} ofertas de renovación.\n\n{resultSummary}"
+            ? $"Se han procesado {acceptedCount + rejectedCount} ofertas.\n\n{resultSummary}"
             : resultSummary;
 
         ShowOfferResultModal(title, text, resultType);

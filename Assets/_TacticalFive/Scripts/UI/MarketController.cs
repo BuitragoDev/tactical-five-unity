@@ -23,13 +23,30 @@ public class MarketController : MonoBehaviour
     private VisualElement _marketClosedOverlay;
     private VisualElement _faRosterFullModal;
     private Label _faRosterFullText;
+    private VisualElement _faRosterFullIcon;
     private VisualElement _faConfirmModal;
     private Button _btnCloseFARosterFull;
     private Button _btnCancelFA;
     private Button _btnConfirmFA;
     private Label _faPlayerName;
-    private Label _faNewSalary;
-    private Label _faYears;
+    private Label _faText1;
+    private Label _faText2;
+    private VisualElement _faIcon;
+    private Label _faSalaryValue;
+    private Label _faSalaryDec;
+    private Label _faSalaryInc;
+    private Label _faYearsValue;
+    private Label _faYearsDec;
+    private Label _faYearsInc;
+    private Label _faWarningText;
+    private Label _faMaxInfo;
+    private Label _faPendingText;
+    private VisualElement _faFormRowSalary;
+    private VisualElement _faFormRowYears;
+    private long _faMaxSalary;
+    private long _faSalary;
+    private int _faYears;
+    private bool _faOfferSent;
     private VisualElement _tradeSuccessOverlay;
     private VisualElement _tradeSuccessBox;
     private VisualElement _tradeSuccessIcon;
@@ -49,7 +66,6 @@ public class MarketController : MonoBehaviour
     private TeamData _selectedTeam;
     private bool _isFA = false;
     private PlayerData _pendingFAPlayer;
-    private Dictionary<int, int> _faCooldowns = new();
 
     private Dictionary<string, Sprite> _headerLogos = new();
     private Dictionary<string, Sprite> _teamGridLogos = new();
@@ -99,13 +115,26 @@ public class MarketController : MonoBehaviour
         _marketClosedOverlay = _root.Q<VisualElement>("MarketClosedOverlay");
         _faRosterFullModal = _root.Q<VisualElement>("FARosterFullModal");
         _faRosterFullText = _root.Q<Label>("FARosterFullText");
+        _faRosterFullIcon = _root.Q<VisualElement>("FARosterFullIcon");
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
         _btnCloseFARosterFull = _root.Q<Button>("BtnCloseFARosterFull");
         _btnCancelFA = _root.Q<Button>("BtnCancelFA");
         _btnConfirmFA = _root.Q<Button>("BtnConfirmFA");
-        _faPlayerName = _root.Q<Label>("FAPlayerName");
-        _faNewSalary = _root.Q<Label>("FANewSalary");
-        _faYears = _root.Q<Label>("FAYears");
+        _faPlayerName = _root.Q<Label>("FATitle");
+        _faText1 = _root.Q<Label>("FAText1");
+        _faText2 = _root.Q<Label>("FAText2");
+        _faIcon = _root.Q<VisualElement>("FAIcon");
+        _faSalaryValue = _root.Q<Label>("FASalaryValue");
+        _faSalaryDec = _root.Q<Label>("FASalaryDec");
+        _faSalaryInc = _root.Q<Label>("FASalaryInc");
+        _faYearsValue = _root.Q<Label>("FAYearsValue");
+        _faYearsDec = _root.Q<Label>("FAYearsDec");
+        _faYearsInc = _root.Q<Label>("FAYearsInc");
+        _faWarningText = _root.Q<Label>("FAWarningText");
+        _faMaxInfo = _root.Q<Label>("FAMaxInfo");
+        _faPendingText = _root.Q<Label>("FAPendingText");
+        _faFormRowSalary = _root.Q<VisualElement>("FAFormRowSalary");
+        _faFormRowYears = _root.Q<VisualElement>("FAFormRowYears");
         _tradeSuccessOverlay = _root.Q<VisualElement>("TradeSuccessOverlay");
         _tradeSuccessBox = _root.Q<VisualElement>("TradeSuccessBox");
         _tradeSuccessIcon = _root.Q<VisualElement>("TradeSuccessIcon");
@@ -150,9 +179,15 @@ public class MarketController : MonoBehaviour
         _btnCloseFARosterFull?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faRosterFullModal.style.display = DisplayStyle.None; });
         _btnCancelFA?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); _faConfirmModal.style.display = DisplayStyle.None; });
+            { PlayClick(); _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
         _btnConfirmFA?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); OnConfirmFA(); });
+            { PlayClick(); SendFAOffer(); });
+
+        // Spinner buttons (long-press para incrementar/decrementar)
+        SetupFALongPress(_faSalaryDec, () => StepFASalary(-1));
+        SetupFALongPress(_faSalaryInc, () => StepFASalary(1));
+        SetupFALongPress(_faYearsDec, () => StepFAYears(-1));
+        SetupFALongPress(_faYearsInc, () => StepFAYears(1));
 
         if (CursorManager.Instance != null)
         {
@@ -169,6 +204,7 @@ public class MarketController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(btn);
 
         var cursorTargets = new[] { "BtnAction", "BtnNegotiate", "ConfigIcon", "BtnCloseFARosterFull", "BtnCancelFA", "BtnConfirmFA",
+            "FASalaryDec", "FASalaryInc", "FAYearsDec", "FAYearsInc",
             "NavDashboard", "NavRoster", "NavCalendar", "NavResults", "NavStandings",
             "NavPalmares", "NavPlayoffs", "NavStats", "NavMarket", "NavFinances",
             "NavArena", "NavMessages" };
@@ -937,10 +973,11 @@ public class MarketController : MonoBehaviour
     {
         _freeAgentsBody.Clear();
 
-        var expired = _faCooldowns.Where(kv => kv.Value <= _season.current_game_day).Select(kv => kv.Key).ToList();
-        foreach (var pid in expired) _faCooldowns.Remove(pid);
-
-        var visible = _freeAgents?.Where(p => !_faCooldowns.ContainsKey(p.id)).ToList();
+        var visible = _freeAgents?.Where(p =>
+        {
+            int cd = p.renewal_cooldown_day;
+            return cd <= 0 || _season == null || _season.current_game_day >= cd;
+        }).ToList();
 
         if (visible == null || visible.Count == 0)
         {
@@ -949,6 +986,8 @@ public class MarketController : MonoBehaviour
             _freeAgentsBody.Add(empty);
             return;
         }
+
+        var pendingSet = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
 
         foreach (var player in visible)
         {
@@ -975,9 +1014,17 @@ public class MarketController : MonoBehaviour
             actionCell.AddToClassList("market-fa-col-action");
             var btn = new Button();
             btn.AddToClassList("market-btn-fa-sign");
-            btn.text = "FIRMAR";
             int playerId = player.id;
-            btn.clicked += () => { PlayClick(); OnSignPlayer(playerId); };
+            if (pendingSet.Contains(playerId))
+            {
+                btn.text = "NEGOCIANDO";
+                btn.SetEnabled(false);
+            }
+            else
+            {
+                btn.text = "FIRMAR";
+                btn.clicked += () => { PlayClick(); OnSignPlayer(playerId); };
+            }
             if (CursorManager.Instance != null)
                 CursorManager.Instance.RegisterHandCursor(btn);
             actionCell.Add(btn);
@@ -993,99 +1040,237 @@ public class MarketController : MonoBehaviour
         if (player == null) return;
 
         var myPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        if (myPlayers.Count >= TradeHelper.MAX_ROSTER)
+        int pendingCount = DatabaseManager.Instance.GetPendingFAOfferCount(_manager.id);
+        if (myPlayers.Count + pendingCount >= TradeHelper.MAX_ROSTER)
         {
             if (_faRosterFullText != null)
-                _faRosterFullText.text = $"No puedes fichar más jugadores. Tu plantilla ya tiene el máximo de {TradeHelper.MAX_ROSTER} jugadores.";
+                _faRosterFullText.text = $"No puedes fichar más jugadores. Tu plantilla ({myPlayers.Count}) + ofertas pendientes ({pendingCount}) alcanzaría el máximo de {TradeHelper.MAX_ROSTER}.";
+            if (_faRosterFullIcon != null)
+            {
+                var xTex = Resources.Load<Texture2D>("Icons/boton-x-64px");
+                if (xTex != null)
+                    _faRosterFullIcon.style.backgroundImage = new StyleBackground(xTex);
+            }
             _faRosterFullModal.style.display = DisplayStyle.Flex;
             return;
         }
 
         _pendingFAPlayer = player;
-        _faPlayerName.text = $"{player.first_name} {player.last_name}";
+        _faOfferSent = false;
 
-        var newSalary = player.salary + 2_000_000;
-        _faNewSalary.text = $"${newSalary:N0}/año";
+        // Calcular límites salariales
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long totalPayroll = myPlayers.Sum(p => p.salary);
+        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll);
+        UpdateFAMaxInfo();
 
-        int years;
-        if (player.age > 35) years = 1;
-        else if (player.age > 32) years = 2;
-        else if (player.age > 28) years = 3;
-        else if (player.age > 25) years = 4;
-        else years = 5;
-        _faYears.text = $" {years} año{(years > 1 ? "s" : "")}";
+        // Mostrar formulario, ocultar pending
+        if (_faFormRowSalary != null) _faFormRowSalary.style.display = DisplayStyle.Flex;
+        if (_faFormRowYears != null) _faFormRowYears.style.display = DisplayStyle.Flex;
+        if (_faPendingText != null) _faPendingText.style.display = DisplayStyle.None;
+        if (_faWarningText != null) _faWarningText.style.display = DisplayStyle.None;
+        if (_btnConfirmFA != null)
+        {
+            _btnConfirmFA.SetEnabled(true);
+            _btnConfirmFA.text = "ENVIAR OFERTA";
+        }
 
+        // Valores por defecto
+        {
+            long autoSalary = player.salary + 2_000_000;
+            _faSalary = autoSalary < _faMaxSalary ? autoSalary : _faMaxSalary;
+            _faSalary = (long)(Mathf.Round(_faSalary / 100_000f) * 100_000);
+        }
+        {
+            if (player.age > 35) _faYears = 1;
+            else if (player.age > 32) _faYears = 2;
+            else if (player.age > 28) _faYears = 3;
+            else if (player.age > 25) _faYears = 4;
+            else _faYears = 5;
+        }
+        RefreshFASpinners();
+
+        _faPlayerName.text = "OFERTA DE CONTRATO";
+        if (_faText1 != null)
+            _faText1.text = $"Oferta de contrato para {player.first_name} {player.last_name}";
+        if (_faIcon != null)
+        {
+            var contractTex = Resources.Load<Texture2D>("Icons/contrato");
+            if (contractTex != null)
+                _faIcon.style.backgroundImage = new StyleBackground(contractTex);
+        }
+
+        UpdateFAWarning();
+        UpdateFAAcceptScore();
         _faConfirmModal.style.display = DisplayStyle.Flex;
     }
 
-    void OnConfirmFA()
+    void SendFAOffer()
     {
-        if (_pendingFAPlayer == null) return;
+        if (_pendingFAPlayer == null || _faOfferSent) return;
 
-        var player = _pendingFAPlayer;
-        _faConfirmModal.style.display = DisplayStyle.None;
-        _pendingFAPlayer = null;
+        if (_faSalary < 1_000_000) _faSalary = 1_000_000;
+        else if (_faSalary > _faMaxSalary) _faSalary = _faMaxSalary;
+        if (_faYears < 1) _faYears = 1;
+        else if (_faYears > 5) _faYears = 5;
+        RefreshFASpinners();
 
-        float chance = Mathf.Clamp(_myTeam.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
-        int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        float chemistryMod = (teamChem - 50) * 0.4f;
-        chance = Mathf.Clamp(chance + chemistryMod, 5, 95);
-        bool accepted = Random.Range(0f, 100f) < chance;
+        int salary = (int)_faSalary;
+        int years = _faYears;
 
-        if (accepted)
+        _faOfferSent = true;
+
+        var offer = new OfferData
         {
-            var newSalary = player.salary + 2_000_000;
+            manager_id = _manager.id,
+            player_id = _pendingFAPlayer.id,
+            offer_salary = salary,
+            offer_years = years,
+            day_sent = _season?.current_game_day ?? 0,
+            offer_type = 1,
+            status = "pending",
+            processed = 0
+        };
+        DatabaseManager.Instance.AddOffer(offer);
+        BuildFreeAgents();
 
-            int years;
-            if (player.age > 35) years = 1;
-            else if (player.age > 32) years = 2;
-            else if (player.age > 28) years = 3;
-            else if (player.age > 25) years = 4;
-            else years = 5;
+        // Ocultar formulario, mostrar pending
+        if (_faFormRowSalary != null) _faFormRowSalary.style.display = DisplayStyle.None;
+        if (_faFormRowYears != null) _faFormRowYears.style.display = DisplayStyle.None;
+        if (_faWarningText != null) _faWarningText.style.display = DisplayStyle.None;
+        if (_faPendingText != null) _faPendingText.style.display = DisplayStyle.Flex;
 
-            player.team_id = _myTeam.id;
-            player.salary = newSalary;
-            player.contract_years = years;
-            DatabaseManager.Instance.UpdatePlayer(player);
+        if (_btnConfirmFA != null)
+        {
+            _btnConfirmFA.SetEnabled(false);
+            _btnConfirmFA.text = "ENVIADA";
+        }
+    }
 
-            // Record trade history
-            DatabaseManager.Instance.InsertTrade(new TradeData
-            {
-                season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
-                game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
-                team_id_from = 0,
-                team_id_to = _myTeam.id,
-                player_id = player.id,
-                trade_type = "free_agent"
-            });
+    void UpdateFAWarning()
+    {
+        if (_faWarningText == null || _pendingFAPlayer == null || _myPlayers == null) return;
 
-            DatabaseManager.Instance.AddMessage(new MessageData
-            {
-                manager_id = _manager.id,
-                sender_type = 1,
-                sender_id = 0,
-                title = $"Fichaje: {player.first_name} {player.last_name}",
-                body = $"{player.first_name} {player.last_name} ha firmado con tu equipo. Contrato: ${newSalary:N0}/año durante {years} año{(years > 1 ? "s" : "")}.",
-                game_day = _season?.current_game_day ?? 0,
-                game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
-                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                is_read = 0
-            });
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        if (leagueSettings == null) return;
 
-            ShowFAResultModal(true, $"{player.first_name} {player.last_name}");
+        long totalPayroll = _myPlayers.Sum(p => p.salary);
+        long newTotal = totalPayroll + _faSalary;
 
-            _freeAgents = DatabaseManager.Instance.GetFreeAgents();
-            BuildFreeAgents();
-            RefreshHeader();
+        if (newTotal > leagueSettings.luxury_tax)
+        {
+            long overage = newTotal - leagueSettings.luxury_tax;
+            _faWarningText.text = $"AVISO: Salario total (${newTotal / 1_000_000}M) supera el límite de lujo en ${overage / 1_000_000}M";
+            _faWarningText.style.display = DisplayStyle.Flex;
         }
         else
         {
-            _faCooldowns[player.id] = _season.current_game_day + 14;
-            ShowFAResultModal(false, $"{player.first_name} {player.last_name}");
-            BuildFreeAgents();
+            _faWarningText.style.display = DisplayStyle.None;
         }
+    }
+
+    void UpdateFAAcceptScore()
+    {
+        if (_faText2 == null || _pendingFAPlayer == null) return;
+
+        if (_faSalary <= 0 || _faYears < 1)
+        {
+            _faText2.text = "";
+            return;
+        }
+
+        int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        float score = RosterController.CalculateAcceptScore(_pendingFAPlayer, (int)_faSalary, _faYears, 0, teamChem);
+        _faText2.text = $"Probabilidad de aceptación: {score:F0}%";
+    }
+
+    void UpdateFAMaxInfo()
+    {
+        if (_faMaxInfo == null || _pendingFAPlayer == null || _myTeam == null) return;
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        if (settings == null) return;
+
+        var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        long totalPayroll = roster.Sum(p => p.salary);
+        var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll);
+
+        _faMaxInfo.text = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
+        _faMaxInfo.style.display = DisplayStyle.Flex;
+    }
+
+    // ── FA Spinner helpers ──────────────────────────────────
+
+    void StepFASalary(int dir)
+    {
+        long val = _faSalary + 500_000 * dir;
+        _faSalary = val < 1_000_000 ? 1_000_000 : (val > _faMaxSalary ? _faMaxSalary : val);
+        RefreshFASpinners();
+        UpdateFAWarning();
+        UpdateFAAcceptScore();
+    }
+
+    void StepFAYears(int dir)
+    {
+        int val = _faYears + dir;
+        _faYears = val < 1 ? 1 : (val > 5 ? 5 : val);
+        RefreshFASpinners();
+        UpdateFAAcceptScore();
+    }
+
+    void RefreshFASpinners()
+    {
+        if (_faSalaryValue != null)
+            _faSalaryValue.text = $"${_faSalary:N0}";
+        if (_faYearsValue != null)
+            _faYearsValue.text = $"{_faYears} año{(_faYears > 1 ? "s" : "")}";
+
+        ToggleFASpinDisabled(_faSalaryDec, _faSalary <= 1_000_000);
+        ToggleFASpinDisabled(_faSalaryInc, _faSalary >= _faMaxSalary);
+        ToggleFASpinDisabled(_faYearsDec, _faYears <= 1);
+        ToggleFASpinDisabled(_faYearsInc, _faYears >= 5);
+    }
+
+    void ToggleFASpinDisabled(Label el, bool disabled)
+    {
+        if (el == null) return;
+        if (disabled)
+            el.AddToClassList("btn-spin--disabled");
+        else
+            el.RemoveFromClassList("btn-spin--disabled");
+    }
+
+    void SetupFALongPress(VisualElement el, System.Action onStep)
+    {
+        if (el == null) return;
+
+        IVisualElementScheduledItem scheduled = null;
+
+        el.RegisterCallback<PointerDownEvent>(_ =>
+        {
+            PlayClick();
+            scheduled?.Pause();
+            onStep();
+            scheduled = el.schedule.Execute(() => onStep()).Every(80).StartingIn(350);
+        });
+
+        el.RegisterCallback<PointerUpEvent>(_ =>
+        {
+            if (scheduled != null)
+            {
+                scheduled.Pause();
+                scheduled = null;
+            }
+        });
+
+        el.RegisterCallback<PointerCaptureOutEvent>(_ =>
+        {
+            if (scheduled != null)
+            {
+                scheduled.Pause();
+                scheduled = null;
+            }
+        });
     }
 
     void ShowFAResultModal(bool success, string playerName)

@@ -10,6 +10,7 @@ public class OfferData
     public long offer_salary { get; set; }
     public int offer_years { get; set; }
     public int day_sent { get; set; }
+    public int offer_type { get; set; } // 0 = renovación, 1 = fichaje agente libre
     public string status { get; set; } // "pending" | "accepted" | "rejected"
     public int processed { get; set; } // 0 = sin procesar, 1 = resultado mostrado
 }
