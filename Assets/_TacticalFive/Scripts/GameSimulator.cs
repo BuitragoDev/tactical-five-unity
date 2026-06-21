@@ -129,6 +129,29 @@ public static class GameSimulator
         game.q4_home = qsArr.Length > 3 ? qsArr[3].Item1 : 0;
         game.q4_away = qsArr.Length > 3 ? qsArr[3].Item2 : 0;
 
+        // Suelo garantizado para atributos elite (tras simulacion)
+        foreach (var ps in homePS.Concat(awayPS))
+        {
+            if (ps.minutes < 20) continue;
+            if (ps.passing >= 95)
+                ps.assists = Mathf.Max(ps.assists, Mathf.RoundToInt(ps.minutes / 48f * 10));
+            if (ps.rebounding >= 95)
+            {
+                int curReb = ps.oreb + ps.dreb;
+                int floorReb = Mathf.RoundToInt(ps.minutes / 48f * 10);
+                if (curReb < floorReb)
+                {
+                    int extra = floorReb - curReb;
+                    ps.oreb += extra / 2;
+                    ps.dreb += extra - extra / 2;
+                }
+            }
+            if (ps.steals_attr >= 90)
+                ps.steals = Mathf.Max(ps.steals, Mathf.RoundToInt(ps.minutes / 48f * 3));
+            if (ps.blocks_attr >= 90)
+                ps.blocks = Mathf.Max(ps.blocks, Mathf.RoundToInt(ps.minutes / 48f * 3));
+        }
+
         // Guardar estadísticas para TODOS los tipos de partido
         // (la pantalla Stats filtra solo temporada regular)
         DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
@@ -289,7 +312,7 @@ public static class GameSimulator
         var off = offIds.Select(i => offAll[i]).ToList();
         var def = defIds.Select(i => defAll[i]).ToList();
 
-        float toPct = 0.07f + (defR - offR) * 0.0003f;
+        float toPct = 0.13f + (defR - offR) * 0.0003f;
         if (UnityEngine.Random.value < toPct)
         {
             DoTO(off, def);
@@ -301,12 +324,12 @@ public static class GameSimulator
 
         string shot = ShotType(shooter);
         var defender = def.OrderByDescending(p => p.defense).FirstOrDefault();
-        float di = defender != null ? (defender.defense - 70) * 0.004f : 0;
+        float di = defender != null ? (defender.defense - 70) * 0.005f : 0;
 
         if (shot == "3")
         {
-            float basePct = 0.33f + (shooter.three_point - 70) * 0.005f;
-            float pct = Mathf.Clamp(basePct - di, 0.28f, 0.48f);
+            float basePct = 0.30f + (shooter.three_point - 70) * 0.003f;
+            float pct = Mathf.Clamp(basePct - di, 0.25f, 0.42f);
             shooter.fg3a++; shooter.fga++;
             if (UnityEngine.Random.value < pct)
             {
@@ -317,8 +340,8 @@ public static class GameSimulator
             return MissHandler(def, off, shooter, true);
         }
 
-        float base2Pct = 0.48f + (shooter.shooting - 70) * 0.005f;
-        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.42f, 0.68f);
+        float base2Pct = 0.42f + (shooter.shooting - 70) * 0.003f;
+        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.38f, 0.55f);
         shooter.fga++;
         if (UnityEngine.Random.value < pct2)
         {
@@ -377,7 +400,7 @@ public static class GameSimulator
     static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court)
     {
         if (court.Count == 0) return null;
-        var weights = court.Select(p => p.overall >= 92 ? Mathf.Pow(p.overall, 1.5f) : Mathf.Pow(p.overall, 1.3f)).ToList();
+        var weights = court.Select(p => Mathf.Pow(p.overall / 100f, 1.3f)).ToList();
         float total = weights.Sum();
         if (total <= 0) return court[UnityEngine.Random.Range(0, court.Count)];
         float r = UnityEngine.Random.value * total;
@@ -461,6 +484,8 @@ public static class GameSimulator
         if (handlers.Count > 0)
             handlers[UnityEngine.Random.Range(0, handlers.Count)].turnovers++;
 
+        // Only ~50% of TOs result in a steal (rest are offensive fouls, out-of-bounds, etc.)
+        if (UnityEngine.Random.value >= 0.5f) return;
         if (def.Count == 0) return;
         var stlW = def.Select(p => Mathf.Pow(p.steals_attr, 3)).ToList();
         float t = stlW.Sum();
