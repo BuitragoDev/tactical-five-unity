@@ -1912,6 +1912,7 @@ public class DashboardController : MonoBehaviour
         if (existingPending.Count > 0) return;
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var targetedIds = new HashSet<int>();
 
         foreach (var aiTeam in allTeams.OrderBy(_ => Random.Range(0, 1000)))
         {
@@ -1927,8 +1928,10 @@ public class DashboardController : MonoBehaviour
             var userHealthy = userRoster.Where(p => p.injury_days == 0).ToList();
             if (userHealthy.Count == 0) continue;
 
-            var target = PickTradeTarget(userHealthy, aiRoster);
+            var target = PickTradeTarget(userHealthy, aiRoster, targetedIds);
             if (target == null) continue;
+
+            targetedIds.Add(target.id);
 
             var aiHealthy = aiRoster
                 .Where(p => p.injury_days == 0 && p.id != target.id)
@@ -1953,7 +1956,8 @@ public class DashboardController : MonoBehaviour
         }
     }
 
-    PlayerData PickTradeTarget(List<PlayerData> userHealthy, List<PlayerData> aiRoster)
+    PlayerData PickTradeTarget(List<PlayerData> userHealthy, List<PlayerData> aiRoster,
+                                HashSet<int> excludedIds)
     {
         var roll = Random.Range(0f, 1f);
 
@@ -1962,19 +1966,42 @@ public class DashboardController : MonoBehaviour
             var aiWeakPos = GetWeakestPosition(aiRoster);
             if (aiWeakPos != null)
             {
-                var candidates = userHealthy.Where(p => p.position == aiWeakPos)
-                    .OrderByDescending(p => p.overall).ToList();
-                if (candidates.Count > 0) return candidates[0];
+                var candidates = userHealthy
+                    .Where(p => p.position == aiWeakPos && !excludedIds.Contains(p.id))
+                    .OrderByDescending(p => p.overall)
+                    .ToList();
+                if (candidates.Count > 0)
+                    return candidates[Random.Range(0, Mathf.Min(3, candidates.Count))];
             }
         }
 
         if (roll < 0.60f)
-            return userHealthy.OrderByDescending(p => p.overall).First();
+        {
+            var candidates = userHealthy
+                .Where(p => !excludedIds.Contains(p.id))
+                .OrderByDescending(p => p.overall)
+                .ToList();
+            if (candidates.Count > 0)
+                return candidates[Random.Range(0, Mathf.Min(3, candidates.Count))];
+        }
 
         if (roll < 0.80f)
-            return userHealthy.OrderByDescending(p => p.salary).First();
+        {
+            var candidates = userHealthy
+                .Where(p => !excludedIds.Contains(p.id))
+                .OrderByDescending(p => p.salary)
+                .ToList();
+            if (candidates.Count > 0)
+                return candidates[Random.Range(0, Mathf.Min(3, candidates.Count))];
+        }
 
-        return userHealthy[Random.Range(0, userHealthy.Count)];
+        var randomCandidates = userHealthy
+            .Where(p => !excludedIds.Contains(p.id))
+            .ToList();
+        if (randomCandidates.Count > 0)
+            return randomCandidates[Random.Range(0, randomCandidates.Count)];
+
+        return null;
     }
 
     List<PlayerData> BuildOfferPackage(List<PlayerData> aiAvailable, int aiRosterCount,
