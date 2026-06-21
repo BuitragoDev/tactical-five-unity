@@ -99,6 +99,7 @@ public class DashboardController : MonoBehaviour
     // Injured lineup modal
     private bool _injuredModalResolved;
     private bool _injuredModalGoToQuinteto;
+    private bool _modalActive;
 
     void OnEnable()
     {
@@ -130,6 +131,7 @@ public class DashboardController : MonoBehaviour
 
     void Update()
     {
+        if (_modalActive) return;
         if (Input.GetKeyDown(KeyCode.S))
         {
             PlayClick();
@@ -956,7 +958,11 @@ public class DashboardController : MonoBehaviour
         Debug.Log($"[Dashboard] ProcessMaturedOffers: checking offers manager={_manager.id} current_day={_season.current_game_day}");
         var offers = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day);
         Debug.Log($"[Dashboard] ProcessMaturedOffers: found {offers.Count} matured offers");
-        if (offers.Count == 0) return;
+        if (offers.Count == 0)
+        {
+            ShowNextPendingTradeOffer();
+            return;
+        }
 
         string resultSummary = "";
         int acceptedCount = 0;
@@ -1210,6 +1216,7 @@ public class DashboardController : MonoBehaviour
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
+            ShowNextPendingTradeOffer();
         });
         box.Add(btn);
 
@@ -1702,6 +1709,8 @@ public class DashboardController : MonoBehaviour
             if (!traded && !needsRosterFill && Random.Range(0f, 1f) < 0.4f)
                 TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
         }
+
+        GenerateAITradeOffersForPlayer(gameDay, seasonId);
     }
 
     string GetWeakestPosition(List<PlayerData> roster)
@@ -1862,6 +1871,291 @@ public class DashboardController : MonoBehaviour
             Debug.Log($"[AI FA] {team.name} signed {player.first_name} {player.last_name} ({player.position}, {player.overall} OVR)");
             break;
         }
+    }
+
+    // ═══════════════════════════════════════════
+    //  AI TRADE OFFERS TO PLAYER
+    // ═══════════════════════════════════════════
+
+    void GenerateAITradeOffersForPlayer(int gameDay, int seasonId)
+    {
+        var existingPending = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
+        if (existingPending.Count > 0) return;
+
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+
+        foreach (var aiTeam in allTeams)
+        {
+            if (aiTeam.id == _myTeam.id) continue;
+            if (Random.Range(0f, 1f) > 0.50f) continue;
+
+            var aiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
+            if (aiRoster.Count < 11) continue;
+
+            var playerRoster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            if (playerRoster.Count < 10 || playerRoster.Count >= TradeHelper.MAX_ROSTER) continue;
+
+            var userCandidates = playerRoster
+                .Where(p => p.injury_days == 0)
+                .OrderByDescending(p => p.overall)
+                .ToList();
+
+            var wantedPlayer = userCandidates.FirstOrDefault(p => p.overall >= 80)
+                               ?? userCandidates.FirstOrDefault();
+            if (wantedPlayer == null) continue;
+
+            var aiAvailable = aiRoster
+                .Where(p => p.injury_days == 0 && p.id != wantedPlayer.id)
+                .OrderBy(p => p.overall)
+                .ToList();
+            if (aiAvailable.Count < 2) continue;
+
+            var offerPack = new List<PlayerData>();
+            long playerPayroll = playerRoster.Sum(p => p.salary);
+
+            foreach (var candidate in aiAvailable)
+            {
+                if (offerPack.Count >= 3) break;
+
+                var testPack = new List<PlayerData>(offerPack) { candidate };
+                var errors = TradeHelper.ValidateTrade(
+                    testPack,
+                    new List<PlayerData> { wantedPlayer },
+                    aiRoster.Count, playerRoster.Count,
+                    _myTeam.name, playerPayroll);
+
+                if (errors.Count == 0 && testPack.Count >= 2)
+                {
+                    offerPack = testPack;
+                    break;
+                }
+
+                if (errors.Count == 0)
+                    offerPack = testPack;
+            }
+
+            if (offerPack.Count < 2) continue;
+
+            var offeredIds = offerPack.Select(p => p.id).ToList();
+            DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
+            {
+                manager_id = _manager.id,
+                team_id_from = aiTeam.id,
+                player_ids_out = TradeOfferData.JoinIds(new List<int> { wantedPlayer.id }),
+                player_ids_in = TradeOfferData.JoinIds(offeredIds),
+                day_sent = gameDay,
+                processed = 0
+            });
+            break;
+        }
+    }
+
+    void ShowNextPendingTradeOffer()
+    {
+        var pending = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
+        if (pending.Count == 0)
+        {
+            _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            Refresh();
+            return;
+        }
+
+        var offer = pending[0];
+        var myRoster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var aiRoster = DatabaseManager.Instance.GetPlayersByTeam(offer.team_id_from);
+
+        var wantedIds = offer.GetWantedPlayerIds();
+        var offeredIds = offer.GetOfferedPlayerIds();
+
+        var ourPlayers = wantedIds
+            .Select(id => myRoster.FirstOrDefault(p => p.id == id))
+            .Where(p => p != null)
+            .ToList();
+
+        var theirPlayers = offeredIds
+            .Select(id => aiRoster.FirstOrDefault(p => p.id == id))
+            .Where(p => p != null)
+            .ToList();
+
+        if (ourPlayers.Count != wantedIds.Count || theirPlayers.Count != offeredIds.Count)
+        {
+            DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
+            ShowNextPendingTradeOffer();
+            return;
+        }
+
+        ShowTradeOfferModal(offer, ourPlayers, theirPlayers);
+    }
+
+    void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+        _modalActive = true;
+
+        var aiTeam = _allTeams.FirstOrDefault(t => t.id == offer.team_id_from);
+        string teamName = aiTeam != null ? aiTeam.name : "?";
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("trade-offer-modal-box");
+        _firedOverlay.Add(box);
+
+        var title = new Label("PROPUESTA DE INTERCAMBIO");
+        title.AddToClassList("fired-modal-title");
+        box.Add(title);
+
+        var columns = new VisualElement();
+        columns.AddToClassList("trade-offer-columns");
+        box.Add(columns);
+
+        var leftCol = BuildPlayerColumn("TÚ ENVÍAS", _myTeam.name, ourPlayers);
+        columns.Add(leftCol);
+
+        var rightCol = BuildPlayerColumn("TÚ RECIBES", teamName, theirPlayers);
+        columns.Add(rightCol);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        var rejectBtn = new Button();
+        rejectBtn.text = "RECHAZAR";
+        rejectBtn.AddToClassList("injured-modal-btn");
+        rejectBtn.style.backgroundColor = new StyleColor(new Color(0.753f, 0.224f, 0.169f));
+        rejectBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
+            _firedOverlay.style.display = DisplayStyle.None;
+            _modalActive = false;
+            ShowNextPendingTradeOffer();
+        });
+        btnGroup.Add(rejectBtn);
+
+        var acceptBtn = new Button();
+        acceptBtn.text = "ACEPTAR";
+        acceptBtn.AddToClassList("injured-modal-btn");
+        acceptBtn.style.backgroundColor = new StyleColor(new Color(0.153f, 0.682f, 0.376f));
+        acceptBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            foreach (var p in ourPlayers)
+            {
+                p.team_id = offer.team_id_from;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season?.id ?? 0,
+                    game_day = _season?.current_game_day ?? 0,
+                    game_date = _season?.current_date ?? now,
+                    team_id_from = _myTeam.id,
+                    team_id_to = offer.team_id_from,
+                    player_id = p.id,
+                    trade_type = "trade"
+                });
+            }
+
+            foreach (var p in theirPlayers)
+            {
+                p.team_id = _myTeam.id;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season?.id ?? 0,
+                    game_day = _season?.current_game_day ?? 0,
+                    game_date = _season?.current_date ?? now,
+                    team_id_from = offer.team_id_from,
+                    team_id_to = _myTeam.id,
+                    player_id = p.id,
+                    trade_type = "trade"
+                });
+            }
+
+            var ourNames = string.Join(", ", ourPlayers.Select(p => $"{p.first_name} {p.last_name}"));
+            var theirNames = string.Join(", ", theirPlayers.Select(p => $"{p.first_name} {p.last_name}"));
+
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 1,
+                sender_id = 0,
+                title = "Intercambio aceptado",
+                body = $"Has intercambiado a {ourNames} por {theirNames} con {teamName}.",
+                game_day = _season.current_game_day,
+                game_date = now,
+                created_at = now,
+                date_sent = now,
+                is_read = 0
+            });
+
+            DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 1);
+            _firedOverlay.style.display = DisplayStyle.None;
+            _modalActive = false;
+            ShowNextPendingTradeOffer();
+        });
+        btnGroup.Add(acceptBtn);
+
+        box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(rejectBtn);
+            CursorManager.Instance.RegisterHandCursor(acceptBtn);
+        }
+    }
+
+    VisualElement BuildPlayerColumn(string label, string teamName, List<PlayerData> players)
+    {
+        var col = new VisualElement();
+        col.AddToClassList("trade-offer-col");
+
+        var header = new Label(label);
+        header.AddToClassList("trade-offer-col-header");
+        col.Add(header);
+
+        var teamLabel = new Label(teamName);
+        teamLabel.AddToClassList("trade-offer-col-team");
+        col.Add(teamLabel);
+
+        foreach (var p in players)
+        {
+            var card = new VisualElement();
+            card.AddToClassList("trade-offer-player-card");
+
+            var photo = new VisualElement();
+            photo.AddToClassList("trade-offer-photo");
+            Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
+            if (tex != null)
+                photo.style.backgroundImage = new StyleBackground(tex);
+            card.Add(photo);
+
+            var info = new VisualElement();
+            info.AddToClassList("trade-offer-player-info");
+
+            var nameLbl = new Label($"{p.first_name} {p.last_name}");
+            nameLbl.AddToClassList("trade-offer-player-name");
+            info.Add(nameLbl);
+
+            var posAge = new Label($"{p.position}  ·  {p.age} años");
+            posAge.AddToClassList("trade-offer-player-detail");
+            info.Add(posAge);
+
+            var salaryLbl = new Label(SalaryStr(p.salary));
+            salaryLbl.AddToClassList("trade-offer-player-salary");
+            info.Add(salaryLbl);
+
+            card.Add(info);
+            col.Add(card);
+        }
+
+        return col;
+    }
+
+    string SalaryStr(long salary)
+    {
+        return "$" + salary.ToString("N0").Replace(',', '.');
     }
 
     void ApplyRenovation(TeamData team)
@@ -2757,6 +3051,10 @@ public class DashboardController : MonoBehaviour
         if (_season == null || _myTeam == null) return;
 
         var teamStats = DatabaseManager.Instance.GetTeamPlayerSeasonStats(_season.id, _myTeam.id, _manager.id);
+        if (teamStats.Count == 0) return;
+
+        var myPlayerIds = _players.Select(p => p.id).ToHashSet();
+        teamStats = teamStats.Where(s => myPlayerIds.Contains(s.player_id)).ToList();
         if (teamStats.Count == 0) return;
 
         var scorer = teamStats.OrderByDescending(s => (float)s.total_points / s.games).First();

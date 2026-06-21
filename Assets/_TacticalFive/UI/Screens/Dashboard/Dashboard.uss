@@ -1087,3 +1087,91 @@
     margin-right: 0;
     margin-left: 6px;
 }
+
+/* ══ TRADE OFFER MODAL ══ */
+
+.trade-offer-modal-box {
+    width: 680px;
+}
+
+.trade-offer-columns {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 12px;
+}
+
+.trade-offer-col {
+    flex-direction: column;
+    align-items: center;
+    width: 300px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.trade-offer-col-header {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(192, 57, 43);
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.trade-offer-col-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-center;
+    margin-bottom: 10px;
+}
+
+.trade-offer-player-card {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(25, 27, 32);
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 6px;
+    width: 100%;
+}
+
+.trade-offer-photo {
+    width: 56px;
+    height: 56px;
+    border-radius: 28px;
+    background-color: rgb(34, 36, 42);
+    -unity-background-scale-mode: scale-to-fit;
+    flex-shrink: 0;
+}
+
+.trade-offer-player-info {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-left: 10px;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.trade-offer-player-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 210px;
+}
+
+.trade-offer-player-detail {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    margin-top: 1px;
+}
+
+.trade-offer-player-salary {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(46, 204, 113);
+    margin-top: 2px;
+}
