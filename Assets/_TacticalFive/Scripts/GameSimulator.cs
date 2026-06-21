@@ -90,21 +90,6 @@ public static class GameSimulator
             quarters.Add((hPts, aPts));
         }
 
-        foreach (var ps in homePS.Concat(awayPS))
-        {
-            ps.minutes = Mathf.Round(ps.minutes);
-            ps.rating = ps.points + ps.oreb + ps.dreb + ps.assists + ps.steals + ps.blocks
-                        - (ps.fga - ps.fgm) - (ps.fta - ps.ftm) - ps.turnovers - ps.pf;
-            int cats = 0;
-            if (ps.points >= 10) cats++;
-            if (ps.oreb + ps.dreb >= 10) cats++;
-            if (ps.assists >= 10) cats++;
-            if (ps.steals >= 10) cats++;
-            if (ps.blocks >= 10) cats++;
-            if (cats >= 3) { ps.triple_double = 1; ps.double_double = 0; }
-            else if (cats >= 2) { ps.double_double = 1; ps.triple_double = 0; }
-        }
-
         int otCount = 0;
         while (homeTotal == awayTotal && otCount < 5)
         {
@@ -150,6 +135,22 @@ public static class GameSimulator
                 ps.steals = Mathf.Max(ps.steals, Mathf.RoundToInt(ps.minutes / 48f * 3));
             if (ps.blocks_attr >= 90)
                 ps.blocks = Mathf.Max(ps.blocks, Mathf.RoundToInt(ps.minutes / 48f * 3));
+        }
+
+        // Calcular rating y dobles-dobles DESPUES del suelo de stats
+        foreach (var ps in homePS.Concat(awayPS))
+        {
+            ps.minutes = Mathf.Round(ps.minutes);
+            ps.rating = ps.points + ps.oreb + ps.dreb + ps.assists + ps.steals + ps.blocks
+                        - (ps.fga - ps.fgm) - (ps.fta - ps.ftm) - ps.turnovers - ps.pf;
+            int cats = 0;
+            if (ps.points >= 10) cats++;
+            if (ps.oreb + ps.dreb >= 10) cats++;
+            if (ps.assists >= 10) cats++;
+            if (ps.steals >= 10) cats++;
+            if (ps.blocks >= 10) cats++;
+            if (cats >= 3) { ps.triple_double = 1; ps.double_double = 0; }
+            else if (cats >= 2) { ps.double_double = 1; ps.triple_double = 0; }
         }
 
         // Guardar estadísticas para TODOS los tipos de partido
