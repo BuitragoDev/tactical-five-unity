@@ -1117,8 +1117,11 @@ public class DatabaseManager : MonoBehaviour
                  long sal, int yrs, bool rookie)
         {
             int teamId = teamByAbbr.TryGetValue(abbr, out var id) ? id : 0;
-            int calcOvr = (int)System.Math.Round((spd + sht + thr + pas + drb + def + reb + ath + iq + stl + blk) / 11f);
+
+            var attrs = GeneratePositionAttrs(ovr, pos, fn + ln);
+            int calcOvr = (int)System.Math.Round(attrs.Average());
             if (calcOvr > pot) calcOvr = pot;
+
             players.Add(new PlayerData
             {
                 team_id = teamId,
@@ -1131,17 +1134,17 @@ public class DatabaseManager : MonoBehaviour
                 weight_kg = w,
                 overall = calcOvr,
                 potential = pot,
-                speed = spd,
-                shooting = sht,
-                three_point = thr,
-                passing = pas,
-                dribbling = drb,
-                defense = def,
-                rebounding = reb,
-                athleticism = ath,
-                iq = iq,
-                steals = stl,
-                blocks = blk,
+                speed = attrs[0],
+                shooting = attrs[1],
+                three_point = attrs[2],
+                passing = attrs[3],
+                dribbling = attrs[4],
+                defense = attrs[5],
+                rebounding = attrs[6],
+                athleticism = attrs[7],
+                iq = attrs[8],
+                steals = attrs[9],
+                blocks = attrs[10],
                 salary = sal,
                 contract_years = yrs,
                 is_rookie = rookie ? 1 : 0,
@@ -1171,8 +1174,8 @@ public class DatabaseManager : MonoBehaviour
 
 
         // ── BOS ──
-        Add("BOS", "Jayson", "Tatum", "PF", 28, "USA", 203, 95, 95, 96, 99, 99, 99, 99, 99, 99, 96, 99, 99, 90, 67, 54100000, 4, false);
-        Add("BOS", "Jaylen", "Brown", "SG", 29, "USA", 198, 101, 92, 93, 99, 99, 94, 90, 98, 99, 89, 99, 99, 89, 57, 53100000, 4, false);
+        Add("BOS", "Jayson", "Tatum", "PF", 28, "USA", 203, 95, 94, 96, 99, 99, 99, 99, 99, 99, 96, 99, 99, 90, 67, 54100000, 4, false);
+        Add("BOS", "Jaylen", "Brown", "SG", 29, "USA", 198, 101, 90, 91, 99, 99, 94, 90, 98, 99, 89, 99, 99, 89, 57, 53100000, 4, false);
         Add("BOS", "Derrick", "White", "PG", 32, "USA", 193, 86, 87, 86, 94, 90, 86, 92, 92, 98, 70, 92, 98, 90, 55, 28100000, 3, false);
         Add("BOS", "Payton", "Pritchard", "PG", 28, "USA", 185, 88, 84, 85, 99, 96, 96, 90, 96, 82, 62, 82, 96, 86, 39, 7200000, 3, false);
         Add("BOS", "Sam", "Hauser", "SF", 28, "USA", 201, 98, 80, 80, 88, 96, 98, 79, 83, 81, 69, 81, 87, 75, 43, 10000000, 4, false);
@@ -1270,7 +1273,7 @@ public class DatabaseManager : MonoBehaviour
         Add("DAL", "Marvin", "Bagley III", "PF", 27, "USA", 208, 106, 76, 76, 89, 87, 56, 72, 74, 85, 95, 91, 83, 56, 48, 2296274, 1, false);
 
         // ── DEN ──
-        Add("DEN", "Nikola", "Jokic", "C", 31, "SRB", 211, 129, 97, 97, 93, 99, 99, 99, 99, 99, 99, 99, 99, 89, 93, 62000000, 4, false);
+        Add("DEN", "Nikola", "Jokic", "C", 31, "SRB", 211, 129, 98, 99, 93, 99, 99, 99, 99, 99, 99, 99, 99, 89, 93, 62000000, 4, false);
         Add("DEN", "Jamal", "Murray", "PG", 29, "CAN", 193, 98, 88, 88, 99, 99, 99, 99, 99, 84, 72, 98, 99, 84, 36, 50000000, 4, false);
         Add("DEN", "Aaron", "Gordon", "PF", 31, "USA", 203, 107, 85, 85, 91, 87, 80, 82, 87, 93, 87, 99, 91, 80, 58, 33000000, 3, false);
         Add("DEN", "Cameron", "Johnson", "SF", 30, "USA", 203, 95, 84, 84, 91, 96, 98, 83, 89, 85, 79, 89, 92, 75, 47, 23000000, 2, false);
@@ -1287,7 +1290,7 @@ public class DatabaseManager : MonoBehaviour
         Add("DEN", "David", "Roddy", "SF", 25, "USA", 193, 116, 72, 74, 80, 77, 75, 69, 73, 78, 73, 84, 77, 67, 39, 2200000, 1, false);
 
         // ── DET ──
-        Add("DET", "Cade", "Cunningham", "PG", 25, "USA", 198, 100, 91, 94, 98, 99, 96, 99, 99, 93, 85, 99, 99, 89, 45, 45000000, 5, false);
+        Add("DET", "Cade", "Cunningham", "PG", 25, "USA", 198, 100, 92, 94, 98, 99, 96, 99, 99, 93, 85, 99, 99, 89, 45, 45000000, 5, false);
         Add("DET", "Jalen", "Duren", "C", 22, "USA", 211, 113, 85, 92, 93, 89, 44, 77, 73, 97, 99, 99, 95, 72, 97, 13000000, 3, false);
         Add("DET", "Ausar", "Thompson", "SF", 23, "USA", 201, 98, 84, 92, 93, 78, 66, 82, 85, 97, 80, 99, 87, 95, 62, 10000000, 3, false);
         Add("DET", "Tobias", "Harris", "PF", 34, "USA", 203, 102, 80, 80, 78, 89, 88, 84, 86, 84, 84, 82, 93, 68, 44, 26000000, 1, false);
@@ -1303,7 +1306,7 @@ public class DatabaseManager : MonoBehaviour
         Add("DET", "Chaz", "Lanier", "SG", 24, "USA", 196, 84, 73, 82, 88, 86, 94, 73, 81, 69, 57, 81, 82, 65, 27, 2800000, 4, false);
 
         // ── GSW ──
-        Add("GSW", "Stephen", "Curry", "PG", 38, "USA", 188, 84, 93, 93, 99, 99, 99, 99, 99, 97, 82, 99, 99, 99, 52, 59600000, 2, false);
+        Add("GSW", "Stephen", "Curry", "PG", 38, "USA", 188, 84, 94, 94, 99, 99, 99, 99, 99, 97, 82, 99, 99, 99, 52, 59600000, 2, false);
         Add("GSW", "Jimmy", "Butler III", "SF", 37, "USA", 201, 104, 89, 89, 91, 97, 83, 95, 97, 97, 81, 95, 99, 91, 53, 54000000, 2, false);
         Add("GSW", "Kristaps", "Porzingis", "C", 31, "LAT", 221, 109, 86, 86, 84, 95, 91, 82, 76, 92, 90, 88, 95, 60, 93, 30700000, 2, false);
         Add("GSW", "Draymond", "Green", "PF", 36, "USA", 198, 104, 83, 83, 76, 76, 70, 94, 86, 98, 84, 82, 99, 92, 56, 26000000, 3, false);
@@ -1318,7 +1321,7 @@ public class DatabaseManager : MonoBehaviour
         Add("GSW", "Gui", "Santos", "SF", 24, "BRA", 203, 95, 74, 82, 84, 75, 71, 73, 76, 82, 73, 86, 78, 73, 43, 2200000, 3, false);
 
         // ── HOU ──
-        Add("HOU", "Kevin", "Durant", "SF", 38, "USA", 211, 109, 92, 92, 96, 99, 99, 99, 99, 94, 88, 99, 99, 78, 62, 54700000, 2, false);
+        Add("HOU", "Kevin", "Durant", "SF", 38, "USA", 211, 109, 93, 93, 96, 99, 99, 99, 99, 94, 88, 99, 99, 78, 62, 54700000, 2, false);
         Add("HOU", "Alperen", "Sengun", "C", 24, "TUR", 211, 110, 90, 94, 87, 99, 87, 99, 99, 91, 99, 93, 99, 73, 64, 38000000, 5, false);
         Add("HOU", "Amen", "Thompson", "SF", 23, "USA", 201, 97, 88, 96, 99, 83, 67, 91, 93, 98, 85, 99, 93, 97, 63, 11000000, 3, false);
         Add("HOU", "Fred", "VanVleet", "PG", 32, "USA", 183, 89, 84, 84, 90, 92, 88, 98, 96, 90, 60, 86, 98, 96, 30, 44500000, 2, false);
@@ -1351,7 +1354,7 @@ public class DatabaseManager : MonoBehaviour
         Add("IND", "Quenton", "Jackson", "SG", 27, "USA", 196, 79, 73, 76, 92, 76, 70, 78, 80, 78, 58, 88, 78, 76, 29, 2200000, 2, false);
 
         // ── LAC ──
-        Add("LAC", "Kawhi", "Leonard", "SF", 35, "USA", 201, 102, 91, 91, 89, 99, 92, 94, 99, 99, 85, 94, 99, 96, 55, 50000000, 2, false);
+        Add("LAC", "Kawhi", "Leonard", "SF", 35, "USA", 201, 102, 92, 92, 89, 99, 92, 94, 99, 99, 85, 94, 99, 96, 55, 50000000, 2, false);
         Add("LAC", "Darius", "Garland", "PG", 26, "USA", 185, 87, 89, 91, 99, 99, 99, 99, 99, 86, 70, 99, 99, 92, 38, 40000000, 4, false);
         Add("LAC", "Bradley", "Beal", "SG", 33, "USA", 193, 94, 85, 85, 97, 99, 96, 95, 99, 80, 64, 94, 99, 76, 36, 5500000, 2, false);
         Add("LAC", "John", "Collins", "PF", 29, "USA", 206, 103, 84, 84, 92, 94, 83, 79, 87, 87, 93, 98, 91, 69, 51, 26000000, 3, false);
@@ -1367,8 +1370,8 @@ public class DatabaseManager : MonoBehaviour
         Add("LAC", "Cam", "Christie", "SG", 21, "USA", 198, 86, 73, 84, 86, 78, 84, 73, 78, 77, 63, 84, 78, 73, 29, 2200000, 4, false);
 
         // ── LAL ──
-        Add("LAL", "Luka", "Doncic", "PG", 27, "SLO", 201, 104, 97, 98, 99, 99, 99, 99, 99, 89, 79, 89, 99, 99, 77, 55000000, 5, false);
-        Add("LAL", "LeBron", "James", "SF", 42, "USA", 206, 113, 90, 90, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48, 52600000, 1, false);
+        Add("LAL", "Luka", "Doncic", "PG", 27, "SLO", 201, 104, 95, 97, 99, 99, 99, 99, 99, 89, 79, 89, 99, 99, 77, 55000000, 5, false);
+        Add("LAL", "LeBron", "James", "SF", 42, "USA", 206, 113, 89, 89, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48, 52600000, 1, false);
         Add("LAL", "Austin", "Reaves", "SG", 28, "USA", 196, 89, 86, 88, 96, 99, 96, 99, 99, 82, 71, 92, 99, 78, 35, 30000000, 4, false);
         Add("LAL", "Deandre", "Ayton", "C", 28, "BAH", 213, 113, 84, 84, 89, 97, 52, 81, 78, 97, 99, 93, 95, 66, 77, 34000000, 2, false);
         Add("LAL", "Marcus", "Smart", "PG", 32, "USA", 193, 100, 81, 81, 85, 81, 75, 90, 86, 98, 65, 86, 94, 98, 33, 21000000, 2, false);
@@ -1384,7 +1387,7 @@ public class DatabaseManager : MonoBehaviour
         Add("LAL", "Luke", "Kennard", "SG", 30, "USA", 196, 93, 76, 76, 87, 90, 99, 83, 88, 69, 59, 81, 90, 61, 29, 9000000, 2, false);
 
         // ── MEM ──
-        Add("MEM", "Ja", "Morant", "PG", 27, "USA", 188, 79, 92, 94, 99, 99, 99, 99, 99, 93, 79, 99, 99, 98, 49, 44000000, 4, false);
+        Add("MEM", "Ja", "Morant", "PG", 27, "USA", 188, 79, 91, 93, 99, 99, 99, 99, 99, 93, 79, 99, 99, 98, 49, 44000000, 4, false);
         Add("MEM", "Taylor", "Hendricks", "PF", 23, "USA", 206, 97, 84, 92, 88, 86, 84, 77, 82, 94, 82, 96, 88, 80, 67, 11000000, 3, false);
         Add("MEM", "Zach", "Edey", "C", 24, "CAN", 224, 136, 83, 90, 71, 99, 47, 78, 75, 99, 99, 86, 99, 61, 99, 9000000, 3, false);
         Add("MEM", "GG", "Jackson", "SF", 21, "USA", 206, 98, 82, 93, 92, 92, 86, 79, 88, 83, 79, 96, 87, 71, 49, 6000000, 3, false);
@@ -1432,7 +1435,7 @@ public class DatabaseManager : MonoBehaviour
         Add("MIL", "Thanasis", "Antetokounmpo", "SF", 34, "GRE", 201, 99, 68, 68, 87, 68, 40, 60, 64, 83, 68, 91, 74, 77, 36, 1200000, 1, false);
 
         // ── MIN ──
-        Add("MIN", "Anthony", "Edwards", "SG", 25, "USA", 193, 102, 96, 97, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 66, 58000000, 5, false);
+        Add("MIN", "Anthony", "Edwards", "SG", 25, "USA", 193, 102, 95, 97, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 66, 58000000, 5, false);
         Add("MIN", "Julius", "Randle", "PF", 31, "USA", 203, 113, 86, 86, 95, 97, 84, 87, 91, 89, 91, 95, 95, 72, 50, 33000000, 3, false);
         Add("MIN", "Rudy", "Gobert", "C", 34, "FRA", 216, 117, 84, 84, 80, 91, 42, 76, 72, 99, 99, 99, 99, 68, 99, 38000000, 2, false);
         Add("MIN", "Jaden", "McDaniels", "SF", 25, "USA", 206, 95, 84, 88, 91, 85, 81, 79, 83, 98, 77, 96, 89, 92, 53, 18000000, 4, false);
@@ -1465,7 +1468,7 @@ public class DatabaseManager : MonoBehaviour
 
         // ── NYK ──
         Add("NYK", "Jalen", "Brunson", "PG", 29, "USA", 188, 86, 93, 93, 99, 99, 99, 99, 99, 95, 81, 99, 99, 99, 55, 48000000, 4, false);
-        Add("NYK", "Karl-Anthony", "Towns", "C", 30, "USA", 213, 112, 89, 90, 93, 99, 99, 93, 95, 85, 93, 95, 99, 74, 54, 52000000, 4, false);
+        Add("NYK", "Karl-Anthony", "Towns", "C", 30, "USA", 213, 112, 92, 93, 93, 99, 99, 93, 95, 85, 93, 95, 99, 74, 54, 52000000, 4, false);
         Add("NYK", "Mikal", "Bridges", "SF", 30, "USA", 198, 95, 87, 87, 95, 92, 86, 84, 90, 99, 82, 99, 93, 97, 40, 30000000, 4, false);
         Add("NYK", "OG", "Anunoby", "SF", 29, "GBR", 201, 105, 87, 87, 94, 88, 83, 85, 88, 99, 85, 99, 94, 99, 43, 28000000, 4, false);
         Add("NYK", "Josh", "Hart", "SG", 31, "USA", 196, 97, 84, 84, 90, 86, 82, 86, 88, 96, 78, 94, 90, 92, 42, 18000000, 3, false);
@@ -1480,7 +1483,7 @@ public class DatabaseManager : MonoBehaviour
         Add("NYK", "Ariel", "Hukporti", "C", 23, "GER", 213, 110, 74, 84, 73, 71, 29, 63, 59, 93, 96, 94, 85, 57, 94, 2200000, 3, false);
 
         // ── OKC ──
-        Add("OKC", "Shai", "Gilgeous-Alexander", "PG", 27, "CAN", 198, 88, 97, 97, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 77, 62000000, 5, false);
+        Add("OKC", "Shai", "Gilgeous-Alexander", "PG", 27, "CAN", 198, 88, 98, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 77, 62000000, 5, false);
         Add("OKC", "Jalen", "Williams", "SF", 25, "USA", 198, 95, 92, 94, 99, 99, 98, 94, 99, 99, 85, 99, 99, 98, 43, 38000000, 4, false);
         Add("OKC", "Chet", "Holmgren", "C", 24, "USA", 216, 97, 90, 92, 87, 94, 89, 83, 87, 96, 99, 93, 94, 69, 99, 36000000, 4, false);
         Add("OKC", "Isaiah", "Hartenstein", "C", 28, "GER", 213, 113, 84, 84, 79, 84, 61, 82, 79, 96, 98, 90, 92, 67, 96, 18000000, 3, false);
@@ -1511,7 +1514,7 @@ public class DatabaseManager : MonoBehaviour
         Add("ORL", "Jamal", "Cain", "SF", 27, "USA", 198, 95, 74, 82, 86, 78, 73, 74, 78, 84, 67, 86, 80, 82, 26, 2000000, 2, false);
 
         // ── PHI ──
-        Add("PHI", "Joel", "Embiid", "C", 32, "CAM", 213, 127, 96, 96, 99, 99, 98, 99, 99, 99, 99, 99, 99, 79, 87, 65000000, 5, false);
+        Add("PHI", "Joel", "Embiid", "C", 32, "CAM", 213, 127, 92, 93, 99, 99, 98, 99, 99, 99, 99, 99, 99, 79, 87, 65000000, 5, false);
         Add("PHI", "Tyrese", "Maxey", "PG", 26, "USA", 188, 86, 92, 94, 99, 99, 99, 99, 99, 94, 74, 99, 99, 99, 52, 42000000, 5, false);
         Add("PHI", "Paul", "George", "SF", 36, "USA", 206, 100, 88, 88, 96, 98, 98, 87, 93, 99, 73, 98, 96, 99, 31, 35000000, 2, false);
         Add("PHI", "Kelly", "Oubre Jr.", "SF", 30, "USA", 198, 95, 80, 82, 93, 89, 86, 80, 84, 89, 66, 89, 87, 87, 30, 12000000, 2, false);
@@ -1527,7 +1530,7 @@ public class DatabaseManager : MonoBehaviour
         Add("PHI", "MarJon", "Beauchamp", "SF", 25, "USA", 201, 95, 76, 84, 93, 81, 74, 76, 80, 85, 68, 89, 83, 81, 26, 2500000, 3, false);
 
         // ── PHX ──
-        Add("PHX", "Devin", "Booker", "SG", 29, "USA", 198, 96, 95, 96, 99, 99, 99, 99, 99, 99, 93, 99, 99, 99, 61, 60000000, 5, false);
+        Add("PHX", "Devin", "Booker", "SG", 29, "USA", 198, 96, 91, 92, 99, 99, 99, 99, 99, 99, 93, 99, 99, 99, 61, 60000000, 5, false);
         Add("PHX", "Jalen", "Green", "SG", 24, "USA", 198, 89, 86, 90, 99, 99, 99, 94, 98, 78, 63, 96, 99, 80, 41, 35000000, 4, false);
         Add("PHX", "Mark", "Williams", "C", 25, "USA", 213, 118, 84, 86, 84, 88, 48, 74, 76, 99, 99, 96, 95, 66, 99, 22000000, 4, false);
         Add("PHX", "Dillon", "Brooks", "SF", 30, "CAN", 198, 102, 82, 82, 93, 87, 84, 82, 86, 95, 70, 95, 89, 93, 28, 20000000, 3, false);
@@ -1573,7 +1576,7 @@ public class DatabaseManager : MonoBehaviour
         Add("SAC", "Maxime", "Raynaud", "C", 23, "FRA", 213, 110, 76, 84, 72, 79, 73, 70, 73, 81, 87, 79, 81, 54, 87, 3000000, 4, false);
 
         // ── SAS ──
-        Add("SAS", "Victor", "Wembanyama", "C", 22, "FRA", 224, 104, 96, 96, 90, 99, 86, 92, 95, 99, 99, 99, 99, 99, 99, 60000000, 5, false);
+        Add("SAS", "Victor", "Wembanyama", "C", 22, "FRA", 224, 104, 94, 99, 90, 99, 86, 92, 95, 99, 99, 99, 99, 99, 99, 60000000, 5, false);
         Add("SAS", "De'Aaron", "Fox", "PG", 28, "USA", 191, 84, 90, 92, 99, 99, 99, 99, 99, 86, 68, 99, 99, 96, 47, 45000000, 5, false);
         Add("SAS", "Stephon", "Castle", "SG", 21, "USA", 198, 96, 84, 88, 96, 92, 84, 90, 92, 88, 69, 92, 92, 90, 39, 9000000, 4, false);
         Add("SAS", "Dylan", "Harper", "SG", 20, "USA", 196, 92, 82, 90, 97, 93, 88, 88, 90, 84, 62, 90, 90, 86, 34, 7000000, 4, false);
@@ -1651,6 +1654,56 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
+    int[] GeneratePositionAttrs(int ovr, string pos, string seed)
+    {
+        // Base positional profiles for a reference 90-OVR player
+        // Order: speed, shooting, three_point, passing, dribbling,
+        //        defense, rebounding, athleticism, iq, steals, blocks
+        int[] profile = pos switch
+        {
+            "PG" => new[] { 94, 88, 92, 97, 97, 78, 62, 82, 95, 80, 50 },
+            "SG" => new[] { 92, 95, 97, 85, 88, 80, 58, 85, 88, 82, 50 },
+            "SF" => new[] { 88, 88, 88, 82, 80, 90, 72, 92, 85, 86, 62 },
+            "PF" => new[] { 78, 78, 72, 72, 65, 95, 95, 90, 80, 72, 82 },
+            "C"  => new[] { 68, 72, 55, 62, 55, 98, 99, 85, 78, 65, 96 },
+            _    => new[] { 85, 85, 85, 85, 85, 85, 85, 85, 85, 85, 85 }
+        };
+
+        var rng = new System.Random(seed.GetHashCode());
+        int[] result = new int[11];
+        int sum = 0;
+
+        for (int i = 0; i < 11; i++)
+        {
+            float ratio = ovr / 90f;
+            int raw = Mathf.RoundToInt(profile[i] * ratio);
+            raw += rng.Next(-2, 3);
+
+            int floor = Mathf.Max(25, ovr - 22);
+            raw = Mathf.Clamp(raw, floor, 99);
+            result[i] = raw;
+            sum += raw;
+        }
+
+        // Renormalize so average equals ovr
+        int targetSum = ovr * 11;
+        int diff = targetSum - sum;
+        for (int i = 0; i < 11 && diff != 0; i++)
+        {
+            int step = Mathf.Clamp(diff, -4, 4);
+            int floor = Mathf.Max(25, ovr - 22);
+            int clamped = Mathf.Clamp(result[i] + step, floor, 99);
+            int actual = clamped - result[i];
+            if (actual != 0)
+            {
+                result[i] = clamped;
+                diff -= actual;
+            }
+        }
+
+        return result;
+    }
+
     public void SeedFreeAgents()
     {
         var freeAgents = new System.Collections.Generic.List<PlayerData>();
@@ -1658,10 +1711,14 @@ public class DatabaseManager : MonoBehaviour
         // Cada agente libre: (fn, ln, pos, age, nat, h, w, ovr, pot, spd, sht, thr, pas,
         //                      drb, def, reb, ath, iq, stl, blk, sal, yrs)
         void AddFA(string fn, string ln, string pos, int age, string nat,
-                   int h, int w, int ovr, int pot, int spd, int sht, int thr, int pas,
-                   int drb, int def, int reb, int ath, int iq, int stl, int blk,
-                   long sal, int yrs)
+                    int h, int w, int ovr, int pot, int spd, int sht, int thr, int pas,
+                    int drb, int def, int reb, int ath, int iq, int stl, int blk,
+                    long sal, int yrs)
         {
+            var attrs = GeneratePositionAttrs(ovr, pos, fn + ln);
+            int calcOvr = (int)System.Math.Round(attrs.Average());
+            if (calcOvr > pot) calcOvr = pot;
+
             freeAgents.Add(new PlayerData
             {
                 team_id = 0,
@@ -1672,19 +1729,19 @@ public class DatabaseManager : MonoBehaviour
                 nationality = nat,
                 height_cm = h,
                 weight_kg = w,
-                overall = ovr,
+                overall = calcOvr,
                 potential = pot,
-                speed = spd,
-                shooting = sht,
-                three_point = thr,
-                passing = pas,
-                dribbling = drb,
-                defense = def,
-                rebounding = reb,
-                athleticism = ath,
-                iq = iq,
-                steals = stl,
-                blocks = blk,
+                speed = attrs[0],
+                shooting = attrs[1],
+                three_point = attrs[2],
+                passing = attrs[3],
+                dribbling = attrs[4],
+                defense = attrs[5],
+                rebounding = attrs[6],
+                athleticism = attrs[7],
+                iq = attrs[8],
+                steals = attrs[9],
+                blocks = attrs[10],
                 salary = sal,
                 contract_years = yrs,
                 is_rookie = 0,
