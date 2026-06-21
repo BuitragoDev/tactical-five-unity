@@ -10,7 +10,6 @@ public class ManagerData
     public string game_mode { get; set; }
     public int    trust          { get; set; }
     public int    morale         { get; set; }
-    public int    pressure       { get; set; }
     public int    fan_confidence { get; set; }
     public int    budget_red_warnings { get; set; }
 }

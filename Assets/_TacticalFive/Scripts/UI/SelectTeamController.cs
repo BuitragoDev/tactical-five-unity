@@ -354,7 +354,6 @@ public class SelectTeamController : MonoBehaviour
                         ? "promanager" : "manager",
             trust = 50,
             morale = 50,
-            pressure = 50,
             fan_confidence = 50
         };
 

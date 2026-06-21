@@ -61,11 +61,9 @@ public class DashboardController : MonoBehaviour
     // Relaciones
     private VisualElement _barTrust;
     private VisualElement _barMorale;
-    private VisualElement _barPressure;
     private VisualElement _barFanConfidence;
     private Label _valTrust;
     private Label _valMorale;
-    private Label _valPressure;
     private Label _valFanConfidence;
 
     // Estadísticas del equipo
@@ -203,11 +201,9 @@ public class DashboardController : MonoBehaviour
         // Relaciones
         _barTrust = _root.Q<VisualElement>("CircleTrust");
         _barMorale = _root.Q<VisualElement>("CircleMorale");
-        _barPressure = _root.Q<VisualElement>("CirclePressure");
         _barFanConfidence = _root.Q<VisualElement>("CircleFanConfidence");
         _valTrust = _root.Q<Label>("ValTrust");
         _valMorale = _root.Q<Label>("ValMorale");
-        _valPressure = _root.Q<Label>("ValPressure");
         _valFanConfidence = _root.Q<Label>("ValFanConfidence");
     }
 
@@ -2701,10 +2697,6 @@ public class DashboardController : MonoBehaviour
         int moraleChange = recentWins >= 4 ? 3 : recentWins >= 3 ? 1 : recentWins <= 1 ? -2 : 0;
         _manager.morale = Mathf.Clamp(_manager.morale + moraleChange, 0, 100);
 
-        // Pressure: inverse of trust
-        int pressureChange = trustChange < 0 ? 2 : trustChange > 0 ? -1 : 0;
-        _manager.pressure = Mathf.Clamp(_manager.pressure + pressureChange, 0, 100);
-
         DatabaseManager.Instance.SaveManager(_manager);
     }
 
@@ -3366,7 +3358,6 @@ public class DashboardController : MonoBehaviour
         if (_manager == null) return;
         SetCircle(_barTrust, _valTrust, _manager.trust);
         SetCircle(_barMorale, _valMorale, _manager.morale);
-        SetCircle(_barPressure, _valPressure, _manager.pressure);
         SetCircle(_barFanConfidence, _valFanConfidence, _manager.fan_confidence);
     }
 

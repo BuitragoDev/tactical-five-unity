@@ -408,13 +408,6 @@
                                         </ui:VisualElement>
                                         <ui:VisualElement class="board-col-sep" />
                                         <ui:VisualElement class="board-col">
-                                            <ui:VisualElement name="CirclePressure" class="board-circle">
-                                                <ui:Label name="ValPressure" class="board-circle-val" text="50%" />
-                                            </ui:VisualElement>
-                                            <ui:Label class="board-col-label" text="PRESIÓN PRENSA" />
-                                        </ui:VisualElement>
-                                        <ui:VisualElement class="board-col-sep" />
-                                        <ui:VisualElement class="board-col">
                                             <ui:VisualElement name="CircleFanConfidence" class="board-circle">
                                                 <ui:Label name="ValFanConfidence" class="board-circle-val" text="50%" />
                                             </ui:VisualElement>
