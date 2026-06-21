@@ -133,7 +133,7 @@ public static class GameSimulator
             }
             if (ps.steals_attr >= 90)
                 ps.steals = Mathf.Max(ps.steals, Mathf.RoundToInt(ps.minutes / 48f * 3));
-            if (ps.blocks_attr >= 90)
+            if (ps.blocks_attr >= 95)
                 ps.blocks = Mathf.Max(ps.blocks, Mathf.RoundToInt(ps.minutes / 48f * 3));
         }
 
@@ -367,7 +367,7 @@ public static class GameSimulator
     {
         foreach (var d in def)
         {
-            float blockChance = Mathf.Clamp((d.blocks_attr - 50) / 500f, 0, 0.15f);
+            float blockChance = Mathf.Clamp((d.blocks_attr - 60) / 400f, 0, 0.10f);
             if (UnityEngine.Random.value < blockChance)
             {
                 d.blocks++;
