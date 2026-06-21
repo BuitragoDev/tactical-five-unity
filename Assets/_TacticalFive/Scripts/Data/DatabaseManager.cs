@@ -1685,25 +1685,43 @@ public class DatabaseManager : MonoBehaviour
             sum += raw;
         }
 
-        // Renormalize so average equals ovr (cycle repeatedly until diff is resolved)
+        // Escalado proporcional: preserva perfil posicional, promedio = ovr
         int targetSum = ovr * 11;
-        int diff = targetSum - sum;
-        int iterations = 0;
-        while (diff != 0 && iterations < 100)
+        float factor = (float)targetSum / sum;
+        int newSum = 0;
+        for (int i = 0; i < 11; i++)
         {
-            for (int i = 0; i < 11 && diff != 0; i++)
+            int scaled = Mathf.RoundToInt(result[i] * factor);
+            int floor = Mathf.Max(25, ovr - 22);
+            result[i] = Mathf.Clamp(scaled, floor, 99);
+            newSum += result[i];
+        }
+
+        // Ajustar resto por redondeo/clamp
+        int remaining = targetSum - newSum;
+        if (remaining > 0)
+        {
+            var candidates = result.Select((v, i) => new { v, i })
+                .Where(x => x.v < 99).OrderByDescending(x => x.v).ToList();
+            foreach (var c in candidates)
             {
-                int step = Mathf.Clamp(diff, -4, 4);
-                int floor = Mathf.Max(25, ovr - 22);
-                int clamped = Mathf.Clamp(result[i] + step, floor, 99);
-                int actual = clamped - result[i];
-                if (actual != 0)
-                {
-                    result[i] = clamped;
-                    diff -= actual;
-                }
+                if (remaining <= 0) break;
+                int add = Mathf.Min(remaining, 99 - c.v);
+                result[c.i] += add;
+                remaining -= add;
             }
-            iterations++;
+        }
+        else if (remaining < 0)
+        {
+            var candidates = result.Select((v, i) => new { v, i })
+                .Where(x => x.v > Mathf.Max(25, ovr - 22)).OrderBy(x => x.v).ToList();
+            foreach (var c in candidates)
+            {
+                if (remaining >= 0) break;
+                int sub = Mathf.Min(-remaining, c.v - Mathf.Max(25, ovr - 22));
+                result[c.i] -= sub;
+                remaining += sub;
+            }
         }
 
         return result;
