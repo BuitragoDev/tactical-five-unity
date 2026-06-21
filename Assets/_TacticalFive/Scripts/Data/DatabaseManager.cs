@@ -274,6 +274,21 @@ public class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for trade_offers: {ex.Message}");
         }
+
+        // Add last_ai_trade_day to seasons
+        try
+        {
+            var sCols = _db.Query<ColumnInfo>("PRAGMA table_info(seasons)");
+            if (sCols.Count > 0 && !sCols.Any(c => c.name == "last_ai_trade_day"))
+            {
+                _db.Execute("ALTER TABLE seasons ADD COLUMN last_ai_trade_day INTEGER DEFAULT -999");
+                Debug.Log("[DB] Migration: added last_ai_trade_day to seasons");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for seasons: {ex.Message}");
+        }
     }
 
     class ColumnInfo

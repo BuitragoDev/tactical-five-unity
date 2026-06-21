@@ -636,6 +636,7 @@ public class DashboardController : MonoBehaviour
     System.Collections.IEnumerator ProcessGameDayRoutine()
     {
         int gameDay = FindNextGameDay();
+        Debug.Log($"[GameDay] ProcessGameDayRoutine started. gameDay={gameDay}");
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
@@ -1668,48 +1669,71 @@ public class DashboardController : MonoBehaviour
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
 
-        // Only run every ~14 game days
-        int lastDay = PlayerPrefs.GetInt("LastAITradeDay", -999);
-        if (gameDay - lastDay < 14) return;
+        // Only run every ~10 game days
+        int lastDay = _season.last_ai_trade_day;
+        Debug.Log($"[AITrades] ProcessAITransfers called. gameDay={gameDay} lastDay={lastDay} diff={gameDay - lastDay}");
+        if (gameDay - lastDay < 15) return;
 
         // Check if in transfer window (1 Sep year_start to 8 Feb year_end)
         if (!System.DateTime.TryParse(_season.current_date, out var date)) return;
         var openDate = new System.DateTime(_season.year_start, 9, 1);
         var closeDate = new System.DateTime(_season.year_end, 2, 8);
-        if (date < openDate || date > closeDate) return;
+        if (date < openDate || date > closeDate)
+        {
+            Debug.Log($"[AITrades] Outside transfer window: date={_season.current_date} window={openDate:dd/MMM} - {closeDate:dd/MMM}");
+            return;
+        }
 
-        PlayerPrefs.SetInt("LastAITradeDay", gameDay);
+        _season.last_ai_trade_day = gameDay;
+        Debug.Log($"[AITrades] Starting cycle. Date={_season.current_date} gameDay={gameDay}");
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var seasonId = _season.id;
         var freeAgentsAll = DatabaseManager.Instance.GetFreeAgents();
 
+        int teamsAttempted = 0, teamsTraded = 0, teamsFAd = 0;
+        const int maxTrades = 2;
+
         foreach (var team in allTeams)
         {
             if (team.id == _myTeam.id) continue;
 
-            if (DatabaseManager.Instance.HasTeamTradedThisSeason(team.id, seasonId)) continue;
+            if (teamsTraded >= maxTrades) break;
 
-            if (Random.Range(0f, 1f) > 0.25f) continue;
+            if (Random.Range(0f, 1f) > 0.3f) continue;
 
             var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
             if (roster.Count < 10) continue;
 
-            // If roster critically low (< 12), increase chance of FA signing
-            bool needsRosterFill = roster.Count < 12;
-
             var weakestPos = GetWeakestPosition(roster);
             if (weakestPos == null) continue;
 
+            teamsAttempted++;
+
+            // If roster < 12, sign free agent directly without trying trade
+            if (roster.Count < 12)
+            {
+                Debug.Log($"[AITrades] {team.name} roster={roster.Count} < 12, direct FA at {weakestPos}");
+                TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
+                teamsFAd++;
+                continue;
+            }
+
             bool traded = TryFindAITrade(team, roster, weakestPos, seasonId, gameDay);
 
-            if (!traded && needsRosterFill)
+            if (traded)
+            {
+                teamsTraded++;
+            }
+            else if (Random.Range(0f, 1f) < 0.3f)
+            {
+                Debug.Log($"[AITrades] {team.name} trade failed, trying FA at {weakestPos}");
                 TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
-
-            if (!traded && !needsRosterFill && Random.Range(0f, 1f) < 0.4f)
-                TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
+                teamsFAd++;
+            }
         }
 
+        Debug.Log($"[AITrades] Cycle complete: {teamsAttempted} teams attempted, {teamsTraded} trades, {teamsFAd} FA signings");
         GenerateAITradeOffersForPlayer(gameDay, seasonId);
     }
 
@@ -1745,86 +1769,91 @@ public class DashboardController : MonoBehaviour
 
         foreach (var teamB in allTeams)
         {
-            if (DatabaseManager.Instance.HasTeamTradedThisSeason(teamB.id, seasonId)) continue;
+            var rosterB = DatabaseManager.Instance.GetPlayersByTeam(teamB.id);
 
-            // Find best player on teamB at targetPos
-            var bTargetPlayers = DatabaseManager.Instance.GetPlayersByTeam(teamB.id)
+            var target = rosterB
                 .Where(p => p.position == targetPos && p.injury_days == 0)
                 .OrderByDescending(p => p.overall)
-                .ToList();
-            if (bTargetPlayers.Count == 0) continue;
-            // Don't take their best player (> 85 OVR) to keep it realistic
-            var playerB = bTargetPlayers.FirstOrDefault(p => p.overall <= 85);
-            if (playerB == null) playerB = bTargetPlayers.Last();
+                .FirstOrDefault(p => p.overall <= 86);
+            if (target == null) continue;
 
-            // Find teamA's weakest position for teamB
-            var rosterB = DatabaseManager.Instance.GetPlayersByTeam(teamB.id);
-            var bWeakPos = GetWeakestPosition(rosterB);
-            if (bWeakPos == null) continue;
-
-            // Find a player on teamA at bWeakPos that we can offer
-            var aOfferPlayers = rosterA
-                .Where(p => p.position == bWeakPos && p.injury_days == 0 && p.id != playerB.id)
+            var candidates = rosterA
+                .Where(p => p.injury_days == 0 && p.id != target.id
+                            && rosterA.Count(r => r.position == p.position) >= (
+                                p.position == targetPos ? 1 : 2))
                 .OrderBy(p => p.overall)
                 .ToList();
-            if (aOfferPlayers.Count == 0) continue;
-            // Don't trade away our best player (> 85 OVR)
-            var playerA = aOfferPlayers.FirstOrDefault(p => p.overall <= 85);
-            if (playerA == null) playerA = aOfferPlayers.First();
+            if (candidates.Count == 0) continue;
 
-            var aSelected = new List<PlayerData> { playerA };
-            var bSelected = new List<PlayerData> { playerB };
-
-            // Validate trade from teamB's perspective
-            var bPayroll = rosterB.Sum(p => p.salary);
-            var errors = TradeHelper.ValidateTrade(
-                aSelected, bSelected,
-                rosterA.Count, rosterB.Count,
-                teamB.name, bPayroll);
-
-            if (errors.Count > 0) continue;
-
-            // Check if teamB would accept
-            var result = TradeHelper.EvaluateTrade(
-                aSelected, bSelected,
-                teamB.name, rosterB.Count, bPayroll);
-
-            if (!result.WouldAccept) continue;
-
-            // Execute trade
-            playerA.team_id = teamB.id;
-            playerB.team_id = teamA.id;
-            DatabaseManager.Instance.UpdatePlayer(playerA);
-            DatabaseManager.Instance.UpdatePlayer(playerB);
-
-            // Log both sides
-            DatabaseManager.Instance.InsertTrade(new TradeData
+            // Try 1-for-1
+            foreach (var c in candidates)
             {
-                season_id = seasonId,
-                game_day = gameDay,
-                game_date = _season.current_date,
-                team_id_from = teamA.id,
-                team_id_to = teamB.id,
-                player_id = playerA.id,
-                trade_type = "trade",
-                partner_player_id = playerB.id
-            });
-            DatabaseManager.Instance.InsertTrade(new TradeData
-            {
-                season_id = seasonId,
-                game_day = gameDay,
-                game_date = _season.current_date,
-                team_id_from = teamB.id,
-                team_id_to = teamA.id,
-                player_id = playerB.id,
-                trade_type = "trade",
-                partner_player_id = playerA.id
-            });
+                if (TryExecuteTrade(teamA, rosterA, teamB, rosterB,
+                        new List<PlayerData> { c },
+                        new List<PlayerData> { target },
+                        seasonId, gameDay))
+                    return true;
+            }
 
-            Debug.Log($"[AI Trade] {teamA.name} ↔ {teamB.name}: {playerA.first_name} {playerA.last_name} for {playerB.first_name} {playerB.last_name}");
-            return true;
+            // Try 2-for-1
+            for (int i = 0; i < candidates.Count; i++)
+            {
+                for (int j = i + 1; j < candidates.Count; j++)
+                {
+                    if (TryExecuteTrade(teamA, rosterA, teamB, rosterB,
+                            new List<PlayerData> { candidates[i], candidates[j] },
+                            new List<PlayerData> { target },
+                            seasonId, gameDay))
+                        return true;
+                }
+            }
         }
         return false;
+    }
+
+    bool TryExecuteTrade(TeamData teamA, List<PlayerData> rosterA,
+                         TeamData teamB, List<PlayerData> rosterB,
+                         List<PlayerData> aSelected, List<PlayerData> bSelected,
+                         int seasonId, int gameDay)
+    {
+        var bPayroll = rosterB.Sum(p => p.salary);
+        var errors = TradeHelper.ValidateTrade(
+            aSelected, bSelected,
+            rosterA.Count, rosterB.Count,
+            teamB.name, bPayroll);
+
+        if (errors.Count > 0) return false;
+
+        foreach (var p in aSelected)
+        {
+            p.team_id = teamB.id;
+            DatabaseManager.Instance.UpdatePlayer(p);
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
+                team_id_from = teamA.id, team_id_to = teamB.id,
+                player_id = p.id, trade_type = "trade",
+                partner_player_id = bSelected.First().id
+            });
+        }
+
+        foreach (var p in bSelected)
+        {
+            p.team_id = teamA.id;
+            DatabaseManager.Instance.UpdatePlayer(p);
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
+                team_id_from = teamB.id, team_id_to = teamA.id,
+                player_id = p.id, trade_type = "trade",
+                partner_player_id = aSelected.First().id
+            });
+        }
+
+        var aNames = string.Join(", ", aSelected.Select(p => $"{p.first_name} {p.last_name}"));
+        var bNames = string.Join(", ", bSelected.Select(p => $"{p.first_name} {p.last_name}"));
+        Debug.Log($"[AI Trade] {teamA.name} ↔ {teamB.name}: {aNames} for {bNames}");
+        return true;
     }
 
     void TrySignFreeAgent(TeamData team, List<PlayerData> roster, string targetPos,
@@ -1884,7 +1913,7 @@ public class DashboardController : MonoBehaviour
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
 
-        foreach (var aiTeam in allTeams)
+        foreach (var aiTeam in allTeams.OrderBy(_ => Random.Range(0, 1000)))
         {
             if (aiTeam.id == _myTeam.id) continue;
             if (Random.Range(0f, 1f) > 0.50f) continue;
@@ -1892,62 +1921,107 @@ public class DashboardController : MonoBehaviour
             var aiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
             if (aiRoster.Count < 11) continue;
 
-            var playerRoster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-            if (playerRoster.Count < 10 || playerRoster.Count >= TradeHelper.MAX_ROSTER) continue;
+            var userRoster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            if (userRoster.Count < 10 || userRoster.Count >= TradeHelper.MAX_ROSTER) continue;
 
-            var userCandidates = playerRoster
-                .Where(p => p.injury_days == 0)
-                .OrderByDescending(p => p.overall)
+            var userHealthy = userRoster.Where(p => p.injury_days == 0).ToList();
+            if (userHealthy.Count == 0) continue;
+
+            var target = PickTradeTarget(userHealthy, aiRoster);
+            if (target == null) continue;
+
+            var aiHealthy = aiRoster
+                .Where(p => p.injury_days == 0 && p.id != target.id)
                 .ToList();
+            if (aiHealthy.Count == 0) continue;
 
-            var wantedPlayer = userCandidates.FirstOrDefault(p => p.overall >= 80)
-                               ?? userCandidates.FirstOrDefault();
-            if (wantedPlayer == null) continue;
+            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster);
+            if (offerPack == null) continue;
 
-            var aiAvailable = aiRoster
-                .Where(p => p.injury_days == 0 && p.id != wantedPlayer.id)
-                .OrderBy(p => p.overall)
-                .ToList();
-            if (aiAvailable.Count < 2) continue;
-
-            var offerPack = new List<PlayerData>();
-            long playerPayroll = playerRoster.Sum(p => p.salary);
-
-            foreach (var candidate in aiAvailable)
-            {
-                if (offerPack.Count >= 3) break;
-
-                var testPack = new List<PlayerData>(offerPack) { candidate };
-                var errors = TradeHelper.ValidateTrade(
-                    testPack,
-                    new List<PlayerData> { wantedPlayer },
-                    aiRoster.Count, playerRoster.Count,
-                    _myTeam.name, playerPayroll);
-
-                if (errors.Count == 0 && testPack.Count >= 2)
-                {
-                    offerPack = testPack;
-                    break;
-                }
-
-                if (errors.Count == 0)
-                    offerPack = testPack;
-            }
-
-            if (offerPack.Count < 2) continue;
-
+            var wantedIds = new List<int> { target.id };
             var offeredIds = offerPack.Select(p => p.id).ToList();
             DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
             {
                 manager_id = _manager.id,
                 team_id_from = aiTeam.id,
-                player_ids_out = TradeOfferData.JoinIds(new List<int> { wantedPlayer.id }),
+                player_ids_out = TradeOfferData.JoinIds(wantedIds),
                 player_ids_in = TradeOfferData.JoinIds(offeredIds),
                 day_sent = gameDay,
                 processed = 0
             });
             break;
         }
+    }
+
+    PlayerData PickTradeTarget(List<PlayerData> userHealthy, List<PlayerData> aiRoster)
+    {
+        var roll = Random.Range(0f, 1f);
+
+        if (roll < 0.35f)
+        {
+            var aiWeakPos = GetWeakestPosition(aiRoster);
+            if (aiWeakPos != null)
+            {
+                var candidates = userHealthy.Where(p => p.position == aiWeakPos)
+                    .OrderByDescending(p => p.overall).ToList();
+                if (candidates.Count > 0) return candidates[0];
+            }
+        }
+
+        if (roll < 0.60f)
+            return userHealthy.OrderByDescending(p => p.overall).First();
+
+        if (roll < 0.80f)
+            return userHealthy.OrderByDescending(p => p.salary).First();
+
+        return userHealthy[Random.Range(0, userHealthy.Count)];
+    }
+
+    List<PlayerData> BuildOfferPackage(List<PlayerData> aiAvailable, int aiRosterCount,
+                                        PlayerData target, List<PlayerData> userRoster)
+    {
+        long userPayroll = userRoster.Sum(p => p.salary);
+
+        // Try 1-for-1: closest salary match first
+        foreach (var p in aiAvailable.OrderBy(p => Mathf.Abs(p.salary - target.salary)))
+        {
+            var pack = new List<PlayerData> { p };
+            if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
+                    aiRosterCount, userRoster.Count, _myTeam.name, userPayroll).Count == 0)
+                return pack;
+        }
+
+        // Try 2-for-1
+        for (int i = 0; i < aiAvailable.Count; i++)
+        {
+            for (int j = i + 1; j < aiAvailable.Count; j++)
+            {
+                var pack = new List<PlayerData> { aiAvailable[i], aiAvailable[j] };
+                if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
+                        aiRosterCount, userRoster.Count, _myTeam.name, userPayroll).Count == 0)
+                    return pack;
+            }
+        }
+
+        // Try 3-for-1
+        if (aiRosterCount - 3 >= 10)
+        {
+            for (int i = 0; i < aiAvailable.Count; i++)
+            {
+                for (int j = i + 1; j < aiAvailable.Count; j++)
+                {
+                    for (int k = j + 1; k < aiAvailable.Count; k++)
+                    {
+                        var pack = new List<PlayerData> { aiAvailable[i], aiAvailable[j], aiAvailable[k] };
+                        if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
+                                aiRosterCount, userRoster.Count, _myTeam.name, userPayroll).Count == 0)
+                            return pack;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     void ShowNextPendingTradeOffer()
