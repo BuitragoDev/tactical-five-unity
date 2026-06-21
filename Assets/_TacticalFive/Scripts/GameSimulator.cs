@@ -301,12 +301,12 @@ public static class GameSimulator
 
         string shot = ShotType(shooter);
         var defender = def.OrderByDescending(p => p.defense).FirstOrDefault();
-        float di = defender != null ? (defender.defense - 70) * 0.002f : 0;
+        float di = defender != null ? (defender.defense - 70) * 0.004f : 0;
 
         if (shot == "3")
         {
-            float basePct = 0.35f + (shooter.three_point - 70) * 0.005f;
-            float pct = Mathf.Clamp(basePct - di, 0.30f, 0.50f);
+            float basePct = 0.33f + (shooter.three_point - 70) * 0.005f;
+            float pct = Mathf.Clamp(basePct - di, 0.28f, 0.48f);
             shooter.fg3a++; shooter.fga++;
             if (UnityEngine.Random.value < pct)
             {
@@ -317,8 +317,8 @@ public static class GameSimulator
             return MissHandler(def, off, shooter, true);
         }
 
-        float base2Pct = 0.52f + (shooter.shooting - 70) * 0.005f;
-        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.45f, 0.72f);
+        float base2Pct = 0.48f + (shooter.shooting - 70) * 0.005f;
+        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.42f, 0.68f);
         shooter.fga++;
         if (UnityEngine.Random.value < pct2)
         {
@@ -328,7 +328,7 @@ public static class GameSimulator
             {
                 DoFoul(def);
                 shooter.fta++;
-                if (UnityEngine.Random.value < 0.78f)
+                if (UnityEngine.Random.value < 0.75f)
                 {
                     shooter.ftm++; shooter.points++;
                     return 3;
@@ -357,7 +357,7 @@ public static class GameSimulator
             DoFoul(def);
             int nShots = isThree ? 3 : 2;
             if (UnityEngine.Random.value < 0.10f && !isThree) nShots = 3;
-            float ftPct = 0.78f + (shooter.overall - 70) * 0.002f;
+            float ftPct = 0.75f + (shooter.overall - 70) * 0.002f;
             int made = 0;
             for (int i = 0; i < nShots; i++)
             {
@@ -377,7 +377,7 @@ public static class GameSimulator
     static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court)
     {
         if (court.Count == 0) return null;
-        var weights = court.Select(p => p.overall >= 92 ? Mathf.Pow(p.overall, 1.7f) : Mathf.Pow(p.overall, 1.5f)).ToList();
+        var weights = court.Select(p => p.overall >= 92 ? Mathf.Pow(p.overall, 1.5f) : Mathf.Pow(p.overall, 1.3f)).ToList();
         float total = weights.Sum();
         if (total <= 0) return court[UnityEngine.Random.Range(0, court.Count)];
         float r = UnityEngine.Random.value * total;
@@ -407,7 +407,7 @@ public static class GameSimulator
 
     static void DoAst(List<PlayerStatSnapshot> court, PlayerStatSnapshot scorer)
     {
-        if (UnityEngine.Random.value >= 0.75f) return;
+        if (UnityEngine.Random.value >= 0.45f) return;
         var others = court.Where(p => p != scorer).ToList();
         if (others.Count == 0) return;
         var w = others.Select(p => Mathf.Max(1, p.passing)).ToList();
@@ -489,12 +489,27 @@ public static class GameSimulator
     {
         int n = Mathf.Min(UnityEngine.Random.value < 0.5f ? 2 : 3, on.Count);
         if (n == 0) return on;
-        var outList = on.OrderBy(_ => UnityEngine.Random.value).Take(n).ToList();
-        var newSet = new HashSet<int>(on.Except(outList));
-        var bench = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i)).OrderBy(_ => UnityEngine.Random.value).ToList();
-        foreach (var i in bench.Take(n))
-            newSet.Add(i);
-        return newSet;
+
+        // 60% skill-based: bench worst players (highest index = lowest OVR),
+        // bring in best bench players (lowest index = highest OVR)
+        // 40% random
+        if (UnityEngine.Random.value < 0.6f)
+        {
+            var outList = on.OrderByDescending(i => i).Take(n).ToList();
+            var newSet = new HashSet<int>(on.Except(outList));
+            var bench = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i))
+                .OrderBy(i => i).ToList();
+            foreach (var i in bench.Take(n))
+                newSet.Add(i);
+            return newSet;
+        }
+
+        var outListR = on.OrderBy(_ => UnityEngine.Random.value).Take(n).ToList();
+        var newSetR = new HashSet<int>(on.Except(outListR));
+        var benchR = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i)).OrderBy(_ => UnityEngine.Random.value).ToList();
+        foreach (var i in benchR.Take(n))
+            newSetR.Add(i);
+        return newSetR;
     }
 
     static float[] SubSchedule(int qNum) => qNum switch
