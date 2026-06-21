@@ -329,8 +329,8 @@ public static class GameSimulator
 
         if (shot == "3")
         {
-            float basePct = 0.30f + (shooter.three_point - 70) * 0.003f;
-            float pct = Mathf.Clamp(basePct - di, 0.25f, 0.42f);
+            float basePct = 0.35f + (shooter.three_point - 70) * 0.004f;
+            float pct = Mathf.Clamp(basePct - di, 0.28f, 0.47f);
             shooter.fg3a++; shooter.fga++;
             if (UnityEngine.Random.value < pct)
             {
@@ -341,8 +341,8 @@ public static class GameSimulator
             return MissHandler(def, off, shooter, true);
         }
 
-        float base2Pct = 0.42f + (shooter.shooting - 70) * 0.003f;
-        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.38f, 0.55f);
+        float base2Pct = 0.50f + (shooter.shooting - 70) * 0.004f;
+        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.40f, 0.62f);
         shooter.fga++;
         if (UnityEngine.Random.value < pct2)
         {
