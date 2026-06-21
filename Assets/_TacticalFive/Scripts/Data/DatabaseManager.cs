@@ -1685,20 +1685,25 @@ public class DatabaseManager : MonoBehaviour
             sum += raw;
         }
 
-        // Renormalize so average equals ovr
+        // Renormalize so average equals ovr (cycle repeatedly until diff is resolved)
         int targetSum = ovr * 11;
         int diff = targetSum - sum;
-        for (int i = 0; i < 11 && diff != 0; i++)
+        int iterations = 0;
+        while (diff != 0 && iterations < 100)
         {
-            int step = Mathf.Clamp(diff, -4, 4);
-            int floor = Mathf.Max(25, ovr - 22);
-            int clamped = Mathf.Clamp(result[i] + step, floor, 99);
-            int actual = clamped - result[i];
-            if (actual != 0)
+            for (int i = 0; i < 11 && diff != 0; i++)
             {
-                result[i] = clamped;
-                diff -= actual;
+                int step = Mathf.Clamp(diff, -4, 4);
+                int floor = Mathf.Max(25, ovr - 22);
+                int clamped = Mathf.Clamp(result[i] + step, floor, 99);
+                int actual = clamped - result[i];
+                if (actual != 0)
+                {
+                    result[i] = clamped;
+                    diff -= actual;
+                }
             }
+            iterations++;
         }
 
         return result;

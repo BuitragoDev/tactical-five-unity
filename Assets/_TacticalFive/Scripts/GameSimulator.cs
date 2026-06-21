@@ -407,10 +407,10 @@ public static class GameSimulator
 
     static void DoAst(List<PlayerStatSnapshot> court, PlayerStatSnapshot scorer)
     {
-        if (UnityEngine.Random.value >= 0.45f) return;
+        if (UnityEngine.Random.value >= 0.35f) return;
         var others = court.Where(p => p != scorer).ToList();
         if (others.Count == 0) return;
-        var w = others.Select(p => Mathf.Max(1, p.passing)).ToList();
+        var w = others.Select(p => Mathf.Pow(Mathf.Max(1, p.passing), 3)).ToList();
         float t = w.Sum();
         if (t <= 0) return;
         float r = UnityEngine.Random.value * t;
