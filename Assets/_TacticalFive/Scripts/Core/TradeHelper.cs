@@ -4,11 +4,11 @@ using System.Linq;
 
 public static class TradeHelper
 {
-    public const long SALARY_CAP = 155_000_000;
-    public const long LUXURY_TAX = 189_000_000;
-    public const long FIRST_APRON = 195_900_000;
-    public const long SECOND_APRON = 207_800_000;
-    public const int MAX_ROSTER = 17;
+    public const long SALARY_CAP = 164_961_000;
+    public const long LUXURY_TAX = 200_428_000;
+    public const long FIRST_APRON = 209_015_000;
+    public const long SECOND_APRON = 221_686_000;
+    public const int MAX_ROSTER = 18;
 
     public static List<string> ValidateTrade(
         List<PlayerData> teamASelected,
