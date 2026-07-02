@@ -40,7 +40,7 @@ public class ResultsController : MonoBehaviour
         LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
-        Refresh();
+        try { Refresh(); } catch (System.Exception ex) { Debug.LogWarning($"[Results] Refresh error: {ex.Message}"); }
     }
 
     void CacheReferences()

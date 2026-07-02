@@ -53,8 +53,8 @@ public class CalendarController : MonoBehaviour
         RegisterCallbacks();
 
         // Auto-select current game day
-        AutoSelectCurrentDay();
-        Refresh();
+        try { AutoSelectCurrentDay(); } catch (System.Exception ex) { Debug.LogWarning($"[Calendar] AutoSelectCurrentDay error: {ex.Message}"); }
+        try { Refresh(); } catch (System.Exception ex) { Debug.LogWarning($"[Calendar] Refresh error: {ex.Message}"); }
         CursorManager.Instance?.SetDefaultCursor();
     }
 
