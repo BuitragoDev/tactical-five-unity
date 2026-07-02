@@ -297,6 +297,7 @@ public class PalmaresController : MonoBehaviour
     void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
+        if (_headerTeamName == null) return;
 
         if (_logoSprites64.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);

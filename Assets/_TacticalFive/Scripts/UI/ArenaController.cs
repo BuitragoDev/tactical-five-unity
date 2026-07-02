@@ -257,6 +257,7 @@ public class ArenaController : MonoBehaviour
     void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
+        if (_headerTeamName == null) return;
 
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         var logoDict = new Dictionary<string, Sprite>();

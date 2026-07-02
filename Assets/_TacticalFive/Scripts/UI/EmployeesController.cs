@@ -451,6 +451,7 @@ public class EmployeesController : MonoBehaviour
     void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
+        if (_headerTeamName == null) return;
 
         if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);

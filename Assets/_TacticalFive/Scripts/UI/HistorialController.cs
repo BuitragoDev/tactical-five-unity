@@ -121,7 +121,7 @@ public class HistorialController : MonoBehaviour
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
         _root.Q<Button>("SubmenuHistorial")?.AddToClassList("nav-submenu-item--active");
-        _btnAction.text = "DASHBOARD";
+        if (_btnAction != null) _btnAction.text = "DASHBOARD";
 
         if (_myTeam != null)
         {
@@ -142,32 +142,35 @@ public class HistorialController : MonoBehaviour
                 }
             }
 
-            var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-            long totalPayroll = players.Sum(p => p.salary);
+            if (_headerBudget != null)
+            {
+                var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+                long totalPayroll = players.Sum(p => p.salary);
 
-            _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
-            _headerBudget.style.color = _myTeam.budget < 0
-                ? new StyleColor(new Color32(192, 57, 43, 255))
-                : new StyleColor(new Color32(39, 174, 96, 255));
-            _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+                _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
+                _headerBudget.style.color = _myTeam.budget < 0
+                    ? new StyleColor(new Color32(192, 57, 43, 255))
+                    : new StyleColor(new Color32(39, 174, 96, 255));
+                _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
-            var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-            long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-            long margin = salaryCap - totalPayroll;
-            string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
-            _headerMargin.text = marginText;
+                var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+                long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+                long margin = salaryCap - totalPayroll;
+                string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+                _headerMargin.text = marginText;
 
-            int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-            _headerChemistry.text = $"{chemistry.ToString()}%";
-            _headerChemistry.RemoveFromClassList("header-stat-value--gold");
-            _headerChemistry.RemoveFromClassList("header-stat-value--negative");
-            if (chemistry < 40)
-                _headerChemistry.AddToClassList("header-stat-value--negative");
-            else if (chemistry < 70)
-                _headerChemistry.AddToClassList("header-stat-value--gold");
+                int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+                _headerChemistry.text = $"{chemistry.ToString()}%";
+                _headerChemistry.RemoveFromClassList("header-stat-value--gold");
+                _headerChemistry.RemoveFromClassList("header-stat-value--negative");
+                if (chemistry < 40)
+                    _headerChemistry.AddToClassList("header-stat-value--negative");
+                else if (chemistry < 70)
+                    _headerChemistry.AddToClassList("header-stat-value--gold");
 
-            _headerMargin.RemoveFromClassList("header-stat-value--negative");
-            if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
+                _headerMargin.RemoveFromClassList("header-stat-value--negative");
+                if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
+            }
         }
 
         if (_season != null)
