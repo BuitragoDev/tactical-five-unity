@@ -463,39 +463,67 @@
 }
 
 /* Botón despedir */
+/* Fila de 3 botones: despedir | rescindir | renovar */
+.detail-button-row {
+    flex-direction: row;
+    margin: 12px 16px 0 16px;
+}
+
 .btn-dismiss {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    margin: 12px 16px;
-    padding: 12px;
+    flex-grow: 1;
+    padding: 10px 4px;
     background-color: rgb(192, 57, 43);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 18px;
-    letter-spacing: 2px;
+    font-size: 15px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
+    white-space: normal;
     flex-shrink: 0;
 }
 .btn-dismiss:hover {
     background-color: rgb(220, 80, 60);
 }
 
+/* Botón rescisión (buyout) */
+.btn-buyout {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    flex-grow: 1;
+    margin: 0 4px;
+    padding: 10px 4px;
+    background-color: rgb(200, 130, 30);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 15px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    flex-shrink: 0;
+}
+.btn-buyout:hover {
+    background-color: rgb(220, 150, 40);
+}
+
 /* Botón renovar contrato */
 .btn-renew {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    margin: 0 16px 12px 16px;
-    padding: 12px;
-    background-color: rgb(212, 160, 23);
+    flex-grow: 1;
+    padding: 10px 4px;
+    background-color: rgb(41, 128, 185);
     border-width: 0;
-    color: rgb(0, 0, 0);
-    font-size: 18px;
-    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    font-size: 15px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
+    white-space: normal;
     flex-shrink: 0;
 }
 .btn-renew:hover {
-    background-color: rgb(230, 180, 40);
+    background-color: rgb(52, 152, 219);
 }
 
 /* Formulario de renovación */

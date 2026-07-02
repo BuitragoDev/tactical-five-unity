@@ -289,7 +289,7 @@ public class SelectTeamController : MonoBehaviour
 
         // Margen salarial real = Cap - suma de salarios de jugadores del equipo
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         var teamPlayers = DatabaseManager.Instance.GetPlayersByTeam(team.id);
         long totalPayroll = teamPlayers.Sum(p => p.salary);
         long margin = salaryCap - totalPayroll;

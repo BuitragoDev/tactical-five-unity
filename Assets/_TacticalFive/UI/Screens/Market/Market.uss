@@ -519,6 +519,25 @@
     background-color: rgb(46, 204, 113);
 }
 
+/* Sign & Trade toggle */
+.market-btn-sat-toggle {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 12px;
+    border-width: 1px;
+    border-color: rgb(200, 160, 30);
+    border-radius: 4px;
+    cursor: pointer;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(200, 160, 30);
+    background-color: rgba(200, 160, 30, 0.1);
+    white-space: normal;
+}
+.market-btn-sat-toggle:hover {
+    background-color: rgba(200, 160, 30, 0.25);
+}
+
 /* ── FREE AGENTS ── */
 .market-fa-row {
     flex-direction: row;

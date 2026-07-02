@@ -72,6 +72,8 @@ public class MarketController : MonoBehaviour
     private Dictionary<string, Sprite> _tradePanelLogos = new();
     private HashSet<int> _selectedMyPlayers = new();
     private HashSet<int> _selectedOtherPlayers = new();
+    private bool _signAndTradeActive = false;
+    private List<PlayerData> _signAndTradeCandidates = new();
 
     // NBA salary thresholds (use TradeHelper constants as source of truth)
 
@@ -753,12 +755,16 @@ public class MarketController : MonoBehaviour
 
         if (mySelected.Count == 0 && otherSelected.Count == 0) return;
 
+        var myPayroll = _myPlayers.Sum(p => p.salary);
         var otherPayroll = _otherPlayers.Sum(p => p.salary);
 
         var errors = TradeHelper.ValidateTrade(
             mySelected, otherSelected,
             _myTotalRosterCount, _otherTotalRosterCount,
-            _selectedTeam.name, otherPayroll);
+            _selectedTeam.name, otherPayroll,
+            _myTeam.name, myPayroll,
+            _myTeam.first_apron_hard_capped == 1,
+            _selectedTeam.first_apron_hard_capped == 1);
 
         if (errors.Count > 0)
         {
@@ -806,6 +812,10 @@ public class MarketController : MonoBehaviour
         var box = new VisualElement();
         box.AddToClassList("market-trade-status-box");
 
+        var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
+        _signAndTradeCandidates = otherSelected.Where(p => p.contract_years <= 1).ToList();
+        _signAndTradeActive = false;
+
         if (result.WouldAccept)
         {
             box.AddToClassList("valid");
@@ -822,6 +832,34 @@ public class MarketController : MonoBehaviour
             var score = new Label($"Probabilidad: {result.AcceptScore}%");
             score.AddToClassList("market-trade-status-score");
             content.Add(score);
+
+            // Sign & Trade option for expiring incoming players
+            if (_signAndTradeCandidates.Count > 0)
+            {
+                var satNames = string.Join(", ", _signAndTradeCandidates.Select(p => $"{p.first_name} {p.last_name}"));
+                var satRow = new VisualElement();
+                satRow.style.flexDirection = FlexDirection.Row;
+                satRow.style.alignItems = Align.Center;
+                satRow.style.marginTop = 8;
+                satRow.style.marginBottom = 4;
+
+                var satToggle = new Label("☐ Sign & Trade");
+                satToggle.AddToClassList("market-btn-sat-toggle");
+                satRow.Add(satToggle);
+
+                var satInfo = new Label($"({satNames}) — extiende contrato al recibir, activa hard cap");
+                satInfo.style.fontSize = 11;
+                satInfo.style.color = new StyleColor(Color.gray);
+                satInfo.style.marginLeft = 6;
+                satRow.Add(satInfo);
+                content.Add(satRow);
+
+                satToggle.RegisterCallback<ClickEvent>(_ =>
+                {
+                    _signAndTradeActive = !_signAndTradeActive;
+                    satToggle.text = _signAndTradeActive ? "☑ Sign & Trade" : "☐ Sign & Trade";
+                });
+            }
 
             var confirmBtn = new Button();
             confirmBtn.AddToClassList("market-btn-confirm-trade");
@@ -861,6 +899,30 @@ public class MarketController : MonoBehaviour
         var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
         var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
 
+        // Sign & Trade: extender contratos antes del traspaso
+        bool satApplied = false;
+        if (_signAndTradeActive && _signAndTradeCandidates.Count > 0)
+        {
+            foreach (var p in _signAndTradeCandidates)
+            {
+                int newYears = CalcSATYears(p.age);
+                long newSalary = CalcSATSalary(p.salary);
+                p.contract_years = newYears;
+                p.salary = newSalary;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                Debug.Log($"[S&T] {p.first_name} {p.last_name} extendido: ${newSalary:N0} x {newYears} años");
+            }
+
+            if (_myTeam.first_apron_hard_capped == 0)
+            {
+                _myTeam.first_apron_hard_capped = 1;
+                DatabaseManager.Instance.UpdateTeam(_myTeam);
+                Debug.Log($"[S&T] {_myTeam.name} sujeto al hard cap del primer apron.");
+            }
+            satApplied = true;
+            _signAndTradeActive = false;
+        }
+
         // Execute trade
         foreach (var p in mySelected)
         {
@@ -874,6 +936,7 @@ public class MarketController : MonoBehaviour
         }
 
         // Record trade history
+        string tradeType = satApplied ? "sign_and_trade" : "trade";
         foreach (var p in mySelected)
         {
             DatabaseManager.Instance.InsertTrade(new TradeData
@@ -884,7 +947,7 @@ public class MarketController : MonoBehaviour
                 team_id_from = _myTeam.id,
                 team_id_to = _selectedTeam.id,
                 player_id = p.id,
-                trade_type = "trade"
+                trade_type = tradeType
             });
         }
         foreach (var p in otherSelected)
@@ -897,22 +960,21 @@ public class MarketController : MonoBehaviour
                 team_id_from = _selectedTeam.id,
                 team_id_to = _myTeam.id,
                 player_id = p.id,
-                trade_type = "trade"
+                trade_type = tradeType
             });
         }
 
-        // Build names for message and modal
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
+        string satNote = satApplied ? " (Sign & Trade: contratos extendidos, hard cap activado)" : "";
 
-        // Create message
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
             sender_type = 1,
             sender_id = 0,
-            title = $"Traspaso aceptado: {_selectedTeam.name}",
-            body = $"El traspaso ha sido aceptado. Envías: {myNames}. Recibes: {otherNames}.",
+            title = satApplied ? $"Traspaso + Sign & Trade: {_selectedTeam.name}" : $"Traspaso aceptado: {_selectedTeam.name}",
+            body = $"El traspaso ha sido aceptado. Envías: {myNames}. Recibes: {otherNames}.{satNote}",
             game_day = _season?.current_game_day ?? 0,
             game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -920,19 +982,18 @@ public class MarketController : MonoBehaviour
             is_read = 0
         });
 
-        // Clear selections
         _selectedMyPlayers.Clear();
         _selectedOtherPlayers.Clear();
 
-        // Show success modal and navigate to Roster after 5 seconds
-        ShowTradeSuccessModal(myNames, otherNames);
+        ShowTradeSuccessModal(myNames, otherNames, satApplied);
     }
 
-    void ShowTradeSuccessModal(string myNames, string otherNames)
+    void ShowTradeSuccessModal(string myNames, string otherNames, bool satApplied = false)
     {
-        if (_tradeSuccessTitle != null) _tradeSuccessTitle.text = "¡TRASPASO REALIZADO!";
+        if (_tradeSuccessTitle != null)
+            _tradeSuccessTitle.text = satApplied ? "¡TRASPASO + SIGN & TRADE REALIZADO!" : "¡TRASPASO REALIZADO!";
         if (_tradeSuccessText1 != null) _tradeSuccessText1.text = $"Has enviado a {myNames} a {_selectedTeam.name}.";
-        if (_tradeSuccessText2 != null) _tradeSuccessText2.text = $"Has recibido a {otherNames}.";
+        if (_tradeSuccessText2 != null) _tradeSuccessText2.text = $"Has recibido a {otherNames}." + (satApplied ? " (contratos extendidos vía Sign & Trade)" : "");
 
         if (_tradeSuccessIcon != null)
         {
@@ -1145,7 +1206,7 @@ public class MarketController : MonoBehaviour
 
     void UpdateFAWarning()
     {
-        if (_faWarningText == null || _pendingFAPlayer == null || _myPlayers == null) return;
+        if (_faWarningText == null || _pendingFAPlayer == null || _myPlayers == null || _myTeam == null) return;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         if (leagueSettings == null) return;
@@ -1153,7 +1214,30 @@ public class MarketController : MonoBehaviour
         long totalPayroll = _myPlayers.Sum(p => p.salary);
         long newTotal = totalPayroll + _faSalary;
 
-        if (newTotal > leagueSettings.luxury_tax)
+        if (totalPayroll > TradeHelper.SECOND_APRON)
+        {
+            _faWarningText.text = $"2º APRON: Solo puedes ofrecer el mínimo (${TradeHelper.MIN_SALARY:N0}) a FAs externos. No puedes usar excepciones.";
+            _faWarningText.style.display = DisplayStyle.Flex;
+        }
+        else if (totalPayroll > TradeHelper.FIRST_APRON)
+        {
+            _faWarningText.text = $"1er APRON: Máximo T-MLE (${TradeHelper.T_MLE:N0}). No puedes usar NT-MLE.";
+            _faWarningText.style.display = DisplayStyle.Flex;
+        }
+        else if (totalPayroll > leagueSettings.salary_cap)
+        {
+            string hardCapNote = _myTeam.first_apron_hard_capped == 1
+                ? " · HARD CAP ACTIVO"
+                : "";
+            _faWarningText.text = $"Sobre el cap: máximo NT-MLE (${TradeHelper.NT_MLE:N0}){hardCapNote}. Usar NT-MLE activará el hard cap del 1er apron.";
+            _faWarningText.style.display = DisplayStyle.Flex;
+        }
+        else if (newTotal > leagueSettings.salary_cap)
+        {
+            _faWarningText.text = $"AVISO: Esta oferta te sitúa por encima del salary cap (${newTotal / 1_000_000}M > ${leagueSettings.salary_cap / 1_000_000}M).";
+            _faWarningText.style.display = DisplayStyle.Flex;
+        }
+        else if (newTotal > leagueSettings.luxury_tax)
         {
             long overage = newTotal - leagueSettings.luxury_tax;
             _faWarningText.text = $"AVISO: Salario total (${newTotal / 1_000_000}M) supera el límite de lujo en ${overage / 1_000_000}M";
@@ -1191,7 +1275,17 @@ public class MarketController : MonoBehaviour
         long totalPayroll = roster.Sum(p => p.salary);
         var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll, false);
 
-        _faMaxInfo.text = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
+        string info = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
+        if (!string.IsNullOrEmpty(breakdown.exceptionName))
+            info += $" · [{breakdown.exceptionName}]";
+
+        long capSpace = settings.salary_cap - totalPayroll;
+        if (capSpace >= 0)
+            info += $" · Margen: ${capSpace:N0}";
+        else
+            info += $" · Excedido: ${-capSpace:N0}";
+
+        _faMaxInfo.text = info;
         _faMaxInfo.style.display = DisplayStyle.Flex;
     }
 
@@ -1332,6 +1426,25 @@ public class MarketController : MonoBehaviour
         _tradePanels.style.display = DisplayStyle.None;
         _btnNegotiate.style.display = DisplayStyle.None;
         BuildFreeAgents();
+    }
+
+    // ── Sign & Trade helpers ──────────────────────────────
+
+    int CalcSATYears(int age)
+    {
+        if (age <= 25) return 5;
+        if (age <= 28) return 4;
+        if (age <= 32) return 3;
+        if (age < 40) return 2;
+        return 1;
+    }
+
+    long CalcSATSalary(long currentSalary)
+    {
+        long newSalary = (long)(currentSalary * 1.05);
+        newSalary = (long)(Mathf.Round(newSalary / 100_000f) * 100_000);
+        if (newSalary < currentSalary) newSalary = currentSalary;
+        return newSalary;
     }
 
     void PlayClick()

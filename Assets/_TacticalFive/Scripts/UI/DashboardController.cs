@@ -458,7 +458,7 @@ public class DashboardController : MonoBehaviour
 
         // Margen salarial = Cap - solo jugadores
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - _players.Sum(p => p.salary);
 
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
@@ -990,7 +990,7 @@ public class DashboardController : MonoBehaviour
                 hasSigning = true;
                 if (accepted)
                 {
-                    // Verificar límite de plantilla (jugadores actuales + ya aceptados en este lote)
+                    // Verificar límite de plantilla
                     var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
                     if (roster.Count + batchSigningsAccepted >= TradeHelper.MAX_ROSTER)
                     {
@@ -1017,16 +1017,43 @@ public class DashboardController : MonoBehaviour
                         continue;
                     }
 
-                    // Verificar espacio salarial (FA de otro equipo → SIN Bird Rights)
+                    // Verificar espacio salarial / excepciones (FA externo → sin Bird Rights)
                     long totalPayroll = roster.Sum(p => p.salary);
                     var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-                    if (leagueSettings != null && totalPayroll + offer.offer_salary > leagueSettings.salary_cap)
+                    bool offerLegal = true;
+                    string illegalReason = "";
+
+                    if (leagueSettings != null)
+                    {
+                        if (totalPayroll <= leagueSettings.salary_cap)
+                        {
+                            offerLegal = totalPayroll + offer.offer_salary <= leagueSettings.salary_cap;
+                            illegalReason = "sin espacio salarial";
+                        }
+                        else if (totalPayroll <= TradeHelper.FIRST_APRON)
+                        {
+                            offerLegal = offer.offer_salary <= TradeHelper.NT_MLE;
+                            illegalReason = $"supera NT-MLE (${TradeHelper.NT_MLE:N0})";
+                        }
+                        else if (totalPayroll <= TradeHelper.SECOND_APRON)
+                        {
+                            offerLegal = offer.offer_salary <= TradeHelper.T_MLE;
+                            illegalReason = $"supera T-MLE (${TradeHelper.T_MLE:N0})";
+                        }
+                        else
+                        {
+                            offerLegal = offer.offer_salary <= TradeHelper.MIN_SALARY;
+                            illegalReason = $"supera salario mínimo (${TradeHelper.MIN_SALARY:N0})";
+                        }
+                    }
+
+                    if (!offerLegal)
                     {
                         rejectedCount++;
                         player.renewal_cooldown_day = _season.current_game_day + 14;
                         DatabaseManager.Instance.UpdatePlayer(player);
 
-                        resultSummary += $"✗ {playerName}: FICHAJE RECHAZADO (sin espacio salarial) — {salaryText} · {yearsText}\n";
+                        resultSummary += $"✗ {playerName}: FICHAJE RECHAZADO ({illegalReason}) — {salaryText} · {yearsText}\n";
 
                         DatabaseManager.Instance.AddMessage(new MessageData
                         {
@@ -1034,7 +1061,7 @@ public class DashboardController : MonoBehaviour
                             sender_type = 1,
                             sender_id = 0,
                             title = $"Fichaje rechazado: {playerName}",
-                            body = $"Tu oferta a {playerName} ha sido rechazada porque no tienes suficiente espacio salarial (${(totalPayroll + offer.offer_salary - leagueSettings.salary_cap) / 1_000_000}M sobre el tope).",
+                            body = $"Tu oferta a {playerName} ha sido rechazada ({illegalReason}).",
                             game_day = _season.current_game_day,
                             game_date = nowStr,
                             created_at = nowStr,
@@ -1079,6 +1106,31 @@ public class DashboardController : MonoBehaviour
                         date_sent = nowStr,
                         is_read = 0
                     });
+
+                    // Activación del hard cap si se usó NT-MLE (>cap, ≤1er apron)
+                    if (_myTeam.first_apron_hard_capped == 0
+                        && leagueSettings != null
+                        && totalPayroll > leagueSettings.salary_cap
+                        && totalPayroll <= TradeHelper.FIRST_APRON)
+                    {
+                        _myTeam.first_apron_hard_capped = 1;
+                        DatabaseManager.Instance.UpdateTeam(_myTeam);
+                        string hardCapMsg = $"El fichaje de {playerName} se ha realizado usando la NT-MLE. Tu equipo queda sujeto al hard cap del primer apron (${TradeHelper.FIRST_APRON:N0}).";
+                        resultSummary += $"\n⚠ {hardCapMsg}\n";
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 1,
+                            sender_id = 0,
+                            title = "Hard cap activado",
+                            body = hardCapMsg,
+                            game_day = _season.current_game_day,
+                            game_date = nowStr,
+                            created_at = nowStr,
+                            date_sent = nowStr,
+                            is_read = 0
+                        });
+                    }
                 }
                 else
                 {
@@ -1840,11 +1892,15 @@ public class DashboardController : MonoBehaviour
                          List<PlayerData> aSelected, List<PlayerData> bSelected,
                          int seasonId, int gameDay)
     {
+        var aPayroll = rosterA.Sum(p => p.salary);
         var bPayroll = rosterB.Sum(p => p.salary);
         var errors = TradeHelper.ValidateTrade(
             aSelected, bSelected,
             rosterA.Count, rosterB.Count,
-            teamB.name, bPayroll);
+            teamB.name, bPayroll,
+            teamA.name, aPayroll,
+            teamA.first_apron_hard_capped == 1,
+            teamB.first_apron_hard_capped == 1);
 
         if (errors.Count > 0) return false;
 
@@ -1962,7 +2018,7 @@ public class DashboardController : MonoBehaviour
                 .ToList();
             if (aiHealthy.Count == 0) continue;
 
-            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster);
+            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam);
             if (offerPack == null) continue;
 
             var wantedIds = new List<int> { target.id };
@@ -2029,16 +2085,22 @@ public class DashboardController : MonoBehaviour
     }
 
     List<PlayerData> BuildOfferPackage(List<PlayerData> aiAvailable, int aiRosterCount,
-                                        PlayerData target, List<PlayerData> userRoster)
+                                        PlayerData target, List<PlayerData> userRoster, TeamData aiTeam)
     {
         long userPayroll = userRoster.Sum(p => p.salary);
+        var fullAiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
+        long aiPayroll = fullAiRoster.Sum(p => p.salary);
+
+        bool aiHardCapped = aiTeam.first_apron_hard_capped == 1;
+        bool userHardCapped = _myTeam.first_apron_hard_capped == 1;
 
         // Try 1-for-1: closest salary match first
         foreach (var p in aiAvailable.OrderBy(p => Mathf.Abs(p.salary - target.salary)))
         {
             var pack = new List<PlayerData> { p };
             if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                    aiRosterCount, userRoster.Count, _myTeam.name, userPayroll).Count == 0)
+                    aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
+                    aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
                 return pack;
         }
 
@@ -2049,7 +2111,8 @@ public class DashboardController : MonoBehaviour
             {
                 var pack = new List<PlayerData> { aiAvailable[i], aiAvailable[j] };
                 if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                        aiRosterCount, userRoster.Count, _myTeam.name, userPayroll).Count == 0)
+                        aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
+                        aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
                     return pack;
             }
         }
@@ -2065,7 +2128,8 @@ public class DashboardController : MonoBehaviour
                     {
                         var pack = new List<PlayerData> { aiAvailable[i], aiAvailable[j], aiAvailable[k] };
                         if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                                aiRosterCount, userRoster.Count, _myTeam.name, userPayroll).Count == 0)
+                                aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
+                                aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
                             return pack;
                     }
                 }

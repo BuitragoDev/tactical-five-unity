@@ -309,7 +309,7 @@ public class RecordsController : MonoBehaviour
         _root.Q<Label>("HeaderPayroll").text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - totalPayroll;
         var marginLbl = _root.Q<Label>("HeaderMargin");
         string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";

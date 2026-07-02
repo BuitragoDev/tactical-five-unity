@@ -12,6 +12,8 @@ public class FinanceRecord
     public const int TYPE_SALARIES      = 7;   // Sueldos de jugadores
     public const int TYPE_EMPLOYEE_SALARY = 8;   // Sueldos de empleados
     public const int TYPE_LOAN = 9;               // Préstamo bancario
+    public const int TYPE_TAX = 10;               // Luxury tax
+    public const int TYPE_BUYOUT = 11;             // Buyout (stretch provision)
 
     [PrimaryKey, AutoIncrement]
     public int id { get; set; }

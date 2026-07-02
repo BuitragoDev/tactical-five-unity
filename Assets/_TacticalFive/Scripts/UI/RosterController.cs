@@ -46,6 +46,7 @@ public class RosterController : MonoBehaviour
     private Label _detailContract;
     private Label _detailPotential;
     private Button _btnDismiss;
+    private Button _btnBuyout;
 
     // Modal despido
     private VisualElement _dismissOverlay;
@@ -54,6 +55,15 @@ public class RosterController : MonoBehaviour
     private Label _dismissText2;
     private Button _btnDismissCancel;
     private Button _btnDismissConfirm;
+
+    // Modal buyout
+    private VisualElement _buyoutOverlay;
+    private VisualElement _buyoutBox;
+    private Label _buyoutText1;
+    private Label _buyoutText2;
+    private Label _buyoutInfo;
+    private Button _btnBuyoutStretch;
+    private Button _btnBuyoutCancel;
 
     // Renovar contrato
     private Button _btnRenew;
@@ -191,14 +201,24 @@ public class RosterController : MonoBehaviour
         _detailContract = _root.Q<Label>("DetailContract");
         _detailPotential = _root.Q<Label>("DetailPotential");
         _btnDismiss = _root.Q<Button>("BtnDismiss");
+        _btnBuyout = _root.Q<Button>("BtnBuyout");
 
-        // Modal
+        // Modal despido
         _dismissOverlay = _root.Q<VisualElement>("DismissOverlay");
         _dismissBox = _root.Q<VisualElement>("DismissBox");
         _dismissText1 = _root.Q<Label>("DismissText1");
         _dismissText2 = _root.Q<Label>("DismissText2");
         _btnDismissCancel = _root.Q<Button>("BtnDismissCancel");
         _btnDismissConfirm = _root.Q<Button>("BtnDismissConfirm");
+
+        // Modal buyout
+        _buyoutOverlay = _root.Q<VisualElement>("BuyoutOverlay");
+        _buyoutBox = _root.Q<VisualElement>("BuyoutBox");
+        _buyoutText1 = _root.Q<Label>("BuyoutText1");
+        _buyoutText2 = _root.Q<Label>("BuyoutText2");
+        _buyoutInfo = _root.Q<Label>("BuyoutInfo");
+        _btnBuyoutStretch = _root.Q<Button>("BtnBuyoutStretch");
+        _btnBuyoutCancel = _root.Q<Button>("BtnBuyoutCancel");
 
         // Renovar contrato
         _btnRenew = _root.Q<Button>("BtnRenew");
@@ -430,6 +450,16 @@ public class RosterController : MonoBehaviour
             { PlayClick(); CloseDismissModal(); }
         });
 
+        // Buyout
+        _btnBuyout?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenBuyoutModal(); });
+        _btnBuyoutStretch?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmBuyout(); });
+        _btnBuyoutCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseBuyoutModal(); });
+        _buyoutOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _buyoutOverlay)
+            { PlayClick(); CloseBuyoutModal(); }
+        });
+
         // Renovar contrato
         _btnRenew?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnRenewClicked(); });
         _btnRenewCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseRenewModal(); });
@@ -447,8 +477,11 @@ public class RosterController : MonoBehaviour
         {
             CursorManager.Instance.RegisterHandCursor(_btnAction);
             CursorManager.Instance.RegisterHandCursor(_btnDismiss);
+            CursorManager.Instance.RegisterHandCursor(_btnBuyout);
             CursorManager.Instance.RegisterHandCursor(_btnDismissCancel);
             CursorManager.Instance.RegisterHandCursor(_btnDismissConfirm);
+            CursorManager.Instance.RegisterHandCursor(_btnBuyoutStretch);
+            CursorManager.Instance.RegisterHandCursor(_btnBuyoutCancel);
             CursorManager.Instance.RegisterHandCursor(_btnRenew);
             CursorManager.Instance.RegisterHandCursor(_btnRenewCancel);
             CursorManager.Instance.RegisterHandCursor(_btnRenewConfirm);
@@ -516,7 +549,7 @@ public class RosterController : MonoBehaviour
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - _players.Sum(p => p.salary);
 
         string marginText = margin >= 0
@@ -923,8 +956,10 @@ public class RosterController : MonoBehaviour
         public long maxByExp;
         public long birdMax;
         public long capSpaceMax;
+        public long exceptionMax;
         public string birdTierName;
         public string bindingReason;
+        public string exceptionName;
     }
 
     public static MaxOfferBreakdown GetMaxOfferBreakdown(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true)
@@ -944,33 +979,74 @@ public class RosterController : MonoBehaviour
         else if (exp <= 9) result.maxByExp = (long)(settings.salary_cap * 0.30);
         else result.maxByExp = (long)(settings.salary_cap * 0.35);
 
-        if (isFromSameTeam && player.seasons_with_team >= 3)
+        if (isFromSameTeam)
         {
-            result.birdTierName = "COMPLETOS";
-            result.birdMax = result.maxByExp;
-        }
-        else if (isFromSameTeam && player.seasons_with_team == 2)
-        {
-            result.birdTierName = "EARLY";
-            result.birdMax = player.salary * 175 / 100;
-            long avgPct = (long)(settings.salary_cap * 105 / 1000);
-            if (avgPct > result.birdMax) result.birdMax = avgPct;
+            if (player.seasons_with_team >= 3)
+            {
+                result.birdTierName = "COMPLETOS";
+                result.birdMax = result.maxByExp;
+            }
+            else if (player.seasons_with_team == 2)
+            {
+                result.birdTierName = "EARLY";
+                result.birdMax = player.salary * 175 / 100;
+                long avgPct = (long)(settings.salary_cap * 105 / 1000);
+                if (avgPct > result.birdMax) result.birdMax = avgPct;
+            }
+            else
+            {
+                result.birdTierName = "SIN BIRD";
+                result.birdMax = player.salary * 120 / 100;
+            }
         }
         else
         {
-            result.birdTierName = "SIN BIRD";
-            result.birdMax = player.salary * 120 / 100;
+            // FA externo: sin Bird Rights
+            result.birdMax = 0;
+            result.birdTierName = "SIN BIRD (FA)";
         }
 
         long capSpace = settings.salary_cap - totalPayroll;
         result.capSpaceMax = player.salary + (capSpace > 0 ? capSpace : 0);
 
-        long rawMax = result.birdMax > result.capSpaceMax ? result.birdMax : result.capSpaceMax;
+        result.exceptionMax = 0;
+        result.exceptionName = "";
+
+        long rawMax;
+        if (!isFromSameTeam && totalPayroll > settings.salary_cap)
+        {
+            // FA externo y equipo sobre el cap: solo excepciones
+            if (totalPayroll <= TradeHelper.FIRST_APRON)
+            {
+                result.exceptionMax = TradeHelper.NT_MLE;
+                result.exceptionName = "NT-MLE";
+            }
+            else if (totalPayroll <= TradeHelper.SECOND_APRON)
+            {
+                result.exceptionMax = TradeHelper.T_MLE;
+                result.exceptionName = "T-MLE";
+                result.capSpaceMax = 0;
+            }
+            else
+            {
+                result.exceptionMax = TradeHelper.MIN_SALARY;
+                result.exceptionName = "Mínimo";
+                result.capSpaceMax = 0;
+            }
+            rawMax = result.exceptionMax;
+        }
+        else
+        {
+            rawMax = result.birdMax > result.capSpaceMax ? result.birdMax : result.capSpaceMax;
+        }
+
         result.finalMax = result.maxByExp < rawMax ? result.maxByExp : rawMax;
 
         // Determine binding reason
         if (result.finalMax == result.maxByExp && result.maxByExp <= rawMax)
             result.bindingReason = $"Máx. por experiencia ({result.maxByExp:N0})";
+        else if (!isFromSameTeam && totalPayroll > settings.salary_cap)
+            result.bindingReason = $"Excepción {result.exceptionName} (${result.exceptionMax:N0})";
         else if (result.birdMax >= result.capSpaceMax)
             result.bindingReason = $"Bird Rights {result.birdTierName} ({result.birdMax:N0})";
         else
@@ -1368,6 +1444,90 @@ public class RosterController : MonoBehaviour
         CloseDismissModal();
 
         // Recargar datos y refrescar
+        _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        _selectedPlayer = null;
+        Refresh();
+    }
+
+    // ── RESCISIÓN (BUYOUT) ────────────────────────────────
+
+    void OpenBuyoutModal()
+    {
+        if (_selectedPlayer == null) return;
+
+        long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
+        int stretchYears = _selectedPlayer.contract_years * 2;
+        long annualPayment = remainingSalary / stretchYears;
+        long lastYear = remainingSalary - annualPayment * (stretchYears - 1);
+        string paymentDetail = annualPayment == lastYear
+            ? $"${annualPayment:N0}/año x {stretchYears} años"
+            : $"${annualPayment:N0}/año x {stretchYears - 1} años + ${lastYear:N0} (último)";
+
+        _buyoutText1.text = $"Rescisión de contrato de {_selectedPlayer.first_name} {_selectedPlayer.last_name}.";
+        _buyoutText2.text = $"Salario restante: ${remainingSalary:N0} · {paymentDetail}";
+
+        _buyoutOverlay.style.display = DisplayStyle.Flex;
+        _buyoutBox.style.display = DisplayStyle.Flex;
+    }
+
+    void CloseBuyoutModal()
+    {
+        _buyoutOverlay.style.display = DisplayStyle.None;
+        _buyoutBox.style.display = DisplayStyle.None;
+    }
+
+    void ConfirmBuyout()
+    {
+        if (_selectedPlayer == null) return;
+
+        long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
+        int stretchYears = _selectedPlayer.contract_years * 2;
+        long annualPayment = remainingSalary / stretchYears;
+        int currentDay = _season?.current_game_day ?? 0;
+        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        _selectedPlayer.team_id = 0;
+        DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
+
+        long remainder = remainingSalary;
+        for (int y = 0; y < stretchYears; y++)
+        {
+            long payment = (y == stretchYears - 1) ? remainder : annualPayment;
+            remainder -= payment;
+            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+            {
+                team_id = _myTeam.id,
+                season_id = _season?.id ?? 0,
+                record_type = FinanceRecord.TYPE_BUYOUT,
+                game_day = currentDay,
+                amount = payment,
+                created_at = now
+            });
+        }
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = "Rescisión de contrato (buyout)",
+            body = $"Se ha rescindido el contrato de {playerName} mediante buyout.\n\n" +
+                   $"Salario restante: {remainingSalary:N0}\n" +
+                   $"Pago progresivo: ${annualPayment:N0} durante {stretchYears} años\n" +
+                   $"Total pagado: {remainingSalary:N0}\n\n" +
+                   $"El jugador queda libre y puede firmar por cualquier equipo.",
+            game_day = currentDay,
+            game_date = now,
+            created_at = now,
+            date_sent = now,
+            is_read = 0
+        });
+
+        Debug.Log($"[Roster] {playerName} buyout. ${remainingSalary} stretched over {stretchYears} years.");
+
+        CloseBuyoutModal();
+
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         _selectedPlayer = null;
         Refresh();

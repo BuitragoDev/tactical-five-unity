@@ -115,6 +115,7 @@ public class DatabaseManager : MonoBehaviour
         template.CreateTable<PlayerRelationshipData>();
         template.CreateTable<LineupData>();
         template.CreateTable<TradeOfferData>();
+        template.CreateTable<DraftPickData>();
         _db.InsertAll(template.Table<TeamData>().ToList());
         _db.InsertAll(template.Table<PlayerData>().ToList());
         _db.InsertAll(template.Table<LeagueSettingsData>().ToList());
@@ -165,6 +166,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<LineupData>();
         _db.CreateTable<OfferData>();
         _db.CreateTable<TradeOfferData>();
+        _db.CreateTable<DraftPickData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -288,6 +290,21 @@ public class DatabaseManager : MonoBehaviour
         catch (System.Exception ex)
         {
             Debug.LogError($"[DB] Migration error for seasons: {ex.Message}");
+        }
+
+        // Add first_apron_hard_capped to teams
+        try
+        {
+            var tCols = _db.Query<ColumnInfo>("PRAGMA table_info(teams)");
+            if (tCols.Count > 0 && !tCols.Any(c => c.name == "first_apron_hard_capped"))
+            {
+                _db.Execute("ALTER TABLE teams ADD COLUMN first_apron_hard_capped INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added first_apron_hard_capped to teams");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for first_apron_hard_capped: {ex.Message}");
         }
     }
 
@@ -756,9 +773,9 @@ public class DatabaseManager : MonoBehaviour
             luxury_tax = TradeHelper.LUXURY_TAX,
             apron = TradeHelper.FIRST_APRON,
             repeater_apron = TradeHelper.SECOND_APRON,
-            mid_level = 14_100_000,
+            mid_level = TradeHelper.NT_MLE,
             bi_annual = 5_100_000,
-            minimum_salary = 2_000_000,
+            minimum_salary = TradeHelper.MIN_SALARY,
             is_active = 1
         });
     }
@@ -838,6 +855,10 @@ public class DatabaseManager : MonoBehaviour
             current_date = $"{yearStart}-09-05"
         };
         _db.Insert(season);
+
+        if (gameMode != "retired")
+            SeedDraftPicks(season.id);
+
         return season;
     }
 
@@ -1483,7 +1504,7 @@ public class DatabaseManager : MonoBehaviour
         Add(285, "MIN", "Jaden", "McDaniels", "SF", 25, "USA", 206, 95, 84, 88, 91, 85, 81, 79, 83, 98, 77, 96, 89, 92, 53, 18000000, 4, false);
         Add(286, "MIN", "Donte", "DiVincenzo", "SG", 29, "USA", 193, 92, 82, 82, 92, 92, 94, 87, 88, 85, 65, 89, 90, 89, 31, 12000000, 2, false);
         Add(289, "MIN", "Ayo", "Dosunmu", "PG", 26, "USA", 193, 91, 79, 82, 91, 88, 84, 89, 91, 82, 60, 86, 89, 84, 25, 8000000, 3, false);
-        Add(290, "MIN", "Kyle", "Anderson", "SF", 32, "USA", 206, 104, 78, 78, 75, 79, 77, 85, 87, 87, 81, 83, 87, 83, 34, 9000000, 1, false);
+        Add(290, "MIN", "Kyle", "Anderson", "SF", 32, "USA", 206, 104, 78, 78, 75, 79, 77, 85, 87, 87, 81, 83, 87, 83, 34, 3900000, 1, false);
         Add(291, "MIN", "Terrence", "Shannon Jr.", "SG", 25, "USA", 198, 98, 80, 90, 94, 88, 82, 80, 84, 82, 70, 92, 88, 80, 40, 6000000, 3, false);
         Add(292, "MIN", "Jaylen", "Clark", "SG", 24, "USA", 193, 88, 76, 84, 88, 76, 68, 78, 80, 90, 64, 90, 80, 88, 34, 3000000, 3, false);
         Add(293, "MIN", "Bones", "Hyland", "PG", 25, "USA", 188, 80, 75, 85, 95, 85, 91, 87, 89, 66, 52, 82, 83, 70, 25, 4000000, 2, false);
@@ -2086,6 +2107,38 @@ public class DatabaseManager : MonoBehaviour
             }
             Debug.Log($"[DB] 3 canales de TV activos seleccionados: {string.Join(", ", selected.Select(c => c.name))}");
         }
+    }
+
+    public void SeedDraftPicks(int seasonId)
+    {
+        var existing = _db.Table<DraftPickData>().Where(p => p.season_id == seasonId).Count();
+        if (existing > 0) return;
+
+        var teams = GetAllTeams().OrderBy(t => t.overall).ThenBy(t => t.reputation).ToList();
+        int pickNum = 1;
+        foreach (var team in teams)
+        {
+            _db.Insert(new DraftPickData
+            {
+                season_id = seasonId,
+                round = 1,
+                pick_number = pickNum++,
+                original_team_id = team.id,
+                current_team_id = team.id
+            });
+        }
+        foreach (var team in teams)
+        {
+            _db.Insert(new DraftPickData
+            {
+                season_id = seasonId,
+                round = 2,
+                pick_number = pickNum++,
+                original_team_id = team.id,
+                current_team_id = team.id
+            });
+        }
+        Debug.Log($"[DB] {teams.Count * 2} draft picks seeded for season {seasonId}.");
     }
 
     public void SeedHistoricalRecords()

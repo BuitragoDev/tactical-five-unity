@@ -388,7 +388,7 @@ public class TrainingController : MonoBehaviour
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - _players.Sum(p => p.salary);
 
         string marginText = margin >= 0

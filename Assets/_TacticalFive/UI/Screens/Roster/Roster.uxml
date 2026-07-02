@@ -265,13 +265,18 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
-                            <!-- Botón despedir -->
-                            <ui:Button name="BtnDismiss" class="btn-dismiss"
-                                       text="DESPEDIR JUGADOR" />
-
-                            <!-- Renovar contrato -->
-                            <ui:Button name="BtnRenew" class="btn-renew"
-                                       text="RENOVAR CONTRATO" />
+                            <!-- Botones de acción en 3 columnas -->
+                            <ui:VisualElement class="detail-button-row">
+                                <ui:Button name="BtnDismiss" class="btn-dismiss"
+                                           text="DESPEDIR
+JUGADOR" />
+                                <ui:Button name="BtnBuyout" class="btn-buyout"
+                                           text="RESCINDIR
+CONTRATO" />
+                                <ui:Button name="BtnRenew" class="btn-renew"
+                                           text="RENOVAR
+CONTRATO" />
+                            </ui:VisualElement>
 
                         </ui:VisualElement>
                     </ui:ScrollView>
@@ -362,6 +367,22 @@
                     <ui:Button name="BtnDismissConfirm" class="btn-modal-confirm" text="CONFIRMAR DESPIDO" />
                 </ui:VisualElement>
             </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL RESCISIÓN (BUYOUT) ══ -->
+        <ui:VisualElement name="BuyoutOverlay" class="dismiss-modal-overlay">
+          <ui:VisualElement name="BuyoutBox" class="dismiss-modal-box">
+            <ui:Label class="dismiss-modal-title" text="RESCISIÓN DE CONTRATO (BUYOUT)" />
+            <ui:Label name="BuyoutText1" class="dismiss-modal-text" text="" />
+            <ui:Label name="BuyoutText2" class="dismiss-modal-text" text="" />
+            <ui:Label name="BuyoutInfo" class="dismiss-modal-text dismiss-modal-text--warning"
+                      style="margin-top: 8px; font-size: 11px;"
+                      text="El jugador quedará libre. El salario restante se reparte en pagos anuales progresivos durante el doble de años pendientes." />
+            <ui:VisualElement class="dismiss-modal-buttons">
+              <ui:Button name="BtnBuyoutCancel" class="btn-modal-cancel" text="CANCELAR" />
+              <ui:Button name="BtnBuyoutStretch" class="btn-modal-confirm" text="CONFIRMAR RESCISIÓN" />
+            </ui:VisualElement>
+          </ui:VisualElement>
         </ui:VisualElement>
 
     </ui:VisualElement>

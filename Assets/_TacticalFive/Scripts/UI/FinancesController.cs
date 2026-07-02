@@ -319,7 +319,7 @@ public class FinancesController : MonoBehaviour
         _root.Q<Label>("HeaderPayroll").text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? 155_000_000;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - totalPayroll;
         var marginLbl = _root.Q<Label>("HeaderMargin");
         string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
@@ -551,12 +551,16 @@ public class FinancesController : MonoBehaviour
         long empSalaryTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_EMPLOYEE_SALARY);
         long renovationTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_RENOVATION);
         long dismissalTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_DISMISSAL);
-        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal;
+        long taxTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TAX);
+        long buyoutTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_BUYOUT);
+        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal + taxTotal + buyoutTotal;
 
         AddTableRow(_expensesTable, "Sueldos de jugadores", salariesTotal, false);
         AddTableRow(_expensesTable, "Sueldos empleados", empSalaryTotal, false);
         AddTableRow(_expensesTable, "Remodelaciones", renovationTotal, false);
         AddTableRow(_expensesTable, "Despidos", dismissalTotal, false);
+        AddTableRow(_expensesTable, "Luxury tax", taxTotal, false);
+        AddTableRow(_expensesTable, "Rescisiones (buyout)", buyoutTotal, false);
 
         _totalExpensesValue.text = $"${total:N0}";
     }

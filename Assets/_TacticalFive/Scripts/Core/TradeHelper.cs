@@ -4,11 +4,47 @@ using System.Linq;
 
 public static class TradeHelper
 {
-    public const long SALARY_CAP = 164_961_000;
+    public const long SALARY_CAP = 154_647_000;
     public const long LUXURY_TAX = 200_428_000;
     public const long FIRST_APRON = 209_015_000;
     public const long SECOND_APRON = 221_686_000;
+    public const long NT_MLE = 14_100_000;
+    public const long T_MLE = 5_700_000;
+    public const long MIN_SALARY = 2_000_000;
     public const int MAX_ROSTER = 18;
+
+    static void ValidateTradeSide(
+        long salaryOut, long salaryIn, int playersInCount,
+        long newPayroll, string teamName, bool hardCappedToFirstApron,
+        List<string> errors)
+    {
+        if (newPayroll > SECOND_APRON || (hardCappedToFirstApron && newPayroll > FIRST_APRON))
+        {
+            if (playersInCount > 1)
+                errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. No puede recibir múltiples jugadores.");
+            if (salaryOut < salaryIn)
+                errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. Solo puede recibir salario ≤ al que envía.");
+        }
+        else if (newPayroll > FIRST_APRON)
+        {
+            var maxReceive = (long)(salaryOut * 1.10);
+            if (salaryIn > maxReceive + 250_000)
+                errors.Add($"{teamName} está en el primer apron. Solo puede recibir hasta el 110% del salario que envía.");
+        }
+        else
+        {
+            long maxReceive;
+            if (salaryOut < 7_500_000)
+                maxReceive = salaryOut * 2 + 250_000;
+            else if (salaryOut < 29_000_000)
+                maxReceive = salaryOut + 7_500_000;
+            else
+                maxReceive = (long)(salaryOut * 1.25 + 250_000);
+
+            if (salaryIn > maxReceive + 250_000)
+                errors.Add($"{teamName} no puede recibir más de ${maxReceive:N0}.");
+        }
+    }
 
     public static List<string> ValidateTrade(
         List<PlayerData> teamASelected,
@@ -16,7 +52,11 @@ public static class TradeHelper
         int teamATotalRoster,
         int teamBTotalRoster,
         string teamBName,
-        long teamBCurrentPayroll)
+        long teamBCurrentPayroll,
+        string teamAName = null,
+        long teamACurrentPayroll = 0,
+        bool teamAHardCapped = false,
+        bool teamBHardCapped = false)
     {
         var errors = new List<string>();
 
@@ -26,41 +66,46 @@ public static class TradeHelper
         var aAfter = teamATotalRoster - teamASelected.Count + teamBSelected.Count;
         var bAfter = teamBTotalRoster - teamBSelected.Count + teamASelected.Count;
 
-        if (aAfter < 10) errors.Add($"El equipo tendría solo {aAfter} jugadores (mínimo 10)");
-        if (aAfter > MAX_ROSTER) errors.Add($"El equipo tendría {aAfter} jugadores (máximo {MAX_ROSTER})");
+        if (aAfter < 10) errors.Add($"{(teamAName ?? "Tu equipo")} tendría solo {aAfter} jugadores (mínimo 10)");
+        if (aAfter > MAX_ROSTER) errors.Add($"{(teamAName ?? "Tu equipo")} tendría {aAfter} jugadores (máximo {MAX_ROSTER})");
         if (bAfter < 10) errors.Add($"{teamBName} tendría solo {bAfter} jugadores (mínimo 10)");
         if (bAfter > MAX_ROSTER) errors.Add($"{teamBName} tendría {bAfter} jugadores (máximo {MAX_ROSTER})");
 
+        if (!string.IsNullOrEmpty(teamAName))
+        {
+            var aPayroll = teamACurrentPayroll - aSalaryOut + bSalaryOut;
+            ValidateTradeSide(aSalaryOut, bSalaryOut, teamBSelected.Count, aPayroll, teamAName, teamAHardCapped, errors);
+        }
+
         var bPayroll = teamBCurrentPayroll - bSalaryOut + aSalaryOut;
-
-        if (bPayroll > SECOND_APRON)
-        {
-            if (teamASelected.Count > 1)
-                errors.Add($"{teamBName} está en el segundo apron. No pueden agregar salarios de múltiples jugadores.");
-            if (bSalaryOut < aSalaryOut)
-                errors.Add($"{teamBName} está en el segundo apron. Solo pueden recibir salario igual o menor al que envían.");
-        }
-        else if (bPayroll > FIRST_APRON)
-        {
-            var maxReceive = bSalaryOut * 1.10;
-            if (aSalaryOut > maxReceive + 250_000)
-                errors.Add($"{teamBName} está en el primer apron. Solo pueden recibir hasta el 110% del salario enviado.");
-        }
-        else
-        {
-            long maxReceive;
-            if (bSalaryOut < 7_500_000)
-                maxReceive = bSalaryOut * 2 + 250_000;
-            else if (bSalaryOut < 29_000_000)
-                maxReceive = bSalaryOut + 7_500_000;
-            else
-                maxReceive = (long)(bSalaryOut * 1.25 + 250_000);
-
-            if (aSalaryOut > maxReceive + 250_000)
-                errors.Add($"{teamBName} no puede recibir más de ${maxReceive:N0}.");
-        }
+        ValidateTradeSide(bSalaryOut, aSalaryOut, teamASelected.Count, bPayroll, teamBName, teamBHardCapped, errors);
 
         return errors;
+    }
+
+    static readonly (long bracket, double rate)[] TaxBrackets = new (long, double)[]
+    {
+        (5_000_000, 1.5),
+        (5_000_000, 1.75),
+        (5_000_000, 2.5),
+        (5_000_000, 3.25),
+        (long.MaxValue, 3.75),
+    };
+
+    public static long CalculateLuxuryTax(long payroll)
+    {
+        if (payroll <= LUXURY_TAX) return 0;
+        long excess = payroll - LUXURY_TAX;
+        long tax = 0;
+        long remaining = excess;
+        foreach (var (bracket, rate) in TaxBrackets)
+        {
+            long chunk = remaining > bracket ? bracket : remaining;
+            tax += (long)(chunk * rate);
+            remaining -= chunk;
+            if (remaining <= 0) break;
+        }
+        return tax;
     }
 
     public static TradeResult EvaluateTrade(
