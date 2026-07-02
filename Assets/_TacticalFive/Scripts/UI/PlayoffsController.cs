@@ -86,6 +86,8 @@ public class PlayoffsController : MonoBehaviour
 
     void RegisterCallbacks()
     {
+        // Sidebar unificado
+        SidebarController.Attach(_root, GameScreen.Playoffs);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 

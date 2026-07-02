@@ -103,6 +103,8 @@ public class StandingsController : MonoBehaviour
 
     void RegisterCallbacks()
     {
+        // Sidebar unificado
+        SidebarController.Attach(_root, GameScreen.Standings);
         RegisterNavButtons();
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("East"); });
         _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("West"); });

@@ -275,6 +275,8 @@ public class EmployeesController : MonoBehaviour
 
     void RegisterCallbacks()
     {
+        // Sidebar unificado
+        SidebarController.Attach(_root, GameScreen.Employees);
         var allSubmenus = new[] {
             _root.Q<VisualElement>("RosterSubmenu"),
             _root.Q<VisualElement>("PalmaresSubmenu"),

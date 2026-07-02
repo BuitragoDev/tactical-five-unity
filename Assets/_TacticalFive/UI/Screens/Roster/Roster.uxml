@@ -8,122 +8,6 @@
     <ui:VisualElement name="RosterRoot" class="roster-root">
 
         <!-- ══ SIDEBAR (reutilizamos del dashboard) ══ -->
-        <ui:VisualElement name="Sidebar" class="sidebar">
-            <ui:VisualElement class="sidebar-logo">
-                <ui:Label class="sidebar-logo-icon" text="TF" />
-                <ui:Label class="sidebar-logo-text" text="TACTICAL" />
-                <ui:Label class="sidebar-logo-text-gold" text="FIVE" />
-            </ui:VisualElement>
-            <ui:VisualElement class="sidebar-nav">
-                <ui:Button name="NavDashboard" class="nav-item">
-                    <ui:VisualElement name="NavDashboardIcon" class="nav-icon"/>
-                    <ui:Label text="Inicio" class="nav-label"/>
-                </ui:Button>
-                <ui:Button name="NavRoster" class="nav-item">
-                    <ui:VisualElement name="NavRosterIcon" class="nav-icon"/>
-                    <ui:Label text="Plantilla" class="nav-label"/>
-                    <ui:Label text="▼" class="nav-arrow" />
-                </ui:Button>
-                <ui:VisualElement name="RosterSubmenu" class="nav-submenu nav-submenu--visible">
-                    <ui:Button name="SubmenuJugadores" class="nav-submenu-item nav-submenu-item--active">
-                        <ui:Label text="Jugadores" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuQuinteto" class="nav-submenu-item">
-                        <ui:Label text="Quinteto" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuEntrenamiento" class="nav-submenu-item">
-                        <ui:Label text="Entrenamiento" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuEmpleados" class="nav-submenu-item">
-                        <ui:Label text="Empleados" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
-                        <ui:Label text="Lesionados" class="nav-submenu-label"/>
-                    </ui:Button>
-                                    <ui:Button name="SubmenuVestuario" class="nav-submenu-item">
-                        <ui:Label text="Vestuario" class="nav-submenu-label"/>
-                    </ui:Button>
-                </ui:VisualElement>
-                <ui:Button name="NavCalendar" class="nav-item">
-                    <ui:VisualElement name="NavCalendarIcon" class="nav-icon"/>
-                    <ui:Label text="Calendario" class="nav-label"/>
-                </ui:Button>
-                <ui:Button name="NavResults" class="nav-item">
-                    <ui:VisualElement name="NavResultsIcon" class="nav-icon"/>
-                    <ui:Label text="Resultados" class="nav-label"/>
-                </ui:Button>
-                <ui:Button name="NavStandings" class="nav-item">
-                    <ui:VisualElement name="NavStandingsIcon" class="nav-icon"/>
-                    <ui:Label text="Clasificación" class="nav-label"/>
-                </ui:Button>
-                <ui:Button name="NavPalmares" class="nav-item">
-                    <ui:VisualElement name="NavPalmaresIcon" class="nav-icon"/>
-                    <ui:Label text="Palmarés" class="nav-label"/>
-                    <ui:Label text="▼" class="nav-arrow" />
-                </ui:Button>
-                <ui:VisualElement name="PalmaresSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuPalmares" class="nav-submenu-item">
-                        <ui:Label text="Palmarés" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuRecords" class="nav-submenu-item">
-                        <ui:Label text="Records" class="nav-submenu-label"/>
-                    </ui:Button>
-                </ui:VisualElement>
-                <ui:Button name="NavPlayoffs" class="nav-item">
-                    <ui:VisualElement name="NavPlayoffsIcon" class="nav-icon"/>
-                    <ui:Label text="Playoffs" class="nav-label"/>
-                </ui:Button>
-                <ui:Button name="NavStats" class="nav-item">
-                    <ui:VisualElement name="NavStatsIcon" class="nav-icon"/>
-                    <ui:Label text="Estadísticas" class="nav-label"/>
-                </ui:Button>
-
-                <ui:Button name="NavMarket" class="nav-item">
-                    <ui:VisualElement name="NavMarketIcon" class="nav-icon" />
-                    <ui:Label class="nav-label" text="Mercado" />
-                    <ui:Label text="▼" class="nav-arrow" />
-                </ui:Button>
-                <ui:VisualElement name="MarketSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuOfertas" class="nav-submenu-item">
-                        <ui:Label text="Ofertas" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuCartera" class="nav-submenu-item">
-                        <ui:Label text="Cartera" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuHistorial" class="nav-submenu-item">
-                        <ui:Label text="Historial" class="nav-submenu-label"/>
-                    </ui:Button>
-                </ui:VisualElement>
-                <ui:Button name="NavFinances" class="nav-item">
-                    <ui:VisualElement name="NavFinancesIcon" class="nav-icon"/>
-                    <ui:Label text="Finanzas" class="nav-label"/>
-                    <ui:Label text="▼" class="nav-arrow" />
-                </ui:Button>
-                <ui:VisualElement name="FinanceSubmenu" class="nav-submenu">
-                    <ui:Button name="SubmenuDecisiones" class="nav-submenu-item">
-                        <ui:Label text="Decisiones" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuPrestamos" class="nav-submenu-item">
-                        <ui:Label text="Préstamos Bancarios" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuSponsors" class="nav-submenu-item">
-                        <ui:Label text="Patrocinadores" class="nav-submenu-label"/>
-                    </ui:Button>
-                    <ui:Button name="SubmenuTV" class="nav-submenu-item">
-                        <ui:Label text="Televisión" class="nav-submenu-label"/>
-                    </ui:Button>
-                </ui:VisualElement>
-                <ui:Button name="NavArena" class="nav-item">
-                    <ui:VisualElement name="NavArenaIcon" class="nav-icon"/>
-                    <ui:Label text="Pabellón" class="nav-label"/>
-                </ui:Button>
-                <ui:Button name="NavMessages" class="nav-item">
-                    <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
-                    <ui:Label text="Mensajes" class="nav-label"/>
-                </ui:Button>
-
-            </ui:VisualElement>
-        </ui:VisualElement>
 
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="roster-main">
@@ -245,11 +129,11 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement class="season-stat-card">
                                     <ui:Label name="StatStl"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="STL" />
+                                    <ui:Label class="season-stat-label" text="ROB" />
                                 </ui:VisualElement>
                                 <ui:VisualElement class="season-stat-card">
                                     <ui:Label name="StatBlk"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="BLK" />
+                                    <ui:Label class="season-stat-label" text="TAP" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
@@ -268,14 +152,11 @@
                             <!-- Botones de acción en 3 columnas -->
                             <ui:VisualElement class="detail-button-row">
                                 <ui:Button name="BtnDismiss" class="btn-dismiss"
-                                           text="DESPEDIR
-JUGADOR" />
+                                           text="DESPEDIR JUGADOR" />
                                 <ui:Button name="BtnBuyout" class="btn-buyout"
-                                           text="RESCINDIR
-CONTRATO" />
+                                           text="RESCINDIR CONTRATO" />
                                 <ui:Button name="BtnRenew" class="btn-renew"
-                                           text="RENOVAR
-CONTRATO" />
+                                           text="RENOVAR CONTRATO" />
                             </ui:VisualElement>
 
                         </ui:VisualElement>
@@ -376,7 +257,7 @@ CONTRATO" />
             <ui:Label name="BuyoutText1" class="dismiss-modal-text" text="" />
             <ui:Label name="BuyoutText2" class="dismiss-modal-text" text="" />
             <ui:Label name="BuyoutInfo" class="dismiss-modal-text dismiss-modal-text--warning"
-                      style="margin-top: 8px; font-size: 11px;"
+                      style="margin-top: 8px; font-size: 18px;"
                       text="El jugador quedará libre. El salario restante se reparte en pagos anuales progresivos durante el doble de años pendientes." />
             <ui:VisualElement class="dismiss-modal-buttons">
               <ui:Button name="BtnBuyoutCancel" class="btn-modal-cancel" text="CANCELAR" />

@@ -472,11 +472,11 @@
 .btn-dismiss {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     flex-grow: 1;
-    padding: 10px 4px;
+    padding: 18px 4px;
     background-color: rgb(192, 57, 43);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 15px;
+    font-size: 16px;
     letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
@@ -492,11 +492,11 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     flex-grow: 1;
     margin: 0 4px;
-    padding: 10px 4px;
+    padding: 18px 4px;
     background-color: rgb(200, 130, 30);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 15px;
+    font-size: 16px;
     letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
@@ -511,11 +511,11 @@
 .btn-renew {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     flex-grow: 1;
-    padding: 10px 4px;
+    padding: 18px 4px;
     background-color: rgb(41, 128, 185);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 15px;
+    font-size: 16px;
     letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
