@@ -54,7 +54,7 @@ public class CalendarController : MonoBehaviour
 
         // Auto-select current game day
         try { AutoSelectCurrentDay(); } catch (System.Exception ex) { Debug.LogWarning($"[Calendar] AutoSelectCurrentDay error: {ex.Message}"); }
-        try { Refresh(); } catch (System.Exception ex) { Debug.LogWarning($"[Calendar] Refresh error: {ex.Message}"); }
+        Refresh();
         CursorManager.Instance?.SetDefaultCursor();
     }
 
@@ -275,7 +275,7 @@ public class CalendarController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Calendar] RefreshHeader error: {ex.Message}"); }
         BuildCalendar();
     }
 

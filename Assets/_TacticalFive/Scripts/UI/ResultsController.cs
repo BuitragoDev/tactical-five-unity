@@ -40,7 +40,7 @@ public class ResultsController : MonoBehaviour
         LoadSidebarIcons();
         LoadData();
         RegisterCallbacks();
-        try { Refresh(); } catch (System.Exception ex) { Debug.LogWarning($"[Results] Refresh error: {ex.Message}"); }
+        Refresh();
     }
 
     void CacheReferences()
@@ -235,7 +235,7 @@ public class ResultsController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Results] RefreshHeader error: {ex.Message}"); }
         UpdateDateLabel();
         ShowResults();
     }
