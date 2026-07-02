@@ -401,7 +401,6 @@ public class MarketController : MonoBehaviour
     void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
-        if (_headerTeamName == null) return;
 
         if (_headerLogos.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
