@@ -62,6 +62,7 @@ public class TVController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.TV);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
@@ -169,9 +170,7 @@ public class TVController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
-        var configIcon = _root.Q<VisualElement>("ConfigIcon");
+                var configIcon = _root.Q<VisualElement>("ConfigIcon");
         if (configIcon != null && CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(configIcon);
     }
@@ -209,62 +208,8 @@ public class TVController : MonoBehaviour
     {
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
-        RefreshHeader();
         BuildCurrentTVBanner();
         BuildCards();
-    }
-
-    void RefreshHeader()
-    {
-        if (_myTeam == null || _manager == null) return;
-
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
-        var logoDict = new Dictionary<string, Sprite>();
-        foreach (var s in logos) logoDict[s.name] = s;
-
-        if (logoDict.TryGetValue(_myTeam.logo, out var sprite))
-            _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
-
-        _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("HeaderManagerName").text = $"Manager: {_manager.name}";
-        var budgetLabel = _root.Q<Label>("HeaderBudget");
-        budgetLabel.text = $"${_myTeam.budget / 1_000_000}M";
-        budgetLabel.style.color = _myTeam.budget < 0
-            ? new StyleColor(new Color32(192, 57, 43, 255))
-            : new StyleColor(new Color32(39, 174, 96, 255));
-
-        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        long totalPayroll = players.Sum(p => p.salary);
-        _root.Q<Label>("HeaderPayroll").text = $"${totalPayroll / 1_000_000}M";
-
-        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long margin = salaryCap - totalPayroll;
-        var marginLbl = _root.Q<Label>("HeaderMargin");
-        string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
-        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        marginLbl.text = marginText;
-        var chemLabel = _root.Q<Label>("HeaderChemistry");
-        if (chemLabel != null)
-        {
-            chemLabel.text = $"{chemistry.ToString()}%";
-            chemLabel.RemoveFromClassList("header-stat-value--gold");
-            chemLabel.RemoveFromClassList("header-stat-value--negative");
-            if (chemistry < 40)
-                chemLabel.AddToClassList("header-stat-value--negative");
-            else if (chemistry < 70)
-                chemLabel.AddToClassList("header-stat-value--gold");
-        }
-        marginLbl.RemoveFromClassList("header-stat-value--negative");
-        if (margin < 0) marginLbl.AddToClassList("header-stat-value--negative");
-
-        if (_season != null)
-        {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
-        }
-
-        _btnAction.text = "DASHBOARD";
     }
 
     // TV channels can only be signed in September (preseason) or October (days 1-10)

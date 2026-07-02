@@ -13,36 +13,6 @@
         <ui:VisualElement class="loans-main">
 
             <!-- TOP HEADER -->
-            <ui:VisualElement name="TopHeader" class="top-header">
-                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo" />
-                <ui:VisualElement class="header-team-info">
-                    <ui:Label name="HeaderTeamName"    class="header-team-name"    text="" />
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="PRESUPUESTO" />
-                    <ui:Label name="HeaderBudget" class="header-stat-value" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MASA SALARIAL" />
-                    <ui:Label name="HeaderPayroll" class="header-stat-value header-stat-value--neutral" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="MARGEN SALARIAL" />
-                    <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-stat">
-                    <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
-                    <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="header-spacer" />
-                <ui:VisualElement class="header-season-info">
-                    <ui:Label name="HeaderSeason" class="header-season-label" text="" />
-                    <ui:Label name="HeaderDate"   class="header-date-label"   text="" />
-                </ui:VisualElement>
-                <ui:Button name="BtnAction" class="btn-action" text="FINANZAS" />
-                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
-            </ui:VisualElement>
 
             <!-- TITLE BOX -->
             <ui:VisualElement class="loans-title-box">

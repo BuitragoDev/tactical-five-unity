@@ -154,6 +154,7 @@ public class LoansController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Loans);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
@@ -272,9 +273,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
-
+        
         var configIcon = _root.Q<VisualElement>("ConfigIcon");
         if (configIcon != null && CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(configIcon);
@@ -287,56 +286,9 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
     {
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
-        RefreshHeader();
         BuildFinancialStaff();
         BuildLoans();
         _root.Q<Button>("SubmenuPrestamos")?.AddToClassList("nav-submenu-item--active");
-    }
-
-    void RefreshHeader()
-    {
-        if (_myTeam == null || _manager == null) return;
-
-        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
-            _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
-
-        _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
-
-        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        long totalPayroll = players.Sum(p => p.salary);
-
-        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
-        _headerBudget.style.color = _myTeam.budget < 0
-            ? new StyleColor(new Color32(192, 57, 43, 255))
-            : new StyleColor(new Color32(39, 174, 96, 255));
-        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
-
-        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long margin = salaryCap - totalPayroll;
-        string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
-        _headerMargin.text = marginText;
-
-        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        _headerChemistry.text = $"{chemistry}%";
-        _headerChemistry.RemoveFromClassList("header-stat-value--gold");
-        _headerChemistry.RemoveFromClassList("header-stat-value--negative");
-        if (chemistry < 40)
-            _headerChemistry.AddToClassList("header-stat-value--negative");
-        else if (chemistry < 70)
-            _headerChemistry.AddToClassList("header-stat-value--gold");
-
-        _headerMargin.RemoveFromClassList("header-stat-value--negative");
-        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
-
-        if (_season != null)
-        {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
-        }
-
-        _btnAction.text = "DASHBOARD";
     }
 
     void BuildFinancialStaff()

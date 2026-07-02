@@ -123,59 +123,6 @@ public class HistorialController : MonoBehaviour
         _root.Q<Button>("SubmenuHistorial")?.AddToClassList("nav-submenu-item--active");
         _btnAction.text = "DASHBOARD";
 
-        if (_myTeam != null)
-        {
-            if (_headerTeamName != null)
-                _headerTeamName.text = _myTeam.name.ToUpper();
-            if (_headerManagerName != null)
-                _headerManagerName.text = $"Manager: {_manager?.name ?? ""}";
-            if (_headerTeamLogo != null)
-            {
-                var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
-                foreach (var s in logos)
-                {
-                    if (s.name == _myTeam.logo)
-                    {
-                        _headerTeamLogo.style.backgroundImage = new StyleBackground(s);
-                        break;
-                    }
-                }
-            }
-
-            var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-            long totalPayroll = players.Sum(p => p.salary);
-
-            _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
-            _headerBudget.style.color = _myTeam.budget < 0
-                ? new StyleColor(new Color32(192, 57, 43, 255))
-                : new StyleColor(new Color32(39, 174, 96, 255));
-            _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
-
-            var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-            long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-            long margin = salaryCap - totalPayroll;
-            string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
-            _headerMargin.text = marginText;
-
-            int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-            _headerChemistry.text = $"{chemistry.ToString()}%";
-            _headerChemistry.RemoveFromClassList("header-stat-value--gold");
-            _headerChemistry.RemoveFromClassList("header-stat-value--negative");
-            if (chemistry < 40)
-                _headerChemistry.AddToClassList("header-stat-value--negative");
-            else if (chemistry < 70)
-                _headerChemistry.AddToClassList("header-stat-value--gold");
-
-            _headerMargin.RemoveFromClassList("header-stat-value--negative");
-            if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
-        }
-
-        if (_season != null)
-        {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
-        }
-
         BuildHistorial();
     }
 
@@ -309,12 +256,11 @@ public class HistorialController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Historial);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
-        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
-        var configIcon = _root.Q<VisualElement>("ConfigIcon");
+                var configIcon = _root.Q<VisualElement>("ConfigIcon");
         if (configIcon != null && CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(configIcon);
         RegisterHandCursors();
