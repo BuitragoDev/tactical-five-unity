@@ -73,11 +73,7 @@ public class MarketController : MonoBehaviour
     private HashSet<int> _selectedMyPlayers = new();
     private HashSet<int> _selectedOtherPlayers = new();
 
-    // NBA salary thresholds
-    private const long SALARY_CAP = 155_000_000;
-    private const long LUXURY_TAX = 189_000_000;
-    private const long FIRST_APRON = 195_900_000;
-    private const long SECOND_APRON = 207_800_000;
+    // NBA salary thresholds (use TradeHelper constants as source of truth)
 
     void OnEnable()
     {
@@ -417,7 +413,7 @@ public class MarketController : MonoBehaviour
         _root.Q<Label>("HeaderPayroll").text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? SALARY_CAP;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - totalPayroll;
         var marginLbl = _root.Q<Label>("HeaderMargin");
         string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
@@ -740,7 +736,7 @@ public class MarketController : MonoBehaviour
         var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
         var payroll = players.Sum(p => p.salary);
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        var cap = leagueSettings?.salary_cap ?? SALARY_CAP;
+        var cap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         return cap - payroll;
     }
 
@@ -1061,7 +1057,7 @@ public class MarketController : MonoBehaviour
         // Calcular límites salariales
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long totalPayroll = myPlayers.Sum(p => p.salary);
-        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll);
+        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll, false);
         UpdateFAMaxInfo();
 
         // Mostrar formulario, ocultar pending
@@ -1193,7 +1189,7 @@ public class MarketController : MonoBehaviour
 
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long totalPayroll = roster.Sum(p => p.salary);
-        var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll);
+        var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll, false);
 
         _faMaxInfo.text = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
         _faMaxInfo.style.display = DisplayStyle.Flex;

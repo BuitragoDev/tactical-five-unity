@@ -752,12 +752,12 @@ public class DatabaseManager : MonoBehaviour
     {
         _db.Insert(new LeagueSettingsData
         {
-            salary_cap = 155_000_000,
-            luxury_tax = 189_000_000,
-            apron = 199_000_000,
-            repeater_apron = 209_000_000,
-            mid_level = 14_000_000,
-            bi_annual = 5_000_000,
+            salary_cap = TradeHelper.SALARY_CAP,
+            luxury_tax = TradeHelper.LUXURY_TAX,
+            apron = TradeHelper.FIRST_APRON,
+            repeater_apron = TradeHelper.SECOND_APRON,
+            mid_level = 14_100_000,
+            bi_annual = 5_100_000,
             minimum_salary = 2_000_000,
             is_active = 1
         });

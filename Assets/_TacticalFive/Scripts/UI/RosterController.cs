@@ -927,7 +927,7 @@ public class RosterController : MonoBehaviour
         public string bindingReason;
     }
 
-    public static MaxOfferBreakdown GetMaxOfferBreakdown(PlayerData player, LeagueSettingsData settings, long totalPayroll)
+    public static MaxOfferBreakdown GetMaxOfferBreakdown(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true)
     {
         var result = new MaxOfferBreakdown();
 
@@ -944,12 +944,12 @@ public class RosterController : MonoBehaviour
         else if (exp <= 9) result.maxByExp = (long)(settings.salary_cap * 0.30);
         else result.maxByExp = (long)(settings.salary_cap * 0.35);
 
-        if (player.seasons_with_team >= 3)
+        if (isFromSameTeam && player.seasons_with_team >= 3)
         {
             result.birdTierName = "COMPLETOS";
             result.birdMax = result.maxByExp;
         }
-        else if (player.seasons_with_team == 2)
+        else if (isFromSameTeam && player.seasons_with_team == 2)
         {
             result.birdTierName = "EARLY";
             result.birdMax = player.salary * 175 / 100;
@@ -979,9 +979,9 @@ public class RosterController : MonoBehaviour
         return result;
     }
 
-    public static long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll)
+    public static long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true)
     {
-        return GetMaxOfferBreakdown(player, settings, totalPayroll).finalMax;
+        return GetMaxOfferBreakdown(player, settings, totalPayroll, isFromSameTeam).finalMax;
     }
 
     string GetBirdRightsTier(PlayerData player)

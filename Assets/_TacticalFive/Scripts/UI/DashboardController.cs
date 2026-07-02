@@ -1017,6 +1017,34 @@ public class DashboardController : MonoBehaviour
                         continue;
                     }
 
+                    // Verificar espacio salarial (FA de otro equipo → SIN Bird Rights)
+                    long totalPayroll = roster.Sum(p => p.salary);
+                    var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+                    if (leagueSettings != null && totalPayroll + offer.offer_salary > leagueSettings.salary_cap)
+                    {
+                        rejectedCount++;
+                        player.renewal_cooldown_day = _season.current_game_day + 14;
+                        DatabaseManager.Instance.UpdatePlayer(player);
+
+                        resultSummary += $"✗ {playerName}: FICHAJE RECHAZADO (sin espacio salarial) — {salaryText} · {yearsText}\n";
+
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 1,
+                            sender_id = 0,
+                            title = $"Fichaje rechazado: {playerName}",
+                            body = $"Tu oferta a {playerName} ha sido rechazada porque no tienes suficiente espacio salarial (${(totalPayroll + offer.offer_salary - leagueSettings.salary_cap) / 1_000_000}M sobre el tope).",
+                            game_day = _season.current_game_day,
+                            game_date = nowStr,
+                            created_at = nowStr,
+                            date_sent = nowStr,
+                            is_read = 0
+                        });
+                        DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                        continue;
+                    }
+
                     acceptedCount++;
                     batchSigningsAccepted++;
                     player.team_id = _myTeam.id;
