@@ -129,7 +129,6 @@ public class VestuarioController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Vestuario);
-        HeaderController.Attach(_root);
         var allSubmenus = new[] {
             _root.Q<VisualElement>("RosterSubmenu"),
             _root.Q<VisualElement>("PalmaresSubmenu"),
@@ -259,7 +258,9 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        
+        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
+
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
@@ -285,6 +286,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
     void Refresh()
     {
+        RefreshHeader();
         DatabaseManager.Instance.EnsureTeamRelationshipsSeeded(_myTeam.id);
         _relationships = DatabaseManager.Instance.GetTeamRelationships(_myTeam.id);
         _personalities = DatabaseManager.Instance.GetTeamPersonalities(_myTeam.id);
@@ -294,6 +296,52 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         BuildRelationsList();
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuVestuario")?.AddToClassList("nav-submenu-item--active");
+    }
+
+    void RefreshHeader()
+    {
+        if (_myTeam == null || _manager == null) return;
+
+        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
+            _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
+
+        _headerTeamName.text = _myTeam.name.ToUpper();
+        _headerManagerName.text = $"Manager: {_manager.name}";
+        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
+        _headerBudget.style.color = _myTeam.budget < 0
+            ? new StyleColor(new Color32(192, 57, 43, 255))
+            : new StyleColor(new Color32(39, 174, 96, 255));
+
+        long totalPayroll = _players.Sum(p => p.salary);
+        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        long margin = salaryCap - _players.Sum(p => p.salary);
+
+        string marginText = margin >= 0
+            ? $"+${margin / 1_000_000}M"
+            : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        _headerMargin.text = marginText;
+        _headerChemistry.text = $"{chemistry}%";
+        _headerChemistry.RemoveFromClassList("header-stat-value--gold");
+        _headerChemistry.RemoveFromClassList("header-stat-value--negative");
+        if (chemistry < 40)
+            _headerChemistry.AddToClassList("header-stat-value--negative");
+        else if (chemistry < 70)
+            _headerChemistry.AddToClassList("header-stat-value--gold");
+
+        _headerMargin.RemoveFromClassList("header-stat-value--negative");
+        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
+
+        if (_season != null)
+        {
+            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+        }
+
+        _btnAction.text = "DASHBOARD";
     }
 
     void BuildChemistryOverview()

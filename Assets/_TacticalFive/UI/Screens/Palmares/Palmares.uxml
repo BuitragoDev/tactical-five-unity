@@ -4,7 +4,36 @@
 <ui:VisualElement name="PalmaresRoot" class="palmares-root">
         
         <ui:VisualElement class="palmares-main">
-            
+            <ui:VisualElement name="TopHeader" class="top-header">
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
+                <ui:VisualElement class="header-team-info">
+                    <ui:Label name="HeaderTeamName" text="" class="header-team-name"/>
+                    <ui:Label name="HeaderManagerName" text="" class="header-manager-name"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label text="PRESUPUESTO" class="header-stat-label"/>
+                    <ui:Label name="HeaderBudget" text="" class="header-stat-value"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label text="MASA SALARIAL" class="header-stat-label"/>
+                    <ui:Label name="HeaderPayroll" text="" class="header-stat-value header-stat-value--neutral"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label text="MARGEN SALARIAL" class="header-stat-label"/>
+                    <ui:Label name="HeaderMargin" text="" class="header-stat-value"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="header-stat">
+                    <ui:Label text="QUÍMICA DE EQUIPO" class="header-stat-label"/>
+                    <ui:Label name="HeaderChemistry" text="" class="header-stat-value"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="header-spacer"/>
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" text="" class="header-season-label"/>
+                    <ui:Label name="HeaderDate" text="" class="header-date-label"/>
+                </ui:VisualElement>
+                <ui:Button name="BtnAction" text="CONTINUAR" class="btn-action"/>
+                <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
+            </ui:VisualElement>
             <!-- PALMARES TITLE BOX -->
             <ui:VisualElement class="palmares-title-box">
                 <ui:Label class="palmares-title-box-label" text="PALMARÉS HISTÓRICO DE EQUIPOS" />

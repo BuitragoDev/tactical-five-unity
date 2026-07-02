@@ -158,7 +158,6 @@ public class QuintetoController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Quinteto);
-        HeaderController.Attach(_root);
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         var allSubmenus = new[] {
@@ -293,7 +292,9 @@ public class QuintetoController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        
+        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
+
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
@@ -323,6 +324,7 @@ public class QuintetoController : MonoBehaviour
 
     void Refresh()
     {
+        RefreshHeader();
         _root.Q<Button>("SubmenuQuinteto")?.AddToClassList("nav-submenu-item--active");
         EnsureLineupSeeded();
         _selectedPlayer = null;
@@ -362,6 +364,50 @@ public class QuintetoController : MonoBehaviour
             }
         }
         _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+    }
+
+    void RefreshHeader()
+    {
+        if (_myTeam == null || _manager == null) return;
+
+        if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
+            _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
+
+        _headerTeamName.text = _myTeam.name.ToUpper();
+        _headerManagerName.text = $"Manager: {_manager.name}";
+
+        if (_season != null)
+        {
+            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+        }
+
+        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
+        _headerBudget.style.color = _myTeam.budget < 0
+            ? new StyleColor(new Color32(192, 57, 43, 255))
+            : new StyleColor(new Color32(39, 174, 96, 255));
+
+        long totalPayroll = _players.Sum(p => p.salary);
+        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        long margin = salaryCap - _players.Sum(p => p.salary);
+
+        string marginText = margin >= 0
+            ? $"+${margin / 1_000_000}M"
+            : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        _headerMargin.text = marginText;
+        _headerMargin.RemoveFromClassList("header-stat-value--negative");
+        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
+
+        int chem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        _headerChemistry.text = $"{chem}%";
+        _headerChemistry.style.color = chem >= 70 ? new StyleColor(new Color(39f / 255, 174f / 255, 96f / 255)) :
+                                         chem >= 40 ? new StyleColor(new Color(212f / 255, 160f / 255, 23f / 255)) :
+                                         new StyleColor(new Color(192f / 255, 57f / 255, 43f / 255));
+
+        _btnAction.text = "DASHBOARD";
     }
 
     void BuildLineup()
