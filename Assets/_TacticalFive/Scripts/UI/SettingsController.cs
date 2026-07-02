@@ -100,6 +100,7 @@ public class SettingsController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Settings);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
 
         _sliderMaster.OnValueChanged = v =>

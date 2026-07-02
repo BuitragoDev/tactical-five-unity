@@ -331,6 +331,7 @@ public class RosterController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Roster);
+        HeaderController.Attach(_root);
         // Sidebar navegación
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });

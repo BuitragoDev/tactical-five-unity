@@ -145,6 +145,7 @@ public class InjuredController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Injured);
+        HeaderController.Attach(_root);
         var allSubmenus = new[] {
             _root.Q<VisualElement>("RosterSubmenu"),
             _root.Q<VisualElement>("PalmaresSubmenu"),

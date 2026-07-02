@@ -309,6 +309,7 @@ public class HistorialController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Historial);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });

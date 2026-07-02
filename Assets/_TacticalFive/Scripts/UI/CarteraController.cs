@@ -147,6 +147,7 @@ public class CarteraController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Cartera);
+        HeaderController.Attach(_root);
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>

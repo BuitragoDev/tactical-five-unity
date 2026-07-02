@@ -158,6 +158,7 @@ public class QuintetoController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Quinteto);
+        HeaderController.Attach(_root);
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         var allSubmenus = new[] {

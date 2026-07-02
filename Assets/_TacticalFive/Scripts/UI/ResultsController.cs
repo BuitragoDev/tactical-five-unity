@@ -97,6 +97,7 @@ public class ResultsController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Results);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnPrevDate?.RegisterCallback<ClickEvent>(_ => { PlayClick(); NavigateDate(-1); });
         _btnNextDate?.RegisterCallback<ClickEvent>(_ => { PlayClick(); NavigateDate(1); });

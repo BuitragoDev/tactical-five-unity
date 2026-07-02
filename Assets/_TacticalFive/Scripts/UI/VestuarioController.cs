@@ -129,6 +129,7 @@ public class VestuarioController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Vestuario);
+        HeaderController.Attach(_root);
         var allSubmenus = new[] {
             _root.Q<VisualElement>("RosterSubmenu"),
             _root.Q<VisualElement>("PalmaresSubmenu"),

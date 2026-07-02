@@ -74,6 +74,7 @@ public class ArenaController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Arena);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });

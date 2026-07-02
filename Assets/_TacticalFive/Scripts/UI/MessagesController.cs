@@ -54,6 +54,7 @@ public class MessagesController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Messages);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });

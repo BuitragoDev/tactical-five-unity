@@ -104,6 +104,7 @@ public class PalmaresController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Palmares);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
 
         _tabEquipos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("equipos"); });

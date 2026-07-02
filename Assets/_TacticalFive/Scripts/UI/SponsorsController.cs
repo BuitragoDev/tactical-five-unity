@@ -62,6 +62,7 @@ public class SponsorsController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Sponsors);
+        HeaderController.Attach(_root);
         RegisterNavButtons();
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });

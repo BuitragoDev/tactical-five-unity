@@ -208,6 +208,7 @@ public class TrainingController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Training);
+        HeaderController.Attach(_root);
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         var allSubmenus = new[] {
