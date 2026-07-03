@@ -247,7 +247,7 @@ public class ArenaController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Arena] RefreshHeader error: {ex.Message}"); }
         BuildArenaInfo();
         BuildArenaLevel();
         BuildArenaImage();

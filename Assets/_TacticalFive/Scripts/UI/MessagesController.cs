@@ -227,7 +227,7 @@ public class MessagesController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Messages] RefreshHeader error: {ex.Message}"); }
         BuildMessages();
     }
 
