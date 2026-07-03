@@ -287,7 +287,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Vestuario] RefreshHeader error: {ex.Message}"); }
         DatabaseManager.Instance.EnsureTeamRelationshipsSeeded(_myTeam.id);
         _relationships = DatabaseManager.Instance.GetTeamRelationships(_myTeam.id);
         _personalities = DatabaseManager.Instance.GetTeamPersonalities(_myTeam.id);

@@ -280,7 +280,7 @@
 }
 
 .market-trade-row.selected {
-    background-color: rgba(128, 128, 0, 0.45);
+    background-color: rgb(16, 56, 92);
 }
 
 .market-trade-col-name {
