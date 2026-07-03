@@ -674,7 +674,11 @@ public class MarketController : MonoBehaviour
             return;
         }
 
-        foreach (var pk in picks.OrderBy(p => p.round).ThenBy(p => p.pick_number))
+        var teamsLookup = DatabaseManager.Instance.GetAllTeams()
+            .ToDictionary(t => t.id, t => t.abbreviation);
+
+        foreach (var pk in picks.OrderBy(p => p.round)
+                                 .ThenBy(p => teamsLookup.TryGetValue(p.original_team_id, out var abbr) ? abbr : "ZZZ"))
         {
             var row = new VisualElement();
             row.AddToClassList("market-pick-row");
@@ -682,7 +686,8 @@ public class MarketController : MonoBehaviour
             row.userData = pk;
 
             int pickId = pk.id;
-            var lbl = new Label($"R{pk.round} #{pk.pick_number}");
+            string abbr = teamsLookup.TryGetValue(pk.original_team_id, out var a) ? a : "???";
+            var lbl = new Label($"R{pk.round} {abbr}");
             lbl.AddToClassList("market-pick-label");
             lbl.style.color = new StyleColor(new Color32(236, 240, 241, 255));
             lbl.style.fontSize = 16;
@@ -691,15 +696,6 @@ public class MarketController : MonoBehaviour
             lbl.style.minWidth = 70;
             lbl.style.unityFontStyleAndWeight = FontStyle.Bold;
             row.Add(lbl);
-
-            var round = new Label($"R{pk.round}");
-            round.AddToClassList("market-pick-round");
-            round.style.color = new StyleColor(new Color32(241, 196, 15, 255));
-            round.style.fontSize = 16;
-            round.style.unityTextAlign = TextAnchor.MiddleRight;
-            round.style.unityFontStyleAndWeight = FontStyle.Bold;
-            round.style.width = 24;
-            row.Add(round);
 
             row.RegisterCallback<ClickEvent>(_ =>
             {
