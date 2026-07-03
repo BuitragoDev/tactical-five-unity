@@ -152,16 +152,33 @@ public static class DraftGenerator
                 draftOrder[pick] = new List<TeamData> { nonLotteryTeams[idx] };
         }
 
-        // Generate players in draft order
+        // Generate players in draft order (60 picks: 30 R1 + 30 R2)
         var draftedPlayers = new List<DraftPickResult>();
 
-        for (int pick = 0; pick < 30; pick++)
+        for (int pick = 0; pick < 60; pick++)
         {
-            var team = draftOrder[pick]?.FirstOrDefault();
+            bool isRound2 = pick >= 30;
+            int round = isRound2 ? 2 : 1;
+
+            TeamData team;
+            if (isRound2)
+            {
+                // Round 2: inverse order of round 1. Pick 30 (overall #31) goes
+                // to the team that got the LAST lottery slot, pick 59 goes to
+                // the worst team.
+                int r1Idx = 29 - (pick - 30);
+                team = draftOrder[r1Idx]?.FirstOrDefault();
+            }
+            else
+            {
+                team = draftOrder[pick]?.FirstOrDefault();
+            }
             if (team == null) continue;
 
-            // Pick 1 = ~80 avg, Pick 30 = ~60 avg
-            float baseAvg = 75 - (pick * (15f / 29f));
+            // R1 picks 1-30: ~80 -> ~60 overall. R2 picks 31-60: ~60 -> ~50.
+            float baseAvg = isRound2
+                ? 60f - ((pick - 30) * 10f / 29f)
+                : 75f - (pick * 15f / 29f);
 
             string position = Positions[UnityEngine.Random.Range(0, Positions.Length)];
             var modifiers = PositionModifiers[position];
@@ -190,12 +207,16 @@ public static class DraftGenerator
             string firstName = FirstNames[UnityEngine.Random.Range(0, FirstNames.Length)];
             string lastName = LastNames[UnityEngine.Random.Range(0, LastNames.Length)];
 
-            long salary = (long)(UnityEngine.Random.Range(3000000, 8000001));
+            long salary = isRound2
+                ? (long)(UnityEngine.Random.Range(1500000, 4000001))
+                : (long)(UnityEngine.Random.Range(3000000, 8000001));
             salary = (salary / 100000) * 100000;
 
             int drafTeamId = team.id;
             var pickRow = DatabaseManager.Instance.Db.Table<DraftPickData>()
-                .FirstOrDefault(p => p.season_id == season.id && p.round == 1 && p.original_team_id == team.id);
+                .FirstOrDefault(p => p.season_id == season.id
+                                     && p.round == round
+                                     && p.original_team_id == team.id);
             if (pickRow != null)
                 drafTeamId = pickRow.current_team_id;
 

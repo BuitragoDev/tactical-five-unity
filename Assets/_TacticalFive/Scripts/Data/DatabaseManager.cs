@@ -314,23 +314,42 @@ public class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for trade_offers: {ex.Message}");
         }
 
-        // Clear draft_picks seeded with old (overall-based) logic.
-        // Picks are now seeded at end of season by standings. Existing picks
-        // from the old per-season-start seed are deleted so they regenerate
-        // correctly at the end of the current season.
+        // Reset draft_picks: clear any legacy picks (seeded by overall at
+        // season start) and re-seed picks for the current manager's active
+        // season based on the previous season's standings (or overall+rep
+        // fallback if there is no previous season).
         string picksKey = $"DraftPicksReset_{_activeSaveSlot}";
         if (PlayerPrefs.GetInt(picksKey, 0) == 0)
         {
             try
             {
                 int deleted = _db.Execute("DELETE FROM draft_picks");
+
+                var mgr = GetActiveManager();
+                if (mgr != null)
+                {
+                    var activeSeason = _db.Table<SeasonData>()
+                        .Where(s => s.manager_id == mgr.id && s.is_active == 1)
+                        .OrderByDescending(s => s.year_start)
+                        .FirstOrDefault();
+                    if (activeSeason != null)
+                    {
+                        int? prevSeasonId = _db.Table<SeasonData>()
+                            .Where(s => s.manager_id == mgr.id && s.id != activeSeason.id)
+                            .OrderByDescending(s => s.year_start)
+                            .Select(s => (int?)s.id)
+                            .FirstOrDefault();
+                        SeedDraftPicks(activeSeason.id, mgr.id, prevSeasonId);
+                    }
+                }
+
                 PlayerPrefs.SetInt(picksKey, 1);
                 PlayerPrefs.Save();
-                Debug.LogWarning($"[DB] Migration: cleared {deleted} legacy draft_picks (will regenerate by standings at season end).");
+                Debug.LogWarning($"[DB] Migration: cleared {deleted} legacy draft_picks and re-seeded for current manager.");
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error clearing draft_picks: {ex.Message}");
+                Debug.LogError($"[DB] Migration error resetting draft_picks: {ex.Message}");
             }
         }
 
@@ -913,6 +932,11 @@ public class DatabaseManager : MonoBehaviour
         };
         _db.Insert(season);
 
+        // Seed draft picks for this new season. First-ever season of the manager
+        // has no previousSeasonId (falls back to overall+reputation ordering).
+        int? prevSeasonId = lastSeason != null ? (int?)lastSeason.id : null;
+        SeedDraftPicks(season.id, managerId, prevSeasonId);
+
         return season;
     }
 
@@ -1208,7 +1232,7 @@ public class DatabaseManager : MonoBehaviour
                                     : pos == "SG" ? "SF"
                                     : pos == "SF" ? "PF"
                                     : pos == "PF" ? "C"
-                                    : pos == "C"  ? "PF"
+                                    : pos == "C" ? "PF"
                                     : "",
                 age = age,
                 nationality = nat,
@@ -1259,7 +1283,7 @@ public class DatabaseManager : MonoBehaviour
         Add(21, "BOS", "Derrick", "White", "PG", 32, "USA", 193, 86, 87, 86, 94, 90, 86, 92, 92, 98, 70, 92, 98, 90, 55, 28100000, 3, false);
         Add(22, "BOS", "Payton", "Pritchard", "PG", 28, "USA", 185, 88, 84, 85, 99, 96, 96, 90, 96, 82, 62, 82, 96, 86, 39, 7200000, 3, false);
         Add(23, "BOS", "Sam", "Hauser", "SF", 28, "USA", 201, 98, 80, 80, 88, 96, 98, 79, 83, 81, 69, 81, 87, 75, 43, 10000000, 4, false);
-        Add(25, "BOS", "Neemias", "Queta", "C", 27, "POR", 213, 111, 75, 78, 83, 71, 47, 65, 59, 81, 95, 89, 81, 65, 89, 3000000, 2, false);
+        Add(25, "BOS", "Neemias", "Queta", "C", 27, "POR", 213, 111, 75, 78, 83, 71, 47, 65, 59, 81, 95, 89, 81, 65, 89, 11000000, 4, false);
         Add(288, "BOS", "Mike", "Conley", "PG", 38, "USA", 185, 79, 80, 80, 84, 90, 91, 98, 97, 76, 52, 82, 95, 90, 25, 10000000, 1, false);
         Add(318, "BOS", "Mitchell", "Robinson", "C", 28, "USA", 213, 111, 83, 83, 89, 79, 38, 71, 68, 99, 99, 99, 99, 73, 99, 14000000, 3, false);
         Add(26, "BOS", "Jordan", "Walsh", "SF", 22, "USA", 201, 93, 74, 81, 89, 71, 63, 69, 71, 87, 71, 91, 77, 75, 50, 2200000, 2, false);
@@ -1399,7 +1423,7 @@ public class DatabaseManager : MonoBehaviour
         Add(144, "DET", "Duncan", "Robinson", "SG", 32, "USA", 201, 97, 78, 78, 89, 97, 99, 77, 83, 75, 66, 83, 89, 66, 34, 9000000, 2, false);
         Add(145, "DET", "Ronald", "Holland II", "SF", 20, "USA", 203, 93, 77, 92, 90, 74, 64, 72, 78, 88, 74, 95, 78, 84, 50, 9000000, 4, false);
         Add(146, "DET", "Marcus", "Sasser", "PG", 25, "USA", 188, 84, 77, 80, 95, 89, 87, 89, 91, 71, 56, 85, 87, 71, 26, 4200000, 2, false);
-        Add(147, "DET", "Javonte", "Green", "SF", 33, "USA", 193, 93, 75, 75, 86, 74, 69, 67, 72, 90, 68, 94, 78, 86, 41, 3500000, 1, false);
+        Add(147, "DET", "Javonte", "Green", "SF", 33, "USA", 193, 93, 75, 75, 86, 74, 69, 67, 72, 90, 68, 94, 78, 86, 41, 3900000, 1, false);
         Add(148, "DET", "Paul", "Reed", "PF", 27, "USA", 206, 95, 75, 78, 82, 74, 53, 68, 66, 88, 92, 90, 78, 70, 64, 5000000, 2, false);
         Add(149, "DET", "Wendell", "Moore Jr.", "SG", 24, "USA", 196, 97, 72, 78, 84, 73, 67, 73, 77, 81, 65, 85, 77, 77, 33, 2500000, 2, false);
         Add(150, "DET", "Chaz", "Lanier", "SG", 24, "USA", 196, 84, 73, 82, 88, 86, 94, 73, 81, 69, 57, 81, 82, 65, 27, 2800000, 4, false);
@@ -1512,7 +1536,6 @@ public class DatabaseManager : MonoBehaviour
         Add(241, "MEM", "Scotty", "Pippen Jr.", "PG", 25, "USA", 185, 84, 78, 84, 95, 84, 78, 93, 91, 80, 54, 87, 87, 84, 25, 5000000, 3, false);
         Add(242, "MEM", "Cedric", "Coward", "SF", 22, "USA", 198, 94, 77, 88, 88, 81, 84, 73, 79, 84, 69, 90, 81, 79, 39, 4000000, 4, false);
         Add(243, "MEM", "Cam", "Spencer", "SG", 26, "USA", 193, 93, 76, 80, 86, 86, 94, 81, 84, 75, 61, 81, 88, 71, 29, 2200000, 2, false);
-        Add(244, "MEM", "Rayan", "Rupert", "SF", 22, "FRA", 198, 88, 75, 88, 89, 73, 67, 71, 75, 89, 65, 93, 77, 85, 41, 3500000, 3, false);
         Add(245, "MEM", "Olivier-Maxence", "Prosper", "SF", 24, "CAN", 201, 104, 75, 84, 87, 75, 67, 71, 75, 88, 69, 92, 79, 83, 39, 3200000, 3, false);
         Add(246, "MEM", "Walter", "Clayton Jr.", "PG", 23, "USA", 188, 88, 74, 84, 90, 85, 89, 85, 87, 67, 51, 83, 83, 69, 25, 2800000, 4, false);
         Add(111, "MEM", "AJ", "Johnson", "PG", 21, "USA", 196, 72, 78, 90, 98, 82, 76, 96, 94, 70, 58, 94, 84, 72, 34, 3090480, 4, false);
@@ -1647,6 +1670,7 @@ public class DatabaseManager : MonoBehaviour
         Add(365, "PHI", "Kyle", "Lowry", "PG", 40, "USA", 183, 88, 78, 78, 79, 85, 87, 97, 97, 79, 50, 81, 91, 87, 25, 8000000, 1, false);
         Add(366, "PHI", "VJ", "Edgecombe", "SG", 20, "BAH", 193, 90, 80, 92, 99, 91, 87, 84, 87, 80, 62, 89, 87, 84, 30, 6000000, 4, false);
         Add(367, "PHI", "Justin", "Edwards", "SF", 22, "USA", 201, 95, 78, 88, 90, 87, 83, 77, 81, 87, 67, 89, 85, 85, 27, 3000000, 4, false);
+        Add(244, "PHI", "Rayan", "Rupert", "SF", 22, "FRA", 198, 88, 75, 88, 89, 73, 67, 71, 75, 89, 65, 93, 77, 85, 41, 3500000, 1, false);
         Add(368, "PHI", "Dominick", "Barlow", "PF", 23, "USA", 206, 102, 76, 86, 84, 80, 72, 76, 78, 86, 78, 88, 82, 84, 28, 2500000, 3, false);
         Add(369, "PHI", "Trendon", "Watford", "PF", 25, "USA", 203, 104, 78, 84, 86, 86, 78, 82, 84, 84, 75, 86, 86, 82, 29, 4000000, 2, false);
         Add(370, "PHI", "Andre", "Drummond", "C", 32, "USA", 211, 127, 80, 80, 75, 85, 34, 67, 66, 99, 99, 99, 95, 62, 99, 5000000, 1, false);
@@ -1891,7 +1915,7 @@ public class DatabaseManager : MonoBehaviour
                                     : pos == "SG" ? "SF"
                                     : pos == "SF" ? "PF"
                                     : pos == "PF" ? "C"
-                                    : pos == "C"  ? "PF"
+                                    : pos == "C" ? "PF"
                                     : "",
                 age = age,
                 nationality = nat,
@@ -2175,69 +2199,87 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    public void SeedDraftPicks(int seasonId, int managerId)
+    public void SeedDraftPicks(int newSeasonId, int managerId, int? previousSeasonId = null)
     {
-        var existing = _db.Table<DraftPickData>().Where(p => p.season_id == seasonId).Count();
-        if (existing > 0) return;
+        // Picks are not cumulative across seasons. Clear any picks from other seasons first.
+        _db.Execute("DELETE FROM draft_picks WHERE season_id != ?", newSeasonId);
+
+        if (_db.Table<DraftPickData>().Where(p => p.season_id == newSeasonId).Count() > 0)
+            return;
 
         var teams = GetAllTeams();
-        var teamStats = teams.ToDictionary(t => t.id, t => (wins: 0, losses: 0));
+        var orderedTeamIds = new List<int>();
 
-        var playedGames = _db.Table<GameData>()
-            .Where(g => g.manager_id == managerId && g.game_type == "regular" && g.is_played == 1)
-            .ToList();
-
-        foreach (var g in playedGames)
+        if (previousSeasonId.HasValue)
         {
-            if (teamStats.ContainsKey(g.home_team_id))
-            {
-                var home = teamStats[g.home_team_id];
-                if (g.home_score > g.away_score) home.wins++; else home.losses++;
-                teamStats[g.home_team_id] = home;
-            }
-            if (teamStats.ContainsKey(g.away_team_id))
-            {
-                var away = teamStats[g.away_team_id];
-                if (g.away_score > g.home_score) away.wins++; else away.losses++;
-                teamStats[g.away_team_id] = away;
-            }
-        }
+            var teamStats = teams.ToDictionary(t => t.id, t => (wins: 0, losses: 0));
 
-        var standings = teams
-            .Select(t => new
+            var playedGames = _db.Table<GameData>()
+                .Where(g => g.season_id == previousSeasonId.Value
+                            && g.game_type == "regular" && g.is_played == 1)
+                .ToList();
+
+            foreach (var g in playedGames)
             {
-                Team = t,
-                Wins = teamStats.ContainsKey(t.id) ? teamStats[t.id].wins : 0,
-                Losses = teamStats.ContainsKey(t.id) ? teamStats[t.id].losses : 0,
-            })
-            .OrderBy(s => (float)s.Wins / Math.Max(1, s.Wins + s.Losses))
-            .ThenBy(s => s.Losses)
-            .ToList();
+                if (teamStats.ContainsKey(g.home_team_id))
+                {
+                    var home = teamStats[g.home_team_id];
+                    if (g.home_score > g.away_score) home.wins++; else home.losses++;
+                    teamStats[g.home_team_id] = home;
+                }
+                if (teamStats.ContainsKey(g.away_team_id))
+                {
+                    var away = teamStats[g.away_team_id];
+                    if (g.away_score > g.home_score) away.wins++; else away.losses++;
+                    teamStats[g.away_team_id] = away;
+                }
+            }
+
+            orderedTeamIds = teams
+                .Select(t => new
+                {
+                    Team = t,
+                    Wins = teamStats.ContainsKey(t.id) ? teamStats[t.id].wins : 0,
+                    Losses = teamStats.ContainsKey(t.id) ? teamStats[t.id].losses : 0,
+                })
+                .OrderBy(s => (float)s.Wins / Math.Max(1, s.Wins + s.Losses))
+                .ThenBy(s => s.Losses)
+                .Select(s => s.Team.id)
+                .ToList();
+        }
+        else
+        {
+            orderedTeamIds = teams
+                .OrderBy(t => t.overall)
+                .ThenBy(t => t.reputation)
+                .Select(t => t.id)
+                .ToList();
+        }
 
         int pickNum = 1;
-        foreach (var s in standings)
+        foreach (var teamId in orderedTeamIds)
         {
             _db.Insert(new DraftPickData
             {
-                season_id = seasonId,
+                season_id = newSeasonId,
                 round = 1,
                 pick_number = pickNum++,
-                original_team_id = s.Team.id,
-                current_team_id = s.Team.id
+                original_team_id = teamId,
+                current_team_id = teamId
             });
         }
-        foreach (var s in standings)
+        foreach (var teamId in orderedTeamIds)
         {
             _db.Insert(new DraftPickData
             {
-                season_id = seasonId,
+                season_id = newSeasonId,
                 round = 2,
                 pick_number = pickNum++,
-                original_team_id = s.Team.id,
-                current_team_id = s.Team.id
+                original_team_id = teamId,
+                current_team_id = teamId
             });
         }
-        Debug.Log($"[DB] {standings.Count * 2} draft picks seeded for season {seasonId} by standings.");
+        Debug.Log($"[DB] {orderedTeamIds.Count * 2} draft picks seeded for season {newSeasonId} (previous={previousSeasonId?.ToString() ?? "none"}).");
     }
 
     public List<DraftPickData> GetDraftPicksForTeam(int teamId)
@@ -4073,6 +4115,11 @@ public class DatabaseManager : MonoBehaviour
             generated = 0
         };
         _db.Insert(newSeason);
+
+        // Seed draft picks for the new season. Use oldSeason standings if it
+        // exists; otherwise fall back to overall+reputation ordering.
+        int? prevSeasonId = oldSeason != null ? (int?)oldSeason.id : null;
+        SeedDraftPicks(newSeason.id, managerId, prevSeasonId);
     }
 
     public PlayerPersonalityData GetPlayerPersonality(int playerId)

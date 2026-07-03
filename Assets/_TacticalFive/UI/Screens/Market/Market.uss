@@ -760,8 +760,6 @@
     background-color: rgb(192, 57, 43);
 }
 
-
-
 /* ── TRANSFER WINDOW CLOSED ── */
 .market-closed-overlay {
     position: absolute;
@@ -1023,7 +1021,7 @@
 }
 
 .market-trade-col-picks {
-    width: 130px;
+    width: 230px;
     flex-shrink: 0;
     flex-direction: column;
     border-left-width: 1px;

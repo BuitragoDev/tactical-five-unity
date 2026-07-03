@@ -57,7 +57,7 @@
                                     </ui:VisualElement>
                                     <ui:VisualElement class="market-trade-col-picks">
                                         <ui:VisualElement class="market-trade-picks-header">
-                                            <ui:Label class="market-trade-picks-title" text="PICKS" />
+                                            <ui:Label class="market-trade-picks-title" text="RONDAS DRAFT" />
                                         </ui:VisualElement>
                                         <ui:ScrollView class="market-trade-picks-scroll"
                                                        horizontal-scrolling-enabled="false"
