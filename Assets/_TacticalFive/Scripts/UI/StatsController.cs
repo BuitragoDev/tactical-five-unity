@@ -334,7 +334,7 @@ public class StatsController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Stats] RefreshHeader error: {ex.Message}"); }
 
         // Dynamic season label
         if (_season != null)
