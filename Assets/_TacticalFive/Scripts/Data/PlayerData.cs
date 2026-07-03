@@ -9,6 +9,7 @@ public class PlayerData
     public string first_name { get; set; }
     public string last_name { get; set; }
     public string position { get; set; }
+    public string secondary_position { get; set; } = "";
     public int age { get; set; }
     public string nationality { get; set; }
     public int height_cm { get; set; }

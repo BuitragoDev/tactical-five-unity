@@ -624,7 +624,9 @@ public class QuintetoController : MonoBehaviour
         _detailEmpty.style.display = DisplayStyle.None;
         _detailScroll.style.display = DisplayStyle.Flex;
 
-        _detailPosBadge.text = p.position;
+        _detailPosBadge.text = string.IsNullOrEmpty(p.secondary_position)
+            ? p.position
+            : $"{p.position} / {p.secondary_position}";
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerMeta.text = $"{PlayerAge(p)} años · {p.nationality}";
         _detailOvr.text = p.overall.ToString();

@@ -261,6 +261,37 @@ public class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: added photo to players");
         }
 
+        // Add secondary_position to players if missing
+        var playerCols4 = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        bool hasSecondaryPos = playerCols4.Any(c => c.name == "secondary_position");
+        if (!hasSecondaryPos)
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN secondary_position TEXT DEFAULT ''");
+            Debug.Log("[DB] Migration: added secondary_position to players");
+        }
+
+        // Migrate existing players: assign adjacent secondary position
+        try
+        {
+            int migrated = _db.Execute(@"
+                UPDATE players
+                SET secondary_position = CASE position
+                    WHEN 'PG' THEN 'SG'
+                    WHEN 'SG' THEN 'SF'
+                    WHEN 'SF' THEN 'PF'
+                    WHEN 'PF' THEN 'C'
+                    WHEN 'C'  THEN 'PF'
+                    ELSE ''
+                END
+                WHERE secondary_position IS NULL OR secondary_position = ''");
+            if (migrated > 0)
+                Debug.Log($"[DB] Migration: assigned adjacent secondary_position to {migrated} players");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[DB] Migration: secondary_position data migration failed: {ex.Message}");
+        }
+
         // Migrate trade_offers to multi-player schema
         try
         {
@@ -1150,6 +1181,12 @@ public class DatabaseManager : MonoBehaviour
                 first_name = fn,
                 last_name = ln,
                 position = pos,
+                secondary_position = pos == "PG" ? "SG"
+                                    : pos == "SG" ? "SF"
+                                    : pos == "SF" ? "PF"
+                                    : pos == "PF" ? "C"
+                                    : pos == "C"  ? "PF"
+                                    : "",
                 age = age,
                 nationality = nat,
                 height_cm = h,
@@ -1827,6 +1864,12 @@ public class DatabaseManager : MonoBehaviour
                 first_name = fn,
                 last_name = ln,
                 position = pos,
+                secondary_position = pos == "PG" ? "SG"
+                                    : pos == "SG" ? "SF"
+                                    : pos == "SF" ? "PF"
+                                    : pos == "PF" ? "C"
+                                    : pos == "C"  ? "PF"
+                                    : "",
                 age = age,
                 nationality = nat,
                 height_cm = h,
@@ -4185,8 +4228,10 @@ public class DatabaseManager : MonoBehaviour
         for (int si = 0; si < posOrder.Length; si++)
         {
             var best = players
-                .Where(p => p.position == posOrder[si] && !assigned.Contains(p.id))
-                .OrderByDescending(p => p.overall)
+                .Where(p => (p.position == posOrder[si] || p.secondary_position == posOrder[si])
+                            && !assigned.Contains(p.id))
+                .OrderByDescending(p => p.position == posOrder[si] ? 1 : 0)
+                .ThenByDescending(p => p.overall)
                 .FirstOrDefault();
             if (best != null)
             {

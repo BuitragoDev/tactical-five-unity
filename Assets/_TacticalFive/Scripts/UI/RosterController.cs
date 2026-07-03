@@ -736,7 +736,7 @@ public class RosterController : MonoBehaviour
 
         // Cabecera
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
-        _detailPlayerMeta.text = $"{p.position} · {p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
+        _detailPlayerMeta.text = $"{p.position}{(string.IsNullOrEmpty(p.secondary_position) ? "" : " / " + p.secondary_position)} · {p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
         _detailOvr.text = p.overall.ToString();
 
         // Foto
