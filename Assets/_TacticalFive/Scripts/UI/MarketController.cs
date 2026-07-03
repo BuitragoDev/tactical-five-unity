@@ -1128,10 +1128,11 @@ public class MarketController : MonoBehaviour
         _selectedMyPlayers.Clear();
         _selectedOtherPlayers.Clear();
 
-        ShowTradeSuccessModal(myNames, otherNames, satApplied);
+        ShowTradeSuccessModal(myNames, otherNames, satApplied, myPicksText, otherPicksText);
     }
 
-    void ShowTradeSuccessModal(string myNames, string otherNames, bool satApplied = false)
+    void ShowTradeSuccessModal(string myNames, string otherNames, bool satApplied = false,
+                               string myPicksText = "", string otherPicksText = "")
     {
         if (_tradeSuccessTitle != null)
             _tradeSuccessTitle.text = satApplied ? "¡TRASPASO + SIGN & TRADE REALIZADO!" : "¡TRASPASO REALIZADO!";
