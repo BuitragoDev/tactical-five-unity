@@ -248,7 +248,7 @@ public class StandingsController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Standings] RefreshHeader error: {ex.Message}"); }
         ShowStandings(_currentFilter);
         RefreshStatCards();
     }

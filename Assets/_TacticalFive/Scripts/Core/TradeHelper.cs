@@ -11,7 +11,7 @@ public static class TradeHelper
     public const long NT_MLE = 14_100_000;
     public const long T_MLE = 5_700_000;
     public const long MIN_SALARY = 2_000_000;
-    public const int MAX_ROSTER = 18;
+    public const int MAX_ROSTER = 17;
 
     static void ValidateTradeSide(
         long salaryOut, long salaryIn, int playersInCount,
