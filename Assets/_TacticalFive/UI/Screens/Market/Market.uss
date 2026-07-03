@@ -201,7 +201,7 @@
     flex-direction: row;
     align-items: center;
     padding: 12px 16px;
-    background-color: rgba(212, 160, 23, 0.04);
+    background-color: rgb(16, 56, 92);
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     flex-shrink: 0;
@@ -297,7 +297,7 @@
 }
 
 .market-trade-row.selected {
-    background-color: rgba(128, 128, 0, 0.45);
+    background-color: rgb(16, 56, 92);
 }
 
 .market-trade-col-name {
@@ -332,16 +332,6 @@
 .market-trade-col-salary {
     width: 100px;
     -unity-text-align: middle-right;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 16px;
-    font-weight: 500;
-    color: rgb(208, 216, 232);
-    align-self: center;
-}
-
-.market-trade-col-restantes {
-    width: 70px;
-    -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 16px;
     font-weight: 500;
@@ -851,11 +841,6 @@
 .market-table-header-salary {
     width: 100px;
     -unity-text-align: middle-right;
-}
-
-.market-table-header-restantes {
-    width: 70px;
-    -unity-text-align: middle-center;
 }
 
 .market-table-header-action {
