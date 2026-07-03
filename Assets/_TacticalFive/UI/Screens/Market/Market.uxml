@@ -13,12 +13,6 @@
         <ui:VisualElement class="market-main">
 
             <!-- TOP HEADER -->
-
-            <!-- MARKET TITLE BOX -->
-            <ui:VisualElement class="market-title-box">
-                <ui:Label class="market-title-box-label" text="MERCADO DE JUGADORES" />
-            </ui:VisualElement>
-
             <!-- MARKET CONTENT -->
             <ui:VisualElement class="market-content">
 
