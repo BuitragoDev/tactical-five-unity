@@ -1009,11 +1009,48 @@
     margin-top: 4px;
 }
 
+.market-trade-columns {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.market-trade-col-players {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.market-trade-col-picks {
+    width: 130px;
+    flex-shrink: 0;
+    flex-direction: column;
+    border-left-width: 1px;
+    border-left-color: rgb(58, 74, 99);
+    margin-left: 6px;
+    padding-left: 6px;
+    min-height: 0;
+}
+
+.market-trade-picks-header {
+    height: 22px;
+    justify-content: center;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(58, 74, 99);
+    margin-bottom: 4px;
+}
+
+.market-trade-picks-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+
 .market-trade-picks-title {
     font-size: 10px;
     color: rgb(160, 174, 192);
     -unity-font-style: bold;
-    margin-bottom: 4px;
     -unity-text-align: middle-center;
 }
 

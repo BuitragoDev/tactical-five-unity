@@ -46,15 +46,25 @@
                                     <ui:VisualElement name="MyTeamLogo" class="market-trade-panel-logo" />
                                     <ui:Label name="MyTeamName" class="market-trade-panel-name" text="" />
                                 </ui:VisualElement>
-                                <ui:VisualElement name="MyTableHeader" class="market-table-header" />
-                                <ui:ScrollView class="market-trade-panel-body"
-                                               horizontal-scrolling-enabled="false"
-                                               mode="Vertical">
-                                    <ui:VisualElement name="MyTeamBody" class="market-trade-panel-content" />
-                                </ui:ScrollView>
-                                <ui:VisualElement class="market-trade-picks-section">
-                                    <ui:Label class="market-trade-picks-title" text="PICKS DISPONIBLES" />
-                                    <ui:VisualElement name="MyPicksBody" class="market-trade-picks-content" />
+                                <ui:VisualElement class="market-trade-columns">
+                                    <ui:VisualElement class="market-trade-col-players">
+                                        <ui:VisualElement name="MyTableHeader" class="market-table-header" />
+                                        <ui:ScrollView class="market-trade-panel-body"
+                                                       horizontal-scrolling-enabled="false"
+                                                       mode="Vertical">
+                                            <ui:VisualElement name="MyTeamBody" class="market-trade-panel-content" />
+                                        </ui:ScrollView>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-trade-col-picks">
+                                        <ui:VisualElement class="market-trade-picks-header">
+                                            <ui:Label class="market-trade-picks-title" text="PICKS" />
+                                        </ui:VisualElement>
+                                        <ui:ScrollView class="market-trade-picks-scroll"
+                                                       horizontal-scrolling-enabled="false"
+                                                       mode="Vertical">
+                                            <ui:VisualElement name="MyPicksBody" class="market-trade-picks-content" />
+                                        </ui:ScrollView>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <!-- Other Team Panel -->
@@ -63,15 +73,25 @@
                                     <ui:VisualElement name="OtherTeamLogo" class="market-trade-panel-logo" />
                                     <ui:Label name="OtherTeamName" class="market-trade-panel-name" text="" />
                                 </ui:VisualElement>
-                                <ui:VisualElement name="OtherTableHeader" class="market-table-header" />
-                                <ui:ScrollView class="market-trade-panel-body"
-                                               horizontal-scrolling-enabled="false"
-                                               mode="Vertical">
-                                    <ui:VisualElement name="OtherTeamBody" class="market-trade-panel-content" />
-                                </ui:ScrollView>
-                                <ui:VisualElement class="market-trade-picks-section">
-                                    <ui:Label class="market-trade-picks-title" text="PICKS DISPONIBLES" />
-                                    <ui:VisualElement name="OtherPicksBody" class="market-trade-picks-content" />
+                                <ui:VisualElement class="market-trade-columns">
+                                    <ui:VisualElement class="market-trade-col-players">
+                                        <ui:VisualElement name="OtherTableHeader" class="market-table-header" />
+                                        <ui:ScrollView class="market-trade-panel-body"
+                                                       horizontal-scrolling-enabled="false"
+                                                       mode="Vertical">
+                                            <ui:VisualElement name="OtherTeamBody" class="market-trade-panel-content" />
+                                        </ui:ScrollView>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="market-trade-col-picks">
+                                        <ui:VisualElement class="market-trade-picks-header">
+                                            <ui:Label class="market-trade-picks-title" text="PICKS" />
+                                        </ui:VisualElement>
+                                        <ui:ScrollView class="market-trade-picks-scroll"
+                                                       horizontal-scrolling-enabled="false"
+                                                       mode="Vertical">
+                                            <ui:VisualElement name="OtherPicksBody" class="market-trade-picks-content" />
+                                        </ui:ScrollView>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
