@@ -288,7 +288,7 @@ public class RecordsController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Records] RefreshHeader error: {ex.Message}"); }
         BuildRecords();
     }
 
