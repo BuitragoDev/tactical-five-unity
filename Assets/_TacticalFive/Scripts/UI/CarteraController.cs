@@ -261,7 +261,7 @@ public class CarteraController : MonoBehaviour
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
         _root.Q<Button>("SubmenuCartera")?.AddToClassList("nav-submenu-item--active");
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Cartera] RefreshHeader error: {ex.Message}"); }
         BuildOjeadorCard();
         BuildTeamList();
         BuildPlayerList();

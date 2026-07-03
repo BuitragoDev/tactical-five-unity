@@ -58,8 +58,10 @@ public class HistorialController : MonoBehaviour
         _headerChemistry = _root.Q<Label>("HeaderChemistry");
         _btnAction = _root.Q<Button>("BtnAction");
 
-        _root.Q<Label>("HeaderSeason").text = "";
-        _root.Q<Label>("HeaderDate").text = "";
+        var headerSeason = _root.Q<Label>("HeaderSeason");
+        if (headerSeason != null) headerSeason.text = "";
+        var headerDate = _root.Q<Label>("HeaderDate");
+        if (headerDate != null) headerDate.text = "";
     }
 
     void LoadSidebarIcons()
@@ -175,8 +177,10 @@ public class HistorialController : MonoBehaviour
 
         if (_season != null)
         {
-            _root.Q<Label>("HeaderSeason").text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+            var headerSeason = _root.Q<Label>("HeaderSeason");
+            if (headerSeason != null) headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            var headerDate = _root.Q<Label>("HeaderDate");
+            if (headerDate != null) headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
         BuildHistorial();

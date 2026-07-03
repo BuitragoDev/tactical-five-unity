@@ -362,7 +362,7 @@ public class MarketController : MonoBehaviour
     void Refresh()
     {
         _root.Q<Button>("SubmenuOfertas")?.AddToClassList("nav-submenu-item--active");
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Market] RefreshHeader error: {ex.Message}"); }
 
         bool windowOpen = IsTransferWindowOpen();
         _teamGrid.style.display = windowOpen ? DisplayStyle.Flex : DisplayStyle.None;
