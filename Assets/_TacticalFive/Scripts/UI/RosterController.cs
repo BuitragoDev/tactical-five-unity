@@ -593,7 +593,8 @@ public class RosterController : MonoBehaviour
         int avgOverall = _players.Count > 0
             ? (int)_players.Average(p => p.overall) : 0;
         _summaryOverall.text = avgOverall.ToString();
-        _summaryBudget.text = $"${_myTeam.budget / 1_000_000}M";
+        long totalPayroll = _players.Sum(p => p.salary);
+        _summaryBudget.text = $"${totalPayroll / 1_000_000}M";
     }
 
     // ── ROSTER LIST ──────────────────────────────────────
