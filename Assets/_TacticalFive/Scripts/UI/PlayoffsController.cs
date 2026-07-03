@@ -284,7 +284,7 @@ public class PlayoffsController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Playoffs] RefreshHeader error: {ex.Message}"); }
 
         string phase = _season?.phase ?? "regular";
 
