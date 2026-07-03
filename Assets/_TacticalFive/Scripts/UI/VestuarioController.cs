@@ -121,6 +121,7 @@ public class VestuarioController : MonoBehaviour
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
 
+        DatabaseManager.Instance.EnsureTeamRelationshipsSeeded(_myTeam.id);
         _personalities = DatabaseManager.Instance.GetTeamPersonalities(_myTeam.id);
         _relationships = DatabaseManager.Instance.GetTeamRelationships(_myTeam.id);
     }
