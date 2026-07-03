@@ -48,7 +48,7 @@ public class EditorController : MonoBehaviour
     private VisualElement _playerDetail;
     private VisualElement _playerDetailPanel;
     private TextField _playerFName, _playerLName;
-    private CustomDropdown _playerPosDropdown, _playerSecPosDropdown, _playerTeamDropdown;
+    private CustomDropdown _playerPosDropdown, _playerTeamDropdown;
     private TextField _playerAge, _playerNat, _playerHt, _playerWt;
     private TextField _playerPot;
     private TextField _playerSpeed, _playerShooting, _player3pt, _playerPassing;
@@ -555,8 +555,7 @@ public class EditorController : MonoBehaviour
         SetLettersOnly(_playerFName);
         _playerLName = AddInput(leftCol, "Apellido", p.last_name);
         SetLettersOnly(_playerLName);
-        _playerPosDropdown = AddDropdown(leftCol, "Posición principal", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
-        _playerSecPosDropdown = AddDropdown(leftCol, "Posición secundaria", new[] { "—", "PG", "SG", "SF", "PF", "C" }, string.IsNullOrEmpty(p.secondary_position) ? "—" : p.secondary_position);
+        _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
         _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
         SetDigitsOnly(_playerAge, 2);
         _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
@@ -634,8 +633,6 @@ public class EditorController : MonoBehaviour
         p.first_name = _playerFName.value;
         p.last_name = _playerLName.value;
         p.position = _playerPosDropdown.Value;
-        string secPos = _playerSecPosDropdown.Value;
-        p.secondary_position = (secPos == "—" || secPos == p.position) ? "" : secPos;
         int.TryParse(_playerAge.value, out int age); p.age = age;
         p.nationality = _playerNat.value;
         int.TryParse(_playerHt.value, out int ht); p.height_cm = ht;
