@@ -626,7 +626,7 @@ public class MarketController : MonoBehaviour
 
         if (header != _freeAgentsTableHeader)
         {
-            var restantes = new Label("RESTANTES");
+            var restantes = new Label("AÑOS");
             restantes.AddToClassList("market-table-header-label");
             restantes.AddToClassList("market-table-header-restantes");
             header.Add(restantes);
@@ -795,6 +795,8 @@ public class MarketController : MonoBehaviour
 
         var restantes = new Label($"{player.contract_years}");
         restantes.AddToClassList("market-trade-col-restantes");
+        if (player.contract_years == 1)
+            restantes.style.color = new StyleColor(new Color32(220, 60, 50, 255));
         row.Add(restantes);
 
         return row;
