@@ -314,6 +314,26 @@ public class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for trade_offers: {ex.Message}");
         }
 
+        // Clear draft_picks seeded with old (overall-based) logic.
+        // Picks are now seeded at end of season by standings. Existing picks
+        // from the old per-season-start seed are deleted so they regenerate
+        // correctly at the end of the current season.
+        string picksKey = $"DraftPicksReset_{_activeSaveSlot}";
+        if (PlayerPrefs.GetInt(picksKey, 0) == 0)
+        {
+            try
+            {
+                int deleted = _db.Execute("DELETE FROM draft_picks");
+                PlayerPrefs.SetInt(picksKey, 1);
+                PlayerPrefs.Save();
+                Debug.LogWarning($"[DB] Migration: cleared {deleted} legacy draft_picks (will regenerate by standings at season end).");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Migration error clearing draft_picks: {ex.Message}");
+            }
+        }
+
         // Add last_ai_trade_day to seasons
         try
         {
@@ -892,9 +912,6 @@ public class DatabaseManager : MonoBehaviour
             current_date = $"{yearStart}-09-05"
         };
         _db.Insert(season);
-
-        if (gameMode != "retired")
-            SeedDraftPicks(season.id);
 
         return season;
     }
@@ -2158,36 +2175,69 @@ public class DatabaseManager : MonoBehaviour
         }
     }
 
-    public void SeedDraftPicks(int seasonId)
+    public void SeedDraftPicks(int seasonId, int managerId)
     {
         var existing = _db.Table<DraftPickData>().Where(p => p.season_id == seasonId).Count();
         if (existing > 0) return;
 
-        var teams = GetAllTeams().OrderBy(t => t.overall).ThenBy(t => t.reputation).ToList();
+        var teams = GetAllTeams();
+        var teamStats = teams.ToDictionary(t => t.id, t => (wins: 0, losses: 0));
+
+        var playedGames = _db.Table<GameData>()
+            .Where(g => g.manager_id == managerId && g.game_type == "regular" && g.is_played == 1)
+            .ToList();
+
+        foreach (var g in playedGames)
+        {
+            if (teamStats.ContainsKey(g.home_team_id))
+            {
+                var home = teamStats[g.home_team_id];
+                if (g.home_score > g.away_score) home.wins++; else home.losses++;
+                teamStats[g.home_team_id] = home;
+            }
+            if (teamStats.ContainsKey(g.away_team_id))
+            {
+                var away = teamStats[g.away_team_id];
+                if (g.away_score > g.home_score) away.wins++; else away.losses++;
+                teamStats[g.away_team_id] = away;
+            }
+        }
+
+        var standings = teams
+            .Select(t => new
+            {
+                Team = t,
+                Wins = teamStats.ContainsKey(t.id) ? teamStats[t.id].wins : 0,
+                Losses = teamStats.ContainsKey(t.id) ? teamStats[t.id].losses : 0,
+            })
+            .OrderBy(s => (float)s.Wins / Math.Max(1, s.Wins + s.Losses))
+            .ThenBy(s => s.Losses)
+            .ToList();
+
         int pickNum = 1;
-        foreach (var team in teams)
+        foreach (var s in standings)
         {
             _db.Insert(new DraftPickData
             {
                 season_id = seasonId,
                 round = 1,
                 pick_number = pickNum++,
-                original_team_id = team.id,
-                current_team_id = team.id
+                original_team_id = s.Team.id,
+                current_team_id = s.Team.id
             });
         }
-        foreach (var team in teams)
+        foreach (var s in standings)
         {
             _db.Insert(new DraftPickData
             {
                 season_id = seasonId,
                 round = 2,
                 pick_number = pickNum++,
-                original_team_id = team.id,
-                current_team_id = team.id
+                original_team_id = s.Team.id,
+                current_team_id = s.Team.id
             });
         }
-        Debug.Log($"[DB] {teams.Count * 2} draft picks seeded for season {seasonId}.");
+        Debug.Log($"[DB] {standings.Count * 2} draft picks seeded for season {seasonId} by standings.");
     }
 
     public List<DraftPickData> GetDraftPicksForTeam(int teamId)

@@ -96,6 +96,7 @@ public class EndSeasonController : MonoBehaviour
             PlayClick();
             _btnDraft.SetEnabled(false);
             _btnDraft.text = "GENERANDO...";
+            DatabaseManager.Instance.SeedDraftPicks(_season.id, _manager.id);
             var drafted = DraftGenerator.GenerateDraft(_season, _manager.id);
             _btnDraft.text = "DRAFT COMPLETADO";
             _btnRenewAll.SetEnabled(false);

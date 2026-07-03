@@ -667,7 +667,7 @@ public class MarketController : MonoBehaviour
             var empty = new Label("Sin picks disponibles");
             empty.AddToClassList("market-trade-empty");
             empty.style.color = new StyleColor(new Color32(120, 130, 150, 255));
-            empty.style.fontSize = 10;
+            empty.style.fontSize = 16;
             empty.style.unityTextAlign = TextAnchor.MiddleCenter;
             empty.style.paddingTop = 4;
             body.Add(empty);
@@ -685,7 +685,7 @@ public class MarketController : MonoBehaviour
             var lbl = new Label($"R{pk.round} #{pk.pick_number}");
             lbl.AddToClassList("market-pick-label");
             lbl.style.color = new StyleColor(new Color32(236, 240, 241, 255));
-            lbl.style.fontSize = 11;
+            lbl.style.fontSize = 16;
             lbl.style.unityTextAlign = TextAnchor.MiddleLeft;
             lbl.style.flexGrow = 1;
             lbl.style.minWidth = 70;
@@ -695,7 +695,7 @@ public class MarketController : MonoBehaviour
             var round = new Label($"R{pk.round}");
             round.AddToClassList("market-pick-round");
             round.style.color = new StyleColor(new Color32(241, 196, 15, 255));
-            round.style.fontSize = 10;
+            round.style.fontSize = 16;
             round.style.unityTextAlign = TextAnchor.MiddleRight;
             round.style.unityFontStyleAndWeight = FontStyle.Bold;
             round.style.width = 24;
