@@ -61,7 +61,6 @@ public static class TradeHelper
         }
         return 3;
     }
-    }
 
     public static List<string> ValidateTrade(
         List<PlayerData> teamASelected,
