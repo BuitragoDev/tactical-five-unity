@@ -682,12 +682,23 @@ public class MarketController : MonoBehaviour
             row.userData = pk;
 
             int pickId = pk.id;
-            var lbl = new Label($"R{pk.round} · Pick #{pk.pick_number}");
+            var lbl = new Label($"R{pk.round} #{pk.pick_number}");
             lbl.AddToClassList("market-pick-label");
+            lbl.style.color = new StyleColor(new Color32(236, 240, 241, 255));
+            lbl.style.fontSize = 11;
+            lbl.style.unityTextAlign = TextAnchor.MiddleLeft;
+            lbl.style.flexGrow = 1;
+            lbl.style.minWidth = 70;
+            lbl.style.unityFontStyleAndWeight = FontStyle.Bold;
             row.Add(lbl);
 
             var round = new Label($"R{pk.round}");
             round.AddToClassList("market-pick-round");
+            round.style.color = new StyleColor(new Color32(241, 196, 15, 255));
+            round.style.fontSize = 10;
+            round.style.unityTextAlign = TextAnchor.MiddleRight;
+            round.style.unityFontStyleAndWeight = FontStyle.Bold;
+            round.style.width = 24;
             row.Add(round);
 
             row.RegisterCallback<ClickEvent>(_ =>
