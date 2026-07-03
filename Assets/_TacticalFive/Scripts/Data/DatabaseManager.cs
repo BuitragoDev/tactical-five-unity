@@ -1261,7 +1261,7 @@ public class DatabaseManager : MonoBehaviour
             });
         }
 
-        // ── ATL ── 15 jugadores
+        // ── ATL ── 14 jugadores
         Add(1, "ATL", "Jalen", "Johnson", "SF", 24, "USA", 203, 99, 86, 91, 92, 85, 83, 92, 88, 88, 93, 98, 92, 80, 55, 30000000, 4, false);
         Add(2, "ATL", "Nickeil", "Alexander-Walker", "SG", 27, "CAN", 196, 90, 81, 82, 95, 86, 78, 80, 84, 88, 72, 86, 84, 88, 50, 15500000, 3, false);
         Add(3, "ATL", "Dyson", "Daniels", "SG", 22, "AUS", 196, 93, 79, 86, 95, 75, 66, 82, 80, 93, 70, 85, 82, 99, 42, 25000000, 4, false);
