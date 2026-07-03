@@ -368,6 +368,21 @@ public class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for seasons: {ex.Message}");
         }
 
+        // Add pick_id to trades
+        try
+        {
+            var tCols = _db.Query<ColumnInfo>("PRAGMA table_info(trades)");
+            if (tCols.Count > 0 && !tCols.Any(c => c.name == "pick_id"))
+            {
+                _db.Execute("ALTER TABLE trades ADD COLUMN pick_id INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added pick_id to trades");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for trades.pick_id: {ex.Message}");
+        }
+
         // Add first_apron_hard_capped to teams
         try
         {

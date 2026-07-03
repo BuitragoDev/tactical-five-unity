@@ -1939,23 +1939,29 @@ public class DashboardController : MonoBehaviour
         {
             var ids = aSelectedPicks.Select(p => p.id).ToList();
             DatabaseManager.Instance.TransferDraftPicks(ids, teamA.id, teamB.id);
-            DatabaseManager.Instance.InsertTrade(new TradeData
+            foreach (var pk in aSelectedPicks)
             {
-                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
-                team_id_from = teamA.id, team_id_to = teamB.id,
-                player_id = 0, trade_type = "pick_trade"
-            });
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
+                    team_id_from = teamA.id, team_id_to = teamB.id,
+                    player_id = 0, pick_id = pk.id, trade_type = "pick_trade"
+                });
+            }
         }
         if (bSelectedPicks != null && bSelectedPicks.Count > 0)
         {
             var ids = bSelectedPicks.Select(p => p.id).ToList();
             DatabaseManager.Instance.TransferDraftPicks(ids, teamB.id, teamA.id);
-            DatabaseManager.Instance.InsertTrade(new TradeData
+            foreach (var pk in bSelectedPicks)
             {
-                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
-                team_id_from = teamB.id, team_id_to = teamA.id,
-                player_id = 0, trade_type = "pick_trade"
-            });
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
+                    team_id_from = teamB.id, team_id_to = teamA.id,
+                    player_id = 0, pick_id = pk.id, trade_type = "pick_trade"
+                });
+            }
         }
 
         var aNames = string.Join(", ", aSelected.Select(p => $"{p.first_name} {p.last_name}"));
@@ -2342,31 +2348,39 @@ public class DashboardController : MonoBehaviour
             {
                 var ids = ourPicks.Select(p => p.id).ToList();
                 DatabaseManager.Instance.TransferDraftPicks(ids, _myTeam.id, offer.team_id_from);
-                DatabaseManager.Instance.InsertTrade(new TradeData
+                foreach (var pk in ourPicks)
                 {
-                    season_id = _season?.id ?? 0,
-                    game_day = _season?.current_game_day ?? 0,
-                    game_date = _season?.current_date ?? now,
-                    team_id_from = _myTeam.id,
-                    team_id_to = offer.team_id_from,
-                    player_id = 0,
-                    trade_type = "pick_trade"
-                });
+                    DatabaseManager.Instance.InsertTrade(new TradeData
+                    {
+                        season_id = _season?.id ?? 0,
+                        game_day = _season?.current_game_day ?? 0,
+                        game_date = _season?.current_date ?? now,
+                        team_id_from = _myTeam.id,
+                        team_id_to = offer.team_id_from,
+                        player_id = 0,
+                        pick_id = pk.id,
+                        trade_type = "pick_trade"
+                    });
+                }
             }
             if (theirPicks != null && theirPicks.Count > 0)
             {
                 var ids = theirPicks.Select(p => p.id).ToList();
                 DatabaseManager.Instance.TransferDraftPicks(ids, offer.team_id_from, _myTeam.id);
-                DatabaseManager.Instance.InsertTrade(new TradeData
+                foreach (var pk in theirPicks)
                 {
-                    season_id = _season?.id ?? 0,
-                    game_day = _season?.current_game_day ?? 0,
-                    game_date = _season?.current_date ?? now,
-                    team_id_from = offer.team_id_from,
-                    team_id_to = _myTeam.id,
-                    player_id = 0,
-                    trade_type = "pick_trade"
-                });
+                    DatabaseManager.Instance.InsertTrade(new TradeData
+                    {
+                        season_id = _season?.id ?? 0,
+                        game_day = _season?.current_game_day ?? 0,
+                        game_date = _season?.current_date ?? now,
+                        team_id_from = offer.team_id_from,
+                        team_id_to = _myTeam.id,
+                        player_id = 0,
+                        pick_id = pk.id,
+                        trade_type = "pick_trade"
+                    });
+                }
             }
 
             var ourNames = string.Join(", ", ourPlayers.Select(p => $"{p.first_name} {p.last_name}"));

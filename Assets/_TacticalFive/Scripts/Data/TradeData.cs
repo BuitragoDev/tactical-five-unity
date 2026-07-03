@@ -11,6 +11,7 @@ public class TradeData
     public int team_id_from { get; set; }
     public int team_id_to { get; set; }
     public int player_id { get; set; }
-    public string trade_type { get; set; } // "trade" | "free_agent"
+    public int pick_id { get; set; }
+    public string trade_type { get; set; } // "trade" | "free_agent" | "pick_trade"
     public int? partner_player_id { get; set; }
 }

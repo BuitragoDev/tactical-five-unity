@@ -1046,6 +1046,7 @@ public class MarketController : MonoBehaviour
                     team_id_from = _myTeam.id,
                     team_id_to = _selectedTeam.id,
                     player_id = 0,
+                    pick_id = pk.id,
                     trade_type = "pick_trade"
                 });
         }
@@ -1062,6 +1063,7 @@ public class MarketController : MonoBehaviour
                     team_id_from = _selectedTeam.id,
                     team_id_to = _myTeam.id,
                     player_id = 0,
+                    pick_id = pk.id,
                     trade_type = "pick_trade"
                 });
         }

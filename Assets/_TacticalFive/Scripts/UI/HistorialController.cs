@@ -23,6 +23,7 @@ public class HistorialController : MonoBehaviour
     private List<TradeData> _trades = new();
     private Dictionary<int, TeamData> _teamCache = new();
     private Dictionary<int, PlayerData> _playerCache = new();
+    private Dictionary<int, DraftPickData> _pickCache = new();
 
     void OnEnable()
     {
@@ -114,6 +115,13 @@ public class HistorialController : MonoBehaviour
                 var p = DatabaseManager.Instance.GetPlayerById(tr.player_id);
                 if (p != null)
                     _playerCache[tr.player_id] = p;
+            }
+
+            if (tr.pick_id > 0 && !_pickCache.ContainsKey(tr.pick_id))
+            {
+                var pk = DatabaseManager.Instance.GetDraftPickById(tr.pick_id);
+                if (pk != null)
+                    _pickCache[tr.pick_id] = pk;
             }
         }
     }
@@ -231,12 +239,26 @@ public class HistorialController : MonoBehaviour
         }
         row.Add(dateLabel);
 
-        // Col 2: Player name
-        var playerLabel = new Label();
-        playerLabel.AddToClassList("historial-col");
-        playerLabel.AddToClassList("historial-col-player");
-        playerLabel.text = player != null ? $"{player.first_name} {player.last_name}" : $"ID {trade.player_id}";
-        row.Add(playerLabel);
+        // Col 2: Player name OR Pick label
+        var itemLabel = new Label();
+        itemLabel.AddToClassList("historial-col");
+        itemLabel.AddToClassList("historial-col-player");
+        if (trade.trade_type == "pick_trade" && trade.pick_id > 0
+            && _pickCache.TryGetValue(trade.pick_id, out var pick)
+            && _teamCache.TryGetValue(pick.original_team_id, out var origTeam))
+        {
+            itemLabel.text = $"R{pick.round} {origTeam.abbreviation}";
+            itemLabel.AddToClassList("historial-pick-label");
+        }
+        else if (player != null)
+        {
+            itemLabel.text = $"{player.first_name} {player.last_name}";
+        }
+        else
+        {
+            itemLabel.text = $"ID {trade.player_id}";
+        }
+        row.Add(itemLabel);
 
         // Col 3: Seller logo
         var sellerLogo = new VisualElement();
