@@ -624,6 +624,14 @@ public class MarketController : MonoBehaviour
         salary.AddToClassList("market-table-header-salary");
         header.Add(salary);
 
+        if (header != _freeAgentsTableHeader)
+        {
+            var restantes = new Label("RESTANTES");
+            restantes.AddToClassList("market-table-header-label");
+            restantes.AddToClassList("market-table-header-restantes");
+            header.Add(restantes);
+        }
+
         if (header == _freeAgentsTableHeader)
         {
             var action = new Label("");
@@ -784,6 +792,10 @@ public class MarketController : MonoBehaviour
         var salary = new Label($"${player.salary:N0}");
         salary.AddToClassList("market-trade-col-salary");
         row.Add(salary);
+
+        var restantes = new Label($"{player.contract_years}");
+        restantes.AddToClassList("market-trade-col-restantes");
+        row.Add(restantes);
 
         return row;
     }
