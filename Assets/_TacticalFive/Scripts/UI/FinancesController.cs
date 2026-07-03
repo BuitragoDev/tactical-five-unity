@@ -289,7 +289,7 @@ public class FinancesController : MonoBehaviour
     {
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Finances] RefreshHeader error: {ex.Message}"); }
         BuildSummary();
         SetupTicketDropdowns();
         BuildIncomePanel();

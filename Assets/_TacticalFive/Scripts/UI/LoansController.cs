@@ -288,7 +288,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
     {
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Loans] RefreshHeader error: {ex.Message}"); }
         BuildFinancialStaff();
         BuildLoans();
         _root.Q<Button>("SubmenuPrestamos")?.AddToClassList("nav-submenu-item--active");

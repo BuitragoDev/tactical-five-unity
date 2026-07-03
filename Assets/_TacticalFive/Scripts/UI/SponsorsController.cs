@@ -210,7 +210,7 @@ public class SponsorsController : MonoBehaviour
     {
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Sponsors] RefreshHeader error: {ex.Message}"); }
         BuildCurrentSponsorBanner();
         BuildCards();
     }

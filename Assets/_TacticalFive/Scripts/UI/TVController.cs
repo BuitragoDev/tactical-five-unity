@@ -210,7 +210,7 @@ public class TVController : MonoBehaviour
     {
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[TV] RefreshHeader error: {ex.Message}"); }
         BuildCurrentTVBanner();
         BuildCards();
     }
