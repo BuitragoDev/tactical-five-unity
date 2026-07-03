@@ -291,10 +291,11 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
         DatabaseManager.Instance.EnsureTeamRelationshipsSeeded(_myTeam.id);
         _relationships = DatabaseManager.Instance.GetTeamRelationships(_myTeam.id);
         _personalities = DatabaseManager.Instance.GetTeamPersonalities(_myTeam.id);
-        BuildChemistryOverview();
-        BuildPersonalitiesLegend();
-        BuildPersonalitiesList();
-        BuildRelationsList();
+        Debug.Log($"[Vestuario] Refresh: _players={_players?.Count ?? -1}, _personalities={_personalities?.Count ?? -1}, _relationships={_relationships?.Count ?? -1}");
+        try { BuildChemistryOverview(); } catch (System.Exception ex) { Debug.LogWarning($"[Vestuario] BuildChemistryOverview error: {ex.Message}"); }
+        try { BuildPersonalitiesLegend(); } catch (System.Exception ex) { Debug.LogWarning($"[Vestuario] BuildPersonalitiesLegend error: {ex.Message}"); }
+        try { BuildPersonalitiesList(); } catch (System.Exception ex) { Debug.LogWarning($"[Vestuario] BuildPersonalitiesList error: {ex.Message}"); }
+        try { BuildRelationsList(); } catch (System.Exception ex) { Debug.LogWarning($"[Vestuario] BuildRelationsList error: {ex.Message}"); }
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuVestuario")?.AddToClassList("nav-submenu-item--active");
     }
@@ -444,8 +445,10 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
     void BuildPersonalitiesList()
     {
+        if (_personalitiesBody == null) return;
         _personalitiesBody.Clear();
 
+        if (_players == null) return;
         var sorted = _players.OrderBy(p => p.position).ThenBy(p => p.last_name).ToList();
         foreach (var player in sorted)
         {
@@ -501,9 +504,10 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
     void BuildRelationsList()
     {
+        if (_relationsBody == null) return;
         _relationsBody.Clear();
 
-        if (_relationships.Count == 0)
+        if (_relationships == null || _relationships.Count == 0)
         {
             _relationsEmpty = new Label();
             _relationsEmpty.text = "No hay relaciones registradas. Juega partidos para que los jugadores desarrollen v\u00ednculos.";
