@@ -446,10 +446,11 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
     void BuildPersonalitiesList()
     {
-        if (_personalitiesBody == null) return;
+        if (_personalitiesBody == null) { Debug.LogWarning("[Vestuario] BuildPersonalitiesList: _personalitiesBody is null"); return; }
         _personalitiesBody.Clear();
 
-        if (_players == null) return;
+        if (_players == null) { Debug.LogWarning("[Vestuario] BuildPersonalitiesList: _players is null"); return; }
+        if (_players.Count == 0) { Debug.LogWarning("[Vestuario] BuildPersonalitiesList: _players is empty (team=" + _myTeam?.id + ")"); return; }
         var sorted = _players.OrderBy(p => p.position).ThenBy(p => p.last_name).ToList();
         foreach (var player in sorted)
         {
@@ -505,11 +506,12 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
 
     void BuildRelationsList()
     {
-        if (_relationsBody == null) return;
+        if (_relationsBody == null) { Debug.LogWarning("[Vestuario] BuildRelationsList: _relationsBody is null"); return; }
         _relationsBody.Clear();
 
         if (_relationships == null || _relationships.Count == 0)
         {
+            Debug.LogWarning("[Vestuario] BuildRelationsList: _relationships is null or empty (count=" + (_relationships?.Count ?? -1) + ")");
             _relationsEmpty = new Label();
             _relationsEmpty.text = "No hay relaciones registradas. Juega partidos para que los jugadores desarrollen v\u00ednculos.";
             _relationsEmpty.AddToClassList("relations-empty");
