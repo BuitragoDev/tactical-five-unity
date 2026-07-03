@@ -52,6 +52,10 @@
                                                mode="Vertical">
                                     <ui:VisualElement name="MyTeamBody" class="market-trade-panel-content" />
                                 </ui:ScrollView>
+                                <ui:VisualElement class="market-trade-picks-section">
+                                    <ui:Label class="market-trade-picks-title" text="PICKS DISPONIBLES" />
+                                    <ui:VisualElement name="MyPicksBody" class="market-trade-picks-content" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                             <!-- Other Team Panel -->
                             <ui:VisualElement class="market-trade-panel">
@@ -65,6 +69,10 @@
                                                mode="Vertical">
                                     <ui:VisualElement name="OtherTeamBody" class="market-trade-panel-content" />
                                 </ui:ScrollView>
+                                <ui:VisualElement class="market-trade-picks-section">
+                                    <ui:Label class="market-trade-picks-title" text="PICKS DISPONIBLES" />
+                                    <ui:VisualElement name="OtherPicksBody" class="market-trade-picks-content" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
 

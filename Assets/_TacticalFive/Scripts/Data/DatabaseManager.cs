@@ -302,6 +302,12 @@ public class DatabaseManager : MonoBehaviour
                 _db.Execute("ALTER TABLE trade_offers ADD COLUMN player_ids_in TEXT DEFAULT ''");
                 Debug.Log("[DB] Migration: added player_ids_out/player_ids_in to trade_offers");
             }
+            if (toCols.Count > 0 && !toCols.Any(c => c.name == "pick_ids_out"))
+            {
+                _db.Execute("ALTER TABLE trade_offers ADD COLUMN pick_ids_out TEXT DEFAULT ''");
+                _db.Execute("ALTER TABLE trade_offers ADD COLUMN pick_ids_in TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added pick_ids_out/pick_ids_in to trade_offers");
+            }
         }
         catch (System.Exception ex)
         {
@@ -2182,6 +2188,55 @@ public class DatabaseManager : MonoBehaviour
             });
         }
         Debug.Log($"[DB] {teams.Count * 2} draft picks seeded for season {seasonId}.");
+    }
+
+    public List<DraftPickData> GetDraftPicksForTeam(int teamId)
+    {
+        if (!EnsureDb()) return new List<DraftPickData>();
+        return _db.Table<DraftPickData>()
+            .Where(p => p.current_team_id == teamId)
+            .OrderBy(p => p.season_id)
+            .ThenBy(p => p.round)
+            .ThenBy(p => p.pick_number)
+            .ToList();
+    }
+
+    public List<DraftPickData> GetDraftPicksForSeason(int seasonId)
+    {
+        if (!EnsureDb()) return new List<DraftPickData>();
+        return _db.Table<DraftPickData>()
+            .Where(p => p.season_id == seasonId)
+            .OrderBy(p => p.round)
+            .ThenBy(p => p.pick_number)
+            .ToList();
+    }
+
+    public DraftPickData GetDraftPickById(int id)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<DraftPickData>().FirstOrDefault(p => p.id == id);
+    }
+
+    public void UpdateDraftPickOwner(int pickId, int newTeamId)
+    {
+        if (!EnsureDb()) return;
+        var pick = GetDraftPickById(pickId);
+        if (pick == null) return;
+        pick.current_team_id = newTeamId;
+        _db.Update(pick);
+    }
+
+    public void TransferDraftPicks(List<int> pickIds, int fromTeamId, int toTeamId)
+    {
+        if (!EnsureDb()) return;
+        foreach (var id in pickIds)
+        {
+            var pick = GetDraftPickById(id);
+            if (pick == null) continue;
+            if (pick.current_team_id != fromTeamId) continue;
+            pick.current_team_id = toTeamId;
+            _db.Update(pick);
+        }
     }
 
     public void SeedHistoricalRecords()

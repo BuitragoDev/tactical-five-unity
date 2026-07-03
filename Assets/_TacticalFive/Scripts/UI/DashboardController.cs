@@ -1892,7 +1892,9 @@ public class DashboardController : MonoBehaviour
     bool TryExecuteTrade(TeamData teamA, List<PlayerData> rosterA,
                          TeamData teamB, List<PlayerData> rosterB,
                          List<PlayerData> aSelected, List<PlayerData> bSelected,
-                         int seasonId, int gameDay)
+                         int seasonId, int gameDay,
+                         List<DraftPickData> aSelectedPicks = null,
+                         List<DraftPickData> bSelectedPicks = null)
     {
         var aPayroll = rosterA.Sum(p => p.salary);
         var bPayroll = rosterB.Sum(p => p.salary);
@@ -1932,9 +1934,37 @@ public class DashboardController : MonoBehaviour
             });
         }
 
+        // Transfer picks
+        if (aSelectedPicks != null && aSelectedPicks.Count > 0)
+        {
+            var ids = aSelectedPicks.Select(p => p.id).ToList();
+            DatabaseManager.Instance.TransferDraftPicks(ids, teamA.id, teamB.id);
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
+                team_id_from = teamA.id, team_id_to = teamB.id,
+                player_id = 0, trade_type = "pick_trade"
+            });
+        }
+        if (bSelectedPicks != null && bSelectedPicks.Count > 0)
+        {
+            var ids = bSelectedPicks.Select(p => p.id).ToList();
+            DatabaseManager.Instance.TransferDraftPicks(ids, teamB.id, teamA.id);
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
+                team_id_from = teamB.id, team_id_to = teamA.id,
+                player_id = 0, trade_type = "pick_trade"
+            });
+        }
+
         var aNames = string.Join(", ", aSelected.Select(p => $"{p.first_name} {p.last_name}"));
         var bNames = string.Join(", ", bSelected.Select(p => $"{p.first_name} {p.last_name}"));
-        Debug.Log($"[AI Trade] {teamA.name} ↔ {teamB.name}: {aNames} for {bNames}");
+        var aPicksLog = aSelectedPicks != null && aSelectedPicks.Count > 0
+            ? " + " + string.Join(", ", aSelectedPicks.Select(p => $"R{p.round}#{p.pick_number}")) : "";
+        var bPicksLog = bSelectedPicks != null && bSelectedPicks.Count > 0
+            ? " + " + string.Join(", ", bSelectedPicks.Select(p => $"R{p.round}#{p.pick_number}")) : "";
+        Debug.Log($"[AI Trade] {teamA.name} ↔ {teamB.name}: {aNames}{aPicksLog} for {bNames}{bPicksLog}");
         return true;
     }
 
@@ -2023,6 +2053,21 @@ public class DashboardController : MonoBehaviour
             var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam);
             if (offerPack == null) continue;
 
+            // If salary gap is large, try sweetening with a draft pick
+            long packSalary = offerPack.Sum(p => p.salary);
+            List<int> offeredPickIds = new List<int>();
+            if (target.salary > packSalary * 1.5f)
+            {
+                var aiPicks = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
+                var futurePick = aiPicks
+                    .OrderByDescending(p => p.season_id)
+                    .ThenBy(p => p.round)
+                    .ThenBy(p => p.pick_number)
+                    .FirstOrDefault();
+                if (futurePick != null)
+                    offeredPickIds.Add(futurePick.id);
+            }
+
             var wantedIds = new List<int> { target.id };
             var offeredIds = offerPack.Select(p => p.id).ToList();
             DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
@@ -2031,6 +2076,8 @@ public class DashboardController : MonoBehaviour
                 team_id_from = aiTeam.id,
                 player_ids_out = TradeOfferData.JoinIds(wantedIds),
                 player_ids_in = TradeOfferData.JoinIds(offeredIds),
+                pick_ids_out = TradeOfferData.JoinIds(new List<int>()),
+                pick_ids_in = TradeOfferData.JoinIds(offeredPickIds),
                 day_sent = gameDay,
                 processed = 0
             });
@@ -2157,6 +2204,8 @@ public class DashboardController : MonoBehaviour
 
         var wantedIds = offer.GetWantedPlayerIds();
         var offeredIds = offer.GetOfferedPlayerIds();
+        var wantedPickIds = offer.GetWantedPickIds();
+        var offeredPickIds = offer.GetOfferedPickIds();
 
         var ourPlayers = wantedIds
             .Select(id => myRoster.FirstOrDefault(p => p.id == id))
@@ -2168,17 +2217,28 @@ public class DashboardController : MonoBehaviour
             .Where(p => p != null)
             .ToList();
 
-        if (ourPlayers.Count != wantedIds.Count || theirPlayers.Count != offeredIds.Count)
+        var ourPicks = wantedPickIds
+            .Select(id => DatabaseManager.Instance.GetDraftPickById(id))
+            .Where(p => p != null && p.current_team_id == _myTeam.id)
+            .ToList();
+        var theirPicks = offeredPickIds
+            .Select(id => DatabaseManager.Instance.GetDraftPickById(id))
+            .Where(p => p != null && p.current_team_id == offer.team_id_from)
+            .ToList();
+
+        if (ourPlayers.Count != wantedIds.Count || theirPlayers.Count != offeredIds.Count
+            || ourPicks.Count != wantedPickIds.Count || theirPicks.Count != offeredPickIds.Count)
         {
             DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
             ShowNextPendingTradeOffer();
             return;
         }
 
-        ShowTradeOfferModal(offer, ourPlayers, theirPlayers);
+        ShowTradeOfferModal(offer, ourPlayers, theirPlayers, ourPicks, theirPicks);
     }
 
-    void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers)
+    void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers,
+                              List<DraftPickData> ourPicks = null, List<DraftPickData> theirPicks = null)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
@@ -2205,6 +2265,19 @@ public class DashboardController : MonoBehaviour
 
         var rightCol = BuildPlayerColumn("TÚ RECIBES", teamName, theirPlayers);
         columns.Add(rightCol);
+
+        if (ourPicks != null && ourPicks.Count > 0)
+        {
+            var pickLbl = new Label($"+ {string.Join(", ", ourPicks.Select(p => $"R{p.round} Pick #{p.pick_number}"))}");
+            pickLbl.AddToClassList("trade-offer-picks-label");
+            leftCol.Add(pickLbl);
+        }
+        if (theirPicks != null && theirPicks.Count > 0)
+        {
+            var pickLbl = new Label($"+ {string.Join(", ", theirPicks.Select(p => $"R{p.round} Pick #{p.pick_number}"))}");
+            pickLbl.AddToClassList("trade-offer-picks-label");
+            rightCol.Add(pickLbl);
+        }
 
         var btnGroup = new VisualElement();
         btnGroup.AddToClassList("injured-modal-btn-group");
@@ -2264,8 +2337,44 @@ public class DashboardController : MonoBehaviour
                 });
             }
 
+            // Transfer picks
+            if (ourPicks != null && ourPicks.Count > 0)
+            {
+                var ids = ourPicks.Select(p => p.id).ToList();
+                DatabaseManager.Instance.TransferDraftPicks(ids, _myTeam.id, offer.team_id_from);
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season?.id ?? 0,
+                    game_day = _season?.current_game_day ?? 0,
+                    game_date = _season?.current_date ?? now,
+                    team_id_from = _myTeam.id,
+                    team_id_to = offer.team_id_from,
+                    player_id = 0,
+                    trade_type = "pick_trade"
+                });
+            }
+            if (theirPicks != null && theirPicks.Count > 0)
+            {
+                var ids = theirPicks.Select(p => p.id).ToList();
+                DatabaseManager.Instance.TransferDraftPicks(ids, offer.team_id_from, _myTeam.id);
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season?.id ?? 0,
+                    game_day = _season?.current_game_day ?? 0,
+                    game_date = _season?.current_date ?? now,
+                    team_id_from = offer.team_id_from,
+                    team_id_to = _myTeam.id,
+                    player_id = 0,
+                    trade_type = "pick_trade"
+                });
+            }
+
             var ourNames = string.Join(", ", ourPlayers.Select(p => $"{p.first_name} {p.last_name}"));
             var theirNames = string.Join(", ", theirPlayers.Select(p => $"{p.first_name} {p.last_name}"));
+            var ourPicksText = ourPicks != null && ourPicks.Count > 0
+                ? " y " + string.Join(", ", ourPicks.Select(p => $"R{p.round} Pick #{p.pick_number}")) : "";
+            var theirPicksText = theirPicks != null && theirPicks.Count > 0
+                ? " y " + string.Join(", ", theirPicks.Select(p => $"R{p.round} Pick #{p.pick_number}")) : "";
 
             DatabaseManager.Instance.AddMessage(new MessageData
             {
@@ -2273,7 +2382,7 @@ public class DashboardController : MonoBehaviour
                 sender_type = 1,
                 sender_id = 0,
                 title = "Intercambio aceptado",
-                body = $"Has intercambiado a {ourNames} por {theirNames} con {teamName}.",
+                body = $"Has intercambiado a {ourNames}{ourPicksText} por {theirNames}{theirPicksText} con {teamName}.",
                 game_day = _season.current_game_day,
                 game_date = now,
                 created_at = now,

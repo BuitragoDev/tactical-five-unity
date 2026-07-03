@@ -193,9 +193,15 @@ public static class DraftGenerator
             long salary = (long)(UnityEngine.Random.Range(3000000, 8000001));
             salary = (salary / 100000) * 100000;
 
+            int drafTeamId = team.id;
+            var pickRow = DatabaseManager.Instance.Db.Table<DraftPickData>()
+                .FirstOrDefault(p => p.season_id == season.id && p.round == 1 && p.original_team_id == team.id);
+            if (pickRow != null)
+                drafTeamId = pickRow.current_team_id;
+
             var player = new PlayerData
             {
-                team_id = team.id,
+                team_id = drafTeamId,
                 first_name = firstName,
                 last_name = lastName,
                 position = position,
@@ -229,7 +235,7 @@ public static class DraftGenerator
             draftedPlayers.Add(new DraftPickResult
             {
                 PickNumber = pick + 1,
-                Team = team,
+                Team = drafTeamId == team.id ? team : (teamsById.ContainsKey(drafTeamId) ? teamsById[drafTeamId] : team),
                 Player = player
             });
         }

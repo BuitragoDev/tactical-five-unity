@@ -15,6 +15,8 @@ public class MarketController : MonoBehaviour
     private VisualElement _teamGrid;
     private VisualElement _myTeamBody;
     private VisualElement _otherTeamBody;
+    private VisualElement _myPicksBody;
+    private VisualElement _otherPicksBody;
     private VisualElement _myTableHeader;
     private VisualElement _otherTableHeader;
     private VisualElement _freeAgentsBody;
@@ -60,6 +62,8 @@ public class MarketController : MonoBehaviour
     private List<TeamData> _allTeams = new();
     private List<PlayerData> _myPlayers;
     private List<PlayerData> _otherPlayers;
+    private List<DraftPickData> _myPicks;
+    private List<DraftPickData> _otherPicks;
     private List<PlayerData> _freeAgents = new();
     private int _myTotalRosterCount;
     private int _otherTotalRosterCount;
@@ -72,6 +76,8 @@ public class MarketController : MonoBehaviour
     private Dictionary<string, Sprite> _tradePanelLogos = new();
     private HashSet<int> _selectedMyPlayers = new();
     private HashSet<int> _selectedOtherPlayers = new();
+    private HashSet<int> _selectedMyPicks = new();
+    private HashSet<int> _selectedOtherPicks = new();
     private bool _signAndTradeActive = false;
     private List<PlayerData> _signAndTradeCandidates = new();
 
@@ -105,6 +111,8 @@ public class MarketController : MonoBehaviour
         _teamGrid = _root.Q<VisualElement>("TeamGrid");
         _myTeamBody = _root.Q<VisualElement>("MyTeamBody");
         _otherTeamBody = _root.Q<VisualElement>("OtherTeamBody");
+        _myPicksBody = _root.Q<VisualElement>("MyPicksBody");
+        _otherPicksBody = _root.Q<VisualElement>("OtherPicksBody");
         _myTableHeader = _root.Q<VisualElement>("MyTableHeader");
         _otherTableHeader = _root.Q<VisualElement>("OtherTableHeader");
         _freeAgentsBody = _root.Q<VisualElement>("FreeAgentsBody");
@@ -529,6 +537,8 @@ public class MarketController : MonoBehaviour
         _tradePanels.style.display = DisplayStyle.Flex;
         _selectedMyPlayers.Clear();
         _selectedOtherPlayers.Clear();
+        _selectedMyPicks.Clear();
+        _selectedOtherPicks.Clear();
         LoadTradeData();
     }
 
@@ -545,6 +555,20 @@ public class MarketController : MonoBehaviour
         _myTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Count;
         _otherTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id).Count;
 
+        var activeSeason = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        if (activeSeason != null)
+        {
+            int activeSeasonId = activeSeason.id;
+            var allPicksForSeason = DatabaseManager.Instance.GetDraftPicksForSeason(activeSeasonId);
+            _myPicks = allPicksForSeason.Where(p => p.current_team_id == _myTeam.id).ToList();
+            _otherPicks = allPicksForSeason.Where(p => p.current_team_id == _selectedTeam.id).ToList();
+        }
+        else
+        {
+            _myPicks = new List<DraftPickData>();
+            _otherPicks = new List<DraftPickData>();
+        }
+
         // Set team logos and names
         if (_tradePanelLogos.TryGetValue(_myTeam.logo, out var mySprite))
             _root.Q<VisualElement>("MyTeamLogo").style.backgroundImage = new StyleBackground(mySprite);
@@ -556,6 +580,7 @@ public class MarketController : MonoBehaviour
 
         InitTableHeaders();
         BuildTradeTable();
+        BuildPicksPanel();
         UpdateSummary();
     }
 
@@ -623,6 +648,62 @@ public class MarketController : MonoBehaviour
         {
             var row = CreateTradeRow(p, false);
             _otherTeamBody.Add(row);
+        }
+    }
+
+    void BuildPicksPanel()
+    {
+        if (_myPicksBody != null) _myPicksBody.Clear();
+        if (_otherPicksBody != null) _otherPicksBody.Clear();
+        BuildPicksList(_myPicks, _myPicksBody, _selectedMyPicks, true);
+        BuildPicksList(_otherPicks, _otherPicksBody, _selectedOtherPicks, false);
+    }
+
+    void BuildPicksList(List<DraftPickData> picks, VisualElement body, HashSet<int> selectedSet, bool isMyTeam)
+    {
+        if (body == null) return;
+        if (picks == null || picks.Count == 0)
+        {
+            var empty = new Label("Sin picks disponibles");
+            empty.AddToClassList("market-trade-empty");
+            empty.style.color = new StyleColor(new Color32(120, 130, 150, 255));
+            empty.style.fontSize = 10;
+            empty.style.unityTextAlign = TextAnchor.MiddleCenter;
+            empty.style.paddingTop = 4;
+            body.Add(empty);
+            return;
+        }
+
+        foreach (var pk in picks.OrderBy(p => p.round).ThenBy(p => p.pick_number))
+        {
+            var row = new VisualElement();
+            row.AddToClassList("market-pick-row");
+            if (selectedSet.Contains(pk.id)) row.AddToClassList("selected");
+            row.userData = pk;
+
+            int pickId = pk.id;
+            var lbl = new Label($"R{pk.round} · Pick #{pk.pick_number}");
+            lbl.AddToClassList("market-pick-label");
+            row.Add(lbl);
+
+            var round = new Label($"R{pk.round}");
+            round.AddToClassList("market-pick-round");
+            row.Add(round);
+
+            row.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                if (selectedSet.Contains(pickId))
+                    selectedSet.Remove(pickId);
+                else
+                    selectedSet.Add(pickId);
+                row.EnableInClassList("selected", selectedSet.Contains(pickId));
+                UpdateSummary();
+                CheckTradeStatus();
+            });
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(row);
+            body.Add(row);
         }
     }
 
@@ -755,8 +836,11 @@ public class MarketController : MonoBehaviour
 
         var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
         var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
+        var myPicksSel = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        var otherPicksSel = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
 
-        if (mySelected.Count == 0 && otherSelected.Count == 0) return;
+        if (mySelected.Count == 0 && otherSelected.Count == 0
+            && myPicksSel.Count == 0 && otherPicksSel.Count == 0) return;
 
         var myPayroll = _myPlayers.Sum(p => p.salary);
         var otherPayroll = _otherPlayers.Sum(p => p.salary);
@@ -777,7 +861,8 @@ public class MarketController : MonoBehaviour
 
         var result = TradeHelper.EvaluateTrade(
             mySelected, otherSelected,
-            _selectedTeam.name, _otherTotalRosterCount, otherPayroll);
+            _selectedTeam.name, _otherTotalRosterCount, otherPayroll,
+            myPicksSel, otherPicksSel);
 
         ShowTradeResult(result);
     }
@@ -938,6 +1023,42 @@ public class MarketController : MonoBehaviour
             DatabaseManager.Instance.UpdatePlayer(p);
         }
 
+        // Transfer picks
+        var myPicksSel = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        var otherPicksSel = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        if (myPicksSel.Count > 0)
+        {
+            var ids = myPicksSel.Select(p => p.id).ToList();
+            DatabaseManager.Instance.TransferDraftPicks(ids, _myTeam.id, _selectedTeam.id);
+            foreach (var pk in myPicksSel)
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season?.id ?? 0,
+                    game_day = _season?.current_game_day ?? 0,
+                    game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
+                    team_id_from = _myTeam.id,
+                    team_id_to = _selectedTeam.id,
+                    player_id = 0,
+                    trade_type = "pick_trade"
+                });
+        }
+        if (otherPicksSel.Count > 0)
+        {
+            var ids = otherPicksSel.Select(p => p.id).ToList();
+            DatabaseManager.Instance.TransferDraftPicks(ids, _selectedTeam.id, _myTeam.id);
+            foreach (var pk in otherPicksSel)
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season?.id ?? 0,
+                    game_day = _season?.current_game_day ?? 0,
+                    game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
+                    team_id_from = _selectedTeam.id,
+                    team_id_to = _myTeam.id,
+                    player_id = 0,
+                    trade_type = "pick_trade"
+                });
+        }
+
         // Record trade history
         string tradeType = satApplied ? "sign_and_trade" : "trade";
         foreach (var p in mySelected)
@@ -969,7 +1090,26 @@ public class MarketController : MonoBehaviour
 
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
+        var myPicksSelForMsg = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        var otherPicksSelForMsg = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        var myPicksText = myPicksSelForMsg.Count > 0
+            ? " y " + string.Join(", ", myPicksSelForMsg.Select(p => $"R{p.round} Pick #{p.pick_number}"))
+            : "";
+        var otherPicksText = otherPicksSelForMsg.Count > 0
+            ? " y " + string.Join(", ", otherPicksSelForMsg.Select(p => $"R{p.round} Pick #{p.pick_number}"))
+            : "";
         string satNote = satApplied ? " (Sign & Trade: contratos extendidos, hard cap activado)" : "";
+
+        // Refresh local pick caches after transfer
+        var activeSeason = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        if (activeSeason != null)
+        {
+            var allPicksForSeason = DatabaseManager.Instance.GetDraftPicksForSeason(activeSeason.id);
+            _myPicks = allPicksForSeason.Where(p => p.current_team_id == _myTeam.id).ToList();
+            _otherPicks = allPicksForSeason.Where(p => p.current_team_id == _selectedTeam.id).ToList();
+        }
+        _selectedMyPicks.Clear();
+        _selectedOtherPicks.Clear();
 
         DatabaseManager.Instance.AddMessage(new MessageData
         {
@@ -995,8 +1135,8 @@ public class MarketController : MonoBehaviour
     {
         if (_tradeSuccessTitle != null)
             _tradeSuccessTitle.text = satApplied ? "¡TRASPASO + SIGN & TRADE REALIZADO!" : "¡TRASPASO REALIZADO!";
-        if (_tradeSuccessText1 != null) _tradeSuccessText1.text = $"Has enviado a {myNames} a {_selectedTeam.name}.";
-        if (_tradeSuccessText2 != null) _tradeSuccessText2.text = $"Has recibido a {otherNames}." + (satApplied ? " (contratos extendidos vía Sign & Trade)" : "");
+        if (_tradeSuccessText1 != null) _tradeSuccessText1.text = $"Has enviado a {myNames}{myPicksText} a {_selectedTeam.name}.";
+        if (_tradeSuccessText2 != null) _tradeSuccessText2.text = $"Has recibido a {otherNames}{otherPicksText}." + (satApplied ? " (contratos extendidos vía Sign & Trade)" : "");
 
         if (_tradeSuccessIcon != null)
         {

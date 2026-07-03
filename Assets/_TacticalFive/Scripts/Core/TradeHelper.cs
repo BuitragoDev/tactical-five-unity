@@ -46,6 +46,23 @@ public static class TradeHelper
         }
     }
 
+    public static int PickBonus(DraftPickData pk)
+    {
+        if (pk == null) return 0;
+        if (pk.round == 1)
+        {
+            int slot = Mathf.Clamp(pk.pick_number, 1, 30);
+            return 10 + (30 - slot) / 3;
+        }
+        if (pk.round == 2)
+        {
+            int slot = Mathf.Clamp(pk.pick_number - 30, 1, 30);
+            return 5 + (30 - slot) / 5;
+        }
+        return 3;
+    }
+    }
+
     public static List<string> ValidateTrade(
         List<PlayerData> teamASelected,
         List<PlayerData> teamBSelected,
@@ -113,7 +130,9 @@ public static class TradeHelper
         List<PlayerData> teamBSelected,
         string teamBName,
         int teamBTotalRoster,
-        long teamBCurrentPayroll)
+        long teamBCurrentPayroll,
+        List<DraftPickData> teamASelectedPicks = null,
+        List<DraftPickData> teamBSelectedPicks = null)
     {
         var aSalaryOut = teamASelected.Sum(p => p.salary);
         var bSalaryOut = teamBSelected.Sum(p => p.salary);
@@ -126,6 +145,18 @@ public static class TradeHelper
         var bTotalOvr = teamBSelected.Sum(p => p.overall);
 
         int acceptScore = 0;
+
+        // Picks as sweetener: B receives A's picks, A receives B's picks
+        if (teamASelectedPicks != null)
+        {
+            foreach (var pk in teamASelectedPicks)
+                acceptScore += PickBonus(pk);
+        }
+        if (teamBSelectedPicks != null)
+        {
+            foreach (var pk in teamBSelectedPicks)
+                acceptScore -= PickBonus(pk);
+        }
 
         // Player quality comparison
         if (bBestOvr >= 90)

@@ -1001,3 +1001,55 @@
     background-color: rgb(30, 34, 46);
     color: rgb(80, 90, 110);
 }
+
+.market-trade-picks-section {
+    border-top-width: 1px;
+    border-top-color: rgb(58, 74, 99);
+    padding-top: 6px;
+    margin-top: 4px;
+}
+
+.market-trade-picks-title {
+    font-size: 10px;
+    color: rgb(160, 174, 192);
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.market-trade-picks-content {
+    flex-direction: column;
+}
+
+.market-pick-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(30, 34, 46);
+    border-radius: 4px;
+    padding: 4px 8px;
+    margin: 2px 0;
+    height: 28px;
+}
+
+.market-pick-row:hover {
+    background-color: rgb(45, 52, 70);
+}
+
+.market-pick-row.selected {
+    background-color: rgb(39, 174, 96);
+}
+
+.market-pick-label {
+    color: rgb(236, 240, 241);
+    font-size: 11px;
+    -unity-font-style: bold;
+    flex-grow: 1;
+}
+
+.market-pick-round {
+    color: rgb(241, 196, 15);
+    font-size: 10px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-right;
+    width: 24px;
+}

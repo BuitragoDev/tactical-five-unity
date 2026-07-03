@@ -13,6 +13,8 @@ public class TradeOfferData
     public string player_ids_in { get; set; }
     public int day_sent { get; set; }
     public int processed { get; set; }
+    public string pick_ids_out { get; set; } = "";
+    public string pick_ids_in { get; set; } = "";
 
     public List<int> GetWantedPlayerIds()
     {
@@ -24,6 +26,18 @@ public class TradeOfferData
     {
         if (string.IsNullOrEmpty(player_ids_in)) return new List<int>();
         return player_ids_in.Split(',').Select(int.Parse).ToList();
+    }
+
+    public List<int> GetWantedPickIds()
+    {
+        if (string.IsNullOrEmpty(pick_ids_out)) return new List<int>();
+        return pick_ids_out.Split(',').Select(int.Parse).ToList();
+    }
+
+    public List<int> GetOfferedPickIds()
+    {
+        if (string.IsNullOrEmpty(pick_ids_in)) return new List<int>();
+        return pick_ids_in.Split(',').Select(int.Parse).ToList();
     }
 
     public static string JoinIds(List<int> ids)
