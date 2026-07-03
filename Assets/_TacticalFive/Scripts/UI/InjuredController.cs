@@ -290,7 +290,7 @@ public class InjuredController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Injured] RefreshHeader error: {ex.Message}"); }
         BuildMedicalStaff();
         BuildInjuredTable();
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");

@@ -201,7 +201,7 @@ public class MatchDayController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[MatchDay] RefreshHeader error: {ex.Message}"); }
         LoadMatchData();
     }
 

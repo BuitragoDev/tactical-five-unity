@@ -281,7 +281,7 @@ _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayCli
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Settings] RefreshHeader error: {ex.Message}"); }
         RefreshSettings();
     }
 

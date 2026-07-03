@@ -438,7 +438,7 @@ public class EmployeesController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Employees] RefreshHeader error: {ex.Message}"); }
         BuildStaff();
         BuildMarket();
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");

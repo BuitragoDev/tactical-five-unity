@@ -428,7 +428,7 @@ public class DashboardController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Dashboard] RefreshHeader error: {ex.Message}"); }
         RefreshLastGame();
         RefreshNextGame();
         RefreshActionButton();

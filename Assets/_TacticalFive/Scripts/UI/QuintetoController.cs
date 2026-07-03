@@ -325,7 +325,7 @@ public class QuintetoController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Quinteto] RefreshHeader error: {ex.Message}"); }
         _root.Q<Button>("SubmenuQuinteto")?.AddToClassList("nav-submenu-item--active");
         EnsureLineupSeeded();
         _selectedPlayer = null;

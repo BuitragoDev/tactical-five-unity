@@ -517,7 +517,7 @@ public class RosterController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Roster] RefreshHeader error: {ex.Message}"); }
         RefreshSummary();
         BuildRosterList();
         _root.Q<Button>("SubmenuJugadores")?.AddToClassList("nav-submenu-item--active");

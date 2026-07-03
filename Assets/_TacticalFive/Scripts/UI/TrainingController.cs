@@ -365,7 +365,7 @@ public class TrainingController : MonoBehaviour
 
     void Refresh()
     {
-        RefreshHeader();
+        try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Training] RefreshHeader error: {ex.Message}"); }
         BuildPlayerList();
         BuildAsistenteCard();
         _selectedPlayer = null;
