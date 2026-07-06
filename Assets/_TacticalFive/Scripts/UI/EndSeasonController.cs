@@ -303,7 +303,8 @@ public class EndSeasonController : MonoBehaviour
 
         var numLbl = new Label();
         numLbl.AddToClassList("draft-pick-num");
-        numLbl.text = $"#{r.PickNumber}";
+        string roundPrefix = r.PickNumber <= 30 ? "R1" : "R2";
+        numLbl.text = $"{roundPrefix} #{r.PickNumber}";
         header.Add(numLbl);
 
         var team = r.Team;

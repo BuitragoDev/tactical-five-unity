@@ -1,5 +1,7 @@
 public class FinalsMVPDetails
 {
+    public int PlayerId { get; set; }
+    public string Photo { get; set; }
     public string PlayerName { get; set; }
     public string TeamName { get; set; }
     public float AvgPts { get; set; }

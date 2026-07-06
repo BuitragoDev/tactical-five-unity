@@ -350,6 +350,7 @@
     color: rgb(212, 160, 23);
     min-width: 36px;
     flex-shrink: 0;
+    margin-right: 8px;
 }
 .draft-team-row {
     flex-direction: row;

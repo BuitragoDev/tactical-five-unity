@@ -36,6 +36,9 @@
             </ui:VisualElement>
             <ui:VisualElement name="FinalsMVPCard" class="finals-mvp-card">
                 <ui:Label text="MVP de las Finales" class="mvp-label"/>
+                <ui:VisualElement class="mvp-photo-wrapper">
+                    <ui:VisualElement name="MvpPhoto" class="mvp-photo"/>
+                </ui:VisualElement>
                 <ui:Label name="MvpName" text="" class="mvp-name"/>
                 <ui:Label name="MvpTeam" text="" class="mvp-team"/>
                 <ui:VisualElement name="MvpStatsRow" class="mvp-stat-row">

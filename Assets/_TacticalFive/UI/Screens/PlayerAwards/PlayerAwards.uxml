@@ -28,8 +28,11 @@
             <ui:VisualElement name="AwardsRow" class="awards-row">
                 <ui:VisualElement name="MvpCard" class="award-card mvp-card">
                     <ui:Label text="MVP de la Temporada" class="award-label"/>
-                    <ui:VisualElement name="MvpPlayerLogo" class="award-player-logo"/>
+                    <ui:VisualElement class="award-photo-wrapper">
+                        <ui:VisualElement name="MvpPlayerPhoto" class="award-player-photo"/>
+                    </ui:VisualElement>
                     <ui:Label name="MvpPlayerName" text="" class="award-player-name"/>
+                    <ui:Label name="MvpPlayerTeam" text="" class="award-player-team"/>
                     <ui:VisualElement class="award-stat-row">
                         <ui:VisualElement class="award-stat-box">
                             <ui:Label name="MvpPts" text="--" class="award-stat-val"/>
@@ -47,8 +50,11 @@
                 </ui:VisualElement>
                 <ui:VisualElement name="RookieCard" class="award-card rookie-card">
                     <ui:Label text="Rookie del Año" class="award-label"/>
-                    <ui:VisualElement name="RookiePlayerLogo" class="award-player-logo"/>
+                    <ui:VisualElement class="award-photo-wrapper">
+                        <ui:VisualElement name="RookiePlayerPhoto" class="award-player-photo"/>
+                    </ui:VisualElement>
                     <ui:Label name="RookiePlayerName" text="" class="award-player-name"/>
+                    <ui:Label name="RookiePlayerTeam" text="" class="award-player-team"/>
                     <ui:VisualElement class="award-stat-row">
                         <ui:VisualElement class="award-stat-box">
                             <ui:Label name="RookiePts" text="--" class="award-stat-val"/>

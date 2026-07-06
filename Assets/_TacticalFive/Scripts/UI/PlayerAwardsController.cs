@@ -18,13 +18,15 @@ public class PlayerAwardsController : MonoBehaviour
 
     // Content
     private Label _seasonTag;
-    private VisualElement _mvpPlayerLogo;
+    private VisualElement _mvpPlayerPhoto;
     private Label _mvpPlayerName;
+    private Label _mvpPlayerTeam;
     private Label _mvpPts;
     private Label _mvpReb;
     private Label _mvpAst;
-    private VisualElement _rookiePlayerLogo;
+    private VisualElement _rookiePlayerPhoto;
     private Label _rookiePlayerName;
+    private Label _rookiePlayerTeam;
     private Label _rookiePts;
     private Label _rookieReb;
     private Label _rookieAst;
@@ -62,13 +64,15 @@ public class PlayerAwardsController : MonoBehaviour
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _seasonTag = _root.Q<Label>("SeasonTag");
-        _mvpPlayerLogo = _root.Q<VisualElement>("MvpPlayerLogo");
+        _mvpPlayerPhoto = _root.Q<VisualElement>("MvpPlayerPhoto");
         _mvpPlayerName = _root.Q<Label>("MvpPlayerName");
+        _mvpPlayerTeam = _root.Q<Label>("MvpPlayerTeam");
         _mvpPts = _root.Q<Label>("MvpPts");
         _mvpReb = _root.Q<Label>("MvpReb");
         _mvpAst = _root.Q<Label>("MvpAst");
-        _rookiePlayerLogo = _root.Q<VisualElement>("RookiePlayerLogo");
+        _rookiePlayerPhoto = _root.Q<VisualElement>("RookiePlayerPhoto");
         _rookiePlayerName = _root.Q<Label>("RookiePlayerName");
+        _rookiePlayerTeam = _root.Q<Label>("RookiePlayerTeam");
         _rookiePts = _root.Q<Label>("RookiePts");
         _rookieReb = _root.Q<Label>("RookieReb");
         _rookieAst = _root.Q<Label>("RookieAst");
@@ -125,8 +129,9 @@ public class PlayerAwardsController : MonoBehaviour
         if (mvp != null)
         {
             _mvpPlayerName.text = mvp.PlayerName;
-            if (logo32Dict.TryGetValue(mvp.TeamKeyword, out var mvpSprite))
-                _mvpPlayerLogo.style.backgroundImage = new StyleBackground(mvpSprite);
+            _mvpPlayerTeam.text = mvp.TeamName;
+            Texture2D mvpTex = PlayerPhotoHelper.Load(mvp.PlayerId, mvp.Photo);
+            _mvpPlayerPhoto.style.backgroundImage = new StyleBackground(mvpTex);
             _mvpPts.text = mvp.AvgPts.ToString("F1");
             _mvpReb.text = mvp.AvgReb.ToString("F1");
             _mvpAst.text = mvp.AvgAst.ToString("F1");
@@ -136,8 +141,9 @@ public class PlayerAwardsController : MonoBehaviour
         if (rookie != null)
         {
             _rookiePlayerName.text = rookie.PlayerName;
-            if (logo32Dict.TryGetValue(rookie.TeamKeyword, out var rookieSprite))
-                _rookiePlayerLogo.style.backgroundImage = new StyleBackground(rookieSprite);
+            _rookiePlayerTeam.text = rookie.TeamName;
+            Texture2D rookieTex = PlayerPhotoHelper.Load(rookie.PlayerId, rookie.Photo);
+            _rookiePlayerPhoto.style.backgroundImage = new StyleBackground(rookieTex);
             _rookiePts.text = rookie.AvgPts.ToString("F1");
             _rookieReb.text = rookie.AvgReb.ToString("F1");
             _rookieAst.text = rookie.AvgAst.ToString("F1");

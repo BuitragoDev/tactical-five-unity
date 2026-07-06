@@ -1152,6 +1152,10 @@
     overflow: hidden;
 }
 
+.trade-offer-player-name-row {
+    flex-direction: row;
+    align-items: center;
+}
 .trade-offer-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
@@ -1159,7 +1163,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 210px;
+    max-width: 160px;
+}
+.trade-offer-player-ovr {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-left: 6px;
 }
 
 .trade-offer-player-detail {

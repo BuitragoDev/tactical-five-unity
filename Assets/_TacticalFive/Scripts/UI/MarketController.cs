@@ -1113,13 +1113,14 @@ public class MarketController : MonoBehaviour
 
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
+        var pickTeamLookup = _allTeams.ToDictionary(t => t.id, t => t.abbreviation);
         var myPicksSelForMsg = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var otherPicksSelForMsg = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var myPicksText = myPicksSelForMsg.Count > 0
-            ? " y " + string.Join(", ", myPicksSelForMsg.Select(p => $"R{p.round} Pick #{p.pick_number}"))
+            ? " y " + string.Join(", ", myPicksSelForMsg.Select(p => $"R{p.round} {(pickTeamLookup.TryGetValue(p.original_team_id, out var a) ? a : "???")}"))
             : "";
         var otherPicksText = otherPicksSelForMsg.Count > 0
-            ? " y " + string.Join(", ", otherPicksSelForMsg.Select(p => $"R{p.round} Pick #{p.pick_number}"))
+            ? " y " + string.Join(", ", otherPicksSelForMsg.Select(p => $"R{p.round} {(pickTeamLookup.TryGetValue(p.original_team_id, out var b) ? b : "???")}"))
             : "";
         string satNote = satApplied ? " (Sign & Trade: contratos extendidos, hard cap activado)" : "";
 

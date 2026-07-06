@@ -5,6 +5,33 @@ TextureImporter:
   - first:
       213: 6011906653665870870
     second: 480_0
+  - first:
+      213: -7692664042928045869
+    second: 480_1
+  - first:
+      213: -4261795786678815408
+    second: 480_2
+  - first:
+      213: -468361298926685305
+    second: 480_3
+  - first:
+      213: -7923197708931687597
+    second: 480_4
+  - first:
+      213: -4840264293581748152
+    second: 480_5
+  - first:
+      213: -1076477364382579746
+    second: 480_6
+  - first:
+      213: -5020463888742434191
+    second: 480_7
+  - first:
+      213: 2064918078413396997
+    second: 480_8
+  - first:
+      213: 4680071851744893864
+    second: 480_9
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,10 +143,10 @@ TextureImporter:
       name: 480_0
       rect:
         serializedVersion: 2
-        x: 7
-        y: 0
-        width: 73
-        height: 80
+        x: 88
+        y: 238
+        width: 17
+        height: 13
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,6 +157,204 @@ TextureImporter:
       bones: []
       spriteID: 614cf82cf359e6350800000000000000
       internalID: 6011906653665870870
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_1
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 241
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d08ad87fca2e3590800000000000000
+      internalID: -7692664042928045869
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_2
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 241
+        width: 22
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 055b0cddf4f0bd4c0800000000000000
+      internalID: -4261795786678815408
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_3
+      rect:
+        serializedVersion: 2
+        x: 127
+        y: 247
+        width: 21
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7833fee41eb0089f0800000000000000
+      internalID: -468361298926685305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_4
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 247
+        width: 13
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 35b10f1a9a52b0290800000000000000
+      internalID: -7923197708931687597
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_5
+      rect:
+        serializedVersion: 2
+        x: 161
+        y: 244
+        width: 18
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8488d02154de3dcb0800000000000000
+      internalID: -4840264293581748152
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_6
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 228
+        width: 25
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ed34a3f5a859f01f0800000000000000
+      internalID: -1076477364382579746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_7
+      rect:
+        serializedVersion: 2
+        x: 17
+        y: 0
+        width: 239
+        height: 243
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 17ab4d751bab35ab0800000000000000
+      internalID: -5020463888742434191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_8
+      rect:
+        serializedVersion: 2
+        x: 71
+        y: 233
+        width: 18
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50cdc1a4d0018ac10800000000000000
+      internalID: 2064918078413396997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: 480_9
+      rect:
+        serializedVersion: 2
+        x: 180
+        y: 239
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8ab1f869d84f2f040800000000000000
+      internalID: 4680071851744893864
       vertices: []
       indices: 
       edges: []
@@ -149,6 +374,15 @@ TextureImporter:
       entries: []
     nameFileIdTable:
       480_0: 6011906653665870870
+      480_1: -7692664042928045869
+      480_2: -4261795786678815408
+      480_3: -468361298926685305
+      480_4: -7923197708931687597
+      480_5: -4840264293581748152
+      480_6: -1076477364382579746
+      480_7: -5020463888742434191
+      480_8: 2064918078413396997
+      480_9: 4680071851744893864
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

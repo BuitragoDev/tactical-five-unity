@@ -2448,9 +2448,24 @@ public class DashboardController : MonoBehaviour
             var info = new VisualElement();
             info.AddToClassList("trade-offer-player-info");
 
+            var nameRow = new VisualElement();
+            nameRow.AddToClassList("trade-offer-player-name-row");
+
             var nameLbl = new Label($"{p.first_name} {p.last_name}");
             nameLbl.AddToClassList("trade-offer-player-name");
-            info.Add(nameLbl);
+            nameRow.Add(nameLbl);
+
+            var ovrLbl = new Label(p.overall.ToString());
+            ovrLbl.AddToClassList("trade-offer-player-ovr");
+            if (p.overall >= 80)
+                ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
+            else if (p.overall >= 60)
+                ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+            else
+                ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
+            nameRow.Add(ovrLbl);
+
+            info.Add(nameRow);
 
             var posAge = new Label($"{p.position}  ·  {p.age} años");
             posAge.AddToClassList("trade-offer-player-detail");
@@ -2903,7 +2918,7 @@ public class DashboardController : MonoBehaviour
 
         // Trust: based on win percentage
         float winPct = myGames.Count > 0 ? (float)wins / myGames.Count : 0.5f;
-        int trustChange = winPct > 0.6f ? 2 : winPct > 0.5f ? 1 : winPct < 0.4f ? -3 : -1;
+        int trustChange = winPct > 0.5f ? 2 : winPct > 0.4f ? 1 : winPct < 0.2f ? -2 : -1;
         _manager.trust = Mathf.Clamp(_manager.trust + trustChange, 0, 100);
 
         // Morale: based on recent form (last 5 games)
@@ -3646,6 +3661,7 @@ public class DashboardController : MonoBehaviour
             .ToList();
 
         var roster = new List<PlayerData>();
+        HashSet<int> usedIds = new();
         string[] positions = { "PG", "SG", "SF", "PF", "C" };
 
         foreach (var pos in positions)
@@ -3653,8 +3669,22 @@ public class DashboardController : MonoBehaviour
             var selected = candidates
                 .Where(p => p.position == pos)
                 .OrderByDescending(p => p.overall)
-                .Take(3);
-            roster.AddRange(selected);
+                .Take(3)
+                .ToList();
+            foreach (var p in selected)
+            {
+                usedIds.Add(p.id);
+                roster.Add(p);
+            }
+        }
+
+        if (roster.Count < 15)
+        {
+            var remaining = candidates
+                .Where(p => !usedIds.Contains(p.id))
+                .OrderByDescending(p => p.overall)
+                .Take(15 - roster.Count);
+            roster.AddRange(remaining);
         }
 
         return roster;

@@ -1,5 +1,7 @@
 public class PlayerAwardInfo
 {
+    public int PlayerId { get; set; }
+    public string Photo { get; set; }
     public string PlayerName { get; set; }
     public string TeamName { get; set; }
     public string TeamKeyword { get; set; }

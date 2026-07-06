@@ -22,6 +22,7 @@ public class SeasonSummaryController : MonoBehaviour
     private Label _championName;
     private Label _finalsResult;
     private Label _finalsLoser;
+    private VisualElement _mvpPhoto;
     private Label _mvpName;
     private Label _mvpTeam;
     private Label _mvpPts;
@@ -67,6 +68,7 @@ public class SeasonSummaryController : MonoBehaviour
         _championName = _root.Q<Label>("ChampionName");
         _finalsResult = _root.Q<Label>("FinalsResult");
         _finalsLoser = _root.Q<Label>("FinalsLoser");
+        _mvpPhoto = _root.Q<VisualElement>("MvpPhoto");
         _mvpName = _root.Q<Label>("MvpName");
         _mvpTeam = _root.Q<Label>("MvpTeam");
         _mvpPts = _root.Q<Label>("MvpPts");
@@ -152,6 +154,8 @@ public class SeasonSummaryController : MonoBehaviour
             var mvpDetails = DatabaseManager.Instance.GetFinalsMVPDetails(_season.id, _manager.id);
             if (mvpDetails != null)
             {
+                Texture2D tex = PlayerPhotoHelper.Load(mvpDetails.PlayerId, mvpDetails.Photo);
+                _mvpPhoto.style.backgroundImage = new StyleBackground(tex);
                 _mvpTeam.text = mvpDetails.TeamName;
                 _mvpPts.text = mvpDetails.AvgPts.ToString("F1");
                 _mvpReb.text = mvpDetails.AvgReb.ToString("F1");

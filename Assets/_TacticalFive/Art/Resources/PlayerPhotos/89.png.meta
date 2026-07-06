@@ -116,10 +116,10 @@ TextureImporter:
       name: 89_0
       rect:
         serializedVersion: 2
-        x: 12
+        x: 0
         y: 0
-        width: 56
-        height: 80
+        width: 256
+        height: 256
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

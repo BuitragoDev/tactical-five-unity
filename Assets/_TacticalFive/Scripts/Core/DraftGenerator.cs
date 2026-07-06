@@ -163,10 +163,10 @@ public static class DraftGenerator
             TeamData team;
             if (isRound2)
             {
-                // Round 2: inverse order of round 1. Pick 30 (overall #31) goes
-                // to the team that got the LAST lottery slot, pick 59 goes to
-                // the worst team.
-                int r1Idx = 29 - (pick - 30);
+                // Round 2: same order as round 1. Pick 30 (overall #31) goes
+                // to the team that got pick 1 in round 1, pick 59 goes to
+                // the team that got pick 30 in round 1.
+                int r1Idx = pick - 30;
                 team = draftOrder[r1Idx]?.FirstOrDefault();
             }
             else
