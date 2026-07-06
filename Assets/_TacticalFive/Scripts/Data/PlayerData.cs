@@ -3,7 +3,7 @@ using SQLite;
 [Table("players")]
 public class PlayerData
 {
-    [PrimaryKey, AutoIncrement]
+    [PrimaryKey]
     public int id { get; set; }
     public int team_id { get; set; } // 0 = agente libre
     public string first_name { get; set; }

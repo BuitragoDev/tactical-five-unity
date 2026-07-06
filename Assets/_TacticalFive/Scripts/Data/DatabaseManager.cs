@@ -1937,7 +1937,7 @@ public class DatabaseManager : MonoBehaviour
                 treated = 0
             });
         }
-        // ── Free Agents ──
+        // ── Free Agents ── 140 jugadores
         AddFA(480, "LeBron", "James", "SF", 42, "USA", 206, 113, 89, 89, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48, 52600000, 1);
         AddFA(400, "DeMar", "DeRozan", "SF", 36, "USA", 201, 100, 86, 86, 99, 99, 98, 92, 98, 82, 69, 96, 99, 79, 35, 25000000, 2);
         AddFA(481, "Gabe", "Vincent", "PG", 29, "USA", 193, 88, 69, 67, 84, 74, 68, 74, 72, 78, 60, 70, 76, 70, 33, 11000000, 2);

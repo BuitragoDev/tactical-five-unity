@@ -155,6 +155,10 @@ public static class DraftGenerator
         // Generate players in draft order (60 picks: 30 R1 + 30 R2)
         var draftedPlayers = new List<DraftPickResult>();
 
+        int nextId = DatabaseManager.Instance.Db.Table<PlayerData>().Any()
+            ? DatabaseManager.Instance.Db.Table<PlayerData>().Max(p => p.id) + 1
+            : 1;
+
         for (int pick = 0; pick < 60; pick++)
         {
             bool isRound2 = pick >= 30;
@@ -222,6 +226,7 @@ public static class DraftGenerator
 
             var player = new PlayerData
             {
+                id = nextId++,
                 team_id = drafTeamId,
                 first_name = firstName,
                 last_name = lastName,
