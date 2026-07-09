@@ -264,9 +264,15 @@
     letter-spacing: 1px;
     white-space: normal;
 }
+.detail-player-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    margin-top: 2px;
+}
 .detail-player-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
 }

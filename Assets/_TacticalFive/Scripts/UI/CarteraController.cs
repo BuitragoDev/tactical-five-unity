@@ -396,8 +396,11 @@ public class CarteraController : MonoBehaviour
             if (_selectedTeam != null && _selectedTeam.id == team.id)
                 btn.AddToClassList("team-logo-btn--selected");
 
+            var logoImg = new VisualElement();
+            logoImg.AddToClassList("team-logo-img");
             if (_logoSprites.TryGetValue(team.logo, out var sprite))
-                btn.style.backgroundImage = new StyleBackground(sprite);
+                logoImg.style.backgroundImage = new StyleBackground(sprite);
+            btn.Add(logoImg);
 
             var captured = team;
             btn.RegisterCallback<ClickEvent>(_ =>

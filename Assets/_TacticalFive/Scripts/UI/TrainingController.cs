@@ -614,7 +614,7 @@ public class TrainingController : MonoBehaviour
 
         _trainingPlayerInfo.AddToClassList("training-player-info--visible");
         _trainingPlayerName.text = $"{player.first_name} {player.last_name}".ToUpper();
-        _trainingPlayerMeta.text = $"{player.age} años · {player.nationality} · {player.height_cm / 100f:F2}m · {player.weight_kg}kg{(player.is_rookie == 1 ? " · Rookie" : "")}";
+        _trainingPlayerMeta.text = $"{player.age} años · {CountryCodes.GetName(player.nationality)} · {player.height_cm / 100f:F2}m · {player.weight_kg}kg{(player.is_rookie == 1 ? " · Rookie" : "")}";
 
         var activeTraining = _activeTraining.FirstOrDefault(t => t.player_id == player.id);
 

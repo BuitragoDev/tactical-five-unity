@@ -623,7 +623,7 @@ public class QuintetoController : MonoBehaviour
             ? p.position
             : $"{p.position} / {p.secondary_position}";
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
-        _detailPlayerMeta.text = $"{PlayerAge(p)} años · {p.nationality}";
+        _detailPlayerMeta.text = $"{PlayerAge(p)} años · {CountryCodes.GetName(p.nationality)}";
         _detailOvr.text = p.GetCalculatedAverage().ToString();
 
         BuildAttrBars(p);

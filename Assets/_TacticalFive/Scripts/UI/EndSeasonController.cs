@@ -341,7 +341,7 @@ public class EndSeasonController : MonoBehaviour
 
         var detailLbl = new Label();
         detailLbl.AddToClassList("draft-player-detail");
-        detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {p.nationality}";
+        detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {CountryCodes.GetName(p.nationality)}";
         info.Add(detailLbl);
 
         var ovrLbl = new Label();

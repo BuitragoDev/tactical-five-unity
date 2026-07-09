@@ -106,20 +106,29 @@ public class MainMenuController : MonoBehaviour
         RegisterCardHover("BtnEditor",     "CtaEditor");
         RegisterCardHover("BtnExit",       "CtaExit");
 
-        // Cursores
-        if (CursorManager.Instance != null)
+        // Cursores — diferidos por si CursorManager aún no está listo en primera carga
+        _root.schedule.Execute(() =>
         {
-            CursorManager.Instance.RegisterHandCursor(_btnManager);
-            CursorManager.Instance.RegisterHandCursor(_btnProManager);
-            CursorManager.Instance.RegisterHandCursor(_btnLoadGame);
-            CursorManager.Instance.RegisterHandCursor(_btnEditor);
-            CursorManager.Instance.RegisterHandCursor(_btnExit);
-            CursorManager.Instance.RegisterHandCursor(_btnLegal);
-            CursorManager.Instance.RegisterHandCursor(_btnCerrar);
-            CursorManager.Instance.RegisterHandCursor(_btnExitYes);
-            CursorManager.Instance.RegisterHandCursor(_btnExitNo);
-
-        }
+            CursorManager.Instance?.SetDefaultCursor();
+            if (CursorManager.Instance != null)
+            {
+                CursorManager.Instance.RegisterHandCursor(_btnManager);
+                CursorManager.Instance.RegisterHandCursor(_btnProManager);
+                CursorManager.Instance.RegisterHandCursor(_btnLoadGame);
+                CursorManager.Instance.RegisterHandCursor(_btnEditor);
+                CursorManager.Instance.RegisterHandCursor(_btnExit);
+                CursorManager.Instance.RegisterHandCursor(_btnLegal);
+                CursorManager.Instance.RegisterHandCursor(_btnCerrar);
+                CursorManager.Instance.RegisterHandCursor(_btnExitYes);
+                CursorManager.Instance.RegisterHandCursor(_btnExitNo);
+                CursorManager.Instance.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
+                CursorManager.Instance.RegisterHandCursor(_btnConfigCerrar);
+                CursorManager.Instance.RegisterHandCursor(_configBtnQualityLow);
+                CursorManager.Instance.RegisterHandCursor(_configBtnQualityMedium);
+                CursorManager.Instance.RegisterHandCursor(_configBtnQualityHigh);
+                CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
+            }
+        }).StartingIn(100);
 
         // Escape para cerrar modales
         _root.focusable = true;
@@ -192,16 +201,6 @@ public class MainMenuController : MonoBehaviour
             if (e.target == _configModalOverlay)
                 { PlayClick(); CloseConfigModal(); }
         });
-
-        if (CursorManager.Instance != null)
-        {
-            CursorManager.Instance.RegisterHandCursor(configIcon);
-            CursorManager.Instance.RegisterHandCursor(_btnConfigCerrar);
-            CursorManager.Instance.RegisterHandCursor(_configBtnQualityLow);
-            CursorManager.Instance.RegisterHandCursor(_configBtnQualityMedium);
-            CursorManager.Instance.RegisterHandCursor(_configBtnQualityHigh);
-            CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
-        }
     }
 
     void OpenConfigModal()

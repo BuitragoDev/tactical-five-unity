@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- TITLE BOX -->
-            <ui:VisualElement class="tv-title-box">
-                <ui:Label class="tv-title-box-label" text="TELEVISIÓN" />
-            </ui:VisualElement>
-
             <!-- TV CONTENT -->
             <ui:VisualElement class="tv-content">
 

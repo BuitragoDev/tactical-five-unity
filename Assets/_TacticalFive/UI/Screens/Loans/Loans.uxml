@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- TITLE BOX -->
-            <ui:VisualElement class="loans-title-box">
-                <ui:Label class="loans-title-box-label" text="PRÉSTAMOS BANCARIOS" />
-            </ui:VisualElement>
-
             <!-- CONTENT -->
             <ui:VisualElement class="loans-content">
 

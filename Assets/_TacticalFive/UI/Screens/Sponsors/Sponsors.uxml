@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- TITLE BOX -->
-            <ui:VisualElement class="sponsors-title-box">
-                <ui:Label class="sponsors-title-box-label" text="PATROCINADORES" />
-            </ui:VisualElement>
-
             <!-- SPONSORS CONTENT -->
             <ui:VisualElement class="sponsors-content">
 

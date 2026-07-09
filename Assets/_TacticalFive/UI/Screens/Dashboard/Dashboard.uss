@@ -311,6 +311,7 @@
     padding: 10px 24px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
+    cursor: pointer;
 }
 .btn-action:hover {
     background-color: rgb(74, 128, 240);
@@ -839,7 +840,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 1px;
-    color: rgb(208, 216, 232);
+    color: rgb(212, 160, 23);
     margin-bottom: 4px;
     white-space: normal;
 }

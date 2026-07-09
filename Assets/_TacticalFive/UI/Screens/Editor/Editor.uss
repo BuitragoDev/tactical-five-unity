@@ -54,6 +54,7 @@
     -unity-text-align: middle-center;
     margin-right: 4px;
     border-top-left-radius: 2px;
+    cursor: pointer;
     border-top-right-radius: 2px;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -302,6 +303,7 @@
     border-bottom-right-radius: 4px;
     min-width: 98%;
     min-height: 50px;
+    cursor: pointer;
 }
 
 .editor-save-btn:hover {
@@ -348,6 +350,7 @@
     margin-right: 8px;
     border-radius: 4px;
     min-width: 150px;
+    cursor: pointer;
 }
 
 .btn-action--reset:hover {
@@ -501,8 +504,24 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
-    margin-bottom: 8px;
+    margin-bottom: 24px;
     -unity-text-align: middle-center;
+}
+
+.editor-modal-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 10px 32px;
+    cursor: pointer;
+}
+
+.editor-modal-btn:hover {
+    background-color: rgb(74, 128, 240);
 }
 
 

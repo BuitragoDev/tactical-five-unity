@@ -71,6 +71,8 @@ public class EditorController : MonoBehaviour
 
     void OnEnable()
     {
+        CursorManager.Instance?.SetDefaultCursor();
+
         _doc = GetComponent<UIDocument>();
         _root = _doc.rootVisualElement;
 
@@ -175,6 +177,7 @@ public class EditorController : MonoBehaviour
                 FilterPlayerList();
             };
 
+            CursorManager.Instance?.RegisterHandCursor(item);
             dd.List.Add(item);
         }
     }
@@ -248,6 +251,15 @@ public class EditorController : MonoBehaviour
 
         _teamFilter?.RegisterValueChangedCallback(_ => FilterTeamList());
         _playerSearch?.RegisterValueChangedCallback(_ => FilterPlayerList());
+
+        // Cursor hand on UXML buttons
+        if (CursorManager.Instance != null)
+        {
+            if (actionBtn != null) CursorManager.Instance.RegisterHandCursor(actionBtn);
+            if (_btnReset != null) CursorManager.Instance.RegisterHandCursor(_btnReset);
+            if (_btnTeams != null) CursorManager.Instance.RegisterHandCursor(_btnTeams);
+            if (_btnPlayers != null) CursorManager.Instance.RegisterHandCursor(_btnPlayers);
+        }
     }
 
     void RegisterNavButtons()
@@ -333,6 +345,7 @@ public class EditorController : MonoBehaviour
             var captured = team;
             var capturedItem = item;
             item.RegisterCallback<ClickEvent>(_ => SelectTeam(captured, capturedItem));
+            CursorManager.Instance?.RegisterHandCursor(item);
             _teamList.Add(item);
 
             if (i == 0)
@@ -513,6 +526,7 @@ public class EditorController : MonoBehaviour
             var captured = player;
             var capturedItem = item;
             item.RegisterCallback<ClickEvent>(_ => SelectPlayer(captured, capturedItem));
+            CursorManager.Instance?.RegisterHandCursor(item);
             _playerList.Add(item);
 
             if (i == 0)
@@ -839,6 +853,9 @@ public class EditorController : MonoBehaviour
 
         root.Add(trigger);
         root.Add(list);
+
+        CursorManager.Instance?.RegisterHandCursor(trigger);
+
         return dd;
     }
 
@@ -859,6 +876,8 @@ public class EditorController : MonoBehaviour
             item.AddToClassList("custom-dropdown__item--selected");
             dd.Root.Focus();
         };
+
+        CursorManager.Instance?.RegisterHandCursor(item);
 
         dd.List.Add(item);
     }
@@ -954,6 +973,7 @@ public class EditorController : MonoBehaviour
         btn.text = text;
         if (!string.IsNullOrEmpty(name)) btn.name = name;
         btn.RegisterCallback<ClickEvent>(_ => { PlayClick(); action(); });
+        CursorManager.Instance?.RegisterHandCursor(btn);
         parent.Add(btn);
     }
 
@@ -984,11 +1004,18 @@ public class EditorController : MonoBehaviour
         text.AddToClassList("editor-modal-text");
         box.Add(text);
 
-        _root.schedule.Execute(() =>
-        {
-            _toast.style.display = DisplayStyle.None;
-            _toast.Clear();
-        }).ExecuteLater(4600);
+        var closeBtn = new Button();
+        closeBtn.clicked += () => { PlayClick(); CloseToast(); };
+        closeBtn.AddToClassList("editor-modal-btn");
+        closeBtn.text = "CERRAR";
+        CursorManager.Instance?.RegisterHandCursor(closeBtn);
+        box.Add(closeBtn);
+    }
+
+    void CloseToast()
+    {
+        _toast.style.display = DisplayStyle.None;
+        _toast.Clear();
     }
 
     void PlayClick()

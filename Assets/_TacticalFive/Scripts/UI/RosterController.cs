@@ -33,6 +33,7 @@ public class RosterController : MonoBehaviour
     private VisualElement _detailContent;
     private VisualElement _detailPhoto;
     private Label _detailPlayerName;
+    private Label _detailPlayerPos;
     private Label _detailPlayerMeta;
     private Label _detailOvr;
     private Label _detailHealth;
@@ -140,6 +141,14 @@ public class RosterController : MonoBehaviour
     private static readonly List<string> PosOrder =
         new() { "PG", "SG", "SF", "PF", "C" };
 
+    static string GetPositionDisplay(string pos, string secondary)
+    {
+        var main = PosLabels.TryGetValue(pos, out var p) ? p : pos;
+        if (string.IsNullOrEmpty(secondary)) return main;
+        var sec = PosLabels.TryGetValue(secondary, out var s) ? s : secondary;
+        return $"{main} / {sec}";
+    }
+
     void OnEnable()
     {
         _doc = GetComponent<UIDocument>();
@@ -188,6 +197,7 @@ public class RosterController : MonoBehaviour
         _detailContent = _root.Q<VisualElement>("DetailContent");
         _detailPhoto = _root.Q<VisualElement>("DetailPhoto");
         _detailPlayerName = _root.Q<Label>("DetailPlayerName");
+        _detailPlayerPos = _root.Q<Label>("DetailPlayerPos");
         _detailPlayerMeta = _root.Q<Label>("DetailPlayerMeta");
         _detailOvr = _root.Q<Label>("DetailOvr");
         _detailHealth = _root.Q<Label>("DetailHealth");
@@ -736,7 +746,8 @@ public class RosterController : MonoBehaviour
 
         // Cabecera
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
-        _detailPlayerMeta.text = $"{p.position}{(string.IsNullOrEmpty(p.secondary_position) ? "" : " / " + p.secondary_position)} · {p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
+        _detailPlayerPos.text = GetPositionDisplay(p.position, p.secondary_position);
+        _detailPlayerMeta.text = $"{p.age} años · {CountryCodes.GetName(p.nationality)} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
         _detailOvr.text = p.GetCalculatedAverage().ToString();
 
         // Foto
