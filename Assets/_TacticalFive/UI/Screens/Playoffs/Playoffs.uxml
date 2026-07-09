@@ -1,71 +1,47 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:uie="UnityEditor.UIElements"
-         editor-extension-mode="False">
-
-    <Style src="Playoffs.uss" />
-    <Style src="../Dashboard/Dashboard.uss" />
-
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Playoffs/Playoffs.uss?fileID=7433441132597879392&amp;guid=4c70296125342de6a9e29705f64cc0eb&amp;type=3#Playoffs"/>
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Dashboard/Dashboard.uss?fileID=7433441132597879392&amp;guid=4ea72934f300e2fc78940e1d76d7e1a8&amp;type=3#Dashboard"/>
     <ui:VisualElement name="PlayoffsRoot" class="playoffs-root">
-
-        <!-- ══ SIDEBAR ══ -->
-
-        <!-- ══ MAIN ══ -->
         <ui:VisualElement class="playoffs-main">
-
-            <!-- TOP HEADER -->
-
-            <!-- PLAYOFFS BODY (clipping container) -->
             <ui:VisualElement class="playoffs-body">
-                <ui:ScrollView class="playoffs-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-
-                    <!-- Regular season empty state -->
+                <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="playoffs-scroll">
                     <ui:VisualElement name="RegularSeasonEmpty" class="bracket-empty" style="display: none;">
-                        <ui:Label class="bracket-empty-icon" text="🏀" />
-                        <ui:Label class="bracket-empty-title" text="TEMPORADA REGULAR EN CURSO" />
-                        <ui:Label class="bracket-empty-subtitle" text="El bracket de Playoffs y Play-In estará disponible cuando termine la temporada regular." />
+                        <ui:Label text="🏀" class="bracket-empty-icon"/>
+                        <ui:Label text="TEMPORADA REGULAR EN CURSO" class="bracket-empty-title"/>
+                        <ui:Label text="El bracket de Playoffs y Play-In estará disponible cuando termine la temporada regular." class="bracket-empty-subtitle"/>
                     </ui:VisualElement>
-
-                    <!-- Play-In -->
-                    <ui:VisualElement name="PlayInPanel" class="panel panel-playoffs" style="border-color: rgb(212, 160, 23);">
-                        <ui:VisualElement class="panel-header">
-                            <ui:Label class="panel-title" text="PLAY-IN TOURNAMENT" />
+                    <ui:VisualElement name="PlayInPanel" class="panel panel-playoffs">
+                        <ui:VisualElement class="panel-header" style="background-color: rgb(157, 114, 3);">
+                            <ui:Label text="PLAY-IN TOURNAMENT" class="panel-title"/>
+                            <ui:Label text="▼" class="panel-toggle-arrow"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="PlayInBody" class="playoffs-bracket" />
-                        <ui:Label name="NoPlayInText" class="no-data-text" text="PLAY-IN NO DISPONIBLE AÚN" />
+                        <ui:VisualElement name="PlayInBody" class="playoffs-bracket"/>
+                        <ui:Label name="NoPlayInText" text="PLAY-IN NO DISPONIBLE AÚN" class="no-data-text"/>
                     </ui:VisualElement>
-
-                    <!-- Eastern Conference -->
-                    <ui:VisualElement class="panel panel-playoffs"  style="border-color: rgb(8, 134, 138);">
-                        <ui:VisualElement class="panel-header">
-                            <ui:Label class="panel-title" text="PLAYOFFS — CONFERENCIA ESTE" />
+                    <ui:VisualElement class="panel panel-playoffs">
+                        <ui:VisualElement class="panel-header" style="background-color: rgb(8, 134, 138);">
+                            <ui:Label text="PLAYOFFS — CONFERENCIA ESTE" class="panel-title"/>
+                            <ui:Label text="▼" class="panel-toggle-arrow"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="EastBracket" class="playoffs-bracket" />
+                        <ui:VisualElement name="EastBracket" class="playoffs-bracket"/>
                     </ui:VisualElement>
-
-                    <!-- Western Conference -->
-                    <ui:VisualElement class="panel panel-playoffs"  style="border-color: rgb(8, 138, 82);">
-                        <ui:VisualElement class="panel-header">
-                            <ui:Label class="panel-title" text="PLAYOFFS — CONFERENCIA OESTE" />
+                    <ui:VisualElement class="panel panel-playoffs">
+                        <ui:VisualElement class="panel-header" style="background-color: rgb(8, 138, 82);">
+                            <ui:Label text="PLAYOFFS — CONFERENCIA OESTE" class="panel-title"/>
+                            <ui:Label text="▼" class="panel-toggle-arrow"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="WestBracket" class="playoffs-bracket" />
+                        <ui:VisualElement name="WestBracket" class="playoffs-bracket"/>
                     </ui:VisualElement>
-
-                    <!-- NBA Finals -->
-                    <ui:VisualElement name="FinalsPanel" class="panel panel-playoffs panel-finals"  style="border-color: rgb(212, 160, 23);">
-                        <ui:VisualElement class="panel-header">
-                            <ui:Label class="panel-title" text="FINALES NBA" />
+                    <ui:VisualElement name="FinalsPanel" class="panel panel-playoffs panel-finals">
+                        <ui:VisualElement class="panel-header" style="background-color: rgb(157, 114, 3);">
+                            <ui:Label text="FINALES NBA" class="panel-title"/>
+                            <ui:Label text="▼" class="panel-toggle-arrow"/>
                         </ui:VisualElement>
-                        <ui:VisualElement name="FinalsBody" class="playoffs-bracket" />
-                        <ui:Label name="NoFinalsText" class="no-data-text" text="FINALES NO DISPONIBLES AÚN" />
+                        <ui:VisualElement name="FinalsBody" class="playoffs-bracket"/>
+                        <ui:Label name="NoFinalsText" text="FINALES NO DISPONIBLES AÚN" class="no-data-text"/>
                     </ui:VisualElement>
-
                 </ui:ScrollView>
             </ui:VisualElement>
-
         </ui:VisualElement>
-
     </ui:VisualElement>
-
 </ui:UXML>

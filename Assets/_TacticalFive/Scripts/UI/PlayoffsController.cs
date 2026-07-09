@@ -134,6 +134,22 @@ public class PlayoffsController : MonoBehaviour
                 panels.Add((header, panel));
         }
 
+        // Helper to update all arrows based on current toggle state
+        void UpdateAllArrows()
+        {
+            foreach (var (hdr, pnl) in panels)
+            {
+                bool open = true;
+                foreach (var child in pnl.Children())
+                {
+                    if (child == hdr) continue;
+                    if (child.style.display == DisplayStyle.None) { open = false; break; }
+                }
+                var arrow = hdr.Q<Label>(null, "panel-toggle-arrow");
+                if (arrow != null) arrow.text = open ? "▲" : "▼";
+            }
+        }
+
         foreach (var (header, panel) in panels)
         {
             header.RegisterCallback<ClickEvent>(_ =>
@@ -169,8 +185,12 @@ public class PlayoffsController : MonoBehaviour
                         child.style.display = DisplayStyle.Flex;
                     }
                 }
+
+                UpdateAllArrows();
             });
         }
+
+        UpdateAllArrows();
     }
 
     void RegisterNavButtons()

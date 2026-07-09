@@ -42,6 +42,14 @@
     border-top-color: rgb(212, 160, 23);
 }
 
+.panel-toggle-arrow {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    margin-left: auto;
+    -unity-text-align: middle-right;
+}
+
 .playoffs-bracket {
     flex-direction: column;
     padding: 12px 18px;
