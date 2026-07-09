@@ -428,7 +428,7 @@ public class MatchDayController : MonoBehaviour
             }
 
             // Position badge
-            var posLbl = new Label { text = player?.position ?? "??" };
+            var posLbl = new Label { text = PositionCodes.GetShort(player?.position) };
             posLbl.AddToClassList("player-pos");
             playerContainer.Add(posLbl);
 

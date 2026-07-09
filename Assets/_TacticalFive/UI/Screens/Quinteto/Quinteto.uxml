@@ -26,19 +26,19 @@
                             <ui:Label class="lineup-col-title" text="TITULARES" />
                             <ui:VisualElement name="StartersList" class="lineup-col-list">
                                 <ui:VisualElement name="StarterSlotPG" class="starter-slot" data-pos="PG">
-                                    <ui:Label class="starter-slot-label" text="PG" />
+                                    <ui:Label class="starter-slot-label" text="B" />
                                 </ui:VisualElement>
                                 <ui:VisualElement name="StarterSlotSG" class="starter-slot" data-pos="SG">
-                                    <ui:Label class="starter-slot-label" text="SG" />
+                                    <ui:Label class="starter-slot-label" text="E" />
                                 </ui:VisualElement>
                                 <ui:VisualElement name="StarterSlotSF" class="starter-slot" data-pos="SF">
-                                    <ui:Label class="starter-slot-label" text="SF" />
+                                    <ui:Label class="starter-slot-label" text="A" />
                                 </ui:VisualElement>
                                 <ui:VisualElement name="StarterSlotPF" class="starter-slot" data-pos="PF">
-                                    <ui:Label class="starter-slot-label" text="PF" />
+                                    <ui:Label class="starter-slot-label" text="AP" />
                                 </ui:VisualElement>
                                 <ui:VisualElement name="StarterSlotC" class="starter-slot" data-pos="C">
-                                    <ui:Label class="starter-slot-label" text="C" />
+                                    <ui:Label class="starter-slot-label" text="P" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>

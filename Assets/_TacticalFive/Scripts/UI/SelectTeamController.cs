@@ -491,28 +491,12 @@ public class SelectTeamController : MonoBehaviour
 
     string GetPositionDisplay(string pos)
     {
-        return pos switch
-        {
-            "PG" => "BASE",
-            "SG" => "ESCOLTA",
-            "SF" => "ALERO",
-            "PF" => "ALA-PIVOT",
-            "C" => "PIVOT",
-            _ => pos
-        };
+        return PositionCodes.GetName(pos);
     }
 
     int GetPositionOrder(string pos)
     {
-        return pos switch
-        {
-            "PG" => 0,
-            "SG" => 1,
-            "SF" => 2,
-            "PF" => 3,
-            "C" => 4,
-            _ => 5
-        };
+        return System.Array.IndexOf(PositionCodes.Order, pos);
     }
 
     void CloseSquadModal()

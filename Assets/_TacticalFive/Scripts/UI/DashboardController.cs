@@ -1419,7 +1419,7 @@ public class DashboardController : MonoBehaviour
         foreach (var (li, p) in injured)
         {
             var slotLabel = li.slot == 0 ? "TITULAR" : "BANQUILLO";
-            var row = new Label($"{p.first_name} {p.last_name} — {p.position} ({slotLabel})");
+            var row = new Label($"{p.first_name} {p.last_name} — {PositionCodes.GetShort(p.position)} ({slotLabel})");
             row.AddToClassList("injured-modal-player-row");
             list.Add(row);
         }
@@ -1562,7 +1562,7 @@ public class DashboardController : MonoBehaviour
 
     PlayerData PickBestReplacement(string injuredPos, List<PlayerData> pool, HashSet<int> used, bool preferExact)
     {
-        var posOrder = new[] { "PG", "SG", "SF", "PF", "C" };
+        var posOrder = PositionCodes.Order;
         int injuredIdx = System.Array.IndexOf(posOrder, injuredPos);
         var nearby = new List<string>();
         if (injuredIdx > 0) nearby.Add(posOrder[injuredIdx - 1]);
@@ -1824,7 +1824,7 @@ public class DashboardController : MonoBehaviour
     {
         if (roster == null || roster.Count == 0) return null;
 
-        var positions = new[] { "PG", "SG", "SF", "PF", "C" };
+        var positions = PositionCodes.Order;
         string weakest = null;
         float lowestAvg = float.MaxValue;
 
@@ -2472,7 +2472,7 @@ public class DashboardController : MonoBehaviour
 
             info.Add(nameRow);
 
-            var posAge = new Label($"{p.position}  ·  {p.age} años");
+            var posAge = new Label($"{PositionCodes.GetShort(p.position)}  ·  {p.age} años");
             posAge.AddToClassList("trade-offer-player-detail");
             info.Add(posAge);
 
@@ -3706,7 +3706,7 @@ public class DashboardController : MonoBehaviour
 
         var roster = new List<PlayerData>();
         HashSet<int> usedIds = new();
-        string[] positions = { "PG", "SG", "SF", "PF", "C" };
+        var positions = PositionCodes.Order;
 
         foreach (var pos in positions)
         {

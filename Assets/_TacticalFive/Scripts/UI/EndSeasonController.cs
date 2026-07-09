@@ -199,7 +199,7 @@ public class EndSeasonController : MonoBehaviour
 
         var posLbl = new Label();
         posLbl.AddToClassList("es-player-pos");
-        posLbl.text = p.position;
+        posLbl.text = PositionCodes.GetShort(p.position);
         row.Add(posLbl);
 
         if (isExpiring)
@@ -336,7 +336,7 @@ public class EndSeasonController : MonoBehaviour
 
         var posLbl = new Label();
         posLbl.AddToClassList("draft-player-pos");
-        posLbl.text = p.position;
+        posLbl.text = PositionCodes.GetShort(p.position);
         info.Add(posLbl);
 
         var detailLbl = new Label();
@@ -471,7 +471,7 @@ public class EndSeasonController : MonoBehaviour
         infoCol.Add(teamNameLbl);
 
         var p = r.Player;
-        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {p.position}  ·  OVR: {p.overall}");
+        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {PositionCodes.GetShort(p.position)}  ·  OVR: {p.overall}");
         playerLbl.AddToClassList("lottery-draft-player");
         infoCol.Add(playerLbl);
 

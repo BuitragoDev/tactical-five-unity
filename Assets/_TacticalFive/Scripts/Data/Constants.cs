@@ -211,3 +211,38 @@ public static class CountryCodes
         return string.IsNullOrEmpty(code) ? "Flags/default" : $"Flags/{code.ToUpper()}";
     }
 }
+
+public static class PositionCodes
+{
+    public static readonly Dictionary<string, string> Short = new()
+    {
+        { "PG", "B" },
+        { "SG", "E" },
+        { "SF", "A" },
+        { "PF", "AP" },
+        { "C",  "P" }
+    };
+
+    public static readonly Dictionary<string, string> Names = new()
+    {
+        { "PG", "Base" },
+        { "SG", "Escolta" },
+        { "SF", "Alero" },
+        { "PF", "Ala-Pivot" },
+        { "C",  "Pivot" }
+    };
+
+    public static readonly string[] Order = { "PG", "SG", "SF", "PF", "C" };
+
+    public static string GetShort(string code)
+    {
+        if (string.IsNullOrEmpty(code)) return "";
+        return Short.TryGetValue(code.ToUpper(), out var s) ? s : code;
+    }
+
+    public static string GetName(string code)
+    {
+        if (string.IsNullOrEmpty(code)) return "";
+        return Names.TryGetValue(code.ToUpper(), out var name) ? name : code;
+    }
+}

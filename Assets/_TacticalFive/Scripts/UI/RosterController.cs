@@ -129,23 +129,11 @@ public class RosterController : MonoBehaviour
 
     private Dictionary<string, Sprite> _logoSprites = new();
 
-    private static readonly Dictionary<string, string> PosLabels = new()
-    {
-        { "PG", "BASE" },
-        { "SG", "ESCOLTA" },
-        { "SF", "ALERO" },
-        { "PF", "ALA-PIVOT" },
-        { "C",  "PIVOT" }
-    };
-
-    private static readonly List<string> PosOrder =
-        new() { "PG", "SG", "SF", "PF", "C" };
-
     static string GetPositionDisplay(string pos, string secondary)
     {
-        var main = PosLabels.TryGetValue(pos, out var p) ? p : pos;
+        var main = PositionCodes.GetName(pos);
         if (string.IsNullOrEmpty(secondary)) return main;
-        var sec = PosLabels.TryGetValue(secondary, out var s) ? s : secondary;
+        var sec = PositionCodes.GetName(secondary);
         return $"{main} / {sec}";
     }
 
@@ -613,7 +601,7 @@ public class RosterController : MonoBehaviour
     {
         _rosterBody.Clear();
 
-        foreach (var pos in PosOrder)
+        foreach (var pos in PositionCodes.Order)
         {
             var posPlayers = _players
                 .Where(p => p.position == pos)
@@ -628,11 +616,11 @@ public class RosterController : MonoBehaviour
 
             var badge = new Label();
             badge.AddToClassList("pos-badge");
-            badge.text = pos;
+            badge.text = PositionCodes.GetShort(pos);
 
             var label = new Label();
             label.AddToClassList("pos-label");
-            label.text = PosLabels.TryGetValue(pos, out var lbl) ? lbl : pos;
+            label.text = PositionCodes.GetName(pos);
 
             posHeader.Add(badge);
             posHeader.Add(label);

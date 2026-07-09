@@ -423,7 +423,7 @@ public class QuintetoController : MonoBehaviour
 
             var label = new Label();
             label.AddToClassList("starter-slot-label");
-            label.text = PosOrder[i];
+            label.text = PositionCodes.GetShort(PosOrder[i]);
             slot.Add(label);
 
             var ls = _lineup.FirstOrDefault(l => l.slot == 0 && l.slot_index == i);
@@ -620,8 +620,8 @@ public class QuintetoController : MonoBehaviour
         _detailScroll.style.display = DisplayStyle.Flex;
 
         _detailPosBadge.text = string.IsNullOrEmpty(p.secondary_position)
-            ? p.position
-            : $"{p.position} / {p.secondary_position}";
+            ? PositionCodes.GetName(p.position)
+            : $"{PositionCodes.GetName(p.position)} / {PositionCodes.GetName(p.secondary_position)}";
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerMeta.text = $"{PlayerAge(p)} años · {CountryCodes.GetName(p.nationality)}";
         _detailOvr.text = p.GetCalculatedAverage().ToString();
@@ -733,7 +733,10 @@ public class QuintetoController : MonoBehaviour
 
         var posLbl = new Label();
         posLbl.AddToClassList("player-card-pos");
-        posLbl.text = $"{player.position} - ";
+        var posStr = PositionCodes.GetShort(player.position);
+        if (!string.IsNullOrEmpty(player.secondary_position))
+            posStr += $" / {PositionCodes.GetShort(player.secondary_position)}";
+        posLbl.text = $"{posStr} - ";
         meta.Add(posLbl);
 
         var ovrLbl = new Label();

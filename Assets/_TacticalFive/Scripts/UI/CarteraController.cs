@@ -523,7 +523,7 @@ public class CarteraController : MonoBehaviour
 
         var posLbl = new Label();
         posLbl.AddToClassList("player-row-pos");
-        posLbl.text = p.position;
+        posLbl.text = PositionCodes.GetShort(p.position);
         row.Add(posLbl);
 
         var ageLbl = new Label();
@@ -623,7 +623,7 @@ public class CarteraController : MonoBehaviour
 
                 var posLbl = new Label();
                 posLbl.AddToClassList("scout-slot-pos");
-                posLbl.text = player.position;
+                posLbl.text = PositionCodes.GetShort(player.position);
                 header.Add(posLbl);
 
                 var ageLbl = new Label();

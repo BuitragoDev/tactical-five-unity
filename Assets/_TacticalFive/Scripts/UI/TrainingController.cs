@@ -53,18 +53,6 @@ public class TrainingController : MonoBehaviour
     private StyleBackground _starBg;
     private StyleBackground _empleadoBg;
 
-    private static readonly Dictionary<string, string> PosLabels = new()
-    {
-        { "PG", "BASE" },
-        { "SG", "ESCOLTA" },
-        { "SF", "ALERO" },
-        { "PF", "ALA-PIVOT" },
-        { "C",  "PIVOT" }
-    };
-
-    private static readonly List<string> PosOrder =
-        new() { "PG", "SG", "SF", "PF", "C" };
-
     private static readonly Dictionary<string, string> AttrDisplay = new()
     {
         { "shooting",    "TIRO" },
@@ -428,7 +416,7 @@ public class TrainingController : MonoBehaviour
     {
         _trainingBody.Clear();
 
-        foreach (var pos in PosOrder)
+        foreach (var pos in PositionCodes.Order)
         {
             var posPlayers = _players
                 .Where(p => p.position == pos)
@@ -442,11 +430,11 @@ public class TrainingController : MonoBehaviour
 
             var badge = new Label();
             badge.AddToClassList("pos-badge");
-            badge.text = pos;
+            badge.text = PositionCodes.GetShort(pos);
 
             var label = new Label();
             label.AddToClassList("pos-label");
-            label.text = PosLabels.TryGetValue(pos, out var lbl) ? lbl : pos;
+            label.text = PositionCodes.GetName(pos);
 
             posHeader.Add(badge);
             posHeader.Add(label);

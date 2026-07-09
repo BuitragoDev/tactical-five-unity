@@ -316,7 +316,7 @@ public class GameResultsController : MonoBehaviour
                 ?? _allTeams.Find(t => t.id == mvpPlayer.team_id);
             _mvpName.text = $"{mvpPlayer.first_name.ToUpper()}\n{mvpPlayer.last_name.ToUpper()}";
             _mvpTeam.text = mvpTeamData?.name ?? "Equipo desconocido";
-            _mvpPos.text = mvpPlayer.position;
+            _mvpPos.text = PositionCodes.GetShort(mvpPlayer.position);
             _mvpPts.text = mvp.points.ToString();
             _mvpReb.text = mvp.rebounds.ToString();
             _mvpAst.text = mvp.assists.ToString();
@@ -357,7 +357,7 @@ public class GameResultsController : MonoBehaviour
             var nameLbl = new Label { text = $"{player.first_name} {player.last_name}" };
             nameLbl.AddToClassList("lb-name");
             info.Add(nameLbl);
-            var teamLbl = new Label { text = $"{team?.abbreviation ?? "FA"} · {player.position}" };
+            var teamLbl = new Label { text = $"{team?.abbreviation ?? "FA"} · {PositionCodes.GetShort(player.position)}" };
             teamLbl.AddToClassList("lb-team");
             info.Add(teamLbl);
 

@@ -927,7 +927,7 @@ public class StatsController : MonoBehaviour
 
             var posLbl = new Label();
             posLbl.AddToClassList("col-pos");
-            posLbl.text = position;
+            posLbl.text = PositionCodes.GetShort(position);
 
             var gpLbl = new Label();
             gpLbl.AddToClassList("col-stat");

@@ -85,11 +85,11 @@
                             <ui:Label class="palmares-section-title" text="HISTORIAL DE QUINTETOS" />
                             <ui:VisualElement class="palmares-table-header">
                                 <ui:Label class="th-season" text="TEMPORADA" />
-                                <ui:Label class="th-quintet-pos" text="PG" />
-                                <ui:Label class="th-quintet-pos" text="SG" />
-                                <ui:Label class="th-quintet-pos" text="SF" />
-                                <ui:Label class="th-quintet-pos" text="PF" />
-                                <ui:Label class="th-quintet-pos" text="C" />
+                                <ui:Label class="th-quintet-pos" text="B" />
+                                <ui:Label class="th-quintet-pos" text="E" />
+                                <ui:Label class="th-quintet-pos" text="A" />
+                                <ui:Label class="th-quintet-pos" text="AP" />
+                                <ui:Label class="th-quintet-pos" text="P" />
                             </ui:VisualElement>
                             <ui:VisualElement class="palmares-scroll-wrapper">
                                 <ui:ScrollView name="QuintetHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">

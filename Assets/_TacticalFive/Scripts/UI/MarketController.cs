@@ -781,7 +781,7 @@ public class MarketController : MonoBehaviour
         name.AddToClassList("market-trade-col-name");
         row.Add(name);
 
-        var pos = new Label(player.position);
+        var pos = new Label(PositionCodes.GetShort(player.position));
         pos.AddToClassList("market-trade-col-pos");
         row.Add(pos);
 
@@ -1223,7 +1223,7 @@ public class MarketController : MonoBehaviour
             name.AddToClassList("market-fa-col-name");
             row.Add(name);
 
-            var pos = new Label(player.position);
+        var pos = new Label(PositionCodes.GetShort(player.position));
             pos.AddToClassList("market-fa-col-pos");
             row.Add(pos);
 

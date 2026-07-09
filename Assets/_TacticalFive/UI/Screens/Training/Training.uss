@@ -65,7 +65,7 @@
     height: 20px;
     background-color: rgb(212, 160, 23);
     border-radius: 3px;
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(11, 14, 20);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     -unity-text-align: middle-center;

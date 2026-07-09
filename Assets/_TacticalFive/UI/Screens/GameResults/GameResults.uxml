@@ -45,7 +45,7 @@
                                         <ui:VisualElement class="mvp-player-details">
                                             <ui:Label name="MvpName" text="ANTHONY&#10;EDWARDS" class="mvp-player-name"/>
                                             <ui:Label name="MvpTeam" text="Minnesota Timberwolves" class="mvp-player-team" style="-unity-text-align: middle-left;"/>
-                                            <ui:Label name="MvpPos" text="SG" class="mvp-player-pos"/>
+                                            <ui:Label name="MvpPos" text="E" class="mvp-player-pos"/>
                                         </ui:VisualElement>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="mvp-stats">

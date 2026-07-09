@@ -518,7 +518,7 @@ public class EditorController : MonoBehaviour
             var abbr = _allTeams.Find(t => t.id == player.team_id)?.abbreviation ?? "FA";
             var nameLbl = new Label($"{player.first_name} {player.last_name}");
             nameLbl.AddToClassList("editor-list-item-name");
-            var subLbl = new Label($"{abbr} | {player.position} | {player.overall}");
+            var subLbl = new Label($"{abbr} | {PositionCodes.GetShort(player.position)} | {player.overall}");
             subLbl.AddToClassList("editor-list-item-sub");
             item.Add(nameLbl);
             item.Add(subLbl);

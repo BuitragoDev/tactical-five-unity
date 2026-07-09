@@ -475,7 +475,7 @@ public class InjuredController : MonoBehaviour
 
             var posLbl = new Label();
             posLbl.AddToClassList("injured-row-pos");
-            posLbl.text = player.position;
+            posLbl.text = PositionCodes.GetShort(player.position);
             row.Add(posLbl);
 
             var injuryLbl = new Label();

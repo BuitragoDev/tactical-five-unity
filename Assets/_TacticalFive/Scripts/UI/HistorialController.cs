@@ -319,7 +319,7 @@ public class HistorialController : MonoBehaviour
         posLabel.AddToClassList("historial-col");
         posLabel.AddToClassList("historial-col-center");
         posLabel.AddToClassList("historial-col-bold");
-        posLabel.text = player?.position ?? "";
+        posLabel.text = PositionCodes.GetShort(player?.position);
         row.Add(posLabel);
 
         // Col 8: Overall
