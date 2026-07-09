@@ -4,11 +4,6 @@
 <ui:VisualElement name="PalmaresRoot" class="palmares-root">
         
         <ui:VisualElement class="palmares-main">
-            
-            <!-- PALMARES TITLE BOX -->
-            <ui:VisualElement class="palmares-title-box">
-                <ui:Label class="palmares-title-box-label" text="PALMARÉS HISTÓRICO DE EQUIPOS" />
-            </ui:VisualElement>
 
             <ui:VisualElement class="palmares-content">
                 <ui:VisualElement class="palmares-tabs" style="border-left-width: 17px; border-top-width: 10px;">

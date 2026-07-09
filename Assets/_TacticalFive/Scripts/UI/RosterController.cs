@@ -362,7 +362,7 @@ public class RosterController : MonoBehaviour
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
         _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
+
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -501,7 +501,7 @@ public class RosterController : MonoBehaviour
                 "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
                 "NavMarket", "NavFinances", "NavArena", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
-                "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario",
+                "SubmenuEmpleados", "SubmenuLesionados",
                 "SubmenuPalmares", "SubmenuRecords",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV"
@@ -591,7 +591,7 @@ public class RosterController : MonoBehaviour
     {
         _summaryPlayers.text = _players.Count.ToString();
         int avgOverall = _players.Count > 0
-            ? (int)_players.Average(p => p.overall) : 0;
+            ? (int)_players.Average(p => p.GetCalculatedAverage()) : 0;
         _summaryOverall.text = avgOverall.ToString();
         long totalPayroll = _players.Sum(p => p.salary);
         _summaryBudget.text = $"${totalPayroll / 1_000_000}M";
@@ -607,7 +607,7 @@ public class RosterController : MonoBehaviour
         {
             var posPlayers = _players
                 .Where(p => p.position == pos)
-                .OrderByDescending(p => p.overall)
+                .OrderByDescending(p => p.GetCalculatedAverage())
                 .ToList();
 
             if (posPlayers.Count == 0) continue;
@@ -660,7 +660,7 @@ public class RosterController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-ovr");
-        ovrLbl.text = player.overall.ToString();
+        ovrLbl.text = player.GetCalculatedAverage().ToString();
 
         var metaLbl = new Label();
         metaLbl.AddToClassList("player-meta");
@@ -737,7 +737,7 @@ public class RosterController : MonoBehaviour
         // Cabecera
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerMeta.text = $"{p.position}{(string.IsNullOrEmpty(p.secondary_position) ? "" : " / " + p.secondary_position)} · {p.age} años · {p.nationality} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
-        _detailOvr.text = p.overall.ToString();
+        _detailOvr.text = p.GetCalculatedAverage().ToString();
 
         // Foto
         if (_detailPhoto != null)

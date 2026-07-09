@@ -248,7 +248,7 @@ public class TrainingController : MonoBehaviour
             ScreenManager.Instance.GoTo(GameScreen.Injured);
         });
         _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
+
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -349,7 +349,7 @@ public class TrainingController : MonoBehaviour
                 "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
                 "NavMarket", "NavFinances", "NavArena", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
-                "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario",
+                "SubmenuEmpleados", "SubmenuLesionados",
                 "SubmenuPalmares", "SubmenuRecords",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV"

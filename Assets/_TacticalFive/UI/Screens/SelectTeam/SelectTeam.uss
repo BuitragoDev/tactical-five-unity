@@ -392,6 +392,188 @@
     -unity-text-align: middle-center;
 }
 
+/* Botón ver plantilla */
+.btn-squad {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 12px 0;
+    width: 100%;
+    -unity-text-align: middle-center;
+    margin-top: 10px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.btn-squad:hover {
+    background-color: rgb(74, 128, 240);
+}
+
+/* Modal overlay */
+.modal-overlay {
+    position: absolute;
+    left: 0; right: 0; top: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    align-items: center;
+    justify-content: center;
+}
+.modal-box {
+    flex-direction: column;
+    width: 1100px;
+    max-height: 85%;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 6px;
+    padding: 24px;
+}
+.modal-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+}
+.modal-logo {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+.modal-header-info {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    justify-content: space-between;
+}
+.modal-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 26px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    flex-grow: 1;
+}
+.modal-avg-circle .stat-circle-ring {
+    width: 60px;
+    height: 60px;
+    border-radius: 27px;
+}
+.modal-avg-circle .stat-circle-value {
+    font-size: 22px;
+}
+.modal-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+.modal-columns {
+    flex-direction: row;
+    flex-grow: 1;
+}
+.modal-column {
+    flex-direction: column;
+    flex-grow: 1;
+    width: 0;
+    min-width: 0;
+    margin-right: 12px;
+}
+.modal-column:last-child {
+    margin-right: 0;
+}
+.modal-header-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 8px;
+    min-height: 28px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+}
+.modal-header-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: rgb(85, 102, 119);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.modal-player-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
+    min-height: 36px;
+}
+.modal-player-row:hover {
+    background-color: rgb(28, 33, 48);
+}
+.modal-player-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.modal-player-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    width: 70px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.modal-player-flag {
+    width: 24px;
+    height: 16px;
+    flex-shrink: 0;
+    margin: 0 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.modal-player-age {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    width: 30px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.modal-player-avg {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    width: 40px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.modal-close {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 10px 0;
+    width: 100%;
+    -unity-text-align: middle-center;
+    margin-top: 24px;
+    flex-shrink: 0;
+}
+.modal-close:hover {
+    background-color: rgb(74, 128, 240);
+}
+
 /* Camisetas */
 .jersey-img {
     width: 121px;

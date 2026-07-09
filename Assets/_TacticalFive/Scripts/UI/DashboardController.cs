@@ -79,6 +79,7 @@ public class DashboardController : MonoBehaviour
     private Label _teamArenaName;
     private Label _teamArenaCapacity;
     private VisualElement _teamReputationStars;
+    private VisualElement _messagesBody;
 
     // Datos
     private ManagerData _manager;
@@ -205,6 +206,9 @@ public class DashboardController : MonoBehaviour
         _valTrust = _root.Q<Label>("ValTrust");
         _valMorale = _root.Q<Label>("ValMorale");
         _valFanConfidence = _root.Q<Label>("ValFanConfidence");
+
+        // Mensajes
+        _messagesBody = _root.Q<VisualElement>("MessagesBody");
     }
 
     void LoadSidebarIcons()
@@ -304,7 +308,7 @@ public class DashboardController : MonoBehaviour
         _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
         _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
         _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Vestuario); });
+
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
@@ -409,7 +413,7 @@ public class DashboardController : MonoBehaviour
                 "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
                 "NavMarket", "NavFinances", "NavArena", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
-                "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario",
+                "SubmenuEmpleados", "SubmenuLesionados",
                 "SubmenuPalmares", "SubmenuRecords",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
@@ -436,6 +440,7 @@ public class DashboardController : MonoBehaviour
         RefreshTeamStats();
         RefreshBoard();
         RefreshPlayerStats();
+        RefreshMessages();
     }
 
     // ── HEADER ───────────────────────────────────────────
@@ -3385,43 +3390,43 @@ public class DashboardController : MonoBehaviour
         var scorer = teamStats.OrderByDescending(s => (float)s.total_points / s.games).First();
         SetStatCard("StatScorer", "StatScorerName", "StatScorerGames",
             (scorer.total_points / (float)scorer.games).ToString("F1"),
-            $"{scorer.first_name}\n{scorer.last_name}",
-            $"{scorer.games} partidos jugados",
+            $"{scorer.first_name} {scorer.last_name}",
+            $"{scorer.games} {(scorer.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             scorer.player_id);
 
         var rebounder = teamStats.OrderByDescending(s => (float)s.total_rebounds / s.games).First();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
             (rebounder.total_rebounds / (float)rebounder.games).ToString("F1"),
-            $"{rebounder.first_name}\n{rebounder.last_name}",
-            $"{rebounder.games} partidos jugados",
+            $"{rebounder.first_name} {rebounder.last_name}",
+            $"{rebounder.games} {(rebounder.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             rebounder.player_id);
 
         var assister = teamStats.OrderByDescending(s => (float)s.total_assists / s.games).First();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
             (assister.total_assists / (float)assister.games).ToString("F1"),
-            $"{assister.first_name}\n{assister.last_name}",
-            $"{assister.games} partidos jugados",
+            $"{assister.first_name} {assister.last_name}",
+            $"{assister.games} {(assister.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             assister.player_id);
 
         var stealer = teamStats.OrderByDescending(s => (float)s.total_steals / s.games).First();
         SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
             (stealer.total_steals / (float)stealer.games).ToString("F1"),
-            $"{stealer.first_name}\n{stealer.last_name}",
-            $"{stealer.games} partidos jugados",
+            $"{stealer.first_name} {stealer.last_name}",
+            $"{stealer.games} {(stealer.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             stealer.player_id);
 
         var blocker = teamStats.OrderByDescending(s => (float)s.total_blocks / s.games).First();
         SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
             (blocker.total_blocks / (float)blocker.games).ToString("F1"),
-            $"{blocker.first_name}\n{blocker.last_name}",
-            $"{blocker.games} partidos jugados",
+            $"{blocker.first_name} {blocker.last_name}",
+            $"{blocker.games} {(blocker.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             blocker.player_id);
 
         var rated = teamStats.OrderByDescending(s => (float)s.total_rating / s.games).First();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
             (rated.total_rating / (float)rated.games).ToString("F1"),
-            $"{rated.first_name}\n{rated.last_name}",
-            $"{rated.games} partidos jugados",
+            $"{rated.first_name} {rated.last_name}",
+            $"{rated.games} {(rated.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             rated.player_id);
     }
 
@@ -3531,10 +3536,11 @@ public class DashboardController : MonoBehaviour
         }
 
         // Media equipo (overall)
+        int teamAvg = _players.Count > 0 ? Mathf.RoundToInt((float)_players.Average(p => p.GetCalculatedAverage())) : 0;
         if (_teamOverallLabel != null)
-            _teamOverallLabel.text = $"Media: {_myTeam.overall}";
+            _teamOverallLabel.text = $"Media: {teamAvg}";
         if (_teamOverallRingVal != null)
-            _teamOverallRingVal.text = _myTeam.overall.ToString();
+            _teamOverallRingVal.text = teamAvg.ToString();
 
         // Química equipo
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
@@ -3591,6 +3597,44 @@ public class DashboardController : MonoBehaviour
         SetCircle(_barTrust, _valTrust, _manager.trust);
         SetCircle(_barMorale, _valMorale, _manager.morale);
         SetCircle(_barFanConfidence, _valFanConfidence, _manager.fan_confidence);
+    }
+
+    // ── MENSAJES ────────────────────────────────────────
+
+    void RefreshMessages()
+    {
+        if (_messagesBody == null || _manager == null) return;
+        _messagesBody.Clear();
+
+        var all = DatabaseManager.Instance.GetMessages(_manager.id);
+        if (all == null || all.Count == 0)
+        {
+            var lbl = new Label("NO HAY MENSAJES");
+            lbl.AddToClassList("no-games-text");
+            _messagesBody.Add(lbl);
+            return;
+        }
+
+        var latest = all.OrderByDescending(m => m.id).Take(8).ToList();
+
+        foreach (var msg in latest)
+        {
+            var item = new VisualElement();
+            item.AddToClassList("message-item");
+
+            var subj = new Label(msg.title ?? "Sin asunto");
+            subj.AddToClassList("message-item-subject");
+            item.Add(subj);
+
+            var body = new Label(msg.body ?? "");
+            body.AddToClassList("message-item-body");
+            item.Add(body);
+
+            _messagesBody.Add(item);
+
+            if (msg.is_read == 0)
+                DatabaseManager.Instance.MarkMessageRead(msg.id);
+        }
     }
 
     void SetCircle(VisualElement circle, Label val, int value)

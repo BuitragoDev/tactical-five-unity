@@ -37,4 +37,9 @@ public class PlayerData
     public int seasons_with_team { get; set; } = 1;
     public int morale { get; set; } = 50;
     public string photo { get; set; }
+
+    public int GetCalculatedAverage()
+    {
+        return (speed + shooting + three_point + passing + dribbling + defense + rebounding + athleticism + iq + steals + blocks) / 11;
+    }
 }

@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- RECORDS TITLE BOX -->
-            <ui:VisualElement class="records-title-box">
-                <ui:Label class="records-title-box-label" text="RÉCORDS HISTÓRICOS" />
-            </ui:VisualElement>
-
             <!-- RECORDS CONTENT -->
             <ui:VisualElement class="records-content">
 

@@ -17,11 +17,6 @@
             <!-- CALENDAR CONTENT -->
             <ui:VisualElement class="calendar-content">
 
-                <!-- TITLE BOX -->
-                <ui:VisualElement class="calendar-title-box">
-                    <ui:Label text="CALENDARIO" class="calendar-title-box-label" />
-                </ui:VisualElement>
-
                 <!-- Month navigation -->
                 <ui:VisualElement class="calendar-nav">
                     <ui:Button name="BtnPrevMonth" class="calendar-nav-btn" text="◀" />

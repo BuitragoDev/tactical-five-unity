@@ -11,23 +11,6 @@
     top: 0; left: 0; right: 0; bottom: 0;
 }
 
-.records-title-box {
-    flex-direction: row;
-    align-items: center;
-    margin: 16px 24px 0;
-    padding: 10px 18px;
-    border-width: 1px;
-    border-color: rgb(42, 95, 201);
-    background-color: rgba(42, 95, 201, 0.08);
-}
-.records-title-box-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 3px;
-    color: rgb(208, 216, 232);
-    text-transform: uppercase;
-}
-
 .records-main {
     flex-direction: column;
     flex-grow: 1;
@@ -39,6 +22,7 @@
     flex-direction: column;
     flex-grow: 1;
     padding: 20px;
+    padding-top: 10px;
     min-height: 0;
 }
 
@@ -61,7 +45,7 @@
     border-color: rgb(42, 51, 71);
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
-    margin-right: 8px;
+    margin-right: 6px;
 }
 
 .records-tab:hover {

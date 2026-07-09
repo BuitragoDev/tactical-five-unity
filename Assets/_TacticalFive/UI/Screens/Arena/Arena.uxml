@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- ARENA TITLE BOX -->
-            <ui:VisualElement class="arena-title-box">
-                <ui:Label class="arena-title-box-label" text="PABELLÓN" />
-            </ui:VisualElement>
-
             <!-- ARENA CONTENT -->
             <ui:VisualElement class="arena-content">
 

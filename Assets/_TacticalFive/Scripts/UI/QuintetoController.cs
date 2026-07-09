@@ -209,12 +209,7 @@ public class QuintetoController : MonoBehaviour
             _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Injured);
         });
-        _root.Q<Button>("SubmenuVestuario")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
-            ScreenManager.Instance.GoTo(GameScreen.Vestuario);
-        });
+
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
@@ -309,7 +304,7 @@ public class QuintetoController : MonoBehaviour
                 "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
                 "NavMarket", "NavFinances", "NavArena", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
-                "SubmenuEmpleados", "SubmenuLesionados", "SubmenuVestuario",
+                "SubmenuEmpleados", "SubmenuLesionados",
                 "SubmenuPalmares", "SubmenuRecords",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV"
@@ -629,7 +624,7 @@ public class QuintetoController : MonoBehaviour
             : $"{p.position} / {p.secondary_position}";
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerMeta.text = $"{PlayerAge(p)} años · {p.nationality}";
-        _detailOvr.text = p.overall.ToString();
+        _detailOvr.text = p.GetCalculatedAverage().ToString();
 
         BuildAttrBars(p);
 
@@ -743,7 +738,7 @@ public class QuintetoController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-card-ovr");
-        ovrLbl.text = $" {player.overall} OVR";
+        ovrLbl.text = $" {player.GetCalculatedAverage()} MED";
         meta.Add(ovrLbl);
 
         info.Add(meta);

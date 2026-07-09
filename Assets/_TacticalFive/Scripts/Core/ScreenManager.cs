@@ -11,7 +11,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument preseasonDocument;
     [SerializeField] private UIDocument dashboardDocument;
     [SerializeField] private UIDocument rosterDocument;
-    [SerializeField] private UIDocument vestuarioDocument;
+
     [SerializeField] private UIDocument quintetoDocument;
     [SerializeField] private UIDocument trainingDocument;
     [SerializeField] private UIDocument calendarDocument;
@@ -165,9 +165,7 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Training:
                 ShowOnly(trainingDocument);
                 break;
-            case GameScreen.Vestuario:
-                ShowOnly(vestuarioDocument);
-                break;
+
             case GameScreen.Quinteto:
                 ShowOnly(quintetoDocument);
                 break;
@@ -210,7 +208,7 @@ public class ScreenManager : MonoBehaviour
         if (editorDocument != null) editorDocument.gameObject.SetActive(false);
         if (historialDocument != null) historialDocument.gameObject.SetActive(false);
         if (trainingDocument != null) trainingDocument.gameObject.SetActive(false);
-        if (vestuarioDocument != null) vestuarioDocument.gameObject.SetActive(false);
+
         if (quintetoDocument != null) quintetoDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }

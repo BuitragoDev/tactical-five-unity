@@ -13,12 +13,6 @@
         <ui:VisualElement class="roster-main">
 
             <!-- TOP HEADER (reutilizamos clases del dashboard) -->
-
-            <!-- TITLE BOX -->
-            <ui:VisualElement class="roster-title-box">
-                <ui:Label text="JUGADORES" class="roster-title-box-label" />
-            </ui:VisualElement>
-
             <!-- SUMMARY BAR -->
             <ui:VisualElement class="summary-bar">
                 <ui:VisualElement class="summary-item">
@@ -27,7 +21,7 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="summary-item">
                     <ui:Label name="SummaryOverall" class="summary-value summary-value--gold" text="0" />
-                    <ui:Label class="summary-label" text="OVERALL" />
+                    <ui:Label class="summary-label" text="MEDIA" />
                 </ui:VisualElement>
                 <ui:VisualElement class="summary-item summary-item-last">
                     <ui:Label name="SummaryBudget" class="summary-value summary-value--gold" text="" />
@@ -71,7 +65,7 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement class="detail-ovr-block">
                                     <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />
-                                    <ui:Label class="detail-ovr-label" text="OVR" />
+                                    <ui:Label class="detail-ovr-label" text="MED" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
 

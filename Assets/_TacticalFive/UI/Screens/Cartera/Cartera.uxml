@@ -10,11 +10,6 @@
         <ui:VisualElement class="cartera-main">
             <!-- TOP HEADER -->
 
-            <!-- TITLE BOX -->
-            <ui:VisualElement class="cartera-title-box">
-                <ui:Label class="cartera-title-box-label" text="CARTERA DE JUGADORES" />
-            </ui:VisualElement>
-
             <!-- CONTENT -->
             <ui:VisualElement class="cartera-content">
                 <!-- LEFT COLUMN -->

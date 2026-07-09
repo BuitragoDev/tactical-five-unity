@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- MESSAGES TITLE BOX -->
-            <ui:VisualElement class="messages-title-box">
-                <ui:Label class="messages-title-box-label" text="MENSAJES" />
-            </ui:VisualElement>
-
             <!-- MESSAGES CONTENT -->
             <ui:VisualElement class="messages-content">
 

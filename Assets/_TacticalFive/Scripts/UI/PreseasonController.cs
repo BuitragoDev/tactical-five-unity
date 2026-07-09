@@ -39,6 +39,7 @@ public class PreseasonController : MonoBehaviour
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites120 = new();
+    private Dictionary<int, int> _teamAvgCache = new();
 
     // Inicializado dinámicamente en LoadData según el año de la temporada
     private string[] _dates = new string[4];
@@ -294,9 +295,15 @@ public class PreseasonController : MonoBehaviour
             scroll.contentContainer.style.alignContent = Align.FlexStart;
         }
 
+        _teamAvgCache.Clear();
         foreach (var team in _allTeams)
         {
             if (team.id == _myTeam.id) continue;
+            var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+            int sum = 0;
+            foreach (var p in players)
+                sum += p.GetCalculatedAverage();
+            _teamAvgCache[team.id] = players.Count > 0 ? Mathf.RoundToInt((float)sum / players.Count) : 0;
             _teamsGrid.Add(CreateTeamItem(team));
         }
     }
@@ -314,7 +321,7 @@ public class PreseasonController : MonoBehaviour
 
         var overall = new Label();
         overall.AddToClassList("team-overall");
-        overall.text = $"MED {team.overall}";
+        overall.text = $"MED {_teamAvgCache.GetValueOrDefault(team.id, 0)}";
 
         item.Add(logo);
         item.Add(overall);

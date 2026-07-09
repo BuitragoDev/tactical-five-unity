@@ -47,11 +47,24 @@ public class SelectTeamController : MonoBehaviour
     private Label _detailOverall;
     private VisualElement _jerseyHome;
     private VisualElement _jerseyAway;
+    private Button _btnShowSquad;
+
+    // Modal
+    private VisualElement _squadModalOverlay;
+    private VisualElement _squadModalLogo;
+    private Label _squadModalTeamName;
+    private Label _squadModalAvg;
+    private VisualElement _squadColumnLeft;
+    private VisualElement _squadColumnRight;
+    private Button _btnCloseSquad;
+
+    private Dictionary<string, Texture2D> _flagTextures = new();
 
     // Estado
     private List<TeamData> _allTeams;
     private List<TeamData> _worstTeams;
     private TeamData _selectedTeam;
+    private List<PlayerData> _cachedPlayers;
 
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -131,6 +144,15 @@ public class SelectTeamController : MonoBehaviour
         _detailOverall = _root.Q<Label>("DetailOverall");
         _jerseyHome = _root.Q<VisualElement>("JerseyHome");
         _jerseyAway = _root.Q<VisualElement>("JerseyAway");
+        _btnShowSquad = _root.Q<Button>("BtnShowSquad");
+
+        _squadModalOverlay = _root.Q<VisualElement>("SquadModalOverlay");
+        _squadModalLogo = _root.Q<VisualElement>("SquadModalLogo");
+        _squadModalTeamName = _root.Q<Label>("SquadModalTeamName");
+        _squadModalAvg = _root.Q<Label>("SquadModalAvg");
+        _squadColumnLeft = _root.Q<VisualElement>("SquadColumnLeft");
+        _squadColumnRight = _root.Q<VisualElement>("SquadColumnRight");
+        _btnCloseSquad = _root.Q<Button>("BtnCloseSquad");
     }
 
     void SetupScrollViews()
@@ -160,6 +182,14 @@ public class SelectTeamController : MonoBehaviour
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowFilter("East"); });
         _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowFilter("West"); });
 
+        _btnShowSquad?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowSquadModal(); });
+        _btnCloseSquad?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseSquadModal(); });
+        _squadModalOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _squadModalOverlay)
+            { PlayClick(); CloseSquadModal(); }
+        });
+
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(_btnBack);
@@ -167,6 +197,8 @@ public class SelectTeamController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_tabAll);
             CursorManager.Instance.RegisterHandCursor(_tabEast);
             CursorManager.Instance.RegisterHandCursor(_tabWest);
+            CursorManager.Instance.RegisterHandCursor(_btnShowSquad);
+            CursorManager.Instance.RegisterHandCursor(_btnCloseSquad);
         }
     }
 
@@ -181,6 +213,11 @@ public class SelectTeamController : MonoBehaviour
         Debug.Log($"[SelectTeam] Camisetas cargadas: {jerseys.Length}");
         foreach (var s in jerseys)
             _jerseySprites[s.name] = s;
+
+        var flags = Resources.LoadAll<Texture2D>("Flags/");
+        Debug.Log($"[SelectTeam] Flags cargados: {flags.Length}");
+        foreach (var f in flags)
+            _flagTextures[f.name] = f;
     }
 
     void LoadTeams()
@@ -288,10 +325,10 @@ public class SelectTeamController : MonoBehaviour
         _detailBudget.text = $"${team.budget / 1_000_000}M";
 
         // Margen salarial real = Cap - suma de salarios de jugadores del equipo
+        _cachedPlayers = DatabaseManager.Instance.GetPlayersByTeam(team.id);
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        var teamPlayers = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-        long totalPayroll = teamPlayers.Sum(p => p.salary);
+        long totalPayroll = _cachedPlayers.Sum(p => p.salary);
         long margin = salaryCap - totalPayroll;
 
         _detailSalaryMargin.text = margin >= 0
@@ -301,10 +338,18 @@ public class SelectTeamController : MonoBehaviour
             ? new StyleColor(new Color(0.15f, 0.68f, 0.38f))
             : new StyleColor(new Color(0.75f, 0.22f, 0.17f));
 
-        // Stats
-        _detailAttack.text = team.attack.ToString();
-        _detailDefense.text = team.defense.ToString();
-        _detailOverall.text = team.overall.ToString();
+        // Stats — calculated from player attributes
+        int atkSum = 0, defSum = 0, ovrSum = 0;
+        foreach (var p in _cachedPlayers)
+        {
+            atkSum += (p.speed + p.shooting + p.three_point + p.passing + p.dribbling + p.athleticism) / 6;
+            defSum += (p.defense + p.rebounding + p.steals + p.blocks + p.iq) / 5;
+            ovrSum += p.GetCalculatedAverage();
+        }
+        int count = _cachedPlayers.Count;
+        _detailAttack.text = count > 0 ? Mathf.RoundToInt((float)atkSum / count).ToString() : "-";
+        _detailDefense.text = count > 0 ? Mathf.RoundToInt((float)defSum / count).ToString() : "-";
+        _detailOverall.text = count > 0 ? Mathf.RoundToInt((float)ovrSum / count).ToString() : "-";
 
         // Estrellas
         BuildStars(_detailReputation, team.reputation);
@@ -331,6 +376,148 @@ public class SelectTeamController : MonoBehaviour
                 star.AddToClassList("star--filled");
             container.Add(star);
         }
+    }
+
+    void ShowSquadModal()
+    {
+        if (_selectedTeam == null || _cachedPlayers == null) return;
+
+        if (_logoSprites.TryGetValue(_selectedTeam.logo, out var logoSprite))
+            _squadModalLogo.style.backgroundImage = new StyleBackground(logoSprite);
+
+        _squadModalTeamName.text = $"PLANTILLA DE LOS {_selectedTeam.name.ToUpper()}";
+
+        double teamSum = 0;
+        foreach (var p in _cachedPlayers)
+            teamSum += p.GetCalculatedAverage();
+        double teamAvg = _cachedPlayers.Count > 0 ? teamSum / _cachedPlayers.Count : 0;
+        _squadModalAvg.text = Mathf.RoundToInt((float)teamAvg).ToString();
+
+        // Sort by position order: PG (0), SG (1), SF (2), PF (3), C (4)
+        var sorted = _cachedPlayers.OrderBy(p => GetPositionOrder(p.position))
+                                   .ThenByDescending(p => p.overall).ToList();
+
+        _squadColumnLeft.Clear();
+        _squadColumnRight.Clear();
+
+        _squadColumnLeft.Add(MakeColumnHeader());
+        _squadColumnRight.Add(MakeColumnHeader());
+
+        int mid = (sorted.Count + 1) / 2;
+        for (int i = 0; i < sorted.Count; i++)
+        {
+            var player = sorted[i];
+            var column = i < mid ? _squadColumnLeft : _squadColumnRight;
+            column.Add(CreatePlayerRow(player));
+        }
+
+        _squadModalOverlay.style.display = DisplayStyle.Flex;
+    }
+
+    VisualElement CreatePlayerRow(PlayerData player)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("modal-player-row");
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("modal-player-name");
+        nameLbl.text = $"{player.first_name} {player.last_name}";
+        row.Add(nameLbl);
+
+        var posLbl = new Label();
+        posLbl.AddToClassList("modal-player-pos");
+        posLbl.text = GetPositionDisplay(player.position);
+        row.Add(posLbl);
+
+        var flag = new VisualElement();
+        flag.AddToClassList("modal-player-flag");
+        if (_flagTextures.TryGetValue(player.nationality ?? "", out var flagTex))
+            flag.style.backgroundImage = new StyleBackground(flagTex);
+        else if (_flagTextures.TryGetValue("default", out var defaultTex))
+            flag.style.backgroundImage = new StyleBackground(defaultTex);
+        row.Add(flag);
+
+        var ageLbl = new Label();
+        ageLbl.AddToClassList("modal-player-age");
+        ageLbl.text = player.age.ToString();
+        row.Add(ageLbl);
+
+        var avgLbl = new Label();
+        avgLbl.AddToClassList("modal-player-avg");
+        avgLbl.text = player.overall.ToString();
+        row.Add(avgLbl);
+
+        return row;
+    }
+
+    VisualElement MakeColumnHeader()
+    {
+        var header = new VisualElement();
+        header.AddToClassList("modal-header-row");
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("modal-header-label");
+        nameLbl.style.flexGrow = 1;
+        nameLbl.style.unityTextAlign = TextAnchor.MiddleLeft;
+        nameLbl.text = "NOMBRE";
+        header.Add(nameLbl);
+
+        var posLbl = new Label();
+        posLbl.AddToClassList("modal-header-label");
+        posLbl.style.width = 70;
+        posLbl.text = "POS";
+        header.Add(posLbl);
+
+        var nacLbl = new Label();
+        nacLbl.AddToClassList("modal-header-label");
+        nacLbl.style.width = 36;
+        nacLbl.text = "NAC";
+        header.Add(nacLbl);
+
+        var ageLbl = new Label();
+        ageLbl.AddToClassList("modal-header-label");
+        ageLbl.style.width = 30;
+        ageLbl.text = "EDAD";
+        header.Add(ageLbl);
+
+        var avgLbl = new Label();
+        avgLbl.AddToClassList("modal-header-label");
+        avgLbl.style.width = 40;
+        avgLbl.text = "MED";
+        header.Add(avgLbl);
+
+        return header;
+    }
+
+    string GetPositionDisplay(string pos)
+    {
+        return pos switch
+        {
+            "PG" => "BASE",
+            "SG" => "ESCOLTA",
+            "SF" => "ALERO",
+            "PF" => "ALA-PIVOT",
+            "C" => "PIVOT",
+            _ => pos
+        };
+    }
+
+    int GetPositionOrder(string pos)
+    {
+        return pos switch
+        {
+            "PG" => 0,
+            "SG" => 1,
+            "SF" => 2,
+            "PF" => 3,
+            "C" => 4,
+            _ => 5
+        };
+    }
+
+    void CloseSquadModal()
+    {
+        _squadModalOverlay.style.display = DisplayStyle.None;
     }
 
     void OnContinue()

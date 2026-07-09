@@ -34,7 +34,6 @@ public enum GameScreen
     Editor,
     Historial,
     Training,
-    Vestuario,
     Quinteto
 }
 

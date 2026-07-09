@@ -359,6 +359,19 @@
     margin-bottom: 16px;
     align-items: stretch;
 }
+.center-column {
+    flex-direction: column;
+    flex-grow: 3;
+    flex-basis: 650px;
+    max-width: 650px;
+    margin-right: 16px;
+}
+.center-column > .panel {
+    margin-right: 0;
+}
+.center-column > .panel-player-stats {
+    margin-bottom: 16px;
+}
 .right-column {
     flex-direction: column;
     flex-grow: 1;
@@ -444,7 +457,7 @@
 .game-team-block {
     flex-direction: column;
     align-items: center;
-    width: 160px;
+    width: 260px;
     flex-shrink: 0;
 }
 .game-team-logo-lg {
@@ -698,9 +711,6 @@
    PANEL ESTADÍSTICAS JUGADORES
    ══════════════════════════════════════════ */
 .panel-player-stats {
-    flex-grow: 3;
-    flex-basis: 650px;
-    max-width: 650px;
 }
 .stats-grid {
     flex-direction: row;
@@ -708,7 +718,7 @@
 }
 .stat-card {
     width: 50%;
-    padding: 16px 12px;
+    padding: 10px 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
     border-right-width: 1px;
@@ -725,20 +735,29 @@
 
 .stat-card-left {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 90px;
-    margin-right: 16px;
+    width: 60px;
+    margin-right: 10px;
 }
 
 .stat-card-photo-wrapper {
-    width: 88px;
-    height: 88px;
+    width: 68px;
+    height: 68px;
     border-radius: 54px;
-    background-color: rgb(42, 95, 201);
+    background-color: rgb(200, 200, 200);
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-card-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50px;
+    background-size: cover;
+    background-position: center;
     flex-shrink: 0;
 }
 
@@ -749,48 +768,93 @@
     flex-grow: 1;
 }
 
-.stat-card-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
-    font-size: 18px;
-    letter-spacing: 2px;
+.stat-card-abbr {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(85, 102, 119);
     -unity-text-align: middle-center;
-    margin-bottom: 6px;
+    margin-top: 2px;
 }
-.stat-card-value {
+
+.stat-card-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 48px;
+    font-size: 32px;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
 }
-.stat-card-photo {
-    width: 80px;
-    height: 80px;
-    border-radius: 50px;
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-}
-.stat-card-player-label {
+
+.stat-card-player {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
 }
+
 .stat-card-games {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
     font-size: 16px;
     color: rgb(85, 102, 119);
     -unity-text-align: middle-center;
-    margin-top: 2px;
+    margin-top: 1px;
+}
+
+/* ══════════════════════════════════════════
+   PANEL MENSAJES
+   ══════════════════════════════════════════ */
+.panel-messages {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: 180px;
+}
+.messages-scroll {
+    flex-grow: 1;
+    min-height: 0;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.messages-scroll .unity-scroll-view__content-viewport {
+    overflow: hidden;
+    padding: 8px 0;
+}
+.messages-scroll .unity-scroll-view__content-container {
+    flex-grow: 1;
+}
+.messages-body {
+    flex-direction: column;
+    padding: 8px 18px;
+}
+.message-item {
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 8px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
+}
+.message-item:last-child {
+    border-bottom-width: 0;
+}
+.message-item-subject {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(208, 216, 232);
+    margin-bottom: 4px;
+    white-space: normal;
+}
+.message-item-body {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    white-space: normal;
 }
 
 /* ══════════════════════════════════════════
    PANEL ESTADÍSTICAS DEL EQUIPO
    ══════════════════════════════════════════ */
 .panel-team-stats {
-    min-height: 390px;
+    min-height: 350px;
 }
 .team-stat-row {
     flex-direction: row;

@@ -14,11 +14,6 @@
 
             <!-- TOP HEADER -->
 
-            <!-- TITLE BOX -->
-            <ui:VisualElement class="historial-title-box">
-                <ui:Label class="historial-title-box-label" text="HISTORIAL DE TRANSFERENCIAS" />
-            </ui:VisualElement>
-
             <!-- HISTORIAL CONTENT -->
             <ui:VisualElement class="historial-content">
                 <ui:VisualElement class="historial-table">

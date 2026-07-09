@@ -17,11 +17,6 @@
             <!-- CONTENT -->
             <ui:VisualElement class="injured-content">
 
-                <!-- TITLE BOX -->
-                <ui:VisualElement class="injured-title-box">
-                    <ui:Label class="injured-title-box-label" text="JUGADORES LESIONADOS" />
-                </ui:VisualElement>
-
                 <!-- MEDICAL STAFF -->
                 <ui:VisualElement name="MedicalStaffSection" class="med-staff-section">
                     <ui:Label class="section-title" text="JEFE DE SERVICIOS MÉDICOS" />

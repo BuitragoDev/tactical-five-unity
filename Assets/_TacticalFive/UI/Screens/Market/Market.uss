@@ -42,10 +42,10 @@
     flex-direction: row;
     align-items: center;
     gap: 10px;
-    padding: 14px 20px;
+    padding: 12px 20px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
-    background-color: rgba(212, 160, 23, 0.04);
+    background-color: rgb(42, 95, 201);
 }
 
 .market-section-icon {
@@ -54,24 +54,23 @@
 
 .market-section-title-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 18px;
     letter-spacing: 1.5px;
     -unity-text-transform: upper;
-    color: rgb(212, 160, 23);
+    color: rgb(255, 255, 255);
 }
 
 /* ── TEAM GRID ── */
 .market-team-grid {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px;
     padding: 16px 20px;
 }
 
 .market-team-chip {
     width: 80px;
     height: 80px;
+    margin: 6px;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);

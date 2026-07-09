@@ -17,11 +17,6 @@
             <!-- CONTENT -->
             <ui:VisualElement class="employees-content">
 
-                <!-- TITLE BOX -->
-                <ui:VisualElement class="employees-title-box">
-                    <ui:Label class="employees-title-box-label" text="EMPLEADOS" />
-                </ui:VisualElement>
-
                 <!-- YOUR STAFF -->
                 <ui:VisualElement class="staff-section">
                     <ui:Label class="staff-section-title" text="TU PERSONAL" />
