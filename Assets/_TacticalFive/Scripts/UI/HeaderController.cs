@@ -75,8 +75,6 @@ public static class HeaderController
                 btnAction.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
             var configIcon = header.Q<VisualElement>("ConfigIcon");
-            if (configIcon != null)
-                configIcon.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Settings); });
 
             LoadTeamLogo(header);
 
