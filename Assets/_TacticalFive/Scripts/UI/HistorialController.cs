@@ -131,7 +131,7 @@ public class HistorialController : MonoBehaviour
         if (CursorManager.Instance != null)
             CursorManager.Instance.SetDefaultCursor();
         _root.Q<Button>("SubmenuHistorial")?.AddToClassList("nav-submenu-item--active");
-        if (_btnAction != null) _btnAction.text = "DASHBOARD";
+        if (_btnAction != null) _btnAction.text = "MENÚ PRINCIPAL";
 
         if (_myTeam != null)
         {

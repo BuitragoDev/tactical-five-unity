@@ -264,7 +264,7 @@ public class SponsorsController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "DASHBOARD";
+        _btnAction.text = "MENÚ PRINCIPAL";
     }
 
     // Sponsors can only be signed in September (preseason) or October (days 1-10)

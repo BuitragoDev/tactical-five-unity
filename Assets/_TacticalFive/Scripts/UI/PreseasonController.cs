@@ -113,7 +113,7 @@ public class PreseasonController : MonoBehaviour
         _datesDb = new string[4];
         for (int i = 0; i < 4; i++)
         {
-            int day = 5 + i * 3; // 05, 08, 11, 14
+            int day = 5 + i * 5; // 05, 10, 15, 20
             _datesDb[i] = $"{yearStart}-09-{day:D2}";
             _dates[i] = $"{day:D2} SEP {yearStart}";
         }

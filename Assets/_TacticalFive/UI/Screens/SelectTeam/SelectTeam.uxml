@@ -32,17 +32,9 @@
                 <ui:ScrollView name="DetailScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="right-scroll">
                     <ui:VisualElement name="DetailPanel" class="detail-panel">
                         <ui:VisualElement class="detail-header">
-                            <ui:VisualElement class="detail-col-logo">
-                                <ui:VisualElement name="DetailLogo" class="detail-logo"/>
-                                <ui:VisualElement class="detail-name-wrap">
-                                    <ui:Label name="DetailTeamName" text="" class="detail-team-name"/>
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-                            <ui:VisualElement class="detail-col-jersey">
-                                <ui:VisualElement name="JerseyHome" class="jersey-img jersey-home"/>
-                            </ui:VisualElement>
-                            <ui:VisualElement class="detail-col-jersey">
-                                <ui:VisualElement name="JerseyAway" class="jersey-img jersey-away"/>
+                            <ui:VisualElement name="DetailLogo" class="detail-logo"/>
+                            <ui:VisualElement class="detail-name-wrap">
+                                <ui:Label name="DetailTeamName" text="" class="detail-team-name"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="detail-row">

@@ -83,7 +83,7 @@
 }
 
 .court-card-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     color: rgb(220, 220, 220);
     -unity-text-align: middle-center;
@@ -95,7 +95,7 @@
 }
 
 .lineup-col-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(180, 180, 180);
     letter-spacing: 2px;
@@ -139,7 +139,7 @@
 }
 
 .starter-slot-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(140, 140, 140);
     width: 30px;
@@ -168,7 +168,7 @@
     background-color: rgba(42, 95, 201, 0.12);
 }
 .bench-slot-label, .inactive-slot-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 14px;
     letter-spacing: 2px;
     color: rgb(70, 70, 70);
@@ -198,7 +198,7 @@
 }
 
 .auto-lineup-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 2px;
     color: rgb(208, 216, 232);
@@ -241,21 +241,24 @@
     background-position: center;
     flex-shrink: 0;
     margin-right: 8px;
+    margin-top: 6px;
 }
 
 .player-card-info {
     flex-direction: column;
+    justify-content: center;
     flex-grow: 1;
     min-width: 0;
     overflow: hidden;
 }
 
 .player-card-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     color: rgb(220, 220, 220);
     overflow: hidden;
     height: auto;
+    margin-top: 6px;
 }
 
 .player-card-meta {
@@ -265,13 +268,13 @@
 }
 
 .player-card-pos {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(130, 130, 130);
 }
 
 .player-card-ovr {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     color: rgb(76, 175, 80);
 }
@@ -317,7 +320,7 @@
 }
 
 .detail-empty-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -344,7 +347,7 @@
 }
 
 .detail-pos-badge {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(255, 255, 255);
     background-color: rgb(42, 95, 201);
@@ -361,7 +364,7 @@
 }
 
 .detail-player-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     color: rgb(255, 255, 255);
     text-transform: uppercase;
@@ -370,7 +373,7 @@
 }
 
 .detail-player-meta {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
@@ -384,14 +387,14 @@
 }
 
 .detail-ovr-val {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 36px;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
 }
 
 .detail-ovr-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -412,7 +415,7 @@
 }
 
 .attr-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -446,7 +449,7 @@
 }
 
 .attr-val {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 20px;
     color: rgb(208, 216, 232);
     width: 32px;
@@ -472,14 +475,14 @@
 }
 
 .season-stat-val {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 32px;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
 }
 
 .season-stat-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     letter-spacing: 2px;
     text-transform: uppercase;

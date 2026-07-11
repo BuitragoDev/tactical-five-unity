@@ -500,7 +500,7 @@ public class EmployeesController : MonoBehaviour
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "DASHBOARD";
+        _btnAction.text = "MENÚ PRINCIPAL";
     }
 
     void BuildStaff()

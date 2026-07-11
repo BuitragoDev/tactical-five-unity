@@ -45,8 +45,6 @@ public class SelectTeamController : MonoBehaviour
     private Label _detailAttack;
     private Label _detailDefense;
     private Label _detailOverall;
-    private VisualElement _jerseyHome;
-    private VisualElement _jerseyAway;
     private Button _btnShowSquad;
 
     // Modal
@@ -68,7 +66,6 @@ public class SelectTeamController : MonoBehaviour
 
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
-    private Dictionary<string, Sprite> _jerseySprites = new();
 
     void OnEnable()
     {
@@ -142,8 +139,6 @@ public class SelectTeamController : MonoBehaviour
         _detailAttack = _root.Q<Label>("DetailAttack");
         _detailDefense = _root.Q<Label>("DetailDefense");
         _detailOverall = _root.Q<Label>("DetailOverall");
-        _jerseyHome = _root.Q<VisualElement>("JerseyHome");
-        _jerseyAway = _root.Q<VisualElement>("JerseyAway");
         _btnShowSquad = _root.Q<Button>("BtnShowSquad");
 
         _squadModalOverlay = _root.Q<VisualElement>("SquadModalOverlay");
@@ -208,11 +203,6 @@ public class SelectTeamController : MonoBehaviour
         Debug.Log($"[SelectTeam] Logos cargados: {logos.Length}");
         foreach (var s in logos)
             _logoSprites[s.name] = s;
-
-        var jerseys = Resources.LoadAll<Sprite>("Teams/Jerseys/121x170/");
-        Debug.Log($"[SelectTeam] Camisetas cargadas: {jerseys.Length}");
-        foreach (var s in jerseys)
-            _jerseySprites[s.name] = s;
 
         var flags = Resources.LoadAll<Texture2D>("Flags/");
         Debug.Log($"[SelectTeam] Flags cargados: {flags.Length}");
@@ -357,12 +347,6 @@ public class SelectTeamController : MonoBehaviour
 
         // Objetivo temporada
         _detailObjective.text = string.IsNullOrEmpty(team.objective) ? "—" : team.objective;
-
-        // Camisetas
-        if (_jerseySprites.TryGetValue(team.jersey_home, out var home))
-            _jerseyHome.style.backgroundImage = new StyleBackground(home);
-        if (_jerseySprites.TryGetValue(team.jersey_away, out var away))
-            _jerseyAway.style.backgroundImage = new StyleBackground(away);
     }
 
     void BuildStars(VisualElement container, int filled)

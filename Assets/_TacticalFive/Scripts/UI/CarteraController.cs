@@ -306,7 +306,7 @@ public class CarteraController : MonoBehaviour
         _headerMargin.RemoveFromClassList("header-stat-value--negative");
         if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
 
-        _btnAction.text = "DASHBOARD";
+        _btnAction.text = "MENÚ PRINCIPAL";
 
         if (_season != null)
         {

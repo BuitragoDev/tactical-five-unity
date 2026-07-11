@@ -26,7 +26,7 @@
             <ui:Label name="HeaderSeason" class="header-season-label" text="" />
             <ui:Label name="HeaderDate" class="header-date-label" text="" />
         </ui:VisualElement>
-        <ui:Button name="BtnAction" class="btn-action" text="DASHBOARD" />
+        <ui:Button name="BtnAction" class="btn-action" text="MENÚ PRINCIPAL" />
         <ui:VisualElement name="ConfigIcon" class="header-config-icon" />
     </ui:VisualElement>
 </ui:UXML>

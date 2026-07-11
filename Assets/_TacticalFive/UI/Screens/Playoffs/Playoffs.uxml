@@ -4,7 +4,7 @@
     <ui:VisualElement name="PlayoffsRoot" class="playoffs-root">
         <ui:VisualElement class="playoffs-main">
             <ui:VisualElement class="playoffs-body">
-                <ui:ScrollView horizontal-scrolling-enabled="false" mode="Vertical" class="playoffs-scroll">
+                <ui:ScrollView name="PlayoffsScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="playoffs-scroll">
                     <ui:VisualElement name="RegularSeasonEmpty" class="bracket-empty" style="display: none;">
                         <ui:Label text="🏀" class="bracket-empty-icon"/>
                         <ui:Label text="TEMPORADA REGULAR EN CURSO" class="bracket-empty-title"/>

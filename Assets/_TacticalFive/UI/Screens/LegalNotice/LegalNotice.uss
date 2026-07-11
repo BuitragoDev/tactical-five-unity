@@ -91,6 +91,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 3px;
+    width: 200px;
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);
     background-color: rgb(42, 95, 201);
@@ -126,6 +127,7 @@
     border-width: 0;
     padding: 12px 32px;
     -unity-text-align: middle-center;
+    min-width: 170px;
 }
 
 .modal-btn--secondary {

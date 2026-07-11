@@ -304,7 +304,7 @@ public class ArenaController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "DASHBOARD";
+        _btnAction.text = "MENÚ PRINCIPAL";
     }
 
     /* ═══════════════════════════════════════════

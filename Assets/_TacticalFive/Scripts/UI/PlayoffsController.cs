@@ -8,6 +8,7 @@ public class PlayoffsController : MonoBehaviour
     private UIDocument _doc;
     private VisualElement _root;
 
+    private ScrollView _scrollView;
     private Button _btnAction;
     private VisualElement _regularSeasonEmpty;
     private VisualElement _playInPanel;
@@ -49,6 +50,7 @@ public class PlayoffsController : MonoBehaviour
 
     void CacheReferences()
     {
+        _scrollView = _root.Q<ScrollView>("PlayoffsScroll");
         _btnAction = _root.Q<Button>("BtnAction");
         _regularSeasonEmpty = _root.Q<VisualElement>("RegularSeasonEmpty");
         _playInPanel = _root.Q<VisualElement>("PlayInPanel");
@@ -184,6 +186,7 @@ public class PlayoffsController : MonoBehaviour
                         if (child == header) continue;
                         child.style.display = DisplayStyle.Flex;
                     }
+                    if (_scrollView != null) _scrollView.scrollOffset = Vector2.zero;
                 }
 
                 UpdateAllArrows();
@@ -328,6 +331,22 @@ public class PlayoffsController : MonoBehaviour
         BuildEastBracket();
         BuildWestBracket();
         BuildFinals();
+
+        // Start with all panels collapsed
+        foreach (var panel in _root.Query<VisualElement>(null, "panel-playoffs").Build())
+        {
+            foreach (var child in panel.Children())
+            {
+                if (child.ClassListContains("panel-header")) continue;
+                child.style.display = DisplayStyle.None;
+            }
+            var header = panel.Q<VisualElement>(null, "panel-header");
+            if (header != null)
+            {
+                var arrow = header.Q<Label>(null, "panel-toggle-arrow");
+                if (arrow != null) arrow.text = "▼";
+            }
+        }
     }
 
     void RefreshHeader()
@@ -376,7 +395,7 @@ public class PlayoffsController : MonoBehaviour
             _root.Q<Label>("HeaderDate").text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _btnAction.text = "DASHBOARD";
+        _btnAction.text = "MENÚ PRINCIPAL";
     }
 
     void BuildPlayIn()
@@ -428,9 +447,9 @@ public class PlayoffsController : MonoBehaviour
         string confLower = conf.ToLower();
         var roundNames = new Dictionary<string, string>
         {
-            { "r1", "Primera Ronda" },
-            { "r2", "Semifinales de Conferencia" },
-            { "r3", "Finales de Conferencia" }
+            { "r1", "PRIMERA RONDA" },
+            { "r2", "SEMIFINALES DE CONFERENCIA" },
+            { "r3", "FINALES DE CONFERENCIA" }
         };
 
         foreach (var round in roundNames)
@@ -502,7 +521,7 @@ public class PlayoffsController : MonoBehaviour
 
         var typeLbl = new Label();
         typeLbl.AddToClassList("playoff-series-type");
-        typeLbl.text = type == "Playoffs" || type == "Finals" ? "Best of 7" : "Single Game";
+        typeLbl.text = type == "Playoffs" || type == "Finals" ? "Mejor de 7" : "Partido único";
 
         header.Add(label);
         header.Add(typeLbl);
@@ -669,17 +688,63 @@ public class PlayoffsController : MonoBehaviour
 
     string FormatSeriesLabel(string label)
     {
-        if (label.StartsWith("playin-7-8-")) return "7 vs 8";
-        if (label.StartsWith("playin-9-10-")) return "9 vs 10";
-        if (label.StartsWith("playin-elim-")) return "Eliminatoria";
+        // Helper: parse conference from last part
+        string ParseConf(string lbl)
+        {
+            var parts = lbl.Split('-');
+            if (parts.Length < 3) return "";
+            string last = parts[parts.Length - 1].ToLower();
+            if (last == "east") return "Este";
+            if (last == "west") return "Oeste";
+            return "";
+        }
+
+        // Play-in: playin-7-8-east, playin-9-10-west, playin-elim-east
+        if (label.StartsWith("playin-"))
+        {
+            string conf = ParseConf(label);
+            if (label.Contains("7-8")) return $"{conf} - 7º vs 8º";
+            if (label.Contains("9-10")) return $"{conf} - 9º vs 10º";
+            if (label.Contains("elim")) return $"{conf} - Eliminatoria";
+            return label;
+        }
+
         if (label == "playoff-r4-finals") return "Final NBA";
 
-        // Remove "playoff-rX-" prefix
-        var parts = label.Split('-');
-        if (parts.Length >= 3 && parts[0] == "playoff")
+        // Playoff R1: playoff-r1-east-1v8 → "Este - 1º vs 8º"
+        if (label.StartsWith("playoff-r1-"))
         {
-            return string.Join("-", parts.Skip(2));
+            var parts = label.Split('-');
+            if (parts.Length >= 4)
+            {
+                string conf = parts[2] == "east" ? "Este" : "Oeste";
+                string matchup = parts[3];
+                var seeds = matchup.Split('v');
+                if (seeds.Length == 2)
+                    return $"{conf} - {seeds[0]}º vs {seeds[1]}º";
+                return $"{conf} - {matchup}";
+            }
         }
+
+        // Playoff R2: playoff-r2-east-s1 → "Este - Semifinal 1"
+        if (label.StartsWith("playoff-r2-"))
+        {
+            var parts = label.Split('-');
+            if (parts.Length >= 4)
+            {
+                string conf = parts[2] == "east" ? "Este" : "Oeste";
+                string series = parts[3] == "s1" ? "Semifinal 1" : "Semifinal 2";
+                return $"{conf} - {series}";
+            }
+        }
+
+        // Playoff R3 (conference finals): playoff-r3-east-s1 → "Este - Final de Conferencia"
+        if (label.StartsWith("playoff-r3-"))
+        {
+            string conf = label.Contains("east") ? "Este" : "Oeste";
+            return $"{conf} - Final de Conferencia";
+        }
+
         return label;
     }
 

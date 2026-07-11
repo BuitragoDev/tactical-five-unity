@@ -404,7 +404,7 @@ public class QuintetoController : MonoBehaviour
                                          chem >= 40 ? new StyleColor(new Color(212f / 255, 160f / 255, 23f / 255)) :
                                          new StyleColor(new Color(192f / 255, 57f / 255, 43f / 255));
 
-        _btnAction.text = "DASHBOARD";
+        _btnAction.text = "MENÚ PRINCIPAL";
     }
 
     void BuildLineup()
