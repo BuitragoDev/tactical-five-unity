@@ -192,6 +192,37 @@
     flex-shrink: 0;
 }
 
+.header-brand {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 24px;
+}
+.header-brand-icon {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    background-color: rgb(212, 160, 23);
+    color: rgb(0, 0, 0);
+    font-size: 28px;
+    padding: 4px 8px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+.header-brand-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    -unity-text-transform: upper;
+}
+.header-brand-text-gold {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: rgb(212, 160, 23);
+    -unity-text-transform: upper;
+}
+
 .header-team-logo {
     width: 64px;
     height: 64px;

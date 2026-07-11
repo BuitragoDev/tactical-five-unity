@@ -275,6 +275,27 @@ public class DashboardController : MonoBehaviour
     {
         // Sidebar unificado
         SidebarController.Attach(_root, GameScreen.Dashboard);
+
+        // Restructure: header full-width above sidebar
+        var container = _root.childCount > 0 ? _root[0] : _root;
+        if (container != null)
+        {
+            var topHeader = container.Q<VisualElement>("TopHeader");
+            if (topHeader != null)
+            {
+                topHeader.RemoveFromHierarchy();
+                var bodyRow = new VisualElement();
+                bodyRow.style.flexDirection = FlexDirection.Row;
+                bodyRow.style.flexGrow = 1;
+                bodyRow.style.minHeight = 0;
+                while (container.childCount > 0)
+                    bodyRow.Add(container[0]);
+                container.Add(topHeader);
+                container.Add(bodyRow);
+                container.style.flexDirection = FlexDirection.Column;
+            }
+        }
+
         _btnAction?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnActionClicked(); });
 
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("East"); });

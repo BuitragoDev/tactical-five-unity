@@ -1,10 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <ui:VisualElement name="Sidebar" class="sidebar">
-        <ui:VisualElement class="sidebar-logo">
-            <ui:Label text="TF" class="sidebar-logo-icon"/>
-            <ui:Label text="TACTICAL" class="sidebar-logo-text"/>
-            <ui:Label text="FIVE" class="sidebar-logo-text-gold"/>
-        </ui:VisualElement>
         <ui:VisualElement class="sidebar-nav">
             <ui:Button name="NavDashboard" class="nav-item">
                 <ui:VisualElement name="NavDashboardIcon" class="nav-icon"/>

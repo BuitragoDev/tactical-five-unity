@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections.Generic;
 using System.Linq;
 
 public static class HeaderController
@@ -27,10 +28,45 @@ public static class HeaderController
             var container = root.childCount > 0 ? root[0] : root;
             if (container == null) container = root;
 
-            var contentWrapper = container.childCount > 1 ? container[1] : container;
+            // After SidebarController inserted the sidebar at index 0, layout is:
+            //   container (flex-direction: row originally)
+            //     [0] sidebar
+            //     [1] main content
+            //     [2+] modals (position: absolute)
+            // We restructure to:
+            //   container (flex-direction: column)
+            //     [0] header (full width)
+            //     [1] body-row (flex row: sidebar + main content)
+            //     [2+] modals (position: absolute)
+
+            var children = new List<VisualElement>();
+            while (container.childCount > 0)
+            {
+                children.Add(container[0]);
+                container.RemoveAt(0);
+            }
 
             var header = template.CloneTree();
-            contentWrapper.Insert(0, header);
+            container.Add(header);
+
+            var bodyRow = new VisualElement();
+            bodyRow.style.flexDirection = FlexDirection.Row;
+            bodyRow.style.flexGrow = 1;
+            bodyRow.style.minHeight = 0;
+
+            // Sidebar is children[0], main content is children[1]
+            if (children.Count >= 2)
+            {
+                bodyRow.Add(children[0]); // sidebar
+                bodyRow.Add(children[1]); // main content
+            }
+            container.Add(bodyRow);
+
+            // Remaining children (modals) go back as direct children of container
+            for (int i = 2; i < children.Count; i++)
+                container.Add(children[i]);
+
+            container.style.flexDirection = FlexDirection.Column;
 
             Populate(header);
 
