@@ -199,7 +199,7 @@
     margin-right: 24px;
 }
 .header-brand-icon {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     background-color: rgb(212, 160, 23);
     color: rgb(0, 0, 0);
     font-size: 28px;
@@ -209,14 +209,14 @@
     margin-right: 10px;
 }
 .header-brand-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
     -unity-text-transform: upper;
 }
 .header-brand-text-gold {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
     color: rgb(212, 160, 23);
@@ -1179,6 +1179,158 @@
     border-color: rgb(192, 57, 43);
     margin-right: 0;
     margin-left: 6px;
+}
+
+/* ══ Config modal settings styles (inlined from Settings.uss) ══ */
+
+.settings-section {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(150, 160, 180);
+    margin-top: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    border-top-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+}
+.settings-section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(150, 160, 180);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+}
+.settings-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.settings-label {
+    width: 160px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+}
+.custom-slider {
+    position: relative;
+    flex-grow: 1;
+    height: 30px;
+    min-height: 30px;
+    margin: 0;
+    margin-right: 12px;
+    padding: 0;
+}
+.custom-slider-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 13px;
+    height: 4px;
+    background-color: rgb(42, 51, 71);
+    border-radius: 2px;
+}
+.custom-slider-fill {
+    position: absolute;
+    left: 0;
+    top: 13px;
+    height: 4px;
+    width: 0%;
+    background-color: rgb(248, 196, 64);
+    border-top-left-radius: 2px;
+    border-bottom-left-radius: 2px;
+}
+.custom-slider-dragger {
+    position: absolute;
+    top: 7px;
+    width: 16px;
+    height: 16px;
+    margin-left: -8px;
+    left: 0%;
+    background-color: rgb(248, 196, 64);
+    border-radius: 8px;
+}
+.settings-value {
+    width: 50px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(248, 196, 64);
+    -unity-text-align: middle-right;
+}
+.settings-quality-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.settings-quality-options {
+    flex-grow: 1;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+.settings-quality-btn {
+    width: 70px;
+    height: 36px;
+    margin-left: 6px;
+    background-color: rgb(15, 17, 23);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 4px;
+    color: rgb(208, 216, 232);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    -unity-text-transform: upper;
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.15s;
+}
+.settings-quality-btn:hover {
+    background-color: rgb(28, 33, 48);
+    border-color: rgb(58, 74, 99);
+}
+.settings-quality-btn--active {
+    background-color: rgb(248, 196, 64);
+    border-color: rgb(248, 196, 64);
+    color: rgb(15, 17, 23);
+}
+.settings-quality-btn--active:hover {
+    background-color: rgb(255, 215, 90);
+    border-color: rgb(255, 215, 90);
+}
+.settings-btn {
+    height: 44px;
+    width: 100%;
+    border-radius: 4px;
+    border-width: 0;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    -unity-text-transform: upper;
+    margin-top: 8px;
+    align-self: center;
+    transition-property: background-color;
+    transition-duration: 0.15s;
+}
+.settings-btn--secondary {
+    background-color: rgb(42, 51, 71);
+    color: rgb(208, 216, 232);
+}
+.settings-btn--secondary:hover {
+    background-color: rgb(58, 74, 99);
+}
+.settings-btn--danger {
+    background-color: rgb(192, 57, 43);
+    color: rgb(255, 255, 255);
+}
+.settings-btn--danger:hover {
+    background-color: rgb(231, 76, 60);
 }
 
 /* ══ TRADE OFFER MODAL ══ */
