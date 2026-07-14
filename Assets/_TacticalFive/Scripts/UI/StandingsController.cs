@@ -835,6 +835,7 @@ public class StandingsController : MonoBehaviour
 
     void OpenMainMenuConfirmModal()
     {
+        CloseConfigModal();
         PlayClick();
         _configMainMenuConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _configMainMenuConfirmOverlay.AddToClassList("modal-overlay--visible");
@@ -845,10 +846,12 @@ public class StandingsController : MonoBehaviour
     {
         _configMainMenuConfirmOverlay.RemoveFromClassList("modal-overlay--visible");
         _configMainMenuConfirmOverlay.Q<VisualElement>("ConfigMainMenuConfirmBox")?.RemoveFromClassList("modal-box--visible");
+        OpenConfigModal();
     }
 
     void OpenExitConfirmModal()
     {
+        CloseConfigModal();
         PlayClick();
         _configExitConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _configExitConfirmOverlay.AddToClassList("modal-overlay--visible");
@@ -859,6 +862,7 @@ public class StandingsController : MonoBehaviour
     {
         _configExitConfirmOverlay.RemoveFromClassList("modal-overlay--visible");
         _configExitConfirmOverlay.Q<VisualElement>("ConfigExitConfirmBox")?.RemoveFromClassList("modal-box--visible");
+        OpenConfigModal();
     }
 
     void QuitGame()

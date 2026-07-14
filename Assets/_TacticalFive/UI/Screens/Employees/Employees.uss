@@ -308,19 +308,19 @@
 
 .btn-hire {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(39, 174, 96);
+    background-color: rgb(5, 115, 51);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 8px 0;
+    padding: 6px 0;
     -unity-text-align: middle-center;
     width: 100%;
     border-radius: 4px;
 }
 .btn-hire:hover {
-    background-color: rgb(46, 204, 113);
+    background-color: rgb(8, 141, 64);
 }
 
 .btn-fire {
@@ -409,9 +409,9 @@
 
 .btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 51, 71);
+    background-color: rgb(42, 95, 201);
     border-width: 0;
-    color: rgb(179, 190, 214);
+    color: rgb(255, 255, 255);
     font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
@@ -420,12 +420,12 @@
     margin-right: 10px;
 }
 .btn-modal-cancel:hover {
-    background-color: rgb(58, 74, 99);
+    background-color: rgb(74, 128, 240);
 }
 
 .btn-modal-confirm {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(39, 174, 96);
+    background-color: rgb(5, 115, 51);
     border-width: 0;
     color: rgb(255, 255, 255);
     font-size: 18px;
@@ -435,7 +435,7 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-confirm:hover {
-    background-color: rgb(46, 204, 113);
+    background-color: rgb(8, 141, 64);
 }
 
 .hire-modal-box--negative {
