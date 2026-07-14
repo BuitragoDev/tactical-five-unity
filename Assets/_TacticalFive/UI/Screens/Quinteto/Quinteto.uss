@@ -293,7 +293,6 @@
 
 .player-card--inactive {
     border-color: rgb(40, 40, 40);
-    opacity: 0.7;
 }
 
 .slot--selected {
@@ -312,11 +311,12 @@
 }
 
 /* ══ PLAYER DETAIL PANEL ══ */
-
 .detail-empty {
-    flex-grow: 1;
+    min-height: 200px;
     align-items: center;
     justify-content: center;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
 }
 
 .detail-empty-text {

@@ -139,7 +139,7 @@
 }
 
 .calendar-day-cell--today {
-    background-color: rgb(82, 42, 3);
+    background-color: rgb(26, 80, 150);
     border-left-width: 4px;
     border-left-color: rgb(212, 160, 23);
 }

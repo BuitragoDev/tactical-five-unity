@@ -4,10 +4,10 @@ using System.Linq;
 
 public static class TradeHelper
 {
-    public const long SALARY_CAP = 154_647_000;
-    public const long LUXURY_TAX = 200_428_000;
-    public const long FIRST_APRON = 209_015_000;
-    public const long SECOND_APRON = 221_686_000;
+    public const long SALARY_CAP = 174_647_000;
+    public const long LUXURY_TAX = 220_428_000;
+    public const long FIRST_APRON = 229_015_000;
+    public const long SECOND_APRON = 241_686_000;
     public const long NT_MLE = 14_100_000;
     public const long T_MLE = 5_700_000;
     public const long MIN_SALARY = 2_000_000;
