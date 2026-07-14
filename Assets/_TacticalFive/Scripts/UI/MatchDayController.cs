@@ -174,6 +174,8 @@ public class MatchDayController : MonoBehaviour
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
+        _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
 
@@ -186,7 +188,7 @@ public class MatchDayController : MonoBehaviour
                 "BtnContinue", "NavDashboard", "NavRoster", "NavCalendar",
                 "NavStandings", "NavPalmares", "NavResults", "NavPlayoffs",
                 "NavStats", "NavRecords", "NavMarket", "NavFinances",
-                "NavSponsors", "NavTV", "NavArena", "NavMessages", "BtnReset",
+                "NavSponsors", "NavTV", "NavArena", "NavManager", "NavMessages", "BtnReset",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos"
             };

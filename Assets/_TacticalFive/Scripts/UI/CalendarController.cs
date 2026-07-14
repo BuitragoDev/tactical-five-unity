@@ -269,6 +269,8 @@ public class CalendarController : MonoBehaviour
         _root.Q<Button>("SubmenuTV")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
+        _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
 
@@ -293,6 +295,7 @@ public class CalendarController : MonoBehaviour
         cursor.RegisterHandCursor(_root.Q<Button>("NavMarket"));
         cursor.RegisterHandCursor(_root.Q<Button>("NavFinances"));
         cursor.RegisterHandCursor(_root.Q<Button>("NavArena"));
+        cursor.RegisterHandCursor(_root.Q<Button>("NavManager"));
         cursor.RegisterHandCursor(_root.Q<Button>("NavMessages"));
         cursor.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
         cursor.RegisterHandCursor(_btnAction);
@@ -607,6 +610,7 @@ public class CalendarController : MonoBehaviour
             {"NavMarketIcon", "mercado"},
             {"NavFinancesIcon", "finanzas"},
             {"NavArenaIcon", "pabellon"},
+            {"NavManagerIcon", "manager"},
             {"NavMessagesIcon", "mensajes"},
 
         };

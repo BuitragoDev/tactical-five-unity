@@ -200,6 +200,7 @@ public class EditorController : MonoBehaviour
             {"NavSponsorsIcon", "patrocinador"},
             {"NavTVIcon", "television"},
             {"NavArenaIcon", "pabellon"},
+            {"NavManagerIcon", "manager"},
             {"NavSettingsIcon", "configuracion"}
         };
         foreach (var kv in iconMap)

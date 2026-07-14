@@ -34,7 +34,8 @@ public enum GameScreen
     Editor,
     Historial,
     Training,
-    Quinteto
+    Quinteto,
+    Manager
 }
 
 public enum GameMode

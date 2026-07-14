@@ -1,0 +1,43 @@
+.manager-root {
+    flex-grow: 1;
+}
+
+.manager-main {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.manager-content {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.manager-title-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.manager-icon {
+    width: 32px;
+    height: 32px;
+    background-image: resource("Icons/manager");
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.manager-title {
+    font-size: 24px;
+    color: rgb(200, 170, 80);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+    text-transform: uppercase;
+}
+
+.manager-subtitle {
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf?fileID=4800000&guid=3f9a9e566c791b44f9e015bd8897f06e&type=3#BarlowCondensed-Regular");
+    margin-left: 44px;
+}

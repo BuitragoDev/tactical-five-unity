@@ -100,6 +100,10 @@
                 <ui:VisualElement name="NavArenaIcon" class="nav-icon"/>
                 <ui:Label text="PABELLÓN" class="nav-label"/>
             </ui:Button>
+            <ui:Button name="NavManager" class="nav-item">
+                <ui:VisualElement name="NavManagerIcon" class="nav-icon"/>
+                <ui:Label text="MANAGER" class="nav-label"/>
+            </ui:Button>
             <ui:Button name="NavMessages" class="nav-item">
                 <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
                 <ui:Label text="MENSAJES" class="nav-label"/>

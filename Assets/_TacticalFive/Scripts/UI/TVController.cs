@@ -195,6 +195,8 @@ public class TVController : MonoBehaviour
         _root.Q<Button>("SubmenuTV")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
+        _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
         _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
@@ -219,6 +221,7 @@ public class TVController : MonoBehaviour
             {"NavMarketIcon", "mercado"},
             {"NavFinancesIcon", "finanzas"},
             {"NavArenaIcon", "pabellon"},
+            {"NavManagerIcon", "manager"},
             {"NavMessagesIcon", "mensajes"},
 
         };
