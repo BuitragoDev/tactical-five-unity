@@ -148,6 +148,7 @@ public class DashboardController : MonoBehaviour
         InitConfigModal();
         LoadSidebarIcons();
         LoadData();
+        SetupPlayerCoach();
         RegisterCallbacks();
         Refresh();
         CheckBudgetWarning();
@@ -898,6 +899,7 @@ public class DashboardController : MonoBehaviour
         {
             DatabaseManager.Instance.UpdateHistoricalPlayerStatsFromSeason(_season.id, _manager.id);
             DatabaseManager.Instance.SaveSeasonEndRecords(_season.id, _manager.id);
+            AssignSeasonPoints();
         }
 
         _season.current_game_day = gameDay;
@@ -3988,6 +3990,108 @@ public class DashboardController : MonoBehaviour
         _configExitConfirmOverlay.RemoveFromClassList("modal-overlay--visible");
         _configExitConfirmOverlay.Q<VisualElement>("ConfigExitConfirmBox")?.RemoveFromClassList("modal-box--visible");
         OpenConfigModal();
+    }
+
+    void SetupPlayerCoach()
+    {
+        if (_myTeam == null || _manager == null) return;
+        DatabaseManager.Instance.AddPlayerCoachEntry(_myTeam.id, _manager.name);
+        DatabaseManager.Instance.SetCoachInactive(_myTeam.id);
+    }
+
+    void AssignSeasonPoints()
+    {
+        if (_manager == null || _season == null) return;
+
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        allGames.AddRange(DatabaseManager.Instance.GetPlayoffGames(_manager.id));
+        allGames.AddRange(DatabaseManager.Instance.GetPlayInGames(_manager.id));
+        var ranking = DatabaseManager.Instance.GetCoachRanking();
+
+        var eastTeams = allTeams.Where(t => t.conference == "East").ToList();
+        var westTeams = allTeams.Where(t => t.conference == "West").ToList();
+
+        var teamRank = new Dictionary<int, int>();
+        ComputeConfRanks(eastTeams, allGames, teamRank);
+        ComputeConfRanks(westTeams, allGames, teamRank);
+
+        int championId = 0, finalistId = 0;
+        var finalsList = DatabaseManager.Instance.GetFinalsRecords();
+        var seasonKey = $"{_season.year_start}-{_season.year_end}";
+        var finals = finalsList.FirstOrDefault(f => f.season == seasonKey);
+        if (finals != null)
+        {
+            championId = allTeams.FirstOrDefault(t => t.abbreviation == finals.champ_keyword)?.id ?? 0;
+            finalistId = allTeams.FirstOrDefault(t => t.abbreviation == finals.finalist_keyword)?.id ?? 0;
+        }
+
+        foreach (var team in allTeams)
+        {
+            var coach = ranking.FirstOrDefault(c => c.team_id == team.id && (c.status == "active" || c.status == "player"));
+            if (coach == null) continue;
+
+            int points = CalcTeamPoints(team, allGames, teamRank, championId, finalistId);
+            DatabaseManager.Instance.UpdateCoachScore(coach.id, points);
+        }
+    }
+
+    void ComputeConfRanks(List<TeamData> confTeams, List<GameData> allGames, Dictionary<int, int> teamRank)
+    {
+        var standings = new List<(int teamId, int wins)>();
+        foreach (var t in confTeams)
+        {
+            var tg = allGames.Where(g => g.is_played == 1 && g.game_type == "regular" && (g.home_team_id == t.id || g.away_team_id == t.id)).ToList();
+            int w = tg.Count(g => (g.home_team_id == t.id && g.home_score > g.away_score) || (g.away_team_id == t.id && g.away_score > g.home_score));
+            standings.Add((t.id, w));
+        }
+        standings.Sort((a, b) => b.wins.CompareTo(a.wins));
+        for (int i = 0; i < standings.Count; i++)
+            teamRank[standings[i].teamId] = i + 1;
+    }
+
+    int CalcTeamPoints(TeamData team, List<GameData> allGames, Dictionary<int, int> teamRank, int championId, int finalistId)
+    {
+        int pts = 0;
+
+        var rg = allGames.Where(g => g.is_played == 1 && g.game_type == "regular" && (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
+        int rWins = rg.Count(g => (g.home_team_id == team.id && g.home_score > g.away_score) || (g.away_team_id == team.id && g.away_score > g.home_score));
+        pts += Mathf.RoundToInt(rWins * 0.5f);
+        if (rWins >= 60) pts += 20;
+        else if (rWins >= 50) pts += 10;
+
+        var pg = allGames.Where(g => g.is_played == 1 && (g.game_type == "playoff" || g.game_type == "playin") && (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
+        int pWins = pg.Count(g => (g.home_team_id == team.id && g.home_score > g.away_score) || (g.away_team_id == team.id && g.away_score > g.home_score));
+        pts += pWins * 2;
+
+        if (team.id == championId) pts += 100;
+        else if (team.id == finalistId) pts += 50;
+        else if (pWins >= 8) pts += 25;
+
+        int rank = teamRank.TryGetValue(team.id, out var r) ? r : 0;
+        string obj = team.objective ?? "";
+        bool met = false;
+        if (rank > 0)
+        {
+            if (obj == "Zona tranquila") met = rank <= 12;
+            else if (obj == "Play-In") met = rank <= 10;
+            else if (obj == "Playoffs") met = rank <= 6;
+            else if (obj == "Campeonato") met = rank <= 2;
+        }
+
+        if (met)
+        {
+            if (obj == "Campeonato") pts += 40;
+            else if (obj == "Playoffs") pts += 25;
+            else if (obj == "Play-In") pts += 12;
+            else if (obj == "Zona tranquila") pts += 6;
+        }
+        else if (rank > 0)
+        {
+            pts -= 15;
+        }
+
+        return pts;
     }
 
     void QuitGame()

@@ -167,6 +167,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<OfferData>();
         _db.CreateTable<TradeOfferData>();
         _db.CreateTable<DraftPickData>();
+        _db.CreateTable<CoachRankingData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -460,6 +461,9 @@ public class DatabaseManager : MonoBehaviour
 
         if (_db.Table<FinalsRecord>().Count() == 0)
             SeedPalmaresData();
+
+        if (_db.Table<CoachRankingData>().Count() == 0)
+            SeedCoachRankings();
     }
 
     bool EnsureDb()
@@ -2399,6 +2403,203 @@ public class DatabaseManager : MonoBehaviour
         foreach (var r in PalmaresSeeder.QuintetData)
             _db.Insert(r);
         Debug.Log($"[DB] {PalmaresSeeder.FinalsData.Count} finales, {PalmaresSeeder.AwardsData.Count} premios, {PalmaresSeeder.QuintetData.Count} quintetos insertados.");
+    }
+
+    void SeedCoachRankings()
+    {
+        var teams = _db.Table<TeamData>().ToList();
+        int GetTeamId(string name) => teams.FirstOrDefault(t => t.name == name)?.id ?? 0;
+
+        var historical = new CoachRankingData[]
+        {
+            new() { name = "Phil Jackson",          team_id = 0, status = "historical", score = 1700 },
+            new() { name = "Red Auerbach",          team_id = 0, status = "historical", score = 1400 },
+            new() { name = "Gregg Popovich",        team_id = 0, status = "historical", score = 1300 },
+            new() { name = "Pat Riley",             team_id = 0, status = "historical", score = 1250 },
+            new() { name = "Don Nelson",            team_id = 0, status = "historical", score = 800  },
+            new() { name = "Jerry Sloan",           team_id = 0, status = "historical", score = 750  },
+            new() { name = "Larry Brown",           team_id = 0, status = "historical", score = 750  },
+            new() { name = "Lenny Wilkens",         team_id = 0, status = "historical", score = 750  },
+            new() { name = "Chuck Daly",            team_id = 0, status = "historical", score = 600  },
+            new() { name = "Rudy Tomjanovich",      team_id = 0, status = "historical", score = 500  },
+            new() { name = "Doc Rivers",            team_id = 0, status = "historical", score = 450  },
+            new() { name = "Bill Fitch",            team_id = 0, status = "historical", score = 350  },
+            new() { name = "K.C. Jones",            team_id = 0, status = "historical", score = 300  },
+            new() { name = "George Karl",           team_id = 0, status = "historical", score = 280  },
+            new() { name = "Mike Budenholzer",      team_id = 0, status = "historical", score = 280 },
+            new() { name = "John Kundla",           team_id = 0, status = "historical", score = 250  },
+            new() { name = "Rick Adelman",          team_id = 0, status = "historical", score = 240 },
+            new() { name = "Hubie Brown",           team_id = 0, status = "historical", score = 235 },
+            new() { name = "Cotton Fitzsimmons",    team_id = 0, status = "historical", score = 225 },
+            new() { name = "Flip Saunders",         team_id = 0, status = "historical", score = 220 },
+            new() { name = "Billy Cunningham",      team_id = 0, status = "historical", score = 220 },
+            new() { name = "Tex Winter",            team_id = 0, status = "historical", score = 180 },
+            new() { name = "George Senesky",        team_id = 0, status = "historical", score = 120 },
+            new() { name = "Tom Heinsohn",          team_id = 0, status = "historical", score = 215 },
+            new() { name = "Jack Ramsay",           team_id = 0, status = "historical", score = 210 },
+            new() { name = "Gene Shue",             team_id = 0, status = "historical", score = 205 },
+            new() { name = "Doug Moe",              team_id = 0, status = "historical", score = 200 },
+            new() { name = "Jeff Van Gundy",        team_id = 0, status = "historical", score = 195 },
+            new() { name = "Stan Van Gundy",        team_id = 0, status = "historical", score = 190 },
+            new() { name = "Mike D'Antoni",         team_id = 0, status = "historical", score = 185 },
+            new() { name = "Monty Williams",        team_id = 0, status = "historical", score = 184 },
+            new() { name = "Frank Vogel",           team_id = 0, status = "historical", score = 182 },
+            new() { name = "Byron Scott",           team_id = 0, status = "historical", score = 180 },
+            new() { name = "Avery Johnson",         team_id = 0, status = "historical", score = 175 },
+            new() { name = "Scott Skiles",          team_id = 0, status = "historical", score = 170 },
+            new() { name = "Lionel Hollins",        team_id = 0, status = "historical", score = 165 },
+            new() { name = "Mike Fratello",         team_id = 0, status = "historical", score = 160 },
+            new() { name = "Paul Westphal",         team_id = 0, status = "historical", score = 155 },
+            new() { name = "Jerry Colangelo",       team_id = 0, status = "historical", score = 150 },
+            new() { name = "Larry Costello",        team_id = 0, status = "historical", score = 145 },
+            new() { name = "Al Attles",             team_id = 0, status = "historical", score = 140 },
+            new() { name = "Gene Mauch",            team_id = 0, status = "historical", score = 140 },
+            new() { name = "Bill Sharman",          team_id = 0, status = "historical", score = 135 },
+            new() { name = "Dick Motta",            team_id = 0, status = "historical", score = 130 },
+            new() { name = "Del Harris",            team_id = 0, status = "historical", score = 125 },
+            new() { name = "Paul Silas",            team_id = 0, status = "historical", score = 120 },
+            new() { name = "George Irvine",         team_id = 0, status = "historical", score = 115 },
+            new() { name = "Frank Layden",          team_id = 0, status = "historical", score = 110 },
+            new() { name = "Mike Dunleavy Sr.",     team_id = 0, status = "historical", score = 105 },
+            new() { name = "Brendan Malone",        team_id = 0, status = "historical", score = 100 },
+            new() { name = "Kevin Loughery",        team_id = 0, status = "historical", score = 98 },
+            new() { name = "Johnny Kerr",           team_id = 0, status = "historical", score = 96 },
+            new() { name = "Dick Harter",           team_id = 0, status = "historical", score = 94 },
+            new() { name = "Don Chaney",            team_id = 0, status = "historical", score = 92 },
+            new() { name = "Mike Woodson",          team_id = 0, status = "historical", score = 90 },
+            new() { name = "P.J. Carlesimo",        team_id = 0, status = "historical", score = 88 },
+            new() { name = "Terry Porter",          team_id = 0, status = "historical", score = 86 },
+            new() { name = "Dwane Casey",           team_id = 0, status = "historical", score = 78 },
+            new() { name = "Terry Stotts",          team_id = 0, status = "historical", score = 76 },
+            new() { name = "Vinny Del Negro",       team_id = 0, status = "historical", score = 74 },
+            new() { name = "Jim Boylen",            team_id = 0, status = "historical", score = 72 },
+            new() { name = "Nate McMillan",         team_id = 0, status = "historical", score = 70 },
+            new() { name = "Maurice Cheeks",        team_id = 0, status = "historical", score = 68 },
+            new() { name = "Nate Bjorkgren",        team_id = 0, status = "historical", score = 66 },
+            new() { name = "Dave Cowens",           team_id = 0, status = "historical", score = 64 },
+            new() { name = "Don Casey",             team_id = 0, status = "historical", score = 62 },
+            new() { name = "Randy Wittman",         team_id = 0, status = "historical", score = 60 },
+            new() { name = "Mike Montgomery",       team_id = 0, status = "historical", score = 58 },
+            new() { name = "Jim O'Brien",           team_id = 0, status = "historical", score = 56 },
+        };
+
+        var active = new (string name, string teamName, int score)[]
+        {
+            ("Steve Kerr",         "Golden State Warriors",  700),
+            ("Erik Spoelstra",     "Miami Heat",             650),
+            ("Tyronn Lue",         "Los Angeles Clippers",   350),
+            ("Rick Carlisle",      "Indiana Pacers",         650),
+            ("Nick Nurse",         "Philadelphia 76ers",     300),
+            ("Ime Udoka",          "Houston Rockets",        150),
+            ("Mark Daigneault",    "Oklahoma City Thunder",  140),
+            ("Chris Finch",        "Minnesota Timberwolves", 160),
+            ("Mike Brown",         "New York Knicks",        450),
+            ("J.B. Bickerstaff",   "Detroit Pistons",        160),
+            ("Joe Mazzulla",       "Boston Celtics",         250),
+            ("Kenny Atkinson",     "Cleveland Cavaliers",    150),
+            ("Will Hardy",         "Utah Jazz",              70 ),
+            ("Quin Snyder",        "Atlanta Hawks",          220),
+            ("Darko Rajaković",    "Toronto Raptors",        55 ),
+            ("Jamahl Mosley",      "New Orleans Pelicans",   60 ),
+            ("Taylor Jenkins",     "Milwaukee Bucks",        90 ),
+            ("JJ Redick",          "Los Angeles Lakers",     5  ),
+            ("Brian Keefe",        "Washington Wizards",     5  ),
+            ("Charles Lee",        "Charlotte Hornets",      5  ),
+            ("Jordi Fernández",    "Brooklyn Nets",          5  ),
+            ("Tiago Splitter",     "Chicago Bulls",          5  ),
+            ("Doug Christie",      "Sacramento Kings",       5  ),
+            ("Sean Sweeney",       "Orlando Magic",          2  ),
+            ("Jordan Ott",         "Phoenix Suns",           2  ),
+            ("Micah Nori",         "Portland Trail Blazers", 2  ),
+            ("Mitch Johnson",      "San Antonio Spurs",      2  ),
+            ("David Adelman",      "Denver Nuggets",         2  ),
+            ("Tuomas Iisalo",      "Memphis Grizzlies",      2  ),
+            ("Dusty May",          "Dallas Mavericks",       2  ),
+        };
+
+        foreach (var c in historical) _db.Insert(c);
+        foreach (var (name, teamName, score) in active)
+        {
+            _db.Insert(new CoachRankingData
+            {
+                name = name,
+                team_id = GetTeamId(teamName),
+                status = "active",
+                score = score
+            });
+        }
+        Debug.Log($"[DB] {historical.Length} coaches históricos, {active.Length} coaches activos insertados.");
+    }
+
+    public void AddPlayerCoachEntry(int teamId, string managerName)
+    {
+        EnsureDb();
+        var existing = _db.Table<CoachRankingData>().FirstOrDefault(c => c.status == "player");
+        if (existing != null) return;
+
+        _db.Insert(new CoachRankingData
+        {
+            name = managerName,
+            team_id = teamId,
+            status = "player",
+            score = 0
+        });
+    }
+
+    public List<CoachRankingData> GetCoachRanking()
+    {
+        EnsureDb();
+        return _db.Table<CoachRankingData>()
+                  .OrderByDescending(c => c.score)
+                  .ToList();
+    }
+
+    public void UpdateCoachScore(int coachId, int scoreDelta)
+    {
+        EnsureDb();
+        var coach = _db.Find<CoachRankingData>(coachId);
+        if (coach == null || coach.status == "historical") return;
+        coach.score += scoreDelta;
+        _db.Update(coach);
+    }
+
+    public void SetCoachInactive(int teamId)
+    {
+        EnsureDb();
+        var coach = _db.Table<CoachRankingData>().FirstOrDefault(c => c.team_id == teamId && c.status == "active");
+        if (coach != null)
+        {
+            coach.status = "inactive";
+            coach.team_id = 0;
+            _db.Update(coach);
+        }
+    }
+
+    public void ReassignCoachToTeam(int teamId)
+    {
+        EnsureDb();
+        // First check if there's already an active/inactive coach for this team
+        var existing = _db.Table<CoachRankingData>().FirstOrDefault(c => c.team_id == teamId && c.status == "player");
+        if (existing != null) return; // team is taken by player
+
+        var inactiveOfThisTeam = _db.Table<CoachRankingData>().FirstOrDefault(c => c.status == "inactive");
+        if (inactiveOfThisTeam != null)
+        {
+            inactiveOfThisTeam.status = "active";
+            inactiveOfThisTeam.team_id = teamId;
+            _db.Update(inactiveOfThisTeam);
+        }
+    }
+
+    public void UpdatePlayerCoachTeam(int newTeamId)
+    {
+        EnsureDb();
+        var playerCoach = _db.Table<CoachRankingData>().FirstOrDefault(c => c.status == "player");
+        if (playerCoach != null)
+        {
+            playerCoach.team_id = newTeamId;
+            _db.Update(playerCoach);
+        }
     }
 
     // ── PALMARES ────────────────────────────────────────

@@ -1,43 +1,319 @@
+/* ══════════════════════════════════════════
+   MANAGER — Manager.uss
+   ══════════════════════════════════════════ */
+
 .manager-root {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
     flex-grow: 1;
 }
 
 .manager-main {
-    flex-grow: 1;
-    padding: 20px;
-}
-
-.manager-content {
     flex-direction: column;
-    align-items: flex-start;
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+    padding: 20px 24px;
 }
 
 .manager-title-row {
     flex-direction: row;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 8px;
-}
-
-.manager-icon {
-    width: 32px;
-    height: 32px;
-    background-image: resource("Icons/manager");
-    background-size: contain;
-    background-position: center center;
-    background-repeat: no-repeat;
+    margin-bottom: 16px;
+    flex-shrink: 0;
 }
 
 .manager-title {
-    font-size: 24px;
+    font-size: 28px;
     color: rgb(200, 170, 80);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
     text-transform: uppercase;
 }
 
-.manager-subtitle {
+.manager-body {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    min-width: 0;
+}
+
+.manager-left {
+    width: 60%;
+    flex-direction: column;
+    min-width: 360px;
+    margin-right: 20px;
+}
+
+.manager-right {
+    flex-grow: 1;
+    min-width: 300px;
+    min-height: 0;
+}
+
+/* Panels */
+
+.manager-panel {
+    background-color: rgb(20, 24, 34);
+    border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(35, 41, 58);
+    padding: 14px 16px;
+    flex-direction: column;
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.manager-panel:last-child {
+    margin-bottom: 0;
+}
+
+.manager-panel-title {
     font-size: 16px;
-    color: rgb(122, 138, 170);
+    color: rgb(140, 156, 188);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(35, 41, 58);
+}
+
+.manager-ranking-panel {
+    flex-grow: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+/* Stats grid */
+
+.manager-stats-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.manager-stat-item {
+    flex-direction: column;
+    align-items: center;
+    min-width: 65px;
+    flex-grow: 1;
+    margin-right: 8px;
+}
+
+.manager-stat-item:last-child {
+    margin-right: 0;
+}
+
+.manager-stat-value {
+    font-size: 24px;
+    color: rgb(220, 228, 245);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+}
+
+.manager-stat-value--win {
+    color: rgb(46, 204, 113);
+}
+
+.manager-stat-value--loss {
+    color: rgb(231, 76, 60);
+}
+
+.manager-stat-label {
+    font-size: 16px;
+    color: rgb(110, 126, 155);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf?fileID=4800000&guid=3f9a9e566c791b44f9e015bd8897f06e&type=3#BarlowCondensed-Regular");
-    margin-left: 44px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* Relationship circles */
+
+.board-columns {
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 8px 0;
+}
+
+.board-col {
+    flex-direction: column;
+    align-items: center;
+    min-width: 60px;
+}
+
+.board-col > .board-circle {
+    margin-bottom: 8px;
+}
+
+.board-col-sep {
+    width: 1px;
+    background-color: rgb(35, 41, 58);
+}
+
+.board-col-label {
+    font-size: 16px;
+    color: rgb(110, 126, 155);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf?fileID=4800000&guid=3f9a9e566c791b44f9e015bd8897f06e&type=3#BarlowCondensed-Regular");
+    text-transform: uppercase;
+    text-align: center;
+    -unity-text-align: middle;
+}
+
+.board-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 32px;
+    border-width: 2px;
+    align-items: center;
+    justify-content: center;
+}
+
+.board-circle-val {
+    font-size: 32px;
+    color: rgb(220, 228, 245);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+}
+
+/* Objective */
+
+.manager-objective-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.manager-objective-row > .manager-objective-icon {
+    margin-left: 10px;
+}
+
+.manager-objective-text {
+    font-size: 18px;
+    color: rgb(220, 228, 245);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+}
+
+.manager-objective-icon {
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+/* Ranking */
+
+.ranking-header {
+    flex-direction: row;
+    padding: 6px 10px;
+    background-color: rgb(15, 18, 26);
+    border-radius: 4px;
+    margin-bottom: 4px;
+    flex-shrink: 0;
+}
+
+.ranking-header > Label {
+    font-size: 16px;
+    color: rgb(110, 126, 155);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+    text-transform: uppercase;
+}
+
+.ranking-col-rank-header {
+    width: 30px;
+}
+
+.ranking-col-name-header {
+    flex-grow: 1;
+}
+
+.ranking-col-score-header {
+    width: 50px;
+    text-align: right;
+}
+
+.ranking-col-badge-header {
+    width: 80px;
+}
+
+.ranking-scroll {
+    flex-grow: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.ranking-body {
+    flex-direction: column;
+}
+
+.ranking-row {
+    flex-direction: row;
+    padding: 6px 10px;
+    align-items: center;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
+    min-height: 44px;
+}
+
+.ranking-row--player {
+    background-color: rgba(200, 170, 80, 0.15);
+    border-left-width: 3px;
+    border-left-color: rgb(200, 170, 80);
+}
+
+.ranking-col-rank {
+    width: 30px;
+    font-size: 18px;
+    color: rgb(140, 156, 188);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+}
+
+.ranking-col-name {
+    flex-grow: 1;
+    font-size: 18px;
+    color: rgb(220, 228, 245);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf?fileID=4800000&guid=3f9a9e566c791b44f9e015bd8897f06e&type=3#BarlowCondensed-Regular");
+}
+
+.ranking-col-score {
+    width: 50px;
+    font-size: 18px;
+    color: rgb(220, 228, 245);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#BarlowCondensed-SemiBold");
+    text-align: right;
+    -unity-text-align: middle;
+}
+
+.ranking-col-badge {
+    width: 80px;
+    margin-left: 4px;
+    flex-direction: row;
+    justify-content: flex-start;
+}
+
+.ranking-badge {
+    font-size: 16px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: rgb(220, 228, 245);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf?fileID=4800000&guid=3f9a9e566c791b44f9e015bd8897f06e&type=3#BarlowCondensed-Regular");
+    text-transform: uppercase;
+    -unity-text-align: middle;
+    -unity-font-style: bold;
+}
+
+.ranking-badge--historical {
+    background-color: rgba(110, 126, 155, 0.3);
+    color: rgb(160, 176, 200);
+}
+
+.ranking-badge--inactive {
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(231, 180, 60);
+}
+
+.ranking-badge--player {
+    background-color: rgba(200, 170, 80, 0.35);
+    color: rgb(220, 190, 100);
 }

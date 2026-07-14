@@ -9,13 +9,115 @@
     <ui:VisualElement name="ManagerRoot" class="manager-root">
 
         <ui:VisualElement class="manager-main">
+            <ui:VisualElement class="manager-title-row">
+                <ui:Label name="ManagerTitle" class="manager-title" text="MANAGER" />
+            </ui:VisualElement>
 
-            <ui:VisualElement class="manager-content">
-                <ui:VisualElement class="manager-title-row">
-                    <ui:VisualElement class="manager-icon" />
-                    <ui:Label class="manager-title" text="MANAGER" />
+            <ui:VisualElement class="manager-body">
+
+                <!-- LEFT COLUMN -->
+                <ui:VisualElement class="manager-left">
+
+                    <!-- Estadísticas Liga Regular -->
+                    <ui:VisualElement class="manager-panel">
+                        <ui:Label class="manager-panel-title" text="LIGA REGULAR" />
+                        <ui:VisualElement class="manager-stats-grid">
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value" name="RegGames" text="0" />
+                                <ui:Label class="manager-stat-label" text="Partidos" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value manager-stat-value--win" name="RegWins" text="0" />
+                                <ui:Label class="manager-stat-label" text="Victorias" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value manager-stat-value--loss" name="RegLosses" text="0" />
+                                <ui:Label class="manager-stat-label" text="Derrotas" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value" name="RegPct" text=".000" />
+                                <ui:Label class="manager-stat-label" text="% Victorias" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Estadísticas Playoffs -->
+                    <ui:VisualElement class="manager-panel">
+                        <ui:Label class="manager-panel-title" text="PLAYOFFS" />
+                        <ui:VisualElement class="manager-stats-grid">
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value" name="PoGames" text="0" />
+                                <ui:Label class="manager-stat-label" text="Partidos" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value manager-stat-value--win" name="PoWins" text="0" />
+                                <ui:Label class="manager-stat-label" text="Victorias" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value manager-stat-value--loss" name="PoLosses" text="0" />
+                                <ui:Label class="manager-stat-label" text="Derrotas" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="manager-stat-item">
+                                <ui:Label class="manager-stat-value" name="PoPct" text=".000" />
+                                <ui:Label class="manager-stat-label" text="% Victorias" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Relaciones -->
+                    <ui:VisualElement class="manager-panel">
+                        <ui:Label class="manager-panel-title" text="RELACIONES" />
+                        <ui:VisualElement class="board-columns">
+                            <ui:VisualElement class="board-col">
+                                <ui:VisualElement name="CircleTrust" class="board-circle">
+                                    <ui:Label name="ValTrust" class="board-circle-val" text="50%" />
+                                </ui:VisualElement>
+                                <ui:Label class="board-col-label" text="DIRECTIVA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="board-col-sep" />
+                            <ui:VisualElement class="board-col">
+                                <ui:VisualElement name="CircleMorale" class="board-circle">
+                                    <ui:Label name="ValMorale" class="board-circle-val" text="50%" />
+                                </ui:VisualElement>
+                                <ui:Label class="board-col-label" text="JUGADORES" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="board-col-sep" />
+                            <ui:VisualElement class="board-col">
+                                <ui:VisualElement name="CircleFanConfidence" class="board-circle">
+                                    <ui:Label name="ValFanConfidence" class="board-circle-val" text="50%" />
+                                </ui:VisualElement>
+                                <ui:Label class="board-col-label" text="FANS" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Objetivo -->
+                    <ui:VisualElement class="manager-panel">
+                        <ui:Label class="manager-panel-title" text="OBJETIVO DE TEMPORADA" />
+                        <ui:VisualElement class="manager-objective-row">
+                            <ui:Label name="ManagerObjective" class="manager-objective-text" text="--" />
+                            <ui:VisualElement name="ManagerObjectiveStatus" class="manager-objective-icon" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
-                <ui:Label class="manager-subtitle" text="Pantalla de gestión del manager" />
+
+                <!-- RIGHT COLUMN — RANKING -->
+                <ui:VisualElement class="manager-right">
+                    <ui:VisualElement class="manager-panel manager-ranking-panel">
+                        <ui:Label class="manager-panel-title" text="RANKING DE ENTRENADORES" />
+                        <ui:VisualElement name="RankingHeader" class="ranking-header">
+                            <ui:Label class="ranking-col-rank-header" text="#" />
+                            <ui:Label class="ranking-col-name-header" text="ENTRENADOR" />
+                            <ui:Label class="ranking-col-score-header" text="PTS" />
+                            <ui:Label class="ranking-col-badge-header" text="" />
+                        </ui:VisualElement>
+                        <ui:ScrollView name="RankingScroll" class="ranking-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
+                            <ui:VisualElement name="RankingBody" class="ranking-body" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
             </ui:VisualElement>
 
         </ui:VisualElement>
