@@ -503,6 +503,8 @@ public class StatsController : MonoBehaviour
             _root.Q<Button>("BtnSeason")?.AddToClassList("filter-btn--active");
         else if (_currentMode == "historical")
             _root.Q<Button>("BtnHistorical")?.AddToClassList("filter-btn--active");
+        else if (_currentMode == "rookies")
+            _root.Q<Button>("BtnRookies")?.AddToClassList("filter-btn--active");
         else
             _root.Q<Button>("BtnMyTeam")?.AddToClassList("filter-btn--active");
 
@@ -997,9 +999,9 @@ public class StatsController : MonoBehaviour
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), true, i == 0));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
-                    row.Add(MakeCell(x.fgPct.ToString("N1", _spanishCI), false, false));
-                    row.Add(MakeCell(x.fg3Pct.ToString("N1", _spanishCI), false, false));
-                    row.Add(MakeCell(x.ftPct.ToString("N1", _spanishCI), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
+                    row.Add(MakeCell(x.fg3Pct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
+                    row.Add(MakeCell(x.ftPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "rebotes":
@@ -1032,7 +1034,7 @@ public class StatsController : MonoBehaviour
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pcttc":
-                    row.Add(MakeCell(x.fgPct.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -1040,7 +1042,7 @@ public class StatsController : MonoBehaviour
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pct3p":
-                    row.Add(MakeCell(x.fg3Pct.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.fg3Pct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -1048,7 +1050,7 @@ public class StatsController : MonoBehaviour
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pcttl":
-                    row.Add(MakeCell(x.ftPct.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.ftPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -1060,7 +1062,7 @@ public class StatsController : MonoBehaviour
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
-                    row.Add(MakeCell(x.fgPct.ToString("N1", _spanishCI), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
                     break;
                 case "perdidas":
                     row.Add(MakeCell(useAverages ? x.avgTov.ToString("N1", _spanishCI) : x.totalTov.ToString("N0", _spanishCI), true, i == 0));

@@ -696,10 +696,17 @@ public class DatabaseManager : MonoBehaviour
 
     public List<PlayerData> GetRetiringPlayers()
     {
-        return _db.Table<PlayerData>()
-                  .Where(p => p.team_id != 0 && p.contract_years <= 1 && p.age >= 40)
-                  .OrderByDescending(p => p.age)
-                  .ToList();
+        var withTeam = _db.Table<PlayerData>()
+            .Where(p => p.team_id != 0 && p.contract_years <= 1 && p.age >= 40)
+            .ToList();
+        var freeAgents = _db.Table<PlayerData>()
+            .Where(p => p.team_id == 0 && p.age >= 40)
+            .ToList();
+        var result = new List<PlayerData>();
+        result.AddRange(withTeam);
+        result.AddRange(freeAgents);
+        result.Sort((a, b) => b.age.CompareTo(a.age));
+        return result;
     }
 
     public List<PlayerData> GetExpiringPlayers()
@@ -1365,7 +1372,7 @@ public class DatabaseManager : MonoBehaviour
         Add(82, "CHI", "Noa", "Essengue", "PF", 19, "FRA", 208, 97, 77, 92, 87, 76, 68, 72, 78, 83, 80, 91, 80, 78, 54, 6500000, 4, false);
         Add(83, "CHI", "Leonard", "Miller", "PF", 22, "CAN", 208, 98, 77, 89, 86, 79, 67, 73, 77, 82, 84, 92, 81, 75, 51, 2800000, 3, false);
         Add(84, "CHI", "Jalen", "Smith", "C", 26, "USA", 208, 98, 77, 80, 78, 82, 78, 71, 70, 82, 90, 82, 82, 63, 69, 9000000, 2, false);
-        Add(85, "CHI", "Caleb", "Wilson", "SF", 19, "USA", 206, 96, 78, 92, 94, 75, 70, 75, 80, 87, 80, 96, 78, 72, 60, 9_400_000, 4, true);
+        Add(85, "CHI", "Caleb", "Wilson", "SF", 19, "USA", 206, 96, 78, 92, 94, 80, 80, 80, 80, 87, 80, 96, 80, 72, 60, 9_400_000, 4, true);
         Add(86, "CHI", "Dailyn", "Swain", "SF", 20, "USA", 201, 95, 67, 79, 84, 76, 78, 72, 76, 82, 68, 85, 74, 72, 52, 4_600_000, 4, true);
 
         // ── CLE ── 12 jugadores
@@ -1780,7 +1787,7 @@ public class DatabaseManager : MonoBehaviour
         Add(460, "UTA", "Svi", "Mykhailiuk", "SG", 28, "UKR", 201, 92, 78, 80, 93, 93, 97, 83, 87, 73, 57, 85, 91, 73, 26, 5000000, 2, false);
         Add(461, "UTA", "John", "Konchar", "SG", 30, "USA", 196, 95, 78, 78, 85, 81, 81, 83, 85, 89, 68, 87, 85, 89, 25, 6000000, 2, false);
         Add(228, "UTA", "Jaxson", "Hayes", "C", 26, "USA", 213, 100, 75, 80, 89, 78, 34, 62, 60, 86, 93, 97, 80, 60, 86, 3000000, 2, false);
-        Add(462, "UTA", "Darryn", "Peterson", "SG", 19, "USA", 196, 98, 80, 94, 91, 91, 88, 84, 92, 85, 66, 93, 85, 80, 55, 10500000, 4, true);
+        Add(462, "UTA", "Darryn", "Peterson", "SG", 19, "USA", 196, 98, 80, 94, 91, 91, 88, 84, 92, 85, 76, 93, 85, 80, 75, 10500000, 4, true);
 
         // ── WAS ── 16 jugadores
         Add(463, "WAS", "Trae", "Young", "PG", 27, "USA", 185, 82, 94, 94, 99, 99, 99, 99, 99, 96, 78, 99, 99, 99, 68, 53000000, 4, false);
@@ -1797,7 +1804,7 @@ public class DatabaseManager : MonoBehaviour
         Add(474, "WAS", "Sharife", "Cooper", "PG", 25, "USA", 183, 82, 74, 84, 94, 84, 81, 88, 86, 67, 49, 81, 82, 77, 25, 2000000, 2, false);
         Add(475, "WAS", "Justin", "Champagnie", "SF", 25, "USA", 198, 95, 78, 82, 88, 86, 84, 78, 82, 89, 68, 88, 84, 86, 25, 3000000, 2, false);
         Add(477, "WAS", "Tristan", "Vukcevic", "C", 22, "SRB", 213, 108, 80, 86, 76, 85, 82, 74, 78, 80, 82, 82, 84, 72, 85, 5000000, 4, false);
-        Add(478, "WAS", "AJ", "Dybantsa", "SF", 19, "USA", 206, 95, 82, 95, 93, 88, 78, 82, 90, 82, 72, 97, 83, 75, 52, 13500000, 4, true);
+        Add(478, "WAS", "AJ", "Dybantsa", "SF", 19, "USA", 206, 95, 82, 95, 93, 88, 85, 82, 90, 82, 80, 97, 83, 80, 72, 13500000, 4, true);
         Add(479, "WAS", "Felix", "Okpara", "C", 22, "NGA", 213, 107, 58, 70, 72, 56, 38, 60, 56, 76, 92, 78, 72, 64, 88, 2000000, 2, true);
 
         _db.BeginTransaction();

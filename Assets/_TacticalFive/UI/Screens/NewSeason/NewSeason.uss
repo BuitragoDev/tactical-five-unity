@@ -87,26 +87,26 @@
 
 /* ── BOTÓN ACCIÓN ── */
 .new-season-root .btn-action {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 250px;
     background-color: rgb(42, 95, 201);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 18px;
+    font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 10px 24px;
+    padding: 10px 18px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
-    border-radius: 4px;
 }
 .new-season-root .btn-action:hover {
     background-color: rgb(74, 128, 240);
 }
 .new-season-root .btn-start-season {
-    background-color: rgb(39, 174, 96);
+    background-color: rgb(23, 119, 63);
 }
 .new-season-root .btn-start-season:hover {
-    background-color: rgb(46, 204, 113);
+    background-color: rgb(28, 146, 77);
 }
 
 /* ── CONTENT ── */

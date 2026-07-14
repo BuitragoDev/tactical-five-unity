@@ -25,8 +25,13 @@ public class ManagerController : MonoBehaviour
     private Label _valTrust, _valMorale, _valFanConfidence;
 
     // Objective
-    private Label _managerObjective;
-    private VisualElement _managerObjectiveStatus;
+    private Label _managerObjectiveTitle;
+    private Label _managerObjectivePosition;
+    private Label _managerObjectiveStatus;
+
+    // Rings
+    private VisualElement _ringsTrophy;
+    private Label _ringsCount;
 
     // Ranking
     private VisualElement _rankingBody;
@@ -96,8 +101,12 @@ public class ManagerController : MonoBehaviour
         _valMorale = _root.Q<Label>("ValMorale");
         _valFanConfidence = _root.Q<Label>("ValFanConfidence");
 
-        _managerObjective       = _root.Q<Label>("ManagerObjective");
-        _managerObjectiveStatus = _root.Q<VisualElement>("ManagerObjectiveStatus");
+        _managerObjectiveTitle = _root.Q<Label>("ManagerObjectiveTitle");
+        _managerObjectivePosition = _root.Q<Label>("ManagerObjectivePosition");
+        _managerObjectiveStatus = _root.Q<Label>("ManagerObjectiveStatus");
+
+        _ringsTrophy = _root.Q<VisualElement>("ManagerRingsTrophy");
+        _ringsCount = _root.Q<Label>("ManagerRingsCount");
 
         _rankingBody = _root.Q<VisualElement>("RankingBody");
 
@@ -320,6 +329,7 @@ public class ManagerController : MonoBehaviour
         RefreshStats();
         RefreshRelationships();
         RefreshObjective();
+        RefreshRings();
         RefreshRanking();
     }
 
@@ -459,7 +469,7 @@ public class ManagerController : MonoBehaviour
         if (_myTeam == null || _allTeams == null || _standingGames == null) return 0;
 
         var confTeams = _allTeams.Where(t => t.conference == _myTeam.conference).ToList();
-        var standings = new List<(TeamData team, int wins)>();
+        var standings = new List<(TeamData team, int wins, int losses)>();
         foreach (var t in confTeams)
         {
             var tg = _standingGames
@@ -468,9 +478,16 @@ public class ManagerController : MonoBehaviour
             int w = tg.Count(g =>
                 (g.home_team_id == t.id && g.home_score > g.away_score) ||
                 (g.away_team_id == t.id && g.away_score > g.home_score));
-            standings.Add((t, w));
+            standings.Add((t, w, tg.Count - w));
         }
-        standings.Sort((a, b) => b.wins.CompareTo(a.wins));
+        standings.Sort((a, b) =>
+        {
+            float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
+            float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
+            if (pctB != pctA) return pctB.CompareTo(pctA);
+            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
+            return b.wins.CompareTo(a.wins);
+        });
         for (int i = 0; i < standings.Count; i++)
             if (standings[i].team.id == _myTeam.id) return i + 1;
         return 0;
@@ -480,26 +497,66 @@ public class ManagerController : MonoBehaviour
     {
         if (_myTeam == null) return;
 
-        if (_managerObjective != null)
-            _managerObjective.text = _myTeam.objective ?? "--";
-
-        if (_managerObjectiveStatus == null) return;
+        string obj = _myTeam.objective ?? "--";
+        if (_managerObjectiveTitle != null)
+            _managerObjectiveTitle.text = $"OBJETIVO DE TEMPORADA: {obj.ToUpper()}";
 
         int rank = GetMyTeamConferenceRank();
         bool met = false;
         if (rank > 0)
         {
-            string obj = _myTeam.objective ?? "";
             if (obj == "Zona tranquila") met = rank <= 12;
             else if (obj == "Play-In") met = rank <= 10;
             else if (obj == "Playoffs") met = rank <= 6;
             else if (obj == "Campeonato") met = rank <= 2;
         }
 
-        string iconName = met ? "boton-v-64px" : "boton-x-64px";
-        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
-        if (tex != null)
-            _managerObjectiveStatus.style.backgroundImage = new StyleBackground(tex);
+        if (_managerObjectivePosition != null)
+        {
+            string conf = _myTeam.conference == "East" ? "Este" : "Oeste";
+            _managerObjectivePosition.text = rank > 0
+                ? $"Puesto {rank}º en la conferencia {conf}"
+                : $"Conferencia {conf}";
+        }
+
+        if (_managerObjectiveStatus != null)
+        {
+            if (rank <= 0)
+            {
+                _managerObjectiveStatus.text = "";
+                _managerObjectiveStatus.RemoveFromClassList("manager-objective-status--met");
+                _managerObjectiveStatus.RemoveFromClassList("manager-objective-status--not-met");
+            }
+            else if (met)
+            {
+                _managerObjectiveStatus.text = "OBJETIVO CUMPLIDO";
+                _managerObjectiveStatus.RemoveFromClassList("manager-objective-status--not-met");
+                _managerObjectiveStatus.AddToClassList("manager-objective-status--met");
+            }
+            else
+            {
+                _managerObjectiveStatus.text = "OBJETIVO NO CUMPLIDO";
+                _managerObjectiveStatus.RemoveFromClassList("manager-objective-status--met");
+                _managerObjectiveStatus.AddToClassList("manager-objective-status--not-met");
+            }
+        }
+    }
+
+    // ── RINGS ────────────────────────────────────────────────────
+
+    void RefreshRings()
+    {
+        if (_myTeam == null) return;
+
+        var tex = Resources.Load<Texture2D>("Icons/trofeo64px");
+        if (tex != null && _ringsTrophy != null)
+            _ringsTrophy.style.backgroundImage = new StyleBackground(tex);
+
+        if (_ringsCount == null) return;
+
+        var finals = DatabaseManager.Instance.GetFinalsRecords();
+        int rings = finals.Count(r => r.champ_name == _myTeam.name);
+        _ringsCount.text = rings.ToString();
     }
 
     // ── RANKING ──────────────────────────────────────────────────
@@ -533,6 +590,16 @@ public class ManagerController : MonoBehaviour
             nameLabel.AddToClassList("ranking-col-name");
             row.Add(nameLabel);
 
+            var teamAbbrev = "—";
+            if (coach.status == "active" || coach.status == "player")
+            {
+                var team = _allTeams?.FirstOrDefault(t => t.id == coach.team_id);
+                if (team != null) teamAbbrev = team.abbreviation;
+            }
+            var teamLabel = new Label(teamAbbrev);
+            teamLabel.AddToClassList("ranking-col-team");
+            row.Add(teamLabel);
+
             var scoreLabel = new Label(coach.score.ToString());
             scoreLabel.AddToClassList("ranking-col-score");
             row.Add(scoreLabel);
@@ -559,6 +626,13 @@ public class ManagerController : MonoBehaviour
                 var badge = new Label("TÚ");
                 badge.AddToClassList("ranking-badge");
                 badge.AddToClassList("ranking-badge--player");
+                badgeContainer.Add(badge);
+            }
+            else if (coach.status == "active")
+            {
+                var badge = new Label("ACTIVO");
+                badge.AddToClassList("ranking-badge");
+                badge.AddToClassList("ranking-badge--active");
                 badgeContainer.Add(badge);
             }
 

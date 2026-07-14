@@ -185,12 +185,22 @@ public class EndSeasonController : MonoBehaviour
         row.AddToClassList("es-player-row");
         if (isExpiring) row.AddToClassList("es-player-expiry-row");
 
-        var logo = new VisualElement();
-        logo.AddToClassList("es-mini-logo");
-        var team = DatabaseManager.Instance.GetTeamById(p.team_id);
-        if (team != null && _logo32.TryGetValue(team.logo, out var sprite))
-            logo.style.backgroundImage = new StyleBackground(sprite);
-        row.Add(logo);
+        if (p.team_id == 0)
+        {
+            var faLabel = new Label();
+            faLabel.text = "AGENTE LIBRE";
+            faLabel.AddToClassList("es-fa-label");
+            row.Add(faLabel);
+        }
+        else
+        {
+            var logo = new VisualElement();
+            logo.AddToClassList("es-mini-logo");
+            var team = DatabaseManager.Instance.GetTeamById(p.team_id);
+            if (team != null && _logo32.TryGetValue(team.logo, out var sprite))
+                logo.style.backgroundImage = new StyleBackground(sprite);
+            row.Add(logo);
+        }
 
         var nameLbl = new Label();
         nameLbl.AddToClassList("es-player-name");
@@ -346,7 +356,7 @@ public class EndSeasonController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("draft-player-ovr");
-        ovrLbl.text = $"OVR: {p.overall}";
+        ovrLbl.text = $"MED: {p.overall}";
         info.Add(ovrLbl);
 
         pick.Add(info);
@@ -471,7 +481,7 @@ public class EndSeasonController : MonoBehaviour
         infoCol.Add(teamNameLbl);
 
         var p = r.Player;
-        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {PositionCodes.GetShort(p.position)}  ·  OVR: {p.overall}");
+        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {PositionCodes.GetShort(p.position)}  ·  MED: {p.overall}");
         playerLbl.AddToClassList("lottery-draft-player");
         infoCol.Add(playerLbl);
 

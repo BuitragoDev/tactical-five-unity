@@ -98,10 +98,10 @@ public class DashboardController : MonoBehaviour
     // Injured lineup modal
     private bool _injuredModalResolved;
     private bool _injuredModalGoToQuinteto;
-    private bool _modalActive;
-
     // Config modal
     private VisualElement _configModalOverlay;
+    private VisualElement _configMainMenuConfirmOverlay;
+    private VisualElement _configExitConfirmOverlay;
     private VisualElement _configModalBox;
     private Button _btnConfigCerrar;
     private CustomSlider _configSliderMaster;
@@ -114,13 +114,9 @@ public class DashboardController : MonoBehaviour
     private Button _configBtnQualityMedium;
     private Button _configBtnQualityHigh;
     private Button _configBtnQualityUltra;
-
-    // Config confirm modals
-    private VisualElement _configMainMenuConfirmOverlay;
     private Button _configBtnMainMenu;
     private Button _configBtnMainMenuYes;
     private Button _configBtnMainMenuNo;
-    private VisualElement _configExitConfirmOverlay;
     private Button _configBtnExit;
     private Button _configBtnExitYes;
     private Button _configBtnExitNo;
@@ -157,12 +153,21 @@ public class DashboardController : MonoBehaviour
 
     void Update()
     {
-        if (_modalActive) return;
+        if (IsAnyModalOpen()) return;
         if (Input.GetKeyDown(KeyCode.S))
         {
             PlayClick();
             OnActionClicked();
         }
+    }
+
+    bool IsAnyModalOpen()
+    {
+        if (_firedOverlay.style.display == DisplayStyle.Flex) return true;
+        if (_configModalOverlay != null && _configModalOverlay.ClassListContains("modal-overlay--visible")) return true;
+        if (_configMainMenuConfirmOverlay != null && _configMainMenuConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
+        if (_configExitConfirmOverlay != null && _configExitConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
+        return false;
     }
 
     void CacheReferences()
@@ -2305,7 +2310,6 @@ public class DashboardController : MonoBehaviour
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
-        _modalActive = true;
 
         var aiTeam = _allTeams.FirstOrDefault(t => t.id == offer.team_id_from);
         string teamName = aiTeam != null ? aiTeam.name : "?";
@@ -2354,7 +2358,6 @@ public class DashboardController : MonoBehaviour
             PlayClick();
             DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
             _firedOverlay.style.display = DisplayStyle.None;
-            _modalActive = false;
             ShowNextPendingTradeOffer();
         });
         btnGroup.Add(rejectBtn);
@@ -2463,7 +2466,6 @@ public class DashboardController : MonoBehaviour
 
             DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 1);
             _firedOverlay.style.display = DisplayStyle.None;
-            _modalActive = false;
             ShowNextPendingTradeOffer();
         });
         btnGroup.Add(acceptBtn);
@@ -2686,10 +2688,12 @@ public class DashboardController : MonoBehaviour
             int w = tGames.Count(g =>
                 (g.home_team_id == t.id && g.home_score > g.away_score) ||
                 (g.away_team_id == t.id && g.away_score > g.home_score));
-            return new { Team = t, Wins = w };
+            int l = tGames.Count - w;
+            return new { Team = t, Wins = w, Losses = l, Pct = tGames.Count > 0 ? (float)w / tGames.Count : 0f };
         })
-        .OrderByDescending(x => x.Wins)
-        .ThenBy(x => x.Team.id)
+        .OrderByDescending(x => x.Pct)
+        .ThenBy(x => x.Losses)
+        .ThenByDescending(x => x.Wins)
         .ToList();
 
         int currentPos = ranked.FindIndex(x => x.Team.id == homeTeam.id) + 1;
@@ -3325,10 +3329,11 @@ public class DashboardController : MonoBehaviour
             float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
             float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
             if (pctB != pctA) return pctB.CompareTo(pctA);
+            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
+            if (b.wins != a.wins) return b.wins.CompareTo(a.wins);
             int diffA = a.pf - a.pa;
             int diffB = b.pf - b.pa;
-            if (diffB != diffA) return diffB.CompareTo(diffA);
-            return b.wins.CompareTo(a.wins);
+            return diffB.CompareTo(diffA);
         });
 
         for (int i = 0; i < rows.Count; i++)
@@ -3532,9 +3537,9 @@ public class DashboardController : MonoBehaviour
 
         standings.Sort((a, b) =>
         {
-            int cmp = b.wins.CompareTo(a.wins);
-            if (cmp != 0) return cmp;
-            return b.pct.CompareTo(a.pct);
+            if (b.pct != a.pct) return b.pct.CompareTo(a.pct);
+            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
+            return b.wins.CompareTo(a.wins);
         });
 
         for (int i = 0; i < standings.Count; i++)
@@ -3889,7 +3894,6 @@ public class DashboardController : MonoBehaviour
                 { PlayClick(); CloseMainMenuConfirmModal(); }
         });
 
-        // Exit confirm modal
         _configBtnExitYes?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -4022,8 +4026,8 @@ public class DashboardController : MonoBehaviour
         var finals = finalsList.FirstOrDefault(f => f.season == seasonKey);
         if (finals != null)
         {
-            championId = allTeams.FirstOrDefault(t => t.abbreviation == finals.champ_keyword)?.id ?? 0;
-            finalistId = allTeams.FirstOrDefault(t => t.abbreviation == finals.finalist_keyword)?.id ?? 0;
+            championId = allTeams.FirstOrDefault(t => t.logo == finals.champ_keyword)?.id ?? 0;
+            finalistId = allTeams.FirstOrDefault(t => t.logo == finals.finalist_keyword)?.id ?? 0;
         }
 
         foreach (var team in allTeams)
@@ -4038,14 +4042,21 @@ public class DashboardController : MonoBehaviour
 
     void ComputeConfRanks(List<TeamData> confTeams, List<GameData> allGames, Dictionary<int, int> teamRank)
     {
-        var standings = new List<(int teamId, int wins)>();
+        var standings = new List<(int teamId, int wins, int losses)>();
         foreach (var t in confTeams)
         {
             var tg = allGames.Where(g => g.is_played == 1 && g.game_type == "regular" && (g.home_team_id == t.id || g.away_team_id == t.id)).ToList();
             int w = tg.Count(g => (g.home_team_id == t.id && g.home_score > g.away_score) || (g.away_team_id == t.id && g.away_score > g.home_score));
-            standings.Add((t.id, w));
+            standings.Add((t.id, w, tg.Count - w));
         }
-        standings.Sort((a, b) => b.wins.CompareTo(a.wins));
+        standings.Sort((a, b) =>
+        {
+            float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
+            float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
+            if (pctB != pctA) return pctB.CompareTo(pctA);
+            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
+            return b.wins.CompareTo(a.wins);
+        });
         for (int i = 0; i < standings.Count; i++)
             teamRank[standings[i].teamId] = i + 1;
     }

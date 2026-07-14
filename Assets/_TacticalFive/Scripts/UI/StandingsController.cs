@@ -522,10 +522,11 @@ public class StandingsController : MonoBehaviour
             float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
             float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
             if (pctB != pctA) return pctB.CompareTo(pctA);
+            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
+            if (b.wins != a.wins) return b.wins.CompareTo(a.wins);
             int diffA = a.pf - a.pa;
             int diffB = b.pf - b.pa;
-            if (diffB != diffA) return diffB.CompareTo(diffA);
-            return b.wins.CompareTo(a.wins);
+            return diffB.CompareTo(diffA);
         });
 
         for (int i = 0; i < rows.Count; i++)

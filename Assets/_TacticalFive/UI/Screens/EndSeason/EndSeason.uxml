@@ -13,11 +13,11 @@
                 </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement class="header-right-group">
-                <ui:Button name="BtnLottery" class="btn-lottery" text="LOTERÍA DRAFT"/>
                 <ui:VisualElement class="header-season-info">
                     <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
                 </ui:VisualElement>
                 <ui:Label name="HeaderDate" class="header-date-label" text=""/>
+                <ui:Button name="BtnLottery" class="btn-lottery" text="LOTERÍA DRAFT"/>
                 <ui:Button name="BtnNextSeason" class="btn-action" text="PRÓXIMA TEMPORADA"/>
             </ui:VisualElement>
         </ui:VisualElement>
