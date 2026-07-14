@@ -170,12 +170,15 @@ public class StatsController : MonoBehaviour
         var btnSeason = _root.Q<Button>("BtnSeason");
         var btnHistorical = _root.Q<Button>("BtnHistorical");
         var btnMyTeam = _root.Q<Button>("BtnMyTeam");
+        var btnRookies = _root.Q<Button>("BtnRookies");
         _filterBtns.Add(btnSeason);
         _filterBtns.Add(btnHistorical);
         _filterBtns.Add(btnMyTeam);
+        _filterBtns.Add(btnRookies);
         btnSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("season"); });
         btnHistorical?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("historical"); });
         btnMyTeam?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("team"); });
+        btnRookies?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetMode("rookies"); });
 
         var btnTotals = _root.Q<Button>("BtnTotals");
         var btnAverages = _root.Q<Button>("BtnAverages");
@@ -212,7 +215,7 @@ public class StatsController : MonoBehaviour
         foreach (var btn in _statTabs)
             CursorManager.Instance.RegisterHandCursor(btn);
 
-        var extraBtns = new[] { "BtnSeason", "BtnHistorical", "BtnMyTeam", "BtnTotals", "BtnAverages" };
+        var extraBtns = new[] { "BtnSeason", "BtnHistorical", "BtnMyTeam", "BtnRookies", "BtnTotals", "BtnAverages" };
         foreach (var name in extraBtns)
         {
             var el = _root.Q<Button>(name);
@@ -442,6 +445,8 @@ public class StatsController : MonoBehaviour
             _root.Q<Button>("BtnSeason")?.AddToClassList("filter-btn--active");
         else if (mode == "historical")
             _root.Q<Button>("BtnHistorical")?.AddToClassList("filter-btn--active");
+        else if (mode == "rookies")
+            _root.Q<Button>("BtnRookies")?.AddToClassList("filter-btn--active");
         else
             _root.Q<Button>("BtnMyTeam")?.AddToClassList("filter-btn--active");
         ShowStats(_currentStat);
@@ -549,6 +554,11 @@ public class StatsController : MonoBehaviour
         {
             var teamPlayers = allPlayers.Where(p => p.team_id == _myTeam.id).ToList();
             playerAggs = BuildSeasonStats(teamPlayers);
+        }
+        else if (_currentMode == "rookies")
+        {
+            var rookiePlayers = allPlayers.Where(p => p.is_rookie == 1).ToList();
+            playerAggs = BuildSeasonStats(rookiePlayers);
         }
         else
         {
