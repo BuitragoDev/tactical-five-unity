@@ -4151,9 +4151,9 @@ public class DatabaseManager : MonoBehaviour
             .OrderByDescending(p => p.overall)
             .ToList();
 
-        var leagueSettings = GetLeagueSettings();
-        long minSalary = leagueSettings?.minimum_salary ?? TradeHelper.MIN_SALARY;
-        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        var settings = GetLeagueSettings();
+        long minSalary = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+        long salaryCap = settings?.salary_cap ?? TradeHelper.SALARY_CAP;
 
         // Sort AI teams by average overall rating descending (best teams sign first)
         var teamsToFill = allTeams
