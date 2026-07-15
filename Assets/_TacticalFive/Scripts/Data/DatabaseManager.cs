@@ -4144,20 +4144,37 @@ public class DatabaseManager : MonoBehaviour
         _db.Execute("DELETE FROM game_attendance");
         _db.Execute("DELETE FROM finance_records");
 
-        // 6. Fill rosters to 12 for all teams (except the user's new team)
+        // 6. Fill rosters to 15 for all teams (except the user's new team)
         var allTeams = GetAllTeams();
         var freeAgents = _db.Table<PlayerData>()
             .Where(p => p.team_id == 0 && p.age < 40)
             .OrderByDescending(p => p.overall)
             .ToList();
 
-        // Sort teams: fill user's new team last to maximize free agent pool for AI
-        var teamsToFill = allTeams.Where(t => t.id != newTeamId).ToList();
+        var leagueSettings = GetLeagueSettings();
+        long minSalary = leagueSettings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+
+        // Sort AI teams by average overall rating descending (best teams sign first)
+        var teamsToFill = allTeams
+            .Where(t => t.id != newTeamId)
+            .Select(t =>
+            {
+                var r = GetPlayersByTeam(t.id);
+                double avg = r.Count > 0 ? r.Average(p => (double)p.overall) : 0;
+                return (team: t, avgOvr: avg);
+            })
+            .OrderByDescending(x => x.avgOvr)
+            .Select(x => x.team)
+            .ToList();
+
+        const int targetRosterSize = 15;
 
         foreach (var team in teamsToFill)
         {
             var roster = GetPlayersByTeam(team.id);
-            int need = 12 - roster.Count;
+            long payroll = roster.Sum(p => p.salary);
+            int need = targetRosterSize - roster.Count;
             if (need <= 0) continue;
 
             var posCounts = new Dictionary<string, int>();
@@ -4182,20 +4199,30 @@ public class DatabaseManager : MonoBehaviour
 
                 if (signed != null)
                 {
+                    long availableCap = salaryCap - payroll;
+                    long faSalary = signed.salary;
+
+                    if (faSalary > availableCap)
+                    {
+                        faSalary = Math.Max(minSalary, availableCap);
+                    }
+
+                    signed.salary = faSalary;
                     signed.team_id = team.id;
-                    signed.contract_years = Math.Max(1, 4 - signed.age / 10);
+                    signed.contract_years = 1;
                     signed.seasons_with_team = 1;
                     _db.Update(signed);
                     freeAgents.Remove(signed);
+                    payroll += faSalary;
                     posCounts[signed.position] = posCounts.GetValueOrDefault(signed.position) + 1;
                 }
             }
         }
 
-        // Now fill user's team to 12 if needed
+        // Now fill user's team to 15 if needed
         {
             var userRoster = GetPlayersByTeam(newTeamId);
-            int need = 12 - userRoster.Count;
+            int need = targetRosterSize - userRoster.Count;
             if (need > 0)
             {
                 var posCounts = new Dictionary<string, int>();
@@ -4221,7 +4248,7 @@ public class DatabaseManager : MonoBehaviour
                     if (signed != null)
                     {
                         signed.team_id = newTeamId;
-                        signed.contract_years = Math.Max(1, 4 - signed.age / 10);
+                        signed.contract_years = 1;
                         signed.seasons_with_team = 1;
                         _db.Update(signed);
                         freeAgents.Remove(signed);
