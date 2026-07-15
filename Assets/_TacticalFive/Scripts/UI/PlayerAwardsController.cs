@@ -60,9 +60,14 @@ public class PlayerAwardsController : MonoBehaviour
         CacheReferences();
         LoadData();
 
+        CursorManager.Instance?.SetDefaultCursor();
+
         var btnEnd = _root.Q<Button>("BtnEndSeason");
         if (btnEnd != null)
+        {
             btnEnd.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.EndSeason); });
+            CursorManager.Instance?.RegisterHandCursor(btnEnd);
+        }
     }
 
     void CacheReferences()

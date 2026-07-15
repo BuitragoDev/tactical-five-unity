@@ -43,6 +43,11 @@ public class NewSeasonController : MonoBehaviour
 
         CacheReferences();
         LoadData();
+
+        CursorManager.Instance?.SetDefaultCursor();
+
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(_btnStartSeason);
     }
 
     void CacheReferences()
@@ -221,6 +226,8 @@ public class NewSeasonController : MonoBehaviour
 
             int capturedId = team.id;
             card.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectTeam(capturedId); });
+
+            CursorManager.Instance?.RegisterHandCursor(card);
 
             _teamSelection.Add(card);
         }

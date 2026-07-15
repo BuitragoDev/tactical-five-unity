@@ -51,9 +51,14 @@ public class SeasonSummaryController : MonoBehaviour
         LoadSprites();
         LoadData();
 
+        CursorManager.Instance?.SetDefaultCursor();
+
         var btnAwards = _root.Q<Button>("BtnGoToAwards");
         if (btnAwards != null)
+        {
             btnAwards.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.PlayerAwards); });
+            CursorManager.Instance?.RegisterHandCursor(btnAwards);
+        }
     }
 
     void CacheReferences()

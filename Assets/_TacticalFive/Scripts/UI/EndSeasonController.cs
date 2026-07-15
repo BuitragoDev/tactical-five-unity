@@ -51,6 +51,16 @@ public class EndSeasonController : MonoBehaviour
 
         CacheReferences();
         LoadData();
+
+        CursorManager.Instance?.SetDefaultCursor();
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(_btnDraft);
+            CursorManager.Instance.RegisterHandCursor(_btnNextSeason);
+            CursorManager.Instance.RegisterHandCursor(_btnRenewAll);
+            CursorManager.Instance.RegisterHandCursor(_btnLottery);
+        }
     }
 
     void CacheReferences()
@@ -230,6 +240,7 @@ public class EndSeasonController : MonoBehaviour
                 row.RemoveFromHierarchy();
             });
             row.Add(renewBtn);
+            CursorManager.Instance?.RegisterHandCursor(renewBtn);
         }
         else
         {
@@ -450,6 +461,7 @@ public class EndSeasonController : MonoBehaviour
             _lotteryOverlay.style.display = DisplayStyle.None;
         });
         box.Add(closeBtn);
+        CursorManager.Instance?.RegisterHandCursor(closeBtn);
     }
 
     VisualElement BuildDraftLotteryRow(DraftGenerator.DraftPickResult r)
@@ -532,6 +544,7 @@ public class EndSeasonController : MonoBehaviour
             _lotteryOverlay.style.display = DisplayStyle.None;
         });
         box.Add(closeBtn);
+        CursorManager.Instance?.RegisterHandCursor(closeBtn);
     }
 
     VisualElement BuildLotteryRow(int rank, TeamData team, string pct)
