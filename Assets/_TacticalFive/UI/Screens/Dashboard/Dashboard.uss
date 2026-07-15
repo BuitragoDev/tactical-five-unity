@@ -730,7 +730,7 @@
 }
 .col-streak {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    width: 40px;
+    width: 55px;
     font-size: 16px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
@@ -1010,27 +1010,27 @@
     flex-grow: 1;
 }
 .board-circle {
-    width: 96px;
-    height: 96px;
+    width: 72px;
+    height: 72px;
     border-radius: 50px;
     border-width: 3px;
     border-color: rgb(212, 160, 23);
     background-color: rgba(212, 160, 23, 0.15);
     align-items: center;
     justify-content: center;
-    margin-top: 16px;
+    margin-top: 10px;
     margin-bottom: 10px;
     flex-shrink: 0;
 }
 .board-circle-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 24px;
+    font-size: 22px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
 }
 .board-col-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;

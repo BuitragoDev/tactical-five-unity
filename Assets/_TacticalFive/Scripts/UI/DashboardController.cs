@@ -3398,7 +3398,7 @@ public class DashboardController : MonoBehaviour
         // %
         var pctLbl = new Label();
         pctLbl.AddToClassList("col-stat");
-        pctLbl.text = pct.ToString("F3");
+        pctLbl.text = pct.ToString("F3", System.Globalization.CultureInfo.InvariantCulture);
 
         // Racha
         var streakLbl = new Label();

@@ -155,6 +155,14 @@
 .player-name--injured {
     color: rgb(192, 57, 43);
 }
+.player-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(85, 102, 119);
+    width: 100px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
 .player-ovr {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
@@ -168,7 +176,7 @@
     font-size: 16px;
     color: rgb(85, 102, 119);
     width: 140px;
-    -unity-text-align: middle-right;
+    -unity-text-align: middle-center;
     flex-shrink: 0;
 }
 .player-contract {
@@ -200,7 +208,7 @@
 
 /* ── RIGHT: detalle jugador ── */
 .player-detail {
-    width: 480px;
+    width: 580px;
     flex-shrink: 0;
     flex-direction: column;
     background-color: rgb(17, 24, 34);
@@ -464,7 +472,7 @@
     background-color: rgb(192, 57, 43);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
@@ -484,7 +492,7 @@
     background-color: rgb(200, 130, 30);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;
@@ -503,7 +511,7 @@
     background-color: rgb(41, 128, 185);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     text-transform: uppercase;
     -unity-text-align: middle-center;

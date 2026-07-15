@@ -116,8 +116,8 @@
                     <ui:Label class="stat-lbl" text="FRANQUICIAS" />
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-item">
-                    <ui:Label class="stat-val stat-val-accent" text="400+" />
-                    <ui:Label class="stat-lbl" text="JUGADORES REALES" />
+                    <ui:Label class="stat-val stat-val-accent" text="600+" />
+                    <ui:Label class="stat-lbl" text="JUGADORES" />
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-item">
                     <ui:Label class="stat-val" text="82" />

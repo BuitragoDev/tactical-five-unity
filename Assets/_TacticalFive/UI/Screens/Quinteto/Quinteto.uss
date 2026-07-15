@@ -331,6 +331,8 @@
 .detail-scroll {
     flex-grow: 1;
     min-height: 0;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
 }
 
 .detail-top {

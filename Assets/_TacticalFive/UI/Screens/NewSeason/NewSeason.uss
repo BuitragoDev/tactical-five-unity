@@ -38,7 +38,7 @@
     align-items: baseline;
 }
 .new-season-root .header-team-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
@@ -46,14 +46,14 @@
     margin-right: 12px;
 }
 .new-season-root .header-subtitle {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-SemiBold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
     font-size: 18px;
     color: rgb(212, 160, 23);
     letter-spacing: 2px;
     -unity-text-transform: upper;
 }
 .new-season-root .header-manager-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
 }
@@ -67,7 +67,7 @@
     margin-right: 20px;
 }
 .new-season-root .header-date-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
@@ -79,7 +79,7 @@
     border-right-color: rgb(42, 51, 71);
 }
 .new-season-root .header-season-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(212, 160, 23);
     letter-spacing: 1px;
@@ -124,7 +124,7 @@
     margin-bottom: 40px;
 }
 .new-season-root .page-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 36px;
     letter-spacing: 4px;
     -unity-text-transform: upper;
@@ -132,12 +132,12 @@
     -unity-text-align: middle-center;
 }
 .new-season-root .season-tag {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     background-color: rgb(212, 160, 23);
     color: rgb(0, 0, 0);
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 2px;
-    padding: 4px 16px;
+    padding: 6px 16px;
     margin-top: 8px;
     -unity-text-align: middle-center;
 }
@@ -177,19 +177,19 @@
     flex-grow: 1;
 }
 .team-select-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 1px;
     color: rgb(208, 216, 232);
 }
 .team-select-detail {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
 }
 .team-select-badge {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 2px;
     color: rgb(212, 160, 23);

@@ -520,7 +520,7 @@ public class TrainingController : MonoBehaviour
 
         var ovrTextLbl = new Label();
         ovrTextLbl.AddToClassList("training-row-ovr-text");
-        ovrTextLbl.text = "OVR";
+        ovrTextLbl.text = "MED";
         row.Add(ovrTextLbl);
 
         row.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnPlayerSelected(player, row); });

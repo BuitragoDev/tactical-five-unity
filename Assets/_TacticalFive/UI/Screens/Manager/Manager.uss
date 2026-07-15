@@ -152,8 +152,8 @@
     background-color: rgb(35, 41, 58);
 }
 
-.board-col-label {
-    font-size: 16px;
+.manager-root .board-col-label {
+    font-size: 18px;
     color: rgb(110, 126, 155);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf?fileID=4800000&guid=3f9a9e566c791b44f9e015bd8897f06e&type=3#Saira_Condensed-Regular");
     text-transform: uppercase;
@@ -161,10 +161,10 @@
     -unity-text-align: middle;
 }
 
-.board-circle {
-    width: 64px;
-    height: 64px;
-    border-radius: 32px;
+.manager-root .board-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50px;
     border-width: 2px;
     align-items: center;
     justify-content: center;
@@ -229,7 +229,7 @@
 
 .manager-rings-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#Saira_Condensed-SemiBold");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(140, 156, 188);
     text-transform: uppercase;
     letter-spacing: 1px;

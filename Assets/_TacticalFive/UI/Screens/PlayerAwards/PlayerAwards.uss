@@ -178,7 +178,7 @@
     flex-direction: row;
     justify-content: center;
     margin-bottom: 26px;
-    min-height: 270px;
+    min-height: 220px;
 }
 .award-card {
     background-color: rgb(17, 24, 34);
@@ -197,7 +197,7 @@
 }
 .award-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(122, 138, 170);
@@ -273,7 +273,8 @@
 
 /* ── QUINTET SECTION ── */
 .award-section {
-    margin-bottom: 16px;
+    margin-top: 26px;
+    margin-bottom: 26px;
     align-items: center;
 }
 .section-title {

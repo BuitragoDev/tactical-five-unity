@@ -453,10 +453,10 @@
 .modal-avg-circle .stat-circle-ring {
     width: 60px;
     height: 60px;
-    border-radius: 27px;
+    border-radius: 50px;
 }
 .modal-avg-circle .stat-circle-value {
-    font-size: 22px;
+    font-size: 24px;
 }
 .modal-scroll {
     flex-grow: 1;
@@ -499,14 +499,14 @@
     padding: 6px 8px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
-    min-height: 36px;
+    min-height: 44px;
 }
 .modal-player-row:hover {
     background-color: rgb(28, 33, 48);
 }
 .modal-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
     -unity-text-align: middle-left;
@@ -516,7 +516,7 @@
 }
 .modal-player-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     width: 70px;
     -unity-text-align: middle-center;
@@ -524,14 +524,14 @@
 }
 .modal-player-flag {
     width: 24px;
-    height: 16px;
+    height: 24px;
     flex-shrink: 0;
     margin: 0 6px;
     -unity-background-scale-mode: scale-to-fit;
 }
 .modal-player-age {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     width: 30px;
     -unity-text-align: middle-center;
@@ -539,7 +539,7 @@
 }
 .modal-player-avg {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
     width: 40px;
     -unity-text-align: middle-center;
@@ -547,13 +547,13 @@
 }
 .modal-close {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 22px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);
     background-color: rgb(42, 95, 201);
     border-width: 0;
-    padding: 10px 0;
+    padding: 12px 0;
     width: 100%;
     -unity-text-align: middle-center;
     margin-top: 24px;

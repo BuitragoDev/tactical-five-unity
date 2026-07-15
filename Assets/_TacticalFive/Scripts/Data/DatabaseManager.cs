@@ -662,11 +662,19 @@ public class DatabaseManager : MonoBehaviour
     }
     // ── END TRAINING HELPERS ───────────────────────────────
 
-    // Los 5 peores equipos por overall (para ProManager)
+    // Los 5 peores equipos por overall real (media de jugadores)
     public List<TeamData> GetWorstTeams(int count = 5)
     {
         var all = _db.Table<TeamData>().ToList();
-        all.Sort((a, b) => a.overall.CompareTo(b.overall));
+        var teamAvgs = new Dictionary<int, double>();
+        foreach (var team in all)
+        {
+            var players = _db.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
+            teamAvgs[team.id] = players.Count > 0
+                ? players.Average(p => (double)p.overall)
+                : team.overall;
+        }
+        all.Sort((a, b) => teamAvgs[a.id].CompareTo(teamAvgs[b.id]));
         return all.GetRange(0, Mathf.Min(count, all.Count));
     }
 
@@ -1243,8 +1251,7 @@ public class DatabaseManager : MonoBehaviour
         {
             int teamId = teamByAbbr.TryGetValue(abbr, out var tid) ? tid : 0;
 
-            var attrs = GeneratePositionAttrs(ovr, pos, fn + ln);
-            int calcOvr = (int)System.Math.Round(attrs.Average());
+            int calcOvr = (spd + sht + thr + pas + drb + def + reb + ath + iq + stl + blk) / 11;
             if (calcOvr > pot) calcOvr = pot;
 
             players.Add(new PlayerData
@@ -1266,17 +1273,17 @@ public class DatabaseManager : MonoBehaviour
                 weight_kg = w,
                 overall = calcOvr,
                 potential = pot,
-                speed = attrs[0],
-                shooting = attrs[1],
-                three_point = attrs[2],
-                passing = attrs[3],
-                dribbling = attrs[4],
-                defense = attrs[5],
-                rebounding = attrs[6],
-                athleticism = attrs[7],
-                iq = attrs[8],
-                steals = attrs[9],
-                blocks = attrs[10],
+                speed = spd,
+                shooting = sht,
+                three_point = thr,
+                passing = pas,
+                dribbling = drb,
+                defense = def,
+                rebounding = reb,
+                athleticism = ath,
+                iq = iq,
+                steals = stl,
+                blocks = blk,
                 salary = sal,
                 contract_years = yrs,
                 is_rookie = rookie ? 1 : 0,
@@ -1790,13 +1797,13 @@ public class DatabaseManager : MonoBehaviour
         Add(462, "UTA", "Darryn", "Peterson", "SG", 19, "USA", 196, 98, 80, 94, 91, 91, 88, 84, 92, 85, 76, 93, 85, 80, 75, 10500000, 4, true);
 
         // ── WAS ── 16 jugadores
-        Add(463, "WAS", "Trae", "Young", "PG", 27, "USA", 185, 82, 94, 94, 99, 99, 99, 99, 99, 96, 78, 99, 99, 99, 68, 53000000, 4, false);
+        Add(463, "WAS", "Trae", "Young", "PG", 27, "USA", 185, 82, 89, 94, 90, 89, 92, 88, 89, 85, 78, 99, 99, 99, 68, 53000000, 4, false);
         Add(465, "WAS", "Deandre", "Ayton", "C", 28, "BHS", 213, 113, 84, 84, 89, 97, 52, 81, 78, 97, 99, 93, 95, 66, 77, 8100000, 1, false);
-        Add(466, "WAS", "Anthony", "Davis", "PF", 33, "USA", 208, 115, 92, 90, 84, 91, 78, 88, 90, 99, 99, 97, 97, 90, 99, 50000000, 4, false);
+        Add(466, "WAS", "Anthony", "Davis", "PF", 33, "USA", 208, 115, 92, 92, 84, 91, 78, 88, 90, 99, 99, 97, 97, 90, 99, 50000000, 4, false);
         Add(467, "WAS", "Alex", "Sarr", "C", 21, "FRA", 213, 100, 86, 92, 83, 85, 75, 79, 81, 90, 94, 91, 89, 85, 94, 12000000, 5, false);
         Add(110, "WAS", "Khris", "Middleton", "SF", 34, "USA", 201, 100, 81, 81, 79, 94, 94, 91, 92, 81, 75, 81, 96, 69, 39, 3000000, 3, false);
         Add(468, "WAS", "Bilal", "Coulibaly", "SF", 22, "FRA", 201, 95, 84, 90, 95, 89, 84, 85, 87, 95, 78, 95, 91, 93, 32, 9000000, 4, false);
-        Add(469, "WAS", "Cam", "Whitmore", "SF", 22, "USA", 198, 100, 86, 92, 98, 98, 92, 86, 90, 92, 70, 96, 94, 92, 38, 8000000, 4, false);
+        Add(469, "WAS", "Cam", "Whitmore", "SF", 22, "USA", 198, 100, 86, 92, 88, 88, 82, 86, 80, 82, 70, 86, 84, 82, 68, 8000000, 4, false);
         Add(470, "WAS", "Tre", "Johnson", "SG", 20, "USA", 196, 88, 82, 90, 99, 96, 98, 85, 88, 77, 61, 90, 92, 83, 33, 5000000, 4, false);
         Add(471, "WAS", "Kyshawn", "George", "SF", 21, "CAN", 203, 94, 80, 88, 92, 88, 90, 82, 86, 86, 66, 88, 86, 88, 28, 5000000, 4, false);
         Add(472, "WAS", "Will", "Riley", "SF", 20, "USA", 201, 92, 78, 88, 94, 86, 88, 80, 84, 82, 63, 86, 84, 84, 27, 4000000, 4, false);
@@ -1804,7 +1811,7 @@ public class DatabaseManager : MonoBehaviour
         Add(474, "WAS", "Sharife", "Cooper", "PG", 25, "USA", 183, 82, 74, 84, 94, 84, 81, 88, 86, 67, 49, 81, 82, 77, 25, 2000000, 2, false);
         Add(475, "WAS", "Justin", "Champagnie", "SF", 25, "USA", 198, 95, 78, 82, 88, 86, 84, 78, 82, 89, 68, 88, 84, 86, 25, 3000000, 2, false);
         Add(477, "WAS", "Tristan", "Vukcevic", "C", 22, "SRB", 213, 108, 80, 86, 76, 85, 82, 74, 78, 80, 82, 82, 84, 72, 85, 5000000, 4, false);
-        Add(478, "WAS", "AJ", "Dybantsa", "SF", 19, "USA", 206, 95, 82, 95, 93, 88, 85, 82, 90, 82, 80, 97, 83, 80, 72, 13500000, 4, true);
+        Add(478, "WAS", "AJ", "Dybantsa", "SF", 19, "USA", 206, 95, 82, 95, 93, 88, 85, 82, 90, 92, 80, 97, 83, 80, 80, 13500000, 4, true);
         Add(479, "WAS", "Felix", "Okpara", "C", 22, "NGA", 213, 107, 58, 70, 72, 56, 38, 60, 56, 76, 92, 78, 72, 64, 88, 2000000, 2, true);
 
         _db.BeginTransaction();

@@ -390,7 +390,7 @@
 }
 .settings-section-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(150, 160, 180);
@@ -407,7 +407,7 @@
 .settings-label {
     width: 160px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
 }
 .custom-slider {
@@ -451,7 +451,7 @@
 .settings-value {
     width: 50px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(248, 196, 64);
     -unity-text-align: middle-right;
 }
@@ -475,7 +475,7 @@
     border-radius: 4px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     -unity-text-align: middle-center;
     -unity-text-transform: upper;
 }

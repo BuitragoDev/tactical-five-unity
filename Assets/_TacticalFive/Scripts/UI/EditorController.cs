@@ -64,6 +64,51 @@ public class EditorController : MonoBehaviour
     private CustomDropdown _openDropdown;
     private VisualElement _toast;
 
+    private static readonly Dictionary<string, string> _confToDisplay = new()
+    {
+        { "East", "Este" },
+        { "West", "Oeste" },
+    };
+    private static readonly Dictionary<string, string> _confFromDisplay = new()
+    {
+        { "Este", "East" },
+        { "Oeste", "West" },
+    };
+    private static readonly Dictionary<string, string> _divToDisplay = new()
+    {
+        { "Atlantic", "Atlántico" },
+        { "Central", "Central" },
+        { "Southeast", "Sudeste" },
+        { "Northwest", "Noroeste" },
+        { "Pacific", "Pacífico" },
+        { "Southwest", "Suroeste" },
+    };
+    private static readonly Dictionary<string, string> _divFromDisplay = new()
+    {
+        { "Atlántico", "Atlantic" },
+        { "Central", "Central" },
+        { "Sudeste", "Southeast" },
+        { "Noroeste", "Northwest" },
+        { "Pacífico", "Pacific" },
+        { "Suroeste", "Southwest" },
+    };
+    private static readonly Dictionary<string, string> _posToDisplay = new()
+    {
+        { "PG", "Base" },
+        { "SG", "Escolta" },
+        { "SF", "Alero" },
+        { "PF", "Ala-Pívot" },
+        { "C", "Pívot" },
+    };
+    private static readonly Dictionary<string, string> _posFromDisplay = new()
+    {
+        { "Base", "PG" },
+        { "Escolta", "SG" },
+        { "Alero", "SF" },
+        { "Ala-Pívot", "PF" },
+        { "Pívot", "C" },
+    };
+
     void OnDisable()
     {
         DatabaseManager.Instance?.CloseTemplateSession();
@@ -393,8 +438,8 @@ public class EditorController : MonoBehaviour
         SetAbbreviationInput(_teamAbbrInput);
         _teamCityInput = AddInput(leftCol, "Ciudad", t.city);
         SetLettersOnly(_teamCityInput);
-        _teamConferenceDropdown = AddDropdown(leftCol, "Conferencia", new[] { "East", "West" }, t.conference);
-        _teamDivisionDropdown = AddDropdown(leftCol, "División", new[] { "Atlantic", "Central", "Southeast", "Northwest", "Pacific", "Southwest" }, t.division);
+        _teamConferenceDropdown = AddDropdown(leftCol, "Conferencia", new[] { "Este", "Oeste" }, _confToDisplay.TryGetValue(t.conference, out var confD) ? confD : t.conference);
+        _teamDivisionDropdown = AddDropdown(leftCol, "División", new[] { "Atlántico", "Central", "Sudeste", "Noroeste", "Pacífico", "Suroeste" }, _divToDisplay.TryGetValue(t.division, out var divD) ? divD : t.division);
         AddDivider(leftCol);
 
         AddSectionTitle(leftCol, "PABELLÓN");
@@ -415,7 +460,7 @@ public class EditorController : MonoBehaviour
         _teamAttackInput.isReadOnly = true;
         _teamDefenseInput = AddInput(rightCol, "Defensa", t.defense.ToString());
         _teamDefenseInput.isReadOnly = true;
-        _teamOverallDisplay = AddInput(rightCol, "Overall", t.overall.ToString());
+        _teamOverallDisplay = AddInput(rightCol, "Media", t.overall.ToString());
         _teamOverallDisplay.isReadOnly = true;
         _teamReputationDropdown = AddDropdown(rightCol, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
         _teamFacilitiesDropdown = AddDropdown(rightCol, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
@@ -466,8 +511,8 @@ public class EditorController : MonoBehaviour
         t.name = _teamNameInput.value;
         t.abbreviation = _teamAbbrInput.value;
         t.city = _teamCityInput.value;
-        t.conference = _teamConferenceDropdown.Value;
-        t.division = _teamDivisionDropdown.Value;
+        t.conference = _confFromDisplay.TryGetValue(_teamConferenceDropdown.Value, out var conf) ? conf : _teamConferenceDropdown.Value;
+        t.division = _divFromDisplay.TryGetValue(_teamDivisionDropdown.Value, out var div) ? div : _teamDivisionDropdown.Value;
         t.arena = _teamArenaInput.value;
         int.TryParse(_teamCapacityInput.value, out int cap); t.capacity = cap;
         t.owner = _teamOwnerInput.value;
@@ -570,7 +615,7 @@ public class EditorController : MonoBehaviour
         SetLettersOnly(_playerFName);
         _playerLName = AddInput(leftCol, "Apellido", p.last_name);
         SetLettersOnly(_playerLName);
-        _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "PG", "SG", "SF", "PF", "C" }, p.position);
+        _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "Base", "Escolta", "Alero", "Ala-Pívot", "Pívot" }, _posToDisplay.TryGetValue(p.position, out var posD) ? posD : p.position);
         _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
         SetDigitsOnly(_playerAge, 2);
         _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
@@ -598,7 +643,7 @@ public class EditorController : MonoBehaviour
         rightCol.AddToClassList("editor-column");
 
         AddSectionTitle(rightCol, "VALORACIONES");
-        _playerOverallDisplay = new Label($"Overall: {p.overall}  /  Potencial: {p.potential}");
+        _playerOverallDisplay = new Label($"Media: {p.overall}  /  Potencial: {p.potential}");
         _playerOverallDisplay.AddToClassList("editor-field-display");
         var ovrRow = new VisualElement();
         ovrRow.AddToClassList("editor-field-row");
@@ -647,7 +692,7 @@ public class EditorController : MonoBehaviour
 
         p.first_name = _playerFName.value;
         p.last_name = _playerLName.value;
-        p.position = _playerPosDropdown.Value;
+        p.position = _posFromDisplay.TryGetValue(_playerPosDropdown.Value, out var pos) ? pos : _playerPosDropdown.Value;
         int.TryParse(_playerAge.value, out int age); p.age = age;
         p.nationality = _playerNat.value;
         int.TryParse(_playerHt.value, out int ht); p.height_cm = ht;

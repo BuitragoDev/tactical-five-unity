@@ -687,7 +687,14 @@ public class RosterController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-ovr");
-        ovrLbl.text = player.GetCalculatedAverage().ToString();
+        int ovrVal = player.GetCalculatedAverage();
+        ovrLbl.text = ovrVal.ToString();
+        if (ovrVal >= 70)
+            ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
+        else if (ovrVal >= 50)
+            ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        else
+            ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
 
         var metaLbl = new Label();
         metaLbl.AddToClassList("player-meta");
@@ -712,8 +719,13 @@ public class RosterController : MonoBehaviour
         moraleDot.style.backgroundColor = new StyleColor(dotColor);
         row.Add(moraleDot);
 
+        var posLbl = new Label();
+        posLbl.AddToClassList("player-pos");
+        posLbl.text = PositionCodes.GetName(player.secondary_position);
+
         row.Add(nameLbl);
         row.Add(ovrLbl);
+        row.Add(posLbl);
         row.Add(metaLbl);
         row.Add(contractLbl);
 
