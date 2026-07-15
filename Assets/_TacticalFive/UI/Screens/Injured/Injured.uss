@@ -357,7 +357,7 @@
     align-items: center;
 }
 .league-injured-col-logo {
-    width: 50px;
+    width: 42px;
     flex-shrink: 0;
 }
 .league-injured-col-team {
@@ -421,8 +421,8 @@
     background-color: rgb(28, 33, 48);
 }
 .league-injured-row-logo {
-    width: 40px;
-    height: 38px;
+    width: 32px;
+    height: 32px;
     flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
     margin-right: 10px;

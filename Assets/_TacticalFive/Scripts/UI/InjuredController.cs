@@ -48,6 +48,7 @@ public class InjuredController : MonoBehaviour
     private EmployeeData _medico;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSprites32 = new();
     private Texture2D _starTex;
     private StyleBackground _starBg;
     private StyleBackground _empleadoBg;
@@ -159,6 +160,9 @@ public class InjuredController : MonoBehaviour
     {
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos) _logoSprites[s.name] = s;
+
+        var logos32 = Resources.LoadAll<Sprite>("Teams/32x32");
+        foreach (var s in logos32) _logoSprites32[s.name] = s;
 
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
         if (_starTex != null)
@@ -662,7 +666,7 @@ public class InjuredController : MonoBehaviour
 
             var logoLbl = new VisualElement();
             logoLbl.AddToClassList("league-injured-row-logo");
-            if (_logoSprites.TryGetValue(team.logo, out var sprite))
+            if (_logoSprites32.TryGetValue(team.logo, out var sprite))
                 logoLbl.style.backgroundImage = new StyleBackground(sprite);
             row.Add(logoLbl);
 
