@@ -607,8 +607,13 @@ public class InjuredController : MonoBehaviour
     void OpenLeagueInjuredModal()
     {
         BuildLeagueInjuredList();
-        _leagueInjuredScroll.style.height = new StyleLength(new Length(320, LengthUnit.Pixel));
-        _leagueInjuredScroll.style.maxHeight = new StyleLength(new Length(320, LengthUnit.Pixel));
+        var scrollWrapper = _root.Q<VisualElement>("LeagueInjuredScrollWrapper");
+        if (scrollWrapper != null)
+        {
+            scrollWrapper.style.height = new StyleLength(new Length(320, LengthUnit.Pixel));
+            scrollWrapper.style.maxHeight = new StyleLength(new Length(320, LengthUnit.Pixel));
+        }
+        _leagueInjuredScroll.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
         _leagueInjuredOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _leagueInjuredOverlay.AddToClassList("modal-overlay--visible");
         _leagueInjuredOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
