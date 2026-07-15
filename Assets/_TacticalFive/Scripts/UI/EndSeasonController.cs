@@ -195,14 +195,7 @@ public class EndSeasonController : MonoBehaviour
         row.AddToClassList("es-player-row");
         if (isExpiring) row.AddToClassList("es-player-expiry-row");
 
-        if (p.team_id == 0)
-        {
-            var faLabel = new Label();
-            faLabel.text = "AGENTE LIBRE";
-            faLabel.AddToClassList("es-fa-label");
-            row.Add(faLabel);
-        }
-        else
+        if (p.team_id != 0)
         {
             var logo = new VisualElement();
             logo.AddToClassList("es-mini-logo");

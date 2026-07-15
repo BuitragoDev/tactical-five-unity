@@ -258,18 +258,9 @@
     flex-shrink: 0;
     margin-right: 12px;
 }
-.es-fa-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
-    color: rgb(140, 156, 188);
-    font-style: italic;
-    margin-right: 12px;
-    width: 100px;
-    flex-shrink: 0;
-}
 .es-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
 }
@@ -284,13 +275,13 @@
 }
 .es-player-age {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     flex-shrink: 0;
 }
 .es-player-salary {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(39, 174, 96);
     flex-shrink: 0;
     margin-right: 12px;
@@ -300,7 +291,7 @@
     -unity-text-align: middle-center;
 }
 .es-player-expiry-row .es-player-salary {
-    min-width: 100px;
+    min-width: 140px;
     -unity-text-align: middle-center;
 }
 .btn-renew {
@@ -308,7 +299,7 @@
     border-width: 0;
     color: rgb(255, 255, 255);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     padding: 4px 12px;
