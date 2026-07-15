@@ -3,6 +3,11 @@
     <ui:VisualElement name="EndSeasonRoot" class="end-season-root">
         <ui:VisualElement name="TopHeader" class="top-header">
             <ui:VisualElement class="header-left">
+                <ui:VisualElement class="header-brand">
+                    <ui:Label text="TF" class="header-brand-icon"/>
+                    <ui:Label text="TACTICAL" class="header-brand-text"/>
+                    <ui:Label text="FIVE" class="header-brand-text-gold"/>
+                </ui:VisualElement>
                 <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
                 <ui:VisualElement class="header-team-info">
                     <ui:VisualElement class="header-team-name-row">
