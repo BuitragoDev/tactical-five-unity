@@ -8,6 +8,8 @@ public class CustomSlider
     private VisualElement _dragger;
     private VisualElement _tracker;
 
+    public VisualElement Container => _container;
+
     private float _value;
     public System.Action<float> OnValueChanged;
 

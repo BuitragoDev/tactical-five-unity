@@ -1075,7 +1075,7 @@
 }
 
 .fired-modal-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 36px;
     letter-spacing: 4px;
     color: rgb(192, 57, 43);
@@ -1198,7 +1198,7 @@
 }
 .settings-section-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(150, 160, 180);
@@ -1215,10 +1215,11 @@
 .settings-label {
     width: 160px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
 }
 .custom-slider {
+    cursor: pointer;
     position: relative;
     flex-grow: 1;
     height: 30px;
@@ -1247,6 +1248,7 @@
     border-bottom-left-radius: 2px;
 }
 .custom-slider-dragger {
+    cursor: pointer;
     position: absolute;
     top: 7px;
     width: 16px;
@@ -1259,7 +1261,7 @@
 .settings-value {
     width: 50px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(248, 196, 64);
     -unity-text-align: middle-right;
 }
@@ -1274,6 +1276,7 @@
     justify-content: flex-end;
 }
 .settings-quality-btn {
+    cursor: pointer;
     width: 70px;
     height: 36px;
     margin-left: 6px;
@@ -1283,7 +1286,7 @@
     border-radius: 4px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     -unity-text-align: middle-center;
     -unity-text-transform: upper;
     transition-property: background-color, border-color, color;
@@ -1303,12 +1306,12 @@
     border-color: rgb(255, 215, 90);
 }
 .settings-btn {
-    height: 44px;
+    cursor: pointer;
+    height: 48px;
     width: 100%;
-    border-radius: 4px;
     border-width: 0;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-align: middle-center;
     -unity-text-transform: upper;
