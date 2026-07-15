@@ -6,6 +6,15 @@ using System.Linq;
 
 public class PlayerAwardsController : MonoBehaviour
 {
+    private static readonly Dictionary<string, string> _posSpanish = new()
+    {
+        { "PG", "Base" },
+        { "SG", "Escolta" },
+        { "SF", "Alero" },
+        { "PF", "Ala-Pívot" },
+        { "C",  "Pívot" },
+    };
+
     private UIDocument _doc;
     private VisualElement _root;
 
@@ -118,9 +127,11 @@ public class PlayerAwardsController : MonoBehaviour
         string seasonLabel = $"{_season.year_start}-{_season.year_end.ToString().Substring(2)}";
         _seasonTag.text = seasonLabel;
 
-        var logo32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
-        var logo32Dict = new Dictionary<string, Sprite>();
-        foreach (var s in logo32) logo32Dict[s.name] = s;
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var abbrevByKeyword = new Dictionary<string, string>();
+        foreach (var t in allTeams)
+            if (!string.IsNullOrEmpty(t.logo))
+                abbrevByKeyword[t.logo] = t.abbreviation;
 
         int seasonId = _season.id;
         int managerId = _manager.id;
@@ -151,14 +162,14 @@ public class PlayerAwardsController : MonoBehaviour
 
         var allStar = DatabaseManager.Instance.GetAllStarTeam(seasonId, managerId);
         foreach (var p in allStar)
-            _quintetGrid.Add(BuildQuintetCard(p, true, logo32Dict));
+            _quintetGrid.Add(BuildQuintetCard(p, true, abbrevByKeyword));
 
         var allRookie = DatabaseManager.Instance.GetAllRookieTeam(seasonId, managerId);
         foreach (var p in allRookie)
-            _rookieGrid.Add(BuildQuintetCard(p, false, logo32Dict));
+            _rookieGrid.Add(BuildQuintetCard(p, false, abbrevByKeyword));
     }
 
-    VisualElement BuildQuintetCard(PlayerAwardInfo p, bool isFive, Dictionary<string, Sprite> logo32)
+    VisualElement BuildQuintetCard(PlayerAwardInfo p, bool isFive, Dictionary<string, string> abbrevByKeyword)
     {
         var card = new VisualElement();
         card.AddToClassList("quintet-card");
@@ -166,18 +177,13 @@ public class PlayerAwardsController : MonoBehaviour
 
         var posLbl = new Label();
         posLbl.AddToClassList("quintet-card-pos");
-        posLbl.text = p.Position;
+        posLbl.text = _posSpanish.TryGetValue(p.Position, out var spanish) ? spanish : p.Position;
         card.Add(posLbl);
-
-        var logo = new VisualElement();
-        logo.AddToClassList("quintet-card-logo");
-        if (logo32.TryGetValue(p.TeamKeyword, out var sprite))
-            logo.style.backgroundImage = new StyleBackground(sprite);
-        card.Add(logo);
 
         var nameLbl = new Label();
         nameLbl.AddToClassList("quintet-card-name");
-        nameLbl.text = p.PlayerName;
+        string abbrev = abbrevByKeyword.TryGetValue(p.TeamKeyword, out var a) ? a : "";
+        nameLbl.text = string.IsNullOrEmpty(abbrev) ? p.PlayerName : $"{p.PlayerName} ({abbrev})";
         card.Add(nameLbl);
 
         var statRow = new VisualElement();
