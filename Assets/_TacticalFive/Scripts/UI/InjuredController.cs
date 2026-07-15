@@ -27,6 +27,12 @@ public class InjuredController : MonoBehaviour
     // Injured table
     private VisualElement _injuredTable;
 
+    // League injured modal
+    private VisualElement _leagueInjuredOverlay;
+    private ScrollView _leagueInjuredScroll;
+    private Button _btnLeagueInjured;
+    private Button _btnLeagueInjuredClose;
+
     // Treatment result modal
     private VisualElement _treatmentResultOverlay;
     private Label _treatmentResultTitle;
@@ -108,6 +114,11 @@ public class InjuredController : MonoBehaviour
         _medStaffCard = _root.Q<VisualElement>("MedStaffCard");
         _medStaffEmpty = _root.Q<VisualElement>("MedStaffEmpty");
         _injuredTable = _root.Q<VisualElement>("InjuredTable");
+
+        _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
+        _leagueInjuredScroll = _root.Q<ScrollView>("LeagueInjuredScroll");
+        _btnLeagueInjured = _root.Q<Button>("BtnLeagueInjured");
+        _btnLeagueInjuredClose = _root.Q<Button>("BtnLeagueInjuredClose");
 
         _treatmentResultOverlay = _root.Q<VisualElement>("TreatmentResultOverlay");
         _treatmentResultTitle = _root.Q<Label>("TreatmentResultTitle");
@@ -296,6 +307,13 @@ public class InjuredController : MonoBehaviour
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _btnTreatmentOk?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseTreatmentResult(); });
+        _btnLeagueInjured?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenLeagueInjuredModal(); });
+        _btnLeagueInjuredClose?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseLeagueInjuredModal(); });
+        _leagueInjuredOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _leagueInjuredOverlay)
+                { PlayClick(); CloseLeagueInjuredModal(); }
+        });
 
         if (CursorManager.Instance == null) return;
         var cursor = CursorManager.Instance;
@@ -317,6 +335,8 @@ public class InjuredController : MonoBehaviour
         cursor.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
         cursor.RegisterHandCursor(_btnAction);
         cursor.RegisterHandCursor(_btnTreatmentOk);
+        cursor.RegisterHandCursor(_btnLeagueInjured);
+        cursor.RegisterHandCursor(_btnLeagueInjuredClose);
     }
 
     void Refresh()
@@ -582,6 +602,89 @@ public class InjuredController : MonoBehaviour
     {
         _treatmentResultOverlay.style.display = DisplayStyle.None;
     }
+    // ── LEAGUE INJURED ──
+
+    void OpenLeagueInjuredModal()
+    {
+        BuildLeagueInjuredList();
+        _leagueInjuredScroll.style.height = new StyleLength(new Length(320, LengthUnit.Pixel));
+        _leagueInjuredScroll.style.maxHeight = new StyleLength(new Length(320, LengthUnit.Pixel));
+        _leagueInjuredOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _leagueInjuredOverlay.AddToClassList("modal-overlay--visible");
+        _leagueInjuredOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseLeagueInjuredModal()
+    {
+        _leagueInjuredOverlay.RemoveFromClassList("modal-overlay--visible");
+        _leagueInjuredOverlay.Q<VisualElement>(null, "modal-box")?.RemoveFromClassList("modal-box--visible");
+    }
+
+    void BuildLeagueInjuredList()
+    {
+        _leagueInjuredScroll.Clear();
+
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var myTeamId = _myTeam.id;
+        var injuredList = new List<(TeamData team, PlayerData player)>();
+
+        foreach (var team in allTeams)
+        {
+            if (team.id == myTeamId) continue;
+            var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+            foreach (var p in players)
+            {
+                if (p.injury_days > 0)
+                    injuredList.Add((team, p));
+            }
+        }
+
+        if (injuredList.Count == 0)
+        {
+            var emptyLbl = new Label();
+            emptyLbl.AddToClassList("league-injured-empty");
+            emptyLbl.text = "No hay jugadores lesionados en la liga.";
+            _leagueInjuredScroll.Add(emptyLbl);
+            return;
+        }
+
+        foreach (var (team, player) in injuredList)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("league-injured-row");
+            row.style.height = new StyleLength(new Length(32, LengthUnit.Pixel));
+            row.style.minHeight = new StyleLength(new Length(32, LengthUnit.Pixel));
+
+            var logoLbl = new VisualElement();
+            logoLbl.AddToClassList("league-injured-row-logo");
+            if (_logoSprites.TryGetValue(team.logo, out var sprite))
+                logoLbl.style.backgroundImage = new StyleBackground(sprite);
+            row.Add(logoLbl);
+
+            var teamLbl = new Label();
+            teamLbl.AddToClassList("league-injured-row-team");
+            teamLbl.text = team.name;
+            row.Add(teamLbl);
+
+            var nameLbl = new Label();
+            nameLbl.AddToClassList("league-injured-row-name");
+            nameLbl.text = $"{player.first_name} {player.last_name}";
+            row.Add(nameLbl);
+
+            var injuryLbl = new Label();
+            injuryLbl.AddToClassList("league-injured-row-injury");
+            injuryLbl.text = string.IsNullOrEmpty(player.injury_type) ? "LESI\u00d3N" : player.injury_type;
+            row.Add(injuryLbl);
+
+            var daysLbl = new Label();
+            daysLbl.AddToClassList("league-injured-row-days");
+            daysLbl.text = player.injury_days.ToString();
+            row.Add(daysLbl);
+
+            _leagueInjuredScroll.Add(row);
+        }
+    }
+
     void InitConfigModal()
     {
         _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");

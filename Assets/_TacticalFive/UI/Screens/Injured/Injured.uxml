@@ -18,20 +18,27 @@
             <!-- CONTENT -->
             <ui:VisualElement class="injured-content">
 
-                <!-- MEDICAL STAFF -->
-                <ui:VisualElement name="MedicalStaffSection" class="med-staff-section">
-                    <ui:Label class="section-title" text="JEFE DE SERVICIOS MÉDICOS" />
-                    <ui:VisualElement name="MedStaffBody" class="med-staff-body">
-                        <ui:VisualElement name="MedStaffCard" class="med-staff-card" />
-                        <ui:VisualElement name="MedStaffEmpty" class="med-staff-empty" style="display: none;" />
+                <!-- SCROLLABLE WRAPPER -->
+                <ui:VisualElement name="InjuredScrollWrapper" class="injured-scroll-wrapper">
+
+                    <!-- MEDICAL STAFF -->
+                    <ui:VisualElement name="MedicalStaffSection" class="med-staff-section">
+                        <ui:Label class="section-title" text="JEFE DE SERVICIOS MÉDICOS" />
+                        <ui:VisualElement name="MedStaffBody" class="med-staff-body">
+                            <ui:VisualElement name="MedStaffCard" class="med-staff-card" />
+                            <ui:VisualElement name="MedStaffEmpty" class="med-staff-empty" style="display: none;" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
+
+                    <!-- INJURED PLAYERS -->
+                    <ui:VisualElement name="InjuredSection" class="injured-section">
+                        <ui:Label class="section-title" text="JUGADORES LESIONADOS" />
+                        <ui:VisualElement name="InjuredTable" class="injured-table" />
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
-                <!-- INJURED PLAYERS -->
-                <ui:VisualElement name="InjuredSection" class="injured-section">
-                    <ui:Label class="section-title" text="JUGADORES LESIONADOS" />
-                    <ui:VisualElement name="InjuredTable" class="injured-table" />
-                </ui:VisualElement>
+                <ui:Button name="BtnLeagueInjured" class="btn-league-injured" text="VER LESIONADOS DE LA LIGA" />
 
             </ui:VisualElement>
 
@@ -49,6 +56,22 @@
         </ui:VisualElement>
 
     </ui:VisualElement>
+
+        <!-- ══ LEAGUE INJURED MODAL ══ -->
+         <ui:VisualElement name="LeagueInjuredOverlay" class="modal-overlay">
+            <ui:VisualElement name="LeagueInjuredBox" class="modal-box" style="width: 1100px; max-height: 700px;">
+                <ui:Label class="modal-title" text="LESIONADOS DE LA LIGA" />
+                <ui:VisualElement class="league-injured-header">
+                    <ui:Label class="league-injured-col-logo" text="" />
+                    <ui:Label class="league-injured-col-team" text="EQUIPO" />
+                    <ui:Label class="league-injured-col-name" text="JUGADOR" />
+                    <ui:Label class="league-injured-col-injury" text="LESIÓN" />
+                    <ui:Label class="league-injured-col-days" text="DÍAS" />
+                </ui:VisualElement>
+                <ui:ScrollView name="LeagueInjuredScroll" class="league-injured-scroll" horizontal-scrolling-enabled="false" mode="Vertical" style="min-height: 0;" />
+                <ui:Button name="BtnLeagueInjuredClose" class="modal-close" text="CERRAR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
 
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
