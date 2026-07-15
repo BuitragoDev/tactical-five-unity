@@ -610,8 +610,8 @@ public class InjuredController : MonoBehaviour
         var scrollWrapper = _root.Q<VisualElement>("LeagueInjuredScrollWrapper");
         if (scrollWrapper != null)
         {
-            scrollWrapper.style.height = new StyleLength(new Length(320, LengthUnit.Pixel));
-            scrollWrapper.style.maxHeight = new StyleLength(new Length(320, LengthUnit.Pixel));
+            scrollWrapper.style.height = new StyleLength(new Length(380, LengthUnit.Pixel));
+            scrollWrapper.style.maxHeight = new StyleLength(new Length(380, LengthUnit.Pixel));
         }
         _leagueInjuredScroll.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
         _leagueInjuredOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
@@ -657,8 +657,8 @@ public class InjuredController : MonoBehaviour
         {
             var row = new VisualElement();
             row.AddToClassList("league-injured-row");
-            row.style.height = new StyleLength(new Length(32, LengthUnit.Pixel));
-            row.style.minHeight = new StyleLength(new Length(32, LengthUnit.Pixel));
+            row.style.height = new StyleLength(new Length(38, LengthUnit.Pixel));
+            row.style.minHeight = new StyleLength(new Length(38, LengthUnit.Pixel));
 
             var logoLbl = new VisualElement();
             logoLbl.AddToClassList("league-injured-row-logo");
