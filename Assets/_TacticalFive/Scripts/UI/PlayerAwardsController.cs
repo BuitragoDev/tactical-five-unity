@@ -139,8 +139,9 @@ public class PlayerAwardsController : MonoBehaviour
         var mvp = DatabaseManager.Instance.GetRegularSeasonMVP(seasonId, managerId);
         if (mvp != null)
         {
-            _mvpPlayerName.text = mvp.PlayerName;
-            _mvpPlayerTeam.text = mvp.TeamName;
+            string mvpAbbrev = abbrevByKeyword.TryGetValue(mvp.TeamKeyword, out var ma) ? ma : "";
+            _mvpPlayerName.text = string.IsNullOrEmpty(mvpAbbrev) ? mvp.PlayerName : $"{mvp.PlayerName} ({mvpAbbrev})";
+            _mvpPlayerTeam.style.display = DisplayStyle.None;
             Texture2D mvpTex = PlayerPhotoHelper.Load(mvp.PlayerId, mvp.Photo);
             _mvpPlayerPhoto.style.backgroundImage = new StyleBackground(mvpTex);
             _mvpPts.text = mvp.AvgPts.ToString("F1");
@@ -151,8 +152,9 @@ public class PlayerAwardsController : MonoBehaviour
         var rookie = DatabaseManager.Instance.GetRookieOfYear(seasonId, managerId);
         if (rookie != null)
         {
-            _rookiePlayerName.text = rookie.PlayerName;
-            _rookiePlayerTeam.text = rookie.TeamName;
+            string rookieAbbrev = abbrevByKeyword.TryGetValue(rookie.TeamKeyword, out var ra) ? ra : "";
+            _rookiePlayerName.text = string.IsNullOrEmpty(rookieAbbrev) ? rookie.PlayerName : $"{rookie.PlayerName} ({rookieAbbrev})";
+            _rookiePlayerTeam.style.display = DisplayStyle.None;
             Texture2D rookieTex = PlayerPhotoHelper.Load(rookie.PlayerId, rookie.Photo);
             _rookiePlayerPhoto.style.backgroundImage = new StyleBackground(rookieTex);
             _rookiePts.text = rookie.AvgPts.ToString("F1");

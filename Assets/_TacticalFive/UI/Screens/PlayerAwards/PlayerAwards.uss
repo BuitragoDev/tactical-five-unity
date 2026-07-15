@@ -185,7 +185,7 @@
     border-width: 1px;
     padding: 16px;
     text-align: center;
-    min-width: 300px;
+    min-width: 400px;
     align-items: center;
 }
 .mvp-card {
