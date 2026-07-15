@@ -681,6 +681,28 @@ public class InjuredController : MonoBehaviour
             if (e.target == _configExitConfirmOverlay)
                 { PlayClick(); CloseExitConfirmModal(); }
         });
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(_btnConfigCerrar);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityLow);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityMedium);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityHigh);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
+            CursorManager.Instance.RegisterHandCursor(_configBtnMainMenu);
+            CursorManager.Instance.RegisterHandCursor(_configBtnExit);
+            CursorManager.Instance.RegisterHandCursor(_configBtnMainMenuYes);
+            CursorManager.Instance.RegisterHandCursor(_configBtnMainMenuNo);
+            CursorManager.Instance.RegisterHandCursor(_configBtnExitYes);
+            CursorManager.Instance.RegisterHandCursor(_configBtnExitNo);
+
+            if (_configSliderMaster?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderMaster.Container);
+            if (_configSliderMusic?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderMusic.Container);
+            if (_configSliderSFX?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderSFX.Container);
+        }
     }
 
     void OpenConfigModal()

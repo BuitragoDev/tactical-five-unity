@@ -789,6 +789,16 @@ public class FinancesController : MonoBehaviour
             if (e.target == _configExitConfirmOverlay)
                 { PlayClick(); CloseExitConfirmModal(); }
         });
+
+        if (CursorManager.Instance != null)
+        {
+            if (_configSliderMaster?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderMaster.Container);
+            if (_configSliderMusic?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderMusic.Container);
+            if (_configSliderSFX?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderSFX.Container);
+        }
     }
 
     void OpenConfigModal()
