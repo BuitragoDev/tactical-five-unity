@@ -161,7 +161,7 @@ public class InjuredController : MonoBehaviour
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        var logos32 = Resources.LoadAll<Sprite>("Teams/32x32");
+        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos32) _logoSprites32[s.name] = s;
 
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
