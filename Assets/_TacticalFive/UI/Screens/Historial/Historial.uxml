@@ -26,7 +26,7 @@
                         <ui:Label class="historial-table-header-label historial-col-logo" text="" />
                         <ui:Label class="historial-table-header-label historial-col" text="DESTINO" />
                         <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="POS" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="OVR" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="MED" />
                     </ui:VisualElement>
                     <ui:ScrollView class="historial-table-body-scroll"
                                    horizontal-scrolling-enabled="false"

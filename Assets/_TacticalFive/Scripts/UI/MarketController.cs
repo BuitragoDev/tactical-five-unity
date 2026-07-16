@@ -644,7 +644,7 @@ public class MarketController : MonoBehaviour
         pos.AddToClassList("market-table-header-pos");
         header.Add(pos);
 
-        var ovr = new Label("OVR");
+        var ovr = new Label("MED");
         ovr.AddToClassList("market-table-header-label");
         ovr.AddToClassList("market-table-header-ovr");
         header.Add(ovr);
@@ -767,7 +767,7 @@ public class MarketController : MonoBehaviour
         pos.AddToClassList("market-table-header-pos");
         header.Add(pos);
 
-        var ovr = new Label("OVR");
+        var ovr = new Label("MED");
         ovr.AddToClassList("market-table-header-label");
         ovr.AddToClassList("market-table-header-ovr");
         header.Add(ovr);
