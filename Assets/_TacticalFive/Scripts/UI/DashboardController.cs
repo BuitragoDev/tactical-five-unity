@@ -3126,6 +3126,31 @@ public class DashboardController : MonoBehaviour
             }
         }
 
+        // Luxury tax mensual
+        var existingTax = DatabaseManager.Instance.GetFinanceRecord(_myTeam.id, _season.id, FinanceRecord.TYPE_TAX, gameDay);
+        if (existingTax == null)
+        {
+            var leagueSett = DatabaseManager.Instance.GetLeagueSettings();
+            long taxThreshold = leagueSett?.luxury_tax ?? TradeHelper.LUXURY_TAX;
+            long annualTax = TradeHelper.CalculateLuxuryTax(players.Sum(p => p.salary), taxThreshold);
+            if (annualTax > 0)
+            {
+                long monthlyTax = annualTax / 12;
+                _myTeam.budget -= monthlyTax;
+                DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+
+                DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+                {
+                    team_id = _myTeam.id,
+                    season_id = _season.id,
+                    record_type = FinanceRecord.TYPE_TAX,
+                    game_day = gameDay,
+                    amount = -monthlyTax,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                });
+            }
+        }
+
         try
         {
             string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

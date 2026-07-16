@@ -90,8 +90,6 @@ public class EndSeasonController : MonoBehaviour
         _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         if (_season == null) return;
 
-        CollectLuxuryTax();
-
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         _logo32 = new Dictionary<string, Sprite>();
         foreach (var s in logos) _logo32[s.name] = s;
@@ -599,40 +597,5 @@ public class EndSeasonController : MonoBehaviour
             result.Add((standings[i].Team, $"{odds[i] * 100:F1}%"));
         }
         return result;
-    }
-
-    void CollectLuxuryTax()
-    {
-        var allTeams = DatabaseManager.Instance.GetAllTeams();
-        string nowStr = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-        int taxedCount = 0;
-        long totalTax = 0;
-
-        foreach (var team in allTeams)
-        {
-            var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-            long payroll = players.Sum(p => p.salary);
-            long tax = TradeHelper.CalculateLuxuryTax(payroll);
-            if (tax > 0)
-            {
-                taxedCount++;
-                totalTax += tax;
-                DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-                {
-                    team_id = team.id,
-                    season_id = _season.id,
-                    record_type = FinanceRecord.TYPE_TAX,
-                    game_day = _season.current_game_day,
-                    amount = -tax,
-                    created_at = nowStr
-                });
-                Debug.Log($"[LuxuryTax] {team.name}: payroll ${payroll:N0}, tax ${tax:N0}");
-            }
-        }
-
-        if (taxedCount > 0)
-            Debug.Log($"[LuxuryTax] Total: {taxedCount} teams taxed, ${totalTax:N0} collected.");
-        else
-            Debug.Log("[LuxuryTax] No teams over the luxury tax threshold.");
     }
 }

@@ -108,10 +108,10 @@ public static class TradeHelper
         (long.MaxValue, 3.75),
     };
 
-    public static long CalculateLuxuryTax(long payroll)
+    public static long CalculateLuxuryTax(long payroll, long taxThreshold = LUXURY_TAX)
     {
-        if (payroll <= LUXURY_TAX) return 0;
-        long excess = payroll - LUXURY_TAX;
+        if (payroll <= taxThreshold) return 0;
+        long excess = payroll - taxThreshold;
         long tax = 0;
         long remaining = excess;
         foreach (var (bracket, rate) in TaxBrackets)
