@@ -708,6 +708,7 @@ public class DashboardController : MonoBehaviour
         ProcessTraining();
         ProcessRenovations();
         ProcessAITransfers(gameDay);
+        ProcessStarFreeAgentSignings(gameDay);
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
 
@@ -1893,6 +1894,70 @@ public class DashboardController : MonoBehaviour
         GenerateAITradeOffersForPlayer(gameDay, seasonId);
     }
 
+    void ProcessStarFreeAgentSignings(int gameDay)
+    {
+        if (_season == null) return;
+
+        var freeAgents = DatabaseManager.Instance.GetFreeAgents();
+        var stars = freeAgents
+            .Where(p => p.GetCalculatedAverage() > 80)
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+        if (stars.Count == 0) return;
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        var allTeams = DatabaseManager.Instance.GetAllTeams()
+            .Where(t => t.id != _myTeam.id)
+            .ToList();
+
+        var teamAvgs = new Dictionary<int, float>();
+        foreach (var team in allTeams)
+        {
+            var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+            teamAvgs[team.id] = roster.Count > 0 ? (float)roster.Average(p => p.GetCalculatedAverage()) : 0f;
+        }
+        var teamsByAvg = allTeams.OrderByDescending(t => teamAvgs[t.id]).ToList();
+
+        foreach (var star in stars)
+        {
+            bool signed = false;
+            foreach (var team in teamsByAvg)
+            {
+                var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+                if (roster.Count >= TradeHelper.MAX_ROSTER) continue;
+
+                long payroll = roster.Sum(p => p.salary);
+                if (salaryCap - payroll < star.salary) continue;
+
+                star.team_id = team.id;
+                int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
+                star.contract_years = years;
+                DatabaseManager.Instance.UpdatePlayer(star);
+
+                DatabaseManager.Instance.InsertTrade(new TradeData
+                {
+                    season_id = _season.id,
+                    game_day = gameDay,
+                    game_date = _season.current_date,
+                    team_id_from = 0,
+                    team_id_to = team.id,
+                    player_id = star.id,
+                    trade_type = "free_agent"
+                });
+
+                Debug.Log($"[StarFA] {team.name} signed star {star.first_name} {star.last_name} (OVR {star.GetCalculatedAverage()})");
+                signed = true;
+                break;
+            }
+
+            if (!signed)
+            {
+                Debug.Log($"[StarFA] No team could sign {star.first_name} {star.last_name} (OVR {star.GetCalculatedAverage()}) — stays in FA");
+            }
+        }
+    }
+
     string GetWeakestPosition(List<PlayerData> roster)
     {
         if (roster == null || roster.Count == 0) return null;
@@ -2329,6 +2394,7 @@ public class DashboardController : MonoBehaviour
 
         var aiTeam = _allTeams.FirstOrDefault(t => t.id == offer.team_id_from);
         string teamName = aiTeam != null ? aiTeam.name : "?";
+        var teamAbbrs = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
 
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box");
@@ -2351,13 +2417,13 @@ public class DashboardController : MonoBehaviour
 
         if (ourPicks != null && ourPicks.Count > 0)
         {
-            var pickLbl = new Label($"+ {string.Join(", ", ourPicks.Select(p => $"R{p.round} Pick #{p.pick_number}"))}");
+            var pickLbl = new Label($"+ {string.Join(", ", ourPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a1) ? a1 : "???")}"))}");
             pickLbl.AddToClassList("trade-offer-picks-label");
             leftCol.Add(pickLbl);
         }
         if (theirPicks != null && theirPicks.Count > 0)
         {
-            var pickLbl = new Label($"+ {string.Join(", ", theirPicks.Select(p => $"R{p.round} Pick #{p.pick_number}"))}");
+            var pickLbl = new Label($"+ {string.Join(", ", theirPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a2) ? a2 : "???")}"))}");
             pickLbl.AddToClassList("trade-offer-picks-label");
             rightCol.Add(pickLbl);
         }
@@ -2462,9 +2528,9 @@ public class DashboardController : MonoBehaviour
             var ourNames = string.Join(", ", ourPlayers.Select(p => $"{p.first_name} {p.last_name}"));
             var theirNames = string.Join(", ", theirPlayers.Select(p => $"{p.first_name} {p.last_name}"));
             var ourPicksText = ourPicks != null && ourPicks.Count > 0
-                ? " y " + string.Join(", ", ourPicks.Select(p => $"R{p.round} Pick #{p.pick_number}")) : "";
+                ? " y " + string.Join(", ", ourPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a3) ? a3 : "???")}")) : "";
             var theirPicksText = theirPicks != null && theirPicks.Count > 0
-                ? " y " + string.Join(", ", theirPicks.Select(p => $"R{p.round} Pick #{p.pick_number}")) : "";
+                ? " y " + string.Join(", ", theirPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a4) ? a4 : "???")}")) : "";
 
             DatabaseManager.Instance.AddMessage(new MessageData
             {
