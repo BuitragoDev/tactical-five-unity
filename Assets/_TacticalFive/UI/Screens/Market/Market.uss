@@ -516,16 +516,17 @@
 .market-btn-sat-toggle {
     flex-direction: row;
     align-items: center;
-    padding: 6px 12px;
+    padding: 8px 20px;
     border-width: 1px;
     border-color: rgb(200, 160, 30);
     border-radius: 4px;
     cursor: pointer;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 15px;
     color: rgb(200, 160, 30);
     background-color: rgba(200, 160, 30, 0.1);
-    white-space: normal;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .market-btn-sat-toggle:hover {
     background-color: rgba(200, 160, 30, 0.25);

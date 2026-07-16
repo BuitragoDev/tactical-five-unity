@@ -399,6 +399,20 @@ public class MarketController : MonoBehaviour
 
     void Refresh()
     {
+        _isFA = false;
+        _selectedTeam = null;
+        _selectedMyPlayers.Clear();
+        _selectedOtherPlayers.Clear();
+        _selectedMyPicks.Clear();
+        _selectedOtherPicks.Clear();
+        _signAndTradeActive = false;
+        _signAndTradeCandidates.Clear();
+        _otherPlayers = null;
+        _myPicks = null;
+        _otherPicks = null;
+        _pendingFAPlayer = null;
+        _faOfferSent = false;
+
         _root.Q<Button>("SubmenuOfertas")?.AddToClassList("nav-submenu-item--active");
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Market] RefreshHeader error: {ex.Message}"); }
 
@@ -979,8 +993,6 @@ public class MarketController : MonoBehaviour
                 var satRow = new VisualElement();
                 satRow.style.flexDirection = FlexDirection.Row;
                 satRow.style.alignItems = Align.Center;
-                satRow.style.marginTop = 8;
-                satRow.style.marginBottom = 4;
 
                 var satToggle = new Label("☐ Sign & Trade");
                 satToggle.AddToClassList("market-btn-sat-toggle");
@@ -991,7 +1003,27 @@ public class MarketController : MonoBehaviour
                 satInfo.style.color = new StyleColor(Color.gray);
                 satInfo.style.marginLeft = 6;
                 satRow.Add(satInfo);
-                content.Add(satRow);
+
+                var confirmBtn = new Button();
+                confirmBtn.AddToClassList("market-btn-confirm-trade");
+                confirmBtn.text = "CONFIRMAR TRASPASO";
+                confirmBtn.style.flexGrow = 1;
+                confirmBtn.style.width = StyleKeyword.None;
+                confirmBtn.style.marginTop = 0;
+                confirmBtn.style.marginLeft = 8;
+                confirmBtn.style.paddingLeft = 21;
+                confirmBtn.style.paddingRight = 21;
+                confirmBtn.clicked += () => { PlayClick(); OnConfirmTrade(); };
+                if (CursorManager.Instance != null)
+                    CursorManager.Instance.RegisterHandCursor(confirmBtn);
+
+                var bottomRow = new VisualElement();
+                bottomRow.style.flexDirection = FlexDirection.Row;
+                bottomRow.style.alignItems = Align.Center;
+                bottomRow.style.marginTop = 8;
+                bottomRow.Add(satRow);
+                bottomRow.Add(confirmBtn);
+                content.Add(bottomRow);
 
                 satToggle.RegisterCallback<ClickEvent>(_ =>
                 {
@@ -999,14 +1031,16 @@ public class MarketController : MonoBehaviour
                     satToggle.text = _signAndTradeActive ? "☑ Sign & Trade" : "☐ Sign & Trade";
                 });
             }
-
-            var confirmBtn = new Button();
-            confirmBtn.AddToClassList("market-btn-confirm-trade");
-            confirmBtn.text = "CONFIRMAR TRASPASO";
-            confirmBtn.clicked += () => { PlayClick(); OnConfirmTrade(); };
-            if (CursorManager.Instance != null)
-                CursorManager.Instance.RegisterHandCursor(confirmBtn);
-            content.Add(confirmBtn);
+            else
+            {
+                var confirmBtn = new Button();
+                confirmBtn.AddToClassList("market-btn-confirm-trade");
+                confirmBtn.text = "CONFIRMAR TRASPASO";
+                confirmBtn.clicked += () => { PlayClick(); OnConfirmTrade(); };
+                if (CursorManager.Instance != null)
+                    CursorManager.Instance.RegisterHandCursor(confirmBtn);
+                content.Add(confirmBtn);
+            }
 
             box.Add(content);
         }
@@ -1143,7 +1177,7 @@ public class MarketController : MonoBehaviour
 
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
-        var pickTeamLookup = _allTeams.ToDictionary(t => t.id, t => t.abbreviation);
+        var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
         var myPicksSelForMsg = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var otherPicksSelForMsg = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var myPicksText = myPicksSelForMsg.Count > 0
