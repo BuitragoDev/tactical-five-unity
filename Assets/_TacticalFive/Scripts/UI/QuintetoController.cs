@@ -654,7 +654,17 @@ public class QuintetoController : MonoBehaviour
             : $"{PositionCodes.GetName(p.position)} / {PositionCodes.GetName(p.secondary_position)}";
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerMeta.text = $"{PlayerAge(p)} años · {CountryCodes.GetName(p.nationality)}";
-        _detailOvr.text = p.GetCalculatedAverage().ToString();
+        int detOvr = p.GetCalculatedAverage();
+        _detailOvr.text = detOvr.ToString();
+        _detailOvr.RemoveFromClassList("detail-ovr--high");
+        _detailOvr.RemoveFromClassList("detail-ovr--mid");
+        _detailOvr.RemoveFromClassList("detail-ovr--low");
+        if (detOvr > 84)
+            _detailOvr.AddToClassList("detail-ovr--high");
+        else if (detOvr >= 70)
+            _detailOvr.AddToClassList("detail-ovr--mid");
+        else
+            _detailOvr.AddToClassList("detail-ovr--low");
 
         BuildAttrBars(p);
 
@@ -771,7 +781,14 @@ public class QuintetoController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-card-ovr");
-        ovrLbl.text = $" {player.GetCalculatedAverage()} MED";
+        int cardOvr = player.GetCalculatedAverage();
+        ovrLbl.text = $" {cardOvr} MED";
+        if (cardOvr > 84)
+            ovrLbl.AddToClassList("player-card-ovr--high");
+        else if (cardOvr >= 70)
+            ovrLbl.AddToClassList("player-card-ovr--mid");
+        else
+            ovrLbl.AddToClassList("player-card-ovr--low");
         meta.Add(ovrLbl);
 
         info.Add(meta);

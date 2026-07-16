@@ -689,16 +689,20 @@ public class RosterController : MonoBehaviour
         ovrLbl.AddToClassList("player-ovr");
         int ovrVal = player.GetCalculatedAverage();
         ovrLbl.text = ovrVal.ToString();
-        if (ovrVal >= 70)
-            ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
-        else if (ovrVal >= 50)
-            ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        if (ovrVal > 84)
+            ovrLbl.AddToClassList("player-ovr--high");
+        else if (ovrVal >= 70)
+            ovrLbl.AddToClassList("player-ovr--mid");
         else
-            ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
+            ovrLbl.AddToClassList("player-ovr--low");
 
         var metaLbl = new Label();
         metaLbl.AddToClassList("player-meta");
         metaLbl.text = $"{player.age} años · {player.height_cm / 100f:F2}m";
+
+        var salaryLbl = new Label();
+        salaryLbl.AddToClassList("player-salary");
+        salaryLbl.text = $"{player.salary.ToString("N0", System.Globalization.CultureInfo.GetCultureInfo("es-ES"))} $";
 
         var contractLbl = new Label();
         contractLbl.AddToClassList("player-contract");
@@ -727,6 +731,7 @@ public class RosterController : MonoBehaviour
         row.Add(ovrLbl);
         row.Add(posLbl);
         row.Add(metaLbl);
+        row.Add(salaryLbl);
         row.Add(contractLbl);
 
         // Columna lesión (imagen o hueco vacío para mantener alineación)
@@ -777,7 +782,17 @@ public class RosterController : MonoBehaviour
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerPos.text = GetPositionDisplay(p.position, p.secondary_position);
         _detailPlayerMeta.text = $"{p.age} años · {CountryCodes.GetName(p.nationality)} · {p.height_cm / 100f:F2}m · {p.weight_kg}kg{(p.is_rookie == 1 ? " · Rookie" : "")}";
-        _detailOvr.text = p.GetCalculatedAverage().ToString();
+        int detailOvrVal = p.GetCalculatedAverage();
+        _detailOvr.text = detailOvrVal.ToString();
+        _detailOvr.RemoveFromClassList("detail-ovr--high");
+        _detailOvr.RemoveFromClassList("detail-ovr--mid");
+        _detailOvr.RemoveFromClassList("detail-ovr--low");
+        if (detailOvrVal > 84)
+            _detailOvr.AddToClassList("detail-ovr--high");
+        else if (detailOvrVal >= 70)
+            _detailOvr.AddToClassList("detail-ovr--mid");
+        else
+            _detailOvr.AddToClassList("detail-ovr--low");
 
         // Foto
         if (_detailPhoto != null)

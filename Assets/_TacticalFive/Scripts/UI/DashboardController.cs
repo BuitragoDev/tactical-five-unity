@@ -765,6 +765,22 @@ public class DashboardController : MonoBehaviour
                 DatabaseManager.Instance.UpdateGame(game);
                 GameResultCache.SimulatedGameIds.Add(game.id);
 
+                if (game.game_type == "allstar")
+                {
+                    var allStats = result.home_stats.Concat(result.away_stats).ToList();
+                    var mvpStats = allStats.OrderByDescending(s => s.rating).First();
+                    var record = new AllStarRecord
+                    {
+                        manager_id = _manager.id,
+                        season = $"{_season.year_start}-{_season.year_end}",
+                        east_score = game.home_score,
+                        west_score = game.away_score,
+                        mvp = mvpStats.name,
+                        mvp_player_id = mvpStats.player_id
+                    };
+                    DatabaseManager.Instance.SaveAllStarRecord(record);
+                }
+
                 if (game.game_type != "allstar")
                     ProcessGameFinances(game, result);
 

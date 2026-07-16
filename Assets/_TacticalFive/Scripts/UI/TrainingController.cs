@@ -496,7 +496,14 @@ public class TrainingController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("training-row-ovr");
-        ovrLbl.text = player.overall.ToString();
+        int ovrVal = player.overall;
+        ovrLbl.text = ovrVal.ToString();
+        if (ovrVal > 84)
+            ovrLbl.AddToClassList("training-row-ovr--high");
+        else if (ovrVal >= 70)
+            ovrLbl.AddToClassList("training-row-ovr--mid");
+        else
+            ovrLbl.AddToClassList("training-row-ovr--low");
 
         row.Add(nameLbl);
 

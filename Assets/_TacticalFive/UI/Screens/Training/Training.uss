@@ -125,8 +125,18 @@
     flex-shrink: 0;
 }
 
+.training-row-ovr--high {
+    color: rgb(39, 174, 96);
+}
+.training-row-ovr--mid {
+    color: rgb(212, 160, 23);
+}
+.training-row-ovr--low {
+    color: rgb(192, 57, 43);
+}
+
 .training-row-ovr-text {
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(80, 94, 120);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 28px;

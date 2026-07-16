@@ -329,6 +329,53 @@
     white-space: nowrap !important;
 }
 
+/* --- Column widths: All-Star tab --- */
+
+#TabContentAllStar .th-season,
+#TabContentAllStar .td-season {
+    width: 100px;
+    flex-shrink: 0;
+}
+
+#TabContentAllStar .th-result,
+#TabContentAllStar .td-result {
+    width: 100px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+#TabContentAllStar .th-winner,
+#TabContentAllStar .td-winner {
+    flex: 1;
+    -unity-text-align: middle-left;
+}
+
+#TabContentAllStar .th-loser,
+#TabContentAllStar .td-loser {
+    flex: 1;
+    -unity-text-align: middle-left;
+}
+
+#TabContentAllStar .th-mvp,
+#TabContentAllStar .td-mvp {
+    flex: 1;
+    -unity-text-align: middle-left;
+}
+
+.td-winner {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf") !important;
+    font-size: 16px !important;
+    color: rgb(212, 160, 23) !important;
+    white-space: nowrap !important;
+}
+
+.td-loser {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf") !important;
+    font-size: 16px !important;
+    color: rgb(208, 216, 232) !important;
+    white-space: nowrap !important;
+}
+
 /* --- Column widths: Quintetos tab --- */
 
 #TabContentQuintetos .th-season,

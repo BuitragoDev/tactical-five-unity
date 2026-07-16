@@ -127,6 +127,8 @@ public class DatabaseManager : MonoBehaviour
         _db.InsertAll(template.Table<FinalsRecord>().ToList());
         _db.InsertAll(template.Table<AwardsRecord>().ToList());
         _db.InsertAll(template.Table<QuintetRecord>().ToList());
+        _db.InsertAll(template.Table<AllStarRecord>().ToList());
+        _db.InsertAll(template.Table<AllStarAppearanceSeed>().ToList());
         _db.InsertAll(template.Table<TradeData>().ToList());
         template.Close();
         Debug.Log("[DB] Static data cloned from template");
@@ -168,6 +170,8 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<TradeOfferData>();
         _db.CreateTable<DraftPickData>();
         _db.CreateTable<CoachRankingData>();
+        _db.CreateTable<AllStarRecord>();
+        _db.CreateTable<AllStarAppearanceSeed>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -461,6 +465,9 @@ public class DatabaseManager : MonoBehaviour
 
         if (_db.Table<FinalsRecord>().Count() == 0)
             SeedPalmaresData();
+
+        if (_db.Table<AllStarRecord>().Count() == 0)
+            SeedAllStarData();
 
         if (_db.Table<CoachRankingData>().Count() == 0)
             SeedCoachRankings();
@@ -1543,7 +1550,7 @@ public class DatabaseManager : MonoBehaviour
         Add(232, "MEM", "Jerami", "Grant", "PF", 32, "USA", 206, 102, 84, 84, 93, 93, 90, 86, 90, 93, 78, 91, 91, 89, 30, 28000000, 3, false);
         Add(233, "MEM", "Kris", "Murray", "SF", 25, "USA", 203, 98, 76, 84, 85, 83, 79, 77, 81, 87, 69, 85, 83, 81, 26, 3000000, 3, false);
         Add(234, "MEM", "Taylor", "Hendricks", "PF", 23, "USA", 206, 97, 84, 92, 88, 86, 84, 77, 82, 94, 82, 96, 88, 80, 67, 11000000, 3, false);
-        Add(235, "MEM", "Zach", "Edey", "C", 24, "CAN", 224, 136, 83, 90, 71, 99, 47, 78, 75, 99, 99, 86, 99, 61, 99, 9000000, 3, false);
+        Add(235, "MEM", "Zach", "Edey", "C", 24, "CAN", 224, 136, 83, 90, 71, 85, 47, 78, 75, 85, 85, 86, 85, 61, 90, 9000000, 3, false);
         Add(236, "MEM", "GG", "Jackson", "SF", 21, "USA", 206, 98, 82, 93, 92, 92, 86, 79, 88, 83, 79, 96, 87, 71, 49, 6000000, 3, false);
         Add(237, "MEM", "Kentavious", "Caldwell-Pope", "SG", 33, "USA", 196, 93, 80, 80, 88, 86, 90, 78, 82, 93, 66, 84, 88, 91, 34, 18000000, 2, false);
         Add(464, "MEM", "D'Angelo", "Russell", "PG", 30, "USA", 193, 88, 84, 86, 97, 98, 99, 97, 99, 75, 59, 89, 95, 83, 33, 7500000, 2, false);
@@ -1555,7 +1562,7 @@ public class DatabaseManager : MonoBehaviour
         Add(242, "MEM", "Cedric", "Coward", "SF", 22, "USA", 198, 94, 77, 88, 88, 81, 84, 73, 79, 84, 69, 90, 81, 79, 39, 4000000, 4, false);
         Add(245, "MEM", "Walter", "Clayton Jr.", "PG", 23, "USA", 188, 88, 74, 84, 90, 85, 89, 85, 87, 67, 51, 83, 83, 69, 25, 2800000, 4, false);
         Add(246, "MEM", "AJ", "Johnson", "PG", 21, "USA", 196, 72, 78, 90, 98, 82, 76, 96, 94, 70, 58, 94, 84, 72, 34, 3090480, 4, false);
-        Add(247, "MEM", "Cameron", "Boozer", "PF", 19, "USA", 203, 115, 79, 91, 77, 73, 74, 83, 72, 85, 93, 82, 90, 74, 68, 10500000, 4, true);
+        Add(247, "MEM", "Cameron", "Boozer", "PF", 19, "USA", 203, 115, 79, 93, 87, 83, 84, 83, 72, 85, 93, 82, 90, 74, 68, 10500000, 4, true);
         Add(248, "MEM", "Karim", "Lopez", "SF", 20, "MEX", 203, 95, 64, 76, 80, 70, 70, 72, 74, 78, 68, 80, 76, 70, 52, 4000000, 4, true);
 
         // ── MIA ── 12 jugadores
@@ -1738,7 +1745,7 @@ public class DatabaseManager : MonoBehaviour
         Add(411, "SAC", "Maxime", "Raynaud", "C", 23, "FRA", 213, 110, 76, 84, 72, 79, 73, 70, 73, 81, 87, 79, 81, 54, 87, 3000000, 4, false);
         Add(412, "SAC", "Alex", "Karaban", "SF", 22, "USA", 206, 100, 63, 73, 76, 74, 78, 70, 74, 82, 72, 76, 84, 70, 56, 3400000, 4, true);
         Add(413, "SAC", "Darius", "Acuff Jr.", "PG", 19, "USA", 191, 88, 74, 87, 89, 88, 80, 85, 86, 76, 55, 88, 80, 78, 44, 6700000, 4, true);
-        Add(414, "SAS", "Maliq", "Brown", "SF", 22, "USA", 201, 95, 58, 69, 80, 64, 56, 66, 70, 84, 70, 84, 70, 84, 56, 2000000, 2, true);
+        Add(414, "SAC", "Maliq", "Brown", "SF", 22, "USA", 201, 95, 58, 69, 80, 64, 56, 66, 70, 84, 70, 84, 70, 84, 56, 2000000, 2, true);
         Add(415, "SAC", "Emanuel", "Sharp", "SG", 22, "USA", 191, 86, 58, 68, 78, 80, 84, 72, 74, 80, 54, 76, 74, 78, 38, 2000000, 2, true);
 
         // ── SAS ── 17 jugadores
@@ -1749,7 +1756,7 @@ public class DatabaseManager : MonoBehaviour
         Add(420, "SAS", "Devin", "Vassell", "SG", 27, "USA", 198, 94, 84, 86, 95, 95, 94, 86, 90, 90, 68, 92, 94, 88, 32, 22000000, 4, false);
         Add(421, "SAS", "Tobias", "Harris", "PF", 34, "USA", 203, 102, 80, 80, 78, 89, 88, 84, 86, 84, 84, 82, 93, 68, 44, 15500000, 2, false);
         Add(422, "SAS", "Keldon", "Johnson", "SF", 26, "USA", 198, 100, 82, 84, 94, 94, 88, 84, 88, 86, 71, 90, 92, 84, 31, 18000000, 3, false);
-        Add(423, "SAS", "Carter", "Bryant", "SF", 20, "USA", 206, 96, 78, 88, 74, 72, 78, 74, 76, 70, 60, 82, 80, 82, 18, 5000000, 4, false);
+        Add(423, "SAS", "Carter", "Bryant", "SF", 20, "USA", 206, 96, 78, 88, 74, 82, 80, 84, 76, 80, 80, 82, 80, 82, 68, 5000000, 4, false);
         Add(424, "SAS", "Julian", "Champagnie", "SF", 26, "USA", 203, 98, 78, 82, 87, 89, 91, 79, 83, 85, 65, 85, 85, 83, 26, 6000000, 2, false);
         Add(425, "SAS", "Luke", "Kornet", "C", 30, "USA", 216, 113, 78, 76, 72, 80, 57, 69, 71, 90, 94, 86, 88, 57, 94, 5000000, 2, false);
         Add(426, "SAS", "Mason", "Plumlee", "C", 36, "USA", 211, 115, 76, 74, 70, 74, 57, 67, 69, 88, 92, 84, 86, 57, 92, 4000000, 1, false);
@@ -1957,7 +1964,7 @@ public class DatabaseManager : MonoBehaviour
             });
         }
         // ── Free Agents ── 139 jugadores
-        AddFA(480, "LeBron", "James", "SF", 42, "USA", 206, 113, 89, 89, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48, 52600000, 1);
+        AddFA(480, "LeBron", "James", "SF", 42, "USA", 206, 113, 89, 89, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48, 25000000, 1);
         AddFA(400, "DeMar", "DeRozan", "SF", 36, "USA", 201, 100, 86, 86, 99, 99, 98, 92, 98, 82, 69, 96, 99, 79, 35, 25000000, 2);
         AddFA(125, "Jonas", "Valanciunas", "C", 34, "LTU", 211, 120, 80, 80, 73, 93, 73, 85, 79, 89, 99, 79, 99, 57, 54, 10000000, 1);
         AddFA(481, "Gabe", "Vincent", "PG", 29, "USA", 193, 88, 69, 67, 84, 74, 68, 74, 72, 78, 60, 70, 76, 70, 33, 11000000, 2);
@@ -2419,6 +2426,99 @@ public class DatabaseManager : MonoBehaviour
         Debug.Log($"[DB] {PalmaresSeeder.FinalsData.Count} finales, {PalmaresSeeder.AwardsData.Count} premios, {PalmaresSeeder.QuintetData.Count} quintetos insertados.");
     }
 
+    void SeedAllStarData()
+    {
+        var appearances = new List<AllStarAppearanceSeed>
+        {
+            new() { player_name = "LeBron James", appearances = 23 },
+            new() { player_name = "Kareem Abdul-Jabbar", appearances = 18 },
+            new() { player_name = "Kevin Durant", appearances = 16 },
+            new() { player_name = "Kobe Bryant", appearances = 15 },
+            new() { player_name = "Tim Duncan", appearances = 15 },
+            new() { player_name = "Kevin Garnett", appearances = 14 },
+            new() { player_name = "Dirk Nowitzki", appearances = 14 },
+            new() { player_name = "Bob Cousy", appearances = 13 },
+            new() { player_name = "Wilt Chamberlain", appearances = 13 },
+            new() { player_name = "John Havlicek", appearances = 13 },
+            new() { player_name = "Michael Jordan", appearances = 13 },
+            new() { player_name = "Bill Russell", appearances = 12 },
+            new() { player_name = "Oscar Robertson", appearances = 12 },
+            new() { player_name = "Jerry West", appearances = 12 },
+            new() { player_name = "Elvin Hayes", appearances = 12 },
+            new() { player_name = "Hakeem Olajuwon", appearances = 12 },
+            new() { player_name = "Karl Malone", appearances = 12 },
+            new() { player_name = "Shaquille O'Neal", appearances = 12 },
+            new() { player_name = "Dwyane Wade", appearances = 12 },
+            new() { player_name = "Dolph Schayes", appearances = 11 },
+            new() { player_name = "Bob Pettit", appearances = 11 },
+            new() { player_name = "Elgin Baylor", appearances = 11 },
+            new() { player_name = "Julius Erving", appearances = 11 },
+            new() { player_name = "Moses Malone", appearances = 11 },
+            new() { player_name = "Magic Johnson", appearances = 11 },
+            new() { player_name = "Larry Bird", appearances = 11 },
+            new() { player_name = "Chris Paul", appearances = 11 },
+            new() { player_name = "Isiah Thomas", appearances = 11 },
+            new() { player_name = "Carmelo Anthony", appearances = 10 },
+            new() { player_name = "Hal Greer", appearances = 10 },
+            new() { player_name = "Paul Pierce", appearances = 10 },
+            new() { player_name = "Russell Westbrook", appearances = 10 },
+            new() { player_name = "Stephen Curry", appearances = 10 },
+            new() { player_name = "James Harden", appearances = 10 },
+            new() { player_name = "David Robinson", appearances = 10 },
+            new() { player_name = "Charles Barkley", appearances = 10 },
+            new() { player_name = "Allen Iverson", appearances = 10 },
+            new() { player_name = "Clyde Drexler", appearances = 10 },
+            new() { player_name = "Patrick Ewing", appearances = 10 },
+            new() { player_name = "George Gervin", appearances = 9 },
+            new() { player_name = "Gary Payton", appearances = 9 },
+            new() { player_name = "Jason Kidd", appearances = 9 },
+            new() { player_name = "Scottie Pippen", appearances = 9 },
+            new() { player_name = "Dominique Wilkins", appearances = 9 },
+            new() { player_name = "Dwight Howard", appearances = 8 },
+            new() { player_name = "Tracy McGrady", appearances = 8 },
+            new() { player_name = "Anthony Davis", appearances = 8 },
+            new() { player_name = "Kawhi Leonard", appearances = 8 },
+            new() { player_name = "Giannis Antetokounmpo", appearances = 8 },
+            new() { player_name = "Damian Lillard", appearances = 8 },
+        };
+
+        var allPlayers = _db.Table<PlayerData>().ToList();
+        foreach (var a in appearances)
+        {
+            var match = allPlayers.FirstOrDefault(p => $"{p.first_name} {p.last_name}" == a.player_name);
+            if (match != null)
+                a.player_id = match.id;
+        }
+        _db.InsertAll(appearances);
+
+        var games = new List<AllStarRecord>
+        {
+            new() { manager_id = 0, season = "2024", east_score = 211, west_score = 186, mvp = "Damian Lillard", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2017", east_score = 182, west_score = 192, mvp = "Anthony Davis", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2016", east_score = 173, west_score = 196, mvp = "Russell Westbrook", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2015", east_score = 158, west_score = 163, mvp = "Russell Westbrook", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2014", east_score = 163, west_score = 155, mvp = "Kyrie Irving", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2013", east_score = 138, west_score = 143, mvp = "Chris Paul", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2012", east_score = 149, west_score = 152, mvp = "Kevin Durant", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2011", east_score = 143, west_score = 148, mvp = "Kobe Bryant", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2010", east_score = 141, west_score = 139, mvp = "Dwyane Wade", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2009", east_score = 119, west_score = 146, mvp = "Kobe Bryant", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2008", east_score = 134, west_score = 128, mvp = "LeBron James", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2007", east_score = 132, west_score = 153, mvp = "Kobe Bryant", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2006", east_score = 122, west_score = 120, mvp = "LeBron James", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2005", east_score = 125, west_score = 115, mvp = "Allen Iverson", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2004", east_score = 132, west_score = 136, mvp = "Shaquille O'Neal", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2003", east_score = 145, west_score = 155, mvp = "Kevin Garnett", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2002", east_score = 120, west_score = 135, mvp = "Kobe Bryant", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2001", east_score = 111, west_score = 110, mvp = "Allen Iverson", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "2000", east_score = 126, west_score = 137, mvp = "Tim Duncan", mvp_player_id = 0 },
+            new() { manager_id = 0, season = "1998", east_score = 135, west_score = 114, mvp = "Michael Jordan", mvp_player_id = 0 },
+        };
+        _db.InsertAll(games);
+
+        Debug.Log($"[DB] {appearances.Count} apariciones All-Star y {games.Count} partidos históricos insertados.");
+    }
+
     void SeedCoachRankings()
     {
         var teams = _db.Table<TeamData>().ToList();
@@ -2634,6 +2734,93 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return new List<QuintetRecord>();
         return _db.Table<QuintetRecord>().ToList();
+    }
+
+    public List<AllStarRecord> GetAllStarRecords(int managerId)
+    {
+        if (!EnsureDb()) return new List<AllStarRecord>();
+        return _db.Table<AllStarRecord>()
+                  .Where(a => a.manager_id == 0 || a.manager_id == managerId)
+                  .ToList();
+    }
+
+    public void SaveAllStarRecord(AllStarRecord record)
+    {
+        if (!EnsureDb()) return;
+        _db.Insert(record);
+    }
+
+    public class AllStarAppearanceEntry
+    {
+        public int player_id { get; set; }
+        public string player_name { get; set; }
+        public string team_logo { get; set; }
+        public int appearances { get; set; }
+    }
+
+    public List<AllStarAppearanceEntry> GetAllStarAppearances(int managerId)
+    {
+        if (!EnsureDb()) return new List<AllStarAppearanceEntry>();
+
+        var fromGames = _db.Query<AllStarAppearanceEntry>(@"
+            SELECT p.id as player_id, p.first_name || ' ' || p.last_name as player_name,
+                   t.logo as team_logo, COUNT(DISTINCT g.season_id) as appearances
+            FROM player_game_stats pgs
+            JOIN games g ON pgs.game_id = g.id
+            JOIN players p ON pgs.player_id = p.id
+            JOIN teams t ON p.team_id = t.id
+            WHERE g.game_type = 'allstar' AND g.manager_id = ?
+            GROUP BY pgs.player_id", managerId);
+
+        var fromSeed = _db.Table<AllStarAppearanceSeed>().ToList();
+
+        var gameById = fromGames.ToDictionary(e => e.player_id);
+
+        var result = new List<AllStarAppearanceEntry>();
+
+        foreach (var s in fromSeed)
+        {
+            int totalApps = s.appearances;
+            string displayName = s.player_name;
+            string logo = "";
+
+            if (s.player_id > 0 && gameById.TryGetValue(s.player_id, out var gameStats))
+            {
+                totalApps += gameStats.appearances;
+                displayName = gameStats.player_name;
+                logo = gameStats.team_logo ?? "";
+                gameById.Remove(s.player_id);
+            }
+            else if (s.player_id > 0)
+            {
+                var player = _db.Table<PlayerData>().FirstOrDefault(p => p.id == s.player_id);
+                if (player != null && player.team_id > 0)
+                {
+                    var team = _db.Table<TeamData>().FirstOrDefault(t => t.id == player.team_id);
+                    if (team != null)
+                        logo = team.logo;
+                }
+            }
+
+            result.Add(new AllStarAppearanceEntry
+            {
+                player_name = displayName,
+                appearances = totalApps,
+                team_logo = logo
+            });
+        }
+
+        foreach (var kv in gameById)
+        {
+            result.Add(new AllStarAppearanceEntry
+            {
+                player_name = kv.Value.player_name,
+                appearances = kv.Value.appearances,
+                team_logo = kv.Value.team_logo ?? ""
+            });
+        }
+
+        return result.OrderByDescending(e => e.appearances).ToList();
     }
 
     // ── PLAYER GAME STATS ─────────────────────────────────

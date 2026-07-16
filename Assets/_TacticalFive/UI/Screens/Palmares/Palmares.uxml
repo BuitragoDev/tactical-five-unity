@@ -11,6 +11,7 @@
                     <ui:Button name="TabEquipos" text="EQUIPOS" class="palmares-tab"/>
                     <ui:Button name="TabJugadores" text="JUGADORES" class="palmares-tab"/>
                     <ui:Button name="TabQuintetos" text="QUINTETOS" class="palmares-tab"/>
+                    <ui:Button name="TabAllStar" text="ALL-STAR" class="palmares-tab"/>
                 </ui:VisualElement>
 
                 <!-- ══ TAB: EQUIPOS ══ -->
@@ -95,6 +96,35 @@
                             <ui:VisualElement class="palmares-scroll-wrapper">
                                 <ui:ScrollView name="QuintetHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
                                     <ui:VisualElement name="QuintetHistoryBody" class="palmares-table-body" />
+                                </ui:ScrollView>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- ══ TAB: ALL-STAR ══ -->
+                <ui:VisualElement name="TabContentAllStar" class="palmares-tab-content" style="display: none;">
+                    <ui:VisualElement class="palmares-split">
+                        <ui:VisualElement class="palmares-left">
+                            <ui:Label class="palmares-section-title" text="APARICIONES EN ALL-STAR" />
+                            <ui:VisualElement class="palmares-scroll-wrapper">
+                                <ui:ScrollView name="AllStarAppearancesScroll" class="palmares-left-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
+                                    <ui:VisualElement name="AllStarAppearancesBody" class="champs-list" />
+                                </ui:ScrollView>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="palmares-right">
+                            <ui:Label class="palmares-section-title" text="HISTORIAL DE ALL-STAR" />
+                            <ui:VisualElement class="palmares-table-header">
+                                <ui:Label class="th-season" text="AÑO" />
+                                <ui:Label class="th-winner" text="GANADOR" />
+                                <ui:Label class="th-loser" text="PERDEDOR" />
+                                <ui:Label class="th-result" text="RESULTADO" />
+                                <ui:Label class="th-mvp" text="MVP" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="palmares-scroll-wrapper">
+                                <ui:ScrollView name="AllStarHistoryScroll" class="palmares-right-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
+                                    <ui:VisualElement name="AllStarHistoryBody" class="palmares-table-body" />
                                 </ui:ScrollView>
                             </ui:VisualElement>
                         </ui:VisualElement>

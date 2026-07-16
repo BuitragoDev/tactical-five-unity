@@ -12,10 +12,12 @@ public class PalmaresController : MonoBehaviour
     private Button _tabEquipos;
     private Button _tabJugadores;
     private Button _tabQuintetos;
+    private Button _tabAllStar;
 
     private VisualElement _tabContentEquipos;
     private VisualElement _tabContentJugadores;
     private VisualElement _tabContentQuintetos;
+    private VisualElement _tabContentAllStar;
 
     private VisualElement _titlesRankingBody;
     private VisualElement _finalsHistoryBody;
@@ -23,6 +25,8 @@ public class PalmaresController : MonoBehaviour
     private VisualElement _awardsHistoryBody;
     private VisualElement _quintetAppearancesBody;
     private VisualElement _quintetHistoryBody;
+    private VisualElement _allStarAppearancesBody;
+    private VisualElement _allStarHistoryBody;
 
     private ManagerData _manager;
     private TeamData _myTeam;
@@ -81,7 +85,7 @@ public class PalmaresController : MonoBehaviour
 
     void SetupScrollViews()
     {
-        var scrolls = new[] { "TitlesRankingScroll", "FinalsHistoryScroll", "MVPRankingScroll", "AwardsHistoryScroll", "QuintetAppearancesScroll", "QuintetHistoryScroll" };
+        var scrolls = new[] { "TitlesRankingScroll", "FinalsHistoryScroll", "MVPRankingScroll", "AwardsHistoryScroll", "QuintetAppearancesScroll", "QuintetHistoryScroll", "AllStarAppearancesScroll", "AllStarHistoryScroll" };
         foreach (var name in scrolls)
         {
             var sv = _root.Q<ScrollView>(name);
@@ -97,10 +101,12 @@ public class PalmaresController : MonoBehaviour
         _tabEquipos = _root.Q<Button>("TabEquipos");
         _tabJugadores = _root.Q<Button>("TabJugadores");
         _tabQuintetos = _root.Q<Button>("TabQuintetos");
+        _tabAllStar = _root.Q<Button>("TabAllStar");
 
         _tabContentEquipos = _root.Q<VisualElement>("TabContentEquipos");
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
         _tabContentQuintetos = _root.Q<VisualElement>("TabContentQuintetos");
+        _tabContentAllStar = _root.Q<VisualElement>("TabContentAllStar");
 
         _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
         _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
@@ -108,6 +114,8 @@ public class PalmaresController : MonoBehaviour
         _awardsHistoryBody = _root.Q<VisualElement>("AwardsHistoryBody");
         _quintetAppearancesBody = _root.Q<VisualElement>("QuintetAppearancesBody");
         _quintetHistoryBody = _root.Q<VisualElement>("QuintetHistoryBody");
+        _allStarAppearancesBody = _root.Q<VisualElement>("AllStarAppearancesBody");
+        _allStarHistoryBody = _root.Q<VisualElement>("AllStarHistoryBody");
     }
 
     void LoadData()
@@ -137,6 +145,7 @@ public class PalmaresController : MonoBehaviour
         _tabEquipos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("equipos"); });
         _tabJugadores?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("jugadores"); });
         _tabQuintetos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("quintetos"); });
+        _tabAllStar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("allstar"); });
 
         _btnAction?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
@@ -165,7 +174,7 @@ public class PalmaresController : MonoBehaviour
                 CursorManager.Instance.RegisterHandCursor(el);
         }
 
-        var extraBtns = new[] { "TabEquipos", "TabJugadores", "TabQuintetos" };
+        var extraBtns = new[] { "TabEquipos", "TabJugadores", "TabQuintetos", "TabAllStar" };
         foreach (var name in extraBtns)
         {
             var el = _root.Q<Button>(name);
@@ -298,10 +307,12 @@ public class PalmaresController : MonoBehaviour
         _tabEquipos.RemoveFromClassList("palmares-tab--active");
         _tabJugadores.RemoveFromClassList("palmares-tab--active");
         _tabQuintetos.RemoveFromClassList("palmares-tab--active");
+        _tabAllStar.RemoveFromClassList("palmares-tab--active");
 
         _tabContentEquipos.style.display = DisplayStyle.None;
         _tabContentJugadores.style.display = DisplayStyle.None;
         _tabContentQuintetos.style.display = DisplayStyle.None;
+        _tabContentAllStar.style.display = DisplayStyle.None;
 
         switch (tab)
         {
@@ -319,6 +330,11 @@ public class PalmaresController : MonoBehaviour
                 _tabQuintetos.AddToClassList("palmares-tab--active");
                 _tabContentQuintetos.style.display = DisplayStyle.Flex;
                 BuildQuintetosTab();
+                break;
+            case "allstar":
+                _tabAllStar.AddToClassList("palmares-tab--active");
+                _tabContentAllStar.style.display = DisplayStyle.Flex;
+                BuildAllStarTab();
                 break;
         }
     }
@@ -657,6 +673,110 @@ public class PalmaresController : MonoBehaviour
 
             _quintetHistoryBody.Add(row);
         }
+    }
+
+    // ══ ALL-STAR TAB ══════════════════════════════════════
+
+    void BuildAllStarTab()
+    {
+        var allStarData = DatabaseManager.Instance.GetAllStarRecords(_manager.id);
+        allStarData.Sort((a, b) => b.season.CompareTo(a.season));
+        BuildAllStarAppearances();
+        BuildAllStarHistory(allStarData);
+    }
+
+    void BuildAllStarAppearances()
+    {
+        _allStarAppearancesBody.Clear();
+
+        var appearances = DatabaseManager.Instance.GetAllStarAppearances(_manager.id);
+
+        if (appearances.Count == 0)
+        {
+            var emptyLbl = new Label { text = "Aún no hay All-Stars registrados" };
+            emptyLbl.AddToClassList("no-data-cell");
+            _allStarAppearancesBody.Add(emptyLbl);
+            return;
+        }
+
+        for (int i = 0; i < appearances.Count; i++)
+        {
+            var a = appearances[i];
+            var row = new VisualElement();
+            row.AddToClassList("champ-row");
+
+            var rankLbl = new Label { text = (i + 1).ToString() };
+            rankLbl.AddToClassList("champ-rank");
+            row.Add(rankLbl);
+
+            var team = _allTeams.Find(t => t.logo == a.team_logo);
+            var logo = new VisualElement();
+            logo.AddToClassList("champ-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var nameLbl = new Label { text = a.player_name };
+            nameLbl.AddToClassList("champ-name");
+            row.Add(nameLbl);
+
+            var countLbl = new Label { text = a.appearances.ToString() };
+            countLbl.AddToClassList("champ-count");
+            row.Add(countLbl);
+
+            _allStarAppearancesBody.Add(row);
+        }
+    }
+
+    void BuildAllStarHistory(List<AllStarRecord> allStarData)
+    {
+        _allStarHistoryBody.Clear();
+
+        _logoSprites32.TryGetValue("all-star-game", out var allStarSprite);
+
+        foreach (var a in allStarData)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("palmares-data-row");
+
+            bool eastWon = a.east_score > a.west_score;
+
+            var seasonLbl = new Label { text = a.season };
+            seasonLbl.AddToClassList("td-season");
+            row.Add(seasonLbl);
+
+            row.Add(CreateAllStarCell(eastWon ? "Conferencia Este" : "Conferencia Oeste", "td-winner", allStarSprite));
+            row.Add(CreateAllStarCell(eastWon ? "Conferencia Oeste" : "Conferencia Este", "td-loser", allStarSprite));
+
+            var resultLbl = new Label { text = $"{a.east_score}-{a.west_score}" };
+            resultLbl.AddToClassList("td-result");
+            row.Add(resultLbl);
+
+            var mvpLbl = new Label { text = a.mvp };
+            mvpLbl.AddToClassList("td-mvp");
+            row.Add(mvpLbl);
+
+            _allStarHistoryBody.Add(row);
+        }
+    }
+
+    VisualElement CreateAllStarCell(string text, string cellClass, Sprite logo)
+    {
+        var cell = new VisualElement();
+        cell.AddToClassList("cell-with-logo");
+
+        var logoEl = new VisualElement();
+        logoEl.AddToClassList("mini-logo");
+        if (logo != null)
+            logoEl.style.backgroundImage = new StyleBackground(logo);
+        cell.Add(logoEl);
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList(cellClass);
+        nameLbl.text = text;
+        cell.Add(nameLbl);
+
+        return cell;
     }
 
     // ══ HELPERS ═══════════════════════════════════════════

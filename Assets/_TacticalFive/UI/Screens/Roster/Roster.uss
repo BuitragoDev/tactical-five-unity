@@ -146,7 +146,7 @@
 
 .player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     flex-grow: 1;
     -unity-text-align: middle-left;
@@ -157,7 +157,7 @@
 }
 .player-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
     width: 100px;
     -unity-text-align: middle-center;
@@ -171,17 +171,26 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
+.player-ovr--high {
+    color: rgb(39, 174, 96);
+}
+.player-ovr--mid {
+    color: rgb(212, 160, 23);
+}
+.player-ovr--low {
+    color: rgb(192, 57, 43);
+}
 .player-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
     width: 140px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
 .player-contract {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
     color: rgb(208, 216, 232);
     width: 90px;
     -unity-text-align: middle-center;
@@ -189,6 +198,14 @@
 }
 .player-contract--expiring {
     color: rgb(212, 160, 23);
+}
+.player-salary {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    width: 130px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
 }
 .player-icon {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
@@ -295,6 +312,15 @@
     font-size: 36px;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
+}
+.detail-ovr--high {
+    color: rgb(39, 174, 96);
+}
+.detail-ovr--mid {
+    color: rgb(212, 160, 23);
+}
+.detail-ovr--low {
+    color: rgb(192, 57, 43);
 }
 .detail-ovr-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
