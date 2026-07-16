@@ -773,7 +773,7 @@ public class DashboardController : MonoBehaviour
                     var record = new AllStarRecord
                     {
                         manager_id = _manager.id,
-                        season = $"{_season.year_start}-{_season.year_end}",
+                        season = $"{_season.year_end}",
                         east_score = game.home_score,
                         west_score = game.away_score,
                         mvp = mvpStats.name,

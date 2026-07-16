@@ -748,7 +748,7 @@ public class PalmaresController : MonoBehaviour
             row.Add(CreateAllStarCell(eastWon ? "Conferencia Este" : "Conferencia Oeste", "td-winner", allStarSprite));
             row.Add(CreateAllStarCell(eastWon ? "Conferencia Oeste" : "Conferencia Este", "td-loser", allStarSprite));
 
-            var resultLbl = new Label { text = $"{a.east_score}-{a.west_score}" };
+            var resultLbl = new Label { text = eastWon ? $"{a.east_score}-{a.west_score}" : $"{a.west_score}-{a.east_score}" };
             resultLbl.AddToClassList("td-result");
             row.Add(resultLbl);
 

@@ -1505,6 +1505,7 @@ public class RosterController : MonoBehaviour
 
         // Recargar datos y refrescar
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
         _selectedPlayer = null;
         Refresh();
     }
@@ -1589,6 +1590,7 @@ public class RosterController : MonoBehaviour
         CloseBuyoutModal();
 
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
         _selectedPlayer = null;
         Refresh();
     }

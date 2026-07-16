@@ -316,7 +316,7 @@ public class InjuredController : MonoBehaviour
         _leagueInjuredOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _leagueInjuredOverlay)
-                { PlayClick(); CloseLeagueInjuredModal(); }
+            { PlayClick(); CloseLeagueInjuredModal(); }
         });
 
         if (CursorManager.Instance == null) return;
@@ -592,7 +592,7 @@ public class InjuredController : MonoBehaviour
         DatabaseManager.Instance.UpdatePlayer(player);
 
         string playerName = $"{player.first_name} {player.last_name}";
-        string reductionText = $"{playerName} ha recibido tratamiento m\u00e9dico.\nSus d\u00edas de baja se reducen de {oldDays} a {player.injury_days}.";
+        string reductionText = $"{playerName} ha recibido tratamiento m\u00e9dico.\nSus d\u00edas de baja se reducen de {oldDays} a {player.injury_days} días.";
 
         ReloadData();
         Refresh();
@@ -697,39 +697,39 @@ public class InjuredController : MonoBehaviour
     void InitConfigModal()
     {
         _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");
-        _configModalBox     = _root.Q<VisualElement>("ConfigModalBox");
-        _btnConfigCerrar    = _root.Q<Button>("ConfigBtnCerrar");
+        _configModalBox = _root.Q<VisualElement>("ConfigModalBox");
+        _btnConfigCerrar = _root.Q<Button>("ConfigBtnCerrar");
 
         _configSliderMaster = new CustomSlider(
             _root.Q<VisualElement>("ConfigSliderMaster"),
             _root.Q<VisualElement>("ConfigFillMaster"),
             _root.Q<VisualElement>("ConfigDraggerMaster"));
-        _configSliderMusic  = new CustomSlider(
+        _configSliderMusic = new CustomSlider(
             _root.Q<VisualElement>("ConfigSliderMusic"),
             _root.Q<VisualElement>("ConfigFillMusic"),
             _root.Q<VisualElement>("ConfigDraggerMusic"));
-        _configSliderSFX    = new CustomSlider(
+        _configSliderSFX = new CustomSlider(
             _root.Q<VisualElement>("ConfigSliderSFX"),
             _root.Q<VisualElement>("ConfigFillSFX"),
             _root.Q<VisualElement>("ConfigDraggerSFX"));
-        _configLabelMaster  = _root.Q<Label>("ConfigLabelMaster");
-        _configLabelMusic   = _root.Q<Label>("ConfigLabelMusic");
-        _configLabelSFX     = _root.Q<Label>("ConfigLabelSFX");
-        _configBtnQualityLow    = _root.Q<Button>("ConfigBtnQualityLow");
+        _configLabelMaster = _root.Q<Label>("ConfigLabelMaster");
+        _configLabelMusic = _root.Q<Label>("ConfigLabelMusic");
+        _configLabelSFX = _root.Q<Label>("ConfigLabelSFX");
+        _configBtnQualityLow = _root.Q<Button>("ConfigBtnQualityLow");
         _configBtnQualityMedium = _root.Q<Button>("ConfigBtnQualityMedium");
-        _configBtnQualityHigh   = _root.Q<Button>("ConfigBtnQualityHigh");
-        _configBtnQualityUltra  = _root.Q<Button>("ConfigBtnQualityUltra");
+        _configBtnQualityHigh = _root.Q<Button>("ConfigBtnQualityHigh");
+        _configBtnQualityUltra = _root.Q<Button>("ConfigBtnQualityUltra");
 
-        _configBtnMainMenu     = _root.Q<Button>("ConfigBtnMainMenu");
-        _configBtnExit         = _root.Q<Button>("ConfigBtnExit");
+        _configBtnMainMenu = _root.Q<Button>("ConfigBtnMainMenu");
+        _configBtnExit = _root.Q<Button>("ConfigBtnExit");
 
         _configMainMenuConfirmOverlay = _root.Q<VisualElement>("ConfigMainMenuConfirmOverlay");
         _configBtnMainMenuYes = _root.Q<Button>("ConfigBtnMainMenuYes");
-        _configBtnMainMenuNo  = _root.Q<Button>("ConfigBtnMainMenuNo");
+        _configBtnMainMenuNo = _root.Q<Button>("ConfigBtnMainMenuNo");
 
         _configExitConfirmOverlay = _root.Q<VisualElement>("ConfigExitConfirmOverlay");
         _configBtnExitYes = _root.Q<Button>("ConfigBtnExitYes");
-        _configBtnExitNo  = _root.Q<Button>("ConfigBtnExitNo");
+        _configBtnExitNo = _root.Q<Button>("ConfigBtnExitNo");
 
         _configSliderMaster.OnValueChanged = v =>
         {
@@ -756,7 +756,7 @@ public class InjuredController : MonoBehaviour
         _configModalOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _configModalOverlay)
-                { PlayClick(); CloseConfigModal(); }
+            { PlayClick(); CloseConfigModal(); }
         });
 
         _configBtnMainMenu?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenMainMenuConfirmModal(); });
@@ -775,7 +775,7 @@ public class InjuredController : MonoBehaviour
         _configMainMenuConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _configMainMenuConfirmOverlay)
-                { PlayClick(); CloseMainMenuConfirmModal(); }
+            { PlayClick(); CloseMainMenuConfirmModal(); }
         });
 
         _configBtnExitYes?.RegisterCallback<ClickEvent>(_ =>
@@ -791,7 +791,7 @@ public class InjuredController : MonoBehaviour
         _configExitConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _configExitConfirmOverlay)
-                { PlayClick(); CloseExitConfirmModal(); }
+            { PlayClick(); CloseExitConfirmModal(); }
         });
 
         if (CursorManager.Instance != null)
@@ -849,9 +849,9 @@ public class InjuredController : MonoBehaviour
         if (_configLabelMaster != null)
             _configLabelMaster.text = $"{Mathf.RoundToInt(am.MasterVolume * 100)}%";
         if (_configLabelMusic != null)
-            _configLabelMusic.text  = $"{Mathf.RoundToInt(am.MusicVolume  * 100)}%";
+            _configLabelMusic.text = $"{Mathf.RoundToInt(am.MusicVolume * 100)}%";
         if (_configLabelSFX != null)
-            _configLabelSFX.text    = $"{Mathf.RoundToInt(am.SFXVolume    * 100)}%";
+            _configLabelSFX.text = $"{Mathf.RoundToInt(am.SFXVolume * 100)}%";
     }
 
     void SelectConfigQuality(int index)
