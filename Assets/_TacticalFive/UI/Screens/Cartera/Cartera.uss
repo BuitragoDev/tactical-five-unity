@@ -427,3 +427,15 @@
 .btn-hire:hover {
     background-color: rgb(52, 115, 231);
 }
+
+.player-ovr--high {
+    color: rgb(39, 174, 96);
+}
+
+.player-ovr--mid {
+    color: rgb(212, 160, 23);
+}
+
+.player-ovr--low {
+    color: rgb(192, 57, 43);
+}

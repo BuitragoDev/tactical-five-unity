@@ -460,7 +460,9 @@ public class CarteraController : MonoBehaviour
 
         _selectedTeamLabel.text = "SELECCIONA UN JUGADOR PARA OJEAR";
 
-        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id);
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id)
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
 
         for (int i = 0; i < players.Count; i += 2)
         {
@@ -558,12 +560,19 @@ public class CarteraController : MonoBehaviour
 
         var ageLbl = new Label();
         ageLbl.AddToClassList("player-row-age");
-        ageLbl.text = p.age.ToString();
+        ageLbl.text = $"{p.age} años";
         row.Add(ageLbl);
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-row-ovr");
-        ovrLbl.text = p.overall.ToString();
+        int med = p.GetCalculatedAverage();
+        ovrLbl.text = med.ToString();
+        if (med > 84)
+            ovrLbl.AddToClassList("player-ovr--high");
+        else if (med >= 70)
+            ovrLbl.AddToClassList("player-ovr--mid");
+        else
+            ovrLbl.AddToClassList("player-ovr--low");
         row.Add(ovrLbl);
 
         var captured = p;
