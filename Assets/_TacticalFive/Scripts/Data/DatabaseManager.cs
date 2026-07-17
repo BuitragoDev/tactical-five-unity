@@ -402,6 +402,49 @@ public class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for first_apron_hard_capped: {ex.Message}");
         }
+
+        // Add career stat columns to managers
+        try
+        {
+            var mgrCols = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");
+            if (mgrCols.Count > 0)
+            {
+                if (!mgrCols.Any(c => c.name == "career_reg_wins"))
+                {
+                    _db.Execute("ALTER TABLE managers ADD COLUMN career_reg_wins INTEGER DEFAULT 0");
+                    Debug.Log("[DB] Migration: added career_reg_wins to managers");
+                }
+                if (!mgrCols.Any(c => c.name == "career_reg_losses"))
+                {
+                    _db.Execute("ALTER TABLE managers ADD COLUMN career_reg_losses INTEGER DEFAULT 0");
+                    Debug.Log("[DB] Migration: added career_reg_losses to managers");
+                }
+                if (!mgrCols.Any(c => c.name == "career_po_wins"))
+                {
+                    _db.Execute("ALTER TABLE managers ADD COLUMN career_po_wins INTEGER DEFAULT 0");
+                    Debug.Log("[DB] Migration: added career_po_wins to managers");
+                }
+                if (!mgrCols.Any(c => c.name == "career_po_losses"))
+                {
+                    _db.Execute("ALTER TABLE managers ADD COLUMN career_po_losses INTEGER DEFAULT 0");
+                    Debug.Log("[DB] Migration: added career_po_losses to managers");
+                }
+                if (!mgrCols.Any(c => c.name == "championships"))
+                {
+                    _db.Execute("ALTER TABLE managers ADD COLUMN championships INTEGER DEFAULT 0");
+                    Debug.Log("[DB] Migration: added championships to managers");
+                }
+                if (!mgrCols.Any(c => c.name == "seasons_completed"))
+                {
+                    _db.Execute("ALTER TABLE managers ADD COLUMN seasons_completed INTEGER DEFAULT 0");
+                    Debug.Log("[DB] Migration: added seasons_completed to managers");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for manager career columns: {ex.Message}");
+        }
     }
 
     class ColumnInfo
@@ -4180,7 +4223,7 @@ public class DatabaseManager : MonoBehaviour
                   .Count() > 0;
     }
 
-    public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId)
+    public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId, int prevTeamId = 0)
     {
         // 0. Archive historical stats BEFORE clearing tables
         var oldSeason = _db.Find<SeasonData>(oldSeasonId);
@@ -4328,6 +4371,68 @@ public class DatabaseManager : MonoBehaviour
             }
             if (changed)
                 UpdateTeamSettings(settings);
+        }
+
+        // 4b. Archive manager career stats from the completed season
+        if (prevTeamId > 0 && oldSeasonId > 0)
+        {
+            try
+            {
+                var seasonGames = _db.Table<GameData>()
+                    .Where(g => g.manager_id == managerId && g.season_id == oldSeasonId && g.is_played == 1)
+                    .ToList();
+
+                if (seasonGames.Count > 0)
+                {
+                    var manager = _db.Find<ManagerData>(managerId);
+                    if (manager != null)
+                    {
+                        // Regular season
+                        var regGames = seasonGames
+                            .Where(g => g.game_type == "regular"
+                                && (g.home_team_id == prevTeamId || g.away_team_id == prevTeamId))
+                            .ToList();
+                        int regW = regGames.Count(g =>
+                            (g.home_team_id == prevTeamId && g.home_score > g.away_score) ||
+                            (g.away_team_id == prevTeamId && g.away_score > g.home_score));
+                        manager.career_reg_wins   += regW;
+                        manager.career_reg_losses += regGames.Count - regW;
+
+                        // Playoff / Play-In
+                        var poGames = seasonGames
+                            .Where(g => (g.game_type == "playoff" || g.game_type == "playin")
+                                && (g.home_team_id == prevTeamId || g.away_team_id == prevTeamId))
+                            .ToList();
+                        int poW = poGames.Count(g =>
+                            (g.home_team_id == prevTeamId && g.home_score > g.away_score) ||
+                            (g.away_team_id == prevTeamId && g.away_score > g.home_score));
+                        manager.career_po_wins   += poW;
+                        manager.career_po_losses += poGames.Count - poW;
+
+                        // Championship
+                        if (oldSeason != null)
+                        {
+                            string seasonLabel = $"{oldSeason.year_start}-{oldSeason.year_end.ToString().Substring(2)}";
+                            var finalsRecord = _db.Table<FinalsRecord>()
+                                .FirstOrDefault(f => f.season == seasonLabel);
+                            if (finalsRecord != null)
+                            {
+                                var oldTeam = GetTeamById(prevTeamId);
+                                if (oldTeam != null && finalsRecord.champ_name == oldTeam.name)
+                                    manager.championships += 1;
+                            }
+                        }
+
+                        manager.seasons_completed += 1;
+                        _db.Update(manager);
+                        Debug.Log($"[DB] Archived career stats for manager {managerId}: reg {manager.career_reg_wins}-{manager.career_reg_losses}, po {manager.career_po_wins}-{manager.career_po_losses}, rings {manager.championships}");
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Error archiving manager career stats: {ex.Message}");
+            }
         }
 
         // 5. Clear tables

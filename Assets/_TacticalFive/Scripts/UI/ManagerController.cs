@@ -389,39 +389,48 @@ public class ManagerController : MonoBehaviour
 
     void RefreshStats()
     {
-        if (_myTeam == null || _standingGames == null) return;
+        if (_manager == null) return;
 
-        var regularGames = _standingGames
-            .Where(g => g.game_type == "regular" && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id) && g.is_played == 1)
-            .ToList();
+        // Current season from DB
+        int curRegW = 0, curRegL = 0;
+        int curPoW = 0, curPoL = 0;
 
-        int regTotal = regularGames.Count;
-        int regWin = regularGames.Count(g =>
-            (g.home_team_id == _myTeam.id && g.home_score > g.away_score) ||
-            (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
-        int regLoss = regTotal - regWin;
-        float regWinPct = regTotal > 0 ? (float)regWin / regTotal : 0f;
+        if (_myTeam != null && _standingGames != null)
+        {
+            var regularGames = _standingGames
+                .Where(g => g.game_type == "regular" && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id) && g.is_played == 1)
+                .ToList();
+            curRegW = regularGames.Count(g =>
+                (g.home_team_id == _myTeam.id && g.home_score > g.away_score) ||
+                (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
+            curRegL = regularGames.Count - curRegW;
 
-        if (_regGames != null) _regGames.text = regTotal.ToString();
-        if (_regWins != null) _regWins.text = regWin.ToString();
-        if (_regLosses != null) _regLosses.text = regLoss.ToString();
-        if (_regPct != null) _regPct.text = regTotal > 0 ? regWinPct.ToString("F3") : ".000";
+            var playoffGames = _standingGames
+                .Where(g => g.is_played == 1 && (g.game_type == "playoff" || g.game_type == "playin") && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
+                .ToList();
+            curPoW = playoffGames.Count(g =>
+                (g.home_team_id == _myTeam.id && g.home_score > g.away_score) ||
+                (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
+            curPoL = playoffGames.Count - curPoW;
+        }
 
-        var playoffGames = _standingGames
-            .Where(g => g.is_played == 1 && (g.game_type == "playoff" || g.game_type == "playin") && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
-            .ToList();
+        // Career totals = archived + current season
+        int regW = _manager.career_reg_wins   + curRegW;
+        int regL = _manager.career_reg_losses + curRegL;
+        int regT = regW + regL;
+        int poW  = _manager.career_po_wins    + curPoW;
+        int poL  = _manager.career_po_losses  + curPoL;
+        int poT  = poW + poL;
 
-        int poTotal = playoffGames.Count;
-        int poWin = playoffGames.Count(g =>
-            (g.home_team_id == _myTeam.id && g.home_score > g.away_score) ||
-            (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
-        int poLoss = poTotal - poWin;
-        float poWinPct = poTotal > 0 ? (float)poWin / poTotal : 0f;
+        if (_regGames != null) _regGames.text = regT.ToString();
+        if (_regWins != null)  _regWins.text  = regW.ToString();
+        if (_regLosses != null) _regLosses.text = regL.ToString();
+        if (_regPct != null)   _regPct.text   = regT > 0 ? ((float)regW / regT).ToString("F3") : ".000";
 
-        if (_poGames != null) _poGames.text = poTotal.ToString();
-        if (_poWins != null) _poWins.text = poWin.ToString();
-        if (_poLosses != null) _poLosses.text = poLoss.ToString();
-        if (_poPct != null) _poPct.text = poTotal > 0 ? poWinPct.ToString("F3") : ".000";
+        if (_poGames != null) _poGames.text = poT.ToString();
+        if (_poWins != null)  _poWins.text  = poW.ToString();
+        if (_poLosses != null) _poLosses.text = poL.ToString();
+        if (_poPct != null)   _poPct.text   = poT > 0 ? ((float)poW / poT).ToString("F3") : ".000";
     }
 
     // ── RELATIONSHIPS ────────────────────────────────────────────
@@ -548,7 +557,7 @@ public class ManagerController : MonoBehaviour
 
     void RefreshRings()
     {
-        if (_myTeam == null) return;
+        if (_manager == null) return;
 
         var tex = Resources.Load<Texture2D>("Icons/trofeo64px");
         if (tex != null && _ringsTrophy != null)
@@ -556,8 +565,34 @@ public class ManagerController : MonoBehaviour
 
         if (_ringsCount == null) return;
 
-        var finals = DatabaseManager.Instance.GetFinalsRecords();
-        int rings = finals.Count(r => r.champ_name == _myTeam.name);
+        int rings = _manager.championships;
+
+        // If current season just ended (FinalsRecord exists but not yet archived), count it too
+        if (_myTeam != null && _season != null)
+        {
+            string seasonLabel = $"{_season.year_start}-{_season.year_end.ToString().Substring(2)}";
+            var finals = DatabaseManager.Instance.GetFinalsRecords()
+                .FirstOrDefault(f => f.season == seasonLabel);
+            if (finals != null && finals.champ_name == _myTeam.name)
+            {
+                // Check if this championship is already counted in archived stats.
+                // It's already counted if seasons_completed includes this season,
+                // which means StartNewSeason already archived it.
+                // We can detect this by comparing: if the FinalsRecord's season label
+                // matches the LAST archived season, it's already counted.
+                // Simple heuristic: if seasons_completed > 0 and the archived
+                // championships count includes this one, we'd double-count.
+                // The safest check: was this season already archived?
+                // seasons_completed was incremented in StartNewSeason. So if
+                // the season ended AND StartNewSeason ran, seasons_completed includes it.
+                // We can't easily detect this from here, so use a simpler approach:
+                // only add 1 if the current season's games still exist in DB
+                // (meaning StartNewSeason hasn't run yet)
+                if (_standingGames != null && _standingGames.Any(g => g.is_played == 1))
+                    rings += 1;
+            }
+        }
+
         _ringsCount.text = rings.ToString();
     }
 

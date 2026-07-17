@@ -246,6 +246,7 @@ public class NewSeasonController : MonoBehaviour
         _btnStartSeason.text = "INICIANDO...";
 
         int newTeamId = _selectedTeamId;
+        int oldTeamId = _manager.team_id; // Capture before possible update
 
         // Update manager team if changed
         if (_manager.team_id != newTeamId)
@@ -259,7 +260,8 @@ public class NewSeasonController : MonoBehaviour
             _season.id,
             newTeamId,
             _season.game_mode,
-            _manager.id
+            _manager.id,
+            oldTeamId
         );
 
         // Navigate to Preseason to set up friendly games

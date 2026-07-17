@@ -12,4 +12,12 @@ public class ManagerData
     public int    morale         { get; set; }
     public int    fan_confidence { get; set; }
     public int    budget_red_warnings { get; set; }
+
+    // Career stats (accumulated across seasons)
+    public int career_reg_wins   { get; set; }
+    public int career_reg_losses { get; set; }
+    public int career_po_wins    { get; set; }
+    public int career_po_losses  { get; set; }
+    public int championships     { get; set; }
+    public int seasons_completed { get; set; }
 }
