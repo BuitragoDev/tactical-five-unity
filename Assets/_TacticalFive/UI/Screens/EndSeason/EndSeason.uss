@@ -417,6 +417,15 @@
     margin-right: 8px;
     flex-shrink: 0;
 }
+.draft-player-sec-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    background-color: rgb(39, 174, 96);
+    color: rgb(255, 255, 255);
+    padding: 2px 8px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
 .draft-player-detail {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;

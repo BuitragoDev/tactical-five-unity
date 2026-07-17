@@ -375,6 +375,14 @@ public class EndSeasonController : MonoBehaviour
         posLbl.text = PositionCodes.GetShort(p.position);
         info.Add(posLbl);
 
+        if (!string.IsNullOrEmpty(p.secondary_position))
+        {
+            var secLbl = new Label();
+            secLbl.AddToClassList("draft-player-sec-pos");
+            secLbl.text = PositionCodes.GetShort(p.secondary_position);
+            info.Add(secLbl);
+        }
+
         var detailLbl = new Label();
         detailLbl.AddToClassList("draft-player-detail");
         detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {CountryCodes.GetName(p.nationality)}";

@@ -231,6 +231,15 @@ public static class DraftGenerator
                 first_name = firstName,
                 last_name = lastName,
                 position = position,
+                secondary_position = position switch
+                {
+                    "PG" => "SG",
+                    "SG" => "SF",
+                    "SF" => "PF",
+                    "PF" => "C",
+                    "C"  => "PF",
+                    _ => ""
+                },
                 age = age,
                 nationality = nationality,
                 height_cm = height,
