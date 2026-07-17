@@ -304,6 +304,14 @@ public class PreseasonController : MonoBehaviour
             foreach (var p in players)
                 sum += p.GetCalculatedAverage();
             _teamAvgCache[team.id] = players.Count > 0 ? Mathf.RoundToInt((float)sum / players.Count) : 0;
+        }
+
+        var sortedTeams = _allTeams
+            .Where(t => t.id != _myTeam.id)
+            .OrderByDescending(t => _teamAvgCache.GetValueOrDefault(t.id, 0))
+            .ToList();
+        foreach (var team in sortedTeams)
+        {
             _teamsGrid.Add(CreateTeamItem(team));
         }
     }

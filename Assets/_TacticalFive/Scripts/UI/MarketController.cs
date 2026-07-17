@@ -70,6 +70,7 @@ public class MarketController : MonoBehaviour
     private TeamData _selectedTeam;
     private bool _isFA = false;
     private PlayerData _pendingFAPlayer;
+    private IVisualElementScheduledItem _faLongPressSchedule;
 
     private Dictionary<string, Sprite> _headerLogos = new();
     private Dictionary<string, Sprite> _teamGridLogos = new();
@@ -215,7 +216,7 @@ public class MarketController : MonoBehaviour
         _btnCloseFARosterFull?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faRosterFullModal.style.display = DisplayStyle.None; });
         _btnCancelFA?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
+            { PlayClick(); _faLongPressSchedule?.Pause(); _faLongPressSchedule = null; _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
         _btnConfirmFA?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); SendFAOffer(); });
 
@@ -412,6 +413,11 @@ public class MarketController : MonoBehaviour
         _otherPicks = null;
         _pendingFAPlayer = null;
         _faOfferSent = false;
+        _faSalary = 0;
+        _faYears = 1;
+        _faLongPressSchedule?.Pause();
+        _faLongPressSchedule = null;
+        _faConfirmModal.style.display = DisplayStyle.None;
 
         _root.Q<Button>("SubmenuOfertas")?.AddToClassList("nav-submenu-item--active");
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Market] RefreshHeader error: {ex.Message}"); }
@@ -1325,6 +1331,9 @@ public class MarketController : MonoBehaviour
 
     void OnSignPlayer(int playerId)
     {
+        _faLongPressSchedule?.Pause();
+        _faLongPressSchedule = null;
+
         var player = _freeAgents.Find(p => p.id == playerId);
         if (player == null) return;
 
@@ -1566,31 +1575,29 @@ public class MarketController : MonoBehaviour
     {
         if (el == null) return;
 
-        IVisualElementScheduledItem scheduled = null;
-
         el.RegisterCallback<PointerDownEvent>(_ =>
         {
             PlayClick();
-            scheduled?.Pause();
+            _faLongPressSchedule?.Pause();
             onStep();
-            scheduled = el.schedule.Execute(() => onStep()).Every(80).StartingIn(350);
+            _faLongPressSchedule = el.schedule.Execute(() => onStep()).Every(80).StartingIn(350);
         });
 
         el.RegisterCallback<PointerUpEvent>(_ =>
         {
-            if (scheduled != null)
+            if (_faLongPressSchedule != null)
             {
-                scheduled.Pause();
-                scheduled = null;
+                _faLongPressSchedule.Pause();
+                _faLongPressSchedule = null;
             }
         });
 
         el.RegisterCallback<PointerCaptureOutEvent>(_ =>
         {
-            if (scheduled != null)
+            if (_faLongPressSchedule != null)
             {
-                scheduled.Pause();
-                scheduled = null;
+                _faLongPressSchedule.Pause();
+                _faLongPressSchedule = null;
             }
         });
     }

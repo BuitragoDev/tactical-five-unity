@@ -95,6 +95,7 @@ public class EndSeasonController : MonoBehaviour
         foreach (var s in logos) _logo32[s.name] = s;
 
         RefreshHeader();
+        ProcessAITeamRenewals();
         RefreshContent();
 
         _btnNextSeason.SetEnabled(false);
@@ -242,6 +243,29 @@ public class EndSeasonController : MonoBehaviour
         }
 
         return row;
+    }
+
+    void ProcessAITeamRenewals()
+    {
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        foreach (var team in allTeams)
+        {
+            if (team.id == _myTeam.id) continue;
+
+            var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+            var candidates = roster
+                .Where(p => p.contract_years == 1 && p.age < 40 && p.GetCalculatedAverage() >= 80)
+                .ToList();
+
+            foreach (var player in candidates)
+            {
+                int years = CalcRenewYears(player.age);
+                long newSalary = CalcRenewSalary(player.salary, player.age);
+                player.contract_years = years;
+                player.salary = newSalary;
+                DatabaseManager.Instance.UpdatePlayer(player);
+            }
+        }
     }
 
     void RenewPlayer(int playerId)
