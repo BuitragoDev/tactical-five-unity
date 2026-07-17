@@ -390,7 +390,7 @@ public class EndSeasonController : MonoBehaviour
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("draft-player-ovr");
-        ovrLbl.text = $"MED: {p.overall}";
+        ovrLbl.text = $"MED: {p.GetCalculatedAverage()}";
         info.Add(ovrLbl);
 
         pick.Add(info);
