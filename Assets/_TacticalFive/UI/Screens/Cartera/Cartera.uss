@@ -115,7 +115,7 @@
     font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    width: 30px;
+    width: 55px;
     -unity-text-align: middle-center;
     margin-right: 10px;
 }
