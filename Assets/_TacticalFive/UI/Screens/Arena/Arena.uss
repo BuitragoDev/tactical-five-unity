@@ -339,6 +339,10 @@
     color: rgb(208, 216, 232);
 }
 
+.upgrade-card-cost--discounted {
+    color: rgb(39, 174, 96);
+}
+
 .upgrade-card-duration {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;

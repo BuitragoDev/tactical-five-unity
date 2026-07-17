@@ -567,8 +567,18 @@ public class ArenaController : MonoBehaviour
         var footer = new VisualElement();
         footer.AddToClassList("upgrade-card-footer");
 
-        var costLbl = new Label($"${info.cost:N0}");
+        long discountedCost = GetRenovationCost(info.cost);
+        var costLbl = new Label();
         costLbl.AddToClassList("upgrade-card-cost");
+        if (discountedCost < info.cost)
+        {
+            costLbl.text = $"${discountedCost:N0} (-${info.cost - discountedCost:N0})";
+            costLbl.AddToClassList("upgrade-card-cost--discounted");
+        }
+        else
+        {
+            costLbl.text = $"${info.cost:N0}";
+        }
 
         var durationLbl = new Label($"{info.durationWeeks} semanas");
         durationLbl.AddToClassList("upgrade-card-duration");
@@ -587,7 +597,7 @@ public class ArenaController : MonoBehaviour
             btn.AddToClassList("upgrade-card-btn--disabled");
             btn.SetEnabled(false);
         }
-        else if (_myTeam.budget < info.cost)
+        else if (_myTeam.budget < discountedCost)
         {
             btn.text = "SIN FONDOS";
             btn.AddToClassList("upgrade-card-btn--no-funds");
@@ -614,14 +624,16 @@ public class ArenaController : MonoBehaviour
     {
         if (!_renovationTypes.TryGetValue(type, out var info)) return;
         if (IsUnderRenovation()) return;
-        if (_myTeam.budget < info.cost) return;
+
+        long discountedCost = GetRenovationCost(info.cost);
+        if (_myTeam.budget < discountedCost) return;
 
         int currentDay = GetCurrentDay();
         int endDay = currentDay + (info.durationWeeks * 7);
 
         _myTeam.arena_renovation_end_day = endDay;
         _myTeam.arena_renovation_type = type;
-        _myTeam.arena_renovation_cost = info.cost;
+        _myTeam.arena_renovation_cost = discountedCost;
         DatabaseManager.Instance.UpdateTeam(_myTeam);
 
         // Message
@@ -649,6 +661,23 @@ public class ArenaController : MonoBehaviour
         if (_season == null) return 0;
         return _season.current_game_day;
     }
+
+    long GetRenovationCost(long baseCost)
+    {
+        var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+        var pabellon = staff.FirstOrDefault(e => e.position == "PABELLON");
+        float discount = pabellon?.reputation switch
+        {
+            5 => 0.80f,
+            4 => 0.85f,
+            3 => 0.90f,
+            2 => 0.95f,
+            1 => 0.97f,
+            _ => 1.0f
+        };
+        return (long)(baseCost * discount);
+    }
+
     void InitConfigModal()
     {
         _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");

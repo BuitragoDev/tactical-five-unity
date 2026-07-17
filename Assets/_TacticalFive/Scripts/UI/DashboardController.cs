@@ -732,6 +732,7 @@ public class DashboardController : MonoBehaviour
         ProcessRenovations();
         ProcessAITransfers(gameDay);
         ProcessStarFreeAgentSignings(gameDay);
+        ProcessPsychologistMorale();
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
 
@@ -2070,6 +2071,45 @@ public class DashboardController : MonoBehaviour
         }
     }
 
+    void ProcessPsychologistMorale()
+    {
+        var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+        var psicologo = staff.FirstOrDefault(e => e.position == "PSICOLOGO");
+
+        int recovery = psicologo?.reputation switch
+        {
+            5 => 2,
+            4 => 1,
+            3 => 1,
+            _ => 0
+        };
+
+        if (recovery <= 0) return;
+
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        foreach (var p in players)
+        {
+            if (p.morale >= 50) continue;
+            int newMorale = Mathf.Min(50, p.morale + recovery);
+            DatabaseManager.Instance.UpdatePlayerMorale(p.id, newMorale);
+        }
+    }
+
+    float GetArenaTicketMultiplier()
+    {
+        var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+        var pabellon = staff.FirstOrDefault(e => e.position == "PABELLON");
+        return pabellon?.reputation switch
+        {
+            5 => 1.20f,
+            4 => 1.15f,
+            3 => 1.10f,
+            2 => 1.06f,
+            1 => 1.03f,
+            _ => 1.0f
+        };
+    }
+
     string GetWeakestPosition(List<PlayerData> roster)
     {
         if (roster == null || roster.Count == 0) return null;
@@ -2971,7 +3011,8 @@ public class DashboardController : MonoBehaviour
         int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : defaultTicketPrice;
 
         int attendance = CalculateAttendance(game, homeTeam);
-        long ticketRevenue = (long)(attendance * ticketPrice);
+        float ticketMultiplier = homeTeam.id == _myTeam.id ? GetArenaTicketMultiplier() : 1.0f;
+        long ticketRevenue = (long)(attendance * ticketPrice * ticketMultiplier);
 
         // Always save attendance, even if financial settings are missing
         DatabaseManager.Instance.SaveGameAttendance(new GameAttendanceData
