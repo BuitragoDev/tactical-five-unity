@@ -98,6 +98,7 @@ public class DashboardController : MonoBehaviour
     // Injured lineup modal
     private bool _injuredModalResolved;
     private bool _injuredModalGoToQuinteto;
+    private static List<int> _pendingRecoveredIds = new();
     // Config modal
     private VisualElement _configModalOverlay;
     private VisualElement _configMainMenuConfirmOverlay;
@@ -149,6 +150,7 @@ public class DashboardController : MonoBehaviour
         Refresh();
         CheckBudgetWarning();
         ProcessMaturedOffers();
+        ShowPendingRecoveryModal();
     }
 
     void Update()
@@ -703,7 +705,28 @@ public class DashboardController : MonoBehaviour
             yield break;
         }
 
-        ProcessInjuries();
+        var recoveredPlayers = ProcessInjuries();
+        if (recoveredPlayers.Count > 0)
+        {
+            foreach (var p in recoveredPlayers)
+            {
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 1,
+                    sender_id = 0,
+                    title = $"Recuperado: {p.first_name} {p.last_name}",
+                    body = $"{p.first_name} {p.last_name} se ha recuperado de su lesión y vuelve a estar disponible.",
+                    game_day = gameDay,
+                    game_date = _season?.current_date ?? "",
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    is_read = 0
+                });
+                _pendingRecoveredIds.Add(p.id);
+            }
+        }
+
         ProcessScouts();
         ProcessTraining();
         ProcessRenovations();
@@ -956,6 +979,7 @@ public class DashboardController : MonoBehaviour
 
         if (gamesToday.Count == 0)
         {
+            ShowPendingRecoveryModal();
             ProcessMaturedOffers();
             Debug.Log($"[Dashboard] Día {gameDay} — sin partidos, continúa en Dashboard");
         }
@@ -1530,6 +1554,90 @@ public class DashboardController : MonoBehaviour
         box.Add(btnGroup);
     }
 
+    void ShowPendingRecoveryModal()
+    {
+        if (_pendingRecoveredIds.Count == 0) return;
+
+        var players = new List<PlayerData>();
+        foreach (int id in _pendingRecoveredIds)
+        {
+            var p = DatabaseManager.Instance.GetPlayerById(id);
+            if (p != null) players.Add(p);
+        }
+        if (players.Count == 0)
+        {
+            _pendingRecoveredIds.Clear();
+            return;
+        }
+
+        _pendingRecoveredIds.Clear();
+        ShowRecoveredModal(players);
+    }
+
+    void ShowRecoveredModal(List<PlayerData> recovered)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--positive");
+        _firedOverlay.Add(box);
+
+        var title = new Label("JUGADOR(ES) RECUPERADO(S)");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fired-modal-title--positive");
+        box.Add(title);
+
+        var text = new Label("Los siguientes jugadores se han recuperado de sus lesiones y vuelven a estar disponibles:");
+        text.AddToClassList("injured-modal-text");
+        box.Add(text);
+
+        var list = new VisualElement();
+        list.AddToClassList("injured-modal-list");
+        foreach (var p in recovered)
+        {
+            var row = new Label($"{p.first_name} {p.last_name} — {PositionCodes.GetShort(p.position)}");
+            row.AddToClassList("injured-modal-player-row");
+            list.Add(row);
+        }
+        box.Add(list);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        var goBtn = new Button();
+        goBtn.text = "IR A QUINTETO";
+        goBtn.AddToClassList("injured-modal-btn");
+        goBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+        goBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+        });
+        btnGroup.Add(goBtn);
+
+        var closeBtn = new Button();
+        closeBtn.text = "CERRAR";
+        closeBtn.AddToClassList("injured-modal-btn");
+        closeBtn.style.marginLeft = 8;
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(closeBtn);
+
+        box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(goBtn);
+            CursorManager.Instance.RegisterHandCursor(closeBtn);
+        }
+    }
+
     void AutoFixInjuredLineup()
     {
         var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
@@ -1743,10 +1851,11 @@ public class DashboardController : MonoBehaviour
         return _season.current_game_day + 1;
     }
 
-    void ProcessInjuries()
+    List<PlayerData> ProcessInjuries()
     {
         var allPlayers = DatabaseManager.Instance.GetAllTeams().SelectMany(t =>
             DatabaseManager.Instance.GetPlayersByTeam(t.id)).ToList();
+        var recovered = new List<PlayerData>();
         foreach (var p in allPlayers)
         {
             if (p.injury_days > 0)
@@ -1757,10 +1866,13 @@ public class DashboardController : MonoBehaviour
                     p.injury_days = 0;
                     p.injury_type = "";
                     p.treated = 0;
+                    if (p.team_id == _myTeam.id)
+                        recovered.Add(p);
                 }
                 DatabaseManager.Instance.UpdatePlayer(p);
             }
         }
+        return recovered;
     }
 
     void ProcessScouts()
