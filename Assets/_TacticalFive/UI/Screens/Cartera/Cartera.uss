@@ -106,10 +106,10 @@
 }
 .player-row-pos {
     font-size: 18px;
-    color: rgb(122, 138, 170);
+    color: white;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     width: 30px;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 .player-row-age {
     font-size: 18px;
