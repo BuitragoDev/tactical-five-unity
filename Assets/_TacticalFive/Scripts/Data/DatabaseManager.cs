@@ -4871,17 +4871,17 @@ public class DatabaseManager : MonoBehaviour
             _db.Delete(e);
 
         var assigned = new HashSet<int>();
-        if (forceInactiveIds != null)
-            assigned.UnionWith(forceInactiveIds);
+        var forceInactive = forceInactiveIds ?? new HashSet<int>();
 
         var posOrder = new[] { "PG", "SG", "SF", "PF", "C" };
 
-        // Assign best player at each position as starter
+        // Assign best player at each position as starter (excluding forced-inactive)
         for (int si = 0; si < posOrder.Length; si++)
         {
             var best = players
                 .Where(p => (p.position == posOrder[si] || p.secondary_position == posOrder[si])
-                            && !assigned.Contains(p.id))
+                            && !assigned.Contains(p.id)
+                            && !forceInactive.Contains(p.id))
                 .OrderByDescending(p => p.position == posOrder[si] ? 1 : 0)
                 .ThenByDescending(p => p.overall)
                 .FirstOrDefault();
@@ -4898,9 +4898,9 @@ public class DatabaseManager : MonoBehaviour
             }
         }
 
-        // Fill bench with the next best unassigned players (up to 7 bench = 12 total active)
+        // Fill bench with the next best unassigned players (excluding forced-inactive)
         var remaining = players
-            .Where(p => !assigned.Contains(p.id))
+            .Where(p => !assigned.Contains(p.id) && !forceInactive.Contains(p.id))
             .OrderByDescending(p => p.overall)
             .ToList();
 
@@ -4922,23 +4922,17 @@ public class DatabaseManager : MonoBehaviour
         int inactIdx = 0;
         const int maxInactive = 5;
 
-        if (forceInactiveIds != null)
+        foreach (var p in players.Where(p => forceInactive.Contains(p.id)))
         {
-            var candidates = forceInactiveIds
-                .Select(pid => players.FirstOrDefault(p => p.id == pid))
-                .Where(p => p != null);
-            foreach (var p in candidates)
+            if (inactIdx >= maxInactive) break;
+            _db.Insert(new LineupData
             {
-                if (inactIdx >= maxInactive) break;
-                _db.Insert(new LineupData
-                {
-                    player_id = p.id,
-                    team_id = teamId,
-                    slot = 2,
-                    slot_index = inactIdx
-                });
-                inactIdx++;
-            }
+                player_id = p.id,
+                team_id = teamId,
+                slot = 2,
+                slot_index = inactIdx
+            });
+            inactIdx++;
         }
 
         foreach (var p in remaining.Skip(benchSlots))

@@ -364,7 +364,10 @@ public class QuintetoController : MonoBehaviour
         var existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
         if (existing.Count == 0)
         {
-            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
+            var injuredIds = new HashSet<int>(_players
+                .Where(p => p.injury_days > 0)
+                .Select(p => p.id));
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players, injuredIds);
         }
         else
         {
