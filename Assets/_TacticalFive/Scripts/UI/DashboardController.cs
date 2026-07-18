@@ -1675,7 +1675,10 @@ public class DashboardController : MonoBehaviour
         marketBtn.text = "IR AL MERCADO";
         marketBtn.AddToClassList("injured-modal-btn");
         marketBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
-        marketBtn.style.borderColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.style.borderTopColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.style.borderBottomColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.style.borderLeftColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.style.borderRightColor = new StyleColor(new Color32(42, 95, 201, 255));
         marketBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
