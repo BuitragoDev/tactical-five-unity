@@ -573,9 +573,15 @@ public class EmployeesController : MonoBehaviour
             posLbl.text = PositionLabels.TryGetValue(emp.position, out var lbl) ? lbl : emp.position;
             info.Add(posLbl);
 
-            // Reputation stars
+            // Reputation stars + salary in one row
+            var starsSalaryRow = new VisualElement();
+            starsSalaryRow.style.flexDirection = FlexDirection.Row;
+            starsSalaryRow.style.alignItems = Align.Center;
+            starsSalaryRow.style.marginTop = 4;
+
             var starsRow = new VisualElement();
             starsRow.AddToClassList("staff-card-stars");
+            starsRow.style.flexGrow = 1;
             for (int i = 0; i < 5; i++)
             {
                 var star = new Label();
@@ -583,12 +589,14 @@ public class EmployeesController : MonoBehaviour
                 star.text = "\u2605";
                 starsRow.Add(star);
             }
-            info.Add(starsRow);
+            starsSalaryRow.Add(starsRow);
 
             var salaryLbl = new Label();
             salaryLbl.AddToClassList("staff-card-salary");
             salaryLbl.text = FormatSalary(emp.salary);
-            info.Add(salaryLbl);
+            starsSalaryRow.Add(salaryLbl);
+
+            info.Add(starsSalaryRow);
 
             var fireBtn = new Button();
             fireBtn.AddToClassList("btn-fire");

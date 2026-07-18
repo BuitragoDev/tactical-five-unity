@@ -197,8 +197,8 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(39, 174, 96);
-    margin-top: 2px;
     -unity-text-align: middle-right;
+    flex-shrink: 0;
 }
 
 /* ── MARKET SECTION ── */
