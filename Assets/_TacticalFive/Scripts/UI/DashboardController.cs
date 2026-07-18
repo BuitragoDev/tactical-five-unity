@@ -1096,6 +1096,31 @@ public class DashboardController : MonoBehaviour
             {
                 // FREE AGENT SIGNING
                 hasSigning = true;
+
+                // Check if player is still a free agent
+                if (player.team_id != 0)
+                {
+                    var signingTeam = DatabaseManager.Instance.GetTeamById(player.team_id);
+                    string teamName = signingTeam?.name ?? "otro equipo";
+                    rejectedCount++;
+                    resultSummary += $"\u2717 {playerName}: FICHAJE CANCELADO \u2014 El jugador fich\u00f3 por {teamName}.\n";
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = 0,
+                        title = $"Fichaje cancelado: {playerName}",
+                        body = $"Tu oferta por {playerName} ha sido cancelada porque el jugador ha fichado por {teamName}.",
+                        game_day = _season.current_game_day,
+                        game_date = nowStr,
+                        created_at = nowStr,
+                        date_sent = nowStr,
+                        is_read = 0
+                    });
+                    DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                    continue;
+                }
+
                 if (accepted)
                 {
                     // Verificar límite de plantilla
@@ -2100,8 +2125,16 @@ public class DashboardController : MonoBehaviour
         }
         var teamsByAvg = allTeams.OrderByDescending(t => teamAvgs[t.id]).ToList();
 
+        var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+
         foreach (var star in stars)
         {
+            if (pendingFAIds.Contains(star.id))
+            {
+                Debug.Log($"[StarFA] Skip {star.first_name} {star.last_name} — user has pending offer");
+                continue;
+            }
+
             bool signed = false;
             foreach (var team in teamsByAvg)
             {
@@ -2342,8 +2375,10 @@ public class DashboardController : MonoBehaviour
     {
         if (roster.Count >= TradeHelper.MAX_ROSTER) return;
 
+        var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+
         var candidates = freeAgents
-            .Where(p => p.position == targetPos && p.salary <= team.budget)
+            .Where(p => p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id))
             .OrderByDescending(p => p.overall)
             .ToList();
 
@@ -2351,7 +2386,7 @@ public class DashboardController : MonoBehaviour
         {
             // Try any position if no match at targetPos
             candidates = freeAgents
-                .Where(p => p.salary <= team.budget)
+                .Where(p => p.salary <= team.budget && !pendingFAIds.Contains(p.id))
                 .OrderByDescending(p => p.overall)
                 .ToList();
         }
