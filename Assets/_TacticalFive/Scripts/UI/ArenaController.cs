@@ -23,6 +23,8 @@ public class ArenaController : MonoBehaviour
     private SeasonData _season;
 
     // Renovation config (same as Django)
+    private const int MAX_CAPACITY = 50000;
+
     readonly Dictionary<string, (string name, string desc, string icon, int capacityBonus, long cost, int durationWeeks)> _renovationTypes = new()
     {
         ["general_seats"] = ("Ampliar Grada General", "Aumenta la capacidad de la grada general", "🏟", 3000, 10_000_000, 3),
@@ -568,22 +570,27 @@ public class ArenaController : MonoBehaviour
         footer.AddToClassList("upgrade-card-footer");
 
         long discountedCost = GetRenovationCost(info.cost);
-        var costLbl = new Label();
-        costLbl.AddToClassList("upgrade-card-cost");
+
+        var costContainer = new VisualElement();
+        costContainer.style.flexDirection = FlexDirection.Row;
+        costContainer.style.alignItems = Align.Center;
+
+        var baseCostLbl = new Label(FormatCost(info.cost));
+        baseCostLbl.AddToClassList("upgrade-card-cost");
+        costContainer.Add(baseCostLbl);
+
         if (discountedCost < info.cost)
         {
-            costLbl.text = $"${discountedCost:N0} (-${info.cost - discountedCost:N0})";
-            costLbl.AddToClassList("upgrade-card-cost--discounted");
+            var discountedLbl = new Label($"({FormatCost(discountedCost)})");
+            discountedLbl.AddToClassList("upgrade-card-cost--discounted");
+            discountedLbl.style.marginLeft = 6;
+            costContainer.Add(discountedLbl);
         }
-        else
-        {
-            costLbl.text = $"${info.cost:N0}";
-        }
+
+        footer.Add(costContainer);
 
         var durationLbl = new Label($"{info.durationWeeks} semanas");
         durationLbl.AddToClassList("upgrade-card-duration");
-
-        footer.Add(costLbl);
         footer.Add(durationLbl);
         card.Add(footer);
 
@@ -594,6 +601,12 @@ public class ArenaController : MonoBehaviour
         if (underRenovation)
         {
             btn.text = "EN OBRAS";
+            btn.AddToClassList("upgrade-card-btn--disabled");
+            btn.SetEnabled(false);
+        }
+        else if (_myTeam.capacity + info.capacityBonus > MAX_CAPACITY)
+        {
+            btn.text = "CAPACIDAD MÁXIMA";
             btn.AddToClassList("upgrade-card-btn--disabled");
             btn.SetEnabled(false);
         }
@@ -676,6 +689,11 @@ public class ArenaController : MonoBehaviour
             _ => 1.0f
         };
         return (long)(baseCost * discount);
+    }
+
+    string FormatCost(long amount)
+    {
+        return amount.ToString("N0").Replace(',', '.') + " $";
     }
 
     void InitConfigModal()

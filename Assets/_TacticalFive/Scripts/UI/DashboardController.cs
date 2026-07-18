@@ -2853,6 +2853,8 @@ public class DashboardController : MonoBehaviour
         var info = GetRenovationInfo(team.arena_renovation_type);
         if (info.name == "") return;
 
+        if (team.capacity + info.capacityBonus > 50000) return;
+
         team.capacity += info.capacityBonus;
         team.arena_renovation_count++;
 
@@ -2894,7 +2896,7 @@ public class DashboardController : MonoBehaviour
         {
             manager_id = _manager.id,
             title = $"Remodelación completada: {info.name}",
-            body = $"La remodelación \"{info.name}\" ha finalizado. Se han añadido {info.capacityBonus} asientos. Coste total: ${team.arena_renovation_cost:N0}.",
+            body = $"La remodelación \"{info.name}\" ha finalizado. Se han añadido {info.capacityBonus} asientos. Coste total: {team.arena_renovation_cost:N0} $.",
             game_day = _season.current_game_day,
             game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(_season.current_game_day - 1).ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
