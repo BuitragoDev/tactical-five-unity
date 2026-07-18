@@ -584,9 +584,10 @@ public class EmployeesController : MonoBehaviour
             starsRow.style.flexGrow = 1;
             for (int i = 0; i < 5; i++)
             {
-                var star = new Label();
+                var star = new VisualElement();
                 star.AddToClassList(i < emp.reputation ? "staff-card-star" : "staff-card-star--empty");
-                star.text = "\u2605";
+                if (_starTex != null)
+                    star.style.backgroundImage = _starBg;
                 starsRow.Add(star);
             }
             starsSalaryRow.Add(starsRow);

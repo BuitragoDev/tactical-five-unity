@@ -184,13 +184,14 @@
 }
 
 .staff-card-star {
-    font-size: 16px;
-    color: rgb(212, 160, 23);
-    margin-right: 2px;
+    width: 18px;
+    height: 18px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: 3px;
 }
 
 .staff-card-star--empty {
-    color: rgb(58, 74, 99);
+    opacity: 0.25;
 }
 
 .staff-card-salary {
