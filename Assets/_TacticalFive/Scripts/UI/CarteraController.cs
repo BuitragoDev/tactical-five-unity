@@ -25,6 +25,10 @@ public class CarteraController : MonoBehaviour
     private VisualElement _ojeadorBody;
     private VisualElement _scoutSlots;
 
+    private VisualElement _salaryMarginBox;
+    private Label _salaryMarginTitle;
+    private Label _salaryMarginValue;
+
     private ManagerData _manager;
     private TeamData _myTeam;
     private SeasonData _season;
@@ -101,6 +105,9 @@ public class CarteraController : MonoBehaviour
         _teamList = _root.Q<VisualElement>("TeamList");
         _selectedTeamLabel = _root.Q<Label>("SelectedTeamLabel");
         _playerList = _root.Q<VisualElement>("PlayerList");
+        _salaryMarginBox = _root.Q<VisualElement>("SalaryMarginBox");
+        _salaryMarginTitle = _root.Q<Label>("SalaryMarginTitle");
+        _salaryMarginValue = _root.Q<Label>("SalaryMarginValue");
         _ojeadorBody = _root.Q<VisualElement>("OjeadorBody");
         _scoutSlots = _root.Q<VisualElement>("ScoutSlots");
     }
@@ -454,8 +461,30 @@ public class CarteraController : MonoBehaviour
 
         if (_selectedTeam == null)
         {
+            if (_salaryMarginBox != null) _salaryMarginBox.style.display = DisplayStyle.None;
             _selectedTeamLabel.text = "Selecciona un equipo para ver sus jugadores";
             return;
+        }
+
+        // Salary margin for selected team
+        if (_salaryMarginBox != null)
+        {
+            _salaryMarginBox.style.display = DisplayStyle.Flex;
+            if (_salaryMarginTitle != null)
+                _salaryMarginTitle.text = $"MARGEN SALARIAL DE {_selectedTeam.name.ToUpper()}";
+            if (_salaryMarginValue != null)
+            {
+                var teamPlayers = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id);
+                long teamPayroll = teamPlayers.Sum(p => p.salary);
+                var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+                long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+                long margin = salaryCap - teamPayroll;
+                string absFormatted = System.Math.Abs(margin).ToString("N0").Replace(',', '.');
+                _salaryMarginValue.text = margin >= 0 ? $"+{absFormatted} $" : $"-{absFormatted} $";
+                _salaryMarginValue.RemoveFromClassList("salary-margin-value--positive");
+                _salaryMarginValue.RemoveFromClassList("salary-margin-value--negative");
+                _salaryMarginValue.AddToClassList(margin >= 0 ? "salary-margin-value--positive" : "salary-margin-value--negative");
+            }
         }
 
         _selectedTeamLabel.text = "SELECCIONA UN JUGADOR PARA OJEAR";

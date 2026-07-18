@@ -75,6 +75,40 @@
     background-color: rgb(35, 40, 55);
 }
 
+/* ── SALARY MARGIN BOX ── */
+
+.salary-margin-box {
+    flex-direction: column;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 10px 14px;
+    margin-bottom: 8px;
+}
+
+.salary-margin-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+}
+
+.salary-margin-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+}
+
+.salary-margin-value--positive {
+    color: rgb(39, 174, 96);
+}
+
+.salary-margin-value--negative {
+    color: rgb(192, 57, 43);
+}
+
 .player-list {
     flex-direction: column;
     flex-grow: 1;

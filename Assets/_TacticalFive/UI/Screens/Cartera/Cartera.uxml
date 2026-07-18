@@ -17,6 +17,10 @@
                 <ui:VisualElement class="cartera-left">
                     <ui:Label class="section-title" text="SELECCIONA UN EQUIPO" />
                     <ui:VisualElement name="TeamList" class="team-list" />
+                    <ui:VisualElement name="SalaryMarginBox" class="salary-margin-box" style="display: none;">
+                        <ui:Label name="SalaryMarginTitle" class="salary-margin-title" text="" />
+                        <ui:Label name="SalaryMarginValue" class="salary-margin-value" text="" />
+                    </ui:VisualElement>
                     <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 12px;" />
                     <ui:VisualElement name="PlayerList" class="player-list" />
                 </ui:VisualElement>
