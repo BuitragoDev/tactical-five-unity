@@ -239,6 +239,11 @@
     border-left-color: rgb(42, 95, 201);
 }
 
+.market-pos-header--hired {
+    background-color: rgb(8, 42, 24);
+    border-left-color: rgb(39, 174, 96);
+}
+
 .market-columns {
     flex-direction: row;
     width: 100%;

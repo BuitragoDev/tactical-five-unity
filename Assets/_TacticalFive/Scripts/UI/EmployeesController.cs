@@ -637,6 +637,9 @@ public class EmployeesController : MonoBehaviour
 
             var header = new Label();
             header.AddToClassList("market-pos-header");
+            bool hasStaff = _myStaff.Any(e => e.position == pos);
+            if (hasStaff)
+                header.AddToClassList("market-pos-header--hired");
             header.text = PositionLabels.TryGetValue(pos, out var lbl) ? lbl : pos;
             group.Add(header);
 
