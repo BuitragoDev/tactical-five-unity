@@ -44,6 +44,7 @@ public class CarteraController : MonoBehaviour
     private StyleBackground _starBg;
 
     private const int MAX_SCOUTS = 3;
+    private int _expandedSlotIndex = -1;
     // Config modal
     private VisualElement _configModalOverlay;
     private VisualElement _configModalBox;
@@ -681,95 +682,100 @@ public class CarteraController : MonoBehaviour
                 else
                     slot.AddToClassList("scout-slot--scouting");
 
+                // ── Header (always visible, clickable) ──
                 var header = new VisualElement();
                 header.AddToClassList("scout-slot-header");
 
+                var arrowLbl = new Label();
+                arrowLbl.AddToClassList("scout-slot-header-arrow");
+                arrowLbl.text = _expandedSlotIndex == i ? "▼" : "▶";
+                header.Add(arrowLbl);
+
                 var nameLbl = new Label();
-                nameLbl.AddToClassList("scout-slot-name");
+                nameLbl.AddToClassList("scout-slot-header-name");
                 nameLbl.text = $"{player.first_name} {player.last_name}".ToUpper();
                 header.Add(nameLbl);
 
-                var posLbl = new Label();
-                posLbl.AddToClassList("scout-slot-pos");
-                posLbl.text = PositionCodes.GetShort(player.position);
-                header.Add(posLbl);
-
-                var ageLbl = new Label();
-                ageLbl.AddToClassList("scout-slot-age");
-                ageLbl.text = $"{player.age} a\u00f1os";
-                header.Add(ageLbl);
-
-                slot.Add(header);
-
                 if (scout.completed == 1)
                 {
-                    // Full details
-                    var attrs = new VisualElement();
-                    attrs.AddToClassList("scout-slot-attributes");
-
-                    AddAttr(attrs, "Media", player.overall.ToString());
-                    AddAttr(attrs, "Potencial", player.potential.ToString());
-                    AddAttr(attrs, "Velocidad", player.speed.ToString());
-                    AddAttr(attrs, "Tiro", player.shooting.ToString());
-                    AddAttr(attrs, "Triple", player.three_point.ToString());
-                    AddAttr(attrs, "Pase", player.passing.ToString());
-                    AddAttr(attrs, "Bote", player.dribbling.ToString());
-                    AddAttr(attrs, "Defensa", player.defense.ToString());
-                    AddAttr(attrs, "Rebote", player.rebounding.ToString());
-                    AddAttr(attrs, "Atletismo", player.athleticism.ToString());
-                    AddAttr(attrs, "IQ", player.iq.ToString());
-                    AddAttr(attrs, "Robos", player.steals.ToString());
-                    AddAttr(attrs, "Tapones", player.blocks.ToString());
-                    AddAttr(attrs, "Moral", player.morale.ToString());
-
-                    slot.Add(attrs);
-
-                    var infoRow = new VisualElement();
-                    infoRow.style.flexDirection = FlexDirection.Row;
-                    infoRow.style.marginTop = 6;
-
-                    var salaryLbl = new Label();
-                    salaryLbl.AddToClassList("scout-slot-salary");
-                    salaryLbl.style.flexGrow = 1;
-                    salaryLbl.text = $"<color=#7a8aaa>Salario:</color> <color=#d0d8e8>{FormatSalary(player.salary)}</color>";
-                    infoRow.Add(salaryLbl);
-
-                    var contractLbl = new Label();
-                    contractLbl.AddToClassList("scout-slot-contract");
-                    contractLbl.style.flexGrow = 1;
-                    string yearPlural = player.contract_years != 1 ? "s" : "";
-                    contractLbl.text = $"<color=#7a8aaa>Contrato:</color> <color=#d0d8e8>{player.contract_years} a\u00f1o{yearPlural}</color>";
-                    infoRow.Add(contractLbl);
-
-                    slot.Add(infoRow);
+                    string posText = PositionCodes.GetName(player.position);
+                    if (!string.IsNullOrEmpty(player.secondary_position))
+                        posText += $" / {PositionCodes.GetName(player.secondary_position)}";
+                    var posLbl = new Label();
+                    posLbl.AddToClassList("scout-slot-header-pos");
+                    posLbl.text = posText;
+                    header.Add(posLbl);
                 }
                 else
                 {
-                    // Minimal info + timer
+                    var posLbl = new Label();
+                    posLbl.AddToClassList("scout-slot-header-pos");
+                    posLbl.text = PositionCodes.GetShort(player.position);
+                    header.Add(posLbl);
+                }
+
+                var ageLbl = new Label();
+                ageLbl.AddToClassList("scout-slot-header-age");
+                ageLbl.text = $"{player.age} años";
+                header.Add(ageLbl);
+
+                int slotIndex = i;
+                header.RegisterCallback<ClickEvent>(_ =>
+                {
+                    PlayClick();
+                    _expandedSlotIndex = _expandedSlotIndex == slotIndex ? -1 : slotIndex;
+                    BuildScoutSlots();
+                });
+                slot.Add(header);
+
+                // ── Content (visible only if expanded) ──
+                bool isExpanded = _expandedSlotIndex == i;
+
+                if (scout.completed == 1)
+                {
+                    if (isExpanded)
+                    {
+                        var content = BuildCompletedScoutContent(player, scout);
+                        slot.Add(content);
+                    }
+                }
+                else
+                {
+                    // Timer
                     var timerLbl = new Label();
                     timerLbl.AddToClassList("scout-slot-timer");
                     int remaining = scout.end_day - (_season?.current_game_day ?? 0);
-                    if (remaining < 0) remaining = 0;
-                    timerLbl.text = $"Ojeando... {remaining} d\u00eda{(remaining != 1 ? "s" : "")} restante{(remaining != 1 ? "s" : "")}";
-                    slot.Add(timerLbl);
-                }
-
-                // Remove button
-                {
-                    var removeBtn = new Button();
-                    removeBtn.AddToClassList("btn-fire");
-                    removeBtn.text = "RETIRAR";
-                    var captured = scout;
-                    removeBtn.RegisterCallback<ClickEvent>(_ =>
+                    if (remaining <= 0)
                     {
-                        PlayClick();
-                        DatabaseManager.Instance.DeleteScout(captured.id);
-                        _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
-                        Refresh();
-                    });
-                    if (CursorManager.Instance != null)
-                        CursorManager.Instance.RegisterHandCursor(removeBtn);
-                    slot.Add(removeBtn);
+                        timerLbl.AddToClassList("scout-slot-ready");
+                        timerLbl.text = "✓ ¡Disponible!";
+                    }
+                    else
+                    {
+                        timerLbl.text = $"Ojeando... {remaining} día{(remaining != 1 ? "s" : "")} restante{(remaining != 1 ? "s" : "")}";
+                    }
+                    slot.Add(timerLbl);
+
+                    // Remove button (always visible while scouting)
+                    if (isExpanded)
+                    {
+                        var removeBtn = new Button();
+                        removeBtn.AddToClassList("scout-card-remove-btn");
+                        removeBtn.style.marginTop = 8;
+                        removeBtn.text = "RETIRAR";
+                        var captured = scout;
+                        removeBtn.RegisterCallback<ClickEvent>(_ =>
+                        {
+                            PlayClick();
+                            DatabaseManager.Instance.DeleteScout(captured.id);
+                            _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
+                            if (_expandedSlotIndex == slotIndex) _expandedSlotIndex = -1;
+                            Refresh();
+                        });
+                        if (CursorManager.Instance != null)
+                            CursorManager.Instance.RegisterHandCursor(removeBtn);
+                        slot.Add(removeBtn);
+                    }
                 }
             }
 
@@ -777,12 +783,109 @@ public class CarteraController : MonoBehaviour
         }
     }
 
-    void AddAttr(VisualElement parent, string label, string value)
+    VisualElement BuildCompletedScoutContent(PlayerData p, ScoutData scout)
     {
-        var row = new Label();
-        row.AddToClassList("scout-attr");
-        row.text = $"<color=#7a8aaa>{label}:</color> <color=#d0d8e8>{value}</color>";
-        parent.Add(row);
+        var content = new VisualElement();
+        content.AddToClassList("scout-slot-content");
+
+        // Top row: photo + attributes
+        var topRow = new VisualElement();
+        topRow.AddToClassList("scout-card-top");
+
+        // Photo
+        var photo = new VisualElement();
+        photo.AddToClassList("scout-player-photo");
+        Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (tex != null)
+            photo.style.backgroundImage = new StyleBackground(tex);
+        topRow.Add(photo);
+
+        // Attributes
+        var attrCol = new VisualElement();
+        attrCol.AddToClassList("scout-attr-column");
+
+        var attrs = new[]
+        {
+            ("Tiro", p.shooting),
+            ("Triple", p.three_point),
+            ("Pase", p.passing),
+            ("Bote", p.dribbling),
+            ("Defensa", p.defense),
+            ("Rebote", p.rebounding),
+            ("Velocidad", p.speed),
+            ("Atletismo", p.athleticism),
+            ("IQ", p.iq),
+            ("Robos", p.steals),
+            ("Tapones", p.blocks),
+        };
+
+        foreach (var (label, val) in attrs)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("scout-attr-row");
+
+            var lbl = new Label();
+            lbl.AddToClassList("scout-attr-label");
+            lbl.text = label;
+
+            var barBg = new VisualElement();
+            barBg.AddToClassList("scout-attr-bar-bg");
+
+            var barFill = new VisualElement();
+            barFill.AddToClassList("scout-attr-bar-fill");
+            if (val < 50) barFill.AddToClassList("scout-attr-bar-fill--low");
+            else if (val < 70) barFill.AddToClassList("scout-attr-bar-fill--mid");
+
+            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
+            barBg.Add(barFill);
+
+            var valLbl = new Label();
+            valLbl.AddToClassList("scout-attr-val");
+            valLbl.text = val.ToString();
+
+            row.Add(lbl);
+            row.Add(barBg);
+            row.Add(valLbl);
+            attrCol.Add(row);
+        }
+
+        topRow.Add(attrCol);
+        content.Add(topRow);
+
+        // Bottom row: salary + contract + button
+        var bottomRow = new VisualElement();
+        bottomRow.AddToClassList("scout-card-bottom");
+
+        var salaryLbl = new Label();
+        salaryLbl.AddToClassList("scout-card-salary");
+        salaryLbl.text = $"Salario: {FormatSalary(p.salary)}";
+        bottomRow.Add(salaryLbl);
+
+        var contractLbl = new Label();
+        contractLbl.AddToClassList("scout-card-contract");
+        string yearPlural = p.contract_years != 1 ? "s" : "";
+        contractLbl.text = $"{p.contract_years} año{yearPlural}";
+        bottomRow.Add(contractLbl);
+
+        var removeBtn = new Button();
+        removeBtn.AddToClassList("scout-card-remove-btn");
+        removeBtn.text = "RETIRAR";
+        var captured = scout;
+        removeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            DatabaseManager.Instance.DeleteScout(captured.id);
+            _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
+            _expandedSlotIndex = -1;
+            Refresh();
+        });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(removeBtn);
+        bottomRow.Add(removeBtn);
+
+        content.Add(bottomRow);
+
+        return content;
     }
 
     int GetScoutDays(int reputation)

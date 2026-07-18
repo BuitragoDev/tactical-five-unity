@@ -210,6 +210,171 @@
     padding: 14px;
     margin-bottom: 8px;
 }
+
+.scout-slot-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+    cursor: pointer;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(208, 216, 232);
+    -unity-text-transform: upper;
+}
+
+.scout-slot-header:hover {
+    opacity: 0.8;
+}
+
+.scout-slot-header-arrow {
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    margin-right: 8px;
+    width: 16px;
+    -unity-text-align: middle-center;
+}
+
+.scout-slot-header-name {
+    font-size: 24px;
+    color: rgb(208, 216, 232);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    -unity-text-transform: upper;
+    flex: 1;
+}
+
+.scout-slot-header-pos {
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    margin-left: 8px;
+}
+
+.scout-slot-header-age {
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    margin-left: 8px;
+}
+
+.scout-slot-content {
+    flex-direction: column;
+}
+
+/* Photo + Attributes row */
+.scout-card-top {
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+.scout-player-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    background-color: rgb(28, 33, 48);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    margin-right: 14px;
+}
+
+.scout-attr-column {
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.scout-attr-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.scout-attr-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
+    width: 75px;
+    flex-shrink: 0;
+    -unity-text-align: middle-left;
+}
+
+.scout-attr-bar-bg {
+    flex-grow: 1;
+    height: 7px;
+    background-color: rgb(28, 33, 48);
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 0 6px;
+}
+
+.scout-attr-bar-fill {
+    height: 7px;
+    border-radius: 3px;
+    background-color: rgb(39, 174, 96);
+}
+
+.scout-attr-bar-fill--mid {
+    background-color: rgb(212, 160, 23);
+}
+
+.scout-attr-bar-fill--low {
+    background-color: rgb(192, 57, 43);
+}
+
+.scout-attr-val {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(208, 216, 232);
+    width: 28px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+/* Bottom row: salary + contract + remove */
+.scout-card-bottom {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
+}
+
+.scout-card-salary {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    flex: 1;
+}
+
+.scout-card-contract {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    flex: 1;
+    -unity-text-align: middle-center;
+}
+
+.scout-card-remove-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgb(116, 34, 24);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 6px 16px;
+    -unity-text-align: middle-center;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.scout-card-remove-btn:hover {
+    background-color: rgb(90, 19, 11);
+}
+
 .scout-slot--completed {
     border-color: rgb(39, 174, 96);
 }
@@ -221,36 +386,6 @@
     opacity: 0.5;
 }
 
-.scout-slot-header {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.scout-slot-name {
-    font-size: 24px;
-    color: rgb(208, 216, 232);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    -unity-text-transform: upper;
-    flex: 1;
-}
-
-.scout-slot-pos {
-    font-size: 18px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    margin-left: 8px;
-    width: 30px;
-    -unity-text-align: middle-center;
-}
-
-.scout-slot-age {
-    font-size: 18px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    margin-left: 8px;
-}
-
 .scout-slot-timer {
     font-size: 18px;
     color: rgb(212, 160, 23);
@@ -259,38 +394,13 @@
     margin-top: 4px;
 }
 
-.scout-slot-attributes {
-    flex-direction: row;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-
-.scout-attr {
+/* Scout finished but not yet processed */
+.scout-slot-ready {
     font-size: 18px;
-    color: rgb(160, 170, 190);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    width: 15%;
-    margin-bottom: 2px;
-    min-width: 0;
-}
-.scout-attr-label {
-    color: rgb(122, 138, 170);
-}
-.scout-attr-val {
-    color: rgb(208, 216, 232);
+    color: rgb(39, 174, 96);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-}
-
-.scout-slot-salary {
-    font-size: 18px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-}
-
-.scout-slot-contract {
-    font-size: 16px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    letter-spacing: 1px;
+    margin-top: 4px;
 }
 
 .scout-empty-text {
