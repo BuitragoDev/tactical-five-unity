@@ -151,6 +151,7 @@ public class DashboardController : MonoBehaviour
         CheckBudgetWarning();
         ProcessMaturedOffers();
         ShowPendingRecoveryModal();
+        CheckTradeDeadlineModal();
     }
 
     void Update()
@@ -967,6 +968,7 @@ public class DashboardController : MonoBehaviour
                     date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     is_read = 0
                 });
+                ShowTradeDeadlineModal();
             }
         }
         DatabaseManager.Instance.UpdateSeason(_season);
@@ -1635,6 +1637,69 @@ public class DashboardController : MonoBehaviour
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(goBtn);
+            CursorManager.Instance.RegisterHandCursor(closeBtn);
+        }
+    }
+
+    void CheckTradeDeadlineModal()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return;
+        if (date.Month == 2 && date.Day == 1 && date.Year == _season.year_end)
+            ShowTradeDeadlineModal();
+    }
+
+    void ShowTradeDeadlineModal()
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--warning");
+        _firedOverlay.Add(box);
+
+        var title = new Label("CIERRE DE MERCADO");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fired-modal-title--warning");
+        box.Add(title);
+
+        var text = new Label("El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.");
+        text.AddToClassList("fired-modal-text");
+        box.Add(text);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        var marketBtn = new Button();
+        marketBtn.text = "IR AL MERCADO";
+        marketBtn.AddToClassList("injured-modal-btn");
+        marketBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.style.borderColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            ScreenManager.Instance.GoTo(GameScreen.Market);
+        });
+        btnGroup.Add(marketBtn);
+
+        var closeBtn = new Button();
+        closeBtn.text = "CERRAR";
+        closeBtn.AddToClassList("injured-modal-btn");
+        closeBtn.style.marginLeft = 8;
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(closeBtn);
+
+        box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(marketBtn);
             CursorManager.Instance.RegisterHandCursor(closeBtn);
         }
     }
