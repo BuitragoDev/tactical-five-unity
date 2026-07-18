@@ -337,10 +337,14 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(120, 130, 150);
+    white-space: nowrap;
 }
 
 .upgrade-card-cost--discounted {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
     color: rgb(39, 174, 96);
+    white-space: nowrap;
 }
 
 .upgrade-card-duration {
