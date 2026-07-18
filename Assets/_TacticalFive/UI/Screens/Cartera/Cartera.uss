@@ -157,7 +157,7 @@
     font-size: 18px;
     color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    width: 30px;
+    width: 60px;
     -unity-text-align: middle-center;
     margin-right: 10px;
 }
@@ -269,7 +269,7 @@
 .scout-player-photo {
     width: 120px;
     height: 120px;
-    border-radius: 8px;
+    border-radius: 64px;
     background-color: rgb(200, 200, 200);
     background-size: cover;
     background-position: center;
@@ -291,7 +291,7 @@
 
 .scout-attr-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
@@ -325,7 +325,7 @@
 
 .scout-attr-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     width: 28px;
     -unity-text-align: middle-right;

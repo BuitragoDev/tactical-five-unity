@@ -626,7 +626,8 @@ public class CarteraController : MonoBehaviour
         if (_scouts.Count >= MAX_SCOUTS) return;
 
         int scoutDays = GetScoutDays(_ojeador.reputation);
-        int endDay = _season.current_game_day + scoutDays;
+        int endDay = _season.current_game_day + scoutDays - 1;
+        if (endDay < _season.current_game_day) endDay = _season.current_game_day;
 
         int slot = 0;
         for (int i = 0; i < MAX_SCOUTS; i++)
@@ -719,6 +720,19 @@ public class CarteraController : MonoBehaviour
                 ageLbl.text = $"{player.age} años";
                 header.Add(ageLbl);
 
+                // MED
+                int med = player.GetCalculatedAverage();
+                var medLbl = new Label();
+                medLbl.AddToClassList("player-row-ovr");
+                medLbl.text = $"{med} MED";
+                if (med > 84)
+                    medLbl.AddToClassList("player-ovr--high");
+                else if (med >= 70)
+                    medLbl.AddToClassList("player-ovr--mid");
+                else
+                    medLbl.AddToClassList("player-ovr--low");
+                header.Add(medLbl);
+
                 int slotIndex = i;
                 header.RegisterCallback<ClickEvent>(_ =>
                 {
@@ -730,8 +744,9 @@ public class CarteraController : MonoBehaviour
 
                 // ── Content (visible only if expanded) ──
                 bool isExpanded = _expandedSlotIndex == i;
+                bool isReady = scout.completed == 1 || (scout.end_day <= (_season?.current_game_day ?? 0));
 
-                if (scout.completed == 1)
+                if (isReady)
                 {
                     if (isExpanded)
                     {
@@ -745,18 +760,9 @@ public class CarteraController : MonoBehaviour
                     var timerLbl = new Label();
                     timerLbl.AddToClassList("scout-slot-timer");
                     int remaining = scout.end_day - (_season?.current_game_day ?? 0);
-                    if (remaining <= 0)
-                    {
-                        timerLbl.AddToClassList("scout-slot-ready");
-                        timerLbl.text = "✓ ¡Disponible!";
-                    }
-                    else
-                    {
-                        timerLbl.text = $"Ojeando... {remaining} día{(remaining != 1 ? "s" : "")} restante{(remaining != 1 ? "s" : "")}";
-                    }
+                    timerLbl.text = $"Ojeando... {remaining} día{(remaining != 1 ? "s" : "")} restante{(remaining != 1 ? "s" : "")}";
                     slot.Add(timerLbl);
 
-                    // Remove button (always visible while scouting)
                     if (isExpanded)
                     {
                         var removeBtn = new Button();
@@ -856,16 +862,11 @@ public class CarteraController : MonoBehaviour
         var bottomRow = new VisualElement();
         bottomRow.AddToClassList("scout-card-bottom");
 
-        var salaryLbl = new Label();
-        salaryLbl.AddToClassList("scout-card-salary");
-        salaryLbl.text = $"Salario anual: {FormatSalary(p.salary)}";
-        bottomRow.Add(salaryLbl);
-
-        var contractLbl = new Label();
-        contractLbl.AddToClassList("scout-card-contract");
         string yearPlural = p.contract_years != 1 ? "s" : "";
-        contractLbl.text = $"Contrato restante: {p.contract_years} año{yearPlural}";
-        bottomRow.Add(contractLbl);
+        var infoLbl = new Label();
+        infoLbl.AddToClassList("scout-card-salary");
+        infoLbl.text = $"Salario anual: {FormatSalary(p.salary)} | Contrato restante: {p.contract_years} año{yearPlural}";
+        bottomRow.Add(infoLbl);
 
         var removeBtn = new Button();
         removeBtn.AddToClassList("scout-card-remove-btn");
