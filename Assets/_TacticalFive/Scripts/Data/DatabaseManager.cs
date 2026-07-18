@@ -4240,6 +4240,12 @@ public class DatabaseManager : MonoBehaviour
         var remaining = _db.Table<PlayerData>().ToList();
         foreach (var p in remaining)
         {
+            if (p.is_rookie == 1)
+            {
+                _db.Update(p);
+                continue;
+            }
+
             p.age += 1;
 
             // Base change by age group
