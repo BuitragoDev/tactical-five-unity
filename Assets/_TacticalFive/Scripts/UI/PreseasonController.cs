@@ -450,11 +450,13 @@ public class PreseasonController : MonoBehaviour
                 ScreenManager.Instance.CurrentMode == GameMode.ProManager
                     ? "promanager" : "manager"
             );
-            season.current_date = _games.Count > 0
-                ? _games.OrderBy(g => g.game_day).First().game_date
-                : $"{season.year_start}-10-22";
-            DatabaseManager.Instance.UpdateSeason(season);
         }
+
+        // Set current_date to first game (preseason or regular)
+        season.current_date = _games.Count > 0
+            ? _games.OrderBy(g => g.game_day).First().game_date
+            : $"{season.year_start}-10-22";
+        DatabaseManager.Instance.UpdateSeason(season);
 
         // 2. Guardar amistosos si los hay
         if (_games.Count > 0)
