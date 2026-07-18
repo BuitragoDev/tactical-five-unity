@@ -654,7 +654,8 @@ public class ArenaController : MonoBehaviour
         {
             manager_id = _manager.id,
             title = $"Remodelación iniciada: {info.name}",
-            body = $"Se ha iniciado la remodelación \"{info.name}\". Duración: {info.durationWeeks} semanas. Finalizará el día {endDay}.",
+            var endDate = System.DateTime.Parse($"{_season.year_start}-10-22").AddDays(endDay - 1);
+            body = $"Se ha iniciado la remodelación \"{info.name}\". Duración: {info.durationWeeks} semanas. Finalizará el {endDate:dd/MM/yyyy}.",
             game_day = currentDay,
             game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(currentDay - 1).ToString("yyyy-MM-dd"),
             is_read = 0
