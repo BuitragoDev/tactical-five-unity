@@ -715,10 +715,26 @@ public class CarteraController : MonoBehaviour
                     header.Add(posLbl);
                 }
 
+                var sep1 = new Label();
+                sep1.text = " - ";
+                sep1.style.color = Color.white;
+                sep1.style.fontSize = 18;
+                sep1.style.marginLeft = 4;
+                sep1.style.marginRight = 4;
+                header.Add(sep1);
+
                 var ageLbl = new Label();
                 ageLbl.AddToClassList("scout-slot-header-age");
                 ageLbl.text = $"{player.age} años";
                 header.Add(ageLbl);
+
+                var sep2 = new Label();
+                sep2.text = " - ";
+                sep2.style.color = Color.white;
+                sep2.style.fontSize = 18;
+                sep2.style.marginLeft = 4;
+                sep2.style.marginRight = 4;
+                header.Add(sep2);
 
                 // MED
                 int med = player.GetCalculatedAverage();
@@ -865,7 +881,7 @@ public class CarteraController : MonoBehaviour
         string yearPlural = p.contract_years != 1 ? "s" : "";
         var infoLbl = new Label();
         infoLbl.AddToClassList("scout-card-salary");
-        infoLbl.text = $"Salario anual: {FormatSalary(p.salary)} | Contrato restante: {p.contract_years} año{yearPlural}";
+        infoLbl.text = $"Salario anual: {FormatSalary(p.salary)}    |    Contrato restante: {p.contract_years} año{yearPlural}";
         bottomRow.Add(infoLbl);
 
         var removeBtn = new Button();
