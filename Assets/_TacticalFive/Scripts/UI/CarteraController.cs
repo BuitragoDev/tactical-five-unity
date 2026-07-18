@@ -858,13 +858,13 @@ public class CarteraController : MonoBehaviour
 
         var salaryLbl = new Label();
         salaryLbl.AddToClassList("scout-card-salary");
-        salaryLbl.text = $"Salario: {FormatSalary(p.salary)}";
+        salaryLbl.text = $"Salario anual: {FormatSalary(p.salary)}";
         bottomRow.Add(salaryLbl);
 
         var contractLbl = new Label();
         contractLbl.AddToClassList("scout-card-contract");
         string yearPlural = p.contract_years != 1 ? "s" : "";
-        contractLbl.text = $"{p.contract_years} año{yearPlural}";
+        contractLbl.text = $"Contrato restante: {p.contract_years} año{yearPlural}";
         bottomRow.Add(contractLbl);
 
         var removeBtn = new Button();
@@ -903,7 +903,7 @@ public class CarteraController : MonoBehaviour
 
     string FormatSalary(long amount)
     {
-        return "$" + amount.ToString("N0").Replace(',', '.');
+        return amount.ToString("N0").Replace(',', '.') + " $";
     }
 
     VisualElement _scoutFullOverlay;
