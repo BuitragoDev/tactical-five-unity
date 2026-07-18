@@ -336,7 +336,7 @@
 .upgrade-card-cost {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
-    color: rgb(208, 216, 232);
+    color: rgb(120, 130, 150);
 }
 
 .upgrade-card-cost--discounted {
