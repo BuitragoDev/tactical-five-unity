@@ -650,6 +650,7 @@ public class ArenaController : MonoBehaviour
         DatabaseManager.Instance.UpdateTeam(_myTeam);
 
         // Message
+        var nowStr = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         var endDate = System.DateTime.Parse($"{_season.year_start}-10-22").AddDays(endDay - 1);
         DatabaseManager.Instance.AddMessage(new MessageData
         {
@@ -658,6 +659,8 @@ public class ArenaController : MonoBehaviour
             body = $"Se ha iniciado la remodelación \"{info.name}\". Duración: {info.durationWeeks} semanas. Finalizará el {endDate:dd/MM/yyyy}.",
             game_day = currentDay,
             game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(currentDay - 1).ToString("yyyy-MM-dd"),
+            created_at = nowStr,
+            date_sent = nowStr,
             is_read = 0
         });
 
