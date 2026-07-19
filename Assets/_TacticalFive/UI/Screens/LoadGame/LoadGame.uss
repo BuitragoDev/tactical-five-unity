@@ -109,9 +109,9 @@
 
 .slots-area {
     flex-shrink: 0;
-    height: 720px;
-    min-height: 720px;
-    max-height: 720px;
+    height: 760px;
+    min-height: 760px;
+    max-height: 760px;
     width: 100%;
     max-width: 980px;
     align-self: center;

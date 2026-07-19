@@ -179,8 +179,8 @@
 /* ══ TRANSFER BUTTON ══ */
 
 .slot-transfer-btn {
-    width: 28px;
-    height: 28px;
+    width: 48px;
+    height: 48px;
     padding: 4px 4px;
     background-color: rgb(42, 95, 201);
     border-radius: 4px;
@@ -189,7 +189,7 @@
     align-self: center;
     margin-left: auto;
     margin-right: 4px;
-    background-size: 24px 24px;
+    background-size: 32px 32px;
     background-position: center;
     background-repeat: no-repeat;
 }
@@ -233,15 +233,15 @@
 }
 
 .player-card-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 16px;
-    background-color: rgb(42, 95, 201);
+    width: 52px;
+    height: 52px;
+    border-radius: 26px;
+    background-color: rgb(200, 200, 200);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
     margin-right: 8px;
-    margin-top: 6px;
+    margin-top: 8px;
 }
 
 .player-card-info {
@@ -507,4 +507,3 @@
     color: rgb(85, 102, 119);
     -unity-text-align: middle-center;
 }
-

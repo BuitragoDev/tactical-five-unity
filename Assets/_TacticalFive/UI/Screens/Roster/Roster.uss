@@ -270,7 +270,7 @@
     width: 72px;
     height: 72px;
     border-radius: 36px;
-    background-color: rgb(42, 95, 201);
+    background-color: rgb(200, 200, 200);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;

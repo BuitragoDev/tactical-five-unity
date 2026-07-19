@@ -43,7 +43,7 @@ public static class PlayerPhotoHelper
 
     public static void CreateRookiePhoto(int playerId)
     {
-        int idx = Random.Range(1, 11);
+        int idx = Random.Range(1, 101);
         Texture2D src = Resources.Load<Texture2D>($"PlayerPhotos/Default/default{idx}");
         if (src == null) return;
 

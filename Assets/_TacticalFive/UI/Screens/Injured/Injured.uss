@@ -314,7 +314,7 @@
 
 .btn-modal-ok {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 51, 71);
+    background-color: rgb(42, 95, 201);
     border-width: 0;
     color: rgb(179, 190, 214);
     font-size: 18px;
@@ -324,7 +324,7 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-ok:hover {
-    background-color: rgb(58, 74, 99);
+    background-color: rgb(52, 115, 231);
 }
 
 /* ── LEAGUE INJURED BUTTON ── */
