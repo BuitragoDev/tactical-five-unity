@@ -78,7 +78,7 @@ public static class GameSimulator
 
         homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus), 0, 99);
         awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus), 0, 99);
-        float pace = Mathf.Clamp(98 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f), 92, 104);
+        float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f), 95, 107);
 
         var quarters = new List<(int, int)>();
         int homeTotal = 0, awayTotal = 0;
@@ -313,7 +313,7 @@ public static class GameSimulator
         var off = offIds.Select(i => offAll[i]).ToList();
         var def = defIds.Select(i => defAll[i]).ToList();
 
-        float toPct = 0.13f + (defR - offR) * 0.0003f;
+        float toPct = 0.11f + (defR - offR) * 0.0003f;
         if (UnityEngine.Random.value < toPct)
         {
             DoTO(off, def);
@@ -329,8 +329,8 @@ public static class GameSimulator
 
         if (shot == "3")
         {
-            float basePct = 0.35f + (shooter.three_point - 70) * 0.004f;
-            float pct = Mathf.Clamp(basePct - di, 0.28f, 0.47f);
+            float basePct = 0.35f + (shooter.three_point - 70) * 0.005f;
+            float pct = Mathf.Clamp(basePct - di, 0.28f, 0.51f);
             shooter.fg3a++; shooter.fga++;
             if (UnityEngine.Random.value < pct)
             {
@@ -341,8 +341,8 @@ public static class GameSimulator
             return MissHandler(def, off, shooter, true);
         }
 
-        float base2Pct = 0.50f + (shooter.shooting - 70) * 0.004f;
-        float pct2 = Mathf.Clamp(base2Pct - di * 0.4f, 0.40f, 0.62f);
+        float base2Pct = 0.50f + (shooter.shooting - 70) * 0.005f;
+        float pct2 = Mathf.Clamp(base2Pct - di * 0.25f, 0.40f, 0.67f);
         shooter.fga++;
         if (UnityEngine.Random.value < pct2)
         {
@@ -401,7 +401,7 @@ public static class GameSimulator
     static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court)
     {
         if (court.Count == 0) return null;
-        var weights = court.Select(p => Mathf.Pow(p.overall / 100f, 1.3f)).ToList();
+        var weights = court.Select(p => Mathf.Pow(p.overall / 100f, 2.2f)).ToList();
         float total = weights.Sum();
         if (total <= 0) return court[UnityEngine.Random.Range(0, court.Count)];
         float r = UnityEngine.Random.value * total;
@@ -418,11 +418,11 @@ public static class GameSimulator
     {
         float base3pt = p.position switch
         {
-            "PG" => 0.36f,
-            "SG" => 0.42f,
-            "SF" => 0.35f,
-            "PF" => 0.30f,
-            "C" => 0.14f,
+            "PG" => 0.40f,
+            "SG" => 0.46f,
+            "SF" => 0.38f,
+            "PF" => 0.33f,
+            "C" => 0.18f,
             _ => 0.30f
         };
         float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f, 0.10f, 0.55f);
@@ -516,10 +516,10 @@ public static class GameSimulator
         int n = Mathf.Min(UnityEngine.Random.value < 0.5f ? 2 : 3, on.Count);
         if (n == 0) return on;
 
-        // 60% skill-based: bench worst players (highest index = lowest OVR),
+        // 75% skill-based: bench worst players (highest index = lowest OVR),
         // bring in best bench players (lowest index = highest OVR)
-        // 40% random
-        if (UnityEngine.Random.value < 0.6f)
+        // 25% random
+        if (UnityEngine.Random.value < 0.75f)
         {
             var outList = on.OrderByDescending(i => i).Take(n).ToList();
             var newSet = new HashSet<int>(on.Except(outList));
