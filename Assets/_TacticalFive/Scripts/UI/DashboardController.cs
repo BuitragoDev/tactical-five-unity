@@ -3341,50 +3341,80 @@ public class DashboardController : MonoBehaviour
         int[] payrollDays = { 1, 31, 61, 91, 121, 151, 181 };
         if (!payrollDays.Contains(gameDay)) return;
 
-        // Check if already paid this cycle
-        var existingPayroll = DatabaseManager.Instance.GetFinanceRecord(_myTeam.id, _season.id, FinanceRecord.TYPE_SALARIES, gameDay);
-        if (existingPayroll != null) return;
-
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        long monthlyPayroll = players.Sum(p => p.salary) / 12; // Monthly = annual / 12
 
-        _myTeam.budget -= monthlyPayroll;
-        DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
-
-        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+        // Player monthly salaries (only if not already paid this cycle)
+        var existingPayroll = DatabaseManager.Instance.GetFinanceRecord(_myTeam.id, _season.id, FinanceRecord.TYPE_SALARIES, gameDay);
+        if (existingPayroll == null)
         {
-            team_id = _myTeam.id,
-            season_id = _season.id,
-            record_type = FinanceRecord.TYPE_SALARIES,
-            game_day = gameDay,
-            amount = monthlyPayroll
-        });
+            long monthlyPayroll = players.Sum(p => p.salary) / 12;
 
-        // Employee monthly salaries
-        var existingEmployeePayroll = DatabaseManager.Instance.GetFinanceRecord(
-            _myTeam.id, _season.id, FinanceRecord.TYPE_EMPLOYEE_SALARY, gameDay);
-        if (existingEmployeePayroll == null)
-        {
-            var employees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-            long monthlyEmployeePayroll = employees.Sum(e => e.salary) / 12;
+            _myTeam.budget -= monthlyPayroll;
+            DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
 
-            if (monthlyEmployeePayroll > 0)
+            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
             {
-                _myTeam.budget -= monthlyEmployeePayroll;
-                DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+                team_id = _myTeam.id,
+                season_id = _season.id,
+                record_type = FinanceRecord.TYPE_SALARIES,
+                game_day = gameDay,
+                amount = monthlyPayroll
+            });
 
-                DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+            // Employee monthly salaries
+            var existingEmployeePayroll = DatabaseManager.Instance.GetFinanceRecord(
+                _myTeam.id, _season.id, FinanceRecord.TYPE_EMPLOYEE_SALARY, gameDay);
+            if (existingEmployeePayroll == null)
+            {
+                var employees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
+                long monthlyEmployeePayroll = employees.Sum(e => e.salary) / 12;
+
+                if (monthlyEmployeePayroll > 0)
                 {
-                    team_id = _myTeam.id,
-                    season_id = _season.id,
-                    record_type = FinanceRecord.TYPE_EMPLOYEE_SALARY,
+                    _myTeam.budget -= monthlyEmployeePayroll;
+                    DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+
+                    DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+                    {
+                        team_id = _myTeam.id,
+                        season_id = _season.id,
+                        record_type = FinanceRecord.TYPE_EMPLOYEE_SALARY,
+                        game_day = gameDay,
+                        amount = monthlyEmployeePayroll
+                    });
+                }
+            }
+
+            // Payroll message
+            try
+            {
+                string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                var gameDate = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1);
+                string monthName = gameDate.ToString("MMMM", new System.Globalization.CultureInfo("es-ES"));
+                monthName = char.ToUpper(monthName[0]) + monthName.Substring(1);
+
+                var msg = new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 1,
+                    sender_id = 0,
+                    title = "Pago de n\u00f3minas",
+                    body = $"Se han pagado las n\u00f3minas del mes de {monthName} por un total de ${monthlyPayroll:N0}.",
                     game_day = gameDay,
-                    amount = monthlyEmployeePayroll
-                });
+                    game_date = gameDate.ToString("yyyy-MM-dd"),
+                    created_at = now,
+                    date_sent = now,
+                    is_read = 0
+                };
+                DatabaseManager.Instance.AddMessage(msg);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[Payroll] Error creating message: {ex.Message}\n{ex.StackTrace}");
             }
         }
 
-        // Luxury tax mensual
+        // Luxury tax mensual (siempre se evalúa)
         var existingTax = DatabaseManager.Instance.GetFinanceRecord(_myTeam.id, _season.id, FinanceRecord.TYPE_TAX, gameDay);
         if (existingTax == null)
         {
@@ -3409,32 +3439,6 @@ public class DashboardController : MonoBehaviour
             }
         }
 
-        try
-        {
-            string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            var gameDate = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1);
-            string monthName = gameDate.ToString("MMMM", new System.Globalization.CultureInfo("es-ES"));
-            monthName = char.ToUpper(monthName[0]) + monthName.Substring(1);
-
-            var msg = new MessageData
-            {
-                manager_id = _manager.id,
-                sender_type = 1,
-                sender_id = 0,
-                title = "Pago de nóminas",
-                body = $"Se han pagado las nóminas del mes de {monthName} por un total de ${monthlyPayroll:N0}.",
-                game_day = gameDay,
-                game_date = gameDate.ToString("yyyy-MM-dd"),
-                created_at = now,
-                date_sent = now,
-                is_read = 0
-            };
-            DatabaseManager.Instance.AddMessage(msg);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[Payroll] Error creating message: {ex.Message}\n{ex.StackTrace}");
-        }
     }
 
     void ProcessSubscriptionRevenue(int gameDay)
