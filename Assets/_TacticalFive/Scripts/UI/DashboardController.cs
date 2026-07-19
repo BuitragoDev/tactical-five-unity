@@ -1166,12 +1166,12 @@ public class DashboardController : MonoBehaviour
                         else if (totalPayroll <= TradeHelper.FIRST_APRON)
                         {
                             offerLegal = offer.offer_salary <= TradeHelper.NT_MLE;
-                            illegalReason = $"supera NT-MLE (${TradeHelper.NT_MLE:N0})";
+                            illegalReason = $"supera Mid-Level Exception (No Taxpayer) (${TradeHelper.NT_MLE:N0})";
                         }
                         else if (totalPayroll <= TradeHelper.SECOND_APRON)
                         {
                             offerLegal = offer.offer_salary <= TradeHelper.T_MLE;
-                            illegalReason = $"supera T-MLE (${TradeHelper.T_MLE:N0})";
+                            illegalReason = $"supera Mid-Level Exception (Taxpayer) (${TradeHelper.T_MLE:N0})";
                         }
                         else
                         {
@@ -1248,7 +1248,7 @@ public class DashboardController : MonoBehaviour
                     {
                         _myTeam.first_apron_hard_capped = 1;
                         DatabaseManager.Instance.UpdateTeam(_myTeam);
-                        string hardCapMsg = $"El fichaje de {playerName} se ha realizado usando la NT-MLE. Tu equipo queda sujeto al hard cap del primer apron (${TradeHelper.FIRST_APRON:N0}).";
+                        string hardCapMsg = $"El fichaje de {playerName} se ha realizado usando la Mid-Level Exception (No Taxpayer). Tu equipo queda sujeto al hard cap del primer apron (${TradeHelper.FIRST_APRON:N0}).";
                         resultSummary += $"\n⚠ {hardCapMsg}\n";
                         DatabaseManager.Instance.AddMessage(new MessageData
                         {

@@ -356,7 +356,7 @@
 }
 
 .chart-month-value {
-    width: 90px;
+    width: 130px;
     margin: 0 10px;
     margin-bottom: 6px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");

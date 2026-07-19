@@ -51,11 +51,6 @@ public class FinancesController : MonoBehaviour
     readonly int[] _ticketPrices = { 30, 50, 70, 100, 150, 200, 250, 300, 500 };
     readonly int[] _subscriptionPrices = { 1000, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300 };
 
-    readonly string[] _monthNames = { "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio" };
-    readonly (int start, int end)[] _monthRanges = {
-        (1, 9), (10, 39), (40, 69), (70, 99), (100, 127),
-        (128, 157), (158, 187), (188, 217), (218, 247), (248, 277)
-    };
     // Config modal
     private VisualElement _configModalOverlay;
     private VisualElement _configModalBox;
@@ -390,22 +385,22 @@ public class FinancesController : MonoBehaviour
         if (_myTeam == null || _season == null) return;
 
         // Budget
-        _summaryBudget.text = $"${_myTeam.budget:N0}";
+        _summaryBudget.text = FormatMoney(_myTeam.budget);
 
         // Annual payroll
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long annualPayroll = players.Sum(p => p.salary);
-        _summaryAnnualPayroll.text = $"${annualPayroll:N0}";
+        _summaryAnnualPayroll.text = FormatMoney(annualPayroll);
 
         // Monthly payroll
         long monthlyPayroll = annualPayroll / 12;
-        _summaryMonthlyPayroll.text = $"${monthlyPayroll:N0}";
+        _summaryMonthlyPayroll.text = FormatMoney(monthlyPayroll);
 
         // Net balance
         long income = DatabaseManager.Instance.GetTotalIncome(_myTeam.id, _season.id);
         long expenses = DatabaseManager.Instance.GetTotalExpenses(_myTeam.id, _season.id);
         long net = income - expenses;
-        _summaryNetBalance.text = net >= 0 ? $"${net:N0}" : $"-${Mathf.Abs((int)net):N0}";
+        _summaryNetBalance.text = FormatMoney(net);
         _summaryNetBalance.RemoveFromClassList("finance-summary-value--income");
         _summaryNetBalance.RemoveFromClassList("finance-summary-value--expense");
         _summaryNetBalance.AddToClassList(net >= 0 ? "finance-summary-value--income" : "finance-summary-value--expense");
@@ -469,7 +464,7 @@ public class FinancesController : MonoBehaviour
         {
             var btn = new Button();
             btn.AddToClassList("price-btn");
-            btn.text = $"${price}";
+            btn.text = $"{price:N0} $";
             btn.clicked += () => { PlayClick(); SelectTicketPrice(price, btn); };
             _ticketPriceGrid.Add(btn);
             if (CursorManager.Instance != null)
@@ -485,7 +480,7 @@ public class FinancesController : MonoBehaviour
         {
             var btn = new Button();
             btn.AddToClassList("price-btn");
-            btn.text = $"${price:N0}";
+            btn.text = $"{price:N0} $";
             if (campaignClosed)
             {
                 btn.AddToClassList("price-btn--disabled");
@@ -505,7 +500,7 @@ public class FinancesController : MonoBehaviour
                 btn.AddToClassList("price-btn--selected");
                 if (campaignClosed)
                 {
-                    btn.text = "CAMPAÑA CERRADA";
+                    btn.text = "CERRADO";
                 }
             }
         }
@@ -567,7 +562,7 @@ public class FinancesController : MonoBehaviour
         AddTableRow(_incomeTable, "Patrocinios", sponsorTotal, true);
         AddTableRow(_incomeTable, "Televisión", tvTotal, true);
 
-        _totalIncomeValue.text = $"${total:N0}";
+        _totalIncomeValue.text = FormatMoney(total);
     }
 
     /* ═══════════════════════════════════════════
@@ -592,10 +587,10 @@ public class FinancesController : MonoBehaviour
         AddTableRow(_expensesTable, "Sueldos empleados", empSalaryTotal, false);
         AddTableRow(_expensesTable, "Remodelaciones", renovationTotal, false);
         AddTableRow(_expensesTable, "Despidos", dismissalTotal, false);
-        AddTableRow(_expensesTable, "Luxury tax", taxTotal, false);
+        AddTableRow(_expensesTable, "Luxury tax", System.Math.Abs(taxTotal), false);
         AddTableRow(_expensesTable, "Rescisiones (buyout)", buyoutTotal, false);
 
-        _totalExpensesValue.text = $"${total:N0}";
+        _totalExpensesValue.text = FormatMoney(total);
     }
 
     void AddTableRow(VisualElement table, string label, long value, bool isIncome)
@@ -606,7 +601,7 @@ public class FinancesController : MonoBehaviour
         var lbl = new Label(label);
         lbl.AddToClassList("finances-row-label");
 
-        var val = new Label($"${value:N0}");
+        var val = new Label(FormatMoney(value));
         val.AddToClassList("finances-row-value");
         val.AddToClassList(isIncome ? "finances-row-value--income" : "finances-row-value--expense");
 
@@ -619,6 +614,32 @@ public class FinancesController : MonoBehaviour
        CHART PANEL
        ═══════════════════════════════════════════ */
 
+    System.DateTime GetDateForGameDay(int gameDay, bool hasPreseason)
+    {
+        var start = new System.DateTime(_season.year_start, 10, 22);
+        if (gameDay >= 1)
+            return start.AddDays(gameDay - 1);
+        if (gameDay < 0)
+            return start.AddDays(gameDay);
+        return hasPreseason
+            ? new System.DateTime(_season.year_start, 9, 5)
+            : start;
+    }
+
+    int GetMonthIndex(System.DateTime date, bool hasPreseason)
+    {
+        if (hasPreseason)
+        {
+            int idx = (date.Month - 9 + 12) % 12;
+            return idx <= 9 ? idx : -1;
+        }
+        else
+        {
+            int idx = (date.Month - 10 + 12) % 12;
+            return idx <= 9 ? idx : -1;
+        }
+    }
+
     void BuildChartPanel()
     {
         _chartBars.Clear();
@@ -626,33 +647,27 @@ public class FinancesController : MonoBehaviour
 
         if (_season == null) return;
 
-        var monthData = new (long income, long expenses, long balance)[10];
-        for (int i = 0; i < 10; i++)
+        bool hasPreseason = DatabaseManager.Instance.GetAllGames(_manager.id)
+            .Any(g => g.game_type == "preseason");
+
+        string[] monthNames = hasPreseason
+            ? new[] { "Septiembre", "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio" }
+            : new[] { "Octubre", "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio" };
+
+        var totals = new (long inc, long exp)[10];
+        foreach (var r in _financeRecords)
         {
-            int start = _monthRanges[i].start;
-            int end = _monthRanges[i].end;
+            var date = GetDateForGameDay(r.game_day, hasPreseason);
+            int idx = GetMonthIndex(date, hasPreseason);
+            if (idx < 0 || idx >= 10) continue;
 
-            // game_day = 0 counts as October (first month)
-            long inc = _financeRecords
-                .Where(r =>
-                {
-                    int day = r.game_day;
-                    if (day == 0) day = 1; // treat unassigned as day 1 (October)
-                    return day >= start && day <= end && r.record_type <= FinanceRecord.TYPE_TV;
-                })
-                .Sum(r => r.amount);
-
-            long exp = _financeRecords
-                .Where(r =>
-                {
-                    int day = r.game_day;
-                    if (day == 0) day = 1; // treat unassigned as day 1 (October)
-                    return day >= start && day <= end && r.record_type >= FinanceRecord.TYPE_RENOVATION;
-                })
-                .Sum(r => r.amount);
-
-            monthData[i] = (inc, exp, inc - exp);
+            if (r.record_type <= FinanceRecord.TYPE_TV)
+                totals[idx].inc += r.amount;
+            else
+                totals[idx].exp += r.amount;
         }
+
+        var monthData = totals.Select(t => (income: t.inc, expenses: t.exp, balance: t.inc - t.exp)).ToArray();
 
         long maxAbs = 1;
         foreach (var d in monthData)
@@ -665,17 +680,14 @@ public class FinancesController : MonoBehaviour
             float pct = maxAbs > 0 ? Mathf.Abs((float)bal) / maxAbs : 0f;
             int barHeight = Mathf.Max(4, (int)(pct * 220));
 
-            // Bar wrapper
             var wrapper = new VisualElement();
             wrapper.AddToClassList("chart-bar-wrapper");
 
-            // Month value above bar
-            var valueLbl = new Label($"${Mathf.Abs((int)bal):N0}");
+            var valueLbl = new Label(FormatMoney(bal));
             valueLbl.AddToClassList("chart-month-value");
             valueLbl.AddToClassList(isIncome ? "chart-month-value--income" : "chart-month-value--expense");
             wrapper.Add(valueLbl);
 
-            // Bar
             var bar = new VisualElement();
             bar.AddToClassList("chart-bar");
             bar.AddToClassList(isIncome ? "chart-bar--income" : "chart-bar--expense");
@@ -684,8 +696,7 @@ public class FinancesController : MonoBehaviour
 
             _chartBars.Add(wrapper);
 
-            // Month label
-            var monthLbl = new Label(_monthNames[i]);
+            var monthLbl = new Label(monthNames[i]);
             monthLbl.AddToClassList("chart-month-label");
             _chartLabels.Add(monthLbl);
         }
@@ -900,5 +911,10 @@ public class FinancesController : MonoBehaviour
     void PlayClick()
     {
         AudioManager.Instance?.PlaySFX("click");
+    }
+
+    string FormatMoney(long amount)
+    {
+        return System.Math.Abs(amount).ToString("N0").Replace(',', '.') + " $";
     }
 }

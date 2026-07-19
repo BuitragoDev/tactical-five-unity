@@ -564,30 +564,39 @@ public class RosterController : MonoBehaviour
     void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
-        if (_headerTeamName == null) return;
+
+        var logo = _root.Q<VisualElement>("HeaderTeamLogo");
+        var teamName = _root.Q<Label>("HeaderTeamName");
+        var managerName = _root.Q<Label>("HeaderManagerName");
+        var budget = _root.Q<Label>("HeaderBudget");
+        var payroll = _root.Q<Label>("HeaderPayroll");
+        var margin = _root.Q<Label>("HeaderMargin");
+        var season = _root.Q<Label>("HeaderSeason");
+        var date = _root.Q<Label>("HeaderDate");
+        if (teamName == null) return;
 
         if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
-            _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
+            logo.style.backgroundImage = new StyleBackground(sprite);
 
-        _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
-        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
-        _headerBudget.style.color = _myTeam.budget < 0
+        teamName.text = _myTeam.name.ToUpper();
+        managerName.text = $"Manager: {_manager.name}";
+        budget.text = $"${_myTeam.budget / 1_000_000}M";
+        budget.style.color = _myTeam.budget < 0
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
         long totalPayroll = _players.Sum(p => p.salary);
-        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+        payroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long margin = salaryCap - _players.Sum(p => p.salary);
+        long marginVal = salaryCap - _players.Sum(p => p.salary);
 
-        string marginText = margin >= 0
-            ? $"+${margin / 1_000_000}M"
-            : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
+        string marginText = marginVal >= 0
+            ? $"+${marginVal / 1_000_000}M"
+            : $"-${Mathf.Abs((int)(marginVal / 1_000_000))}M";
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        _headerMargin.text = marginText;
+        margin.text = marginText;
         var chemLabel = _root.Q<Label>("HeaderChemistry");
         if (chemLabel != null)
         {
@@ -600,13 +609,13 @@ public class RosterController : MonoBehaviour
                 chemLabel.AddToClassList("header-stat-value--gold");
         }
 
-        _headerMargin.RemoveFromClassList("header-stat-value--negative");
-        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
+        margin.RemoveFromClassList("header-stat-value--negative");
+        if (marginVal < 0) margin.AddToClassList("header-stat-value--negative");
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+            season.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            date.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
         _btnAction.text = "MENÚ PRINCIPAL";
@@ -1079,12 +1088,12 @@ public class RosterController : MonoBehaviour
             if (totalPayroll <= TradeHelper.FIRST_APRON)
             {
                 result.exceptionMax = TradeHelper.NT_MLE;
-                result.exceptionName = "NT-MLE";
+                result.exceptionName = "Mid-Level Exception (No Taxpayer)";
             }
             else if (totalPayroll <= TradeHelper.SECOND_APRON)
             {
                 result.exceptionMax = TradeHelper.T_MLE;
-                result.exceptionName = "T-MLE";
+                result.exceptionName = "Mid-Level Exception (Taxpayer)";
                 result.capSpaceMax = 0;
             }
             else

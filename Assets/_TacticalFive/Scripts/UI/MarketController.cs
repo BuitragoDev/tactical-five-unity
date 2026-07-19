@@ -1462,7 +1462,7 @@ public class MarketController : MonoBehaviour
         }
         else if (totalPayroll > TradeHelper.FIRST_APRON)
         {
-            _faWarningText.text = $"1er APRON: Máximo T-MLE (${TradeHelper.T_MLE:N0}). No puedes usar NT-MLE.";
+            _faWarningText.text = $"1er APRON: Máximo Mid-Level Exception (Taxpayer) (${TradeHelper.T_MLE:N0}). No puedes usar Mid-Level Exception (No Taxpayer).";
             _faWarningText.style.display = DisplayStyle.Flex;
         }
         else if (totalPayroll > leagueSettings.salary_cap)
@@ -1470,7 +1470,7 @@ public class MarketController : MonoBehaviour
             string hardCapNote = _myTeam.first_apron_hard_capped == 1
                 ? " · HARD CAP ACTIVO"
                 : "";
-            _faWarningText.text = $"Sobre el cap: máximo NT-MLE (${TradeHelper.NT_MLE:N0}){hardCapNote}. Usar NT-MLE activará el hard cap del 1er apron.";
+            _faWarningText.text = $"Sobre el cap: máximo Mid-Level Exception (No Taxpayer) (${TradeHelper.NT_MLE:N0}){hardCapNote}. Usar Mid-Level Exception (No Taxpayer) activará el hard cap del 1er apron.";
             _faWarningText.style.display = DisplayStyle.Flex;
         }
         else if (newTotal > leagueSettings.salary_cap)

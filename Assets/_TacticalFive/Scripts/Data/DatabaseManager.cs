@@ -1672,7 +1672,7 @@ public class DatabaseManager : MonoBehaviour
         Add(309, "NOP", "Derik", "Queen", "PF", 20, "USA", 208, 110, 77, 90, 79, 84, 71, 75, 77, 85, 90, 86, 86, 61, 53, 4000000, 4, false);
         Add(310, "NOP", "Jaron", "Pierre Jr.", "PG", 22, "USA", 191, 86, 57, 66, 82, 78, 72, 78, 76, 72, 50, 80, 76, 72, 40, 2000000, 2, true);
 
-        // ── NYK ── 16 jugadores
+        // ── NYK ── 17 jugadores
         Add(311, "NYK", "Jalen", "Brunson", "PG", 29, "USA", 188, 86, 93, 93, 95, 95, 95, 95, 95, 95, 81, 95, 95, 95, 55, 48000000, 4, false);
         Add(312, "NYK", "Karl-Anthony", "Towns", "C", 30, "USA", 213, 112, 92, 93, 93, 99, 99, 93, 95, 85, 93, 95, 99, 74, 54, 52000000, 4, false);
         Add(313, "NYK", "Mikal", "Bridges", "SF", 30, "USA", 198, 95, 87, 87, 95, 92, 86, 84, 90, 99, 82, 99, 93, 97, 40, 30000000, 4, false);
@@ -1682,6 +1682,7 @@ public class DatabaseManager : MonoBehaviour
         Add(317, "NYK", "Andre", "Drummond", "C", 32, "USA", 211, 127, 80, 80, 75, 85, 34, 67, 66, 99, 99, 99, 95, 62, 99, 3900000, 1, false);
         Add(318, "NYK", "Jordan", "Clarkson", "SG", 33, "USA", 193, 88, 81, 81, 98, 99, 99, 88, 94, 67, 57, 87, 94, 75, 33, 3900000, 1, false);
         Add(319, "NYK", "Tyler", "Kolek", "PG", 25, "USA", 188, 84, 78, 84, 91, 90, 88, 98, 97, 68, 50, 84, 91, 76, 25, 4000000, 3, false);
+        Add(498, "NYK", "Moussa", "Cisse", "C", 23, "MLI", 211, 102, 74, 82, 70, 70, 40, 60, 62, 84, 86, 82, 80, 86, 10, 2000000, 2, false);
         Add(320, "NYK", "Landry", "Shamet", "SG", 29, "USA", 193, 88, 76, 76, 89, 91, 99, 77, 85, 71, 59, 81, 89, 67, 28, 6000000, 1, false);
         Add(321, "NYK", "Jeremy", "Sochan", "PF", 23, "USA", 203, 104, 82, 88, 89, 84, 72, 84, 86, 97, 78, 97, 88, 91, 36, 9000000, 3, false);
         Add(322, "NYK", "Pacome", "Dadiet", "SF", 20, "FRA", 203, 93, 76, 88, 86, 79, 77, 75, 79, 84, 67, 90, 83, 79, 37, 3000000, 4, false);
@@ -2026,7 +2027,6 @@ public class DatabaseManager : MonoBehaviour
         AddFA(495, "Olivier", "Sarr", "C", 26, "FRA", 213, 108, 78, 84, 70, 78, 70, 70, 74, 82, 80, 80, 78, 82, 14, 3000000, 2);
         AddFA(496, "Nae'Qwan", "Tomlin", "PF", 25, "USA", 206, 104, 74, 82, 78, 72, 66, 70, 72, 80, 70, 80, 76, 78, 10, 2000000, 2);
         AddFA(497, "Dwight", "Powell", "C", 34, "CAN", 208, 108, 76, 78, 68, 74, 60, 72, 74, 82, 82, 80, 78, 84, 8, 4000000, 1);
-        AddFA(498, "Moussa", "Cisse", "C", 23, "MLI", 211, 102, 74, 82, 70, 70, 40, 60, 62, 84, 86, 82, 80, 86, 10, 2000000, 2);
         AddFA(499, "Spencer", "Jones", "SF", 24, "USA", 206, 100, 74, 82, 78, 78, 80, 72, 74, 76, 58, 76, 76, 74, 10, 2000000, 2);
         AddFA(500, "Curtis", "Jones", "SG", 25, "USA", 193, 90, 76, 84, 84, 78, 76, 78, 76, 60, 44, 74, 76, 72, 10, 2000000, 2);
         AddFA(501, "KJ", "Simpson", "PG", 23, "USA", 185, 84, 78, 86, 88, 80, 78, 82, 80, 58, 40, 76, 76, 74, 12, 2500000, 3);
@@ -2523,6 +2523,48 @@ public class DatabaseManager : MonoBehaviour
             new() { player_name = "Kawhi Leonard", appearances = 8 },
             new() { player_name = "Giannis Antetokounmpo", appearances = 8 },
             new() { player_name = "Damian Lillard", appearances = 8 },
+            new() { player_name = "Nikola Jokic", appearances = 7 },
+            new() { player_name = "Joel Embiid", appearances = 7 },
+            new() { player_name = "DeMar DeRozan", appearances = 7 },
+            new() { player_name = "Luka Doncic", appearances = 6 },
+            new() { player_name = "Jimmy Butler III", appearances = 6 },
+            new() { player_name = "Donovan Mitchell", appearances = 6 },
+            new() { player_name = "Jayson Tatum", appearances = 6 },
+            new() { player_name = "Paul George", appearances = 9 },
+            new() { player_name = "Karl-Anthony Towns", appearances = 5 },
+            new() { player_name = "Devin Booker", appearances = 5 },
+            new() { player_name = "Jaylen Brown", appearances = 5 },
+            new() { player_name = "Trae Young", appearances = 4 },
+            new() { player_name = "Rudy Gobert", appearances = 4 },
+            new() { player_name = "Pascal Siakam", appearances = 4 },
+            new() { player_name = "Shai Gilgeous-Alexander", appearances = 4 },
+            new() { player_name = "Anthony Edwards", appearances = 4 },
+            new() { player_name = "Ja Morant", appearances = 3 },
+            new() { player_name = "Domantas Sabonis", appearances = 3 },
+            new() { player_name = "Julius Randle", appearances = 3 },
+            new() { player_name = "Khris Middleton", appearances = 3 },
+            new() { player_name = "Bradley Beal", appearances = 3 },
+            new() { player_name = "Tyrese Haliburton", appearances = 3 },
+            new() { player_name = "Bam Adebayo", appearances = 3 },
+            new() { player_name = "Zach LaVine", appearances = 2 },
+            new() { player_name = "Darius Garland", appearances = 2 },
+            new() { player_name = "Jarrett Allen", appearances = 2 },
+            new() { player_name = "Jrue Holiday", appearances = 2 },
+            new() { player_name = "Kristaps Porzingis", appearances = 2 },
+            new() { player_name = "Scottie Barnes", appearances = 2 },
+            new() { player_name = "Jalen Brunson", appearances = 2 },
+            new() { player_name = "Victor Wembanyama", appearances = 2 },
+            new() { player_name = "Tyrese Maxey", appearances = 2 },
+            new() { player_name = "LaMelo Ball", appearances = 1 },
+            new() { player_name = "Dejounte Murray", appearances = 1 },
+            new() { player_name = "Fred VanVleet", appearances = 1 },
+            new() { player_name = "De'Aaron Fox", appearances = 1 },
+            new() { player_name = "Andrew Wiggins", appearances = 1 },
+            new() { player_name = "Alperen Sengun", appearances = 1 },
+            new() { player_name = "Cade Cunningham", appearances = 1 },
+            new() { player_name = "Jalen Duren", appearances = 1 },
+            new() { player_name = "Jalen Johnson", appearances = 1 },
+            new() { player_name = "Norman Powell", appearances = 1 },
         };
 
         var allPlayers = _db.Table<PlayerData>().ToList();
@@ -4401,7 +4443,7 @@ public class DatabaseManager : MonoBehaviour
                         int regW = regGames.Count(g =>
                             (g.home_team_id == prevTeamId && g.home_score > g.away_score) ||
                             (g.away_team_id == prevTeamId && g.away_score > g.home_score));
-                        manager.career_reg_wins   += regW;
+                        manager.career_reg_wins += regW;
                         manager.career_reg_losses += regGames.Count - regW;
 
                         // Playoff / Play-In
@@ -4412,7 +4454,7 @@ public class DatabaseManager : MonoBehaviour
                         int poW = poGames.Count(g =>
                             (g.home_team_id == prevTeamId && g.home_score > g.away_score) ||
                             (g.away_team_id == prevTeamId && g.away_score > g.home_score));
-                        manager.career_po_wins   += poW;
+                        manager.career_po_wins += poW;
                         manager.career_po_losses += poGames.Count - poW;
 
                         // Championship
@@ -4888,8 +4930,7 @@ public class DatabaseManager : MonoBehaviour
                 .Where(p => (p.position == posOrder[si] || p.secondary_position == posOrder[si])
                             && !assigned.Contains(p.id)
                             && !forceInactive.Contains(p.id))
-                .OrderByDescending(p => p.position == posOrder[si] ? 1 : 0)
-                .ThenByDescending(p => p.overall)
+                .OrderByDescending(p => p.overall)
                 .FirstOrDefault();
             if (best != null)
             {
