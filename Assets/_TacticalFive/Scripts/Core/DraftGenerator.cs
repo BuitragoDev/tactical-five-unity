@@ -159,6 +159,24 @@ public static class DraftGenerator
             ? DatabaseManager.Instance.Db.Table<PlayerData>().Max(p => p.id) + 1
             : 1;
 
+        // Draft class quality (rolled once per draft)
+        float classQuality;
+        string classLabel;
+        float classRoll = UnityEngine.Random.value;
+        if (classRoll < 0.15f) { classQuality = -3f; classLabel = "weak"; }
+        else if (classRoll < 0.70f) { classQuality = 0f; classLabel = "normal"; }
+        else if (classRoll < 0.90f) { classQuality = 2f; classLabel = "strong"; }
+        else { classQuality = 4f; classLabel = "historic"; }
+
+        // Pre-roll generational talents for historic drafts
+        var generationalPicks = new HashSet<int>();
+        if (classLabel == "historic")
+        {
+            int count = UnityEngine.Random.value < 0.5f ? 1 : 2;
+            var candidates = Enumerable.Range(0, 14).OrderBy(_ => UnityEngine.Random.value).Take(count);
+            foreach (var c in candidates) generationalPicks.Add(c);
+        }
+
         for (int pick = 0; pick < 60; pick++)
         {
             bool isRound2 = pick >= 30;
@@ -179,11 +197,39 @@ public static class DraftGenerator
             }
             if (team == null) continue;
 
-            // R1 picks 1-30: ~80 -> ~60 overall. R2 picks 31-60: ~60 -> ~50.
-            float baseAvg = isRound2
-                ? 60f - ((pick - 30) * 10f / 29f)
-                : 75f - (pick * 15f / 29f);
+            // ─── BASE AVERAGE BY PICK ──────────────────────────────
+            float baseAvg;
+            if (isRound2)
+            {
+                baseAvg = 60f - ((pick - 30) * 10f / 29f);
+            }
+            else
+            {
+                baseAvg = pick switch
+                {
+                    0 => 83f + UnityEngine.Random.Range(-2f, 3f),
+                    1 => 80f + UnityEngine.Random.Range(-2f, 3f),
+                    2 => 78f + UnityEngine.Random.Range(-2f, 3f),
+                    3 => 76f + UnityEngine.Random.Range(-2f, 3f),
+                    4 => 75f + UnityEngine.Random.Range(-2f, 3f),
+                    _ => 75f - (pick * 15f / 29f),
+                };
+            }
+            baseAvg += classQuality;
 
+            // ─── GENERATIONAL TALENT ────────────────────────────────
+            bool isGenerational = false;
+            if (classLabel == "historic")
+                isGenerational = generationalPicks.Contains(pick);
+            else if (pick < 5)
+                isGenerational = UnityEngine.Random.value < 0.03f;
+            else if (pick < 14)
+                isGenerational = UnityEngine.Random.value < 0.01f;
+
+            if (isGenerational)
+                baseAvg = Mathf.Max(baseAvg, 86f + UnityEngine.Random.Range(-2f, 5f));
+
+            // ─── POSITION ──────────────────────────────────────────
             string position = Positions[UnityEngine.Random.Range(0, Positions.Length)];
             var modifiers = PositionModifiers[position];
             var heightRange = PositionHeight[position];
@@ -191,19 +237,62 @@ public static class DraftGenerator
 
             int height = UnityEngine.Random.Range(heightRange.min, heightRange.max + 1);
             int weight = UnityEngine.Random.Range(weightRange.min, weightRange.max + 1);
-            int age = UnityEngine.Random.Range(19, 21);
 
+            // ─── AGE VARIETY ────────────────────────────────────────
+            int age;
+            float ageRoll = UnityEngine.Random.value;
+            if (ageRoll < 0.20f) age = UnityEngine.Random.Range(18, 20);
+            else if (ageRoll < 0.80f) age = UnityEngine.Random.Range(19, 22);
+            else age = UnityEngine.Random.Range(22, 25);
+
+            // ─── TRAIT / ARCHETYPE (30%) ────────────────────────────
+            bool hasTrait = UnityEngine.Random.value < 0.30f;
+            string trait = "";
+            if (hasTrait)
+            {
+                string[] traits = { "shooter", "scorer", "defender", "athlete", "playmaker", "rim_protector" };
+                trait = traits[UnityEngine.Random.Range(0, traits.Length)];
+            }
+
+            // ─── ATTRIBUTES ─────────────────────────────────────────
             var attrs = new Dictionary<string, int>();
             foreach (var attr in new[] { "speed", "shooting", "three_point", "passing", "ball_handling",
-                                          "defense", "rebounding", "athleticism", "iq", "steals", "blocks" })
+                                           "defense", "rebounding", "athleticism", "iq", "steals", "blocks" })
             {
                 int mod = modifiers.ContainsKey(attr) ? modifiers[attr] : 0;
-                int value = (int)Mathf.Clamp(baseAvg + mod + UnityEngine.Random.Range(-5, 6), 30, 99);
+                int roll = UnityEngine.Random.Range(-5, 6);
+
+                int traitBonus = 0;
+                if (hasTrait)
+                {
+                    traitBonus = trait switch
+                    {
+                        "shooter" when attr == "three_point" || attr == "shooting" => 8,
+                        "scorer" when attr == "shooting" || attr == "ball_handling" => 8,
+                        "defender" when attr == "defense" || attr == "steals" || attr == "blocks" => 8,
+                        "athlete" when attr == "athleticism" || attr == "speed" => 8,
+                        "playmaker" when attr == "passing" || attr == "iq" => 8,
+                        "rim_protector" when attr == "blocks" || attr == "rebounding" => 8,
+                        _ => 0
+                    };
+                }
+
+                int value = (int)Mathf.Clamp(baseAvg + mod + roll + traitBonus, 30, 99);
                 attrs[attr] = value;
             }
 
             int overall = (int)System.Math.Round(attrs.Values.Average());
-            int potential = Mathf.Min(99, overall + UnityEngine.Random.Range(3, 13));
+
+            // ─── POTENTIAL BY PICK ──────────────────────────────────
+            int potential;
+            if (isGenerational)
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(5, 14));
+            else if (!isRound2 && pick < 3)
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(8, 21));
+            else if (!isRound2)
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(5, 17));
+            else
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(3, 15));
             if (overall > potential) overall = potential;
 
             string nationality = UnityEngine.Random.value < 0.9f ? "USA" : GetRandomNationality();
@@ -211,9 +300,15 @@ public static class DraftGenerator
             string firstName = FirstNames[UnityEngine.Random.Range(0, FirstNames.Length)];
             string lastName = LastNames[UnityEngine.Random.Range(0, LastNames.Length)];
 
-            long salary = isRound2
-                ? (long)(UnityEngine.Random.Range(1500000, 4000001))
-                : (long)(UnityEngine.Random.Range(3000000, 8000001));
+            long salary;
+            if (isGenerational)
+                salary = (long)UnityEngine.Random.Range(9000000, 15000001);
+            else if (!isRound2 && pick < 3)
+                salary = (long)UnityEngine.Random.Range(7000000, 12000001);
+            else if (!isRound2)
+                salary = (long)UnityEngine.Random.Range(3000000, 8000001);
+            else
+                salary = (long)UnityEngine.Random.Range(1500000, 4000001);
             salary = (salary / 100000) * 100000;
 
             int drafTeamId = team.id;
