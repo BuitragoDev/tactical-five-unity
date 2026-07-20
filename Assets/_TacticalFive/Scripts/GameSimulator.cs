@@ -513,11 +513,14 @@ public static class GameSimulator
 
     static HashSet<int> DoSub(HashSet<int> on, int maxPlayers)
     {
-        int n = Mathf.Min(UnityEngine.Random.value < 0.5f ? 2 : 3, on.Count);
+        bool isLargeRoster = maxPlayers > 12;
+        int n = isLargeRoster
+            ? Mathf.Min(4, on.Count)
+            : Mathf.Min(UnityEngine.Random.value < 0.5f ? 2 : 3, on.Count);
         if (n == 0) return on;
 
         // 75% skill-based: bench worst players (highest index = lowest OVR),
-        // bring in best bench players (lowest index = highest OVR)
+        // bring in best available bench players
         // 25% random
         if (UnityEngine.Random.value < 0.75f)
         {
@@ -526,9 +529,20 @@ public static class GameSimulator
             // Prioritize bench players (index >= 5) over benched starters (index < 5)
             // so the rotation reaches deep bench players instead of always cycling starters back
             var notOnCourt = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i)).ToList();
-            var benchPlayers = notOnCourt.Where(i => i >= 5).OrderBy(i => i).ToList();
+            var benchPlayers = notOnCourt.Where(i => i >= 5).ToList();
             var benchedStarters = notOnCourt.Where(i => i < 5).OrderBy(i => i).ToList();
-            var selection = benchPlayers.Concat(benchedStarters).Take(n).ToList();
+
+            List<int> selection;
+            if (isLargeRoster)
+                // All-Star: random so all 10 bench players get court time
+                selection = benchPlayers.OrderBy(_ => UnityEngine.Random.value).Take(n).ToList();
+            else
+                // Normal: skill-based, best OVR first (lowest index)
+                selection = benchPlayers.OrderBy(i => i).Take(n).ToList();
+
+            if (selection.Count < n)
+                selection.AddRange(benchedStarters.Take(n - selection.Count));
+
             foreach (var i in selection)
                 newSet.Add(i);
             return newSet;
