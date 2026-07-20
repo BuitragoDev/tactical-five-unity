@@ -403,8 +403,8 @@ public class MatchDayController : MonoBehaviour
     {
         body.Clear();
 
-        // Only show players with minutes > 0
-        var playingStats = stats.Where(s => s.minutes > 0).ToList();
+        // Show all active players (including those with 0 min)
+        var playingStats = stats;
 
         foreach (var s in playingStats)
         {

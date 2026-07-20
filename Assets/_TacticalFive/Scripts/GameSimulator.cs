@@ -523,9 +523,13 @@ public static class GameSimulator
         {
             var outList = on.OrderByDescending(i => i).Take(n).ToList();
             var newSet = new HashSet<int>(on.Except(outList));
-            var bench = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i))
-                .OrderBy(i => i).ToList();
-            foreach (var i in bench.Take(n))
+            // Prioritize bench players (index >= 5) over benched starters (index < 5)
+            // so the rotation reaches deep bench players instead of always cycling starters back
+            var notOnCourt = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i)).ToList();
+            var benchPlayers = notOnCourt.Where(i => i >= 5).OrderBy(i => i).ToList();
+            var benchedStarters = notOnCourt.Where(i => i < 5).OrderBy(i => i).ToList();
+            var selection = benchPlayers.Concat(benchedStarters).Take(n).ToList();
+            foreach (var i in selection)
                 newSet.Add(i);
             return newSet;
         }

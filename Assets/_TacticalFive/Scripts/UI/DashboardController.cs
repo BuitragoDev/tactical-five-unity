@@ -1671,7 +1671,16 @@ public class DashboardController : MonoBehaviour
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
         if (!System.DateTime.TryParse(_season.current_date, out var date)) return;
         if (date.Month == 2 && date.Day == 1 && date.Year == _season.year_end)
+        {
+            // Check if the message was already sent this season to avoid repeating the modal
+            var existing = DatabaseManager.Instance.Db.Table<MessageData>()
+                .FirstOrDefault(m => m.manager_id == _manager.id
+                                  && m.title == "Última semana de traspasos"
+                                  && m.game_date == _season.current_date);
+            if (existing != null) return;
+
             ShowTradeDeadlineModal();
+        }
     }
 
     void ShowTradeDeadlineModal()
