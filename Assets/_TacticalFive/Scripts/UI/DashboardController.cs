@@ -867,6 +867,8 @@ public class DashboardController : MonoBehaviour
             }
 
             UpdateManagerStats(gameDay);
+
+            QuickNewsGenerator.Generate(_manager, _myTeam, _season, gamesToday, gameDay, _season?.current_date ?? "");
         }
 
         // ── Phase transitions ──
@@ -4162,7 +4164,7 @@ public class DashboardController : MonoBehaviour
         var all = DatabaseManager.Instance.GetMessages(_manager.id);
         if (all == null || all.Count == 0)
         {
-            var lbl = new Label("NO HAY MENSAJES");
+            var lbl = new Label("NO HAY NOTICIAS");
             lbl.AddToClassList("no-games-text");
             _messagesBody.Add(lbl);
             return;

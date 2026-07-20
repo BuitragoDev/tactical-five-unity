@@ -313,7 +313,7 @@
                             <ui:VisualElement name="PanelMessages" class="panel panel-messages">
                                 <ui:VisualElement class="panel-header">
                                     <ui:VisualElement class="panel-header-left">
-                                        <ui:Label text="MENSAJES" class="panel-title"/>
+                                        <ui:Label text="NOTICIAS" class="panel-title"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:ScrollView name="MessagesScroll" class="messages-scroll" horizontal-scrolling-enabled="false" mode="Vertical">

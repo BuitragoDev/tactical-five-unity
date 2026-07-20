@@ -106,7 +106,7 @@
             </ui:Button>
             <ui:Button name="NavMessages" class="nav-item">
                 <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
-                <ui:Label text="MENSAJES" class="nav-label"/>
+                <ui:Label text="NOTICIAS" class="nav-label"/>
             </ui:Button>
         </ui:VisualElement>
     </ui:VisualElement>
