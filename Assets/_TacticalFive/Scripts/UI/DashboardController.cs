@@ -99,6 +99,10 @@ public class DashboardController : MonoBehaviour
     private bool _injuredModalResolved;
     private bool _injuredModalGoToQuinteto;
     private static List<int> _pendingRecoveredIds = new();
+
+    // Empty lineup modal
+    private bool _emptyLineupModalResolved;
+    private bool _emptyLineupGoToQuinteto;
     // Config modal
     private VisualElement _configModalOverlay;
     private VisualElement _configMainMenuConfirmOverlay;
@@ -743,6 +747,22 @@ public class DashboardController : MonoBehaviour
 
         if (myTeamPlays)
         {
+            // Check for empty starter slots (e.g. after a trade)
+            var emptySlots = GetEmptyStarterSlots();
+            if (emptySlots.Count > 0)
+            {
+                _emptyLineupModalResolved = false;
+                _emptyLineupGoToQuinteto = false;
+                ShowEmptyLineupModal(emptySlots);
+                yield return new WaitUntil(() => _emptyLineupModalResolved);
+                if (_emptyLineupGoToQuinteto)
+                {
+                    HideLoading();
+                    ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                    yield break;
+                }
+            }
+
             var injured = GetInjuredActiveLineupPlayers();
             if (injured.Count > 0)
             {
@@ -1506,6 +1526,26 @@ public class DashboardController : MonoBehaviour
         box.Add(btn);
     }
 
+    List<int> GetEmptyStarterSlots()
+    {
+        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        if (lineup.Count == 0) return new List<int>();
+
+        var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var playerMap = allPlayers.ToDictionary(p => p.id);
+
+        var filledSlots = new HashSet<int>();
+        foreach (var l in lineup)
+            if (l.slot == 0 && playerMap.ContainsKey(l.player_id))
+                filledSlots.Add(l.slot_index);
+
+        var emptySlots = new List<int>();
+        for (int i = 0; i < 5; i++)
+            if (!filledSlots.Contains(i))
+                emptySlots.Add(i);
+        return emptySlots;
+    }
+
     List<(LineupData li, PlayerData p)> GetInjuredActiveLineupPlayers()
     {
         var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
@@ -1519,6 +1559,71 @@ public class DashboardController : MonoBehaviour
             .Select(l => (li: l, p: playerMap.GetValueOrDefault(l.player_id)))
             .Where(x => x.p != null && x.p.injury_days > 0)
             .ToList();
+    }
+
+    void ShowEmptyLineupModal(List<int> emptySlots)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--warning");
+        _firedOverlay.Add(box);
+
+        var title = new Label("5 TITULAR INCOMPLETO");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fired-modal-title--warning");
+        box.Add(title);
+
+        var text = new Label("Hay puestos del quinteto titular sin jugador asignado. Revisa la convocatoria antes del partido:");
+        text.AddToClassList("fired-modal-text");
+        box.Add(text);
+
+        var posNames = new[] { "Base (PG)", "Escolta (SG)", "Alero (SF)", "Ala-Pívot (PF)", "Pívot (C)" };
+        var list = new VisualElement();
+        list.AddToClassList("injured-modal-list");
+        foreach (var si in emptySlots)
+        {
+            var row = new Label(posNames[si]);
+            row.AddToClassList("injured-modal-player-row");
+            list.Add(row);
+        }
+        box.Add(list);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        var manualBtn = new Button();
+        manualBtn.text = "REVISAR MANUALMENTE";
+        manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _emptyLineupGoToQuinteto = true;
+            _emptyLineupModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(manualBtn);
+
+        var autoBtn = new Button();
+        autoBtn.text = "AUTO-RELLENAR";
+        autoBtn.AddToClassList("injured-modal-btn");
+        autoBtn.AddToClassList("injured-modal-btn--primary");
+        autoBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            var injuredIds = new HashSet<int>(allPlayers
+                .Where(p => p.injury_days > 0)
+                .Select(p => p.id));
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers, injuredIds);
+            _emptyLineupModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(autoBtn);
+
+        box.Add(btnGroup);
     }
 
     void ShowInjuredLineupModal(List<(LineupData li, PlayerData p)> injured)
