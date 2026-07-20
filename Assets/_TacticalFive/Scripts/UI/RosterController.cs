@@ -730,7 +730,6 @@ public class RosterController : MonoBehaviour
         else
             dotColor = new Color32(192, 57, 43, 255);
         moraleDot.style.backgroundColor = new StyleColor(dotColor);
-        moraleDot.tooltip = $"Moral: {player.morale}";
         row.Add(moraleDot);
 
         // Fisico dot
@@ -744,7 +743,6 @@ public class RosterController : MonoBehaviour
         else
             fisicoColor = new Color32(192, 57, 43, 255);
         fisicoDot.style.backgroundColor = new StyleColor(fisicoColor);
-        fisicoDot.tooltip = $"Físico: {player.fisico}";
         row.Add(fisicoDot);
 
         var posLbl = new Label();
@@ -891,12 +889,6 @@ public class RosterController : MonoBehaviour
             var lbl = new Label();
             lbl.AddToClassList("attr-label");
             lbl.text = label;
-            lbl.tooltip = label switch
-            {
-                "MORAL" => "La moral del jugador. Afecta al rendimiento en pista. Sube con victorias, baja con derrotas, lesiones y malos resultados.",
-                "FÍSICO" => "Estado físico del jugador. Se reduce al jugar minutos y se recupera en días de descanso. Por debajo de 30: mayor riesgo de lesión y menor rendimiento.",
-                _ => null
-            };
 
             var barBg = new VisualElement();
             barBg.AddToClassList("attr-bar-bg");

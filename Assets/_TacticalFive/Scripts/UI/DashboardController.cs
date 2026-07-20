@@ -748,6 +748,14 @@ public class DashboardController : MonoBehaviour
 
         if (myTeamPlays)
         {
+            // Ensure lineup exists before simulation
+            var lineupCheck = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+            if (lineupCheck.Count == 0)
+            {
+                var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+                DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers);
+            }
+
             // Check for empty starter slots (e.g. after a trade)
             var emptySlots = GetEmptyStarterSlots();
             if (emptySlots.Count > 0)

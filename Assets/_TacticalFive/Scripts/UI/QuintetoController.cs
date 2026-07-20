@@ -364,10 +364,7 @@ public class QuintetoController : MonoBehaviour
         var existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
         if (existing.Count == 0)
         {
-            var injuredIds = new HashSet<int>(_players
-                .Where(p => p.injury_days > 0)
-                .Select(p => p.id));
-            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players, injuredIds);
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
         }
         else
         {
@@ -719,12 +716,6 @@ public class QuintetoController : MonoBehaviour
             var lbl = new Label();
             lbl.AddToClassList("attr-label");
             lbl.text = label;
-            lbl.tooltip = label switch
-            {
-                "MORAL" => "La moral del jugador. Afecta al rendimiento en pista. Sube con victorias, baja con derrotas, lesiones y malos resultados.",
-                "FÍSICO" => "Estado físico del jugador. Se reduce al jugar minutos y se recupera en días de descanso. Por debajo de 30: mayor riesgo de lesión y menor rendimiento.",
-                _ => null
-            };
 
             var barBg = new VisualElement();
             barBg.AddToClassList("attr-bar-bg");
@@ -811,7 +802,6 @@ public class QuintetoController : MonoBehaviour
             fisicoLbl.AddToClassList("player-card-fisico--mid");
         else
             fisicoLbl.AddToClassList("player-card-fisico--low");
-        fisicoLbl.tooltip = $"Físico: {player.fisico}";
         meta.Add(fisicoLbl);
 
         info.Add(meta);
