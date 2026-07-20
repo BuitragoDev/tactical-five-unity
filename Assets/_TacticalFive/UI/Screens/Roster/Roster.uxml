@@ -111,7 +111,10 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement class="flex-col" style="align-items: center;">
                                     <ui:Label class="detail-role-label" text="ROL" />
-                                    <ui:VisualElement name="DetailRoleIcon" class="detail-role-icon" />
+                                    <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                        <ui:VisualElement name="DetailRoleIcon" class="detail-role-icon" />
+                                        <ui:Label name="DetailRoleName" class="detail-role-name" text="" />
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="flex-col" style="align-items: flex-end;">
                                     <ui:Label class="detail-potential-label" text="POTENCIAL" />

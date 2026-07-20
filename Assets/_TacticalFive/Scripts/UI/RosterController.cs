@@ -749,8 +749,14 @@ public class RosterController : MonoBehaviour
         posLbl.AddToClassList("player-pos");
         posLbl.text = PositionCodes.GetName(player.secondary_position);
 
+        // Role icon
+        var roleIcon = new VisualElement();
+        roleIcon.AddToClassList("player-row-role-icon");
+        UpdateRoleIcon(roleIcon, player.role);
+
         row.Add(nameLbl);
         row.Add(ovrLbl);
+        row.Add(roleIcon);
         row.Add(posLbl);
         row.Add(metaLbl);
         row.Add(salaryLbl);
@@ -767,6 +773,8 @@ public class RosterController : MonoBehaviour
             injIcon.tooltip = $"{player.injury_type} — {player.injury_days} días de baja";
         }
         row.Add(injIcon);
+
+        row.userData = player;
 
         // Click
         row.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnPlayerSelected(player, row); });
@@ -866,6 +874,9 @@ public class RosterController : MonoBehaviour
             if (CursorManager.Instance != null)
                 CursorManager.Instance.RegisterHandCursor(roleIcon);
         }
+        var roleNameLbl = _root.Q<Label>("DetailRoleName");
+        if (roleNameLbl != null)
+            roleNameLbl.text = GetRoleName(p.role);
 
         // Botón renovar siempre visible
         if (_btnRenew != null)
@@ -907,7 +918,7 @@ public class RosterController : MonoBehaviour
 
             var barFill = new VisualElement();
             barFill.AddToClassList("attr-bar-fill");
-            if (val < 50) barFill.AddToClassList("attr-bar-fill--low");
+            if (val < 40) barFill.AddToClassList("attr-bar-fill--low");
             else if (val < 70) barFill.AddToClassList("attr-bar-fill--mid");
 
             barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
@@ -1858,8 +1869,32 @@ public class RosterController : MonoBehaviour
         DatabaseManager.Instance.UpdatePlayerRole(p.id, newRole);
         p.role = newRole;
         UpdateRoleIcon(icon, newRole);
+
+        // Update the corresponding row icon in the list
+        foreach (var row in _rosterBody.Query<VisualElement>(className: "player-row").Build().ToList())
+        {
+            if (row.userData is PlayerData rowPlayer && rowPlayer.id == p.id)
+            {
+                var rowIcon = row.Q<VisualElement>(className: "player-row-role-icon");
+                if (rowIcon != null) UpdateRoleIcon(rowIcon, newRole);
+                break;
+            }
+        }
+
+        // Update the detail role name label
+        var roleNameLbl = _root.Q<Label>("DetailRoleName");
+        if (roleNameLbl != null) roleNameLbl.text = GetRoleName(newRole);
+
         PlayClick();
     }
+
+    static string GetRoleName(PlayerRole role) => role switch
+    {
+        PlayerRole.Estrella => "Estrella",
+        PlayerRole.Titular => "Titular",
+        PlayerRole.Banquillo => "Banquillo",
+        _ => "Último recurso"
+    };
 
     void UpdateRoleIcon(VisualElement icon, PlayerRole role)
     {

@@ -101,6 +101,17 @@
     border-right-width: 0;
     margin-bottom: 2px;
 }
+.player-row-role-icon {
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-left: 8px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
 .pos-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
@@ -508,6 +519,14 @@
 }
 .detail-role-icon:hover {
     opacity: 0.8;
+}
+.detail-role-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    text-transform: uppercase;
+    color: rgb(255, 255, 255);
+    margin-left: 8px;
+    -unity-text-align: middle-left;
 }
 
 /* Botón despedir */

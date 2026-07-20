@@ -1373,7 +1373,11 @@ public class DatabaseManager : MonoBehaviour
                 seasons_with_team = Math.Max(1, 5 - yrs),
                 injury_days = 0,
                 injury_type = "",
-                treated = 0
+                treated = 0,
+                role = calcOvr >= 88 ? PlayerRole.Estrella
+                     : calcOvr >= 78 ? PlayerRole.Titular
+                     : calcOvr >= 68 ? PlayerRole.Banquillo
+                     :                 PlayerRole.UltimoRecurso
             });
         }
 
@@ -2035,7 +2039,11 @@ public class DatabaseManager : MonoBehaviour
                 seasons_with_team = 0,
                 injury_days = 0,
                 injury_type = "",
-                treated = 0
+                treated = 0,
+                role = calcOvr >= 80 ? PlayerRole.Estrella
+                     : calcOvr >= 70 ? PlayerRole.Titular
+                     : calcOvr >= 60 ? PlayerRole.Banquillo
+                     :                 PlayerRole.UltimoRecurso
             });
         }
         // ── Free Agents ── 139 jugadores

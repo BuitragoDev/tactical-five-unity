@@ -246,3 +246,11 @@ public static class PositionCodes
         return Names.TryGetValue(code.ToUpper(), out var name) ? name : code;
     }
 }
+
+public enum PlayerRole
+{
+    Estrella = 0,
+    Titular = 1,
+    Banquillo = 2,
+    UltimoRecurso = 3
+}

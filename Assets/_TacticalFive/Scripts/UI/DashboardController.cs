@@ -3197,57 +3197,66 @@ public class DashboardController : MonoBehaviour
         int gameDay = _season?.current_game_day ?? 0;
         string gameDate = _season?.current_date ?? "";
 
-        foreach (var ps in stats)
+        int GetRoleDelta(PlayerRole role, float ratio)
         {
-            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
-            if (player == null) continue;
-
-            // Get average rating of last 5 games
-            var last5Stats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
-                .OrderByDescending(s => s.game_id).Take(5).ToList();
-            float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
-
-            int baseMorale = 50;
-            int winBonus = Mathf.RoundToInt(winPct * 30);
-            int formBonus = Mathf.RoundToInt((avgRating - 15) * 2);
-            int contractPenalty = player.contract_years == 1 ? -5 : 0;
-            int injuryPenalty = player.injury_days > 0 ? -10 : 0;
-
-            // Role satisfaction
-            float expectedMin = player.role switch
+            return role switch
             {
-                PlayerRole.Estrella => 40f,
-                PlayerRole.Titular => 28f,
-                PlayerRole.Banquillo => 10f,
-                _ => 3f
+                PlayerRole.Estrella => ratio >= 1.0f ? 2 : ratio >= 0.7f ? 1 : ratio >= 0.4f ? -1 : ratio > 0f ? -2 : -3,
+                PlayerRole.Titular => ratio >= 1.0f ? 2 : ratio >= 0.7f ? 1 : ratio >= 0.4f ? 0 : ratio > 0f ? -1 : -2,
+                PlayerRole.Banquillo => ratio >= 1.0f ? 2 : ratio >= 0.7f ? 1 : ratio >= 0.4f ? 0 : ratio > 0f ? 0 : -1,
+                _ => ratio >= 1.0f ? 2 : ratio >= 0.7f ? 1 : 0
             };
-            float ratio = ps.minutes / expectedMin;
-            int roleBonus = ratio >= 1.0f ? 2
-                          : ratio >= 0.7f ? 0
-                          : ratio >= 0.4f ? -5
-                          : -10;
-            if (teamWon) roleBonus = Mathf.Min(roleBonus + 3, 2);
+        }
 
-            int newMorale = Mathf.Clamp(baseMorale + winBonus + formBonus + contractPenalty + injuryPenalty + roleBonus, 0, 100);
+        float ExpectedMinForRole(PlayerRole role) => role switch
+        {
+            PlayerRole.Estrella => 40f,
+            PlayerRole.Titular => 28f,
+            PlayerRole.Banquillo => 10f,
+            _ => 3f
+        };
+
+        void ProcessPlayer(PlayerData player, float minutes, float? avgRating)
+        {
+            float expectedMin = ExpectedMinForRole(player.role);
+            float ratio = expectedMin > 0f ? minutes / expectedMin : 1f;
+            int roleDelta = GetRoleDelta(player.role, ratio);
+            if (teamWon) roleDelta = Mathf.Min(roleDelta + 1, 2);
+
+            int formDelta = avgRating.HasValue
+                ? (avgRating.Value >= 28f ? 2
+                    : avgRating.Value >= 20f ? 1
+                    : avgRating.Value >= 15f ? 0
+                    : avgRating.Value >= 10f ? -1
+                    : -2)
+                : 0;
+
+            int streakDelta = winPct >= 0.7f ? 1 : winPct <= 0.3f ? -1 : 0;
+            int contractDelta = player.contract_years == 1 ? -1 : 0;
+            int injuryDelta = player.injury_days > 0 ? -2 : 0;
+
+            int totalDelta = Mathf.Clamp(roleDelta + formDelta + streakDelta + contractDelta + injuryDelta, -3, 3);
+            int newMorale = Mathf.Clamp(player.morale + totalDelta, 0, 100);
             DatabaseManager.Instance.UpdatePlayerMorale(player.id, newMorale);
 
-            // Generate complaint messages for my team players
-            if (isMyTeam && player.role != PlayerRole.UltimoRecurso && ps.minutes > 0 && roleBonus <= -5)
+            // Generate complaint messages for my team players with very low morale
+            if (isMyTeam && player.role != PlayerRole.UltimoRecurso && newMorale < 20)
             {
+                int minGameDay = gameDay - 10;
                 var recentMsg = DatabaseManager.Instance.Db.Table<MessageData>()
-                    .FirstOrDefault(m => m.sender_id == player.id && m.game_day > gameDay - 10);
+                    .FirstOrDefault(m => m.sender_id == player.id && m.game_day > minGameDay);
                 if (recentMsg == null)
                 {
                     string title, body;
-                    if (roleBonus <= -10)
+                    if (newMorale < 10)
                     {
                         title = $"Queja: {player.first_name} {player.last_name}";
-                        body = $"{player.first_name} {player.last_name} está furioso por su tiempo de juego. Esperaba jugar ~{expectedMin:F0}min pero está muy por debajo. Exige un traspaso inmediato.";
+                        body = $"{player.first_name} {player.last_name} está furioso por la falta de minutos. Exige un traspaso inmediato.";
                     }
                     else
                     {
                         title = $"Preocupación: {player.first_name} {player.last_name}";
-                        body = $"{player.first_name} {player.last_name} no está contento con su rol en el equipo. Esperaba jugar ~{expectedMin:F0}min pero jugó solo {ps.minutes:F0}min.";
+                        body = $"{player.first_name} {player.last_name} no está conforme con los minutos que está jugando. Espera tener más protagonismo teniendo en cuenta el rol que se le prometió.";
                     }
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
@@ -3264,6 +3273,30 @@ public class DashboardController : MonoBehaviour
                     });
                 }
             }
+        }
+
+        // ── Active players (12 que jugaron) ──
+        var activeIds = new HashSet<int>();
+        foreach (var ps in stats)
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
+            if (player == null) continue;
+            activeIds.Add(player.id);
+
+            var last5Stats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
+                .OrderByDescending(s => s.game_id).Take(5).ToList();
+            float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
+
+            ProcessPlayer(player, ps.minutes, avgRating);
+        }
+
+        // ── Inactive healthy players (no convocados pero sanos) ──
+        var allTeamPlayers = DatabaseManager.Instance.GetPlayersByTeam(teamId);
+        foreach (var player in allTeamPlayers)
+        {
+            if (player.injury_days > 0) continue;
+            if (activeIds.Contains(player.id)) continue;
+            ProcessPlayer(player, 0f, null);
         }
     }
 
