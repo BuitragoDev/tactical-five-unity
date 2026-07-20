@@ -1580,7 +1580,7 @@ public class DashboardController : MonoBehaviour
         text.AddToClassList("fired-modal-text");
         box.Add(text);
 
-        var posNames = new[] { "Base (PG)", "Escolta (SG)", "Alero (SF)", "Ala-Pívot (PF)", "Pívot (C)" };
+        var posNames = new[] { "Base", "Escolta", "Alero", "Ala-Pívot", "Pívot" };
         var list = new VisualElement();
         list.AddToClassList("injured-modal-list");
         foreach (var si in emptySlots)
