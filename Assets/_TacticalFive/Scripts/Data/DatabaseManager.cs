@@ -3459,8 +3459,9 @@ public class DatabaseManager : MonoBehaviour
 
         return _db.Query<PlayerCareerSeasonRow>(
             @"SELECT g.season_id, s.year_start, s.year_end,
-                     ps.team_id, t.abbreviation AS team_abbreviation,
+                     ps.team_id, t.abbreviation AS team_abbreviation, t.name AS team_name,
                      COUNT(*) AS games,
+                     SUM(ps.minutes) AS total_minutes,
                      SUM(ps.points) AS total_points,
                      SUM(ps.rebounds) AS total_rebounds,
                      SUM(ps.assists) AS total_assists,
@@ -5189,7 +5190,9 @@ public class PlayerCareerSeasonRow
     public int year_end { get; set; }
     public int team_id { get; set; }
     public string team_abbreviation { get; set; }
+    public string team_name { get; set; }
     public int games { get; set; }
+    public double total_minutes { get; set; }
     public int total_points { get; set; }
     public int total_rebounds { get; set; }
     public int total_assists { get; set; }

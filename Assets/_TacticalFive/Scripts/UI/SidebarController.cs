@@ -16,6 +16,7 @@ public static class SidebarController
     {
         new() { screen = GameScreen.Dashboard,   navName = "NavDashboard" },
         new() { screen = GameScreen.Roster,      navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuJugadores" },
+        new() { screen = GameScreen.Trajectory,  navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuJugadores" },
         new() { screen = GameScreen.Quinteto,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuQuinteto" },
         new() { screen = GameScreen.Training,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuEntrenamiento" },
         new() { screen = GameScreen.Employees,   navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuEmpleados" },

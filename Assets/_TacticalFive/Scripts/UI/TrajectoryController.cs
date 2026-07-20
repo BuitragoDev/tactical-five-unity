@@ -35,8 +35,9 @@ public class TrajectoryController : MonoBehaviour
     private VisualElement _trajectoryAwardsBody;
 
     // Tabla
-    private ScrollView _trajectoryTableBody;
+    private VisualElement _trajectoryTableBody;
     private VisualElement _trajectoryEmpty;
+    private VisualElement _trajectoryStatsSection;
 
     // Config modal
     private VisualElement _configModalOverlay;
@@ -66,7 +67,6 @@ public class TrajectoryController : MonoBehaviour
     private SeasonData _season;
     private List<PlayerCareerSeasonRow> _careerHistory;
     private List<PlayerAwardEntry> _awards;
-    private HistoricalPlayerStatsData _historical;
 
     void OnEnable()
     {
@@ -99,8 +99,9 @@ public class TrajectoryController : MonoBehaviour
         _trajectoryOvr = _root.Q<Label>("TrajectoryOvr");
         _trajectoryAwards = _root.Q<VisualElement>("TrajectoryAwards");
         _trajectoryAwardsBody = _root.Q<VisualElement>("TrajectoryAwardsBody");
-        _trajectoryTableBody = _root.Q<ScrollView>("TrajectoryTableBody");
+        _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
         _trajectoryEmpty = _root.Q<VisualElement>("TrajectoryEmpty");
+        _trajectoryStatsSection = _root.Q<VisualElement>("TrajectoryStatsSection");
 
         var scrollView = _root.Q<ScrollView>();
         if (scrollView != null)
@@ -159,7 +160,6 @@ public class TrajectoryController : MonoBehaviour
 
         _careerHistory = DatabaseManager.Instance.GetPlayerCareerHistory(playerId, _manager.id);
         _awards = DatabaseManager.Instance.GetPlayerAwards(playerId);
-        _historical = DatabaseManager.Instance.GetHistoricalPlayerStats(_player.first_name, _player.last_name);
     }
 
     void RegisterCallbacks()
@@ -170,6 +170,11 @@ public class TrajectoryController : MonoBehaviour
 
         _btnAction?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
+
+        _root.Q<Button>("TrajectoryBackBtn")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(_root.Q<Button>("TrajectoryBackBtn"));
     }
 
     void RegisterNavButtons()
@@ -229,6 +234,15 @@ public class TrajectoryController : MonoBehaviour
 
         int ovr = _player.GetCalculatedAverage();
         _trajectoryOvr.text = ovr.ToString();
+        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--high");
+        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--mid");
+        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--low");
+        if (ovr > 84)
+            _trajectoryOvr.AddToClassList("trajectory-ovr--high");
+        else if (ovr >= 70)
+            _trajectoryOvr.AddToClassList("trajectory-ovr--mid");
+        else
+            _trajectoryOvr.AddToClassList("trajectory-ovr--low");
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _trajectoryPhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
@@ -258,14 +272,18 @@ public class TrajectoryController : MonoBehaviour
     {
         if (_careerHistory == null || _careerHistory.Count == 0)
         {
-            _trajectoryTableBody.style.display = DisplayStyle.None;
+            if (_trajectoryStatsSection != null)
+                _trajectoryStatsSection.style.display = DisplayStyle.None;
             _trajectoryEmpty.style.display = DisplayStyle.Flex;
             return;
         }
 
-        _trajectoryTableBody.style.display = DisplayStyle.Flex;
+        if (_trajectoryStatsSection != null)
+            _trajectoryStatsSection.style.display = DisplayStyle.Flex;
         _trajectoryEmpty.style.display = DisplayStyle.None;
         _trajectoryTableBody.Clear();
+
+        var fmt = System.Globalization.CultureInfo.InvariantCulture;
 
         foreach (var season in _careerHistory)
         {
@@ -273,38 +291,59 @@ public class TrajectoryController : MonoBehaviour
             row.AddToClassList("trajectory-table-row");
 
             row.Add(CreateCell("td-season", $"{season.year_start}-{season.year_end}"));
-            row.Add(CreateCell("td-team", season.team_abbreviation ?? "—"));
+            row.Add(CreateCell("td-team", season.team_name ?? "—"));
             row.Add(CreateCell("td-gp", season.games.ToString()));
-            row.Add(CreateCell("td-pts", season.games > 0 ? ((float)season.total_points / season.games).ToString("F1") : "0.0"));
-            row.Add(CreateCell("td-reb", season.games > 0 ? ((float)season.total_rebounds / season.games).ToString("F1") : "0.0"));
-            row.Add(CreateCell("td-ast", season.games > 0 ? ((float)season.total_assists / season.games).ToString("F1") : "0.0"));
-            row.Add(CreateCell("td-stl", season.games > 0 ? ((float)season.total_steals / season.games).ToString("F1") : "0.0"));
-            row.Add(CreateCell("td-blk", season.games > 0 ? ((float)season.total_blocks / season.games).ToString("F1") : "0.0"));
-            row.Add(CreateCell("td-val", season.games > 0 ? ((float)season.total_rating / season.games).ToString("F1") : "0.0"));
+            row.Add(CreateCell("td-mp", season.games > 0
+                ? (season.total_minutes / season.games).ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-pts", season.games > 0
+                ? ((float)season.total_points / season.games).ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-reb", season.games > 0
+                ? ((float)season.total_rebounds / season.games).ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-ast", season.games > 0
+                ? ((float)season.total_assists / season.games).ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-stl", season.games > 0
+                ? ((float)season.total_steals / season.games).ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-blk", season.games > 0
+                ? ((float)season.total_blocks / season.games).ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-val", season.games > 0
+                ? ((float)season.total_rating / season.games).ToString("F1", fmt) : "0.0"));
 
             _trajectoryTableBody.Add(row);
         }
 
-        // Fila de totales carrera
-        if (_historical != null)
-        {
-            var totalRow = new VisualElement();
-            totalRow.AddToClassList("trajectory-table-row");
-            totalRow.AddToClassList("trajectory-table-row--totals");
+        // Fila de totales carrera (calculados desde careerHistory)
+        int totalGames = _careerHistory.Sum(s => s.games);
+        double totalMinutes = _careerHistory.Sum(s => s.total_minutes);
+        int totalPts = _careerHistory.Sum(s => s.total_points);
+        int totalReb = _careerHistory.Sum(s => s.total_rebounds);
+        int totalAst = _careerHistory.Sum(s => s.total_assists);
+        int totalStl = _careerHistory.Sum(s => s.total_steals);
+        int totalBlk = _careerHistory.Sum(s => s.total_blocks);
+        int totalRat = _careerHistory.Sum(s => s.total_rating);
 
-            totalRow.Add(CreateCell("td-season", "TOTAL"));
-            totalRow.Add(CreateCell("td-team", ""));
-            totalRow.Add(CreateCell("td-gp", _historical.games.ToString()));
-            totalRow.Add(CreateCell("td-pts", _historical.ppg.ToString("F1")));
-            totalRow.Add(CreateCell("td-reb", _historical.rpg.ToString("F1")));
-            totalRow.Add(CreateCell("td-ast", _historical.apg.ToString("F1")));
-            totalRow.Add(CreateCell("td-stl", _historical.spg.ToString("F1")));
-            totalRow.Add(CreateCell("td-blk", _historical.bpg.ToString("F1")));
-            totalRow.Add(CreateCell("td-val", _historical.games > 0
-                ? ((float)_historical.total_rating / _historical.games).ToString("F1") : "0.0"));
+        var totalRow = new VisualElement();
+        totalRow.AddToClassList("trajectory-table-row");
+        totalRow.AddToClassList("trajectory-table-row--totals");
 
-            _trajectoryTableBody.Add(totalRow);
-        }
+        totalRow.Add(CreateCell("td-season", "TOTAL"));
+        totalRow.Add(CreateCell("td-team", ""));
+        totalRow.Add(CreateCell("td-gp", totalGames.ToString()));
+        totalRow.Add(CreateCell("td-mp", totalGames > 0
+            ? (totalMinutes / totalGames).ToString("F1", fmt) : "0.0"));
+        totalRow.Add(CreateCell("td-pts", totalGames > 0
+            ? ((float)totalPts / totalGames).ToString("F1", fmt) : "0.0"));
+        totalRow.Add(CreateCell("td-reb", totalGames > 0
+            ? ((float)totalReb / totalGames).ToString("F1", fmt) : "0.0"));
+        totalRow.Add(CreateCell("td-ast", totalGames > 0
+            ? ((float)totalAst / totalGames).ToString("F1", fmt) : "0.0"));
+        totalRow.Add(CreateCell("td-stl", totalGames > 0
+            ? ((float)totalStl / totalGames).ToString("F1", fmt) : "0.0"));
+        totalRow.Add(CreateCell("td-blk", totalGames > 0
+            ? ((float)totalBlk / totalGames).ToString("F1", fmt) : "0.0"));
+        totalRow.Add(CreateCell("td-val", totalGames > 0
+            ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
+
+        _trajectoryTableBody.Add(totalRow);
     }
 
     static Label CreateCell(string className, string text)
@@ -450,9 +489,9 @@ public class TrajectoryController : MonoBehaviour
     {
         if (_configModalOverlay == null) return;
         _configModalOverlay.style.display = DisplayStyle.Flex;
-        _configSliderMaster.SetValue(AudioManager.Instance?.MasterVolume ?? 1f);
-        _configSliderMusic.SetValue(AudioManager.Instance?.MusicVolume ?? 1f);
-        _configSliderSFX.SetValue(AudioManager.Instance?.SFXVolume ?? 1f);
+        _configSliderMaster.SetValueWithoutNotify(AudioManager.Instance?.MasterVolume ?? 1f);
+        _configSliderMusic.SetValueWithoutNotify(AudioManager.Instance?.MusicVolume ?? 1f);
+        _configSliderSFX.SetValueWithoutNotify(AudioManager.Instance?.SFXVolume ?? 1f);
         int q = QualitySettings.GetQualityLevel();
         SelectConfigQuality(q, true);
         UpdateConfigLabels();
@@ -501,11 +540,7 @@ public class TrajectoryController : MonoBehaviour
     void GoToMainMenu()
     {
         CloseConfigModal();
-        if (SaveSystem.Instance != null)
-        {
-            SaveSystem.Instance.SaveGame();
-            SaveSystem.Instance.LoadScene("MainMenu");
-        }
+        ScreenManager.Instance.GoTo(GameScreen.MainMenu);
     }
 
     void OpenExitConfirm()
