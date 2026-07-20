@@ -478,7 +478,7 @@
 }
 .detail-potential-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: rgb(85, 102, 119);
@@ -489,7 +489,25 @@
     font-size: 26px;
     color: rgb(74, 128, 240);
     -unity-text-align: middle-right;
-    margin-top: 2px;
+}
+
+/* Rol */
+.detail-role-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgb(85, 102, 119);
+    -unity-text-align: middle-center;
+}
+.detail-role-icon {
+    width: 32px;
+    height: 32px;
+    margin-top: 4px;
+    cursor: pointer;
+}
+.detail-role-icon:hover {
+    opacity: 0.8;
 }
 
 /* Botón despedir */

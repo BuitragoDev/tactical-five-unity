@@ -462,6 +462,7 @@ public class QuintetoController : MonoBehaviour
             {
                 var card = CreatePlayerCard(p, 0);
                 slot.Add(card);
+                slot.Add(CreateRoleIcon(p));
                 slot.RemoveFromClassList("starter-slot--empty");
                 if (p.injury_days > 0) slot.AddToClassList("slot--injured");
             }
@@ -483,6 +484,7 @@ public class QuintetoController : MonoBehaviour
             {
                 var card = CreatePlayerCard(p, 1);
                 slot.Add(card);
+                slot.Add(CreateRoleIcon(p));
                 if (p.injury_days > 0) slot.AddToClassList("slot--injured");
             }
             else
@@ -505,6 +507,7 @@ public class QuintetoController : MonoBehaviour
             {
                 var card = CreatePlayerCard(p, 2);
                 slot.Add(card);
+                slot.Add(CreateRoleIcon(p));
                 if (p.injury_days > 0) slot.AddToClassList("slot--injured");
             }
             else
@@ -586,6 +589,29 @@ public class QuintetoController : MonoBehaviour
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(btn);
         return btn;
+    }
+
+    VisualElement CreateRoleIcon(PlayerData player)
+    {
+        var icon = new VisualElement();
+        icon.AddToClassList("slot-role-icon");
+        string iconName = player.role switch
+        {
+            PlayerRole.Estrella => "rol_estrella",
+            PlayerRole.Titular => "rol_titular",
+            PlayerRole.Banquillo => "rol_banquillo",
+            _ => "rol_ultimoRecurso"
+        };
+        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
+        if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
+        icon.tooltip = player.role switch
+        {
+            PlayerRole.Estrella => "Estrella",
+            PlayerRole.Titular => "Titular",
+            PlayerRole.Banquillo => "Banquillo",
+            _ => "Último recurso"
+        };
+        return icon;
     }
 
     void BuildCourtView()

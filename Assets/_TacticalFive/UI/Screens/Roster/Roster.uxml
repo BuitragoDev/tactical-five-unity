@@ -103,11 +103,15 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
-                            <!-- Footer contrato / potencial -->
+                            <!-- Footer contrato / rol / potencial -->
                             <ui:VisualElement class="detail-footer">
                                 <ui:VisualElement class="flex-col">
                                     <ui:Label class="detail-contract-label" text="CONTRATO" />
                                     <ui:Label name="DetailContract" class="detail-contract-value" text="" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="flex-col" style="align-items: center;">
+                                    <ui:Label class="detail-role-label" text="ROL" />
+                                    <ui:VisualElement name="DetailRoleIcon" class="detail-role-icon" />
                                 </ui:VisualElement>
                                 <ui:VisualElement class="flex-col" style="align-items: flex-end;">
                                     <ui:Label class="detail-potential-label" text="POTENCIAL" />

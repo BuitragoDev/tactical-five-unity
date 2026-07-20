@@ -37,6 +37,7 @@ public class PlayerData
     public int seasons_with_team { get; set; } = 1;
     public int morale { get; set; } = 50;
     public int fisico { get; set; } = 99;
+    public PlayerRole role { get; set; } = PlayerRole.UltimoRecurso;
     public string photo { get; set; }
 
     public int GetCalculatedAverage()

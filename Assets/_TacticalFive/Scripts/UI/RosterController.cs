@@ -855,6 +855,18 @@ public class RosterController : MonoBehaviour
         _detailContract.text = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
         _detailPotential.text = p.potential.ToString();
 
+        // Rol - icono clickeable que rota
+        var roleIcon = _root.Q<VisualElement>("DetailRoleIcon");
+        if (roleIcon != null)
+        {
+            UpdateRoleIcon(roleIcon, p.role);
+            roleIcon.userData = p;
+            roleIcon.UnregisterCallback<ClickEvent>(CycleRole);
+            roleIcon.RegisterCallback<ClickEvent>(CycleRole);
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(roleIcon);
+        }
+
         // Botón renovar siempre visible
         if (_btnRenew != null)
             _btnRenew.style.display = DisplayStyle.Flex;
@@ -1836,6 +1848,37 @@ public class RosterController : MonoBehaviour
 #else
         Application.Quit();
 #endif
+    }
+
+    void CycleRole(ClickEvent ev)
+    {
+        var icon = ev.target as VisualElement;
+        if (icon?.userData is not PlayerData p) return;
+        PlayerRole newRole = (PlayerRole)(((int)p.role + 1) % 4);
+        DatabaseManager.Instance.UpdatePlayerRole(p.id, newRole);
+        p.role = newRole;
+        UpdateRoleIcon(icon, newRole);
+        PlayClick();
+    }
+
+    void UpdateRoleIcon(VisualElement icon, PlayerRole role)
+    {
+        string iconName = role switch
+        {
+            PlayerRole.Estrella => "rol_estrella",
+            PlayerRole.Titular => "rol_titular",
+            PlayerRole.Banquillo => "rol_banquillo",
+            _ => "rol_ultimoRecurso"
+        };
+        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
+        icon.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
+        icon.tooltip = role switch
+        {
+            PlayerRole.Estrella => "Estrella",
+            PlayerRole.Titular => "Titular",
+            PlayerRole.Banquillo => "Banquillo",
+            _ => "Último recurso"
+        };
     }
 
     void PlayClick()

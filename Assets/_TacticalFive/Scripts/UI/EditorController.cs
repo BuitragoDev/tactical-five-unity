@@ -48,7 +48,7 @@ public class EditorController : MonoBehaviour
     private VisualElement _playerDetail;
     private VisualElement _playerDetailPanel;
     private TextField _playerFName, _playerLName;
-    private CustomDropdown _playerPosDropdown, _playerTeamDropdown;
+    private CustomDropdown _playerPosDropdown, _playerTeamDropdown, _playerRoleDropdown;
     private TextField _playerAge, _playerNat, _playerHt, _playerWt;
     private TextField _playerPot;
     private TextField _playerSpeed, _playerShooting, _player3pt, _playerPassing;
@@ -678,6 +678,9 @@ public class EditorController : MonoBehaviour
         _playerMorale = AddInput(rightCol, "Moral", p.morale.ToString());
         SetDigitsOnly(_playerMorale, 2);
 
+        string[] roleChoices = { "Estrella", "Titular", "Banquillo", "Último recurso" };
+        _playerRoleDropdown = AddDropdown(rightCol, "Rol", roleChoices, roleChoices[(int)p.role]);
+
         columnsRow.Add(leftCol);
         columnsRow.Add(rightCol);
         _playerDetail.Add(columnsRow);
@@ -715,6 +718,10 @@ public class EditorController : MonoBehaviour
         int.TryParse(_playerSteals.value, out int stl); p.steals = Mathf.Clamp(stl, 0, 99);
         int.TryParse(_playerBlocks.value, out int blk); p.blocks = Mathf.Clamp(blk, 0, 99);
         int.TryParse(_playerMorale.value, out int mor); p.morale = Mathf.Clamp(mor, 0, 99);
+
+        string[] roleChoices = { "Estrella", "Titular", "Banquillo", "Último recurso" };
+        int roleIdx = System.Array.IndexOf(roleChoices, _playerRoleDropdown.Value);
+        p.role = (PlayerRole)(roleIdx >= 0 ? roleIdx : 3);
 
         int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
                   p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;

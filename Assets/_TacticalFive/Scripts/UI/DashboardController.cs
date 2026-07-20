@@ -3193,6 +3193,10 @@ public class DashboardController : MonoBehaviour
             (g.away_team_id == teamId && g.away_score > g.home_score));
         float winPct = teamGames.Count > 0 ? (float)winsInLast10 / teamGames.Count : 0.5f;
 
+        bool isMyTeam = teamId == _myTeam.id;
+        int gameDay = _season?.current_game_day ?? 0;
+        string gameDate = _season?.current_date ?? "";
+
         foreach (var ps in stats)
         {
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
@@ -3204,13 +3208,62 @@ public class DashboardController : MonoBehaviour
             float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
 
             int baseMorale = 50;
-            int winBonus = Mathf.RoundToInt(winPct * 30);    // max +15 (at 50% win)
-            int formBonus = Mathf.RoundToInt((avgRating - 15) * 2); // -10 a +10
+            int winBonus = Mathf.RoundToInt(winPct * 30);
+            int formBonus = Mathf.RoundToInt((avgRating - 15) * 2);
             int contractPenalty = player.contract_years == 1 ? -5 : 0;
             int injuryPenalty = player.injury_days > 0 ? -10 : 0;
 
-            int newMorale = Mathf.Clamp(baseMorale + winBonus + formBonus + contractPenalty + injuryPenalty, 0, 100);
+            // Role satisfaction
+            float expectedMin = player.role switch
+            {
+                PlayerRole.Estrella => 40f,
+                PlayerRole.Titular => 28f,
+                PlayerRole.Banquillo => 10f,
+                _ => 3f
+            };
+            float ratio = ps.minutes / expectedMin;
+            int roleBonus = ratio >= 1.0f ? 2
+                          : ratio >= 0.7f ? 0
+                          : ratio >= 0.4f ? -5
+                          : -10;
+            if (teamWon) roleBonus = Mathf.Min(roleBonus + 3, 2);
+
+            int newMorale = Mathf.Clamp(baseMorale + winBonus + formBonus + contractPenalty + injuryPenalty + roleBonus, 0, 100);
             DatabaseManager.Instance.UpdatePlayerMorale(player.id, newMorale);
+
+            // Generate complaint messages for my team players
+            if (isMyTeam && player.role != PlayerRole.UltimoRecurso && ps.minutes > 0 && roleBonus <= -5)
+            {
+                var recentMsg = DatabaseManager.Instance.Db.Table<MessageData>()
+                    .FirstOrDefault(m => m.sender_id == player.id && m.game_day > gameDay - 10);
+                if (recentMsg == null)
+                {
+                    string title, body;
+                    if (roleBonus <= -10)
+                    {
+                        title = $"Queja: {player.first_name} {player.last_name}";
+                        body = $"{player.first_name} {player.last_name} está furioso por su tiempo de juego. Esperaba jugar ~{expectedMin:F0}min pero está muy por debajo. Exige un traspaso inmediato.";
+                    }
+                    else
+                    {
+                        title = $"Preocupación: {player.first_name} {player.last_name}";
+                        body = $"{player.first_name} {player.last_name} no está contento con su rol en el equipo. Esperaba jugar ~{expectedMin:F0}min pero jugó solo {ps.minutes:F0}min.";
+                    }
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = player.id,
+                        title = title,
+                        body = body,
+                        game_day = gameDay,
+                        game_date = gameDate,
+                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        is_read = 0
+                    });
+                }
+            }
         }
     }
 

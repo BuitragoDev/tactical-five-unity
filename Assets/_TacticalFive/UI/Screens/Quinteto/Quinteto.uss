@@ -224,6 +224,7 @@
     padding: 2px 10px;
     border: 2px solid rgb(45, 45, 45);
     border-radius: 4px;
+    flex-grow: 1;
     flex-shrink: 0;
     margin-bottom: 8px;
 }
@@ -305,6 +306,14 @@
 
 .player-card-fisico--low {
     color: rgb(192, 57, 43);
+}
+
+.slot-role-icon {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-color: transparent;
 }
 
 .player-card--starter {

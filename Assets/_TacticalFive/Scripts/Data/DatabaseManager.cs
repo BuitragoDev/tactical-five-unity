@@ -226,6 +226,15 @@ public class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: added morale to players");
         }
 
+        // Add role to players if missing
+        var playerCols5 = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        bool hasRole = playerCols5.Any(c => c.name == "role");
+        if (!hasRole)
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN role INTEGER DEFAULT 3");
+            Debug.Log("[DB] Migration: added role to players");
+        }
+
         // Recalculate overall for all players from their 11 attributes (fix seed data mismatch)
         string migrationKey = $"OverallMigration_{_activeSaveSlot}";
         if (PlayerPrefs.GetInt(migrationKey, 0) == 0)
@@ -469,7 +478,7 @@ public class DatabaseManager : MonoBehaviour
         public string name { get; set; }
         public string type { get; set; }
         public int notnull { get; set; }
-        public object dflt_value { get; set; }
+        public string dflt_value { get; set; }
         public int pk { get; set; }
     }
 
@@ -632,6 +641,14 @@ public class DatabaseManager : MonoBehaviour
         var player = _db.Table<PlayerData>().FirstOrDefault(p => p.id == playerId);
         if (player == null) return;
         player.morale = Mathf.Clamp(morale, 0, 100);
+        _db.Update(player);
+    }
+
+    public void UpdatePlayerRole(int playerId, PlayerRole role)
+    {
+        var player = _db.Table<PlayerData>().FirstOrDefault(p => p.id == playerId);
+        if (player == null) return;
+        player.role = role;
         _db.Update(player);
     }
 
