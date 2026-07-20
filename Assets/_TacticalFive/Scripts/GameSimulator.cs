@@ -16,6 +16,7 @@ public static class GameSimulator
         public int oreb, dreb;
         public int assists, steals, blocks, turnovers, pf, points, rating;
         public int double_double, triple_double;
+        public int fisico;
     }
 
     public class TeamStats
@@ -168,6 +169,32 @@ public static class GameSimulator
             DatabaseManager.Instance.CheckAndUpdateRecords(game, awayPS, game.away_team_id);
         }
 
+        // Fatiga post-partido
+        bool homeBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
+            .Any(g => (g.home_team_id == game.home_team_id || g.away_team_id == game.home_team_id)
+                   && g.is_played == 1 && g.game_day == game.game_day - 1);
+        bool awayBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
+            .Any(g => (g.home_team_id == game.away_team_id || g.away_team_id == game.away_team_id)
+                   && g.is_played == 1 && g.game_day == game.game_day - 1);
+        foreach (var ps in homePS)
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
+            if (player == null) continue;
+            int loss = Mathf.RoundToInt(ps.minutes * 0.4f);
+            if (homeBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
+            player.fisico = Mathf.Max(0, player.fisico - loss);
+            DatabaseManager.Instance.UpdatePlayer(player);
+        }
+        foreach (var ps in awayPS)
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
+            if (player == null) continue;
+            int loss = Mathf.RoundToInt(ps.minutes * 0.4f);
+            if (awayBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
+            player.fisico = Mathf.Max(0, player.fisico - loss);
+            DatabaseManager.Instance.UpdatePlayer(player);
+        }
+
         var homeInjuries = CheckInjuries(homePS);
         var awayInjuries = CheckInjuries(awayPS);
 
@@ -201,7 +228,8 @@ public static class GameSimulator
             defense = p.defense,
             steals_attr = p.steals,
             blocks_attr = p.blocks,
-            minutes = 0
+            minutes = 0,
+            fisico = p.fisico
         };
     }
 
@@ -230,7 +258,8 @@ public static class GameSimulator
             pf = ps.pf,
             rating = ps.rating,
             double_double = ps.double_double,
-            triple_double = ps.triple_double
+            triple_double = ps.triple_double,
+            fisico_start = ps.fisico
         };
     }
 
@@ -308,6 +337,12 @@ public static class GameSimulator
         return (homePts, awayPts);
     }
 
+    static float FisicoPenalty(int fisico)
+    {
+        if (fisico >= 30) return 1f;
+        return 0.75f + (fisico / 30f) * 0.25f;
+    }
+
     static int RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR)
     {
         var off = offIds.Select(i => offAll[i]).ToList();
@@ -329,7 +364,8 @@ public static class GameSimulator
 
         if (shot == "3")
         {
-            float basePct = 0.35f + (shooter.three_point - 70) * 0.005f;
+            float fp3 = FisicoPenalty(shooter.fisico);
+            float basePct = (0.35f + (shooter.three_point - 70) * 0.005f) * fp3;
             float pct = Mathf.Clamp(basePct - di, 0.28f, 0.51f);
             shooter.fg3a++; shooter.fga++;
             if (UnityEngine.Random.value < pct)
@@ -341,7 +377,8 @@ public static class GameSimulator
             return MissHandler(def, off, shooter, true);
         }
 
-        float base2Pct = 0.50f + (shooter.shooting - 70) * 0.005f;
+        float fp2 = FisicoPenalty(shooter.fisico);
+        float base2Pct = (0.50f + (shooter.shooting - 70) * 0.005f) * fp2;
         float pct2 = Mathf.Clamp(base2Pct - di * 0.25f, 0.40f, 0.67f);
         shooter.fga++;
         if (UnityEngine.Random.value < pct2)
@@ -401,7 +438,7 @@ public static class GameSimulator
     static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court)
     {
         if (court.Count == 0) return null;
-        var weights = court.Select(p => Mathf.Pow(p.overall / 100f, 2.2f)).ToList();
+        var weights = court.Select(p => Mathf.Pow(p.overall / 100f, 2.2f) * FisicoPenalty(p.fisico)).ToList();
         float total = weights.Sum();
         if (total <= 0) return court[UnityEngine.Random.Range(0, court.Count)];
         float r = UnityEngine.Random.value * total;
@@ -426,6 +463,7 @@ public static class GameSimulator
             _ => 0.30f
         };
         float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f, 0.10f, 0.55f);
+        adj *= FisicoPenalty(p.fisico);
         return UnityEngine.Random.value < adj ? "3" : "2";
     }
 
@@ -483,7 +521,17 @@ public static class GameSimulator
         var handlers = off.Where(p => p.position is "PG" or "SG" or "SF").ToList();
         if (handlers.Count == 0) handlers = off;
         if (handlers.Count > 0)
-            handlers[UnityEngine.Random.Range(0, handlers.Count)].turnovers++;
+        {
+            var toWeights = handlers.Select(p => 1f / Mathf.Max(0.1f, FisicoPenalty(p.fisico))).ToList();
+            float toTotal = toWeights.Sum();
+            float toR = UnityEngine.Random.value * toTotal;
+            float toC = 0;
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                toC += toWeights[i];
+                if (toR <= toC) { handlers[i].turnovers++; break; }
+            }
+        }
 
         // Only ~50% of TOs result in a steal (rest are offensive fouls, out-of-bounds, etc.)
         if (UnityEngine.Random.value >= 0.5f) return;
@@ -617,7 +665,10 @@ public static class GameSimulator
         {
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
             if (player == null || player.injury_days > 0) continue;
-            if (UnityEngine.Random.value >= 0.008f) continue;
+            float injuryChance = 0.008f;
+            if (ps.fisico < 30)
+                injuryChance *= 1f + (30f - ps.fisico) * 0.15f;
+            if (UnityEngine.Random.value >= injuryChance) continue;
 
             var injury = PickInjury();
             player.injury_type = injury.type;

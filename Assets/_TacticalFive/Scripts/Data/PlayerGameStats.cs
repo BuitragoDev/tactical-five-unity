@@ -30,4 +30,5 @@ public class PlayerGameStats
     public int rating { get; set; }
     public int double_double { get; set; }
     public int triple_double { get; set; }
+    public int fisico_start { get; set; }
 }

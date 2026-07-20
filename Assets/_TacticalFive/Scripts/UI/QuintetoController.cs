@@ -708,6 +708,7 @@ public class QuintetoController : MonoBehaviour
             ("ROBOS",     p.steals),
             ("TAPONES",   p.blocks),
             ("MORAL",     p.morale),
+            ("FÍSICO",    p.fisico),
         };
 
         foreach (var (label, val) in attrs)
@@ -793,6 +794,18 @@ public class QuintetoController : MonoBehaviour
         else
             ovrLbl.AddToClassList("player-card-ovr--low");
         meta.Add(ovrLbl);
+
+        var fisicoLbl = new Label();
+        fisicoLbl.AddToClassList("player-card-fisico");
+        int fisicoVal = player.fisico;
+        fisicoLbl.text = $" FIS:{fisicoVal}";
+        if (fisicoVal >= 60)
+            fisicoLbl.AddToClassList("player-card-fisico--high");
+        else if (fisicoVal >= 30)
+            fisicoLbl.AddToClassList("player-card-fisico--mid");
+        else
+            fisicoLbl.AddToClassList("player-card-fisico--low");
+        meta.Add(fisicoLbl);
 
         info.Add(meta);
         card.Add(info);

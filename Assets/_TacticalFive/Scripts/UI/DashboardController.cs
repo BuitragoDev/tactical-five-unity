@@ -711,6 +711,7 @@ public class DashboardController : MonoBehaviour
         }
 
         var recoveredPlayers = ProcessInjuries();
+        ProcessFisicoRecovery();
         if (recoveredPlayers.Count > 0)
         {
             foreach (var p in recoveredPlayers)
@@ -2081,6 +2082,18 @@ public class DashboardController : MonoBehaviour
             }
         }
         return recovered;
+    }
+
+    void ProcessFisicoRecovery()
+    {
+        if (_myTeam == null) return;
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        foreach (var p in players)
+        {
+            if (p.injury_days > 0) continue;
+            p.fisico = Mathf.Min(99, p.fisico + 8);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
     }
 
     void ProcessScouts()

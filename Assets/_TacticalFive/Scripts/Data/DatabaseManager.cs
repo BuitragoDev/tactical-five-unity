@@ -446,6 +446,21 @@ public class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for manager career columns: {ex.Message}");
         }
+
+        // Add fisico to players if missing
+        try
+        {
+            var playerColsFisico = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!playerColsFisico.Any(c => c.name == "fisico"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN fisico INTEGER DEFAULT 99");
+                Debug.Log("[DB] Migration: added fisico to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
+        }
     }
 
     class ColumnInfo

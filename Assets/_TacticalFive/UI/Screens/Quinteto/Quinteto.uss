@@ -289,6 +289,24 @@
     color: rgb(192, 57, 43);
 }
 
+.player-card-fisico {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    margin-left: 18px;
+}
+
+.player-card-fisico--high {
+    color: rgb(39, 174, 96);
+}
+
+.player-card-fisico--mid {
+    color: rgb(212, 160, 23);
+}
+
+.player-card-fisico--low {
+    color: rgb(192, 57, 43);
+}
+
 .player-card--starter {
     border-color: rgb(60, 80, 60);
 }

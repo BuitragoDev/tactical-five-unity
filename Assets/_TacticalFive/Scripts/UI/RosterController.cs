@@ -732,6 +732,20 @@ public class RosterController : MonoBehaviour
         moraleDot.style.backgroundColor = new StyleColor(dotColor);
         row.Add(moraleDot);
 
+        // Fisico dot
+        var fisicoDot = new VisualElement();
+        fisicoDot.AddToClassList("fisico-dot");
+        Color fisicoColor;
+        if (player.fisico >= 60)
+            fisicoColor = new Color32(39, 174, 96, 255);
+        else if (player.fisico >= 30)
+            fisicoColor = new Color32(212, 160, 23, 255);
+        else
+            fisicoColor = new Color32(192, 57, 43, 255);
+        fisicoDot.style.backgroundColor = new StyleColor(fisicoColor);
+        fisicoDot.tooltip = $"Físico: {player.fisico}";
+        row.Add(fisicoDot);
+
         var posLbl = new Label();
         posLbl.AddToClassList("player-pos");
         posLbl.text = PositionCodes.GetName(player.secondary_position);
@@ -865,6 +879,7 @@ public class RosterController : MonoBehaviour
             ("ROBOS",     p.steals),
             ("TAPONES",   p.blocks),
             ("MORAL",     p.morale),
+            ("FÍSICO",    p.fisico),
         };
 
         foreach (var (label, val) in attrs)

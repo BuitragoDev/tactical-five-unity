@@ -36,6 +36,7 @@ public class PlayerData
     public int renewal_cooldown_day { get; set; }
     public int seasons_with_team { get; set; } = 1;
     public int morale { get; set; } = 50;
+    public int fisico { get; set; } = 99;
     public string photo { get; set; }
 
     public int GetCalculatedAverage()
