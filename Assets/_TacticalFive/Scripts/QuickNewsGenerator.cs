@@ -12,12 +12,17 @@ public static class QuickNewsGenerator
 
         var allStandingsGames = DatabaseManager.Instance.GetStandingsGames(manager.id);
         var allTeams = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);
-        bool anySaved = false;
+        var teamRealAvg = allTeams.Values.ToDictionary(
+            t => t.id,
+            t => {
+                var players = DatabaseManager.Instance.GetPlayersByTeam(t.id);
+                return players.Count > 0 ? (int)Math.Round(players.Average(p => p.GetCalculatedAverage())) : 50;
+            });
         int newsCount = 0;
 
         if (gameDay % 41 == 0 && gameDay <= 82)
         {
-            SaveNews(manager, gameDay, gameDate, "📊 HITO", gameDay == 41
+            SaveNews(manager, gameDay, gameDate, "HITO", gameDay == 41
                 ? "¡Mitad de temporada superada! Comienza la segunda vuelta."
                 : $"¡Jornada {gameDay}! Se acerca el final de la temporada regular.");
             newsCount++;
@@ -35,54 +40,39 @@ public static class QuickNewsGenerator
 
             if (newsCount < 2 && homeStreak >= 5)
             {
-                if (SaveNews(manager, gameDay, gameDate, "🔥 RACHA", $"{homeTeam.name} acumula {homeStreak} victorias consecutivas"))
+                if (SaveNews(manager, gameDay, gameDate, "RACHA DE VICTORIAS", $"{homeTeam.name} acumula {homeStreak} victorias consecutivas"))
                     { newsCount++; continue; }
             }
             if (newsCount < 2 && awayStreak >= 5)
             {
-                if (SaveNews(manager, gameDay, gameDate, "🔥 RACHA", $"{awayTeam.name} acumula {awayStreak} victorias consecutivas"))
+                if (SaveNews(manager, gameDay, gameDate, "RACHA DE VICTORIAS", $"{awayTeam.name} acumula {awayStreak} victorias consecutivas"))
                     { newsCount++; continue; }
             }
 
             if (newsCount < 2 && homeStreak <= -5)
             {
-                if (SaveNews(manager, gameDay, gameDate, "💀 MALA RACHA", $"{homeTeam.name} encadena {-homeStreak} derrotas consecutivas"))
+                if (SaveNews(manager, gameDay, gameDate, "MALA RACHA", $"{homeTeam.name} encadena {-homeStreak} derrotas consecutivas"))
                     { newsCount++; continue; }
             }
             if (newsCount < 2 && awayStreak <= -5)
             {
-                if (SaveNews(manager, gameDay, gameDate, "💀 MALA RACHA", $"{awayTeam.name} encadena {-awayStreak} derrotas consecutivas"))
+                if (SaveNews(manager, gameDay, gameDate, "MALA RACHA", $"{awayTeam.name} encadena {-awayStreak} derrotas consecutivas"))
                     { newsCount++; continue; }
             }
 
-            int medDiff = Mathf.Abs(homeTeam.overall - awayTeam.overall);
-            bool homeFav = homeTeam.overall > awayTeam.overall;
+            int homeAvg = teamRealAvg[game.home_team_id];
+            int awayAvg = teamRealAvg[game.away_team_id];
+            int medDiff = Mathf.Abs(homeAvg - awayAvg);
+            bool homeFav = homeAvg > awayAvg;
             bool homeWon = game.home_score > game.away_score;
             if (newsCount < 2 && medDiff >= 15 && ((homeFav && !homeWon) || (!homeFav && homeWon)))
             {
                 var winner = homeWon ? homeTeam : awayTeam;
                 var loser = homeWon ? awayTeam : homeTeam;
-                if (SaveNews(manager, gameDay, gameDate, "⚡ CAMPANADA", $"¡Campanada! {winner.name} ({winner.overall}) derrota a {loser.name} ({loser.overall})"))
+                int winAvg = homeWon ? homeAvg : awayAvg;
+                int loseAvg = homeWon ? awayAvg : homeAvg;
+                if (SaveNews(manager, gameDay, gameDate, "CAMPANADA", $"¡Campanada! {winner.name} ({winAvg}) derrota a {loser.name} ({loseAvg})"))
                     { newsCount++; continue; }
-            }
-
-            bool isMyGame = game.home_team_id == myTeam.id || game.away_team_id == myTeam.id;
-            if (newsCount < 2 && isMyGame)
-            {
-                bool myIsHome = game.home_team_id == myTeam.id;
-                int myScore = myIsHome ? game.home_score : game.away_score;
-                int oppScore = myIsHome ? game.away_score : game.home_score;
-                var rival = myIsHome ? awayTeam : homeTeam;
-                if (myScore > oppScore)
-                {
-                    if (SaveNews(manager, gameDay, gameDate, "🏆 VICTORIA", $"¡Victoria de {myTeam.name} frente a {rival.name}!"))
-                        { newsCount++; continue; }
-                }
-                else
-                {
-                    if (SaveNews(manager, gameDay, gameDate, "😞 DERROTA", $"Derrota de {myTeam.name} ante {rival.name} por {oppScore - myScore} puntos"))
-                        { newsCount++; continue; }
-                }
             }
 
             if (newsCount >= 2) continue;
@@ -99,8 +89,16 @@ public static class QuickNewsGenerator
                     var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                     if (player == null) continue;
                     var opponent = game.home_team_id == player.team_id ? awayTeam : homeTeam;
-                    if (SaveNews(manager, gameDay, gameDate, "💎 TRIPLE-DOBLE",
-                        $"{player.first_name} {player.last_name} firma un triple-doble ({ps.points}+{ps.rebounds}+{ps.assists}) ante {opponent.name}"))
+
+                    var tdParts = new List<string>();
+                    if (ps.points >= 10) tdParts.Add($"{ps.points} pts");
+                    if (ps.rebounds >= 10) tdParts.Add($"{ps.rebounds} reb");
+                    if (ps.assists >= 10) tdParts.Add($"{ps.assists} ast");
+                    if (ps.steals >= 10) tdParts.Add($"{ps.steals} rob");
+                    if (ps.blocks >= 10) tdParts.Add($"{ps.blocks} tap");
+
+                    if (SaveNews(manager, gameDay, gameDate, "TRIPLE-DOBLE",
+                        $"{player.first_name} {player.last_name} firma un triple-doble ({string.Join(" + ", tdParts.Take(3))}) ante {opponent.name}"))
                         { newsCount++; continue; }
                 }
 
@@ -109,7 +107,7 @@ public static class QuickNewsGenerator
                     var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                     if (player == null) continue;
                     var opponent = game.home_team_id == player.team_id ? awayTeam : homeTeam;
-                    if (SaveNews(manager, gameDay, gameDate, "⭐ EXPLOSIÓN",
+                    if (SaveNews(manager, gameDay, gameDate, "EXPLOSIÓN",
                         $"{player.first_name} {player.last_name} explota con {ps.points} puntos ante {opponent.name}"))
                         { newsCount++; continue; }
                 }
