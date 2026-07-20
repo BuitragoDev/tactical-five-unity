@@ -84,17 +84,12 @@ public static class QuickNewsGenerator
                         { newsCount++; continue; }
                 }
             }
-        }
 
-        var allGameIds = gamesToday.Select(g => g.id).ToList();
-        var allStats = DatabaseManager.Instance.GetGamePlayerStatsBatch(allGameIds);
-        if (allStats == null) return;
+            if (newsCount >= 2) continue;
 
-        foreach (var g in gamesToday)
-        {
-            if (newsCount >= 2) break;
+            var gameStats = DatabaseManager.Instance.GetGamePlayerStats(game.id);
+            if (gameStats == null) continue;
 
-            var gameStats = allStats.Where(s => s.game_id == g.id).ToList();
             foreach (var ps in gameStats)
             {
                 if (newsCount >= 2) break;
@@ -103,8 +98,7 @@ public static class QuickNewsGenerator
                 {
                     var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                     if (player == null) continue;
-                    var opponent = g.home_team_id == player.team_id ? awayTeam : homeTeam;
-                    if (opponent == null) continue;
+                    var opponent = game.home_team_id == player.team_id ? awayTeam : homeTeam;
                     if (SaveNews(manager, gameDay, gameDate, "💎 TRIPLE-DOBLE",
                         $"{player.first_name} {player.last_name} firma un triple-doble ({ps.points}+{ps.rebounds}+{ps.assists}) ante {opponent.name}"))
                         { newsCount++; continue; }
@@ -114,8 +108,7 @@ public static class QuickNewsGenerator
                 {
                     var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                     if (player == null) continue;
-                    var opponent = g.home_team_id == player.team_id ? awayTeam : homeTeam;
-                    if (opponent == null) continue;
+                    var opponent = game.home_team_id == player.team_id ? awayTeam : homeTeam;
                     if (SaveNews(manager, gameDay, gameDate, "⭐ EXPLOSIÓN",
                         $"{player.first_name} {player.last_name} explota con {ps.points} puntos ante {opponent.name}"))
                         { newsCount++; continue; }
