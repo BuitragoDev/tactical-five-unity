@@ -253,7 +253,7 @@
                                             <ui:VisualElement name="CircleMorale" class="board-circle">
                                                 <ui:Label name="ValMorale" class="board-circle-val" text="50%" />
                                             </ui:VisualElement>
-                                            <ui:Label class="board-col-label" text="MORAL DEL EQUIPO" />
+                                            <ui:Label class="board-col-label" text="MORAL DEL EQUIPO" tooltip="La moral colectiva del equipo. Una moral alta mejora el rendimiento en los partidos." />
                                         </ui:VisualElement>
                                         <ui:VisualElement class="board-col-sep" />
                                         <ui:VisualElement class="board-col">
@@ -293,7 +293,7 @@
                                     <ui:VisualElement class="team-stat-row">
                                         <ui:VisualElement name="TeamChemistryIcon" class="team-stat-logo"/>
                                         <ui:VisualElement class="team-stat-info">
-                                            <ui:Label text="Química equipo" class="team-stat-title"/>
+                                            <ui:Label text="Química equipo" class="team-stat-title" tooltip="La química del equipo. Una química alta mejora el rendimiento colectivo. Se construye con victorias y buen ambiente en el vestuario." />
                                             <ui:Label name="TeamChemistryLabel" text="--" class="team-stat-subtitle"/>
                                         </ui:VisualElement>
                                         <ui:VisualElement name="TeamChemistryRing" class="team-stat-ring">

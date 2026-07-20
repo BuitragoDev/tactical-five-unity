@@ -23,7 +23,7 @@
             <ui:Label name="HeaderMargin" class="header-stat-value" text="" />
         </ui:VisualElement>
         <ui:VisualElement class="header-stat">
-            <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" />
+            <ui:Label class="header-stat-label" text="QUÍMICA DE EQUIPO" tooltip="La química del equipo. Afecta al rendimiento en los partidos. Sube con las victorias y el buen ambiente." />
             <ui:Label name="HeaderChemistry" class="header-stat-value" text="" />
         </ui:VisualElement>
         <ui:VisualElement class="header-spacer" />
