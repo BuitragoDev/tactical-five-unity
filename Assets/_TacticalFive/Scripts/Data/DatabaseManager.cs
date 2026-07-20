@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using SQLite;
 using System;
 using System.Linq;
+using System.Globalization;
 
 public class DatabaseManager : MonoBehaviour
 {
@@ -1344,13 +1345,14 @@ public class DatabaseManager : MonoBehaviour
             });
         }
 
-        // ── ATL ── 14 jugadores
+        // ── ATL ── 16 jugadores
         Add(1, "ATL", "Jalen", "Johnson", "SF", 24, "USA", 203, 99, 86, 91, 92, 85, 83, 92, 88, 88, 93, 98, 92, 80, 55, 30000000, 4, false);
         Add(483, "ATL", "Jonathan", "Kuminga", "SF", 22, "COD", 201, 99, 78, 88, 95, 83, 72, 72, 78, 80, 78, 97, 81, 72, 50, 24000000, 1, false);
         Add(2, "ATL", "Nickeil", "Alexander-Walker", "SG", 27, "CAN", 196, 90, 81, 82, 95, 86, 78, 80, 84, 88, 72, 86, 84, 88, 50, 15500000, 3, false);
         Add(3, "ATL", "Dyson", "Daniels", "SG", 22, "AUS", 196, 93, 79, 86, 95, 75, 66, 82, 80, 93, 70, 85, 82, 99, 42, 25000000, 4, false);
+        Add(331, "ATL", "Luguentz", "Dort", "SG", 27, "CAN", 193, 99, 84, 84, 95, 86, 76, 84, 85, 99, 70, 99, 91, 97, 42, 16000000, 3, false);
         Add(4, "ATL", "Onyeka", "Okongwu", "C", 25, "USA", 206, 104, 80, 84, 88, 72, 50, 71, 64, 91, 99, 97, 89, 70, 89, 16000000, 2, false);
-        Add(5, "ATL", "Zaccharie", "Risacher", "SF", 21, "FRA", 203, 90, 76, 84, 85, 87, 89, 81, 85, 75, 63, 77, 87, 73, 34, 13200000, 2, false);
+        Add(112, "ATL", "Ryan", "Nembhard", "PG", 23, "CAN", 180, 81, 76, 82, 96, 79, 75, 98, 94, 67, 53, 80, 90, 77, 27, 400000, 4, false);
         Add(6, "ATL", "CJ", "McCollum", "SG", 34, "USA", 191, 86, 78, 74, 90, 94, 88, 85, 92, 75, 57, 77, 88, 71, 41, 21000000, 1, false);
         Add(7, "ATL", "Aaron", "Wiggins", "SF", 27, "USA", 198, 93, 80, 82, 92, 88, 86, 80, 84, 88, 71, 90, 88, 84, 29, 9000000, 3, false);
         Add(8, "ATL", "Buddy", "Hield", "SG", 33, "BHS", 196, 97, 73, 70, 86, 96, 94, 74, 76, 68, 59, 74, 80, 63, 33, 9000000, 2, false);
@@ -1457,7 +1459,7 @@ public class DatabaseManager : MonoBehaviour
         Add(107, "DAL", "Max", "Christie", "SG", 23, "USA", 196, 86, 79, 86, 88, 81, 81, 77, 83, 88, 69, 90, 83, 86, 43, 7700000, 3, false);
         Add(108, "DAL", "Naji", "Marshall", "SF", 28, "USA", 198, 99, 79, 79, 89, 81, 75, 79, 83, 87, 73, 91, 85, 81, 45, 9000000, 2, false);
         Add(109, "DAL", "Caleb", "Martin", "SF", 30, "USA", 196, 92, 78, 78, 87, 81, 81, 75, 79, 87, 71, 89, 85, 81, 42, 9500000, 2, false);
-        Add(112, "DAL", "Ryan", "Nembhard", "PG", 23, "CAN", 180, 81, 76, 82, 96, 79, 75, 98, 94, 67, 53, 80, 90, 77, 27, 400000, 4, false);
+        Add(5, "DAL", "Zaccharie", "Risacher", "SF", 21, "FRA", 203, 90, 76, 84, 85, 87, 89, 81, 85, 75, 63, 77, 87, 73, 34, 13200000, 2, false);
         Add(113, "DAL", "Brandon", "Williams", "PG", 26, "USA", 188, 86, 74, 76, 95, 82, 76, 87, 85, 68, 54, 85, 82, 72, 28, 2200000, 1, false);
         Add(114, "DAL", "Morez", "Johnson Jr.", "PF", 19, "USA", 206, 104, 71, 84, 84, 66, 52, 70, 74, 82, 90, 93, 76, 68, 82, 5700000, 4, true);
         Add(115, "DAL", "Sergio", "de Larrea", "SF", 20, "ESP", 203, 91, 63, 77, 78, 74, 78, 76, 78, 80, 62, 78, 82, 68, 48, 3600000, 4, true);
@@ -1691,12 +1693,11 @@ public class DatabaseManager : MonoBehaviour
         Add(325, "NYK", "Tyler", "Nickel", "SF", 21, "USA", 203, 97, 57, 68, 76, 72, 76, 70, 74, 76, 66, 78, 76, 68, 50, 2000000, 2, true);
         Add(326, "NYK", "Jack", "Kayil", "PG", 20, "DEU", 191, 84, 58, 70, 80, 72, 70, 80, 78, 72, 50, 78, 80, 68, 36, 2000000, 2, true);
 
-        // ── OKC ── 15 jugadores
+        // ── OKC ── 14 jugadores
         Add(327, "OKC", "Shai", "Gilgeous-Alexander", "PG", 27, "CAN", 198, 88, 98, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 99, 77, 62000000, 5, false);
         Add(328, "OKC", "Jalen", "Williams", "SF", 25, "USA", 198, 95, 92, 94, 99, 99, 98, 94, 99, 99, 85, 99, 99, 98, 43, 38000000, 4, false);
         Add(329, "OKC", "Chet", "Holmgren", "C", 24, "USA", 216, 97, 90, 92, 87, 94, 89, 83, 87, 96, 99, 93, 94, 69, 99, 36000000, 4, false);
         Add(330, "OKC", "Isaiah", "Hartenstein", "C", 28, "DEU", 213, 113, 84, 84, 79, 84, 61, 82, 79, 96, 98, 90, 92, 67, 96, 18000000, 3, false);
-        Add(331, "OKC", "Luguentz", "Dort", "SG", 27, "CAN", 193, 99, 84, 84, 95, 86, 76, 84, 85, 99, 70, 99, 91, 97, 42, 16000000, 3, false);
         Add(332, "OKC", "Alex", "Caruso", "SG", 32, "USA", 196, 92, 82, 82, 88, 82, 76, 86, 88, 97, 72, 98, 92, 98, 25, 14000000, 2, false);
         Add(333, "OKC", "Cason", "Wallace", "PG", 22, "USA", 191, 88, 82, 88, 93, 85, 79, 91, 89, 94, 65, 93, 87, 93, 33, 9000000, 4, false);
         Add(334, "OKC", "Kenrich", "Williams", "PF", 30, "USA", 198, 99, 78, 78, 78, 80, 74, 80, 82, 89, 78, 89, 85, 87, 36, 7000000, 2, false);
@@ -1711,9 +1712,9 @@ public class DatabaseManager : MonoBehaviour
         // ── ORL ── 14 jugadores
         Add(342, "ORL", "Paolo", "Banchero", "PF", 26, "USA", 208, 113, 92, 94, 88, 88, 93, 95, 98, 96, 94, 88, 88, 79, 61, 48000000, 5, false);
         Add(343, "ORL", "Nikola", "Vucevic", "C", 35, "MNE", 208, 120, 83, 83, 71, 95, 87, 91, 81, 85, 98, 83, 98, 59, 65, 3900000, 1, false);
-        Add(344, "ORL", "Franz", "Wagner", "SF", 25, "DEU", 206, 100, 88, 90, 95, 97, 94, 92, 95, 95, 78, 95, 95, 86, 46, 30000000, 4, false);
-        Add(345, "ORL", "Desmond", "Bane", "SG", 28, "USA", 196, 98, 88, 88, 99, 99, 99, 92, 99, 86, 72, 94, 99, 88, 41, 35000000, 4, false);
-        Add(346, "ORL", "Jalen", "Suggs", "PG", 25, "USA", 191, 93, 84, 86, 94, 88, 82, 90, 92, 96, 69, 94, 90, 94, 35, 22000000, 4, false);
+        Add(344, "ORL", "Franz", "Wagner", "SF", 25, "DEU", 206, 100, 88, 90, 95, 90, 94, 92, 90, 90, 78, 85, 85, 86, 46, 30000000, 4, false);
+        Add(345, "ORL", "Desmond", "Bane", "SG", 28, "USA", 196, 88, 88, 88, 89, 89, 89, 82, 89, 86, 72, 84, 89, 88, 41, 35000000, 4, false);
+        Add(346, "ORL", "Jalen", "Suggs", "PG", 25, "USA", 191, 93, 84, 86, 94, 88, 82, 70, 72, 76, 69, 74, 90, 94, 35, 22000000, 4, false);
         Add(347, "ORL", "Wendell", "Carter Jr.", "C", 27, "USA", 208, 113, 84, 84, 78, 86, 76, 80, 78, 94, 95, 90, 90, 62, 95, 18000000, 3, false);
         Add(348, "ORL", "Jonathan", "Isaac", "PF", 28, "USA", 208, 104, 82, 82, 84, 76, 66, 72, 76, 98, 86, 98, 84, 96, 66, 17000000, 3, false);
         Add(349, "ORL", "Anthony", "Black", "PG", 22, "USA", 198, 95, 80, 86, 90, 82, 76, 88, 88, 92, 67, 90, 84, 90, 33, 9000000, 4, false);
@@ -3647,7 +3648,7 @@ public class DatabaseManager : MonoBehaviour
             var mvpPlayer = GetPlayerById(topMvp.player_id);
             var mvpTeam = mvpPlayer != null ? GetTeamById(mvpPlayer.team_id) : null;
             string mvpName = mvpPlayer != null ? $"{mvpPlayer.first_name} {mvpPlayer.last_name}" : "";
-            string mvpRatingStr = ((double)topMvp.total_rating / Math.Max(1, topMvp.games)).ToString("F1");
+            string mvpRatingStr = ((double)topMvp.total_rating / Math.Max(1, topMvp.games)).ToString("F1", CultureInfo.InvariantCulture);
 
             // Rookie of the Year
             var rookieCandidates = seasonStats
@@ -3667,7 +3668,7 @@ public class DatabaseManager : MonoBehaviour
                 var rookieTeam = rookiePlayer != null ? GetTeamById(rookiePlayer.team_id) : null;
                 rookieName = rookiePlayer != null ? $"{rookiePlayer.first_name} {rookiePlayer.last_name}" : "";
                 rookieTeamKeyword = rookieTeam?.logo ?? "";
-                rookieRatingStr = ((double)topRookie.total_rating / Math.Max(1, topRookie.games)).ToString("F1");
+                rookieRatingStr = ((double)topRookie.total_rating / Math.Max(1, topRookie.games)).ToString("F1", CultureInfo.InvariantCulture);
             }
 
             _db.Insert(new AwardsRecord
