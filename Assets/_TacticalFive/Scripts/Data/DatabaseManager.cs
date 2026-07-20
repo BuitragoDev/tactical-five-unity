@@ -3453,6 +3453,90 @@ public class DatabaseManager : MonoBehaviour
                   .FirstOrDefault();
     }
 
+    public List<PlayerCareerSeasonRow> GetPlayerCareerHistory(int playerId, int managerId)
+    {
+        if (!EnsureDb()) return new List<PlayerCareerSeasonRow>();
+
+        return _db.Query<PlayerCareerSeasonRow>(
+            @"SELECT g.season_id, s.year_start, s.year_end,
+                     ps.team_id, t.abbreviation AS team_abbreviation,
+                     COUNT(*) AS games,
+                     SUM(ps.points) AS total_points,
+                     SUM(ps.rebounds) AS total_rebounds,
+                     SUM(ps.assists) AS total_assists,
+                     SUM(ps.steals) AS total_steals,
+                     SUM(ps.blocks) AS total_blocks,
+                     SUM(ps.rating) AS total_rating
+              FROM player_game_stats ps
+              JOIN games g ON ps.game_id = g.id
+              JOIN seasons s ON g.season_id = s.id
+              LEFT JOIN teams t ON ps.team_id = t.id
+              WHERE ps.player_id = ? AND g.manager_id = ? AND g.is_played = 1
+              GROUP BY g.season_id
+              ORDER BY g.season_id",
+            playerId, managerId).ToList();
+    }
+
+    public List<PlayerAwardEntry> GetPlayerAwards(int playerId)
+    {
+        if (!EnsureDb()) return new List<PlayerAwardEntry>();
+
+        var allRecords = _db.Query<SeasonAwardRow>(
+            @"SELECT sr.season_id, s.year_start, s.year_end,
+                     sr.season_mvp_id, sr.rookie_of_year_id, sr.finals_mvp_id,
+                     sr.best_defender_id, sr.sixth_man_id, sr.most_improved_id,
+                     sr.all_star_pg_id, sr.all_star_sg_id, sr.all_star_sf_id,
+                     sr.all_star_pf_id, sr.all_star_c_id,
+                     sr.first_team_pg, sr.first_team_sg, sr.first_team_sf,
+                     sr.first_team_pf, sr.first_team_c,
+                     sr.second_team_pg, sr.second_team_sg, sr.second_team_sf,
+                     sr.second_team_pf, sr.second_team_c,
+                     sr.champion_id
+              FROM season_records sr
+              JOIN seasons s ON sr.season_id = s.id
+              ORDER BY sr.season_id").ToList();
+
+        var awards = new List<PlayerAwardEntry>();
+
+        foreach (var r in allRecords)
+        {
+            if (r.season_mvp_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "mvp" });
+            if (r.rookie_of_year_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "roty" });
+            if (r.finals_mvp_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "finals_mvp" });
+            if (r.best_defender_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "dpoy" });
+            if (r.sixth_man_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "sixth_man" });
+            if (r.most_improved_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "mip" });
+            if (r.champion_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "champion" });
+
+            // All-Star
+            if (r.all_star_pg_id == playerId || r.all_star_sg_id == playerId ||
+                r.all_star_sf_id == playerId || r.all_star_pf_id == playerId ||
+                r.all_star_c_id == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "all_star" });
+
+            // First Team
+            if (r.first_team_pg == playerId || r.first_team_sg == playerId ||
+                r.first_team_sf == playerId || r.first_team_pf == playerId ||
+                r.first_team_c == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "first_team" });
+
+            // Second Team
+            if (r.second_team_pg == playerId || r.second_team_sg == playerId ||
+                r.second_team_sf == playerId || r.second_team_pf == playerId ||
+                r.second_team_c == playerId)
+                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "second_team" });
+        }
+
+        return awards;
+    }
+
     public void SaveHistoricalPlayerStats(HistoricalPlayerStatsData stats)
     {
         var existing = GetHistoricalPlayerStats(stats.first_name, stats.last_name);
@@ -5096,4 +5180,57 @@ public class HistoricalStatsAggregateRow
     public int total_triple_doubles { get; set; }
     public int total_minutes { get; set; }
     public int total_rating { get; set; }
+}
+
+public class PlayerCareerSeasonRow
+{
+    public int season_id { get; set; }
+    public int year_start { get; set; }
+    public int year_end { get; set; }
+    public int team_id { get; set; }
+    public string team_abbreviation { get; set; }
+    public int games { get; set; }
+    public int total_points { get; set; }
+    public int total_rebounds { get; set; }
+    public int total_assists { get; set; }
+    public int total_steals { get; set; }
+    public int total_blocks { get; set; }
+    public int total_rating { get; set; }
+}
+
+public class SeasonAwardRow
+{
+    public int season_id { get; set; }
+    public int year_start { get; set; }
+    public int year_end { get; set; }
+    public int season_mvp_id { get; set; }
+    public int rookie_of_year_id { get; set; }
+    public int finals_mvp_id { get; set; }
+    public int best_defender_id { get; set; }
+    public int sixth_man_id { get; set; }
+    public int most_improved_id { get; set; }
+    public int all_star_pg_id { get; set; }
+    public int all_star_sg_id { get; set; }
+    public int all_star_sf_id { get; set; }
+    public int all_star_pf_id { get; set; }
+    public int all_star_c_id { get; set; }
+    public int first_team_pg { get; set; }
+    public int first_team_sg { get; set; }
+    public int first_team_sf { get; set; }
+    public int first_team_pf { get; set; }
+    public int first_team_c { get; set; }
+    public int second_team_pg { get; set; }
+    public int second_team_sg { get; set; }
+    public int second_team_sf { get; set; }
+    public int second_team_pf { get; set; }
+    public int second_team_c { get; set; }
+    public int champion_id { get; set; }
+}
+
+public class PlayerAwardEntry
+{
+    public int season_id { get; set; }
+    public int year_start { get; set; }
+    public int year_end { get; set; }
+    public string award_type { get; set; }
 }

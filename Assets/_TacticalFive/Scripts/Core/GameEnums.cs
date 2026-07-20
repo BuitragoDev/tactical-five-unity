@@ -35,7 +35,8 @@ public enum GameScreen
     Historial,
     Training,
     Quinteto,
-    Manager
+    Manager,
+    Trajectory
 }
 
 public enum GameMode

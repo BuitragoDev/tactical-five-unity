@@ -64,6 +64,7 @@
                                     <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
                                     <ui:Label name="DetailPlayerPos"  class="detail-player-pos"  text="" />
                                     <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
+                                    <ui:Label name="DetailLinkTrajectory" class="detail-link-trajectory" text="VER TRAYECTORIA" />
                                 </ui:VisualElement>
                                 <ui:VisualElement class="detail-ovr-block">
                                     <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />

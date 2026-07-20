@@ -42,6 +42,9 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument editorDocument;
     [SerializeField] private UIDocument historialDocument;
     [SerializeField] private UIDocument managerDocument;
+    [SerializeField] private UIDocument trajectoryDocument;
+
+    public static int SelectedPlayerId { get; set; }
 
     public GameMode CurrentMode { get; private set; } = GameMode.None;
     public GameScreen CurrentScreen { get; private set; } = GameScreen.MainMenu;
@@ -173,6 +176,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Manager:
                 ShowOnly(managerDocument);
                 break;
+            case GameScreen.Trajectory:
+                ShowOnly(trajectoryDocument);
+                break;
         }
     }
 
@@ -215,6 +221,7 @@ public class ScreenManager : MonoBehaviour
 
         if (quintetoDocument != null) quintetoDocument.gameObject.SetActive(false);
         if (managerDocument != null) managerDocument.gameObject.SetActive(false);
+        if (trajectoryDocument != null) trajectoryDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

@@ -35,6 +35,7 @@ public class RosterController : MonoBehaviour
     private Label _detailPlayerName;
     private Label _detailPlayerPos;
     private Label _detailPlayerMeta;
+    private Label _detailLinkTrajectory;
     private Label _detailOvr;
     private Label _detailHealth;
     private VisualElement _detailAttrs;
@@ -213,6 +214,7 @@ public class RosterController : MonoBehaviour
         _detailPlayerName = _root.Q<Label>("DetailPlayerName");
         _detailPlayerPos = _root.Q<Label>("DetailPlayerPos");
         _detailPlayerMeta = _root.Q<Label>("DetailPlayerMeta");
+        _detailLinkTrajectory = _root.Q<Label>("DetailLinkTrajectory");
         _detailOvr = _root.Q<Label>("DetailOvr");
         _detailHealth = _root.Q<Label>("DetailHealth");
         _detailAttrs = _root.Q<VisualElement>("DetailAttrs");
@@ -540,6 +542,17 @@ public class RosterController : MonoBehaviour
                     CursorManager.Instance.RegisterHandCursor(el);
             }
         }
+
+        // Trajectory link
+        _detailLinkTrajectory?.RegisterCallback<ClickEvent>(_ =>
+        {
+            if (_selectedPlayer == null) return;
+            PlayClick();
+            ScreenManager.SelectedPlayerId = _selectedPlayer.id;
+            ScreenManager.Instance.GoTo(GameScreen.Trajectory);
+        });
+        if (CursorManager.Instance != null && _detailLinkTrajectory != null)
+            CursorManager.Instance.RegisterHandCursor(_detailLinkTrajectory);
     }
 
     void Refresh()

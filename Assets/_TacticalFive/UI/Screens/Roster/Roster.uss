@@ -269,7 +269,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 18px;
+    padding: 8px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     border-top-width: 0;
@@ -311,6 +311,17 @@
     font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
+}
+.detail-link-trajectory {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(42, 95, 201);
+    margin-top: 4px;
+    cursor: pointer;
+    -unity-text-align: middle-left;
+}
+.detail-link-trajectory:hover {
+    color: rgb(82, 135, 241);
 }
 .detail-ovr-block {
     flex-direction: column;

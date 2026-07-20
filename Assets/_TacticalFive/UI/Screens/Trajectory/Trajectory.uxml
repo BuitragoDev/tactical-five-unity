@@ -1,0 +1,164 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Trajectory.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
+
+    <ui:VisualElement name="TrajectoryRoot" class="trajectory-root">
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="trajectory-main">
+
+            <!-- CONTENT -->
+            <ui:VisualElement class="trajectory-content">
+
+                <!-- Cabecera del jugador -->
+                <ui:VisualElement class="trajectory-header">
+                    <ui:VisualElement name="TrajectoryPhoto" class="trajectory-photo" />
+                    <ui:VisualElement class="trajectory-name-block">
+                        <ui:Label name="TrajectoryPlayerName" class="trajectory-player-name" text="" />
+                        <ui:Label name="TrajectoryPlayerPos" class="trajectory-player-pos" text="" />
+                        <ui:VisualElement class="trajectory-role-row">
+                            <ui:Label name="TrajectoryRoleName" class="trajectory-role-text" text="" />
+                            <ui:VisualElement name="TrajectoryRoleIcon" class="trajectory-role-icon" />
+                        </ui:VisualElement>
+                        <ui:Label name="TrajectoryMeta" class="trajectory-meta" text="" />
+                        <ui:Label name="TrajectoryNationality" class="trajectory-nationality" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trajectory-ovr-block">
+                        <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />
+                        <ui:Label class="trajectory-ovr-label" text="MED" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Logros -->
+                <ui:VisualElement name="TrajectoryAwards" class="trajectory-awards" style="display: none;">
+                    <ui:Label class="trajectory-section-label" text="LOGROS" />
+                    <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
+                </ui:VisualElement>
+
+                <!-- Tabla de estadísticas -->
+                <ui:Label class="trajectory-section-label" text="ESTADÍSTICAS POR TEMPORADA" />
+                <ui:VisualElement class="trajectory-table">
+                    <ui:VisualElement class="trajectory-table-header">
+                        <ui:Label class="th-season" text="TEMPORADA" />
+                        <ui:Label class="th-team" text="EQ" />
+                        <ui:Label class="th-gp" text="PJ" />
+                        <ui:Label class="th-pts" text="PTS" />
+                        <ui:Label class="th-reb" text="REB" />
+                        <ui:Label class="th-ast" text="AST" />
+                        <ui:Label class="th-stl" text="ROB" />
+                        <ui:Label class="th-blk" text="TAP" />
+                        <ui:Label class="th-val" text="VAL" />
+                    </ui:VisualElement>
+                    <ui:ScrollView class="trajectory-table-body-scroll"
+                                   horizontal-scrolling-enabled="false"
+                                   mode="Vertical">
+                        <ui:VisualElement name="TrajectoryTableBody" class="trajectory-table-body" />
+                    </ui:ScrollView>
+                </ui:VisualElement>
+
+                <!-- Estado vacío -->
+                <ui:VisualElement name="TrajectoryEmpty" class="trajectory-empty">
+                    <ui:Label class="trajectory-empty-text"
+                        text="Este jugador no ha disputado ningún partido todavía." />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+    <!-- ══ MODAL CONFIGURACIÓN ══ -->
+    <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigModalBox" class="modal-box">
+            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:VisualElement class="modal-body">
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Música" />
+                        <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:VisualElement class="settings-quality-row">
+                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:VisualElement class="settings-quality-options">
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="JUEGO" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
+    <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
+                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
+    <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
+                <ui:Label class="modal-paragraph" text="Se cerrará la aplicación. Asegúrate de haber guardado tu progreso si lo deseas." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+</ui:UXML>
