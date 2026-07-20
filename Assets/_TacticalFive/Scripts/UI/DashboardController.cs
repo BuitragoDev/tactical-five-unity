@@ -2101,7 +2101,7 @@ public class DashboardController : MonoBehaviour
         foreach (var p in players)
         {
             if (p.injury_days > 0) continue;
-            p.fisico = Mathf.Min(99, p.fisico + 8);
+            p.fisico = Mathf.Min(99, p.fisico + 12);
             DatabaseManager.Instance.UpdatePlayer(p);
         }
     }

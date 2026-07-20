@@ -180,7 +180,7 @@ public static class GameSimulator
         {
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
             if (player == null) continue;
-            int loss = Mathf.RoundToInt(ps.minutes * 0.4f);
+            int loss = Mathf.RoundToInt(ps.minutes * 0.25f);
             if (homeBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
             player.fisico = Mathf.Max(0, player.fisico - loss);
             DatabaseManager.Instance.UpdatePlayer(player);
@@ -189,7 +189,7 @@ public static class GameSimulator
         {
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
             if (player == null) continue;
-            int loss = Mathf.RoundToInt(ps.minutes * 0.4f);
+            int loss = Mathf.RoundToInt(ps.minutes * 0.25f);
             if (awayBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
             player.fisico = Mathf.Max(0, player.fisico - loss);
             DatabaseManager.Instance.UpdatePlayer(player);
