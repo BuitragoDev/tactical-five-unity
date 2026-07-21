@@ -388,6 +388,8 @@ public class TrajectoryController : MonoBehaviour
         "dpoy" => "trajectory-award-badge--dpoy",
         "sixth_man" => "trajectory-award-badge--sixth_man",
         "mip" => "trajectory-award-badge--mip",
+        "player_month" => "trajectory-award-badge--player_month",
+        "rookie_month" => "trajectory-award-badge--rookie_month",
         _ => ""
     };
 
@@ -403,9 +405,11 @@ public class TrajectoryController : MonoBehaviour
             "second_team" => "2º Quinteto",
             "roty" => "Rookie del Año",
             "dpoy" => "Mejor Defensor",
-            "sixth_man" => "Sexto Hombre",
-            "mip" => "Jugador + Mejorado",
-            _ => award.award_type
+        "sixth_man" => "Sexto Hombre",
+        "mip" => "Jugador + Mejorado",
+        "player_month" => "Jugador del Mes",
+        "rookie_month" => "Rookie del Mes",
+        _ => award.award_type
         };
         return $"{label} ({award.year_start}-{award.year_end})";
     }

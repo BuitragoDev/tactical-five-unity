@@ -21,7 +21,7 @@
                 <!-- Title -->
                 <ui:VisualElement class="messages-title-row">
                     <ui:Label class="messages-icon" text="📫" />
-                    <ui:Label class="messages-title" text="NOTICIAS" />
+                    <ui:Label class="messages-title" text="BANDEJA DE ENTRADA" />
                 </ui:VisualElement>
 
                 <!-- Message list -->

@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using SQLite;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using System.Linq;
 
 public class DashboardController : MonoBehaviour
@@ -388,6 +389,7 @@ public class DashboardController : MonoBehaviour
         });
         _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("SubmenuRecords")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Records); });
+        _root.Q<Button>("SubmenuPremios")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Premios); });
         _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
@@ -888,6 +890,8 @@ public class DashboardController : MonoBehaviour
                        && g.is_played == 0);
             if (allRegularPlayed)
             {
+                // Evaluate April before transitioning (use May 1 so prevMonth = 4 / April)
+                EvaluateMonthlyAwards(new System.DateTime(_season.year_end, 5, 1));
                 PlayoffsGenerator.GeneratePlayIn(_season, _manager.id);
                 _season.phase = "playin";
                 DatabaseManager.Instance.UpdateSeason(_season);
@@ -1000,6 +1004,13 @@ public class DashboardController : MonoBehaviour
                     is_read = 0
                 });
                 ShowTradeDeadlineModal();
+            }
+
+            // Monthly awards evaluation (1st of Dec through Apr)
+            if (_season.phase == "regular" && newDate.Day == 1
+                && (newDate.Month == 12 || newDate.Month <= 4))
+            {
+                EvaluateMonthlyAwards(newDate);
             }
         }
         DatabaseManager.Instance.UpdateSeason(_season);
@@ -3572,6 +3583,66 @@ public class DashboardController : MonoBehaviour
         _manager.morale = Mathf.Clamp(_manager.morale + moraleChange, 0, 100);
 
         DatabaseManager.Instance.SaveManager(_manager);
+    }
+
+    void EvaluateMonthlyAwards(System.DateTime evaluationDate)
+    {
+        string prevMonthStart, prevMonthEnd;
+        int prevMonth = evaluationDate.Month - 1;
+        int prevYear = evaluationDate.Year;
+        if (prevMonth == 0) { prevMonth = 12; prevYear--; }
+
+        // Awards are for the PREVIOUS month's games, so use the previous month's name
+        string monthName = new System.DateTime(prevYear, prevMonth, 1).ToString("MMMM", new System.Globalization.CultureInfo("es-ES"));
+
+        if (prevMonth == 4 && evaluationDate.Month == 5)
+        {
+            // End-of-season April evaluation: Apr 1 to end of regular season
+            prevMonthStart = $"{prevYear}-04-01";
+            prevMonthEnd = _season.current_date;
+        }
+        else
+        {
+            prevMonthStart = $"{prevYear}-{prevMonth:D2}-01";
+            prevMonthEnd = $"{prevYear}-{prevMonth:D2}-{System.DateTime.DaysInMonth(prevYear, prevMonth)}";
+        }
+
+        var winners = DatabaseManager.Instance.EvaluateMonthlyAwards(
+            _season.id, monthName, prevMonthStart, prevMonthEnd, _manager.id, _myTeam.id);
+
+        if (winners.Count == 0) return;
+
+        // Build news message
+        var managers = winners.Where(w => w.award_type == "manager").OrderBy(w => w.rank).ToList();
+        var players = winners.Where(w => w.award_type == "player").OrderBy(w => w.rank).ToList();
+        var rookies = winners.Where(w => w.award_type == "rookie").OrderBy(w => w.rank).ToList();
+
+        var body = new System.Text.StringBuilder();
+        body.AppendLine($"<b>MANAGER DEL MES - {monthName}</b>");
+        foreach (var m in managers)
+            body.AppendLine($"{m.rank}. {m.team_name} ({(m.value * 100):F1}%)");
+        body.AppendLine();
+        body.AppendLine($"<b>JUGADOR DEL MES - {monthName}</b>");
+        foreach (var p in players)
+            body.AppendLine($"{p.rank}. {p.player_name} ({p.team_name}) - {p.value:F1} VAL");
+        body.AppendLine();
+        body.AppendLine($"<b>ROOKIE DEL MES - {monthName}</b>");
+        foreach (var r in rookies)
+            body.AppendLine($"{r.rank}. {r.player_name} ({r.team_name}) - {r.value:F1} VAL");
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 2,
+            sender_id = 0,
+            title = $"Premios del Mes de {monthName}",
+            body = body.ToString(),
+            game_day = _season.current_game_day,
+            game_date = _season.current_date,
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            is_read = 0
+        });
     }
 
     void ProcessMonthlyPayroll(int gameDay)

@@ -27,6 +27,7 @@ public static class SidebarController
         new() { screen = GameScreen.Standings,   navName = "NavStandings" },
         new() { screen = GameScreen.Palmares,    navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPalmares" },
         new() { screen = GameScreen.Records,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuRecords" },
+        new() { screen = GameScreen.Premios,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPremios" },
         new() { screen = GameScreen.Playoffs,    navName = "NavPlayoffs" },
         new() { screen = GameScreen.Stats,       navName = "NavStats" },
         new() { screen = GameScreen.Market,      navName = "NavMarket",    submenuName = "MarketSubmenu",   submenuItemName = "SubmenuOfertas" },
@@ -63,28 +64,18 @@ public static class SidebarController
         var container = root.childCount > 0 ? root[0] : root;
         if (container == null) container = root;
 
+        // Check if sidebar already exists (idempotent)
+        var existing = container.Q<VisualElement>("Sidebar");
+        if (existing != null)
+        {
+            UpdateActiveState(existing, activeScreen);
+            return;
+        }
+
         var sidebar = template.CloneTree();
         container.Insert(0, sidebar);
 
-        var mapping = FindMapping(activeScreen);
-        if (mapping != null)
-        {
-            var activeNav = sidebar.Q<Button>(mapping.Value.navName);
-            if (activeNav != null) activeNav.AddToClassList("nav-item--active");
-
-            if (!string.IsNullOrEmpty(mapping.Value.submenuName))
-            {
-                var activeSub = sidebar.Q<VisualElement>(mapping.Value.submenuName);
-                if (activeSub != null) activeSub.AddToClassList("nav-submenu--visible");
-            }
-
-            if (!string.IsNullOrEmpty(mapping.Value.submenuItemName))
-            {
-                var activeItem = sidebar.Q<Button>(mapping.Value.submenuItemName);
-                if (activeItem != null) activeItem.AddToClassList("nav-submenu-item--active");
-            }
-        }
-
+        ApplyActiveState(sidebar, activeScreen);
         LoadIcons(sidebar);
 
         if (CursorManager.Instance != null)
@@ -96,7 +87,7 @@ public static class SidebarController
                 "NavMarket", "NavFinances", "NavArena", "NavManager", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados",
-                "SubmenuPalmares", "SubmenuRecords",
+                "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
             };
@@ -107,6 +98,41 @@ public static class SidebarController
                     CursorManager.Instance.RegisterHandCursor(el);
             }
         }
+    }
+
+    static void ApplyActiveState(VisualElement sidebar, GameScreen activeScreen)
+    {
+        var mapping = FindMapping(activeScreen);
+        if (mapping == null) return;
+
+        var activeNav = sidebar.Q<Button>(mapping.Value.navName);
+        if (activeNav != null) activeNav.AddToClassList("nav-item--active");
+
+        if (!string.IsNullOrEmpty(mapping.Value.submenuName))
+        {
+            var activeSub = sidebar.Q<VisualElement>(mapping.Value.submenuName);
+            if (activeSub != null) activeSub.AddToClassList("nav-submenu--visible");
+        }
+
+        if (!string.IsNullOrEmpty(mapping.Value.submenuItemName))
+        {
+            var activeItem = sidebar.Q<Button>(mapping.Value.submenuItemName);
+            if (activeItem != null) activeItem.AddToClassList("nav-submenu-item--active");
+        }
+    }
+
+    static void UpdateActiveState(VisualElement sidebar, GameScreen activeScreen)
+    {
+        // Remove active state from all nav items
+        foreach (var nav in sidebar.Query<Button>(null, "nav-item").Build())
+            nav.RemoveFromClassList("nav-item--active");
+        foreach (var sub in sidebar.Query<VisualElement>(null, "nav-submenu").Build())
+            sub.RemoveFromClassList("nav-submenu--visible");
+        foreach (var item in sidebar.Query<Button>(null, "nav-submenu-item").Build())
+            item.RemoveFromClassList("nav-submenu-item--active");
+
+        // Apply active for the current screen
+        ApplyActiveState(sidebar, activeScreen);
     }
 
     static ScreenNavMapping? FindMapping(GameScreen screen)

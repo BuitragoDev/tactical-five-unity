@@ -174,6 +174,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<AllStarRecord>();
         _db.CreateTable<PlayerSeasonStatRow>();
         _db.CreateTable<AllStarAppearanceSeed>();
+        _db.CreateTable<MonthlyAwardData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -500,6 +501,28 @@ public class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for player_season_stats: {ex.Message}");
         }
+
+        // Create monthly_awards table if missing (for monthly awards)
+        try
+        {
+            _db.Execute("CREATE TABLE IF NOT EXISTS monthly_awards (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "season_id INTEGER, " +
+                "month_name TEXT, " +
+                "award_type TEXT, " +
+                "rank INTEGER, " +
+                "manager_id INTEGER, " +
+                "player_id INTEGER, " +
+                "team_id INTEGER, " +
+                "team_name TEXT, " +
+                "player_name TEXT, " +
+                "value REAL" +
+            ")");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for monthly_awards: {ex.Message}");
+        }
     }
 
     class ColumnInfo
@@ -571,7 +594,7 @@ public class DatabaseManager : MonoBehaviour
             SeedCoachRankings();
     }
 
-    bool EnsureDb()
+    public bool EnsureDb()
     {
         if (_db == null)
         {
@@ -3577,6 +3600,18 @@ public class DatabaseManager : MonoBehaviour
                 awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "second_team" });
         }
 
+        // Monthly awards (player / rookie of the month)
+        var monthlyAwards = _db.Query<MonthlyAwardData>(
+            "SELECT * FROM monthly_awards WHERE player_id = ? AND award_type IN ('player_month', 'rookie_month')",
+            playerId).ToList();
+
+        foreach (var m in monthlyAwards)
+        {
+            var season = _db.Find<SeasonData>(m.season_id);
+            if (season != null)
+                awards.Add(new PlayerAwardEntry { season_id = m.season_id, year_start = season.year_start, year_end = season.year_end, award_type = m.award_type });
+        }
+
         return awards;
     }
 
@@ -4185,6 +4220,171 @@ public class DatabaseManager : MonoBehaviour
         return _db.Table<SeasonGameRecordData>()
                   .Where(r => r.team_id == teamId && r.season_id == seasonId && r.stat_type == statType)
                   .FirstOrDefault();
+    }
+
+    public List<MonthlyAwardData> EvaluateMonthlyAwards(int seasonId, string monthName,
+        string startDate, string endDate, int managerId, int myTeamId)
+    {
+        if (!EnsureDb()) return new List<MonthlyAwardData>();
+
+        // Clear previous evaluations for this season/month
+        _db.Execute("DELETE FROM monthly_awards WHERE season_id = ? AND month_name = ?", seasonId, monthName);
+
+        var results = new List<MonthlyAwardData>();
+
+        // ── Manager of the Month ──
+        var managerAwards = _db.Query<MonthlyManagerAwardRow>(@"
+            SELECT t.id AS team_id, t.name AS team_name,
+                   SUM(CASE WHEN (g.home_team_id = t.id AND g.home_score > g.away_score)
+                             OR (g.away_team_id = t.id AND g.away_score > g.home_score) THEN 1 ELSE 0 END) AS wins,
+                   COUNT(*) AS games,
+                   SUM(CASE WHEN g.home_team_id = t.id THEN g.home_score - g.away_score
+                            ELSE g.away_score - g.home_score END) AS diff
+            FROM games g
+            JOIN teams t ON t.id IN (g.home_team_id, g.away_team_id)
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.game_date >= ? AND g.game_date <= ?
+            GROUP BY t.id
+            HAVING games >= 5
+            ORDER BY CAST(wins AS REAL) / games DESC, diff DESC
+            LIMIT 3",
+            seasonId, startDate, endDate);
+
+        for (int i = 0; i < managerAwards.Count; i++)
+        {
+            var m = managerAwards[i];
+            int? mgrId = m.team_id == myTeamId ? (int?)managerId : null;
+            float winPct = m.games > 0 ? (float)m.wins / m.games : 0f;
+            results.Add(new MonthlyAwardData
+            {
+                season_id = seasonId,
+                month_name = monthName,
+                award_type = "manager",
+                rank = i + 1,
+                manager_id = mgrId,
+                team_id = m.team_id,
+                team_name = m.team_name,
+                player_name = m.team_name,
+                value = winPct
+            });
+        }
+
+        // ── Player of the Month ──
+        var playerAwards = _db.Query<MonthlyPlayerAwardRow>(@"
+            SELECT ps.player_id, p.first_name || ' ' || p.last_name AS player_name,
+                   p.team_id, t.name AS team_name,
+                   AVG(ps.rating) AS avg_rating, COUNT(*) AS games
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN players p ON ps.player_id = p.id
+            LEFT JOIN teams t ON p.team_id = t.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.game_date >= ? AND g.game_date <= ?
+            GROUP BY ps.player_id
+            HAVING games >= 5
+            ORDER BY avg_rating DESC
+            LIMIT 3",
+            seasonId, startDate, endDate);
+
+        for (int i = 0; i < playerAwards.Count; i++)
+        {
+            var p = playerAwards[i];
+            results.Add(new MonthlyAwardData
+            {
+                season_id = seasonId,
+                month_name = monthName,
+                award_type = "player",
+                rank = i + 1,
+                player_id = p.player_id,
+                player_name = p.player_name,
+                team_id = p.team_id,
+                team_name = p.team_name,
+                value = (float)p.avg_rating
+            });
+        }
+
+        // ── Rookie of the Month ──
+        var rookieAwards = _db.Query<MonthlyPlayerAwardRow>(@"
+            SELECT ps.player_id, p.first_name || ' ' || p.last_name AS player_name,
+                   p.team_id, t.name AS team_name,
+                   AVG(ps.rating) AS avg_rating, COUNT(*) AS games
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN players p ON ps.player_id = p.id AND p.is_rookie = 1
+            LEFT JOIN teams t ON p.team_id = t.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.game_date >= ? AND g.game_date <= ?
+            GROUP BY ps.player_id
+            ORDER BY avg_rating DESC
+            LIMIT 3",
+            seasonId, startDate, endDate);
+
+        for (int i = 0; i < rookieAwards.Count; i++)
+        {
+            var r = rookieAwards[i];
+            results.Add(new MonthlyAwardData
+            {
+                season_id = seasonId,
+                month_name = monthName,
+                award_type = "rookie",
+                rank = i + 1,
+                player_id = r.player_id,
+                player_name = r.player_name,
+                team_id = r.team_id,
+                team_name = r.team_name,
+                value = (float)r.avg_rating
+            });
+        }
+
+        // Persist all
+        foreach (var award in results)
+            _db.Insert(award);
+
+        return results;
+    }
+
+    public List<MonthlyAwardData> GetMonthlyAwardsForSeason(int seasonId)
+    {
+        if (!EnsureDb()) return new List<MonthlyAwardData>();
+        return _db.Query<MonthlyAwardData>(@"
+            SELECT * FROM monthly_awards
+            WHERE season_id = ?
+            ORDER BY
+                CASE month_name
+                    WHEN 'noviembre' THEN 0
+                    WHEN 'diciembre' THEN 1
+                    WHEN 'enero' THEN 2
+                    WHEN 'febrero' THEN 3
+                    WHEN 'marzo' THEN 4
+                    ELSE 5
+                END,
+                CASE award_type
+                    WHEN 'manager' THEN 0
+                    WHEN 'player' THEN 1
+                    ELSE 2
+                END,
+                rank", seasonId).ToList();
+    }
+
+    public int CountManagerOfTheMonthWins(int managerId)
+    {
+        if (!EnsureDb()) return 0;
+        return _db.Table<MonthlyAwardData>()
+                  .Count(a => a.manager_id == managerId && a.award_type == "manager" && a.rank == 1);
+    }
+
+    public int CountPlayerOfTheMonthWins(int playerId)
+    {
+        if (!EnsureDb()) return 0;
+        return _db.Table<MonthlyAwardData>()
+                  .Count(a => a.player_id == playerId && a.award_type == "player" && a.rank == 1);
+    }
+
+    public int CountRookieOfTheMonthWins(int playerId)
+    {
+        if (!EnsureDb()) return 0;
+        return _db.Table<MonthlyAwardData>()
+                  .Count(a => a.player_id == playerId && a.award_type == "rookie" && a.rank == 1);
     }
 
     public void CheckAndUpdateRecords(GameData game, List<GameSimulator.PlayerStatSnapshot> playerStats, int teamId)
@@ -5319,4 +5519,23 @@ public class PlayerAwardEntry
     public int year_start { get; set; }
     public int year_end { get; set; }
     public string award_type { get; set; }
+}
+
+public class MonthlyManagerAwardRow
+{
+    public int team_id { get; set; }
+    public string team_name { get; set; }
+    public int wins { get; set; }
+    public int games { get; set; }
+    public int diff { get; set; }
+}
+
+public class MonthlyPlayerAwardRow
+{
+    public int player_id { get; set; }
+    public string player_name { get; set; }
+    public int team_id { get; set; }
+    public string team_name { get; set; }
+    public double avg_rating { get; set; }
+    public int games { get; set; }
 }

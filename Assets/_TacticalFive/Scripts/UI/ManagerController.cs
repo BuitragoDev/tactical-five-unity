@@ -33,6 +33,9 @@ public class ManagerController : MonoBehaviour
     private VisualElement _ringsTrophy;
     private Label _ringsCount;
 
+    // Monthly Awards
+    private Label _monthlyAwards;
+
     // Ranking
     private VisualElement _rankingBody;
 
@@ -107,6 +110,8 @@ public class ManagerController : MonoBehaviour
 
         _ringsTrophy = _root.Q<VisualElement>("ManagerRingsTrophy");
         _ringsCount = _root.Q<Label>("ManagerRingsCount");
+
+        _monthlyAwards = _root.Q<Label>("ManagerMonthlyAwards");
 
         _rankingBody = _root.Q<VisualElement>("RankingBody");
 
@@ -233,6 +238,7 @@ public class ManagerController : MonoBehaviour
         });
         _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("SubmenuRecords")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Records); });
+        _root.Q<Button>("SubmenuPremios")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Premios); });
         _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
@@ -332,6 +338,7 @@ public class ManagerController : MonoBehaviour
         RefreshRelationships();
         RefreshObjective();
         RefreshRings();
+        RefreshMonthlyAwards();
         RefreshRanking();
     }
 
@@ -594,6 +601,16 @@ public class ManagerController : MonoBehaviour
         }
 
         _ringsCount.text = rings.ToString();
+    }
+
+    // ── MONTHLY AWARDS ──────────────────────────────────────────
+
+    void RefreshMonthlyAwards()
+    {
+        if (_manager == null || _monthlyAwards == null) return;
+
+        int count = DatabaseManager.Instance.CountManagerOfTheMonthWins(_manager.id);
+        _monthlyAwards.text = count.ToString();
     }
 
     // ── RANKING ──────────────────────────────────────────────────

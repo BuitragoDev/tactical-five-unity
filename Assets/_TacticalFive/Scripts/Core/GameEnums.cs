@@ -36,7 +36,8 @@ public enum GameScreen
     Training,
     Quinteto,
     Manager,
-    Trajectory
+    Trajectory,
+    Premios
 }
 
 public enum GameMode

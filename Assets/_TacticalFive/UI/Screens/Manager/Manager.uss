@@ -208,6 +208,25 @@
 
 /* Rings panel */
 
+.manager-awards-row {
+    flex-direction: row;
+    margin-bottom: 14px;
+}
+
+.manager-awards-col {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.manager-awards-col--left {
+    margin-right: 7px;
+}
+
+.manager-awards-col--right {
+    margin-left: 7px;
+}
+
 .manager-rings-row {
     flex-direction: row;
     align-items: center;

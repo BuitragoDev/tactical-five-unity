@@ -28,6 +28,21 @@ public static class HeaderController
             var container = root.childCount > 0 ? root[0] : root;
             if (container == null) container = root;
 
+            // If header already exists, just repopulate it (idempotent)
+            var existingHeader = container.Q<VisualElement>("TopHeader");
+            if (existingHeader != null)
+            {
+                Populate(existingHeader);
+                var existingBtn = existingHeader.Q<Button>("BtnAction");
+                if (existingBtn != null)
+                {
+                    existingBtn.ClearBindings();
+                    existingBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
+                }
+                LoadTeamLogo(existingHeader);
+                return;
+            }
+
             // After SidebarController inserted the sidebar at index 0, layout is:
             //   container (flex-direction: row originally)
             //     [0] sidebar

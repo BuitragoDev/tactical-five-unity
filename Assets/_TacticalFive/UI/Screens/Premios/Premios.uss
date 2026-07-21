@@ -1,0 +1,142 @@
+.premios-root {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.premios-main {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.premios-content {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 20px;
+}
+
+.premios-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: white;
+    font-weight: bold;
+    margin-bottom: 20px;
+    unity-text-align: middle-center;
+}
+
+.premios-scroll-wrapper {
+    flex-grow: 1;
+}
+
+.premios-scroll {
+    flex-grow: 1;
+}
+
+.premios-body {
+    flex-direction: column;
+}
+
+/* Months row: 2 columns */
+.premios-months-row {
+    flex-direction: row;
+    margin-bottom: 24px;
+}
+
+/* Month Section */
+.premios-month-section {
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    background-color: rgba(30, 30, 30, 0.9);
+    border-radius: 6px;
+    padding: 16px;
+    margin: 0 6px;
+}
+
+.premios-month-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(255, 183, 77);
+    font-weight: bold;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+/* Winners row: 3 columns */
+.premios-winners-row {
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+/* Card column */
+.premios-card {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(20, 24, 34, 0.8);
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgb(35, 41, 58);
+    padding: 14px 10px;
+    margin-right: 12px;
+}
+
+.premios-card:last-child {
+    margin-right: 0;
+}
+
+.premios-card-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(140, 156, 188);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    unity-text-align: middle-center;
+}
+
+.premios-card-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 18px;
+    color: white;
+    unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.premios-card-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(130, 146, 175);
+    unity-text-align: middle-center;
+    margin-bottom: 6px;
+}
+
+.premios-card-stat {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(100, 200, 255);
+    unity-text-align: middle-center;
+}
+
+.premios-card-empty {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(100, 100, 100);
+    font-style: italic;
+    margin-top: 4px;
+}
+
+/* Pending state (whole month) */
+.premios-pending {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(100, 100, 100);
+    font-style: italic;
+    padding-left: 8px;
+}

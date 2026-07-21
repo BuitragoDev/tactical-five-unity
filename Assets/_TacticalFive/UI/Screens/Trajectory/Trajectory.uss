@@ -260,6 +260,20 @@
     border-color: rgba(39, 174, 96, 0.2);
 }
 
+.trajectory-award-badge--player_month {
+    background-color: rgba(241, 196, 15, 0.15);
+    color: rgb(241, 196, 15);
+    border-width: 1px;
+    border-color: rgba(241, 196, 15, 0.3);
+}
+
+.trajectory-award-badge--rookie_month {
+    background-color: rgba(46, 204, 113, 0.15);
+    color: rgb(46, 204, 113);
+    border-width: 1px;
+    border-color: rgba(46, 204, 113, 0.3);
+}
+
 /* ── Tabla ── */
 .trajectory-table {
     flex-direction: column;

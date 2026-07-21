@@ -98,13 +98,23 @@
                         <ui:Label name="ManagerObjectiveStatus" class="manager-objective-status" text="" />
                     </ui:VisualElement>
 
-                    <!-- Anillos NBA -->
-                    <ui:VisualElement class="manager-panel manager-rings-panel">
-                        <ui:VisualElement class="manager-rings-row">
-                            <ui:VisualElement name="ManagerRingsTrophy" class="manager-rings-trophy" />
-                            <ui:VisualElement class="manager-rings-info">
-                                <ui:Label class="manager-rings-label" text="ANILLOS DE LA NBA" />
-                                <ui:Label name="ManagerRingsCount" class="manager-rings-count" text="0" />
+                    <!-- Anillos + Manager del Mes (dos columnas) -->
+                    <ui:VisualElement class="manager-awards-row">
+                        <ui:VisualElement class="manager-panel manager-rings-panel manager-awards-col manager-awards-col--left">
+                            <ui:VisualElement class="manager-rings-row">
+                                <ui:VisualElement name="ManagerRingsTrophy" class="manager-rings-trophy" />
+                                <ui:VisualElement class="manager-rings-info">
+                                    <ui:Label class="manager-rings-label" text="CAMPEONATOS GANADOS" />
+                                    <ui:Label name="ManagerRingsCount" class="manager-rings-count" text="0" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="manager-panel manager-awards-col manager-awards-col--right">
+                            <ui:VisualElement class="manager-rings-row">
+                                <ui:VisualElement class="manager-rings-info">
+                                    <ui:Label class="manager-rings-label" text="MANAGER DEL MES" />
+                                    <ui:Label name="ManagerMonthlyAwards" class="manager-rings-count" text="0" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
