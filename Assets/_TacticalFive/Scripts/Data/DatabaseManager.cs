@@ -172,6 +172,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<DraftPickData>();
         _db.CreateTable<CoachRankingData>();
         _db.CreateTable<AllStarRecord>();
+        _db.CreateTable<PlayerSeasonStatRow>();
         _db.CreateTable<AllStarAppearanceSeed>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
@@ -469,6 +470,35 @@ public class DatabaseManager : MonoBehaviour
         catch (System.Exception ex)
         {
             Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
+        }
+
+        // Create player_season_stats table if missing (for career history across seasons)
+        try
+        {
+            _db.Execute("CREATE TABLE IF NOT EXISTS player_season_stats (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "player_id INTEGER, " +
+                "season_id INTEGER, " +
+                "year_start INTEGER, " +
+                "year_end INTEGER, " +
+                "team_id INTEGER, " +
+                "team_abbreviation TEXT, " +
+                "team_name TEXT, " +
+                "games INTEGER, " +
+                "total_minutes REAL, " +
+                "total_points INTEGER, " +
+                "total_rebounds INTEGER, " +
+                "total_assists INTEGER, " +
+                "total_steals INTEGER, " +
+                "total_blocks INTEGER, " +
+                "total_rating INTEGER" +
+            ")");
+            _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerSeasonStats_PlayerId ON player_season_stats(player_id)");
+            _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerSeasonStats_SeasonId ON player_season_stats(season_id)");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for player_season_stats: {ex.Message}");
         }
     }
 
@@ -1377,7 +1407,7 @@ public class DatabaseManager : MonoBehaviour
                 role = calcOvr >= 88 ? PlayerRole.Estrella
                      : calcOvr >= 78 ? PlayerRole.Titular
                      : calcOvr >= 68 ? PlayerRole.Banquillo
-                     :                 PlayerRole.UltimoRecurso
+                     : PlayerRole.UltimoRecurso
             });
         }
 
@@ -1609,21 +1639,21 @@ public class DatabaseManager : MonoBehaviour
 
         // ── LAL ── 17 jugadores
         Add(215, "LAL", "Luka", "Doncic", "PG", 27, "SVN", 201, 104, 95, 97, 99, 99, 99, 99, 99, 89, 79, 89, 99, 99, 77, 55000000, 5, false);
-        Add(216, "LAL", "Walker", "Kessler", "C", 25, "USA", 213, 118, 84, 80, 86, 85, 64, 82, 76, 99, 99, 99, 99, 76, 99, 32500000, 4, false);
+        Add(216, "LAL", "Walker", "Kessler", "C", 25, "USA", 213, 118, 84, 80, 86, 85, 64, 82, 76, 89, 89, 89, 89, 76, 89, 32500000, 4, false);
         Add(217, "LAL", "Quentin", "Grimes", "SG", 26, "USA", 196, 92, 82, 84, 93, 93, 93, 82, 88, 88, 66, 90, 91, 88, 30, 15000000, 4, false);
         Add(218, "LAL", "Collin", "Sexton", "PG", 27, "USA", 188, 86, 84, 84, 99, 99, 89, 91, 99, 79, 61, 98, 95, 81, 33, 9500000, 2, false);
         Add(219, "LAL", "Jaden", "Hardy", "SG", 23, "USA", 193, 90, 82, 88, 99, 99, 95, 88, 91, 76, 60, 89, 93, 80, 32, 6000000, 3, false);
         Add(220, "LAL", "Sandro", "Mamukelashvili", "PF", 27, "GEO", 208, 104, 78, 80, 82, 88, 84, 80, 84, 86, 80, 84, 86, 78, 26, 10000000, 4, false);
-        Add(221, "LAL", "Austin", "Reaves", "SG", 28, "USA", 196, 89, 86, 88, 96, 89, 96, 89, 89, 82, 71, 92, 89, 78, 35, 46250000, 4, false);
+        Add(221, "LAL", "Austin", "Reaves", "SG", 28, "USA", 196, 89, 86, 88, 96, 89, 96, 89, 89, 82, 91, 92, 89, 88, 65, 46250000, 4, false);
         Add(223, "LAL", "Jarred", "Vanderbilt", "PF", 27, "USA", 203, 97, 79, 79, 90, 75, 53, 71, 77, 98, 84, 99, 83, 94, 45, 12000000, 3, false);
         Add(224, "LAL", "Dalton", "Knecht", "SG", 25, "USA", 198, 96, 78, 87, 91, 93, 99, 80, 85, 74, 64, 85, 87, 68, 32, 4500000, 3, false);
         Add(225, "LAL", "Jake", "LaRavia", "SF", 25, "USA", 201, 106, 77, 80, 84, 83, 83, 79, 81, 83, 73, 84, 85, 73, 39, 6000000, 2, false);
         Add(226, "LAL", "Maxi", "Kleber", "PF", 34, "DEU", 208, 109, 76, 76, 74, 80, 87, 72, 70, 86, 82, 76, 89, 66, 54, 11000000, 1, false);
-        Add(227, "LAL", "Nick", "Smith Jr.", "SG", 22, "USA", 188, 84, 76, 87, 95, 87, 85, 87, 89, 69, 55, 87, 85, 71, 26, 4500000, 3, false);
+        Add(395, "LAL", "Matisse", "Thybulle", "SG", 29, "AUS", 196, 95, 80, 80, 94, 80, 70, 76, 80, 99, 69, 99, 88, 99, 26, 9000000, 1, false);
         Add(301, "LAL", "Kevon", "Looney", "C", 30, "USA", 206, 111, 80, 80, 71, 83, 52, 79, 75, 97, 99, 85, 89, 59, 91, 3900000, 1, false);
         Add(229, "LAL", "Drew", "Timme", "PF", 26, "USA", 208, 107, 74, 78, 75, 85, 68, 81, 79, 75, 89, 75, 93, 56, 38, 2200000, 2, false);
         Add(39, "LAL", "Ziaire", "Williams", "SF", 24, "USA", 206, 84, 77, 82, 90, 82, 78, 74, 80, 82, 72, 86, 82, 72, 49, 3400000, 1, false);
-        Add(230, "LAL", "Bronny", "James", "PG", 22, "USA", 191, 95, 70, 80, 85, 70, 66, 76, 78, 79, 54, 83, 76, 78, 25, 2500000, 3, false);
+        Add(230, "LAL", "Bronny", "James", "PG", 22, "USA", 191, 95, 70, 80, 85, 70, 66, 76, 78, 69, 54, 83, 66, 78, 25, 2500000, 3, false);
         Add(231, "LAL", "Cameron", "Carr", "SG", 21, "USA", 196, 93, 63, 78, 86, 82, 84, 72, 76, 74, 60, 86, 74, 68, 44, 3700000, 4, true);
 
         // ── MEM ── 17 jugadores
@@ -1796,7 +1826,7 @@ public class DatabaseManager : MonoBehaviour
         Add(538, "PHX", "Koby", "Brea", "SG", 24, "USA", 196, 90, 78, 86, 80, 84, 86, 72, 74, 60, 44, 74, 78, 68, 12, 2500000, 1, false);
         Add(385, "PHX", "Koa", "Peat", "SF", 19, "USA", 201, 102, 62, 74, 84, 68, 66, 68, 70, 80, 74, 86, 72, 72, 58, 3400000, 4, true);
 
-        // ── POR ── 12 jugadores
+        // ── POR ── 11 jugadores
         Add(386, "PRT", "Ja", "Morant", "PG", 27, "USA", 188, 79, 91, 93, 85, 85, 85, 85, 85, 93, 79, 85, 85, 98, 49, 44000000, 4, false);
         Add(387, "PRT", "Damian", "Lillard", "PG", 36, "USA", 188, 88, 82, 82, 79, 79, 79, 79, 79, 85, 75, 89, 89, 89, 50, 40000000, 2, false);
         Add(388, "PRT", "Scoot", "Henderson", "PG", 22, "USA", 191, 90, 88, 92, 89, 79, 84, 79, 79, 83, 67, 88, 79, 88, 43, 12000000, 4, false);
@@ -1806,7 +1836,6 @@ public class DatabaseManager : MonoBehaviour
         Add(392, "PRT", "Toumani", "Camara", "SF", 25, "BEL", 198, 98, 82, 86, 91, 85, 78, 83, 85, 97, 76, 95, 89, 95, 28, 8000000, 3, false);
         Add(393, "PRT", "Donovan", "Clingan", "C", 22, "USA", 218, 120, 84, 86, 78, 90, 39, 75, 76, 99, 99, 99, 99, 71, 99, 9000000, 4, false);
         Add(394, "PRT", "Robert", "Williams III", "C", 28, "USA", 208, 108, 82, 82, 86, 82, 41, 70, 69, 99, 99, 98, 94, 65, 99, 14600000, 3, false);
-        Add(395, "PRT", "Matisse", "Thybulle", "SG", 29, "AUS", 196, 95, 80, 80, 94, 80, 70, 76, 80, 99, 69, 99, 88, 99, 26, 9000000, 2, false);
         Add(396, "PRT", "Blake", "Wesley", "PG", 23, "USA", 193, 86, 78, 84, 93, 85, 80, 84, 85, 87, 58, 89, 86, 86, 25, 3000000, 3, false);
         Add(397, "PRT", "Vit", "Krejci", "SG", 26, "CZE", 198, 88, 76, 78, 87, 87, 88, 83, 85, 79, 57, 83, 85, 77, 25, 4000000, 2, false);
 
@@ -2043,7 +2072,7 @@ public class DatabaseManager : MonoBehaviour
                 role = calcOvr >= 80 ? PlayerRole.Estrella
                      : calcOvr >= 70 ? PlayerRole.Titular
                      : calcOvr >= 60 ? PlayerRole.Banquillo
-                     :                 PlayerRole.UltimoRecurso
+                     : PlayerRole.UltimoRecurso
             });
         }
         // ── Free Agents ── 139 jugadores
@@ -2051,6 +2080,7 @@ public class DatabaseManager : MonoBehaviour
         AddFA(404, "Russell", "Westbrook", "PG", 37, "USA", 191, 91, 82, 82, 99, 93, 79, 98, 99, 75, 59, 93, 94, 87, 26, 8000000, 1);
         AddFA(400, "DeMar", "DeRozan", "SF", 36, "USA", 201, 100, 86, 86, 99, 99, 98, 92, 98, 82, 69, 96, 99, 79, 35, 10000000, 2);
         AddFA(201, "Bradley", "Beal", "SG", 33, "USA", 193, 94, 85, 85, 97, 99, 96, 95, 99, 80, 64, 94, 99, 76, 36, 5500000, 2);
+        AddFA(227, "Nick", "Smith Jr.", "SG", 22, "USA", 188, 84, 76, 87, 95, 87, 85, 87, 89, 69, 55, 87, 85, 71, 26, 3300000, 3);
         AddFA(125, "Jonas", "Valanciunas", "C", 34, "LTU", 211, 120, 80, 80, 73, 93, 73, 85, 79, 89, 99, 79, 99, 57, 54, 10000000, 1);
         AddFA(481, "Gabe", "Vincent", "PG", 29, "USA", 193, 88, 69, 67, 84, 74, 68, 74, 72, 78, 60, 70, 76, 70, 33, 11000000, 2);
         AddFA(482, "Caleb", "Houstan", "SF", 23, "CAN", 201, 97, 66, 74, 79, 71, 73, 62, 64, 66, 62, 69, 67, 67, 46, 2000000, 3);
@@ -3457,8 +3487,19 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return new List<PlayerCareerSeasonRow>();
 
+        // Archived past seasons + current unarchived season
         return _db.Query<PlayerCareerSeasonRow>(
-            @"SELECT g.season_id, s.year_start, s.year_end,
+            @"SELECT season_id, year_start, year_end, team_id,
+                     team_abbreviation, team_name,
+                     games, total_minutes, total_points,
+                     total_rebounds, total_assists,
+                     total_steals, total_blocks, total_rating
+              FROM player_season_stats
+              WHERE player_id = ?
+
+              UNION ALL
+
+              SELECT g.season_id, s.year_start, s.year_end,
                      ps.team_id, t.abbreviation AS team_abbreviation, t.name AS team_name,
                      COUNT(*) AS games,
                      SUM(ps.minutes) AS total_minutes,
@@ -3474,8 +3515,9 @@ public class DatabaseManager : MonoBehaviour
               LEFT JOIN teams t ON ps.team_id = t.id
               WHERE ps.player_id = ? AND g.manager_id = ? AND g.is_played = 1
               GROUP BY g.season_id
-              ORDER BY g.season_id",
-            playerId, managerId).ToList();
+
+              ORDER BY season_id",
+            playerId, playerId, managerId).ToList();
     }
 
     public List<PlayerAwardEntry> GetPlayerAwards(int playerId)
@@ -3631,6 +3673,54 @@ public class DatabaseManager : MonoBehaviour
             }
 
             SaveHistoricalPlayerStats(hist);
+        }
+
+        // Save per-season stats for career history
+        _db.Execute("DELETE FROM player_season_stats WHERE season_id = ?", seasonId);
+        var seasonInfo = _db.Find<SeasonData>(seasonId);
+        if (seasonInfo != null)
+        {
+            var rows = _db.Query<HistoricalStatsAggregateRow>(
+                @"SELECT ps.player_id,
+                         COUNT(*) AS games,
+                         SUM(ps.minutes) AS total_minutes,
+                         SUM(ps.points) AS total_points,
+                         SUM(ps.rebounds) AS total_rebounds,
+                         SUM(ps.assists) AS total_assists,
+                         SUM(ps.steals) AS total_steals,
+                         SUM(ps.blocks) AS total_blocks,
+                         SUM(ps.rating) AS total_rating
+                  FROM player_game_stats ps
+                  JOIN games g ON ps.game_id = g.id
+                  WHERE g.season_id = ? AND g.is_played = 1
+                  GROUP BY ps.player_id",
+                seasonId);
+
+            foreach (var row in rows)
+            {
+                var player = GetPlayerById(row.player_id);
+                if (player == null) continue;
+                var team = GetTeamById(player.team_id);
+
+                _db.Insert(new PlayerSeasonStatRow
+                {
+                    player_id = row.player_id,
+                    season_id = seasonId,
+                    year_start = seasonInfo.year_start,
+                    year_end = seasonInfo.year_end,
+                    team_id = player.team_id,
+                    team_abbreviation = team?.abbreviation ?? "",
+                    team_name = team?.name ?? "",
+                    games = row.games,
+                    total_minutes = row.total_minutes,
+                    total_points = row.total_points,
+                    total_rebounds = row.total_rebounds,
+                    total_assists = row.total_assists,
+                    total_steals = row.total_steals,
+                    total_blocks = row.total_blocks,
+                    total_rating = row.total_rating
+                });
+            }
         }
     }
 
@@ -5185,6 +5275,29 @@ public class HistoricalStatsAggregateRow
 
 public class PlayerCareerSeasonRow
 {
+    public int season_id { get; set; }
+    public int year_start { get; set; }
+    public int year_end { get; set; }
+    public int team_id { get; set; }
+    public string team_abbreviation { get; set; }
+    public string team_name { get; set; }
+    public int games { get; set; }
+    public double total_minutes { get; set; }
+    public int total_points { get; set; }
+    public int total_rebounds { get; set; }
+    public int total_assists { get; set; }
+    public int total_steals { get; set; }
+    public int total_blocks { get; set; }
+    public int total_rating { get; set; }
+}
+
+public class PlayerSeasonStatRow
+{
+    [PrimaryKey, AutoIncrement]
+    public int id { get; set; }
+    [Indexed]
+    public int player_id { get; set; }
+    [Indexed]
     public int season_id { get; set; }
     public int year_start { get; set; }
     public int year_end { get; set; }
