@@ -425,18 +425,18 @@
 }
 
 .morale-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 12px;
     margin-left: 10px;
-    margin-right: 4px;
+    margin-right: 10px;
     flex-shrink: 0;
 }
 
 .fisico-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 6px;
+    width: 18px;
+    height: 18px;
+    border-radius: 12px;
     margin-right: 16px;
     flex-shrink: 0;
 }

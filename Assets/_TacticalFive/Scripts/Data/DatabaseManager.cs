@@ -3674,54 +3674,6 @@ public class DatabaseManager : MonoBehaviour
 
             SaveHistoricalPlayerStats(hist);
         }
-
-        // Save per-season stats for career history
-        _db.Execute("DELETE FROM player_season_stats WHERE season_id = ?", seasonId);
-        var seasonInfo = _db.Find<SeasonData>(seasonId);
-        if (seasonInfo != null)
-        {
-            var rows = _db.Query<HistoricalStatsAggregateRow>(
-                @"SELECT ps.player_id,
-                         COUNT(*) AS games,
-                         SUM(ps.minutes) AS total_minutes,
-                         SUM(ps.points) AS total_points,
-                         SUM(ps.rebounds) AS total_rebounds,
-                         SUM(ps.assists) AS total_assists,
-                         SUM(ps.steals) AS total_steals,
-                         SUM(ps.blocks) AS total_blocks,
-                         SUM(ps.rating) AS total_rating
-                  FROM player_game_stats ps
-                  JOIN games g ON ps.game_id = g.id
-                  WHERE g.season_id = ? AND g.is_played = 1
-                  GROUP BY ps.player_id",
-                seasonId);
-
-            foreach (var row in rows)
-            {
-                var player = GetPlayerById(row.player_id);
-                if (player == null) continue;
-                var team = GetTeamById(player.team_id);
-
-                _db.Insert(new PlayerSeasonStatRow
-                {
-                    player_id = row.player_id,
-                    season_id = seasonId,
-                    year_start = seasonInfo.year_start,
-                    year_end = seasonInfo.year_end,
-                    team_id = player.team_id,
-                    team_abbreviation = team?.abbreviation ?? "",
-                    team_name = team?.name ?? "",
-                    games = row.games,
-                    total_minutes = row.total_minutes,
-                    total_points = row.total_points,
-                    total_rebounds = row.total_rebounds,
-                    total_assists = row.total_assists,
-                    total_steals = row.total_steals,
-                    total_blocks = row.total_blocks,
-                    total_rating = row.total_rating
-                });
-            }
-        }
     }
 
     public void SaveSeasonEndRecords(int seasonId, int managerId)
@@ -4487,6 +4439,24 @@ public class DatabaseManager : MonoBehaviour
         var oldSeason = _db.Find<SeasonData>(oldSeasonId);
         if (oldSeason != null)
             UpdateHistoricalPlayerStatsFromSeason(oldSeasonId, managerId);
+
+        // 0b. Archive per-season stats for career history
+        _db.Execute("DELETE FROM player_season_stats WHERE season_id = ?", oldSeasonId);
+        _db.Execute(@"INSERT INTO player_season_stats
+            (player_id, season_id, year_start, year_end, team_id,
+             team_abbreviation, team_name,
+             games, total_minutes, total_points, total_rebounds, total_assists,
+             total_steals, total_blocks, total_rating)
+            SELECT ps.player_id, g.season_id, s.year_start, s.year_end,
+                   ps.team_id, t.abbreviation, t.name,
+                   COUNT(*), SUM(ps.minutes), SUM(ps.points), SUM(ps.rebounds),
+                   SUM(ps.assists), SUM(ps.steals), SUM(ps.blocks), SUM(ps.rating)
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN seasons s ON g.season_id = s.id
+            LEFT JOIN teams t ON ps.team_id = t.id
+            WHERE g.season_id = ? AND g.is_played = 1
+            GROUP BY ps.player_id", oldSeasonId, oldSeasonId);
 
         var allPlayers = _db.Table<PlayerData>().ToList();
 

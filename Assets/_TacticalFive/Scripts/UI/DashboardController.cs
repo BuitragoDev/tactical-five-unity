@@ -2101,7 +2101,7 @@ public class DashboardController : MonoBehaviour
         foreach (var p in players)
         {
             if (p.injury_days > 0) continue;
-            p.fisico = Mathf.Min(99, p.fisico + 12);
+            p.fisico = Mathf.Min(99, p.fisico + 8);
             DatabaseManager.Instance.UpdatePlayer(p);
         }
     }
@@ -2447,9 +2447,13 @@ public class DashboardController : MonoBehaviour
             DatabaseManager.Instance.UpdatePlayer(p);
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
-                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
-                team_id_from = teamA.id, team_id_to = teamB.id,
-                player_id = p.id, trade_type = "trade",
+                season_id = seasonId,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = teamA.id,
+                team_id_to = teamB.id,
+                player_id = p.id,
+                trade_type = "trade",
                 partner_player_id = bSelected.First().id
             });
         }
@@ -2460,9 +2464,13 @@ public class DashboardController : MonoBehaviour
             DatabaseManager.Instance.UpdatePlayer(p);
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
-                season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
-                team_id_from = teamB.id, team_id_to = teamA.id,
-                player_id = p.id, trade_type = "trade",
+                season_id = seasonId,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = teamB.id,
+                team_id_to = teamA.id,
+                player_id = p.id,
+                trade_type = "trade",
                 partner_player_id = aSelected.First().id
             });
         }
@@ -2476,9 +2484,14 @@ public class DashboardController : MonoBehaviour
             {
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
-                    season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
-                    team_id_from = teamA.id, team_id_to = teamB.id,
-                    player_id = 0, pick_id = pk.id, trade_type = "pick_trade"
+                    season_id = seasonId,
+                    game_day = gameDay,
+                    game_date = _season.current_date,
+                    team_id_from = teamA.id,
+                    team_id_to = teamB.id,
+                    player_id = 0,
+                    pick_id = pk.id,
+                    trade_type = "pick_trade"
                 });
             }
         }
@@ -2490,9 +2503,14 @@ public class DashboardController : MonoBehaviour
             {
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
-                    season_id = seasonId, game_day = gameDay, game_date = _season.current_date,
-                    team_id_from = teamB.id, team_id_to = teamA.id,
-                    player_id = 0, pick_id = pk.id, trade_type = "pick_trade"
+                    season_id = seasonId,
+                    game_day = gameDay,
+                    game_date = _season.current_date,
+                    team_id_from = teamB.id,
+                    team_id_to = teamA.id,
+                    player_id = 0,
+                    pick_id = pk.id,
+                    trade_type = "pick_trade"
                 });
             }
         }
@@ -4403,39 +4421,39 @@ public class DashboardController : MonoBehaviour
     void InitConfigModal()
     {
         _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");
-        _configModalBox     = _root.Q<VisualElement>("ConfigModalBox");
-        _btnConfigCerrar    = _root.Q<Button>("ConfigBtnCerrar");
+        _configModalBox = _root.Q<VisualElement>("ConfigModalBox");
+        _btnConfigCerrar = _root.Q<Button>("ConfigBtnCerrar");
 
         _configSliderMaster = new CustomSlider(
             _root.Q<VisualElement>("ConfigSliderMaster"),
             _root.Q<VisualElement>("ConfigFillMaster"),
             _root.Q<VisualElement>("ConfigDraggerMaster"));
-        _configSliderMusic  = new CustomSlider(
+        _configSliderMusic = new CustomSlider(
             _root.Q<VisualElement>("ConfigSliderMusic"),
             _root.Q<VisualElement>("ConfigFillMusic"),
             _root.Q<VisualElement>("ConfigDraggerMusic"));
-        _configSliderSFX    = new CustomSlider(
+        _configSliderSFX = new CustomSlider(
             _root.Q<VisualElement>("ConfigSliderSFX"),
             _root.Q<VisualElement>("ConfigFillSFX"),
             _root.Q<VisualElement>("ConfigDraggerSFX"));
-        _configLabelMaster  = _root.Q<Label>("ConfigLabelMaster");
-        _configLabelMusic   = _root.Q<Label>("ConfigLabelMusic");
-        _configLabelSFX     = _root.Q<Label>("ConfigLabelSFX");
-        _configBtnQualityLow    = _root.Q<Button>("ConfigBtnQualityLow");
+        _configLabelMaster = _root.Q<Label>("ConfigLabelMaster");
+        _configLabelMusic = _root.Q<Label>("ConfigLabelMusic");
+        _configLabelSFX = _root.Q<Label>("ConfigLabelSFX");
+        _configBtnQualityLow = _root.Q<Button>("ConfigBtnQualityLow");
         _configBtnQualityMedium = _root.Q<Button>("ConfigBtnQualityMedium");
-        _configBtnQualityHigh   = _root.Q<Button>("ConfigBtnQualityHigh");
-        _configBtnQualityUltra  = _root.Q<Button>("ConfigBtnQualityUltra");
+        _configBtnQualityHigh = _root.Q<Button>("ConfigBtnQualityHigh");
+        _configBtnQualityUltra = _root.Q<Button>("ConfigBtnQualityUltra");
 
-        _configBtnMainMenu     = _root.Q<Button>("ConfigBtnMainMenu");
-        _configBtnExit         = _root.Q<Button>("ConfigBtnExit");
+        _configBtnMainMenu = _root.Q<Button>("ConfigBtnMainMenu");
+        _configBtnExit = _root.Q<Button>("ConfigBtnExit");
 
         _configMainMenuConfirmOverlay = _root.Q<VisualElement>("ConfigMainMenuConfirmOverlay");
         _configBtnMainMenuYes = _root.Q<Button>("ConfigBtnMainMenuYes");
-        _configBtnMainMenuNo  = _root.Q<Button>("ConfigBtnMainMenuNo");
+        _configBtnMainMenuNo = _root.Q<Button>("ConfigBtnMainMenuNo");
 
         _configExitConfirmOverlay = _root.Q<VisualElement>("ConfigExitConfirmOverlay");
         _configBtnExitYes = _root.Q<Button>("ConfigBtnExitYes");
-        _configBtnExitNo  = _root.Q<Button>("ConfigBtnExitNo");
+        _configBtnExitNo = _root.Q<Button>("ConfigBtnExitNo");
 
         _configSliderMaster.OnValueChanged = v =>
         {
@@ -4462,7 +4480,7 @@ public class DashboardController : MonoBehaviour
         _configModalOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _configModalOverlay)
-                { PlayClick(); CloseConfigModal(); }
+            { PlayClick(); CloseConfigModal(); }
         });
 
         // Juego buttons
@@ -4483,7 +4501,7 @@ public class DashboardController : MonoBehaviour
         _configMainMenuConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _configMainMenuConfirmOverlay)
-                { PlayClick(); CloseMainMenuConfirmModal(); }
+            { PlayClick(); CloseMainMenuConfirmModal(); }
         });
 
         _configBtnExitYes?.RegisterCallback<ClickEvent>(_ =>
@@ -4499,7 +4517,7 @@ public class DashboardController : MonoBehaviour
         _configExitConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
         {
             if (e.target == _configExitConfirmOverlay)
-                { PlayClick(); CloseExitConfirmModal(); }
+            { PlayClick(); CloseExitConfirmModal(); }
         });
 
         if (CursorManager.Instance != null)
@@ -4557,9 +4575,9 @@ public class DashboardController : MonoBehaviour
         if (_configLabelMaster != null)
             _configLabelMaster.text = $"{Mathf.RoundToInt(am.MasterVolume * 100)}%";
         if (_configLabelMusic != null)
-            _configLabelMusic.text  = $"{Mathf.RoundToInt(am.MusicVolume  * 100)}%";
+            _configLabelMusic.text = $"{Mathf.RoundToInt(am.MusicVolume * 100)}%";
         if (_configLabelSFX != null)
-            _configLabelSFX.text    = $"{Mathf.RoundToInt(am.SFXVolume    * 100)}%";
+            _configLabelSFX.text = $"{Mathf.RoundToInt(am.SFXVolume * 100)}%";
     }
 
     void SelectConfigQuality(int index)
