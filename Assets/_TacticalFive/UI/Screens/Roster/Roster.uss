@@ -428,8 +428,8 @@
     width: 18px;
     height: 18px;
     border-radius: 12px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 6px;
+    margin-right: 4px;
     flex-shrink: 0;
 }
 
@@ -437,8 +437,17 @@
     width: 18px;
     height: 18px;
     border-radius: 12px;
-    margin-right: 16px;
+    margin-right: 4px;
     flex-shrink: 0;
+}
+
+.dot-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(180, 190, 210);
+    width: 20px;
+    margin-right: 10px;
+    -unity-text-align: middle-left;
 }
 
 /* Stats temporada */

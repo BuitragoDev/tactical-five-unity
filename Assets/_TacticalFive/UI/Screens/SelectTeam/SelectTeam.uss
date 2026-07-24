@@ -540,10 +540,18 @@
 .modal-player-avg {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
-    color: rgb(212, 160, 23);
     width: 40px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
+}
+.modal-player-avg--high {
+    color: rgb(39, 174, 96);
+}
+.modal-player-avg--mid {
+    color: rgb(212, 160, 23);
+}
+.modal-player-avg--low {
+    color: rgb(192, 57, 43);
 }
 .modal-close {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");

@@ -428,7 +428,14 @@ public class SelectTeamController : MonoBehaviour
 
         var avgLbl = new Label();
         avgLbl.AddToClassList("modal-player-avg");
-        avgLbl.text = player.overall.ToString();
+        int ovrVal = player.GetCalculatedAverage();
+        avgLbl.text = ovrVal.ToString();
+        if (ovrVal > 84)
+            avgLbl.AddToClassList("modal-player-avg--high");
+        else if (ovrVal >= 70)
+            avgLbl.AddToClassList("modal-player-avg--mid");
+        else
+            avgLbl.AddToClassList("modal-player-avg--low");
         row.Add(avgLbl);
 
         return row;

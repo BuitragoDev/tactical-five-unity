@@ -744,7 +744,9 @@ public class RosterController : MonoBehaviour
         else
             dotColor = new Color32(192, 57, 43, 255);
         moraleDot.style.backgroundColor = new StyleColor(dotColor);
-        row.Add(moraleDot);
+
+        var moLabel = new Label("MO");
+        moLabel.AddToClassList("dot-label");
 
         // Fisico dot
         var fisicoDot = new VisualElement();
@@ -757,7 +759,9 @@ public class RosterController : MonoBehaviour
         else
             fisicoColor = new Color32(192, 57, 43, 255);
         fisicoDot.style.backgroundColor = new StyleColor(fisicoColor);
-        row.Add(fisicoDot);
+
+        var fiLabel = new Label("FI");
+        fiLabel.AddToClassList("dot-label");
 
         var posLbl = new Label();
         posLbl.AddToClassList("player-pos");
@@ -770,6 +774,10 @@ public class RosterController : MonoBehaviour
 
         row.Add(nameLbl);
         row.Add(ovrLbl);
+        row.Add(moraleDot);
+        row.Add(moLabel);
+        row.Add(fisicoDot);
+        row.Add(fiLabel);
         row.Add(roleIcon);
         row.Add(posLbl);
         row.Add(metaLbl);
