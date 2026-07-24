@@ -254,3 +254,31 @@ public enum PlayerRole
     Banquillo = 2,
     UltimoRecurso = 3
 }
+
+public static class NCAATeams
+{
+    public static readonly string[] Names =
+    {
+        "Duke", "Kentucky", "Kansas", "North Carolina", "UCLA",
+        "Indiana", "Michigan State", "Louisville", "Syracuse", "Connecticut",
+        "Villanova", "Gonzaga", "Michigan", "Ohio State", "Florida",
+        "Arizona", "Georgetown", "Memphis", "Wisconsin", "Purdue",
+        "Illinois", "Maryland", "Texas", "Alabama", "LSU",
+        "Auburn", "Tennessee", "Georgia", "Florida State", "Miami",
+        "Clemson", "Virginia Tech", "Virginia", "Notre Dame", "USC",
+        "Oregon", "Washington", "Stanford", "California", "Oklahoma",
+        "Oklahoma State", "Texas A&M", "Baylor", "TCU", "Texas Tech",
+        "West Virginia", "Iowa State", "Kansas State", "Nebraska", "Iowa",
+        "Minnesota", "Northwestern", "Penn State", "Rutgers", "Pittsburgh",
+        "Boston College", "Wake Forest", "NC State", "Georgia Tech", "South Carolina",
+        "Mississippi State", "Ole Miss", "Arkansas", "Missouri", "Vanderbilt",
+        "Cincinnati", "Houston", "SMU", "Boise State", "San Diego State",
+        "BYU", "Utah", "Colorado", "Oregon State", "Washington State",
+        "Arizona State", "UNLV", "Nevada", "Fresno State", "Marquette",
+        "Xavier", "Butler", "Creighton", "Providence", "Seton Hall",
+        "St. John's", "DePaul", "Temple", "UAB", "East Carolina",
+        "Tulane", "Tulsa", "Wichita State", "Dayton", "VCU",
+        "Saint Mary's", "San Francisco", "Loyola Chicago", "Davidson", "Richmond",
+        "Colorado State", "Air Force"
+    };
+}
