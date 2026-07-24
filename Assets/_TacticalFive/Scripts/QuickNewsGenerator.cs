@@ -20,11 +20,13 @@ public static class QuickNewsGenerator
             });
         int newsCount = 0;
 
-        if (gameDay % 41 == 0 && gameDay <= 82)
+        int myTeamGames = allStandingsGames.Count(g =>
+            (g.home_team_id == myTeam.id || g.away_team_id == myTeam.id) && g.is_played == 1);
+        if ((myTeamGames == 41 || myTeamGames == 82) && season.phase == "regular")
         {
-            SaveNews(manager, gameDay, gameDate, "HITO", gameDay == 41
-                ? "¡Mitad de temporada superada! Comienza la segunda vuelta."
-                : $"¡Jornada {gameDay}! Se acerca el final de la temporada regular.");
+            SaveNews(manager, gameDay, gameDate, "HITO", myTeamGames == 41
+                ? "¡Mitad de temporada superada!"
+                : "¡Se acerca el final de la temporada regular. Últimos partidos!");
             newsCount++;
         }
 

@@ -12,6 +12,29 @@ public class PremiosController : MonoBehaviour
     SeasonData _season;
     TeamData _myTeam;
 
+    // Config modal
+    private VisualElement _configModalOverlay;
+    private VisualElement _configModalBox;
+    private Button _btnConfigCerrar;
+    private CustomSlider _configSliderMaster;
+    private CustomSlider _configSliderMusic;
+    private CustomSlider _configSliderSFX;
+    private Label _configLabelMaster;
+    private Label _configLabelMusic;
+    private Label _configLabelSFX;
+    private Button _configBtnQualityLow;
+    private Button _configBtnQualityMedium;
+    private Button _configBtnQualityHigh;
+    private Button _configBtnQualityUltra;
+    private VisualElement _configMainMenuConfirmOverlay;
+    private Button _configBtnMainMenu;
+    private Button _configBtnMainMenuYes;
+    private Button _configBtnMainMenuNo;
+    private VisualElement _configExitConfirmOverlay;
+    private Button _configBtnExit;
+    private Button _configBtnExitYes;
+    private Button _configBtnExitNo;
+
     void OnEnable()
     {
         _root = GetComponent<UIDocument>()?.rootVisualElement;
@@ -23,7 +46,7 @@ public class PremiosController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
-        FixMonthNames();
+        RecoverCorruptedMonths();
 
         _manager = DatabaseManager.Instance?.GetActiveManager();
         _season = DatabaseManager.Instance?.GetActiveSeason(_manager?.id ?? 0);
@@ -32,25 +55,35 @@ public class PremiosController : MonoBehaviour
         _body = _root.Q<VisualElement>("PremiosBody");
 
         RegisterNavButtons();
+        InitConfigModal();
         Refresh();
     }
 
-    void FixMonthNames()
+    void RecoverCorruptedMonths()
     {
         if (!DatabaseManager.Instance.EnsureDb()) return;
-        DatabaseManager.Instance.Db.Execute(@"
-            UPDATE monthly_awards
-            SET month_name =
-              CASE month_name
-                WHEN 'diciembre' THEN 'noviembre'
-                WHEN 'enero'     THEN 'diciembre'
-                WHEN 'febrero'   THEN 'enero'
-                WHEN 'marzo'     THEN 'febrero'
-                WHEN 'abril'     THEN 'marzo'
-                WHEN 'mayo'      THEN 'abril'
-                ELSE month_name
-              END
-        ");
+        var db = DatabaseManager.Instance.Db;
+        var seasonIds = db.Table<MonthlyAwardData>()
+            .Select(a => a.season_id)
+            .Distinct()
+            .ToList();
+        string[] seq = { "noviembre", "diciembre", "enero", "febrero", "marzo", "abril" };
+        foreach (var sid in seasonIds)
+        {
+            for (int i = 0; i < seq.Length; i++)
+            {
+                var entries = db.Query<MonthlyAwardData>(
+                    "SELECT * FROM monthly_awards WHERE season_id = ? AND month_name = ? ORDER BY id",
+                    sid, seq[i]);
+                if (entries.Count > 9 && i + 1 < seq.Length)
+                {
+                    var extraIds = entries.Skip(9).Select(e => e.id).ToList();
+                    db.Execute(
+                        $"UPDATE monthly_awards SET month_name = ? WHERE id IN ({string.Join(",", extraIds)})",
+                        seq[i + 1]);
+                }
+            }
+        }
     }
 
     void RegisterNavButtons()
@@ -58,16 +91,48 @@ public class PremiosController : MonoBehaviour
         SidebarController.Attach(_root, GameScreen.Premios);
         HeaderController.Attach(_root);
 
+        var allSubmenus = new[]
+        {
+            _root.Q<VisualElement>("RosterSubmenu"),
+            _root.Q<VisualElement>("PalmaresSubmenu"),
+            _root.Q<VisualElement>("MarketSubmenu"),
+            _root.Q<VisualElement>("FinanceSubmenu"),
+        };
+
         _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
         _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("RosterSubmenu");
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
+        });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("PalmaresSubmenu");
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
+        });
+        _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
+        _root.Q<Button>("SubmenuRecords")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Records); });
+        _root.Q<Button>("SubmenuPremios")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Premios); });
         _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
@@ -75,21 +140,41 @@ public class PremiosController : MonoBehaviour
         _root.Q<Button>("NavStats")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Stats); });
         _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Market); });
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("MarketSubmenu");
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
+        });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Finances); });
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("FinanceSubmenu");
+            if (submenu == null) return;
+            bool opening = !submenu.ClassListContains("nav-submenu--visible");
+            foreach (var s in allSubmenus)
+                if (s != null && s != submenu)
+                    s.RemoveFromClassList("nav-submenu--visible");
+            submenu.EnableInClassList("nav-submenu--visible", opening);
+        });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
+
+        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); OpenConfigModal(); });
     }
 
     void PlayClick()
     {
-        var audio = GetComponent<AudioSource>();
-        if (audio != null) audio.Play();
+        AudioManager.Instance?.PlaySFX("click");
     }
 
     void Refresh()
@@ -157,10 +242,18 @@ public class PremiosController : MonoBehaviour
         var row = new VisualElement();
         row.AddToClassList("premios-winners-row");
 
+        string managerName = null;
+        if (managerWinner != null && managerWinner.team_id.HasValue)
+        {
+            managerName = DatabaseManager.Instance.GetManagerNameByTeamId(managerWinner.team_id.Value);
+            if (string.IsNullOrEmpty(managerName))
+                managerName = managerWinner.team_name;
+        }
+
         BuildCard(row, "MANAGER DEL MES",
+            managerName,
             managerWinner != null ? managerWinner.team_name : null,
-            managerWinner != null ? managerWinner.team_name : null,
-            managerWinner != null ? (managerWinner.value * 100).ToString("F1", CultureInfo.InvariantCulture) + "%" : null);
+            managerWinner != null ? (managerWinner.value * 100).ToString("F1", CultureInfo.InvariantCulture) + "% VIC" : null);
 
         BuildCard(row, "JUGADOR DEL MES",
             playerWinner != null ? playerWinner.player_name : null,
@@ -206,5 +299,222 @@ public class PremiosController : MonoBehaviour
         }
 
         row.Add(card);
+    }
+
+    void InitConfigModal()
+    {
+        _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");
+        _configModalBox     = _root.Q<VisualElement>("ConfigModalBox");
+        _btnConfigCerrar    = _root.Q<Button>("ConfigBtnCerrar");
+
+        _configSliderMaster = new CustomSlider(
+            _root.Q<VisualElement>("ConfigSliderMaster"),
+            _root.Q<VisualElement>("ConfigFillMaster"),
+            _root.Q<VisualElement>("ConfigDraggerMaster"));
+        _configSliderMusic  = new CustomSlider(
+            _root.Q<VisualElement>("ConfigSliderMusic"),
+            _root.Q<VisualElement>("ConfigFillMusic"),
+            _root.Q<VisualElement>("ConfigDraggerMusic"));
+        _configSliderSFX    = new CustomSlider(
+            _root.Q<VisualElement>("ConfigSliderSFX"),
+            _root.Q<VisualElement>("ConfigFillSFX"),
+            _root.Q<VisualElement>("ConfigDraggerSFX"));
+        _configLabelMaster  = _root.Q<Label>("ConfigLabelMaster");
+        _configLabelMusic   = _root.Q<Label>("ConfigLabelMusic");
+        _configLabelSFX     = _root.Q<Label>("ConfigLabelSFX");
+        _configBtnQualityLow    = _root.Q<Button>("ConfigBtnQualityLow");
+        _configBtnQualityMedium = _root.Q<Button>("ConfigBtnQualityMedium");
+        _configBtnQualityHigh   = _root.Q<Button>("ConfigBtnQualityHigh");
+        _configBtnQualityUltra  = _root.Q<Button>("ConfigBtnQualityUltra");
+
+        _configBtnMainMenu     = _root.Q<Button>("ConfigBtnMainMenu");
+        _configBtnExit         = _root.Q<Button>("ConfigBtnExit");
+
+        _configMainMenuConfirmOverlay = _root.Q<VisualElement>("ConfigMainMenuConfirmOverlay");
+        _configBtnMainMenuYes = _root.Q<Button>("ConfigBtnMainMenuYes");
+        _configBtnMainMenuNo  = _root.Q<Button>("ConfigBtnMainMenuNo");
+
+        _configExitConfirmOverlay = _root.Q<VisualElement>("ConfigExitConfirmOverlay");
+        _configBtnExitYes = _root.Q<Button>("ConfigBtnExitYes");
+        _configBtnExitNo  = _root.Q<Button>("ConfigBtnExitNo");
+
+        _configSliderMaster.OnValueChanged = v =>
+        {
+            AudioManager.Instance?.SetMasterVolume(v);
+            UpdateConfigLabels();
+        };
+        _configSliderMusic.OnValueChanged = v =>
+        {
+            AudioManager.Instance?.SetMusicVolume(v);
+            UpdateConfigLabels();
+        };
+        _configSliderSFX.OnValueChanged = v =>
+        {
+            AudioManager.Instance?.SetSFXVolume(v);
+            UpdateConfigLabels();
+        };
+
+        _configBtnQualityLow?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(0); });
+        _configBtnQualityMedium?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(1); });
+        _configBtnQualityHigh?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(2); });
+        _configBtnQualityUltra?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(3); });
+
+        _btnConfigCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseConfigModal(); });
+        _configModalOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _configModalOverlay)
+                { PlayClick(); CloseConfigModal(); }
+        });
+
+        _configBtnMainMenu?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenMainMenuConfirmModal(); });
+        _configBtnExit?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenExitConfirmModal(); });
+
+        _configBtnMainMenuYes?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.MainMenu);
+        });
+        _configBtnMainMenuNo?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseMainMenuConfirmModal();
+        });
+        _configMainMenuConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _configMainMenuConfirmOverlay)
+                { PlayClick(); CloseMainMenuConfirmModal(); }
+        });
+
+        _configBtnExitYes?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            QuitGame();
+        });
+        _configBtnExitNo?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseExitConfirmModal();
+        });
+        _configExitConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _configExitConfirmOverlay)
+                { PlayClick(); CloseExitConfirmModal(); }
+        });
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(_btnConfigCerrar);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityLow);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityMedium);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityHigh);
+            CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
+            CursorManager.Instance.RegisterHandCursor(_configBtnMainMenu);
+            CursorManager.Instance.RegisterHandCursor(_configBtnExit);
+            CursorManager.Instance.RegisterHandCursor(_configBtnMainMenuYes);
+            CursorManager.Instance.RegisterHandCursor(_configBtnMainMenuNo);
+            CursorManager.Instance.RegisterHandCursor(_configBtnExitYes);
+            CursorManager.Instance.RegisterHandCursor(_configBtnExitNo);
+
+            if (_configSliderMaster?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderMaster.Container);
+            if (_configSliderMusic?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderMusic.Container);
+            if (_configSliderSFX?.Container != null)
+                CursorManager.Instance.RegisterHandCursor(_configSliderSFX.Container);
+        }
+    }
+
+    void OpenConfigModal()
+    {
+        CursorManager.Instance?.SetDefaultCursor();
+        var am = AudioManager.Instance;
+        if (am != null)
+        {
+            _configSliderMaster.SetValueWithoutNotify(am.MasterVolume);
+            _configSliderMusic.SetValueWithoutNotify(am.MusicVolume);
+            _configSliderSFX.SetValueWithoutNotify(am.SFXVolume);
+            UpdateConfigLabels();
+        }
+        int q = QualitySettings.GetQualityLevel();
+        UpdateConfigQualityButtons(Mathf.Clamp(q, 0, 3));
+
+        _configModalOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _configModalOverlay.AddToClassList("modal-overlay--visible");
+        _configModalBox.AddToClassList("modal-box--visible");
+    }
+
+    void CloseConfigModal()
+    {
+        _configModalOverlay.RemoveFromClassList("modal-overlay--visible");
+        _configModalBox.RemoveFromClassList("modal-box--visible");
+    }
+
+    void UpdateConfigLabels()
+    {
+        var am = AudioManager.Instance;
+        if (am == null) return;
+        if (_configLabelMaster != null)
+            _configLabelMaster.text = $"{Mathf.RoundToInt(am.MasterVolume * 100)}%";
+        if (_configLabelMusic != null)
+            _configLabelMusic.text  = $"{Mathf.RoundToInt(am.MusicVolume  * 100)}%";
+        if (_configLabelSFX != null)
+            _configLabelSFX.text    = $"{Mathf.RoundToInt(am.SFXVolume    * 100)}%";
+    }
+
+    void SelectConfigQuality(int index)
+    {
+        AudioManager.Instance?.SetQualityLevel(index);
+        UpdateConfigQualityButtons(index);
+    }
+
+    void UpdateConfigQualityButtons(int activeIndex)
+    {
+        var buttons = new[] { _configBtnQualityLow, _configBtnQualityMedium, _configBtnQualityHigh, _configBtnQualityUltra };
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            if (buttons[i] == null) continue;
+            buttons[i].EnableInClassList("settings-quality-btn--active", i == activeIndex);
+        }
+    }
+
+    void OpenMainMenuConfirmModal()
+    {
+        CloseConfigModal();
+        PlayClick();
+        _configMainMenuConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _configMainMenuConfirmOverlay.AddToClassList("modal-overlay--visible");
+        _configMainMenuConfirmOverlay.Q<VisualElement>("ConfigMainMenuConfirmBox")?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseMainMenuConfirmModal()
+    {
+        _configMainMenuConfirmOverlay.RemoveFromClassList("modal-overlay--visible");
+        _configMainMenuConfirmOverlay.Q<VisualElement>("ConfigMainMenuConfirmBox")?.RemoveFromClassList("modal-box--visible");
+        OpenConfigModal();
+    }
+
+    void OpenExitConfirmModal()
+    {
+        CloseConfigModal();
+        PlayClick();
+        _configExitConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _configExitConfirmOverlay.AddToClassList("modal-overlay--visible");
+        _configExitConfirmOverlay.Q<VisualElement>("ConfigExitConfirmBox")?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseExitConfirmModal()
+    {
+        _configExitConfirmOverlay.RemoveFromClassList("modal-overlay--visible");
+        _configExitConfirmOverlay.Q<VisualElement>("ConfigExitConfirmBox")?.RemoveFromClassList("modal-box--visible");
+        OpenConfigModal();
+    }
+
+    void QuitGame()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

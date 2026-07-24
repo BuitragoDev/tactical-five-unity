@@ -111,8 +111,9 @@
                         </ui:VisualElement>
                         <ui:VisualElement class="manager-panel manager-awards-col manager-awards-col--right">
                             <ui:VisualElement class="manager-rings-row">
+                                <ui:VisualElement name="ManagerMonthlyAwardsIcon" class="manager-rings-trophy" />
                                 <ui:VisualElement class="manager-rings-info">
-                                    <ui:Label class="manager-rings-label" text="MANAGER DEL MES" />
+                                    <ui:Label class="manager-rings-label" text="VECES MANAGER DEL MES" />
                                     <ui:Label name="ManagerMonthlyAwards" class="manager-rings-count" text="0" />
                                 </ui:VisualElement>
                             </ui:VisualElement>

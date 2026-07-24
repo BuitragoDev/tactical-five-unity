@@ -3620,15 +3620,22 @@ public class DashboardController : MonoBehaviour
         var body = new System.Text.StringBuilder();
         body.AppendLine($"<b>MANAGER DEL MES - {monthName}</b>");
         foreach (var m in managers)
-            body.AppendLine($"{m.rank}. {m.team_name} ({(m.value * 100):F1}%)");
+        {
+            string mgrName = m.team_id.HasValue
+                ? DatabaseManager.Instance.GetManagerNameByTeamId(m.team_id.Value)
+                : null;
+            if (string.IsNullOrEmpty(mgrName))
+                mgrName = m.team_name;
+            body.AppendLine($"{m.rank}. {mgrName} ({(m.value * 100).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%)");
+        }
         body.AppendLine();
         body.AppendLine($"<b>JUGADOR DEL MES - {monthName}</b>");
         foreach (var p in players)
-            body.AppendLine($"{p.rank}. {p.player_name} ({p.team_name}) - {p.value:F1} VAL");
+            body.AppendLine($"{p.rank}. {p.player_name} ({p.team_name}) - {p.value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)} VAL");
         body.AppendLine();
         body.AppendLine($"<b>ROOKIE DEL MES - {monthName}</b>");
         foreach (var r in rookies)
-            body.AppendLine($"{r.rank}. {r.player_name} ({r.team_name}) - {r.value:F1} VAL");
+            body.AppendLine($"{r.rank}. {r.player_name} ({r.team_name}) - {r.value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)} VAL");
 
         DatabaseManager.Instance.AddMessage(new MessageData
         {
@@ -4353,7 +4360,9 @@ public class DashboardController : MonoBehaviour
             return;
         }
 
-        var latest = all.OrderByDescending(m => m.id).Take(8).ToList();
+        var latest = all.OrderByDescending(m => m.id)
+                        .Where(m => !m.title.StartsWith("Premios del Mes"))
+                        .Take(8).ToList();
 
         foreach (var msg in latest)
         {

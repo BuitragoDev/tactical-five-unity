@@ -502,7 +502,7 @@ public class MatchDayController : MonoBehaviour
         // Check if there are other games on the same day (excluding my team's game)
         bool hasMoreGames = simulatedIds.Any(id => id != myGameId);
 
-        ScreenManager.Instance.GoTo(hasMoreGames ? GameScreen.GameResults : GameScreen.Dashboard);
+        ScreenManager.Instance.GoTo(GameScreen.GameResults);
     }
 
     void SetLogo(VisualElement elem, string logoName, string sizeFolder = null)

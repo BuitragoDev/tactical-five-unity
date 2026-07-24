@@ -34,6 +34,7 @@ public class ManagerController : MonoBehaviour
     private Label _ringsCount;
 
     // Monthly Awards
+    private VisualElement _monthlyAwardsIcon;
     private Label _monthlyAwards;
 
     // Ranking
@@ -111,6 +112,7 @@ public class ManagerController : MonoBehaviour
         _ringsTrophy = _root.Q<VisualElement>("ManagerRingsTrophy");
         _ringsCount = _root.Q<Label>("ManagerRingsCount");
 
+        _monthlyAwardsIcon = _root.Q<VisualElement>("ManagerMonthlyAwardsIcon");
         _monthlyAwards = _root.Q<Label>("ManagerMonthlyAwards");
 
         _rankingBody = _root.Q<VisualElement>("RankingBody");
@@ -608,6 +610,10 @@ public class ManagerController : MonoBehaviour
     void RefreshMonthlyAwards()
     {
         if (_manager == null || _monthlyAwards == null) return;
+
+        var tex = Resources.Load<Texture2D>("Icons/manager_mes");
+        if (tex != null && _monthlyAwardsIcon != null)
+            _monthlyAwardsIcon.style.backgroundImage = new StyleBackground(tex);
 
         int count = DatabaseManager.Instance.CountManagerOfTheMonthWins(_manager.id);
         _monthlyAwards.text = count.ToString();
