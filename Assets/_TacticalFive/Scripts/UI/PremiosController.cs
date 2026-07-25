@@ -46,8 +46,6 @@ public class PremiosController : MonoBehaviour
         _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
         _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
 
-        RecoverCorruptedMonths();
-
         _manager = DatabaseManager.Instance?.GetActiveManager();
         _season = DatabaseManager.Instance?.GetActiveSeason(_manager?.id ?? 0);
         _myTeam = DatabaseManager.Instance?.GetTeamById(_manager?.team_id ?? 0);
@@ -57,33 +55,6 @@ public class PremiosController : MonoBehaviour
         RegisterNavButtons();
         InitConfigModal();
         Refresh();
-    }
-
-    void RecoverCorruptedMonths()
-    {
-        if (!DatabaseManager.Instance.EnsureDb()) return;
-        var db = DatabaseManager.Instance.Db;
-        var seasonIds = db.Table<MonthlyAwardData>()
-            .Select(a => a.season_id)
-            .Distinct()
-            .ToList();
-        string[] seq = { "noviembre", "diciembre", "enero", "febrero", "marzo", "abril" };
-        foreach (var sid in seasonIds)
-        {
-            for (int i = 0; i < seq.Length; i++)
-            {
-                var entries = db.Query<MonthlyAwardData>(
-                    "SELECT * FROM monthly_awards WHERE season_id = ? AND month_name = ? ORDER BY id",
-                    sid, seq[i]);
-                if (entries.Count > 9 && i + 1 < seq.Length)
-                {
-                    var extraIds = entries.Skip(9).Select(e => e.id).ToList();
-                    db.Execute(
-                        $"UPDATE monthly_awards SET month_name = ? WHERE id IN ({string.Join(",", extraIds)})",
-                        seq[i + 1]);
-                }
-            }
-        }
     }
 
     void RegisterNavButtons()
@@ -188,7 +159,20 @@ public class PremiosController : MonoBehaviour
         _body.Clear();
 
         var awards = DatabaseManager.Instance.GetMonthlyAwardsForSeason(_season.id);
-        var grouped = awards.GroupBy(a => a.month_name);
+
+        var corrupted = awards.GroupBy(a => a.month_name).Where(g => g.Count() > 9).ToList();
+        if (corrupted.Any())
+        {
+            var db = DatabaseManager.Instance.Db;
+            foreach (var group in corrupted)
+            {
+                var ordered = group.OrderBy(a => a.id).ToList();
+                var extraIds = ordered.Skip(9).Select(a => a.id).ToList();
+                Debug.LogWarning($"[Premios] Mes '{group.Key}' tiene {group.Count()} entradas, limpiando {extraIds.Count} duplicados");
+                db.Execute($"DELETE FROM monthly_awards WHERE id IN ({string.Join(",", extraIds)})");
+            }
+            awards = DatabaseManager.Instance.GetMonthlyAwardsForSeason(_season.id);
+        }
 
         string[] monthOrder = { "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril" };
 

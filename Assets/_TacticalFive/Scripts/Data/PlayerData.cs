@@ -12,6 +12,7 @@ public class PlayerData
     public string secondary_position { get; set; } = "";
     public int age { get; set; }
     public string nationality { get; set; }
+    public string college { get; set; }
     public int height_cm { get; set; }
     public int weight_kg { get; set; }
     public int overall { get; set; }

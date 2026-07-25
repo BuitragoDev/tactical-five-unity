@@ -296,6 +296,7 @@ public static class DraftGenerator
             if (overall > potential) overall = potential;
 
             string nationality = UnityEngine.Random.value < 0.9f ? "USA" : GetRandomNationality();
+            string college = NCAATeams.Names[UnityEngine.Random.Range(0, NCAATeams.Names.Length)];
 
             string firstName = FirstNames[UnityEngine.Random.Range(0, FirstNames.Length)];
             string lastName = LastNames[UnityEngine.Random.Range(0, LastNames.Length)];
@@ -337,6 +338,7 @@ public static class DraftGenerator
                 },
                 age = age,
                 nationality = nationality,
+                college = college,
                 height_cm = height,
                 weight_kg = weight,
                 overall = overall,

@@ -385,7 +385,8 @@ public class EndSeasonController : MonoBehaviour
 
         var detailLbl = new Label();
         detailLbl.AddToClassList("draft-player-detail");
-        detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {CountryCodes.GetName(p.nationality)}";
+        string college = !string.IsNullOrEmpty(p.college) ? $" · {p.college}" : "";
+        detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {CountryCodes.GetName(p.nationality)}{college}";
         info.Add(detailLbl);
 
         var ovrLbl = new Label();
@@ -516,7 +517,8 @@ public class EndSeasonController : MonoBehaviour
         infoCol.Add(teamNameLbl);
 
         var p = r.Player;
-        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {PositionCodes.GetShort(p.position)}  ·  MED: {p.overall}");
+        string collegeStr = !string.IsNullOrEmpty(p.college) ? $" · {p.college}" : "";
+        var playerLbl = new Label($"{p.first_name} {p.last_name}  ·  {PositionCodes.GetShort(p.position)}  ·  MED: {p.overall}{collegeStr}");
         playerLbl.AddToClassList("lottery-draft-player");
         infoCol.Add(playerLbl);
 

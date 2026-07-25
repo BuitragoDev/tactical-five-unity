@@ -144,6 +144,7 @@ public class DatabaseManager : MonoBehaviour
         _db.CreateTable<GameData>();
         _db.CreateTable<SeasonData>();
         _db.CreateTable<PlayerData>();
+        try { _db.Execute("ALTER TABLE players ADD COLUMN college TEXT DEFAULT ''"); } catch { }
         _db.CreateTable<EmployeeData>();
         _db.CreateTable<ScoutData>();
         _db.CreateTable<PlayerGameStats>();
@@ -1896,6 +1897,7 @@ public class DatabaseManager : MonoBehaviour
         Add(394, "PRT", "Robert",    "Williams III",    "C",  28, "USA", 208, 108, 72, 82, 68, 80, 30, 55, 48, 82, 84, 76, 78, 58, 88, 14600000, 3, false);
         Add(396, "PRT", "Blake",     "Wesley",          "PG", 23, "USA", 193,  86, 68, 84, 84, 72, 68, 72, 74, 72, 52, 74, 70, 72, 38,  3000000, 3, false);
         Add(397, "PRT", "Vit",       "Krejci",          "SG", 26, "CZE", 198,  88, 68, 78, 74, 74, 78, 72, 74, 68, 55, 72, 75, 66, 38,  4000000, 2, false);
+        Add(601, "PRT", "John",      "Tonje",           "SG", 25, "USA", 196,  99, 70, 79, 70, 70, 80, 70, 70, 70, 70, 70, 70, 70, 60,  2000000, 1, false);
 
         // ── SAC ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
@@ -4266,7 +4268,8 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return new List<MonthlyAwardData>();
 
-        // Clear previous evaluations for this season/month
+        Debug.Log($"[MonthlyAwards] Evaluando {monthName}: {startDate} → {endDate} (season {seasonId})");
+
         _db.Execute("DELETE FROM monthly_awards WHERE season_id = ? AND month_name = ?", seasonId, monthName);
 
         var results = new List<MonthlyAwardData>();
@@ -4374,6 +4377,8 @@ public class DatabaseManager : MonoBehaviour
                 value = (float)r.avg_rating
             });
         }
+
+        Debug.Log($"[MonthlyAwards] {monthName}: {managerAwards.Count} managers, {playerAwards.Count} players, {rookieAwards.Count} rookies → {results.Count} total");
 
         // Persist all
         foreach (var award in results)

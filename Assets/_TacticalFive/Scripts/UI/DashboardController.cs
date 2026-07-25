@@ -891,6 +891,7 @@ public class DashboardController : MonoBehaviour
             if (allRegularPlayed)
             {
                 // Evaluate April before transitioning (use May 1 so prevMonth = 4 / April)
+                Debug.Log("[Dashboard] Regular season finished, evaluating April awards");
                 EvaluateMonthlyAwards(new System.DateTime(_season.year_end, 5, 1));
                 PlayoffsGenerator.GeneratePlayIn(_season, _manager.id);
                 _season.phase = "playin";
@@ -1010,6 +1011,7 @@ public class DashboardController : MonoBehaviour
             if (_season.phase == "regular" && newDate.Day == 1
                 && (newDate.Month == 12 || newDate.Month <= 4))
             {
+                Debug.Log($"[Dashboard] Trigger awards: newDate={newDate:yyyy-MM-dd}, phase={_season.phase}");
                 EvaluateMonthlyAwards(newDate);
             }
         }
@@ -3594,6 +3596,8 @@ public class DashboardController : MonoBehaviour
 
         // Awards are for the PREVIOUS month's games, so use the previous month's name
         string monthName = new System.DateTime(prevYear, prevMonth, 1).ToString("MMMM", new System.Globalization.CultureInfo("es-ES"));
+
+        Debug.Log($"[Dashboard] EvaluateMonthlyAwards: evalDate={evaluationDate:yyyy-MM-dd}, prevMonth={prevMonth}, prevYear={prevYear}, monthName={monthName}");
 
         if (prevMonth == 4 && evaluationDate.Month == 5)
         {
