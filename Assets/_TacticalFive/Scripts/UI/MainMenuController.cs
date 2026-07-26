@@ -436,7 +436,13 @@ public class MainMenuController : MonoBehaviour
 
             textField.RegisterValueChangedCallback(evt =>
             {
-                _bugReportText = evt.newValue;
+                var v = evt.newValue;
+                if (v.Length > 300)
+                {
+                    v = v.Substring(0, 300);
+                    textField.SetValueWithoutNotify(v);
+                }
+                _bugReportText = v;
             });
 
             _bugReportInputContainer.Add(textField);
@@ -459,7 +465,7 @@ public class MainMenuController : MonoBehaviour
 
         string subject = System.Uri.EscapeDataString("Bug Report - Tactical Five");
         string encodedBody = System.Uri.EscapeDataString(body);
-        Application.OpenURL($"mailto:bugreports@tacticalfive.com?subject={subject}&body={encodedBody}");
+        Application.OpenURL($"mailto:buitr4gosw@gmail.com?subject={subject}&body={encodedBody}");
         CloseBugReportModal();
     }
 

@@ -39,9 +39,9 @@
     background-color: rgb(212, 160, 23);
     color: rgb(0, 0, 0);
     -unity-font-style: bold;
-    font-size: 22px;
+    font-size: 32px;
     letter-spacing: 1px;
-    padding: 6px 20px 6px 12px;
+    padding: 2px 12px 2px 12px;
     -unity-text-align: middle-center;
 }
 
