@@ -6,8 +6,9 @@
 
     <ui:VisualElement name="LoadingRoot" class="loading-root">
         <ui:VisualElement name="LoadingLogo" class="loading-logo" />
-        <ui:Label name="LoadingTip" class="loading-tip" text="" />
         <ui:Label class="loading-prompt" text="Pulsa cualquier tecla o haz clic para continuar" />
+        <ui:VisualElement class="loading-spacer" />
+        <ui:Label name="LoadingTip" class="loading-tip" text="" />
     </ui:VisualElement>
 
 </ui:UXML>
