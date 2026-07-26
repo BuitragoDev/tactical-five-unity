@@ -493,7 +493,7 @@
     display: none;
 }
 .lottery-box {
-    width: 800px;
+    width: 1000px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
     border-color: rgb(58, 74, 99);

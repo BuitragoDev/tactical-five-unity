@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 
 public class ManagerController : MonoBehaviour
 {
@@ -434,12 +435,12 @@ public class ManagerController : MonoBehaviour
         if (_regGames != null) _regGames.text = regT.ToString();
         if (_regWins != null)  _regWins.text  = regW.ToString();
         if (_regLosses != null) _regLosses.text = regL.ToString();
-        if (_regPct != null)   _regPct.text   = regT > 0 ? ((float)regW / regT).ToString("F3") : ".000";
+        if (_regPct != null)   _regPct.text   = regT > 0 ? ((float)regW / regT).ToString("F3", CultureInfo.InvariantCulture) : ".000";
 
         if (_poGames != null) _poGames.text = poT.ToString();
         if (_poWins != null)  _poWins.text  = poW.ToString();
         if (_poLosses != null) _poLosses.text = poL.ToString();
-        if (_poPct != null)   _poPct.text   = poT > 0 ? ((float)poW / poT).ToString("F3") : ".000";
+        if (_poPct != null)   _poPct.text   = poT > 0 ? ((float)poW / poT).ToString("F3", CultureInfo.InvariantCulture) : ".000";
     }
 
     // ── RELATIONSHIPS ────────────────────────────────────────────

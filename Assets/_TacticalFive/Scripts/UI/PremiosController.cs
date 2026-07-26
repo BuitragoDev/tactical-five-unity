@@ -83,6 +83,11 @@ public class PremiosController : MonoBehaviour
                     s.RemoveFromClassList("nav-submenu--visible");
             submenu.EnableInClassList("nav-submenu--visible", opening);
         });
+        _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Roster); });
+        _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
+        _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
+        _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
+        _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
         _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
@@ -121,6 +126,9 @@ public class PremiosController : MonoBehaviour
                     s.RemoveFromClassList("nav-submenu--visible");
             submenu.EnableInClassList("nav-submenu--visible", opening);
         });
+        _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Market); });
+        _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Cartera); });
+        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Historial); });
         _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -132,6 +140,10 @@ public class PremiosController : MonoBehaviour
                     s.RemoveFromClassList("nav-submenu--visible");
             submenu.EnableInClassList("nav-submenu--visible", opening);
         });
+        _root.Q<Button>("SubmenuDecisiones")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Finances); });
+        _root.Q<Button>("SubmenuPrestamos")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Loans); });
+        _root.Q<Button>("SubmenuSponsors")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Sponsors); });
+        _root.Q<Button>("SubmenuTV")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.TV); });
         _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>

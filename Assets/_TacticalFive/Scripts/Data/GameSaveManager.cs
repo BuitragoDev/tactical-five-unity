@@ -130,6 +130,12 @@ public static class GameSaveManager
             try { File.Delete(dbPath); } catch { }
         }
 
+        string photoDir = Path.Combine(Application.persistentDataPath, "PlayerPhotos", slotNumber.ToString());
+        if (Directory.Exists(photoDir))
+        {
+            try { Directory.Delete(photoDir, true); } catch { }
+        }
+
         var slot = GetSlot(slotNumber);
         if (slot != null)
         {

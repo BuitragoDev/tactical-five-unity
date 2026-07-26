@@ -1703,14 +1703,13 @@ public class DatabaseManager : MonoBehaviour
         Add(230, "LAL", "Bronny",    "James",           "PG", 22, "USA", 191,  95, 70, 70, 78, 74, 72, 72, 72, 74, 72, 72, 72, 64, 46,  2500000, 3, false);
         Add(231, "LAL", "Cameron",   "Carr",            "SG", 21, "USA", 196,  93, 68, 82, 75, 70, 71, 65, 62, 62, 60, 66, 64, 49, 41,  3700000, 4, true);
 
-        // ── MEM ── 17 jugadores
+        // ── MEM ── 16 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(232, "MEM", "Jerami",     "Grant",          "PF", 32, "USA", 206, 102, 76, 84, 74, 86, 84, 72, 78, 78, 68, 82, 82, 58, 70, 28000000, 3, false);
         Add(233, "MEM", "Kris",       "Murray",         "SF", 25, "USA", 203,  98, 67, 84, 68, 74, 74, 65, 68, 70, 68, 72, 72, 55, 52,  3000000, 3, false);
         Add(234, "MEM", "Taylor",     "Hendricks",      "PF", 23, "USA", 206,  97, 71, 92, 72, 76, 76, 62, 65, 76, 72, 78, 72, 58, 78, 11000000, 3, false);
         Add(235, "MEM", "Zach",       "Edey",           "C",  24, "CAN", 224, 136, 68, 90, 55, 90, 35, 58, 48, 82, 90, 82, 82, 42, 88,  9000000, 3, false);
         Add(236, "MEM", "GG",         "Jackson",        "SF", 21, "USA", 206,  98, 71, 93, 75, 82, 80, 68, 76, 70, 68, 80, 74, 58, 55,  6000000, 3, false);
-        Add(237, "MEM", "Kentavious", "Caldwell-Pope",  "SG", 33, "USA", 196,  93, 72, 80, 74, 78, 85, 70, 74, 84, 58, 74, 80, 78, 42, 18000000, 2, false);
         Add(464, "MEM", "D'Angelo",   "Russell",        "PG", 30, "USA", 193,  88, 72, 86, 75, 85, 86, 88, 88, 62, 52, 70, 86, 65, 35,  7500000, 2, false);
         Add(238, "MEM", "Ty",         "Jerome",         "PG", 29, "USA", 196,  88, 67, 80, 70, 78, 82, 80, 78, 65, 50, 65, 80, 60, 32,  9000000, 2, false);
         Add(239, "MEM", "Isaiah",     "Stewart",        "PF", 25, "USA", 203, 113, 71, 80, 65, 78, 74, 60, 58, 80, 82, 78, 75, 55, 78, 15000000, 3, false);
@@ -1825,6 +1824,7 @@ public class DatabaseManager : MonoBehaviour
         Add(336, "OKC", "Nikola",   "Topic",              "PG", 20, "SRB", 198,  88, 83, 94, 85, 87, 80, 88, 85, 76, 72, 82, 86, 74, 51,  5000000, 4, false);
         Add(337, "OKC", "Jared",    "McCain",             "SG", 22, "USA", 191,  88, 83, 93, 82, 84, 89, 81, 82, 76, 74, 81, 82, 74, 48,  6000000, 4, false);
         Add(338, "OKC", "Ajay",     "Mitchell",           "PG", 23, "BEL", 193,  86, 81, 89, 81, 83, 79, 81, 81, 75, 73, 79, 81, 71, 48,  2000000, 4, false);
+        Add(499, "OKC", "Spencer",  "Jones",              "SF", 24, "USA", 206, 100, 74, 82, 78, 78, 80, 72, 74, 76, 58, 76, 76, 74, 10,  6000000, 2, false);
         Add(339, "OKC", "Aday",     "Mara",               "C",  20, "ESP", 221, 109, 76, 89, 70, 79, 65, 75, 60, 92, 90, 80, 85, 60, 85,  5000000, 4, true);
         Add(340, "OKC", "Bennett",  "Stirtz",             "PG", 22, "USA", 191,  86, 79, 82, 80, 82, 80, 80, 74, 72, 78, 78, 70, 70, 50,  4500000, 4, true);
         Add(341, "OKC", "Otega",    "Oweh",               "SG", 22, "USA", 196,  97, 79, 75, 80, 77, 73, 71, 77, 63, 83, 73, 73, 73, 46,  2000000, 2, true);
@@ -1848,7 +1848,7 @@ public class DatabaseManager : MonoBehaviour
 
         // ── PHI ── 17 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(480, "PHI", "LeBron",   "James",            "SF", 42, "USA", 206, 113, 89, 89, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48,  8000000, 2, false);
+        Add(480, "PHI", "LeBron",   "James",            "SF", 42, "USA", 206, 113, 89, 89, 92, 99, 91, 99, 99, 91, 93, 97, 99, 82, 48,  4000000, 2, false);
         Add(356, "PHI", "Joel",     "Embiid",           "C",  32, "CMR", 213, 127, 89, 96, 76, 96, 86, 84, 80, 91, 95, 91, 97, 63, 91, 65000000, 5, false);
         Add(357, "PHI", "Tyrese",   "Maxey",            "PG", 26, "USA", 188,  86, 91, 97, 93, 93, 92, 89, 93, 81, 65, 93, 94, 82, 52, 42000000, 5, false);
         Add(358, "PHI", "Jaylen",   "Brown",            "SG", 29, "USA", 198, 101, 93, 95, 92, 95, 89, 84, 91, 93, 79, 95, 94, 85, 61, 53100000, 4, false);
@@ -1862,7 +1862,7 @@ public class DatabaseManager : MonoBehaviour
         Add(366, "PHI", "Trendon",  "Watford",          "PF", 25, "USA", 203, 104, 76, 89, 75, 82, 77, 80, 78, 76, 79, 79, 80, 67, 57,  4000000, 2, false);
         Add(367, "PHI", "Adem",     "Bona",             "C",  22, "NGA", 208, 104, 72, 93, 72, 81, 32, 57, 52, 82, 86, 87, 75, 59, 91,  3000000, 4, false);
         Add(368, "PHI", "Johni",    "Broome",           "C",  24, "USA", 206, 110, 73, 88, 69, 80, 62, 62, 55, 78, 84, 79, 74, 55, 85,  3000000, 3, false);
-        Add(369, "PHI", "MarJon",   "Beauchamp",        "SF", 25, "USA", 201,  95, 72, 89, 80, 80, 78, 70, 74, 74, 69, 82, 74, 65, 49,  2500000, 3, false);
+        Add(237, "PHI", "Kentavious", "Caldwell-Pope",  "SG", 33, "USA", 196,  93, 72, 80, 74, 78, 85, 70, 74, 84, 58, 74, 80, 78, 42,  3900000, 1, false);
         Add(370, "PHI", "Caleb",    "Love",             "PG", 24, "USA", 188,  84, 73, 91, 84, 80, 84, 78, 82, 68, 57, 81, 74, 65, 37,  2000000, 1, false);
         Add(371, "PHI", "Labaron",  "Philon Jr.",       "PG", 20, "USA", 191,  86, 71, 83, 81, 76, 78, 78, 78, 68, 55, 78, 71, 62, 39,  3900000, 4, true);
 
@@ -1884,7 +1884,7 @@ public class DatabaseManager : MonoBehaviour
         Add(538, "PHX", "Koby",     "Brea",             "SG", 24, "USA", 196,  90, 65, 78, 74, 72, 84, 68, 70, 64, 52, 72, 74, 55, 32,  2500000, 1, false);
         Add(385, "PHX", "Koa",      "Peat",             "SF", 19, "USA", 201, 102, 68, 62, 72, 75, 68, 65, 70, 70, 72, 78, 70, 60, 52,  3400000, 4, true);
 
-        // ── POR ── 11 jugadores
+        // ── POR ── 12 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(386, "PRT", "Ja",        "Morant",          "PG", 27, "USA", 188,  79, 81, 93, 94, 90, 78, 86, 88, 70, 58, 92, 90, 76, 45, 44000000, 4, false);
         Add(387, "PRT", "Damian",    "Lillard",         "PG", 36, "USA", 188,  88, 79, 82, 85, 88, 88, 84, 86, 68, 55, 88, 90, 68, 32, 40000000, 2, false);
@@ -2146,6 +2146,7 @@ public class DatabaseManager : MonoBehaviour
         AddFA(201, "Bradley", "Beal", "SG", 33, "USA", 193, 94, 85, 85, 97, 99, 96, 95, 99, 80, 64, 94, 99, 76, 36, 5500000, 2);
         AddFA(227, "Nick", "Smith Jr.", "SG", 22, "USA", 188, 84, 76, 87, 95, 87, 85, 87, 89, 69, 55, 87, 85, 71, 26, 3300000, 3);
         AddFA(125, "Jonas", "Valanciunas", "C", 34, "LTU", 211, 120, 80, 80, 73, 93, 73, 85, 79, 89, 99, 79, 99, 57, 54, 10000000, 1);
+        AddFA(369, "MarJon", "Beauchamp", "SF", 25, "USA", 201, 95, 72, 89, 80, 80, 78, 70, 74, 74, 69, 82, 74, 65, 49, 2500000, 3);
         AddFA(481, "Gabe", "Vincent", "PG", 29, "USA", 193, 88, 69, 67, 84, 74, 68, 74, 72, 78, 60, 70, 76, 70, 33, 11000000, 2);
         AddFA(482, "Caleb", "Houstan", "SF", 23, "CAN", 201, 97, 66, 74, 79, 71, 73, 62, 64, 66, 62, 69, 67, 67, 46, 2000000, 3);
         AddFA(484, "Keaton", "Wallace", "SG", 25, "USA", 191, 93, 62, 62, 80, 67, 61, 63, 65, 65, 49, 73, 65, 63, 31, 2300000, 2);
@@ -2162,7 +2163,6 @@ public class DatabaseManager : MonoBehaviour
         AddFA(495, "Olivier", "Sarr", "C", 26, "FRA", 213, 108, 78, 84, 70, 78, 70, 70, 74, 82, 80, 80, 78, 82, 14, 3000000, 2);
         AddFA(496, "Nae'Qwan", "Tomlin", "PF", 25, "USA", 206, 104, 74, 82, 78, 72, 66, 70, 72, 80, 70, 80, 76, 78, 10, 2000000, 2);
         AddFA(497, "Dwight", "Powell", "C", 34, "CAN", 208, 108, 76, 78, 68, 74, 60, 72, 74, 82, 82, 80, 78, 84, 8, 4000000, 1);
-        AddFA(499, "Spencer", "Jones", "SF", 24, "USA", 206, 100, 74, 82, 78, 78, 80, 72, 74, 76, 58, 76, 76, 74, 10, 2000000, 2);
         AddFA(500, "Curtis", "Jones", "SG", 25, "USA", 193, 90, 76, 84, 84, 78, 76, 78, 76, 60, 44, 74, 76, 72, 10, 2000000, 2);
         AddFA(501, "KJ", "Simpson", "PG", 23, "USA", 185, 84, 78, 86, 88, 80, 78, 82, 80, 58, 40, 76, 76, 74, 12, 2500000, 3);
         AddFA(502, "Isaac", "Jones", "PF", 25, "USA", 206, 102, 76, 84, 78, 74, 66, 70, 72, 82, 72, 82, 78, 80, 10, 2000000, 2);
@@ -4156,42 +4156,52 @@ public class DatabaseManager : MonoBehaviour
     {
         if (!EnsureDb()) return new List<PlayerAwardInfo>();
         string rookieFilter = rookieOnly == true ? "AND p.is_rookie = 1" : "";
+        string sql = $@"
+            SELECT p.id, p.photo, p.first_name, p.last_name, p.position, p.secondary_position,
+                   t.name AS team_name, t.logo AS team_logo,
+                   COUNT(*) AS games,
+                   AVG(ps.points) AS avg_pts, AVG(ps.rebounds) AS avg_reb,
+                   AVG(ps.assists) AS avg_ast, AVG(ps.rating) AS avg_rating
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN players p ON ps.player_id = p.id
+            JOIN teams t ON p.team_id = t.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.manager_id = ? {rookieFilter}
+            GROUP BY ps.player_id
+            HAVING games >= ?
+            ORDER BY avg_rating DESC";
+        var allRows = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, minGames);
         var result = new List<PlayerAwardInfo>();
         string[] positions = { "PG", "SG", "SF", "PF", "C" };
+        var assigned = new HashSet<int>();
         foreach (var pos in positions)
         {
-            string sql = $@"
-                SELECT p.id, p.photo, p.first_name, p.last_name, p.position, t.name AS team_name, t.logo AS team_logo,
-                       COUNT(*) AS games,
-                       AVG(ps.points) AS avg_pts,
-                       AVG(ps.rebounds) AS avg_reb,
-                       AVG(ps.assists) AS avg_ast,
-                       AVG(ps.rating) AS avg_rating
-                FROM player_game_stats ps
-                JOIN games g ON ps.game_id = g.id
-                JOIN players p ON ps.player_id = p.id
-                JOIN teams t ON p.team_id = t.id
-                WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
-                  AND g.manager_id = ? AND p.position = ? {rookieFilter}
-                GROUP BY ps.player_id
-                HAVING games >= ?
-                ORDER BY avg_rating DESC
-                LIMIT 1";
-            var row = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, pos, minGames).FirstOrDefault();
-            if (row != null)
+            PlayerAwardQueryRow best = null;
+            foreach (var row in allRows)
             {
+                if (assigned.Contains(row.id)) continue;
+                if (row.position == pos || (!string.IsNullOrEmpty(row.secondary_position) && row.secondary_position == pos))
+                {
+                    if (best == null || row.avg_rating > best.avg_rating)
+                        best = row;
+                }
+            }
+            if (best != null)
+            {
+                assigned.Add(best.id);
                 result.Add(new PlayerAwardInfo
                 {
-                    PlayerId = row.id,
-                    Photo = row.photo ?? "",
-                    PlayerName = $"{row.first_name} {row.last_name}",
-                    TeamName = row.team_name ?? "",
-                    TeamKeyword = row.team_logo ?? "",
-                    Position = row.position ?? "",
-                    AvgPts = (float)row.avg_pts,
-                    AvgReb = (float)row.avg_reb,
-                    AvgAst = (float)row.avg_ast,
-                    AvgRating = (float)row.avg_rating
+                    PlayerId = best.id,
+                    Photo = best.photo ?? "",
+                    PlayerName = $"{best.first_name} {best.last_name}",
+                    TeamName = best.team_name ?? "",
+                    TeamKeyword = best.team_logo ?? "",
+                    Position = best.position ?? "",
+                    AvgPts = (float)best.avg_pts,
+                    AvgReb = (float)best.avg_reb,
+                    AvgAst = (float)best.avg_ast,
+                    AvgRating = (float)best.avg_rating
                 });
             }
         }
@@ -5466,6 +5476,7 @@ public class PlayerAwardQueryRow
     public string first_name { get; set; }
     public string last_name { get; set; }
     public string position { get; set; }
+    public string secondary_position { get; set; }
     public string team_name { get; set; }
     public string team_logo { get; set; }
     public int games { get; set; }
