@@ -5,16 +5,16 @@ public class LoadingController : MonoBehaviour
 {
     private static readonly string[] Tips =
     {
-        "El baloncesto no se juega con las manos, se juega con el coraz\u00f3n.",
-        "Un buen entrenador gana partidos, uno grande gana campeonatos.",
-        "La clave del \u00e9xito est\u00e1 en la preparaci\u00f3n y el scouting.",
-        "No hay 'yo' en 'equipo' \u2014 la qu\u00edmica lo es todo.",
-        "El trabajo duro vence al talento cuando el talento no trabaja duro.",
-        "Defensa gana campeonatos, ataque gana partidos.",
-        "Cada partido es una oportunidad para escribir tu leyenda.",
-        "Gestiona bien tu presupuesto: el mercado nunca cierra.",
-        "Un draft acertado puede cambiar el futuro de tu franquicia.",
-        "La afici\u00f3n nunca olvida a los que dan todo en la pista."
+        "He fallado más de 9.000 tiros en mi carrera. He perdido casi 300 partidos. 26 veces me han confiado el tiro ganador y he fallado. He fallado una y otra vez en mi vida. Y por eso tengo éxito. — Michael Jordan",
+        "El talento gana partidos, pero el trabajo en equipo y la inteligencia ganan campeonatos. — Michael Jordan",
+        "No puedes poner un límite a nada. Cuanto más sueñas, más lejos llegas. — Michael Phelps",
+        "El baloncesto es mi esposa. Exige lealtad y responsabilidad, y me devuelve satisfacción y paz. — Jerry West",
+        "El éxito no es un accidente. Es trabajo duro, perseverancia, aprendizaje, estudio, sacrificio y, sobre todo, amor por lo que estás haciendo. — Pelé",
+        "La fuerza del equipo está en cada miembro individual. La fuerza de cada miembro está en el equipo. — Phil Jackson",
+        "La excelencia es el resultado gradual de esforzarse siempre por hacerlo mejor. — Pat Riley",
+        "Todo lo negativo —presión, desafíos— es una oportunidad para que me supere. — Kobe Bryant",
+        "No importa lo bueno que seas, siempre puedes mejorar. — LeBron James",
+        "El baloncesto es un juego de errores. Quien cometa menos errores gana. — John Wooden"
     };
 
     private UIDocument _doc;

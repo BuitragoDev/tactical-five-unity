@@ -41,6 +41,6 @@
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
     white-space: normal;
-    max-width: 800px;
+    max-width: 1200px;
     margin-bottom: 120px;
 }
