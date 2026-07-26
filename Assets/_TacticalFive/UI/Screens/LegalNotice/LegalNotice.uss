@@ -147,3 +147,11 @@
 .modal-btn--danger:hover {
     background-color: rgb(210, 70, 55);
 }
+
+.modal-btn--primary {
+    background-color: rgb(42, 95, 201);
+}
+
+.modal-btn--primary:hover {
+    background-color: rgb(74, 128, 240);
+}

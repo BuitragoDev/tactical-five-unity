@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEngine.Networking;
+using System.Collections;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -12,10 +14,18 @@ public class MainMenuController : MonoBehaviour
     private Button _btnEditor;
     private Button _btnExit;
     private Button _btnLegal;
+    private Button _btnBugReport;
 
     private VisualElement _modalOverlay;
     private VisualElement _modalBox;
     private Button _btnCerrar;
+
+    private VisualElement _bugReportOverlay;
+    private VisualElement _bugReportBox;
+    private VisualElement _bugReportInputContainer;
+    private string _bugReportText = "";
+    private Button _btnBugReportSend;
+    private Button _btnBugReportCerrar;
 
     private VisualElement _exitModalOverlay;
     private VisualElement _exitModalBox;
@@ -62,11 +72,19 @@ public class MainMenuController : MonoBehaviour
         _btnEditor     = _root.Q<Button>("BtnEditor");
         _btnExit       = _root.Q<Button>("BtnExit");
         _btnLegal      = _root.Q<Button>("BtnLegal");
+        _btnBugReport  = _root.Q<Button>("BtnBugReport");
 
         // Modal Legal
         _modalOverlay = _root.Q<VisualElement>("ModalOverlay");
         _modalBox     = _root.Q<VisualElement>("ModalBox");
         _btnCerrar    = _root.Q<Button>("BtnCerrar");
+
+        // Modal Bug Report
+        _bugReportOverlay = _root.Q<VisualElement>("BugReportOverlay");
+        _bugReportBox     = _root.Q<VisualElement>("BugReportBox");
+        _bugReportInputContainer = _root.Q<VisualElement>("BugReportInputContainer");
+        _btnBugReportSend = _root.Q<Button>("BtnBugReportSend");
+        _btnBugReportCerrar = _root.Q<Button>("BtnBugReportCerrar");
 
         // Modal Salir
         _exitModalOverlay = _root.Q<VisualElement>("ExitModalOverlay");
@@ -81,6 +99,7 @@ public class MainMenuController : MonoBehaviour
         _btnEditor?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnEditorClicked(); });
         _btnExit?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnExitClicked(); });
         _btnLegal?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLegalClicked(); });
+        _btnBugReport?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnBugReportClicked(); });
 
         // Callbacks modal legal
         _btnCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseModal(); });
@@ -88,6 +107,15 @@ public class MainMenuController : MonoBehaviour
         {
             if (e.target == _modalOverlay)
                 { PlayClick(); CloseModal(); }
+        });
+
+        // Callbacks modal bug report
+        _btnBugReportSend?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnBugReportSendClicked(); });
+        _btnBugReportCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseBugReportModal(); });
+        _bugReportOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _bugReportOverlay)
+                { PlayClick(); CloseBugReportModal(); }
         });
 
         // Callbacks modal salir
@@ -118,7 +146,10 @@ public class MainMenuController : MonoBehaviour
                 CursorManager.Instance.RegisterHandCursor(_btnEditor);
                 CursorManager.Instance.RegisterHandCursor(_btnExit);
                 CursorManager.Instance.RegisterHandCursor(_btnLegal);
+                CursorManager.Instance.RegisterHandCursor(_btnBugReport);
                 CursorManager.Instance.RegisterHandCursor(_btnCerrar);
+                CursorManager.Instance.RegisterHandCursor(_btnBugReportSend);
+                CursorManager.Instance.RegisterHandCursor(_btnBugReportCerrar);
                 CursorManager.Instance.RegisterHandCursor(_btnExitYes);
                 CursorManager.Instance.RegisterHandCursor(_btnExitNo);
                 CursorManager.Instance.RegisterHandCursor(_root.Q<VisualElement>("ConfigIcon"));
@@ -137,7 +168,9 @@ public class MainMenuController : MonoBehaviour
         {
             if (e.keyCode == KeyCode.Escape)
             {
-                if (_exitModalOverlay.style.display == DisplayStyle.Flex)
+                if (_bugReportOverlay.style.display == DisplayStyle.Flex)
+                    CloseBugReportModal();
+                else if (_exitModalOverlay.style.display == DisplayStyle.Flex)
                     CloseExitModal();
                 else if (_modalOverlay.style.display == DisplayStyle.Flex)
                     CloseModal();
@@ -348,6 +381,111 @@ public class MainMenuController : MonoBehaviour
     void OnLegalClicked()
     {
         OpenModal();
+    }
+
+    void OnBugReportClicked()
+    {
+        OpenBugReportModal();
+    }
+
+    void OpenBugReportModal()
+    {
+        CursorManager.Instance?.SetDefaultCursor();
+        _bugReportOverlay.style.display = DisplayStyle.Flex;
+        _bugReportBox.style.display     = DisplayStyle.Flex;
+
+        if (_bugReportInputContainer != null)
+        {
+            _bugReportInputContainer.Clear();
+            var textField = new TextField();
+            textField.multiline = true;
+            textField.focusable = true;
+            textField.style.flexGrow = 1;
+            textField.style.width = Length.Percent(100);
+            textField.style.height = 200;
+            textField.style.backgroundColor = new Color(0.086f, 0.102f, 0.141f);
+            textField.style.borderLeftWidth = 1;
+            textField.style.borderRightWidth = 1;
+            textField.style.borderTopWidth = 1;
+            textField.style.borderBottomWidth = 1;
+            textField.style.borderLeftColor = new Color(0.227f, 0.29f, 0.388f);
+            textField.style.borderRightColor = new Color(0.227f, 0.29f, 0.388f);
+            textField.style.borderTopColor = new Color(0.227f, 0.29f, 0.388f);
+            textField.style.borderBottomColor = new Color(0.227f, 0.29f, 0.388f);
+            textField.style.color = new Color(0.78f, 0.82f, 0.9f);
+            textField.style.fontSize = 16;
+            textField.style.paddingLeft = 12;
+            textField.style.paddingRight = 12;
+            textField.style.paddingTop = 12;
+            textField.style.paddingBottom = 12;
+            textField.style.whiteSpace = WhiteSpace.Normal;
+            textField.style.unityTextAlign = TextAnchor.UpperLeft;
+
+            var textInput = textField.Q(name: "unity-text-input");
+            if (textInput != null)
+            {
+                textInput.style.backgroundColor = new Color(0.086f, 0.102f, 0.141f);
+                textInput.style.color = new Color(0.78f, 0.82f, 0.9f);
+                textInput.style.fontSize = 20;
+                textInput.style.paddingLeft = 12;
+                textInput.style.paddingRight = 12;
+                textInput.style.paddingTop = 12;
+                textInput.style.paddingBottom = 12;
+                textInput.style.whiteSpace = WhiteSpace.Normal;
+                textInput.style.unityTextAlign = TextAnchor.UpperLeft;
+                textInput.style.flexGrow = 1;
+            }
+
+            textField.RegisterValueChangedCallback(evt =>
+            {
+                _bugReportText = evt.newValue;
+            });
+
+            _bugReportInputContainer.Add(textField);
+            _root.schedule.Execute(() => textField.Focus()).StartingIn(100);
+        }
+    }
+
+    void CloseBugReportModal()
+    {
+        _bugReportOverlay.style.display = DisplayStyle.None;
+        _bugReportBox.style.display     = DisplayStyle.None;
+        _bugReportInputContainer?.Clear();
+        _bugReportText = "";
+    }
+
+    void OnBugReportSendClicked()
+    {
+        string body = _bugReportText?.Trim();
+        if (string.IsNullOrEmpty(body)) return;
+
+        StartCoroutine(SendBugReportCoroutine(body));
+    }
+
+    System.Collections.IEnumerator SendBugReportCoroutine(string body)
+    {
+        string url = "http://localhost:5000/api/bug-report";
+        string escapedBody = body.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r");
+        string json = $"{{\"body\": \"{escapedBody}\"}}";
+
+        using var request = new UnityWebRequest(url, "POST");
+        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
+        request.uploadHandler = new UploadHandlerRaw(jsonToSend);
+        request.downloadHandler = new DownloadHandlerBuffer();
+        request.SetRequestHeader("Content-Type", "application/json");
+
+        yield return request.SendWebRequest();
+
+        if (request.result == UnityWebRequest.Result.Success)
+        {
+            Debug.Log("[BugReport] Enviado correctamente");
+        }
+        else
+        {
+            Debug.LogError($"[BugReport] Error: {request.error}");
+        }
+
+        CloseBugReportModal();
     }
 
     void PlayClick()

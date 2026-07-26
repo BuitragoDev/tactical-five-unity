@@ -94,6 +94,58 @@
     background-color: rgb(30, 25, 10);
 }
 
+.btn-bug-report {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    color: rgb(122, 138, 170);
+    font-size: 18px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    padding: 7px 16px;
+    -unity-text-align: middle-center;
+    margin-left: 8px;
+}
+.btn-bug-report:hover {
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+    background-color: rgb(30, 25, 10);
+}
+
+.bug-report-input {
+    width: 100%;
+    height: 200px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    font-size: 16px;
+    padding: 0;
+    white-space: normal;
+    -unity-text-align: upper-left;
+    margin-top: 8px;
+    flex-direction: column;
+}
+
+.bug-report-input .unity-text-field {
+    flex-grow: 1;
+    width: 100%;
+    height: 100%;
+    border-width: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.bug-report-input .unity-text-field #unity-text-input {
+    background-color: rgb(22, 26, 36);
+    color: rgb(200, 210, 230);
+    font-size: 16px;
+    padding: 12px;
+    -unity-text-align: upper-left;
+    white-space: normal;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+}
+
 /* ── HERO ── */
 .hero {
     flex-grow: 1;

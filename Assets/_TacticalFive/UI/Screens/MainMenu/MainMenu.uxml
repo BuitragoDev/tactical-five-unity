@@ -1,230 +1,195 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements"
-         xmlns:uie="UnityEditor.UIElements"
-         editor-extension-mode="False">
-
-    <Style src="MainMenu.uss" />
-    <Style src="../LegalNotice/LegalNotice.uss" />
-
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/MainMenu/MainMenu.uss?fileID=7433441132597879392&amp;guid=2b99c20946e41924185896be51aea01e&amp;type=3#MainMenu"/>
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/LegalNotice/LegalNotice.uss?fileID=7433441132597879392&amp;guid=deb7c919a769e08a5a963187da128735&amp;type=3#LegalNotice"/>
     <ui:VisualElement name="MainMenuRoot" class="main-menu-root">
-
-        <!-- ══ HEADER ══ -->
         <ui:VisualElement name="Header" class="header">
             <ui:VisualElement class="header-logo-wrap">
-                <ui:Label class="header-logo-icon" text="TF" />
-                <ui:Label class="header-logo-text" text="TACTICAL" />
-                <ui:Label class="header-logo-text-gold" text="FIVE" />
+                <ui:Label text="TF" class="header-logo-icon"/>
+                <ui:Label text="TACTICAL" class="header-logo-text"/>
+                <ui:Label text="FIVE" class="header-logo-text-gold"/>
             </ui:VisualElement>
             <ui:VisualElement class="header-right">
-                <ui:VisualElement name="ConfigIcon" class="config-icon" />
-                <ui:Button name="BtnLegal" class="btn-legal" text="AVISO LEGAL" />
+                <ui:VisualElement name="ConfigIcon" class="config-icon"/>
+                <ui:Button name="BtnLegal" text="AVISO LEGAL" class="btn-legal"/>
+                <ui:Button name="BtnBugReport" text="INFORME DE ERRORES" class="btn-bug-report"/>
             </ui:VisualElement>
         </ui:VisualElement>
-
-        <!-- ══ HERO ══ -->
         <ui:VisualElement name="Hero" class="hero">
-
-            <!-- Season bar -->
             <ui:VisualElement name="SeasonBar" class="season-bar">
-                <ui:VisualElement class="season-bar-line" />
+                <ui:VisualElement class="season-bar-line"/>
                 <ui:VisualElement class="season-bar-inner">
-                    <ui:VisualElement class="season-dot" />
-                    <ui:Label class="season-label" text="TEMPORADA 2026 · 2027" />
+                    <ui:VisualElement class="season-dot"/>
+                    <ui:Label text="TEMPORADA 2026 · 2027" class="season-label"/>
                 </ui:VisualElement>
-                <ui:VisualElement class="season-bar-line" />
+                <ui:VisualElement class="season-bar-line"/>
             </ui:VisualElement>
-
-            <!-- Título -->
-            <ui:Label name="TitleLine1" class="hero-title-line1" text="TACTICAL" />
-            <ui:Label name="TitleLine2" class="hero-title-line2" text="FIVE" />
-
-            <!-- Divisor -->
+            <ui:Label name="TitleLine1" text="TACTICAL" class="hero-title-line1"/>
+            <ui:Label name="TitleLine2" text="FIVE" class="hero-title-line2"/>
             <ui:VisualElement class="hero-divider">
-                <ui:VisualElement class="divider-line" />
-                <ui:Label class="divider-text" text="ELIGE TU MODO DE JUEGO" />
-                <ui:VisualElement class="divider-line" />
+                <ui:VisualElement class="divider-line"/>
+                <ui:Label text="ELIGE TU MODO DE JUEGO" class="divider-text"/>
+                <ui:VisualElement class="divider-line"/>
             </ui:VisualElement>
-
-            <!-- ══ MENU GRID ══ -->
             <ui:VisualElement name="MenuGrid" class="menu-grid">
-
-                <!-- Liga Manager -->
                 <ui:Button name="BtnManager" class="menu-card card-manager">
-                    <ui:Label class="card-title" text="LIGA&#10;MANAGER" />
-                    <ui:VisualElement class="card-sep" />
-                    <ui:Label class="card-desc"
-                        text="Dirige tu club con estabilidad y visión a largo plazo. Construye un proyecto, gestiona cada temporada y mantente al frente hasta que tú decidas… o la directiva decida por ti." />
+                    <ui:Label text="LIGA&#10;MANAGER" class="card-title"/>
+                    <ui:VisualElement class="card-sep"/>
+                    <ui:Label text="Dirige tu club con estabilidad y visión a largo plazo. Construye un proyecto, gestiona cada temporada y mantente al frente hasta que tú decidas… o la directiva decida por ti." class="card-desc"/>
                     <ui:VisualElement name="CtaManager" class="card-cta">
-                        <ui:Label class="cta-label" text="COMENZAR" />
-                        <ui:Label class="cta-arrow" text="→" />
+                        <ui:Label text="COMENZAR" class="cta-label"/>
+                        <ui:Label text="→" class="cta-arrow"/>
                     </ui:VisualElement>
                 </ui:Button>
-
-                <!-- Liga ProManager -->
                 <ui:Button name="BtnProManager" class="menu-card card-pro">
-                    <ui:Label class="card-title" text="LIGA&#10;PROMANAGER" />
-                    <ui:VisualElement class="card-sep" />
-                    <ui:Label class="card-desc"
-                        text="Empieza desde abajo y haz que tu carrera hable por ti. Tus resultados abrirán nuevas puertas cada temporada: quédate, progresa… o salta a un desafío mayor." />
+                    <ui:Label text="LIGA&#10;PROMANAGER" class="card-title"/>
+                    <ui:VisualElement class="card-sep"/>
+                    <ui:Label text="Empieza desde abajo y haz que tu carrera hable por ti. Tus resultados abrirán nuevas puertas cada temporada: quédate, progresa… o salta a un desafío mayor." class="card-desc"/>
                     <ui:VisualElement name="CtaPro" class="card-cta">
-                        <ui:Label class="cta-label" text="COMENZAR" />
-                        <ui:Label class="cta-arrow" text="→" />
+                        <ui:Label text="COMENZAR" class="cta-label"/>
+                        <ui:Label text="→" class="cta-arrow"/>
                     </ui:VisualElement>
                 </ui:Button>
-
-                <!-- Cargar Partida -->
                 <ui:Button name="BtnLoadGame" class="menu-card card-load">
-                    <ui:Label class="card-title" text="CARGAR&#10;PARTIDA" />
-                    <ui:VisualElement class="card-sep" />
-                    <ui:Label class="card-desc"
-                        text="Continúa tu carrera donde la dejaste. Carga una partida guardada o gestiona tus archivos de guardado." />
+                    <ui:Label text="CARGAR&#10;PARTIDA" class="card-title"/>
+                    <ui:VisualElement class="card-sep"/>
+                    <ui:Label text="Continúa tu carrera donde la dejaste. Carga una partida guardada o gestiona tus archivos de guardado." class="card-desc"/>
                     <ui:VisualElement name="CtaLoad" class="card-cta">
-                        <ui:Label class="cta-label" text="ABRIR" />
-                        <ui:Label class="cta-arrow" text="→" />
+                        <ui:Label text="ABRIR" class="cta-label"/>
+                        <ui:Label text="→" class="cta-arrow"/>
                     </ui:VisualElement>
                 </ui:Button>
-
-                <!-- Editor -->
                 <ui:Button name="BtnEditor" class="menu-card card-editor">
-                    <ui:Label class="card-title" text="EDITOR&#10;BASE DE DATOS" />
-                    <ui:VisualElement class="card-sep" />
-                    <ui:Label class="card-desc"
-                        text="Edita jugadores, equipos, atributos y estadísticas. Crea tu liga personalizada y ajusta cada detalle antes de empezar tu partida." />
+                    <ui:Label text="EDITOR&#10;BASE DE DATOS" class="card-title"/>
+                    <ui:VisualElement class="card-sep"/>
+                    <ui:Label text="Edita jugadores, equipos, atributos y estadísticas. Crea tu liga personalizada y ajusta cada detalle antes de empezar tu partida." class="card-desc"/>
                     <ui:VisualElement name="CtaEditor" class="card-cta">
-                        <ui:Label class="cta-label" text="ABRIR" />
-                        <ui:Label class="cta-arrow" text="→" />
+                        <ui:Label text="ABRIR" class="cta-label"/>
+                        <ui:Label text="→" class="cta-arrow"/>
                     </ui:VisualElement>
                 </ui:Button>
-
-                <!-- Salir del juego -->
                 <ui:Button name="BtnExit" class="menu-card card-exit last">
-                    <ui:Label class="card-title" text="SALIR&#10;DEL JUEGO" />
-                    <ui:VisualElement class="card-sep" />
-                    <ui:Label class="card-desc"
-                        text="Cierra el juego y vuelve al escritorio. Asegúrate de haber guardado tu progreso si lo deseas." />
+                    <ui:Label text="SALIR&#10;DEL JUEGO" class="card-title"/>
+                    <ui:VisualElement class="card-sep"/>
+                    <ui:Label text="Cierra el juego y vuelve al escritorio. Asegúrate de haber guardado tu progreso si lo deseas." class="card-desc"/>
                     <ui:VisualElement name="CtaExit" class="card-cta">
-                        <ui:Label class="cta-label" text="SALIR" />
-                        <ui:Label class="cta-arrow" text="→" />
+                        <ui:Label text="SALIR" class="cta-label"/>
+                        <ui:Label text="→" class="cta-arrow"/>
                     </ui:VisualElement>
                 </ui:Button>
-
             </ui:VisualElement>
-
-            <!-- ══ STATS STRIP ══ -->
             <ui:VisualElement name="StatsStrip" class="stats-strip">
                 <ui:VisualElement class="stat-item">
-                    <ui:Label class="stat-val" text="30" />
-                    <ui:Label class="stat-lbl" text="FRANQUICIAS" />
+                    <ui:Label text="30" class="stat-val"/>
+                    <ui:Label text="FRANQUICIAS" class="stat-lbl"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-item">
-                    <ui:Label class="stat-val stat-val-accent" text="600+" />
-                    <ui:Label class="stat-lbl" text="JUGADORES" />
+                    <ui:Label text="600+" class="stat-val stat-val-accent"/>
+                    <ui:Label text="JUGADORES" class="stat-lbl"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-item">
-                    <ui:Label class="stat-val" text="82" />
-                    <ui:Label class="stat-lbl" text="PARTIDOS / TEMPORADA" />
+                    <ui:Label text="82" class="stat-val"/>
+                    <ui:Label text="PARTIDOS / TEMPORADA" class="stat-lbl"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="stat-item last">
-                    <ui:Label class="stat-val stat-val-accent" text="∞" />
-                    <ui:Label class="stat-lbl" text="TEMPORADAS" />
+                    <ui:Label text="∞" class="stat-val stat-val-accent"/>
+                    <ui:Label text="TEMPORADAS" class="stat-lbl"/>
                 </ui:VisualElement>
             </ui:VisualElement>
-
         </ui:VisualElement>
-
-        <!-- ══ FOOTER ══ -->
         <ui:VisualElement name="Footer" class="footer">
             <ui:VisualElement class="version-tag">
-                <ui:VisualElement class="version-dot" />
-                <ui:Label class="version-label" text="v0.9.0 · Beta" />
+                <ui:VisualElement class="version-dot"/>
+                <ui:Label text="v0.9.0 · Beta" class="version-label"/>
             </ui:VisualElement>
         </ui:VisualElement>
-
-        <!-- ══ MODAL AVISO LEGAL ══ -->
         <ui:VisualElement name="ModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="AVISO LEGAL" />
+                <ui:Label text="AVISO LEGAL" class="modal-title"/>
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph"
-                        text="Tactical Five es un videojuego de simulación deportiva desarrollado con fines educativos y de entretenimiento personal." />
-                    <ui:Label class="modal-paragraph"
-                        text="Los nombres de equipos, jugadores y logotipos de la NBA son propiedad de sus respectivos dueños. Tactical Five no está afiliado, patrocinado ni respaldado por la NBA, sus equipos ni sus jugadores." />
-                    <ui:Label class="modal-paragraph"
-                        text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." />
-                    <ui:Label class="modal-copyright"
-                        text="© 2026 Tactical Five  ·  Todos los derechos reservados" />
+                    <ui:Label text="Tactical Five es un videojuego de simulación deportiva desarrollado con fines educativos y de entretenimiento personal." class="modal-paragraph"/>
+                    <ui:Label text="Los nombres de equipos, jugadores y logotipos de la NBA son propiedad de sus respectivos dueños. Tactical Five no está afiliado, patrocinado ni respaldado por la NBA, sus equipos ni sus jugadores." class="modal-paragraph"/>
+                    <ui:Label text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." class="modal-paragraph"/>
+                    <ui:Label text="© 2026 Tactical Five  ·  Todos los derechos reservados" class="modal-copyright"/>
                 </ui:VisualElement>
-                <ui:Button name="BtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="BtnCerrar" text="CERRAR" class="modal-close"/>
             </ui:VisualElement>
         </ui:VisualElement>
-
-        <!-- ══ MODAL SALIR DEL JUEGO ══ -->
         <ui:VisualElement name="ExitModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ExitModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:Label text="SALIR DEL JUEGO" class="modal-title"/>
                 <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph"
-                        text="¿Estás seguro de que quieres salir del juego?" />
+                    <ui:Label text="¿Estás seguro de que quieres salir del juego?" class="modal-paragraph"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
-                    <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="BtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                    <ui:Button name="BtnExitNo" text="NO" class="modal-btn modal-btn--secondary"/>
+                    <ui:VisualElement class="modal-spacer"/>
+                    <ui:Button name="BtnExitYes" text="SÍ, SALIR" class="modal-btn modal-btn--danger"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
-
-        <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:Label text="CONFIGURACIÓN" class="modal-title"/>
                 <ui:VisualElement class="modal-body">
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:Label text="AUDIO" class="settings-section-title"/>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:Label text="Volumen General" class="settings-label"/>
                             <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
-                                <ui:VisualElement class="custom-slider-track" />
-                                <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
-                                <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
+                                <ui:VisualElement class="custom-slider-track"/>
+                                <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill"/>
+                                <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger"/>
                             </ui:VisualElement>
-                            <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+                            <ui:Label name="ConfigLabelMaster" text="100%" class="settings-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
+                            <ui:Label text="Música" class="settings-label"/>
                             <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
-                                <ui:VisualElement class="custom-slider-track" />
-                                <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
-                                <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
+                                <ui:VisualElement class="custom-slider-track"/>
+                                <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill"/>
+                                <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger"/>
                             </ui:VisualElement>
-                            <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
+                            <ui:Label name="ConfigLabelMusic" text="100%" class="settings-value"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:Label text="Efectos" class="settings-label"/>
                             <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
-                                <ui:VisualElement class="custom-slider-track" />
-                                <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
-                                <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                                <ui:VisualElement class="custom-slider-track"/>
+                                <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill"/>
+                                <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger"/>
                             </ui:VisualElement>
-                            <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
+                            <ui:Label name="ConfigLabelSFX" text="100%" class="settings-value"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:Label text="GRÁFICOS" class="settings-section-title"/>
                         <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:Label text="Calidad" class="settings-label"/>
                             <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                <ui:Button name="ConfigBtnQualityLow" text="Baja" class="settings-quality-btn"/>
+                                <ui:Button name="ConfigBtnQualityMedium" text="Media" class="settings-quality-btn"/>
+                                <ui:Button name="ConfigBtnQualityHigh" text="Alta" class="settings-quality-btn"/>
+                                <ui:Button name="ConfigBtnQualityUltra" text="Ultra" class="settings-quality-btn"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:Button name="ConfigBtnCerrar" text="CERRAR" class="modal-close"/>
             </ui:VisualElement>
         </ui:VisualElement>
-
+        <ui:VisualElement name="BugReportOverlay" class="modal-overlay" style="display: none;">
+            <ui:VisualElement name="BugReportBox" class="modal-box">
+                <ui:Label text="INFORME DE ERRORES" class="modal-title"/>
+                <ui:VisualElement class="modal-body">
+                    <ui:Label text="Si has encontrado un error o quieres sugerir una mejora, descríbenoslo aquí. Tu mensaje se enviará directamente a nuestro equipo de desarrollo." class="modal-paragraph"/>
+                    <ui:VisualElement name="BugReportInputContainer" class="bug-report-input"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnBugReportCerrar" text="CERRAR" class="modal-btn modal-btn--secondary"/>
+                    <ui:VisualElement class="modal-spacer"/>
+                    <ui:Button name="BtnBugReportSend" text="ENVIAR" class="modal-btn modal-btn--primary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
-
 </ui:UXML>
