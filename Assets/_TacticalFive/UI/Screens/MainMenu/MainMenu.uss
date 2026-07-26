@@ -146,6 +146,22 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
 }
 
+#BtnBugReportSend {
+    background-color: rgb(46, 160, 67);
+}
+
+#BtnBugReportSend:hover {
+    background-color: rgb(60, 190, 85);
+}
+
+#BtnBugReportCerrar {
+    background-color: rgb(42, 95, 201);
+}
+
+#BtnBugReportCerrar:hover {
+    background-color: rgb(74, 128, 240);
+}
+
 /* ── HERO ── */
 .hero {
     flex-grow: 1;
