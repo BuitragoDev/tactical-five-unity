@@ -32,7 +32,6 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument matchDayDocument;
     [SerializeField] private UIDocument gameResultsDocument;
     [SerializeField] private UIDocument loadGameDocument;
-    [SerializeField] private UIDocument settingsDocument;
     [SerializeField] private UIDocument employeesDocument;
     [SerializeField] private UIDocument injuredDocument;
     [SerializeField] private UIDocument carteraDocument;
@@ -59,7 +58,22 @@ public class ScreenManager : MonoBehaviour
             return;
         }
         Instance = this;
-        ShowOnly(mainMenuDocument);
+
+        if (loadingDocument == null)
+        {
+            var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            foreach (var doc in allDocs)
+            {
+                string n = doc.gameObject.name.ToLower();
+                if (n.Contains("loading"))
+                {
+                    loadingDocument = doc;
+                    break;
+                }
+            }
+        }
+
+        ShowOnly(loadingDocument);
     }
 
     public void GoTo(GameScreen screen, GameMode mode = GameMode.None)
@@ -141,9 +155,6 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.LoadGame:
                 ShowOnly(loadGameDocument);
                 break;
-            case GameScreen.Settings:
-                ShowOnly(settingsDocument);
-                break;
             case GameScreen.Employees:
                 ShowOnly(employeesDocument);
                 break;
@@ -216,7 +227,6 @@ public class ScreenManager : MonoBehaviour
         if (matchDayDocument != null) matchDayDocument.gameObject.SetActive(false);
         if (gameResultsDocument != null) gameResultsDocument.gameObject.SetActive(false);
         if (loadGameDocument != null) loadGameDocument.gameObject.SetActive(false);
-        if (settingsDocument != null) settingsDocument.gameObject.SetActive(false);
         if (employeesDocument != null) employeesDocument.gameObject.SetActive(false);
         if (injuredDocument != null) injuredDocument.gameObject.SetActive(false);
         if (carteraDocument != null) carteraDocument.gameObject.SetActive(false);
