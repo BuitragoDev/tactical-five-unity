@@ -1,7 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using UnityEngine.Networking;
-using System.Collections;
 
 public class MainMenuController : MonoBehaviour
 {
@@ -459,32 +457,9 @@ public class MainMenuController : MonoBehaviour
         string body = _bugReportText?.Trim();
         if (string.IsNullOrEmpty(body)) return;
 
-        StartCoroutine(SendBugReportCoroutine(body));
-    }
-
-    System.Collections.IEnumerator SendBugReportCoroutine(string body)
-    {
-        string url = "http://localhost:5000/api/bug-report";
-        string escapedBody = body.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\n", "\\n").Replace("\r", "\\r");
-        string json = $"{{\"body\": \"{escapedBody}\"}}";
-
-        using var request = new UnityWebRequest(url, "POST");
-        byte[] jsonToSend = new System.Text.UTF8Encoding().GetBytes(json);
-        request.uploadHandler = new UploadHandlerRaw(jsonToSend);
-        request.downloadHandler = new DownloadHandlerBuffer();
-        request.SetRequestHeader("Content-Type", "application/json");
-
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.Success)
-        {
-            Debug.Log("[BugReport] Enviado correctamente");
-        }
-        else
-        {
-            Debug.LogError($"[BugReport] Error: {request.error}");
-        }
-
+        string subject = System.Uri.EscapeDataString("Bug Report - Tactical Five");
+        string encodedBody = System.Uri.EscapeDataString(body);
+        Application.OpenURL($"mailto:bugreports@tacticalfive.com?subject={subject}&body={encodedBody}");
         CloseBugReportModal();
     }
 
