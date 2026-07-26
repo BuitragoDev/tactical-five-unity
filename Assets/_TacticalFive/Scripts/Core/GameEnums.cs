@@ -1,5 +1,6 @@
 public enum GameScreen
 {
+    Loading,
     MainMenu,
     SelectTeam,
     LegalNotice,

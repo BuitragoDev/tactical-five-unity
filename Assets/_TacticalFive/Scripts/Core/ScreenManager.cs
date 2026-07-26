@@ -5,6 +5,7 @@ public class ScreenManager : MonoBehaviour
 {
     public static ScreenManager Instance { get; private set; }
 
+    [SerializeField] private UIDocument loadingDocument;
     [SerializeField] private UIDocument mainMenuDocument;
     [SerializeField] private UIDocument selectTeamDocument;
     [SerializeField] private UIDocument legalNoticeDocument;
@@ -48,7 +49,7 @@ public class ScreenManager : MonoBehaviour
     public static int SelectedPlayerId { get; set; }
 
     public GameMode CurrentMode { get; private set; } = GameMode.None;
-    public GameScreen CurrentScreen { get; private set; } = GameScreen.MainMenu;
+    public GameScreen CurrentScreen { get; private set; } = GameScreen.Loading;
 
     void Awake()
     {
@@ -68,6 +69,9 @@ public class ScreenManager : MonoBehaviour
         CurrentScreen = screen;
         switch (screen)
         {
+            case GameScreen.Loading:
+                ShowOnly(loadingDocument);
+                break;
             case GameScreen.MainMenu:
                 ShowOnly(mainMenuDocument);
                 break;
@@ -188,6 +192,7 @@ public class ScreenManager : MonoBehaviour
 
     void ShowOnly(UIDocument target)
     {
+        if (loadingDocument != null) loadingDocument.gameObject.SetActive(false);
         if (mainMenuDocument != null) mainMenuDocument.gameObject.SetActive(false);
         if (selectTeamDocument != null) selectTeamDocument.gameObject.SetActive(false);
         if (legalNoticeDocument != null) legalNoticeDocument.gameObject.SetActive(false);

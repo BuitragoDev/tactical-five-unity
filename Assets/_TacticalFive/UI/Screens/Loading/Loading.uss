@@ -1,0 +1,44 @@
+/* ══════════════════════════════════════════
+   LOADING — Loading.uss
+   ══════════════════════════════════════════ */
+
+.loading-root {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(22, 26, 36);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.loading-logo {
+    width: 500px;
+    height: 274px;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/buitrago_studios_logo1.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.loading-tip {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 22px;
+    color: rgb(212, 160, 23);
+    margin-top: 60px;
+    margin-bottom: 20px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    max-width: 800px;
+}
+
+.loading-prompt {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(85, 102, 119);
+    -unity-text-align: middle-center;
+    opacity: 0.6;
+    margin-top: 40px;
+}
