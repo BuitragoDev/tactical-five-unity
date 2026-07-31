@@ -16,16 +16,16 @@ public static class TradeHelper
     static void ValidateTradeSide(
         long salaryOut, long salaryIn, int playersInCount,
         long newPayroll, string teamName, bool hardCappedToFirstApron,
-        List<string> errors)
+        List<string> errors, long firstApron = FIRST_APRON, long secondApron = SECOND_APRON)
     {
-        if (newPayroll > SECOND_APRON || (hardCappedToFirstApron && newPayroll > FIRST_APRON))
+        if (newPayroll > secondApron || (hardCappedToFirstApron && newPayroll > firstApron))
         {
             if (playersInCount > 1)
                 errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. No puede recibir múltiples jugadores.");
             if (salaryOut < salaryIn)
                 errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. Solo puede recibir salario ≤ al que envía.");
         }
-        else if (newPayroll > FIRST_APRON)
+        else if (newPayroll > firstApron)
         {
             var maxReceive = (long)(salaryOut * 1.10);
             if (salaryIn > maxReceive + 250_000)
@@ -72,7 +72,10 @@ public static class TradeHelper
         string teamAName = null,
         long teamACurrentPayroll = 0,
         bool teamAHardCapped = false,
-        bool teamBHardCapped = false)
+        bool teamBHardCapped = false,
+        long firstApron = FIRST_APRON,
+        long secondApron = SECOND_APRON,
+        long luxuryTax = LUXURY_TAX)
     {
         var errors = new List<string>();
 
@@ -90,11 +93,11 @@ public static class TradeHelper
         if (!string.IsNullOrEmpty(teamAName))
         {
             var aPayroll = teamACurrentPayroll - aSalaryOut + bSalaryOut;
-            ValidateTradeSide(aSalaryOut, bSalaryOut, teamBSelected.Count, aPayroll, teamAName, teamAHardCapped, errors);
+            ValidateTradeSide(aSalaryOut, bSalaryOut, teamBSelected.Count, aPayroll, teamAName, teamAHardCapped, errors, firstApron, secondApron);
         }
 
         var bPayroll = teamBCurrentPayroll - bSalaryOut + aSalaryOut;
-        ValidateTradeSide(bSalaryOut, aSalaryOut, teamASelected.Count, bPayroll, teamBName, teamBHardCapped, errors);
+        ValidateTradeSide(bSalaryOut, aSalaryOut, teamASelected.Count, bPayroll, teamBName, teamBHardCapped, errors, firstApron, secondApron);
 
         return errors;
     }
@@ -131,7 +134,10 @@ public static class TradeHelper
         int teamBTotalRoster,
         long teamBCurrentPayroll,
         List<DraftPickData> teamASelectedPicks = null,
-        List<DraftPickData> teamBSelectedPicks = null)
+        List<DraftPickData> teamBSelectedPicks = null,
+        long firstApron = FIRST_APRON,
+        long secondApron = SECOND_APRON,
+        long luxuryTax = LUXURY_TAX)
     {
         var aSalaryOut = teamASelected.Sum(p => p.salary);
         var bSalaryOut = teamBSelected.Sum(p => p.salary);
@@ -186,17 +192,17 @@ public static class TradeHelper
         acceptScore += Mathf.Clamp(aTotalOvr - bTotalOvr, -20, 20);
 
         // Financial situation
-        if (teamBCurrentPayroll > SECOND_APRON)
+        if (teamBCurrentPayroll > secondApron)
         {
             if (aSalaryOut > bSalaryOut) acceptScore += 30;
             else acceptScore -= 20;
         }
-        else if (teamBCurrentPayroll > FIRST_APRON)
+        else if (teamBCurrentPayroll > firstApron)
         {
             if (aSalaryOut > bSalaryOut) acceptScore += 20;
             else acceptScore -= 10;
         }
-        else if (teamBCurrentPayroll > LUXURY_TAX)
+        else if (teamBCurrentPayroll > luxuryTax)
         {
             if (aSalaryOut > bSalaryOut) acceptScore += 15;
             else if (aSalaryOut < bSalaryOut) acceptScore -= 5;
@@ -227,8 +233,8 @@ public static class TradeHelper
         acceptScore = Mathf.Clamp(acceptScore, 0, 100);
 
         var threshold = 50;
-        if (teamBCurrentPayroll > SECOND_APRON) threshold = 40;
-        else if (teamBCurrentPayroll > FIRST_APRON) threshold = 45;
+        if (teamBCurrentPayroll > secondApron) threshold = 40;
+        else if (teamBCurrentPayroll > firstApron) threshold = 45;
 
         return new TradeResult
         {
