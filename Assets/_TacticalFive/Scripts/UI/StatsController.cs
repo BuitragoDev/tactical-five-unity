@@ -358,49 +358,45 @@ using System.Linq;
     // ═══════════════════════════════════════════════════════
     // BUILD SEASON STATS (aggregates from PlayerGameStats)
     // ═══════════════════════════════════════════════════════
-    List<StatRow> BuildSeasonStats(List<PlayerData> allPlayers)
+    List<StatRow> BuildSeasonStats(List<PlayerData> players)
     {
-        var allStats = new List<PlayerGameStats>();
+        if (_season == null || _manager == null)
+            return new List<StatRow>();
+        if (players == null || players.Count == 0)
+            return new List<StatRow>();
 
-        // Only count regular season games (same as Django)
-        if (_season != null && _manager != null)
+        // Agregación en SQL (JOIN player_game_stats + games, GROUP BY), sin N+1
+        var aggregates = DatabaseManager.Instance.GetSeasonPlayerStatsAggregates(_manager.id, _season.id);
+        if (aggregates.Count == 0) return new List<StatRow>();
+
+        var ids = new HashSet<int>(players.Select(p => p.id));
+        var rows = new List<StatRow>(aggregates.Count);
+        foreach (var a in aggregates)
         {
-            var games = DatabaseManager.Instance.GetSeasonGames(_manager.id, _season.id)
-                .Where(g => g.game_type == "regular").ToList();
-            var gameIds = new HashSet<int>(games.Select(g => g.id));
-            foreach (var player in allPlayers)
+            if (!ids.Contains(a.player_id)) continue;
+            rows.Add(new StatRow
             {
-                var playerStats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
-                    .Where(s => gameIds.Contains(s.game_id))
-                    .ToList();
-                allStats.AddRange(playerStats);
-            }
+                playerId = a.player_id,
+                gp = a.gp,
+                totalPts = a.total_points,
+                totalReb = a.total_rebounds,
+                totalAst = a.total_assists,
+                totalStl = a.total_steals,
+                totalBlk = a.total_blocks,
+                totalFgm = a.total_fgm,
+                totalFga = a.total_fga,
+                totalFg3m = a.total_fg3m,
+                totalFg3a = a.total_fg3a,
+                totalFtm = a.total_ftm,
+                totalFta = a.total_fta,
+                totalTov = a.total_turnovers,
+                totalMin = (float)a.total_minutes,
+                totalVal = a.total_rating,
+                totalDd = a.total_dd,
+                totalTd = a.total_td,
+            });
         }
-
-        return allStats
-            .GroupBy(s => s.player_id)
-            .Select(g => new StatRow
-            {
-                playerId = g.Key,
-                gp = g.Count(),
-                totalPts = g.Sum(s => s.points),
-                totalReb = g.Sum(s => s.rebounds),
-                totalAst = g.Sum(s => s.assists),
-                totalStl = g.Sum(s => s.steals),
-                totalBlk = g.Sum(s => s.blocks),
-                totalFgm = g.Sum(s => s.fgm),
-                totalFga = g.Sum(s => s.fga),
-                totalFg3m = g.Sum(s => s.fg3m),
-                totalFg3a = g.Sum(s => s.fg3a),
-                totalFtm = g.Sum(s => s.ftm),
-                totalFta = g.Sum(s => s.fta),
-                totalTov = g.Sum(s => s.turnovers),
-                totalMin = g.Sum(s => s.minutes),
-                totalVal = g.Sum(s => s.rating),
-                totalDd = g.Sum(s => s.double_double),
-                totalTd = g.Sum(s => s.triple_double),
-            })
-            .ToList();
+        return rows;
     }
 
     // ═══════════════════════════════════════════════════════

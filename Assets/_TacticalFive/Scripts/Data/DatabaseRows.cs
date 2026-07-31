@@ -21,6 +21,34 @@ public class PlayerSeasonStatsRow
     public int total_rating { get; set; }
 }
 
+public class SeasonStatsAggregate
+{
+    public int player_id { get; set; }
+    public int gp { get; set; }
+    public int total_points { get; set; }
+    public int total_rebounds { get; set; }
+    public int total_assists { get; set; }
+    public int total_steals { get; set; }
+    public int total_blocks { get; set; }
+    public int total_fgm { get; set; }
+    public int total_fga { get; set; }
+    public int total_fg3m { get; set; }
+    public int total_fg3a { get; set; }
+    public int total_ftm { get; set; }
+    public int total_fta { get; set; }
+    public int total_turnovers { get; set; }
+    public double total_minutes { get; set; }
+    public int total_rating { get; set; }
+    public int total_dd { get; set; }
+    public int total_td { get; set; }
+}
+
+public class PlayerStatTotalRow
+{
+    public int player_id { get; set; }
+    public double total { get; set; }
+}
+
 public class PlayerAwardQueryRow
 {
     public int id { get; set; }

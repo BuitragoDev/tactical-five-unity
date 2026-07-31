@@ -67,38 +67,33 @@ public partial class DatabaseManager
         var season = GetActiveSeason(managerId);
         if (season == null) return new List<PlayerData>();
 
-        var allGames = _db.Table<GameData>()
-                          .Where(g => g.manager_id == season.manager_id
-                                   && g.is_played == 1
-                                   && g.game_type == "regular")
-                          .ToList();
-
-        var totals = new Dictionary<int, double>();
-        foreach (var game in allGames)
+        string col = stat switch
         {
-            var stats = GetGamePlayerStats(game.id);
-            foreach (var s in stats)
-            {
-                double value;
-                switch (stat)
-                {
-                    case "rebounds": value = s.rebounds; break;
-                    case "assists":  value = s.assists;  break;
-                    case "steals":   value = s.steals;   break;
-                    case "blocks":   value = s.blocks;   break;
-                    case "minutes":  value = s.minutes;  break;
-                    case "rating":   value = s.rating;   break;
-                    default:         value = s.points;   break;
-                }
-                totals[s.player_id] = totals.GetValueOrDefault(s.player_id, 0) + value;
-            }
-        }
+            "rebounds" => "rebounds",
+            "assists" => "assists",
+            "steals" => "steals",
+            "blocks" => "blocks",
+            "minutes" => "minutes",
+            "rating" => "rating",
+            _ => "points",
+        };
 
-        var sorted = totals.OrderByDescending(kvp => kvp.Value).Take(count).ToList();
+        var rows = _db.Query<PlayerStatTotalRow>(
+            $@"SELECT ps.player_id, SUM(ps.{col}) AS total
+               FROM player_game_stats ps
+               JOIN games g ON ps.game_id = g.id
+               WHERE g.manager_id = ?
+                 AND g.is_played = 1
+                 AND g.game_type = 'regular'
+               GROUP BY ps.player_id
+               ORDER BY total DESC
+               LIMIT ?",
+            managerId, count);
+
         var result = new List<PlayerData>();
-        foreach (var kvp in sorted)
+        foreach (var r in rows)
         {
-            var player = _db.Table<PlayerData>().Where(p => p.id == kvp.Key).FirstOrDefault();
+            var player = _db.Table<PlayerData>().Where(p => p.id == r.player_id).FirstOrDefault();
             if (player != null) result.Add(player);
         }
         return result;

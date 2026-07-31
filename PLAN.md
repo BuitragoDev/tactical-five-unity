@@ -75,7 +75,10 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
    `Editor` → compilan en `Assembly-CSharp-Editor`, que sí ve `Assembly-CSharp` y NUnit.
    `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance`
    (`GameSimulator.cs:159-196`), por lo que no es testeable en EditMode sin refactor.*
-
-## Pendiente
-
-1. **Refactor grande** — líderes de liga en SQL en lugar de LINQ en C#.
+- **[hecho]** Líderes de liga en SQL en lugar de LINQ en C#: `BuildSeasonStats`
+   (`StatsController.cs`) pasa de N+1 queries + `GroupBy` en memoria a una sola
+   agregación SQL (`GetSeasonPlayerStatsAggregates` en `DatabaseManager.Records.cs`,
+   `JOIN player_game_stats + games` con `GROUP BY`, filtro por temporada regular
+   jugada). Verificado: 348 jugadores y 17 columnas idénticas contra la lógica LINQ
+   anterior en `save_1.db`. `GetTopPlayersByStat` (`DatabaseManager.Players.cs`)
+   también migrado a SQL (agregación cross-season).

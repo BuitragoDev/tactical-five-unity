@@ -562,6 +562,38 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    public List<SeasonStatsAggregate> GetSeasonPlayerStatsAggregates(int managerId, int seasonId)
+    {
+        if (!EnsureDb()) return new List<SeasonStatsAggregate>();
+        return _db.Query<SeasonStatsAggregate>(
+            @"SELECT ps.player_id,
+                     COUNT(*) AS gp,
+                     SUM(ps.points) AS total_points,
+                     SUM(ps.rebounds) AS total_rebounds,
+                     SUM(ps.assists) AS total_assists,
+                     SUM(ps.steals) AS total_steals,
+                     SUM(ps.blocks) AS total_blocks,
+                     SUM(ps.fgm) AS total_fgm,
+                     SUM(ps.fga) AS total_fga,
+                     SUM(ps.fg3m) AS total_fg3m,
+                     SUM(ps.fg3a) AS total_fg3a,
+                     SUM(ps.ftm) AS total_ftm,
+                     SUM(ps.fta) AS total_fta,
+                     SUM(ps.turnovers) AS total_turnovers,
+                     SUM(ps.minutes) AS total_minutes,
+                     SUM(ps.rating) AS total_rating,
+                     SUM(ps.double_double) AS total_dd,
+                     SUM(ps.triple_double) AS total_td
+              FROM player_game_stats ps
+              JOIN games g ON ps.game_id = g.id
+              WHERE g.manager_id = ?
+                AND g.season_id = ?
+                AND g.game_type = 'regular'
+                AND g.is_played = 1
+              GROUP BY ps.player_id",
+            managerId, seasonId);
+    }
+
     public List<PlayerGameStats> GetGamePlayerStats(int gameId)
     {
         return _db.Table<PlayerGameStats>()
