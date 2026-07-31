@@ -736,7 +736,6 @@ public class EditorController : UIScreenController
             if (!char.IsLetter(evt.character) && evt.character != ' ')
             {
                 evt.StopPropagation();
-                evt.PreventDefault();
             }
         }, TrickleDown.TrickleDown);
         field.RegisterValueChangedCallback(evt =>
@@ -755,7 +754,6 @@ public class EditorController : UIScreenController
             if (!char.IsDigit(evt.character))
             {
                 evt.StopPropagation();
-                evt.PreventDefault();
             }
         }, TrickleDown.TrickleDown);
         field.RegisterValueChangedCallback(evt =>
@@ -780,7 +778,6 @@ public class EditorController : UIScreenController
             if (!char.IsLetter(evt.character))
             {
                 evt.StopPropagation();
-                evt.PreventDefault();
             }
         }, TrickleDown.TrickleDown);
         field.RegisterValueChangedCallback(evt =>

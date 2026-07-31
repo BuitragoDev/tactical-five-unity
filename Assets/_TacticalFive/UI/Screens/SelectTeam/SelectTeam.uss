@@ -473,9 +473,6 @@
     min-width: 0;
     margin-right: 12px;
 }
-.modal-column:last-child {
-    margin-right: 0;
-}
 .modal-header-row {
     flex-direction: row;
     align-items: center;

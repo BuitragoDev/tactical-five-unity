@@ -356,10 +356,6 @@
     background-color: rgba(255, 255, 255, 0.02);
 }
 
-.trajectory-table-row:last-child {
-    border-bottom-width: 0;
-}
-
 .td-season { width: 130px; -unity-text-align: middle-left; padding-left: 8px; }
 .td-team   { width: 240px; -unity-text-align: middle-left; }
 .td-gp     { width: 80px;  -unity-text-align: middle-center; }

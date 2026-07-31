@@ -106,10 +106,6 @@
     border-bottom-color: rgb(32, 38, 54);
 }
 
-.arena-info-row:last-child {
-    border-bottom-width: 0;
-}
-
 .arena-info-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;

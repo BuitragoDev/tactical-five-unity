@@ -109,10 +109,6 @@
     background-color: rgba(255, 255, 255, 0.02);
 }
 
-.historial-row:last-child {
-    border-bottom-width: 0;
-}
-
 .historial-col {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;

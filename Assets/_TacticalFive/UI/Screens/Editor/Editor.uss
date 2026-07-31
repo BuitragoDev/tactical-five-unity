@@ -340,11 +340,6 @@
     padding-right: 12px;
 }
 
-.editor-column:last-child {
-    padding-right: 0;
-    padding-left: 12px;
-}
-
 .btn-action--reset {
     background-color: rgb(201, 48, 48);
     margin-right: 8px;
@@ -521,5 +516,4 @@
 .editor-modal-btn:hover {
     background-color: rgb(74, 128, 240);
 }
-
 

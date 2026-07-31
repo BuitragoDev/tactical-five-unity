@@ -175,10 +175,6 @@
     min-height: 0;
 }
 
-.market-trade-panel:last-child {
-    border-right-width: 0;
-}
-
 .market-trade-panel-header {
     flex-direction: row;
     align-items: center;
@@ -360,9 +356,7 @@
     margin-bottom: 16px;
 }
 
-.market-summary-grid > .market-summary-col:first-child {
-    margin-right: 20px;
-}
+.market-summary-grid
 
 .market-summary-col {
     flex: 1;
@@ -668,10 +662,6 @@
     color: rgb(208, 216, 232);
     line-height: 1.6;
     margin-bottom: 10px;
-}
-
-.market-modal-text:last-child {
-    margin-bottom: 0;
 }
 
 .market-modal-highlight {

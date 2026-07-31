@@ -88,10 +88,6 @@
     margin-right: 12px;
 }
 
-.premios-card:last-child {
-    margin-right: 0;
-}
-
 .premios-card-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;

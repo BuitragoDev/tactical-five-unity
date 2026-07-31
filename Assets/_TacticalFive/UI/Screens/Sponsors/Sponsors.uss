@@ -107,10 +107,6 @@
     border-bottom-color: rgb(42, 51, 71);
 }
 
-.sponsor-card-row:last-child {
-    border-bottom-width: 0;
-}
-
 .sponsor-card-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;

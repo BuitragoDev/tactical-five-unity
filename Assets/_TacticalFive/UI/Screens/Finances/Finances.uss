@@ -46,10 +46,6 @@
     margin-right: 16px;
 }
 
-.finance-summary-box:last-child {
-    margin-right: 0;
-}
-
 .finance-summary-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
@@ -156,10 +152,6 @@
     margin-right: 24px;
 }
 
-.ticket-config-col:last-child {
-    margin-right: 0;
-}
-
 .ticket-config-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
@@ -235,10 +227,6 @@
     padding: 14px 0;
     border-bottom-width: 1px;
     border-bottom-color: rgb(32, 38, 54);
-}
-
-.finances-row:last-child {
-    border-bottom-width: 0;
 }
 
 .finances-row-label {

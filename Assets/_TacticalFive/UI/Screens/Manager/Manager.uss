@@ -65,10 +65,6 @@
     overflow: hidden;
 }
 
-.manager-panel:last-child {
-    margin-bottom: 0;
-}
-
 .manager-panel-title {
     font-size: 24px;
     color: rgb(140, 156, 188);
@@ -101,10 +97,6 @@
     min-width: 65px;
     flex-grow: 1;
     margin-right: 8px;
-}
-
-.manager-stat-item:last-child {
-    margin-right: 0;
 }
 
 .manager-stat-value {

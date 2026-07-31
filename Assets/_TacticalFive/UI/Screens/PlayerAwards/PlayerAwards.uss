@@ -253,9 +253,6 @@
     min-height: 50px;
     margin-right: 12px;
 }
-.award-stat-box:last-child {
-    margin-right: 0;
-}
 .award-stat-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
@@ -305,9 +302,6 @@
     flex-shrink: 0;
     flex-grow: 0;
 }
-.quintet-card:last-child {
-    margin-right: 0;
-}
 .quintet-card--five {
     border-color: rgb(212, 160, 23);
 }
@@ -356,9 +350,6 @@
     min-height: 40px;
     margin-right: 6px;
     flex-shrink: 0;
-}
-.quintet-stat-box:last-child {
-    margin-right: 0;
 }
 .quintet-stat-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");

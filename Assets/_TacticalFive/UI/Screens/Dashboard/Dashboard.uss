@@ -862,9 +862,6 @@
     border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
 }
-.message-item:last-child {
-    border-bottom-width: 0;
-}
 .message-item-subject {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
@@ -892,9 +889,6 @@
     padding: 10px 0;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.4);
-}
-.team-stat-row:last-child {
-    border-bottom-width: 0;
 }
 .team-stat-icon-bg {
     width: 28px;

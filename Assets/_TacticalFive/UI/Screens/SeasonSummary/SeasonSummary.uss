@@ -302,9 +302,6 @@
     min-height: 60px;
     margin-right: 16px;
 }
-.mvp-stat-box:last-child {
-    margin-right: 0;
-}
 .mvp-stat-box .stat-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
