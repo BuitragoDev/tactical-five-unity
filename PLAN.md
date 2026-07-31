@@ -55,13 +55,21 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
   configuración (usa `style.display` frente a las clases CSS de la base). Validado con una
   simulación de temporada completa. `Assets/_TacticalFive/Scripts/Core/UIScreenController.cs`.
 
+- **[hecho]** Transacción del día de partido: `ProcessGameDayRoutine` (`DashboardController.cs`)
+  se divide en dos bloques atómicos — lote pre-partido (lesiones, fatiga, scouts, entrenos,
+  traspasos IA, ofertas FA, psicólogo) en su propia transacción, y simulación + bookkeeping
+  (partidos, química, noticias, transiciones de fase, payroll mensual, avance de fecha,
+  premios, `UpdateSeason`) en una transacción de un solo frame (se eliminaron los
+  `yield return null` del loop; los modales interactivos de alineación quedan fuera de
+  transacción). En fallo: rollback, limpieza de `GameResultCache`/`_pendingRecoveredIds` y
+  modal de error sin avanzar el día. `SavePlayInGames`/`SavePlayoffGames` usan
+  `RunInTransaction` (savepoints) para anidar con la transacción del día y re-lanzar errores
+  en lugar de tragárselos. `DatabaseManager.Games.cs`.
+
 ## Pendiente
 
-1. **Transacción del día de partido** — no implementada: el procesamiento es una corrutina
-   con `yield return` dentro del loop de partidos (`DashboardController.cs`), y una
-   transacción abierta entre frames mantendría el lock. Pendiente de rediseño.
-2. **Refactor grande** — líderes de liga en SQL en lugar de LINQ en C#.
-3. **Tests unitarios** — `Assets/_TacticalFive/Tests/Editor/` con `TradeHelperTests` +
+1. **Refactor grande** — líderes de liga en SQL en lugar de LINQ en C#.
+2. **Tests unitarios** — `Assets/_TacticalFive/Tests/Editor/` con `TradeHelperTests` +
    `EditModeSmokeTests`. Pendiente: compilar/ejecutar en el editor.
    *Nota: un test assembly (asmdef) NO puede referenciar la predefined assembly
    `Assembly-CSharp` (limitación de Unity 6; ni `references`, ni `optionalUnityReferences:

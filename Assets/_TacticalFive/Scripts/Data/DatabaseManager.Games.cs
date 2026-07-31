@@ -250,37 +250,23 @@ public partial class DatabaseManager
     public void SavePlayInGames(List<GameData> games)
     {
         if (games.Count == 0) return;
-        _db.BeginTransaction();
-        try
+        _db.RunInTransaction(() =>
         {
             foreach (var g in games)
                 _db.Insert(g);
-            _db.Commit();
-            Debug.Log($"[DB] {games.Count} partidos Play-In guardados.");
-        }
-        catch (Exception e)
-        {
-            _db.Rollback();
-            Debug.LogError($"[DB] Error guardando partidos Play-In: {e.Message}");
-        }
+        });
+        Debug.Log($"[DB] {games.Count} partidos Play-In guardados.");
     }
 
     public void SavePlayoffGames(List<GameData> games)
     {
         if (games.Count == 0) return;
-        _db.BeginTransaction();
-        try
+        _db.RunInTransaction(() =>
         {
             foreach (var g in games)
                 _db.Insert(g);
-            _db.Commit();
-            Debug.Log($"[DB] {games.Count} partidos de Playoff guardados.");
-        }
-        catch (Exception e)
-        {
-            _db.Rollback();
-            Debug.LogError($"[DB] Error guardando partidos de Playoff: {e.Message}");
-        }
+        });
+        Debug.Log($"[DB] {games.Count} partidos de Playoff guardados.");
     }
 
     public List<GameData> GetPlayInGames(int managerId)

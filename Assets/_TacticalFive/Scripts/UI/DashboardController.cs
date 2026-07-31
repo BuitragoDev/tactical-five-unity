@@ -492,35 +492,51 @@ using System.Linq;
             yield break;
         }
 
-        var recoveredPlayers = ProcessInjuries();
-        ProcessFisicoRecovery();
-        if (recoveredPlayers.Count > 0)
-        {
-            foreach (var p in recoveredPlayers)
-            {
-                DatabaseManager.Instance.AddMessage(new MessageData
-                {
-                    manager_id = _manager.id,
-                    sender_type = 1,
-                    sender_id = 0,
-                    title = $"Recuperado: {p.first_name} {p.last_name}",
-                    body = $"{p.first_name} {p.last_name} se ha recuperado de su lesión y vuelve a estar disponible.",
-                    game_day = gameDay,
-                    game_date = _season?.current_date ?? "",
-                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    is_read = 0
-                });
-                _pendingRecoveredIds.Add(p.id);
-            }
-        }
+        var db = DatabaseManager.Instance.Db;
 
-        ProcessScouts();
-        ProcessTraining();
-        ProcessRenovations();
-        ProcessAITransfers(gameDay);
-        ProcessStarFreeAgentSignings(gameDay);
-        ProcessPsychologistMorale();
+        db.BeginTransaction();
+        try
+        {
+            var recoveredPlayers = ProcessInjuries();
+            ProcessFisicoRecovery();
+            if (recoveredPlayers.Count > 0)
+            {
+                foreach (var p in recoveredPlayers)
+                {
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = 0,
+                        title = $"Recuperado: {p.first_name} {p.last_name}",
+                        body = $"{p.first_name} {p.last_name} se ha recuperado de su lesión y vuelve a estar disponible.",
+                        game_day = gameDay,
+                        game_date = _season?.current_date ?? "",
+                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        is_read = 0
+                    });
+                    _pendingRecoveredIds.Add(p.id);
+                }
+            }
+
+            ProcessScouts();
+            ProcessTraining();
+            ProcessRenovations();
+            ProcessAITransfers(gameDay);
+            ProcessStarFreeAgentSignings(gameDay);
+            ProcessPsychologistMorale();
+            db.Commit();
+        }
+        catch (System.Exception ex)
+        {
+            db.Rollback();
+            _pendingRecoveredIds.Clear();
+            Debug.LogError($"[GameDay] Error en el lote pre-partido, revertido: {ex.Message}\n{ex.StackTrace}");
+            HideLoading();
+            ShowOfferResultModal("ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.\n\n" + ex.Message, -1);
+            yield break;
+        }
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
 
@@ -570,6 +586,9 @@ using System.Linq;
             }
         }
 
+        db.BeginTransaction();
+        try
+        {
         if (gamesToday.Count > 0)
         {
             GameResultCache.Clear();
@@ -643,8 +662,6 @@ using System.Linq;
                 DatabaseManager.Instance.UpdateRelationshipsAfterGame(
                     game.away_team_id, game.id, !homeWon,
                     result.away_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
-
-                yield return null;
             }
 
             // Recalculate team chemistry for all teams involved today
@@ -703,7 +720,6 @@ using System.Linq;
                         ProcessGameFinances(elimGame, elimResult);
                         UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
                         UpdatePlayersMoraleAfterGame(elimResult.away_stats, elimGame.away_team_id, elimGame.away_score > elimGame.home_score);
-                        yield return null;
                     }
                     GameResultCache.LastGameDay = gameDay;
                     GameResultCache.SimulatedGameIds.AddRange(elimToday.Select(g => g.id));
@@ -795,7 +811,18 @@ using System.Linq;
                 EvaluateMonthlyAwards(newDate);
             }
         }
-        DatabaseManager.Instance.UpdateSeason(_season);
+            DatabaseManager.Instance.UpdateSeason(_season);
+            db.Commit();
+        }
+        catch (System.Exception ex)
+        {
+            db.Rollback();
+            GameResultCache.Clear();
+            Debug.LogError($"[GameDay] Error simulando el día, revertido: {ex.Message}\n{ex.StackTrace}");
+            HideLoading();
+            ShowOfferResultModal("ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.\n\n" + ex.Message, -1);
+            yield break;
+        }
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
         Refresh();
