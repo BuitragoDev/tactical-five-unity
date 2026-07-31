@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 
-public class PlayerAwardsController : MonoBehaviour
+public class PlayerAwardsController : UIScreenController
 {
     private static readonly Dictionary<string, string> _posSpanish = new()
     {
@@ -14,9 +14,6 @@ public class PlayerAwardsController : MonoBehaviour
         { "PF", "Ala-Pívot" },
         { "C",  "Pívot" },
     };
-
-    private UIDocument _doc;
-    private VisualElement _root;
 
     // Header
     private VisualElement _headerTeamLogo;
@@ -42,35 +39,13 @@ public class PlayerAwardsController : MonoBehaviour
     private VisualElement _quintetGrid;
     private VisualElement _rookieGrid;
 
-    private ManagerData _manager;
-    private TeamData _myTeam;
-    private SeasonData _season;
-
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        CacheReferences();
-        LoadData();
-
+        base.OnEnable();
         CursorManager.Instance?.SetDefaultCursor();
-
-        var btnEnd = _root.Q<Button>("BtnEndSeason");
-        if (btnEnd != null)
-        {
-            btnEnd.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.EndSeason); });
-            CursorManager.Instance?.RegisterHandCursor(btnEnd);
-        }
     }
 
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -94,20 +69,29 @@ public class PlayerAwardsController : MonoBehaviour
         _rookieGrid = _root.Q<VisualElement>("RookieGrid");
     }
 
-    void LoadData()
+    protected override void LoadData()
     {
-        _manager = DatabaseManager.Instance.GetActiveManager();
-        if (_manager == null) return;
-        _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
-        if (_myTeam == null) return;
-        _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        if (_season == null) return;
+        base.LoadData();
+    }
 
+    protected override void RegisterCallbacks()
+    {
+        var btnEnd = _root.Q<Button>("BtnEndSeason");
+        if (btnEnd != null)
+        {
+            btnEnd.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.EndSeason); });
+            CursorManager.Instance?.RegisterHandCursor(btnEnd);
+        }
+    }
+
+    protected override void Refresh()
+    {
+        if (_season == null || _manager == null) return;
         RefreshHeader();
         RefreshContent();
     }
 
-    void RefreshHeader()
+    protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
 
@@ -220,10 +204,5 @@ public class PlayerAwardsController : MonoBehaviour
         box.Add(lblLbl);
 
         return box;
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

@@ -2,11 +2,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
-
-public class TrajectoryController : MonoBehaviour
+    public class TrajectoryController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
+    protected override GameScreen ScreenId => GameScreen.Trajectory;
 
     // Header
     private VisualElement _headerTeamLogo;
@@ -16,7 +14,6 @@ public class TrajectoryController : MonoBehaviour
     private Label _headerPayroll;
     private Label _headerMargin;
     private Label _headerChemistry;
-    private Button _btnAction;
     private Label _headerSeason;
     private Label _headerDate;
 
@@ -38,56 +35,10 @@ public class TrajectoryController : MonoBehaviour
     private VisualElement _trajectoryTableBody;
     private VisualElement _trajectoryEmpty;
     private VisualElement _trajectoryStatsSection;
-
-    // Config modal
-    private VisualElement _configModalOverlay;
-    private VisualElement _configModalBox;
-    private Button _btnConfigCerrar;
-    private CustomSlider _configSliderMaster;
-    private CustomSlider _configSliderMusic;
-    private CustomSlider _configSliderSFX;
-    private Label _configLabelMaster;
-    private Label _configLabelMusic;
-    private Label _configLabelSFX;
-    private Button _configBtnQualityLow;
-    private Button _configBtnQualityMedium;
-    private Button _configBtnQualityHigh;
-    private Button _configBtnQualityUltra;
-    private VisualElement _configMainMenuConfirmOverlay;
-    private Button _configBtnMainMenu;
-    private Button _configBtnMainMenuYes;
-    private Button _configBtnMainMenuNo;
-    private VisualElement _configExitConfirmOverlay;
-    private Button _configBtnExit;
-    private Button _configBtnExitYes;
-    private Button _configBtnExitNo;
-
     private PlayerData _player;
-    private ManagerData _manager;
-    private SeasonData _season;
     private List<PlayerCareerSeasonRow> _careerHistory;
     private List<PlayerAwardEntry> _awards;
-
-    void OnEnable()
-    {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        CacheReferences();
-        LoadSidebarIcons();
-        LoadData();
-        RegisterCallbacks();
-        InitConfigModal();
-        Refresh();
-    }
-
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _trajectoryPhoto = _root.Q<VisualElement>("TrajectoryPhoto");
         _trajectoryPlayerName = _root.Q<Label>("TrajectoryPlayerName");
@@ -114,45 +65,16 @@ public class TrajectoryController : MonoBehaviour
         _headerPayroll = _root.Q<Label>("HeaderPayroll");
         _headerMargin = _root.Q<Label>("HeaderMargin");
         _headerChemistry = _root.Q<Label>("HeaderChemistry");
-        _btnAction = _root.Q<Button>("BtnAction");
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
     }
-
-    void LoadSidebarIcons()
+    protected override void LoadData()
     {
-        var iconMap = new Dictionary<string, string>
-        {
-            {"NavDashboardIcon", "inicio"},
-            {"NavRosterIcon", "plantilla"},
-            {"NavCalendarIcon", "calendario"},
-            {"NavStandingsIcon", "clasificacion"},
-            {"NavPalmaresIcon", "palmares"},
-            {"NavResultsIcon", "resultados"},
-            {"NavPlayoffsIcon", "playoff"},
-            {"NavStatsIcon", "estadisticas"},
-            {"NavMarketIcon", "mercado"},
-            {"NavFinancesIcon", "finanzas"},
-            {"NavArenaIcon", "pabellon"},
-            {"NavManagerIcon", "manager"},
-            {"NavMessagesIcon", "mensajes"},
-        };
+        base.LoadData();
 
-        foreach (var kv in iconMap)
-        {
-            var iconElem = _root.Q<VisualElement>(kv.Key);
-            if (iconElem == null) continue;
-            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
-            if (tex != null)
-                iconElem.style.backgroundImage = new StyleBackground(tex);
-        }
-    }
-
-    void LoadData()
-    {
-        _manager = DatabaseManager.Instance.GetActiveManager();
-        if (_manager == null) return;
-        _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        
+        
+        
 
         int playerId = ScreenManager.SelectedPlayerId;
         _player = DatabaseManager.Instance.GetPlayerById(playerId);
@@ -161,129 +83,15 @@ public class TrajectoryController : MonoBehaviour
         _careerHistory = DatabaseManager.Instance.GetPlayerCareerHistory(playerId, _manager.id);
         _awards = DatabaseManager.Instance.GetPlayerAwards(playerId);
     }
-
-    void RegisterCallbacks()
+    protected override void RegisterCallbacks()
     {
-        SidebarController.Attach(_root, GameScreen.Trajectory);
-        HeaderController.Attach(_root);
-        RegisterNavButtons();
-
-        _btnAction?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
-
+        base.RegisterCallbacks();
         _root.Q<Button>("TrajectoryBackBtn")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(_root.Q<Button>("TrajectoryBackBtn"));
     }
-
-    void RegisterNavButtons()
-    {
-        var allSubmenus = new[]
-        {
-            _root.Q<VisualElement>("RosterSubmenu"),
-            _root.Q<VisualElement>("PalmaresSubmenu"),
-            _root.Q<VisualElement>("MarketSubmenu"),
-            _root.Q<VisualElement>("FinanceSubmenu"),
-        };
-
-        _root.Q<Button>("NavDashboard")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
-        _root.Q<Button>("NavRoster")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            var submenu = _root.Q<VisualElement>("RosterSubmenu");
-            if (submenu == null) return;
-            bool opening = !submenu.ClassListContains("nav-submenu--visible");
-            foreach (var s in allSubmenus)
-                if (s != null && s != submenu)
-                    s.RemoveFromClassList("nav-submenu--visible");
-            submenu.EnableInClassList("nav-submenu--visible", opening);
-        });
-        _root.Q<Button>("SubmenuJugadores")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
-            ScreenManager.Instance.GoTo(GameScreen.Roster);
-        });
-        _root.Q<Button>("SubmenuEmpleados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Employees); });
-        _root.Q<Button>("SubmenuLesionados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Injured); });
-        _root.Q<Button>("SubmenuQuinteto")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Quinteto); });
-        _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
-        _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
-        _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
-        _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            var submenu = _root.Q<VisualElement>("PalmaresSubmenu");
-            if (submenu == null) return;
-            bool opening = !submenu.ClassListContains("nav-submenu--visible");
-            foreach (var s in allSubmenus)
-                if (s != null && s != submenu)
-                    s.RemoveFromClassList("nav-submenu--visible");
-            submenu.EnableInClassList("nav-submenu--visible", opening);
-        });
-        _root.Q<Button>("SubmenuPalmares")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
-        _root.Q<Button>("SubmenuRecords")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Records); });
-        _root.Q<Button>("SubmenuPremios")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Premios); });
-        _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
-        _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Playoffs); });
-        _root.Q<Button>("NavStats")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Stats); });
-        _root.Q<Button>("NavMarket")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            var submenu = _root.Q<VisualElement>("MarketSubmenu");
-            if (submenu == null) return;
-            bool opening = !submenu.ClassListContains("nav-submenu--visible");
-            foreach (var s in allSubmenus)
-                if (s != null && s != submenu)
-                    s.RemoveFromClassList("nav-submenu--visible");
-            submenu.EnableInClassList("nav-submenu--visible", opening);
-        });
-        _root.Q<Button>("SubmenuOfertas")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible");
-            ScreenManager.Instance.GoTo(GameScreen.Market);
-        });
-        _root.Q<Button>("SubmenuCartera")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Cartera); });
-        _root.Q<Button>("SubmenuHistorial")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Historial); });
-        _root.Q<Button>("NavFinances")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            var submenu = _root.Q<VisualElement>("FinanceSubmenu");
-            if (submenu == null) return;
-            bool opening = !submenu.ClassListContains("nav-submenu--visible");
-            foreach (var s in allSubmenus)
-                if (s != null && s != submenu)
-                    s.RemoveFromClassList("nav-submenu--visible");
-            submenu.EnableInClassList("nav-submenu--visible", opening);
-        });
-        _root.Q<Button>("SubmenuDecisiones")?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible");
-            ScreenManager.Instance.GoTo(GameScreen.Finances);
-        });
-        _root.Q<Button>("SubmenuPrestamos")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Loans); });
-        _root.Q<Button>("SubmenuSponsors")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Sponsors); });
-        _root.Q<Button>("SubmenuTV")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.TV); });
-        _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
-        _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
-        _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
-        _root.Q<VisualElement>("ConfigIcon")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); OpenConfigModal(); });
-    }
-
-    void Refresh()
+    protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Trajectory] RefreshHeader error: {ex.Message}"); }
         if (_player == null) return;
@@ -485,161 +293,7 @@ public class TrajectoryController : MonoBehaviour
         return $"{label} ({award.year_start}-{award.year_end})";
     }
 
-    // ── CONFIG MODAL ──
-
-    void InitConfigModal()
-    {
-        _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");
-        _configModalBox     = _root.Q<VisualElement>("ConfigModalBox");
-        _btnConfigCerrar    = _root.Q<Button>("ConfigBtnCerrar");
-
-        _configSliderMaster = new CustomSlider(
-            _root.Q<VisualElement>("ConfigSliderMaster"),
-            _root.Q<VisualElement>("ConfigFillMaster"),
-            _root.Q<VisualElement>("ConfigDraggerMaster"));
-        _configSliderMusic  = new CustomSlider(
-            _root.Q<VisualElement>("ConfigSliderMusic"),
-            _root.Q<VisualElement>("ConfigFillMusic"),
-            _root.Q<VisualElement>("ConfigDraggerMusic"));
-        _configSliderSFX    = new CustomSlider(
-            _root.Q<VisualElement>("ConfigSliderSFX"),
-            _root.Q<VisualElement>("ConfigFillSFX"),
-            _root.Q<VisualElement>("ConfigDraggerSFX"));
-        _configLabelMaster  = _root.Q<Label>("ConfigLabelMaster");
-        _configLabelMusic   = _root.Q<Label>("ConfigLabelMusic");
-        _configLabelSFX     = _root.Q<Label>("ConfigLabelSFX");
-        _configBtnQualityLow    = _root.Q<Button>("ConfigBtnQualityLow");
-        _configBtnQualityMedium = _root.Q<Button>("ConfigBtnQualityMedium");
-        _configBtnQualityHigh   = _root.Q<Button>("ConfigBtnQualityHigh");
-        _configBtnQualityUltra  = _root.Q<Button>("ConfigBtnQualityUltra");
-
-        _configBtnMainMenu     = _root.Q<Button>("ConfigBtnMainMenu");
-        _configBtnExit         = _root.Q<Button>("ConfigBtnExit");
-
-        _configMainMenuConfirmOverlay = _root.Q<VisualElement>("ConfigMainMenuConfirmOverlay");
-        _configBtnMainMenuYes = _root.Q<Button>("ConfigBtnMainMenuYes");
-        _configBtnMainMenuNo  = _root.Q<Button>("ConfigBtnMainMenuNo");
-
-        _configExitConfirmOverlay = _root.Q<VisualElement>("ConfigExitConfirmOverlay");
-        _configBtnExitYes = _root.Q<Button>("ConfigBtnExitYes");
-        _configBtnExitNo  = _root.Q<Button>("ConfigBtnExitNo");
-
-        _configSliderMaster.OnValueChanged = v =>
-        {
-            AudioManager.Instance?.SetMasterVolume(v);
-            UpdateConfigLabels();
-        };
-        _configSliderMusic.OnValueChanged = v =>
-        {
-            AudioManager.Instance?.SetMusicVolume(v);
-            UpdateConfigLabels();
-        };
-        _configSliderSFX.OnValueChanged = v =>
-        {
-            AudioManager.Instance?.SetSFXVolume(v);
-            UpdateConfigLabels();
-        };
-
-        _configBtnQualityLow?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(0); });
-        _configBtnQualityMedium?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(1); });
-        _configBtnQualityHigh?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(2); });
-        _configBtnQualityUltra?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(3); });
-
-        _btnConfigCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseConfigModal(); });
-        _configModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _configModalOverlay)
-                CloseConfigModal();
-        });
-
-        _configBtnMainMenu?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenMainMenuConfirm(); });
-        _configBtnMainMenuNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseMainMenuConfirm(); });
-        _configBtnMainMenuYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToMainMenu(); });
-        _configBtnExit?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenExitConfirm(); });
-        _configBtnExitNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseExitConfirm(); });
-        _configBtnExitYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); QuitGame(); });
-    }
-
-    void OpenConfigModal()
-    {
-        if (_configModalOverlay == null) return;
-        _configModalOverlay.style.display = DisplayStyle.Flex;
-        _configSliderMaster.SetValueWithoutNotify(AudioManager.Instance?.MasterVolume ?? 1f);
-        _configSliderMusic.SetValueWithoutNotify(AudioManager.Instance?.MusicVolume ?? 1f);
-        _configSliderSFX.SetValueWithoutNotify(AudioManager.Instance?.SFXVolume ?? 1f);
-        int q = QualitySettings.GetQualityLevel();
-        SelectConfigQuality(q, true);
-        UpdateConfigLabels();
-    }
-
-    void CloseConfigModal()
-    {
-        if (_configModalOverlay != null)
-            _configModalOverlay.style.display = DisplayStyle.None;
-        CloseMainMenuConfirm();
-        CloseExitConfirm();
-    }
-
-    void UpdateConfigLabels()
-    {
-        if (_configLabelMaster != null) _configLabelMaster.text = $"{Mathf.RoundToInt(_configSliderMaster.Value * 100)}%";
-        if (_configLabelMusic != null)  _configLabelMusic.text  = $"{Mathf.RoundToInt(_configSliderMusic.Value * 100)}%";
-        if (_configLabelSFX != null)    _configLabelSFX.text    = $"{Mathf.RoundToInt(_configSliderSFX.Value * 100)}%";
-    }
-
-    void SelectConfigQuality(int level, bool silent = false)
-    {
-        QualitySettings.SetQualityLevel(level, true);
-        string activeClass = "settings-quality-btn--active";
-        _configBtnQualityLow?.RemoveFromClassList(activeClass);
-        _configBtnQualityMedium?.RemoveFromClassList(activeClass);
-        _configBtnQualityHigh?.RemoveFromClassList(activeClass);
-        _configBtnQualityUltra?.RemoveFromClassList(activeClass);
-        var map = new[] { _configBtnQualityLow, _configBtnQualityMedium, _configBtnQualityHigh, _configBtnQualityUltra };
-        if (level >= 0 && level < map.Length && map[level] != null)
-            map[level].AddToClassList(activeClass);
-    }
-
-    void OpenMainMenuConfirm()
-    {
-        if (_configMainMenuConfirmOverlay != null)
-            _configMainMenuConfirmOverlay.style.display = DisplayStyle.Flex;
-    }
-
-    void CloseMainMenuConfirm()
-    {
-        if (_configMainMenuConfirmOverlay != null)
-            _configMainMenuConfirmOverlay.style.display = DisplayStyle.None;
-    }
-
-    void GoToMainMenu()
-    {
-        CloseConfigModal();
-        ScreenManager.Instance.GoTo(GameScreen.MainMenu);
-    }
-
-    void OpenExitConfirm()
-    {
-        if (_configExitConfirmOverlay != null)
-            _configExitConfirmOverlay.style.display = DisplayStyle.Flex;
-    }
-
-    void CloseExitConfirm()
-    {
-        if (_configExitConfirmOverlay != null)
-            _configExitConfirmOverlay.style.display = DisplayStyle.None;
-    }
-
-    void QuitGame()
-    {
-#if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        Application.Quit();
-#endif
-    }
-
-    void RefreshHeader()
+    protected override void RefreshHeader()
     {
         if (_manager == null || _season == null) return;
 
@@ -693,10 +347,5 @@ public class TrajectoryController : MonoBehaviour
             _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
         if (_headerDate != null)
             _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

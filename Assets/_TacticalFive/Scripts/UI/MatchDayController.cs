@@ -3,11 +3,8 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
-public class MatchDayController : MonoBehaviour
+public class MatchDayController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
-
     private Label _homeScore, _awayScore, _homeName, _awayName;
     private VisualElement _homeLogo, _awayLogo;
     private Label _venueLabel;
@@ -23,32 +20,17 @@ public class MatchDayController : MonoBehaviour
     // Header
     private Label _headerSubtitle, _headerGameDay;
 
-    private ManagerData _manager;
-    private TeamData _myTeam;
-    private SeasonData _season;
     private List<TeamData> _allTeams;
     private Dictionary<string, Sprite> _logoSprites = new();
 
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
+        base.OnEnable();
         CursorManager.Instance?.SetDefaultCursor();
         AudioManager.Instance?.PlayMusic("backgroundGameDay");
-        CacheReferences();
-        LoadData();
-        RegisterCallbacks();
-        Refresh();
     }
 
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _homeScore = _root.Q<Label>("HomeScore");
         _awayScore = _root.Q<Label>("AwayScore");
@@ -76,16 +58,13 @@ public class MatchDayController : MonoBehaviour
         _headerGameDay = _root.Q<Label>("HeaderGameDay");
     }
 
-    void LoadData()
+    protected override void LoadData()
     {
+        base.LoadData();
+
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        _manager = DatabaseManager.Instance.GetActiveManager();
-        if (_manager == null) return;
-
-        _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
-        _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
 
@@ -98,7 +77,7 @@ public class MatchDayController : MonoBehaviour
         }
     }
 
-    void RegisterCallbacks()
+    protected override void RegisterCallbacks()
     {
         _btnContinue?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnContinue(); });
 
@@ -201,13 +180,13 @@ public class MatchDayController : MonoBehaviour
         }
     }
 
-    void Refresh()
+    protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[MatchDay] RefreshHeader error: {ex.Message}"); }
         LoadMatchData();
     }
 
-    void RefreshHeader()
+    protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
 
@@ -521,10 +500,5 @@ public class MatchDayController : MonoBehaviour
 
         if (_logoSprites.TryGetValue(logoName, out var fallback))
             elem.style.backgroundImage = new StyleBackground(fallback);
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

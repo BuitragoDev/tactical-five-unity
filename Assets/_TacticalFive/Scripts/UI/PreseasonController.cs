@@ -3,11 +3,8 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
-public class PreseasonController : MonoBehaviour
+public class PreseasonController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
-
     // Header
     private Button _btnBack;
     private Button _btnContinue;
@@ -28,8 +25,6 @@ public class PreseasonController : MonoBehaviour
     private VisualElement _teamsGrid;
 
     // Estado
-    private TeamData _myTeam;
-    private ManagerData _manager;
     private List<TeamData> _allTeams;
     private List<GameData> _games = new();
     private bool _isHome = true;
@@ -45,35 +40,7 @@ public class PreseasonController : MonoBehaviour
     private string[] _dates = new string[4];
     private string[] _datesDb = new string[4];
 
-    void OnEnable()
-    {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0;
-        _root.style.right = 0;
-        _root.style.top = 0;
-        _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        CacheReferences();
-        LoadData();
-        RegisterCallbacks();
-        BuildTeamsGrid();
-
-        // Reset: cada vez que se muestra Preseason se empieza de cero
-        _games.Clear();
-        _isHome = true;
-        SetLocation(true);
-        RefreshSlots();
-        UpdateTeamsGridAvailability();
-        UpdateInfoBar();
-        UpdateContinueButton();
-    }
-
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _btnBack = _root.Q<Button>("BtnBack");
         _btnContinue = _root.Q<Button>("BtnContinue");
@@ -88,8 +55,11 @@ public class PreseasonController : MonoBehaviour
         _teamsGrid = _root.Q<VisualElement>("TeamsGrid");
     }
 
-    void LoadData()
+    protected override void LoadData()
     {
+        base.LoadData();
+        if (_myTeam == null) return;
+
         var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
         foreach (var s in logos80)
             _logoSprites[s.name] = s;
@@ -98,13 +68,9 @@ public class PreseasonController : MonoBehaviour
         foreach (var s in logos120)
             _logoSprites120[s.name] = s;
 
-        _manager = DatabaseManager.Instance.GetActiveManager();
-        _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
         _allTeams = DatabaseManager.Instance.GetAllTeams();
 
-        // Inicializar fechas de pretemporada según el año de la temporada activa
-        var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        int yearStart = season?.year_start ?? 2026;
+        int yearStart = _season?.year_start ?? 2026;
 
         if (_headerYear != null) _headerYear.text = yearStart.ToString();
         if (_infoBarSeason != null) _infoBarSeason.text = $"SEPTIEMBRE {yearStart}";
@@ -117,9 +83,11 @@ public class PreseasonController : MonoBehaviour
             _datesDb[i] = $"{yearStart}-09-{day:D2}";
             _dates[i] = $"{day:D2} SEP {yearStart}";
         }
+
+        BuildTeamsGrid();
     }
 
-    void RegisterCallbacks()
+    protected override void RegisterCallbacks()
     {
         _btnBack?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.SelectTeam); });
@@ -134,6 +102,20 @@ public class PreseasonController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_btnHome);
             CursorManager.Instance.RegisterHandCursor(_btnAway);
         }
+    }
+
+    protected override void Refresh()
+    {
+        if (_myTeam == null) return;
+
+        // Reset: cada vez que se muestra Preseason se empieza de cero
+        _games.Clear();
+        _isHome = true;
+        SetLocation(true);
+        RefreshSlots();
+        UpdateTeamsGridAvailability();
+        UpdateInfoBar();
+        UpdateContinueButton();
     }
 
     // ── INFO BAR ──────────────────────────────────────────
@@ -349,6 +331,8 @@ public class PreseasonController : MonoBehaviour
 
     void UpdateTeamsGridAvailability()
     {
+        if (_allTeams == null) return;
+
         var usedIds = _games.Select(g =>
             g.is_home == 1 ? g.away_team_id : g.home_team_id).ToHashSet();
 
@@ -506,10 +490,5 @@ public class PreseasonController : MonoBehaviour
         }
 
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

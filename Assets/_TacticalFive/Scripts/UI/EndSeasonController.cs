@@ -4,11 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-public class EndSeasonController : MonoBehaviour
+public class EndSeasonController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
-
     // Header
     private VisualElement _headerTeamLogo;
     private Label _headerTeamName;
@@ -28,29 +25,15 @@ public class EndSeasonController : MonoBehaviour
     private VisualElement _expiringPanel;
     private ScrollView _draftResults;
 
-    private ManagerData _manager;
-    private TeamData _myTeam;
-    private SeasonData _season;
-
     private Dictionary<string, Sprite> _logo32;
 
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+        base.OnEnable();
 
         _lotteryOverlay = new VisualElement();
         _lotteryOverlay.AddToClassList("lottery-overlay");
         _root.Add(_lotteryOverlay);
-
-        CacheReferences();
-        LoadData();
 
         CursorManager.Instance?.SetDefaultCursor();
 
@@ -63,7 +46,7 @@ public class EndSeasonController : MonoBehaviour
         }
     }
 
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -81,26 +64,23 @@ public class EndSeasonController : MonoBehaviour
         _draftResults = _root.Q<ScrollView>("DraftResults");
     }
 
-    void LoadData()
+    protected override void LoadData()
     {
-        _manager = DatabaseManager.Instance.GetActiveManager();
-        if (_manager == null) return;
-        _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
-        if (_myTeam == null) return;
-        _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
+        base.LoadData();
         if (_season == null) return;
 
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         _logo32 = new Dictionary<string, Sprite>();
         foreach (var s in logos) _logo32[s.name] = s;
 
-        RefreshHeader();
         ProcessAITeamRenewals();
-        RefreshContent();
 
         _btnNextSeason.SetEnabled(false);
+    }
 
-        _btnDraft.RegisterCallback<ClickEvent>(_ =>
+    protected override void RegisterCallbacks()
+    {
+        _btnDraft?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _btnDraft.SetEnabled(false);
@@ -114,14 +94,21 @@ public class EndSeasonController : MonoBehaviour
             _btnNextSeason.SetEnabled(true);
         });
 
-        _btnNextSeason.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.NewSeason); });
+        _btnNextSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.NewSeason); });
 
-        _btnRenewAll.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
+        _btnRenewAll?.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
 
-        _btnLottery.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowLotteryModal(); });
+        _btnLottery?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowLotteryModal(); });
     }
 
-    void RefreshHeader()
+    protected override void Refresh()
+    {
+        if (_season == null) return;
+        RefreshHeader();
+        RefreshContent();
+    }
+
+    protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
 
@@ -432,11 +419,6 @@ public class EndSeasonController : MonoBehaviour
         box.Add(val);
 
         return box;
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 
     void ShowDraftLotteryModal(List<DraftGenerator.DraftPickResult> drafted)

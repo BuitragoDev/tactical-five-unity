@@ -3,11 +3,8 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
-public class SelectTeamController : MonoBehaviour
+public class SelectTeamController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
-
     // Header
     private Button _btnBack;
     private Button _btnContinue;
@@ -67,49 +64,7 @@ public class SelectTeamController : MonoBehaviour
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
 
-    void OnEnable()
-    {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        // Forzar root a ocupar toda la pantalla
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0;
-        _root.style.right = 0;
-        _root.style.top = 0;
-        _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        CacheReferences();
-        SetupScrollViews();
-        RegisterCallbacks();
-        LoadSprites();
-        LoadTeams();
-
-        // Modo de juego
-        var mode = ScreenManager.Instance.CurrentMode;
-        _headerMode.text = mode == GameMode.ProManager ? "PROMANAGER" : "MANAGER";
-
-        // Estado inicial
-        _detailScroll.style.display = DisplayStyle.None;
-        _detailPlaceholder.style.display = DisplayStyle.Flex;
-        _btnContinue.SetEnabled(false);
-
-        // Listener del nombre del manager
-        _managerInput?.RegisterValueChangedCallback(_ => ValidateContinue());
-
-        ShowFilter("All");
-    }
-
-    void ValidateContinue()
-    {
-        bool hasTeam = _selectedTeam != null;
-        bool hasName = !string.IsNullOrWhiteSpace(_managerInput?.value);
-        _btnContinue.SetEnabled(hasTeam && hasName);
-    }
-
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _btnBack = _root.Q<Button>("BtnBack");
         _btnContinue = _root.Q<Button>("BtnContinue");
@@ -168,7 +123,16 @@ public class SelectTeamController : MonoBehaviour
         }
     }
 
-    void RegisterCallbacks()
+    protected override void LoadData()
+    {
+        base.LoadData();
+
+        LoadSprites();
+        LoadTeams();
+        SetupScrollViews();
+    }
+
+    protected override void RegisterCallbacks()
     {
         _btnBack?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
@@ -185,6 +149,9 @@ public class SelectTeamController : MonoBehaviour
             { PlayClick(); CloseSquadModal(); }
         });
 
+        // Listener del nombre del manager
+        _managerInput?.RegisterValueChangedCallback(_ => ValidateContinue());
+
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(_btnBack);
@@ -195,6 +162,27 @@ public class SelectTeamController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_btnShowSquad);
             CursorManager.Instance.RegisterHandCursor(_btnCloseSquad);
         }
+    }
+
+    protected override void Refresh()
+    {
+        // Modo de juego
+        var mode = ScreenManager.Instance.CurrentMode;
+        _headerMode.text = mode == GameMode.ProManager ? "PROMANAGER" : "MANAGER";
+
+        // Estado inicial
+        _detailScroll.style.display = DisplayStyle.None;
+        _detailPlaceholder.style.display = DisplayStyle.Flex;
+        _btnContinue.SetEnabled(false);
+
+        ShowFilter("All");
+    }
+
+    void ValidateContinue()
+    {
+        bool hasTeam = _selectedTeam != null;
+        bool hasName = !string.IsNullOrWhiteSpace(_managerInput?.value);
+        _btnContinue.SetEnabled(hasTeam && hasName);
     }
 
     void LoadSprites()
@@ -526,10 +514,5 @@ public class SelectTeamController : MonoBehaviour
         // La partida solo se "crea" oficialmente al pulsar Continuar en Preseason.
 
         ScreenManager.Instance.GoTo(GameScreen.Preseason);
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

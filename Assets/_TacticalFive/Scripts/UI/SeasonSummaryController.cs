@@ -4,11 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System;
 
-public class SeasonSummaryController : MonoBehaviour
+public class SeasonSummaryController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
-
     // Header
     private VisualElement _headerTeamLogo;
     private Label _headerTeamName;
@@ -29,39 +26,17 @@ public class SeasonSummaryController : MonoBehaviour
     private Label _mvpReb;
     private Label _mvpAst;
 
-    private ManagerData _manager;
-    private TeamData _myTeam;
-    private SeasonData _season;
     private List<TeamData> _allTeams = new();
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSpritesLarge = new();
 
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        CacheReferences();
-        LoadSprites();
-        LoadData();
-
+        base.OnEnable();
         CursorManager.Instance?.SetDefaultCursor();
-
-        var btnAwards = _root.Q<Button>("BtnGoToAwards");
-        if (btnAwards != null)
-        {
-            btnAwards.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.PlayerAwards); });
-            CursorManager.Instance?.RegisterHandCursor(btnAwards);
-        }
     }
 
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -81,8 +56,12 @@ public class SeasonSummaryController : MonoBehaviour
         _mvpAst = _root.Q<Label>("MvpAst");
     }
 
-    void LoadSprites()
+    protected override void LoadData()
     {
+        base.LoadData();
+        if (_season == null) return;
+        _allTeams = DatabaseManager.Instance.GetAllTeams();
+
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64)
             _logoSprites[s.name] = s;
@@ -92,21 +71,24 @@ public class SeasonSummaryController : MonoBehaviour
             _logoSpritesLarge[s.name] = s;
     }
 
-    void LoadData()
+    protected override void RegisterCallbacks()
     {
-        _manager = DatabaseManager.Instance.GetActiveManager();
-        if (_manager == null) return;
-        _myTeam = DatabaseManager.Instance.GetTeamById(_manager.team_id);
-        if (_myTeam == null) return;
-        _season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        if (_season == null) return;
-        _allTeams = DatabaseManager.Instance.GetAllTeams();
+        var btnAwards = _root.Q<Button>("BtnGoToAwards");
+        if (btnAwards != null)
+        {
+            btnAwards.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.PlayerAwards); });
+            CursorManager.Instance?.RegisterHandCursor(btnAwards);
+        }
+    }
 
+    protected override void Refresh()
+    {
+        if (_season == null || _myTeam == null) return;
         RefreshHeader();
         RefreshSummary();
     }
 
-    void RefreshHeader()
+    protected override void RefreshHeader()
     {
         SetTeamLogo(_headerTeamLogo, _myTeam.logo);
         _headerTeamName.text = _myTeam.name.ToUpper();
@@ -191,10 +173,5 @@ public class SeasonSummaryController : MonoBehaviour
             elem.style.backgroundImage = new StyleBackground(sprite);
         else if (_logoSprites.TryGetValue(logoName, out var fallback))
             elem.style.backgroundImage = new StyleBackground(fallback);
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

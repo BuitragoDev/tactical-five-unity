@@ -3,7 +3,7 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
-public class EditorController : MonoBehaviour
+public class EditorController : UIScreenController
 {
     class CustomDropdown
     {
@@ -13,9 +13,6 @@ public class EditorController : MonoBehaviour
         public Label ValueLabel;
         public string Value => ValueLabel?.text ?? "";
     }
-    private UIDocument _doc;
-    private VisualElement _root;
-    private Button _btnAction;
     private Button _btnReset;
 
     // Tabs
@@ -114,24 +111,11 @@ public class EditorController : MonoBehaviour
         DatabaseManager.Instance?.CloseTemplateSession();
     }
 
-    void OnEnable()
+    protected override void OnEnable()
     {
+        base.OnEnable();
+
         CursorManager.Instance?.SetDefaultCursor();
-
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        CacheReferences();
-        LoadImages();
-        LoadData();
-        RegisterCallbacks();
-        Refresh();
 
         // Root-level overlay so dropdown lists render above everything
         _dropdownOverlay = new VisualElement();
@@ -148,7 +132,7 @@ public class EditorController : MonoBehaviour
         _root.Add(_toast);
     }
 
-    void CacheReferences()
+    protected override void CacheReferences()
     {
         _btnAction = _root.Q<Button>("BtnAction");
         _btnReset = _root.Q<Button>("BtnReset");
@@ -227,44 +211,16 @@ public class EditorController : MonoBehaviour
         }
     }
 
-    void LoadSidebarIcons()
-    {
-        var iconMap = new Dictionary<string, string>
-        {
-            {"NavDashboardIcon", "inicio"},
-            {"NavRosterIcon", "plantilla"},
-            {"NavCalendarIcon", "calendario"},
-            {"NavStandingsIcon", "clasificacion"},
-            {"NavPalmaresIcon", "palmares"},
-            {"NavResultsIcon", "resultados"},
-            {"NavPlayoffsIcon", "playoff"},
-            {"NavStatsIcon", "estadisticas"},
-            {"NavRecordsIcon", "records"},
-            {"NavMarketIcon", "mercado"},
-            {"NavFinancesIcon", "finanzas"},
-            {"NavSponsorsIcon", "patrocinador"},
-            {"NavTVIcon", "television"},
-            {"NavArenaIcon", "pabellon"},
-            {"NavManagerIcon", "manager"},
-            {"NavSettingsIcon", "configuracion"}
-        };
-        foreach (var kv in iconMap)
-        {
-            var elem = _root.Q<VisualElement>(kv.Key);
-            if (elem == null) continue;
-            var tex = Resources.Load<Texture2D>($"Icons/{kv.Value}");
-            if (tex != null) elem.style.backgroundImage = new StyleBackground(tex);
-        }
-    }
-
     void LoadImages()
     {
         foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/64x64"))
             _logoSprites[s.name] = s;
     }
 
-    void LoadData()
+    protected override void LoadData()
     {
+        LoadImages();
+
         if (DatabaseManager.Instance.Db == null)
         {
             DatabaseManager.Instance.EnsureTemplateDb();
@@ -281,10 +237,8 @@ public class EditorController : MonoBehaviour
         SetFilterDropdownItems(_playerPosFilter, new[] { "TODOS", "PG", "SG", "SF", "PF", "C" }, 0);
     }
 
-    void RegisterCallbacks()
+    protected override void RegisterCallbacks()
     {
-        RegisterNavButtons();
-
         var actionBtn = _root.Q<Button>("BtnAction");
         if (actionBtn != null)
             actionBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
@@ -308,11 +262,7 @@ public class EditorController : MonoBehaviour
         }
     }
 
-    void RegisterNavButtons()
-    {
-    }
-
-    void Refresh()
+    protected override void Refresh()
     {
         SwitchTab("teams");
     }
@@ -1069,10 +1019,5 @@ public class EditorController : MonoBehaviour
     {
         _toast.style.display = DisplayStyle.None;
         _toast.Clear();
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

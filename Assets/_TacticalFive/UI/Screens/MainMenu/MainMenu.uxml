@@ -99,7 +99,7 @@
         <ui:VisualElement name="Footer" class="footer">
             <ui:VisualElement class="version-tag">
                 <ui:VisualElement class="version-dot"/>
-                <ui:Label text="v0.9.0 · Beta" class="version-label"/>
+                <ui:Label text="v1.0.0 · Beta" class="version-label"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ModalOverlay" class="modal-overlay">

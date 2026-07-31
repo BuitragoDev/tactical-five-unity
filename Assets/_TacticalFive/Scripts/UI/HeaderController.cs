@@ -14,7 +14,7 @@ public static class HeaderController
         return _headerTemplate;
     }
 
-    public static void Attach(VisualElement root)
+    public static void Attach(VisualElement root, bool registerBtnAction = true)
     {
         try
         {
@@ -33,11 +33,14 @@ public static class HeaderController
             if (existingHeader != null)
             {
                 Populate(existingHeader);
-                var existingBtn = existingHeader.Q<Button>("BtnAction");
-                if (existingBtn != null)
+                if (registerBtnAction)
                 {
-                    existingBtn.ClearBindings();
-                    existingBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
+                    var existingBtn = existingHeader.Q<Button>("BtnAction");
+                    if (existingBtn != null)
+                    {
+                        existingBtn.ClearBindings();
+                        existingBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
+                    }
                 }
                 LoadTeamLogo(existingHeader);
                 return;
@@ -86,7 +89,7 @@ public static class HeaderController
             Populate(header);
 
             var btnAction = header.Q<Button>("BtnAction");
-            if (btnAction != null)
+            if (registerBtnAction && btnAction != null)
                 btnAction.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Dashboard); });
 
             var configIcon = header.Q<VisualElement>("ConfigIcon");

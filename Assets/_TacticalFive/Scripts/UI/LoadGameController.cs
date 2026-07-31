@@ -3,10 +3,8 @@ using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 
-public class LoadGameController : MonoBehaviour
+public class LoadGameController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
     private VisualElement _slotsContainer;
     private VisualElement _emptyState;
     private VisualElement _slotsArea;
@@ -21,37 +19,40 @@ public class LoadGameController : MonoBehaviour
 
     private Dictionary<string, Sprite> _logoSprites = new();
 
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        _root.style.position = Position.Absolute;
-        _root.style.left = 0; _root.style.right = 0;
-        _root.style.top = 0; _root.style.bottom = 0;
-        _root.style.width = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
-
-        // Reset cursor al entrar (evita que se quede como mano de la pantalla anterior)
+        base.OnEnable();
         CursorManager.Instance?.SetDefaultCursor();
+    }
 
-        // Load team logos
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
-        foreach (var s in logos) _logoSprites[s.name] = s;
-
+    protected override void CacheReferences()
+    {
         _slotsContainer = _root.Q<VisualElement>("SlotsContainer");
         _emptyState = _root.Q<VisualElement>("EmptyState");
         _slotsArea = _root.Q<VisualElement>("SlotsScrollView").parent;
         _btnBack = _root.Q<Button>("BtnBack");
 
-        _btnBack?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
-
-        // Modal borrar partida
         _deleteModalOverlay = _root.Q<VisualElement>("DeleteModalOverlay");
         _deleteModalBox = _root.Q<VisualElement>("DeleteModalBox");
         _btnDeleteYes = _root.Q<Button>("BtnDeleteYes");
         _btnDeleteNo = _root.Q<Button>("BtnDeleteNo");
+    }
 
+    protected override void LoadData()
+    {
+        base.LoadData();
+
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
+        foreach (var s in logos) _logoSprites[s.name] = s;
+
+        GameSaveManager.CleanupAllOrphanDbs();
+    }
+
+    protected override void RegisterCallbacks()
+    {
+        _btnBack?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
+
+        // Modal borrar partida
         _btnDeleteYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmDelete(); });
         _btnDeleteNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseDeleteModal(); });
         _deleteModalOverlay?.RegisterCallback<ClickEvent>(e =>
@@ -76,10 +77,10 @@ public class LoadGameController : MonoBehaviour
             CursorManager.Instance.RegisterHandCursor(_btnDeleteYes);
             CursorManager.Instance.RegisterHandCursor(_btnDeleteNo);
         }
+    }
 
-        // Limpiar DBs huérfanas antes de refrescar
-        GameSaveManager.CleanupAllOrphanDbs();
-
+    protected override void Refresh()
+    {
         RefreshSlots();
     }
 
@@ -222,10 +223,5 @@ public class LoadGameController : MonoBehaviour
             GameSaveManager.DeleteSave(_pendingDeleteSlot);
         CloseDeleteModal();
         RefreshSlots();
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

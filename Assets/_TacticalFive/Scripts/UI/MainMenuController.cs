@@ -1,11 +1,8 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class MainMenuController : MonoBehaviour
+public class MainMenuController : UIScreenController
 {
-    private UIDocument _doc;
-    private VisualElement _root;
-
     private Button _btnManager;
     private Button _btnProManager;
     private Button _btnLoadGame;
@@ -30,40 +27,16 @@ public class MainMenuController : MonoBehaviour
     private Button _btnExitYes;
     private Button _btnExitNo;
 
-    private VisualElement _configModalOverlay;
-    private VisualElement _configModalBox;
-    private Button _btnConfigCerrar;
-    private CustomSlider _configSliderMaster;
-    private CustomSlider _configSliderMusic;
-    private CustomSlider _configSliderSFX;
-    private Label _configLabelMaster;
-    private Label _configLabelMusic;
-    private Label _configLabelSFX;
-    private Button _configBtnQualityLow;
-    private Button _configBtnQualityMedium;
-    private Button _configBtnQualityHigh;
-    private Button _configBtnQualityUltra;
-
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc  = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
-
-        // Forzar root a ocupar toda la pantalla
-        _root.style.position = Position.Absolute;
-        _root.style.left   = 0;
-        _root.style.right  = 0;
-        _root.style.top    = 0;
-        _root.style.bottom = 0;
-        _root.style.width  = new StyleLength(new Length(100, LengthUnit.Percent));
-        _root.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
+        base.OnEnable();
 
         CursorManager.Instance?.SetDefaultCursor();
         AudioManager.Instance?.PlayMusic("backgroundMenu");
+    }
 
-        InitConfigModal();
-
-        // Botones principales
+    protected override void CacheReferences()
+    {
         _btnManager    = _root.Q<Button>("BtnManager");
         _btnProManager = _root.Q<Button>("BtnProManager");
         _btnLoadGame   = _root.Q<Button>("BtnLoadGame");
@@ -89,7 +62,10 @@ public class MainMenuController : MonoBehaviour
         _exitModalBox     = _root.Q<VisualElement>("ExitModalBox");
         _btnExitYes       = _root.Q<Button>("BtnExitYes");
         _btnExitNo        = _root.Q<Button>("BtnExitNo");
+    }
 
+    protected override void RegisterCallbacks()
+    {
         // Callbacks botones principales
         _btnManager?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnManagerClicked(); });
         _btnProManager?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnProManagerClicked(); });
@@ -173,10 +149,10 @@ public class MainMenuController : MonoBehaviour
                 else if (_modalOverlay.style.display == DisplayStyle.Flex)
                     CloseModal();
             }
-        });    
+        });
     }
 
-    void InitConfigModal()
+    protected override void InitConfigModal()
     {
         _configModalOverlay = _root.Q<VisualElement>("ConfigModalOverlay");
         _configModalBox     = _root.Q<VisualElement>("ConfigModalBox");
@@ -244,7 +220,7 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
-    void OpenConfigModal()
+    protected override void OpenConfigModal()
     {
         CursorManager.Instance?.SetDefaultCursor();
         var am = AudioManager.Instance;
@@ -262,7 +238,7 @@ public class MainMenuController : MonoBehaviour
         _configModalBox.style.display     = DisplayStyle.Flex;
     }
 
-    void CloseConfigModal()
+    protected override void CloseConfigModal()
     {
         _configModalOverlay.style.display = DisplayStyle.None;
         _configModalBox.style.display     = DisplayStyle.None;
@@ -467,10 +443,5 @@ public class MainMenuController : MonoBehaviour
         string encodedBody = System.Uri.EscapeDataString(body);
         Application.OpenURL($"mailto:buitr4gosw@gmail.com?subject={subject}&body={encodedBody}");
         CloseBugReportModal();
-    }
-
-    void PlayClick()
-    {
-        AudioManager.Instance?.PlaySFX("click");
     }
 }

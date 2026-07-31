@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class LoadingController : MonoBehaviour
+public class LoadingController : UIScreenController
 {
     private static readonly string[] Tips =
     {
@@ -17,15 +17,13 @@ public class LoadingController : MonoBehaviour
         "El baloncesto es un juego de errores. Quien cometa menos errores gana. — John Wooden"
     };
 
-    private UIDocument _doc;
-    private VisualElement _root;
     private Label _tipLabel;
     private bool _transitioning;
 
-    void OnEnable()
+    protected override void OnEnable()
     {
-        _doc = GetComponent<UIDocument>();
-        _root = _doc.rootVisualElement;
+        base.OnEnable();
+
         _root.style.flexGrow = 1f;
 
         _tipLabel = _root.Q<Label>("LoadingTip");
