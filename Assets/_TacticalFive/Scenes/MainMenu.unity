@@ -372,7 +372,6 @@ GameObject:
   m_Component:
   - component: {fileID: 351767217}
   - component: {fileID: 351767216}
-  - component: {fileID: 351767218}
   - component: {fileID: 351767219}
   m_Layer: 0
   m_Name: ScreenManager
@@ -396,7 +395,6 @@ MonoBehaviour:
   loadingDocument: {fileID: 1167804956}
   mainMenuDocument: {fileID: 745749056}
   selectTeamDocument: {fileID: 1801478275}
-  legalNoticeDocument: {fileID: 745749056}
   preseasonDocument: {fileID: 1606452532}
   dashboardDocument: {fileID: 1593075660}
   rosterDocument: {fileID: 1791527373}
@@ -446,22 +444,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &351767218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 351767215}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25127634058beedfcabfaeebc4023032, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CursorManager
-  cursorDefault: {fileID: 2800000, guid: 3a515610c4d834f4aaf7b45271be78d9, type: 3}
-  cursorHand: {fileID: 2800000, guid: 90d3664b42fec17e28e60d99cb1fdab3, type: 3}
-  defaultHotspot: {x: 0, y: 0}
-  handHotspot: {x: 0, y: 0}
 --- !u!114 &351767219
 MonoBehaviour:
   m_ObjectHideFlags: 0

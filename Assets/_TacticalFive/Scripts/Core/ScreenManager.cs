@@ -8,7 +8,6 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument loadingDocument;
     [SerializeField] private UIDocument mainMenuDocument;
     [SerializeField] private UIDocument selectTeamDocument;
-    [SerializeField] private UIDocument legalNoticeDocument;
     [SerializeField] private UIDocument preseasonDocument;
     [SerializeField] private UIDocument dashboardDocument;
     [SerializeField] private UIDocument rosterDocument;
@@ -58,6 +57,7 @@ public class ScreenManager : MonoBehaviour
             return;
         }
         Instance = this;
+        DontDestroyOnLoad(gameObject);
 
         if (loadingDocument == null)
         {
@@ -91,9 +91,6 @@ public class ScreenManager : MonoBehaviour
                 break;
             case GameScreen.SelectTeam:
                 ShowOnly(selectTeamDocument);
-                break;
-            case GameScreen.LegalNotice:
-                ShowOnly(legalNoticeDocument);
                 break;
             case GameScreen.Preseason:
                 ShowOnly(preseasonDocument);
@@ -206,7 +203,6 @@ public class ScreenManager : MonoBehaviour
         if (loadingDocument != null) loadingDocument.gameObject.SetActive(false);
         if (mainMenuDocument != null) mainMenuDocument.gameObject.SetActive(false);
         if (selectTeamDocument != null) selectTeamDocument.gameObject.SetActive(false);
-        if (legalNoticeDocument != null) legalNoticeDocument.gameObject.SetActive(false);
         if (preseasonDocument != null) preseasonDocument.gameObject.SetActive(false);
         if (dashboardDocument != null) dashboardDocument.gameObject.SetActive(false);
         if (rosterDocument != null) rosterDocument.gameObject.SetActive(false);
