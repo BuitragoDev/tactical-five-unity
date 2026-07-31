@@ -23,6 +23,7 @@
 .vs/
 .vscode/
 *.sln
+*.slnx
 *.csproj
 *.pidb
 *.tmp

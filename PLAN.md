@@ -1,181 +1,71 @@
-# Plan de Mejoras — Sistema de Traspasos y Fichajes NBA
+# Plan de mejoras — Tactical Five
 
-## Diagnóstico principal
+Estado verificado contra el código en la rama `crear-mejoras`. Las entradas marcan
+`[hecho]` o `[pendiente]` con referencia `archivo:línea` cuando aplica.
 
-**Bug crítico**: Equipos muy por encima del salary cap pueden ofertar salarios enormes a agentes libres externos porque `GetMaxOfferBreakdown` usa la excepción "SIN BIRD" (120% del salario previo) para cualquier FA, cuando en realidad esa excepción solo aplica para renovar jugadores propios.
+## Completado
 
-**Ejemplo**: OKC con $230M payroll (-$75M margen) puede ofertar $54.25M a LeBron James como FA. En la NBA real un equipo sobre el cap solo puede fichar FAs externos usando las excepciones MLE, BAE o mínimo.
+- **[hecho]** Hard cap / aprons: validación de ofertas por apron y activación del
+  hard cap del 1er apron al usar NT-MLE. `RosterController.cs:GetMaxOfferBreakdown`,
+  `DashboardController.cs` (maduración de ofertas), `MarketController.cs` (aviso).
+- **[hecho]** Luxury tax mensual para todos los equipos (antes solo el usuario).
+  `DashboardController.cs:ProcessMonthlyPayroll`/`ProcessTeamLuxuryTax`.
+- **[hecho]** Buyout con stretch `contract_years * 2`. `RosterController.cs`.
+- **[hecho]** Draft picks al inicio de temporada. `DatabaseManager.cs:SeedDraftPicks`.
+- **[hecho]** Fuente única de topes salariales: `league_settings` crece +5%/año y el
+  código lee de ahí con fallback a `TradeHelper` (añadida columna `taxpayer_mid_level`).
+  `TradeHelper.cs` recibe aprons/luxury tax opcionales en `ValidateTrade`/`EvaluateTrade`.
+- **[hecho]** Recuperación de fatiga (`fisico`) para todas las plantillas, no solo el
+  equipo del usuario. `DashboardController.cs:ProcessFisicoRecovery`.
+- **[hecho]** Migraciones one-time dentro del DB (`schema_migrations` + `PRAGMA user_version`)
+  en lugar de flags globales en `PlayerPrefs`. `DatabaseManager.cs:RunMigrations`.
+- **[hecho]** `StartNewSeason` y el batch de ofertas maduradas en transacción.
+  `DatabaseManager.cs:StartNewSeason`, `DashboardController.cs:ProcessMaturedOffers`.
+- **[hecho]** Semilla determinista FNV-1a (antes `string.GetHashCode()`).
+  `DatabaseManager.cs:StableHash`.
+- **[hecho]** `GetTopPlayersByStat` con estadísticas reales de `player_game_stats`.
+  `DatabaseManager.cs:GetTopPlayersByStat`.
+- **[hecho]** Eliminado código muerto: `GameScreen.Settings`, `GameScreen.LegalNotice`,
+  `SettingsController`, `Settings.uxml/uss`, `SQLiteAsync.cs`, campo `legalNoticeDocument`.
+- **[hecho]** CursorManager duplicado eliminado de la escena; guard singleton endurecido;
+  `ScreenManager` y `DatabaseManager` persisten con `DontDestroyOnLoad` propio.
 
----
+- **[hecho]** Sign-and-trade en el trade UI: al recibir jugadores con `contract_years <= 1`,
+  se ofrece el toggle "Sign & Trade" (extiende contrato +5%, activa hard cap del 1er apron y
+  registra `trade_type="sign_and_trade"`). `MarketController.cs`.
+  *Nota: no existe un flujo de "firmar FA externo y traspasarlo inmediatamente"; el S&T
+  implementado extiende al jugador entrante como parte del traspaso.*
+- **[hecho]** Validación de ofertas de FA: espacio salarial/excepciones/aprons se validan en la
+  maduración (7 días) y el aviso en vivo se muestra al ajustar el salario (`MarketController.cs:UpdateFAWarning`).
+- **[hecho]** Validación de ofertas al enviar: si el salario excede el máximo legal, se ajusta y se
+  informa en el formulario (antes se recortaba en silencio). `MarketController.cs:SendFAOffer`,
+  `RosterController.cs:SendOffer`.
+- **[hecho]** `DatabaseManager` dividido en partial classes por dominio (5.714 → ~660 líneas en el
+  archivo principal): `DatabaseManager.cs` (conexión, esquema, migraciones, ciclo de vida),
+  `DatabaseManager.Teams.cs`, `.Players.cs`, `.Staff.cs` (empleados/préstamos/scouts),
+  `.Manager.cs` (manager, league settings), `.Games.cs` (temporadas/partidos),
+  `.Seeding.cs` (generación de jugadores, draft), `.Records.cs` (históricos/premios/alineaciones);
+  las clases fila (POCOs) pasaron a `DatabaseRows.cs`. Split mecánico verificado
+  (round-trip exacto + balance de llaves por segmento).
+- **[hecho]** Clase base `UIScreenController` adoptada por las 37 pantallas (antes cada una con su
+  `OnEnable` duplicado). La base centraliza el fullscreen del root, `LoadData`/`RefreshHeader`
+  comunes, la inyección del Sidebar/Header unificados, la navegación y el modal de configuración
+  (`InitConfigModal`/`OpenConfigModal`/`CloseConfigModal`). `HeaderController`/`SidebarController`
+  quedan como helpers `static` idempotentes. `MainMenuController` overrridea el modal de
+  configuración (usa `style.display` frente a las clases CSS de la base). Validado con una
+  simulación de temporada completa. `Assets/_TacticalFive/Scripts/Core/UIScreenController.cs`.
 
-## Fase 1: Arreglar ofertas a agentes libres externos
+## Pendiente
 
-### 1.1 — `GetMaxOfferBreakdown`: eliminar Bird Rights para FA externos
-
-**Archivo**: `RosterController.cs` (líneas 947-968)
-
-Cambiar la lógica para `isFromSameTeam=false`:
-- `birdMax = 0` (sin Bird Rights para FA externos)
-- Si `totalPayroll <= salary_cap`: usar `capSpaceMax` (espacio salarial disponible)
-- Si `totalPayroll > salary_cap`: usar excepciones según apron:
-  - `≤ FIRST_APRON`: NT-MLE (~$14.1M)
-  - `≤ SECOND_APRON`: T-MLE (~$5.7M)  
-  - `> SECOND_APRON`: salario mínimo (~$2M)
-
-### 1.2 — `UpdateFAMaxInfo`: mostrar explicación de la excepción usada
-
-**Archivo**: `MarketController.cs`
-
-Mostrar qué tipo de excepción permite la oferta y por qué (cap space, NT-MLE, T-MLE, mínimo).
-
-### 1.3 — `SendFAOffer`: validar antes de enviar
-
-**Archivo**: `MarketController.cs`
-
-Rechazar la oferta inmediatamente si excede el máximo legal, en lugar de dejar que el usuario espere 7 días para recibir un rechazo automático.
-
-### 1.4 — Simplificar `ProcessMaturedOffers`
-
-**Archivo**: `DashboardController.cs`
-
-Quitar el check de cap space redundante (líneas 1020-1046), ya que la validación se hará en el envío.
-
----
-
-## Fase 2: Hard cap + validación bilateral de traspasos
-
-### 2.1 — Hard cap tracking
-
-**Archivo**: `TeamData.cs`
-- Campo `first_apron_hard_capped` (int, 0/1)
-
-**Archivo**: `DashboardController.cs`
-- Al usar NT-MLE para fichar un FA, marcar `first_apron_hard_capped = 1`
-- Bloquear cualquier transacción que lleve el payroll por encima de `FIRST_APRON`
-
-### 2.2 — `ValidateTradeSide`: validación para un equipo
-
-**Archivo**: `TradeHelper.cs`
-- Nuevo método estático que aplica reglas de salary matching a UN solo equipo
-- Parámetro `hardCappedToFirstApron` para el nuevo hard cap
-- Reglas según payroll post-trade:
-  - `> SECOND_APRON` o hard-capped + `> FIRST_APRON`: no agregación, salario entrante ≤ saliente
-  - `> FIRST_APRON`: máximo 110% del salario saliente
-  - resto: reglas estándar (2×+$250K, +$7.5M, 125%+$250K)
-
-### 2.3 — `ValidateTrade`: validar ambos lados
-
-**Archivo**: `TradeHelper.cs`
-- Llamar `ValidateTradeSide()` para el equipo A Y el equipo B
-- Pasar flags de hard cap de cada equipo
-
-### 2.4 — Actualizar callers
-
-**Archivos**: `MarketController.cs`, `DashboardController.cs`
-- Pasar nombres y payrolls de ambos equipos
-- Pasar flags de hard cap
-
----
-
-## Fase 3: Draft picks + Luxury Tax
-
-### 3.1 — Modelo de draft picks
-
-**Archivo nuevo**: `DraftPickData.cs`
-- Tabla SQLite `draft_picks`
-- Campos: id, season_id, round, pick_number, original_team_id, current_team_id
-
-**Archivo**: `DatabaseManager.cs`
-- `CreateTable<DraftPickData>()` en `CreateTables`
-- `SeedDraftPicks(seasonId)`: 2 rondas × 30 equipos, ordenados por overall
-
-### 3.2 — Luxury tax
-
-**Archivo**: `TradeHelper.cs`
-- `CalculateLuxuryTax(payroll)`: tramos progresivos
-  - $0-$5M sobre tax: ×1.50
-  - $5M-$10M: ×1.75
-  - $10M-$15M: ×2.50
-  - $15M-$20M: ×3.25
-  - $20M+: ×3.75
-
-**Archivo**: `FinanceRecord.cs`
-- `TYPE_TAX = 10`
-
-**Archivo**: `EndSeasonController.cs`
-- `CollectLuxuryTax()`: calcular y registrar para los 30 equipos
-
-**Archivo**: `FinancesController.cs`
-- Mostrar luxury tax en tabla de gastos
-
----
-
-## Fase 4: Sign-and-Trade + Buyout
-
-### 4.1 — Sign-and-Trade en traspasos
-
-**Archivo**: `MarketController.cs`
-- Detectar jugadores entrantes con `contract_years <= 1`
-- Mostrar toggle "Sign & Trade" en el panel de confirmación
-- Al confirmar: extender contrato (`CalcSATYears`/`CalcSATSalary`), hard cap al equipo receptor
-- `trade_type = "sign_and_trade"` en TradeData
-
-### 4.2 — Buyout con stretch provision
-
-**Archivos**: `Roster.uxml`, `RosterController.cs`
-- Botón "RESCINDIR CONTRATO" en panel de detalle
-- Modal con opción de rescisión progresiva
-- Stretch: salario restante ÷ (2 × años pendientes), pagos anuales
-
-**Archivo**: `FinanceRecord.cs`
-- `TYPE_BUYOUT = 11`
-
-**Archivo**: `Roster.uss`
-- Estilo `.btn-buyout`
-
-**Archivo**: `FinancesController.cs`
-- Mostrar buyout en tabla de gastos
-
----
-
-## Constantes NBA 2025-26 (fuente única: `TradeHelper.cs`)
-
-| Constante | Valor |
-|-----------|-------|
-| `SALARY_CAP` | $154,647,000 |
-| `LUXURY_TAX` | $200,428,000 |
-| `FIRST_APRON` | $209,015,000 |
-| `SECOND_APRON` | $221,686,000 |
-| `NT_MLE` | $14,100,000 |
-| `T_MLE` | $5,700,000 |
-| `MIN_SALARY` | $2,000,000 |
-| `MAX_ROSTER` | 18 |
-
----
-
-## Decisiones clave
-
-1. **Sin Bird Rights para FA externos**: las excepciones Bird/Non-Bird solo aplican al renovar jugadores propios
-2. **NT-MLE activa hard cap**: el equipo no puede superar FIRST_APRON en ninguna transacción posterior
-3. **Validación en envío, no en maduración**: la oferta se rechaza al enviarla si es ilegal, no 7 días después
-4. **Ambos lados del traspaso validados**: las reglas de apron aplican tanto al equipo IA como al usuario
-5. **Constantes unificadas en TradeHelper**: eliminar duplicados de `MarketController` y `FinancesController`
-
----
-
-## Archivos modificados
-
-| Archivo | Fases |
-|---------|-------|
-| `TradeHelper.cs` | 2, 3 |
-| `RosterController.cs` | 1 |
-| `MarketController.cs` | 1, 2, 4 |
-| `DashboardController.cs` | 1, 2 |
-| `TeamData.cs` | 2 |
-| `FinanceRecord.cs` | 3, 4 |
-| `FinancesController.cs` | 3, 4 |
-| `EndSeasonController.cs` | 3 |
-| `Roster.uxml` | 4 |
-| `Roster.uss` | 4 |
-| `DraftPickData.cs` (nuevo) | 3 |
-| `DatabaseManager.cs` | 3 |
+1. **Transacción del día de partido** — no implementada: el procesamiento es una corrutina
+   con `yield return` dentro del loop de partidos (`DashboardController.cs`), y una
+   transacción abierta entre frames mantendría el lock. Pendiente de rediseño.
+2. **Refactor grande** — líderes de liga en SQL en lugar de LINQ en C#.
+3. **Tests unitarios** — `Assets/_TacticalFive/Tests/Editor/` con `TradeHelperTests` +
+   `EditModeSmokeTests`. Pendiente: compilar/ejecutar en el editor.
+   *Nota: un test assembly (asmdef) NO puede referenciar la predefined assembly
+   `Assembly-CSharp` (limitación de Unity 6; ni `references`, ni `optionalUnityReferences:
+   ["TestAssemblies"]` la habilitan). Por eso los tests viven sin asmdef en una carpeta
+   `Editor` → compilan en `Assembly-CSharp-Editor`, que sí ve `Assembly-CSharp` y NUnit.
+   `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance`
+   (`GameSimulator.cs:159-196`), por lo que no es testeable en EditMode sin refactor.*
