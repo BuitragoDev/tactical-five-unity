@@ -64,16 +64,18 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
   transacción). En fallo: rollback, limpieza de `GameResultCache`/`_pendingRecoveredIds` y
   modal de error sin avanzar el día. `SavePlayInGames`/`SavePlayoffGames` usan
   `RunInTransaction` (savepoints) para anidar con la transacción del día y re-lanzar errores
-  en lugar de tragárselos. `DatabaseManager.Games.cs`.
-
-## Pendiente
-
-1. **Refactor grande** — líderes de liga en SQL en lugar de LINQ en C#.
-2. **Tests unitarios** — `Assets/_TacticalFive/Tests/Editor/` con `TradeHelperTests` +
-   `EditModeSmokeTests`. Pendiente: compilar/ejecutar en el editor.
+  en lugar de tragárselos.    `DatabaseManager.Games.cs`.
+- **[hecho]** Tests unitarios compilados y ejecutados en el editor (Test Runner, EditMode):
+   17/17 en verde. `Assets/_TacticalFive/Tests/Editor/TradeHelperTests.cs` (15 tests:
+   luxury tax progresivo, pick bonus, validación de traspasos por apron/hard cap, rating)
+   y `EditModeSmokeTests.cs` (2 tests: accesibilidad de tipos y constantes salariales).
    *Nota: un test assembly (asmdef) NO puede referenciar la predefined assembly
    `Assembly-CSharp` (limitación de Unity 6; ni `references`, ni `optionalUnityReferences:
    ["TestAssemblies"]` la habilitan). Por eso los tests viven sin asmdef en una carpeta
    `Editor` → compilan en `Assembly-CSharp-Editor`, que sí ve `Assembly-CSharp` y NUnit.
    `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance`
    (`GameSimulator.cs:159-196`), por lo que no es testeable en EditMode sin refactor.*
+
+## Pendiente
+
+1. **Refactor grande** — líderes de liga en SQL en lugar de LINQ en C#.
