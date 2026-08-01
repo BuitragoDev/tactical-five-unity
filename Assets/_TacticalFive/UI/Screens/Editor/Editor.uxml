@@ -14,6 +14,7 @@
             <ui:VisualElement name="TopHeader" class="top-header">
                 <ui:Label class="editor-header-title" text="EDITOR DE BASE DE DATOS" />
                 <ui:VisualElement class="header-spacer" />
+                <ui:VisualElement name="LoadingSpinner" class="loading-spinner" />
                 <ui:Button name="BtnReset" class="btn-action btn-action--reset" text="RESETEAR BASE DE DATOS" />
                 <ui:Button name="BtnAction" class="btn-action" text="VOLVER AL MENÚ" style="min-width:200px; margin-left:10px;" />
             </ui:VisualElement>

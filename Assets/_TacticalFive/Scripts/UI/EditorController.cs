@@ -14,6 +14,9 @@ public class EditorController : UIScreenController
         public string Value => ValueLabel?.text ?? "";
     }
     private Button _btnReset;
+    private VisualElement _loadingSpinner;
+    private IVisualElementScheduledItem _spinScheduler;
+    private bool _isLoading;
 
     // Tabs
     private Button _btnTeams, _btnPlayers;
@@ -130,6 +133,9 @@ public class EditorController : UIScreenController
         _toast = new VisualElement();
         _toast.AddToClassList("editor-modal-overlay");
         _root.Add(_toast);
+
+        _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
+        _loadingSpinner.style.display = DisplayStyle.None;
     }
 
     protected override void CacheReferences()
@@ -269,16 +275,50 @@ public class EditorController : UIScreenController
 
     void ResetToDefaults()
     {
-        DatabaseManager.Instance.CloseTemplateSession();
+        ShowLoading();
+        try
+        {
+            DatabaseManager.Instance.CloseTemplateSession();
 
-        if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
-            System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
+            if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
+                System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
 
-        DatabaseManager.Instance.EnsureTemplateDb();
-        DatabaseManager.Instance.InitTemplateSession();
-        LoadData();
-        Refresh();
-        ShowToast("Base de datos restablecida correctamente");
+            DatabaseManager.Instance.EnsureTemplateDb();
+            DatabaseManager.Instance.InitTemplateSession();
+            LoadData();
+            Refresh();
+            ShowToast("Base de datos restablecida correctamente");
+        }
+        finally
+        {
+            HideLoading();
+        }
+    }
+
+    void ShowLoading()
+    {
+        if (_isLoading) return;
+        _isLoading = true;
+        if (_btnReset != null) _btnReset.SetEnabled(false);
+        _loadingSpinner.style.display = DisplayStyle.Flex;
+
+        _spinScheduler = _root.schedule.Execute(() =>
+        {
+            if (_loadingSpinner == null) return;
+            var current = _loadingSpinner.style.rotate;
+            float angle = current.value.angle.value + 15f;
+            if (angle >= 360f) angle -= 360f;
+            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+        }).Every(30);
+    }
+
+    void HideLoading()
+    {
+        _spinScheduler?.Pause();
+        _spinScheduler = null;
+        _loadingSpinner.style.display = DisplayStyle.None;
+        if (_btnReset != null) _btnReset.SetEnabled(true);
+        _isLoading = false;
     }
 
     void SwitchTab(string tab)
