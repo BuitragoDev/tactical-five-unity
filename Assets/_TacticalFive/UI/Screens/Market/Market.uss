@@ -303,8 +303,17 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     font-weight: 700;
-    color: rgb(212, 160, 23);
+    color: rgb(255, 255, 255);
     align-self: center;
+}
+.market-trade-col-ovr--high {
+    color: rgb(39, 174, 96);
+}
+.market-trade-col-ovr--mid {
+    color: rgb(212, 160, 23);
+}
+.market-trade-col-ovr--low {
+    color: rgb(192, 57, 43);
 }
 
 .market-trade-col-salary {
@@ -564,7 +573,16 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     font-weight: 700;
+    color: rgb(255, 255, 255);
+}
+.market-fa-col-ovr--high {
+    color: rgb(39, 174, 96);
+}
+.market-fa-col-ovr--mid {
     color: rgb(212, 160, 23);
+}
+.market-fa-col-ovr--low {
+    color: rgb(192, 57, 43);
 }
 
 .market-fa-col-salary {

@@ -365,11 +365,11 @@ using System.Linq;
     {
         _myPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id)
             .Where(p => p.injury_days == 0)
-            .OrderByDescending(p => p.overall)
+            .OrderByDescending(p => p.GetCalculatedAverage())
             .ToList();
         _otherPlayers = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id)
             .Where(p => p.injury_days == 0)
-            .OrderByDescending(p => p.overall)
+            .OrderByDescending(p => p.GetCalculatedAverage())
             .ToList();
         _myTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Count;
         _otherTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id).Count;
@@ -604,8 +604,15 @@ using System.Linq;
         pos.AddToClassList("market-trade-col-pos");
         row.Add(pos);
 
-        var ovr = new Label(player.overall.ToString());
+        var ovr = new Label(player.GetCalculatedAverage().ToString());
         ovr.AddToClassList("market-trade-col-ovr");
+        int ovrVal = player.GetCalculatedAverage();
+        if (ovrVal > 84)
+            ovr.AddToClassList("market-trade-col-ovr--high");
+        else if (ovrVal >= 70)
+            ovr.AddToClassList("market-trade-col-ovr--mid");
+        else
+            ovr.AddToClassList("market-trade-col-ovr--low");
         row.Add(ovr);
 
         var salary = new Label($"${player.salary:N0}");
@@ -1073,8 +1080,15 @@ using System.Linq;
             pos.AddToClassList("market-fa-col-pos");
             row.Add(pos);
 
-            var ovr = new Label(player.overall.ToString());
+            var ovr = new Label(player.GetCalculatedAverage().ToString());
             ovr.AddToClassList("market-fa-col-ovr");
+            int ovrVal = player.GetCalculatedAverage();
+            if (ovrVal > 84)
+                ovr.AddToClassList("market-fa-col-ovr--high");
+            else if (ovrVal >= 70)
+                ovr.AddToClassList("market-fa-col-ovr--mid");
+            else
+                ovr.AddToClassList("market-fa-col-ovr--low");
             row.Add(ovr);
 
             var salary = new Label($"${player.salary:N0}");
