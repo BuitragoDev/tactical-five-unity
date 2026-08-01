@@ -429,11 +429,6 @@
     color: rgb(122, 138, 170);
     margin-right: 8px;
 }
-.draft-player-ovr {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(212, 160, 23);
-}
 .draft-player-attrs {
     flex-direction: row;
     flex-wrap: wrap;
@@ -459,6 +454,31 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
+}
+
+.draft-attr-med--high {
+    background-color: rgba(39, 174, 96, 0.12);
+    border-color: rgb(39, 174, 96);
+}
+.draft-attr-med--high .draft-attr-lbl,
+.draft-attr-med--high .draft-attr-val {
+    color: rgb(39, 174, 96);
+}
+.draft-attr-med--mid {
+    background-color: rgba(212, 160, 23, 0.12);
+    border-color: rgb(212, 160, 23);
+}
+.draft-attr-med--mid .draft-attr-lbl,
+.draft-attr-med--mid .draft-attr-val {
+    color: rgb(212, 160, 23);
+}
+.draft-attr-med--low {
+    background-color: rgba(192, 57, 43, 0.12);
+    border-color: rgb(192, 57, 43);
+}
+.draft-attr-med--low .draft-attr-lbl,
+.draft-attr-med--low .draft-attr-val {
+    color: rgb(192, 57, 43);
 }
 
 /* ══ LOTTERY BUTTON ══ */

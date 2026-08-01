@@ -35,7 +35,7 @@ public partial class DatabaseManager
     public List<PlayerData> GetRetiringPlayers()
     {
         var withTeam = _db.Table<PlayerData>()
-            .Where(p => p.team_id != 0 && p.contract_years <= 1 && p.age >= 40)
+            .Where(p => p.team_id != 0 && p.age >= 40)
             .ToList();
         var freeAgents = _db.Table<PlayerData>()
             .Where(p => p.team_id == 0 && p.age >= 40)

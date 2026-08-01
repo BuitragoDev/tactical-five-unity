@@ -376,16 +376,12 @@ public class EndSeasonController : UIScreenController
         detailLbl.text = $"{p.age} años · {p.height_cm}cm · {p.weight_kg}kg · {CountryCodes.GetName(p.nationality)}{college}";
         info.Add(detailLbl);
 
-        var ovrLbl = new Label();
-        ovrLbl.AddToClassList("draft-player-ovr");
-        ovrLbl.text = $"MED: {p.GetCalculatedAverage()}";
-        info.Add(ovrLbl);
-
         pick.Add(info);
 
         var attrs = new VisualElement();
         attrs.AddToClassList("draft-player-attrs");
 
+        attrs.Add(BuildMedAttr(p.GetCalculatedAverage()));
         attrs.Add(MakeAttr("VEL", p.speed));
         attrs.Add(MakeAttr("TIR", p.shooting));
         attrs.Add(MakeAttr("3PT", p.three_point));
@@ -417,6 +413,32 @@ public class EndSeasonController : UIScreenController
         val.AddToClassList("draft-attr-val");
         val.text = value.ToString();
         box.Add(val);
+
+        return box;
+    }
+
+    VisualElement BuildMedAttr(int value)
+    {
+        var box = new VisualElement();
+        box.AddToClassList("draft-attr");
+        box.AddToClassList("draft-attr-med");
+
+        var lbl = new Label();
+        lbl.AddToClassList("draft-attr-lbl");
+        lbl.text = "MED";
+        box.Add(lbl);
+
+        var val = new Label();
+        val.AddToClassList("draft-attr-val");
+        val.text = value.ToString();
+        box.Add(val);
+
+        if (value > 84)
+            box.AddToClassList("draft-attr-med--high");
+        else if (value >= 70)
+            box.AddToClassList("draft-attr-med--mid");
+        else
+            box.AddToClassList("draft-attr-med--low");
 
         return box;
     }
