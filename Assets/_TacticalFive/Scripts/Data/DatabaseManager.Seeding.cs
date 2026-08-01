@@ -973,7 +973,8 @@ public partial class DatabaseManager
         var all = _db.Table<SponsorData>().ToList();
         if (all.Count >= 3)
         {
-            var selected = all.OrderBy(_ => UnityEngine.Random.value).Take(3).ToList();
+            var rng = new System.Random();
+            var selected = all.OrderBy(_ => rng.Next()).Take(3).ToList();
             foreach (var s in selected)
             {
                 s.is_active = 1;
@@ -1007,7 +1008,8 @@ public partial class DatabaseManager
         var all = _db.Table<TvChannelData>().ToList();
         if (all.Count >= 3)
         {
-            var selected = all.OrderBy(_ => UnityEngine.Random.value).Take(3).ToList();
+            var rng = new System.Random();
+            var selected = all.OrderBy(_ => rng.Next()).Take(3).ToList();
             foreach (var c in selected)
             {
                 c.is_active = 1;
