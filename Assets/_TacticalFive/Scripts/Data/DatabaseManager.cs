@@ -86,18 +86,18 @@ public partial class DatabaseManager : MonoBehaviour
 
     private static readonly object _templateLock = new();
 
-    public void BuildTemplateDatabaseInBackground()
+    public void BuildTemplateDatabaseInBackground(string dbPath)
     {
         lock (_templateLock)
         {
             var oldDb = _db;
-            _db = new SQLiteConnection(TemplateDbPath);
+            _db = new SQLiteConnection(dbPath);
             CreateTables();
             RunMigrations();
             SeedStaticDataIfNeeded();
             _db.Close();
             _db = oldDb;
-            Debug.Log($"[DB] Template database created (background): {TemplateDbPath}");
+            Debug.Log($"[DB] Template database created (background): {dbPath}");
         }
     }
 

@@ -294,11 +294,12 @@ public class EditorController : UIScreenController
 
         _templateReady = false;
         string errorMsg = null;
+        string templatePath = DatabaseManager.Instance.TemplateDbPath;
         Task.Run(() =>
         {
             try
             {
-                DatabaseManager.Instance.BuildTemplateDatabaseInBackground();
+                DatabaseManager.Instance.BuildTemplateDatabaseInBackground(templatePath);
             }
             catch (System.Exception ex)
             {
