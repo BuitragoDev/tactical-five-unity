@@ -1729,7 +1729,7 @@ public partial class DatabaseManager
                     PlayerName = $"{best.first_name} {best.last_name}",
                     TeamName = best.team_name ?? "",
                     TeamKeyword = best.team_logo ?? "",
-                    Position = best.position ?? "",
+                    Position = pos,
                     AvgPts = (float)best.avg_pts,
                     AvgReb = (float)best.avg_reb,
                     AvgAst = (float)best.avg_ast,
