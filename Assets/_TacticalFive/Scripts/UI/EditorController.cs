@@ -3,6 +3,7 @@ using UnityEngine.UIElements;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 public class EditorController : UIScreenController
 {
@@ -16,7 +17,9 @@ public class EditorController : UIScreenController
     }
     private Button _btnReset;
     private VisualElement _loadingSpinner;
+    private IVisualElementScheduledItem _spinScheduler;
     private bool _isLoading;
+    private volatile bool _templateReady;
 
     // Tabs
     private Button _btnTeams, _btnPlayers;
@@ -284,14 +287,22 @@ public class EditorController : UIScreenController
         ShowLoading();
         yield return null;
 
+        DatabaseManager.Instance.CloseTemplateSession();
+
+        if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
+            System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
+
+        _templateReady = false;
+        Task.Run(() =>
+        {
+            DatabaseManager.Instance.BuildTemplateDatabaseInBackground();
+            _templateReady = true;
+        });
+
+        yield return new WaitWhile(() => !_templateReady);
+
         try
         {
-            DatabaseManager.Instance.CloseTemplateSession();
-
-            if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
-                System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
-
-            DatabaseManager.Instance.EnsureTemplateDb();
             DatabaseManager.Instance.InitTemplateSession();
             LoadData();
             Refresh();
@@ -309,10 +320,21 @@ public class EditorController : UIScreenController
         _isLoading = true;
         if (_btnReset != null) _btnReset.SetEnabled(false);
         _loadingSpinner.style.display = DisplayStyle.Flex;
+
+        _spinScheduler = _root.schedule.Execute(() =>
+        {
+            if (_loadingSpinner == null) return;
+            var current = _loadingSpinner.style.rotate;
+            float angle = current.value.angle.value + 15f;
+            if (angle >= 360f) angle -= 360f;
+            _loadingSpinner.style.rotate = new Rotate(Angle.Degrees(angle));
+        }).Every(30);
     }
 
     void HideLoading()
     {
+        _spinScheduler?.Pause();
+        _spinScheduler = null;
         _loadingSpinner.style.display = DisplayStyle.None;
         if (_btnReset != null) _btnReset.SetEnabled(true);
         _isLoading = false;
