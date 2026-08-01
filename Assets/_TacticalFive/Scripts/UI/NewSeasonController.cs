@@ -23,9 +23,21 @@ public class NewSeasonController : UIScreenController
     private int _selectedTeamId;
     private List<TeamData> _availableTeams;
 
+    // Roster modal
+    private VisualElement _rosterOverlay;
+    private Label _rosterCountLabel;
+    private Button _btnRosterContinue;
+    private List<PlayerData> _rosterPlayers;
+    private int _rosterActiveCount;
+
     protected override void OnEnable()
     {
         base.OnEnable();
+
+        _rosterOverlay = new VisualElement();
+        _rosterOverlay.AddToClassList("ns-roster-overlay");
+        _root.Add(_rosterOverlay);
+
         CursorManager.Instance?.SetDefaultCursor();
     }
 
@@ -226,6 +238,17 @@ public class NewSeasonController : UIScreenController
 
     void OnStartSeason()
     {
+        var roster = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        if (roster.Count > TradeHelper.MAX_ROSTER)
+        {
+            OpenRosterModal(roster);
+            return;
+        }
+        ExecuteStartSeason();
+    }
+
+    void ExecuteStartSeason()
+    {
         _btnStartSeason.SetEnabled(false);
         _btnStartSeason.text = "INICIANDO...";
 
@@ -250,5 +273,210 @@ public class NewSeasonController : UIScreenController
 
         // Navigate to Preseason to set up friendly games
         ScreenManager.Instance.GoTo(GameScreen.Preseason);
+    }
+
+    // ── ROSTER TRIM MODAL ────────────────────────────────
+
+    void OpenRosterModal(List<PlayerData> roster)
+    {
+        _rosterPlayers = roster;
+        _rosterActiveCount = roster.Count;
+
+        _rosterOverlay.Clear();
+        _rosterOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        _rosterOverlay.Add(box);
+
+        var title = new Label("PLANTILLA COMPLETA");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label($"Tu plantilla tiene {_rosterActiveCount} jugadores. El máximo es {TradeHelper.MAX_ROSTER}.\nDebes rescindir contratos hasta alcanzar el límite.");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        _rosterCountLabel = new Label($"Jugadores: {_rosterActiveCount} / {TradeHelper.MAX_ROSTER}");
+        _rosterCountLabel.AddToClassList("ns-roster-count");
+        box.Add(_rosterCountLabel);
+
+        var grid = new VisualElement();
+        grid.AddToClassList("ns-roster-grid");
+        box.Add(grid);
+
+        var col1 = new VisualElement();
+        col1.AddToClassList("ns-roster-col");
+        var col2 = new VisualElement();
+        col2.AddToClassList("ns-roster-col");
+        var col3 = new VisualElement();
+        col3.AddToClassList("ns-roster-col");
+        var col4 = new VisualElement();
+        col4.AddToClassList("ns-roster-col");
+        grid.Add(col1);
+        grid.Add(col2);
+        grid.Add(col3);
+        grid.Add(col4);
+
+        int perCol = (int)System.Math.Ceiling(roster.Count / 4f);
+        for (int i = 0; i < roster.Count; i++)
+        {
+            VisualElement target;
+            if (i < perCol) target = col1;
+            else if (i < perCol * 2) target = col2;
+            else if (i < perCol * 3) target = col3;
+            else target = col4;
+            target.Add(BuildPlayerCard(roster[i]));
+        }
+
+        _btnRosterContinue = new Button();
+        _btnRosterContinue.AddToClassList("ns-roster-continue");
+        _btnRosterContinue.text = "CONTINUAR A LA SIGUIENTE TEMPORADA";
+        _btnRosterContinue.SetEnabled(_rosterActiveCount <= TradeHelper.MAX_ROSTER);
+        _btnRosterContinue.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _rosterOverlay.style.display = DisplayStyle.None;
+            ExecuteStartSeason();
+        });
+        box.Add(_btnRosterContinue);
+
+        CursorManager.Instance?.RegisterHandCursor(_btnRosterContinue);
+    }
+
+    VisualElement BuildPlayerCard(PlayerData p)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("ns-roster-card");
+
+        var topRow = new VisualElement();
+        topRow.AddToClassList("ns-roster-card-top");
+
+        int ovr = p.GetCalculatedAverage();
+        var medBox = new VisualElement();
+        medBox.AddToClassList("ns-roster-med");
+        if (ovr > 84)
+            medBox.AddToClassList("ns-roster-med--high");
+        else if (ovr >= 70)
+            medBox.AddToClassList("ns-roster-med--mid");
+        else
+            medBox.AddToClassList("ns-roster-med--low");
+
+        var medLbl = new Label();
+        medLbl.AddToClassList("ns-roster-med-lbl");
+        medLbl.text = "MED";
+        medBox.Add(medLbl);
+
+        var medVal = new Label();
+        medVal.AddToClassList("ns-roster-med-val");
+        medVal.text = ovr.ToString();
+        medBox.Add(medVal);
+
+        topRow.Add(medBox);
+
+        var rightCol = new VisualElement();
+        rightCol.AddToClassList("ns-roster-card-right");
+
+        var rookieTag = p.is_rookie == 1 ? " (R)" : "";
+        var nameLbl = new Label($"{p.first_name} {p.last_name}{rookieTag}");
+        nameLbl.AddToClassList("ns-roster-name");
+        rightCol.Add(nameLbl);
+
+        var detailRow = new VisualElement();
+        detailRow.AddToClassList("ns-roster-detail");
+
+        var salaryLbl = new Label($"{p.salary:N0}$");
+        salaryLbl.AddToClassList("ns-roster-salary");
+        detailRow.Add(salaryLbl);
+
+        var yearsLbl = new Label();
+        yearsLbl.AddToClassList("ns-roster-years");
+        yearsLbl.text = p.contract_years == 1 ? "1 año" : $"{p.contract_years} años";
+        detailRow.Add(yearsLbl);
+
+        rightCol.Add(detailRow);
+        topRow.Add(rightCol);
+        card.Add(topRow);
+
+        var btn = new Button();
+        btn.AddToClassList("ns-roster-btn");
+        btn.text = "RESCINDIR CONTRATO";
+        int capturedId = p.id;
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            OnRescindir(capturedId, btn);
+        });
+        CursorManager.Instance?.RegisterHandCursor(btn);
+        card.Add(btn);
+
+        return card;
+    }
+
+    void OnRescindir(int playerId, Button btn)
+    {
+        var player = _rosterPlayers.FirstOrDefault(p => p.id == playerId);
+        if (player == null) return;
+        if (player.team_id != _selectedTeamId) return;
+
+        long salary = player.salary;
+        int years = player.contract_years;
+        long remainingSalary = salary * years;
+        long penalty = (long)(remainingSalary * 0.5f);
+        long netBalance = remainingSalary - penalty;
+        int currentDay = _season?.current_game_day ?? 0;
+        string playerName = $"{player.first_name} {player.last_name}";
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        player.team_id = 0;
+        DatabaseManager.Instance.UpdatePlayer(player);
+
+        var selectedTeam = DatabaseManager.Instance.GetTeamById(_selectedTeamId);
+        if (selectedTeam != null)
+        {
+            selectedTeam.budget -= penalty;
+            DatabaseManager.Instance.UpdateTeamBudget(selectedTeam.id, selectedTeam.budget);
+        }
+
+        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+        {
+            team_id = _selectedTeamId,
+            season_id = _season?.id ?? 0,
+            record_type = FinanceRecord.TYPE_DISMISSAL,
+            game_day = currentDay,
+            amount = penalty
+        });
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = "Jugador despedido",
+            body = $"El club ha decidido rescindir el contrato de {playerName} con efecto inmediato.\n\n" +
+                   $"La operación supone una penalización económica de {penalty:N0} €, que ha sido cargada a las cuentas del club.\n\n" +
+                   $"La salida del jugador libera una plaza en la plantilla y su salario dejará de computar a partir de esta fecha.\n\n" +
+                   $"Coste de rescisión: {penalty:N0} €\n" +
+                   $"Ahorro salarial restante: {remainingSalary:N0} €\n" +
+                   $"Balance neto de la operación: {netBalance:N0} €",
+            game_day = currentDay,
+            game_date = now,
+            created_at = now,
+            date_sent = now,
+            is_read = 0
+        });
+
+        btn.text = "DESPEDIDO";
+        btn.SetEnabled(false);
+        btn.AddToClassList("ns-roster-btn--dismissed");
+
+        _rosterActiveCount = _rosterPlayers.Count(p => p.team_id == _selectedTeamId);
+        _rosterCountLabel.text = $"Jugadores: {_rosterActiveCount} / {TradeHelper.MAX_ROSTER}";
+
+        if (_rosterActiveCount <= TradeHelper.MAX_ROSTER)
+        {
+            _btnRosterContinue.SetEnabled(true);
+            CursorManager.Instance?.RegisterHandCursor(_btnRosterContinue);
+        }
     }
 }
