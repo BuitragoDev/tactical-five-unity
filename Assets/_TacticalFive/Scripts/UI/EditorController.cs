@@ -293,13 +293,32 @@ public class EditorController : UIScreenController
             System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
 
         _templateReady = false;
+        string errorMsg = null;
         Task.Run(() =>
         {
-            DatabaseManager.Instance.BuildTemplateDatabaseInBackground();
-            _templateReady = true;
+            try
+            {
+                DatabaseManager.Instance.BuildTemplateDatabaseInBackground();
+            }
+            catch (System.Exception ex)
+            {
+                errorMsg = ex.Message;
+                Debug.LogError($"[Editor] Error building template: {ex}");
+            }
+            finally
+            {
+                _templateReady = true;
+            }
         });
 
         yield return new WaitWhile(() => !_templateReady);
+
+        if (!string.IsNullOrEmpty(errorMsg))
+        {
+            HideLoading();
+            ShowToast("Error al restablecer la base de datos: " + errorMsg, isError: true);
+            yield break;
+        }
 
         try
         {
