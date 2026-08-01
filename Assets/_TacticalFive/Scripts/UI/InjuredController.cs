@@ -358,21 +358,13 @@ using System.Linq;
             _ => Random.Range(0.05f, 0.12f),
         };
 
-        int oldDays = player.injury_days;
         int newDays = Mathf.CeilToInt(player.injury_days * (1f - pct));
         player.injury_days = Mathf.Clamp(newDays, 1, player.injury_days);
         player.treated = 1;
         DatabaseManager.Instance.UpdatePlayer(player);
 
-        string playerName = $"{player.first_name} {player.last_name}";
-        string reductionText = $"{playerName} ha recibido tratamiento m\u00e9dico.\nSus d\u00edas de baja se reducen de {oldDays} a {player.injury_days} días.";
-
         ReloadData();
         Refresh();
-
-        _treatmentResultTitle.text = "TRATAMIENTO COMPLETADO";
-        _treatmentResultText.text = reductionText;
-        _treatmentResultOverlay.style.display = DisplayStyle.Flex;
     }
 
     void CloseTreatmentResult()
