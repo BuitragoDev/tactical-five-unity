@@ -275,24 +275,29 @@ public class EditorController : UIScreenController
 
     void ResetToDefaults()
     {
+        if (_isLoading) return;
         ShowLoading();
-        try
-        {
-            DatabaseManager.Instance.CloseTemplateSession();
 
-            if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
-                System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
-
-            DatabaseManager.Instance.EnsureTemplateDb();
-            DatabaseManager.Instance.InitTemplateSession();
-            LoadData();
-            Refresh();
-            ShowToast("Base de datos restablecida correctamente");
-        }
-        finally
+        _root.schedule.Execute(() =>
         {
-            HideLoading();
-        }
+            try
+            {
+                DatabaseManager.Instance.CloseTemplateSession();
+
+                if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
+                    System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
+
+                DatabaseManager.Instance.EnsureTemplateDb();
+                DatabaseManager.Instance.InitTemplateSession();
+                LoadData();
+                Refresh();
+                ShowToast("Base de datos restablecida correctamente");
+            }
+            finally
+            {
+                HideLoading();
+            }
+        }).StartingIn(100);
     }
 
     void ShowLoading()
