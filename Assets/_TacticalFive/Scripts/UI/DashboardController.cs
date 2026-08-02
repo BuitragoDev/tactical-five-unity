@@ -113,6 +113,12 @@ using System.Linq;
     private int _fastSimAutoFixAttempts;
     private bool _fastSimRunning;
     private bool _fastSimStopRequested;
+    private bool _fastSimAbortOffers;
+    private bool _fastSimOfferPauseActive;
+    private bool _offerModalResolved;
+    private bool _offerModalGoToQuinteto;
+    private bool _tradeOfferModalResolved;
+    private bool _tradeOfferAccepted;
 
     protected override void OnEnable()
     {
@@ -897,10 +903,18 @@ using System.Linq;
         if (fastSim)
         {
             // En modo simulación rápida no se navega ni se refresca por día:
-            // el refresh se hace al final.
+            // el refresh se hace al final. Si hay ofertas maduradas o propuestas
+            // de traspaso pendientes, se aborta el día para mostrarlas con la
+            // simulación parada (el día ya está commiteado).
             _pendingRecoveredIds.Clear();
-            if (gamesToday.Count == 0)
-                ProcessMaturedOffers();
+            var matured = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day);
+            var pendingTrades = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
+            if (matured.Count > 0 || pendingTrades.Count > 0)
+            {
+                _fastSimAborted = true;
+                _fastSimAbortOffers = true;
+                yield break;
+            }
             yield break;
         }
 
@@ -1032,6 +1046,9 @@ using System.Linq;
         _fastSimAutoFixAttempts = 0;
         _fastSimAbortEmptySlots = new List<int>();
         _fastSimAbortInjured = new List<(LineupData, PlayerData)>();
+        _fastSimAbortOffers = false;
+        _fastSimOfferPauseActive = false;
+        _offerModalGoToQuinteto = false;
 
         ShowLoading();
 
@@ -1093,6 +1110,55 @@ using System.Linq;
                         yield break;
                     }
                     autoFixed = true;
+                }
+                else if (_fastSimAbortOffers)
+                {
+                    _fastSimOfferPauseActive = true;
+
+                    if (DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day).Count > 0)
+                    {
+                        _offerModalResolved = false;
+                        _offerModalGoToQuinteto = false;
+                        ProcessMaturedOffers();
+                        yield return new WaitUntil(() => _offerModalResolved);
+                        _firedOverlay.style.display = DisplayStyle.None;
+                        if (_offerModalGoToQuinteto)
+                        {
+                            _fastSimOfferPauseActive = false;
+                            _fastSimAbortOffers = false;
+                            _fastSimRunning = false;
+                            SetSidebarNavigationEnabled(true);
+                            HideLoading();
+                            ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                            yield break;
+                        }
+                    }
+
+                    bool tradeAccepted = false;
+                    while (DatabaseManager.Instance.GetPendingTradeOffers(_manager.id).Count > 0)
+                    {
+                        _tradeOfferModalResolved = false;
+                        _tradeOfferAccepted = false;
+                        ShowNextPendingTradeOffer();
+                        if (_firedOverlay.style.display != DisplayStyle.Flex) continue;
+                        yield return new WaitUntil(() => _tradeOfferModalResolved);
+                        if (_tradeOfferAccepted)
+                        {
+                            tradeAccepted = true;
+                            break;
+                        }
+                    }
+
+                    _fastSimOfferPauseActive = false;
+                    _fastSimAbortOffers = false;
+
+                    if (tradeAccepted)
+                    {
+                        _fastSimAborted = true;
+                        break;
+                    }
+                    _fastSimAborted = false;
+                    continue;
                 }
 
                 _fastSimAbortEmptySlots.Clear();
@@ -1256,7 +1322,11 @@ using System.Linq;
         foreach (var offer in offers)
         {
             var player = DatabaseManager.Instance.GetPlayerById(offer.player_id);
-            if (player == null) continue;
+            if (player == null)
+            {
+                DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                continue;
+            }
 
             int gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(player.id, _season.id);
             int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
@@ -1610,23 +1680,62 @@ using System.Linq;
         textLabel.style.whiteSpace = WhiteSpace.Normal;
         box.Add(textLabel);
 
-        var btn = new Button();
-        btn.text = "CONTINUAR";
-        btn.AddToClassList("fired-modal-btn");
-        if (resultType == 0)
-            btn.AddToClassList("fired-modal-btn--warning");
-        else if (resultType == 1)
-            btn.AddToClassList("fired-modal-btn--positive");
-        btn.RegisterCallback<ClickEvent>(_ =>
+        if (_fastSimRunning && _fastSimOfferPauseActive)
         {
-            PlayClick();
-            _firedOverlay.style.display = DisplayStyle.None;
-            ShowNextPendingTradeOffer();
-        });
-        box.Add(btn);
+            var btnGroup = new VisualElement();
+            btnGroup.AddToClassList("injured-modal-btn-group");
 
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.RegisterHandCursor(btn);
+            var goToQuintetoBtn = new Button();
+            goToQuintetoBtn.text = "IR A QUINTETO";
+            goToQuintetoBtn.AddToClassList("injured-modal-btn");
+            goToQuintetoBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+            goToQuintetoBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                _firedOverlay.style.display = DisplayStyle.None;
+                _offerModalGoToQuinteto = true;
+                _offerModalResolved = true;
+            });
+            btnGroup.Add(goToQuintetoBtn);
+
+            var continueBtn = new Button();
+            continueBtn.text = "SEGUIR SIMULANDO";
+            continueBtn.AddToClassList("injured-modal-btn");
+            continueBtn.style.backgroundColor = new StyleColor(new Color(0.153f, 0.682f, 0.376f));
+            continueBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                _firedOverlay.style.display = DisplayStyle.None;
+                _offerModalGoToQuinteto = false;
+                _offerModalResolved = true;
+            });
+            btnGroup.Add(continueBtn);
+
+            box.Add(btnGroup);
+
+            if (CursorManager.Instance != null)
+            {
+                CursorManager.Instance.RegisterHandCursor(goToQuintetoBtn);
+                CursorManager.Instance.RegisterHandCursor(continueBtn);
+            }
+        }
+        else
+        {
+            var btn = new Button();
+            btn.text = "CERRAR";
+            btn.AddToClassList("fired-modal-btn");
+            btn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+            btn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                _firedOverlay.style.display = DisplayStyle.None;
+                ShowNextPendingTradeOffer();
+            });
+            box.Add(btn);
+
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(btn);
+        }
     }
 
     void ShowBudgetWarningModal(int num)
@@ -3020,7 +3129,13 @@ using System.Linq;
             PlayClick();
             DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
             _firedOverlay.style.display = DisplayStyle.None;
-            ShowNextPendingTradeOffer();
+            if (_fastSimOfferPauseActive)
+            {
+                _tradeOfferModalResolved = true;
+                _tradeOfferAccepted = false;
+            }
+            else
+                ShowNextPendingTradeOffer();
         });
         btnGroup.Add(rejectBtn);
 
@@ -3128,7 +3243,13 @@ using System.Linq;
 
             DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 1);
             _firedOverlay.style.display = DisplayStyle.None;
-            ShowNextPendingTradeOffer();
+            if (_fastSimOfferPauseActive)
+            {
+                _tradeOfferModalResolved = true;
+                _tradeOfferAccepted = true;
+            }
+            else
+                ShowNextPendingTradeOffer();
         });
         btnGroup.Add(acceptBtn);
 
@@ -4310,42 +4431,42 @@ using System.Linq;
 
         var scorer = teamStats.OrderByDescending(s => (float)s.total_points / s.games).First();
         SetStatCard("StatScorer", "StatScorerName", "StatScorerGames",
-            (scorer.total_points / (float)scorer.games).ToString("F1"),
+            (scorer.total_points / (float)scorer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " pts",
             $"{scorer.first_name} {scorer.last_name}",
             $"{scorer.games} {(scorer.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             scorer.player_id);
 
         var rebounder = teamStats.OrderByDescending(s => (float)s.total_rebounds / s.games).First();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
-            (rebounder.total_rebounds / (float)rebounder.games).ToString("F1"),
+            (rebounder.total_rebounds / (float)rebounder.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " reb",
             $"{rebounder.first_name} {rebounder.last_name}",
             $"{rebounder.games} {(rebounder.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             rebounder.player_id);
 
         var assister = teamStats.OrderByDescending(s => (float)s.total_assists / s.games).First();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
-            (assister.total_assists / (float)assister.games).ToString("F1"),
+            (assister.total_assists / (float)assister.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " ast",
             $"{assister.first_name} {assister.last_name}",
             $"{assister.games} {(assister.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             assister.player_id);
 
         var stealer = teamStats.OrderByDescending(s => (float)s.total_steals / s.games).First();
         SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
-            (stealer.total_steals / (float)stealer.games).ToString("F1"),
+            (stealer.total_steals / (float)stealer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " rob",
             $"{stealer.first_name} {stealer.last_name}",
             $"{stealer.games} {(stealer.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             stealer.player_id);
 
         var blocker = teamStats.OrderByDescending(s => (float)s.total_blocks / s.games).First();
         SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
-            (blocker.total_blocks / (float)blocker.games).ToString("F1"),
+            (blocker.total_blocks / (float)blocker.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " tap",
             $"{blocker.first_name} {blocker.last_name}",
             $"{blocker.games} {(blocker.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             blocker.player_id);
 
         var rated = teamStats.OrderByDescending(s => (float)s.total_rating / s.games).First();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
-            (rated.total_rating / (float)rated.games).ToString("F1"),
+            (rated.total_rating / (float)rated.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " val",
             $"{rated.first_name} {rated.last_name}",
             $"{rated.games} {(rated.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
             rated.player_id);
