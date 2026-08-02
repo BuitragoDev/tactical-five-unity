@@ -34,7 +34,7 @@ public partial class DatabaseManager
                 last_name = ln,
                 position = pos,
                 secondary_position = pos == "PG" ? "SG"
-                                    : pos == "SG" ? "SF"
+                                    : pos == "SG" ? (h < 198 ? "PG" : "SF")
                                     : pos == "SF" ? "PF"
                                     : pos == "PF" ? "C"
                                     : pos == "C" ? "PF"
@@ -744,7 +744,7 @@ public partial class DatabaseManager
                 last_name = ln,
                 position = pos,
                 secondary_position = pos == "PG" ? "SG"
-                                    : pos == "SG" ? "SF"
+                                    : pos == "SG" ? (h < 198 ? "PG" : "SF")
                                     : pos == "SF" ? "PF"
                                     : pos == "PF" ? "C"
                                     : pos == "C" ? "PF"
