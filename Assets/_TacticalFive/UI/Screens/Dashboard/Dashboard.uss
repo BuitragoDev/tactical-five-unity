@@ -754,6 +754,8 @@
     padding: 8px 12px;
     margin: 2px;
     background-color: rgb(17, 24, 34);
+    border-color: rgb(28, 40, 56);
+    border-width: 1px;
 }
 
 .stat-card-two-column {
@@ -775,8 +777,10 @@
 .stat-card-photo-wrapper {
     width: 68px;
     height: 68px;
-    border-radius: 54px;
-
+    border-radius: 5px;
+    background-color: rgb(230, 227, 227);
+    background-size: cover;
+    background-position: center;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
@@ -1427,4 +1431,18 @@
     font-size: 16px;
     color: rgb(46, 204, 113);
     margin-top: 2px;
+}
+
+/* ── Resumen de simulación rápida ── */
+.fastsim-summary-box {
+    max-height: 600px;
+    border-top-color: rgb(46, 204, 113);
+}
+
+.fastsim-summary-title {
+    color: rgb(46, 204, 113);
+}
+
+.fastsim-summary-btn {
+    border-radius: 0;
 }

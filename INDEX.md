@@ -38,6 +38,7 @@
 |---|---|
 | [Docs/CODE_GUIDELINES.md](Docs/CODE_GUIDELINES.md) | Real conventions, patterns to follow/avoid, how to add screens/mechanics/data |
 | [Docs/TODO_TECHNICAL_DEBT.md](Docs/TODO_TECHNICAL_DEBT.md) | Prioritized bugs, refactors, debt, risks, improvements (P0–P3) |
+| [Docs/IMPROVEMENT_PROPOSALS.md](Docs/IMPROVEMENT_PROPOSALS.md) | Propuestas de mejora para hacer el juego más potente, priorizadas por impacto/esfuerzo |
 
 ### Agent knowledge base
 | Doc | Contents |

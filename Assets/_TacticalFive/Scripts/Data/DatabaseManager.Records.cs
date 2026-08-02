@@ -1458,21 +1458,23 @@ public partial class DatabaseManager
             });
             Debug.Log($"[DB] AwardsRecord saved: MVP={mvpName}, ROY={rookieName}");
 
-            // All-NBA Quintets
+            // All-NBA Quintets — both primary and secondary positions, no duplicate players
             string[] positions = { "PG", "SG", "SF", "PF", "C" };
             var posValues = new Dictionary<string, (string name, string team)>
             {
                 { "PG", ("", "") }, { "SG", ("", "") }, { "SF", ("", "") },
                 { "PF", ("", "") }, { "C",  ("", "") }
             };
+            var assigned = new HashSet<int>();
 
             foreach (string pos in positions)
             {
                 var posPlayers = seasonStats
                     .Where(s =>
                     {
+                        if (assigned.Contains(s.player_id)) return false;
                         var p = GetPlayerById(s.player_id);
-                        return p != null && p.position == pos;
+                        return p != null && (p.position == pos || (!string.IsNullOrEmpty(p.secondary_position) && p.secondary_position == pos));
                     })
                     .ToList();
                 if (posPlayers.Count == 0) continue;
@@ -1480,6 +1482,7 @@ public partial class DatabaseManager
                 var qualified = posPlayers.Where(x => x.games >= 65).ToList();
                 if (qualified.Count == 0) qualified = posPlayers;
                 var best = qualified.OrderByDescending(x => (double)x.total_rating / x.games).First();
+                assigned.Add(best.player_id);
                 var player = GetPlayerById(best.player_id);
                 var team = player != null ? GetTeamById(player.team_id) : null;
                 string fullName = player != null ? $"{player.first_name} {player.last_name}" : "";

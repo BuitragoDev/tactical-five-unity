@@ -269,3 +269,27 @@
     -unity-text-align: middle-start;
     padding: 30px 16px;
 }
+
+/* Botón simular hasta fecha */
+.btn-fastsim {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    cursor: pointer;
+    font-size: 17px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    padding: 12px 18px;
+    margin: 12px 16px;
+    -unity-text-align: middle-center;
+}
+
+.btn-fastsim:hover {
+    background-color: rgb(74, 128, 240);
+}
+
+.btn-fastsim:disabled {
+    background-color: rgb(58, 74, 99);
+    color: rgb(122, 138, 170);
+}

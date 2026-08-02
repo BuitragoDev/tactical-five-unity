@@ -25,6 +25,12 @@ using System.Linq;
     private Dictionary<string, Sprite> _logoSprites64 = new();
     private System.DateTime _currentMonthDate;
     private System.DateTime? _currentGameDate;
+    private System.DateTime? _targetDate;
+    private Button _btnSimulateToDate;
+    private VisualElement _fastSimConfirmOverlay;
+    private Label _fastSimConfirmText;
+    private Button _fastSimConfirmBtn;
+    private Button _fastSimCancelBtn;
     private static readonly string[] MonthNames = {
         "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
@@ -38,6 +44,11 @@ using System.Linq;
         _selectedDayTitle = _root.Q<Label>("SelectedDayTitle");
         _selectedDayGames = _root.Q<VisualElement>("SelectedDayGames");
         _noGamesText = _root.Q<Label>("NoGamesText");
+        _btnSimulateToDate = _root.Q<Button>("BtnSimulateToDate");
+        _fastSimConfirmOverlay = _root.Q<VisualElement>("FastSimConfirmOverlay");
+        _fastSimConfirmText = _root.Q<Label>("FastSimConfirmText");
+        _fastSimConfirmBtn = _root.Q<Button>("FastSimConfirmBtn");
+        _fastSimCancelBtn = _root.Q<Button>("FastSimCancelBtn");
     }
     protected override void LoadData()
     {
@@ -112,10 +123,22 @@ using System.Linq;
         base.RegisterCallbacks();
         _btnPrevMonth?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeMonth(-1); });
         _btnNextMonth?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeMonth(1); });
+
+        _btnSimulateToDate?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenFastSimConfirmModal(); });
+        _fastSimConfirmBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmFastSim(); });
+        _fastSimCancelBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseFastSimConfirmModal(); });
+        _fastSimConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _fastSimConfirmOverlay) { PlayClick(); CloseFastSimConfirmModal(); }
+        });
+
         if (CursorManager.Instance == null) return;
         var cursor = CursorManager.Instance;
         cursor.RegisterHandCursor(_btnPrevMonth);
         cursor.RegisterHandCursor(_btnNextMonth);
+        cursor.RegisterHandCursor(_btnSimulateToDate);
+        cursor.RegisterHandCursor(_fastSimConfirmBtn);
+        cursor.RegisterHandCursor(_fastSimCancelBtn);
     }
     protected override void Refresh()
     {
@@ -123,6 +146,7 @@ using System.Linq;
         try { AutoSelectCurrentDay(); }
         catch (System.Exception ex) { Debug.LogWarning($"[Calendar] AutoSelectCurrentDay error: {ex.Message}"); }
         BuildCalendar();
+        UpdateFastSimButton();
     }
     protected override void RefreshHeader()
     {
@@ -181,6 +205,8 @@ using System.Linq;
         _selectedDayGames.Clear();
         _noGamesText.style.display = DisplayStyle.Flex;
         _selectedDayTitle.text = "";
+        _targetDate = null;
+        UpdateFastSimButton();
     }
 
     void BuildCalendar()
@@ -308,6 +334,16 @@ using System.Linq;
     {
         _selectedDayTitle.text = $"{day} / {MonthNames[_currentMonthDate.Month].ToUpper()} / {_currentMonthDate.Year}";
         _selectedDayGames.Clear();
+        _targetDate = null;
+        if (System.DateTime.TryParseExact(dateStr, "yyyy-MM-dd",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var iso))
+            _targetDate = iso;
+        else if (System.DateTime.TryParseExact(dateStr, "dd/MM/yyyy",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var local))
+            _targetDate = local;
+        UpdateFastSimButton();
 
         if (games.Count == 0)
         {
@@ -403,6 +439,65 @@ using System.Linq;
                 _selectedDayGames.Add(row);
             }
         }
+    }
+
+    // ── SIMULACIÓN RÁPIDA HASTA FECHA ─────────────────────
+
+    void UpdateFastSimButton()
+    {
+        if (_btnSimulateToDate == null) return;
+
+        bool valid = false;
+        string todayStr = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+        if (_targetDate.HasValue
+            && !string.IsNullOrEmpty(todayStr)
+            && System.DateTime.TryParseExact(todayStr, "dd/MM/yyyy",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var today)
+            && _targetDate.Value >= today
+            && _season != null
+            && _season.phase != "finished")
+        {
+            valid = true;
+        }
+
+        _btnSimulateToDate.SetEnabled(valid);
+        _btnSimulateToDate.text = _targetDate.HasValue
+            ? $"SIMULAR HASTA {_targetDate.Value:dd/MM/yyyy}"
+            : "SIMULAR HASTA UNA FECHA";
+    }
+
+    void OpenFastSimConfirmModal()
+    {
+        if (!_targetDate.HasValue) return;
+        if (_fastSimConfirmText != null)
+        {
+            _fastSimConfirmText.text =
+                $"¿Simular todos los días hasta el {_targetDate.Value:dd/MM/yyyy}?\n\n" +
+                "Se simularán automáticamente todos los partidos, incluidos los de tu equipo, " +
+                "sin poder modificar quintetos ni ver resultados hasta el final.";
+        }
+        _fastSimConfirmOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _fastSimConfirmOverlay.AddToClassList("modal-overlay--visible");
+        _fastSimConfirmOverlay.Q<VisualElement>("FastSimConfirmBox")?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseFastSimConfirmModal()
+    {
+        _fastSimConfirmOverlay.RemoveFromClassList("modal-overlay--visible");
+        _fastSimConfirmOverlay.Q<VisualElement>("FastSimConfirmBox")?.RemoveFromClassList("modal-box--visible");
+    }
+
+    void ConfirmFastSim()
+    {
+        if (!_targetDate.HasValue)
+        {
+            CloseFastSimConfirmModal();
+            return;
+        }
+        GameResultCache.FastSimTargetDate = _targetDate.Value;
+        CloseFastSimConfirmModal();
+        ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }
 
     void OnActionClicked()

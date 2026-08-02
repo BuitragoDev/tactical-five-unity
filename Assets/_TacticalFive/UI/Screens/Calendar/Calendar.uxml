@@ -56,6 +56,7 @@
                             <ui:VisualElement name="SelectedDayGames" class="selected-day-games" />
                         </ui:ScrollView>
                         <ui:Label name="NoGamesText" class="no-games-text" text="NO HAY PARTIDOS ESTE DÍA" />
+                        <ui:Button name="BtnSimulateToDate" class="btn-fastsim" text="SIMULAR HASTA UNA FECHA" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>
@@ -65,6 +66,21 @@
         </ui:VisualElement>
 
     </ui:VisualElement>
+
+        <!-- ══ MODAL CONFIRMAR SIMULACIÓN RÁPIDA ══ -->
+        <ui:VisualElement name="FastSimConfirmOverlay" class="modal-overlay">
+            <ui:VisualElement name="FastSimConfirmBox" class="modal-box">
+                <ui:Label class="modal-title" text="SIMULAR HASTA FECHA" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label name="FastSimConfirmText" class="modal-paragraph" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="FastSimCancelBtn" class="modal-btn modal-btn--secondary" text="CANCELAR" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="FastSimConfirmBtn" class="modal-btn modal-btn--primary" text="SIMULAR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
 
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">

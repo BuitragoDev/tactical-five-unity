@@ -330,7 +330,7 @@ public static class DraftGenerator
                 secondary_position = position switch
                 {
                     "PG" => "SG",
-                    "SG" => "SF",
+                    "SG" => height < 198 ? "PG" : "SF",
                     "SF" => "PF",
                     "PF" => "C",
                     "C"  => "PF",

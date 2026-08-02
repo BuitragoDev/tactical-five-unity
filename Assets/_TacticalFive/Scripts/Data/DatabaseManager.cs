@@ -317,7 +317,7 @@ public partial class DatabaseManager : MonoBehaviour
                 UPDATE players
                 SET secondary_position = CASE position
                     WHEN 'PG' THEN 'SG'
-                    WHEN 'SG' THEN 'SF'
+                    WHEN 'SG' THEN CASE WHEN height_cm < 198 THEN 'PG' ELSE 'SF' END
                     WHEN 'SF' THEN 'PF'
                     WHEN 'PF' THEN 'C'
                     WHEN 'C'  THEN 'PF'

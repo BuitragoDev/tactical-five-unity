@@ -13,6 +13,10 @@ public static class GameResultCache
     // Flag para mostrar aviso de presupuesto en rojo al volver al Dashboard
     public static bool PendingBudgetWarning { get; set; }
 
+    // Fecha objetivo de la simulación rápida solicitada desde el Calendario.
+    // Se consume y resetea en DashboardController.OnEnable.
+    public static System.DateTime? FastSimTargetDate { get; set; }
+
     public static void Clear()
     {
         SimulatedGameIds.Clear();

@@ -673,6 +673,7 @@ public static class GameSimulator
             var injury = PickInjury();
             player.injury_type = injury.type;
             player.injury_days = UnityEngine.Random.Range(injury.minDays, injury.maxDays + 1);
+            player.treated = 0;
             DatabaseManager.Instance.UpdatePlayer(player);
             injuries.Add((ps.player_id, injury.type, player.injury_days));
         }
