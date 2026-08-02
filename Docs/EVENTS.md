@@ -46,6 +46,7 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | Queja / Preocupación de jugador (morale < 20/10) | `DashboardController.UpdatePlayersMoraleAfterGame` (3282) | Signals morale issue |
 | Remodelación iniciada/completada | `ArenaController` (656), `DashboardController` (3102) | Arena capacity increased |
 | Última semana de traspasos (Feb 1) | `DashboardController.ProcessGameDayRoutine` (996) | Reminder |
+| Simulación rápida hasta fecha | `CalendarController.ConfirmFastSim` → `GameResultCache.FastSimTargetDate` → `DashboardController.FastSimRoutine` | Modal de resumen en Dashboard (rango de fechas, W-L, eventos) |
 | Noticias rápidas (hitos/rachas/campanadas/TD/40pts) | `QuickNewsGenerator.Generate` (max 2/day) | Inbox |
 | Premio del mes (Manager/Jugador/Rookie) | `DatabaseManager.EvaluateMonthlyAwards` | Inbox + `monthly_awards` |
 | Trade AI offers to player | `DashboardController.GenerateAITradeOffersForPlayer` → shown via `ShowNextPendingTradeOffer` modal (not inbox) | User accepts/rejects in a modal |

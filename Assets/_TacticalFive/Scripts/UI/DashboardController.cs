@@ -103,18 +103,48 @@ using System.Linq;
     // Empty lineup modal
     private bool _emptyLineupModalResolved;
     private bool _emptyLineupGoToQuinteto;
+
+    // Simulación rápida (hasta una fecha elegida en el Calendario)
+    private System.DateTime? _fastSimTarget;
+    private bool _fastSimAborted;
+    private List<int> _fastSimAbortEmptySlots = new();
+    private List<(LineupData li, PlayerData p)> _fastSimAbortInjured = new();
+    private bool _fastSimSkipPreBatch;
+    private int _fastSimAutoFixAttempts;
+    private bool _fastSimRunning;
+    private bool _fastSimStopRequested;
+
     protected override void OnEnable()
     {
         base.OnEnable();
         _firedOverlay = new VisualElement();
         _firedOverlay.AddToClassList("fired-modal-overlay");
         _root.Add(_firedOverlay);
+        SetSidebarNavigationEnabled(true);
         AudioManager.Instance?.PlayMusic("backgroundMenu");
         SetupPlayerCoach();
-        CheckBudgetWarning();
-        ProcessMaturedOffers();
-        ShowPendingRecoveryModal();
-        CheckTradeDeadlineModal();
+
+        // Si viene una solicitud de simulación rápida desde el Calendario, se
+        // arranca aquí (diferido un frame para que OnEnable termine).
+        var pendingTarget = GameResultCache.FastSimTargetDate;
+        GameResultCache.FastSimTargetDate = null;
+        if (pendingTarget.HasValue)
+        {
+            _fastSimTarget = pendingTarget.Value;
+            _root.schedule.Execute(() =>
+            {
+                if (_fastSimTarget.HasValue)
+                    StartCoroutine(FastSimRoutine(_fastSimTarget.Value));
+            }).ExecuteLater(0);
+        }
+        else
+        {
+            _fastSimTarget = null;
+            CheckBudgetWarning();
+            ProcessMaturedOffers();
+            ShowPendingRecoveryModal();
+            CheckTradeDeadlineModal();
+        }
     }
 
     void Update()
@@ -381,6 +411,12 @@ using System.Linq;
 
     void RefreshActionButton()
     {
+        if (_fastSimRunning)
+        {
+            SetActionBtn("DETENER SIMULACIÓN", "");
+            return;
+        }
+
         if (_season == null || _myTeam == null)
         {
             SetActionBtn("CONTINUAR", "");
@@ -424,8 +460,19 @@ using System.Linq;
             _btnAction.AddToClassList(extraClass);
     }
 
+    void SetSidebarNavigationEnabled(bool enabled)
+    {
+        _root.Query<Button>(null, "nav-item").ForEach(btn => btn.SetEnabled(enabled));
+        _root.Query<Button>(null, "nav-submenu-item").ForEach(btn => btn.SetEnabled(enabled));
+    }
+
     void OnActionClicked()
     {
+        if (_fastSimRunning)
+        {
+            _fastSimStopRequested = true;
+            return;
+        }
         if (_season == null || _isLoading) return;
 
         if (_season.phase == "finished")
@@ -481,61 +528,94 @@ using System.Linq;
             .ToList();
     }
 
-    System.Collections.IEnumerator ProcessGameDayRoutine()
+    System.Collections.IEnumerator ProcessGameDayRoutine(bool fastSim = false)
     {
         int gameDay = FindNextGameDay();
         Debug.Log($"[GameDay] ProcessGameDayRoutine started. gameDay={gameDay}");
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
-            HideLoading();
+            if (!fastSim) HideLoading();
             yield break;
         }
 
         var db = DatabaseManager.Instance.Db;
 
-        db.BeginTransaction();
-        try
+        // En una simulación rápida reanudada tras el modal de alineación, el
+        // pre-lote del día ya se commiteó antes del aborto; se evita re-ejecutarlo.
+        bool skipPreBatch = fastSim && _fastSimSkipPreBatch;
+        _fastSimSkipPreBatch = false;
+
+        if (!skipPreBatch)
         {
-            var recoveredPlayers = ProcessInjuries();
-            ProcessFisicoRecovery();
-            if (recoveredPlayers.Count > 0)
+            db.BeginTransaction();
+
+            // Paso 1: lesiones y recuperaciones
+            try
             {
-                foreach (var p in recoveredPlayers)
+                var recoveredPlayers = ProcessInjuries();
+                ProcessFisicoRecovery();
+                if (recoveredPlayers.Count > 0)
                 {
-                    DatabaseManager.Instance.AddMessage(new MessageData
+                    foreach (var p in recoveredPlayers)
                     {
-                        manager_id = _manager.id,
-                        sender_type = 1,
-                        sender_id = 0,
-                        title = $"Recuperado: {p.first_name} {p.last_name}",
-                        body = $"{p.first_name} {p.last_name} se ha recuperado de su lesión y vuelve a estar disponible.",
-                        game_day = gameDay,
-                        game_date = _season?.current_date ?? "",
-                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0
-                    });
-                    _pendingRecoveredIds.Add(p.id);
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 1,
+                            sender_id = 0,
+                            title = $"Recuperado: {p.first_name} {p.last_name}",
+                            body = $"{p.first_name} {p.last_name} se ha recuperado de su lesión y vuelve a estar disponible.",
+                            game_day = gameDay,
+                            game_date = _season?.current_date ?? "",
+                            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            is_read = 0
+                        });
+                        _pendingRecoveredIds.Add(p.id);
+                    }
                 }
             }
+            catch (System.Exception ex)
+            {
+                db.Rollback();
+                _pendingRecoveredIds.Clear();
+                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
+                yield break;
+            }
+            if (fastSim) yield return null;
 
-            ProcessScouts();
-            ProcessTraining();
-            ProcessRenovations();
-            ProcessAITransfers(gameDay);
-            ProcessStarFreeAgentSignings(gameDay);
-            ProcessPsychologistMorale();
-            db.Commit();
-        }
-        catch (System.Exception ex)
-        {
-            db.Rollback();
-            _pendingRecoveredIds.Clear();
-            Debug.LogError($"[GameDay] Error en el lote pre-partido, revertido: {ex.Message}\n{ex.StackTrace}");
-            HideLoading();
-            ShowOfferResultModal("ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.\n\n" + ex.Message, -1);
-            yield break;
+            // Paso 2: scouts, entrenamiento y renovaciones
+            try
+            {
+                ProcessScouts();
+                ProcessTraining();
+                ProcessRenovations();
+            }
+            catch (System.Exception ex)
+            {
+                db.Rollback();
+                _pendingRecoveredIds.Clear();
+                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
+                yield break;
+            }
+            if (fastSim) yield return null;
+
+            // Paso 3: traspasos AI, fichajes estrella y psicólogo
+            try
+            {
+                ProcessAITransfers(gameDay);
+                ProcessStarFreeAgentSignings(gameDay);
+                ProcessPsychologistMorale();
+                db.Commit();
+            }
+            catch (System.Exception ex)
+            {
+                db.Rollback();
+                _pendingRecoveredIds.Clear();
+                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
+                yield break;
+            }
         }
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
@@ -558,6 +638,12 @@ using System.Linq;
             var emptySlots = GetEmptyStarterSlots();
             if (emptySlots.Count > 0)
             {
+                if (fastSim)
+                {
+                    _fastSimAborted = true;
+                    _fastSimAbortEmptySlots = emptySlots;
+                    yield break;
+                }
                 _emptyLineupModalResolved = false;
                 _emptyLineupGoToQuinteto = false;
                 ShowEmptyLineupModal(emptySlots);
@@ -573,6 +659,12 @@ using System.Linq;
             var injured = GetInjuredActiveLineupPlayers();
             if (injured.Count > 0)
             {
+                if (fastSim)
+                {
+                    _fastSimAborted = true;
+                    _fastSimAbortInjured = injured;
+                    yield break;
+                }
                 _injuredModalResolved = false;
                 _injuredModalGoToQuinteto = false;
                 ShowInjuredLineupModal(injured);
@@ -589,94 +681,64 @@ using System.Linq;
         db.BeginTransaction();
         try
         {
-        if (gamesToday.Count > 0)
-        {
-            GameResultCache.Clear();
-            GameResultCache.LastGameDay = gameDay;
-
-            foreach (var game in gamesToday)
+            if (gamesToday.Count > 0)
             {
-                List<PlayerData> homePlayers, awayPlayers;
-
-                if (game.game_type == "allstar")
-                {
-                    homePlayers = BuildAllStarRoster("East");
-                    awayPlayers = BuildAllStarRoster("West");
-                }
-                else
-                {
-                    homePlayers = GetActivePlayers(game.home_team_id);
-                    awayPlayers = GetActivePlayers(game.away_team_id);
-                }
-
-                int homeChem = DatabaseManager.Instance.GetTeamChemistry(game.home_team_id);
-                int awayChem = DatabaseManager.Instance.GetTeamChemistry(game.away_team_id);
-                bool isMyHomeGame = game.home_team_id == _myTeam.id;
-
-                var homeStarters = new HashSet<int>(homePlayers.Take(5).Select(p => p.id));
-                var awayStarters = new HashSet<int>(awayPlayers.Take(5).Select(p => p.id));
-                GameResultCache.GameStarters[game.id] = new HashSet<int>(homeStarters.Concat(awayStarters));
-
-                var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem, isMyHomeGame);
-                DatabaseManager.Instance.UpdateGame(game);
-                GameResultCache.SimulatedGameIds.Add(game.id);
-
-                if (game.game_type == "allstar")
-                {
-                    var allStats = result.home_stats.Concat(result.away_stats).ToList();
-                    var mvpStats = allStats.OrderByDescending(s => s.rating).First();
-                    var record = new AllStarRecord
-                    {
-                        manager_id = _manager.id,
-                        season = $"{_season.year_end}",
-                        east_score = game.home_score,
-                        west_score = game.away_score,
-                        mvp = mvpStats.name,
-                        mvp_player_id = mvpStats.player_id
-                    };
-                    DatabaseManager.Instance.SaveAllStarRecord(record);
-                }
-
-                if (game.game_type != "allstar")
-                    ProcessGameFinances(game, result);
-
-                ProcessGameInjuries(result, game.game_date);
-
-                bool myTeamInThisGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
-                if (myTeamInThisGame)
-                {
-                    CreateGameResultMessage(game, result);
-                    UpdateFanConfidence(game, result);
-                    CheckBudgetAfterGame();
-                }
-
-                // Recalculate morale for all players in this game
-                bool homeWon = game.home_score > game.away_score;
-                UpdatePlayersMoraleAfterGame(result.home_stats, game.home_team_id, homeWon);
-                UpdatePlayersMoraleAfterGame(result.away_stats, game.away_team_id, !homeWon);
-
-                // Evolve relationships for teams in this game
-                DatabaseManager.Instance.UpdateRelationshipsAfterGame(
-                    game.home_team_id, game.id, homeWon,
-                    result.home_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
-                DatabaseManager.Instance.UpdateRelationshipsAfterGame(
-                    game.away_team_id, game.id, !homeWon,
-                    result.away_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
+                GameResultCache.Clear();
+                GameResultCache.LastGameDay = gameDay;
             }
+        }
+        catch (System.Exception ex)
+        {
+            db.Rollback();
+            GameResultCache.Clear();
+            HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
+            yield break;
+        }
 
-            // Recalculate team chemistry for all teams involved today
-            foreach (var game in gamesToday)
+        foreach (var game in gamesToday)
+        {
+            try
+            {
+                ProcessSingleGame(game);
+            }
+            catch (System.Exception ex)
+            {
+                db.Rollback();
+                GameResultCache.Clear();
+                HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
+                yield break;
+            }
+            if (fastSim) yield return null;
+        }
+
+        // Recalculate team chemistry for all teams involved today
+        foreach (var game in gamesToday)
+        {
+            try
             {
                 int chem = DatabaseManager.Instance.CalculateTeamChemistry(game.home_team_id, gameDay);
                 DatabaseManager.Instance.UpdateTeamChemistry(game.home_team_id, chem);
                 chem = DatabaseManager.Instance.CalculateTeamChemistry(game.away_team_id, gameDay);
                 DatabaseManager.Instance.UpdateTeamChemistry(game.away_team_id, chem);
             }
-
-            UpdateManagerStats(gameDay);
-
-            QuickNewsGenerator.Generate(_manager, _myTeam, _season, gamesToday, gameDay, _season?.current_date ?? "");
+            catch (System.Exception ex)
+            {
+                db.Rollback();
+                GameResultCache.Clear();
+                HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
+                yield break;
+            }
+            if (fastSim) yield return null;
         }
+
+        try
+        {
+            if (gamesToday.Count > 0)
+            {
+                UpdateManagerStats(gameDay);
+
+                QuickNewsGenerator.Generate(_manager, _myTeam, _season, gamesToday, gameDay, _season?.current_date ?? "");
+            }
 
         // ── Phase transitions ──
         if (_season.phase == "regular" || _season.phase == "preseason")
@@ -800,7 +862,8 @@ using System.Linq;
                     date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     is_read = 0
                 });
-                ShowTradeDeadlineModal();
+                if (!fastSim)
+                    ShowTradeDeadlineModal();
             }
 
             // Monthly awards evaluation (1st of Dec through Apr)
@@ -819,12 +882,28 @@ using System.Linq;
             db.Rollback();
             GameResultCache.Clear();
             Debug.LogError($"[GameDay] Error simulando el día, revertido: {ex.Message}\n{ex.StackTrace}");
+            if (fastSim)
+            {
+                _fastSimAborted = true;
+                yield break;
+            }
             HideLoading();
             ShowOfferResultModal("ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.\n\n" + ex.Message, -1);
             yield break;
         }
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+
+        if (fastSim)
+        {
+            // En modo simulación rápida no se navega ni se refresca por día:
+            // el refresh se hace al final.
+            _pendingRecoveredIds.Clear();
+            if (gamesToday.Count == 0)
+                ProcessMaturedOffers();
+            yield break;
+        }
+
         Refresh();
 
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
@@ -850,6 +929,245 @@ using System.Linq;
             Debug.Log($"[Dashboard] Día {gameDay} — {gamesToday.Count} partidos → GameResults");
             ScreenManager.Instance.GoTo(GameScreen.GameResults);
         }
+    }
+
+    void ProcessSingleGame(GameData game)
+    {
+        List<PlayerData> homePlayers, awayPlayers;
+
+        if (game.game_type == "allstar")
+        {
+            homePlayers = BuildAllStarRoster("East");
+            awayPlayers = BuildAllStarRoster("West");
+        }
+        else
+        {
+            homePlayers = GetActivePlayers(game.home_team_id);
+            awayPlayers = GetActivePlayers(game.away_team_id);
+        }
+
+        int homeChem = DatabaseManager.Instance.GetTeamChemistry(game.home_team_id);
+        int awayChem = DatabaseManager.Instance.GetTeamChemistry(game.away_team_id);
+        bool isMyHomeGame = game.home_team_id == _myTeam.id;
+
+        var homeStarters = new HashSet<int>(homePlayers.Take(5).Select(p => p.id));
+        var awayStarters = new HashSet<int>(awayPlayers.Take(5).Select(p => p.id));
+        GameResultCache.GameStarters[game.id] = new HashSet<int>(homeStarters.Concat(awayStarters));
+
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem, isMyHomeGame);
+        DatabaseManager.Instance.UpdateGame(game);
+        GameResultCache.SimulatedGameIds.Add(game.id);
+
+        if (game.game_type == "allstar")
+        {
+            var allStats = result.home_stats.Concat(result.away_stats).ToList();
+            var mvpStats = allStats.OrderByDescending(s => s.rating).First();
+            var record = new AllStarRecord
+            {
+                manager_id = _manager.id,
+                season = $"{_season.year_end}",
+                east_score = game.home_score,
+                west_score = game.away_score,
+                mvp = mvpStats.name,
+                mvp_player_id = mvpStats.player_id
+            };
+            DatabaseManager.Instance.SaveAllStarRecord(record);
+        }
+
+        if (game.game_type != "allstar")
+            ProcessGameFinances(game, result);
+
+        ProcessGameInjuries(result, game.game_date);
+
+        bool myTeamInThisGame = game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id;
+        if (myTeamInThisGame)
+        {
+            CreateGameResultMessage(game, result);
+            UpdateFanConfidence(game, result);
+            CheckBudgetAfterGame();
+        }
+
+        // Recalculate morale for all players in this game
+        bool homeWon = game.home_score > game.away_score;
+        UpdatePlayersMoraleAfterGame(result.home_stats, game.home_team_id, homeWon);
+        UpdatePlayersMoraleAfterGame(result.away_stats, game.away_team_id, !homeWon);
+
+        // Evolve relationships for teams in this game
+        DatabaseManager.Instance.UpdateRelationshipsAfterGame(
+            game.home_team_id, game.id, homeWon,
+            result.home_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
+        DatabaseManager.Instance.UpdateRelationshipsAfterGame(
+            game.away_team_id, game.id, !homeWon,
+            result.away_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
+    }
+
+    void HandleDayError(string step, string modalTitle, string modalBody, System.Exception ex, bool fastSim)
+    {
+        Debug.LogError($"[GameDay] {step}, revertido: {ex.Message}\n{ex.StackTrace}");
+        if (fastSim)
+        {
+            _fastSimAborted = true;
+            _fastSimAbortEmptySlots.Clear();
+            _fastSimAbortInjured.Clear();
+        }
+        else
+        {
+            HideLoading();
+            ShowOfferResultModal(modalTitle, modalBody + "\n\n" + ex.Message, -1);
+        }
+    }
+
+    // ── SIMULACIÓN RÁPIDA ─────────────────────────────────
+
+    System.Collections.IEnumerator FastSimRoutine(System.DateTime target)
+    {
+        if (_season == null)
+        {
+            HideLoading();
+            yield break;
+        }
+
+        _fastSimAborted = false;
+        _fastSimSkipPreBatch = false;
+        _fastSimAutoFixAttempts = 0;
+        _fastSimAbortEmptySlots = new List<int>();
+        _fastSimAbortInjured = new List<(LineupData, PlayerData)>();
+
+        ShowLoading();
+
+        // Durante la simulación el botón de acción permite detenerla.
+        _fastSimRunning = true;
+        _fastSimStopRequested = false;
+        SetActionBtn("DETENER SIMULACIÓN", "");
+        _btnAction.SetEnabled(true);
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(_btnAction);
+        SetSidebarNavigationEnabled(false);
+
+        while (_season.phase != "finished")
+        {
+            if (_fastSimStopRequested) break;
+
+            string curDate = _season.current_date;
+            if (string.IsNullOrEmpty(curDate)
+                || !System.DateTime.TryParse(curDate, out System.DateTime cur)
+                || cur > target)
+                break;
+
+            if (FindNextGameDay() == 0)
+                break;
+
+            yield return ProcessGameDayRoutine(fastSim: true);
+
+            if (_fastSimAborted)
+            {
+                bool autoFixed = false;
+                if (_fastSimAbortEmptySlots.Count > 0)
+                {
+                    _emptyLineupModalResolved = false;
+                    _emptyLineupGoToQuinteto = false;
+                    ShowEmptyLineupModal(_fastSimAbortEmptySlots);
+                    yield return new WaitUntil(() => _emptyLineupModalResolved);
+                    if (_emptyLineupGoToQuinteto)
+                    {
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                        yield break;
+                    }
+                    autoFixed = true;
+                }
+                else if (_fastSimAbortInjured.Count > 0)
+                {
+                    _injuredModalResolved = false;
+                    _injuredModalGoToQuinteto = false;
+                    ShowInjuredLineupModal(_fastSimAbortInjured);
+                    yield return new WaitUntil(() => _injuredModalResolved);
+                    if (_injuredModalGoToQuinteto)
+                    {
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                        yield break;
+                    }
+                    autoFixed = true;
+                }
+
+                _fastSimAbortEmptySlots.Clear();
+                _fastSimAbortInjured.Clear();
+
+                if (autoFixed)
+                {
+                    if (++_fastSimAutoFixAttempts > 3)
+                    {
+                        Debug.LogWarning("[Dashboard] No se pudo completar la alineación en varios intentos. Se detiene la simulación.");
+                        break;
+                    }
+                    _fastSimAborted = false;
+                    _fastSimSkipPreBatch = true;
+                    continue;
+                }
+                break;
+            }
+            _fastSimAutoFixAttempts = 0;
+
+            // Refrescar cabecera (fecha) y paneles del Dashboard tras cada día
+            _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+            Refresh();
+
+            // Renderizar un frame por día para que el spinner de la cabecera
+            // gire visiblemente durante la simulación rápida.
+            yield return null;
+        }
+
+        _fastSimRunning = false;
+        SetSidebarNavigationEnabled(true);
+        _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        Refresh();
+        GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
+        HideLoading();
+
+        if (!_fastSimAborted && !_fastSimStopRequested)
+        {
+            ShowFastSimSummary();
+        }
+    }
+
+    void ShowFastSimSummary()
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fastsim-summary-box");
+        _firedOverlay.Add(box);
+
+        var title = new Label("SIMULACIÓN COMPLETADA");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fastsim-summary-title");
+        box.Add(title);
+
+        var btn = new Button();
+        btn.text = "CERRAR";
+        btn.AddToClassList("injured-modal-btn");
+        btn.AddToClassList("fastsim-summary-btn");
+        btn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+        btnGroup.Add(btn);
+        box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(btn);
     }
 
     void ShowLoading()

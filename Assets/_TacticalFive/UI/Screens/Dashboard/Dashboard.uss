@@ -1428,3 +1428,17 @@
     color: rgb(46, 204, 113);
     margin-top: 2px;
 }
+
+/* ── Resumen de simulación rápida ── */
+.fastsim-summary-box {
+    max-height: 600px;
+    border-top-color: rgb(46, 204, 113);
+}
+
+.fastsim-summary-title {
+    color: rgb(46, 204, 113);
+}
+
+.fastsim-summary-btn {
+    border-radius: 0;
+}
