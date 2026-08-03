@@ -12,7 +12,7 @@
 
 - You are the **manager** (`ManagerData`) of one of **30 NBA-like franchises** (`TeamData`) named after real NBA teams (division/conference/arena/capacity/owner/logo/jerseys are seeded real data).
 - A season runs roughly from **October 22 to mid-April** plus Play-In/Playoffs, modeled as a sequence of **game days** (one `GameData` row per match, up to 15 matches/day).
-- You do **not** control a player live: matches are **simulated possession-by-possession** (`GameSimulator`) with your starting lineup (`LineupData`), substitutions, chemistry, morale, fatigue and injuries.
+- You do **not** control a player live: matches are **simulated possession-by-possession** (`GameSimulator`) with your starting lineup (`LineupData`), substitutions, chemistry, morale, fatigue and injuries. The match can be shown live in a **play-by-play overlay** (marcador, reloj, barra de progreso y boxscore en vivo) or simulated directly (`Directa`), configurable via "Vista de Partido" en los ajustes.
 - The strategic layer includes: roster building (trades, free agents, renewals), finances (budget, ticket price, subscriptions, sponsors, TV deals, loans, arena renovations, luxury tax), training, staff (employees/scouts/psychologist), morale/relationships, and a full league simulation (draft lottery, playoffs, awards, historical records).
 
 ## 2. Game modes
@@ -104,7 +104,7 @@ Assets/UI Toolkit/       Unity default runtime theme
 
 - Very mature feature set (30+ screens, full season cycle, records/awards, finances, personnel, morale, injuries, draft, playoffs).
 - Branding/labels: product "TacticalFive", company "BuitragoStudio", version `v0.9.0 Beta`.
-- ~503 commits; last commit `50b1a86` (2026-07-29).
+- ~500 commits; last commits on `main`: play-by-play en vivo (`40d1221`, merge de `crear-mejoras2`).
 - `PLAN.md` (a plan for fixing free-agent offers/trades) is **partially implemented**: draft picks model, hard cap flag, luxury tax and buyout record types already exist; validation happens at maturation time (not at send) and sign-and-trade/buyout UI are not observed. Details in `MEMORY.md` and `TODO_TECHNICAL_DEBT.md`.
 - Known structural debt: duplicate `CursorManager`, orphaned `SettingsController`, unused `SQLiteAsync.cs`, stub `GetTopPlayersByStat`. See `TODO_TECHNICAL_DEBT.md`.
 

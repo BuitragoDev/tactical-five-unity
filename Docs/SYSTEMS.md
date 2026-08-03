@@ -21,13 +21,14 @@
 ## S3. Match simulation engine
 
 - **Responsibility:** possession-by-possession simulation producing per-player stats, injuries, fatigue, record checks.
-- **Files:** `GameSimulator.cs` (732 ln). DTOs: `PlayerStatSnapshot`, `TeamStats`, `GameResult` (nested).
+- **Files:** `GameSimulator.cs` (~930 ln). DTOs: `PlayerStatSnapshot`, `TeamStats`, `GameResult`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome` (nested).
 - **Entry point:** `SimulateGame(GameData, homePlayers, awayPlayers, homeChemistry, awayChemistry, isHome)`.
+- **Play-by-play capture:** sin alterar el resultado, el simulador registra la crónica (`PlayByPlayEvent`: quarter, texto en español, marcador acumulado, `timeElapsed`, deltas `StatDelta` por jugador) vía `CaptureBox`/`DiffBox` + minutos por jugador en pista; se consume en el overlay de `MatchDayController` cuando `GetSimMode()==1`. Ver `GAMEPLAY.md` §2.
 - **Pipeline:** filter injured → team ratings (mean `overall + (morale-50)*0.1`, home chemistry bonus ×0.15, away ×0.10, home court +1.5) → `pace = Clamp(101 + (hR+aR-140)*0.06 + rand(-2,2), 95, 107)` → 4 quarters (`SimQuarter`) + up to 5 OTs (`SimOvertime`, 24 possessions) → elite floors (passing≥95 min assists, rebounding≥95 min boards, steals≥90/blocks≥95) if `minutes≥20` → persist stats (`DeletePlayerGameStatsForGame` + `SavePlayerGameStats`) → `CheckAndUpdateRecords` (except allstar) → fatigue `fisico -= minutes*0.25` (×1.5 on real back-to-back) → `CheckInjuries` (base 0.008, up to ×5.5 if `fisico<30`).
 - **Simulation internals:** `RunPossession` (turnover prob `0.11 + (defR-offR)*0.0003`; weighted shooter `(overall/100)^2.2 * FisicoPenalty`; shot-type split by position with `three_point` adjustment; defense = best `defense` on floor, factor `(def-70)*0.005`; FG% clamped (3pt 0.28–0.51, 2pt 0.40–0.67); and-one 6%; fouls on miss 18%/14% (3pt/2pt); rebounds `DoReb`; turnovers `DoTO`; fouls `DoFoul` prefers C/PF). Rotations via `SubSchedule(q)` (75% skill / 25% random).
 - **Data used:** `GameData`, `PlayerData`, `PlayerGameStats`, `INJURY_TYPES` (27 weighted types, from "Sobrecarga muscular" w60/1–3d to "Rotura ligamento cruzado anterior" w1/180–300d).
 - **Dependencies:** `DatabaseManager.Instance`, records system.
-- **Risks:** non-deterministic (no seed); uses `UnityEngine.Random`; single-threaded (blocks main thread for a few ms per game — acceptable for 15 games/day).
+- **Risks:** uses `UnityEngine.Random`; single-threaded (blocks main thread for a few ms per game — acceptable for 15 games/day).
 
 ## S4. Schedule generator
 
@@ -66,6 +67,7 @@
 - **Attendance formula** (`DashboardController.CalculateAttendance`): `capacity * (base factors) * randomFactor(0.92–1.08) * priceFactor * objectiveFactor`, clamped to capacity. Home game base: `0.30 + fanConfidence/100*0.35 + winPct*0.15 + rivalRep/5*0.08`. Away: `0.55 + winPct*0.30 + myRep/5*0.06`. Others: `0.55 + winPct*0.40`. `priceFactor = Clamp(Exp(-(ticketPrice-30)/150), 0.20, 1.0)`. `objectiveFactor` = `Clamp(1 - posGap*0.06, 0.30, 1)` when not meeting the team objective.
 - **Ticket revenue** = `attendance * ticket_price * arenaMultiplier` (arenaMultiplier by `PABELLON` staff reputation: 5→1.20, 4→1.15, 3→1.10, 2→1.06, 1→1.03). Persisted in `game_attendance`.
 - **Monthly:** `ProcessMonthlyPayroll` (salaries + employees), `ProcessSubscriptionRevenue` (subscriptions).
+- **Cap sheet panel** (`FinancesController.BuildCapSheet`, tab «CAP SHEET»): read-only projection. Summary = payroll/cap/apron/space (from `LeagueSettings`, fallback `TradeHelper`); per-year projection (current + 4) applies `+5%` per season to cap (`ProjectedCap`) and computes committed payroll as `Σ salary` for players with `contract_years > yr` (flat salary); expiring players (`contract_years == 1` → FA); exceptions NT-MLE/T-MLE/minimum + luxury/aprons shown.
 - **Sponsors/TV:** `SignSponsor`/`FireSponsor`, `SignTVChannel`/`FireTVChannel` (max 3 TV), with `initial_income` and `home_game_income` per game; contracts in years.
 - **Loans:** `LoanData` (slot, amount, total_debt, remaining_months, interest_rate, monthly_payment).
 - **Arena:** renovations `general_seats (+3000, $10M, 3wk)`, `tribune (+2000, $20M, 5wk)`, `vip_seats (+1000, $35M, 8wk)`; cost discounted by `PABELLON` reputation (5→0.80 … 1→0.97); max capacity 50,000; tickets/subscriptions in `ArenaController`.

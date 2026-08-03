@@ -18,6 +18,7 @@
 | `LastGameDay` | `DashboardController` (`ProcessGameDayRoutine`, ~line 796) | `GameResultsController` (to know which day to show) | GameResults screen shows that day |
 | `SimulatedGameIds` | `DashboardController` | `GameResultsController` | Which games have live results |
 | `GameStarters` (dict game→HashSet<int>) | `DashboardController` (starters = first 5 `GetActivePlayers`) | `GameResultsController`, `MatchDayController` | Highlight starters, box scores |
+| `PlayByPlayLogs` (dict game→`List<PlayByPlayEvent>`) | `DashboardController.ProcessSingleGame` (solo modo Play-by-play) | `MatchDayController` (overlay play-by-play) | Crónica del partido: marcador, reloj y deltas por evento |
 | `PendingBudgetWarning` | `DashboardController.CheckBudgetAfterGame` (line 1079) | `DashboardController.CheckBudgetWarning` (line 1090) | Shows fired/warning modal after day |
 
 `GameResultCache.Clear()` is called at the start of each simulated game day.
@@ -60,6 +61,8 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | `TF_Audio_Music` | `AudioManager.SetMusicVolume` | `AudioManager.LoadSettings` |
 | `TF_Audio_SFX` | `AudioManager.SetSFXVolume` | `AudioManager.LoadSettings` |
 | `TF_Graphics_Quality` | `AudioManager.SetQualityLevel` | `AudioManager.LoadSettings` |
+| `TF_SimMode` | `UIScreenController.SelectConfigSimMode` (Vista de Partido) | `UIScreenController.GetSimMode`, `MatchDayController` | 0 = Directa, 1 = Play-by-play |
+| `TF_PbpSpeed` | `MatchDayController.SelectPbpSpeed` (x1/x3/x5/x10) | `MatchDayController` | Velocidad del overlay play-by-play |
 | `OverallMigration_{slot}` | `DatabaseManager.RunMigrations` | one-time flag |
 | `DraftPicksReset_{slot}` | `DatabaseManager.RunMigrations` | one-time flag |
 

@@ -24,11 +24,9 @@ Fuentes consultadas: `Docs/PROJECT_OVERVIEW.md`, `Docs/GAMEPLAY.md`,
 
 ## Frente 1 — Engagement / presentación (mayor "potencia" percibida)
 
-El gap más evidente: **el partido es invisible**. Se simula y solo se ve el resultado.
+El gap más evidente era: **el partido es invisible**. Se simula y solo se ve el resultado.
 
-- **Play-by-play en vivo / crónica en texto**: vista de partido con posesiones
-  comentadas en texto durante la simulación (`GameSimulator` ya produce `GameResult`
-  posesión a posesión; falta un consumidor en `MatchDay`/`GameResults`).
+- ✅ **Play-by-play en vivo / crónica en texto** — **hecho** (`crear-mejoras2`, commit `9c69e09`, mergeado a `main`): toggle "Vista de Partido" (Directa/Play-by-play), overlay inmersivo en MatchDay con marcador acumulado, reloj, barra de progreso, boxscore en vivo ordenado por VAL, totales recalculados, velocidades x1/x3/x5/x10 y botón SALTAR/IR AL RESUMEN. Ver `GAMEPLAY.md` §2.
 - **Mejores vitrinas**: box score detallado por cuarto, "jugador del partido",
   gráfica de rachas de la clasificación.
 - **Logros/trofeos del GM** + palmarés visual enriquecido.
@@ -42,7 +40,9 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 - **Sign-and-trade real**: `trade_type="sign_and_trade"` existe pero sin flujo UI
   (`SYSTEMS.md §S7`).
 - **Cap sheet / planificador de masa salarial a futuro** (años venideros, cap
-  proyectado +5%/año).
+  proyectado +5%/año). **Nota**: la parte **visual/informativa** ya está hecha
+  (tab «CAP SHEET» en Finances); quedan la **simulación "¿y si firmo a X?"** y las
+  **opciones de contrato** como pendientes.
 - **Opciones de contrato** (team/player option) y años garantizados/no garantizados.
 - **Picks protegidos** y más flexibilidad de transferencia de picks.
 - **Trade deadline con evento real** (el recordatorio existe; falta el cierre con efectos).
@@ -53,8 +53,6 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 ## Frente 3 — Simulación & AI (realismo)
 
-- **Determinismo** (`TODO_TECHNICAL_DEBT.md` B10): seed por partido/temporada →
-  resultados reproducibles; ya hay `StableHash` FNV-1a, falta inyectarlo en `GameSimulator`.
 - **AI de GMs más inteligente**: reconstrucción por edades, priorizar assets, no
   firmar solo lo que falta al roster.
 - **Analytics avanzados**: PER/WS/eFG/TS%/espaciado por encima del box score actual.
@@ -84,9 +82,8 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 | Prioridad | Iniciativa | Frente |
 |---|---|---|
-| **Alta** | Play-by-play en vivo del partido | 1 |
-| **Alta** | Determinismo de simulación (B10) | 3 |
-| **Media-Alta** | Cap sheet + opciones de contrato | 2 |
+| **Hecho** | Play-by-play en vivo del partido (commit `9c69e09`) | 1 |
+| **Media-Alta** | Cap sheet (info, hecho) + opciones de contrato + sim "¿y si firmo?" | 2 |
 | **Media** | ProManager diferenciado (B20) | 4 |
 | **Media** | AI de GM más lista + analytics | 3 |
 | **Media** | Async DB (B8) | 5 |
@@ -98,3 +95,8 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 Añadir aquí el estado de cada propuesta cuando se decida abordarla
 (`pendiente` / `en curso` / `hecho` con referencia de commit o archivo).
+
+| Propuesta | Estado |
+|---|---|
+| Play-by-play en vivo del partido | **Hecho** — commit `9c69e09` (situación de `crear-mejoras2`, mergeade a `main`) |
+| Cap sheet (Finances → «CAP SHEET») | **Hecho** — `FinancesController.BuildCapSheet` + pestaña `PanelCap` (info read-only) |

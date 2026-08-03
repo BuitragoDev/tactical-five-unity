@@ -100,14 +100,14 @@ Notable specifics:
 | Market | `Screens/Market` | `MarketController` | Trades + FA market |
 | Cartera | `Screens/Cartera` | `CarteraController` | Player wallet/contracts |
 | Historial | `Screens/Historial` | `HistorialController` | Trade history |
-| Finances | `Screens/Finances` | `FinancesController` | P&L (income/expenses incl. tax & buyout) |
+| Finances | `Screens/Finances` | `FinancesController` | P&L (income/expenses incl. tax & buyout) + Cap sheet (payroll committed by year, cap/space projections to 5 yrs, expiring players, exceptions) |
 | Loans | `Screens/Loans` | `LoansController` | Loans |
 | Sponsors | `Screens/Sponsors` | `SponsorsController` | Sponsor deals |
 | TV | `Screens/TV` | `TVController` | TV deals |
 | Arena | `Screens/Arena` | `ArenaController` | Arena management (tickets/subscriptions/renovations) |
 | Manager | `Screens/Manager` | `ManagerController` | Manager profile, morale/fans circles, psychologist |
 | Messages | `Screens/Messages` | `MessagesController` | Inbox |
-| MatchDay | `Screens/MatchDay` | `MatchDayController` | Pre-match view |
+| MatchDay | `Screens/MatchDay` | `MatchDayController` | Pre-match view + overlay play-by-play en vivo (marcador, reloj, boxscore) |
 | GameResults | `Screens/GameResults` | `GameResultsController` | Post-match box score |
 | LoadGame | `Screens/LoadGame` | `LoadGameController` | Save slots |
 | Editor | `Screens/Editor` | `EditorController` | Editor (template DB) |

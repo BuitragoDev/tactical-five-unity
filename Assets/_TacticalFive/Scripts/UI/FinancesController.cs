@@ -17,12 +17,26 @@ using System.Linq;
     private Button _tabIncome;
     private Button _tabExpenses;
     private Button _tabChart;
+    private Button _tabCap;
 
     // Panels
     private VisualElement _panelTickets;
     private VisualElement _panelIncome;
     private VisualElement _panelExpenses;
     private VisualElement _panelChart;
+    private VisualElement _panelCap;
+
+    // Cap sheet
+    private Label _capSheetSalary;
+    private Label _capSheetCap;
+    private Label _capSheetSpace;
+    private Label _capSheetApron;
+    private VisualElement _capProjectionTable;
+    private Label _capExpiringLabel;
+    private Label _capExceptionNtMle;
+    private Label _capExceptionTMle;
+    private Label _capExceptionMin;
+    private Label _capExceptionApron;
 
     // Ticket config
     private VisualElement _ticketPriceGrid;
@@ -54,11 +68,24 @@ using System.Linq;
         _tabIncome = _root.Q<Button>("TabIncome");
         _tabExpenses = _root.Q<Button>("TabExpenses");
         _tabChart = _root.Q<Button>("TabChart");
+        _tabCap = _root.Q<Button>("TabCap");
 
         _panelTickets = _root.Q<VisualElement>("PanelTickets");
         _panelIncome = _root.Q<VisualElement>("PanelIncome");
         _panelExpenses = _root.Q<VisualElement>("PanelExpenses");
         _panelChart = _root.Q<VisualElement>("PanelChart");
+        _panelCap = _root.Q<VisualElement>("PanelCap");
+
+        _capSheetSalary = _root.Q<Label>("CapSheetSalaryLabel");
+        _capSheetCap = _root.Q<Label>("CapSheetCapLabel");
+        _capSheetSpace = _root.Q<Label>("CapSheetSpaceLabel");
+        _capSheetApron = _root.Q<Label>("CapSheetApronLabel");
+        _capProjectionTable = _root.Q<VisualElement>("CapProjectionTable");
+        _capExpiringLabel = _root.Q<Label>("CapExpiringLabel");
+        _capExceptionNtMle = _root.Q<Label>("CapExceptionNtMle");
+        _capExceptionTMle = _root.Q<Label>("CapExceptionTMle");
+        _capExceptionMin = _root.Q<Label>("CapExceptionMin");
+        _capExceptionApron = _root.Q<Label>("CapExceptionApron");
 
         _ticketPriceGrid = _root.Q<VisualElement>("TicketPriceGrid");
         _subscriptionPriceGrid = _root.Q<VisualElement>("SubscriptionPriceGrid");
@@ -104,6 +131,7 @@ using System.Linq;
         _tabIncome.clicked += () => { PlayClick(); SwitchTab("income"); };
         _tabExpenses.clicked += () => { PlayClick(); SwitchTab("expenses"); };
         _tabChart.clicked += () => { PlayClick(); SwitchTab("chart"); };
+        _tabCap.clicked += () => { PlayClick(); SwitchTab("cap"); };
     }
     protected override void Refresh()
     {
@@ -115,6 +143,7 @@ using System.Linq;
         BuildIncomePanel();
         BuildExpensesPanel();
         BuildChartPanel();
+        BuildCapSheet();
         _root.Q<Button>("SubmenuDecisiones")?.AddToClassList("nav-submenu-item--active");
     }
 
@@ -158,11 +187,13 @@ using System.Linq;
         _tabIncome.RemoveFromClassList("finances-tab--active");
         _tabExpenses.RemoveFromClassList("finances-tab--active");
         _tabChart.RemoveFromClassList("finances-tab--active");
+        _tabCap.RemoveFromClassList("finances-tab--active");
 
         _panelTickets.style.display = DisplayStyle.None;
         _panelIncome.style.display = DisplayStyle.None;
         _panelExpenses.style.display = DisplayStyle.None;
         _panelChart.style.display = DisplayStyle.None;
+        _panelCap.style.display = DisplayStyle.None;
 
         switch (tab)
         {
@@ -181,6 +212,10 @@ using System.Linq;
             case "chart":
                 _tabChart.AddToClassList("finances-tab--active");
                 _panelChart.style.display = DisplayStyle.Flex;
+                break;
+            case "cap":
+                _tabCap.AddToClassList("finances-tab--active");
+                _panelCap.style.display = DisplayStyle.Flex;
                 break;
         }
     }
@@ -442,6 +477,139 @@ using System.Linq;
             monthLbl.AddToClassList("chart-month-label");
             _chartLabels.Add(monthLbl);
         }
+    }
+
+    /* ═══════════════════════════════════════════
+       CAP SHEET PANEL
+       ═══════════════════════════════════════════ */
+
+    const int CapProjectionYears = 5;
+
+    void BuildCapSheet()
+    {
+        _capProjectionTable.Clear();
+
+        if (_myTeam == null) return;
+
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+
+        long cap = settings != null ? settings.salary_cap : TradeHelper.SALARY_CAP;
+        long luxury = settings != null ? settings.luxury_tax : TradeHelper.LUXURY_TAX;
+        long apron = settings != null ? settings.apron : TradeHelper.FIRST_APRON;
+
+        long currentPayroll = players.Sum(p => p.salary);
+        long space = cap - currentPayroll;
+
+        // Summary boxes
+        _capSheetSalary.text = FormatMoney(currentPayroll);
+        _capSheetCap.text = FormatMoney(cap);
+        _capSheetSpace.text = FormatMoney(space);
+        _capSheetSpace.RemoveFromClassList("cap-summary-value--income");
+        _capSheetSpace.RemoveFromClassList("cap-summary-value--danger");
+        _capSheetSpace.AddToClassList(space >= 0 ? "cap-summary-value--income" : "cap-summary-value--danger");
+
+        _capSheetApron.text = FormatMoney(apron);
+        _capSheetApron.RemoveFromClassList("cap-summary-value--income");
+        _capSheetApron.RemoveFromClassList("cap-summary-value--danger");
+        _capSheetApron.AddToClassList(currentPayroll > apron ? "cap-summary-value--danger" : "cap-summary-value--income");
+
+        // Projection header
+        var headerRow = new VisualElement();
+        headerRow.AddToClassList("cap-proj-header-row");
+
+        var headerLabel = new Label("AÑO");
+        headerLabel.AddToClassList("cap-proj-header-label");
+
+        var headerCap = new Label("CAP");
+        headerCap.AddToClassList("cap-proj-header-cell");
+
+        var headerSalary = new Label("COMPROMETIDO");
+        headerSalary.AddToClassList("cap-proj-header-cell");
+
+        var headerSpace = new Label("ESPACIO");
+        headerSpace.AddToClassList("cap-proj-header-cell");
+
+        headerRow.Add(headerLabel);
+        headerRow.Add(headerCap);
+        headerRow.Add(headerSalary);
+        headerRow.Add(headerSpace);
+        _capProjectionTable.Add(headerRow);
+
+        // Projection rows
+        for (int yr = 0; yr < CapProjectionYears; yr++)
+        {
+            long yearCap = ProjectedCap(cap, yr);
+            long yearPayroll = players.Sum(p => p.contract_years > yr ? p.salary : 0);
+            long yearSpace = yearCap - yearPayroll;
+
+            int yearLabel = (_season != null ? _season.year_start : System.DateTime.Now.Year) + yr;
+
+            var row = new VisualElement();
+            row.AddToClassList("cap-proj-row");
+
+            var lbl = new Label(yr == 0 ? $"Actual ({yearLabel})" : yearLabel.ToString());
+            lbl.AddToClassList("cap-proj-label");
+
+            var capCell = new Label(FormatMoney(yearCap));
+            capCell.AddToClassList("cap-proj-cell");
+            capCell.AddToClassList("cap-proj-cell--cap");
+
+            var salaryCell = new Label(FormatMoney(yearPayroll));
+            salaryCell.AddToClassList("cap-proj-cell");
+
+            var spaceCell = new Label(FormatMoney(yearSpace));
+            spaceCell.AddToClassList("cap-proj-cell");
+            spaceCell.AddToClassList(yearSpace < 0
+                ? "cap-proj-cell--negative"
+                : yearSpace < yearCap * 0.1
+                    ? "cap-proj-cell--warn"
+                    : "cap-proj-cell--positive");
+
+            row.Add(lbl);
+            row.Add(capCell);
+            row.Add(salaryCell);
+            row.Add(spaceCell);
+            _capProjectionTable.Add(row);
+        }
+
+        // Expiring players
+        var expiring = players
+            .Where(p => p.contract_years == 1)
+            .OrderByDescending(p => p.salary)
+            .ToList();
+        if (expiring.Count == 0)
+        {
+            _capExpiringLabel.text = "Ningún jugador expira este año";
+        }
+        else
+        {
+            _capExpiringLabel.text = string.Join(", ", expiring.Select(p =>
+                $"{p.first_name} {p.last_name} ({FormatMoney(p.salary)})"));
+        }
+
+        // Exceptions
+        long ntMle = settings != null ? settings.mid_level : TradeHelper.NT_MLE;
+        long tMle = settings != null ? settings.taxpayer_mid_level : TradeHelper.T_MLE;
+        long minSal = settings != null ? settings.minimum_salary : TradeHelper.MIN_SALARY;
+        _capExceptionNtMle.text = FormatMoney(ntMle);
+        _capExceptionTMle.text = FormatMoney(tMle);
+        _capExceptionMin.text = FormatMoney(minSal);
+        _capExceptionApron.text =
+            $"{FormatMoney(luxury)} / {FormatMoney(settings != null ? settings.repeater_apron : TradeHelper.SECOND_APRON)}";
+    }
+
+    long ProjectedCap(long baseCap, int yearsAhead)
+    {
+        return (long)(baseCap * System.Math.Pow(1.05, yearsAhead));
+    }
+
+    static string PositionName(string primary, string secondary)
+    {
+        var main = PositionCodes.GetName(primary);
+        if (string.IsNullOrEmpty(secondary)) return main;
+        var sec = PositionCodes.GetName(secondary);
+        return $"{main}/{sec}";
     }
 
     string FormatMoney(long amount)

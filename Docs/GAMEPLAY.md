@@ -51,6 +51,13 @@ If `minutes ≥ 20`: `passing ≥ 95` → minimum assists; `rebounding ≥ 95` �
 - Injuries: base prob 0.008/game, multiplied up to ×5.5 when `fisico < 30`; 27 weighted types (1–300 days).
 - `rating` = player game score; `double_double`/`triple_double` flags.
 
+### Play-by-play en vivo (Vista de Partido)
+- Toggle **Vista de Partido** en los modales de Configuración (Dashboard/MainMenu): `Directa` (resultado instantáneo) o `Play-by-play`. Persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()` / `SimModePrefKey`, 0=Directa, 1=Play). Solo aplica al flujo día a día (no fast sim).
+- `GameSimulator` captura la crónica sin alterar el resultado: `PlayByPlayEvent` (quarter, text en español, `homeScore`/`awayScore` acumulados, `timeElapsed`, deltas `StatDelta` por jugador). `RunPossession`/`MissHandler` devuelven `PossessionOutcome` con la descripción; `DoAst/DoReb/AwardReb/DoTO/DoFoul` devuelven el nombre del jugador. `CaptureBox`/`DiffBox` generan los deltas tras cada posesión + minutos por jugador en pista; hay meta-eventos de inicio de cuarto/prórroga y fin de partido.
+- `DashboardController.ProcessSingleGame` rellena `GameResultCache.PlayByPlayLogs[game.id]` cuando el modo es Play.
+- Overlay inmersivo en `MatchDay` (`PlayByPlayOverlay`): nombres + logos de equipos, marcador acumulado, reloj `mm:ss`, barra de progreso 0–100% por tiempo real del partido, y **boxscore en vivo** por equipo (12 columnas) que se reordena por **VAL descendente** en cada evento y cuya fila de TOTALES se **recalcula desde los jugadores** (`RecalcTotals`) en cada actualización.
+- Velocidades **x1/x3/x5/x10** (persistidas en `TF_PbpSpeed`; base 2 s/evento) y botón **SALTAR**: durante el partido avanza al final (reconstruyendo el boxscore completo); al acabar cambia a **IR AL RESUMEN** y cierra el overlay para mostrar el MatchDay con el resumen final (marcador, boxscore y asistencia). — `MatchDayController.cs`
+
 ### Fallback
 If a team has <2 available players, result is random-ish (105–125 vs 100–120) with `DistributeQuarters`.
 
@@ -83,6 +90,13 @@ Acceptance probability via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll 
 
 ### Trades (`TradeHelper.ValidateTrade` / `EvaluateTrade`)
 Both sides validated against apron rules (2nd apron: no aggregation, incoming ≤ outgoing; 1st apron: ≤110% of outgoing; else standard matching `2×+250K` / `+7.5M` / `125%+250K`). AI accept via `EvaluateTrade` score vs threshold (see `SYSTEMS.md §S7`). Picks can be traded (`draft_picks.current_team_id`). User-initiated trades live in `MarketController`; AI-initiated offers appear as modals via `ShowNextPendingTradeOffer`.
+
+### Cap sheet (Finances → «CAP SHEET») — `FinancesController.BuildCapSheet`
+- **Summary boxes**: current payroll (sum of `players.salary`), cap and apron from `LeagueSettings` (fallback `TradeHelper`), space = cap − payroll.
+- **Projection to 5 years (including current) at +5%/season** (`ProjectedCap`, mirroring `StartNewSeason`): per year shows cap, committed payroll and space (color-coded green/amber/red).
+- **Yearly committed payroll**: a player contributes `salary` for the current year and each year while `contract_years > yr` (years remaining; flat salary model), dropping the further out the contract expires.
+- **Expiring players**: `contract_years == 1` → become FA at season end (`team_id=0`).
+- **Available exceptions**: NT-MLE / T-MLE / minimum plus luxury tax and 2nd apron. Read-only for now.
 
 ## 5. Economy
 
