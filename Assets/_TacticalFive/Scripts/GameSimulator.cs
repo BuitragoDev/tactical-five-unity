@@ -26,6 +26,29 @@ public static class GameSimulator
         public int assists, steals, blocks, turnovers, pf;
     }
 
+    public class PlayByPlayEvent
+    {
+        public int quarter;
+        public string text;
+        public int homeScore;
+        public int awayScore;
+        public float timeElapsed;
+        public List<StatDelta> deltas;
+    }
+
+    public class StatDelta
+    {
+        public int player_id;
+        public string stat;
+        public float amount;
+    }
+
+    public class PossessionOutcome
+    {
+        public int pts;
+        public string desc;
+    }
+
     public class GameResult
     {
         public GameData game;
@@ -36,6 +59,7 @@ public static class GameSimulator
         public TeamStats home_team_stats = new();
         public TeamStats away_team_stats = new();
         public List<(int player_id, string type, int days)> injuries = new();
+        public List<PlayByPlayEvent> playByPlay = new();
     }
 
     public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
@@ -82,11 +106,20 @@ public static class GameSimulator
         float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f), 95, 107);
 
         var quarters = new List<(int, int)>();
+        var playByPlay = new List<PlayByPlayEvent>();
         int homeTotal = 0, awayTotal = 0;
 
         for (int q = 0; q < 4; q++)
         {
-            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace);
+            playByPlay.Add(new PlayByPlayEvent
+            {
+                quarter = q + 1,
+                text = $"Comienza el cuarto {q + 1}",
+                homeScore = homeTotal,
+                awayScore = awayTotal,
+                timeElapsed = 0
+            });
+            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal);
             homeTotal += hPts; awayTotal += aPts;
             quarters.Add((hPts, aPts));
         }
@@ -95,10 +128,27 @@ public static class GameSimulator
         while (homeTotal == awayTotal && otCount < 5)
         {
             otCount++;
-            var (hOT, aOT) = SimOvertime(homeR, awayR, homePS, awayPS);
+            playByPlay.Add(new PlayByPlayEvent
+            {
+                quarter = 4 + otCount,
+                text = "¡A la prórroga!",
+                homeScore = homeTotal,
+                awayScore = awayTotal,
+                timeElapsed = 0
+            });
+            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal);
             homeTotal += hOT; awayTotal += aOT;
             quarters.Add((hOT, aOT));
         }
+
+        playByPlay.Add(new PlayByPlayEvent
+        {
+            quarter = 4 + otCount,
+            text = "¡Fin del partido!",
+            homeScore = homeTotal,
+            awayScore = awayTotal,
+            timeElapsed = 4 + otCount <= 4 ? 12 : 5
+        });
 
         game.home_score = homeTotal;
         game.away_score = awayTotal;
@@ -208,7 +258,8 @@ public static class GameSimulator
             away_stats = awayPS,
             home_team_stats = CalcTeamStats(homePS),
             away_team_stats = CalcTeamStats(awayPS),
-            injuries = homeInjuries.Concat(awayInjuries).ToList()
+            injuries = homeInjuries.Concat(awayInjuries).ToList(),
+            playByPlay = playByPlay
         };
         return result;
     }
@@ -263,7 +314,7 @@ public static class GameSimulator
         };
     }
 
-    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace)
+    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0)
     {
         int homePts = 0, awayPts = 0;
         int teamPoss = Mathf.Clamp(Mathf.RoundToInt(pace / 4 * UnityEngine.Random.Range(0.96f, 1.04f)), 22, 28);
@@ -290,9 +341,27 @@ public static class GameSimulator
             foreach (int i in awayOn) awayMins[i] += minsPerPoss;
 
             if (UnityEngine.Random.value < 0.5f)
-                homePts += RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR);
+            {
+                var before = CaptureBox(homePS, awayPS);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR);
+                homePts += outHome.pts;
+                var after = CaptureBox(homePS, awayPS);
+                var deltas = DiffBox(before, after);
+                foreach (int i in homeOn) deltas.Add(new StatDelta { player_id = homePS[i].player_id, stat = "min", amount = minsPerPoss });
+                foreach (int i in awayOn) deltas.Add(new StatDelta { player_id = awayPS[i].player_id, stat = "min", amount = minsPerPoss });
+                AddLog(log, qNum, outHome.desc, baseHome + homePts, baseAway + awayPts, elapsed, deltas);
+            }
             else
-                awayPts += RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR);
+            {
+                var before = CaptureBox(homePS, awayPS);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR);
+                awayPts += outAway.pts;
+                var after = CaptureBox(homePS, awayPS);
+                var deltas = DiffBox(before, after);
+                foreach (int i in homeOn) deltas.Add(new StatDelta { player_id = homePS[i].player_id, stat = "min", amount = minsPerPoss });
+                foreach (int i in awayOn) deltas.Add(new StatDelta { player_id = awayPS[i].player_id, stat = "min", amount = minsPerPoss });
+                AddLog(log, qNum, outAway.desc, baseHome + homePts, baseAway + awayPts, elapsed, deltas);
+            }
         }
 
         for (int i = 0; i < homePS.Count; i++) homePS[i].minutes += homeMins[i];
@@ -301,7 +370,7 @@ public static class GameSimulator
         return (homePts, awayPts);
     }
 
-    static (int, int) SimOvertime(int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS)
+    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0)
     {
         int homePts = 0, awayPts = 0;
         int totalPoss = 24;
@@ -326,9 +395,27 @@ public static class GameSimulator
             foreach (int i in awayOn) awayMins[i] += minsPerPoss;
 
             if (UnityEngine.Random.value < 0.5f)
-                homePts += RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR);
+            {
+                var before = CaptureBox(homePS, awayPS);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR);
+                homePts += outHome.pts;
+                var after = CaptureBox(homePS, awayPS);
+                var deltas = DiffBox(before, after);
+                foreach (int i in homeOn) deltas.Add(new StatDelta { player_id = homePS[i].player_id, stat = "min", amount = minsPerPoss });
+                foreach (int i in awayOn) deltas.Add(new StatDelta { player_id = awayPS[i].player_id, stat = "min", amount = minsPerPoss });
+                AddLog(log, qNum, outHome.desc, baseHome + homePts, baseAway + awayPts, elapsed, deltas);
+            }
             else
-                awayPts += RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR);
+            {
+                var before = CaptureBox(homePS, awayPS);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR);
+                awayPts += outAway.pts;
+                var after = CaptureBox(homePS, awayPS);
+                var deltas = DiffBox(before, after);
+                foreach (int i in homeOn) deltas.Add(new StatDelta { player_id = homePS[i].player_id, stat = "min", amount = minsPerPoss });
+                foreach (int i in awayOn) deltas.Add(new StatDelta { player_id = awayPS[i].player_id, stat = "min", amount = minsPerPoss });
+                AddLog(log, qNum, outAway.desc, baseHome + homePts, baseAway + awayPts, elapsed, deltas);
+            }
         }
 
         for (int i = 0; i < homePS.Count; i++) homePS[i].minutes += homeMins[i];
@@ -343,7 +430,79 @@ public static class GameSimulator
         return 0.75f + (fisico / 30f) * 0.25f;
     }
 
-    static int RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR)
+    static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore, float elapsed, List<StatDelta> deltas = null)
+    {
+        if (log == null || string.IsNullOrEmpty(desc)) return;
+        log.Add(new PlayByPlayEvent
+        {
+            quarter = quarter,
+            text = desc,
+            homeScore = homeScore,
+            awayScore = awayScore,
+            timeElapsed = elapsed,
+            deltas = deltas
+        });
+    }
+
+    struct BoxSnapshot
+    {
+        public int player_id;
+        public float minutes;
+        public int points, fgm, fga, fg3m, fg3a, ftm, fta, oreb, dreb, assists, steals, blocks, turnovers, pf;
+    }
+
+    static BoxSnapshot SnapPlayer(PlayerStatSnapshot p)
+    {
+        return new BoxSnapshot
+        {
+            player_id = p.player_id,
+            minutes = p.minutes,
+            points = p.points, fgm = p.fgm, fga = p.fga,
+            fg3m = p.fg3m, fg3a = p.fg3a, ftm = p.ftm, fta = p.fta,
+            oreb = p.oreb, dreb = p.dreb, assists = p.assists,
+            steals = p.steals, blocks = p.blocks, turnovers = p.turnovers, pf = p.pf
+        };
+    }
+
+    static List<BoxSnapshot> CaptureBox(List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS)
+    {
+        var snap = new List<BoxSnapshot>(homePS.Count + awayPS.Count);
+        for (int i = 0; i < homePS.Count; i++) snap.Add(SnapPlayer(homePS[i]));
+        for (int i = 0; i < awayPS.Count; i++) snap.Add(SnapPlayer(awayPS[i]));
+        return snap;
+    }
+
+    static List<StatDelta> DiffBox(List<BoxSnapshot> before, List<BoxSnapshot> after)
+    {
+        var deltas = new List<StatDelta>();
+        if (before == null || after == null || before.Count != after.Count) return deltas;
+        for (int i = 0; i < before.Count; i++)
+        {
+            var b = before[i]; var a = after[i];
+            AddD(deltas, a.player_id, "pts", a.points - b.points);
+            AddD(deltas, a.player_id, "fgm", a.fgm - b.fgm);
+            AddD(deltas, a.player_id, "fga", a.fga - b.fga);
+            AddD(deltas, a.player_id, "fg3m", a.fg3m - b.fg3m);
+            AddD(deltas, a.player_id, "fg3a", a.fg3a - b.fg3a);
+            AddD(deltas, a.player_id, "ftm", a.ftm - b.ftm);
+            AddD(deltas, a.player_id, "fta", a.fta - b.fta);
+            AddD(deltas, a.player_id, "oreb", a.oreb - b.oreb);
+            AddD(deltas, a.player_id, "dreb", a.dreb - b.dreb);
+            AddD(deltas, a.player_id, "ast", a.assists - b.assists);
+            AddD(deltas, a.player_id, "stl", a.steals - b.steals);
+            AddD(deltas, a.player_id, "blk", a.blocks - b.blocks);
+            AddD(deltas, a.player_id, "to", a.turnovers - b.turnovers);
+            AddD(deltas, a.player_id, "pf", a.pf - b.pf);
+        }
+        return deltas;
+    }
+
+    static void AddD(List<StatDelta> deltas, int player_id, string stat, float amount)
+    {
+        if (amount != 0) deltas.Add(new StatDelta { player_id = player_id, stat = stat, amount = amount });
+    }
+
+    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR)
     {
         var off = offIds.Select(i => offAll[i]).ToList();
         var def = defIds.Select(i => defAll[i]).ToList();
@@ -351,12 +510,17 @@ public static class GameSimulator
         float toPct = 0.11f + (defR - offR) * 0.0003f;
         if (UnityEngine.Random.value < toPct)
         {
-            DoTO(off, def);
-            return 0;
+            string toName = DoTO(off, def);
+            return new PossessionOutcome
+            {
+                pts = 0,
+                desc = $"{toName ?? "Pérdida de balón"} pierde el balón"
+            };
         }
 
         var shooter = PickShooter(off);
-        if (shooter == null) return 0;
+        if (shooter == null)
+            return new PossessionOutcome { pts = 0, desc = "Pérdida" };
 
         string shot = ShotType(shooter);
         var defender = def.OrderByDescending(p => p.defense).FirstOrDefault();
@@ -371,8 +535,14 @@ public static class GameSimulator
             if (UnityEngine.Random.value < pct)
             {
                 shooter.fg3m++; shooter.fgm++; shooter.points += 3;
-                DoAst(off, shooter);
-                return 3;
+                string astr = DoAst(off, shooter);
+                return new PossessionOutcome
+                {
+                    pts = 3,
+                    desc = astr != null
+                        ? $"{shooter.name} encesta un triple (asist. {astr})"
+                        : $"{shooter.name} encesta un triple"
+                };
             }
             return MissHandler(def, off, shooter, true);
         }
@@ -384,23 +554,38 @@ public static class GameSimulator
         if (UnityEngine.Random.value < pct2)
         {
             shooter.fgm++; shooter.points += 2;
-            DoAst(off, shooter);
+            string astr = DoAst(off, shooter);
             if (UnityEngine.Random.value < 0.06f)
             {
-                DoFoul(def);
+                string foulName = DoFoul(def);
                 shooter.fta++;
                 if (UnityEngine.Random.value < 0.75f)
                 {
                     shooter.ftm++; shooter.points++;
-                    return 3;
+                    return new PossessionOutcome
+                    {
+                        pts = 3,
+                        desc = $"{shooter.name} anota y añade el tiro libre (falta de {foulName ?? "defensa"})"
+                    };
                 }
+                return new PossessionOutcome
+                {
+                    pts = 2,
+                    desc = $"{shooter.name} anota de dos pero falla el tiro adicional"
+                };
             }
-            return 2;
+            return new PossessionOutcome
+            {
+                pts = 2,
+                desc = astr != null
+                    ? $"{shooter.name} anota de dos (asist. {astr})"
+                    : $"{shooter.name} anota de dos"
+            };
         }
         return MissHandler(def, off, shooter, false);
     }
 
-    static int MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree)
+    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree)
     {
         foreach (var d in def)
         {
@@ -408,14 +593,18 @@ public static class GameSimulator
             if (UnityEngine.Random.value < blockChance)
             {
                 d.blocks++;
-                return 0;
+                return new PossessionOutcome
+                {
+                    pts = 0,
+                    desc = $"{d.name} tapona el tiro de {shooter.name}"
+                };
             }
         }
 
         float foulChance = isThree ? 0.18f : 0.14f;
         if (UnityEngine.Random.value < foulChance)
         {
-            DoFoul(def);
+            string foulName = DoFoul(def);
             int nShots = isThree ? 3 : 2;
             if (UnityEngine.Random.value < 0.10f && !isThree) nShots = 3;
             float ftPct = 0.75f + (shooter.overall - 70) * 0.002f;
@@ -428,11 +617,20 @@ public static class GameSimulator
                     shooter.ftm++; shooter.points++; made++;
                 }
             }
-            return made;
+            string ftDesc = made > 0
+                ? $"{shooter.name} convierte {made}/{nShots} tiros libres (falta de {foulName ?? "defensa"})"
+                : $"{shooter.name} falla los {nShots} tiros libres";
+            return new PossessionOutcome { pts = made, desc = ftDesc };
         }
 
-        DoReb(def, off);
-        return 0;
+        string rebName = DoReb(def, off);
+        return new PossessionOutcome
+        {
+            pts = 0,
+            desc = rebName != null
+                ? $"{rebName} captura el rebote"
+                : "Rebote capturado"
+        };
     }
 
     static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court)
@@ -467,41 +665,41 @@ public static class GameSimulator
         return UnityEngine.Random.value < adj ? "3" : "2";
     }
 
-    static void DoAst(List<PlayerStatSnapshot> court, PlayerStatSnapshot scorer)
+    static string DoAst(List<PlayerStatSnapshot> court, PlayerStatSnapshot scorer)
     {
-        if (UnityEngine.Random.value >= 0.35f) return;
+        if (UnityEngine.Random.value >= 0.35f) return null;
         var others = court.Where(p => p != scorer).ToList();
-        if (others.Count == 0) return;
+        if (others.Count == 0) return null;
         var w = others.Select(p => Mathf.Pow(Mathf.Max(1, p.passing), 3)).ToList();
         float t = w.Sum();
-        if (t <= 0) return;
+        if (t <= 0) return null;
         float r = UnityEngine.Random.value * t;
         float c = 0;
         for (int i = 0; i < others.Count; i++)
         {
             c += w[i];
-            if (r <= c) { others[i].assists++; return; }
+            if (r <= c) { others[i].assists++; return others[i].name; }
         }
+        return null;
     }
 
-    static void DoReb(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off)
+    static string DoReb(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off)
     {
         float dw = def.Sum(p => Mathf.Pow(p.rebounding, 3));
         float ow = off.Sum(p => Mathf.Pow(p.rebounding, 2.5f));
         float t = dw + ow;
-        if (t <= 0) return;
+        if (t <= 0) return null;
 
         if (UnityEngine.Random.value * t < dw)
-            AwardReb(def, true);
-        else
-            AwardReb(off, false);
+            return AwardReb(def, true);
+        return AwardReb(off, false);
     }
 
-    static void AwardReb(List<PlayerStatSnapshot> players, bool defensive)
+    static string AwardReb(List<PlayerStatSnapshot> players, bool defensive)
     {
         var w = players.Select(p => Mathf.Pow(p.rebounding, 3)).ToList();
         float s = w.Sum();
-        if (s <= 0) return;
+        if (s <= 0) return null;
         float r = UnityEngine.Random.value * s;
         float c = 0;
         for (int i = 0; i < players.Count; i++)
@@ -511,13 +709,15 @@ public static class GameSimulator
             {
                 if (defensive) players[i].dreb++;
                 else players[i].oreb++;
-                return;
+                return players[i].name;
             }
         }
+        return null;
     }
 
-    static void DoTO(List<PlayerStatSnapshot> off, List<PlayerStatSnapshot> def)
+    static string DoTO(List<PlayerStatSnapshot> off, List<PlayerStatSnapshot> def)
     {
+        string toName = null;
         var handlers = off.Where(p => p.position is "PG" or "SG" or "SF").ToList();
         if (handlers.Count == 0) handlers = off;
         if (handlers.Count > 0)
@@ -529,13 +729,13 @@ public static class GameSimulator
             for (int i = 0; i < handlers.Count; i++)
             {
                 toC += toWeights[i];
-                if (toR <= toC) { handlers[i].turnovers++; break; }
+                if (toR <= toC) { handlers[i].turnovers++; toName = handlers[i].name; break; }
             }
         }
 
         // Only ~50% of TOs result in a steal (rest are offensive fouls, out-of-bounds, etc.)
-        if (UnityEngine.Random.value >= 0.5f) return;
-        if (def.Count == 0) return;
+        if (UnityEngine.Random.value >= 0.5f) return toName;
+        if (def.Count == 0) return toName;
         var stlW = def.Select(p => Mathf.Pow(p.steals_attr, 3)).ToList();
         float t = stlW.Sum();
         if (t > 0)
@@ -545,18 +745,21 @@ public static class GameSimulator
             for (int i = 0; i < def.Count; i++)
             {
                 c += stlW[i];
-                if (r <= c) { def[i].steals++; return; }
+                if (r <= c) { def[i].steals++; return toName; }
             }
         }
         def.OrderByDescending(p => p.steals_attr).First().steals++;
+        return toName;
     }
 
-    static void DoFoul(List<PlayerStatSnapshot> court)
+    static string DoFoul(List<PlayerStatSnapshot> court)
     {
         var bigs = court.Where(p => p.position is "C" or "PF").ToList();
         if (bigs.Count == 0) bigs = court;
-        if (bigs.Count > 0)
-            bigs[UnityEngine.Random.Range(0, bigs.Count)].pf++;
+        if (bigs.Count == 0) return null;
+        var fouler = bigs[UnityEngine.Random.Range(0, bigs.Count)];
+        fouler.pf++;
+        return fouler.name;
     }
 
     static HashSet<int> DoSub(HashSet<int> on, int maxPlayers)
