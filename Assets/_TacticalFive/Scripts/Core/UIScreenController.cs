@@ -36,6 +36,8 @@ public class UIScreenController : MonoBehaviour
     protected Button _configBtnQualityMedium;
     protected Button _configBtnQualityHigh;
     protected Button _configBtnQualityUltra;
+    protected Button _configBtnSimDirect;
+    protected Button _configBtnSimPlay;
 
     // Config confirm modals
     protected VisualElement _configMainMenuConfirmOverlay;
@@ -415,6 +417,45 @@ public class UIScreenController : MonoBehaviour
             if (_configSliderSFX?.Container != null)
                 CursorManager.Instance.RegisterHandCursor(_configSliderSFX.Container);
         }
+
+        InitConfigSimToggle();
+    }
+
+    // ── Config modal: modo de simulación ────────────────────
+    public const string SimModePrefKey = "TF_SimMode";
+
+    public static int GetSimMode()
+    {
+        return PlayerPrefs.GetInt(SimModePrefKey, 0);
+    }
+
+    protected void InitConfigSimToggle()
+    {
+        _configBtnSimDirect = _root.Q<Button>("ConfigBtnSimDirect");
+        _configBtnSimPlay   = _root.Q<Button>("ConfigBtnSimPlay");
+
+        _configBtnSimDirect?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(0); });
+        _configBtnSimPlay?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigSimMode(1); });
+    }
+
+    protected void UpdateConfigSimToggle()
+    {
+        UpdateConfigSimButtons(GetSimMode());
+    }
+
+    protected void SelectConfigSimMode(int mode)
+    {
+        PlayerPrefs.SetInt(SimModePrefKey, mode);
+        PlayerPrefs.Save();
+        UpdateConfigSimButtons(mode);
+    }
+
+    void UpdateConfigSimButtons(int activeIndex)
+    {
+        if (_configBtnSimDirect != null)
+            _configBtnSimDirect.EnableInClassList("settings-quality-btn--active", activeIndex == 0);
+        if (_configBtnSimPlay != null)
+            _configBtnSimPlay.EnableInClassList("settings-quality-btn--active", activeIndex == 1);
     }
 
     protected virtual void OpenConfigModal()
@@ -430,6 +471,7 @@ public class UIScreenController : MonoBehaviour
         }
         int q = QualitySettings.GetQualityLevel();
         UpdateConfigQualityButtons(Mathf.Clamp(q, 0, 3));
+        UpdateConfigSimToggle();
 
         _configModalOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _configModalOverlay.AddToClassList("modal-overlay--visible");

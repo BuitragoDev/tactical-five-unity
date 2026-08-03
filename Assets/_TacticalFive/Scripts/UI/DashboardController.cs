@@ -972,6 +972,9 @@ using System.Linq;
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
 
+        if (UIScreenController.GetSimMode() == 1 && result.playByPlay != null)
+            GameResultCache.PlayByPlayLogs[game.id] = result.playByPlay;
+
         if (game.game_type == "allstar")
         {
             var allStats = result.home_stats.Concat(result.away_stats).ToList();

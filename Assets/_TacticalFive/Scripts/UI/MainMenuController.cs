@@ -218,6 +218,8 @@ public class MainMenuController : UIScreenController
             if (_configSliderSFX?.Container != null)
                 CursorManager.Instance.RegisterHandCursor(_configSliderSFX.Container);
         }
+
+        InitConfigSimToggle();
     }
 
     protected override void OpenConfigModal()
@@ -233,6 +235,7 @@ public class MainMenuController : UIScreenController
         }
         int q = QualitySettings.GetQualityLevel();
         UpdateConfigQualityButtons(Mathf.Clamp(q, 0, 3));
+        UpdateConfigSimToggle();
 
         _configModalOverlay.style.display = DisplayStyle.Flex;
         _configModalBox.style.display     = DisplayStyle.Flex;

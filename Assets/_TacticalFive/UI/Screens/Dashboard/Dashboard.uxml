@@ -374,6 +374,16 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
+                        <ui:Label class="settings-section-title" text="SIMULACIÓN" />
+                        <ui:VisualElement class="settings-quality-row">
+                            <ui:Label class="settings-label" text="Vista de Partido" />
+                            <ui:VisualElement class="settings-quality-options">
+                                <ui:Button name="ConfigBtnSimDirect" class="settings-quality-btn" text="Directa" />
+                                <ui:Button name="ConfigBtnSimPlay" class="settings-quality-btn settings-quality-btn--wide" text="Play-by-play" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-section">
                         <ui:Label class="settings-section-title" text="JUEGO" />
                         <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
                         <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />

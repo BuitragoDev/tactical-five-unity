@@ -121,6 +121,42 @@
 
         </ui:VisualElement>
 
+        <!-- PLAY-BY-PLAY OVERLAY -->
+        <ui:VisualElement name="PlayByPlayOverlay" class="pbp-overlay" style="display: none;">
+            <ui:VisualElement class="pbp-header">
+                <ui:VisualElement class="pbp-team-side pbp-team-side--home">
+                    <ui:Label name="PbpHomeName" class="pbp-team" text="" />
+                    <ui:VisualElement name="PbpHomeLogo" class="pbp-team-logo" />
+                </ui:VisualElement>
+                <ui:Label name="PbpScore" class="pbp-score" text="0 - 0" />
+                <ui:VisualElement class="pbp-team-side pbp-team-side--away">
+                    <ui:VisualElement name="PbpAwayLogo" class="pbp-team-logo" />
+                    <ui:Label name="PbpAwayName" class="pbp-team" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="pbp-meta-row">
+                <ui:Label name="PbpQuarter" class="pbp-quarter" text="" />
+                <ui:Label name="PbpClock" class="pbp-clock" text="12:00" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pbp-progress">
+                <ui:VisualElement name="PbpProgressFill" class="pbp-progress-fill" />
+                <ui:Label name="PbpProgressLabel" class="pbp-progress-label" text="0%" />
+            </ui:VisualElement>
+            <ui:Label name="PbpText" class="pbp-text" text="" />
+            <ui:VisualElement name="PbpBoxes" class="pbp-boxes">
+                <ui:VisualElement name="PbpHomeBox" class="pbp-box-panel" />
+                <ui:VisualElement name="PbpAwayBox" class="pbp-box-panel" />
+            </ui:VisualElement>
+            <ui:VisualElement class="pbp-controls">
+                <ui:Button name="PbpBtnSpeed1" class="pbp-speed-btn" text="x1" />
+                <ui:Button name="PbpBtnSpeed3" class="pbp-speed-btn" text="x3" />
+                <ui:Button name="PbpBtnSpeed5" class="pbp-speed-btn pbp-speed-btn--active" text="x5" />
+                <ui:Button name="PbpBtnSpeed10" class="pbp-speed-btn" text="x10" />
+                <ui:VisualElement class="pbp-spacer" />
+                <ui:Button name="PbpSkip" class="pbp-skip" text="SALTAR ►" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
     </ui:VisualElement>
 
 </ui:UXML>

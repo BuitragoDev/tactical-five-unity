@@ -1305,6 +1305,9 @@
     background-color: rgb(255, 215, 90);
     border-color: rgb(255, 215, 90);
 }
+.settings-quality-btn--wide {
+    width: 130px;
+}
 .settings-btn {
     cursor: pointer;
     height: 48px;
