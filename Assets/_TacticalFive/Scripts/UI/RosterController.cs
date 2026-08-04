@@ -120,8 +120,10 @@ using System.Linq;
     // Datos
     private int _renewOfferYears;
     private long _renewOfferSalary;
-    private Toggle _renewTeamOption;
-    private Toggle _renewPlayerOption;
+    private Button _renewTeamOption;
+    private Button _renewPlayerOption;
+    private bool _teamOptionActive;
+    private bool _playerOptionActive;
     private List<PlayerData> _players;
     private PlayerData _selectedPlayer;
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -216,8 +218,8 @@ using System.Linq;
         _renewYearsValue = _root.Q<Label>("RenewYearsValue");
         _renewYearsDec = _root.Q<Label>("RenewYearsDec");
         _renewYearsInc = _root.Q<Label>("RenewYearsInc");
-        _renewTeamOption = _root.Q<Toggle>("RenewTeamOption");
-        _renewPlayerOption = _root.Q<Toggle>("RenewPlayerOption");
+        _renewTeamOption = _root.Q<Button>("RenewTeamOption");
+        _renewPlayerOption = _root.Q<Button>("RenewPlayerOption");
         _renewPendingText = _root.Q<Label>("RenewPendingText");
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
         _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
@@ -304,8 +306,8 @@ using System.Linq;
         SetupRenewLongPress(_renewSalaryInc, () => StepRenewSalary(1));
         SetupRenewLongPress(_renewYearsDec, () => StepRenewYears(-1));
         SetupRenewLongPress(_renewYearsInc, () => StepRenewYears(1));
-        _renewTeamOption?.RegisterValueChangedCallback(evt => { if (evt.newValue) _renewPlayerOption.value = false; });
-        _renewPlayerOption?.RegisterValueChangedCallback(evt => { if (evt.newValue) _renewTeamOption.value = false; });
+        _renewTeamOption?.clicked += () => { ToggleRenewOption("team"); };
+        _renewPlayerOption?.clicked += () => { ToggleRenewOption("player"); };
         _detailLinkTrajectory?.RegisterCallback<ClickEvent>(_ =>
         {
             if (_selectedPlayer == null) return;
@@ -719,6 +721,37 @@ using System.Linq;
 
     // ── RENOVAR CONTRATO ──────────────────────────────────
 
+    void ToggleRenewOption(string type)
+    {
+        if (type == "team")
+        {
+            _teamOptionActive = !_teamOptionActive;
+            if (_teamOptionActive) _playerOptionActive = false;
+        }
+        else
+        {
+            _playerOptionActive = !_playerOptionActive;
+            if (_playerOptionActive) _teamOptionActive = false;
+        }
+        RefreshRenewOptionToggles();
+    }
+
+    void RefreshRenewOptionToggles()
+    {
+        if (_renewTeamOption != null)
+        {
+            _renewTeamOption.RemoveFromClassList("renew-toggle-btn--team-active");
+            if (_teamOptionActive)
+                _renewTeamOption.AddToClassList("renew-toggle-btn--team-active");
+        }
+        if (_renewPlayerOption != null)
+        {
+            _renewPlayerOption.RemoveFromClassList("renew-toggle-btn--player-active");
+            if (_playerOptionActive)
+                _renewPlayerOption.AddToClassList("renew-toggle-btn--player-active");
+        }
+    }
+
     void OnRenewClicked()
     {
         if (_selectedPlayer == null) return;
@@ -765,8 +798,9 @@ using System.Linq;
         _renewSalary = autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary;
         _renewSalary = (long)(Mathf.Round(_renewSalary / 100_000f) * 100_000);
         _renewYears = CalculateAutoYears(_selectedPlayer.age);
-        if (_renewTeamOption != null) _renewTeamOption.value = false;
-        if (_renewPlayerOption != null) _renewPlayerOption.value = false;
+        _teamOptionActive = false;
+        _playerOptionActive = false;
+        RefreshRenewOptionToggles();
         RefreshRenewSpinners();
 
         ClearRenewModalColor(_renewBox, _renewTitle);
@@ -1025,8 +1059,8 @@ using System.Linq;
 
         // Guardar oferta en BD
         int currentDay = _season?.current_game_day ?? 0;
-bool hasTeamOpt = _renewTeamOption != null && _renewTeamOption.value;
-            bool hasPlayerOpt = _renewPlayerOption != null && _renewPlayerOption.value;
+bool hasTeamOpt = _teamOptionActive;
+            bool hasPlayerOpt = _playerOptionActive;
             int guarYears = (hasTeamOpt || hasPlayerOpt) && _renewOfferYears > 1 ? _renewOfferYears - 1 : _renewOfferYears;
             var offer = new OfferData
             {

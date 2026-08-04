@@ -165,16 +165,10 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="RenewFormRowOptions" class="renew-form-row renew-options-row">
-                    <ui:Label class="renew-form-label" text="OPCIONES DE CONTRATO" />
+                    <ui:Label class="renew-form-label" text="OPCIONES" />
                     <ui:VisualElement class="renew-options-toggles">
-                        <ui:VisualElement class="renew-option-toggle">
-                            <ui:Toggle name="RenewTeamOption" class="renew-toggle" />
-                            <ui:Label class="renew-toggle-label" text="Team Option (último año)" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="renew-option-toggle">
-                            <ui:Toggle name="RenewPlayerOption" class="renew-toggle" />
-                            <ui:Label class="renew-toggle-label" text="Player Option (último año)" />
-                        </ui:VisualElement>
+                        <ui:Button name="RenewTeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
+                        <ui:Button name="RenewPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Label name="RenewText2" class="renew-modal-text" text="" />
