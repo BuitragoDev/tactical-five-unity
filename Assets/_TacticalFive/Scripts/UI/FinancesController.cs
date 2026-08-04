@@ -50,14 +50,7 @@ using System.Linq;
     }
     private readonly List<ScenarioPlayer> _scenarioPlayers = new();
     private VisualElement _scenarioSection;
-    private TextField _scenarioLabel;
-    private TextField _scenarioSalary;
-    private TextField _scenarioYears;
-    private Toggle _scenarioTeamOpt;
-    private Toggle _scenarioPlayerOpt;
-    private Button _scenarioAddBtn;
     private VisualElement _scenarioList;
-    private Label _scenarioHint;
 
     // Ticket config
     private VisualElement _ticketPriceGrid;
@@ -109,14 +102,7 @@ using System.Linq;
         _capExceptionApron = _root.Q<Label>("CapExceptionApron");
 
         _scenarioSection = _root.Q<VisualElement>("CapScenarioSection");
-        _scenarioLabel = _root.Q<TextField>("ScenarioLabel");
-        _scenarioSalary = _root.Q<TextField>("ScenarioSalary");
-        _scenarioYears = _root.Q<TextField>("ScenarioYears");
-        _scenarioTeamOpt = _root.Q<Toggle>("ScenarioTeamOpt");
-        _scenarioPlayerOpt = _root.Q<Toggle>("ScenarioPlayerOpt");
-        _scenarioAddBtn = _root.Q<Button>("ScenarioAddBtn");
         _scenarioList = _root.Q<VisualElement>("CapScenarioList");
-        _scenarioHint = _root.Q<Label>("CapScenarioHint");
 
         _ticketPriceGrid = _root.Q<VisualElement>("TicketPriceGrid");
         _subscriptionPriceGrid = _root.Q<VisualElement>("SubscriptionPriceGrid");
@@ -163,7 +149,6 @@ using System.Linq;
         _tabExpenses.clicked += () => { PlayClick(); SwitchTab("expenses"); };
         _tabChart.clicked += () => { PlayClick(); SwitchTab("chart"); };
         _tabCap.clicked += () => { PlayClick(); SwitchTab("cap"); };
-        _scenarioAddBtn.clicked += OnAddScenario;
     }
     protected override void Refresh()
     {
@@ -526,7 +511,7 @@ using System.Linq;
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         var settings = DatabaseManager.Instance.GetLeagueSettings();
 
-        _scenarioHint.style.display = _scenarioPlayers.Count > 0 ? DisplayStyle.None : DisplayStyle.Flex;
+        _scenarioSection.style.display = _scenarioPlayers.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
         BuildScenarioList();
 
         long cap = settings != null ? settings.salary_cap : TradeHelper.SALARY_CAP;
@@ -669,41 +654,6 @@ using System.Linq;
     long ProjectedCap(long baseCap, int yearsAhead)
     {
         return (long)(baseCap * System.Math.Pow(1.05, yearsAhead));
-    }
-
-    void OnAddScenario()
-    {
-        string label = _scenarioLabel.value?.Trim();
-        string salaryText = _scenarioSalary.value?.Trim();
-        string yearsText = _scenarioYears.value?.Trim();
-
-        if (string.IsNullOrEmpty(label) || string.IsNullOrEmpty(salaryText) || string.IsNullOrEmpty(yearsText))
-            return;
-        if (!long.TryParse(salaryText, out long salary) || salary <= 0) return;
-        if (!int.TryParse(yearsText, out int years) || years <= 0) return;
-
-        int guaranteedYears = _scenarioTeamOpt.value || _scenarioPlayerOpt.value ? years - 1 : years;
-        if (guaranteedYears < 0) guaranteedYears = 0;
-
-        _scenarioPlayers.Add(new ScenarioPlayer
-        {
-            label = label,
-            salary = salary,
-            years = years,
-            guaranteedYears = guaranteedYears,
-            hasTeamOption = _scenarioTeamOpt.value,
-            hasPlayerOption = _scenarioPlayerOpt.value
-        });
-
-        _scenarioLabel.value = "";
-        _scenarioSalary.value = "";
-        _scenarioYears.value = "";
-        _scenarioTeamOpt.value = false;
-        _scenarioPlayerOpt.value = false;
-
-        BuildCapSheet();
-
-        PlayClick();
     }
 
     void BuildScenarioList()
