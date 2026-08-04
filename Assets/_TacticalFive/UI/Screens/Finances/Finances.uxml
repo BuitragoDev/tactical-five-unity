@@ -142,6 +142,24 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    <ui:VisualElement class="cap-section" name="CapScenarioSection" style="display:none;">
+                        <ui:Label class="cap-section-title" text="ESCENARIO HIPOTÉTICO" />
+                        <ui:VisualElement class="cap-scenario-form">
+                            <ui:TextField name="ScenarioLabel" class="cap-scenario-input" label="Jugador" value="" />
+                            <ui:TextField name="ScenarioSalary" class="cap-scenario-input" label="Salario" value="" />
+                            <ui:TextField name="ScenarioYears" class="cap-scenario-input" label="Años" value="" />
+                            <ui:VisualElement class="cap-scenario-check-row">
+                                <ui:Label class="cap-scenario-check-label" text="Team Option" />
+                                <ui:Toggle name="ScenarioTeamOpt" class="cap-scenario-toggle" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="cap-scenario-check-row">
+                                <ui:Label class="cap-scenario-check-label" text="Player Option" />
+                                <ui:Toggle name="ScenarioPlayerOpt" class="cap-scenario-toggle" />
+                            </ui:VisualElement>
+                            <ui:Button name="ScenarioAddBtn" class="cap-scenario-btn" text="AÑADIR" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="CapScenarioList" class="cap-scenario-list" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Tab Content: GRÁFICO -->

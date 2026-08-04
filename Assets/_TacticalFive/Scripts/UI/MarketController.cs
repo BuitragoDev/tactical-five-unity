@@ -870,6 +870,7 @@ using System.Linq;
                 int newYears = CalcSATYears(p.age);
                 long newSalary = CalcSATSalary(p.salary);
                 p.contract_years = newYears;
+                p.guaranteed_years = newYears;
                 p.salary = newSalary;
                 DatabaseManager.Instance.UpdatePlayer(p);
                 Debug.Log($"[S&T] {p.first_name} {p.last_name} extendido: ${newSalary:N0} x {newYears} años");

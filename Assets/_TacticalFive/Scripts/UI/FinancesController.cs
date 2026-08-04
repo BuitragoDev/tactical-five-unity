@@ -38,6 +38,26 @@ using System.Linq;
     private Label _capExceptionMin;
     private Label _capExceptionApron;
 
+    // Scenario
+    private class ScenarioPlayer
+    {
+        public string label;
+        public long salary;
+        public int years;
+        public int guaranteedYears;
+        public bool hasTeamOption;
+        public bool hasPlayerOption;
+    }
+    private readonly List<ScenarioPlayer> _scenarioPlayers = new();
+    private VisualElement _scenarioSection;
+    private TextField _scenarioLabel;
+    private TextField _scenarioSalary;
+    private TextField _scenarioYears;
+    private Toggle _scenarioTeamOpt;
+    private Toggle _scenarioPlayerOpt;
+    private Button _scenarioAddBtn;
+    private VisualElement _scenarioList;
+
     // Ticket config
     private VisualElement _ticketPriceGrid;
     private VisualElement _subscriptionPriceGrid;
@@ -87,6 +107,15 @@ using System.Linq;
         _capExceptionMin = _root.Q<Label>("CapExceptionMin");
         _capExceptionApron = _root.Q<Label>("CapExceptionApron");
 
+        _scenarioSection = _root.Q<VisualElement>("CapScenarioSection");
+        _scenarioLabel = _root.Q<TextField>("ScenarioLabel");
+        _scenarioSalary = _root.Q<TextField>("ScenarioSalary");
+        _scenarioYears = _root.Q<TextField>("ScenarioYears");
+        _scenarioTeamOpt = _root.Q<Toggle>("ScenarioTeamOpt");
+        _scenarioPlayerOpt = _root.Q<Toggle>("ScenarioPlayerOpt");
+        _scenarioAddBtn = _root.Q<Button>("ScenarioAddBtn");
+        _scenarioList = _root.Q<VisualElement>("CapScenarioList");
+
         _ticketPriceGrid = _root.Q<VisualElement>("TicketPriceGrid");
         _subscriptionPriceGrid = _root.Q<VisualElement>("SubscriptionPriceGrid");
 
@@ -132,6 +161,7 @@ using System.Linq;
         _tabExpenses.clicked += () => { PlayClick(); SwitchTab("expenses"); };
         _tabChart.clicked += () => { PlayClick(); SwitchTab("chart"); };
         _tabCap.clicked += () => { PlayClick(); SwitchTab("cap"); };
+        _scenarioAddBtn.clicked += OnAddScenario;
     }
     protected override void Refresh()
     {
@@ -494,11 +524,15 @@ using System.Linq;
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         var settings = DatabaseManager.Instance.GetLeagueSettings();
 
+        _scenarioSection.style.display = _scenarioPlayers.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+        BuildScenarioList();
+
         long cap = settings != null ? settings.salary_cap : TradeHelper.SALARY_CAP;
         long luxury = settings != null ? settings.luxury_tax : TradeHelper.LUXURY_TAX;
         long apron = settings != null ? settings.apron : TradeHelper.FIRST_APRON;
 
-        long currentPayroll = players.Sum(p => p.salary);
+        long currentPayroll = players.Sum(p => p.salary)
+            + _scenarioPlayers.Sum(sp => sp.salary);
         long space = cap - currentPayroll;
 
         // Summary boxes
@@ -530,18 +564,39 @@ using System.Linq;
         var headerSpace = new Label("ESPACIO");
         headerSpace.AddToClassList("cap-proj-header-cell");
 
+        var headerOptions = new Label("OPCIONES");
+        headerOptions.AddToClassList("cap-proj-header-cell");
+
         headerRow.Add(headerLabel);
         headerRow.Add(headerCap);
         headerRow.Add(headerSalary);
         headerRow.Add(headerSpace);
+        headerRow.Add(headerOptions);
         _capProjectionTable.Add(headerRow);
 
         // Projection rows
         for (int yr = 0; yr < CapProjectionYears; yr++)
         {
             long yearCap = ProjectedCap(cap, yr);
-            long yearPayroll = players.Sum(p => p.contract_years > yr ? p.salary : 0);
+            long yearGuaranteed = players.Sum(p => p.guaranteed_years > yr ? p.salary : 0)
+                + _scenarioPlayers.Where(sp => sp.guaranteedYears > yr).Sum(sp => sp.salary);
+            long yearOptional = players.Sum(p =>
+                (p.contract_years > yr && p.guaranteed_years <= yr && (p.has_team_option == 1 || p.has_player_option == 1))
+                    ? p.salary : 0)
+                + _scenarioPlayers.Where(sp =>
+                    sp.years > yr && sp.guaranteedYears <= yr && (sp.hasTeamOption || sp.hasPlayerOption))
+                    .Sum(sp => sp.salary);
+            long yearPayroll = yearGuaranteed + yearOptional;
             long yearSpace = yearCap - yearPayroll;
+            string optionSuffix = yearOptional > 0 ? " (Opc)" : "";
+
+            bool hasTeamOpt = players.Any(p => p.contract_years > yr && p.guaranteed_years <= yr && p.has_team_option == 1)
+                || _scenarioPlayers.Any(sp => sp.years > yr && sp.guaranteedYears <= yr && sp.hasTeamOption);
+            bool hasPlayerOpt = players.Any(p => p.contract_years > yr && p.guaranteed_years <= yr && p.has_player_option == 1)
+                || _scenarioPlayers.Any(sp => sp.years > yr && sp.guaranteedYears <= yr && sp.hasPlayerOption);
+            string optionLabel = yearOptional > 0
+                ? $"{(hasTeamOpt ? "TO" : "")}{(hasTeamOpt && hasPlayerOpt ? "/" : "")}{(hasPlayerOpt ? "PO" : "")}  {FormatMoney(yearOptional)}"
+                : "";
 
             int yearLabel = (_season != null ? _season.year_start : System.DateTime.Now.Year) + yr;
 
@@ -566,10 +621,15 @@ using System.Linq;
                     ? "cap-proj-cell--warn"
                     : "cap-proj-cell--positive");
 
+            var optionsCell = new Label(optionLabel);
+            optionsCell.AddToClassList("cap-proj-cell");
+            optionsCell.AddToClassList(yearOptional > 0 ? "cap-proj-cell--warn" : "cap-proj-cell--cap");
+
             row.Add(lbl);
             row.Add(capCell);
             row.Add(salaryCell);
             row.Add(spaceCell);
+            row.Add(optionsCell);
             _capProjectionTable.Add(row);
         }
 
@@ -585,7 +645,12 @@ using System.Linq;
         else
         {
             _capExpiringLabel.text = string.Join(", ", expiring.Select(p =>
-                $"{p.first_name} {p.last_name} ({FormatMoney(p.salary)})"));
+            {
+                string optMarker = "";
+                if (p.has_team_option == 1 && p.guaranteed_years == 0) optMarker = " (TO)";
+                if (p.has_player_option == 1 && p.guaranteed_years == 0) optMarker = " (PO)";
+                return $"{p.first_name} {p.last_name} ({PositionName(p.position, p.secondary_position)}) - {FormatMoney(p.salary)}{optMarker}";
+            }));
         }
 
         // Exceptions
@@ -602,6 +667,94 @@ using System.Linq;
     long ProjectedCap(long baseCap, int yearsAhead)
     {
         return (long)(baseCap * System.Math.Pow(1.05, yearsAhead));
+    }
+
+    void OnAddScenario()
+    {
+        string label = _scenarioLabel.value?.Trim();
+        string salaryText = _scenarioSalary.value?.Trim();
+        string yearsText = _scenarioYears.value?.Trim();
+
+        if (string.IsNullOrEmpty(label) || string.IsNullOrEmpty(salaryText) || string.IsNullOrEmpty(yearsText))
+            return;
+        if (!long.TryParse(salaryText, out long salary) || salary <= 0) return;
+        if (!int.TryParse(yearsText, out int years) || years <= 0) return;
+
+        int guaranteedYears = _scenarioTeamOpt.value || _scenarioPlayerOpt.value ? years - 1 : years;
+        if (guaranteedYears < 0) guaranteedYears = 0;
+
+        _scenarioPlayers.Add(new ScenarioPlayer
+        {
+            label = label,
+            salary = salary,
+            years = years,
+            guaranteedYears = guaranteedYears,
+            hasTeamOption = _scenarioTeamOpt.value,
+            hasPlayerOption = _scenarioPlayerOpt.value
+        });
+
+        _scenarioLabel.value = "";
+        _scenarioSalary.value = "";
+        _scenarioYears.value = "";
+        _scenarioTeamOpt.value = false;
+        _scenarioPlayerOpt.value = false;
+
+        BuildCapSheet();
+
+        PlayClick();
+    }
+
+    void BuildScenarioList()
+    {
+        _scenarioList.Clear();
+        for (int i = 0; i < _scenarioPlayers.Count; i++)
+        {
+            int idx = i;
+            var sp = _scenarioPlayers[i];
+            var row = new VisualElement();
+            row.AddToClassList("cap-scenario-item");
+
+            string desc = $"{sp.label} - {FormatMoney(sp.salary)} x {sp.years} año{(sp.years != 1 ? "s" : "")}";
+            if (sp.hasTeamOption) desc += " (TO último año)";
+            else if (sp.hasPlayerOption) desc += " (PO último año)";
+
+            var lbl = new Label(desc);
+            lbl.AddToClassList("cap-scenario-item-label");
+
+            var rmBtn = new Button { text = "✕" };
+            rmBtn.AddToClassList("cap-scenario-item-remove");
+            rmBtn.clicked += () => { RemoveScenario(idx); };
+
+            row.Add(lbl);
+            row.Add(rmBtn);
+            _scenarioList.Add(row);
+        }
+    }
+
+    void RemoveScenario(int index)
+    {
+        if (index < 0 || index >= _scenarioPlayers.Count) return;
+        _scenarioPlayers.RemoveAt(index);
+        BuildCapSheet();
+        PlayClick();
+    }
+
+    public void ShowScenario(string label, long salary, int years, int guaranteedYears = 0,
+        bool hasTeamOption = false, bool hasPlayerOption = false)
+    {
+        if (guaranteedYears <= 0) guaranteedYears = hasTeamOption || hasPlayerOption ? years - 1 : years;
+        _scenarioPlayers.Clear();
+        _scenarioPlayers.Add(new ScenarioPlayer
+        {
+            label = label,
+            salary = salary,
+            years = years,
+            guaranteedYears = guaranteedYears,
+            hasTeamOption = hasTeamOption,
+            hasPlayerOption = hasPlayerOption
+        });
+        SwitchTab("cap");
+        BuildCapSheet();
     }
 
     static string PositionName(string primary, string secondary)

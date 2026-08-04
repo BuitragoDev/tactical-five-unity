@@ -9,6 +9,9 @@ public class OfferData
     public int player_id { get; set; }
     public long offer_salary { get; set; }
     public int offer_years { get; set; }
+    public int guaranteed_years { get; set; }
+    public int has_team_option { get; set; }
+    public int has_player_option { get; set; }
     public int day_sent { get; set; }
     public int offer_type { get; set; } // 0 = renovación, 1 = fichaje agente libre
     public string status { get; set; } // "pending" | "accepted" | "rejected"

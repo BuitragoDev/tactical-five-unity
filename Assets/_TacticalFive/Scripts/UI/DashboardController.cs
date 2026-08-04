@@ -1463,6 +1463,9 @@ using System.Linq;
                     player.team_id = _myTeam.id;
                     player.salary = offer.offer_salary;
                     player.contract_years = offer.offer_years;
+                    player.guaranteed_years = offer.guaranteed_years > 0 ? offer.guaranteed_years : offer.offer_years;
+                    player.has_team_option = offer.has_team_option;
+                    player.has_player_option = offer.has_player_option;
                     player.seasons_with_team = 1;
                     DatabaseManager.Instance.UpdatePlayer(player);
 
@@ -1550,6 +1553,9 @@ using System.Linq;
                     acceptedCount++;
                     player.salary = offer.offer_salary;
                     player.contract_years = offer.offer_years;
+                    player.guaranteed_years = offer.guaranteed_years > 0 ? offer.guaranteed_years : offer.offer_years;
+                    player.has_team_option = offer.has_team_option;
+                    player.has_player_option = offer.has_player_option;
                     player.renewal_cooldown_day = _season.current_game_day + 365;
                     DatabaseManager.Instance.UpdatePlayer(player);
 
@@ -2561,6 +2567,7 @@ using System.Linq;
                 star.team_id = team.id;
                 int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
+                star.guaranteed_years = years;
                 DatabaseManager.Instance.UpdatePlayer(star);
 
                 DatabaseManager.Instance.InsertTrade(new TradeData
@@ -2837,6 +2844,7 @@ using System.Linq;
             int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
             player.salary += 2_000_000;
             player.contract_years = years;
+            player.guaranteed_years = years;
             DatabaseManager.Instance.UpdatePlayer(player);
 
             DatabaseManager.Instance.InsertTrade(new TradeData

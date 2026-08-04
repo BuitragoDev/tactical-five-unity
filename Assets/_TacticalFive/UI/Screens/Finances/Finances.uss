@@ -561,8 +561,83 @@
 
 .cap-expiring-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     white-space: normal;
     padding: 8px 0 12px 0;
+}
+
+/* ══ Scenario ══ */
+.cap-scenario-form {
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 12px;
+    padding: 12px 0;
+}
+
+.cap-scenario-input {
+    width: 140px;
+}
+
+.cap-scenario-check-row {
+    flex-direction: column;
+    align-items: center;
+}
+
+.cap-scenario-check-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(120, 130, 150);
+    margin-bottom: 4px;
+}
+
+.cap-scenario-toggle {
+    margin: 0;
+}
+
+.cap-scenario-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(15, 17, 23);
+    background-color: rgb(248, 196, 64);
+    border-width: 0;
+    border-radius: 4px;
+    padding: 6px 16px;
+    height: 30px;
+}
+
+.cap-scenario-btn:hover {
+    background-color: rgb(255, 210, 80);
+}
+
+.cap-scenario-list {
+    flex-direction: column;
+    padding: 8px 0;
+}
+
+.cap-scenario-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(32, 38, 54);
+}
+
+.cap-scenario-item-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(248, 196, 64);
+    flex-grow: 1;
+}
+
+.cap-scenario-item-remove {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(192, 57, 43);
+    background-color: transparent;
+    border-width: 0;
+    padding: 2px 10px;
+}
 }

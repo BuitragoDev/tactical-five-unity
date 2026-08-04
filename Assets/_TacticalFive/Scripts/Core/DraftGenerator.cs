@@ -359,6 +359,7 @@ public static class DraftGenerator
                 treated = 0,
                 salary = (int)salary,
                 contract_years = 4,
+                guaranteed_years = 4,
                 is_rookie = 1
             };
 

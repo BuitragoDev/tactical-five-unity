@@ -2339,11 +2339,29 @@ public partial class DatabaseManager
             // Save old team for seasons_with_team tracking
             int oldTeamId = p.team_id;
 
+            // 2.5. Resolve contract options before decrement
+            if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            {
+                if (DecideTeamOption(p))
+                    p.guaranteed_years = p.contract_years;
+                p.has_team_option = 0;
+            }
+            if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            {
+                if (DecidePlayerOption(p))
+                    p.guaranteed_years = p.contract_years;
+                p.has_player_option = 0;
+            }
+
             // 3. Decrement contracts
             p.contract_years -= 1;
+            p.guaranteed_years -= 1;
             if (p.contract_years <= 0)
             {
                 p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                p.has_player_option = 0;
                 p.team_id = 0;
             }
 
@@ -2550,6 +2568,7 @@ public partial class DatabaseManager
                     signed.salary = faSalary;
                     signed.team_id = team.id;
                     signed.contract_years = 1;
+                    signed.guaranteed_years = 1;
                     signed.seasons_with_team = 1;
                     _db.Update(signed);
                     freeAgents.Remove(signed);
@@ -2664,6 +2683,9 @@ public partial class DatabaseManager
                 var p = sorted[i];
                 p.team_id = 0;
                 p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                p.has_player_option = 0;
                 _db.Update(p);
             }
         }
@@ -2993,5 +3015,33 @@ public partial class DatabaseManager
             });
             inactIdx++;
         }
+    }
+
+    /// <summary>
+    /// AI decides whether to exercise a team option. The option year is the current upcoming season.
+    /// Criteria: the player contributes positively (overall above threshold relative to salary/slot).
+    /// </summary>
+    bool DecideTeamOption(PlayerData p)
+    {
+        // Always exercise if the player is decent and salary is reasonable
+        if (p.overall < 65) return false;
+        // Reject if the player is old and declining (age > 34 or overall < potential-10)
+        if (p.age > 34 && p.overall < p.potential - 10) return false;
+        // Accept otherwise
+        return true;
+    }
+
+    /// <summary>
+    /// AI decides whether the player exercises their player option (opts out to test FA market).
+    /// The player evaluates whether they could get a better deal in FA (approximation).
+    /// </summary>
+    bool DecidePlayerOption(PlayerData p)
+    {
+        // All-Star caliber players (overall >= 85) opt out to test the market
+        if (p.overall >= 85) return false;
+        // Young players with good potential opt out (bet on themselves)
+        if (p.age < 28 && p.overall >= 80 && p.potential >= 85) return false;
+        // Most players opt in (security)
+        return true;
     }
 }

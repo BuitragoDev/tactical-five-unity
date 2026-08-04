@@ -29,7 +29,10 @@ public class PlayerData
     public int steals { get; set; }
     public int blocks { get; set; }
     public long salary { get; set; }
-    public int contract_years { get; set; }
+    public int contract_years { get; set; }        // total de años restantes del contrato (garantizados + opción)
+    public int guaranteed_years { get; set; }     // años totalmente garantizados restantes (default = contract_years)
+    public int has_team_option { get; set; }      // 1 si el último año es team option (se resuelve al llegar a él)
+    public int has_player_option { get; set; }    // 1 si el último año es player option (no puede coexistir con team)
     public int is_rookie { get; set; }
     public int injury_days { get; set; }
     public string injury_type { get; set; }
