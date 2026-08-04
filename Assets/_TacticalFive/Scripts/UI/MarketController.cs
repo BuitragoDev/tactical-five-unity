@@ -1164,7 +1164,8 @@ using System.Linq;
         // Calcular límites salariales
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long totalPayroll = myPlayers.Sum(p => p.salary);
-        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll, false);
+        bool isOwnRecentFA = DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id);
+        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll, isOwnRecentFA);
         UpdateFAMaxInfo();
 
         // Mostrar formulario, ocultar pending

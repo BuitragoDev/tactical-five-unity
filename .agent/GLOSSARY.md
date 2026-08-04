@@ -15,6 +15,7 @@
 | **Hard cap** | Team cannot exceed 1st apron after using NT-MLE | `teams.first_apron_hard_capped` |
 | **Team Option (TO)** | Team can void the last contract year | `players/offers.has_team_option` |
 | **Player Option (PO)** | Player can void the last contract year | `players/offers.has_player_option` |
+| **Re-firma / Bird rights** | Re-signing an own recent FA above cap using retained rights | `players.last_team_id`, `RosterController.GetMaxOfferBreakdown(isFromSameTeam:true)` |
 | **Luxury tax** | Progressive tax on payroll over threshold | `TradeHelper.CalculateLuxuryTax` |
 | **Buyout / Rescisión** | Contract release with stretch payments | `RosterController.ConfirmBuyout` |
 | **Renovación** | Contract renewal | `OfferData.offer_type=0` |

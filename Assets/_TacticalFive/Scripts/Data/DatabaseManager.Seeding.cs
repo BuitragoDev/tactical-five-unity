@@ -30,6 +30,7 @@ public partial class DatabaseManager
             {
                 id = pid,
                 team_id = teamId,
+                last_team_id = teamId,
                 first_name = fn,
                 last_name = ln,
                 position = pos,

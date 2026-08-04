@@ -45,8 +45,9 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
   implementada; quedan ajustes de equilibrio.
 - **Opciones de contrato** (team/player option) y años garantizados/no garantizados.
   **Nota**: implementadas en el modal de oferta (Roster renovaciones + Market FA) y en
-  los mensajes de resultado (`FormatContractYears`); pendiente: maduración más realista
-  (ejercer/declinar soft cap, impacto de mercado).
+  los mensajes de resultado (`FormatContractYears`); incluye maduración con re-firma de
+  FA propio vía Bird rights (`last_team_id`, `IsOwnRecentFA`, modal de re-firma en
+  `NewSeasonController`). Queda fino: soft cap / impacto de mercado en la re-firma.
 - **Picks protegidos** y más flexibilidad de transferencia de picks.
 - **Trade deadline con evento real** (el recordatorio existe; falta el cierre con efectos).
 - **Objetivos de temporada del propietario** con recompensas/cese (ya hay factor

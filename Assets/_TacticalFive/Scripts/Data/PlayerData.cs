@@ -6,6 +6,7 @@ public class PlayerData
     [PrimaryKey]
     public int id { get; set; }
     public int team_id { get; set; } // 0 = agente libre
+    public int last_team_id { get; set; } // último equipo para el que jugó (0 si nunca/FA externo); habilita Bird rights al re-firmar
     public string first_name { get; set; }
     public string last_name { get; set; }
     public string position { get; set; }

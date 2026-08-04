@@ -2393,6 +2393,8 @@ public partial class DatabaseManager
                 p.guaranteed_years = 0;
                 p.has_team_option = 0;
                 p.has_player_option = 0;
+                if (oldTeamId != 0 && p.last_team_id == 0)
+                    p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                 p.team_id = 0;
             }
 
@@ -3060,6 +3062,15 @@ public partial class DatabaseManager
         if (p.age > 34 && p.overall < p.potential - 10) return false;
         // Accept otherwise
         return true;
+    }
+
+    /// <summary>
+    /// True si el jugador es un agente libre reciente que jugó para `teamId`
+    /// (conserva Bird rights / contexto de re-firma aunque ahora sea FA).
+    /// </summary>
+    public bool IsOwnRecentFA(PlayerData p, int teamId)
+    {
+        return p.team_id == 0 && p.last_team_id == teamId && p.seasons_with_team > 0;
     }
 
     /// <summary>

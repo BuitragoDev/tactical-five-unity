@@ -80,7 +80,14 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
   `MarketController`; al activarse, `guaranteed_years = max(0, years − 1)`. Los mensajes de
   resultado (inbox + modal resumen, `DashboardController.ProcessMaturedOffers`) formatean las
   opciones vía `FormatContractYears` (p. ej. `3 años (Team Option)`, `2 años + Player Option`).
-   `RosterController.cs:SendOffer`, `MarketController.cs:SendFAOffer`, `DashboardController.cs`.
+  `RosterController.cs:SendOffer`, `MarketController.cs:SendFAOffer`, `DashboardController.cs`.
+- **[hecho]** Maduración de opciones + re-firma de FA propio con Bird rights: al declinar una
+  opción el jugador pasa a FA conservando `last_team_id` y `seasons_with_team`; `NewSeasonController`
+  muestra un modal de re-firma (mercado + máximo con Bird rights) que envía una oferta diferida a 7
+  días; `ProcessMaturedOffers` reasigna `team_id` al aceptarla (o la cancela si fichó por otro equipo).
+  `MarketController.OnSignPlayer` respeta `IsOwnRecentFA` para conservar Bird rights al firmar FA propio.
+  `DatabaseManager.cs` (migración `last_team_id`), `DatabaseManager.Records.cs`
+  (`IsOwnRecentFA`), `NewSeasonController.cs`, `DashboardController.cs`.
 - **[hecho]** Líderes de liga en SQL en lugar de LINQ en C#: `BuildSeasonStats`
    (`StatsController.cs`) pasa de N+1 queries + `GroupBy` en memoria a una sola
    agregación SQL (`GetSeasonPlayerStatsAggregates` en `DatabaseManager.Records.cs`,

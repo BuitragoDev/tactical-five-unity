@@ -343,6 +343,14 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: added guaranteed_years/has_team_option/has_player_option to players");
         }
 
+        // Add last_team_id to players if missing
+        if (!playerColsOpt.Any(c => c.name == "last_team_id"))
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN last_team_id INTEGER DEFAULT 0");
+            _db.Execute("UPDATE players SET last_team_id = team_id WHERE team_id != 0");
+            Debug.Log("[DB] Migration: added last_team_id to players");
+        }
+
         // Add guaranteed_years to offers if missing
         var offersCols = _db.Query<ColumnInfo>("PRAGMA table_info(offers)");
         if (!offersCols.Any(c => c.name == "guaranteed_years"))

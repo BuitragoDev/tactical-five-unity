@@ -1471,6 +1471,7 @@ using System.Linq;
                     acceptedCount++;
                     batchSigningsAccepted++;
                     player.team_id = _myTeam.id;
+                    player.last_team_id = _myTeam.id;
                     player.salary = offer.offer_salary;
                     player.contract_years = offer.offer_years;
                     player.guaranteed_years = offer.guaranteed_years;
@@ -1566,10 +1567,40 @@ using System.Linq;
                     player.guaranteed_years = offer.guaranteed_years;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
+                    // Re-firma de un FA propio reciente (declinó su opción): devolverlo al equipo
+                    if (player.team_id == 0 && DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id))
+                    {
+                        player.team_id = _myTeam.id;
+                        player.last_team_id = _myTeam.id;
+                    }
+                    // Si como FA reciente firmó con otro equipo mientras maduraba, cancelar
+                    else if (player.team_id != 0 && player.team_id != _myTeam.id)
+                    {
+                        rejectedCount++;
+                        player.renewal_cooldown_day = _season.current_game_day + 15;
+                        DatabaseManager.Instance.UpdatePlayer(player);
+                        resultSummary += $"✗ {playerName}: RE-FIRMA CANCELADA — el jugador fichó por {DatabaseManager.Instance.GetTeamById(player.team_id)?.name ?? "otro equipo"}.\n";
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 0,
+                            sender_id = 0,
+                            title = $"Re-firma cancelada: {playerName}",
+                            body = $"Tu oferta de re-firma a {playerName} ha sido cancelada porque el jugador ha fichado por {DatabaseManager.Instance.GetTeamById(player.team_id)?.name ?? "otro equipo"}.",
+                            game_day = _season.current_game_day,
+                            game_date = nowStr,
+                            created_at = nowStr,
+                            date_sent = nowStr,
+                            is_read = 0
+                        });
+                        DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                        continue;
+                    }
                     player.renewal_cooldown_day = _season.current_game_day + 365;
                     DatabaseManager.Instance.UpdatePlayer(player);
 
-                    resultSummary += $"✓ {playerName}: CONTRATO RENOVADO — {salaryText} · {yearsText}\n";
+                    string reSignTag = player.team_id == _myTeam.id && player.last_team_id == _myTeam.id ? " RE-FIRMADO" : "";
+                    resultSummary += $"✓ {playerName}: CONTRATO RENOVADO{reSignTag} — {salaryText} · {yearsText}\n";
 
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
@@ -2575,6 +2606,7 @@ using System.Linq;
                 if (salaryCap - payroll < star.salary) continue;
 
                 star.team_id = team.id;
+                star.last_team_id = team.id;
                 int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
                 star.guaranteed_years = years;
@@ -2851,6 +2883,7 @@ using System.Linq;
             if (Random.Range(0, 100) >= chance) continue;
 
             player.team_id = team.id;
+            player.last_team_id = team.id;
             int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
             player.salary += 2_000_000;
             player.contract_years = years;
