@@ -2270,6 +2270,27 @@ public partial class DatabaseManager
 
         // 2. Age + attribute changes (progression/regression by career phase)
         var remaining = _db.Table<PlayerData>().ToList();
+
+        // Pre-compute team win% for player option decisions
+        var teamWinPctCache = new Dictionary<int, float>();
+        var leagueSettings = GetLeagueSettings();
+        if (leagueSettings != null && oldSeasonId > 0)
+        {
+            var seasonGames = _db.Table<GameData>()
+                .Where(g => g.season_id == oldSeasonId && g.is_played == 1)
+                .ToList();
+            var teamGames = new Dictionary<int, (int wins, int total)>();
+            foreach (var g in seasonGames)
+            {
+                if (!teamGames.ContainsKey(g.team_id_home)) teamGames[g.team_id_home] = (0, 0);
+                if (!teamGames.ContainsKey(g.team_id_away)) teamGames[g.team_id_away] = (0, 0);
+                teamGames[g.team_id_home] = (teamGames[g.team_id_home].wins + (g.score_home > g.score_away ? 1 : 0), teamGames[g.team_id_home].total + 1);
+                teamGames[g.team_id_away] = (teamGames[g.team_id_away].wins + (g.score_away > g.score_home ? 1 : 0), teamGames[g.team_id_away].total + 1);
+            }
+            foreach (var kv in teamGames)
+                teamWinPctCache[kv.Key] = kv.Value.total > 0 ? (float)kv.Value.wins / kv.Value.total : 0.5f;
+        }
+
         foreach (var p in remaining)
         {
             if (p.is_rookie == 1)
@@ -2354,7 +2375,8 @@ public partial class DatabaseManager
             // Player options are always decided by the AI (player decides)
             if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
             {
-                if (DecidePlayerOption(p))
+                float teamPct = teamWinPctCache.TryGetValue(p.team_id, out float wp) ? wp : 0.5f;
+                if (DecidePlayerOption(p, teamPct, leagueSettings))
                 {
                     p.contract_years += 1;
                     p.guaranteed_years = p.contract_years;
@@ -3042,15 +3064,64 @@ public partial class DatabaseManager
 
     /// <summary>
     /// AI decides whether the player exercises their player option (opts out to test FA market).
-    /// The player evaluates whether they could get a better deal in FA (approximation).
+    /// Uses a weighted score: market value, happiness, loyalty, role, age, team success.
     /// </summary>
-    public bool DecidePlayerOption(PlayerData p)
+    public bool DecidePlayerOption(PlayerData p, float teamWinPct, LeagueSettingsData settings)
     {
-        // All-Star caliber players (overall >= 85) opt out to test the market
+        if (settings == null) return DecidePlayerOptionLegacy(p);
+
+        long cap = settings.salary_cap;
+        float score = 50f;
+
+        // 1. Market: current salary vs estimated market value
+        long marketSalary = EstimateMarketSalary(p.overall, cap);
+        float salaryRatio = marketSalary > 0 ? (float)p.salary / marketSalary : 1f;
+        if (salaryRatio >= 1.0f)      score += 20f;  // well paid → stay
+        else if (salaryRatio < 0.70f) score -= 25f;  // underpaid → seek market
+
+        // 2. Happiness + loyalty
+        score += (p.morale - 50) * 0.5f;                    // morale: -25 to +25
+        score += System.Math.Min(p.seasons_with_team, 5) * 4f;  // loyalty: +4/yr, max +20
+
+        // 3. Role
+        score += p.role switch
+        {
+            PlayerRole.Estrella => 15f,
+            PlayerRole.Titular => 5f,
+            PlayerRole.Banquillo => -5f,
+            PlayerRole.UltimoRecurso => -15f,
+            _ => 0f
+        };
+
+        // 4. Age
+        if (p.age < 26 && p.potential >= p.overall + 3) score -= 15f;  // young + upside → bet
+        else if (p.age > 33)                               score += 10f;  // veteran → security
+
+        // 5. Team success
+        if (teamWinPct >= 0.60f)      score += 15f;   // contender
+        else if (teamWinPct <= 0.35f) score -= 15f;   // tanking
+
+        // 6. Controlled randomness (±10)
+        score += UnityEngine.Random.Range(-10, 11);
+
+        return score >= 50f;
+    }
+
+    bool DecidePlayerOptionLegacy(PlayerData p)
+    {
         if (p.overall >= 85) return false;
-        // Young players with good potential opt out (bet on themselves)
         if (p.age < 28 && p.overall >= 80 && p.potential >= 85) return false;
-        // Most players opt in (security)
         return true;
+    }
+
+    /// <summary>
+    /// Estimated market salary based on overall rating.
+    /// Formula: (overall - 40) * 0.005 of the salary cap, clamped to [2%, 35%].
+    /// </summary>
+    public long EstimateMarketSalary(int overall, long cap)
+    {
+        float pct = (overall - 40) * 0.005f;
+        pct = System.Math.Clamp(pct, 0.02f, 0.35f);
+        return (long)(cap * pct);
     }
 }

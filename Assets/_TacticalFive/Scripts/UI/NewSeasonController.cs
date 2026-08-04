@@ -295,10 +295,25 @@ public class NewSeasonController : UIScreenController
             return;
         }
 
+        float teamWinPct = 0.5f;
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        if (_season != null)
+        {
+            var seasonGames = DatabaseManager.Instance.GetSeasonGames(_manager.id, _season.id);
+            int total = seasonGames.Count;
+            if (total > 0)
+            {
+                int wins = seasonGames.Count(g =>
+                    (g.team_id_home == _selectedTeamId && g.score_home > g.score_away) ||
+                    (g.team_id_away == _selectedTeamId && g.score_away > g.score_home));
+                teamWinPct = (float)wins / total;
+            }
+        }
+
         var results = new List<PlayerOptionResult>();
         foreach (var p in playerOptions)
         {
-            bool optsIn = DatabaseManager.Instance.DecidePlayerOption(p);
+            bool optsIn = DatabaseManager.Instance.DecidePlayerOption(p, teamWinPct, settings);
             if (optsIn)
             {
                 p.contract_years += 1;
