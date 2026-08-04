@@ -350,6 +350,7 @@ public partial class DatabaseManager : MonoBehaviour
             _db.Execute("ALTER TABLE offers ADD COLUMN guaranteed_years INTEGER DEFAULT 0");
             _db.Execute("ALTER TABLE offers ADD COLUMN has_team_option INTEGER DEFAULT 0");
             _db.Execute("ALTER TABLE offers ADD COLUMN has_player_option INTEGER DEFAULT 0");
+            _db.Execute("UPDATE offers SET guaranteed_years = offer_years WHERE guaranteed_years = 0");
             Debug.Log("[DB] Migration: added guaranteed_years/has_team_option/has_player_option to offers");
         }
 
