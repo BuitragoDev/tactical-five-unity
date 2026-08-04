@@ -34,6 +34,15 @@ public class NewSeasonController : UIScreenController
     private VisualElement _teamOptionOverlay;
     private List<PlayerData> _pendingOptionPlayers;
 
+    private struct PlayerOptionResult
+    {
+        public string firstName;
+        public string lastName;
+        public string position;
+        public long salary;
+        public bool optedIn;
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -258,18 +267,63 @@ public class NewSeasonController : UIScreenController
     void CheckTeamOptions()
     {
         var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
-        var pendingOptions = players
+        var teamOptions = players
             .Where(p => p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
             .OrderByDescending(p => p.salary)
             .ToList();
 
-        if (pendingOptions.Count == 0)
+        if (teamOptions.Count > 0)
+        {
+            OpenTeamOptionModal(teamOptions);
+            return;
+        }
+
+        ResolvePlayerOptionsAndStart();
+    }
+
+    void ResolvePlayerOptionsAndStart()
+    {
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        var playerOptions = players
+            .Where(p => p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            .OrderByDescending(p => p.salary)
+            .ToList();
+
+        if (playerOptions.Count == 0)
         {
             ExecuteStartSeason();
             return;
         }
 
-        OpenTeamOptionModal(pendingOptions);
+        var results = new List<PlayerOptionResult>();
+        foreach (var p in playerOptions)
+        {
+            bool optsIn = DatabaseManager.Instance.DecidePlayerOption(p);
+            if (optsIn)
+            {
+                p.contract_years += 1;
+                p.guaranteed_years = p.contract_years;
+            }
+            else
+            {
+                p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.team_id = 0;
+            }
+            p.has_player_option = 0;
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            results.Add(new PlayerOptionResult
+            {
+                firstName = p.first_name,
+                lastName = p.last_name,
+                position = p.position,
+                salary = p.salary,
+                optedIn = optsIn
+            });
+        }
+
+        OpenPlayerOptionResultModal(results);
     }
 
     void ExecuteStartSeason()
@@ -608,7 +662,60 @@ public class NewSeasonController : UIScreenController
         }
 
         _teamOptionOverlay.style.display = DisplayStyle.None;
-        ExecuteStartSeason();
+        ResolvePlayerOptionsAndStart();
+    }
+
+    // ── PLAYER OPTION RESULT MODAL ────────────────────────
+
+    void OpenPlayerOptionResultModal(List<PlayerOptionResult> results)
+    {
+        _teamOptionOverlay.Clear();
+        _teamOptionOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        box.AddToClassList("ns-option-box");
+        _teamOptionOverlay.Add(box);
+
+        var title = new Label("DECISIONES DE JUGADOR");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label("Los siguientes jugadores tenían player option y han decidido su futuro:");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var list = new VisualElement();
+        list.AddToClassList("ns-option-list");
+        box.Add(list);
+
+        foreach (var r in results)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("ns-option-row");
+
+            string action = r.optedIn ? "EJERCE player option" : "RECHAZA player option (agente libre)";
+            string color = r.optedIn ? "#27AE60" : "#C0392B";
+
+            var info = new Label($"{r.firstName} {r.lastName} ({PositionCodes.GetName(r.position)})"
+                + $" — {FormatMoney(r.salary)}"
+                + $" — <color={color}>{action}</color>");
+            info.AddToClassList("ns-option-info");
+            info.enableRichText = true;
+            row.Add(info);
+            list.Add(row);
+        }
+
+        var continueBtn = new Button { text = "CONTINUAR" };
+        continueBtn.AddToClassList("ns-roster-continue");
+        continueBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _teamOptionOverlay.style.display = DisplayStyle.None;
+            ExecuteStartSeason();
+        });
+        box.Add(continueBtn);
+        CursorManager.Instance?.RegisterHandCursor(continueBtn);
     }
 
     string FormatMoney(long amount)

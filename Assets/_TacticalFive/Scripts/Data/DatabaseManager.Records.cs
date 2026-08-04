@@ -2340,27 +2340,26 @@ public partial class DatabaseManager
             int oldTeamId = p.team_id;
 
             // 2.5. Resolve contract options before decrement
-            // Skip the manager's team — player already handled options in NewSeason modal
-            if (p.team_id != newTeamId)
+            // Skip team options for the manager's team (already handled in NewSeason modal)
+            if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0
+                && p.team_id != newTeamId)
             {
-                if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+                if (DecideTeamOption(p))
                 {
-                    if (DecideTeamOption(p))
-                    {
-                        p.contract_years += 1;
-                        p.guaranteed_years = p.contract_years;
-                    }
-                    p.has_team_option = 0;
+                    p.contract_years += 1;
+                    p.guaranteed_years = p.contract_years;
                 }
-                if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+                p.has_team_option = 0;
+            }
+            // Player options are always decided by the AI (player decides)
+            if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            {
+                if (DecidePlayerOption(p))
                 {
-                    if (DecidePlayerOption(p))
-                    {
-                        p.contract_years += 1;
-                        p.guaranteed_years = p.contract_years;
-                    }
-                    p.has_player_option = 0;
+                    p.contract_years += 1;
+                    p.guaranteed_years = p.contract_years;
                 }
+                p.has_player_option = 0;
             }
 
             // 3. Decrement contracts
@@ -3031,7 +3030,7 @@ public partial class DatabaseManager
     /// AI decides whether to exercise a team option. The option year is the current upcoming season.
     /// Criteria: the player contributes positively (overall above threshold relative to salary/slot).
     /// </summary>
-    bool DecideTeamOption(PlayerData p)
+    public bool DecideTeamOption(PlayerData p)
     {
         // Always exercise if the player is decent and salary is reasonable
         if (p.overall < 65) return false;
@@ -3045,7 +3044,7 @@ public partial class DatabaseManager
     /// AI decides whether the player exercises their player option (opts out to test FA market).
     /// The player evaluates whether they could get a better deal in FA (approximation).
     /// </summary>
-    bool DecidePlayerOption(PlayerData p)
+    public bool DecidePlayerOption(PlayerData p)
     {
         // All-Star caliber players (overall >= 85) opt out to test the market
         if (p.overall >= 85) return false;
