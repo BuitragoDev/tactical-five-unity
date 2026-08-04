@@ -2340,17 +2340,21 @@ public partial class DatabaseManager
             int oldTeamId = p.team_id;
 
             // 2.5. Resolve contract options before decrement
-            if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            // Skip the manager's team — player already handled options in NewSeason modal
+            if (p.team_id != newTeamId)
             {
-                if (DecideTeamOption(p))
-                    p.guaranteed_years = p.contract_years;
-                p.has_team_option = 0;
-            }
-            if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
-            {
-                if (DecidePlayerOption(p))
-                    p.guaranteed_years = p.contract_years;
-                p.has_player_option = 0;
+                if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+                {
+                    if (DecideTeamOption(p))
+                        p.guaranteed_years = p.contract_years;
+                    p.has_team_option = 0;
+                }
+                if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+                {
+                    if (DecidePlayerOption(p))
+                        p.guaranteed_years = p.contract_years;
+                    p.has_player_option = 0;
+                }
             }
 
             // 3. Decrement contracts

@@ -597,7 +597,10 @@ public class NewSeasonController : UIScreenController
             }
             else
             {
+                p.contract_years = 0;
+                p.guaranteed_years = 0;
                 p.has_team_option = 0;
+                p.team_id = 0;
             }
             DatabaseManager.Instance.UpdatePlayer(p);
         }

@@ -1061,7 +1061,7 @@ using System.Linq;
         int currentDay = _season?.current_game_day ?? 0;
 bool hasTeamOpt = _teamOptionActive;
             bool hasPlayerOpt = _playerOptionActive;
-            int guarYears = (hasTeamOpt || hasPlayerOpt) && _renewOfferYears > 1 ? _renewOfferYears - 1 : _renewOfferYears;
+            int guarYears = (hasTeamOpt || hasPlayerOpt) ? System.Math.Max(0, _renewOfferYears - 1) : _renewOfferYears;
             var offer = new OfferData
             {
                 manager_id = _manager.id,
