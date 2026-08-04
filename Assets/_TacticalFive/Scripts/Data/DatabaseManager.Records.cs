@@ -2346,13 +2346,19 @@ public partial class DatabaseManager
                 if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
                 {
                     if (DecideTeamOption(p))
+                    {
+                        p.contract_years += 1;
                         p.guaranteed_years = p.contract_years;
+                    }
                     p.has_team_option = 0;
                 }
                 if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
                 {
                     if (DecidePlayerOption(p))
+                    {
+                        p.contract_years += 1;
                         p.guaranteed_years = p.contract_years;
+                    }
                     p.has_player_option = 0;
                 }
             }

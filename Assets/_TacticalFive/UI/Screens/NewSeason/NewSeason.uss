@@ -399,6 +399,9 @@
 }
 
 /* ══ Team Option Modal ══ */
+.ns-option-box {
+    width: 700px;
+}
 .ns-option-list {
     flex-direction: column;
     padding: 12px 0;

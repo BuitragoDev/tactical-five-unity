@@ -516,6 +516,7 @@ public class NewSeasonController : UIScreenController
 
         var box = new VisualElement();
         box.AddToClassList("ns-roster-box");
+        box.AddToClassList("ns-option-box");
         _teamOptionOverlay.Add(box);
 
         var title = new Label("DECISIONES DE CONTRATO");
@@ -592,6 +593,7 @@ public class NewSeasonController : UIScreenController
 
             if (dec == 1)
             {
+                p.contract_years += 1;
                 p.guaranteed_years = p.contract_years;
                 p.has_team_option = 0;
             }
