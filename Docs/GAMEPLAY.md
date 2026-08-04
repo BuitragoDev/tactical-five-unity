@@ -86,7 +86,7 @@ Constants (2025-26, `TradeHelper.cs`): cap `174,647,000`, luxury `220,428,000`, 
 6. `finalMax = min(maxByExp, rawMax)`.
 
 ### Offer resolution (`ProcessMaturedOffers`, after 7 days)
-Acceptance probability via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll `Random(1,101) ≤ score`. Results: accepted → player signs/renews (sets `team_id`, `salary`, `contract_years`, `seasons_with_team=1` for FAs; cooldowns), rejected → cooldown (+14/15 days). Legality re-checked at maturity: over-cap signings only legal up to the applicable exception; **NT-MLE usage sets hard cap** (`first_apron_hard_capped=1`).
+Acceptance probability via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll `Random(1,101) ≤ score`. Results: accepted → player signs/renews (sets `team_id`, `salary`, `contract_years`, `guaranteed_years`, `has_team_option`, `has_player_option`, `seasons_with_team=1` for FAs; cooldowns), rejected → cooldown (+14/15 days). Legality re-checked at maturity: over-cap signings only legal up to the applicable exception; **NT-MLE usage sets hard cap** (`first_apron_hard_capped=1`). Contract outcomes in the inbox and the summary modal now show the options: e.g. `3 años (Team Option)`, `2 años + Player Option` (helper `FormatContractYears`).
 
 ### Trades (`TradeHelper.ValidateTrade` / `EvaluateTrade`)
 Both sides validated against apron rules (2nd apron: no aggregation, incoming ≤ outgoing; 1st apron: ≤110% of outgoing; else standard matching `2×+250K` / `+7.5M` / `125%+250K`). AI accept via `EvaluateTrade` score vs threshold (see `SYSTEMS.md §S7`). Picks can be traded (`draft_picks.current_team_id`). User-initiated trades live in `MarketController`; AI-initiated offers appear as modals via `ShowNextPendingTradeOffer`.
@@ -120,9 +120,9 @@ Both sides validated against apron rules (2nd apron: no aggregation, incoming �
 
 ## 6. Roster management
 
-- **Renewals** (`RosterController`): salary spinner 1M..max, years 1–5; warning when payroll exceeds luxury tax; `GetMaxOfferBreakdown` shown; offer persisted in `offers`.
+- **Renewals** (`RosterController`): salary spinner 1M..max, years 1–5; warning when payroll exceeds luxury tax; `GetMaxOfferBreakdown` shown; **optional TO/PO toggle buttons** (team option / player option, mutually exclusive; option years reduce guaranteed years by 1); offer persisted in `offers` with `guaranteed_years`/`has_team_option`/`has_player_option`.
 - **Dismissal / buyout** (`RosterController`): `DESPEDIR`/`RESCINDIR CONTRATO` buttons on player detail. Dismissal: severance recorded (finance type 6). Buyout (`ConfirmBuyout`): stretch provision implemented (see §5) with TYPE_BUYOUT records.
-- **FA market** (`MarketController`): `FreeAgentsPanel`, salary/years spinners, accept-score preview (`UpdateFAAcceptScore`), legality enforced via `GetMaxOfferBreakdown(..., isFromSameTeam:false)`.
+- **FA market** (`MarketController`): `FreeAgentsPanel`, salary/years spinners, accept-score preview (`UpdateFAAcceptScore`), legality enforced via `GetMaxOfferBreakdown(..., isFromSameTeam:false)`. The contract offer modal includes the same **TO/PO toggle buttons** as renewals (`ToggleFAOption`/`RefreshFAOptionToggles`), so FA signings can carry team/player options too.
 - **Trajectory** (`TrajectoryController`): player career stats screen (uses `ScreenManager.SelectedPlayerId`).
 
 ## 7. Training

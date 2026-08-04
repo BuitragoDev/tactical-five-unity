@@ -41,9 +41,12 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
   (`SYSTEMS.md §S7`).
 - **Cap sheet / planificador de masa salarial a futuro** (años venideros, cap
   proyectado +5%/año). **Nota**: la parte **visual/informativa** ya está hecha
-  (tab «CAP SHEET» en Finances); quedan la **simulación "¿y si firmo a X?"** y las
-  **opciones de contrato** como pendientes.
+  (tab «CAP SHEET» en Finances) y la **simulación "¿y si firmo a X?"** ya está
+  implementada; quedan ajustes de equilibrio.
 - **Opciones de contrato** (team/player option) y años garantizados/no garantizados.
+  **Nota**: implementadas en el modal de oferta (Roster renovaciones + Market FA) y en
+  los mensajes de resultado (`FormatContractYears`); pendiente: maduración más realista
+  (ejercer/declinar soft cap, impacto de mercado).
 - **Picks protegidos** y más flexibilidad de transferencia de picks.
 - **Trade deadline con evento real** (el recordatorio existe; falta el cierre con efectos).
 - **Objetivos de temporada del propietario** con recompensas/cese (ya hay factor

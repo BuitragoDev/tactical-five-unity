@@ -37,11 +37,11 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | Event (title pattern) | Emitter (file:line) | Consequence |
 |---|---|---|
 | Match result message (`Resultado: ...`) | `DashboardController.CreateGameResultMessage` (~3442) | Inbox entry with score/attendance |
-| Fichaje / Oferta aceptada/rechazada | `DashboardController.ProcessMaturedOffers` (1139–1383) | User learns outcome of FA/renewal |
-| Contrato renovado | `DashboardController.ProcessMaturedOffers` (1349) | Same |
-| Fichaje cancelado (player signed elsewhere) | `DashboardController.ProcessMaturedOffers` (1151) | Same |
-| Fichaje rechazado (plantilla completa / ilegal) | `DashboardController.ProcessMaturedOffers` (1180, 1235) | Same |
-| Hard cap activado | `DashboardController.ProcessMaturedOffers` (1297) | Warns user of NT-MLE hard cap |
+| Fichaje / Oferta aceptada/rechazada | `DashboardController.ProcessMaturedOffers` (1344–1657) | User learns outcome of FA/renewal |
+| Contrato renovado | `DashboardController.ProcessMaturedOffers` (1579) | Same; contract text includes TO/PO via `FormatContractYears` |
+| Fichaje cancelado (player signed elsewhere) | `DashboardController.ProcessMaturedOffers` (1364) | Same |
+| Fichaje rechazado (plantilla completa / ilegal) | `DashboardController.ProcessMaturedOffers` (1392, 1452) | Same |
+| Hard cap activado | `DashboardController.ProcessMaturedOffers` (1524) | Warns user of NT-MLE hard cap |
 | Recuperado de lesión | `DashboardController.ProcessGameDayRoutine` (721) | Inbox; player back in lineup |
 | Lesión (from game) | `DashboardController.ProcessGameInjuries` | Inbox |
 | Queja / Preocupación de jugador (morale < 20/10) | `DashboardController.UpdatePlayersMoraleAfterGame` (3282) | Signals morale issue |

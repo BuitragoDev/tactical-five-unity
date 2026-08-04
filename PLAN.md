@@ -75,6 +75,12 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
    `Editor` → compilan en `Assembly-CSharp-Editor`, que sí ve `Assembly-CSharp` y NUnit.
    `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance`
    (`GameSimulator.cs:159-196`), por lo que no es testeable en EditMode sin refactor.*
+- **[hecho]** Opciones de contrato (team/player option) en renovaciones y fichajes FA:
+  toggles TO/PO mutuamente excluyentes en el modal de oferta de `RosterController` y
+  `MarketController`; al activarse, `guaranteed_years = max(0, years − 1)`. Los mensajes de
+  resultado (inbox + modal resumen, `DashboardController.ProcessMaturedOffers`) formatean las
+  opciones vía `FormatContractYears` (p. ej. `3 años (Team Option)`, `2 años + Player Option`).
+   `RosterController.cs:SendOffer`, `MarketController.cs:SendFAOffer`, `DashboardController.cs`.
 - **[hecho]** Líderes de liga en SQL en lugar de LINQ en C#: `BuildSeasonStats`
    (`StatsController.cs`) pasa de N+1 queries + `GroupBy` en memoria a una sola
    agregación SQL (`GetSeasonPlayerStatsAggregates` en `DatabaseManager.Records.cs`,
