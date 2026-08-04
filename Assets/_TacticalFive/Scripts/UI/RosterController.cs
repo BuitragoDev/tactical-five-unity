@@ -179,6 +179,7 @@ using System.Linq;
         _statStl = _root.Q<Label>("StatStl");
         _statBlk = _root.Q<Label>("StatBlk");
         _detailContract = _root.Q<Label>("DetailContract");
+        _detailContract.enableRichText = true;
         _detailPotential = _root.Q<Label>("DetailPotential");
         _btnDismiss = _root.Q<Button>("BtnDismiss");
         _btnBuyout = _root.Q<Button>("BtnBuyout");
@@ -644,7 +645,12 @@ using System.Linq;
         _statBlk.text = s.avgBlk.ToString("F1");
 
         // Contrato y potencial
-        _detailContract.text = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
+        string contractText = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
+        if (p.has_team_option == 1)
+            contractText += " · <color=#27AE60>TEAM OPTION</color>";
+        else if (p.has_player_option == 1)
+            contractText += " · <color=#F8C440>PLAYER OPTION</color>";
+        _detailContract.text = contractText;
         _detailPotential.text = p.potential.ToString();
 
         // Rol - icono clickeable que rota
