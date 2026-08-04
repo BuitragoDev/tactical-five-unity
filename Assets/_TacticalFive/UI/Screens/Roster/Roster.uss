@@ -884,6 +884,8 @@
     border-color: rgb(42, 51, 71);
     border-radius: 4px;
     padding: 6px 14px;
+    flex-grow: 1;
+    -unity-text-align: middle-center;
 }
 
 .renew-toggle-btn:hover {
