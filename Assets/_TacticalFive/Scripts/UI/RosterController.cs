@@ -308,8 +308,8 @@ using System.Linq;
         SetupRenewLongPress(_renewSalaryInc, () => StepRenewSalary(1));
         SetupRenewLongPress(_renewYearsDec, () => StepRenewYears(-1));
         SetupRenewLongPress(_renewYearsInc, () => StepRenewYears(1));
-        _renewTeamOption?.RegisterCallback<ClickEvent>(_ => { ToggleRenewOption("team"); });
-        _renewPlayerOption?.RegisterCallback<ClickEvent>(_ => { ToggleRenewOption("player"); });
+        _renewTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewOption("team"); });
+        _renewPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewOption("player"); });
         _detailLinkTrajectory?.RegisterCallback<ClickEvent>(_ =>
         {
             if (_selectedPlayer == null) return;
