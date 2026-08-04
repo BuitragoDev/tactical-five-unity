@@ -1338,7 +1338,17 @@ using System.Linq;
 
             string playerName = $"{player.first_name} {player.last_name}";
             string salaryText = $"${offer.offer_salary / 1_000_000}M/año";
-            string yearsText = $"{offer.offer_years} año{(offer.offer_years > 1 ? "s" : "")}";
+            string yearsText = FormatContractYears(offer);
+
+            string FormatContractYears(OfferData o)
+            {
+                bool hasOpt = o.has_team_option == 1 || o.has_player_option == 1;
+                if (!hasOpt) return $"{o.offer_years} año{(o.offer_years != 1 ? "s" : "")}";
+                string optLabel = o.has_team_option == 1 ? "Team Option" : "Player Option";
+                if (o.guaranteed_years == 0)
+                    return $"{o.offer_years} año{(o.offer_years != 1 ? "s" : "")} ({optLabel})";
+                return $"{o.guaranteed_years} año{(o.guaranteed_years != 1 ? "s" : "")} + {optLabel}";
+            }
 
             if (offer.offer_type == 1)
             {

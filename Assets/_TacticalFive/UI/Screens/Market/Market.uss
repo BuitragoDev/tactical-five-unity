@@ -1098,3 +1098,44 @@
     -unity-text-align: middle-right;
     width: 24px;
 }
+
+.renew-options-row {
+    min-height: unset;
+    margin-bottom: 8px;
+}
+
+.renew-options-toggles {
+    flex-direction: row;
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+.renew-toggle-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 4px;
+    padding: 6px 14px;
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+}
+
+.renew-toggle-btn:hover {
+    background-color: rgb(28, 33, 48);
+    border-color: rgb(85, 102, 119);
+}
+
+.renew-toggle-btn--team-active {
+    color: rgb(39, 174, 96);
+    border-color: rgb(39, 174, 96);
+    background-color: rgba(39, 174, 96, 0.15);
+}
+
+.renew-toggle-btn--player-active {
+    color: rgb(248, 196, 64);
+    border-color: rgb(248, 196, 64);
+    background-color: rgba(248, 196, 64, 0.15);
+}

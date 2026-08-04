@@ -205,6 +205,13 @@
                         <ui:Label name="FAYearsInc" class="btn-spin" text="▶" />
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement name="FAFormRowOptions" class="renew-form-row renew-options-row">
+                    <ui:Label class="renew-form-label" text="OPCIONES" />
+                    <ui:VisualElement class="renew-options-toggles">
+                        <ui:Button name="FATeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
+                        <ui:Button name="FAPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:Label name="FAText2" class="renew-modal-text" text="" />
                 <ui:Label name="FAWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
                 <ui:Label name="FAMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />

@@ -41,10 +41,15 @@ using System.Linq;
     private Label _faPendingText;
     private VisualElement _faFormRowSalary;
     private VisualElement _faFormRowYears;
+    private VisualElement _faFormRowOptions;
+    private Button _faTeamOption;
+    private Button _faPlayerOption;
     private long _faMaxSalary;
     private long _faSalary;
     private int _faYears;
     private bool _faOfferSent;
+    private bool _faTeamOptionActive;
+    private bool _faPlayerOptionActive;
     private VisualElement _tradeSuccessOverlay;
     private VisualElement _tradeSuccessBox;
     private VisualElement _tradeSuccessIcon;
@@ -118,6 +123,10 @@ using System.Linq;
         _faPendingText = _root.Q<Label>("FAPendingText");
         _faFormRowSalary = _root.Q<VisualElement>("FAFormRowSalary");
         _faFormRowYears = _root.Q<VisualElement>("FAFormRowYears");
+        _faFormRowOptions = _root.Q<VisualElement>("FAFormRowOptions");
+        _faTeamOption = _root.Q<Button>("FATeamOption");
+        _faPlayerOption = _root.Q<Button>("FAPlayerOption");
+        if (_faPlayerOption != null) _faPlayerOption.style.marginLeft = 12;
         _tradeSuccessOverlay = _root.Q<VisualElement>("TradeSuccessOverlay");
         _tradeSuccessBox = _root.Q<VisualElement>("TradeSuccessBox");
         _tradeSuccessIcon = _root.Q<VisualElement>("TradeSuccessIcon");
@@ -167,6 +176,8 @@ using System.Linq;
         SetupFALongPress(_faSalaryInc, () => StepFASalary(1));
         SetupFALongPress(_faYearsDec, () => StepFAYears(-1));
         SetupFALongPress(_faYearsInc, () => StepFAYears(1));
+        _faTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("team"); });
+        _faPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("player"); });
     }
     protected override void Refresh()
     {
@@ -1146,6 +1157,9 @@ using System.Linq;
 
         _pendingFAPlayer = player;
         _faOfferSent = false;
+        _faTeamOptionActive = false;
+        _faPlayerOptionActive = false;
+        RefreshFAOptionToggles();
 
         // Calcular límites salariales
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
@@ -1156,6 +1170,7 @@ using System.Linq;
         // Mostrar formulario, ocultar pending
         if (_faFormRowSalary != null) _faFormRowSalary.style.display = DisplayStyle.Flex;
         if (_faFormRowYears != null) _faFormRowYears.style.display = DisplayStyle.Flex;
+        if (_faFormRowOptions != null) _faFormRowOptions.style.display = DisplayStyle.Flex;
         if (_faPendingText != null) _faPendingText.style.display = DisplayStyle.None;
         if (_faWarningText != null) _faWarningText.style.display = DisplayStyle.None;
         if (_btnConfirmFA != null)
@@ -1229,13 +1244,19 @@ using System.Linq;
 
         _faOfferSent = true;
 
+        bool hasTeamOpt = _faTeamOptionActive;
+        bool hasPlayerOpt = _faPlayerOptionActive;
+        int guarYears = (hasTeamOpt || hasPlayerOpt) ? System.Math.Max(0, years - 1) : years;
+
         var offer = new OfferData
         {
             manager_id = _manager.id,
             player_id = _pendingFAPlayer.id,
             offer_salary = salary,
             offer_years = years,
-            guaranteed_years = years,
+            guaranteed_years = guarYears,
+            has_team_option = hasTeamOpt ? 1 : 0,
+            has_player_option = hasPlayerOpt ? 1 : 0,
             day_sent = _season?.current_game_day ?? 0,
             offer_type = 1,
             status = "pending",
@@ -1247,6 +1268,7 @@ using System.Linq;
         // Ocultar formulario, mostrar pending
         if (_faFormRowSalary != null) _faFormRowSalary.style.display = DisplayStyle.None;
         if (_faFormRowYears != null) _faFormRowYears.style.display = DisplayStyle.None;
+        if (_faFormRowOptions != null) _faFormRowOptions.style.display = DisplayStyle.None;
         if (_faWarningText != null) _faWarningText.style.display = DisplayStyle.None;
         if (_faPendingText != null) _faPendingText.style.display = DisplayStyle.Flex;
 
@@ -1378,6 +1400,37 @@ using System.Linq;
         ToggleFASpinDisabled(_faSalaryInc, _faSalary >= _faMaxSalary);
         ToggleFASpinDisabled(_faYearsDec, _faYears <= 1);
         ToggleFASpinDisabled(_faYearsInc, _faYears >= 5);
+    }
+
+    void ToggleFAOption(string type)
+    {
+        if (type == "team")
+        {
+            _faTeamOptionActive = !_faTeamOptionActive;
+            if (_faTeamOptionActive) _faPlayerOptionActive = false;
+        }
+        else
+        {
+            _faPlayerOptionActive = !_faPlayerOptionActive;
+            if (_faPlayerOptionActive) _faTeamOptionActive = false;
+        }
+        RefreshFAOptionToggles();
+    }
+
+    void RefreshFAOptionToggles()
+    {
+        if (_faTeamOption != null)
+        {
+            _faTeamOption.RemoveFromClassList("renew-toggle-btn--team-active");
+            if (_faTeamOptionActive)
+                _faTeamOption.AddToClassList("renew-toggle-btn--team-active");
+        }
+        if (_faPlayerOption != null)
+        {
+            _faPlayerOption.RemoveFromClassList("renew-toggle-btn--player-active");
+            if (_faPlayerOptionActive)
+                _faPlayerOption.AddToClassList("renew-toggle-btn--player-active");
+        }
     }
 
     void ToggleFASpinDisabled(Label el, bool disabled)
