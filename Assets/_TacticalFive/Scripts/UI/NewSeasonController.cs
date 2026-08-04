@@ -362,7 +362,7 @@ public class NewSeasonController : UIScreenController
         {
             PlayClick();
             _rosterOverlay.style.display = DisplayStyle.None;
-            ExecuteStartSeason();
+            CheckTeamOptions();
         });
         box.Add(_btnRosterContinue);
 
