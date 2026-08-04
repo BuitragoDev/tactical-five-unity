@@ -870,14 +870,13 @@
 
 .renew-options-toggles {
     flex-direction: row;
-    gap: 12px;
     flex-grow: 1;
     margin-left: 8px;
 }
 
 .renew-toggle-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     background-color: rgb(22, 26, 36);
     border-width: 1px;

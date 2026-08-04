@@ -221,6 +221,7 @@ using System.Linq;
         _renewYearsInc = _root.Q<Label>("RenewYearsInc");
         _renewTeamOption = _root.Q<Button>("RenewTeamOption");
         _renewPlayerOption = _root.Q<Button>("RenewPlayerOption");
+        if (_renewPlayerOption != null) _renewPlayerOption.style.marginLeft = 12;
         _renewPendingText = _root.Q<Label>("RenewPendingText");
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
         _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
