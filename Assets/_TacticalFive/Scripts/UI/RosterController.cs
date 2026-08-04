@@ -645,11 +645,19 @@ using System.Linq;
         _statBlk.text = s.avgBlk.ToString("F1");
 
         // Contrato y potencial
-        string contractText = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
-        if (p.has_team_option == 1)
-            contractText += " · <color=#27AE60>TEAM OPTION</color>";
-        else if (p.has_player_option == 1)
-            contractText += " · <color=#F8C440>PLAYER OPTION</color>";
+        int guaranteed = p.guaranteed_years;
+        int total = p.contract_years;
+        bool hasOpt = p.has_team_option == 1 || p.has_player_option == 1;
+        string optLabel = p.has_team_option == 1 ? "TO" : "PO";
+        string optColor = p.has_team_option == 1 ? "#27AE60" : "#F8C440";
+
+        string contractText = $"${p.salary / 1_000_000}M/año";
+        if (hasOpt && guaranteed == 0)
+            contractText += $" · {total} año{(total != 1 ? "s" : "")} (<color={optColor}>{optLabel}</color>)";
+        else if (hasOpt)
+            contractText += $" · {guaranteed} año{(guaranteed != 1 ? "s" : "")} + <color={optColor}>{optLabel}</color>";
+        else
+            contractText += $" · {total} año{(total != 1 ? "s" : "")}";
         _detailContract.text = contractText;
         _detailPotential.text = p.potential.ToString();
 
