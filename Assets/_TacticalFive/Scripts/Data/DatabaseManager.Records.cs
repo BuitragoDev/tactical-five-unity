@@ -2273,8 +2273,8 @@ public partial class DatabaseManager
 
         // Pre-compute team win% for player option decisions
         var teamWinPctCache = new Dictionary<int, float>();
-        var leagueSettings = GetLeagueSettings();
-        if (leagueSettings != null && oldSeasonId > 0)
+        var teamOptionSettings = GetLeagueSettings();
+        if (teamOptionSettings != null && oldSeasonId > 0)
         {
             var seasonGames = _db.Table<GameData>()
                 .Where(g => g.season_id == oldSeasonId && g.is_played == 1)
@@ -2282,10 +2282,10 @@ public partial class DatabaseManager
             var teamGames = new Dictionary<int, (int wins, int total)>();
             foreach (var g in seasonGames)
             {
-                if (!teamGames.ContainsKey(g.team_id_home)) teamGames[g.team_id_home] = (0, 0);
-                if (!teamGames.ContainsKey(g.team_id_away)) teamGames[g.team_id_away] = (0, 0);
-                teamGames[g.team_id_home] = (teamGames[g.team_id_home].wins + (g.score_home > g.score_away ? 1 : 0), teamGames[g.team_id_home].total + 1);
-                teamGames[g.team_id_away] = (teamGames[g.team_id_away].wins + (g.score_away > g.score_home ? 1 : 0), teamGames[g.team_id_away].total + 1);
+                if (!teamGames.ContainsKey(g.home_team_id)) teamGames[g.home_team_id] = (0, 0);
+                if (!teamGames.ContainsKey(g.away_team_id)) teamGames[g.away_team_id] = (0, 0);
+                teamGames[g.home_team_id] = (teamGames[g.home_team_id].wins + (g.home_score > g.away_score ? 1 : 0), teamGames[g.home_team_id].total + 1);
+                teamGames[g.away_team_id] = (teamGames[g.away_team_id].wins + (g.away_score > g.home_score ? 1 : 0), teamGames[g.away_team_id].total + 1);
             }
             foreach (var kv in teamGames)
                 teamWinPctCache[kv.Key] = kv.Value.total > 0 ? (float)kv.Value.wins / kv.Value.total : 0.5f;
@@ -2376,7 +2376,7 @@ public partial class DatabaseManager
             if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
             {
                 float teamPct = teamWinPctCache.TryGetValue(p.team_id, out float wp) ? wp : 0.5f;
-                if (DecidePlayerOption(p, teamPct, leagueSettings))
+                if (DecidePlayerOption(p, teamPct, teamOptionSettings))
                 {
                     p.contract_years += 1;
                     p.guaranteed_years = p.contract_years;

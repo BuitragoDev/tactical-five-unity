@@ -304,8 +304,8 @@ public class NewSeasonController : UIScreenController
             if (total > 0)
             {
                 int wins = seasonGames.Count(g =>
-                    (g.team_id_home == _selectedTeamId && g.score_home > g.score_away) ||
-                    (g.team_id_away == _selectedTeamId && g.score_away > g.score_home));
+                    (g.home_team_id == _selectedTeamId && g.home_score > g.away_score) ||
+                    (g.away_team_id == _selectedTeamId && g.away_score > g.home_score));
                 teamWinPct = (float)wins / total;
             }
         }
