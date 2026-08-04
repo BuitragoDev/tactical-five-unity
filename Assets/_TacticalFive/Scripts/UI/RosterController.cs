@@ -648,7 +648,7 @@ using System.Linq;
         int guaranteed = p.guaranteed_years;
         int total = p.contract_years;
         bool hasOpt = p.has_team_option == 1 || p.has_player_option == 1;
-        string optLabel = p.has_team_option == 1 ? "TO" : "PO";
+        string optLabel = p.has_team_option == 1 ? "Team Option" : "Player Option";
         string optColor = p.has_team_option == 1 ? "#27AE60" : "#F8C440";
 
         string contractText = $"${p.salary / 1_000_000}M/año";
