@@ -30,6 +30,10 @@ public class NewSeasonController : UIScreenController
     private List<PlayerData> _rosterPlayers;
     private int _rosterActiveCount;
 
+    // Team option modal
+    private VisualElement _teamOptionOverlay;
+    private List<PlayerData> _pendingOptionPlayers;
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -37,6 +41,10 @@ public class NewSeasonController : UIScreenController
         _rosterOverlay = new VisualElement();
         _rosterOverlay.AddToClassList("ns-roster-overlay");
         _root.Add(_rosterOverlay);
+
+        _teamOptionOverlay = new VisualElement();
+        _teamOptionOverlay.AddToClassList("ns-roster-overlay");
+        _root.Add(_teamOptionOverlay);
 
         CursorManager.Instance?.SetDefaultCursor();
     }
@@ -244,7 +252,24 @@ public class NewSeasonController : UIScreenController
             OpenRosterModal(roster);
             return;
         }
-        ExecuteStartSeason();
+        CheckTeamOptions();
+    }
+
+    void CheckTeamOptions()
+    {
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        var pendingOptions = players
+            .Where(p => p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            .OrderByDescending(p => p.salary)
+            .ToList();
+
+        if (pendingOptions.Count == 0)
+        {
+            ExecuteStartSeason();
+            return;
+        }
+
+        OpenTeamOptionModal(pendingOptions);
     }
 
     void ExecuteStartSeason()
@@ -478,5 +503,111 @@ public class NewSeasonController : UIScreenController
             _btnRosterContinue.SetEnabled(true);
             CursorManager.Instance?.RegisterHandCursor(_btnRosterContinue);
         }
+    }
+
+    // ── TEAM OPTION DECISION MODAL ────────────────────────
+
+    void OpenTeamOptionModal(List<PlayerData> players)
+    {
+        _pendingOptionPlayers = players;
+
+        _teamOptionOverlay.Clear();
+        _teamOptionOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        _teamOptionOverlay.Add(box);
+
+        var title = new Label("DECISIONES DE CONTRATO");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label("Los siguientes jugadores tienen una team option pendiente.\nDecide si ejecutar o declinar cada opción antes de avanzar la temporada.");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var list = new VisualElement();
+        list.AddToClassList("ns-option-list");
+        box.Add(list);
+
+        // Track decisions: 0 = unset, 1 = exercise, -1 = decline
+        var decisions = new Dictionary<int, int>();
+        foreach (var p in players)
+        {
+            decisions[p.id] = 0;
+
+            var row = new VisualElement();
+            row.AddToClassList("ns-option-row");
+
+            var info = new Label($"{p.first_name} {p.last_name} ({PositionCodes.GetName(p.position)})"
+                + $" — {FormatMoney(p.salary)}"
+                + $" — {p.contract_years} año{(p.contract_years != 1 ? "s" : "")} restantes");
+            info.AddToClassList("ns-option-info");
+            row.Add(info);
+
+            var btns = new VisualElement();
+            btns.AddToClassList("ns-option-btns");
+
+            var exerciseBtn = new Button { text = "EJECUTAR" };
+            exerciseBtn.AddToClassList("ns-option-btn");
+            exerciseBtn.AddToClassList("ns-option-btn--exercise");
+            CursorManager.Instance?.RegisterHandCursor(exerciseBtn);
+
+            var declineBtn = new Button { text = "DECLINAR" };
+            declineBtn.AddToClassList("ns-option-btn");
+            declineBtn.AddToClassList("ns-option-btn--decline");
+            CursorManager.Instance?.RegisterHandCursor(declineBtn);
+
+            exerciseBtn.clicked += () =>
+            {
+                decisions[p.id] = 1;
+                declineBtn.SetEnabled(false);
+                exerciseBtn.SetEnabled(false);
+                exerciseBtn.AddToClassList("ns-option-btn--selected");
+                CheckAllOptionsDecided(decisions);
+            };
+            declineBtn.clicked += () =>
+            {
+                decisions[p.id] = -1;
+                exerciseBtn.SetEnabled(false);
+                declineBtn.SetEnabled(false);
+                declineBtn.AddToClassList("ns-option-btn--selected");
+                CheckAllOptionsDecided(decisions);
+            };
+
+            btns.Add(exerciseBtn);
+            btns.Add(declineBtn);
+            row.Add(btns);
+            list.Add(row);
+        }
+    }
+
+    void CheckAllOptionsDecided(Dictionary<int, int> decisions)
+    {
+        if (decisions.Values.Any(v => v == 0)) return;
+
+        foreach (var p in _pendingOptionPlayers)
+        {
+            if (!decisions.TryGetValue(p.id, out int dec)) continue;
+
+            if (dec == 1)
+            {
+                p.guaranteed_years = p.contract_years;
+                p.has_team_option = 0;
+            }
+            else
+            {
+                p.has_team_option = 0;
+            }
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+
+        _teamOptionOverlay.style.display = DisplayStyle.None;
+        ExecuteStartSeason();
+    }
+
+    string FormatMoney(long amount)
+    {
+        return System.Math.Abs(amount).ToString("N0").Replace(',', '.') + " $";
     }
 }

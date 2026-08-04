@@ -1235,6 +1235,7 @@ using System.Linq;
             player_id = _pendingFAPlayer.id,
             offer_salary = salary,
             offer_years = years,
+            guaranteed_years = years,
             day_sent = _season?.current_game_day ?? 0,
             offer_type = 1,
             status = "pending",

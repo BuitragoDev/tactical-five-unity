@@ -1020,6 +1020,7 @@ using System.Linq;
             player_id = _selectedPlayer.id,
             offer_salary = _renewOfferSalary,
             offer_years = _renewOfferYears,
+            guaranteed_years = _renewOfferYears,
             day_sent = currentDay,
             status = "pending",
             processed = 0
