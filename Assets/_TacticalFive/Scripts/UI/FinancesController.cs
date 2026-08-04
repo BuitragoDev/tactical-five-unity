@@ -57,6 +57,7 @@ using System.Linq;
     private Toggle _scenarioPlayerOpt;
     private Button _scenarioAddBtn;
     private VisualElement _scenarioList;
+    private Label _scenarioHint;
 
     // Ticket config
     private VisualElement _ticketPriceGrid;
@@ -115,6 +116,7 @@ using System.Linq;
         _scenarioPlayerOpt = _root.Q<Toggle>("ScenarioPlayerOpt");
         _scenarioAddBtn = _root.Q<Button>("ScenarioAddBtn");
         _scenarioList = _root.Q<VisualElement>("CapScenarioList");
+        _scenarioHint = _root.Q<Label>("CapScenarioHint");
 
         _ticketPriceGrid = _root.Q<VisualElement>("TicketPriceGrid");
         _subscriptionPriceGrid = _root.Q<VisualElement>("SubscriptionPriceGrid");
@@ -524,7 +526,7 @@ using System.Linq;
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         var settings = DatabaseManager.Instance.GetLeagueSettings();
 
-        _scenarioSection.style.display = _scenarioPlayers.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
+        _scenarioHint.style.display = _scenarioPlayers.Count > 0 ? DisplayStyle.None : DisplayStyle.Flex;
         BuildScenarioList();
 
         long cap = settings != null ? settings.salary_cap : TradeHelper.SALARY_CAP;

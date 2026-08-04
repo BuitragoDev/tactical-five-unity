@@ -612,6 +612,13 @@
     background-color: rgb(255, 210, 80);
 }
 
+.cap-scenario-hint {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(120, 130, 150);
+    padding: 0 0 12px 0;
+}
+
 .cap-scenario-list {
     flex-direction: column;
     padding: 8px 0;
