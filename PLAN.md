@@ -107,3 +107,11 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
   `[DEADLINE]` en títulos de ofertas IA; badge `⏳ ÚLTIMOS X DÍAS` en el header del Market
   durante la semana de deadline. `DashboardController.cs`, `MarketController.cs`,
   `Market.uxml/uss`, `Dashboard.uss`.
+- **[hecho]** AI de GMs con estrategia por equipo: `enum TeamStrategy { Rebuild, Balanced, Contend }`
+  (`GetTeamStrategy`/`BuildTeamStrategyCache`), cooldowns por equipo según estrategia
+  (`_teamTradeCooldown`; Contend 6d, Rebuild 8d, Balanced 15d; 3-5 en deadline) y densidad
+  (0.45/0.40/0.25) en `ProcessAITransfers`; fire sale de rebuild (`TrySellVeteran`, vende
+  veteranos ≥30 por jóvenes/picks); contender busca upgrades OVR≤90 con pick futuro protegiendo
+  jóvenes (<26, OVR≥82); ofertas al usuario según estrategia (`PickTradeTarget`/`BuildOfferPackage`);
+  Star FA prioriza Contend > Balanced > Rebuild y Rebuild no ficha OVR≥85 (tankea el draft).
+  `DashboardController.cs`.

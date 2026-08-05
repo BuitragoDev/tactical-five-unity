@@ -125,6 +125,10 @@ using System.Linq;
     private bool _deadlineDayModalShown;
     private int _deadlineModalSeasonId;
 
+    // AI de GMs: estrategia por equipo y cooldown por equipo para traspasos
+    private Dictionary<int, TeamStrategy> _teamStrategyCache = new();
+    private Dictionary<int, int> _teamTradeCooldown = new();
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -160,6 +164,7 @@ using System.Linq;
             {
                 _deadlineDayModalShown = false;
                 _deadlineModalSeasonId = _season.id;
+                _teamTradeCooldown.Clear();
             }
             CheckBudgetWarning();
             ProcessMaturedOffers();
@@ -2606,6 +2611,8 @@ using System.Linq;
     //  AI TRANSFERS
     // ═══════════════════════════════════════════
 
+    enum TeamStrategy { Rebuild, Balanced, Contend }
+
     bool IsDeadlineWeek()
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
@@ -2623,13 +2630,60 @@ using System.Linq;
         return top4.Any(s => s.teamId == team.id);
     }
 
+    // Clasifica la estrategia de un equipo a partir de su clasificación y plantilla.
+    TeamStrategy GetTeamStrategy(TeamData team, List<StandingRow> confStandings, List<PlayerData> roster)
+    {
+        var row = confStandings?.FirstOrDefault(s => s.teamId == team.id);
+        int rank = row?.rank ?? 0;
+        int confSize = confStandings?.Count ?? 0;
+
+        var stars = roster.Count(p => p.overall >= 85);
+        float avgAge = roster.Count > 0 ? (float)roster.Average(p => p.age) : 30f;
+
+        // Contender: top 4 de su conferencia o plantilla con 2+ estrellas (OVR >= 85)
+        bool byRecord = rank > 0 && rank <= 4;
+        bool byRoster = stars >= 2;
+        if (byRecord || byRoster) return TeamStrategy.Contend;
+
+        // Rebuild: últimos 4 de su conferencia o plantilla joven sin estrellas (OVR >= 80)
+        bool weakRecord = rank > 0 && rank >= confSize - 3;
+        bool youngNoStars = avgAge <= 27f && stars == 0 && roster.Count(p => p.overall >= 80) <= 1;
+        if (weakRecord || youngNoStars) return TeamStrategy.Rebuild;
+
+        return TeamStrategy.Balanced;
+    }
+
+    // Precalcula la estrategia de todos los equipos una vez por ciclo de traspaso.
+    void BuildTeamStrategyCache()
+    {
+        _teamStrategyCache.Clear();
+        if (_allTeams == null || _allTeams.Count == 0) return;
+
+        var eastTeams = _allTeams.Where(t => t.conference == "East").ToList();
+        var westTeams = _allTeams.Where(t => t.conference == "West").ToList();
+        var eastStandings = BuildStandings(eastTeams);
+        var westStandings = BuildStandings(westTeams);
+
+        foreach (var team in _allTeams)
+        {
+            var standings = team.conference == "East" ? eastStandings : westStandings;
+            var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+            _teamStrategyCache[team.id] = GetTeamStrategy(team, standings, roster);
+        }
+    }
+
+    TeamStrategy GetTeamStrategy(int teamId)
+    {
+        return _teamStrategyCache.TryGetValue(teamId, out var s) ? s : TeamStrategy.Balanced;
+    }
+
     void ProcessAITransfers(int gameDay)
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
 
         // Only run every ~10 game days (or 3-5 during deadline week)
         int lastDay = _season.last_ai_trade_day;
-        int cooldownDays = IsDeadlineWeek() ? Random.Range(3, 6) : 15;
+        int cooldownDays = IsDeadlineWeek() ? Random.Range(3, 6) : 10;
         Debug.Log($"[AITrades] ProcessAITransfers called. gameDay={gameDay} lastDay={lastDay} diff={gameDay - lastDay}");
         if (gameDay - lastDay < cooldownDays) return;
 
@@ -2646,20 +2700,42 @@ using System.Linq;
         _season.last_ai_trade_day = gameDay;
         Debug.Log($"[AITrades] Starting cycle. Date={_season.current_date} gameDay={gameDay}");
 
+        BuildTeamStrategyCache();
+
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var seasonId = _season.id;
         var freeAgentsAll = DatabaseManager.Instance.GetFreeAgents();
 
         int teamsAttempted = 0, teamsTraded = 0, teamsFAd = 0;
-        const int maxTrades = 2;
+        const int maxTrades = 3;
 
-        foreach (var team in allTeams)
+        foreach (var team in allTeams.OrderBy(_ => Random.Range(0, 1000)))
         {
             if (team.id == _myTeam.id) continue;
 
             if (teamsTraded >= maxTrades) break;
 
-            if (Random.Range(0f, 1f) > 0.3f) continue;
+            var strategy = GetTeamStrategy(team.id);
+
+            // Densidad por estrategia: contender y rebuild se mueven más que balanced
+            float moveChance = strategy switch
+            {
+                TeamStrategy.Contend => 0.45f,
+                TeamStrategy.Rebuild => 0.40f,
+                _ => 0.25f
+            };
+            if (Random.Range(0f, 1f) > moveChance) continue;
+
+            // Cooldown por equipo según estrategia
+            int teamCooldown = strategy switch
+            {
+                TeamStrategy.Contend => IsDeadlineWeek() ? 3 : 6,
+                TeamStrategy.Rebuild => IsDeadlineWeek() ? 3 : 8,
+                _ => IsDeadlineWeek() ? 5 : 15
+            };
+            int lastTeamTrade = _teamTradeCooldown.TryGetValue(team.id, out var lt) ? lt : -10000;
+            if (gameDay - lastTeamTrade < teamCooldown) continue;
+            _teamTradeCooldown[team.id] = gameDay;
 
             var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
             if (roster.Count < 10) continue;
@@ -2668,6 +2744,13 @@ using System.Linq;
             if (weakestPos == null) continue;
 
             teamsAttempted++;
+
+            // Rebuild: primero intenta vender veteranos (fire sale) para obtener jóvenes/picks
+            if (strategy == TeamStrategy.Rebuild && TrySellVeteran(team, roster, seasonId, gameDay))
+            {
+                teamsTraded++;
+                continue;
+            }
 
             // If roster < 12, sign free agent directly without trying trade
             if (roster.Count < 12)
@@ -2696,6 +2779,67 @@ using System.Linq;
         GenerateAITradeOffersForPlayer(gameDay, seasonId);
     }
 
+    // Fire sale de un equipo en reconstrucción: ofrece veteranos (edad >= 30, salario alto)
+    // a cambio de jugadores jóvenes o picks de equipos contender/balanced.
+    bool TrySellVeteran(TeamData seller, List<PlayerData> sellerRoster, int seasonId, int gameDay)
+    {
+        var vets = sellerRoster
+            .Where(p => p.injury_days == 0 && p.age >= 30 && p.salary >= TradeHelper.MIN_SALARY)
+            .OrderByDescending(p => p.salary)
+            .ToList();
+        if (vets.Count == 0) return false;
+
+        var buyers = DatabaseManager.Instance.GetAllTeams()
+            .Where(t => t.id != _myTeam.id && t.id != seller.id)
+            .OrderBy(_ => Random.Range(0, 1000))
+            .ToList();
+
+        foreach (var vet in vets)
+        {
+            foreach (var buyer in buyers)
+            {
+                if (GetTeamStrategy(buyer.id) == TeamStrategy.Rebuild) continue;
+
+                var buyerRoster = DatabaseManager.Instance.GetPlayersByTeam(buyer.id);
+                if (buyerRoster.Count < 12) continue;
+
+                // El comprador paga con jóvenes (edad < 25) baratos o con picks
+                var young = buyerRoster
+                    .Where(p => p.injury_days == 0 && p.age < 25 && p.salary <= vet.salary * 0.8f)
+                    .OrderBy(p => p.salary)
+                    .ToList();
+                if (young.Count == 0) continue;
+
+                var candidate = young[0];
+                var youngPack = new List<PlayerData> { candidate };
+                if (young.Count >= 2 && Random.Range(0f, 1f) < 0.4f)
+                    youngPack.Add(young[1]);
+
+                var buyerPicks = DatabaseManager.Instance.GetDraftPicksForTeam(buyer.id);
+                var futurePick = buyerPicks
+                    .OrderByDescending(p => p.season_id)
+                    .ThenBy(p => p.round)
+                    .ThenBy(p => p.pick_number)
+                    .FirstOrDefault();
+                var picks = new List<DraftPickData>();
+                if (futurePick != null && Random.Range(0f, 1f) < 0.5f)
+                    picks.Add(futurePick);
+
+                if (TryExecuteTrade(seller, sellerRoster, buyer, buyerRoster,
+                        new List<PlayerData> { vet },
+                        youngPack,
+                        seasonId, gameDay,
+                        aSelectedPicks: null,
+                        bSelectedPicks: picks))
+                {
+                    Debug.Log($"[AITrades] {seller.name} vende a {vet.first_name} {vet.last_name} ({vet.age} años) a {buyer.name} por jóvenes/picks (rebuild fire sale)");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     void ProcessStarFreeAgentSignings(int gameDay)
     {
         if (_season == null) return;
@@ -2714,12 +2858,20 @@ using System.Linq;
             .ToList();
 
         var teamAvgs = new Dictionary<int, float>();
+        var teamStrategies = new Dictionary<int, TeamStrategy>();
         foreach (var team in allTeams)
         {
             var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
             teamAvgs[team.id] = roster.Count > 0 ? (float)roster.Average(p => p.GetCalculatedAverage()) : 0f;
+            teamStrategies[team.id] = GetTeamStrategy(team.id);
         }
-        var teamsByAvg = allTeams.OrderByDescending(t => teamAvgs[t.id]).ToList();
+        // Prioridad de destino: contender > balanced > rebuild (los rebuild tankean y
+        // preservan el pick alto del draft).
+        var teamsByPriority = allTeams
+            .OrderByDescending(t => teamStrategies[t.id] == TeamStrategy.Contend ? 3
+                                   : teamStrategies[t.id] == TeamStrategy.Balanced ? 2 : 1)
+            .ThenByDescending(t => teamAvgs[t.id])
+            .ToList();
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
         var pendingSATIds = GetPendingSATIds();
@@ -2739,10 +2891,13 @@ using System.Linq;
             }
 
             bool signed = false;
-            foreach (var team in teamsByAvg)
+            foreach (var team in teamsByPriority)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
                 if (roster.Count >= TradeHelper.MAX_ROSTER) continue;
+
+                // Un equipo en reconstrucción no ficha estrellas top (tankea para el draft)
+                if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
 
                 long payroll = roster.Sum(p => p.salary);
                 if (salaryCap - payroll < star.salary) continue;
@@ -2850,10 +3005,14 @@ using System.Linq;
         {
             var rosterB = DatabaseManager.Instance.GetPlayersByTeam(teamB.id);
 
+            // Los contenders buscan mejoras más fuertes (sin tope de 86) y pueden incluir picks
+            var teamAStrategy = GetTeamStrategy(teamA.id);
+            int targetCap = teamAStrategy == TeamStrategy.Contend ? 90 : 86;
+
             var target = rosterB
                 .Where(p => p.position == targetPos && p.injury_days == 0)
                 .OrderByDescending(p => p.overall)
-                .FirstOrDefault(p => p.overall <= 86);
+                .FirstOrDefault(p => p.overall <= targetCap);
             if (target == null) continue;
 
             var candidates = rosterA
@@ -2864,25 +3023,48 @@ using System.Linq;
                 .ToList();
             if (candidates.Count == 0) continue;
 
+            // Los contender protegen a sus jóvenes con valor (edad < 26 y OVR >= 82)
+            List<PlayerData> tradeableCandidates;
+            if (teamAStrategy == TeamStrategy.Contend)
+                tradeableCandidates = candidates.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
+            else
+                tradeableCandidates = candidates;
+
+            if (tradeableCandidates.Count == 0) continue;
+
+            // Los contender suelen añadir un pick futuro como "sweetener"
+            List<DraftPickData> teamAPicks = null;
+            if (teamAStrategy == TeamStrategy.Contend && target.overall > 84)
+            {
+                var futurePick = DatabaseManager.Instance.GetDraftPicksForTeam(teamA.id)
+                    .OrderByDescending(p => p.season_id)
+                    .ThenBy(p => p.round)
+                    .ThenBy(p => p.pick_number)
+                    .FirstOrDefault();
+                if (futurePick != null) teamAPicks = new List<DraftPickData> { futurePick };
+            }
+
             // Try 1-for-1
-            foreach (var c in candidates)
+            foreach (var c in tradeableCandidates)
             {
                 if (TryExecuteTrade(teamA, rosterA, teamB, rosterB,
                         new List<PlayerData> { c },
                         new List<PlayerData> { target },
-                        seasonId, gameDay))
+                        seasonId, gameDay,
+                        aSelectedPicks: teamAPicks))
                     return true;
             }
 
             // Try 2-for-1
-            for (int i = 0; i < candidates.Count; i++)
+            for (int i = 0; i < tradeableCandidates.Count; i++)
             {
-                for (int j = i + 1; j < candidates.Count; j++)
+                for (int j = i + 1; j < tradeableCandidates.Count; j++)
                 {
                     if (TryExecuteTrade(teamA, rosterA, teamB, rosterB,
-                            new List<PlayerData> { candidates[i], candidates[j] },
+                            new List<PlayerData> { tradeableCandidates[i], tradeableCandidates[j] },
                             new List<PlayerData> { target },
-                            seasonId, gameDay))
+                            seasonId, gameDay,
+                            aSelectedPicks: teamAPicks))
                         return true;
                 }
             }
@@ -3141,7 +3323,8 @@ using System.Linq;
                 }
             }
 
-            var target = PickTradeTarget(userHealthy, aiRoster, targetedIds);
+            var aiStrategy = GetTeamStrategy(aiTeam.id);
+            var target = PickTradeTarget(userHealthy, aiRoster, targetedIds, aiStrategy);
             if (target == null) continue;
 
             targetedIds.Add(target.id);
@@ -3151,7 +3334,7 @@ using System.Linq;
                 .ToList();
             if (aiHealthy.Count == 0) continue;
 
-            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam);
+            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam, aiStrategy);
             if (offerPack == null) continue;
 
             long packSalary = offerPack.Sum(p => p.salary);
@@ -3187,9 +3370,31 @@ using System.Linq;
     }
 
     PlayerData PickTradeTarget(List<PlayerData> userHealthy, List<PlayerData> aiRoster,
-                                HashSet<int> excludedIds)
+                                HashSet<int> excludedIds, TeamStrategy aiStrategy = TeamStrategy.Balanced)
     {
         var roll = Random.Range(0f, 1f);
+
+        // Los contenders persiguen a tus mejores jugadores (estrellas)
+        if (aiStrategy == TeamStrategy.Contend && roll < 0.75f)
+        {
+            var starCandidates = userHealthy
+                .Where(p => !excludedIds.Contains(p.id) && p.overall >= 83)
+                .OrderByDescending(p => p.overall)
+                .ToList();
+            if (starCandidates.Count > 0)
+                return starCandidates[Random.Range(0, Mathf.Min(2, starCandidates.Count))];
+        }
+
+        // Los rebuild buscan activos jóvenes (los explotan o los roban baratos)
+        if (aiStrategy == TeamStrategy.Rebuild && roll < 0.30f)
+        {
+            var youngCandidates = userHealthy
+                .Where(p => !excludedIds.Contains(p.id) && p.age <= 26)
+                .OrderByDescending(p => p.overall)
+                .ToList();
+            if (youngCandidates.Count > 0)
+                return youngCandidates[Random.Range(0, Mathf.Min(2, youngCandidates.Count))];
+        }
 
         if (roll < 0.35f)
         {
@@ -3235,7 +3440,8 @@ using System.Linq;
     }
 
     List<PlayerData> BuildOfferPackage(List<PlayerData> aiAvailable, int aiRosterCount,
-                                        PlayerData target, List<PlayerData> userRoster, TeamData aiTeam)
+                                        PlayerData target, List<PlayerData> userRoster, TeamData aiTeam,
+                                        TeamStrategy aiStrategy = TeamStrategy.Balanced)
     {
         long userPayroll = userRoster.Sum(p => p.salary);
         var fullAiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
@@ -3244,8 +3450,17 @@ using System.Linq;
         bool aiHardCapped = aiTeam.first_apron_hard_capped == 1;
         bool userHardCapped = _myTeam.first_apron_hard_capped == 1;
 
+        // Los contender nunca ofrecen a sus jóvenes de valor; los rebuild no se
+        // deshacen de promesas jóvenes, solo de salarios caros.
+        var tradeable = aiAvailable;
+        if (aiStrategy == TeamStrategy.Contend)
+            tradeable = aiAvailable.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
+        if (aiStrategy == TeamStrategy.Rebuild)
+            tradeable = aiAvailable.Where(p => p.age >= 25).ToList();
+        if (tradeable.Count == 0) return null;
+
         // Try 1-for-1: closest salary match first
-        foreach (var p in aiAvailable.OrderBy(p => Mathf.Abs(p.salary - target.salary)))
+        foreach (var p in tradeable.OrderBy(p => Mathf.Abs(p.salary - target.salary)))
         {
             var pack = new List<PlayerData> { p };
             if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
@@ -3255,11 +3470,11 @@ using System.Linq;
         }
 
         // Try 2-for-1
-        for (int i = 0; i < aiAvailable.Count; i++)
+        for (int i = 0; i < tradeable.Count; i++)
         {
-            for (int j = i + 1; j < aiAvailable.Count; j++)
+            for (int j = i + 1; j < tradeable.Count; j++)
             {
-                var pack = new List<PlayerData> { aiAvailable[i], aiAvailable[j] };
+                var pack = new List<PlayerData> { tradeable[i], tradeable[j] };
                 if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
                         aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
                         aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
@@ -3270,13 +3485,13 @@ using System.Linq;
         // Try 3-for-1
         if (aiRosterCount - 3 >= 10)
         {
-            for (int i = 0; i < aiAvailable.Count; i++)
+            for (int i = 0; i < tradeable.Count; i++)
             {
-                for (int j = i + 1; j < aiAvailable.Count; j++)
+                for (int j = i + 1; j < tradeable.Count; j++)
                 {
-                    for (int k = j + 1; k < aiAvailable.Count; k++)
+                    for (int k = j + 1; k < tradeable.Count; k++)
                     {
-                        var pack = new List<PlayerData> { aiAvailable[i], aiAvailable[j], aiAvailable[k] };
+                        var pack = new List<PlayerData> { tradeable[i], tradeable[j], tradeable[k] };
                         if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
                                 aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
                                 aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)

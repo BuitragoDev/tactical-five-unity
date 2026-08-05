@@ -60,8 +60,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 ## Frente 3 — Simulación & AI (realismo)
 
-- **AI de GMs más inteligente**: reconstrucción por edades, priorizar assets, no
-  firmar solo lo que falta al roster.
+- **AI de GMs más inteligente** — **hecho** (rama `crear-mejoras2`): enum `TeamStrategy` (Rebuild/Balanced/Contend) en `DashboardController`; cooldowns y densidad por estrategia (Contend 0.45/6d, Rebuild 0.40/8d, Balanced 0.25/15d; 3-5 en deadline), fire sale de rebuild (`TrySellVeteran`), contender busca upgrades OVR≤90 con pick futuro protegiendo jóvenes, ofertas al usuario según estrategia (`PickTradeTarget`/`BuildOfferPackage`) y Star FA que prioriza contender sobre rebuild (que tankea y no ficha OVR≥85). Ver `SYSTEMS.md` §S.
 - **Analytics avanzados**: PER/WS/eFG/TS%/espaciado por encima del box score actual.
 - **Fog-of-war en valoraciones** (el ojeador da rangos, no OVR exacto) — casa con
   la pantalla de Ojeadores.
@@ -109,3 +108,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Cap sheet (Finances → «CAP SHEET») | **Hecho** — `FinancesController.BuildCapSheet` + pestaña `PanelCap` (info read-only) |
 | Sign-and-trade de FA propio (NBA clásico) | **Hecho** — `MarketController.ProcessSATrade` + `TradeHelper` sign salaries + IA |
 | Trade deadline con evento real | **Hecho** — `DashboardController.ShowDeadlineDayModal` + `IsDeadlineWeek`/`IsFeb7OfYearEnd` + rush IA + badge Market (commit `649c98e`) |
+| AI de GMs más inteligente (estrategia por equipo) | **Hecho** — `TeamStrategy` + cooldowns/densidad por estrategia + fire sale rebuild + Star FA por prioridad |
