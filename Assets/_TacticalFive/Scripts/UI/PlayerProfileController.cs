@@ -207,22 +207,8 @@ using System.Linq;
             ("FÍSICO",    _player.fisico),
         };
 
-        var cols = new VisualElement[4];
-        for (int c = 0; c < 4; c++)
+        foreach (var (label, val) in attrs)
         {
-            cols[c] = new VisualElement();
-            cols[c].AddToClassList("playerprofile-attrs-column");
-            _profileAttrsBody.Add(cols[c]);
-        }
-
-        for (int i = 0; i < attrs.Length; i++)
-        {
-            int colIdx = i < 4 ? 0 : 1 + (i - 4) / 3;
-            var (label, val) = attrs[i];
-
-            var row = new VisualElement();
-            row.AddToClassList("playerprofile-attr-row");
-
             var card = new VisualElement();
             card.AddToClassList("playerprofile-attr-card");
 
@@ -242,8 +228,7 @@ using System.Linq;
 
             card.Add(valLbl);
             card.Add(labLbl);
-            row.Add(card);
-            cols[colIdx].Add(row);
+            _profileAttrsBody.Add(card);
         }
     }
 

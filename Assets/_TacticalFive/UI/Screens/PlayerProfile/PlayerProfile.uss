@@ -216,18 +216,10 @@
 
 .playerprofile-attrs-body {
     flex-direction: row;
-}
-
-.playerprofile-attrs-column {
-    flex: 1;
-    flex-direction: column;
-    margin-right: 16px;
+    flex-wrap: wrap;
 }
 
 /* Attribute card rows */
-.playerprofile-attr-row {
-    margin-bottom: 7px;
-}
 
 .playerprofile-attr-card {
     width: 110px;
@@ -235,7 +227,9 @@
     border-radius: 8px;
     border-width: 1px;
     border-color: rgb(42, 51, 71);
-    padding: 10px 8px;
+    padding: 12px 8px;
+    margin-right: 10px;
+    margin-bottom: 10px;
     flex-direction: column;
     align-items: center;
 }
