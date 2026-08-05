@@ -1,137 +1,170 @@
+/* PLAYERPROFILE — PlayerProfile.uss */
+
 .playerprofile-root {
+    flex-direction: row;
     width: 100%;
     height: 100%;
-    background-color: var(--bg-dark);
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
 }
 
 .playerprofile-main {
+    flex-direction: column;
     flex-grow: 1;
-    flex-direction: row;
+    min-width: 0;
+    min-height: 0;
     overflow: hidden;
 }
 
 .playerprofile-content {
-    flex-grow: 1;
     flex-direction: column;
-    padding: 20px 32px;
-    overflow: hidden;
+    flex-grow: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px 28px 24px 28px;
 }
 
 /* Back button */
 .playerprofile-back-btn {
-    font-size: 13px;
-    color: var(--text-muted);
-    background-color: transparent;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgb(42, 95, 201);
     border-width: 0;
-    margin-bottom: 16px;
-    padding: 6px 0;
-    align-self: flex-start;
+    color: rgb(255, 255, 255);
+    font-size: 22px;
+    letter-spacing: 2px;
+    -unity-text-transform: uppercase;
+    padding: 10px 18px;
+    margin-bottom: 14px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
 }
 
 .playerprofile-back-btn:hover {
-    color: var(--text-primary);
+    background-color: rgb(74, 128, 240);
 }
 
 /* Header */
 .playerprofile-header {
     flex-direction: row;
     align-items: center;
-    background-color: var(--bg-panel);
-    border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 18px;
+    padding: 16px 24px;
+    background-color: rgb(28, 33, 48);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    flex-shrink: 0;
 }
 
 .playerprofile-photo {
     width: 100px;
     height: 100px;
     border-radius: 8px;
-    background-color: var(--bg-dark);
+    background-color: rgb(200, 200, 200);
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
     margin-right: 20px;
 }
 
 .playerprofile-name-block {
-    flex-grow: 1;
     flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
 }
 
 .playerprofile-player-name {
-    font-size: 22px;
-    color: var(--text-primary);
-    -unity-font-style: bold;
-    margin-bottom: 2px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-left;
+    text-transform: uppercase;
 }
 
 .playerprofile-player-pos {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 2px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    margin-top: 4px;
 }
 
 .playerprofile-player-team {
-    font-size: 14px;
-    color: var(--accent-blue);
-    margin-bottom: 4px;
-    -unity-font-style: bold;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(42, 95, 201);
+    margin-top: 2px;
 }
 
 .playerprofile-role-row {
     flex-direction: row;
     align-items: center;
-    margin-bottom: 2px;
+    margin-top: 4px;
 }
 
 .playerprofile-role-icon {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     margin-right: 6px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .playerprofile-role-text {
-    font-size: 13px;
-    color: var(--text-muted);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
 }
 
 .playerprofile-meta {
-    font-size: 13px;
-    color: var(--text-muted);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(122, 138, 170);
+    margin-top: 4px;
 }
 
 .playerprofile-ovr-block {
     flex-direction: column;
     align-items: center;
-    padding: 12px 20px;
-    background-color: var(--bg-dark);
+    padding: 12px 24px;
+    background-color: rgb(22, 26, 36);
     border-radius: 10px;
-    margin-left: 20px;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    margin-left: 24px;
 }
 
 .playerprofile-ovr-val {
-    font-size: 36px;
-    color: var(--text-primary);
-    -unity-font-style: bold;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 42px;
+    color: rgb(255, 255, 255);
 }
 
 .playerprofile-ovr-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 12px;
-    color: var(--text-muted);
+    color: rgb(122, 138, 170);
+    margin-top: 2px;
+    letter-spacing: 2px;
 }
 
 /* Section labels */
 .playerprofile-section-label {
-    font-size: 14px;
-    color: var(--accent-blue);
-    -unity-font-style: bold;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
     margin-bottom: 12px;
-    letter-spacing: 1px;
+    letter-spacing: 2px;
+    -unity-text-transform: uppercase;
 }
 
 /* Season stats grid */
 .playerprofile-season-section {
-    background-color: var(--bg-panel);
-    border-radius: 12px;
-    padding: 18px 24px;
-    margin-bottom: 18px;
+    background-color: rgb(28, 33, 48);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 16px 24px;
+    margin-top: 16px;
+    flex-shrink: 0;
 }
 
 .playerprofile-stats-grid {
@@ -141,8 +174,10 @@
 
 .playerprofile-stat-card {
     width: 120px;
-    background-color: var(--bg-dark);
+    background-color: rgb(22, 26, 36);
     border-radius: 8px;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
     padding: 12px;
     margin-right: 10px;
     margin-bottom: 10px;
@@ -151,31 +186,34 @@
 }
 
 .playerprofile-stat-card-value {
-    font-size: 20px;
-    color: var(--text-primary);
-    -unity-font-style: bold;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(230, 230, 230);
 }
 
 .playerprofile-stat-card-value--accent {
-    font-size: 20px;
-    color: var(--accent-green);
-    -unity-font-style: bold;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(39, 174, 96);
 }
 
 .playerprofile-stat-card-label {
-    font-size: 11px;
-    color: var(--text-muted);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    color: rgb(122, 138, 170);
     margin-top: 4px;
 }
 
 /* Career table */
 .playerprofile-career-section {
     flex-grow: 1;
-    background-color: var(--bg-panel);
-    border-radius: 12px;
-    padding: 18px 24px;
+    background-color: rgb(28, 33, 48);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 16px 24px;
+    margin-top: 16px;
     margin-bottom: 16px;
-    min-height: 0;
+    min-height: 200px;
 }
 
 .playerprofile-table {
@@ -188,7 +226,7 @@
     flex-direction: row;
     padding: 8px 0;
     border-bottom-width: 1px;
-    border-bottom-color: var(--bg-dark);
+    border-bottom-color: rgb(42, 51, 71);
     flex-shrink: 0;
 }
 
@@ -209,47 +247,98 @@
 }
 
 .playerprofile-table-row--totals {
-    background-color: var(--bg-dark);
+    background-color: rgba(42, 95, 201, 0.12);
     border-radius: 4px;
     margin-top: 4px;
     padding: 8px 0;
     -unity-font-style: bold;
 }
 
-/* Column widths */
-.pph-season { width: 100px; font-size: 13px; color: var(--text-muted); }
-.pph-team { width: 140px; font-size: 13px; color: var(--text-secondary); }
-.pph-gp { width: 40px; font-size: 13px; color: var(--text-secondary); }
-.pph-mp { width: 50px; font-size: 13px; color: var(--text-secondary); }
-.pph-pts { width: 50px; font-size: 13px; color: var(--text-primary); -unity-font-style: bold; }
-.pph-reb { width: 50px; font-size: 13px; color: var(--text-secondary); }
-.pph-ast { width: 50px; font-size: 13px; color: var(--text-secondary); }
-.pph-val { width: 50px; font-size: 13px; color: var(--text-secondary); }
+/* Column widths — header + cells */
+.pph-season {
+    width: 100px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+}
+.pph-team {
+    width: 140px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
+.pph-gp {
+    width: 40px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
+.pph-mp {
+    width: 50px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
+.pph-pts {
+    width: 50px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(230, 230, 230);
+}
+.pph-reb {
+    width: 50px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
+.pph-ast {
+    width: 50px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
+.pph-val {
+    width: 50px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
 
-/* Table cell helpers */
-.td-pps { font-size: 13px; color: var(--text-secondary); }
-.td-pps--bold { font-size: 13px; color: var(--text-primary); -unity-font-style: bold; }
+/* Table cell helpers (C# created) */
+.td-pps {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(160, 170, 190);
+}
+.td-pps--bold {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(230, 230, 230);
+}
 
 /* Trajectory link */
 .playerprofile-link-row {
     flex-direction: row;
     justify-content: flex-end;
-    margin-top: 4px;
+    flex-shrink: 0;
 }
 
 .playerprofile-trajectory-btn {
-    font-size: 13px;
-    color: var(--text-secondary);
-    background-color: var(--bg-panel);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(212, 160, 23);
+    background-color: rgb(28, 33, 48);
     border-width: 1px;
-    border-color: var(--text-muted);
+    border-color: rgb(212, 160, 23);
     border-radius: 6px;
-    padding: 8px 16px;
+    padding: 10px 20px;
+    letter-spacing: 1px;
+    -unity-text-transform: uppercase;
 }
 
 .playerprofile-trajectory-btn:hover {
-    color: var(--text-primary);
-    border-color: var(--accent-blue);
+    background-color: rgb(42, 51, 71);
+    color: rgb(255, 255, 255);
 }
 
 /* Empty state */
@@ -261,6 +350,7 @@
 }
 
 .playerprofile-empty-text {
-    font-size: 15px;
-    color: var(--text-muted);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
 }
