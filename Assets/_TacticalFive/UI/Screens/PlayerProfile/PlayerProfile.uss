@@ -236,7 +236,7 @@
 
 .playerprofile-attr-card-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 32px;
 }
 
 .playerprofile-attr-card-value--high {
@@ -253,7 +253,7 @@
 
 .playerprofile-attr-card-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 4px;
     text-transform: uppercase;
