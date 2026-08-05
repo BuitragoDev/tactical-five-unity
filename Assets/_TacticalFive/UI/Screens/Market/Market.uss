@@ -278,6 +278,16 @@
     background-color: rgb(16, 56, 92);
 }
 
+.market-trade-sat-section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(200, 160, 30);
+    padding: 8px 10px 2px 10px;
+    background-color: rgba(200, 160, 30, 0.08);
+    border-top-width: 1px;
+    border-top-color: rgba(200, 160, 30, 0.4);
+}
+
 .market-trade-col-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
@@ -762,6 +772,23 @@
     background-color: rgb(192, 57, 43);
 }
 
+/* ── DEADLINE COUNTDOWN ── */
+.market-deadline-countdown-bar {
+    padding: 10px 24px;
+    background-color: rgb(212, 160, 23);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+.market-deadline-countdown-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(0, 0, 0);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+}
+
 /* ── TRANSFER WINDOW CLOSED ── */
 .market-closed-overlay {
     position: absolute;
@@ -1097,4 +1124,45 @@
     -unity-font-style: bold;
     -unity-text-align: middle-right;
     width: 24px;
+}
+
+.renew-options-row {
+    min-height: unset;
+    margin-bottom: 8px;
+}
+
+.renew-options-toggles {
+    flex-direction: row;
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+.renew-toggle-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 4px;
+    padding: 6px 14px;
+    flex-grow: 1;
+    -unity-text-align: middle-center;
+}
+
+.renew-toggle-btn:hover {
+    background-color: rgb(28, 33, 48);
+    border-color: rgb(85, 102, 119);
+}
+
+.renew-toggle-btn--team-active {
+    color: rgb(39, 174, 96);
+    border-color: rgb(39, 174, 96);
+    background-color: rgba(39, 174, 96, 0.15);
+}
+
+.renew-toggle-btn--player-active {
+    color: rgb(248, 196, 64);
+    border-color: rgb(248, 196, 64);
+    background-color: rgba(248, 196, 64, 0.15);
 }

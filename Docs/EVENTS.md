@@ -18,6 +18,7 @@
 | `LastGameDay` | `DashboardController` (`ProcessGameDayRoutine`, ~line 796) | `GameResultsController` (to know which day to show) | GameResults screen shows that day |
 | `SimulatedGameIds` | `DashboardController` | `GameResultsController` | Which games have live results |
 | `GameStarters` (dict game→HashSet<int>) | `DashboardController` (starters = first 5 `GetActivePlayers`) | `GameResultsController`, `MatchDayController` | Highlight starters, box scores |
+| `PlayByPlayLogs` (dict game→`List<PlayByPlayEvent>`) | `DashboardController.ProcessSingleGame` (solo modo Play-by-play) | `MatchDayController` (overlay play-by-play) | Crónica del partido: marcador, reloj y deltas por evento |
 | `PendingBudgetWarning` | `DashboardController.CheckBudgetAfterGame` (line 1079) | `DashboardController.CheckBudgetWarning` (line 1090) | Shows fired/warning modal after day |
 
 `GameResultCache.Clear()` is called at the start of each simulated game day.
@@ -36,11 +37,11 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | Event (title pattern) | Emitter (file:line) | Consequence |
 |---|---|---|
 | Match result message (`Resultado: ...`) | `DashboardController.CreateGameResultMessage` (~3442) | Inbox entry with score/attendance |
-| Fichaje / Oferta aceptada/rechazada | `DashboardController.ProcessMaturedOffers` (1139–1383) | User learns outcome of FA/renewal |
-| Contrato renovado | `DashboardController.ProcessMaturedOffers` (1349) | Same |
-| Fichaje cancelado (player signed elsewhere) | `DashboardController.ProcessMaturedOffers` (1151) | Same |
-| Fichaje rechazado (plantilla completa / ilegal) | `DashboardController.ProcessMaturedOffers` (1180, 1235) | Same |
-| Hard cap activado | `DashboardController.ProcessMaturedOffers` (1297) | Warns user of NT-MLE hard cap |
+| Fichaje / Oferta aceptada/rechazada | `DashboardController.ProcessMaturedOffers` (1344–1657) | User learns outcome of FA/renewal |
+| Contrato renovado | `DashboardController.ProcessMaturedOffers` (1579) | Same; contract text includes TO/PO via `FormatContractYears` |
+| Fichaje cancelado (player signed elsewhere) | `DashboardController.ProcessMaturedOffers` (1364) | Same |
+| Fichaje rechazado (plantilla completa / ilegal) | `DashboardController.ProcessMaturedOffers` (1392, 1452) | Same |
+| Hard cap activado | `DashboardController.ProcessMaturedOffers` (1524) | Warns user of NT-MLE hard cap |
 | Recuperado de lesión | `DashboardController.ProcessGameDayRoutine` (721) | Inbox; player back in lineup |
 | Lesión (from game) | `DashboardController.ProcessGameInjuries` | Inbox |
 | Queja / Preocupación de jugador (morale < 20/10) | `DashboardController.UpdatePlayersMoraleAfterGame` (3282) | Signals morale issue |
@@ -60,6 +61,8 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | `TF_Audio_Music` | `AudioManager.SetMusicVolume` | `AudioManager.LoadSettings` |
 | `TF_Audio_SFX` | `AudioManager.SetSFXVolume` | `AudioManager.LoadSettings` |
 | `TF_Graphics_Quality` | `AudioManager.SetQualityLevel` | `AudioManager.LoadSettings` |
+| `TF_SimMode` | `UIScreenController.SelectConfigSimMode` (Vista de Partido) | `UIScreenController.GetSimMode`, `MatchDayController` | 0 = Directa, 1 = Play-by-play |
+| `TF_PbpSpeed` | `MatchDayController.SelectPbpSpeed` (x1/x3/x5/x10) | `MatchDayController` | Velocidad del overlay play-by-play |
 | `OverallMigration_{slot}` | `DatabaseManager.RunMigrations` | one-time flag |
 | `DraftPicksReset_{slot}` | `DatabaseManager.RunMigrations` | one-time flag |
 

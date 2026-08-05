@@ -30,6 +30,7 @@ public partial class DatabaseManager
             {
                 id = pid,
                 team_id = teamId,
+                last_team_id = teamId,
                 first_name = fn,
                 last_name = ln,
                 position = pos,
@@ -58,6 +59,7 @@ public partial class DatabaseManager
                 blocks = blk,
                 salary = sal,
                 contract_years = yrs,
+                guaranteed_years = yrs,
                 is_rookie = rookie ? 1 : 0,
                 seasons_with_team = Math.Max(1, 5 - yrs),
                 injury_days = 0,
@@ -768,6 +770,7 @@ public partial class DatabaseManager
                 blocks = blk,
                 salary = sal,
                 contract_years = yrs,
+                guaranteed_years = yrs,
                 is_rookie = 0,
                 seasons_with_team = 0,
                 injury_days = 0,

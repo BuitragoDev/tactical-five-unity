@@ -97,17 +97,17 @@ Notable specifics:
 | Records | `Screens/Records` | `RecordsController` | Records screen |
 | Palmares | `Screens/Palmares` | `PalmaresController` | Historical palmarés |
 | Premios | `Screens/Premios` | `PremiosController` | Monthly awards |
-| Market | `Screens/Market` | `MarketController` | Trades + FA market |
+| Market | `Screens/Market` | `MarketController` | Trades + FA market (contract offer with TO/PO toggles) |
 | Cartera | `Screens/Cartera` | `CarteraController` | Player wallet/contracts |
 | Historial | `Screens/Historial` | `HistorialController` | Trade history |
-| Finances | `Screens/Finances` | `FinancesController` | P&L (income/expenses incl. tax & buyout) |
+| Finances | `Screens/Finances` | `FinancesController` | P&L (income/expenses incl. tax & buyout) + Cap sheet (payroll committed by year, cap/space projections to 5 yrs, expiring players, exceptions) |
 | Loans | `Screens/Loans` | `LoansController` | Loans |
 | Sponsors | `Screens/Sponsors` | `SponsorsController` | Sponsor deals |
 | TV | `Screens/TV` | `TVController` | TV deals |
 | Arena | `Screens/Arena` | `ArenaController` | Arena management (tickets/subscriptions/renovations) |
 | Manager | `Screens/Manager` | `ManagerController` | Manager profile, morale/fans circles, psychologist |
 | Messages | `Screens/Messages` | `MessagesController` | Inbox |
-| MatchDay | `Screens/MatchDay` | `MatchDayController` | Pre-match view |
+| MatchDay | `Screens/MatchDay` | `MatchDayController` | Pre-match view + overlay play-by-play en vivo (marcador, reloj, boxscore) |
 | GameResults | `Screens/GameResults` | `GameResultsController` | Post-match box score |
 | LoadGame | `Screens/LoadGame` | `LoadGameController` | Save slots |
 | Editor | `Screens/Editor` | `EditorController` | Editor (template DB) |
@@ -119,6 +119,8 @@ Notable specifics:
 | Settings | (UXML exists) | `SettingsController` | **Orphaned** — not wired to `ScreenManager` (see TODO) |
 
 > The "PLANTILLA" submenu (Roster → Quinteto/Training/Employees/Injured) and "MERCADO"/"FINANZAS" submenus are handled by the sidebar navigation; each entry maps to the screens above.
+
+> The Roster renew modal and Market FA-sign modal share the `.renew-*`/`renew-toggle-btn*` classes (TO/PO toggles); each screen's USS independently declares `renew-options-row`, `renew-options-toggles`, `renew-toggle-btn`, `renew-toggle-btn--team-active`, `renew-toggle-btn--player-active`.
 
 ## 6. Navigation tree
 

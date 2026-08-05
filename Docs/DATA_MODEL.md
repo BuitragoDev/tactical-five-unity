@@ -30,7 +30,7 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 `id` (PK, manual), `name`, `abbreviation`, `city`, `conference` (East/West), `division`, `arena`, `capacity`, `owner`, `attack`, `defense`, `overall`, `budget`, `reputation` (1–5), `facilities` (1–5), `logo`, `jersey_home`, `jersey_away`, `salary_margin`, `objective` (TEXT: "Campeonato"|"Playoffs"|"Play-In"|"Zona tranquila"|…, migrated), `team_chemistry`, `first_apron_hard_capped` (int 0/1, migrated), `arena_renovation_type/count/cost/end_day` (set via ArenaController), `arena_renovation_end_day`.
 
 ### players (`PlayerData`)
-`id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated).
+`id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
 - `GetCalculatedAverage()` returns `round(mean(11 attrs))`. **`overall` is always recomputed from the attributes and capped by `potential`** (seed, training, progression, migration) [F].
 
 ### managers (`ManagerData`)
@@ -61,13 +61,15 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.
 
 ### offers (`OfferData`)
-`id`, `manager_id`, `player_id`, `offer_salary`, `offer_years`, `day_sent`, `offer_type` (0=renewal, 1=FA signing), `status` ("pending"/"accepted"/"rejected"), `processed` (0/1). Matured when `processed=0 && currentDay >= day_sent + 7`.
+`id`, `manager_id`, `player_id`, `offer_salary`, `offer_years`, `guaranteed_years`, `has_team_option` (0/1), `has_player_option` (0/1), `day_sent`, `offer_type` (0=renewal, 1=FA signing), `status` ("pending"/"accepted"/"rejected"), `processed` (0/1). Matured when `processed=0 && currentDay >= day_sent + 7`. When an option is set, `guaranteed_years = max(0, offer_years − 1)`.
 
 ### trade_offers (`TradeOfferData`)
 `id`, `manager_id`, `day_sent`, `team_id_from`, `team_id_to`, `player_ids_out`, `player_ids_in`, `pick_ids_out`, `pick_ids_in` (CSV text, migrated), `processed`, `status`, `trade_type`. Helpers: `GetWantedPlayerIds()`, `GetOfferedPlayerIds()`, `GetWantedPickIds()`, `GetOfferedPickIds()`.
 
 ### trades (`TradeData`)
 `id`, `season_id`, `game_day`, `game_date`, `team_id_from`, `team_id_to`, `player_id`, `pick_id` (migrated, default 0), `trade_type` ("trade"|"free_agent"|"pick_trade"|"sign_and_trade"), `partner_player_id` (nullable).
+
+Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bird rights, `team_id_from=0`) + `sign_and_trade` (traspaso inmediato). Sin migración de esquema: `MarketController.ProcessSATrade` y `DashboardController.ShowNextPendingTradeOffer` ejecutan el flujo.
 
 ### draft_picks (`DraftPickData`)
 `id`, `season_id`, `round`, `pick_number`, `original_team_id`, `current_team_id`. Seeded 2×30 per season ordered by reverse standings (or overall for year 1).
@@ -160,6 +162,8 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 | `teams` | `first_apron_hard_capped` | 0 |
 | `managers` | `career_reg_wins/losses`, `career_po_wins/losses`, `championships`, `seasons_completed` | 0 |
 | `players` | `fisico` | 99 |
+| `players` | `guaranteed_years`, `has_team_option`, `has_player_option` (last year is a TO/PO) | `guaranteed_years`=0, `has_*_option`=0 |
+| `players` | `last_team_id` (último equipo para el que jugó; habilita Bird rights al re-firmar) | 0 |
 
 **One-time data migrations (PlayerPrefs, per slot):**
 - `OverallMigration_{slot}`: recompute `overall` for all players as mean of 11 attrs (cap potential).

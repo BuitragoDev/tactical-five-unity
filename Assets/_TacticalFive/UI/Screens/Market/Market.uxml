@@ -17,6 +17,11 @@
             <!-- MARKET CONTENT -->
             <ui:VisualElement class="market-content">
 
+                <!-- ══ DEADLINE COUNTDOWN ══ -->
+                <ui:VisualElement name="DeadlineCountdownBar" class="market-deadline-countdown-bar" style="display: none;">
+                    <ui:Label name="DeadlineCountdownText" class="market-deadline-countdown-text" text="" />
+                </ui:VisualElement>
+
                 <!-- ══ TEAM SELECTION ══ -->
                 <ui:VisualElement class="market-section">
                     <ui:VisualElement class="market-section-title">
@@ -203,6 +208,13 @@
                         <ui:Label name="FAYearsDec" class="btn-spin" text="◀" />
                         <ui:Label name="FAYearsValue" class="renew-spin-label" text="" />
                         <ui:Label name="FAYearsInc" class="btn-spin" text="▶" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement name="FAFormRowOptions" class="renew-form-row renew-options-row">
+                    <ui:Label class="renew-form-label" text="OPCIONES" />
+                    <ui:VisualElement class="renew-options-toggles">
+                        <ui:Button name="FATeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
+                        <ui:Button name="FAPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Label name="FAText2" class="renew-modal-text" text="" />

@@ -30,6 +30,22 @@ public class NewSeasonController : UIScreenController
     private List<PlayerData> _rosterPlayers;
     private int _rosterActiveCount;
 
+    // Team option modal
+    private VisualElement _teamOptionOverlay;
+    private List<PlayerData> _pendingOptionPlayers;
+
+    // Re-sign candidates (jugadores que declinaron su player option y son FA reciente)
+    private List<PlayerData> _reSignCandidates = new();
+
+    private struct PlayerOptionResult
+    {
+        public string firstName;
+        public string lastName;
+        public string position;
+        public long salary;
+        public bool optedIn;
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -37,6 +53,10 @@ public class NewSeasonController : UIScreenController
         _rosterOverlay = new VisualElement();
         _rosterOverlay.AddToClassList("ns-roster-overlay");
         _root.Add(_rosterOverlay);
+
+        _teamOptionOverlay = new VisualElement();
+        _teamOptionOverlay.AddToClassList("ns-roster-overlay");
+        _root.Add(_teamOptionOverlay);
 
         CursorManager.Instance?.SetDefaultCursor();
     }
@@ -244,7 +264,87 @@ public class NewSeasonController : UIScreenController
             OpenRosterModal(roster);
             return;
         }
-        ExecuteStartSeason();
+        CheckTeamOptions();
+    }
+
+    void CheckTeamOptions()
+    {
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        var teamOptions = players
+            .Where(p => p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            .OrderByDescending(p => p.salary)
+            .ToList();
+
+        if (teamOptions.Count > 0)
+        {
+            OpenTeamOptionModal(teamOptions);
+            return;
+        }
+
+        ResolvePlayerOptionsAndStart();
+    }
+
+    void ResolvePlayerOptionsAndStart()
+    {
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        var playerOptions = players
+            .Where(p => p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            .OrderByDescending(p => p.salary)
+            .ToList();
+
+        if (playerOptions.Count == 0)
+        {
+            ExecuteStartSeason();
+            return;
+        }
+
+        float teamWinPct = 0.5f;
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        if (_season != null)
+        {
+            var seasonGames = DatabaseManager.Instance.GetSeasonGames(_manager.id, _season.id);
+            int total = seasonGames.Count;
+            if (total > 0)
+            {
+                int wins = seasonGames.Count(g =>
+                    (g.home_team_id == _selectedTeamId && g.home_score > g.away_score) ||
+                    (g.away_team_id == _selectedTeamId && g.away_score > g.home_score));
+                teamWinPct = (float)wins / total;
+            }
+        }
+
+        var results = new List<PlayerOptionResult>();
+        _reSignCandidates.Clear();
+        foreach (var p in playerOptions)
+        {
+            bool optsIn = DatabaseManager.Instance.DecidePlayerOption(p, teamWinPct, settings);
+            if (optsIn)
+            {
+                p.contract_years += 1;
+                p.guaranteed_years = p.contract_years;
+            }
+            else
+            {
+                p.contract_years = 0;
+                p.guaranteed_years = 0;
+                if (p.last_team_id == 0) p.last_team_id = _selectedTeamId;
+                p.team_id = 0;
+                _reSignCandidates.Add(p);
+            }
+            p.has_player_option = 0;
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            results.Add(new PlayerOptionResult
+            {
+                firstName = p.first_name,
+                lastName = p.last_name,
+                position = p.position,
+                salary = p.salary,
+                optedIn = optsIn
+            });
+        }
+
+        OpenPlayerOptionResultModal(results);
     }
 
     void ExecuteStartSeason()
@@ -337,7 +437,7 @@ public class NewSeasonController : UIScreenController
         {
             PlayClick();
             _rosterOverlay.style.display = DisplayStyle.None;
-            ExecuteStartSeason();
+            CheckTeamOptions();
         });
         box.Add(_btnRosterContinue);
 
@@ -478,5 +578,322 @@ public class NewSeasonController : UIScreenController
             _btnRosterContinue.SetEnabled(true);
             CursorManager.Instance?.RegisterHandCursor(_btnRosterContinue);
         }
+    }
+
+    // ── TEAM OPTION DECISION MODAL ────────────────────────
+
+    void OpenTeamOptionModal(List<PlayerData> players)
+    {
+        _pendingOptionPlayers = players;
+
+        _teamOptionOverlay.Clear();
+        _teamOptionOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        box.AddToClassList("ns-option-box");
+        _teamOptionOverlay.Add(box);
+
+        var title = new Label("DECISIONES DE CONTRATO");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label("Los siguientes jugadores tienen una team option pendiente.\nDecide si ejecutar o declinar cada opción antes de avanzar la temporada.");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var list = new VisualElement();
+        list.AddToClassList("ns-option-list");
+        box.Add(list);
+
+        // Track decisions: 0 = unset, 1 = exercise, -1 = decline
+        var decisions = new Dictionary<int, int>();
+        foreach (var p in players)
+        {
+            decisions[p.id] = 0;
+
+            var row = new VisualElement();
+            row.AddToClassList("ns-option-row");
+
+            var info = new Label($"{p.first_name} {p.last_name} ({PositionCodes.GetName(p.position)})"
+                + $" — {FormatMoney(p.salary)}"
+                + $" — {p.contract_years} año{(p.contract_years != 1 ? "s" : "")} restantes");
+            info.AddToClassList("ns-option-info");
+            row.Add(info);
+
+            var btns = new VisualElement();
+            btns.AddToClassList("ns-option-btns");
+
+            var exerciseBtn = new Button { text = "EJECUTAR" };
+            exerciseBtn.AddToClassList("ns-option-btn");
+            exerciseBtn.AddToClassList("ns-option-btn--exercise");
+            CursorManager.Instance?.RegisterHandCursor(exerciseBtn);
+
+            var declineBtn = new Button { text = "DECLINAR" };
+            declineBtn.AddToClassList("ns-option-btn");
+            declineBtn.AddToClassList("ns-option-btn--decline");
+            CursorManager.Instance?.RegisterHandCursor(declineBtn);
+
+            exerciseBtn.clicked += () =>
+            {
+                decisions[p.id] = 1;
+                declineBtn.SetEnabled(false);
+                exerciseBtn.SetEnabled(false);
+                exerciseBtn.AddToClassList("ns-option-btn--selected");
+                CheckAllOptionsDecided(decisions);
+            };
+            declineBtn.clicked += () =>
+            {
+                decisions[p.id] = -1;
+                exerciseBtn.SetEnabled(false);
+                declineBtn.SetEnabled(false);
+                declineBtn.AddToClassList("ns-option-btn--selected");
+                CheckAllOptionsDecided(decisions);
+            };
+
+            btns.Add(exerciseBtn);
+            btns.Add(declineBtn);
+            row.Add(btns);
+            list.Add(row);
+        }
+    }
+
+    void CheckAllOptionsDecided(Dictionary<int, int> decisions)
+    {
+        if (decisions.Values.Any(v => v == 0)) return;
+
+        foreach (var p in _pendingOptionPlayers)
+        {
+            if (!decisions.TryGetValue(p.id, out int dec)) continue;
+
+            if (dec == 1)
+            {
+                p.contract_years += 1;
+                p.guaranteed_years = p.contract_years;
+                p.has_team_option = 0;
+            }
+            else
+            {
+                p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                if (p.last_team_id == 0) p.last_team_id = _selectedTeamId;
+                p.team_id = 0;
+            }
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+
+        _teamOptionOverlay.style.display = DisplayStyle.None;
+        ResolvePlayerOptionsAndStart();
+    }
+
+    // ── PLAYER OPTION RESULT MODAL ────────────────────────
+
+    void OpenPlayerOptionResultModal(List<PlayerOptionResult> results)
+    {
+        _teamOptionOverlay.Clear();
+        _teamOptionOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        box.AddToClassList("ns-option-box");
+        _teamOptionOverlay.Add(box);
+
+        var title = new Label("DECISIONES DE JUGADOR");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label("Los siguientes jugadores tenían player option y han decidido su futuro:");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var list = new VisualElement();
+        list.AddToClassList("ns-option-list");
+        box.Add(list);
+
+        foreach (var r in results)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("ns-option-row");
+
+            string action = r.optedIn ? "EJERCE player option" : "RECHAZA player option (agente libre)";
+            string color = r.optedIn ? "#27AE60" : "#C0392B";
+
+            var info = new Label($"{r.firstName} {r.lastName} ({PositionCodes.GetName(r.position)})"
+                + $" — {FormatMoney(r.salary)}"
+                + $" — <color={color}>{action}</color>");
+            info.AddToClassList("ns-option-info");
+            info.enableRichText = true;
+            row.Add(info);
+            list.Add(row);
+        }
+
+        var continueBtn = new Button { text = "CONTINUAR" };
+        continueBtn.AddToClassList("ns-roster-continue");
+        continueBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _teamOptionOverlay.style.display = DisplayStyle.None;
+            if (_reSignCandidates.Count > 0)
+                OpenReSignModal();
+            else
+                ExecuteStartSeason();
+        });
+        box.Add(continueBtn);
+        CursorManager.Instance?.RegisterHandCursor(continueBtn);
+    }
+
+    // ── RE-SIGN (re-firma de FA propio que declinó su opción) ────────
+
+    void OpenReSignModal()
+    {
+        _teamOptionOverlay.Clear();
+        _teamOptionOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        box.AddToClassList("ns-option-box");
+        _teamOptionOverlay.Add(box);
+
+        var title = new Label("RE-FIRMA DE AGENTES LIBRES");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label("Estos jugadores declinaron su player option y son agentes libres recientes de tu equipo.\nPuedes ofrecerles una re-firma con Bird rights, o dejarlos salir al mercado.");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var list = new VisualElement();
+        list.AddToClassList("ns-option-list");
+        box.Add(list);
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long totalPayroll = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId).Sum(p => p.salary);
+
+        foreach (var p in _reSignCandidates)
+        {
+            long market = DatabaseManager.Instance.EstimateMarketSalary(p.GetCalculatedAverage(), settings != null ? settings.salary_cap : TradeHelper.SALARY_CAP);
+            var breakdown = RosterController.GetMaxOfferBreakdown(p, settings, totalPayroll, true);
+            long birdMax = breakdown.birdMax > 0 ? breakdown.birdMax : market;
+
+            var row = new VisualElement();
+            row.AddToClassList("ns-option-row");
+
+            var info = new Label($"{p.first_name} {p.last_name} ({PositionCodes.GetName(p.position)})"
+                + $" — salario previo {FormatMoney(p.salary)}"
+                + $" — mercado {FormatMoney(market)}"
+                + $" — máximo con Bird rights {FormatMoney(birdMax)}");
+            info.AddToClassList("ns-option-info");
+            row.Add(info);
+
+            var btns = new VisualElement();
+            btns.AddToClassList("ns-option-btns");
+
+            var signBtn = new Button { text = "RE-FIRMAR" };
+            signBtn.AddToClassList("ns-option-btn");
+            signBtn.AddToClassList("ns-option-btn--exercise");
+            CursorManager.Instance?.RegisterHandCursor(signBtn);
+
+            var releaseBtn = new Button { text = "SALIR A MERCADO" };
+            releaseBtn.AddToClassList("ns-option-btn");
+            releaseBtn.AddToClassList("ns-option-btn--decline");
+            CursorManager.Instance?.RegisterHandCursor(releaseBtn);
+
+            int pid = p.id;
+            signBtn.clicked += () => { PlayClick(); SendReSignOffer(pid, market, birdMax); signBtn.SetEnabled(false); releaseBtn.SetEnabled(false); };
+            releaseBtn.clicked += () =>
+            {
+                PlayClick();
+                var player = _reSignCandidates.FirstOrDefault(x => x.id == pid);
+                if (player != null)
+                {
+                    player.renewal_cooldown_day = 0;
+                    DatabaseManager.Instance.UpdatePlayer(player);
+                    AddReSignMessage(player, null);
+                }
+                signBtn.SetEnabled(false);
+                releaseBtn.SetEnabled(false);
+            };
+
+            btns.Add(signBtn);
+            btns.Add(releaseBtn);
+            row.Add(btns);
+            list.Add(row);
+        }
+
+        var continueBtn = new Button { text = "CONTINUAR" };
+        continueBtn.AddToClassList("ns-roster-continue");
+        continueBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _teamOptionOverlay.style.display = DisplayStyle.None;
+            ExecuteStartSeason();
+        });
+        box.Add(continueBtn);
+        CursorManager.Instance?.RegisterHandCursor(continueBtn);
+    }
+
+    void SendReSignOffer(int playerId, long marketSalary, long birdMax)
+    {
+        var player = _reSignCandidates.FirstOrDefault(p => p.id == playerId);
+        if (player == null) return;
+
+        // Oferta de re-firma: salario = mercado clamp a bird max, años según edad
+        long salary = marketSalary < 1_000_000 ? 1_000_000 : marketSalary;
+        if (salary > birdMax) salary = birdMax;
+        int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
+
+        var offer = new OfferData
+        {
+            manager_id = _manager.id,
+            player_id = player.id,
+            offer_salary = salary,
+            offer_years = years,
+            guaranteed_years = years,
+            has_team_option = 0,
+            has_player_option = 0,
+            day_sent = _season?.current_game_day ?? 0,
+            offer_type = 0, // renovación / re-firma
+            status = "pending",
+            processed = 0
+        };
+        DatabaseManager.Instance.AddOffer(offer);
+        AddReSignMessage(player, offer);
+    }
+
+    void AddReSignMessage(PlayerData player, OfferData offer)
+    {
+        string playerName = $"{player.first_name} {player.last_name}";
+        int currentDay = _season?.current_game_day ?? 0;
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        string body;
+        if (offer != null)
+            body = $"Has enviado una oferta de re-firma a {playerName}, que declinó su player option.\n" +
+                   $"Al ser un agente libre reciente de tu equipo, conservas sus Bird rights.\n\n" +
+                   $"Oferta: {offer.offer_salary:N0} $ durante {offer.offer_years} año{(offer.offer_years != 1 ? "s" : "")}.\n" +
+                   $"Recibirás su respuesta en el Dashboard en 7 días.";
+        else
+            body = $"{playerName}, que declinó su player option, sale a la agencia libre.\n" +
+                   "Conservas sus Bird rights por si decides re-firmarlo más adelante.";
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = offer != null ? $"Re-firma enviada: {playerName}" : $"Agente libre: {playerName}",
+            body = body,
+            game_day = currentDay,
+            game_date = now,
+            created_at = now,
+            date_sent = now,
+            is_read = 0
+        });
+    }
+
+    string FormatMoney(long amount)
+    {
+        return System.Math.Abs(amount).ToString("N0").Replace(',', '.') + " $";
     }
 }

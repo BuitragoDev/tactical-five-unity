@@ -2270,6 +2270,27 @@ public partial class DatabaseManager
 
         // 2. Age + attribute changes (progression/regression by career phase)
         var remaining = _db.Table<PlayerData>().ToList();
+
+        // Pre-compute team win% for player option decisions
+        var teamWinPctCache = new Dictionary<int, float>();
+        var teamOptionSettings = GetLeagueSettings();
+        if (teamOptionSettings != null && oldSeasonId > 0)
+        {
+            var seasonGames = _db.Table<GameData>()
+                .Where(g => g.season_id == oldSeasonId && g.is_played == 1)
+                .ToList();
+            var teamGames = new Dictionary<int, (int wins, int total)>();
+            foreach (var g in seasonGames)
+            {
+                if (!teamGames.ContainsKey(g.home_team_id)) teamGames[g.home_team_id] = (0, 0);
+                if (!teamGames.ContainsKey(g.away_team_id)) teamGames[g.away_team_id] = (0, 0);
+                teamGames[g.home_team_id] = (teamGames[g.home_team_id].wins + (g.home_score > g.away_score ? 1 : 0), teamGames[g.home_team_id].total + 1);
+                teamGames[g.away_team_id] = (teamGames[g.away_team_id].wins + (g.away_score > g.home_score ? 1 : 0), teamGames[g.away_team_id].total + 1);
+            }
+            foreach (var kv in teamGames)
+                teamWinPctCache[kv.Key] = kv.Value.total > 0 ? (float)kv.Value.wins / kv.Value.total : 0.5f;
+        }
+
         foreach (var p in remaining)
         {
             if (p.is_rookie == 1)
@@ -2339,11 +2360,41 @@ public partial class DatabaseManager
             // Save old team for seasons_with_team tracking
             int oldTeamId = p.team_id;
 
+            // 2.5. Resolve contract options before decrement
+            // Skip team options for the manager's team (already handled in NewSeason modal)
+            if (p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0
+                && p.team_id != newTeamId)
+            {
+                if (DecideTeamOption(p))
+                {
+                    p.contract_years += 1;
+                    p.guaranteed_years = p.contract_years;
+                }
+                p.has_team_option = 0;
+            }
+            // Player options are always decided by the AI (player decides)
+            if (p.has_player_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
+            {
+                float teamPct = teamWinPctCache.TryGetValue(p.team_id, out float wp) ? wp : 0.5f;
+                if (DecidePlayerOption(p, teamPct, teamOptionSettings))
+                {
+                    p.contract_years += 1;
+                    p.guaranteed_years = p.contract_years;
+                }
+                p.has_player_option = 0;
+            }
+
             // 3. Decrement contracts
             p.contract_years -= 1;
+            p.guaranteed_years -= 1;
             if (p.contract_years <= 0)
             {
                 p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                p.has_player_option = 0;
+                if (oldTeamId != 0 && p.last_team_id == 0)
+                    p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                 p.team_id = 0;
             }
 
@@ -2550,6 +2601,7 @@ public partial class DatabaseManager
                     signed.salary = faSalary;
                     signed.team_id = team.id;
                     signed.contract_years = 1;
+                    signed.guaranteed_years = 1;
                     signed.seasons_with_team = 1;
                     _db.Update(signed);
                     freeAgents.Remove(signed);
@@ -2664,6 +2716,9 @@ public partial class DatabaseManager
                 var p = sorted[i];
                 p.team_id = 0;
                 p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                p.has_player_option = 0;
                 _db.Update(p);
             }
         }
@@ -2993,5 +3048,91 @@ public partial class DatabaseManager
             });
             inactIdx++;
         }
+    }
+
+    /// <summary>
+    /// AI decides whether to exercise a team option. The option year is the current upcoming season.
+    /// Criteria: the player contributes positively (overall above threshold relative to salary/slot).
+    /// </summary>
+    public bool DecideTeamOption(PlayerData p)
+    {
+        // Always exercise if the player is decent and salary is reasonable
+        if (p.overall < 65) return false;
+        // Reject if the player is old and declining (age > 34 or overall < potential-10)
+        if (p.age > 34 && p.overall < p.potential - 10) return false;
+        // Accept otherwise
+        return true;
+    }
+
+    /// <summary>
+    /// True si el jugador es un agente libre reciente que jugó para `teamId`
+    /// (conserva Bird rights / contexto de re-firma aunque ahora sea FA).
+    /// </summary>
+    public bool IsOwnRecentFA(PlayerData p, int teamId)
+    {
+        return p.team_id == 0 && p.last_team_id == teamId && p.seasons_with_team > 0;
+    }
+
+    /// <summary>
+    /// AI decides whether the player exercises their player option (opts out to test FA market).
+    /// Uses a weighted score: market value, happiness, loyalty, role, age, team success.
+    /// </summary>
+    public bool DecidePlayerOption(PlayerData p, float teamWinPct, LeagueSettingsData settings)
+    {
+        if (settings == null) return DecidePlayerOptionLegacy(p);
+
+        long cap = settings.salary_cap;
+        float score = 50f;
+
+        // 1. Market: current salary vs estimated market value
+        long marketSalary = EstimateMarketSalary(p.overall, cap);
+        float salaryRatio = marketSalary > 0 ? (float)p.salary / marketSalary : 1f;
+        if (salaryRatio >= 1.0f)      score += 20f;  // well paid → stay
+        else if (salaryRatio < 0.70f) score -= 25f;  // underpaid → seek market
+
+        // 2. Happiness + loyalty
+        score += (p.morale - 50) * 0.5f;                    // morale: -25 to +25
+        score += System.Math.Min(p.seasons_with_team, 5) * 4f;  // loyalty: +4/yr, max +20
+
+        // 3. Role
+        score += p.role switch
+        {
+            PlayerRole.Estrella => 15f,
+            PlayerRole.Titular => 5f,
+            PlayerRole.Banquillo => -5f,
+            PlayerRole.UltimoRecurso => -15f,
+            _ => 0f
+        };
+
+        // 4. Age
+        if (p.age < 26 && p.potential >= p.overall + 3) score -= 15f;  // young + upside → bet
+        else if (p.age > 33)                               score += 10f;  // veteran → security
+
+        // 5. Team success
+        if (teamWinPct >= 0.60f)      score += 15f;   // contender
+        else if (teamWinPct <= 0.35f) score -= 15f;   // tanking
+
+        // 6. Controlled randomness (±10)
+        score += UnityEngine.Random.Range(-10, 11);
+
+        return score >= 50f;
+    }
+
+    bool DecidePlayerOptionLegacy(PlayerData p)
+    {
+        if (p.overall >= 85) return false;
+        if (p.age < 28 && p.overall >= 80 && p.potential >= 85) return false;
+        return true;
+    }
+
+    /// <summary>
+    /// Estimated market salary based on overall rating.
+    /// Formula: (overall - 40) * 0.005 of the salary cap, clamped to [2%, 35%].
+    /// </summary>
+    public long EstimateMarketSalary(int overall, long cap)
+    {
+        float pct = (overall - 40) * 0.005f;
+        pct = System.Math.Clamp(pct, 0.02f, 0.35f);
+        return (long)(cap * pct);
     }
 }

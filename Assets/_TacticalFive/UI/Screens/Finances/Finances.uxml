@@ -43,6 +43,7 @@
                     <ui:Button name="TabTickets"      class="finances-tab finances-tab--active" text="🎫  TAQUILLA" />
                     <ui:Button name="TabIncome"       class="finances-tab" text="💰  INGRESOS" />
                     <ui:Button name="TabExpenses"     class="finances-tab" text="💸  GASTOS" />
+                    <ui:Button name="TabCap"          class="finances-tab" text="💼  CAP SHEET" />
                     <ui:Button name="TabChart"        class="finances-tab" text="📊  GRÁFICO" />
                 </ui:VisualElement>
 
@@ -86,6 +87,64 @@
                     <ui:VisualElement class="finances-total-row">
                         <ui:Label class="finances-total-label" text="TOTAL GASTOS" />
                         <ui:Label name="TotalExpensesValue" class="finances-total-value finances-total-value--expense" text="$0" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Tab Content: CAP SHEET -->
+                <ui:VisualElement name="PanelCap" class="finances-panel" style="display:none;">
+                    <ui:VisualElement class="finances-panel-header">
+                        <ui:Label class="finances-panel-title" text="CAP SHEET — MASA SALARIAL" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cap-summary">
+                        <ui:VisualElement class="cap-summary-box">
+                            <ui:Label class="cap-summary-label" text="NÓMINA ACTUAL" />
+                            <ui:Label name="CapSheetSalaryLabel" class="cap-summary-value" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cap-summary-box">
+                            <ui:Label class="cap-summary-label" text="CAP" />
+                            <ui:Label name="CapSheetCapLabel" class="cap-summary-value" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cap-summary-box">
+                            <ui:Label class="cap-summary-label" text="ESPACIO" />
+                            <ui:Label name="CapSheetSpaceLabel" class="cap-summary-value" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="cap-summary-box">
+                            <ui:Label class="cap-summary-label" text="1º APRON" />
+                            <ui:Label name="CapSheetApronLabel" class="cap-summary-value" text="" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cap-section">
+                        <ui:Label class="cap-section-title" text="PROYECCIÓN A 5 AÑOS" />
+                        <ui:VisualElement name="CapProjectionTable" class="cap-projection-table" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cap-section">
+                        <ui:Label class="cap-section-title" text="JUGADORES QUE EXPIRAN" />
+                        <ui:Label name="CapExpiringLabel" class="cap-expiring-label" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cap-section">
+                        <ui:Label class="cap-section-title" text="EXCEPCIONES DISPONIBLES" />
+                        <ui:VisualElement name="CapExceptionsRow" class="cap-exceptions-row">
+                            <ui:VisualElement class="cap-exception-box">
+                                <ui:Label class="cap-exception-name" text="NT-MLE" />
+                                <ui:Label name="CapExceptionNtMle" class="cap-exception-value" text="" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="cap-exception-box">
+                                <ui:Label class="cap-exception-name" text="T-MLE" />
+                                <ui:Label name="CapExceptionTMle" class="cap-exception-value" text="" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="cap-exception-box">
+                                <ui:Label class="cap-exception-name" text="SALARIO MÍNIMO" />
+                                <ui:Label name="CapExceptionMin" class="cap-exception-value" text="" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="cap-exception-box">
+                                <ui:Label class="cap-exception-name" text="LUXURY / 2º APRON" />
+                                <ui:Label name="CapExceptionApron" class="cap-exception-value" text="" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="cap-section" name="CapScenarioSection" style="display:none;">
+                        <ui:Label class="cap-section-title" text="ESCENARIO HIPOTÉTICO" />
+                        <ui:VisualElement name="CapScenarioList" class="cap-scenario-list" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 

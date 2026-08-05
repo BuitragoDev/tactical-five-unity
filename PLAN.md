@@ -33,8 +33,13 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
 - **[hecho]** Sign-and-trade en el trade UI: al recibir jugadores con `contract_years <= 1`,
   se ofrece el toggle "Sign & Trade" (extiende contrato +5%, activa hard cap del 1er apron y
   registra `trade_type="sign_and_trade"`). `MarketController.cs`.
-  *Nota: no existe un flujo de "firmar FA externo y traspasarlo inmediatamente"; el S&T
-  implementado extiende al jugador entrante como parte del traspaso.*
+- **[hecho]** Sign-and-trade de FA propio (NBA clásico, equipo origen): sección "FA RECIENTES
+  (BIRD RIGHTS) — SIGN & TRADE" en el panel de traspaso; `ProcessSATrade` firma a un `IsOwnRecentFA`
+  con su máximo Bird y lo traspasa de inmediato (dos `TradeData`: `free_agent` + `sign_and_trade`;
+  receptor bajo hard cap). `TradeHelper.ValidateTrade`/`EvaluateTrade` reciben `teamASignSalaries`/
+  `teamBSignSalaries` para valorar el nuevo salario firmado (sin descontar roster/nómina del que
+  firma). La IA propone S&T por tu FA propio (`GenerateAITradeOffersForPlayer`→`ShowNextPendingTradeOffer`)
+  y respeta `pendingSATIds` en sus fichajes. `MarketController.cs`, `DashboardController.cs`, `TradeHelper.cs`.
 - **[hecho]** Validación de ofertas de FA: espacio salarial/excepciones/aprons se validan en la
   maduración (7 días) y el aviso en vivo se muestra al ajustar el salario (`MarketController.cs:UpdateFAWarning`).
 - **[hecho]** Validación de ofertas al enviar: si el salario excede el máximo legal, se ajusta y se
@@ -75,10 +80,30 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
    `Editor` → compilan en `Assembly-CSharp-Editor`, que sí ve `Assembly-CSharp` y NUnit.
    `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance`
    (`GameSimulator.cs:159-196`), por lo que no es testeable en EditMode sin refactor.*
+- **[hecho]** Opciones de contrato (team/player option) en renovaciones y fichajes FA:
+  toggles TO/PO mutuamente excluyentes en el modal de oferta de `RosterController` y
+  `MarketController`; al activarse, `guaranteed_years = max(0, years − 1)`. Los mensajes de
+  resultado (inbox + modal resumen, `DashboardController.ProcessMaturedOffers`) formatean las
+  opciones vía `FormatContractYears` (p. ej. `3 años (Team Option)`, `2 años + Player Option`).
+  `RosterController.cs:SendOffer`, `MarketController.cs:SendFAOffer`, `DashboardController.cs`.
+- **[hecho]** Maduración de opciones + re-firma de FA propio con Bird rights: al declinar una
+  opción el jugador pasa a FA conservando `last_team_id` y `seasons_with_team`; `NewSeasonController`
+  muestra un modal de re-firma (mercado + máximo con Bird rights) que envía una oferta diferida a 7
+  días; `ProcessMaturedOffers` reasigna `team_id` al aceptarla (o la cancela si fichó por otro equipo).
+  `MarketController.OnSignPlayer` respeta `IsOwnRecentFA` para conservar Bird rights al firmar FA propio.
+  `DatabaseManager.cs` (migración `last_team_id`), `DatabaseManager.Records.cs`
+  (`IsOwnRecentFA`), `NewSeasonController.cs`, `DashboardController.cs`.
 - **[hecho]** Líderes de liga en SQL en lugar de LINQ en C#: `BuildSeasonStats`
    (`StatsController.cs`) pasa de N+1 queries + `GroupBy` en memoria a una sola
    agregación SQL (`GetSeasonPlayerStatsAggregates` en `DatabaseManager.Records.cs`,
    `JOIN player_game_stats + games` con `GROUP BY`, filtro por temporada regular
    jugada). Verificado: 348 jugadores y 17 columnas idénticas contra la lógica LINQ
    anterior en `save_1.db`. `GetTopPlayersByStat` (`DatabaseManager.Players.cs`)
-   también migrado a SQL (agregación cross-season).
+    también migrado a SQL (agregación cross-season).
+- **[hecho]** Trade Deadline con evento real: modal DEADLINE DAY en Feb 7 que intercepta
+  el btnAction (IR AL MERCADO / CERRAR, una vez por temporada vía `_deadlineDayModalShown` +
+  `_deadlineModalSeasonId`); rush IA con cooldown de traspasos reducido a 3-5 días en
+  Feb 1-8 (`IsDeadlineWeek`), contenders (`IsTeamContender`) ofrecen picks extra, tag
+  `[DEADLINE]` en títulos de ofertas IA; badge `⏳ ÚLTIMOS X DÍAS` en el header del Market
+  durante la semana de deadline. `DashboardController.cs`, `MarketController.cs`,
+  `Market.uxml/uss`, `Dashboard.uss`.

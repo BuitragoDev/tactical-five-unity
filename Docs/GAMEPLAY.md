@@ -14,7 +14,7 @@
 | `playoff` | 4 rounds, best-of-7, 2-2-1-1-1 | `PlayoffsGenerator.GeneratePlayoffs` / `AdvancePlayoffSeries` |
 | `finished` | Season over | Dashboard phase transition → `EndSeason` → `Draft` → `NewSeason` |
 
-**Calendar facts:** season start date `Oct 22 of year_start`; All-Star window Feb 8–14; up to 15 games/day; no back-to-backs by design; trade deadline reminder on Feb 1. — `ScheduleGenerator.cs`, `DashboardController.cs:996`
+**Calendar facts:** season start date `Oct 22 of year_start`; trade deadline reminder on Feb 1; **Deadline Day modal on Feb 7** (intercepts btnAction, once per season: IR AL MERCADO / CERRAR, does not advance the day); All-Star window Feb 8–14; up to 15 games/day; no back-to-backs by design. — `ScheduleGenerator.cs`, `DashboardController.cs`
 
 ## 2. Match simulation (core mechanic)
 
@@ -51,6 +51,13 @@ If `minutes ≥ 20`: `passing ≥ 95` → minimum assists; `rebounding ≥ 95` �
 - Injuries: base prob 0.008/game, multiplied up to ×5.5 when `fisico < 30`; 27 weighted types (1–300 days).
 - `rating` = player game score; `double_double`/`triple_double` flags.
 
+### Play-by-play en vivo (Vista de Partido)
+- Toggle **Vista de Partido** en los modales de Configuración (Dashboard/MainMenu): `Directa` (resultado instantáneo) o `Play-by-play`. Persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()` / `SimModePrefKey`, 0=Directa, 1=Play). Solo aplica al flujo día a día (no fast sim).
+- `GameSimulator` captura la crónica sin alterar el resultado: `PlayByPlayEvent` (quarter, text en español, `homeScore`/`awayScore` acumulados, `timeElapsed`, deltas `StatDelta` por jugador). `RunPossession`/`MissHandler` devuelven `PossessionOutcome` con la descripción; `DoAst/DoReb/AwardReb/DoTO/DoFoul` devuelven el nombre del jugador. `CaptureBox`/`DiffBox` generan los deltas tras cada posesión + minutos por jugador en pista; hay meta-eventos de inicio de cuarto/prórroga y fin de partido.
+- `DashboardController.ProcessSingleGame` rellena `GameResultCache.PlayByPlayLogs[game.id]` cuando el modo es Play.
+- Overlay inmersivo en `MatchDay` (`PlayByPlayOverlay`): nombres + logos de equipos, marcador acumulado, reloj `mm:ss`, barra de progreso 0–100% por tiempo real del partido, y **boxscore en vivo** por equipo (12 columnas) que se reordena por **VAL descendente** en cada evento y cuya fila de TOTALES se **recalcula desde los jugadores** (`RecalcTotals`) en cada actualización.
+- Velocidades **x1/x3/x5/x10** (persistidas en `TF_PbpSpeed`; base 2 s/evento) y botón **SALTAR**: durante el partido avanza al final (reconstruyendo el boxscore completo); al acabar cambia a **IR AL RESUMEN** y cierra el overlay para mostrar el MatchDay con el resumen final (marcador, boxscore y asistencia). — `MatchDayController.cs`
+
 ### Fallback
 If a team has <2 available players, result is random-ish (105–125 vs 100–120) with `DistributeQuarters`.
 
@@ -79,10 +86,20 @@ Constants (2025-26, `TradeHelper.cs`): cap `174,647,000`, luxury `220,428,000`, 
 6. `finalMax = min(maxByExp, rawMax)`.
 
 ### Offer resolution (`ProcessMaturedOffers`, after 7 days)
-Acceptance probability via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll `Random(1,101) ≤ score`. Results: accepted → player signs/renews (sets `team_id`, `salary`, `contract_years`, `seasons_with_team=1` for FAs; cooldowns), rejected → cooldown (+14/15 days). Legality re-checked at maturity: over-cap signings only legal up to the applicable exception; **NT-MLE usage sets hard cap** (`first_apron_hard_capped=1`).
+Acceptance probability via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll `Random(1,101) ≤ score`. Results: accepted → player signs/renews (sets `team_id`, `salary`, `contract_years`, `guaranteed_years`, `has_team_option`, `has_player_option`, `seasons_with_team=1` for FAs; cooldowns), rejected → cooldown (+14/15 days). Legality re-checked at maturity: over-cap signings only legal up to the applicable exception; **NT-MLE usage sets hard cap** (`first_apron_hard_capped=1`). Contract outcomes in the inbox and the summary modal now show the options: e.g. `3 años (Team Option)`, `2 años + Player Option` (helper `FormatContractYears`). **Re-firma de FA propio**: si un jugador que declinó su player option (FA reciente con `last_team_id == myTeam`) es re-firmado, la rama renovación le reasigna `team_id`; si mientras maduraba firmó con otro equipo, la re-firma se cancela.
 
 ### Trades (`TradeHelper.ValidateTrade` / `EvaluateTrade`)
 Both sides validated against apron rules (2nd apron: no aggregation, incoming ≤ outgoing; 1st apron: ≤110% of outgoing; else standard matching `2×+250K` / `+7.5M` / `125%+250K`). AI accept via `EvaluateTrade` score vs threshold (see `SYSTEMS.md §S7`). Picks can be traded (`draft_picks.current_team_id`). User-initiated trades live in `MarketController`; AI-initiated offers appear as modals via `ShowNextPendingTradeOffer`.
+
+### Sign-and-Trade (S&T) de FA propio — `MarketController`
+Junto a los jugadores del equipo, el panel de traspaso muestra la sección **"FA RECIENTES (BIRD RIGHTS) — SIGN & TRADE"**: tus FA propios (`IsOwnRecentFA`) con su salario máximo Bird (`GetMaxOfferBreakdown(isFromSameTeam:true)`). Al seleccionarlos y confirmar, `ProcessSATrade` los **firma** (Bird rights) y los **traspasa de inmediato** al equipo rival a cambio de jugadores/picks; el receptor queda bajo hard cap del 1er apron. Se registran dos `TradeData` (`free_agent` de la firma + `sign_and_trade` del traspaso). `ValidateTrade`/`EvaluateTrade` aceptan `teamASignSalaries`/`teamBSignSalaries` para valorar el nuevo salario firmado (sin descontar roster/nómina del equipo que firma). La IA puede proponer S&T por tu FA propio (`GenerateAITradeOffersForPlayer` → `ShowNextPendingTradeOffer`) y respeta `pendingSATIds` para no robártelo en sus fichajes.
+
+### Cap sheet (Finances → «CAP SHEET») — `FinancesController.BuildCapSheet`
+- **Summary boxes**: current payroll (sum of `players.salary`), cap and apron from `LeagueSettings` (fallback `TradeHelper`), space = cap − payroll.
+- **Projection to 5 years (including current) at +5%/season** (`ProjectedCap`, mirroring `StartNewSeason`): per year shows cap, committed payroll and space (color-coded green/amber/red).
+- **Yearly committed payroll**: a player contributes `salary` for the current year and each year while `contract_years > yr` (years remaining; flat salary model), dropping the further out the contract expires.
+- **Expiring players**: `contract_years == 1` → become FA at season end (`team_id=0`).
+- **Available exceptions**: NT-MLE / T-MLE / minimum plus luxury tax and 2nd apron. Read-only for now.
 
 ## 5. Economy
 
@@ -106,9 +123,10 @@ Both sides validated against apron rules (2nd apron: no aggregation, incoming �
 
 ## 6. Roster management
 
-- **Renewals** (`RosterController`): salary spinner 1M..max, years 1–5; warning when payroll exceeds luxury tax; `GetMaxOfferBreakdown` shown; offer persisted in `offers`.
+- **Renewals** (`RosterController`): salary spinner 1M..max, years 1–5; warning when payroll exceeds luxury tax; `GetMaxOfferBreakdown` shown; **optional TO/PO toggle buttons** (team option / player option, mutually exclusive; option years reduce guaranteed years by 1); offer persisted in `offers` with `guaranteed_years`/`has_team_option`/`has_player_option`.
 - **Dismissal / buyout** (`RosterController`): `DESPEDIR`/`RESCINDIR CONTRATO` buttons on player detail. Dismissal: severance recorded (finance type 6). Buyout (`ConfirmBuyout`): stretch provision implemented (see §5) with TYPE_BUYOUT records.
-- **FA market** (`MarketController`): `FreeAgentsPanel`, salary/years spinners, accept-score preview (`UpdateFAAcceptScore`), legality enforced via `GetMaxOfferBreakdown(..., isFromSameTeam:false)`.
+- **FA market** (`MarketController`): `FreeAgentsPanel`, salary/years spinners, accept-score preview (`UpdateFAAcceptScore`), legality enforced via `GetMaxOfferBreakdown(..., isFromSameTeam:false)`. The free agent list is shown **sorted by descending calculated average** (`GetCalculatedAverage`) after fetching from `GetFreeAgents()`. The contract offer modal includes the same **TO/PO toggle buttons** as renewals (`ToggleFAOption`/`RefreshFAOptionToggles`), so FA signings can carry team/player options too. Los FA recientes de tu equipo (que declinaron su player option, `last_team_id == myTeam`) conservan **Bird rights** (`isFromSameTeam=true`) al firmarles.
+- **Re-firma de FA propio** (`NewSeasonController`): tras decidir las player options, si un jugador declinó la suya aparece un modal "RE-FIRMA DE AGENTES LIBRES" con salario previo, valor de mercado (`EstimateMarketSalary`) y máximo con Bird rights; el manager puede enviar una oferta diferida (madura 7 días) o dejarlo salir al mercado.
 - **Trajectory** (`TrajectoryController`): player career stats screen (uses `ScreenManager.SelectedPlayerId`).
 
 ## 7. Training
@@ -134,7 +152,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 ## 9. League AI
 
-- `ProcessAITransfers` (every ≥15 game days, transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 2 per cycle, 30% per team); 30% fallback to FA.
+- `ProcessAITransfers` (every ≥15 game days, reduced to 3-5 game days during deadline week Feb 1-8, `IsDeadlineWeek`; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 2 per cycle, 30% per team); 30% fallback to FA. Contenders (top 4 conference, `IsTeamContender`) offer draft picks more aggressively during deadline week. Trade offer titles prefixed with `[DEADLINE]`.
 - `ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with the strongest teams (by roster average), respecting pending user offers [D].
 - `EndSeasonController.ProcessAITeamRenewals`: AI renews its expiring players.
 - `StartNewSeason` refills AI rosters to 15 (best teams pick first, positional need), trims to 17 max, aging/progression, +5% caps, new sponsors/TV for teams without contracts (excluding user).
@@ -186,5 +204,4 @@ flowchart LR
 ## Open questions
 
 - Does the psychologist actually accelerate recovery (`treated` flag)? `ProcessPsychologistMorale` suggests morale-only [H].
-- Luxury tax and buyout are **implemented** (confirmed: `DashboardController.cs:3741`, `RosterController.cs:1583`); what remains unverified is whether `PLAN.md`'s sign-and-trade flow (`trade_type="sign_and_trade"`) is reachable in the UI — the constant exists in `TradeData.cs` but no UI toggle was found [H].
 - `GameMode.ProManager` behavioral differences — none found [H].

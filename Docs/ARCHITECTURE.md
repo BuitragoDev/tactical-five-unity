@@ -28,7 +28,6 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 - **[F]** No prefabs and no game ScriptableObjects. All runtime data lives in SQLite. — see `PREFABS.md`, `SCRIPTABLE_OBJECTS.md`
 - **[F]** No C# event bus / no messaging framework. Cross-system communication is done via (a) the SQLite `messages` table, (b) static mutable state (`GameResultCache`, `ScreenManager.SelectedPlayerId/CurrentMode`), (c) `PlayerPrefs` for settings, and (d) UI Toolkit callbacks. — see `EVENTS.md`
 - **[F]** All database access goes through `DatabaseManager.Instance` (a `MonoBehaviour` singleton). No other script opens its own connection except the editor flow via `GameSaveManager`. — `DatabaseManager.cs:30-70`
-- **[F]** Simulation is **non-deterministic**: `UnityEngine.Random` is used without seeding throughout (`GameSimulator`, `QuickNewsGenerator`, relationships, AI trades). Exception: `DatabaseManager.GeneratePositionAttrs` uses a seeded `System.Random`. — `GameSimulator.cs`, `DatabaseManager.cs:2013`
 
 ## 2. Module inventory
 

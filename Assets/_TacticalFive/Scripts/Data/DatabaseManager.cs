@@ -332,6 +332,36 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogWarning($"[DB] Migration: secondary_position data migration failed: {ex.Message}");
         }
 
+        // Add guaranteed_years to players if missing
+        var playerColsOpt = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        if (!playerColsOpt.Any(c => c.name == "guaranteed_years"))
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN guaranteed_years INTEGER DEFAULT 0");
+            _db.Execute("ALTER TABLE players ADD COLUMN has_team_option INTEGER DEFAULT 0");
+            _db.Execute("ALTER TABLE players ADD COLUMN has_player_option INTEGER DEFAULT 0");
+            _db.Execute("UPDATE players SET guaranteed_years = contract_years WHERE contract_years > 0");
+            Debug.Log("[DB] Migration: added guaranteed_years/has_team_option/has_player_option to players");
+        }
+
+        // Add last_team_id to players if missing
+        if (!playerColsOpt.Any(c => c.name == "last_team_id"))
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN last_team_id INTEGER DEFAULT 0");
+            _db.Execute("UPDATE players SET last_team_id = team_id WHERE team_id != 0");
+            Debug.Log("[DB] Migration: added last_team_id to players");
+        }
+
+        // Add guaranteed_years to offers if missing
+        var offersCols = _db.Query<ColumnInfo>("PRAGMA table_info(offers)");
+        if (!offersCols.Any(c => c.name == "guaranteed_years"))
+        {
+            _db.Execute("ALTER TABLE offers ADD COLUMN guaranteed_years INTEGER DEFAULT 0");
+            _db.Execute("ALTER TABLE offers ADD COLUMN has_team_option INTEGER DEFAULT 0");
+            _db.Execute("ALTER TABLE offers ADD COLUMN has_player_option INTEGER DEFAULT 0");
+            _db.Execute("UPDATE offers SET guaranteed_years = offer_years WHERE guaranteed_years = 0");
+            Debug.Log("[DB] Migration: added guaranteed_years/has_team_option/has_player_option to offers");
+        }
+
         // Migrate trade_offers to multi-player schema
         try
         {

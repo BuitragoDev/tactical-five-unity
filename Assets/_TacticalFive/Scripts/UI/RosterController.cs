@@ -85,6 +85,7 @@ using System.Linq;
     private Label _renewPendingText;
     private VisualElement _renewFormRowSalary;
     private VisualElement _renewFormRowYears;
+    private VisualElement _renewFormRowOptions;
     private Label _renewWarningText;
     private Label _renewMaxInfo;
     private long _renewMaxSalary;
@@ -119,6 +120,10 @@ using System.Linq;
     // Datos
     private int _renewOfferYears;
     private long _renewOfferSalary;
+    private Button _renewTeamOption;
+    private Button _renewPlayerOption;
+    private bool _teamOptionActive;
+    private bool _playerOptionActive;
     private List<PlayerData> _players;
     private PlayerData _selectedPlayer;
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -174,6 +179,7 @@ using System.Linq;
         _statStl = _root.Q<Label>("StatStl");
         _statBlk = _root.Q<Label>("StatBlk");
         _detailContract = _root.Q<Label>("DetailContract");
+        _detailContract.enableRichText = true;
         _detailPotential = _root.Q<Label>("DetailPotential");
         _btnDismiss = _root.Q<Button>("BtnDismiss");
         _btnBuyout = _root.Q<Button>("BtnBuyout");
@@ -213,9 +219,13 @@ using System.Linq;
         _renewYearsValue = _root.Q<Label>("RenewYearsValue");
         _renewYearsDec = _root.Q<Label>("RenewYearsDec");
         _renewYearsInc = _root.Q<Label>("RenewYearsInc");
+        _renewTeamOption = _root.Q<Button>("RenewTeamOption");
+        _renewPlayerOption = _root.Q<Button>("RenewPlayerOption");
+        if (_renewPlayerOption != null) _renewPlayerOption.style.marginLeft = 12;
         _renewPendingText = _root.Q<Label>("RenewPendingText");
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
         _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
+        _renewFormRowOptions = _root.Q<VisualElement>("RenewFormRowOptions");
         _renewWarningText = _root.Q<Label>("RenewWarningText");
         _renewMaxInfo = _root.Q<Label>("RenewMaxInfo");
 
@@ -298,6 +308,8 @@ using System.Linq;
         SetupRenewLongPress(_renewSalaryInc, () => StepRenewSalary(1));
         SetupRenewLongPress(_renewYearsDec, () => StepRenewYears(-1));
         SetupRenewLongPress(_renewYearsInc, () => StepRenewYears(1));
+        _renewTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewOption("team"); });
+        _renewPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewOption("player"); });
         _detailLinkTrajectory?.RegisterCallback<ClickEvent>(_ =>
         {
             if (_selectedPlayer == null) return;
@@ -634,7 +646,20 @@ using System.Linq;
         _statBlk.text = s.avgBlk.ToString("F1");
 
         // Contrato y potencial
-        _detailContract.text = $"${p.salary / 1_000_000}M/año · {p.contract_years} año{(p.contract_years != 1 ? "s" : "")}";
+        int guaranteed = p.guaranteed_years;
+        int total = p.contract_years;
+        bool hasOpt = p.has_team_option == 1 || p.has_player_option == 1;
+        string optLabel = p.has_team_option == 1 ? "Team Option" : "Player Option";
+        string optColor = p.has_team_option == 1 ? "#27AE60" : "#F8C440";
+
+        string contractText = $"${p.salary / 1_000_000}M/año";
+        if (hasOpt && guaranteed == 0)
+            contractText += $" · {total} año{(total != 1 ? "s" : "")} (<color={optColor}>{optLabel}</color>)";
+        else if (hasOpt)
+            contractText += $" · {guaranteed} año{(guaranteed != 1 ? "s" : "")} + <color={optColor}>{optLabel}</color>";
+        else
+            contractText += $" · {total} año{(total != 1 ? "s" : "")}";
+        _detailContract.text = contractText;
         _detailPotential.text = p.potential.ToString();
 
         // Rol - icono clickeable que rota
@@ -711,6 +736,37 @@ using System.Linq;
 
     // ── RENOVAR CONTRATO ──────────────────────────────────
 
+    void ToggleRenewOption(string type)
+    {
+        if (type == "team")
+        {
+            _teamOptionActive = !_teamOptionActive;
+            if (_teamOptionActive) _playerOptionActive = false;
+        }
+        else
+        {
+            _playerOptionActive = !_playerOptionActive;
+            if (_playerOptionActive) _teamOptionActive = false;
+        }
+        RefreshRenewOptionToggles();
+    }
+
+    void RefreshRenewOptionToggles()
+    {
+        if (_renewTeamOption != null)
+        {
+            _renewTeamOption.RemoveFromClassList("renew-toggle-btn--team-active");
+            if (_teamOptionActive)
+                _renewTeamOption.AddToClassList("renew-toggle-btn--team-active");
+        }
+        if (_renewPlayerOption != null)
+        {
+            _renewPlayerOption.RemoveFromClassList("renew-toggle-btn--player-active");
+            if (_playerOptionActive)
+                _renewPlayerOption.AddToClassList("renew-toggle-btn--player-active");
+        }
+    }
+
     void OnRenewClicked()
     {
         if (_selectedPlayer == null) return;
@@ -742,6 +798,7 @@ using System.Linq;
         // Mostrar formulario, ocultar pending
         if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.Flex;
         if (_renewFormRowYears != null) _renewFormRowYears.style.display = DisplayStyle.Flex;
+        if (_renewFormRowOptions != null) _renewFormRowOptions.style.display = DisplayStyle.Flex;
         if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.None;
         if (_renewText1 != null) _renewText1.style.display = DisplayStyle.Flex;
         if (_renewText2 != null) _renewText2.style.display = DisplayStyle.Flex;
@@ -756,6 +813,9 @@ using System.Linq;
         _renewSalary = autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary;
         _renewSalary = (long)(Mathf.Round(_renewSalary / 100_000f) * 100_000);
         _renewYears = CalculateAutoYears(_selectedPlayer.age);
+        _teamOptionActive = false;
+        _playerOptionActive = false;
+        RefreshRenewOptionToggles();
         RefreshRenewSpinners();
 
         ClearRenewModalColor(_renewBox, _renewTitle);
@@ -1014,13 +1074,19 @@ using System.Linq;
 
         // Guardar oferta en BD
         int currentDay = _season?.current_game_day ?? 0;
-        var offer = new OfferData
-        {
-            manager_id = _manager.id,
-            player_id = _selectedPlayer.id,
-            offer_salary = _renewOfferSalary,
-            offer_years = _renewOfferYears,
-            day_sent = currentDay,
+bool hasTeamOpt = _teamOptionActive;
+            bool hasPlayerOpt = _playerOptionActive;
+            int guarYears = (hasTeamOpt || hasPlayerOpt) ? System.Math.Max(0, _renewOfferYears - 1) : _renewOfferYears;
+            var offer = new OfferData
+            {
+                manager_id = _manager.id,
+                player_id = _selectedPlayer.id,
+                offer_salary = _renewOfferSalary,
+                offer_years = _renewOfferYears,
+                guaranteed_years = guarYears,
+                has_team_option = hasTeamOpt ? 1 : 0,
+                has_player_option = hasPlayerOpt ? 1 : 0,
+                day_sent = currentDay,
             status = "pending",
             processed = 0
         };
@@ -1030,6 +1096,7 @@ using System.Linq;
         // Ocultar formulario, mostrar pending
         if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.None;
         if (_renewFormRowYears != null) _renewFormRowYears.style.display = DisplayStyle.None;
+        if (_renewFormRowOptions != null) _renewFormRowOptions.style.display = DisplayStyle.None;
         if (_renewText1 != null) _renewText1.style.display = DisplayStyle.None;
         if (_renewText2 != null) _renewText2.style.display = DisplayStyle.None;
         if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.Flex;

@@ -249,6 +249,7 @@ public class EndSeasonController : UIScreenController
                 int years = CalcRenewYears(player.age);
                 long newSalary = CalcRenewSalary(player.salary, player.age);
                 player.contract_years = years;
+                player.guaranteed_years = years;
                 player.salary = newSalary;
                 DatabaseManager.Instance.UpdatePlayer(player);
             }
@@ -264,6 +265,7 @@ public class EndSeasonController : UIScreenController
         long newSalary = CalcRenewSalary(player.salary, player.age);
 
         player.contract_years = years;
+        player.guaranteed_years = years;
         player.salary = newSalary;
         DatabaseManager.Instance.UpdatePlayer(player);
     }
@@ -277,6 +279,7 @@ public class EndSeasonController : UIScreenController
             int years = CalcRenewYears(p.age);
             long newSalary = CalcRenewSalary(p.salary, p.age);
             p.contract_years = years;
+            p.guaranteed_years = years;
             p.salary = newSalary;
             DatabaseManager.Instance.UpdatePlayer(p);
         }

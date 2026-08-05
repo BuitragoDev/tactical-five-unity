@@ -120,12 +120,22 @@ using System.Linq;
     private bool _tradeOfferModalResolved;
     private bool _tradeOfferAccepted;
 
+    private VisualElement _deadlineDayOverlay;
+    private bool _deadlineDayActive;
+    private bool _deadlineDayModalShown;
+    private int _deadlineModalSeasonId;
+
     protected override void OnEnable()
     {
         base.OnEnable();
         _firedOverlay = new VisualElement();
         _firedOverlay.AddToClassList("fired-modal-overlay");
         _root.Add(_firedOverlay);
+
+        _deadlineDayOverlay = new VisualElement();
+        _deadlineDayOverlay.AddToClassList("deadline-overlay");
+        _root.Add(_deadlineDayOverlay);
+
         SetSidebarNavigationEnabled(true);
         AudioManager.Instance?.PlayMusic("backgroundMenu");
         SetupPlayerCoach();
@@ -146,6 +156,11 @@ using System.Linq;
         else
         {
             _fastSimTarget = null;
+            if (_season != null && _season.id != _deadlineModalSeasonId)
+            {
+                _deadlineDayModalShown = false;
+                _deadlineModalSeasonId = _season.id;
+            }
             CheckBudgetWarning();
             ProcessMaturedOffers();
             ShowPendingRecoveryModal();
@@ -166,6 +181,7 @@ using System.Linq;
     bool IsAnyModalOpen()
     {
         if (_firedOverlay != null && _firedOverlay.style.display == DisplayStyle.Flex) return true;
+        if (_deadlineDayOverlay != null && _deadlineDayOverlay.style.display == DisplayStyle.Flex) return true;
         if (_configModalOverlay != null && _configModalOverlay.ClassListContains("modal-overlay--visible")) return true;
         if (_configMainMenuConfirmOverlay != null && _configMainMenuConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
         if (_configExitConfirmOverlay != null && _configExitConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
@@ -429,6 +445,12 @@ using System.Linq;
             return;
         }
 
+        if (_deadlineDayActive)
+        {
+            SetActionBtn("DEADLINE DAY ACTIVO", "");
+            return;
+        }
+
         int nextDay = FindNextGameDay();
         if (nextDay == 0)
         {
@@ -480,6 +502,14 @@ using System.Linq;
             return;
         }
         if (_season == null || _isLoading) return;
+        if (_deadlineDayActive) return;
+
+        if (IsFeb7OfYearEnd() && !_deadlineDayModalShown)
+        {
+            _deadlineDayModalShown = true;
+            ShowDeadlineDayModal();
+            return;
+        }
 
         if (_season.phase == "finished")
         {
@@ -1338,7 +1368,17 @@ using System.Linq;
 
             string playerName = $"{player.first_name} {player.last_name}";
             string salaryText = $"${offer.offer_salary / 1_000_000}M/año";
-            string yearsText = $"{offer.offer_years} año{(offer.offer_years > 1 ? "s" : "")}";
+            string yearsText = FormatContractYears(offer);
+
+            string FormatContractYears(OfferData o)
+            {
+                bool hasOpt = o.has_team_option == 1 || o.has_player_option == 1;
+                if (!hasOpt) return $"{o.offer_years} año{(o.offer_years != 1 ? "s" : "")}";
+                string optLabel = o.has_team_option == 1 ? "Team Option" : "Player Option";
+                if (o.guaranteed_years == 0)
+                    return $"{o.offer_years} año{(o.offer_years != 1 ? "s" : "")} ({optLabel})";
+                return $"{o.guaranteed_years} año{(o.guaranteed_years != 1 ? "s" : "")} + {optLabel}";
+            }
 
             if (offer.offer_type == 1)
             {
@@ -1461,8 +1501,12 @@ using System.Linq;
                     acceptedCount++;
                     batchSigningsAccepted++;
                     player.team_id = _myTeam.id;
+                    player.last_team_id = _myTeam.id;
                     player.salary = offer.offer_salary;
                     player.contract_years = offer.offer_years;
+                    player.guaranteed_years = offer.guaranteed_years;
+                    player.has_team_option = offer.has_team_option;
+                    player.has_player_option = offer.has_player_option;
                     player.seasons_with_team = 1;
                     DatabaseManager.Instance.UpdatePlayer(player);
 
@@ -1550,10 +1594,43 @@ using System.Linq;
                     acceptedCount++;
                     player.salary = offer.offer_salary;
                     player.contract_years = offer.offer_years;
+                    player.guaranteed_years = offer.guaranteed_years;
+                    player.has_team_option = offer.has_team_option;
+                    player.has_player_option = offer.has_player_option;
+                    // Re-firma de un FA propio reciente (declinó su opción): devolverlo al equipo
+                    if (player.team_id == 0 && DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id))
+                    {
+                        player.team_id = _myTeam.id;
+                        player.last_team_id = _myTeam.id;
+                    }
+                    // Si como FA reciente firmó con otro equipo mientras maduraba, cancelar
+                    else if (player.team_id != 0 && player.team_id != _myTeam.id)
+                    {
+                        rejectedCount++;
+                        player.renewal_cooldown_day = _season.current_game_day + 15;
+                        DatabaseManager.Instance.UpdatePlayer(player);
+                        resultSummary += $"✗ {playerName}: RE-FIRMA CANCELADA — el jugador fichó por {DatabaseManager.Instance.GetTeamById(player.team_id)?.name ?? "otro equipo"}.\n";
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 0,
+                            sender_id = 0,
+                            title = $"Re-firma cancelada: {playerName}",
+                            body = $"Tu oferta de re-firma a {playerName} ha sido cancelada porque el jugador ha fichado por {DatabaseManager.Instance.GetTeamById(player.team_id)?.name ?? "otro equipo"}.",
+                            game_day = _season.current_game_day,
+                            game_date = nowStr,
+                            created_at = nowStr,
+                            date_sent = nowStr,
+                            is_read = 0
+                        });
+                        DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                        continue;
+                    }
                     player.renewal_cooldown_day = _season.current_game_day + 365;
                     DatabaseManager.Instance.UpdatePlayer(player);
 
-                    resultSummary += $"✓ {playerName}: CONTRATO RENOVADO — {salaryText} · {yearsText}\n";
+                    string reSignTag = player.team_id == _myTeam.id && player.last_team_id == _myTeam.id ? " RE-FIRMADO" : "";
+                    resultSummary += $"✓ {playerName}: CONTRATO RENOVADO{reSignTag} — {salaryText} · {yearsText}\n";
 
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
@@ -2133,6 +2210,93 @@ using System.Linq;
         }
     }
 
+    void ShowDeadlineDayModal()
+    {
+        _deadlineDayActive = true;
+        _deadlineDayOverlay.Clear();
+        _deadlineDayOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("deadline-box");
+        _deadlineDayOverlay.Add(box);
+
+        var icon = new Label("\u23F0");
+        icon.AddToClassList("deadline-icon");
+        box.Add(icon);
+
+        var title = new Label("DEADLINE DAY");
+        title.AddToClassList("deadline-title");
+        box.Add(title);
+
+        var pendingTrades = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id) ?? new List<TradeOfferData>();
+        var pendingSATIds = GetPendingSATIds();
+        var maturedOffers = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day) ?? new List<OfferData>();
+
+        var countText = "";
+        if (pendingTrades.Count > 0)
+            countText += $"  \u2022  {pendingTrades.Count} oferta(s) de traspaso pendiente(s)\n";
+        if (pendingSATIds.Count > 0)
+            countText += $"  \u2022  {pendingSATIds.Count} sign-and-trade(s) pendiente(s)\n";
+        if (maturedOffers.Count > 0)
+            countText += $"  \u2022  {maturedOffers.Count} oferta(s) de FA por resolver\n";
+
+        if (string.IsNullOrEmpty(countText))
+            countText = "  No tienes operaciones pendientes.";
+
+        var stats = new Label(countText.TrimEnd());
+        stats.AddToClassList("deadline-text");
+        stats.style.whiteSpace = WhiteSpace.Normal;
+        box.Add(stats);
+
+        var subtitle = new Label("\u00DAltima oportunidad para realizar traspasos antes del cierre.");
+        subtitle.AddToClassList("deadline-subtitle");
+        box.Add(subtitle);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("deadline-btn-group");
+
+        var marketBtn = new Button();
+        marketBtn.text = "IR AL MERCADO";
+        marketBtn.AddToClassList("deadline-btn");
+        marketBtn.AddToClassList("deadline-btn--primary");
+        marketBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _deadlineDayActive = false;
+            _deadlineDayOverlay.style.display = DisplayStyle.None;
+            ScreenManager.Instance.GoTo(GameScreen.Market);
+        });
+        btnGroup.Add(marketBtn);
+
+        var closeBtn = new Button();
+        closeBtn.text = "CERRAR";
+        closeBtn.AddToClassList("deadline-btn");
+        closeBtn.AddToClassList("deadline-btn--danger");
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _deadlineDayActive = false;
+            _deadlineDayOverlay.style.display = DisplayStyle.None;
+            RefreshActionButton();
+        });
+        btnGroup.Add(closeBtn);
+
+        box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(marketBtn);
+            CursorManager.Instance.RegisterHandCursor(closeBtn);
+        }
+    }
+
+    bool IsFeb7OfYearEnd()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date.Month == 2 && date.Day == 7 && date.Year == _season.year_end;
+    }
+
     void AutoFixInjuredLineup()
     {
         var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
@@ -2442,14 +2606,32 @@ using System.Linq;
     //  AI TRANSFERS
     // ═══════════════════════════════════════════
 
+    bool IsDeadlineWeek()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date.Month == 2 && date.Day >= 1 && date.Day <= 8 && date.Year == _season.year_end;
+    }
+
+    bool IsTeamContender(TeamData team)
+    {
+        if (_allGames == null || _allGames.Count == 0) return false;
+        var confTeams = _allTeams?.Where(t => t.conference == team.conference).ToList();
+        if (confTeams == null || confTeams.Count == 0) return false;
+        var standings = BuildStandings(confTeams);
+        var top4 = standings.Take(4).ToList();
+        return top4.Any(s => s.teamId == team.id);
+    }
+
     void ProcessAITransfers(int gameDay)
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
 
-        // Only run every ~10 game days
+        // Only run every ~10 game days (or 3-5 during deadline week)
         int lastDay = _season.last_ai_trade_day;
+        int cooldownDays = IsDeadlineWeek() ? Random.Range(3, 6) : 15;
         Debug.Log($"[AITrades] ProcessAITransfers called. gameDay={gameDay} lastDay={lastDay} diff={gameDay - lastDay}");
-        if (gameDay - lastDay < 15) return;
+        if (gameDay - lastDay < cooldownDays) return;
 
         // Check if in transfer window (1 Sep year_start to 8 Feb year_end)
         if (!System.DateTime.TryParse(_season.current_date, out var date)) return;
@@ -2540,12 +2722,19 @@ using System.Linq;
         var teamsByAvg = allTeams.OrderByDescending(t => teamAvgs[t.id]).ToList();
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+        var pendingSATIds = GetPendingSATIds();
 
         foreach (var star in stars)
         {
             if (pendingFAIds.Contains(star.id))
             {
                 Debug.Log($"[StarFA] Skip {star.first_name} {star.last_name} — user has pending offer");
+                continue;
+            }
+
+            if (pendingSATIds.Contains(star.id))
+            {
+                Debug.Log($"[StarFA] Skip {star.first_name} {star.last_name} — user has pending sign-and-trade offer");
                 continue;
             }
 
@@ -2559,8 +2748,10 @@ using System.Linq;
                 if (salaryCap - payroll < star.salary) continue;
 
                 star.team_id = team.id;
+                star.last_team_id = team.id;
                 int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
+                star.guaranteed_years = years;
                 DatabaseManager.Instance.UpdatePlayer(star);
 
                 DatabaseManager.Instance.InsertTrade(new TradeData
@@ -2813,9 +3004,10 @@ using System.Linq;
         if (roster.Count >= TradeHelper.MAX_ROSTER) return;
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+        var pendingSATIds = GetPendingSATIds();
 
         var candidates = freeAgents
-            .Where(p => p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id))
+            .Where(p => p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
             .OrderByDescending(p => p.overall)
             .ToList();
 
@@ -2823,7 +3015,7 @@ using System.Linq;
         {
             // Try any position if no match at targetPos
             candidates = freeAgents
-                .Where(p => p.salary <= team.budget && !pendingFAIds.Contains(p.id))
+                .Where(p => p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
                 .OrderByDescending(p => p.overall)
                 .ToList();
         }
@@ -2834,9 +3026,11 @@ using System.Linq;
             if (Random.Range(0, 100) >= chance) continue;
 
             player.team_id = team.id;
+            player.last_team_id = team.id;
             int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
             player.salary += 2_000_000;
             player.contract_years = years;
+            player.guaranteed_years = years;
             DatabaseManager.Instance.UpdatePlayer(player);
 
             DatabaseManager.Instance.InsertTrade(new TradeData
@@ -2858,6 +3052,24 @@ using System.Linq;
     // ═══════════════════════════════════════════
     //  AI TRADE OFFERS TO PLAYER
     // ═══════════════════════════════════════════
+
+    HashSet<int> GetPendingSATIds()
+    {
+        var result = new HashSet<int>();
+        var pending = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
+        var freeAgents = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id))
+            .ToDictionary(p => p.id, p => p);
+        foreach (var offer in pending)
+        {
+            foreach (var id in offer.GetWantedPlayerIds())
+            {
+                if (freeAgents.ContainsKey(id))
+                    result.Add(id);
+            }
+        }
+        return result;
+    }
 
     void GenerateAITradeOffersForPlayer(int gameDay, int seasonId)
     {
@@ -2881,6 +3093,54 @@ using System.Linq;
             var userHealthy = userRoster.Where(p => p.injury_days == 0).ToList();
             if (userHealthy.Count == 0) continue;
 
+            // S&T de IA: proponer traspasar un FA reciente del usuario (Bird rights)
+            if (Random.Range(0f, 1f) > 0.55f)
+            {
+                var userFAs = DatabaseManager.Instance.GetFreeAgents()
+                    .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id) && p.GetCalculatedAverage() > 75)
+                    .OrderByDescending(p => p.GetCalculatedAverage())
+                    .ToList();
+                var faTarget = userFAs.FirstOrDefault(p => !targetedIds.Contains(p.id));
+                if (faTarget != null)
+                {
+                    targetedIds.Add(faTarget.id);
+                    var aiHealthyForSA = aiRoster.Where(p => p.injury_days == 0).ToList();
+                    if (aiHealthyForSA.Count > 0)
+                    {
+                        long estimatedSalary = faTarget.salary;
+                        var faPack = aiHealthyForSA
+                            .OrderBy(p => Mathf.Abs(p.salary - estimatedSalary))
+                            .Take(2)
+                            .ToList();
+                        if (faPack.Count > 0)
+                        {
+                            var aiPicksForSA = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
+                            var futurePick = aiPicksForSA
+                                .OrderByDescending(p => p.season_id)
+                                .ThenBy(p => p.round)
+                                .ThenBy(p => p.pick_number)
+                                .FirstOrDefault();
+                            var saPicks = new List<int>();
+                            if (futurePick != null && Random.Range(0f, 1f) > 0.4f)
+                                saPicks.Add(futurePick.id);
+                            DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
+                            {
+                                manager_id = _manager.id,
+                                team_id_from = aiTeam.id,
+                                player_ids_out = TradeOfferData.JoinIds(new List<int> { faTarget.id }),
+                                player_ids_in = TradeOfferData.JoinIds(faPack.Select(p => p.id).ToList()),
+                                pick_ids_out = TradeOfferData.JoinIds(new List<int>()),
+                                pick_ids_in = TradeOfferData.JoinIds(saPicks),
+                                day_sent = gameDay,
+                                processed = 0
+                            });
+                            Debug.Log($"[AITrades] {aiTeam.name} propone S&T por {faTarget.first_name} {faTarget.last_name} (FA propio del usuario)");
+                            break;
+                        }
+                    }
+                }
+            }
+
             var target = PickTradeTarget(userHealthy, aiRoster, targetedIds);
             if (target == null) continue;
 
@@ -2894,10 +3154,10 @@ using System.Linq;
             var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam);
             if (offerPack == null) continue;
 
-            // If salary gap is large, try sweetening with a draft pick
             long packSalary = offerPack.Sum(p => p.salary);
             List<int> offeredPickIds = new List<int>();
-            if (target.salary > packSalary * 1.5f)
+            bool isContender = IsTeamContender(aiTeam);
+            if (target.salary > packSalary * 1.5f || (IsDeadlineWeek() && isContender))
             {
                 var aiPicks = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
                 var futurePick = aiPicks
@@ -3053,6 +3313,20 @@ using System.Linq;
             .Where(p => p != null)
             .ToList();
 
+        // S&T: si la IA pide un FA propio tuyo (no está en el roster), se firma y se traspasa
+        var ourSATFAs = new List<PlayerData>();
+        var freeAgents = DatabaseManager.Instance.GetFreeAgents().ToList();
+        var unaccounted = wantedIds.Where(id => ourPlayers.All(p => p.id != id)).ToList();
+        foreach (var id in unaccounted)
+        {
+            var fa = freeAgents.FirstOrDefault(p => p.id == id && DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id));
+            if (fa != null)
+            {
+                ourSATFAs.Add(fa);
+                ourPlayers.Add(fa);
+            }
+        }
+
         var theirPlayers = offeredIds
             .Select(id => aiRoster.FirstOrDefault(p => p.id == id))
             .Where(p => p != null)
@@ -3075,11 +3349,12 @@ using System.Linq;
             return;
         }
 
-        ShowTradeOfferModal(offer, ourPlayers, theirPlayers, ourPicks, theirPicks);
+        ShowTradeOfferModal(offer, ourPlayers, theirPlayers, ourPicks, theirPicks, ourSATFAs);
     }
 
     void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers,
-                              List<DraftPickData> ourPicks = null, List<DraftPickData> theirPicks = null)
+                              List<DraftPickData> ourPicks = null, List<DraftPickData> theirPicks = null,
+                              List<PlayerData> ourSATFAs = null)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
@@ -3093,7 +3368,8 @@ using System.Linq;
         box.AddToClassList("trade-offer-modal-box");
         _firedOverlay.Add(box);
 
-        var title = new Label("PROPUESTA DE INTERCAMBIO");
+        var titleText = IsDeadlineWeek() ? "[DEADLINE] PROPUESTA DE INTERCAMBIO" : "PROPUESTA DE INTERCAMBIO";
+        var title = new Label(titleText);
         title.AddToClassList("fired-modal-title");
         box.Add(title);
 
@@ -3151,6 +3427,42 @@ using System.Linq;
             PlayClick();
             var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+            // S&T: firmar los FA propios antes de traspazarlos a la IA
+            if (ourSATFAs != null && ourSATFAs.Count > 0)
+            {
+                var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+                long myPayroll = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+                foreach (var fa in ourSATFAs)
+                {
+                    var breakdown = RosterController.GetMaxOfferBreakdown(fa, leagueSettings, myPayroll, true);
+                    long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(), leagueSettings != null ? leagueSettings.salary_cap : TradeHelper.SALARY_CAP);
+                    long signSalary = breakdown.birdMax > 0 ? breakdown.birdMax : market;
+                    int years = fa.age > 35 ? 1 : fa.age > 32 ? 2 : fa.age > 28 ? 3 : fa.age > 25 ? 4 : 5;
+                    fa.team_id = _myTeam.id;
+                    fa.last_team_id = _myTeam.id;
+                    fa.salary = signSalary;
+                    fa.contract_years = years;
+                    fa.guaranteed_years = years;
+                    fa.seasons_with_team = 1;
+                    DatabaseManager.Instance.UpdatePlayer(fa);
+                    DatabaseManager.Instance.InsertTrade(new TradeData
+                    {
+                        season_id = _season?.id ?? 0,
+                        game_day = _season?.current_game_day ?? 0,
+                        game_date = _season?.current_date ?? now,
+                        team_id_from = 0,
+                        team_id_to = _myTeam.id,
+                        player_id = fa.id,
+                        trade_type = "free_agent"
+                    });
+                }
+                if (_myTeam.first_apron_hard_capped == 0)
+                {
+                    _myTeam.first_apron_hard_capped = 1;
+                    DatabaseManager.Instance.UpdateTeam(_myTeam);
+                }
+            }
+
             foreach (var p in ourPlayers)
             {
                 p.team_id = offer.team_id_from;
@@ -3163,7 +3475,7 @@ using System.Linq;
                     team_id_from = _myTeam.id,
                     team_id_to = offer.team_id_from,
                     player_id = p.id,
-                    trade_type = "trade"
+                    trade_type = (ourSATFAs != null && ourSATFAs.Any(x => x.id == p.id)) ? "sign_and_trade" : "trade"
                 });
             }
 
@@ -3230,13 +3542,16 @@ using System.Linq;
             var theirPicksText = theirPicks != null && theirPicks.Count > 0
                 ? " y " + string.Join(", ", theirPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a4) ? a4 : "???")}")) : "";
 
+            var satMsg = (ourSATFAs != null && ourSATFAs.Count > 0)
+                ? $" (Sign & Trade: {string.Join(", ", ourSATFAs.Select(x => $"{x.first_name} {x.last_name}"))} firmado(s) con Bird rights y traspasado(s))."
+                : "";
             DatabaseManager.Instance.AddMessage(new MessageData
             {
                 manager_id = _manager.id,
                 sender_type = 1,
                 sender_id = 0,
                 title = "Intercambio aceptado",
-                body = $"Has intercambiado a {ourNames}{ourPicksText} por {theirNames}{theirPicksText} con {teamName}.",
+                body = $"Has intercambiado a {ourNames}{ourPicksText} por {theirNames}{theirPicksText} con {teamName}.{satMsg}",
                 game_day = _season.current_game_day,
                 game_date = now,
                 created_at = now,

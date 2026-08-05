@@ -64,12 +64,6 @@
 - **Impact:** crash mid-flow leaves partial state (game played, no stats; aging applied but caps not raised).
 - **Fix:** wrap day/session flows in transactions.
 
-### B10. Simulation is non-deterministic
-- **Type:** design/quality.
-- **Detail [F]:** `UnityEngine.Random` unseeded in `GameSimulator`, relationships, AI trades, news. `GeneratePositionAttrs` uses `System.Random(string.GetHashCode())`.
-- **Impact:** unreproducible games; `string.GetHashCode` is not stable across .NET runtimes/platforms (variation between builds).
-- **Fix:** inject a `System.Random` seed per game/season; replace hash-based seed with a stable hash (e.g., `xxHash`).
-
 ### B11. No schema versioning
 - **Type:** maintainability.
 - **Detail [F]:** migrations rely on column presence; two one-time migrations keyed in `PlayerPrefs`.
