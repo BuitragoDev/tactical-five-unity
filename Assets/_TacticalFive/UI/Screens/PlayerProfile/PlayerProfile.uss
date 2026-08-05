@@ -215,7 +215,13 @@
 }
 
 .playerprofile-attrs-body {
+    flex-direction: row;
+}
+
+.playerprofile-attrs-column {
+    flex: 1;
     flex-direction: column;
+    margin-right: 16px;
 }
 
 /* Attribute bar rows */
