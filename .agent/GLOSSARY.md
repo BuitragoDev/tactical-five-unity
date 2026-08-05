@@ -101,5 +101,6 @@
 | **Series label** | Playoff series id (`playoff-r1-east-1v8`, …) |
 | **Sender type** | `MessageData.sender_type`: 0 system, 1 player, 2 news |
 | **Transfer window** | Sep 1 → Feb 8 (AI trades active) |
+| **Team strategy (IA)** | `TeamStrategy { Rebuild, Balanced, Contend }` — clasifica cada equipo cada ciclo de traspasos (contender=top4 conf o 2+ estrellas; rebuild=últimos 4 o plantilla joven sin estrellas) |
 | **Fisico penalty** | Performance multiplier when fatigue < 30 |
 | **Hard cap flag** | `teams.first_apron_hard_capped` |

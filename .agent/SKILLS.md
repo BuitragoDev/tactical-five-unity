@@ -54,6 +54,7 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 - No namespaces; global classes.
 - All DB code in `DatabaseManager`; all UI wiring in the controller's `OnEnable`.
 - `UnityEngine.Random` for game randomness; seeded `System.Random` only in `GeneratePositionAttrs`.
+- AI GM decisions are strategy-aware: `TeamStrategy { Rebuild, Balanced, Contend }` computed per team each trade cycle (`DashboardController.GetTeamStrategy`/`BuildTeamStrategyCache`), drives cooldowns, densities, `TryFindAITrade`, `TrySellVeteran`, `PickTradeTarget`/`BuildOfferPackage` and star FA signings.
 - Money: `$"{value:N0}"`; dates as `"yyyy-MM-dd"` strings.
 - Logos via `Resources.LoadAll<Sprite>("Teams/Logos/{size}x{size}")` → dictionary.
 - Modals: overlay+box elements, `DisplayStyle.Flex/None`.
@@ -106,7 +107,6 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 - **Duplicate `CursorManager`** can destroy the `ScreenManager` GO at boot (B1). Don't "fix" navigation until you understand this.
 - `GameScreen.Settings` is dead; settings live in the per-screen config modal.
 - `SQLiteAsync` unused; all DB is sync on main thread.
-- `GetTopPlayersByStat` is a stub.
 - `PLAN.md` at repo root describes features, some already implemented — verify against code before trusting it.
 
 ## 12. Keeping this knowledge base in sync

@@ -163,6 +163,6 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 
 ## 8. Open questions
 
-- Why `GameMode.ProManager` exists if it has no code-level difference? ([H] intended for a stricter mode)
+- ~~Why `GameMode.ProManager` exists if it has no code-level difference~~ — **resolved:** ProManager restricts team selection to the worst teams (`GetWorstTeams(5)`) and new-season offers to bottom-10; still intended to be a stricter mode (harder cap/earlier firing) per `TODO` B20.
 - Whether the "Editor" template flow is a developer tool or an intended user feature.
 - Whether `SQLiteAsync.cs` was legacy from a previous "async loading" design. (See `TODO_TECHNICAL_DEBT.md`.)

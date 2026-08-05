@@ -40,11 +40,9 @@
 - **Impact:** ~60% boilerplate duplication.
 - **Fix:** `UIScreenController` base with template methods (`CacheReferences`, `LoadData`, `RegisterCallbacks`, `Refresh`).
 
-### B6. `GetTopPlayersByStat` is a stub
-- **Type:** incomplete feature.
-- **Detail [F]:** `DatabaseManager.GetTopPlayersByStat` returns the manager's roster sorted by overall, with a comment "Para ahora devolvemos jugadores del equipo del manager".
-- **Impact:** any screen relying on league stat leaders may show wrong data.
-- **Fix:** implement with real `player_game_stats` aggregation.
+### B6. `GetTopPlayersByStat` was a stub
+- **Type:** ~~incomplete feature~~ **done.**
+- **Detail [F]:** `DatabaseManager.GetTopPlayersByStat` previously returned the manager's roster sorted by overall. **Fixed** — now aggregates `player_game_stats` in SQL (regular-season games only), see `DatabaseManager.Players.cs:64`. `StatsController.BuildSeasonStats` also moved to a single SQL aggregate (`GetSeasonPlayerStatsAggregates`).
 
 ### B7. `GameScreen.Settings` dead + `SettingsController` orphaned
 - **Type:** dead code / incomplete wiring.
@@ -115,10 +113,10 @@
 - **Impact:** no central registry; magic strings.
 - **Fix:** `GameSettings` static wrapper.
 
-### B20. `GameMode.ProManager` has no behavioral difference
-- **Detail [D]:** only labels differ.
-- **Impact:** unclear feature intent.
-- **Fix:** implement differences or remove.
+### B20. `GameMode.ProManager` has limited behavioral difference
+- **Detail [F]:** ProManager already selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`, others disabled) and `NewSeasonController` limits offers to current team + 3 random from bottom-10. Not yet the intended "harder" difficulty (no NT-MLE, stricter cap, earlier firing).
+- **Impact:** mode works but shallower than intended.
+- **Fix:** implement the remaining difficulty differences (or document the current scope).
 
 ---
 
@@ -139,7 +137,7 @@
 
 1. Fix **B1** (remove duplicate CursorManager; explicit `DontDestroyOnLoad`).
 2. Introduce UI base controller (**B5**) and shared config modal (**B4**) — highest maintenance win.
-3. Implement **B6** and wire/remove **B7**.
+3. Wire/remove **B7** (Settings dead code).
 4. Add schema versioning (**B11**) and transaction wrappers (**B9**) before any new major feature.
 5. Decide on **B20** (ProManager) and **B27** (PLAN.md sync).
 6. Add tests (**B25**) for the core static helpers.

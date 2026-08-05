@@ -204,4 +204,4 @@ flowchart LR
 ## Open questions
 
 - Does the psychologist actually accelerate recovery (`treated` flag)? `ProcessPsychologistMorale` suggests morale-only [H].
-- `GameMode.ProManager` behavioral differences — none found [H].
+- `GameMode.ProManager` differences — only worst teams selectable (`SelectTeamController` `GetWorstTeams(5)`) and new-season offers limited to bottom-10 (`NewSeasonController`). Harder cap/firing rules not implemented yet (TODO B20).
