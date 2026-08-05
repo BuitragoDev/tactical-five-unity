@@ -1,0 +1,266 @@
+.playerprofile-root {
+    width: 100%;
+    height: 100%;
+    background-color: var(--bg-dark);
+}
+
+.playerprofile-main {
+    flex-grow: 1;
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.playerprofile-content {
+    flex-grow: 1;
+    flex-direction: column;
+    padding: 20px 32px;
+    overflow: hidden;
+}
+
+/* Back button */
+.playerprofile-back-btn {
+    font-size: 13px;
+    color: var(--text-muted);
+    background-color: transparent;
+    border-width: 0;
+    margin-bottom: 16px;
+    padding: 6px 0;
+    align-self: flex-start;
+}
+
+.playerprofile-back-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Header */
+.playerprofile-header {
+    flex-direction: row;
+    align-items: center;
+    background-color: var(--bg-panel);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 18px;
+}
+
+.playerprofile-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 8px;
+    background-color: var(--bg-dark);
+    margin-right: 20px;
+}
+
+.playerprofile-name-block {
+    flex-grow: 1;
+    flex-direction: column;
+}
+
+.playerprofile-player-name {
+    font-size: 22px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+    margin-bottom: 2px;
+}
+
+.playerprofile-player-pos {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.playerprofile-player-team {
+    font-size: 14px;
+    color: var(--accent-blue);
+    margin-bottom: 4px;
+    -unity-font-style: bold;
+}
+
+.playerprofile-role-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 2px;
+}
+
+.playerprofile-role-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+}
+
+.playerprofile-role-text {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.playerprofile-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.playerprofile-ovr-block {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: var(--bg-dark);
+    border-radius: 10px;
+    margin-left: 20px;
+}
+
+.playerprofile-ovr-val {
+    font-size: 36px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+}
+
+.playerprofile-ovr-label {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+/* Section labels */
+.playerprofile-section-label {
+    font-size: 14px;
+    color: var(--accent-blue);
+    -unity-font-style: bold;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+}
+
+/* Season stats grid */
+.playerprofile-season-section {
+    background-color: var(--bg-panel);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 18px;
+}
+
+.playerprofile-stats-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.playerprofile-stat-card {
+    width: 120px;
+    background-color: var(--bg-dark);
+    border-radius: 8px;
+    padding: 12px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.playerprofile-stat-card-value {
+    font-size: 20px;
+    color: var(--text-primary);
+    -unity-font-style: bold;
+}
+
+.playerprofile-stat-card-value--accent {
+    font-size: 20px;
+    color: var(--accent-green);
+    -unity-font-style: bold;
+}
+
+.playerprofile-stat-card-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Career table */
+.playerprofile-career-section {
+    flex-grow: 1;
+    background-color: var(--bg-panel);
+    border-radius: 12px;
+    padding: 18px 24px;
+    margin-bottom: 16px;
+    min-height: 0;
+}
+
+.playerprofile-table {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.playerprofile-table-header {
+    flex-direction: row;
+    padding: 8px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--bg-dark);
+    flex-shrink: 0;
+}
+
+.playerprofile-table-body-scroll {
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.playerprofile-table-body {
+    flex-direction: column;
+}
+
+.playerprofile-table-row {
+    flex-direction: row;
+    padding: 7px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(255, 255, 255, 0.04);
+}
+
+.playerprofile-table-row--totals {
+    background-color: var(--bg-dark);
+    border-radius: 4px;
+    margin-top: 4px;
+    padding: 8px 0;
+    -unity-font-style: bold;
+}
+
+/* Column widths */
+.pph-season { width: 100px; font-size: 13px; color: var(--text-muted); }
+.pph-team { width: 140px; font-size: 13px; color: var(--text-secondary); }
+.pph-gp { width: 40px; font-size: 13px; color: var(--text-secondary); }
+.pph-mp { width: 50px; font-size: 13px; color: var(--text-secondary); }
+.pph-pts { width: 50px; font-size: 13px; color: var(--text-primary); -unity-font-style: bold; }
+.pph-reb { width: 50px; font-size: 13px; color: var(--text-secondary); }
+.pph-ast { width: 50px; font-size: 13px; color: var(--text-secondary); }
+.pph-val { width: 50px; font-size: 13px; color: var(--text-secondary); }
+
+/* Table cell helpers */
+.td-pps { font-size: 13px; color: var(--text-secondary); }
+.td-pps--bold { font-size: 13px; color: var(--text-primary); -unity-font-style: bold; }
+
+/* Trajectory link */
+.playerprofile-link-row {
+    flex-direction: row;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.playerprofile-trajectory-btn {
+    font-size: 13px;
+    color: var(--text-secondary);
+    background-color: var(--bg-panel);
+    border-width: 1px;
+    border-color: var(--text-muted);
+    border-radius: 6px;
+    padding: 8px 16px;
+}
+
+.playerprofile-trajectory-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-blue);
+}
+
+/* Empty state */
+.playerprofile-empty {
+    display: none;
+    padding: 40px;
+    align-items: center;
+    justify-content: center;
+}
+
+.playerprofile-empty-text {
+    font-size: 15px;
+    color: var(--text-muted);
+}

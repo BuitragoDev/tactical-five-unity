@@ -905,6 +905,17 @@ using System.Linq;
                     break;
             }
 
+            if (x.playerId > 0)
+            {
+                row.RegisterCallback<ClickEvent>(_ =>
+                {
+                    PlayClick();
+                    ScreenManager.SelectedPlayerId = x.playerId;
+                    ScreenManager.Instance.GoTo(GameScreen.PlayerProfile);
+                });
+                CursorManager.Instance?.RegisterHandCursor(row);
+            }
+
             _statsBody.Add(row);
         }
 

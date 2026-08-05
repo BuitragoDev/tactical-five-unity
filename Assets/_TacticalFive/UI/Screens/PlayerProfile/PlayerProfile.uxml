@@ -1,0 +1,176 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="PlayerProfile.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
+
+    <ui:VisualElement name="PlayerProfileRoot" class="playerprofile-root">
+
+        <!-- MAIN -->
+        <ui:VisualElement class="playerprofile-main">
+            <ui:VisualElement class="playerprofile-content">
+
+                <!-- Back button -->
+                <ui:Button name="PlayerProfileBackBtn" class="playerprofile-back-btn" text="VOLVER A ESTADÍSTICAS" />
+
+                <!-- Player header -->
+                <ui:VisualElement class="playerprofile-header">
+                    <ui:VisualElement name="ProfilePhoto" class="playerprofile-photo" />
+                    <ui:VisualElement class="playerprofile-name-block">
+                        <ui:Label name="ProfilePlayerName" class="playerprofile-player-name" text="" />
+                        <ui:Label name="ProfilePlayerPos" class="playerprofile-player-pos" text="" />
+                        <ui:Label name="ProfilePlayerTeam" class="playerprofile-player-team" text="" />
+                        <ui:VisualElement class="playerprofile-role-row">
+                            <ui:VisualElement name="ProfileRoleIcon" class="playerprofile-role-icon" />
+                            <ui:Label name="ProfileRoleName" class="playerprofile-role-text" text="" />
+                        </ui:VisualElement>
+                        <ui:Label name="ProfileMeta" class="playerprofile-meta" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="playerprofile-ovr-block">
+                        <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
+                        <ui:Label class="playerprofile-ovr-label" text="MED" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Season stats section -->
+                <ui:VisualElement name="ProfileSeasonSection" class="playerprofile-season-section">
+                    <ui:Label class="playerprofile-section-label" text="ESTADÍSTICAS DE TEMPORADA" />
+                    <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
+                </ui:VisualElement>
+
+                <!-- Career section -->
+                <ui:VisualElement name="ProfileCareerSection" class="playerprofile-career-section">
+                    <ui:Label class="playerprofile-section-label" text="TRAYECTORIA POR TEMPORADA" />
+                    <ui:VisualElement class="playerprofile-table">
+                        <ui:VisualElement class="playerprofile-table-header">
+                            <ui:Label class="pph-season" text="TEMPORADA" />
+                            <ui:Label class="pph-team" text="EQUIPO" />
+                            <ui:Label class="pph-gp" text="PJ" />
+                            <ui:Label class="pph-mp" text="MP" />
+                            <ui:Label class="pph-pts" text="PTS" />
+                            <ui:Label class="pph-reb" text="REB" />
+                            <ui:Label class="pph-ast" text="AST" />
+                            <ui:Label class="pph-val" text="VAL" />
+                        </ui:VisualElement>
+                        <ui:ScrollView class="playerprofile-table-body-scroll"
+                                       horizontal-scrolling-enabled="false"
+                                       mode="Vertical">
+                            <ui:VisualElement name="ProfileCareerBody" class="playerprofile-table-body" />
+                        </ui:ScrollView>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- Link to full trajectory -->
+                <ui:VisualElement class="playerprofile-link-row">
+                    <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />
+                </ui:VisualElement>
+
+                <!-- Empty state -->
+                <ui:VisualElement name="ProfileEmpty" class="playerprofile-empty">
+                    <ui:Label class="playerprofile-empty-text"
+                        text="Este jugador no ha disputado ningún partido todavía." />
+                </ui:VisualElement>
+
+                <!-- No season stats -->
+                <ui:VisualElement name="ProfileNoStats" class="playerprofile-empty">
+                    <ui:Label class="playerprofile-empty-text"
+                        text="No hay estadísticas de temporada disponibles." />
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+    <!-- CONFIG MODAL -->
+    <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigModalBox" class="modal-box">
+            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:VisualElement class="modal-body">
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Música" />
+                        <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:VisualElement class="settings-quality-row">
+                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:VisualElement class="settings-quality-options">
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="JUEGO" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- CONFIRM MAIN MENU -->
+    <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
+                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- CONFIRM EXIT -->
+    <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
+                <ui:Label class="modal-paragraph" text="Se cerrará la aplicación. Asegúrate de haber guardado tu progreso si lo deseas." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+</ui:UXML>
