@@ -46,6 +46,12 @@
                     <ui:VisualElement name="ProfileAttrsBody" class="playerprofile-attrs-body" />
                 </ui:VisualElement>
 
+                <!-- Attributes locked -->
+                <ui:VisualElement name="ProfileAttrsLocked" class="playerprofile-locked">
+                    <ui:Label class="playerprofile-locked-text"
+                        text="Ojea a este jugador en CARTERA para revelar sus atributos." />
+                </ui:VisualElement>
+
                 <!-- Link to full trajectory -->
                 <ui:VisualElement class="playerprofile-link-row">
                     <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />

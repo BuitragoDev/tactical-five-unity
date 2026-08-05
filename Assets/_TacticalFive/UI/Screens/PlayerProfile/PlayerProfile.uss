@@ -173,7 +173,7 @@
 }
 
 .playerprofile-stat-card {
-    width: 110px;
+    width: 116px;
     background-color: rgb(22, 26, 36);
     border-radius: 8px;
     border-width: 1px;
@@ -222,7 +222,7 @@
 /* Attribute card rows */
 
 .playerprofile-attr-card {
-    width: 110px;
+    width: 242px;
     background-color: rgb(22, 26, 36);
     border-radius: 8px;
     border-width: 1px;
@@ -284,6 +284,25 @@
 .playerprofile-trajectory-btn:hover {
     background-color: rgb(42, 51, 71);
     color: rgb(255, 255, 255);
+}
+
+/* Attributes locked */
+.playerprofile-locked {
+    display: none;
+    background-color: rgb(28, 33, 48);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 30px 24px;
+    margin-top: 16px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.playerprofile-locked-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
 }
 
 /* Empty state */

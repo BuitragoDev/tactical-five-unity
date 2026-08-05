@@ -19,9 +19,11 @@ using System.Linq;
     private VisualElement _profileSeasonBody;
     private VisualElement _profileAttrsSection;
     private VisualElement _profileAttrsBody;
+    private VisualElement _profileAttrsLocked;
     private VisualElement _profileNoStats;
 
     private PlayerData _player;
+    private HashSet<int> _scoutedPlayerIds;
     private static readonly System.Globalization.CultureInfo _fmt = System.Globalization.CultureInfo.InvariantCulture;
     private static readonly System.Globalization.CultureInfo _spanishCI = new("es-ES");
 
@@ -39,6 +41,7 @@ using System.Linq;
         _profileSeasonBody = _root.Q<VisualElement>("ProfileSeasonBody");
         _profileAttrsSection = _root.Q<VisualElement>("ProfileAttrsSection");
         _profileAttrsBody = _root.Q<VisualElement>("ProfileAttrsBody");
+        _profileAttrsLocked = _root.Q<VisualElement>("ProfileAttrsLocked");
         _profileNoStats = _root.Q<VisualElement>("ProfileNoStats");
     }
 
@@ -48,6 +51,10 @@ using System.Linq;
 
         int playerId = ScreenManager.SelectedPlayerId;
         _player = DatabaseManager.Instance.GetPlayerById(playerId);
+
+        var scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam != null ? _myTeam.id : 0);
+        _scoutedPlayerIds = new HashSet<int>(
+            scouts.Where(s => s.completed == 1).Select(s => s.player_id));
     }
 
     protected override void RegisterCallbacks()
@@ -67,12 +74,13 @@ using System.Linq;
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[PlayerProfile] RefreshHeader error: {ex.Message}"); }
         if (_player == null) return;
-        FillPlayerHeader();
+        bool canView = _player.team_id == _myTeam.id || _scoutedPlayerIds.Contains(_player.id);
+        FillPlayerHeader(canView);
         BuildSeasonStats();
-        BuildAttrs();
+        BuildAttrs(canView);
     }
 
-    void FillPlayerHeader()
+    void FillPlayerHeader(bool canView)
     {
         _profilePlayerName.text = $"{_player.first_name} {_player.last_name}".ToUpper();
         _profilePlayerPos.text = $"{PositionCodes.GetName(_player.position)} · {PositionCodes.GetName(_player.secondary_position)}";
@@ -80,13 +88,29 @@ using System.Linq;
         var team = DatabaseManager.Instance.GetTeamById(_player.team_id);
         _profilePlayerTeam.text = team?.name ?? "FA";
 
-        UpdateRoleIcon(_player.role);
-        _profileRoleName.text = GetRoleName(_player.role);
+        if (canView)
+        {
+            UpdateRoleIcon(_player.role);
+            _profileRoleName.text = GetRoleName(_player.role);
+            _profileRoleIcon.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            _profileRoleName.text = "?";
+            _profileRoleIcon.style.display = DisplayStyle.None;
+        }
 
         _profileMeta.text = $"{_player.age} años · {_player.height_cm / 100f:F2}m · {_player.weight_kg}kg · {CountryCodes.GetName(_player.nationality)}";
 
-        int ovr = _player.GetCalculatedAverage();
-        _profileOvr.text = ovr.ToString();
+        if (canView)
+        {
+            int ovr = _player.GetCalculatedAverage();
+            _profileOvr.text = ovr.ToString();
+        }
+        else
+        {
+            _profileOvr.text = "?";
+        }
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _profilePhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
@@ -186,8 +210,17 @@ using System.Linq;
         _profileSeasonBody.Add(card);
     }
 
-    void BuildAttrs()
+    void BuildAttrs(bool canView)
     {
+        if (!canView)
+        {
+            _profileAttrsSection.style.display = DisplayStyle.None;
+            _profileAttrsLocked.style.display = DisplayStyle.Flex;
+            return;
+        }
+
+        _profileAttrsSection.style.display = DisplayStyle.Flex;
+        _profileAttrsLocked.style.display = DisplayStyle.None;
         _profileAttrsBody.Clear();
 
         var attrs = new (string label, int val)[]
