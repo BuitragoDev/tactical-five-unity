@@ -70,7 +70,9 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 ## Frente 4 — Modos y contenido
 
 - **ProManager real** (`TODO_TECHNICAL_DEBT.md` B20): dificultad aumentada (sin
-  NT-MLE, hard cap más estricto, cese más fácil).
+  NT-MLE, hard cap más estricto, cese más fácil). El modal de restricciones del
+  menú principal ya anuncia estas reglas (`MainMenuController.OpenProModal`), pero
+  aún no están implementadas en la lógica.
 - **Expansión / liga personalizada** vía el editor de `template.db`.
 - **Historial rico**: anillos por jugador, retiro de dorsales, hall of fame.
 

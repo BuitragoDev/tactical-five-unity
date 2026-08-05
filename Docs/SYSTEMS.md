@@ -138,6 +138,6 @@
 
 ## Open questions
 
-- `ProManager` harder-cap differences (no NT-MLE, stricter cap, earlier firing) not implemented yet (TODO B20); current code-level difference is worst-team selection + bottom-10 new-season offers. 
+- `ProManager` harder-cap differences (no NT-MLE, stricter cap, earlier firing) **announced to the player via a restrictions modal** on the main menu (`MainMenuController.OpenProModal`) but **not yet enforced in logic** (TODO B20); current code-level difference is worst-team selection + bottom-10 new-season offers. 
 - Whether buyout (stretch provision) is intended but unfinished (`PLAN.md` §4.2 mentions it; only dismissal exists).
 - Whether AI star FA signings block the user's offers correctly when they overlap (`ProcessStarFreeAgentSignings` vs user's pending offers) — see `MEMORY.md`.

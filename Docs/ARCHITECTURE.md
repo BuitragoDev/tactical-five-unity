@@ -82,7 +82,9 @@ Active GameObjects with scripts (order not guaranteed, by hierarchy):
 LoadingController.OnEnable → tip text, click/key/timer(10 s) → GoTo(MainMenu)
 
 [New game]
-MainMenuController.OnManagerClicked/OnProManagerClicked
+MainMenuController.OnManagerClicked                  (Manager, direct)
+MainMenuController.OnProManagerClicked → OpenProModal  (ProManager: restrictions modal)
+MainMenuController.ConfirmProManager                  (ProManager: CONTINUAR → runs the flow below)
     ├─ GameSaveManager.FindNextAvailableSlot()
     ├─ GameSaveManager.CleanupOrphanDb(slot)
     ├─ DatabaseManager.InitSaveSlot(slot)   ← opens/creates save_N.db, creates tables,
@@ -163,6 +165,6 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 
 ## 8. Open questions
 
-- ~~Why `GameMode.ProManager` exists if it has no code-level difference~~ — **resolved:** ProManager restricts team selection to the worst teams (`GetWorstTeams(5)`) and new-season offers to bottom-10; still intended to be a stricter mode (harder cap/earlier firing) per `TODO` B20.
+- ~~Why `GameMode.ProManager` exists if it has no code-level difference~~ — **resolved:** ProManager restricts team selection to the worst teams (`GetWorstTeams(5)`), limits new-season offers to bottom-10, and shows a restrictions modal on the main menu (no NT-MLE, stricter budget/objective firing). The stricter cap/firing rules are announced but not yet enforced per `TODO` B20.
 - Whether the "Editor" template flow is a developer tool or an intended user feature.
 - Whether `SQLiteAsync.cs` was legacy from a previous "async loading" design. (See `TODO_TECHNICAL_DEBT.md`.)

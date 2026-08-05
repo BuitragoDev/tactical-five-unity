@@ -22,7 +22,7 @@ Defined in `GameEnums.cs` (`GameMode`): `None`, `Manager`, `ProManager`, `Editor
 | Mode | Entry point | Meaning |
 |---|---|---|
 | `Manager` | `MainMenuController.OnManagerClicked` | Standard career; selects a team, plays seasons |
-| `ProManager` | `MainMenuController.OnProManagerClicked` | Same flow; **no gameplay difference currently observed in code** — `SelectTeamController` uses `CurrentMode` only to label the screen (hypothesis: intended for a harder/more restricted mode, not yet differentiated) |
+| `ProManager` | `MainMenuController.OnProManagerClicked` | Harder mode; shows a restrictions modal (`OpenProModal`) before starting — no NT-MLE, stricter budget/objective firing, season objective, annual team change. Code-level differences: worst-team selection + bottom-10 new-season offers; the announced cap/firing rules are not yet enforced (TODO B20) |
 | `Editor` | `MainMenuController.OnEditorClicked` | Opens `GameScreen.Editor` → `EditorController`, which seeds the `template.db` used to bootstrap new save slots |
 | `None` | — | Default |
 

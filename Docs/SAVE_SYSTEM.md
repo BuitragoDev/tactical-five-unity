@@ -29,7 +29,7 @@ All under `Application.persistentDataPath`:
 ## 3. Save / load flows
 
 ### New game
-`MainMenuController.OnManagerClicked/OnProManagerClicked`:
+`MainMenuController.OnManagerClicked` / `ConfirmProManager` (ProManager runs `OnProManagerClicked` → `OpenProModal` first, then `ConfirmProManager` on CONTINUAR):
 1. `GameSaveManager.FindNextAvailableSlot()` → smallest free slot number.
 2. `GameSaveManager.CleanupOrphanDb(slot)`.
 3. `DatabaseManager.InitSaveSlot(slot)`:

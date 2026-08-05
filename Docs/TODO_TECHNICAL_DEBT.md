@@ -114,9 +114,9 @@
 - **Fix:** `GameSettings` static wrapper.
 
 ### B20. `GameMode.ProManager` has limited behavioral difference
-- **Detail [F]:** ProManager already selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`, others disabled) and `NewSeasonController` limits offers to current team + 3 random from bottom-10. Not yet the intended "harder" difficulty (no NT-MLE, stricter cap, earlier firing).
-- **Impact:** mode works but shallower than intended.
-- **Fix:** implement the remaining difficulty differences (or document the current scope).
+- **Detail [F]:** ProManager already selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`, others disabled) and `NewSeasonController` limits offers to current team + 3 random from bottom-10. The main-menu restrictions modal (`MainMenuController.OpenProModal`) announces the harder rules (no NT-MLE, stricter budget/objective firing, season objective, annual team change) but they are **not yet enforced**.
+- **Impact:** the modal promises a stricter mode that doesn't fully exist yet.
+- **Fix:** enforce the announced rules (no NT-MLE on offers, earlier firing thresholds, objective-based firing).
 
 ---
 
