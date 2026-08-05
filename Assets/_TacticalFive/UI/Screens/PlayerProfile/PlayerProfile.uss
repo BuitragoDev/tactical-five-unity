@@ -230,6 +230,7 @@
 }
 
 .playerprofile-attr-card {
+    width: 110px;
     background-color: rgb(22, 26, 36);
     border-radius: 8px;
     border-width: 1px;
