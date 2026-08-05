@@ -17,13 +17,11 @@ using System.Linq;
 
     private VisualElement _profileSeasonSection;
     private VisualElement _profileSeasonBody;
-    private VisualElement _profileCareerSection;
-    private VisualElement _profileCareerBody;
-    private VisualElement _profileEmpty;
+    private VisualElement _profileAttrsSection;
+    private VisualElement _profileAttrsBody;
     private VisualElement _profileNoStats;
 
     private PlayerData _player;
-    private List<PlayerCareerSeasonRow> _careerHistory;
     private static readonly System.Globalization.CultureInfo _fmt = System.Globalization.CultureInfo.InvariantCulture;
     private static readonly System.Globalization.CultureInfo _spanishCI = new("es-ES");
 
@@ -39,9 +37,8 @@ using System.Linq;
         _profileOvr = _root.Q<Label>("ProfileOvr");
         _profileSeasonSection = _root.Q<VisualElement>("ProfileSeasonSection");
         _profileSeasonBody = _root.Q<VisualElement>("ProfileSeasonBody");
-        _profileCareerSection = _root.Q<VisualElement>("ProfileCareerSection");
-        _profileCareerBody = _root.Q<VisualElement>("ProfileCareerBody");
-        _profileEmpty = _root.Q<VisualElement>("ProfileEmpty");
+        _profileAttrsSection = _root.Q<VisualElement>("ProfileAttrsSection");
+        _profileAttrsBody = _root.Q<VisualElement>("ProfileAttrsBody");
         _profileNoStats = _root.Q<VisualElement>("ProfileNoStats");
     }
 
@@ -51,8 +48,6 @@ using System.Linq;
 
         int playerId = ScreenManager.SelectedPlayerId;
         _player = DatabaseManager.Instance.GetPlayerById(playerId);
-        if (_player != null)
-            _careerHistory = DatabaseManager.Instance.GetPlayerCareerHistory(playerId, _manager.id);
     }
 
     protected override void RegisterCallbacks()
@@ -74,7 +69,7 @@ using System.Linq;
         if (_player == null) return;
         FillPlayerHeader();
         BuildSeasonStats();
-        BuildCareerTable();
+        BuildAttrs();
     }
 
     void FillPlayerHeader()
@@ -191,85 +186,56 @@ using System.Linq;
         _profileSeasonBody.Add(card);
     }
 
-    void BuildCareerTable()
+    void BuildAttrs()
     {
-        if (_careerHistory == null || _careerHistory.Count == 0)
+        _profileAttrsBody.Clear();
+
+        var attrs = new (string label, int val)[]
         {
-            _profileCareerSection.style.display = DisplayStyle.None;
-            _profileEmpty.style.display = DisplayStyle.Flex;
-            return;
-        }
+            ("TIRO",      _player.shooting),
+            ("TRIPLE",    _player.three_point),
+            ("PASE",      _player.passing),
+            ("BOTE",      _player.dribbling),
+            ("DEFENSA",   _player.defense),
+            ("REBOTE",    _player.rebounding),
+            ("VELOCIDAD", _player.speed),
+            ("ATLETISMO", _player.athleticism),
+            ("IQ",        _player.iq),
+            ("ROBOS",     _player.steals),
+            ("TAPONES",   _player.blocks),
+            ("MORAL",     _player.morale),
+            ("FÍSICO",    _player.fisico),
+        };
 
-        _profileCareerSection.style.display = DisplayStyle.Flex;
-        _profileEmpty.style.display = DisplayStyle.None;
-        _profileCareerBody.Clear();
-
-        var fmt = System.Globalization.CultureInfo.InvariantCulture;
-
-        foreach (var season in _careerHistory)
+        foreach (var (label, val) in attrs)
         {
             var row = new VisualElement();
-            row.AddToClassList("playerprofile-table-row");
+            row.AddToClassList("playerprofile-attr-row");
 
-            row.Add(CreateCell("pph-season", $"{season.year_start}-{season.year_end}"));
-            row.Add(CreateCell("pph-team", season.team_name ?? "—"));
-            row.Add(CreateCell("pph-gp", season.games.ToString()));
-            row.Add(CreateCell("pph-mp", season.games > 0
-                ? (season.total_minutes / season.games).ToString("F1", fmt) : "0.0"));
-            row.Add(CreateCellBold("pph-pts", season.games > 0
-                ? ((float)season.total_points / season.games).ToString("F1", fmt) : "0.0"));
-            row.Add(CreateCell("pph-reb", season.games > 0
-                ? ((float)season.total_rebounds / season.games).ToString("F1", fmt) : "0.0"));
-            row.Add(CreateCell("pph-ast", season.games > 0
-                ? ((float)season.total_assists / season.games).ToString("F1", fmt) : "0.0"));
-            row.Add(CreateCell("pph-val", season.games > 0
-                ? ((float)season.total_rating / season.games).ToString("F1", fmt) : "0.0"));
+            var lbl = new Label();
+            lbl.AddToClassList("playerprofile-attr-label");
+            lbl.text = label;
 
-            _profileCareerBody.Add(row);
+            var barBg = new VisualElement();
+            barBg.AddToClassList("playerprofile-attr-bar-bg");
+
+            var barFill = new VisualElement();
+            barFill.AddToClassList("playerprofile-attr-bar-fill");
+            if (val < 40) barFill.AddToClassList("playerprofile-attr-bar-fill--low");
+            else if (val < 70) barFill.AddToClassList("playerprofile-attr-bar-fill--mid");
+
+            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
+            barBg.Add(barFill);
+
+            var valLbl = new Label();
+            valLbl.AddToClassList("playerprofile-attr-val");
+            valLbl.text = val.ToString();
+
+            row.Add(lbl);
+            row.Add(barBg);
+            row.Add(valLbl);
+            _profileAttrsBody.Add(row);
         }
-
-        int totalGames = _careerHistory.Sum(s => s.games);
-        double totalMinutes = _careerHistory.Sum(s => s.total_minutes);
-        int totalPts = _careerHistory.Sum(s => s.total_points);
-        int totalReb = _careerHistory.Sum(s => s.total_rebounds);
-        int totalAst = _careerHistory.Sum(s => s.total_assists);
-        int totalRat = _careerHistory.Sum(s => s.total_rating);
-
-        var totalRow = new VisualElement();
-        totalRow.AddToClassList("playerprofile-table-row");
-        totalRow.AddToClassList("playerprofile-table-row--totals");
-
-        totalRow.Add(CreateCell("pph-season", "TOTAL"));
-        totalRow.Add(CreateCell("pph-team", ""));
-        totalRow.Add(CreateCell("pph-gp", totalGames.ToString()));
-        totalRow.Add(CreateCell("pph-mp", totalGames > 0
-            ? (totalMinutes / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCellBold("pph-pts", totalGames > 0
-            ? ((float)totalPts / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("pph-reb", totalGames > 0
-            ? ((float)totalReb / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("pph-ast", totalGames > 0
-            ? ((float)totalAst / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("pph-val", totalGames > 0
-            ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
-
-        _profileCareerBody.Add(totalRow);
-    }
-
-    static Label CreateCell(string className, string text)
-    {
-        var lbl = new Label();
-        lbl.AddToClassList(className);
-        lbl.text = text;
-        return lbl;
-    }
-
-    static Label CreateCellBold(string className, string text)
-    {
-        var lbl = new Label();
-        lbl.AddToClassList("td-pps--bold");
-        lbl.text = text;
-        return lbl;
     }
 
     static string GetRoleName(PlayerRole role) => role switch

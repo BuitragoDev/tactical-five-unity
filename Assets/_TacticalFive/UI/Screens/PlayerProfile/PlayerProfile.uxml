@@ -40,37 +40,15 @@
                     <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
                 </ui:VisualElement>
 
-                <!-- Career section -->
-                <ui:VisualElement name="ProfileCareerSection" class="playerprofile-career-section">
-                    <ui:Label class="playerprofile-section-label" text="TRAYECTORIA POR TEMPORADA" />
-                    <ui:VisualElement class="playerprofile-table">
-                        <ui:VisualElement class="playerprofile-table-header">
-                            <ui:Label class="pph-season" text="TEMPORADA" />
-                            <ui:Label class="pph-team" text="EQUIPO" />
-                            <ui:Label class="pph-gp" text="PJ" />
-                            <ui:Label class="pph-mp" text="MP" />
-                            <ui:Label class="pph-pts" text="PTS" />
-                            <ui:Label class="pph-reb" text="REB" />
-                            <ui:Label class="pph-ast" text="AST" />
-                            <ui:Label class="pph-val" text="VAL" />
-                        </ui:VisualElement>
-                        <ui:ScrollView class="playerprofile-table-body-scroll"
-                                       horizontal-scrolling-enabled="false"
-                                       mode="Vertical">
-                            <ui:VisualElement name="ProfileCareerBody" class="playerprofile-table-body" />
-                        </ui:ScrollView>
-                    </ui:VisualElement>
+                <!-- Attributes section -->
+                <ui:VisualElement name="ProfileAttrsSection" class="playerprofile-attrs-section">
+                    <ui:Label class="playerprofile-section-label" text="ATRIBUTOS" />
+                    <ui:VisualElement name="ProfileAttrsBody" class="playerprofile-attrs-body" />
                 </ui:VisualElement>
 
                 <!-- Link to full trajectory -->
                 <ui:VisualElement class="playerprofile-link-row">
                     <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />
-                </ui:VisualElement>
-
-                <!-- Empty state -->
-                <ui:VisualElement name="ProfileEmpty" class="playerprofile-empty">
-                    <ui:Label class="playerprofile-empty-text"
-                        text="Este jugador no ha disputado ningún partido todavía." />
                 </ui:VisualElement>
 
                 <!-- No season stats -->
