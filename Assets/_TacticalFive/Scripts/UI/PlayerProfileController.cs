@@ -223,28 +223,26 @@ using System.Linq;
             var row = new VisualElement();
             row.AddToClassList("playerprofile-attr-row");
 
-            var lbl = new Label();
-            lbl.AddToClassList("playerprofile-attr-label");
-            lbl.text = label;
-
-            var barBg = new VisualElement();
-            barBg.AddToClassList("playerprofile-attr-bar-bg");
-
-            var barFill = new VisualElement();
-            barFill.AddToClassList("playerprofile-attr-bar-fill");
-            if (val < 40) barFill.AddToClassList("playerprofile-attr-bar-fill--low");
-            else if (val < 70) barFill.AddToClassList("playerprofile-attr-bar-fill--mid");
-
-            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
-            barBg.Add(barFill);
+            var card = new VisualElement();
+            card.AddToClassList("playerprofile-attr-card");
 
             var valLbl = new Label();
-            valLbl.AddToClassList("playerprofile-attr-val");
+            valLbl.AddToClassList("playerprofile-attr-card-value");
+            if (val >= 70)
+                valLbl.AddToClassList("playerprofile-attr-card-value--high");
+            else if (val >= 40)
+                valLbl.AddToClassList("playerprofile-attr-card-value--mid");
+            else
+                valLbl.AddToClassList("playerprofile-attr-card-value--low");
             valLbl.text = val.ToString();
 
-            row.Add(lbl);
-            row.Add(barBg);
-            row.Add(valLbl);
+            var labLbl = new Label();
+            labLbl.AddToClassList("playerprofile-attr-card-label");
+            labLbl.text = label;
+
+            card.Add(valLbl);
+            card.Add(labLbl);
+            row.Add(card);
             cols[colIdx].Add(row);
         }
     }
