@@ -844,7 +844,7 @@ public class MatchDayController : UIScreenController
         header.Add(MakeStatLabel("AST", "col-ast col-stat--header"));
         header.Add(MakeStatLabel("ROB", "col-stl col-stat--header"));
         header.Add(MakeStatLabel("TAP", "col-blk col-stat--header"));
-        header.Add(MakeStatLabel("PER", "col-to col-stat--header"));
+        header.Add(MakeStatLabel("TO", "col-to col-stat--header"));
         header.Add(MakeStatLabel("FP", "col-pf col-stat--header"));
         header.Add(MakeStatLabel("VAL", "col-val col-stat--header"));
         panel.Add(header);
