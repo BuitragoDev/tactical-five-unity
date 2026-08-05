@@ -596,47 +596,47 @@ using System.Threading.Tasks;
         if (!skipPreBatch)
         {
             // Paso 1: lesiones y recuperaciones (background)
-            try
+            var recoveryTask = DatabaseManager.Instance.RunInBackground(conn =>
             {
-                var recoveryTask = DatabaseManager.Instance.RunInBackground(conn =>
-                {
-                    conn.BeginTransaction();
-                    var recovered = new List<(int id, string first, string last)>();
+                conn.BeginTransaction();
+                var recovered = new List<(int id, string first, string last)>();
 
-                    var allTeams = conn.Table<TeamData>().ToList();
-                    foreach (var team in allTeams)
+                var allTeams = conn.Table<TeamData>().ToList();
+                foreach (var team in allTeams)
+                {
+                    var players = conn.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
+                    foreach (var p in players)
                     {
-                        var players = conn.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
-                        foreach (var p in players)
+                        if (p.injury_days > 0)
                         {
-                            if (p.injury_days > 0)
-                            {
-                                p.injury_days--;
-                                if (p.injury_days <= 0)
-                                {
-                                    p.injury_days = 0;
-                                    p.injury_type = "";
-                                    p.treated = 0;
-                                    if (p.team_id == _myTeam.id)
-                                        recovered.Add((p.id, p.first_name, p.last_name));
-                                }
-                                conn.Update(p);
-                            }
+                            p.injury_days--;
                             if (p.injury_days <= 0)
                             {
-                                p.fisico = Mathf.Min(99, p.fisico + 8);
-                                conn.Update(p);
+                                p.injury_days = 0;
+                                p.injury_type = "";
+                                p.treated = 0;
+                                if (p.team_id == _myTeam.id)
+                                    recovered.Add((p.id, p.first_name, p.last_name));
                             }
+                            conn.Update(p);
+                        }
+                        if (p.injury_days <= 0)
+                        {
+                            p.fisico = Mathf.Min(99, p.fisico + 8);
+                            conn.Update(p);
                         }
                     }
+                }
 
-                    conn.Commit();
-                    return recovered;
-                });
+                conn.Commit();
+                return recovered;
+            });
 
-                while (!recoveryTask.IsCompleted)
-                    yield return null;
+            while (!recoveryTask.IsCompleted)
+                yield return null;
 
+            try
+            {
                 var recoveredPlayers = recoveryTask.Result;
 
                 if (recoveredPlayers.Count > 0)
