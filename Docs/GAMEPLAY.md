@@ -14,7 +14,7 @@
 | `playoff` | 4 rounds, best-of-7, 2-2-1-1-1 | `PlayoffsGenerator.GeneratePlayoffs` / `AdvancePlayoffSeries` |
 | `finished` | Season over | Dashboard phase transition → `EndSeason` → `Draft` → `NewSeason` |
 
-**Calendar facts:** season start date `Oct 22 of year_start`; All-Star window Feb 8–14; up to 15 games/day; no back-to-backs by design; trade deadline reminder on Feb 1. — `ScheduleGenerator.cs`, `DashboardController.cs:996`
+**Calendar facts:** season start date `Oct 22 of year_start`; trade deadline reminder on Feb 1; **Deadline Day modal on Feb 7** (intercepts btnAction, once per season: IR AL MERCADO / CERRAR, does not advance the day); All-Star window Feb 8–14; up to 15 games/day; no back-to-backs by design. — `ScheduleGenerator.cs`, `DashboardController.cs`
 
 ## 2. Match simulation (core mechanic)
 
@@ -152,7 +152,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 ## 9. League AI
 
-- `ProcessAITransfers` (every ≥15 game days, transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 2 per cycle, 30% per team); 30% fallback to FA.
+- `ProcessAITransfers` (every ≥15 game days, reduced to 3-5 game days during deadline week Feb 1-8, `IsDeadlineWeek`; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 2 per cycle, 30% per team); 30% fallback to FA. Contenders (top 4 conference, `IsTeamContender`) offer draft picks more aggressively during deadline week. Trade offer titles prefixed with `[DEADLINE]`.
 - `ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with the strongest teams (by roster average), respecting pending user offers [D].
 - `EndSeasonController.ProcessAITeamRenewals`: AI renews its expiring players.
 - `StartNewSeason` refills AI rosters to 15 (best teams pick first, positional need), trims to 17 max, aging/progression, +5% caps, new sponsors/TV for teams without contracts (excluding user).

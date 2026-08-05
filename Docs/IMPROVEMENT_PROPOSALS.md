@@ -52,7 +52,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
   FA propio vía Bird rights (`last_team_id`, `IsOwnRecentFA`, modal de re-firma en
   `NewSeasonController`). Queda fino: soft cap / impacto de mercado en la re-firma.
 - **Picks protegidos** y más flexibilidad de transferencia de picks.
-- **Trade deadline con evento real** (el recordatorio existe; falta el cierre con efectos).
+- **Trade deadline con evento real** — **hecho** (rama `crear-mejoras2`, commit `649c98e`): modal DEADLINE DAY en Feb 7 que intercepta el btnAction (IR AL MERCADO / CERRAR, una vez por temporada); rush IA con cooldown 3-5 días Feb 1-8, contenders ofrecen picks, tag `[DEADLINE]` en ofertas; badge `⏳ ÚLTIMOS X DÍAS` en Market.
 - **Objetivos de temporada del propietario** con recompensas/cese (ya hay factor
   "objetivo" en asistencia y despido por presupuesto → expandir).
 - **Rest / load management** (los back-to-backs existen, pero no la decisión de descanso).
@@ -94,7 +94,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 | **Media** | ProManager diferenciado (B20) | 4 |
 | **Media** | AI de GM más lista + analytics | 3 |
 | **Media** | Async DB (B8) | 5 |
-| **Baja-Media** | Logros, G-League, picks protegidos, trade deadline | 2/4 |
+| **Baja-Media** | Logros, G-League, picks protegidos | 2/4 |
 
 ---
 
@@ -108,3 +108,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Play-by-play en vivo del partido | **Hecho** — commit `9c69e09` (situación de `crear-mejoras2`, mergeade a `main`) |
 | Cap sheet (Finances → «CAP SHEET») | **Hecho** — `FinancesController.BuildCapSheet` + pestaña `PanelCap` (info read-only) |
 | Sign-and-trade de FA propio (NBA clásico) | **Hecho** — `MarketController.ProcessSATrade` + `TradeHelper` sign salaries + IA |
+| Trade deadline con evento real | **Hecho** — `DashboardController.ShowDeadlineDayModal` + `IsDeadlineWeek`/`IsFeb7OfYearEnd` + rush IA + badge Market (commit `649c98e`) |

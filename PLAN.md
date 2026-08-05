@@ -99,4 +99,11 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
    `JOIN player_game_stats + games` con `GROUP BY`, filtro por temporada regular
    jugada). Verificado: 348 jugadores y 17 columnas idénticas contra la lógica LINQ
    anterior en `save_1.db`. `GetTopPlayersByStat` (`DatabaseManager.Players.cs`)
-   también migrado a SQL (agregación cross-season).
+    también migrado a SQL (agregación cross-season).
+- **[hecho]** Trade Deadline con evento real: modal DEADLINE DAY en Feb 7 que intercepta
+  el btnAction (IR AL MERCADO / CERRAR, una vez por temporada vía `_deadlineDayModalShown` +
+  `_deadlineModalSeasonId`); rush IA con cooldown de traspasos reducido a 3-5 días en
+  Feb 1-8 (`IsDeadlineWeek`), contenders (`IsTeamContender`) ofrecen picks extra, tag
+  `[DEADLINE]` en títulos de ofertas IA; badge `⏳ ÚLTIMOS X DÍAS` en el header del Market
+  durante la semana de deadline. `DashboardController.cs`, `MarketController.cs`,
+  `Market.uxml/uss`, `Dashboard.uss`.
