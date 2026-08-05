@@ -291,6 +291,23 @@ using System.Linq;
         }
 
         _btnAction.text = "MENÚ PRINCIPAL";
+
+        var countdownBar = _root.Q<VisualElement>("DeadlineCountdownBar");
+        var countdownText = _root.Q<Label>("DeadlineCountdownText");
+        if (countdownBar != null && countdownText != null)
+        {
+            if (_season != null && System.DateTime.TryParse(_season.current_date, out var cd)
+                && cd.Month == 2 && cd.Day >= 1 && cd.Day <= 8 && cd.Year == _season.year_end)
+            {
+                int daysLeft = 9 - cd.Day;
+                countdownText.text = $"⏳ ÚLTIMOS {daysLeft} DÍAS DE MERCADO DE TRASPASOS";
+                countdownBar.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                countdownBar.style.display = DisplayStyle.None;
+            }
+        }
     }
 
     // ═══════════════════════════════════════════

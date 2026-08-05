@@ -120,12 +120,22 @@ using System.Linq;
     private bool _tradeOfferModalResolved;
     private bool _tradeOfferAccepted;
 
+    private VisualElement _deadlineDayOverlay;
+    private bool _deadlineDayActive;
+    private bool _deadlineDayModalShown;
+    private int _deadlineModalSeasonId;
+
     protected override void OnEnable()
     {
         base.OnEnable();
         _firedOverlay = new VisualElement();
         _firedOverlay.AddToClassList("fired-modal-overlay");
         _root.Add(_firedOverlay);
+
+        _deadlineDayOverlay = new VisualElement();
+        _deadlineDayOverlay.AddToClassList("deadline-overlay");
+        _root.Add(_deadlineDayOverlay);
+
         SetSidebarNavigationEnabled(true);
         AudioManager.Instance?.PlayMusic("backgroundMenu");
         SetupPlayerCoach();
@@ -146,6 +156,11 @@ using System.Linq;
         else
         {
             _fastSimTarget = null;
+            if (_season != null && _season.id != _deadlineModalSeasonId)
+            {
+                _deadlineDayModalShown = false;
+                _deadlineModalSeasonId = _season.id;
+            }
             CheckBudgetWarning();
             ProcessMaturedOffers();
             ShowPendingRecoveryModal();
@@ -166,6 +181,7 @@ using System.Linq;
     bool IsAnyModalOpen()
     {
         if (_firedOverlay != null && _firedOverlay.style.display == DisplayStyle.Flex) return true;
+        if (_deadlineDayOverlay != null && _deadlineDayOverlay.style.display == DisplayStyle.Flex) return true;
         if (_configModalOverlay != null && _configModalOverlay.ClassListContains("modal-overlay--visible")) return true;
         if (_configMainMenuConfirmOverlay != null && _configMainMenuConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
         if (_configExitConfirmOverlay != null && _configExitConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
@@ -429,6 +445,12 @@ using System.Linq;
             return;
         }
 
+        if (_deadlineDayActive)
+        {
+            SetActionBtn("DEADLINE DAY ACTIVO", "");
+            return;
+        }
+
         int nextDay = FindNextGameDay();
         if (nextDay == 0)
         {
@@ -480,6 +502,14 @@ using System.Linq;
             return;
         }
         if (_season == null || _isLoading) return;
+        if (_deadlineDayActive) return;
+
+        if (IsFeb7OfYearEnd() && !_deadlineDayModalShown)
+        {
+            _deadlineDayModalShown = true;
+            ShowDeadlineDayModal();
+            return;
+        }
 
         if (_season.phase == "finished")
         {
@@ -2180,6 +2210,93 @@ using System.Linq;
         }
     }
 
+    void ShowDeadlineDayModal()
+    {
+        _deadlineDayActive = true;
+        _deadlineDayOverlay.Clear();
+        _deadlineDayOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("deadline-box");
+        _deadlineDayOverlay.Add(box);
+
+        var icon = new Label("\u23F0");
+        icon.AddToClassList("deadline-icon");
+        box.Add(icon);
+
+        var title = new Label("DEADLINE DAY");
+        title.AddToClassList("deadline-title");
+        box.Add(title);
+
+        var pendingTrades = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id) ?? new List<TradeOfferData>();
+        var pendingSATIds = GetPendingSATIds();
+        var maturedOffers = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day) ?? new List<OfferData>();
+
+        var countText = "";
+        if (pendingTrades.Count > 0)
+            countText += $"  \u2022  {pendingTrades.Count} oferta(s) de traspaso pendiente(s)\n";
+        if (pendingSATIds.Count > 0)
+            countText += $"  \u2022  {pendingSATIds.Count} sign-and-trade(s) pendiente(s)\n";
+        if (maturedOffers.Count > 0)
+            countText += $"  \u2022  {maturedOffers.Count} oferta(s) de FA por resolver\n";
+
+        if (string.IsNullOrEmpty(countText))
+            countText = "  No tienes operaciones pendientes.";
+
+        var stats = new Label(countText.TrimEnd());
+        stats.AddToClassList("deadline-text");
+        stats.style.whiteSpace = WhiteSpace.Normal;
+        box.Add(stats);
+
+        var subtitle = new Label("\u00DAltima oportunidad para realizar traspasos antes del cierre.");
+        subtitle.AddToClassList("deadline-subtitle");
+        box.Add(subtitle);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("deadline-btn-group");
+
+        var marketBtn = new Button();
+        marketBtn.text = "IR AL MERCADO";
+        marketBtn.AddToClassList("deadline-btn");
+        marketBtn.AddToClassList("deadline-btn--primary");
+        marketBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _deadlineDayActive = false;
+            _deadlineDayOverlay.style.display = DisplayStyle.None;
+            ScreenManager.Instance.GoTo(GameScreen.Market);
+        });
+        btnGroup.Add(marketBtn);
+
+        var closeBtn = new Button();
+        closeBtn.text = "CERRAR";
+        closeBtn.AddToClassList("deadline-btn");
+        closeBtn.AddToClassList("deadline-btn--danger");
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _deadlineDayActive = false;
+            _deadlineDayOverlay.style.display = DisplayStyle.None;
+            RefreshActionButton();
+        });
+        btnGroup.Add(closeBtn);
+
+        box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(marketBtn);
+            CursorManager.Instance.RegisterHandCursor(closeBtn);
+        }
+    }
+
+    bool IsFeb7OfYearEnd()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date.Month == 2 && date.Day == 7 && date.Year == _season.year_end;
+    }
+
     void AutoFixInjuredLineup()
     {
         var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
@@ -2489,14 +2606,32 @@ using System.Linq;
     //  AI TRANSFERS
     // ═══════════════════════════════════════════
 
+    bool IsDeadlineWeek()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date.Month == 2 && date.Day >= 1 && date.Day <= 8 && date.Year == _season.year_end;
+    }
+
+    bool IsTeamContender(TeamData team)
+    {
+        if (_allGames == null || _allGames.Count == 0) return false;
+        var confTeams = _allTeams?.Where(t => t.conference == team.conference).ToList();
+        if (confTeams == null || confTeams.Count == 0) return false;
+        var standings = BuildStandings(confTeams);
+        var top4 = standings.Take(4).ToList();
+        return top4.Any(s => s.teamId == team.id);
+    }
+
     void ProcessAITransfers(int gameDay)
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
 
-        // Only run every ~10 game days
+        // Only run every ~10 game days (or 3-5 during deadline week)
         int lastDay = _season.last_ai_trade_day;
+        int cooldownDays = IsDeadlineWeek() ? Random.Range(3, 6) : 15;
         Debug.Log($"[AITrades] ProcessAITransfers called. gameDay={gameDay} lastDay={lastDay} diff={gameDay - lastDay}");
-        if (gameDay - lastDay < 15) return;
+        if (gameDay - lastDay < cooldownDays) return;
 
         // Check if in transfer window (1 Sep year_start to 8 Feb year_end)
         if (!System.DateTime.TryParse(_season.current_date, out var date)) return;
@@ -3019,10 +3154,10 @@ using System.Linq;
             var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam);
             if (offerPack == null) continue;
 
-            // If salary gap is large, try sweetening with a draft pick
             long packSalary = offerPack.Sum(p => p.salary);
             List<int> offeredPickIds = new List<int>();
-            if (target.salary > packSalary * 1.5f)
+            bool isContender = IsTeamContender(aiTeam);
+            if (target.salary > packSalary * 1.5f || (IsDeadlineWeek() && isContender))
             {
                 var aiPicks = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
                 var futurePick = aiPicks
@@ -3233,7 +3368,8 @@ using System.Linq;
         box.AddToClassList("trade-offer-modal-box");
         _firedOverlay.Add(box);
 
-        var title = new Label("PROPUESTA DE INTERCAMBIO");
+        var titleText = IsDeadlineWeek() ? "[DEADLINE] PROPUESTA DE INTERCAMBIO" : "PROPUESTA DE INTERCAMBIO";
+        var title = new Label(titleText);
         title.AddToClassList("fired-modal-title");
         box.Add(title);
 

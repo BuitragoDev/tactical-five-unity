@@ -17,6 +17,11 @@
             <!-- MARKET CONTENT -->
             <ui:VisualElement class="market-content">
 
+                <!-- ══ DEADLINE COUNTDOWN ══ -->
+                <ui:VisualElement name="DeadlineCountdownBar" class="market-deadline-countdown-bar" style="display: none;">
+                    <ui:Label name="DeadlineCountdownText" class="market-deadline-countdown-text" text="" />
+                </ui:VisualElement>
+
                 <!-- ══ TEAM SELECTION ══ -->
                 <ui:VisualElement class="market-section">
                     <ui:VisualElement class="market-section-title">

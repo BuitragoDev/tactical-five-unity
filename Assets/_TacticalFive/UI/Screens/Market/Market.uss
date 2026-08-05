@@ -772,6 +772,23 @@
     background-color: rgb(192, 57, 43);
 }
 
+/* ── DEADLINE COUNTDOWN ── */
+.market-deadline-countdown-bar {
+    padding: 10px 24px;
+    background-color: rgb(212, 160, 23);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    border-radius: 4px;
+}
+.market-deadline-countdown-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(0, 0, 0);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+}
+
 /* ── TRANSFER WINDOW CLOSED ── */
 .market-closed-overlay {
     position: absolute;
