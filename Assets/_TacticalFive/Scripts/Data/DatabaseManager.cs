@@ -53,7 +53,7 @@ public partial class DatabaseManager : MonoBehaviour
             Directory.CreateDirectory(dir);
 
         _db = new SQLiteConnection(DbPath);
-        _db.Execute("PRAGMA journal_mode=WAL");
+        _db.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
         CreateTables();
         RunMigrations();
 
