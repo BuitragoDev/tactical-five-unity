@@ -49,6 +49,29 @@
                             <ui:VisualElement name="StandingsBody" class="standings-table" />
                         </ui:VisualElement>
                     </ui:ScrollView>
+
+                    <!-- Rank Evolution Chart -->
+                    <ui:VisualElement name="RankEvolutionPanel" class="rank-evolution-panel">
+                        <ui:Button name="RankEvoToggle" class="rank-evo-toggle" text="EVOLUCIÓN EN LA TABLA" />
+                        <ui:VisualElement name="RankEvoContent" class="rank-evo-content" style="display: none;">
+                            <ui:VisualElement name="RankChart" class="rank-chart" />
+                            <ui:VisualElement name="RankChartXLabels" class="rank-chart-xlabels" />
+                            <ui:VisualElement class="rank-evo-legend">
+                                <ui:VisualElement class="rank-evo-legend-item">
+                                    <ui:VisualElement class="rank-evo-legend-dot rank-evo-legend-dot--playoff" />
+                                    <ui:Label class="rank-evo-legend-label" text="Playoffs (1-6)" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="rank-evo-legend-item">
+                                    <ui:VisualElement class="rank-evo-legend-dot rank-evo-legend-dot--playin" />
+                                    <ui:Label class="rank-evo-legend-label" text="Play-In (7-10)" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="rank-evo-legend-item">
+                                    <ui:VisualElement class="rank-evo-legend-dot rank-evo-legend-dot--lottery" />
+                                    <ui:Label class="rank-evo-legend-label" text="Lottery (11-15)" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- RIGHT: stat cards (25%) -->

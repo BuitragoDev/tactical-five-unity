@@ -28,6 +28,11 @@ using System.Linq;
     private Dictionary<string, Sprite> _logoSprites32 = new();
     private Dictionary<string, Sprite> _logoSprites64 = new();
     private string _currentFilter = "East";
+    private VisualElement _rankChart;
+    private VisualElement _rankChartXLabels;
+    private VisualElement _rankEvoContent;
+    private Button _rankEvoToggle;
+    private bool _rankEvoExpanded;
     protected override void CacheReferences()
     {
         _tabEast = _root.Q<Button>("TabEast");
@@ -46,6 +51,11 @@ using System.Linq;
         _cardBestDefenseValue = _root.Q<Label>("CardBestDefenseValue");
         _cardBestStreakValue = _root.Q<Label>("CardBestStreakValue");
         _cardWorstStreakValue = _root.Q<Label>("CardWorstStreakValue");
+
+        _rankChart = _root.Q<VisualElement>("RankChart");
+        _rankChartXLabels = _root.Q<VisualElement>("RankChartXLabels");
+        _rankEvoContent = _root.Q<VisualElement>("RankEvoContent");
+        _rankEvoToggle = _root.Q<Button>("RankEvoToggle");
     }
     protected override void LoadData()
     {
@@ -77,12 +87,14 @@ using System.Linq;
         base.RegisterCallbacks();
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("East"); });
         _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("West"); });
+        _rankEvoToggle?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRankEvolution(); });
     }
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Standings] RefreshHeader error: {ex.Message}"); }
         ShowStandings(_currentFilter);
         RefreshStatCards();
+        BuildRankEvolution();
     }
 
     void RefreshStatCards()
@@ -434,6 +446,141 @@ using System.Linq;
         var last10 = games.Skip(Mathf.Max(0, games.Count - 10)).ToList();
         int wins = last10.Count(g => g);
         return $"{wins}-{last10.Count - wins}";
+    }
+
+    void ToggleRankEvolution()
+    {
+        _rankEvoExpanded = !_rankEvoExpanded;
+        if (_rankEvoExpanded)
+        {
+            _rankEvoContent.RemoveFromClassList("rank-evo-content--hidden");
+            _rankEvoContent.style.display = DisplayStyle.Flex;
+        }
+        else
+        {
+            _rankEvoContent.AddToClassList("rank-evo-content--hidden");
+            _rankEvoContent.style.display = DisplayStyle.None;
+        }
+    }
+
+    void BuildRankEvolution()
+    {
+        if (_rankChart == null || _myTeam == null || _allGames == null || _allGames.Count == 0) return;
+
+        _rankChart.Clear();
+        _rankChartXLabels.Clear();
+
+        var myConferenceTeams = _allTeams
+            .Where(t => t.conference == _myTeam.conference)
+            .Select(t => t.id)
+            .ToHashSet();
+
+        var gamesByDay = _allGames
+            .GroupBy(g => g.game_day)
+            .OrderBy(g => g.Key)
+            .ToList();
+
+        const float chartHeight = 220f;
+        const int maxRank = 15;
+
+        for (int r = 1; r <= maxRank; r++)
+        {
+            if (r == 1 || r == 5 || r == 10 || r == 15)
+            {
+                var gridLine = new VisualElement();
+                gridLine.AddToClassList("rank-chart-line");
+                float yPos = (r - 1) / (float)(maxRank - 1) * chartHeight;
+                gridLine.style.top = new StyleLength(new Length(yPos, LengthUnit.Pixel));
+                _rankChart.Add(gridLine);
+
+                var yLabel = new Label(r.ToString());
+                yLabel.AddToClassList("rank-chart-y-label");
+                yLabel.style.top = new StyleLength(new Length(yPos - 7f, LengthUnit.Pixel));
+                _rankChart.Add(yLabel);
+            }
+        }
+
+        var confStandings = new Dictionary<int, (int wins, int losses, int pf, int pa)>();
+        foreach (var t in _allTeams)
+            if (myConferenceTeams.Contains(t.id))
+                confStandings[t.id] = (0, 0, 0, 0);
+
+        int totalDays = gamesByDay.Count;
+        if (totalDays <= 1) return;
+
+        for (int di = 0; di < totalDays; di++)
+        {
+            var dayGroup = gamesByDay[di];
+
+            foreach (var g in dayGroup)
+            {
+                if (confStandings.ContainsKey(g.home_team_id))
+                {
+                    bool homeWon = g.home_score > g.away_score;
+                    var s = confStandings[g.home_team_id];
+                    confStandings[g.home_team_id] = (
+                        s.wins + (homeWon ? 1 : 0),
+                        s.losses + (homeWon ? 0 : 1),
+                        s.pf + g.home_score,
+                        s.pa + g.away_score);
+                }
+                if (confStandings.ContainsKey(g.away_team_id))
+                {
+                    bool awayWon = g.away_score > g.home_score;
+                    var s = confStandings[g.away_team_id];
+                    confStandings[g.away_team_id] = (
+                        s.wins + (awayWon ? 1 : 0),
+                        s.losses + (awayWon ? 0 : 1),
+                        s.pf + g.away_score,
+                        s.pa + g.home_score);
+                }
+            }
+
+            var sorted = confStandings
+                .Select(kv => (id: kv.Key, w: kv.Value.wins, l: kv.Value.losses, pf: kv.Value.pf, pa: kv.Value.pa))
+                .OrderByDescending(x => x.w + x.l > 0 ? (float)x.w / (x.w + x.l) : 0f)
+                .ThenBy(x => x.l)
+                .ThenByDescending(x => x.w)
+                .ThenByDescending(x => x.pf - x.pa)
+                .ToList();
+
+            int myRank = sorted.FindIndex(x => x.id == _myTeam.id) + 1;
+
+            var bar = new VisualElement();
+            bar.AddToClassList("rank-chart-bar");
+            if (myRank <= 6)
+                bar.AddToClassList("rank-chart-bar--playoff");
+            else if (myRank <= 10)
+                bar.AddToClassList("rank-chart-bar--playin");
+            else
+                bar.AddToClassList("rank-chart-bar--lottery");
+
+            float xPct = di / (float)(totalDays - 1) * 100f;
+            float yPos = (myRank - 1) / (float)(maxRank - 1) * chartHeight;
+
+            bar.style.left = new StyleLength(new Length(xPct, LengthUnit.Percent));
+            bar.style.top = new StyleLength(new Length(yPos, LengthUnit.Pixel));
+            bar.style.height = new StyleLength(new Length(3f, LengthUnit.Pixel));
+            _rankChart.Add(bar);
+        }
+
+        int step = totalDays <= 10 ? 1
+            : totalDays <= 20 ? 2
+            : totalDays <= 41 ? 5
+            : 10;
+
+        for (int di = 0; di < totalDays; di++)
+        {
+            int dayNum = gamesByDay[di].Key;
+            if (dayNum % step == 1 || di == 0 || di == totalDays - 1)
+            {
+                var xLabel = new Label(dayNum.ToString());
+                xLabel.AddToClassList("rank-chart-x-label");
+                float xPct = di / (float)(totalDays - 1) * 100f;
+                xLabel.style.left = new StyleLength(new Length(xPct, LengthUnit.Percent));
+                _rankChartXLabels.Add(xLabel);
+            }
+        }
     }
 
     void SetTeamLogo(VisualElement elem, string logoName)
