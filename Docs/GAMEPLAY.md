@@ -91,6 +91,9 @@ Acceptance probability via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll 
 ### Trades (`TradeHelper.ValidateTrade` / `EvaluateTrade`)
 Both sides validated against apron rules (2nd apron: no aggregation, incoming ≤ outgoing; 1st apron: ≤110% of outgoing; else standard matching `2×+250K` / `+7.5M` / `125%+250K`). AI accept via `EvaluateTrade` score vs threshold (see `SYSTEMS.md §S7`). Picks can be traded (`draft_picks.current_team_id`). User-initiated trades live in `MarketController`; AI-initiated offers appear as modals via `ShowNextPendingTradeOffer`.
 
+### Sign-and-Trade (S&T) de FA propio — `MarketController`
+Junto a los jugadores del equipo, el panel de traspaso muestra la sección **"FA RECIENTES (BIRD RIGHTS) — SIGN & TRADE"**: tus FA propios (`IsOwnRecentFA`) con su salario máximo Bird (`GetMaxOfferBreakdown(isFromSameTeam:true)`). Al seleccionarlos y confirmar, `ProcessSATrade` los **firma** (Bird rights) y los **traspasa de inmediato** al equipo rival a cambio de jugadores/picks; el receptor queda bajo hard cap del 1er apron. Se registran dos `TradeData` (`free_agent` de la firma + `sign_and_trade` del traspaso). `ValidateTrade`/`EvaluateTrade` aceptan `teamASignSalaries`/`teamBSignSalaries` para valorar el nuevo salario firmado (sin descontar roster/nómina del equipo que firma). La IA puede proponer S&T por tu FA propio (`GenerateAITradeOffersForPlayer` → `ShowNextPendingTradeOffer`) y respeta `pendingSATIds` para no robártelo en sus fichajes.
+
 ### Cap sheet (Finances → «CAP SHEET») — `FinancesController.BuildCapSheet`
 - **Summary boxes**: current payroll (sum of `players.salary`), cap and apron from `LeagueSettings` (fallback `TradeHelper`), space = cap − payroll.
 - **Projection to 5 years (including current) at +5%/season** (`ProjectedCap`, mirroring `StartNewSeason`): per year shows cap, committed payroll and space (color-coded green/amber/red).
@@ -122,7 +125,7 @@ Both sides validated against apron rules (2nd apron: no aggregation, incoming �
 
 - **Renewals** (`RosterController`): salary spinner 1M..max, years 1–5; warning when payroll exceeds luxury tax; `GetMaxOfferBreakdown` shown; **optional TO/PO toggle buttons** (team option / player option, mutually exclusive; option years reduce guaranteed years by 1); offer persisted in `offers` with `guaranteed_years`/`has_team_option`/`has_player_option`.
 - **Dismissal / buyout** (`RosterController`): `DESPEDIR`/`RESCINDIR CONTRATO` buttons on player detail. Dismissal: severance recorded (finance type 6). Buyout (`ConfirmBuyout`): stretch provision implemented (see §5) with TYPE_BUYOUT records.
-- **FA market** (`MarketController`): `FreeAgentsPanel`, salary/years spinners, accept-score preview (`UpdateFAAcceptScore`), legality enforced via `GetMaxOfferBreakdown(..., isFromSameTeam:false)`. The contract offer modal includes the same **TO/PO toggle buttons** as renewals (`ToggleFAOption`/`RefreshFAOptionToggles`), so FA signings can carry team/player options too. Los FA recientes de tu equipo (que declinaron su player option, `last_team_id == myTeam`) conservan **Bird rights** (`isFromSameTeam=true`) al firmarles.
+- **FA market** (`MarketController`): `FreeAgentsPanel`, salary/years spinners, accept-score preview (`UpdateFAAcceptScore`), legality enforced via `GetMaxOfferBreakdown(..., isFromSameTeam:false)`. The free agent list is shown **sorted by descending calculated average** (`GetCalculatedAverage`) after fetching from `GetFreeAgents()`. The contract offer modal includes the same **TO/PO toggle buttons** as renewals (`ToggleFAOption`/`RefreshFAOptionToggles`), so FA signings can carry team/player options too. Los FA recientes de tu equipo (que declinaron su player option, `last_team_id == myTeam`) conservan **Bird rights** (`isFromSameTeam=true`) al firmarles.
 - **Re-firma de FA propio** (`NewSeasonController`): tras decidir las player options, si un jugador declinó la suya aparece un modal "RE-FIRMA DE AGENTES LIBRES" con salario previo, valor de mercado (`EstimateMarketSalary`) y máximo con Bird rights; el manager puede enviar una oferta diferida (madura 7 días) o dejarlo salir al mercado.
 - **Trajectory** (`TrajectoryController`): player career stats screen (uses `ScreenManager.SelectedPlayerId`).
 
@@ -201,5 +204,4 @@ flowchart LR
 ## Open questions
 
 - Does the psychologist actually accelerate recovery (`treated` flag)? `ProcessPsychologistMorale` suggests morale-only [H].
-- Luxury tax and buyout are **implemented** (confirmed: `DashboardController.cs:3741`, `RosterController.cs:1583`); what remains unverified is whether `PLAN.md`'s sign-and-trade flow (`trade_type="sign_and_trade"`) is reachable in the UI — the constant exists in `TradeData.cs` but no UI toggle was found [H].
 - `GameMode.ProManager` behavioral differences — none found [H].

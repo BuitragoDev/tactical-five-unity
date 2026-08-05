@@ -69,6 +69,8 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 ### trades (`TradeData`)
 `id`, `season_id`, `game_day`, `game_date`, `team_id_from`, `team_id_to`, `player_id`, `pick_id` (migrated, default 0), `trade_type` ("trade"|"free_agent"|"pick_trade"|"sign_and_trade"), `partner_player_id` (nullable).
 
+Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bird rights, `team_id_from=0`) + `sign_and_trade` (traspaso inmediato). Sin migración de esquema: `MarketController.ProcessSATrade` y `DashboardController.ShowNextPendingTradeOffer` ejecutan el flujo.
+
 ### draft_picks (`DraftPickData`)
 `id`, `season_id`, `round`, `pick_number`, `original_team_id`, `current_team_id`. Seeded 2×30 per season ordered by reverse standings (or overall for year 1).
 
@@ -160,6 +162,8 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 | `teams` | `first_apron_hard_capped` | 0 |
 | `managers` | `career_reg_wins/losses`, `career_po_wins/losses`, `championships`, `seasons_completed` | 0 |
 | `players` | `fisico` | 99 |
+| `players` | `guaranteed_years`, `has_team_option`, `has_player_option` (last year is a TO/PO) | `guaranteed_years`=0, `has_*_option`=0 |
+| `players` | `last_team_id` (último equipo para el que jugó; habilita Bird rights al re-firmar) | 0 |
 
 **One-time data migrations (PlayerPrefs, per slot):**
 - `OverallMigration_{slot}`: recompute `overall` for all players as mean of 11 attrs (cap potential).

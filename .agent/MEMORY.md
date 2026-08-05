@@ -33,7 +33,6 @@
 - `GameScreen.Settings` / `SettingsController` orphaned.
 - `ProManager` mode has no behavioral differences.
 - `SQLiteAsync.cs` present but unused.
-- Sign-and-trade (`trade_type="sign_and_trade"`) constant exists but no UI flow found.
 - `PLAN.md` (repo root) documents an improvement plan; parts already done (draft picks, hard cap, luxury tax, buyout). **Not synced with code.**
 
 ## 4. Known bugs / risks (see `TODO_TECHNICAL_DEBT.md` for full list)
@@ -67,6 +66,7 @@
 - Offers mature after 7 days (`day_sent + 7`); acceptance = `Random(1,101) <= acceptScore`.
 - Contract options (TO/PO) are mutually exclusive; if set, `guaranteed_years = max(0, offer_years − 1)`. Persisted on `players`/`offers` (`guaranteed_years`, `has_team_option`, `has_player_option`). Renewal & FA offer modals toggle them; `ProcessMaturedOffers.FormatContractYears` shows them in inbox messages.
 - `players.last_team_id` tracks the last team a player played for (set at seed/sign, kept when going to FA via option decline or contract expiry). `IsOwnRecentFA(p, teamId)` = `team_id==0 && last_team_id==teamId && seasons_with_team>0` → used to grant **Bird rights** on re-sign (`GetMaxOfferBreakdown(isFromSameTeam:true)`) and to re-attach the player on accepted re-sign offers. `NewSeasonController` shows a re-sign modal for declined player options (deferred offer, matures in 7 days).
+- **Sign-and-trade de FA propio** (`MarketController.ProcessSATrade`): sección "FA RECIENTES (BIRD RIGHTS)" en el panel de traspaso; firma (Bird) + traspaso inmediato → dos `TradeData` (`free_agent` + `sign_and_trade`); receptor bajo hard cap del 1er apron. `TradeHelper.ValidateTrade`/`EvaluateTrade` aceptan `teamASignSalaries`/`teamBSignSalaries` (salario nuevo firmado; no descuenta roster/nómina del que firma). La IA propone S&T por el FA propio del usuario (`GenerateAITradeOffersForPlayer`, resuelto en `ShowNextPendingTradeOffer`) y `pendingSATIds` evita que la IA lo fiche mientras la oferta está pendiente. El S&T de jugador entrante expirante (toggle en `ShowTradeResult`) se mantiene.
 - `saves.json` written at: preseason commit (`PreseasonController:429`), every day advance (`DashboardController:1023`), load (`LoadGameController:193`), delete (`GameSaveManager:192`).
 
 ## 7. Things that must NEVER change without reviewing the rest of the project

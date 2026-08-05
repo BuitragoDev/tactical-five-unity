@@ -131,4 +131,46 @@ public class TradeHelperTests
         var result = TradeHelper.EvaluateTrade(a, b, "Bulls", 12, 250_000_000L);
         Assert.That(result.Threshold, Is.EqualTo(40));
     }
+
+    [Test]
+    public void ValidateTrade_SignAndTrade_UsingNewSignedSalary()
+    {
+        // FA propio firmado a 25M (teamA envia solo el FA via S&T) contra 15M de B.
+        // Sin la firma el salario entrante seria el de su contiene externa; con el
+        // nuevo salario de 25M el matching se valida sobre ese valor.
+        var a = new List<PlayerData> { Player(8_000_000, 85, 26) };
+        var b = new List<PlayerData> { Player(15_000_000, 78, 27) };
+        var sign = new Dictionary<int, long> { [a[0].id] = 25_000_000L };
+        var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", 100_000_000L, "Lakers", 100_000_000L,
+            false, false, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
+        // A envia 25M por 15M -> salario saliente > entrante, ok. No deben saltar errores de matching.
+        Assert.That(errors, Is.Empty);
+    }
+
+    [Test]
+    public void ValidateTrade_SignAndTrade_FACountsForReceiverRosterNotForSigner()
+    {
+        // A (12 jugadores) hace S&T enviando SOLO el FA firmado; B (12) envía 1 jugador.
+        // El FA no estaba en la plantilla de A -> A no pierde rostro, B lo gana.
+        // A: 12 - 0 (FA no contaba) + 1 (recibe de B) = 13 (ok, no mín/máx).
+        var a = new List<PlayerData> { Player(5_000_000, 82, 26) };
+        var b = new List<PlayerData> { Player(5_000_000, 80, 27) };
+        var signA = new Dictionary<int, long> { [a[0].id] = 10_000_000L };
+        var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", 100_000_000L, "Lakers", 100_000_000L,
+            false, false, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, signA);
+        // Sin error de roster (el FA no resta del equipo que firma).
+        Assert.That(errors, Does.Not.Contain("mínimo 10"));
+        Assert.That(errors, Does.Not.Contain("máximo 17"));
+    }
+
+    [Test]
+    public void EvaluateTrade_SignAndTrade_UsesNewSalaryForMatching()
+    {
+        var a = new List<PlayerData> { Player(8_000_000, 85, 26) };
+        var b = new List<PlayerData> { Player(15_000_000, 80, 27) };
+        var sign = new Dictionary<int, long> { [a[0].id] = 25_000_000L };
+        var result = TradeHelper.EvaluateTrade(a, b, "Bulls", 12, 100_000_000L,
+            null, null, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
+        Assert.That(result.AcceptScore, Is.InRange(0, 100));
+    }
 }

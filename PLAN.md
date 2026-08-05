@@ -33,8 +33,13 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
 - **[hecho]** Sign-and-trade en el trade UI: al recibir jugadores con `contract_years <= 1`,
   se ofrece el toggle "Sign & Trade" (extiende contrato +5%, activa hard cap del 1er apron y
   registra `trade_type="sign_and_trade"`). `MarketController.cs`.
-  *Nota: no existe un flujo de "firmar FA externo y traspasarlo inmediatamente"; el S&T
-  implementado extiende al jugador entrante como parte del traspaso.*
+- **[hecho]** Sign-and-trade de FA propio (NBA clásico, equipo origen): sección "FA RECIENTES
+  (BIRD RIGHTS) — SIGN & TRADE" en el panel de traspaso; `ProcessSATrade` firma a un `IsOwnRecentFA`
+  con su máximo Bird y lo traspasa de inmediato (dos `TradeData`: `free_agent` + `sign_and_trade`;
+  receptor bajo hard cap). `TradeHelper.ValidateTrade`/`EvaluateTrade` reciben `teamASignSalaries`/
+  `teamBSignSalaries` para valorar el nuevo salario firmado (sin descontar roster/nómina del que
+  firma). La IA propone S&T por tu FA propio (`GenerateAITradeOffersForPlayer`→`ShowNextPendingTradeOffer`)
+  y respeta `pendingSATIds` en sus fichajes. `MarketController.cs`, `DashboardController.cs`, `TradeHelper.cs`.
 - **[hecho]** Validación de ofertas de FA: espacio salarial/excepciones/aprons se validan en la
   maduración (7 días) y el aviso en vivo se muestra al ajustar el salario (`MarketController.cs:UpdateFAWarning`).
 - **[hecho]** Validación de ofertas al enviar: si el salario excede el máximo legal, se ajusta y se

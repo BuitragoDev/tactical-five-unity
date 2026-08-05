@@ -16,6 +16,7 @@
 | **Team Option (TO)** | Team can void the last contract year | `players/offers.has_team_option` |
 | **Player Option (PO)** | Player can void the last contract year | `players/offers.has_player_option` |
 | **Re-firma / Bird rights** | Re-signing an own recent FA above cap using retained rights | `players.last_team_id`, `RosterController.GetMaxOfferBreakdown(isFromSameTeam:true)` |
+| **Sign-and-Trade (S&T)** | Firmar a un FA propio (Bird rights) y traspasarlo de inmediato | `MarketController.ProcessSATrade`, `trade_type="sign_and_trade"` |
 | **Luxury tax** | Progressive tax on payroll over threshold | `TradeHelper.CalculateLuxuryTax` |
 | **Buyout / Rescisión** | Contract release with stretch payments | `RosterController.ConfirmBuyout` |
 | **Renovación** | Contract renewal | `OfferData.offer_type=0` |

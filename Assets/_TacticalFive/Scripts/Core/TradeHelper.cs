@@ -62,6 +62,16 @@ public static class TradeHelper
         return 3;
     }
 
+    // Resuelve el salario efectivo de un jugador en un traspaso:
+    // si está en `signSalaries` (player.id -> nuevo salario), se usa ese (S&T de FA
+    // propio firmado con Bird rights); si no, el salario actual del contrato.
+    static long SalaryOf(PlayerData p, Dictionary<int, long> signSalaries)
+    {
+        if (signSalaries != null && signSalaries.TryGetValue(p.id, out var newSal))
+            return newSal;
+        return p.salary;
+    }
+
     public static List<string> ValidateTrade(
         List<PlayerData> teamASelected,
         List<PlayerData> teamBSelected,
@@ -75,15 +85,25 @@ public static class TradeHelper
         bool teamBHardCapped = false,
         long firstApron = FIRST_APRON,
         long secondApron = SECOND_APRON,
-        long luxuryTax = LUXURY_TAX)
+        long luxuryTax = LUXURY_TAX,
+        Dictionary<int, long> teamASignSalaries = null,
+        Dictionary<int, long> teamBSignSalaries = null)
     {
         var errors = new List<string>();
 
-        var aSalaryOut = teamASelected.Sum(p => p.salary);
-        var bSalaryOut = teamBSelected.Sum(p => p.salary);
+        var aSalaryOut = teamASelected.Sum(p => SalaryOf(p, teamASignSalaries));
+        var bSalaryOut = teamBSelected.Sum(p => SalaryOf(p, teamBSignSalaries));
 
-        var aAfter = teamATotalRoster - teamASelected.Count + teamBSelected.Count;
-        var bAfter = teamBTotalRoster - teamBSelected.Count + teamASelected.Count;
+        // En un S&T el FA firmado (presente en *SignSalaries) nunca estuvo en la
+        // plantilla del equipo que firma: no descuenta roster ni nómina de ese lado,
+        // pero sí cuenta como salario entrante para el otro lado (el nuevo contrato).
+        int aOutCount = teamASelected.Count(p => teamASignSalaries == null || !teamASignSalaries.ContainsKey(p.id));
+        int bOutCount = teamBSelected.Count(p => teamBSignSalaries == null || !teamBSignSalaries.ContainsKey(p.id));
+        long aRosterOut = teamASelected.Where(p => teamASignSalaries == null || !teamASignSalaries.ContainsKey(p.id)).Sum(p => p.salary);
+        long bRosterOut = teamBSelected.Where(p => teamBSignSalaries == null || !teamBSignSalaries.ContainsKey(p.id)).Sum(p => p.salary);
+
+        var aAfter = teamATotalRoster - aOutCount + teamBSelected.Count;
+        var bAfter = teamBTotalRoster - bOutCount + teamASelected.Count;
 
         if (aAfter < 10) errors.Add($"{(teamAName ?? "Tu equipo")} tendría solo {aAfter} jugadores (mínimo 10)");
         if (aAfter > MAX_ROSTER) errors.Add($"{(teamAName ?? "Tu equipo")} tendría {aAfter} jugadores (máximo {MAX_ROSTER})");
@@ -92,11 +112,11 @@ public static class TradeHelper
 
         if (!string.IsNullOrEmpty(teamAName))
         {
-            var aPayroll = teamACurrentPayroll - aSalaryOut + bSalaryOut;
+            var aPayroll = teamACurrentPayroll - aRosterOut + bSalaryOut;
             ValidateTradeSide(aSalaryOut, bSalaryOut, teamBSelected.Count, aPayroll, teamAName, teamAHardCapped, errors, firstApron, secondApron);
         }
 
-        var bPayroll = teamBCurrentPayroll - bSalaryOut + aSalaryOut;
+        var bPayroll = teamBCurrentPayroll - bRosterOut + aSalaryOut;
         ValidateTradeSide(bSalaryOut, aSalaryOut, teamASelected.Count, bPayroll, teamBName, teamBHardCapped, errors, firstApron, secondApron);
 
         return errors;
@@ -137,10 +157,13 @@ public static class TradeHelper
         List<DraftPickData> teamBSelectedPicks = null,
         long firstApron = FIRST_APRON,
         long secondApron = SECOND_APRON,
-        long luxuryTax = LUXURY_TAX)
+        long luxuryTax = LUXURY_TAX,
+        Dictionary<int, long> teamASignSalaries = null,
+        Dictionary<int, long> teamBSignSalaries = null)
     {
-        var aSalaryOut = teamASelected.Sum(p => p.salary);
-        var bSalaryOut = teamBSelected.Sum(p => p.salary);
+        var aSalaryOut = teamASelected.Sum(p => SalaryOf(p, teamASignSalaries));
+        var bSalaryOut = teamBSelected.Sum(p => SalaryOf(p, teamBSignSalaries));
+        int bOutCount = teamBSelected.Count(p => teamBSignSalaries == null || !teamBSignSalaries.ContainsKey(p.id));
 
         var bBestOvr = teamBSelected.Count > 0 ? teamBSelected.Max(p => p.overall) : 0;
         var aBestOvr = teamASelected.Count > 0 ? teamASelected.Max(p => p.overall) : 0;
@@ -214,7 +237,7 @@ public static class TradeHelper
         }
 
         // Team needs
-        var bAfter = teamBTotalRoster - teamBSelected.Count + teamASelected.Count;
+        var bAfter = teamBTotalRoster - bOutCount + teamASelected.Count;
         if (bAfter <= 12) acceptScore += 15;
         else if (bAfter <= 14) acceptScore += 5;
 

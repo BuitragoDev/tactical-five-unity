@@ -66,6 +66,7 @@ There is **no explicit autosave timer** [F]. Everything is persisted **immediate
 - **No schema version table, no `PRAGMA user_version`** [F]. Versioning is **additive and idempotent**:
   - Column presence check: `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
   - One-time data migrations keyed in `PlayerPrefs`: `OverallMigration_{slot}` (recompute overall = mean of 11 attrs, cap by potential) and `DraftPicksReset_{slot}` (wipe & reseed draft picks for the active season).
+  - **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN`. E.g. adding `players.last_team_id` backfills `last_team_id = team_id` for players currently on a roster (`team_id != 0`).
 - **Implication:** older saves open fine on newer code; newer saves with extra columns read fine by older code only if older code ignores extra columns (it does — sqlite-net maps known fields only).
 
 ## 6. Exactly what is stored (summary)

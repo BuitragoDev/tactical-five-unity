@@ -37,8 +37,11 @@ El gap más evidente era: **el partido es invisible**. Se simula y solo se ve el
 Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 `MEMORY.md §3`):
 
-- **Sign-and-trade real**: `trade_type="sign_and_trade"` existe pero sin flujo UI
-  (`SYSTEMS.md §S7`).
+- ✅ **Sign-and-trade real** — **hecho** (`crear-mejoras2`, en curso de merge): flujo de S&T de
+  FA propio con Bird rights (`MarketController.ProcessSATrade`): sección "FA RECIENTES (BIRD RIGHTS)"
+  en el panel de traspaso, firma + traspaso inmediato, dos `TradeData`, receptor bajo hard cap;
+  `TradeHelper.ValidateTrade`/`EvaluateTrade` con `teamASignSalaries`/`teamBSignSalaries`;
+  IA propone S&T y respeta `pendingSATIds`. El S&T de jugador entrante que expira (PLAN.md) se conserva.
 - **Cap sheet / planificador de masa salarial a futuro** (años venideros, cap
   proyectado +5%/año). **Nota**: la parte **visual/informativa** ya está hecha
   (tab «CAP SHEET» en Finances) y la **simulación "¿y si firmo a X?"** ya está
@@ -104,3 +107,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 |---|---|
 | Play-by-play en vivo del partido | **Hecho** — commit `9c69e09` (situación de `crear-mejoras2`, mergeade a `main`) |
 | Cap sheet (Finances → «CAP SHEET») | **Hecho** — `FinancesController.BuildCapSheet` + pestaña `PanelCap` (info read-only) |
+| Sign-and-trade de FA propio (NBA clásico) | **Hecho** — `MarketController.ProcessSATrade` + `TradeHelper` sign salaries + IA |

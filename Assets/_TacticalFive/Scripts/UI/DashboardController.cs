@@ -2587,12 +2587,19 @@ using System.Linq;
         var teamsByAvg = allTeams.OrderByDescending(t => teamAvgs[t.id]).ToList();
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+        var pendingSATIds = GetPendingSATIds();
 
         foreach (var star in stars)
         {
             if (pendingFAIds.Contains(star.id))
             {
                 Debug.Log($"[StarFA] Skip {star.first_name} {star.last_name} — user has pending offer");
+                continue;
+            }
+
+            if (pendingSATIds.Contains(star.id))
+            {
+                Debug.Log($"[StarFA] Skip {star.first_name} {star.last_name} — user has pending sign-and-trade offer");
                 continue;
             }
 
@@ -2862,9 +2869,10 @@ using System.Linq;
         if (roster.Count >= TradeHelper.MAX_ROSTER) return;
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+        var pendingSATIds = GetPendingSATIds();
 
         var candidates = freeAgents
-            .Where(p => p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id))
+            .Where(p => p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
             .OrderByDescending(p => p.overall)
             .ToList();
 
@@ -2872,7 +2880,7 @@ using System.Linq;
         {
             // Try any position if no match at targetPos
             candidates = freeAgents
-                .Where(p => p.salary <= team.budget && !pendingFAIds.Contains(p.id))
+                .Where(p => p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
                 .OrderByDescending(p => p.overall)
                 .ToList();
         }
@@ -2910,6 +2918,24 @@ using System.Linq;
     //  AI TRADE OFFERS TO PLAYER
     // ═══════════════════════════════════════════
 
+    HashSet<int> GetPendingSATIds()
+    {
+        var result = new HashSet<int>();
+        var pending = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
+        var freeAgents = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id))
+            .ToDictionary(p => p.id, p => p);
+        foreach (var offer in pending)
+        {
+            foreach (var id in offer.GetWantedPlayerIds())
+            {
+                if (freeAgents.ContainsKey(id))
+                    result.Add(id);
+            }
+        }
+        return result;
+    }
+
     void GenerateAITradeOffersForPlayer(int gameDay, int seasonId)
     {
         var existingPending = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
@@ -2931,6 +2957,54 @@ using System.Linq;
 
             var userHealthy = userRoster.Where(p => p.injury_days == 0).ToList();
             if (userHealthy.Count == 0) continue;
+
+            // S&T de IA: proponer traspasar un FA reciente del usuario (Bird rights)
+            if (Random.Range(0f, 1f) > 0.55f)
+            {
+                var userFAs = DatabaseManager.Instance.GetFreeAgents()
+                    .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id) && p.GetCalculatedAverage() > 75)
+                    .OrderByDescending(p => p.GetCalculatedAverage())
+                    .ToList();
+                var faTarget = userFAs.FirstOrDefault(p => !targetedIds.Contains(p.id));
+                if (faTarget != null)
+                {
+                    targetedIds.Add(faTarget.id);
+                    var aiHealthyForSA = aiRoster.Where(p => p.injury_days == 0).ToList();
+                    if (aiHealthyForSA.Count > 0)
+                    {
+                        long estimatedSalary = faTarget.salary;
+                        var faPack = aiHealthyForSA
+                            .OrderBy(p => Mathf.Abs(p.salary - estimatedSalary))
+                            .Take(2)
+                            .ToList();
+                        if (faPack.Count > 0)
+                        {
+                            var aiPicksForSA = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
+                            var futurePick = aiPicksForSA
+                                .OrderByDescending(p => p.season_id)
+                                .ThenBy(p => p.round)
+                                .ThenBy(p => p.pick_number)
+                                .FirstOrDefault();
+                            var saPicks = new List<int>();
+                            if (futurePick != null && Random.Range(0f, 1f) > 0.4f)
+                                saPicks.Add(futurePick.id);
+                            DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
+                            {
+                                manager_id = _manager.id,
+                                team_id_from = aiTeam.id,
+                                player_ids_out = TradeOfferData.JoinIds(new List<int> { faTarget.id }),
+                                player_ids_in = TradeOfferData.JoinIds(faPack.Select(p => p.id).ToList()),
+                                pick_ids_out = TradeOfferData.JoinIds(new List<int>()),
+                                pick_ids_in = TradeOfferData.JoinIds(saPicks),
+                                day_sent = gameDay,
+                                processed = 0
+                            });
+                            Debug.Log($"[AITrades] {aiTeam.name} propone S&T por {faTarget.first_name} {faTarget.last_name} (FA propio del usuario)");
+                            break;
+                        }
+                    }
+                }
+            }
 
             var target = PickTradeTarget(userHealthy, aiRoster, targetedIds);
             if (target == null) continue;
@@ -3104,6 +3178,20 @@ using System.Linq;
             .Where(p => p != null)
             .ToList();
 
+        // S&T: si la IA pide un FA propio tuyo (no está en el roster), se firma y se traspasa
+        var ourSATFAs = new List<PlayerData>();
+        var freeAgents = DatabaseManager.Instance.GetFreeAgents().ToList();
+        var unaccounted = wantedIds.Where(id => ourPlayers.All(p => p.id != id)).ToList();
+        foreach (var id in unaccounted)
+        {
+            var fa = freeAgents.FirstOrDefault(p => p.id == id && DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id));
+            if (fa != null)
+            {
+                ourSATFAs.Add(fa);
+                ourPlayers.Add(fa);
+            }
+        }
+
         var theirPlayers = offeredIds
             .Select(id => aiRoster.FirstOrDefault(p => p.id == id))
             .Where(p => p != null)
@@ -3126,11 +3214,12 @@ using System.Linq;
             return;
         }
 
-        ShowTradeOfferModal(offer, ourPlayers, theirPlayers, ourPicks, theirPicks);
+        ShowTradeOfferModal(offer, ourPlayers, theirPlayers, ourPicks, theirPicks, ourSATFAs);
     }
 
     void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers,
-                              List<DraftPickData> ourPicks = null, List<DraftPickData> theirPicks = null)
+                              List<DraftPickData> ourPicks = null, List<DraftPickData> theirPicks = null,
+                              List<PlayerData> ourSATFAs = null)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
@@ -3202,6 +3291,42 @@ using System.Linq;
             PlayClick();
             var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+            // S&T: firmar los FA propios antes de traspazarlos a la IA
+            if (ourSATFAs != null && ourSATFAs.Count > 0)
+            {
+                var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+                long myPayroll = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+                foreach (var fa in ourSATFAs)
+                {
+                    var breakdown = RosterController.GetMaxOfferBreakdown(fa, leagueSettings, myPayroll, true);
+                    long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(), leagueSettings != null ? leagueSettings.salary_cap : TradeHelper.SALARY_CAP);
+                    long signSalary = breakdown.birdMax > 0 ? breakdown.birdMax : market;
+                    int years = fa.age > 35 ? 1 : fa.age > 32 ? 2 : fa.age > 28 ? 3 : fa.age > 25 ? 4 : 5;
+                    fa.team_id = _myTeam.id;
+                    fa.last_team_id = _myTeam.id;
+                    fa.salary = signSalary;
+                    fa.contract_years = years;
+                    fa.guaranteed_years = years;
+                    fa.seasons_with_team = 1;
+                    DatabaseManager.Instance.UpdatePlayer(fa);
+                    DatabaseManager.Instance.InsertTrade(new TradeData
+                    {
+                        season_id = _season?.id ?? 0,
+                        game_day = _season?.current_game_day ?? 0,
+                        game_date = _season?.current_date ?? now,
+                        team_id_from = 0,
+                        team_id_to = _myTeam.id,
+                        player_id = fa.id,
+                        trade_type = "free_agent"
+                    });
+                }
+                if (_myTeam.first_apron_hard_capped == 0)
+                {
+                    _myTeam.first_apron_hard_capped = 1;
+                    DatabaseManager.Instance.UpdateTeam(_myTeam);
+                }
+            }
+
             foreach (var p in ourPlayers)
             {
                 p.team_id = offer.team_id_from;
@@ -3214,7 +3339,7 @@ using System.Linq;
                     team_id_from = _myTeam.id,
                     team_id_to = offer.team_id_from,
                     player_id = p.id,
-                    trade_type = "trade"
+                    trade_type = (ourSATFAs != null && ourSATFAs.Any(x => x.id == p.id)) ? "sign_and_trade" : "trade"
                 });
             }
 
@@ -3281,13 +3406,16 @@ using System.Linq;
             var theirPicksText = theirPicks != null && theirPicks.Count > 0
                 ? " y " + string.Join(", ", theirPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a4) ? a4 : "???")}")) : "";
 
+            var satMsg = (ourSATFAs != null && ourSATFAs.Count > 0)
+                ? $" (Sign & Trade: {string.Join(", ", ourSATFAs.Select(x => $"{x.first_name} {x.last_name}"))} firmado(s) con Bird rights y traspasado(s))."
+                : "";
             DatabaseManager.Instance.AddMessage(new MessageData
             {
                 manager_id = _manager.id,
                 sender_type = 1,
                 sender_id = 0,
                 title = "Intercambio aceptado",
-                body = $"Has intercambiado a {ourNames}{ourPicksText} por {theirNames}{theirPicksText} con {teamName}.",
+                body = $"Has intercambiado a {ourNames}{ourPicksText} por {theirNames}{theirPicksText} con {teamName}.{satMsg}",
                 game_day = _season.current_game_day,
                 game_date = now,
                 created_at = now,

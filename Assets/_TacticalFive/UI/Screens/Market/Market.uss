@@ -278,6 +278,16 @@
     background-color: rgb(16, 56, 92);
 }
 
+.market-trade-sat-section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(200, 160, 30);
+    padding: 8px 10px 2px 10px;
+    background-color: rgba(200, 160, 30, 0.08);
+    border-top-width: 1px;
+    border-top-color: rgba(200, 160, 30, 0.4);
+}
+
 .market-trade-col-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
