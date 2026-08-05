@@ -33,6 +33,7 @@ using System.Linq;
     private StyleBackground _starBg;
     private const int MAX_SCOUTS = 3;
     private int _expandedSlotIndex = -1;
+    private HashSet<int> _scoutedPlayerIds;
     protected override void CacheReferences()
     {
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
@@ -94,6 +95,7 @@ using System.Linq;
             CursorManager.Instance.SetDefaultCursor();
         _root.Q<Button>("SubmenuCartera")?.AddToClassList("nav-submenu-item--active");
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Cartera] RefreshHeader error: {ex.Message}"); }
+        _scoutedPlayerIds = new HashSet<int>(_scouts.Where(s => s.completed == 1).Select(s => s.player_id));
         BuildOjeadorCard();
         BuildTeamList();
         BuildPlayerList();
@@ -389,7 +391,7 @@ using System.Linq;
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-row-ovr");
         int med = p.GetCalculatedAverage();
-        ovrLbl.text = med.ToString();
+        ovrLbl.text = FogOfWarHelper.GetOvrDisplay(p, _myTeam.id, _scoutedPlayerIds);
         if (med > 84)
             ovrLbl.AddToClassList("player-ovr--high");
         else if (med >= 70)
@@ -530,10 +532,11 @@ using System.Linq;
                 header.Add(sep2);
 
                 // MED
-                int med = player.GetCalculatedAverage();
                 var medLbl = new Label();
                 medLbl.AddToClassList("player-row-ovr");
-                medLbl.text = $"{med} MED";
+                string ovrText = FogOfWarHelper.GetOvrDisplay(player, _myTeam.id, _scoutedPlayerIds);
+                medLbl.text = $"{ovrText} MED";
+                int med = player.GetCalculatedAverage();
                 if (med > 84)
                     medLbl.AddToClassList("player-ovr--high");
                 else if (med >= 70)

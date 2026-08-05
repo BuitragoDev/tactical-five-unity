@@ -74,7 +74,7 @@ using System.Linq;
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[PlayerProfile] RefreshHeader error: {ex.Message}"); }
         if (_player == null) return;
-        bool canView = _player.team_id == _myTeam.id || _scoutedPlayerIds.Contains(_player.id);
+        bool canView = FogOfWarHelper.CanViewRatings(_player, _myTeam.id, _scoutedPlayerIds);
         FillPlayerHeader(canView);
         BuildSeasonStats();
         BuildAttrs(canView);
@@ -104,12 +104,11 @@ using System.Linq;
 
         if (canView)
         {
-            int ovr = _player.GetCalculatedAverage();
-            _profileOvr.text = ovr.ToString();
+            _profileOvr.text = _player.GetCalculatedAverage().ToString();
         }
         else
         {
-            _profileOvr.text = "?";
+            _profileOvr.text = FogOfWarHelper.GetRatingBand(_player.GetCalculatedAverage(), _player.id);
         }
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);

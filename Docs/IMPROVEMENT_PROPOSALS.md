@@ -27,8 +27,6 @@ Fuentes consultadas: `Docs/PROJECT_OVERVIEW.md`, `Docs/GAMEPLAY.md`,
 El gap más evidente era: **el partido es invisible**. Se simula y solo se ve el resultado.
 
 - ✅ **Play-by-play en vivo / crónica en texto** — **hecho** (`crear-mejoras2`, commit `9c69e09`, mergeado a `main`): toggle "Vista de Partido" (Directa/Play-by-play), overlay inmersivo en MatchDay con marcador acumulado, reloj, barra de progreso, boxscore en vivo ordenado por VAL, totales recalculados, velocidades x1/x3/x5/x10 y botón SALTAR/IR AL RESUMEN. Ver `GAMEPLAY.md` §2.
-- **Mejores vitrinas**: box score detallado por cuarto, "jugador del partido",
-  gráfica de rachas de la clasificación.
 - **Logros/trofeos del GM** + palmarés visual enriquecido.
 - **Más variedad de audio** (solo 7 WAVs, `SYSTEMS.md §S15`).
 
@@ -114,3 +112,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Sign-and-trade de FA propio (NBA clásico) | **Hecho** — `MarketController.ProcessSATrade` + `TradeHelper` sign salaries + IA |
 | Trade deadline con evento real | **Hecho** — `DashboardController.ShowDeadlineDayModal` + `IsDeadlineWeek`/`IsFeb7OfYearEnd` + rush IA + badge Market (commit `649c98e`) |
 | AI de GMs más inteligente (estrategia por equipo) | **Hecho** — `TeamStrategy` + cooldowns/densidad por estrategia + fire sale rebuild + Star FA por prioridad |
+| Fog-of-war en valoraciones (ojeador da rangos) | **En curso** — Cartera + Perfil con `FogOfWarHelper` |
