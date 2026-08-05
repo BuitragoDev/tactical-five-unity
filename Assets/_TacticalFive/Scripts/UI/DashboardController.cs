@@ -518,7 +518,12 @@ using System.Linq;
 
         if (_season.phase == "finished")
         {
-            if (_manager.trust < 10)
+            bool isPro = _manager.game_mode == "promanager";
+            if (isPro && !IsObjectiveMetThisSeason())
+            {
+                ShowObjectiveFiredModal();
+            }
+            else if (_manager.trust < 10)
             {
                 ShowFiredModal();
             }
@@ -1319,7 +1324,9 @@ using System.Linq;
         if (!GameResultCache.PendingBudgetWarning) return;
         GameResultCache.PendingBudgetWarning = false;
 
-        if (_manager.budget_red_warnings >= 3)
+        // ProManager: cese por presupuesto más exigente (2 avisos en rojo vs 3).
+        int threshold = _manager.game_mode == "promanager" ? 2 : 3;
+        if (_manager.budget_red_warnings >= threshold)
             ShowBudgetFiredModal();
         else
             ShowBudgetWarningModal(_manager.budget_red_warnings);
@@ -2451,6 +2458,43 @@ using System.Linq;
         var text = new Label(
             "La directiva ha decidido prescindir de tus servicios.\n\n" +
             "Los resultados de la temporada no han cumplido las expectativas mínimas."
+        );
+        text.AddToClassList("fired-modal-text");
+        box.Add(text);
+
+        var btn = new Button();
+        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.AddToClassList("fired-modal-btn");
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.MainMenu);
+        });
+        box.Add(btn);
+    }
+
+    void ShowObjectiveFiredModal()
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        _firedOverlay.Add(box);
+
+        var icon = new VisualElement();
+        icon.AddToClassList("fired-modal-icon");
+        box.Add(icon);
+
+        var title = new Label("DESPIDO");
+        title.AddToClassList("fired-modal-title");
+        box.Add(title);
+
+        string obj = _myTeam?.objective ?? "el objetivo de temporada";
+        var text = new Label(
+            "La directiva ha decidido prescindir de tus servicios.\n\n" +
+            $"No has cumplido el objetivo de la temporada: {obj}.\n" +
+            "En el modo ProManager, el objetivo es innegociable."
         );
         text.AddToClassList("fired-modal-text");
         box.Add(text);
@@ -5036,36 +5080,14 @@ using System.Linq;
 
     int GetMyTeamConferenceRank()
     {
-        if (_myTeam == null || _allGames == null) return 0;
+        if (_myTeam == null) return 0;
+        return ObjectiveHelper.GetConferenceRank(_myTeam.id, _myTeam.conference, _allTeams, _allGames);
+    }
 
-        var confTeams = _allTeams.Where(t => t.conference == _myTeam.conference).ToList();
-        var standings = new List<(TeamData team, int wins, int losses, float pct)>();
-
-        foreach (var team in confTeams)
-        {
-            var teamGames = _allGames.Where(g => g.is_played == 1 &&
-                (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
-            int wins = teamGames.Count(g =>
-                (g.home_team_id == team.id && g.home_score > g.away_score) ||
-                (g.away_team_id == team.id && g.away_score > g.home_score));
-            int losses = teamGames.Count - wins;
-            float pct = teamGames.Count > 0 ? (float)wins / teamGames.Count : 0f;
-            standings.Add((team, wins, losses, pct));
-        }
-
-        standings.Sort((a, b) =>
-        {
-            if (b.pct != a.pct) return b.pct.CompareTo(a.pct);
-            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
-            return b.wins.CompareTo(a.wins);
-        });
-
-        for (int i = 0; i < standings.Count; i++)
-        {
-            if (standings[i].team.id == _myTeam.id)
-                return i + 1;
-        }
-        return 0;
+    bool IsObjectiveMetThisSeason()
+    {
+        if (_myTeam == null) return false;
+        return ObjectiveHelper.IsObjectiveMet(_myTeam.objective, GetMyTeamConferenceRank());
     }
 
     void RefreshTeamStats()
@@ -5078,19 +5100,7 @@ using System.Linq;
 
         // Estado del objetivo: calcular según posición en conferencia
         int rank = GetMyTeamConferenceRank();
-        bool objectiveMet = false;
-        string obj = _myTeam.objective ?? "";
-        if (rank > 0)
-        {
-            if (obj == "Zona tranquila")
-                objectiveMet = rank <= 12;          // 11+ = no entrar a nada
-            else if (obj == "Play-In")
-                objectiveMet = rank <= 10;          // 1-10 = al menos play-in
-            else if (obj == "Playoffs")
-                objectiveMet = rank <= 6;          // 1-6 = en posición de playoffs
-            else if (obj == "Campeonato")
-                objectiveMet = rank <= 2;           // 1-2 = top directo, contender
-        }
+        bool objectiveMet = ObjectiveHelper.IsObjectiveMet(_myTeam.objective, rank);
 
         if (_teamObjectiveStatus != null)
         {

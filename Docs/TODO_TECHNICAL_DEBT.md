@@ -114,9 +114,9 @@
 - **Fix:** `GameSettings` static wrapper.
 
 ### B20. `GameMode.ProManager` has limited behavioral difference
-- **Detail [F]:** ProManager already selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`, others disabled) and `NewSeasonController` limits offers to current team + 3 random from bottom-10. The main-menu restrictions modal (`MainMenuController.OpenProModal`) announces the harder rules (no NT-MLE, stricter budget/objective firing, season objective, annual team change) but they are **not yet enforced**.
-- **Impact:** the modal promises a stricter mode that doesn't fully exist yet.
-- **Fix:** enforce the announced rules (no NT-MLE on offers, earlier firing thresholds, objective-based firing).
+- **Detail [F]:** ProManager already selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`, others disabled) and `NewSeasonController` limits offers to current team + 3 random from bottom-10. The main-menu restrictions modal (`MainMenuController.OpenProModal`) announces the harder rules. Implemented: **firing for a missed season objective at end of season** (ProManager only, `DashboardController.OnActionClicked` → `ShowObjectiveFiredModal`), **easier budget firing** (threshold 2 vs 3 red warnings, `CheckBudgetWarning`), and `ObjectiveHelper` static helper. Remaining: **no NT-MLE** enforcement on FA offers.
+- **Impact:** the modal now mostly matches reality; only the NT-MLE cap rule is missing.
+- **Fix:** enforce no-NT-MLE on offers (`RosterController.GetMaxOfferBreakdown`, `MarketController`, `DashboardController.ProcessMaturedOffers`).
 
 ---
 

@@ -255,31 +255,8 @@ using System.Globalization;
 
     int GetMyTeamConferenceRank()
     {
-        if (_myTeam == null || _allTeams == null || _standingGames == null) return 0;
-
-        var confTeams = _allTeams.Where(t => t.conference == _myTeam.conference).ToList();
-        var standings = new List<(TeamData team, int wins, int losses)>();
-        foreach (var t in confTeams)
-        {
-            var tg = _standingGames
-                .Where(g => g.is_played == 1 && g.game_type == "regular" && (g.home_team_id == t.id || g.away_team_id == t.id))
-                .ToList();
-            int w = tg.Count(g =>
-                (g.home_team_id == t.id && g.home_score > g.away_score) ||
-                (g.away_team_id == t.id && g.away_score > g.home_score));
-            standings.Add((t, w, tg.Count - w));
-        }
-        standings.Sort((a, b) =>
-        {
-            float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
-            float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
-            if (pctB != pctA) return pctB.CompareTo(pctA);
-            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
-            return b.wins.CompareTo(a.wins);
-        });
-        for (int i = 0; i < standings.Count; i++)
-            if (standings[i].team.id == _myTeam.id) return i + 1;
-        return 0;
+        if (_myTeam == null) return 0;
+        return ObjectiveHelper.GetConferenceRank(_myTeam.id, _myTeam.conference, _allTeams, _standingGames);
     }
 
     void RefreshObjective()
@@ -291,14 +268,7 @@ using System.Globalization;
             _managerObjectiveTitle.text = $"OBJETIVO DE TEMPORADA: {obj.ToUpper()}";
 
         int rank = GetMyTeamConferenceRank();
-        bool met = false;
-        if (rank > 0)
-        {
-            if (obj == "Zona tranquila") met = rank <= 12;
-            else if (obj == "Play-In") met = rank <= 10;
-            else if (obj == "Playoffs") met = rank <= 6;
-            else if (obj == "Campeonato") met = rank <= 2;
-        }
+        bool met = ObjectiveHelper.IsObjectiveMet(_myTeam.objective, rank);
 
         if (_managerObjectivePosition != null)
         {

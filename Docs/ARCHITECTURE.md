@@ -165,6 +165,6 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 
 ## 8. Open questions
 
-- ~~Why `GameMode.ProManager` exists if it has no code-level difference~~ — **resolved:** ProManager restricts team selection to the worst teams (`GetWorstTeams(5)`), limits new-season offers to bottom-10, and shows a restrictions modal on the main menu (no NT-MLE, stricter budget/objective firing). The stricter cap/firing rules are announced but not yet enforced per `TODO` B20.
+- ~~Why `GameMode.ProManager` exists if it has no code-level difference~~ — **resolved:** ProManager restricts team selection to the worst teams (`GetWorstTeams(5)`), limits new-season offers to bottom-10, and shows a restrictions modal on the main menu. Implemented: objective-based season-end firing (`ShowObjectiveFiredModal`) and earlier budget firing (`CheckBudgetWarning` threshold 2). Objective/rank logic in `ObjectiveHelper`. The no-NT-MLE cap rule is announced but not yet enforced per `TODO` B20.
 - Whether the "Editor" template flow is a developer tool or an intended user feature.
 - Whether `SQLiteAsync.cs` was legacy from a previous "async loading" design. (See `TODO_TECHNICAL_DEBT.md`.)

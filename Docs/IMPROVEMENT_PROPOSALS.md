@@ -69,10 +69,11 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 ## Frente 4 — Modos y contenido
 
-- **ProManager real** (`TODO_TECHNICAL_DEBT.md` B20): dificultad aumentada (sin
-  NT-MLE, hard cap más estricto, cese más fácil). El modal de restricciones del
-  menú principal ya anuncia estas reglas (`MainMenuController.OpenProModal`), pero
-  aún no están implementadas en la lógica.
+- **ProManager real** (`TODO_TECHNICAL_DEBT.md` B20): dificultad aumentada. El modal de
+  restricciones del menú principal anuncia las reglas (`MainMenuController.OpenProModal`).
+  Hecho: **cese por objetivo no cumplido** al fin de temporada (solo ProManager,
+  `ShowObjectiveFiredModal`) y **cese por presupuesto más fácil** (umbral 2 vs 3 en
+  `CheckBudgetWarning`); lógica centralizada en `ObjectiveHelper`. Pendiente: **sin NT-MLE**.
 - **Expansión / liga personalizada** vía el editor de `template.db`.
 - **Historial rico**: anillos por jugador, retiro de dorsales, hall of fame.
 
