@@ -21,7 +21,7 @@ public static class FogOfWarHelper
 
     public static string GetRatingBand(int med, int playerId)
     {
-        int offset = (int)((uint)(playerId * 2654435761UL) % BAND_WIDTH);
+        int offset = (int)((uint)playerId * 2654435761U % BAND_WIDTH);
         int low = med - offset;
         int high = low + BAND_WIDTH;
         return $"{low}-{high}";
