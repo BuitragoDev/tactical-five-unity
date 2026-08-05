@@ -7,9 +7,11 @@
 
 ## P0 — Critical
 
-### ~~B1. Duplicate `CursorManager` can destroy the `ScreenManager` GameObject~~ **DONE** (commit `685f809`)
+### B1. Duplicate `CursorManager` can destroy the `ScreenManager` GameObject
 - **Type:** bug / fragility.
-- **Detail [F]:** ~~`MainMenu.unity` has two `CursorManager` components~~ Removed the duplicate CursorManager component on the ScreenManager GO. Fixed the singleton guard (`Destroy(this)` instead of `Destroy(gameObject)`). ScreenManager now marks itself `DontDestroyOnLoad`.
+- **Detail [F]:** `MainMenu.unity` has two `CursorManager` components — one in the root `CursorManager` GO and one inside the `ScreenManager` GO (with `ScreenManager` and `DatabaseManager`). The singleton guard in `Awake` does `if (Instance != null && Instance != this) { Destroy(gameObject); return; }`. If the instance inside the `ScreenManager` GO loses the race, `Destroy(gameObject)` destroys the whole `ScreenManager` GO (navigation + DB gateway gone). Order is undefined.
+- **Impact:** game-breaking at boot, intermittent.
+- **Fix:** remove one instance; move `DontDestroyOnLoad` responsibility explicitly onto `ScreenManager`/`DatabaseManager` (they currently rely on the co-located `CursorManager`).
 
 ### B2. `OverallMigration_{slot}` PlayerPrefs flag is machine-global and never cleared on slot deletion
 - **Type:** data correctness (low severity).
