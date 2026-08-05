@@ -114,9 +114,9 @@
 - **Fix:** `GameSettings` static wrapper.
 
 ### B20. `GameMode.ProManager` has limited behavioral difference
-- **Detail [F]:** ProManager already selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`, others disabled) and `NewSeasonController` limits offers to current team + 3 random from bottom-10. The main-menu restrictions modal (`MainMenuController.OpenProModal`) announces the harder rules. Implemented: **firing for a missed season objective at end of season** (ProManager only, `DashboardController.OnActionClicked` → `ShowObjectiveFiredModal`), **easier budget firing** (threshold 2 vs 3 red warnings, `CheckBudgetWarning`), and `ObjectiveHelper` static helper. Remaining: **no NT-MLE** enforcement on FA offers.
-- **Impact:** the modal now mostly matches reality; only the NT-MLE cap rule is missing.
-- **Fix:** enforce no-NT-MLE on offers (`RosterController.GetMaxOfferBreakdown`, `MarketController`, `DashboardController.ProcessMaturedOffers`).
+- **Detail [F]:** ProManager selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`), limits new-season offers to current team + 3 random from bottom-10, and shows a restrictions modal (`MainMenuController.OpenProModal`). All announced harder rules are now **implemented**: objective-based season-end firing (`ShowObjectiveFiredModal`), easier budget firing (`CheckBudgetWarning` threshold 2), **no NT-MLE** on FA offers (`GetMaxOfferBreakdown`/`CalculateMaxOfferSalary` `proManagerOnly` forces Taxpayer MLE; `MarketController.UpdateFAMaxInfo`/`UpdateFAWarning`/`SendFAOffer`; `DashboardController.ProcessMaturedOffers`) and no NT-MLE hard-cap activation. Objective/rank logic centralized in `ObjectiveHelper`. **B20 closed / done.**
+- **Impact:** resolved.
+- **Fix:** none remaining. Verify balance of the Taxpayer-MLE offer cap in a full season.
 
 ---
 

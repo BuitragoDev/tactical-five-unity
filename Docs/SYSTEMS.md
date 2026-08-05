@@ -138,6 +138,6 @@
 
 ## Open questions
 
-- `ProManager` harder-cap differences — **partially implemented**: objective-based firing at season end (`DashboardController.OnActionClicked` → `ShowObjectiveFiredModal`, ProManager only) and earlier budget firing (`CheckBudgetWarning` threshold 2 vs 3). The **no-NT-MLE cap rule is announced but not yet enforced in logic** (TODO B20); current code-level difference also includes worst-team selection + bottom-10 new-season offers + annual team change. 
+- `ProManager` harder-cap differences — **fully implemented**: objective-based firing at season end (`DashboardController.OnActionClicked` → `ShowObjectiveFiredModal`, ProManager only), earlier budget firing (`CheckBudgetWarning` threshold 2 vs 3), and **no NT-MLE** (over-cap FA signed via Taxpayer MLE; no NT-MLE hard-cap activation). Other differences: worst-team selection + bottom-10 new-season offers + annual team change. Logic centralized in `ObjectiveHelper`. 
 - Whether buyout (stretch provision) is intended but unfinished (`PLAN.md` §4.2 mentions it; only dismissal exists).
 - Whether AI star FA signings block the user's offers correctly when they overlap (`ProcessStarFreeAgentSignings` vs user's pending offers) — see `MEMORY.md`.

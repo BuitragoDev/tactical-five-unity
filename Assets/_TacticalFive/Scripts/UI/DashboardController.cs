@@ -1463,10 +1463,16 @@ using System.Linq;
 
                     if (leagueSettings != null)
                     {
+                        bool proManagerOnly = _manager.game_mode == "promanager";
                         if (totalPayroll <= leagueSettings.salary_cap)
                         {
                             offerLegal = totalPayroll + offer.offer_salary <= leagueSettings.salary_cap;
                             illegalReason = "sin espacio salarial";
+                        }
+                        else if (proManagerOnly && totalPayroll <= firstApron)
+                        {
+                            offerLegal = offer.offer_salary <= tMle;
+                            illegalReason = $"supera Mid-Level Exception (Taxpayer) (${tMle:N0}) — MODO PRO sin No-Taxpayer";
                         }
                         else if (totalPayroll <= firstApron)
                         {
@@ -1549,8 +1555,10 @@ using System.Linq;
                         is_read = 0
                     });
 
-                    // Activación del hard cap si se usó NT-MLE (>cap, ≤1er apron)
-                    if (_myTeam.first_apron_hard_capped == 0
+                    // Activación del hard cap si se usó NT-MLE (>cap, ≤1er apron).
+                    // En ProManager la NT-MLE no existe → el hard cap por NT-MLE no se activa.
+                    if (_manager.game_mode != "promanager"
+                        && _myTeam.first_apron_hard_capped == 0
                         && leagueSettings != null
                         && totalPayroll > leagueSettings.salary_cap
                         && totalPayroll <= firstApron)
