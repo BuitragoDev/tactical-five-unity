@@ -112,4 +112,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Sign-and-trade de FA propio (NBA clásico) | **Hecho** — `MarketController.ProcessSATrade` + `TradeHelper` sign salaries + IA |
 | Trade deadline con evento real | **Hecho** — `DashboardController.ShowDeadlineDayModal` + `IsDeadlineWeek`/`IsFeb7OfYearEnd` + rush IA + badge Market (commit `649c98e`) |
 | AI de GMs más inteligente (estrategia por equipo) | **Hecho** — `TeamStrategy` + cooldowns/densidad por estrategia + fire sale rebuild + Star FA por prioridad |
-| Fog-of-war en valoraciones (ojeador da rangos) | **En curso** — Cartera + Perfil con `FogOfWarHelper` |
+| Fog-of-war en valoraciones (ojeador da rangos) | **Hecho** — `FogOfWarHelper` + Cartera + PlayerProfile (commit `a924226`) |

@@ -5,6 +5,7 @@ using SQLite;
 using System;
 using System.Linq;
 using System.Globalization;
+using System.Threading.Tasks;
 
 public partial class DatabaseManager : MonoBehaviour
 {
@@ -52,6 +53,7 @@ public partial class DatabaseManager : MonoBehaviour
             Directory.CreateDirectory(dir);
 
         _db = new SQLiteConnection(DbPath);
+        _db.Execute("PRAGMA journal_mode=WAL");
         CreateTables();
         RunMigrations();
 
@@ -68,6 +70,26 @@ public partial class DatabaseManager : MonoBehaviour
         }
 
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
+    }
+
+    public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
+    {
+        string path = DbPath;
+        return Task.Run(() =>
+        {
+            using var conn = new SQLiteConnection(path);
+            return work(conn);
+        });
+    }
+
+    public Task RunInBackground(Action<SQLiteConnection> work)
+    {
+        string path = DbPath;
+        return Task.Run(() =>
+        {
+            using var conn = new SQLiteConnection(path);
+            work(conn);
+        });
     }
 
     public void EnsureTemplateDb()

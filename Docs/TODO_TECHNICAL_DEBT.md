@@ -50,11 +50,11 @@
 - **Impact:** dead code; confusion about where settings live (they live in the per-screen config modal).
 - **Fix:** either remove or wire it and centralize settings there.
 
-### B8. `SQLiteAsync.cs` unused; all DB work is synchronous on main thread
+### B8. All DB work is synchronous on main thread; heavy batches block UI
 - **Type:** performance.
-- **Detail [F]:** `SQLiteAsync.cs` is compiled but never referenced; `SQLiteConnection` ops block the UI thread.
+- **Detail [F]:** The bundled `SQLite.cs` is synchronous-only (no `SQLiteAsyncConnection`). Heavy player iteration loops (injuries, fisico, AI transfers) and season-end aggregation run on main thread.
 - **Impact:** stutter during `StartNewSeason`, draft generation, and large queries.
-- **Fix:** evaluate using async or a background connection for heavy ops (trade-offs with transactions).
+- **Fix:** WAL mode + second SQLiteConnection in `Task.Run` for heavy pre/post-game batches.
 
 ### B9. No transactions around most multi-write operations
 - **Type:** data integrity.

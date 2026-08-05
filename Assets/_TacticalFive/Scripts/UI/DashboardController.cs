@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Threading.Tasks;
     public class DashboardController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Dashboard;
@@ -594,37 +595,73 @@ using System.Linq;
 
         if (!skipPreBatch)
         {
-            db.BeginTransaction();
-
-            // Paso 1: lesiones y recuperaciones
+            // Paso 1: lesiones y recuperaciones (background)
             try
             {
-                var recoveredPlayers = ProcessInjuries();
-                ProcessFisicoRecovery();
+                var recoveryTask = DatabaseManager.Instance.RunInBackground(conn =>
+                {
+                    conn.BeginTransaction();
+                    var recovered = new List<(int id, string first, string last)>();
+
+                    var allTeams = conn.Table<TeamData>().ToList();
+                    foreach (var team in allTeams)
+                    {
+                        var players = conn.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
+                        foreach (var p in players)
+                        {
+                            if (p.injury_days > 0)
+                            {
+                                p.injury_days--;
+                                if (p.injury_days <= 0)
+                                {
+                                    p.injury_days = 0;
+                                    p.injury_type = "";
+                                    p.treated = 0;
+                                    if (p.team_id == _myTeam.id)
+                                        recovered.Add((p.id, p.first_name, p.last_name));
+                                }
+                                conn.Update(p);
+                            }
+                            if (p.injury_days <= 0)
+                            {
+                                p.fisico = Mathf.Min(99, p.fisico + 8);
+                                conn.Update(p);
+                            }
+                        }
+                    }
+
+                    conn.Commit();
+                    return recovered;
+                });
+
+                while (!recoveryTask.IsCompleted)
+                    yield return null;
+
+                var recoveredPlayers = recoveryTask.Result;
+
                 if (recoveredPlayers.Count > 0)
                 {
-                    foreach (var p in recoveredPlayers)
+                    foreach (var (id, first, last) in recoveredPlayers)
                     {
                         DatabaseManager.Instance.AddMessage(new MessageData
                         {
                             manager_id = _manager.id,
                             sender_type = 1,
                             sender_id = 0,
-                            title = $"Recuperado: {p.first_name} {p.last_name}",
-                            body = $"{p.first_name} {p.last_name} se ha recuperado de su lesión y vuelve a estar disponible.",
+                            title = $"Recuperado: {first} {last}",
+                            body = $"{first} {last} se ha recuperado de su lesión y vuelve a estar disponible.",
                             game_day = gameDay,
                             game_date = _season?.current_date ?? "",
                             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                             is_read = 0
                         });
-                        _pendingRecoveredIds.Add(p.id);
+                        _pendingRecoveredIds.Add(id);
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                db.Rollback();
                 _pendingRecoveredIds.Clear();
                 HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
                 yield break;
@@ -632,6 +669,7 @@ using System.Linq;
             if (fastSim) yield return null;
 
             // Paso 2: scouts, entrenamiento y renovaciones
+            db.BeginTransaction();
             try
             {
                 ProcessScouts();
