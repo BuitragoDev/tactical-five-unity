@@ -186,19 +186,21 @@ using System.Threading.Tasks;
 
     void Update()
     {
-        if (IsAnyModalOpen()) return;
-        if (Input.GetKeyDown(KeyCode.S))
-        {
-            PlayClick();
-            OnActionClicked();
-        }
-
-        // Toasts de logros del GM (cola consumida en el hilo principal)
+        // Toasts de logros del GM (cola consumida en el hilo principal). Se
+        // procesa antes del guard de modales para no perder desbloqueos si al
+        // terminar el día queda algún overlay abierto.
         if (_achievementToast != null && !_toastScheduled)
         {
             var def = AchievementService.TakeNextToast();
             if (def != null)
                 ShowAchievementToast(def);
+        }
+
+        if (IsAnyModalOpen()) return;
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            PlayClick();
+            OnActionClicked();
         }
     }
 

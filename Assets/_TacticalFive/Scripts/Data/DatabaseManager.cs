@@ -269,6 +269,10 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<PlayerSeasonStatRow>();
         _db.CreateTable<AllStarAppearanceSeed>();
         _db.CreateTable<MonthlyAwardData>();
+        // Migración: el índice antiguo era UNIQUE solo sobre manager_id (creaba
+        // UNIQUE(manager_id)); se elimina para que CreateTable genere el índice
+        // compuesto UNIQUE(manager_id, type) definido en GmAchievementData.
+        try { _db.Execute("DROP INDEX IF EXISTS \"IX_Achievements_Manager_Type\""); } catch { }
         _db.CreateTable<GmAchievementData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");

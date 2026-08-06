@@ -23,6 +23,7 @@ public class LogrosController : UIScreenController
 
     protected override void Refresh()
     {
+        base.Refresh();
         if (_body == null || _manager == null) return;
 
         // Backfill silencioso de logros de carrera para partidas ya avanzadas
@@ -51,10 +52,13 @@ public class LogrosController : UIScreenController
                 btn.AddToClassList("logros-tab--active");
             btn.clicked += () =>
             {
+                PlayClick();
                 _selectedCategory = cat;
                 Rebuild();
             };
             _tabs.Add(btn);
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(btn);
         }
 
         MakeTab("TODOS", null);
