@@ -155,6 +155,36 @@
     background-color: rgb(30, 20, 20);
 }
 
+.player-row--on-block {
+    border-left-width: 4px;
+    border-left-color: rgb(212, 160, 23);
+}
+
+.trade-block-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(80, 90, 110);
+    letter-spacing: 1px;
+    margin-left: 8px;
+    width: 110px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    transition-property: color;
+    transition-duration: 0.15s;
+}
+
+.trade-block-label:hover {
+    color: rgb(212, 160, 23);
+}
+
+.trade-block-label--active {
+    color: rgb(212, 160, 23);
+}
+
+.trade-block-label--active:hover {
+    color: rgb(240, 190, 50);
+}
+
 .player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
