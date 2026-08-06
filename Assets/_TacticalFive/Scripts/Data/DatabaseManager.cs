@@ -269,6 +269,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<PlayerSeasonStatRow>();
         _db.CreateTable<AllStarAppearanceSeed>();
         _db.CreateTable<MonthlyAwardData>();
+        _db.CreateTable<GmAchievementData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");

@@ -30,6 +30,9 @@ using System.Globalization;
     private VisualElement _monthlyAwardsIcon;
     private Label _monthlyAwards;
 
+    // Achievements
+    private Label _achievementsCount;
+
     // Ranking
     private VisualElement _rankingBody;
     protected override void CacheReferences()
@@ -61,6 +64,14 @@ using System.Globalization;
 
         _monthlyAwardsIcon = _root.Q<VisualElement>("ManagerMonthlyAwardsIcon");
         _monthlyAwards = _root.Q<Label>("ManagerMonthlyAwards");
+
+        _achievementsCount = _root.Q<Label>("ManagerAchievementsCount");
+
+        _root.Q<Button>("ManagerBtnLogros")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.Logros);
+        });
 
         _rankingBody = _root.Q<VisualElement>("RankingBody");
 
@@ -111,6 +122,7 @@ using System.Globalization;
         RefreshObjective();
         RefreshRings();
         RefreshMonthlyAwards();
+        RefreshAchievements();
         RefreshRanking();
     }
     protected override void RefreshHeader()
@@ -356,6 +368,24 @@ using System.Globalization;
 
         int count = DatabaseManager.Instance.CountManagerOfTheMonthWins(_manager.id);
         _monthlyAwards.text = count.ToString();
+    }
+
+    // ── ACHIEVEMENTS ─────────────────────────────────────────────
+
+    void RefreshAchievements()
+    {
+        if (_manager == null || _achievementsCount == null) return;
+
+        var tex = Resources.Load<Texture2D>("Icons/trofeo64px");
+        if (tex != null)
+        {
+            var icon = _root.Q<VisualElement>("ManagerAchievementsIcon");
+            if (icon != null) icon.style.backgroundImage = new StyleBackground(tex);
+        }
+
+        int count = DatabaseManager.Instance.CountAchievements(_manager.id);
+        int total = AchievementCatalog.All.Length;
+        _achievementsCount.text = $"{count} / {total}";
     }
 
     // ── RANKING ──────────────────────────────────────────────────

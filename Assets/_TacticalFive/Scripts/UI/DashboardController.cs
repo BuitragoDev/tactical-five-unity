@@ -126,6 +126,12 @@ using System.Threading.Tasks;
     private bool _deadlineDayModalShown;
     private int _deadlineModalSeasonId;
 
+    // Toast de logros del GM
+    private VisualElement _achievementToast;
+    private VisualElement _achievementToastIcon;
+    private Label _achievementToastDesc;
+    private bool _toastScheduled;
+
     // AI de GMs: estrategia por equipo y cooldown por equipo para traspasos
     private Dictionary<int, TeamStrategy> _teamStrategyCache = new();
     private Dictionary<int, int> _teamTradeCooldown = new();
@@ -142,6 +148,8 @@ using System.Threading.Tasks;
         _deadlineDayOverlay = new VisualElement();
         _deadlineDayOverlay.AddToClassList("deadline-overlay");
         _root.Add(_deadlineDayOverlay);
+
+        CreateAchievementToast();
 
         SetSidebarNavigationEnabled(true);
         AudioManager.Instance?.PlayMusic("backgroundMenu");
@@ -184,6 +192,88 @@ using System.Threading.Tasks;
             PlayClick();
             OnActionClicked();
         }
+
+        // Toasts de logros del GM (cola consumida en el hilo principal)
+        if (_achievementToast != null && !_toastScheduled)
+        {
+            var def = AchievementService.TakeNextToast();
+            if (def != null)
+                ShowAchievementToast(def);
+        }
+    }
+
+    void CreateAchievementToast()
+    {
+        _achievementToast = new VisualElement();
+        _achievementToast.style.position = Position.Absolute;
+        _achievementToast.style.left = Length.Percent(20);
+        _achievementToast.style.right = Length.Percent(20);
+        _achievementToast.style.top = 72;
+        _achievementToast.style.flexDirection = FlexDirection.Row;
+        _achievementToast.style.alignItems = Align.Center;
+        _achievementToast.style.backgroundColor = new StyleColor(new Color(0.09f, 0.12f, 0.19f, 0.97f));
+        _achievementToast.style.borderTopWidth = 1;
+        _achievementToast.style.borderBottomWidth = 1;
+        _achievementToast.style.borderLeftWidth = 1;
+        _achievementToast.style.borderRightWidth = 1;
+        var gold = new Color(0.85f, 0.70f, 0.30f, 1f);
+        _achievementToast.style.borderTopColor = new StyleColor(gold);
+        _achievementToast.style.borderBottomColor = new StyleColor(gold);
+        _achievementToast.style.borderLeftColor = new StyleColor(gold);
+        _achievementToast.style.borderRightColor = new StyleColor(gold);
+        _achievementToast.style.borderTopLeftRadius = 8;
+        _achievementToast.style.borderTopRightRadius = 8;
+        _achievementToast.style.borderBottomLeftRadius = 8;
+        _achievementToast.style.borderBottomRightRadius = 8;
+        _achievementToast.style.paddingTop = 10;
+        _achievementToast.style.paddingBottom = 10;
+        _achievementToast.style.paddingLeft = 14;
+        _achievementToast.style.paddingRight = 14;
+        _achievementToast.style.display = DisplayStyle.None;
+
+        _achievementToastIcon = new VisualElement();
+        _achievementToastIcon.style.width = 36;
+        _achievementToastIcon.style.height = 36;
+        _achievementToastIcon.style.marginRight = 12;
+        _achievementToast.Add(_achievementToastIcon);
+
+        var textBox = new VisualElement();
+        textBox.style.flexDirection = FlexDirection.Column;
+        var titleLbl = new Label("🏆 LOGRO DESBLOQUEADO");
+        titleLbl.style.color = gold;
+        titleLbl.style.fontSize = 15;
+        titleLbl.style.unityFontStyleAndWeight = FontStyle.Bold;
+        titleLbl.style.marginBottom = 2;
+        titleLbl.AddToClassList("toast-achievement-title");
+        textBox.Add(titleLbl);
+
+        _achievementToastDesc = new Label();
+        _achievementToastDesc.style.color = Color.white;
+        _achievementToastDesc.style.fontSize = 14;
+        _achievementToastDesc.AddToClassList("toast-achievement-desc");
+        textBox.Add(_achievementToastDesc);
+
+        _achievementToast.Add(textBox);
+
+        _root.Add(_achievementToast);
+    }
+
+    void ShowAchievementToast(GmAchievementDefinition def)
+    {
+        if (_achievementToast == null) return;
+        var tex = Resources.Load<Texture2D>($"Icons/{def.Icon}");
+        if (tex != null)
+            _achievementToastIcon.style.backgroundImage = new StyleBackground(tex);
+        else
+            _achievementToastIcon.style.backgroundImage = null;
+        _achievementToastDesc.text = def.Title;
+        _achievementToast.style.display = DisplayStyle.Flex;
+        _toastScheduled = true;
+        _root.schedule.Execute(() =>
+        {
+            _achievementToast.style.display = DisplayStyle.None;
+            _toastScheduled = false;
+        }).ExecuteLater(4000);
     }
 
     bool IsAnyModalOpen()
@@ -827,6 +917,8 @@ using System.Threading.Tasks;
                 UpdateManagerStats(gameDay);
 
                 QuickNewsGenerator.Generate(_manager, _myTeam, _season, gamesToday, gameDay, _season?.current_date ?? "");
+
+                AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
             }
 
         // ── Phase transitions ──
@@ -930,6 +1022,7 @@ using System.Threading.Tasks;
             DatabaseManager.Instance.UpdateHistoricalPlayerStatsFromSeason(_season.id, _manager.id);
             DatabaseManager.Instance.SaveSeasonEndRecords(_season.id, _manager.id);
             AssignSeasonPoints();
+            AchievementService.EvaluateSeasonEnd(_manager.id, _myTeam.id, _season.id);
         }
 
         _season.current_game_day = gameDay;
@@ -1570,6 +1663,8 @@ using System.Threading.Tasks;
                     player.has_player_option = offer.has_player_option;
                     player.seasons_with_team = 1;
                     DatabaseManager.Instance.UpdatePlayer(player);
+
+                    AchievementService.EvaluateSignStarFA(_manager.id, _myTeam.id, _season?.id ?? 0, player);
 
                     DatabaseManager.Instance.InsertTrade(new TradeData
                     {

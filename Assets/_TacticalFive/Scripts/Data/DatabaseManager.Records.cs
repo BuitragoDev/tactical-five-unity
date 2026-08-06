@@ -1994,6 +1994,7 @@ public partial class DatabaseManager
         if (team == null) return;
 
         string[] statFields = { "points", "rebounds", "assists", "steals", "blocks", "fgm", "fg3m", "ftm", "turnovers" };
+        bool brokeHistoricalRecord = false;
 
         foreach (var ps in playerStats)
         {
@@ -2024,6 +2025,7 @@ public partial class DatabaseManager
                 var histRecord = GetHistoricalRecord(stat);
                 if (histRecord == null || value > histRecord.value)
                 {
+                    brokeHistoricalRecord = true;
                     if (histRecord == null)
                     {
                         histRecord = new HistoricalRecordData
@@ -2100,6 +2102,17 @@ public partial class DatabaseManager
                         }
                     }
                 }
+            }
+        }
+
+        // Logro del GM: romper un récord histórico con un jugador de tu equipo
+        if (brokeHistoricalRecord)
+        {
+            var mgr = GetActiveManager();
+            if (mgr != null && mgr.team_id == teamId)
+            {
+                var s = GetActiveSeason(mgr.id);
+                AchievementService.EvaluateRecordBreak(mgr.id, teamId, s?.id ?? 0);
             }
         }
     }
