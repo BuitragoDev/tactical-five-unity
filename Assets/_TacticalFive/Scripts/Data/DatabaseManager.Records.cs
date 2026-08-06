@@ -2330,10 +2330,42 @@ public partial class DatabaseManager
                     break;
             }
 
+            int GetPositionDeclineModifier(string pos, string attr, int age)
+            {
+                int mod = 0;
+
+                // Declive atlético general ≥ 31
+                if (age >= 31 && (attr == "speed" || attr == "athleticism"))
+                {
+                    mod -= 1;
+                    // Declive severo ≥ 35: guards pierden más físico, bigs pierden defensa/blocks
+                    if (age >= 35)
+                    {
+                        if (pos == "PG" || pos == "SG") mod -= 1;
+                        else if (pos == "PF" || pos == "C")
+                        {
+                            if (attr == "blocks" || attr == "defense") mod -= 1;
+                        }
+                        else mod -= 1; // SF
+                    }
+                }
+
+                // IQ veterano ≥ 28: guards y wings ganan IQ y tiro
+                if (age >= 28)
+                {
+                    if (attr == "iq") mod += 1;
+                    if (attr == "shooting" && (pos == "PG" || pos == "SG" || pos == "SF"))
+                        mod += 1;
+                }
+
+                return mod;
+            }
+
             int Apply(string name, int current)
             {
                 int change = baseChange;
                 if (priorityAttrs.Contains(name)) change += 1;
+                change += GetPositionDeclineModifier(p.position, name, p.age);
                 change += UnityEngine.Random.Range(-1, 2);
                 return Math.Max(0, Math.Min(99, current + change));
             }
@@ -2414,6 +2446,9 @@ public partial class DatabaseManager
 
             _db.Update(p);
         }
+
+        // 3a. Mentoring: veteranos enseñan a jóvenes
+        ApplyMentoring(remaining);
 
         // 3b. Decrement employee contracts
         var allEmployees = _db.Table<EmployeeData>().Where(e => e.team_id != 0).ToList();
@@ -3134,5 +3169,80 @@ public partial class DatabaseManager
         float pct = (overall - 40) * 0.005f;
         pct = System.Math.Clamp(pct, 0.02f, 0.35f);
         return (long)(cap * pct);
+    }
+
+    void ApplyMentoring(List<PlayerData> allPlayers)
+    {
+        var byTeam = allPlayers
+            .Where(p => p.is_rookie == 0 && p.team_id != 0)
+            .GroupBy(p => p.team_id);
+
+        foreach (var teamGroup in byTeam)
+        {
+            var youngPlayers = teamGroup.Where(p => p.age >= 19 && p.age <= 22).ToList();
+            if (youngPlayers.Count == 0) continue;
+
+            var veterans = teamGroup.Where(p => p.age >= 30 && p.iq >= 70 && p.morale >= 60)
+                .OrderByDescending(p => p.iq).ToList();
+            if (veterans.Count == 0) continue;
+
+            var mentor = veterans[0];
+            int bonus = mentor.iq >= 80 ? 2 : 1;
+
+            var priorityAttrsByPos = new Dictionary<string, string[]>
+            {
+                { "PG", new[] { "passing", "dribbling", "speed", "iq", "three_point" } },
+                { "SG", new[] { "shooting", "three_point", "speed", "dribbling", "steals" } },
+                { "SF", new[] { "shooting", "defense", "athleticism", "speed", "rebounding" } },
+                { "PF", new[] { "defense", "rebounding", "blocks", "athleticism" } },
+                { "C",  new[] { "rebounding", "blocks", "defense", "iq", "athleticism" } }
+            };
+
+            foreach (var young in youngPlayers)
+            {
+                if (!priorityAttrsByPos.TryGetValue(young.position, out var attrs))
+                    continue;
+
+                string targetAttr = attrs[UnityEngine.Random.Range(0, attrs.Length)];
+                int oldVal = GetAttr(young, targetAttr);
+                int newVal = Math.Min(99, oldVal + bonus);
+                SetAttr(young, targetAttr, newVal);
+                _db.Update(young);
+            }
+        }
+    }
+
+    static int GetAttr(PlayerData p, string attr) => attr switch
+    {
+        "speed" => p.speed,
+        "shooting" => p.shooting,
+        "three_point" => p.three_point,
+        "passing" => p.passing,
+        "dribbling" => p.dribbling,
+        "defense" => p.defense,
+        "rebounding" => p.rebounding,
+        "athleticism" => p.athleticism,
+        "iq" => p.iq,
+        "steals" => p.steals,
+        "blocks" => p.blocks,
+        _ => 0
+    };
+
+    static void SetAttr(PlayerData p, string attr, int val)
+    {
+        switch (attr)
+        {
+            case "speed": p.speed = val; break;
+            case "shooting": p.shooting = val; break;
+            case "three_point": p.three_point = val; break;
+            case "passing": p.passing = val; break;
+            case "dribbling": p.dribbling = val; break;
+            case "defense": p.defense = val; break;
+            case "rebounding": p.rebounding = val; break;
+            case "athleticism": p.athleticism = val; break;
+            case "iq": p.iq = val; break;
+            case "steals": p.steals = val; break;
+            case "blocks": p.blocks = val; break;
+        }
     }
 }
