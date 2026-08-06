@@ -39,7 +39,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
   - PLANTILLA → Jugadores, Quinteto, Entrenamiento, Empleados, Lesionados
   - RESULTADOS → Calendar, Results, Playoffs
   - CLASIFICACIÓN → Standings
-  - LIGA → Palmarés (Palmarés, Records, Premios), Stats
+  - LIGA → Palmarés (Palmarés, Records, Premios, **Logros del GM**), Stats
   - MERCADO → Ofertas, Cartera, Historial
   - FINANZAS → Decisiones, Préstamos, Patrocinadores, Televisión
   - PABELLÓN → Arena
@@ -49,7 +49,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
 ### CustomSlider (`Scripts/UI/CustomSlider.cs`)
 - Custom `Slider` subclass used in the config modals (master/music/SFX). Binds `ChangeEvent<float>` to labels and `AudioManager` volume setters.
 
-## 4. Controller pattern (38 controllers)
+## 4. Controller pattern (39 controllers)
 
 **No common base class** [F] — each is a plain `MonoBehaviour`. The convention (repeated in every controller):
 
@@ -97,6 +97,7 @@ Notable specifics:
 | Records | `Screens/Records` | `RecordsController` | Records screen |
 | Palmares | `Screens/Palmares` | `PalmaresController` | Historical palmarés |
 | Premios | `Screens/Premios` | `PremiosController` | Monthly awards |
+| Logros | `Screens/Logros` | `LogrosController` | GM achievements: tabs by category + grid 6 columns + progress counter; desbloqueo persistido en `gm_achievements` |
 | Market | `Screens/Market` | `MarketController` | Trades + FA market (contract offer with TO/PO toggles) |
 | Cartera | `Screens/Cartera` | `CarteraController` | Player wallet/contracts |
 | Historial | `Screens/Historial` | `HistorialController` | Trade history |

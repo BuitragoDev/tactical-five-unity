@@ -67,6 +67,10 @@
 
                     <!-- Right panel: player detail on hover -->
                     <ui:VisualElement class="lineup-col lineup-col--right-panel">
+                        <ui:VisualElement class="load-mgmt-row">
+                            <ui:Button name="LoadMgmtBtnOn" class="load-mgmt-btn load-mgmt-btn--on" text="GESTIONAR DESCANSOS" />
+                            <ui:Button name="LoadMgmtBtnOff" class="load-mgmt-btn load-mgmt-btn--off" text="NO GESTIONAR DESCANSOS" />
+                        </ui:VisualElement>
                         <ui:VisualElement name="DetailEmpty" class="detail-empty">
                             <ui:Label class="detail-empty-text" text="PASA EL RATÓN SOBRE UN JUGADOR" />
                         </ui:VisualElement>
@@ -100,11 +104,11 @@
                                     </ui:VisualElement>
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatStl" class="season-stat-val" text="0.0" />
-                                        <ui:Label class="season-stat-label" text="STL" />
+                                        <ui:Label class="season-stat-label" text="ROB" />
                                     </ui:VisualElement>
                                     <ui:VisualElement class="season-stat-card">
                                         <ui:Label name="StatBlk" class="season-stat-val" text="0.0" />
-                                        <ui:Label class="season-stat-label" text="BLK" />
+                                        <ui:Label class="season-stat-label" text="TAP" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>

@@ -121,6 +121,10 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 - `all_star_appearance_seed` (`AllStarAppearanceSeed`): player_name → appearances (correlated by name to `players`).
 - `monthly_awards` (`MonthlyAwardData`): `id, season_id, month_name, award_type ("manager"|"player"|"rookie"), rank, manager_id, player_id, team_id, team_name, player_name, value`.
 
+### gm_achievements (`GmAchievementData`)
+`id`, `manager_id`, `type` (enum key string, p. ej. `first_win`, `champion`, `reg_wins_60`), `season_id` (nullable), `season_label` (nullable, p. ej. `"2025-26"`), `unlocked_at` ("yyyy-MM-dd HH:mm:ss").
+Índice compuesto **`UNIQUE(manager_id, type)`** (`IX_Achievements_Manager_Type`): un desbloqueo por logro y por manager. Escritura idempotente vía `INSERT OR IGNORE` (`DatabaseManager.UnlockAchievement`). *Histórico: el índice nació UNIQUE solo sobre `manager_id`, lo que impedía desbloquear más de un logro por partida; `DatabaseManager.CreateTables` ejecuta `DROP INDEX IF EXISTS` antes de `CreateTable` para regenerar el índice compuesto correcto.* Catálogo de 28 tipos en `AchievementCatalog.All`; la pantalla hace `BackfillCareer` silencioso al abrir para partidas ya avanzadas.
+
 ## 4. Seed data
 
 | Seed | Source | Volume | Notes |

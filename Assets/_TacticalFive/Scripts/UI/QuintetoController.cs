@@ -41,6 +41,8 @@ using System.Linq;
     const int BENCH_SLOTS = 7;
     const int INACTIVE_SLOTS = 5;
     static readonly string[] PosOrder = { "PG", "SG", "SF", "PF", "C" };
+    private Button _loadMgmtBtnOn;
+    private Button _loadMgmtBtnOff;
 
     static readonly Dictionary<string, (float x, float y)> CourtPositions = new()
     {
@@ -80,6 +82,31 @@ using System.Linq;
         _statAst = _root.Q<Label>("StatAst");
         _statStl = _root.Q<Label>("StatStl");
         _statBlk = _root.Q<Label>("StatBlk");
+
+        _loadMgmtBtnOn = _root.Q<Button>("LoadMgmtBtnOn");
+        _loadMgmtBtnOff = _root.Q<Button>("LoadMgmtBtnOff");
+        _loadMgmtBtnOn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLoadMgmt(true); });
+        _loadMgmtBtnOff?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLoadMgmt(false); });
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(_loadMgmtBtnOn);
+            CursorManager.Instance.RegisterHandCursor(_loadMgmtBtnOff);
+        }
+        UpdateLoadMgmtButtons();
+    }
+
+    void SetLoadMgmt(bool enabled)
+    {
+        PlayerPrefs.SetInt("TF_LoadMgmt_Enabled", enabled ? 1 : 0);
+        PlayerPrefs.Save();
+        UpdateLoadMgmtButtons();
+    }
+
+    void UpdateLoadMgmtButtons()
+    {
+        bool on = PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1;
+        _loadMgmtBtnOn?.EnableInClassList("load-mgmt-btn--active", on);
+        _loadMgmtBtnOff?.EnableInClassList("load-mgmt-btn--active", !on);
     }
     protected override void LoadData()
     {

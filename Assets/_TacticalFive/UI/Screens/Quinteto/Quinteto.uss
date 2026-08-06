@@ -216,6 +216,57 @@
     background-color: rgb(60, 120, 240);
 }
 
+.load-mgmt-row {
+    flex-direction: row;
+    margin-top: 20px;
+    margin-bottom: 6px;
+}
+
+.load-mgmt-btn {
+    flex-grow: 1;
+    height: 50px;
+    border-width: 1px;
+    border-radius: 4px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    color: rgb(208, 216, 232);
+    background-color: rgb(15, 17, 23);
+    border-color: rgb(42, 51, 71);
+    transition-property: background-color, border-color, color;
+    transition-duration: 0.15s;
+    white-space: nowrap;
+}
+
+.load-mgmt-btn:hover {
+    background-color: rgb(28, 33, 48);
+}
+
+.load-mgmt-btn--on {
+    margin-right: 6px;
+}
+
+.load-mgmt-btn--on.load-mgmt-btn--active {
+    background-color: rgb(25, 135, 84);
+    border-color: rgb(25, 135, 84);
+    color: rgb(15, 17, 23);
+}
+
+.load-mgmt-btn--on.load-mgmt-btn--active:hover {
+    background-color: rgb(30, 160, 100);
+}
+
+.load-mgmt-btn--off.load-mgmt-btn--active {
+    background-color: rgb(192, 57, 43);
+    border-color: rgb(192, 57, 43);
+    color: rgb(15, 17, 23);
+}
+
+.load-mgmt-btn--off.load-mgmt-btn--active:hover {
+    background-color: rgb(220, 70, 55);
+}
+
 /* ══ PLAYER CARDS ══ */
 
 .player-card {

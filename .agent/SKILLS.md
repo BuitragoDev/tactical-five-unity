@@ -27,7 +27,7 @@ A single-player **NBA management sim** ("Tactical Five", `v0.9.0 Beta`) in Unity
 Assets/_TacticalFive/
   Scripts/Core/     navigation, audio, cursor, generators, trade rules, enums
   Scripts/Data/     DatabaseManager, GameSaveManager, ~40 table models, seeders, Constants
-  Scripts/UI/       38 controllers + CustomSlider
+  Scripts/UI/       39 controllers + CustomSlider
   Scripts/(root)    GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper
   Scenes/           MainMenu.unity
   UI/Resources/     PanelSettings, theme, Header/Sidebar UXML

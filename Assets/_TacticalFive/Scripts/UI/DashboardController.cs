@@ -105,6 +105,12 @@ using System.Threading.Tasks;
     private bool _emptyLineupModalResolved;
     private bool _emptyLineupGoToQuinteto;
 
+    // Load management modal
+    private bool _loadMgmtModalResolved;
+    private bool _loadMgmtModalGoToQuinteto;
+    private List<(LineupData li, PlayerData p)> _loadMgmtTiredPlayers = new();
+    private bool _loadMgmtIsB2B;
+
     // Simulación rápida (hasta una fecha elegida en el Calendario)
     private System.DateTime? _fastSimTarget;
     private bool _fastSimAborted;
@@ -815,6 +821,33 @@ using System.Threading.Tasks;
                 DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers);
             }
 
+            // Check for tired players (load management) — skipped on fast‑sim re‑entry
+            if (!skipPreBatch && PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1)
+            {
+                _loadMgmtIsB2B = IsMyTeamBackToBack(gameDay);
+                _loadMgmtTiredPlayers = GetTiredActivePlayers();
+                if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
+                {
+                    if (fastSim)
+                    {
+                        _fastSimAborted = true;
+                        yield break;
+                    }
+                    _loadMgmtModalResolved = false;
+                    _loadMgmtModalGoToQuinteto = false;
+                    ShowLoadManagementModal(_loadMgmtTiredPlayers, _loadMgmtIsB2B);
+                    yield return new WaitUntil(() => _loadMgmtModalResolved);
+                    _loadMgmtTiredPlayers.Clear();
+                    _loadMgmtIsB2B = false;
+                    if (_loadMgmtModalGoToQuinteto)
+                    {
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                        yield break;
+                    }
+                }
+            }
+
             // Check for empty starter slots (e.g. after a trade)
             var emptySlots = GetEmptyStarterSlots();
             if (emptySlots.Count > 0)
@@ -1260,7 +1293,25 @@ using System.Threading.Tasks;
             if (_fastSimAborted)
             {
                 bool autoFixed = false;
-                if (_fastSimAbortEmptySlots.Count > 0)
+                if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
+                {
+                    _loadMgmtModalResolved = false;
+                    _loadMgmtModalGoToQuinteto = false;
+                    ShowLoadManagementModal(_loadMgmtTiredPlayers, _loadMgmtIsB2B);
+                    yield return new WaitUntil(() => _loadMgmtModalResolved);
+                    _loadMgmtTiredPlayers.Clear();
+                    _loadMgmtIsB2B = false;
+                    if (_loadMgmtModalGoToQuinteto)
+                    {
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                        yield break;
+                    }
+                    autoFixed = true;
+                }
+                else if (_fastSimAbortEmptySlots.Count > 0)
                 {
                     _emptyLineupModalResolved = false;
                     _emptyLineupGoToQuinteto = false;
@@ -2085,6 +2136,32 @@ using System.Threading.Tasks;
             .ToList();
     }
 
+    bool IsMyTeamBackToBack(int gameDay)
+    {
+        if (_myTeam == null) return false;
+        return DatabaseManager.Instance.Db.Table<GameData>()
+            .Any(g => (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id)
+                   && g.is_played == 1 && g.game_day == gameDay - 1);
+    }
+
+    List<(LineupData li, PlayerData p)> GetTiredActivePlayers()
+    {
+        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        if (lineup.Count == 0) return new List<(LineupData, PlayerData)>();
+
+        var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var playerMap = allPlayers.ToDictionary(p => p.id);
+
+        return lineup
+            .Where(l => l.slot <= 1)
+            .Select(l => (li: l, p: playerMap.GetValueOrDefault(l.player_id)))
+            .Where(x => x.p != null && x.p.injury_days == 0)
+            .Where(x => (x.li.slot == 0 && x.p.fisico < 55) || (x.li.slot == 1 && x.p.fisico < 30))
+            .OrderBy(x => x.li.slot)
+            .ThenBy(x => x.p.fisico)
+            .ToList();
+    }
+
     void ShowEmptyLineupModal(List<int> emptySlots)
     {
         _firedOverlay.Clear();
@@ -2207,6 +2284,106 @@ using System.Threading.Tasks;
             _firedOverlay.style.display = DisplayStyle.None;
         });
         btnGroup.Add(autoBtn);
+
+        box.Add(btnGroup);
+    }
+
+    void ShowLoadManagementModal(List<(LineupData li, PlayerData p)> tiredPlayers, bool isB2B)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        _firedOverlay.Add(box);
+
+        var title = new Label("GESTIÓN DE DESCANSO");
+        title.AddToClassList("fired-modal-title");
+        box.Add(title);
+
+        if (isB2B)
+        {
+            var b2bLabel = new Label("Back‑to‑back: tu equipo jugó ayer. Considera descansar algún jugador.");
+            b2bLabel.AddToClassList("fired-modal-text");
+            box.Add(b2bLabel);
+        }
+
+        if (tiredPlayers.Count == 0 && isB2B)
+        {
+            var infoLabel = new Label("Ningún jugador está por debajo del umbral de cansancio, pero el descanso proactivo puede prevenir lesiones.");
+            infoLabel.AddToClassList("fired-modal-text");
+            box.Add(infoLabel);
+        }
+
+        if (tiredPlayers.Count > 0)
+        {
+            var text = new Label("Los siguientes jugadores están cansados y tienen mayor riesgo de lesión:");
+            text.AddToClassList("fired-modal-text");
+            box.Add(text);
+
+            var list = new VisualElement();
+            list.AddToClassList("injured-modal-list");
+            foreach (var (li, p) in tiredPlayers)
+            {
+                var slotLabel = li.slot == 0 ? "TITULAR" : "BANQUILLO";
+                Color fisicoColor = p.fisico >= 60 ? new Color32(39, 174, 96, 255)
+                    : p.fisico >= 30 ? new Color32(212, 160, 23, 255)
+                    : new Color32(192, 57, 43, 255);
+                var row = new Label($"{p.first_name} {p.last_name} — {PositionCodes.GetShort(p.position)} ({slotLabel}) — Físico: {p.fisico}");
+                row.AddToClassList("injured-modal-player-row");
+                row.style.color = new StyleColor(fisicoColor);
+                list.Add(row);
+            }
+            box.Add(list);
+        }
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        if (tiredPlayers.Count > 0)
+        {
+            var restBtn = new Button();
+            restBtn.text = "DESCANSAR CANSADOS";
+            restBtn.AddToClassList("injured-modal-btn");
+            restBtn.AddToClassList("injured-modal-btn--primary");
+            restBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+                var tiredIds = new HashSet<int>(tiredPlayers.Select(x => x.p.id));
+                var injuredIds = new HashSet<int>(allPlayers
+                    .Where(p => p.injury_days > 0)
+                    .Select(p => p.id));
+                tiredIds.UnionWith(injuredIds);
+                DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers, tiredIds);
+                _loadMgmtModalResolved = true;
+                _firedOverlay.style.display = DisplayStyle.None;
+            });
+            btnGroup.Add(restBtn);
+        }
+
+        var manualBtn = new Button();
+        manualBtn.text = "IR AL QUINTETO";
+        manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _loadMgmtModalGoToQuinteto = true;
+            _loadMgmtModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(manualBtn);
+
+        var continueBtn = new Button();
+        continueBtn.text = "CONTINUAR SIN CAMBIOS";
+        continueBtn.AddToClassList("injured-modal-btn");
+        continueBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _loadMgmtModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        btnGroup.Add(continueBtn);
 
         box.Add(btnGroup);
     }

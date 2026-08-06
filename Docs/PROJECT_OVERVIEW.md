@@ -62,7 +62,7 @@ Assets/_TacticalFive/
                GameEnums, TradeHelper, DraftGenerator, PlayoffsGenerator, ScheduleGenerator
     Data/      DatabaseManager, GameSaveManager, SQLite(.Async), Constants,
                LeagueSettings, SaveSlotInfo + ~40 table model classes + seeders
-    UI/        38 screen controllers + CustomSlider
+    UI/        39 screen controllers + CustomSlider
     (root)     GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper
   Scenes/      MainMenu.unity  (the only scene)
   UI/

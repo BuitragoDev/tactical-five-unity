@@ -115,3 +115,23 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
   jóvenes (<26, OVR≥82); ofertas al usuario según estrategia (`PickTradeTarget`/`BuildOfferPackage`);
   Star FA prioriza Contend > Balanced > Rebuild y Rebuild no ficha OVR≥85 (tankea el draft).
   `DashboardController.cs`.
+
+- **[hecho]** Logros/trofeos del GM: catálogo de 28 logros (`AchievementCatalog`) en 6
+  categorías (Primeros Pasos, Temporada, Jugador Premiado, Playoffs, Carrera, Mercado),
+  persistidos por slot en `gm_achievements` con `INSERT OR IGNORE` idempotente.
+  Detección en flujo de juego: `AchievementService.EvaluateGameDay` (partido/día,
+  `DashboardController.cs:921`), `EvaluateSeasonEnd` (playoffs/campeonatos/premios),
+  `EvaluateSignStarFA`/`EvaluateSignAndTrade`/`EvaluateTradeStar` (mercado),
+  `EvaluateRecordBreak` (récords). Pantalla `Logros` (UXML/USS) con tabs por categoría,
+  grid de 6 columnas y contador `X / total`; botón + contador en `Manager`; toast de
+  desbloqueo en el Dashboard. `LogrosController.cs`, `AchievementService.cs`,
+  `AchievementCatalog.cs`, `DatabaseManager.Achievements.cs`, `GmAchievementData.cs`.
+- **[hecho]** Fix crítico en `gm_achievements`: el índice `IX_Achievements_Manager_Type`
+  era UNIQUE solo sobre `manager_id` (impedía desbloquear más de un logro por partida;
+  `first_win` jamás se persistía). Migración en `DatabaseManager.CreateTables` que hace
+  `DROP INDEX IF EXISTS` y regenera el índice compuesto `UNIQUE(manager_id, type)`.
+  `GmAchievementData.cs`, `DatabaseManager.cs`.
+- **[hecho]** Toast de logros robusto: el consumo de la cola (`DashboardController.Update`)
+  ya no depende de `IsAnyModalOpen()`; se muestra aunque quede un overlay abierto al
+  terminar el día. Cursor hand + clic en los tabs de la pantalla Logros y navegación
+  `SubmenuLogros` del sidebar (estaba sin handler en `UIScreenController.RegisterNavButtons`).

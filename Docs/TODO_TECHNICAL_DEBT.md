@@ -36,7 +36,7 @@
 
 ### B5. No UI base controller
 - **Type:** refactor.
-- **Detail [F]:** 38 controllers each duplicate the same `OnEnable` pipeline, full-screen styling, logo dictionaries, and `_manager/_myTeam/_season` loading.
+- **Detail [F]:** 39 controllers each duplicate the same `OnEnable` pipeline, full-screen styling, logo dictionaries, and `_manager/_myTeam/_season` loading.
 - **Impact:** ~60% boilerplate duplication.
 - **Fix:** `UIScreenController` base with template methods (`CacheReferences`, `LoadData`, `RegisterCallbacks`, `Refresh`).
 
