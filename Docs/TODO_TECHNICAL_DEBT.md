@@ -51,10 +51,11 @@
 - **Fix:** either remove or wire it and centralize settings there.
 
 ### B8. All DB work is synchronous on main thread; heavy batches block UI
-- **Type:** performance.
-- **Detail [F]:** The bundled `SQLite.cs` is synchronous-only (no `SQLiteAsyncConnection`). Heavy player iteration loops (injuries, fisico, AI transfers) and season-end aggregation run on main thread.
-- **Impact:** stutter during `StartNewSeason`, draft generation, and large queries.
-- **Fix:** WAL mode + second SQLiteConnection in `Task.Run` for heavy pre/post-game batches.
+- **Type:** performance — **mostly resolved.**
+- **Detail [F]:** the bundled `SQLite.cs` is synchronous-only (no `SQLiteAsyncConnection`). **Now** heavy batches run in `Task.Run` with a dedicated `SQLiteConnection` + WAL. `DatabaseManager.RunInBackground` (pre-lote, `33f4e12`) and `RunInBackgroundAsync` (`5bcca3b`, `71775bf`) set an `AsyncLocal` ambient connection so all DB helpers write on the background connection while the coroutine waits. Off main thread: daily injury/physical batch, `StartNewSeason`, AI transfers + star-FA signings (`_aiRng`, `System.Random` thread-safe).
+- **Closed (2026-08):** match-day simulation (`GameSimulator.SimulateGame`) is intentionally left on the main thread — measured fast and stable; B8 is closed with the batches already moved. Draft generation also remains on main thread; revisit only if targeted stalls appear.
+- **Impact:** stutter removed for season start and pre-game batch.
+- **Fix (rest):** none required.
 
 ### B9. No transactions around most multi-write operations
 - **Type:** data integrity.
