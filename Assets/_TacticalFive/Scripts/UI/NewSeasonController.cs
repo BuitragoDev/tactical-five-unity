@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -351,7 +352,11 @@ public class NewSeasonController : UIScreenController
     {
         _btnStartSeason.SetEnabled(false);
         _btnStartSeason.text = "INICIANDO...";
+        StartCoroutine(ExecuteStartSeasonAsync());
+    }
 
+    IEnumerator ExecuteStartSeasonAsync()
+    {
         int newTeamId = _selectedTeamId;
         int oldTeamId = _manager.team_id; // Capture before possible update
 
@@ -362,14 +367,36 @@ public class NewSeasonController : UIScreenController
             DatabaseManager.Instance.SaveManager(_manager);
         }
 
-        // Execute the full new season logic
-        DatabaseManager.Instance.StartNewSeason(
-            _season.id,
-            newTeamId,
-            _season.game_mode,
-            _manager.id,
-            oldTeamId
-        );
+        int seasonId = _season.id;
+        int managerId = _manager.id;
+        string gameMode = _season.game_mode;
+
+        // Execute the full new season logic on a background thread (own SQLite connection)
+        var task = DatabaseManager.Instance.RunInBackgroundAsync(() =>
+        {
+            DatabaseManager.Instance.StartNewSeason(
+                seasonId,
+                newTeamId,
+                gameMode,
+                managerId,
+                oldTeamId
+            );
+        });
+
+        while (!task.IsCompleted)
+            yield return null;
+
+        try
+        {
+            task.GetAwaiter().GetResult();
+        }
+        catch (System.Exception ex)
+        {
+            _btnStartSeason.SetEnabled(true);
+            _btnStartSeason.text = "EMPEZAR TEMPORADA";
+            Debug.LogError($"[NewSeason] Error al iniciar la nueva temporada: {ex.Message}\n{ex.StackTrace}");
+            yield break;
+        }
 
         // Navigate to Preseason to set up friendly games
         ScreenManager.Instance.GoTo(GameScreen.Preseason);
