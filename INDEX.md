@@ -28,7 +28,7 @@
 ### UI
 | Doc | Contents |
 |---|---|
-| [Docs/UI_TOOLKIT.md](Docs/UI_TOOLKIT.md) | PanelSettings/theme, UXML/USS, controller pattern, 38 screens, navigation tree |
+| [Docs/UI_TOOLKIT.md](Docs/UI_TOOLKIT.md) | PanelSettings/theme, UXML/USS, controller pattern, 39 screens, navigation tree |
 | [Docs/SCENES.md](Docs/SCENES.md) | The single scene, its 40 GameObjects, lifecycle |
 | [Docs/PREFABS.md](Docs/PREFABS.md) | Why there are zero prefabs; runtime instantiation patterns |
 | [Docs/SCRIPTABLE_OBJECTS.md](Docs/SCRIPTABLE_OBJECTS.md) | No game SOs; the PanelSettings + fonts that exist |

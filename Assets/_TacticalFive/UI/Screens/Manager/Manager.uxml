@@ -118,6 +118,16 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
+                        <ui:VisualElement class="manager-panel manager-awards-col manager-awards-col--achievements">
+                            <ui:VisualElement class="manager-rings-row">
+                                <ui:VisualElement name="ManagerAchievementsIcon" class="manager-rings-trophy" />
+                                <ui:VisualElement class="manager-rings-info">
+                                    <ui:Label class="manager-rings-label" text="LOGROS" />
+                                    <ui:Label name="ManagerAchievementsCount" class="manager-rings-count" text="0" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:Button name="ManagerBtnLogros" class="manager-btn-logros" text="VER LOGROS" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>

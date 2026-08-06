@@ -1151,6 +1151,11 @@ using System.Linq;
         _selectedMyPlayers.Clear();
         _selectedOtherPlayers.Clear();
 
+        // Logros del GM
+        AchievementService.EvaluateTradeStar(_manager.id, _myTeam.id, _season?.id ?? 0, otherSelected);
+        if (satApplied)
+            AchievementService.EvaluateSignAndTrade(_manager.id, _myTeam.id, _season?.id ?? 0);
+
         ShowTradeSuccessModal(myNames, otherNames, satApplied, myPicksText, otherPicksText);
     }
 
@@ -1862,6 +1867,10 @@ using System.Linq;
             _myPicks = allPicksForSeason.Where(p => p.current_team_id == _myTeam.id).ToList();
             _otherPicks = allPicksForSeason.Where(p => p.current_team_id == _selectedTeam.id).ToList();
         }
+
+        // Logros del GM
+        AchievementService.EvaluateSignAndTrade(_manager.id, _myTeam.id, _season?.id ?? 0);
+        AchievementService.EvaluateTradeStar(_manager.id, _myTeam.id, _season?.id ?? 0, otherSelected);
 
         ShowTradeSuccessModal(myNames, $"{saNames}{otherNames}", true, "", otherPicksText,
             "(FA propio firmado con Bird rights y traspasado de inmediato)");

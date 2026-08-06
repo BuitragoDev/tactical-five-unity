@@ -37,7 +37,8 @@ public enum GameScreen
     Manager,
     Trajectory,
     Premios,
-    PlayerProfile
+    PlayerProfile,
+    Logros
 }
 
 public enum GameMode

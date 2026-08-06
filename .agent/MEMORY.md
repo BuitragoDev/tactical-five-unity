@@ -19,7 +19,7 @@
 ## 3. Current development state (observed)
 
 **Functional (implemented in code):**
-- Full screen set (~38 active screens + Loading/MainMenu); navigation via `ScreenManager`.
+- Full screen set (~39 active screens + Loading/MainMenu); navigation via `ScreenManager`.
 - New game (Manager / ProManager), load game (slots), editor (template DB).
 - Preseason + schedule generation; regular season; Play-In; Playoffs; season end awards; draft; new season loop.
 - Salary cap, Bird Rights, exceptions, aprons, hard cap flag, luxury tax (monthly `annual/12`), buyout (stretch), offers (renewal/FA, 7-day maturation), AI trades, star FA signings.

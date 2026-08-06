@@ -7,7 +7,7 @@
 ## 1. `MainMenu.unity`
 
 ### Objective
-Host the entire game: boot/loading, menus, and all ~38 management screens as inert `UIDocument` GameObjects, plus the three persistent singletons.
+Host the entire game: boot/loading, menus, and all ~39 management screens as inert `UIDocument` GameObjects, plus the three persistent singletons.
 
 ### Root GameObjects (40)
 
@@ -41,6 +41,7 @@ Host the entire game: boot/loading, menus, and all ~38 management screens as ine
 | GameResultsDocument | UIDocument + FullScreenUI + GameResultsController | no |
 | RecordsDocument | UIDocument + FullScreenUI + RecordsController | no |
 | PremiosMensualesDocument | UIDocument + FullScreenUI + PremiosController | no |
+| LogrosDocument | UIDocument + FullScreenUI + LogrosController | no |
 | SponsorsDocument | UIDocument + FullScreenUI + SponsorsController | no |
 | TVDocument | UIDocument + FullScreenUI + TVController | no |
 | ArenaDocument | UIDocument + FullScreenUI + ArenaController | no |
@@ -55,7 +56,7 @@ Host the entire game: boot/loading, menus, and all ~38 management screens as ine
 | NewSeasonDocument | UIDocument + FullScreenUI + NewSeasonController | no |
 
 ### Serialization notes
-- `ScreenManager` has 39 serialized `UIDocument` fields; **`legalNoticeDocument` points to the same object as `mainMenuDocument`** (Legal Notice is a modal inside `MainMenu.uxml`).
+- `ScreenManager` has 40 serialized `UIDocument` fields; **`legalNoticeDocument` points to the same object as `mainMenuDocument`** (Legal Notice is a modal inside `MainMenu.uxml`).
 - **`settingsDocument` does not exist** → `GameScreen.Settings` unreachable.
 - Every document shares `TacticalFivePanelSettings.asset` (guid `84f0403e…`) and has its own `sourceAsset` (the screen UXML).
 

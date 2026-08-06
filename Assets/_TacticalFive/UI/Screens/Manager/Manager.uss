@@ -219,6 +219,30 @@
     margin-left: 7px;
 }
 
+.manager-awards-col--achievements {
+    margin-left: 7px;
+}
+
+.manager-btn-logros {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf?fileID=4800000&guid=0b839cefea68a5446946e734e71a15b2&type=3#Saira_Condensed-Bold");
+    font-size: 14px;
+    color: rgb(15, 17, 23);
+    background-color: rgb(255, 183, 77);
+    border-radius: 6px;
+    border-width: 0;
+    padding: 8px 12px;
+    margin-top: 12px;
+    align-self: flex-start;
+}
+
+.manager-btn-logros:hover {
+    background-color: rgb(255, 198, 102);
+}
+
+.manager-btn-logros:active {
+    background-color: rgb(224, 152, 44);
+}
+
 .manager-rings-row {
     flex-direction: row;
     align-items: center;

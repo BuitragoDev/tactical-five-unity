@@ -175,6 +175,15 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - `overall` = mean of 11 attributes (cap potential), recomputed everywhere.
 - `secondary_position` = adjacent position (PG→SG, SF→PF, PF→C, C→PF); los SG toman Base si `height_cm < 198` y Alero si `≥ 198`.
 
+## 13. GM achievements (Logros)
+
+- Persistidos por slot en `gm_achievements` (`UNIQUE(manager_id, type)`, escritura `INSERT OR IGNORE` idempotente) — ver `DATA_MODEL.md`.
+- 28 logros en 6 categorías: Primeros Pasos (`first_game`/`first_win`/`first_ring`), Temporada (30/50/60 victorias regulares, rachas de 5/10, manager del mes), Jugador Premiado (MVP/Rookie del Año/quinteto ideal), Playoffs (postemporada, finales, campeón, bicampeón, dinastías 3/5), Carrera (250/500/1000 victorias de carrera, 10/20 temporadas, trust 90), Mercado (fichaje estrella 85+, sign-and-trade, traspaso de 90+, récord histórico).
+- Desbloqueo en el flujo: `EvaluateGameDay` al simular un día (partido, victoria, rachas, victorias de temporada); `EvaluateSeasonEnd` (premios de temporada, playoffs, campeonato, bicampeón por `finals_records` de la temporada previa, dinastías, hitos de carrera); hooks de mercado en `MarketController` (`EvaluateSignStarFA`/`EvaluateSignAndTrade`/`EvaluateTradeStar`) y récords (`EvaluateRecordBreak`).
+- `BackfillCareer` silencioso al abrir la pantalla Logros desbloquea hitos de carrera de partidas ya avanzadas (sin toast).
+- Toast de desbloqueo: overlay en el Dashboard; la cola `_pendingToasts` se consume en `DashboardController.Update` independientemente de modales abiertos.
+- UI: `Logros.uxml/uss` con tabs de categoría, grid de ~6 columnas y contador `DESBLOQUEADOS X / total`; acceso desde el sidebar `LOGROS → LOGROS DEL GM` y desde el botón/counter en `Manager`.
+
 ---
 
 ## Cross-mechanic interaction diagram

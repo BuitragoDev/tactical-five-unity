@@ -134,6 +134,15 @@
 - **Files:** `TeamRecordData/HistoricalRecordData/HistoricalPlayerStatsData/SeasonRecord/AllStarRecord/AwardsRecord/FinalsRecord/FinalsPlayerStatsData/MonthlyAwardData/QuintetRecord/CoachRankingData` + `HistoricalPlayerStatsSeeder/TeamRecordSeeder/PalmaresSeeder/AllStarAppearanceSeed`.
 - **Behavior:** in-game record checks (`CheckAndUpdateRecords` on stats), season-end awards (`SaveSeasonEndRecords`, `EvaluateMonthlyAwards`), All-Star MVP record, career stats archive (`UpdateHistoricalPlayerStatsFromSeason`), coach ranking (score updated on seasons), player awards (`GetPlayerAwards`).
 
+## S17. GM achievements (Logros)
+
+- **Files:** `AchievementCatalog.cs`, `AchievementService.cs`, `GmAchievementType.cs`, `DatabaseManager.Achievements.cs`, `GmAchievementData.cs`, `LogrosController.cs`.
+- **Catalog:** 28 achievements across 6 categories (Primeros Pasos, Temporada, Jugador Premiado, Playoffs, Carrera, Mercado), defined in `AchievementCatalog.All` with `new GmAchievementDefinition(...)` (+ optional progress targets for milestones).
+- **Persistence:** `gm_achievements` table, `INSERT OR IGNORE` idempotente + `UNIQUE(manager_id, type)` composite index. `UnlockAchievement` returns true only for fresh unlocks; `_pendingToasts` queue is consumed by `DashboardController.Update` (independent of `IsAnyModalOpen`).
+- **Hooks:** `EvaluateGameDay` (primer partido, primera victoria, victorias regulares, rachas, `DashboardController.cs:921`), `EvaluateSeasonEnd` (playoffs, campeonato, bicampeón, dinastías, premios MVP/ROTY/quinteto, victorias de carrera, temporadas, trust), `EvaluateSignStarFA`/`EvaluateSignAndTrade`/`EvaluateTradeStar` (mercado), `EvaluateRecordBreak` (récords).
+- **UI:** `Logros` screen with category tabs + 6-column grid + progress counter; button + counter in `Manager`; unlock-toast overlay on the Dashboard. `SubmenuLogros` in the sidebar (`UIScreenController.RegisterNavButtons`).
+- **Migration:** `DatabaseManager.CreateTables` re-drops `IX_Achievements_Manager_Type` so existing saves regenerate the correct composite index (was previously UNIQUE on `manager_id` alone, which capped unlock to one achievement per save).
+
 ---
 
 ## Open questions

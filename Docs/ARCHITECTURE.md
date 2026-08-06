@@ -8,7 +8,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  UI LAYER — UI Toolkit (38 screen controllers + 2 injected components)  │
+│  UI LAYER — UI Toolkit (39 screen controllers + 2 injected components)  │
 │  MainMenu.unity (single scene, ~40 UIDocument GameObjects)              │
 │  ScreenManager (navigates by toggling SetActive)                        │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -53,7 +53,7 @@ Common pattern: `public static X Instance { get; private set; }` + guard in `Awa
 | Singleton | Auto-create | `DontDestroyOnLoad` | Notes |
 |---|---|---|---|
 | `AudioManager` | **Yes** — `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]` creates a GameObject `"AudioManager"` | Yes | Also loads volumes/quality from `PlayerPrefs` and plays menu music |
-| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Not explicit** — it only survives because the co-located `CursorManager` runs `DontDestroyOnLoad` on the shared GameObject (see Risk R1) | Holds 39 serialized `UIDocument` refs |
+| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Not explicit** — it only survives because the co-located `CursorManager` runs `DontDestroyOnLoad` on the shared GameObject (see Risk R1) | Holds 40 serialized `UIDocument` refs |
 | `CursorManager` | No (GameObject `CursorManager` **and** a second instance inside `ScreenManager` GameObject) | Yes | Duplicate instance is a known fragility (Risk R1) |
 | `DatabaseManager` | No (on `ScreenManager` GameObject) | Yes | Opens no DB in `Awake`; slot init is driven by UI flow |
 
