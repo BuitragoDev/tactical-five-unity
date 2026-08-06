@@ -62,8 +62,8 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 - **Analytics avanzados**: PER/WS/eFG/TS%/espaciado por encima del box score actual.
 - **Fog-of-war en valoraciones** (el ojeador da rangos, no OVR exacto) — casa con
   la pantalla de Ojeadores.
-- **Desarrollo/regresión más realista**: declive atlético por posición y mentoring
-  de veteranos.
+- ✅ **Desarrollo/regresión más realista** — declive atlético por posición y mentoring
+  de veteranos (**hecho**, commit `2281089`).
 
 ## Frente 4 — Modos y contenido
 
@@ -79,8 +79,19 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 ## Frente 5 — Técnico / rendimiento (potencia bajo el capó)
 
-- **`SQLiteAsync` + trabajo en hilo de fondo** (`TODO_TECHNICAL_DEBT.md` B8) para
-  temporadas largas sin congelar el hilo principal.
+- ✅ **Trabajo en hilo de fondo con WAL** (`TODO_TECHNICAL_DEBT.md` B8) — **en lo crítico**:
+  `SQLite.cs` es síncrono y no tiene `SQLiteAsyncConnection`, así que se usa WAL + `Task.Run`
+  con una `SQLiteConnection` dedicada por hilo y una conexión "ambient" vía
+  `AsyncLocal<SQLiteConnection>` (`DatabaseManager.RunInBackgroundAsync`/`RunInBackground`):
+  todos los helpers escriben en la conexión de fondo sin tocar la principal, mientras la
+  coroutine espera.
+  Movidos fuera del hilo principal: **pre-lote diario de lesiones+físico** (`33f4e12`),
+  **`StartNewSeason`** (`5bcca3b`), **traspasos/fichajes AI** (`71775bf`, con
+  `System.Random` thread-safe `_aiRng` para el camino AI).
+  **Decisión (2026-08):** la simulación de partidos (`GameSimulator.SimulateGame`) **no se
+  mueve** a hilo de fondo — ya es rápida y estable en el hilo principal; B8 se da por cerrado
+  con estos lotes. La generación del draft sigue en el hilo principal (revisar solo si hay
+  bloqueos puntuales).
 - **Caché de logos/estática** (`TODO_TECHNICAL_DEBT.md` B13) y `ListView` en tablas.
 - Cerrar TODO pendiente: `Settings` muerto (`B7`), `CursorManager` duplicado (`B1`),
   tests para `GameSimulator`/migraciones (ya hay 17 para `TradeHelper`).
@@ -95,7 +106,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 | **Media-Alta** | Cap sheet (info, hecho) + opciones de contrato + sim "¿y si firmo?" | 2 |
 | **Media** | ProManager diferenciado (B20) | 4 |
 | **Media** | AI de GM más lista + analytics | 3 |
-| **Media** | Async DB (B8) | 5 |
+| **Hecho** | Async DB (B8): pre-lote, StartNewSeason y AI trades en hilo de fondo (WAL + conexión ambient) | 5 |
 | **Baja-Media** | Logros, G-League, picks protegidos | 2/4 |
 
 ---
@@ -113,3 +124,7 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Trade deadline con evento real | **Hecho** — `DashboardController.ShowDeadlineDayModal` + `IsDeadlineWeek`/`IsFeb7OfYearEnd` + rush IA + badge Market (commit `649c98e`) |
 | AI de GMs más inteligente (estrategia por equipo) | **Hecho** — `TeamStrategy` + cooldowns/densidad por estrategia + fire sale rebuild + Star FA por prioridad |
 | Fog-of-war en valoraciones (ojeador da rangos) | **Hecho** — `FogOfWarHelper` + Cartera + PlayerProfile (commit `a924226`) |
+| Declive atlético por posición + mentoring de veteranos | **Hecho** — aging por posición + mentoring (commit `2281089`) |
+| Async DB (B8): pre-lote diario (lesiones + físico) en hilo de fondo | **Hecho** — `Task.Run` + WAL (commit `33f4e12`) |
+| Async DB (B8): `StartNewSeason` en hilo de fondo | **Hecho** — conexión ambient `AsyncLocal` + WAL (commit `5bcca3b`) |
+| Async DB (B8): traspasos/fichajes AI en hilo de fondo | **Hecho** — conexión ambient + `System.Random` thread-safe (`_aiRng`) (commit `71775bf`) |

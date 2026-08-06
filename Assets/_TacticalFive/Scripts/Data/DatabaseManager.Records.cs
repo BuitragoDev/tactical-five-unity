@@ -2366,7 +2366,7 @@ public partial class DatabaseManager
                 int change = baseChange;
                 if (priorityAttrs.Contains(name)) change += 1;
                 change += GetPositionDeclineModifier(p.position, name, p.age);
-                change += UnityEngine.Random.Range(-1, 2);
+                change += Rng.Next(-1, 2);
                 return Math.Max(0, Math.Min(99, current + change));
             }
 
@@ -3148,7 +3148,7 @@ public partial class DatabaseManager
         else if (teamWinPct <= 0.35f) score -= 15f;   // tanking
 
         // 6. Controlled randomness (±10)
-        score += UnityEngine.Random.Range(-10, 11);
+        score += Rng.Next(-10, 11);
 
         return score >= 50f;
     }
@@ -3203,7 +3203,7 @@ public partial class DatabaseManager
                 if (!priorityAttrsByPos.TryGetValue(young.position, out var attrs))
                     continue;
 
-                string targetAttr = attrs[UnityEngine.Random.Range(0, attrs.Length)];
+                string targetAttr = attrs[Rng.Next(0, attrs.Length)];
                 int oldVal = GetAttr(young, targetAttr);
                 int newVal = Math.Min(99, oldVal + bonus);
                 SetAttr(young, targetAttr, newVal);

@@ -129,6 +129,8 @@ using System.Threading.Tasks;
     // AI de GMs: estrategia por equipo y cooldown por equipo para traspasos
     private Dictionary<int, TeamStrategy> _teamStrategyCache = new();
     private Dictionary<int, int> _teamTradeCooldown = new();
+    // RNG seguro para el camino AI (se ejecuta en hilo de fondo; UnityEngine.Random no es thread-safe)
+    private readonly System.Random _aiRng = new System.Random();
 
     protected override void OnEnable()
     {
@@ -675,6 +677,7 @@ using System.Threading.Tasks;
                 ProcessScouts();
                 ProcessTraining();
                 ProcessRenovations();
+                db.Commit();
             }
             catch (System.Exception ex)
             {
@@ -685,17 +688,19 @@ using System.Threading.Tasks;
             }
             if (fastSim) yield return null;
 
-            // Paso 3: traspasos AI, fichajes estrella y psicólogo
+            // Paso 3: traspasos AI, fichajes estrella y psicólogo (hilo de fondo)
+            var aiTask = DatabaseManager.Instance.RunInBackgroundAsync(() =>
+                ProcessAIMarket(gameDay));
+
+            while (!aiTask.IsCompleted)
+                yield return null;
+
             try
             {
-                ProcessAITransfers(gameDay);
-                ProcessStarFreeAgentSignings(gameDay);
-                ProcessPsychologistMorale();
-                db.Commit();
+                aiTask.GetAwaiter().GetResult();
             }
             catch (System.Exception ex)
             {
-                db.Rollback();
                 _pendingRecoveredIds.Clear();
                 HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
                 yield break;
@@ -2767,13 +2772,33 @@ using System.Threading.Tasks;
         return _teamStrategyCache.TryGetValue(teamId, out var s) ? s : TeamStrategy.Balanced;
     }
 
+    void ProcessAIMarket(int gameDay)
+    {
+        // Se ejecuta en hilo de fondo; _db (ambient) apunta a la conexión de fondo.
+        // El main thread espera la finalización, así que leer/mutar estado de instancia es seguro.
+        var db = DatabaseManager.Instance.Db;
+        db.BeginTransaction();
+        try
+        {
+            ProcessAITransfers(gameDay);
+            ProcessStarFreeAgentSignings(gameDay);
+            ProcessPsychologistMorale();
+            db.Commit();
+        }
+        catch
+        {
+            db.Rollback();
+            throw;
+        }
+    }
+
     void ProcessAITransfers(int gameDay)
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
 
         // Only run every ~10 game days (or 3-5 during deadline week)
         int lastDay = _season.last_ai_trade_day;
-        int cooldownDays = IsDeadlineWeek() ? Random.Range(3, 6) : 10;
+        int cooldownDays = IsDeadlineWeek() ? _aiRng.Next(3, 6) : 10;
         Debug.Log($"[AITrades] ProcessAITransfers called. gameDay={gameDay} lastDay={lastDay} diff={gameDay - lastDay}");
         if (gameDay - lastDay < cooldownDays) return;
 
@@ -2799,7 +2824,7 @@ using System.Threading.Tasks;
         int teamsAttempted = 0, teamsTraded = 0, teamsFAd = 0;
         const int maxTrades = 3;
 
-        foreach (var team in allTeams.OrderBy(_ => Random.Range(0, 1000)))
+        foreach (var team in allTeams.OrderBy(_ => _aiRng.Next(0, 1000)))
         {
             if (team.id == _myTeam.id) continue;
 
@@ -2814,7 +2839,7 @@ using System.Threading.Tasks;
                 TeamStrategy.Rebuild => 0.40f,
                 _ => 0.25f
             };
-            if (Random.Range(0f, 1f) > moveChance) continue;
+            if ((float)_aiRng.NextDouble() > moveChance) continue;
 
             // Cooldown por equipo según estrategia
             int teamCooldown = strategy switch
@@ -2857,7 +2882,7 @@ using System.Threading.Tasks;
             {
                 teamsTraded++;
             }
-            else if (Random.Range(0f, 1f) < 0.3f)
+            else if ((float)_aiRng.NextDouble() < 0.3f)
             {
                 Debug.Log($"[AITrades] {team.name} trade failed, trying FA at {weakestPos}");
                 TrySignFreeAgent(team, roster, weakestPos, freeAgentsAll, seasonId, gameDay);
@@ -2881,7 +2906,7 @@ using System.Threading.Tasks;
 
         var buyers = DatabaseManager.Instance.GetAllTeams()
             .Where(t => t.id != _myTeam.id && t.id != seller.id)
-            .OrderBy(_ => Random.Range(0, 1000))
+            .OrderBy(_ => _aiRng.Next(0, 1000))
             .ToList();
 
         foreach (var vet in vets)
@@ -2902,7 +2927,7 @@ using System.Threading.Tasks;
 
                 var candidate = young[0];
                 var youngPack = new List<PlayerData> { candidate };
-                if (young.Count >= 2 && Random.Range(0f, 1f) < 0.4f)
+                if (young.Count >= 2 && (float)_aiRng.NextDouble() < 0.4f)
                     youngPack.Add(young[1]);
 
                 var buyerPicks = DatabaseManager.Instance.GetDraftPicksForTeam(buyer.id);
@@ -2912,7 +2937,7 @@ using System.Threading.Tasks;
                     .ThenBy(p => p.pick_number)
                     .FirstOrDefault();
                 var picks = new List<DraftPickData>();
-                if (futurePick != null && Random.Range(0f, 1f) < 0.5f)
+                if (futurePick != null && (float)_aiRng.NextDouble() < 0.5f)
                     picks.Add(futurePick);
 
                 if (TryExecuteTrade(seller, sellerRoster, buyer, buyerRoster,
@@ -3088,7 +3113,7 @@ using System.Threading.Tasks;
     {
         var allTeams = DatabaseManager.Instance.GetAllTeams()
             .Where(t => t.id != _myTeam.id && t.id != teamA.id)
-            .OrderBy(_ => Random.Range(0, 1000))
+            .OrderBy(_ => _aiRng.Next(0, 1000))
             .ToList();
 
         foreach (var teamB in allTeams)
@@ -3295,7 +3320,7 @@ using System.Threading.Tasks;
         foreach (var player in candidates)
         {
             int chance = (int)Mathf.Clamp(team.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
-            if (Random.Range(0, 100) >= chance) continue;
+            if (_aiRng.Next(0, 100) >= chance) continue;
 
             player.team_id = team.id;
             player.last_team_id = team.id;
@@ -3351,10 +3376,10 @@ using System.Threading.Tasks;
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var targetedIds = new HashSet<int>();
 
-        foreach (var aiTeam in allTeams.OrderBy(_ => Random.Range(0, 1000)))
+        foreach (var aiTeam in allTeams.OrderBy(_ => _aiRng.Next(0, 1000)))
         {
             if (aiTeam.id == _myTeam.id) continue;
-            if (Random.Range(0f, 1f) > 0.50f) continue;
+            if ((float)_aiRng.NextDouble() > 0.50f) continue;
 
             var aiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
             if (aiRoster.Count < 11) continue;
@@ -3366,7 +3391,7 @@ using System.Threading.Tasks;
             if (userHealthy.Count == 0) continue;
 
             // S&T de IA: proponer traspasar un FA reciente del usuario (Bird rights)
-            if (Random.Range(0f, 1f) > 0.55f)
+            if ((float)_aiRng.NextDouble() > 0.55f)
             {
                 var userFAs = DatabaseManager.Instance.GetFreeAgents()
                     .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id) && p.GetCalculatedAverage() > 75)
@@ -3393,7 +3418,7 @@ using System.Threading.Tasks;
                                 .ThenBy(p => p.pick_number)
                                 .FirstOrDefault();
                             var saPicks = new List<int>();
-                            if (futurePick != null && Random.Range(0f, 1f) > 0.4f)
+                            if (futurePick != null && (float)_aiRng.NextDouble() > 0.4f)
                                 saPicks.Add(futurePick.id);
                             DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
                             {
@@ -3462,7 +3487,7 @@ using System.Threading.Tasks;
     PlayerData PickTradeTarget(List<PlayerData> userHealthy, List<PlayerData> aiRoster,
                                 HashSet<int> excludedIds, TeamStrategy aiStrategy = TeamStrategy.Balanced)
     {
-        var roll = Random.Range(0f, 1f);
+        var roll = (float)_aiRng.NextDouble();
 
         // Los contenders persiguen a tus mejores jugadores (estrellas)
         if (aiStrategy == TeamStrategy.Contend && roll < 0.75f)
@@ -3472,7 +3497,7 @@ using System.Threading.Tasks;
                 .OrderByDescending(p => p.overall)
                 .ToList();
             if (starCandidates.Count > 0)
-                return starCandidates[Random.Range(0, Mathf.Min(2, starCandidates.Count))];
+                return starCandidates[_aiRng.Next(0, Mathf.Min(2, starCandidates.Count))];
         }
 
         // Los rebuild buscan activos jóvenes (los explotan o los roban baratos)
@@ -3483,7 +3508,7 @@ using System.Threading.Tasks;
                 .OrderByDescending(p => p.overall)
                 .ToList();
             if (youngCandidates.Count > 0)
-                return youngCandidates[Random.Range(0, Mathf.Min(2, youngCandidates.Count))];
+                return youngCandidates[_aiRng.Next(0, Mathf.Min(2, youngCandidates.Count))];
         }
 
         if (roll < 0.35f)
@@ -3496,7 +3521,7 @@ using System.Threading.Tasks;
                     .OrderByDescending(p => p.overall)
                     .ToList();
                 if (candidates.Count > 0)
-                    return candidates[Random.Range(0, Mathf.Min(3, candidates.Count))];
+                    return candidates[_aiRng.Next(0, Mathf.Min(3, candidates.Count))];
             }
         }
 
@@ -3507,7 +3532,7 @@ using System.Threading.Tasks;
                 .OrderByDescending(p => p.overall)
                 .ToList();
             if (candidates.Count > 0)
-                return candidates[Random.Range(0, Mathf.Min(3, candidates.Count))];
+                return candidates[_aiRng.Next(0, Mathf.Min(3, candidates.Count))];
         }
 
         if (roll < 0.80f)
@@ -3517,14 +3542,14 @@ using System.Threading.Tasks;
                 .OrderByDescending(p => p.salary)
                 .ToList();
             if (candidates.Count > 0)
-                return candidates[Random.Range(0, Mathf.Min(3, candidates.Count))];
+                return candidates[_aiRng.Next(0, Mathf.Min(3, candidates.Count))];
         }
 
         var randomCandidates = userHealthy
             .Where(p => !excludedIds.Contains(p.id))
             .ToList();
         if (randomCandidates.Count > 0)
-            return randomCandidates[Random.Range(0, randomCandidates.Count)];
+            return randomCandidates[_aiRng.Next(0, randomCandidates.Count)];
 
         return null;
     }

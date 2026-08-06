@@ -5,13 +5,28 @@ using SQLite;
 using System;
 using System.Linq;
 using System.Globalization;
+using System.Threading;
 using System.Threading.Tasks;
 
 public partial class DatabaseManager : MonoBehaviour
 {
     public static DatabaseManager Instance { get; private set; }
 
-    private SQLiteConnection _db;
+    private SQLiteConnection _dbField;
+    private static readonly AsyncLocal<SQLiteConnection> _ambientDb = new();
+
+    /// <summary>
+    /// Conexión activa. En el hilo principal devuelve _dbField; mientras un
+    /// RunInBackgroundAsync() corre en un hilo de fondo, devuelve la conexión
+    /// propia de ese hilo para que todos los helpers (que usan `_db`) escriban
+    /// en ella sin tocar la conexión principal.
+    /// </summary>
+    private SQLiteConnection _db
+    {
+        get => _ambientDb.Value ?? _dbField;
+        set => _dbField = value;
+    }
+
     public SQLiteConnection Db => _db;
     private int _activeSaveSlot = 0;
     private bool _isTemplateSession = false;
@@ -92,6 +107,40 @@ public partial class DatabaseManager : MonoBehaviour
         });
     }
 
+    /// <summary>
+    /// Ejecuta `work` en un hilo de fondo usando una conexión SQLite propia.
+    /// Mientras `work` corre, cualquier helper que acceda a `_db` (o Db) resuelve
+    /// a esa conexión de fondo, de modo que operaciones pesadas como StartNewSeason
+    /// escriben en un hilo secundario sin bloquear la UI.
+    /// </summary>
+    public Task RunInBackgroundAsync(Action work)
+    {
+        string path = DbPath;
+        return Task.Run(() =>
+        {
+            using var conn = new SQLiteConnection(path);
+            conn.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
+            var prev = _ambientDb.Value;
+            _ambientDb.Value = conn;
+            try { work(); }
+            finally { _ambientDb.Value = prev; }
+        });
+    }
+
+    public Task<T> RunInBackgroundAsync<T>(Func<T> work)
+    {
+        string path = DbPath;
+        return Task.Run(() =>
+        {
+            using var conn = new SQLiteConnection(path);
+            conn.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
+            var prev = _ambientDb.Value;
+            _ambientDb.Value = conn;
+            try { return work(); }
+            finally { _ambientDb.Value = prev; }
+        });
+    }
+
     public void EnsureTemplateDb()
     {
         if (File.Exists(TemplateDbPath)) return;
@@ -107,6 +156,9 @@ public partial class DatabaseManager : MonoBehaviour
     }
 
     private static readonly object _templateLock = new();
+
+    [ThreadStatic] private static System.Random _threadRng;
+    private static System.Random Rng => _threadRng ??= new System.Random();
 
     public void BuildTemplateDatabaseInBackground(string dbPath)
     {
