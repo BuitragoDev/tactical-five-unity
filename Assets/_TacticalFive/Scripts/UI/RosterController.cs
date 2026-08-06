@@ -463,6 +463,8 @@ using System.Linq;
         row.AddToClassList("player-row");
         if (player.injury_days > 0)
             row.AddToClassList("player-row--injured");
+        if (player.on_trade_block == 1)
+            row.AddToClassList("player-row--on-block");
 
         var nameLbl = new Label();
         nameLbl.AddToClassList("player-name");
@@ -547,6 +549,26 @@ using System.Linq;
         row.Add(metaLbl);
         row.Add(salaryLbl);
         row.Add(contractLbl);
+
+        // Trade block label
+        var tradeBlockLbl = new Label();
+        tradeBlockLbl.AddToClassList("trade-block-label");
+        if (player.on_trade_block == 1)
+            tradeBlockLbl.AddToClassList("trade-block-label--active");
+        tradeBlockLbl.text = player.on_trade_block == 1 ? "TRANSFERIBLE" : "BLOQUEADO";
+        tradeBlockLbl.RegisterCallback<ClickEvent>(evt =>
+        {
+            evt.StopPropagation();
+            PlayClick();
+            player.on_trade_block = player.on_trade_block == 1 ? 0 : 1;
+            DatabaseManager.Instance.UpdatePlayer(player);
+            row.EnableInClassList("player-row--on-block", player.on_trade_block == 1);
+            tradeBlockLbl.text = player.on_trade_block == 1 ? "TRANSFERIBLE" : "BLOQUEADO";
+            tradeBlockLbl.EnableInClassList("trade-block-label--active", player.on_trade_block == 1);
+        });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(tradeBlockLbl);
+        row.Add(tradeBlockLbl);
 
         // Columna lesión (imagen o hueco vacío para mantener alineación)
         var injIcon = new VisualElement();

@@ -604,6 +604,21 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
         }
 
+        // Add on_trade_block to players if missing
+        try
+        {
+            var playerColsBlock = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!playerColsBlock.Any(c => c.name == "on_trade_block"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN on_trade_block INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added on_trade_block to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for on_trade_block: {ex.Message}");
+        }
+
         // Create player_season_stats table if missing (for career history across seasons)
         try
         {

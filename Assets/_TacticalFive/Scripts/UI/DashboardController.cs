@@ -3763,6 +3763,23 @@ using System.Threading.Tasks;
     {
         var roll = (float)_aiRng.NextDouble();
 
+        // Trade block: si el usuario ha puesto jugadores en el mercado, la IA
+        // los prioriza con un 60 % de probabilidad (siempre que encajen en la
+        // estrategia del equipo AI).
+        var onBlock = userHealthy
+            .Where(p => p.on_trade_block == 1 && !excludedIds.Contains(p.id))
+            .ToList();
+        if (onBlock.Count > 0 && _aiRng.NextDouble() < 0.60f)
+        {
+            var validBlock = onBlock
+                .Where(p =>
+                    aiStrategy == TeamStrategy.Contend ? p.overall >= 75 :
+                    aiStrategy == TeamStrategy.Rebuild ? (p.age <= 28 || p.overall >= 70) : true)
+                .ToList();
+            if (validBlock.Count > 0)
+                return validBlock[_aiRng.Next(validBlock.Count)];
+        }
+
         // Los contenders persiguen a tus mejores jugadores (estrellas)
         if (aiStrategy == TeamStrategy.Contend && roll < 0.75f)
         {
