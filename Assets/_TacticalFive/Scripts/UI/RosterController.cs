@@ -899,7 +899,7 @@ using System.Linq;
     public string bindingReason;
     public string exceptionName;
     }
-    public static MaxOfferBreakdown GetMaxOfferBreakdown(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true)
+    public static MaxOfferBreakdown GetMaxOfferBreakdown(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true, bool proManagerOnly = false)
     {
         var result = new MaxOfferBreakdown();
 
@@ -958,8 +958,16 @@ using System.Linq;
         long rawMax;
         if (!isFromSameTeam && totalPayroll > settings.salary_cap)
         {
-            // FA externo y equipo sobre el cap: solo excepciones
-            if (totalPayroll <= firstApron)
+            // FA externo y equipo sobre el cap: solo excepciones.
+            // ProManager: sin Non-Taxpayer MLE → la excepción pasa a ser la Taxpayer MLE
+            // aunque el equipo esté solo sobre el cap (≤1er apron).
+            if (proManagerOnly)
+            {
+                result.exceptionMax = tMle;
+                result.exceptionName = "Mid-Level Exception (Taxpayer)";
+                result.capSpaceMax = 0;
+            }
+            else if (totalPayroll <= firstApron)
             {
                 result.exceptionMax = ntMle;
                 result.exceptionName = "Mid-Level Exception (No Taxpayer)";
@@ -997,9 +1005,9 @@ using System.Linq;
 
         return result;
     }
-    public static long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true)
+    public static long CalculateMaxOfferSalary(PlayerData player, LeagueSettingsData settings, long totalPayroll, bool isFromSameTeam = true, bool proManagerOnly = false)
     {
-        return GetMaxOfferBreakdown(player, settings, totalPayroll, isFromSameTeam).finalMax;
+        return GetMaxOfferBreakdown(player, settings, totalPayroll, isFromSameTeam, proManagerOnly).finalMax;
     }
 
     string GetBirdRightsTier(PlayerData player)

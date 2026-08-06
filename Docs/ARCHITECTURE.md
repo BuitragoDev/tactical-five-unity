@@ -82,7 +82,9 @@ Active GameObjects with scripts (order not guaranteed, by hierarchy):
 LoadingController.OnEnable → tip text, click/key/timer(10 s) → GoTo(MainMenu)
 
 [New game]
-MainMenuController.OnManagerClicked/OnProManagerClicked
+MainMenuController.OnManagerClicked                  (Manager, direct)
+MainMenuController.OnProManagerClicked → OpenProModal  (ProManager: restrictions modal)
+MainMenuController.ConfirmProManager                  (ProManager: CONTINUAR → runs the flow below)
     ├─ GameSaveManager.FindNextAvailableSlot()
     ├─ GameSaveManager.CleanupOrphanDb(slot)
     ├─ DatabaseManager.InitSaveSlot(slot)   ← opens/creates save_N.db, creates tables,
@@ -163,6 +165,6 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 
 ## 8. Open questions
 
-- Why `GameMode.ProManager` exists if it has no code-level difference? ([H] intended for a stricter mode)
+- ~~Why `GameMode.ProManager` exists if it has no code-level difference~~ — **resolved:** ProManager restricts team selection to the worst teams (`GetWorstTeams(5)`), limits new-season offers to bottom-10, and shows a restrictions modal on the main menu. All harder rules implemented: objective-based season-end firing (`ShowObjectiveFiredModal`), earlier budget firing (`CheckBudgetWarning` threshold 2), and **no NT-MLE** on FA offers (Taxpayer MLE only). Objective/rank logic in `ObjectiveHelper`.
 - Whether the "Editor" template flow is a developer tool or an intended user feature.
 - Whether `SQLiteAsync.cs` was legacy from a previous "async loading" design. (See `TODO_TECHNICAL_DEBT.md`.)

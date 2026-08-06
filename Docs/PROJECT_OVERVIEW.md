@@ -22,7 +22,7 @@ Defined in `GameEnums.cs` (`GameMode`): `None`, `Manager`, `ProManager`, `Editor
 | Mode | Entry point | Meaning |
 |---|---|---|
 | `Manager` | `MainMenuController.OnManagerClicked` | Standard career; selects a team, plays seasons |
-| `ProManager` | `MainMenuController.OnProManagerClicked` | Same flow; **no gameplay difference currently observed in code** — `SelectTeamController` uses `CurrentMode` only to label the screen (hypothesis: intended for a harder/more restricted mode, not yet differentiated) |
+| `ProManager` | `MainMenuController.OnProManagerClicked` | Harder mode; shows a restrictions modal (`OpenProModal`) before starting. All harder rules implemented: objective-based season-end firing, earlier budget firing (threshold 2), no NT-MLE on FA (Taxpayer MLE only). Code-level differences: worst-team selection, bottom-10 new-season offers, annual team change |
 | `Editor` | `MainMenuController.OnEditorClicked` | Opens `GameScreen.Editor` → `EditorController`, which seeds the `template.db` used to bootstrap new save slots |
 | `None` | — | Default |
 
@@ -104,9 +104,9 @@ Assets/UI Toolkit/       Unity default runtime theme
 
 - Very mature feature set (30+ screens, full season cycle, records/awards, finances, personnel, morale, injuries, draft, playoffs).
 - Branding/labels: product "TacticalFive", company "BuitragoStudio", version `v0.9.0 Beta`.
-- ~500 commits; last commits on `main`: play-by-play en vivo (`40d1221`, merge de `crear-mejoras2`).
-- `PLAN.md` (a plan for fixing free-agent offers/trades) is **partially implemented**: draft picks model, hard cap flag, luxury tax and buyout record types already exist; validation happens at maturation time (not at send) and sign-and-trade/buyout UI are not observed. Details in `MEMORY.md` and `TODO_TECHNICAL_DEBT.md`.
-- Known structural debt: duplicate `CursorManager`, orphaned `SettingsController`, unused `SQLiteAsync.cs`, stub `GetTopPlayersByStat`. See `TODO_TECHNICAL_DEBT.md`.
+- ~500 commits; last merge to `main`: play-by-play + S&T + options + trade deadline + AI GM strategy (`41a5d45`, merge de `crear-mejoras2`).
+- `PLAN.md` (a plan for fixing free-agent offers/trades) is **largely implemented**: draft picks model, hard cap flag, luxury tax, buyout/stretch, sign-and-trade (own FA with Bird rights), options (TO/PO) with re-sign, and trade deadline event all exist. See `MEMORY.md` and `TODO_TECHNICAL_DEBT.md`.
+- Known structural debt: duplicate `CursorManager`, orphaned `SettingsController`, unused `SQLiteAsync.cs`. See `TODO_TECHNICAL_DEBT.md`.
 
 ---
 

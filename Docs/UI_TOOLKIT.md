@@ -79,7 +79,7 @@ Notable specifics:
 | Screen | UXML folder | Controller | Purpose |
 |---|---|---|---|
 | Loading | `Screens/Loading` | `LoadingController` | Boot/tip screen → MainMenu |
-| MainMenu | `Screens/MainMenu` | `MainMenuController` | Manager / Pro Manager / Load / Editor / Exit; modals (legal, bug report, config) |
+| MainMenu | `Screens/MainMenu` | `MainMenuController` | Manager / Pro Manager / Load / Editor / Exit; modals (legal, bug report, config, ProManager restrictions) |
 | LegalNotice | inside MainMenu | (MainMenuController) | Modal; shares MainMenu UIDocument |
 | SelectTeam | `Screens/SelectTeam` | `SelectTeamController` | Pick franchise (mode-aware) |
 | Preseason | `Screens/Preseason` | `PreseasonController` | Preseason sim + schedule generation |

@@ -1302,7 +1302,8 @@ using System.Linq;
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long totalPayroll = myPlayers.Sum(p => p.salary);
         bool isOwnRecentFA = DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id);
-        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll, isOwnRecentFA);
+        bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
+        _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll, isOwnRecentFA, proManagerOnly);
         UpdateFAMaxInfo();
 
         // Mostrar formulario, ocultar pending
@@ -1432,6 +1433,7 @@ using System.Linq;
 
         long totalPayroll = _myPlayers.Sum(p => p.salary);
         long newTotal = totalPayroll + _faSalary;
+        bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
 
         if (totalPayroll > secondApron)
         {
@@ -1445,11 +1447,19 @@ using System.Linq;
         }
         else if (totalPayroll > leagueSettings.salary_cap)
         {
-            string hardCapNote = _myTeam.first_apron_hard_capped == 1
-                ? " · HARD CAP ACTIVO"
-                : "";
-            _faWarningText.text = $"Sobre el cap: máximo Mid-Level Exception (No Taxpayer) (${ntMle:N0}){hardCapNote}. Usar Mid-Level Exception (No Taxpayer) activará el hard cap del 1er apron.";
-            _faWarningText.style.display = DisplayStyle.Flex;
+            if (proManagerOnly)
+            {
+                _faWarningText.text = $"MODO PRO: Sin Mid-Level Exception (No Taxpayer). Sobre el cap solo puedes usar la excepción Taxpayer (${tMle:N0}).";
+                _faWarningText.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                string hardCapNote = _myTeam.first_apron_hard_capped == 1
+                    ? " · HARD CAP ACTIVO"
+                    : "";
+                _faWarningText.text = $"Sobre el cap: máximo Mid-Level Exception (No Taxpayer) (${ntMle:N0}){hardCapNote}. Usar Mid-Level Exception (No Taxpayer) activará el hard cap del 1er apron.";
+                _faWarningText.style.display = DisplayStyle.Flex;
+            }
         }
         else if (newTotal > leagueSettings.salary_cap)
         {
@@ -1492,7 +1502,8 @@ using System.Linq;
 
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long totalPayroll = roster.Sum(p => p.salary);
-        var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll, false);
+        bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
+        var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll, false, proManagerOnly);
 
         string info = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
         if (!string.IsNullOrEmpty(breakdown.exceptionName))

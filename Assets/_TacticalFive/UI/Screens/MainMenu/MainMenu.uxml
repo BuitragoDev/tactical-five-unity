@@ -187,6 +187,23 @@
                 <ui:Button name="ConfigBtnCerrar" text="CERRAR" class="modal-close"/>
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="ProModalOverlay" class="modal-overlay" style="display: none;">
+            <ui:VisualElement name="ProModalBox" class="modal-box">
+                <ui:Label text="MODO PRO — PROMANAGER" class="modal-title"/>
+                <ui:VisualElement class="modal-body">
+                    <ui:Label text="Has seleccionado la carrera ProManager. Este modo añade restricciones que te pondrán a prueba como director general:" class="modal-paragraph"/>
+                    <ui:Label text="Sin Mid-Level Exception (No-Taxpayer): sobre el cap, los fichajes de agentes libres se limitan a la excepción para pagadores de impuestos." class="modal-paragraph modal-paragraph--highlight"/>
+                    <ui:Label text="Cese por presupuesto más exigente: la directiva te despide antes ante malos resultados económicos." class="modal-paragraph"/>
+                    <ui:Label text="Objetivo de temporada: no cumplirlo puede costarte el puesto." class="modal-paragraph"/>
+                    <ui:Label text="Cambio de equipo: cada temporada podrás cambiar de franquicia entre los peores equipos de la liga." class="modal-paragraph"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnProCancel" text="CERRAR" class="modal-btn modal-btn--secondary"/>
+                    <ui:VisualElement class="modal-spacer"/>
+                    <ui:Button name="BtnProConfirm" text="CONTINUAR" class="modal-btn modal-btn--primary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
         <ui:VisualElement name="BugReportOverlay" class="modal-overlay" style="display: none;">
             <ui:VisualElement name="BugReportBox" class="modal-box">
                 <ui:Label text="INFORME DE ERRORES" class="modal-title"/>

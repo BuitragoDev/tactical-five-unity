@@ -37,6 +37,9 @@ using System.Linq;
     public float avgMin;
     public float avgVal;
     public float avgTov;
+    public float efgPct;
+    public float tsPct;
+    public float per;
 }
     public class StatsController : UIScreenController
 {
@@ -71,8 +74,8 @@ using System.Linq;
         _modeBtns.Clear();
 
         string[] tabNames = { "TabPuntos", "TabRebotes", "TabAsistencias", "TabRobos", "TabTapones",
-                              "TabPctTC", "TabPct3P", "TabPctTL", "TabVal", "TabPerdidas",
-                              "TabMinutos", "TabDD", "TabTD" };
+                              "TabPctTC", "TabPct3P", "TabPctTL", "TabEFG", "TabTS", "TabPER",
+                              "TabVal", "TabPerdidas", "TabMinutos", "TabDD", "TabTD" };
         foreach (var name in tabNames)
         {
             var btn = _root.Q<Button>(name);
@@ -97,8 +100,8 @@ using System.Linq;
     {
         base.RegisterCallbacks();
         string[] statKeys = { "puntos", "rebotes", "asistencias", "robos", "tapones",
-                              "pcttc", "pct3p", "pcttl", "val", "perdidas",
-                              "minutos", "dd", "td" };
+                              "pcttc", "pct3p", "pcttl", "efgpct", "tspct", "per",
+                              "val", "perdidas", "minutos", "dd", "td" };
         for (int i = 0; i < _statTabs.Count && i < statKeys.Length; i++)
         {
             int idx = i;
@@ -289,9 +292,12 @@ using System.Linq;
             "asistencias" => "ASISTENCIAS",
             "robos" => "ROBOS",
             "tapones" => "TAPONES",
-            "pcttc" => "% TC",
-            "pct3p" => "% 3P",
-            "pcttl" => "% TL",
+            "pcttc" => "PORCENTAJE TIROS DE CAMPO",
+            "pct3p" => "PORCENTAJE TRIPLES",
+            "pcttl" => "PORCENTAJE TIROS LIBRES",
+            "efgpct" => "PORCENTAJE EFECTIVO DE CAMPO",
+            "tspct" => "PORCENTAJE REAL DE TIRO",
+            "per" => "EFICIENCIA POR MINUTO",
             "val" => "VAL",
             "perdidas" => "PÉRDIDAS",
             "minutos" => "MINUTOS",
@@ -342,6 +348,11 @@ using System.Linq;
             s.fgPct = s.totalFga > 0 ? (float)s.totalFgm / s.totalFga * 100f : 0;
             s.fg3Pct = s.totalFg3a > 0 ? (float)s.totalFg3m / s.totalFg3a * 100f : 0;
             s.ftPct = s.totalFta > 0 ? (float)s.totalFtm / s.totalFta * 100f : 0;
+            s.efgPct = AdvancedStatsHelper.CalcEFG(s.totalFgm, s.totalFga, s.totalFg3m);
+            s.tsPct = AdvancedStatsHelper.CalcTS(s.totalPts, s.totalFga, s.totalFta);
+            var eff = AdvancedStatsHelper.CalcEff(s.totalPts, s.totalReb, s.totalAst, s.totalStl, s.totalBlk,
+                                                  s.totalFgm, s.totalFga, s.totalFtm, s.totalFta, s.totalTov);
+            s.per = AdvancedStatsHelper.CalcPER(eff, s.totalMin);
         }
 
         // Sort
@@ -521,6 +532,9 @@ using System.Linq;
             "pcttc" => rows.Where(x => x.totalFga >= 10).OrderByDescending(x => x.fgPct).ToList(),
             "pct3p" => rows.Where(x => x.totalFg3a >= 5).OrderByDescending(x => x.fg3Pct).ToList(),
             "pcttl" => rows.Where(x => x.totalFta >= 5).OrderByDescending(x => x.ftPct).ToList(),
+            "efgpct" => rows.Where(x => x.totalFga >= 10).OrderByDescending(x => x.efgPct).ToList(),
+            "tspct" => rows.Where(x => x.totalFga >= 10 && x.totalFta >= 5).OrderByDescending(x => x.tsPct).ToList(),
+            "per" => rows.OrderByDescending(x => x.per).ToList(),
             "val" => useAverages
                 ? rows.OrderByDescending(x => x.avgVal).ToList()
                 : rows.OrderByDescending(x => x.totalVal).ToList(),
@@ -616,6 +630,28 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell("CONV", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
                 break;
+            case "efgpct":
+                _tableHeader.Add(MakeHeaderCell("EFG%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell("TC%", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "tspct":
+                _tableHeader.Add(MakeHeaderCell("TS%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
+            case "per":
+                _tableHeader.Add(MakeHeaderCell("PER", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
+                break;
             case "val":
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", true));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
@@ -624,7 +660,7 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell("TC%", "col-stat", false));
                 break;
             case "perdidas":
-                _tableHeader.Add(MakeHeaderCell($"PER{suffix}", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell($"TO{suffix}", "col-stat", true));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
@@ -810,6 +846,28 @@ using System.Linq;
                     row.Add(MakeCell($"{x.totalFtm}/{x.totalFta}", false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
+                case "efgpct":
+                    row.Add(MakeCell(x.efgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
+                    break;
+                case "tspct":
+                    row.Add(MakeCell(x.tsPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
+                    break;
+                case "per":
+                    row.Add(MakeCell(x.per.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
+                    break;
                 case "val":
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), true, i == 0));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
@@ -845,6 +903,17 @@ using System.Linq;
                     row.Add(MakeCell(x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
+            }
+
+            if (x.playerId > 0)
+            {
+                row.RegisterCallback<ClickEvent>(_ =>
+                {
+                    PlayClick();
+                    ScreenManager.SelectedPlayerId = x.playerId;
+                    ScreenManager.Instance.GoTo(GameScreen.PlayerProfile);
+                });
+                CursorManager.Instance?.RegisterHandCursor(row);
             }
 
             _statsBody.Add(row);

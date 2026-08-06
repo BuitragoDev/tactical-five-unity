@@ -27,6 +27,11 @@ public class MainMenuController : UIScreenController
     private Button _btnExitYes;
     private Button _btnExitNo;
 
+    private VisualElement _proModalOverlay;
+    private VisualElement _proModalBox;
+    private Button _btnProCancel;
+    private Button _btnProConfirm;
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -62,6 +67,12 @@ public class MainMenuController : UIScreenController
         _exitModalBox     = _root.Q<VisualElement>("ExitModalBox");
         _btnExitYes       = _root.Q<Button>("BtnExitYes");
         _btnExitNo        = _root.Q<Button>("BtnExitNo");
+
+        // Modal ProManager
+        _proModalOverlay  = _root.Q<VisualElement>("ProModalOverlay");
+        _proModalBox      = _root.Q<VisualElement>("ProModalBox");
+        _btnProCancel     = _root.Q<Button>("BtnProCancel");
+        _btnProConfirm    = _root.Q<Button>("BtnProConfirm");
     }
 
     protected override void RegisterCallbacks()
@@ -101,6 +112,15 @@ public class MainMenuController : UIScreenController
                 { PlayClick(); CloseExitModal(); }
         });
 
+        // Callbacks modal ProManager
+        _btnProConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmProManager(); });
+        _btnProCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseProModal(); });
+        _proModalOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _proModalOverlay)
+                { PlayClick(); CloseProModal(); }
+        });
+
         // Hover CTA tarjetas
         RegisterCardHover("BtnManager",    "CtaManager");
         RegisterCardHover("BtnProManager", "CtaPro");
@@ -132,6 +152,8 @@ public class MainMenuController : UIScreenController
                 CursorManager.Instance.RegisterHandCursor(_configBtnQualityMedium);
                 CursorManager.Instance.RegisterHandCursor(_configBtnQualityHigh);
                 CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
+                CursorManager.Instance.RegisterHandCursor(_btnProCancel);
+                CursorManager.Instance.RegisterHandCursor(_btnProConfirm);
             }
         }).StartingIn(100);
 
@@ -334,10 +356,27 @@ public class MainMenuController : UIScreenController
 
     void OnProManagerClicked()
     {
+        OpenProModal();
+    }
+
+    void ConfirmProManager()
+    {
         int slot = GameSaveManager.FindNextAvailableSlot();
         GameSaveManager.CleanupOrphanDb(slot);
         DatabaseManager.Instance.InitSaveSlot(slot);
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.ProManager);
+    }
+
+    void OpenProModal()
+    {
+        _proModalOverlay.style.display = DisplayStyle.Flex;
+        _proModalBox.style.display     = DisplayStyle.Flex;
+    }
+
+    void CloseProModal()
+    {
+        _proModalOverlay.style.display = DisplayStyle.None;
+        _proModalBox.style.display     = DisplayStyle.None;
     }
 
     void OnLoadGameClicked()

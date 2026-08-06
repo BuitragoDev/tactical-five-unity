@@ -18,7 +18,7 @@
             <!-- STATS CONTENT -->
             <ui:VisualElement class="stats-content">
 
-                <!-- Stat type tabs (13) -->
+                <!-- Stat type tabs (16) -->
                 <ui:VisualElement name="StatTabs" class="stats-tabs">
                     <ui:Button name="TabPuntos" class="stats-tab stats-tab--active" text="PUNTOS" />
                     <ui:Button name="TabRebotes" class="stats-tab" text="REBOTES" />
@@ -28,6 +28,9 @@
                     <ui:Button name="TabPctTC" class="stats-tab" text="% TC" />
                     <ui:Button name="TabPct3P" class="stats-tab" text="% 3P" />
                     <ui:Button name="TabPctTL" class="stats-tab" text="% TL" />
+                    <ui:Button name="TabEFG" class="stats-tab" text="% EFG" />
+                    <ui:Button name="TabTS" class="stats-tab" text="TS%" />
+                    <ui:Button name="TabPER" class="stats-tab" text="PER" />
                     <ui:Button name="TabVal" class="stats-tab" text="VAL" />
                     <ui:Button name="TabPerdidas" class="stats-tab" text="PÉRDIDAS" />
                     <ui:Button name="TabMinutos" class="stats-tab" text="MINUTOS" />

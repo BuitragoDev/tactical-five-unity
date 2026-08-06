@@ -27,8 +27,6 @@ Fuentes consultadas: `Docs/PROJECT_OVERVIEW.md`, `Docs/GAMEPLAY.md`,
 El gap más evidente era: **el partido es invisible**. Se simula y solo se ve el resultado.
 
 - ✅ **Play-by-play en vivo / crónica en texto** — **hecho** (`crear-mejoras2`, commit `9c69e09`, mergeado a `main`): toggle "Vista de Partido" (Directa/Play-by-play), overlay inmersivo en MatchDay con marcador acumulado, reloj, barra de progreso, boxscore en vivo ordenado por VAL, totales recalculados, velocidades x1/x3/x5/x10 y botón SALTAR/IR AL RESUMEN. Ver `GAMEPLAY.md` §2.
-- **Mejores vitrinas**: box score detallado por cuarto, "jugador del partido",
-  gráfica de rachas de la clasificación.
 - **Logros/trofeos del GM** + palmarés visual enriquecido.
 - **Más variedad de audio** (solo 7 WAVs, `SYSTEMS.md §S15`).
 
@@ -60,8 +58,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 ## Frente 3 — Simulación & AI (realismo)
 
-- **AI de GMs más inteligente**: reconstrucción por edades, priorizar assets, no
-  firmar solo lo que falta al roster.
+- **AI de GMs más inteligente** — **hecho** (rama `crear-mejoras2`): enum `TeamStrategy` (Rebuild/Balanced/Contend) en `DashboardController`; cooldowns y densidad por estrategia (Contend 0.45/6d, Rebuild 0.40/8d, Balanced 0.25/15d; 3-5 en deadline), fire sale de rebuild (`TrySellVeteran`), contender busca upgrades OVR≤90 con pick futuro protegiendo jóvenes, ofertas al usuario según estrategia (`PickTradeTarget`/`BuildOfferPackage`) y Star FA que prioriza contender sobre rebuild (que tankea y no ficha OVR≥85). Ver `SYSTEMS.md` §S.
 - **Analytics avanzados**: PER/WS/eFG/TS%/espaciado por encima del box score actual.
 - **Fog-of-war en valoraciones** (el ojeador da rangos, no OVR exacto) — casa con
   la pantalla de Ojeadores.
@@ -70,8 +67,13 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 
 ## Frente 4 — Modos y contenido
 
-- **ProManager real** (`TODO_TECHNICAL_DEBT.md` B20): dificultad aumentada (sin
-  NT-MLE, hard cap más estricto, cese más fácil).
+- **ProManager real** (`TODO_TECHNICAL_DEBT.md` B20): dificultad aumentada. El modal de
+  restricciones del menú principal anuncia las reglas (`MainMenuController.OpenProModal`).
+  Hecho: **cese por objetivo no cumplido** al fin de temporada (solo ProManager,
+  `ShowObjectiveFiredModal`), **cese por presupuesto más fácil** (umbral 2 vs 3 en
+  `CheckBudgetWarning`), **sin NT-MLE** (FA sobre el cap limitado a Taxpayer MLE vía
+  `GetMaxOfferBreakdown(proManagerOnly:true)` y sin activación del hard cap por NT-MLE);
+  lógica centralizada en `ObjectiveHelper`. **B20 cerrado.**
 - **Expansión / liga personalizada** vía el editor de `template.db`.
 - **Historial rico**: anillos por jugador, retiro de dorsales, hall of fame.
 
@@ -109,3 +111,5 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Cap sheet (Finances → «CAP SHEET») | **Hecho** — `FinancesController.BuildCapSheet` + pestaña `PanelCap` (info read-only) |
 | Sign-and-trade de FA propio (NBA clásico) | **Hecho** — `MarketController.ProcessSATrade` + `TradeHelper` sign salaries + IA |
 | Trade deadline con evento real | **Hecho** — `DashboardController.ShowDeadlineDayModal` + `IsDeadlineWeek`/`IsFeb7OfYearEnd` + rush IA + badge Market (commit `649c98e`) |
+| AI de GMs más inteligente (estrategia por equipo) | **Hecho** — `TeamStrategy` + cooldowns/densidad por estrategia + fire sale rebuild + Star FA por prioridad |
+| Fog-of-war en valoraciones (ojeador da rangos) | **Hecho** — `FogOfWarHelper` + Cartera + PlayerProfile (commit `a924226`) |

@@ -40,11 +40,9 @@
 - **Impact:** ~60% boilerplate duplication.
 - **Fix:** `UIScreenController` base with template methods (`CacheReferences`, `LoadData`, `RegisterCallbacks`, `Refresh`).
 
-### B6. `GetTopPlayersByStat` is a stub
-- **Type:** incomplete feature.
-- **Detail [F]:** `DatabaseManager.GetTopPlayersByStat` returns the manager's roster sorted by overall, with a comment "Para ahora devolvemos jugadores del equipo del manager".
-- **Impact:** any screen relying on league stat leaders may show wrong data.
-- **Fix:** implement with real `player_game_stats` aggregation.
+### B6. `GetTopPlayersByStat` was a stub
+- **Type:** ~~incomplete feature~~ **done.**
+- **Detail [F]:** `DatabaseManager.GetTopPlayersByStat` previously returned the manager's roster sorted by overall. **Fixed** — now aggregates `player_game_stats` in SQL (regular-season games only), see `DatabaseManager.Players.cs:64`. `StatsController.BuildSeasonStats` also moved to a single SQL aggregate (`GetSeasonPlayerStatsAggregates`).
 
 ### B7. `GameScreen.Settings` dead + `SettingsController` orphaned
 - **Type:** dead code / incomplete wiring.
@@ -52,11 +50,11 @@
 - **Impact:** dead code; confusion about where settings live (they live in the per-screen config modal).
 - **Fix:** either remove or wire it and centralize settings there.
 
-### B8. `SQLiteAsync.cs` unused; all DB work is synchronous on main thread
+### B8. All DB work is synchronous on main thread; heavy batches block UI
 - **Type:** performance.
-- **Detail [F]:** `SQLiteAsync.cs` is compiled but never referenced; `SQLiteConnection` ops block the UI thread.
+- **Detail [F]:** The bundled `SQLite.cs` is synchronous-only (no `SQLiteAsyncConnection`). Heavy player iteration loops (injuries, fisico, AI transfers) and season-end aggregation run on main thread.
 - **Impact:** stutter during `StartNewSeason`, draft generation, and large queries.
-- **Fix:** evaluate using async or a background connection for heavy ops (trade-offs with transactions).
+- **Fix:** WAL mode + second SQLiteConnection in `Task.Run` for heavy pre/post-game batches.
 
 ### B9. No transactions around most multi-write operations
 - **Type:** data integrity.
@@ -115,10 +113,10 @@
 - **Impact:** no central registry; magic strings.
 - **Fix:** `GameSettings` static wrapper.
 
-### B20. `GameMode.ProManager` has no behavioral difference
-- **Detail [D]:** only labels differ.
-- **Impact:** unclear feature intent.
-- **Fix:** implement differences or remove.
+### B20. `GameMode.ProManager` has limited behavioral difference
+- **Detail [F]:** ProManager selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`), limits new-season offers to current team + 3 random from bottom-10, and shows a restrictions modal (`MainMenuController.OpenProModal`). All announced harder rules are now **implemented**: objective-based season-end firing (`ShowObjectiveFiredModal`), easier budget firing (`CheckBudgetWarning` threshold 2), **no NT-MLE** on FA offers (`GetMaxOfferBreakdown`/`CalculateMaxOfferSalary` `proManagerOnly` forces Taxpayer MLE; `MarketController.UpdateFAMaxInfo`/`UpdateFAWarning`/`SendFAOffer`; `DashboardController.ProcessMaturedOffers`) and no NT-MLE hard-cap activation. Objective/rank logic centralized in `ObjectiveHelper`. **B20 closed / done.**
+- **Impact:** resolved.
+- **Fix:** none remaining. Verify balance of the Taxpayer-MLE offer cap in a full season.
 
 ---
 
@@ -139,7 +137,7 @@
 
 1. Fix **B1** (remove duplicate CursorManager; explicit `DontDestroyOnLoad`).
 2. Introduce UI base controller (**B5**) and shared config modal (**B4**) — highest maintenance win.
-3. Implement **B6** and wire/remove **B7**.
+3. Wire/remove **B7** (Settings dead code).
 4. Add schema versioning (**B11**) and transaction wrappers (**B9**) before any new major feature.
 5. Decide on **B20** (ProManager) and **B27** (PLAN.md sync).
 6. Add tests (**B25**) for the core static helpers.

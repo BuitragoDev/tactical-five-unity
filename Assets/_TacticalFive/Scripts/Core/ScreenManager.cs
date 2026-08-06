@@ -42,6 +42,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument historialDocument;
     [SerializeField] private UIDocument managerDocument;
     [SerializeField] private UIDocument trajectoryDocument;
+    [SerializeField] private UIDocument playerProfileDocument;
     [SerializeField] private UIDocument premiosDocument;
 
     public static int SelectedPlayerId { get; set; }
@@ -195,6 +196,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Premios:
                 ShowOnly(premiosDocument);
                 break;
+            case GameScreen.PlayerProfile:
+                ShowOnly(playerProfileDocument);
+                break;
         }
     }
 
@@ -238,6 +242,7 @@ public class ScreenManager : MonoBehaviour
         if (managerDocument != null) managerDocument.gameObject.SetActive(false);
         if (trajectoryDocument != null) trajectoryDocument.gameObject.SetActive(false);
         if (premiosDocument != null) premiosDocument.gameObject.SetActive(false);
+        if (playerProfileDocument != null) playerProfileDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }
