@@ -43,6 +43,8 @@ public class PlayerData
     public int morale { get; set; } = 50;
     public int fisico { get; set; } = 99;
     public int on_trade_block { get; set; }
+    public int rings { get; set; }
+    public int finals_mvps { get; set; }
     public PlayerRole role { get; set; } = PlayerRole.UltimoRecurso;
     public string photo { get; set; }
 

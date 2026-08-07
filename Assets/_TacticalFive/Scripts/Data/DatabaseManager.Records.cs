@@ -1284,6 +1284,85 @@ public partial class DatabaseManager
         }
     }
 
+    /// <summary>
+    /// Decide si un jugador merece entrar en el Salón de la Fama según sus
+    /// estadísticas históricas, anillos y Finales MVP (tanto pre-partida como simuladas).
+    /// </summary>
+    public bool WouldInduct(PlayerData p)
+    {
+        try
+        {
+            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            int pts = hist?.total_points ?? 0;
+            int reb = hist?.total_rebounds ?? 0;
+            int ast = hist?.total_assists ?? 0;
+            int fmvps = p.finals_mvps
+                + _db.Table<FinalsRecord>()
+                    .Count(f => f.mvp == $"{p.first_name} {p.last_name}");
+            return HallOfFameHelper.ShouldInduct(p.rings, fmvps, pts, reb, ast);
+        }
+        catch { return false; }
+    }
+
+    /// <summary>
+    /// Jugadores con 40+ años que se retirarán esta temporada y merecen entrar
+    /// al Salón de la Fama (según WouldInduct).
+    /// </summary>
+    public List<PlayerData> GetRetiringHallOfFameMembers()
+    {
+        var candidates = _db.Table<PlayerData>()
+            .Where(p => p.age >= 40)
+            .ToList();
+        return candidates
+            .Where(p => WouldInduct(p))
+            .OrderByDescending(p => p.age)
+            .ToList();
+    }
+
+    /// <summary>
+    /// Captura a un jugador retirado que cumpla los umbrales y lo inserta en el Salón de la Fama.
+    /// Se llama antes de borrar al jugador de la tabla players.
+    /// </summary>
+    void TryInductIntoHallOfFame(PlayerData p, string seasonLabel)
+    {
+        try
+        {
+            if (!WouldInduct(p))
+                return;
+
+            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            int pts = hist?.total_points ?? 0;
+            int reb = hist?.total_rebounds ?? 0;
+            int ast = hist?.total_assists ?? 0;
+            int games = hist?.games ?? 0;
+            int fmvps = p.finals_mvps
+                + _db.Table<FinalsRecord>()
+                    .Count(f => f.mvp == $"{p.first_name} {p.last_name}");
+
+            var team = GetTeamById(p.team_id);
+            _db.Insert(new HallOfFameData
+            {
+                player_id = p.id,
+                first_name = p.first_name,
+                last_name = p.last_name,
+                position = p.position,
+                team_abbreviation = team?.abbreviation ?? "",
+                rings = p.rings,
+                career_points = pts,
+                career_rebounds = reb,
+                career_assists = ast,
+                career_games = games,
+                finals_mvps = fmvps,
+                induction_season = seasonLabel
+            });
+            Debug.Log($"[DB] {p.first_name} {p.last_name} inducido al Salón de la Fama ({seasonLabel}, {p.rings} anillos).");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Error induciendo al HOF a {p.first_name} {p.last_name}: {ex.Message}");
+        }
+    }
+
     public void SaveSeasonEndRecords(int seasonId, int managerId)
     {
         var season = GetActiveSeason(managerId);
@@ -1384,6 +1463,16 @@ public partial class DatabaseManager
                 mvp = finalsMvp
             });
             Debug.Log($"[DB] FinalsRecord saved: {champTeam?.name} {champWins}-{finalistWins} over {finalistTeam?.name}");
+
+            // Ring para todos los jugadores del equipo campeón (los que están en su plantilla al ganar).
+            var champRosters = _db.Table<PlayerData>().Where(p => p.team_id == champId).ToList();
+            foreach (var cp in champRosters)
+            {
+                cp.rings = cp.rings + 1;
+                _db.Update(cp);
+            }
+            if (champRosters.Count > 0)
+                Debug.Log($"[DB] Rings +{champRosters.Count} para la plantilla campeona {champTeam?.name}");
         }
 
         // ── Season awards & All-NBA quintets (regular season) ──
@@ -2277,9 +2366,15 @@ public partial class DatabaseManager
 
         var allPlayers = _db.Table<PlayerData>().ToList();
 
-        // 1. Retire players 40+
+        // 1. Retire players 40+ (capturando a los que entran al Salón de la Fama)
+        string retireSeasonLabel = "";
+        if (oldSeason != null)
+            retireSeasonLabel = oldSeason.year_end.ToString();
         foreach (var p in allPlayers.Where(p => p.age >= 40))
+        {
+            TryInductIntoHallOfFame(p, retireSeasonLabel);
             _db.Delete(p);
+        }
 
         // 2. Age + attribute changes (progression/regression by career phase)
         var remaining = _db.Table<PlayerData>().ToList();

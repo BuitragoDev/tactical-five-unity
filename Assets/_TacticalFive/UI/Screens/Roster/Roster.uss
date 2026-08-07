@@ -353,6 +353,18 @@
 .detail-link-trajectory:hover {
     color: rgb(82, 135, 241);
 }
+
+.detail-links-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.detail-link-separator {
+    color: rgb(42, 95, 201);
+    font-size: 14px;
+    margin: 0 6px;
+}
 .detail-ovr-block {
     flex-direction: column;
     align-items: center;

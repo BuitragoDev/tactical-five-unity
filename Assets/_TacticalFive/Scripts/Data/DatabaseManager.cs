@@ -224,6 +224,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.InsertAll(template.Table<AllStarRecord>().ToList());
         _db.InsertAll(template.Table<AllStarAppearanceSeed>().ToList());
         _db.InsertAll(template.Table<TradeData>().ToList());
+        _db.InsertAll(template.Table<HallOfFameData>().ToList());
         template.Close();
         Debug.Log("[DB] Static data cloned from template");
     }
@@ -274,6 +275,7 @@ public partial class DatabaseManager : MonoBehaviour
         // compuesto UNIQUE(manager_id, type) definido en GmAchievementData.
         try { _db.Execute("DROP INDEX IF EXISTS \"IX_Achievements_Manager_Type\""); } catch { }
         _db.CreateTable<GmAchievementData>();
+        _db.CreateTable<HallOfFameData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -619,6 +621,36 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for on_trade_block: {ex.Message}");
         }
 
+        // Add rings to players if missing (championships won by the player)
+        try
+        {
+            var playerColsRings = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!playerColsRings.Any(c => c.name == "rings"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN rings INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added rings to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for rings: {ex.Message}");
+        }
+
+        // Add finals_mvps to players if missing (Bill Russell Finals MVP awards won)
+        try
+        {
+            var playerColsFmVp = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!playerColsFmVp.Any(c => c.name == "finals_mvps"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN finals_mvps INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added finals_mvps to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for finals_mvps: {ex.Message}");
+        }
+
         // Create player_season_stats table if missing (for career history across seasons)
         try
         {
@@ -780,6 +812,27 @@ public partial class DatabaseManager : MonoBehaviour
 
         if (_db.Table<CoachRankingData>().Count() == 0)
             SeedCoachRankings();
+
+        if (_db.Table<HallOfFameData>().Count() == 0)
+            SeedHallOfFame();
+
+        SeedActivePlayerCareers();
+    }
+
+    public void SeedHallOfFame()
+    {
+        foreach (var h in HallOfFameSeeder.Data)
+        {
+            h.player_id = 0;
+            _db.Insert(h);
+        }
+        Debug.Log($"[DB] {HallOfFameSeeder.Data.Count} leyendas insertadas en el Salón de la Fama.");
+    }
+
+    public List<HallOfFameData> GetHoFMembers()
+    {
+        if (!EnsureDb()) return new List<HallOfFameData>();
+        return _db.Table<HallOfFameData>().ToList();
     }
 
     public bool EnsureDb()

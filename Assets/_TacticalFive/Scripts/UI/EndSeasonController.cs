@@ -16,13 +16,12 @@ public class EndSeasonController : UIScreenController
     // Content
     private Label _seasonTag;
     private ScrollView _retiringList;
-    private ScrollView _expiringList;
+    private ScrollView _fameList;
     private Button _btnDraft;
     private Button _btnNextSeason;
-    private Button _btnRenewAll;
     private Button _btnLottery;
     private VisualElement _lotteryOverlay;
-    private VisualElement _expiringPanel;
+    private VisualElement _famePanel;
     private ScrollView _draftResults;
 
     private Dictionary<string, Sprite> _logo32;
@@ -41,7 +40,6 @@ public class EndSeasonController : UIScreenController
         {
             CursorManager.Instance.RegisterHandCursor(_btnDraft);
             CursorManager.Instance.RegisterHandCursor(_btnNextSeason);
-            CursorManager.Instance.RegisterHandCursor(_btnRenewAll);
             CursorManager.Instance.RegisterHandCursor(_btnLottery);
         }
     }
@@ -55,12 +53,11 @@ public class EndSeasonController : UIScreenController
         _headerDate = _root.Q<Label>("HeaderDate");
         _seasonTag = _root.Q<Label>("SeasonTag");
         _retiringList = _root.Q<ScrollView>("RetiringList");
-        _expiringList = _root.Q<ScrollView>("ExpiringList");
+        _fameList = _root.Q<ScrollView>("FameList");
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
-        _btnRenewAll = _root.Q<Button>("BtnRenewAll");
         _btnLottery = _root.Q<Button>("BtnLottery");
-        _expiringPanel = _root.Q<VisualElement>("ExpiringPanel");
+        _famePanel = _root.Q<VisualElement>("FamePanel");
         _draftResults = _root.Q<ScrollView>("DraftResults");
     }
 
@@ -87,16 +84,13 @@ public class EndSeasonController : UIScreenController
             _btnDraft.text = "GENERANDO...";
             var drafted = DraftGenerator.GenerateDraft(_season, _manager.id);
             _btnDraft.text = "DRAFT COMPLETADO";
-            _btnRenewAll.SetEnabled(false);
-            if (_expiringPanel != null) _expiringPanel.style.display = DisplayStyle.None;
+            if (_famePanel != null) _famePanel.style.display = DisplayStyle.None;
             ShowDraftResults(drafted);
             ShowDraftLotteryModal(drafted);
             _btnNextSeason.SetEnabled(true);
         });
 
         _btnNextSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.NewSeason); });
-
-        _btnRenewAll?.RegisterCallback<ClickEvent>(_ => { PlayClick(); RenewAll(); });
 
         _btnLottery?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowLotteryModal(); });
     }
@@ -134,7 +128,7 @@ public class EndSeasonController : UIScreenController
         _seasonTag.text = seasonLabel;
 
         LoadRetiringPlayers();
-        LoadExpiringPlayers();
+        LoadFamePlayers();
 
         _btnDraft.text = $"EMPEZAR DRAFT {_season.year_end}";
     }
@@ -153,33 +147,32 @@ public class EndSeasonController : UIScreenController
         }
         foreach (var p in players)
         {
-            _retiringList.Add(BuildPlayerRow(p, false));
+            _retiringList.Add(BuildPlayerRow(p));
         }
     }
 
-    void LoadExpiringPlayers()
+    void LoadFamePlayers()
     {
-        _expiringList.Clear();
-        var players = DatabaseManager.Instance.GetExpiringPlayers();
-        if (players.Count == 0)
+        _fameList.Clear();
+        var inductees = DatabaseManager.Instance.GetRetiringHallOfFameMembers();
+        if (inductees.Count == 0)
         {
             var empty = new Label();
             empty.AddToClassList("es-empty");
-            empty.text = "No hay contratos expirando";
-            _expiringList.Add(empty);
+            empty.text = "Ningún jugador entra al Salón de la Fama esta temporada";
+            _fameList.Add(empty);
             return;
         }
-        foreach (var p in players)
+        foreach (var p in inductees)
         {
-            _expiringList.Add(BuildPlayerRow(p, true));
+            _fameList.Add(BuildFameRow(p));
         }
     }
 
-    VisualElement BuildPlayerRow(PlayerData p, bool isExpiring)
+    VisualElement BuildPlayerRow(PlayerData p)
     {
         var row = new VisualElement();
         row.AddToClassList("es-player-row");
-        if (isExpiring) row.AddToClassList("es-player-expiry-row");
 
         if (p.team_id != 0)
         {
@@ -201,33 +194,46 @@ public class EndSeasonController : UIScreenController
         posLbl.text = PositionCodes.GetShort(p.position);
         row.Add(posLbl);
 
-        if (isExpiring)
-        {
-            var salaryLbl = new Label();
-            salaryLbl.AddToClassList("es-player-salary");
-            salaryLbl.text = $"${p.salary:N0}";
-            row.Add(salaryLbl);
+        var ageLbl = new Label();
+        ageLbl.AddToClassList("es-player-age");
+        ageLbl.text = $"{p.age} años";
+        row.Add(ageLbl);
 
-            var renewBtn = new Button();
-            renewBtn.AddToClassList("btn-renew");
-            renewBtn.text = "Renovar";
-            int capturedId = p.id;
-            renewBtn.RegisterCallback<ClickEvent>(_ =>
-            {
-                PlayClick();
-                RenewPlayer(capturedId);
-                row.RemoveFromHierarchy();
-            });
-            row.Add(renewBtn);
-            CursorManager.Instance?.RegisterHandCursor(renewBtn);
-        }
-        else
+        return row;
+    }
+
+    VisualElement BuildFameRow(PlayerData p)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("es-player-row");
+        row.AddToClassList("es-player-fame-row");
+
+        if (p.team_id != 0)
         {
-            var ageLbl = new Label();
-            ageLbl.AddToClassList("es-player-age");
-            ageLbl.text = $"{p.age} años";
-            row.Add(ageLbl);
+            var logo = new VisualElement();
+            logo.AddToClassList("es-mini-logo");
+            var team = DatabaseManager.Instance.GetTeamById(p.team_id);
+            if (team != null && _logo32.TryGetValue(team.logo, out var sprite))
+                logo.style.backgroundImage = new StyleBackground(sprite);
+            row.Add(logo);
         }
+
+        var nameLbl = new Label();
+        nameLbl.AddToClassList("es-player-name");
+        nameLbl.text = $"{p.first_name} {p.last_name}";
+        row.Add(nameLbl);
+
+        var credentialsLbl = new Label();
+        credentialsLbl.AddToClassList("es-player-credentials");
+        credentialsLbl.text = p.rings > 0 || p.finals_mvps > 0
+            ? $"{p.rings} anillo(s)  ·  {p.finals_mvps} Finales MVP"
+            : "";
+        row.Add(credentialsLbl);
+
+        var fameLbl = new Label();
+        fameLbl.AddToClassList("es-player-fame");
+        fameLbl.text = "Salón de la Fama";
+        row.Add(fameLbl);
 
         return row;
     }
@@ -254,37 +260,6 @@ public class EndSeasonController : UIScreenController
                 DatabaseManager.Instance.UpdatePlayer(player);
             }
         }
-    }
-
-    void RenewPlayer(int playerId)
-    {
-        var player = DatabaseManager.Instance.GetPlayerById(playerId);
-        if (player == null) return;
-
-        int years = CalcRenewYears(player.age);
-        long newSalary = CalcRenewSalary(player.salary, player.age);
-
-        player.contract_years = years;
-        player.guaranteed_years = years;
-        player.salary = newSalary;
-        DatabaseManager.Instance.UpdatePlayer(player);
-    }
-
-    void RenewAll()
-    {
-        var players = DatabaseManager.Instance.GetExpiringPlayers();
-        foreach (var p in players)
-        {
-            if (p.age >= 40) continue;
-            int years = CalcRenewYears(p.age);
-            long newSalary = CalcRenewSalary(p.salary, p.age);
-            p.contract_years = years;
-            p.guaranteed_years = years;
-            p.salary = newSalary;
-            DatabaseManager.Instance.UpdatePlayer(p);
-        }
-        LoadExpiringPlayers();
-        _btnRenewAll.SetEnabled(false);
     }
 
     int CalcRenewYears(int age)

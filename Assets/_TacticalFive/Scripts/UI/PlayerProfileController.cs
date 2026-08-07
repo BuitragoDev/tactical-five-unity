@@ -14,6 +14,10 @@ using System.Linq;
     private Label _profileRoleName;
     private Label _profileMeta;
     private Label _profileOvr;
+    private VisualElement _profileRingsIcon;
+    private Label _profileRingsCount;
+    private VisualElement _profileFinalsIcon;
+    private Label _profileFinalsCount;
 
     private VisualElement _profileSeasonSection;
     private VisualElement _profileSeasonBody;
@@ -37,6 +41,10 @@ using System.Linq;
         _profileRoleName = _root.Q<Label>("ProfileRoleName");
         _profileMeta = _root.Q<Label>("ProfileMeta");
         _profileOvr = _root.Q<Label>("ProfileOvr");
+        _profileRingsIcon = _root.Q<VisualElement>("ProfileRingsIcon");
+        _profileRingsCount = _root.Q<Label>("ProfileRingsCount");
+        _profileFinalsIcon = _root.Q<VisualElement>("ProfileFinalsIcon");
+        _profileFinalsCount = _root.Q<Label>("ProfileFinalsCount");
         _profileSeasonSection = _root.Q<VisualElement>("ProfileSeasonSection");
         _profileSeasonBody = _root.Q<VisualElement>("ProfileSeasonBody");
         _profileAttrsSection = _root.Q<VisualElement>("ProfileAttrsSection");
@@ -100,7 +108,8 @@ using System.Linq;
             _profileRoleIcon.style.display = DisplayStyle.None;
         }
 
-        _profileMeta.text = $"{_player.age} años · {_player.height_cm / 100f:F2}m · {_player.weight_kg}kg · {CountryCodes.GetName(_player.nationality)}";
+        _profileMeta.text = $"{_player.age} años · {_player.height_cm / 100f:F2}m · {_player.weight_kg}kg · {CountryCodes.GetName(_player.nationality)}"
+            + (_player.rings > 0 ? $"  ·  {_player.rings} anillo{(_player.rings > 1 ? "s" : "")}" : "");
 
         if (canView)
         {
@@ -110,6 +119,16 @@ using System.Linq;
         {
             _profileOvr.text = FogOfWarHelper.GetRatingBand(_player.GetCalculatedAverage(), _player.id);
         }
+
+        var ringsSprite = Resources.Load<Sprite>("Icons/trofeo64px");
+        if (ringsSprite != null)
+            _profileRingsIcon.style.backgroundImage = new StyleBackground(ringsSprite);
+        _profileRingsCount.text = _player.rings.ToString();
+
+        var finalsSprite = Resources.Load<Sprite>("Icons/vs_icon");
+        if (finalsSprite != null)
+            _profileFinalsIcon.style.backgroundImage = new StyleBackground(finalsSprite);
+        _profileFinalsCount.text = _player.finals_mvps.ToString();
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _profilePhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;

@@ -40,13 +40,10 @@
                             <ui:ScrollView name="RetiringList" class="es-player-scroll" mode="Vertical"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="ExpiringPanel" class="es-panel">
-                        <ui:VisualElement class="es-panel-title-row">
-                            <ui:Label text="Contratos Expirando (1 año)" class="es-panel-title"/>
-                            <ui:Button name="BtnRenewAll" class="btn-renew-all" text="RENOVAR TODOS"/>
-                        </ui:VisualElement>
+                    <ui:VisualElement name="FamePanel" class="es-panel">
+                        <ui:Label text="Salón de la Fama — Nuevas inducciones" class="es-panel-title"/>
                         <ui:VisualElement class="es-scroll-wrapper">
-                            <ui:ScrollView name="ExpiringList" class="es-player-scroll" mode="Vertical"/>
+                            <ui:ScrollView name="FameList" class="es-player-scroll" mode="Vertical"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

@@ -33,6 +33,7 @@ using System.Linq;
     private Label _detailPlayerPos;
     private Label _detailPlayerMeta;
     private Label _detailLinkTrajectory;
+        private Label _detailLinkProfile;
     private Label _detailOvr;
     private Label _detailHealth;
     private VisualElement _detailAttrs;
@@ -169,6 +170,7 @@ using System.Linq;
         _detailPlayerPos = _root.Q<Label>("DetailPlayerPos");
         _detailPlayerMeta = _root.Q<Label>("DetailPlayerMeta");
         _detailLinkTrajectory = _root.Q<Label>("DetailLinkTrajectory");
+        _detailLinkProfile = _root.Q<Label>("DetailLinkProfile");
         _detailOvr = _root.Q<Label>("DetailOvr");
         _detailHealth = _root.Q<Label>("DetailHealth");
         _detailAttrs = _root.Q<VisualElement>("DetailAttrs");
@@ -319,6 +321,16 @@ using System.Linq;
         });
         if (CursorManager.Instance != null && _detailLinkTrajectory != null)
             CursorManager.Instance.RegisterHandCursor(_detailLinkTrajectory);
+
+        _detailLinkProfile?.RegisterCallback<ClickEvent>(_ =>
+        {
+            if (_selectedPlayer == null) return;
+            PlayClick();
+            ScreenManager.SelectedPlayerId = _selectedPlayer.id;
+            ScreenManager.Instance.GoTo(GameScreen.PlayerProfile);
+        });
+        if (CursorManager.Instance != null && _detailLinkProfile != null)
+            CursorManager.Instance.RegisterHandCursor(_detailLinkProfile);
     }
     protected override void Refresh()
     {

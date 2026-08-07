@@ -26,6 +26,10 @@ using System.Linq;
     private Label _trajectoryMeta;
     private Label _trajectoryNationality;
     private Label _trajectoryOvr;
+    private VisualElement _trajectoryRingsIcon;
+    private Label _trajectoryRingsCount;
+    private VisualElement _trajectoryFinalsIcon;
+    private Label _trajectoryFinalsCount;
 
     // Logros
     private VisualElement _trajectoryAwards;
@@ -48,6 +52,10 @@ using System.Linq;
         _trajectoryMeta = _root.Q<Label>("TrajectoryMeta");
         _trajectoryNationality = _root.Q<Label>("TrajectoryNationality");
         _trajectoryOvr = _root.Q<Label>("TrajectoryOvr");
+        _trajectoryRingsIcon = _root.Q<VisualElement>("TrajectoryRingsIcon");
+        _trajectoryRingsCount = _root.Q<Label>("TrajectoryRingsCount");
+        _trajectoryFinalsIcon = _root.Q<VisualElement>("TrajectoryFinalsIcon");
+        _trajectoryFinalsCount = _root.Q<Label>("TrajectoryFinalsCount");
         _trajectoryAwards = _root.Q<VisualElement>("TrajectoryAwards");
         _trajectoryAwardsBody = _root.Q<VisualElement>("TrajectoryAwardsBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
@@ -122,6 +130,16 @@ using System.Linq;
             _trajectoryOvr.AddToClassList("trajectory-ovr--mid");
         else
             _trajectoryOvr.AddToClassList("trajectory-ovr--low");
+
+        var ringsSprite = Resources.Load<Sprite>("Icons/trofeo64px");
+        if (ringsSprite != null)
+            _trajectoryRingsIcon.style.backgroundImage = new StyleBackground(ringsSprite);
+        _trajectoryRingsCount.text = _player.rings.ToString();
+
+        var finalsSprite = Resources.Load<Sprite>("Icons/vs_icon");
+        if (finalsSprite != null)
+            _trajectoryFinalsIcon.style.backgroundImage = new StyleBackground(finalsSprite);
+        _trajectoryFinalsCount.text = _player.finals_mvps.ToString();
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _trajectoryPhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;

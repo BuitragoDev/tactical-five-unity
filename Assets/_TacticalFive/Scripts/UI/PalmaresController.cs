@@ -9,6 +9,7 @@ using System.Linq;
     private Button _tabJugadores;
     private Button _tabQuintetos;
     private Button _tabAllStar;
+    private Button _tabSalonFama;
     private VisualElement _tabContentEquipos;
     private VisualElement _tabContentJugadores;
     private VisualElement _tabContentQuintetos;
@@ -21,6 +22,8 @@ using System.Linq;
     private VisualElement _quintetHistoryBody;
     private VisualElement _allStarAppearancesBody;
     private VisualElement _allStarHistoryBody;
+    private VisualElement _tabContentSalonFama;
+    private VisualElement _hoFBody;
     private List<TeamData> _allTeams;
     private List<SeasonRecord> _seasonRecords;
     private Dictionary<string, Sprite> _logoSprites32 = new();
@@ -33,7 +36,7 @@ using System.Linq;
 
     void SetupScrollViews()
     {
-        var scrolls = new[] { "TitlesRankingScroll", "FinalsHistoryScroll", "MVPRankingScroll", "AwardsHistoryScroll", "QuintetAppearancesScroll", "QuintetHistoryScroll", "AllStarAppearancesScroll", "AllStarHistoryScroll" };
+        var scrolls = new[] { "TitlesRankingScroll", "FinalsHistoryScroll", "MVPRankingScroll", "AwardsHistoryScroll", "QuintetAppearancesScroll", "QuintetHistoryScroll", "AllStarAppearancesScroll", "AllStarHistoryScroll", "HallOfFameScroll" };
         foreach (var name in scrolls)
         {
             var sv = _root.Q<ScrollView>(name);
@@ -48,6 +51,7 @@ using System.Linq;
         _tabJugadores = _root.Q<Button>("TabJugadores");
         _tabQuintetos = _root.Q<Button>("TabQuintetos");
         _tabAllStar = _root.Q<Button>("TabAllStar");
+        _tabSalonFama = _root.Q<Button>("TabSalonFama");
 
         _tabContentEquipos = _root.Q<VisualElement>("TabContentEquipos");
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
@@ -62,6 +66,8 @@ using System.Linq;
         _quintetHistoryBody = _root.Q<VisualElement>("QuintetHistoryBody");
         _allStarAppearancesBody = _root.Q<VisualElement>("AllStarAppearancesBody");
         _allStarHistoryBody = _root.Q<VisualElement>("AllStarHistoryBody");
+        _tabContentSalonFama = _root.Q<VisualElement>("TabContentSalonFama");
+        _hoFBody = _root.Q<VisualElement>("HallOfFameBody");
     }
     protected override void LoadData()
     {
@@ -88,6 +94,7 @@ using System.Linq;
         _tabJugadores?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("jugadores"); });
         _tabQuintetos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("quintetos"); });
         _tabAllStar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("allstar"); });
+        _tabSalonFama?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("salonfama"); });
     }
     protected override void Refresh()
     {
@@ -101,11 +108,13 @@ using System.Linq;
         _tabJugadores.RemoveFromClassList("palmares-tab--active");
         _tabQuintetos.RemoveFromClassList("palmares-tab--active");
         _tabAllStar.RemoveFromClassList("palmares-tab--active");
+        _tabSalonFama.RemoveFromClassList("palmares-tab--active");
 
         _tabContentEquipos.style.display = DisplayStyle.None;
         _tabContentJugadores.style.display = DisplayStyle.None;
         _tabContentQuintetos.style.display = DisplayStyle.None;
         _tabContentAllStar.style.display = DisplayStyle.None;
+        _tabContentSalonFama.style.display = DisplayStyle.None;
 
         switch (tab)
         {
@@ -128,6 +137,11 @@ using System.Linq;
                 _tabAllStar.AddToClassList("palmares-tab--active");
                 _tabContentAllStar.style.display = DisplayStyle.Flex;
                 BuildAllStarTab();
+                break;
+            case "salonfama":
+                _tabSalonFama.AddToClassList("palmares-tab--active");
+                _tabContentSalonFama.style.display = DisplayStyle.Flex;
+                BuildSalonFamaTab();
                 break;
         }
     }
@@ -569,6 +583,80 @@ using System.Linq;
         cell.Add(nameLbl);
 
         return cell;
+    }
+
+    // ══ SALÓN DE LA FAMA TAB ════════════════════════════
+
+    void BuildSalonFamaTab()
+    {
+        if (_hoFBody == null) return;
+        _hoFBody.Clear();
+
+        var members = DatabaseManager.Instance.GetHoFMembers();
+        members.Sort((a, b) =>
+        {
+            int bySeason = string.Compare(b.induction_season, a.induction_season, System.StringComparison.Ordinal);
+            if (bySeason != 0) return bySeason;
+            int byRings = b.rings.CompareTo(a.rings);
+            if (byRings != 0) return byRings;
+            int byPts = b.career_points.CompareTo(a.career_points);
+            return byPts != 0 ? byPts : string.Compare(a.FullName, b.FullName, System.StringComparison.Ordinal);
+        });
+
+        if (members.Count == 0)
+        {
+            var emptyLbl = new Label { text = "Todavía no hay miembros en el Salón de la Fama" };
+            emptyLbl.AddToClassList("no-data-cell");
+            _hoFBody.Add(emptyLbl);
+            return;
+        }
+
+        for (int i = 0; i < members.Count; i++)
+        {
+            var m = members[i];
+            var row = new VisualElement();
+            row.AddToClassList("palmares-data-row");
+
+            row.Add(MakeHoFCell((i + 1).ToString(), "td-hof-rank", true));
+            row.Add(MakeHoFCell(m.FullName, "td-hof-name", false));
+            row.Add(MakeHoFCell(PositionCodes.GetName(m.position), "td-hof-pos", false));
+            row.Add(MakeHoFCell(GetHoFTeamName(m), "td-hof-team", false));
+            row.Add(MakeHoFCell(m.rings.ToString(), "td-hof-rings", false));
+            row.Add(MakeHoFCell(m.finals_mvps.ToString(), "td-hof-fmvp", false));
+            row.Add(MakeHoFCell(FormatThousands(m.career_points), "td-hof-points", true));
+            row.Add(MakeHoFCell(FormatThousands(m.career_rebounds), "td-hof-rebounds", true));
+            row.Add(MakeHoFCell(FormatThousands(m.career_assists), "td-hof-assists", true));
+            row.Add(MakeHoFCell(m.induction_season, "td-hof-season", false));
+
+            _hoFBody.Add(row);
+        }
+    }
+
+    static readonly System.Globalization.CultureInfo _hoFCulture = new("es-ES");
+
+    string GetHoFTeamName(HallOfFameData m)
+    {
+        if (!string.IsNullOrEmpty(m.team_abbreviation) && _allTeams != null)
+        {
+            var team = _allTeams.Find(t =>
+                string.Equals(t.abbreviation, m.team_abbreviation, System.StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(t.logo, m.team_abbreviation, System.StringComparison.OrdinalIgnoreCase));
+            if (team != null) return team.name;
+        }
+        return m.team_abbreviation;
+    }
+
+    string FormatThousands(int value)
+    {
+        return value.ToString("N0", _hoFCulture);
+    }
+
+    Label MakeHoFCell(string text, string cssClass, bool right)
+    {
+        var lbl = new Label { text = text };
+        lbl.AddToClassList(cssClass);
+        if (right) lbl.style.unityTextAlign = TextAnchor.MiddleRight;
+        return lbl;
     }
 
     // ══ HELPERS ═══════════════════════════════════════════

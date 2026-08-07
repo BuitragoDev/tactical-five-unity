@@ -3204,15 +3204,14 @@ using System.Threading.Tasks;
                 if (young.Count >= 2 && (float)_aiRng.NextDouble() < 0.4f)
                     youngPack.Add(young[1]);
 
-                var buyerPicks = DatabaseManager.Instance.GetDraftPicksForTeam(buyer.id);
-                var futurePick = buyerPicks
-                    .OrderByDescending(p => p.season_id)
-                    .ThenBy(p => p.round)
-                    .ThenBy(p => p.pick_number)
-                    .FirstOrDefault();
+                var futurePicks = GetFuturePicksForTeam(buyer.id, true);
                 var picks = new List<DraftPickData>();
-                if (futurePick != null && (float)_aiRng.NextDouble() < 0.5f)
-                    picks.Add(futurePick);
+                if (futurePicks.Count > 0 && (float)_aiRng.NextDouble() < 0.5f)
+                {
+                    picks.Add(futurePicks[0]);
+                    if (futurePicks.Count > 1 && (float)_aiRng.NextDouble() < 0.4f)
+                        picks.Add(futurePicks[1]);
+                }
 
                 if (TryExecuteTrade(seller, sellerRoster, buyer, buyerRoster,
                         new List<PlayerData> { vet },
@@ -3421,16 +3420,13 @@ using System.Threading.Tasks;
 
             if (tradeableCandidates.Count == 0) continue;
 
-            // Los contender suelen añadir un pick futuro como "sweetener"
+            // Los contender suelen añadir un pick futuro como "sweetener" (R1 + a veces R2)
             List<DraftPickData> teamAPicks = null;
             if (teamAStrategy == TeamStrategy.Contend && target.overall > 84)
             {
-                var futurePick = DatabaseManager.Instance.GetDraftPicksForTeam(teamA.id)
-                    .OrderByDescending(p => p.season_id)
-                    .ThenBy(p => p.round)
-                    .ThenBy(p => p.pick_number)
-                    .FirstOrDefault();
-                if (futurePick != null) teamAPicks = new List<DraftPickData> { futurePick };
+                var futurePicks = GetFuturePicksForTeam(teamA.id, true);
+                if (futurePicks.Count > 0)
+                    teamAPicks = futurePicks.Take((float)_aiRng.NextDouble() < 0.4f && futurePicks.Count > 1 ? 2 : 1).ToList();
             }
 
             // Try 1-for-1
@@ -3459,6 +3455,23 @@ using System.Threading.Tasks;
             }
         }
         return false;
+    }
+
+    List<DraftPickData> GetFuturePicksForTeam(int teamId, bool includeRound2)
+    {
+        var all = DatabaseManager.Instance.GetDraftPicksForTeam(teamId)
+            .OrderByDescending(p => p.season_id)
+            .ToList();
+        if (all.Count == 0) return all;
+
+        // Se toma la temporada futura más lejana que posea el equipo (mismo criterio
+        // que antes), para no descapitalizar el próximo draft.
+        var farSeason = all[0].season_id;
+        var rounded = all.Where(p => p.season_id == farSeason).ToList();
+        var r1 = rounded.Where(p => p.round == 1).Take(1).ToList();
+        if (!includeRound2)
+            return r1;
+        return r1.Concat(rounded.Where(p => p.round == 2).Take(1)).ToList();
     }
 
     bool TryExecuteTrade(TeamData teamA, List<PlayerData> rosterA,
@@ -3685,15 +3698,10 @@ using System.Threading.Tasks;
                             .ToList();
                         if (faPack.Count > 0)
                         {
-                            var aiPicksForSA = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
-                            var futurePick = aiPicksForSA
-                                .OrderByDescending(p => p.season_id)
-                                .ThenBy(p => p.round)
-                                .ThenBy(p => p.pick_number)
-                                .FirstOrDefault();
+                            var futurePicks = GetFuturePicksForTeam(aiTeam.id, true);
                             var saPicks = new List<int>();
-                            if (futurePick != null && (float)_aiRng.NextDouble() > 0.4f)
-                                saPicks.Add(futurePick.id);
+                            if (futurePicks.Count > 0 && (float)_aiRng.NextDouble() > 0.4f)
+                                saPicks.Add(futurePicks[0].id);
                             DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
                             {
                                 manager_id = _manager.id,
@@ -3726,30 +3734,52 @@ using System.Threading.Tasks;
             var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam, aiStrategy);
             if (offerPack == null) continue;
 
-            long packSalary = offerPack.Sum(p => p.salary);
-            List<int> offeredPickIds = new List<int>();
+List<int> offeredPickIds = new List<int>();
+            List<int> wantedPickIds = new List<int>();
             bool isContender = IsTeamContender(aiTeam);
-            if (target.salary > packSalary * 1.5f || (IsDeadlineWeek() && isContender))
+
+            // Compensación por valor: el hueco de nivel entre el jugador que quiere la
+            // IA (target = el tuyo) y lo mejor que ofrece en jugadores.
+            int packBest = offerPack.Max(p => p.overall);
+            int gap = target.overall - packBest;
+
+            // Brecha demasiado grande para compensarla con rondas: no hay trato justo.
+            if (gap >= 9)
+                continue;
+
+            // Quien ofrece jugadores PEORES añade rondas para igualar el valor.
+            if (gap >= 5)
             {
-                var aiPicks = DatabaseManager.Instance.GetDraftPicksForTeam(aiTeam.id);
-                var futurePick = aiPicks
-                    .OrderByDescending(p => p.season_id)
-                    .ThenBy(p => p.round)
-                    .ThenBy(p => p.pick_number)
-                    .FirstOrDefault();
-                if (futurePick != null)
-                    offeredPickIds.Add(futurePick.id);
+                var payPicks = GetFuturePicksForTeam(aiTeam.id, gap >= 7);
+                foreach (var pk in payPicks)
+                    offeredPickIds.Add(pk.id);
+            }
+            // Caso inverso (raro): la IA ofrece mejor talento y pide una ronda tuya como
+            // suplemento, siempre con prob modestia y nunca como abuso del bug original.
+            else if (gap <= -5)
+            {
+                var askPicks = GetFuturePicksForTeam(_myTeam.id, gap <= -7);
+                if (askPicks.Count > 0 && (float)_aiRng.NextDouble() < 0.5f)
+                    wantedPickIds.Add(askPicks[0].id);
             }
 
-            var wantedIds = new List<int> { target.id };
+            // Deadline: los contenders presionan y añaden su R1 como incentivo extra.
+            if (IsDeadlineWeek() && isContender)
+            {
+                var dlPicks = GetFuturePicksForTeam(aiTeam.id, true);
+                if (dlPicks.Count > 0)
+                    offeredPickIds.Add(dlPicks[0].id);
+            }
+
+            var wantIds = new List<int> { target.id };
             var offeredIds = offerPack.Select(p => p.id).ToList();
             DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
             {
                 manager_id = _manager.id,
                 team_id_from = aiTeam.id,
-                player_ids_out = TradeOfferData.JoinIds(wantedIds),
+                player_ids_out = TradeOfferData.JoinIds(wantIds),
                 player_ids_in = TradeOfferData.JoinIds(offeredIds),
-                pick_ids_out = TradeOfferData.JoinIds(new List<int>()),
+                pick_ids_out = TradeOfferData.JoinIds(wantedPickIds),
                 pick_ids_in = TradeOfferData.JoinIds(offeredPickIds),
                 day_sent = gameDay,
                 processed = 0
@@ -4004,18 +4034,8 @@ using System.Threading.Tasks;
         var rightCol = BuildPlayerColumn("TÚ RECIBES", teamName, theirPlayers);
         columns.Add(rightCol);
 
-        if (ourPicks != null && ourPicks.Count > 0)
-        {
-            var pickLbl = new Label($"+ {string.Join(", ", ourPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a1) ? a1 : "???")}"))}");
-            pickLbl.AddToClassList("trade-offer-picks-label");
-            leftCol.Add(pickLbl);
-        }
-        if (theirPicks != null && theirPicks.Count > 0)
-        {
-            var pickLbl = new Label($"+ {string.Join(", ", theirPicks.Select(p => $"R{p.round} {(teamAbbrs.TryGetValue(p.original_team_id, out var a2) ? a2 : "???")}"))}");
-            pickLbl.AddToClassList("trade-offer-picks-label");
-            rightCol.Add(pickLbl);
-        }
+        BuildTradePickRows(leftCol, ourPicks, "RONDAS QUE ENTREGAS", teamAbbrs);
+        BuildTradePickRows(rightCol, theirPicks, "RONDAS QUE RECIBES", teamAbbrs);
 
         var btnGroup = new VisualElement();
         btnGroup.AddToClassList("injured-modal-btn-group");
@@ -4261,6 +4281,24 @@ using System.Threading.Tasks;
         }
 
         return col;
+    }
+
+    void BuildTradePickRows(VisualElement col, List<DraftPickData> picks,
+                            string headerText, Dictionary<int, string> teamAbbrs)
+    {
+        if (picks == null || picks.Count == 0) return;
+
+        var header = new Label(headerText);
+        header.AddToClassList("trade-offer-picks-header");
+        col.Add(header);
+
+        foreach (var pk in picks.OrderBy(p => p.round).ThenBy(p => p.pick_number))
+        {
+            string abr = teamAbbrs.TryGetValue(pk.original_team_id, out var a) ? a : "???";
+            var pickLbl = new Label($"R{pk.round} · {abr}");
+            pickLbl.AddToClassList("trade-offer-picks-label");
+            col.Add(pickLbl);
+        }
     }
 
     string SalaryStr(long salary)
