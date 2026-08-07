@@ -1545,6 +1545,27 @@
     margin-top: 2px;
 }
 
+.trade-offer-picks-header {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 15px;
+    letter-spacing: 2px;
+    color: rgb(122, 138, 170);
+    margin-top: 12px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.trade-offer-picks-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.15);
+    border-radius: 4px;
+    padding: 4px 12px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
 /* ── Resumen de simulación rápida ── */
 .fastsim-summary-box {
     max-height: 600px;
