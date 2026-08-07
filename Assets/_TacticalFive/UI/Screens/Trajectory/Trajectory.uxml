@@ -28,6 +28,22 @@
                         <ui:Label name="TrajectoryMeta" class="trajectory-meta" text="" />
                         <ui:Label name="TrajectoryNationality" class="trajectory-nationality" text="" />
                     </ui:VisualElement>
+                    <ui:VisualElement name="TrajectoryHonors" class="trajectory-honors">
+                        <ui:VisualElement class="trajectory-honor-item">
+                            <ui:VisualElement class="trajectory-honor-row">
+                                <ui:VisualElement name="TrajectoryRingsIcon" class="trajectory-honor-icon" />
+                                <ui:Label name="TrajectoryRingsCount" class="trajectory-honor-count" text="0" />
+                            </ui:VisualElement>
+                            <ui:Label class="trajectory-honor-label" text="CAMPEONATOS" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="trajectory-honor-item">
+                            <ui:VisualElement class="trajectory-honor-row">
+                                <ui:VisualElement name="TrajectoryFinalsIcon" class="trajectory-honor-icon" />
+                                <ui:Label name="TrajectoryFinalsCount" class="trajectory-honor-count" text="0" />
+                            </ui:VisualElement>
+                            <ui:Label class="trajectory-honor-label" text="FINALES" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                     <ui:VisualElement class="trajectory-ovr-block">
                         <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />
                         <ui:Label class="trajectory-ovr-label" text="MED" />

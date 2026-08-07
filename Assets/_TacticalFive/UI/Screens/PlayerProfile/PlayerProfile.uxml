@@ -28,6 +28,22 @@
                         </ui:VisualElement>
                         <ui:Label name="ProfileMeta" class="playerprofile-meta" text="" />
                     </ui:VisualElement>
+                    <ui:VisualElement name="ProfileHonors" class="playerprofile-honors">
+                        <ui:VisualElement class="playerprofile-honor-item">
+                            <ui:VisualElement class="playerprofile-honor-row">
+                                <ui:VisualElement name="ProfileRingsIcon" class="playerprofile-honor-icon" />
+                                <ui:Label name="ProfileRingsCount" class="playerprofile-honor-count" text="0" />
+                            </ui:VisualElement>
+                            <ui:Label class="playerprofile-honor-label" text="CAMPEONATOS" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="playerprofile-honor-item">
+                            <ui:VisualElement class="playerprofile-honor-row">
+                                <ui:VisualElement name="ProfileFinalsIcon" class="playerprofile-honor-icon" />
+                                <ui:Label name="ProfileFinalsCount" class="playerprofile-honor-count" text="0" />
+                            </ui:VisualElement>
+                            <ui:Label class="playerprofile-honor-label" text="FINALES" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                     <ui:VisualElement class="playerprofile-ovr-block">
                         <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
                         <ui:Label class="playerprofile-ovr-label" text="MED" />

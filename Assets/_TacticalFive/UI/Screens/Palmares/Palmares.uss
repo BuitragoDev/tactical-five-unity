@@ -424,4 +424,95 @@
     display: none;
 }
 
+/* ══ TAB: SALÓN DE LA FAMA ══ */
+
+.palmares-full {
+    flex: 1 1 100%;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 16px;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#TabContentSalonFama .th-hof-rank,
+#TabContentSalonFama .td-hof-rank {
+    width: 56px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+#TabContentSalonFama .th-hof-name,
+#TabContentSalonFama .td-hof-name {
+    flex: 2.2;
+}
+
+#TabContentSalonFama .th-hof-pos,
+#TabContentSalonFama .td-hof-pos {
+    width: 90px;
+    flex-shrink: 0;
+    -unity-text-align: middle-left;
+}
+
+#TabContentSalonFama .th-hof-team,
+#TabContentSalonFama .td-hof-team {
+    flex: 1.6;
+    -unity-text-align: middle-left;
+}
+
+#TabContentSalonFama .th-hof-rings,
+#TabContentSalonFama .td-hof-rings {
+    width: 80px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+#TabContentSalonFama .th-hof-fmvp,
+#TabContentSalonFama .td-hof-fmvp {
+    width: 110px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+#TabContentSalonFama .th-hof-points,
+#TabContentSalonFama .td-hof-points,
+#TabContentSalonFama .th-hof-rebounds,
+#TabContentSalonFama .td-hof-rebounds,
+#TabContentSalonFama .th-hof-assists,
+#TabContentSalonFama .td-hof-assists {
+    width: 110px;
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+}
+
+#TabContentSalonFama .th-hof-season,
+#TabContentSalonFama .td-hof-season {
+    width: 100px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.td-hof-rank {
+    color: rgb(85, 102, 119) !important;
+    font-size: 16px !important;
+    -unity-text-align: middle-center;
+}
+
+.td-hof-name {
+    color: rgb(255, 255, 255) !important;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf") !important;
+}
+
+.td-hof-rings {
+    color: rgb(212, 160, 23) !important;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf") !important;
+}
+
+.td-hof-season {
+    color: rgb(85, 102, 119) !important;
+    white-space: nowrap !important;
+}
+
 /* Sidebar / header from Dashboard.uss are inherited */

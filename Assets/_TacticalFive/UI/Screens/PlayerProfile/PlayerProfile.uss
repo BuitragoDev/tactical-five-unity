@@ -119,7 +119,48 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 15px;
     color: rgb(122, 138, 170);
-    margin-top: 4px;
+}
+
+.playerprofile-honors {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 24px;
+    margin-left: auto;
+}
+
+.playerprofile-honor-item {
+    flex-direction: column;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.playerprofile-honor-row {
+    flex-direction: row;
+    align-items: center;
+}
+
+.playerprofile-honor-icon {
+    width: 64px;
+    height: 64px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-right: 4px;
+}
+
+.playerprofile-honor-count {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 42px;
+    color: rgb(212, 160, 23);
+}
+
+.playerprofile-honor-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
 }
 
 .playerprofile-ovr-block {
@@ -141,7 +182,7 @@
 
 .playerprofile-ovr-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
     letter-spacing: 2px;

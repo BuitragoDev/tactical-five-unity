@@ -52,7 +52,7 @@ using System.Linq;
     private string _currentStat = "puntos";
     private string _currentMode = "season";
     private string _currentDisplay = "totals";
-    private static readonly System.Globalization.CultureInfo _spanishCI = new("es-ES");
+    private static readonly System.Globalization.CultureInfo _spanishCI = System.Globalization.CultureInfo.InvariantCulture;
     private List<Button> _statTabs = new();
     private List<Button> _filterBtns = new();
     private List<Button> _modeBtns = new();
