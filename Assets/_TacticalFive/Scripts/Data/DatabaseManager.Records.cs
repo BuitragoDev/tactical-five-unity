@@ -1296,9 +1296,8 @@ public partial class DatabaseManager
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
-            int fmvps = p.finals_mvps
-                + _db.Table<FinalsRecord>()
-                    .Count(f => f.mvp == $"{p.first_name} {p.last_name}");
+            int fmvps = Math.Max(p.finals_mvps,
+                _db.Table<FinalsRecord>().Count(f => f.mvp == $"{p.first_name} {p.last_name}"));
             return HallOfFameHelper.ShouldInduct(p.rings, fmvps, pts, reb, ast);
         }
         catch { return false; }
@@ -1335,9 +1334,8 @@ public partial class DatabaseManager
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
             int games = hist?.games ?? 0;
-            int fmvps = p.finals_mvps
-                + _db.Table<FinalsRecord>()
-                    .Count(f => f.mvp == $"{p.first_name} {p.last_name}");
+            int fmvps = Math.Max(p.finals_mvps,
+                _db.Table<FinalsRecord>().Count(f => f.mvp == $"{p.first_name} {p.last_name}"));
 
             var team = GetTeamById(p.team_id);
             _db.Insert(new HallOfFameData
@@ -1449,7 +1447,13 @@ public partial class DatabaseManager
                     .First();
                 var mvpPlayer = GetPlayerById(topPlayer.PlayerId);
                 if (mvpPlayer != null)
+                {
                     finalsMvp = $"{mvpPlayer.first_name} {mvpPlayer.last_name}";
+
+                    // Finals MVP +1 en el contador del jugador (como los anillos del campeón).
+                    mvpPlayer.finals_mvps = mvpPlayer.finals_mvps + 1;
+                    _db.Update(mvpPlayer);
+                }
             }
 
             _db.Insert(new FinalsRecord
@@ -1473,6 +1477,18 @@ public partial class DatabaseManager
             }
             if (champRosters.Count > 0)
                 Debug.Log($"[DB] Rings +{champRosters.Count} para la plantilla campeona {champTeam?.name}");
+
+            // Finales jugadas: +1 para todos los jugadores de ambos finalistas (campeón y subcampeón).
+            var finalsRosters = _db.Table<PlayerData>()
+                .Where(p => p.team_id == champId || p.team_id == finalistId)
+                .ToList();
+            foreach (var fp in finalsRosters)
+            {
+                fp.finals_played = fp.finals_played + 1;
+                _db.Update(fp);
+            }
+            if (finalsRosters.Count > 0)
+                Debug.Log($"[DB] Finals played +{finalsRosters.Count} para los finalistas {champTeam?.name} y {finalistTeam?.name}");
         }
 
         // ── Season awards & All-NBA quintets (regular season) ──
@@ -1513,6 +1529,13 @@ public partial class DatabaseManager
             var mvpTeam = mvpPlayer != null ? GetTeamById(mvpPlayer.team_id) : null;
             string mvpName = mvpPlayer != null ? $"{mvpPlayer.first_name} {mvpPlayer.last_name}" : "";
             string mvpRatingStr = ((double)topMvp.total_rating / Math.Max(1, topMvp.games)).ToString("F1", CultureInfo.InvariantCulture);
+
+            // MVP temporada regular: +1 en el contador del jugador.
+            if (mvpPlayer != null)
+            {
+                mvpPlayer.season_mvps = mvpPlayer.season_mvps + 1;
+                _db.Update(mvpPlayer);
+            }
 
             // Rookie of the Year
             var rookieCandidates = seasonStats

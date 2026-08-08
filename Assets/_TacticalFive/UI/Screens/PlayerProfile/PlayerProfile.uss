@@ -132,7 +132,7 @@
 .playerprofile-honor-item {
     flex-direction: column;
     align-items: center;
-    margin-right: 20px;
+    margin-right: 14px;
 }
 
 .playerprofile-honor-row {

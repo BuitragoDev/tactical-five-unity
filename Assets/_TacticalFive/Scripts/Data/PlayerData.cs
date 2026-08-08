@@ -45,6 +45,8 @@ public class PlayerData
     public int on_trade_block { get; set; }
     public int rings { get; set; }
     public int finals_mvps { get; set; }
+    public int finals_played { get; set; }
+    public int season_mvps { get; set; }
     public PlayerRole role { get; set; } = PlayerRole.UltimoRecurso;
     public string photo { get; set; }
 

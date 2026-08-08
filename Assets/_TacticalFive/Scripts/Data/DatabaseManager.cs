@@ -651,6 +651,36 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for finals_mvps: {ex.Message}");
         }
 
+        // Add finals_played to players if missing (finals games played by the player)
+        try
+        {
+            var playerColsFp = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!playerColsFp.Any(c => c.name == "finals_played"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN finals_played INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added finals_played to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for finals_played: {ex.Message}");
+        }
+
+        // Add season_mvps to players if missing (regular season MVP awards won)
+        try
+        {
+            var playerColsSmv = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!playerColsSmv.Any(c => c.name == "season_mvps"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN season_mvps INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added season_mvps to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for season_mvps: {ex.Message}");
+        }
+
         // Create player_season_stats table if missing (for career history across seasons)
         try
         {
