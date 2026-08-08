@@ -128,3 +128,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Async DB (B8): pre-lote diario (lesiones + físico) en hilo de fondo | **Hecho** — `Task.Run` + WAL (commit `33f4e12`) |
 | Async DB (B8): `StartNewSeason` en hilo de fondo | **Hecho** — conexión ambient `AsyncLocal` + WAL (commit `5bcca3b`) |
 | Async DB (B8): traspasos/fichajes AI en hilo de fondo | **Hecho** — conexión ambient + `System.Random` thread-safe (`_aiRng`) (commit `71775bf`) |
+| Contadores de honores del jugador (CAMPEONATOS/FINALES/MVP/MVP FINALS) | **Hecho** — campos `players.rings/finals_mvps/finals_played/season_mvps`, incremento en `SaveSeasonEndRecords`, contadores en header de PlayerProfile/Trajectory (commits `d52d5cf`, `a32ae75`) |

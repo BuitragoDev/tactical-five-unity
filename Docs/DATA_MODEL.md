@@ -31,6 +31,7 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 
 ### players (`PlayerData`)
 `id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
+- **Honores de carrera (migrados, default 0):** `rings` (campeonatos ganados), `finals_mvps` (MVP de las Finales), `finals_played` (finales disputadas), `season_mvps` (MVP de temporada regular). Se incrementan en `SaveSeasonEndRecords` (ver GAMEPLAY §11). Se muestran como contadores en el header de `PlayerProfile` y `Trajectory` (CAMPEONATOS / FINALES / MVP / MVP FINALS).
 - `GetCalculatedAverage()` returns `round(mean(11 attrs))`. **`overall` is always recomputed from the attributes and capped by `potential`** (seed, training, progression, migration) [F].
 
 ### managers (`ManagerData`)
@@ -168,6 +169,9 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 | `players` | `fisico` | 99 |
 | `players` | `guaranteed_years`, `has_team_option`, `has_player_option` (last year is a TO/PO) | `guaranteed_years`=0, `has_*_option`=0 |
 | `players` | `last_team_id` (último equipo para el que jugó; habilita Bird rights al re-firmar) | 0 |
+| `players` | `rings` (campeonatos), `finals_mvps` (MVP de las Finales) | 0 |
+| `players` | `finals_played` (finales disputadas) | 0 |
+| `players` | `season_mvps` (MVP de temporada regular) | 0 |
 
 **One-time data migrations (PlayerPrefs, per slot):**
 - `OverallMigration_{slot}`: recompute `overall` for all players as mean of 11 attrs (cap potential).

@@ -165,6 +165,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 - Monthly awards (Manager/Jugador/Rookie del Mes) via `EvaluateMonthlyAwards`.
 - Season-end records: `SaveSeasonEndRecords` (MVP, ROY, best defender, sixth man, most improved, All-NBA teams, All-Star teams, finals MVP, champion).
+- **Contadores de honores del jugador** (campo `players.*`, default 0, migrados): `rings` +1 a la plantilla campeona; `finals_mvps` +1 al MVP de las Finales (mejor rating medio del equipo campeón); `finals_played` +1 a todos los jugadores de ambos finalistas; `season_mvps` +1 al MVP de temporada regular (mejor rating medio con ≥65 partidos). Se muestran en el header de `PlayerProfile` y `Trajectory` como CAMPEONATOS / FINALES / MVP / MVP FINALS (iconos `trofeo64px`, `vs_icon`, `trofeo_mvp`, `mvp_finals`).
 - Career stats archived per season (`UpdateHistoricalPlayerStatsFromSeason`, `player_season_stats`).
 - Records: historical + team + season single-game records via `CheckAndUpdateRecords`.
 - Aging/progression per season (`StartNewSeason`): band-based attribute deltas, retirements ≥40, contract expiry → FA.
