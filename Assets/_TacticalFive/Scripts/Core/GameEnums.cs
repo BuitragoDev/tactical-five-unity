@@ -28,6 +28,7 @@ public enum GameScreen
     Cartera,
     SeasonSummary,
     PlayerAwards,
+    Quintos,
     EndSeason,
     NewSeason,
     Editor,

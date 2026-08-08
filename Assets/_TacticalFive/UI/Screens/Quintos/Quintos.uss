@@ -1,9 +1,9 @@
 /* ══════════════════════════════════════════
-   PLAYER AWARDS — PlayerAwards.uss
+   QUINTOS — Quintos.uss
    ══════════════════════════════════════════ */
 
 /* ── ROOT ── */
-.player-awards-root {
+.quintos-root {
     flex-direction: column;
     width: 100%;
     height: 100%;
@@ -13,13 +13,13 @@
 }
 
 /* ── HEADER BRAND ── */
-.player-awards-root .header-brand {
+.quintos-root .header-brand {
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
     margin-right: 24px;
 }
-.player-awards-root .header-brand-icon {
+.quintos-root .header-brand-icon {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     background-color: rgb(212, 160, 23);
     color: rgb(0, 0, 0);
@@ -29,14 +29,14 @@
     flex-shrink: 0;
     margin-right: 10px;
 }
-.player-awards-root .header-brand-text {
+.quintos-root .header-brand-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
     -unity-text-transform: upper;
 }
-.player-awards-root .header-brand-text-gold {
+.quintos-root .header-brand-text-gold {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
@@ -44,8 +44,8 @@
     -unity-text-transform: upper;
 }
 
-/* ── TOP HEADER (MatchDay style) ── */
-.player-awards-root .top-header {
+/* ── TOP HEADER (PlayerAwards style) ── */
+.quintos-root .top-header {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -56,24 +56,24 @@
     flex-shrink: 0;
     min-height: 100px;
 }
-.player-awards-root .header-left {
+.quintos-root .header-left {
     flex-direction: row;
     align-items: center;
 }
-.player-awards-root .header-team-logo {
+.quintos-root .header-team-logo {
     width: 64px;
     height: 64px;
     flex-shrink: 0;
     margin-right: 16px;
 }
-.player-awards-root .header-team-info {
+.quintos-root .header-team-info {
     flex-direction: column;
 }
-.player-awards-root .header-team-name-row {
+.quintos-root .header-team-name-row {
     flex-direction: row;
     align-items: baseline;
 }
-.player-awards-root .header-team-name {
+.quintos-root .header-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 1px;
@@ -81,28 +81,28 @@
     -unity-text-transform: upper;
     margin-right: 12px;
 }
-.player-awards-root .header-subtitle {
+.quintos-root .header-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
     font-size: 18px;
     color: rgb(212, 160, 23);
     letter-spacing: 2px;
     -unity-text-transform: upper;
 }
-.player-awards-root .header-manager-name {
+.quintos-root .header-manager-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
 }
-.player-awards-root .header-right-group {
+.quintos-root .header-right-group {
     flex-direction: row;
     align-items: center;
 }
-.player-awards-root .header-season-info {
+.quintos-root .header-season-info {
     flex-direction: column;
     align-items: flex-end;
     margin-right: 20px;
 }
-.player-awards-root .header-date-label {
+.quintos-root .header-date-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
@@ -114,7 +114,7 @@
     border-right-width: 1px;
     border-right-color: rgb(42, 51, 71);
 }
-.player-awards-root .header-season-label {
+.quintos-root .header-season-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(212, 160, 23);
@@ -122,7 +122,7 @@
 }
 
 /* ── BOTÓN ACCIÓN ── */
-.player-awards-root .btn-action {
+.quintos-root .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 250px;
     background-color: rgb(42, 95, 201);
@@ -135,12 +135,12 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
-.player-awards-root .btn-action:hover {
+.quintos-root .btn-action:hover {
     background-color: rgb(74, 128, 240);
 }
 
 /* ── CONTENT ── */
-.content-area {
+.quintos-root .content-area {
     flex-grow: 1;
     flex-direction: column;
     align-items: center;
@@ -149,12 +149,12 @@
 }
 
 /* ── SUMMARY HEADER ── */
-.summary-header {
+.quintos-root .summary-header {
     text-align: center;
     margin-bottom: 24px;
     align-items: center;
 }
-.summary-title {
+.quintos-root .summary-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 36px;
     letter-spacing: 4px;
@@ -162,7 +162,7 @@
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
 }
-.season-tag {
+.quintos-root .season-tag {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     background-color: rgb(212, 160, 23);
     color: rgb(0, 0, 0);
@@ -173,202 +173,13 @@
     -unity-text-align: middle-center;
 }
 
-/* ── AWARDS ROW (MVP + Rookie side by side) ── */
-.awards-row {
-    flex-direction: row;
-    justify-content: center;
-    margin-bottom: 26px;
-    min-height: 220px;
-}
-.award-card {
-    background-color: rgb(17, 24, 34);
-    border-width: 1px;
-    padding: 16px;
-    text-align: center;
-    min-width: 400px;
-    align-items: center;
-}
-.mvp-card {
-    border-color: rgb(212, 160, 23);
-    margin-right: 20px;
-}
-.rookie-card {
-    border-color: rgb(42, 95, 201);
-}
-.award-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 3px;
-    -unity-text-transform: upper;
-    color: rgb(122, 138, 170);
-    margin-bottom: 12px;
-    -unity-text-align: middle-center;
-}
-.award-photo-wrapper {
-    width: 68px;
-    height: 68px;
-    border-radius: 54px;
-    background-color: rgb(200, 200, 200);
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-bottom: 8px;
-}
-.award-player-photo {
-    width: 60px;
-    height: 60px;
-    border-radius: 50px;
-    background-size: cover;
-    background-position: center;
-    flex-shrink: 0;
-}
-.award-player-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 24px;
-    letter-spacing: 1px;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
-}
-.award-player-team {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
-    color: rgb(122, 138, 170);
-    margin-bottom: 4px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-}
-.award-stat-row {
-    flex-direction: row;
-    justify-content: center;
-    margin-top: 12px;
-}
-.award-stat-box {
-    flex-direction: column;
-    align-items: center;
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    padding: 6px 14px;
-    min-width: 60px;
-    min-height: 50px;
-    margin-right: 12px;
-}
-.award-stat-val {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
-}
-.award-stat-lbl {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 11px;
-    color: rgb(122, 138, 170);
-    letter-spacing: 1px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-}
-
-/* ── EXTRA ROW (DPOY / Sexto / MIP / Coach) ── */
-.extra-awards-row {
-    flex-direction: row;
-    justify-content: center;
-    margin-bottom: 26px;
-    align-items: stretch;
-    flex-wrap: wrap;
-}
-.extra-card {
-    background-color: rgb(17, 24, 34);
-    border-width: 1px;
-    padding: 12px 10px;
-    text-align: center;
-    min-width: 230px;
-    align-items: center;
-    margin-right: 12px;
-    margin-bottom: 12px;
-    flex-shrink: 0;
-}
-.dpoy-card {
-    border-color: rgb(42, 95, 201);
-}
-.sixth-card {
-    border-color: rgb(42, 95, 201);
-}
-.mip-card {
-    border-color: rgb(142, 160, 23);
-}
-.coach-card {
-    border-color: rgb(212, 160, 23);
-}
-.extra-card-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    color: rgb(122, 138, 170);
-    margin-bottom: 10px;
-    -unity-text-align: middle-center;
-}
-.extra-card .extra-photo {
-    width: 64px;
-    height: 64px;
-    border-radius: 50px;
-    background-color: rgb(200, 200, 200);
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-bottom: 6px;
-}
-.extra-player-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
-    letter-spacing: 1px;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-}
-.extra-player-team {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
-    color: rgb(122, 138, 170);
-    margin-bottom: 4px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-}
-.extra-coach-logo {
-    width: 52px;
-    height: 52px;
-    border-radius: 44px;
-    background-color: rgb(32, 38, 52);
-    background-size: contain;
-    background-position: center;
-    flex-shrink: 0;
-}
-.extra-stat-row {
-    margin-top: 6px;
-}
-.extra-stat-row .award-stat-box {
-    min-width: 56px;
-    min-height: 40px;
-    padding: 4px 8px;
-    margin-right: 6px;
-}
-.extra-stat-lbl-long {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
-    color: rgb(122, 138, 170);
-    letter-spacing: 1px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-    white-space: normal;
-}
-
 /* ── QUINTET SECTION ── */
-.award-section {
+.quintos-root .quintet-section {
     margin-top: 26px;
     margin-bottom: 26px;
     align-items: center;
 }
-.section-title {
+.quintos-root .section-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
     letter-spacing: 3px;
@@ -380,12 +191,13 @@
     border-bottom-color: rgb(42, 51, 71);
     -unity-text-align: middle-center;
 }
-.quintet-grid {
+.quintos-root .quintet-grid {
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
-.quintet-card {
+.quintos-root .quintet-card {
     flex-direction: column;
     align-items: center;
     background-color: rgb(17, 24, 34);
@@ -393,16 +205,27 @@
     padding: 16px 12px;
     min-width: 300px;
     margin-right: 12px;
+    margin-bottom: 12px;
     flex-shrink: 0;
     flex-grow: 0;
 }
-.quintet-card--five {
+.quintos-root .quintet-card--five {
     border-color: rgb(212, 160, 23);
 }
-.quintet-card--rookie {
+.quintos-root .quintet-card--rookie {
     border-color: rgb(42, 95, 201);
 }
-.quintet-card-pos {
+.quintos-root .quintet-card-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50px;
+    background-color: rgb(200, 200, 200);
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-card-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     background-color: rgb(42, 95, 201);
@@ -411,7 +234,7 @@
     margin-bottom: 8px;
     flex-shrink: 0;
 }
-.quintet-card-name {
+.quintos-root .quintet-card-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 1px;
@@ -420,7 +243,7 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
-.quintet-card-team {
+.quintos-root .quintet-card-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 11px;
     color: rgb(122, 138, 170);
@@ -428,12 +251,12 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
-.quintet-stat-row {
+.quintos-root .quintet-stat-row {
     flex-direction: row;
     justify-content: center;
     flex-shrink: 0;
 }
-.quintet-stat-box {
+.quintos-root .quintet-stat-box {
     flex-direction: column;
     align-items: center;
     background-color: rgb(22, 26, 36);
@@ -445,14 +268,14 @@
     margin-right: 6px;
     flex-shrink: 0;
 }
-.quintet-stat-val {
+.quintos-root .quintet-stat-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
-.quintet-stat-lbl {
+.quintos-root .quintet-stat-lbl {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 14px;
     color: rgb(122, 138, 170);

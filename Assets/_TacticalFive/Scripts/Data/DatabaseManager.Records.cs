@@ -1855,6 +1855,157 @@ public partial class DatabaseManager
         return result;
     }
 
+    public PlayerAwardInfo GetBestDefensivePlayer(int seasonId, int managerId)
+    {
+        if (!EnsureDb()) return null;
+        var row = _db.Query<PlayerAwardQueryRow>(@"
+            SELECT p.id, p.photo, p.first_name, p.last_name, p.position, t.name AS team_name, t.logo AS team_logo,
+                   COUNT(*) AS games,
+                   AVG(ps.rating) AS avg_rating,
+                   AVG(ps.steals) AS avg_pts,
+                   AVG(ps.blocks) AS avg_reb,
+                   0 AS avg_ast
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN players p ON ps.player_id = p.id
+            JOIN teams t ON p.team_id = t.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.manager_id = ?
+            GROUP BY ps.player_id
+            HAVING games >= 55
+            ORDER BY (AVG(ps.steals) + AVG(ps.blocks)) DESC
+            LIMIT 1", seasonId, managerId).FirstOrDefault();
+        if (row == null) return null;
+        return new PlayerAwardInfo
+        {
+            PlayerId = row.id,
+            Photo = row.photo ?? "",
+            PlayerName = $"{row.first_name} {row.last_name}",
+            TeamName = row.team_name ?? "",
+            TeamKeyword = row.team_logo ?? "",
+            Position = row.position ?? "",
+            AvgPts = (float)row.avg_pts,
+            AvgReb = (float)row.avg_reb,
+            AvgAst = 0
+        };
+    }
+
+    public PlayerAwardInfo GetSixthMan(int seasonId, int managerId)
+    {
+        if (!EnsureDb()) return null;
+        string sql = $@"
+            SELECT p.id, p.photo, p.first_name, p.last_name, p.position, t.name AS team_name, t.logo AS team_logo,
+                   COUNT(*) AS games,
+                   AVG(ps.points) AS avg_pts,
+                   AVG(ps.rebounds) AS avg_reb,
+                   AVG(ps.assists) AS avg_ast,
+                   AVG(ps.rating) AS avg_rating
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            JOIN players p ON ps.player_id = p.id
+            JOIN teams t ON p.team_id = t.id
+            JOIN team_lineup l ON l.player_id = p.id AND l.slot = 1
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.manager_id = ?
+            GROUP BY ps.player_id
+            HAVING COUNT(*) >= 40
+            ORDER BY avg_rating DESC
+            LIMIT 1";
+        var row = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId).FirstOrDefault();
+        if (row == null) return null;
+        return new PlayerAwardInfo
+        {
+            PlayerId = row.id,
+            Photo = row.photo ?? "",
+            PlayerName = $"{row.first_name} {row.last_name}",
+            TeamName = row.team_name ?? "",
+            TeamKeyword = row.team_logo ?? "",
+            Position = row.position ?? "",
+            AvgPts = (float)row.avg_pts,
+            AvgReb = (float)row.avg_reb,
+            AvgAst = (float)row.avg_ast
+        };
+    }
+
+    public PlayerAwardInfo GetMostImprovedPlayer(int seasonId, int managerId)
+    {
+        if (!EnsureDb()) return null;
+
+        int prevSeasonId = seasonId - 1;
+        var curRatings = GetSeasonPlayerRatings(seasonId, managerId);
+        var prevRatings = GetSeasonPlayerRatings(prevSeasonId, managerId);
+        if (prevRatings.Count == 0) return null;
+
+        PlayerAwardInfo best = null;
+        float bestDelta = -999f;
+        foreach (var cur in curRatings.Values)
+        {
+            if (!prevRatings.TryGetValue(cur.player_id, out var prev)) continue;
+            if (prev.games < 40 || cur.games < 40) continue;
+            float delta = (float)cur.avg_rating - (float)prev.avg_rating;
+            if (delta <= bestDelta) continue;
+            bestDelta = delta;
+            var player = GetPlayerById(cur.player_id);
+            if (player == null) continue;
+            var team = GetTeamById(player.team_id);
+            best = new PlayerAwardInfo
+            {
+                PlayerId = player.id,
+                Photo = player.photo ?? "",
+                PlayerName = $"{player.first_name} {player.last_name}",
+                TeamName = team?.name ?? "",
+                TeamKeyword = team?.logo ?? "",
+                Position = player.position ?? "",
+                AvgPts = (float)cur.avg_rating,
+                AvgReb = (float)prev.avg_rating,
+                AvgAst = bestDelta
+            };
+        }
+        return best;
+    }
+
+    Dictionary<int, SeasonPlayerRatingRow> GetSeasonPlayerRatings(int seasonId, int managerId)
+    {
+        var result = new Dictionary<int, SeasonPlayerRatingRow>();
+        if (!EnsureDb() || seasonId <= 0) return result;
+        var rows = _db.Query<SeasonPlayerRatingRow>(@"
+            SELECT ps.player_id, AVG(ps.rating) AS avg_rating, COUNT(*) AS games
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.manager_id = ?
+            GROUP BY ps.player_id", seasonId, managerId);
+        foreach (var r in rows) result[r.player_id] = r;
+        return result;
+    }
+
+    public CoachAwardInfo GetCoachOfTheYear(int seasonId)
+    {
+        if (!EnsureDb()) return null;
+        var top = _db.Query<CoachMonthRow>(@"
+            SELECT team_id, COUNT(*) AS mes_count
+            FROM monthly_awards
+            WHERE season_id = ? AND award_type = 'manager' AND rank = 1
+            GROUP BY team_id
+            ORDER BY COUNT(*) DESC
+            LIMIT 1", seasonId).FirstOrDefault();
+        if (top == null || top.team_id == 0) return null;
+
+        var coach = _db.Table<CoachRankingData>()
+            .FirstOrDefault(c => c.team_id == top.team_id && (c.status == "active" || c.status == "player"));
+        if (coach == null)
+            coach = _db.Table<CoachRankingData>().FirstOrDefault(c => c.team_id == top.team_id);
+
+        var team = GetTeamById(top.team_id);
+        return new CoachAwardInfo
+        {
+            CoachName = coach?.name ?? "",
+            TeamName = team?.name ?? "",
+            TeamKeyword = team?.logo ?? "",
+            EntrenadorMes = top.mes_count
+        };
+    }
+
     // ── RECORDS TRACKING ──────────────────────────────────
 
     public List<HistoricalRecordData> GetAllHistoricalRecords()

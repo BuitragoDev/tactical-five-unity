@@ -143,7 +143,7 @@ using System.Linq;
             _profileMvpFinalsIcon.style.backgroundImage = new StyleBackground(mvpFinalsSprite);
         _profileMvpFinalsCount.text = _player.finals_mvps.ToString();
 
-        var mvpSeasonSprite = Resources.Load<Sprite>("Icons/trofeo_mvp");
+        var mvpSeasonSprite = Resources.Load<Sprite>("Icons/trofeo3");
         if (mvpSeasonSprite != null)
             _profileMvpSeasonIcon.style.backgroundImage = new StyleBackground(mvpSeasonSprite);
         _profileMvpSeasonCount.text = _player.season_mvps.ToString();

@@ -28,7 +28,6 @@ public static class SidebarController
         new() { screen = GameScreen.Palmares,    navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPalmares" },
         new() { screen = GameScreen.Records,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuRecords" },
         new() { screen = GameScreen.Premios,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPremios" },
-        new() { screen = GameScreen.Logros,      navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuLogros" },
         new() { screen = GameScreen.Playoffs,    navName = "NavPlayoffs" },
         new() { screen = GameScreen.Stats,       navName = "NavStats" },
         new() { screen = GameScreen.Market,      navName = "NavMarket",    submenuName = "MarketSubmenu",   submenuItemName = "SubmenuOfertas" },
@@ -39,7 +38,8 @@ public static class SidebarController
         new() { screen = GameScreen.Sponsors,    navName = "NavFinances",  submenuName = "FinanceSubmenu",  submenuItemName = "SubmenuSponsors" },
         new() { screen = GameScreen.TV,          navName = "NavFinances",  submenuName = "FinanceSubmenu",  submenuItemName = "SubmenuTV" },
         new() { screen = GameScreen.Arena,       navName = "NavArena" },
-        new() { screen = GameScreen.Manager,     navName = "NavManager" },
+        new() { screen = GameScreen.Manager,     navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuManager" },
+        new() { screen = GameScreen.Logros,      navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuLogros" },
         new() { screen = GameScreen.Messages,    navName = "NavMessages" },
     };
 
@@ -88,9 +88,10 @@ public static class SidebarController
                 "NavMarket", "NavFinances", "NavArena", "NavManager", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados",
-                "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios", "SubmenuLogros",
+                "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
+                "SubmenuManager", "SubmenuLogros",
             };
             foreach (var name in cursorNames)
             {

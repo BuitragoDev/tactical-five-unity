@@ -2,19 +2,9 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System;
-using System.Linq;
 
 public class PlayerAwardsController : UIScreenController
 {
-    private static readonly Dictionary<string, string> _posSpanish = new()
-    {
-        { "PG", "Base" },
-        { "SG", "Escolta" },
-        { "SF", "Alero" },
-        { "PF", "Ala-Pívot" },
-        { "C",  "Pívot" },
-    };
-
     // Header
     private VisualElement _headerTeamLogo;
     private Label _headerTeamName;
@@ -36,8 +26,26 @@ public class PlayerAwardsController : UIScreenController
     private Label _rookiePts;
     private Label _rookieReb;
     private Label _rookieAst;
-    private VisualElement _quintetGrid;
-    private VisualElement _rookieGrid;
+    private VisualElement _dpoyPlayerPhoto;
+    private Label _dpoyPlayerName;
+    private Label _dpoyPlayerTeam;
+    private Label _dpoyStl;
+    private Label _dpoyBlk;
+    private VisualElement _sixthPlayerPhoto;
+    private Label _sixthPlayerName;
+    private Label _sixthPlayerTeam;
+    private Label _sixthPts;
+    private Label _sixthReb;
+    private Label _sixthAst;
+    private VisualElement _mipPlayerPhoto;
+    private Label _mipPlayerName;
+    private Label _mipPlayerTeam;
+    private Label _mipNow;
+    private Label _mipPrev;
+    private VisualElement _coachPlayerPhoto;
+    private Label _coachPlayerName;
+    private Label _coachPlayerTeam;
+    private Label _coachCount;
 
     protected override void OnEnable()
     {
@@ -65,8 +73,26 @@ public class PlayerAwardsController : UIScreenController
         _rookiePts = _root.Q<Label>("RookiePts");
         _rookieReb = _root.Q<Label>("RookieReb");
         _rookieAst = _root.Q<Label>("RookieAst");
-        _quintetGrid = _root.Q<VisualElement>("QuintetGrid");
-        _rookieGrid = _root.Q<VisualElement>("RookieGrid");
+        _dpoyPlayerPhoto = _root.Q<VisualElement>("DpoyPlayerPhoto");
+        _dpoyPlayerName = _root.Q<Label>("DpoyPlayerName");
+        _dpoyPlayerTeam = _root.Q<Label>("DpoyPlayerTeam");
+        _dpoyStl = _root.Q<Label>("DpoyStl");
+        _dpoyBlk = _root.Q<Label>("DpoyBlk");
+        _sixthPlayerPhoto = _root.Q<VisualElement>("SixthPlayerPhoto");
+        _sixthPlayerName = _root.Q<Label>("SixthPlayerName");
+        _sixthPlayerTeam = _root.Q<Label>("SixthPlayerTeam");
+        _sixthPts = _root.Q<Label>("SixthPts");
+        _sixthReb = _root.Q<Label>("SixthReb");
+        _sixthAst = _root.Q<Label>("SixthAst");
+        _mipPlayerPhoto = _root.Q<VisualElement>("MipPlayerPhoto");
+        _mipPlayerName = _root.Q<Label>("MipPlayerName");
+        _mipPlayerTeam = _root.Q<Label>("MipPlayerTeam");
+        _mipNow = _root.Q<Label>("MipNow");
+        _mipPrev = _root.Q<Label>("MipPrev");
+        _coachPlayerPhoto = _root.Q<VisualElement>("CoachPlayerPhoto");
+        _coachPlayerName = _root.Q<Label>("CoachPlayerName");
+        _coachPlayerTeam = _root.Q<Label>("CoachPlayerTeam");
+        _coachCount = _root.Q<Label>("CoachCount");
     }
 
     protected override void LoadData()
@@ -76,11 +102,11 @@ public class PlayerAwardsController : UIScreenController
 
     protected override void RegisterCallbacks()
     {
-        var btnEnd = _root.Q<Button>("BtnEndSeason");
-        if (btnEnd != null)
+        var btnGo = _root.Q<Button>("BtnGoQuintos");
+        if (btnGo != null)
         {
-            btnEnd.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.EndSeason); });
-            CursorManager.Instance?.RegisterHandCursor(btnEnd);
+            btnGo.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Quintos); });
+            CursorManager.Instance?.RegisterHandCursor(btnGo);
         }
     }
 
@@ -151,58 +177,56 @@ public class PlayerAwardsController : UIScreenController
             _rookieAst.text = rookie.AvgAst.ToString("F1");
         }
 
-        var allStar = DatabaseManager.Instance.GetAllStarTeam(seasonId, managerId);
-        foreach (var p in allStar)
-            _quintetGrid.Add(BuildQuintetCard(p, true, abbrevByKeyword));
+        var dpoy = DatabaseManager.Instance.GetBestDefensivePlayer(seasonId, managerId);
+        if (dpoy != null)
+        {
+            string dpoyAbbrev = abbrevByKeyword.TryGetValue(dpoy.TeamKeyword, out var da) ? da : "";
+            _dpoyPlayerName.text = string.IsNullOrEmpty(dpoyAbbrev) ? dpoy.PlayerName : $"{dpoy.PlayerName} ({dpoyAbbrev})";
+            _dpoyPlayerTeam.text = dpoy.TeamName;
+            Texture2D dpoyTex = PlayerPhotoHelper.Load(dpoy.PlayerId, dpoy.Photo);
+            _dpoyPlayerPhoto.style.backgroundImage = new StyleBackground(dpoyTex);
+            _dpoyStl.text = dpoy.AvgPts.ToString("F1");
+            _dpoyBlk.text = dpoy.AvgReb.ToString("F1");
+        }
 
-        var allRookie = DatabaseManager.Instance.GetAllRookieTeam(seasonId, managerId);
-        foreach (var p in allRookie)
-            _rookieGrid.Add(BuildQuintetCard(p, false, abbrevByKeyword));
-    }
+        var sixth = DatabaseManager.Instance.GetSixthMan(seasonId, managerId);
+        if (sixth != null)
+        {
+            string sixthAbbrev = abbrevByKeyword.TryGetValue(sixth.TeamKeyword, out var sa) ? sa : "";
+            _sixthPlayerName.text = string.IsNullOrEmpty(sixthAbbrev) ? sixth.PlayerName : $"{sixth.PlayerName} ({sixthAbbrev})";
+            _sixthPlayerTeam.text = sixth.TeamName;
+            Texture2D sixthTex = PlayerPhotoHelper.Load(sixth.PlayerId, sixth.Photo);
+            _sixthPlayerPhoto.style.backgroundImage = new StyleBackground(sixthTex);
+            _sixthPts.text = sixth.AvgPts.ToString("F1");
+            _sixthReb.text = sixth.AvgReb.ToString("F1");
+            _sixthAst.text = sixth.AvgAst.ToString("F1");
+        }
 
-    VisualElement BuildQuintetCard(PlayerAwardInfo p, bool isFive, Dictionary<string, string> abbrevByKeyword)
-    {
-        var card = new VisualElement();
-        card.AddToClassList("quintet-card");
-        card.AddToClassList(isFive ? "quintet-card--five" : "quintet-card--rookie");
+        var mip = DatabaseManager.Instance.GetMostImprovedPlayer(seasonId, managerId);
+        if (mip != null)
+        {
+            string mipAbbrev = abbrevByKeyword.TryGetValue(mip.TeamKeyword, out var ia) ? ia : "";
+            _mipPlayerName.text = string.IsNullOrEmpty(mipAbbrev) ? mip.PlayerName : $"{mip.PlayerName} ({mipAbbrev})";
+            _mipPlayerTeam.text = mip.TeamName;
+            Texture2D mipTex = PlayerPhotoHelper.Load(mip.PlayerId, mip.Photo);
+            _mipPlayerPhoto.style.backgroundImage = new StyleBackground(mipTex);
+            _mipNow.text = mip.AvgPts.ToString("F1");
+            _mipPrev.text = mip.AvgReb.ToString("F1");
+        }
 
-        var posLbl = new Label();
-        posLbl.AddToClassList("quintet-card-pos");
-        posLbl.text = _posSpanish.TryGetValue(p.Position, out var spanish) ? spanish : p.Position;
-        card.Add(posLbl);
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("quintet-card-name");
-        string abbrev = abbrevByKeyword.TryGetValue(p.TeamKeyword, out var a) ? a : "";
-        nameLbl.text = string.IsNullOrEmpty(abbrev) ? p.PlayerName : $"{p.PlayerName} ({abbrev})";
-        card.Add(nameLbl);
-
-        var statRow = new VisualElement();
-        statRow.AddToClassList("quintet-stat-row");
-
-        statRow.Add(MakeSmallStatBox(p.AvgPts.ToString("F1"), "PTS"));
-        statRow.Add(MakeSmallStatBox(p.AvgReb.ToString("F1"), "REB"));
-        statRow.Add(MakeSmallStatBox(p.AvgAst.ToString("F1"), "AST"));
-
-        card.Add(statRow);
-        return card;
-    }
-
-    VisualElement MakeSmallStatBox(string val, string label)
-    {
-        var box = new VisualElement();
-        box.AddToClassList("quintet-stat-box");
-
-        var valLbl = new Label();
-        valLbl.AddToClassList("quintet-stat-val");
-        valLbl.text = val;
-        box.Add(valLbl);
-
-        var lblLbl = new Label();
-        lblLbl.AddToClassList("quintet-stat-lbl");
-        lblLbl.text = label;
-        box.Add(lblLbl);
-
-        return box;
+        var coach = DatabaseManager.Instance.GetCoachOfTheYear(seasonId);
+        if (coach != null)
+        {
+            _coachPlayerName.text = coach.CoachName;
+            _coachPlayerTeam.text = coach.TeamName;
+            _coachCount.text = coach.EntrenadorMes.ToString();
+            var coachLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+            var coachLogoDict = new Dictionary<string, Sprite>();
+            foreach (var s in coachLogos) coachLogoDict[s.name] = s;
+            if (coachLogoDict.TryGetValue(coach.TeamKeyword, out var coachSprite))
+                _coachPlayerPhoto.style.backgroundImage = new StyleBackground(coachSprite);
+            else
+                _coachPlayerPhoto.style.backgroundImage = null;
+        }
     }
 }

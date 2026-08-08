@@ -1,0 +1,43 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Quintos/Quintos.uss?fileID=7433441132597879392&amp;guid=7e5e6ea5522b1e64d8f96796ac0406c2&amp;type=3#Quintos"/>
+    <ui:VisualElement name="QuintosRoot" class="quintos-root">
+        <ui:VisualElement name="TopHeader" class="top-header">
+            <ui:VisualElement class="header-left">
+                <ui:VisualElement class="header-brand">
+                    <ui:Label text="TF" class="header-brand-icon"/>
+                    <ui:Label text="TACTICAL" class="header-brand-text"/>
+                    <ui:Label text="FIVE" class="header-brand-text-gold"/>
+                </ui:VisualElement>
+                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
+                <ui:VisualElement class="header-team-info">
+                    <ui:VisualElement class="header-team-name-row">
+                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
+                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(MEJORES QUINTETOS)"/>
+                    </ui:VisualElement>
+                    <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement class="header-right-group">
+                <ui:VisualElement class="header-season-info">
+                    <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
+                </ui:VisualElement>
+                <ui:Label name="HeaderDate" class="header-date-label" text=""/>
+                <ui:Button name="BtnEndSeason" class="btn-action" text="FIN DE TEMPORADA"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="ContentArea" class="content-area">
+            <ui:VisualElement class="summary-header">
+                <ui:Label text="Mejores Quintetos" class="summary-title"/>
+                <ui:Label name="SeasonTag" text="" class="season-tag"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="QuintetSection" class="quintet-section">
+                <ui:Label text="Mejor Quinteto de la Temporada" class="section-title"/>
+                <ui:VisualElement name="QuintetGrid" class="quintet-grid"/>
+            </ui:VisualElement>
+            <ui:VisualElement name="RookieSection" class="quintet-section">
+                <ui:Label text="Mejor Quinteto de Rookies" class="section-title"/>
+                <ui:VisualElement name="RookieGrid" class="quintet-grid"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

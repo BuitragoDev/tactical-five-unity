@@ -36,6 +36,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument carteraDocument;
     [SerializeField] private UIDocument seasonSummaryDocument;
     [SerializeField] private UIDocument playerAwardsDocument;
+    [SerializeField] private UIDocument quintosDocument;
     [SerializeField] private UIDocument endSeasonDocument;
     [SerializeField] private UIDocument newSeasonDocument;
     [SerializeField] private UIDocument editorDocument;
@@ -169,6 +170,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.PlayerAwards:
                 ShowOnly(playerAwardsDocument);
                 break;
+            case GameScreen.Quintos:
+                ShowOnly(quintosDocument);
+                break;
             case GameScreen.EndSeason:
                 ShowOnly(endSeasonDocument);
                 break;
@@ -236,6 +240,7 @@ public class ScreenManager : MonoBehaviour
         if (carteraDocument != null) carteraDocument.gameObject.SetActive(false);
         if (seasonSummaryDocument != null) seasonSummaryDocument.gameObject.SetActive(false);
         if (playerAwardsDocument != null) playerAwardsDocument.gameObject.SetActive(false);
+        if (quintosDocument != null) quintosDocument.gameObject.SetActive(false);
         if (endSeasonDocument != null) endSeasonDocument.gameObject.SetActive(false);
         if (newSeasonDocument != null) newSeasonDocument.gameObject.SetActive(false);
         if (editorDocument != null) editorDocument.gameObject.SetActive(false);

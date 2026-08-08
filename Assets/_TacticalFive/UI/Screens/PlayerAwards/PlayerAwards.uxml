@@ -22,12 +22,12 @@
                     <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
                 </ui:VisualElement>
                 <ui:Label name="HeaderDate" class="header-date-label" text=""/>
-                <ui:Button name="BtnEndSeason" class="btn-action" text="FIN DE TEMPORADA"/>
+                <ui:Button name="BtnGoQuintos" class="btn-action" text="VER QUINTETOS"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ContentArea" class="content-area">
             <ui:VisualElement class="summary-header">
-                <ui:Label text="Premios de Jugadores" class="summary-title"/>
+                <ui:Label text="Premios Individuales" class="summary-title"/>
                 <ui:Label name="SeasonTag" text="" class="season-tag"/>
             </ui:VisualElement>
             <ui:VisualElement name="AwardsRow" class="awards-row">
@@ -76,13 +76,79 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="QuintetSection" class="award-section">
-                <ui:Label text="Mejor Quinteto de la Temporada" class="section-title"/>
-                <ui:VisualElement name="QuintetGrid" class="quintet-grid"/>
-            </ui:VisualElement>
-            <ui:VisualElement name="RookieSection" class="award-section">
-                <ui:Label text="Mejor Quinteto de Rookies" class="section-title"/>
-                <ui:VisualElement name="RookieGrid" class="quintet-grid"/>
+            <ui:VisualElement name="ExtraAwardsRow" class="extra-awards-row">
+                <ui:VisualElement name="DpoyCard" class="extra-card dpoy-card">
+                    <ui:Label text="Mejor Defensor" class="extra-card-title"/>
+                    <ui:VisualElement class="award-photo-wrapper extra-photo">
+                        <ui:VisualElement name="DpoyPlayerPhoto" class="award-player-photo"/>
+                    </ui:VisualElement>
+                    <ui:Label name="DpoyPlayerName" text="" class="extra-player-name"/>
+                    <ui:Label name="DpoyPlayerTeam" text="" class="extra-player-team"/>
+                    <ui:VisualElement class="award-stat-row extra-stat-row">
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="DpoyStl" text="--" class="award-stat-val"/>
+                            <ui:Label text="ROB" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="DpoyBlk" text="--" class="award-stat-val"/>
+                            <ui:Label text="TAP" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="extra-card sixth-card">
+                    <ui:Label text="Sexto Hombre" class="extra-card-title"/>
+                    <ui:VisualElement class="award-photo-wrapper extra-photo">
+                        <ui:VisualElement name="SixthPlayerPhoto" class="award-player-photo"/>
+                    </ui:VisualElement>
+                    <ui:Label name="SixthPlayerName" text="" class="extra-player-name"/>
+                    <ui:Label name="SixthPlayerTeam" text="" class="extra-player-team"/>
+                    <ui:VisualElement class="award-stat-row extra-stat-row">
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="SixthPts" text="--" class="award-stat-val"/>
+                            <ui:Label text="PTS" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="SixthReb" text="--" class="award-stat-val"/>
+                            <ui:Label text="REB" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="SixthAst" text="--" class="award-stat-val"/>
+                            <ui:Label text="AST" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="extra-card mip-card">
+                    <ui:Label text="Jugador Más Mejorado" class="extra-card-title"/>
+                    <ui:VisualElement class="award-photo-wrapper extra-photo">
+                        <ui:VisualElement name="MipPlayerPhoto" class="award-player-photo"/>
+                    </ui:VisualElement>
+                    <ui:Label name="MipPlayerName" text="" class="extra-player-name"/>
+                    <ui:Label name="MipPlayerTeam" text="" class="extra-player-team"/>
+                    <ui:VisualElement class="award-stat-row extra-stat-row">
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="MipNow" text="--" class="award-stat-val"/>
+                            <ui:Label text="AHORA" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="MipPrev" text="--" class="award-stat-val"/>
+                            <ui:Label text="ANTES" class="award-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="extra-card coach-card">
+                    <ui:Label text="Entrenador del Año" class="extra-card-title"/>
+                    <ui:VisualElement class="award-photo-wrapper extra-photo">
+                        <ui:VisualElement name="CoachPlayerPhoto" class="extra-coach-logo"/>
+                    </ui:VisualElement>
+                    <ui:Label name="CoachPlayerName" text="" class="extra-player-name"/>
+                    <ui:Label name="CoachPlayerTeam" text="" class="extra-player-team"/>
+                    <ui:VisualElement class="award-stat-row extra-stat-row">
+                        <ui:VisualElement class="award-stat-box">
+                            <ui:Label name="CoachCount" text="--" class="award-stat-val"/>
+                            <ui:Label text="ENTRENADOR DEL MES" class="extra-stat-lbl-long"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
