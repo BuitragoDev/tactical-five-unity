@@ -26,6 +26,8 @@ using System.Linq;
     private System.DateTime _currentMonthDate;
     private System.DateTime? _currentGameDate;
     private System.DateTime? _targetDate;
+    private System.DateTime? _minSimDate;
+    private System.DateTime? _maxSimDate;
     private Button _btnSimulateToDate;
     private VisualElement _fastSimConfirmOverlay;
     private Label _fastSimConfirmText;
@@ -73,6 +75,33 @@ using System.Linq;
         
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetAllGames(_manager.id);
+        ComputeSimRange();
+    }
+
+    void ComputeSimRange()
+    {
+        _minSimDate = null;
+        _maxSimDate = null;
+        if (_allGames == null || _allGames.Count == 0) return;
+
+        System.DateTime? first = null;
+        System.DateTime? lastRegular = null;
+        foreach (var g in _allGames)
+        {
+            if (!System.DateTime.TryParseExact(g.game_date, "yyyy-MM-dd",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var date))
+                continue;
+
+            if (first == null || date < first.Value) first = date;
+
+            if (g.game_type == "regular" || g.game_type == "allstar")
+                if (lastRegular == null || date > lastRegular.Value)
+                    lastRegular = date;
+        }
+
+        _minSimDate = first;
+        _maxSimDate = lastRegular;
     }
 
     void AutoSelectCurrentDay()
@@ -455,6 +484,9 @@ using System.Linq;
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.None, out var today)
             && _targetDate.Value >= today
+            && _maxSimDate.HasValue
+            && _targetDate.Value <= _maxSimDate.Value
+            && (!_minSimDate.HasValue || _targetDate.Value >= _minSimDate.Value)
             && _season != null
             && _season.phase != "finished")
         {
