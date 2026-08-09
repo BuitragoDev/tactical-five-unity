@@ -32,6 +32,48 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    /// <summary>
+    /// Asigna al jugador el menor dorsal libre del equipo (0-35), evitando
+    /// los dorsales retirados y los ya ocupados. Si no encuentra hueco usa 0.
+    /// </summary>
+    public void AssignJerseyNumber(PlayerData player, int teamId)
+    {
+        if (player == null) return;
+        var used = _db.Table<PlayerData>()
+                      .Where(p => p.team_id == teamId && p.id != player.id && p.number > 0)
+                      .ToList()
+                      .Select(p => p.number)
+                      .ToHashSet();
+        foreach (var r in _db.Table<RetiredNumberData>()
+                             .Where(r => r.team_id == teamId)
+                             .ToList())
+            used.Add(r.number);
+
+        for (int n = 0; n <= 35; n++)
+        {
+            if (used.Contains(n)) continue;
+            player.number = n;
+            return;
+        }
+        player.number = 0;
+    }
+
+    public List<RetiredNumberData> GetRetiredNumbers(int teamId)
+    {
+        if (!EnsureDb()) return new List<RetiredNumberData>();
+        var all = _db.Table<RetiredNumberData>()
+                     .Where(r => r.team_id == teamId)
+                     .OrderBy(r => r.number)
+                     .ToList();
+
+        var activeIds = _db.Table<PlayerData>()
+                           .Select(p => p.id)
+                           .ToHashSet();
+
+        return all.Where(r => r.player_id == 0 || !activeIds.Contains(r.player_id))
+                  .ToList();
+    }
+
     public List<PlayerData> GetRetiringPlayers()
     {
         var withTeam = _db.Table<PlayerData>()

@@ -1709,6 +1709,7 @@ using System.Linq;
             p.seasons_with_team = 1;
             p.team_id = _myTeam.id;
             p.last_team_id = _myTeam.id;
+            DatabaseManager.Instance.AssignJerseyNumber(p, _myTeam.id);
             DatabaseManager.Instance.UpdatePlayer(p);
 
             DatabaseManager.Instance.InsertTrade(new TradeData

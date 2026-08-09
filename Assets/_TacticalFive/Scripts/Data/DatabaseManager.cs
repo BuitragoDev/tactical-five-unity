@@ -276,6 +276,7 @@ public partial class DatabaseManager : MonoBehaviour
         try { _db.Execute("DROP INDEX IF EXISTS \"IX_Achievements_Manager_Type\""); } catch { }
         _db.CreateTable<GmAchievementData>();
         _db.CreateTable<HallOfFameData>();
+        _db.CreateTable<RetiredNumberData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -314,6 +315,15 @@ public partial class DatabaseManager : MonoBehaviour
         {
             _db.Execute("ALTER TABLE players ADD COLUMN renewal_cooldown_day INTEGER DEFAULT 0");
             Debug.Log("[DB] Migration: added renewal_cooldown_day to players");
+        }
+
+        // Add number (dorsal) to players if missing
+        var playerColsNum = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+        bool hasNumber = playerColsNum.Any(c => c.name == "number");
+        if (!hasNumber)
+        {
+            _db.Execute("ALTER TABLE players ADD COLUMN number INTEGER DEFAULT 0");
+            Debug.Log("[DB] Migration: added number to players");
         }
 
         // Add budget_red_warnings to managers if missing
@@ -846,6 +856,12 @@ public partial class DatabaseManager : MonoBehaviour
         if (_db.Table<HallOfFameData>().Count() == 0)
             SeedHallOfFame();
 
+        if (_db.Table<RetiredNumberData>().Count() == 0)
+        {
+            SeedRetiredNumbers();
+            SeedVeteranRetiredNumbers();
+        }
+
         SeedActivePlayerCareers();
     }
 
@@ -857,6 +873,75 @@ public partial class DatabaseManager : MonoBehaviour
             _db.Insert(h);
         }
         Debug.Log($"[DB] {HallOfFameSeeder.Data.Count} leyendas insertadas en el Salón de la Fama.");
+    }
+
+    public void SeedRetiredNumbers()
+    {
+        var teams = GetAllTeams().ToDictionary(t => t.abbreviation, t => t.id);
+        var hof = HallOfFameSeeder.Data;
+
+        foreach (var (firstName, lastName, number) in RetiredNumberSeeder.Data)
+        {
+            var legend = hof.FirstOrDefault(x => x.first_name == firstName && x.last_name == lastName);
+            if (legend == null)
+            {
+                Debug.LogWarning($"[DB] Leyenda {firstName} {lastName} no encontrada en HallOfFameSeeder");
+                continue;
+            }
+
+            if (!teams.TryGetValue(legend.team_abbreviation, out var teamId))
+            {
+                Debug.LogWarning($"[DB] Equipo {legend.team_abbreviation} no encontrado para retirar dorsal {number} de {firstName} {lastName}");
+                continue;
+            }
+
+            _db.Insert(new RetiredNumberData
+            {
+                team_id = teamId,
+                number = number,
+                player_id = 0,
+                first_name = firstName,
+                last_name = lastName,
+                position = legend.position,
+                rings = legend.rings,
+                career_points = legend.career_points,
+                induction_season = legend.induction_season
+            });
+        }
+        Debug.Log($"[DB] Dorsales iniciales de leyendas HOF retirados sembrados.");
+    }
+
+    public void SeedVeteranRetiredNumbers()
+    {
+        var teams = GetAllTeams().ToDictionary(t => t.abbreviation, t => t.id);
+        var players = _db.Table<PlayerData>().ToList();
+        var playerByName = players.ToLookup(p => (p.first_name, p.last_name));
+
+        foreach (var (firstName, lastName, abbr, number) in VeteranRetiredNumberSeeder.Data)
+        {
+            if (!teams.TryGetValue(abbr, out var teamId))
+            {
+                Debug.LogWarning($"[DB] Equipo {abbr} no encontrado para dorsal veterano de {firstName} {lastName}");
+                continue;
+            }
+
+            var match = playerByName[(firstName, lastName)].FirstOrDefault();
+            var hist = match != null ? GetHistoricalPlayerStats(match.first_name, match.last_name) : null;
+
+            _db.Insert(new RetiredNumberData
+            {
+                team_id = teamId,
+                number = number,
+                player_id = match?.id ?? 0,
+                first_name = firstName,
+                last_name = lastName,
+                position = match?.position ?? "",
+                rings = match?.rings ?? 0,
+                career_points = hist?.total_points ?? 0,
+                induction_season = ""
+            });
+        }
+        Debug.Log($"[DB] Dorsales de veteranos activos sembrados en franquicias históricas.");
     }
 
     public List<HallOfFameData> GetHoFMembers()

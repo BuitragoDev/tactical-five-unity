@@ -21,6 +21,7 @@ public static class SidebarController
         new() { screen = GameScreen.Training,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuEntrenamiento" },
         new() { screen = GameScreen.Employees,   navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuEmpleados" },
         new() { screen = GameScreen.Injured,     navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuLesionados" },
+        new() { screen = GameScreen.Dorsales,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuDorsales" },
 
         new() { screen = GameScreen.Calendar,    navName = "NavCalendar" },
         new() { screen = GameScreen.Results,     navName = "NavResults" },
@@ -87,7 +88,7 @@ public static class SidebarController
                 "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
                 "NavMarket", "NavFinances", "NavArena", "NavManager", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
-                "SubmenuEmpleados", "SubmenuLesionados",
+                "SubmenuEmpleados", "SubmenuLesionados", "SubmenuDorsales",
                 "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",

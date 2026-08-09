@@ -35,6 +35,7 @@ public enum GameScreen
     Historial,
     Training,
     Quinteto,
+    Dorsales,
     Manager,
     Trajectory,
     Premios,

@@ -363,6 +363,7 @@ public static class DraftGenerator
                 is_rookie = 1
             };
 
+            DatabaseManager.Instance.AssignJerseyNumber(player, drafTeamId);
             DatabaseManager.Instance.Db.Insert(player);
             PlayerPhotoHelper.CreateRookiePhoto(player.id);
             draftedPlayers.Add(new DraftPickResult

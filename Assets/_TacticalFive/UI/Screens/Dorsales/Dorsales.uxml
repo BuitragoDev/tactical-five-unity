@@ -1,0 +1,46 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="../Dorsales/Dorsales.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
+
+    <ui:VisualElement name="DorsalesRoot" class="dorsales-root">
+
+        <!-- MAIN -->
+        <ui:VisualElement class="dorsales-main">
+
+            <!-- CONTENT -->
+            <ui:VisualElement class="dorsales-content">
+
+                <!-- SCROLLABLE WRAPPER -->
+                <ui:VisualElement class="dorsales-scroll-wrapper">
+
+                    <!-- TABS -->
+                    <ui:VisualElement class="dorsales-tabs">
+                        <ui:Button name="BtnTabActuales" class="dorsales-tab" text="ACTUALES" />
+                        <ui:Button name="BtnTabRetirados" class="dorsales-tab" text="RETIRADOS" />
+                    </ui:VisualElement>
+
+                    <!-- CURRENT NUMBERS -->
+                    <ui:VisualElement name="TabActuales" class="dorsales-section">
+                        <ui:Label class="section-title" text="DORSALES DE LA PLANTILLA" />
+                        <ui:VisualElement name="TablaActuales" class="dorsales-cards" />
+                    </ui:VisualElement>
+
+                    <!-- RETIRED NUMBERS -->
+                    <ui:VisualElement name="TabRetirados" class="dorsales-section" style="display: none;">
+                        <ui:Label class="section-title" text="DORSALES RETIRADOS" />
+                        <ui:VisualElement name="TablaRetirados" class="dorsales-cards" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

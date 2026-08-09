@@ -46,6 +46,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument playerProfileDocument;
     [SerializeField] private UIDocument premiosDocument;
     [SerializeField] private UIDocument logrosDocument;
+    [SerializeField] private UIDocument dorsalesDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -192,6 +193,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Quinteto:
                 ShowOnly(quintetoDocument);
                 break;
+            case GameScreen.Dorsales:
+                ShowOnly(dorsalesDocument);
+                break;
             case GameScreen.Manager:
                 ShowOnly(managerDocument);
                 break;
@@ -248,6 +252,7 @@ public class ScreenManager : MonoBehaviour
         if (trainingDocument != null) trainingDocument.gameObject.SetActive(false);
 
         if (quintetoDocument != null) quintetoDocument.gameObject.SetActive(false);
+        if (dorsalesDocument != null) dorsalesDocument.gameObject.SetActive(false);
         if (managerDocument != null) managerDocument.gameObject.SetActive(false);
         if (trajectoryDocument != null) trajectoryDocument.gameObject.SetActive(false);
         if (premiosDocument != null) premiosDocument.gameObject.SetActive(false);

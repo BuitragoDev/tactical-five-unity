@@ -49,6 +49,7 @@ public class PlayerData
     public int season_mvps { get; set; }
     public PlayerRole role { get; set; } = PlayerRole.UltimoRecurso;
     public string photo { get; set; }
+    public int number { get; set; } // dorsal
 
     public int GetCalculatedAverage()
     {

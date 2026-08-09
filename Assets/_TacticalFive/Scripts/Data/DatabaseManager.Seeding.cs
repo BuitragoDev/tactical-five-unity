@@ -630,6 +630,7 @@ public partial class DatabaseManager
         _db.BeginTransaction();
         try
         {
+            AssignSeedJerseyNumbers(players, teamByAbbr);
             foreach (var p in players)
                 _db.Insert(p);
             _db.Commit();
@@ -640,6 +641,115 @@ public partial class DatabaseManager
             _db.Rollback();
             Debug.LogError($"[DB] Error insertando jugadores: {e.Message}");
         }
+    }
+
+    static readonly Dictionary<(string, string), int> exceptions = new()
+    {
+        {("Nikola", "Jokic"), 15},
+        {("Shai", "Gilgeous-Alexander"), 2},
+        {("Giannis", "Antetokounmpo"), 7},
+        {("Luka", "Doncic"), 77},
+        {("Stephen", "Curry"), 30},
+        {("Victor", "Wembanyama"), 1},
+        {("LeBron", "James"), 23},
+        {("Anthony", "Edwards"), 5},
+        {("Jayson", "Tatum"), 0},
+        {("Kevin", "Durant"), 35},
+        {("Joel", "Embiid"), 21},
+        {("Devin", "Booker"), 1},
+        {("Donovan", "Mitchell"), 45},
+        {("Anthony", "Davis"), 3},
+        {("Ja", "Morant"), 12},
+        {("Tyrese", "Haliburton"), 0},
+        {("Jalen", "Brunson"), 11},
+        {("Jaylen", "Brown"), 7},
+        {("Domantas", "Sabonis"), 11},
+        {("Trae", "Young"), 11},
+        {("Damian", "Lillard"), 0},
+        {("Tyrese", "Maxey"), 0},
+        {("Cade", "Cunningham"), 2},
+        {("Karl-Anthony", "Towns"), 32},
+        {("Bam", "Adebayo"), 13},
+        {("De'Aaron", "Fox"), 8},
+        {("Kyrie", "Irving"), 11},
+        {("LaMelo", "Ball"), 1},
+        {("Paolo", "Banchero"), 5},
+        {("Alperen", "Sengun"), 28},
+        {("Jalen", "Williams"), 8},
+        {("Jamal", "Murray"), 27},
+        {("DeMar", "DeRozan"), 10},
+        {("Zion", "Williamson"), 1},
+        {("Scottie", "Barnes"), 4},
+        {("Chet", "Holmgren"), 7},
+        {("Pascal", "Siakam"), 43},
+        {("Evan", "Mobley"), 4},
+        {("Jalen", "Johnson"), 1},
+        {("Desmond", "Bane"), 3},
+        {("Derrick", "White"), 9},
+        {("Franz", "Wagner"), 22},
+        {("Mikal", "Bridges"), 25},
+        {("Brandon", "Ingram"), 14},
+        {("Jaren", "Jackson Jr."), 13},
+        {("Cooper", "Flagg"), 32},
+        {("Darius", "Garland"), 10},
+        {("Jrue", "Holiday"), 4},
+        {("Kristaps", "Porzingis"), 6},
+        {("Lauri", "Markkanen"), 23}
+    };
+
+    static void AssignSeedJerseyNumbers(List<PlayerData> players, Dictionary<string, int> teamByAbbr)
+    {
+        var retiredByTeam = BuildRetiredNumbersByTeam(teamByAbbr);
+
+        foreach (var group in players.Where(p => p.team_id > 0).GroupBy(p => p.team_id))
+        {
+            var used = new HashSet<int>();
+            var withExact = new HashSet<PlayerData>();
+            foreach (var exc in exceptions)
+            {
+                var p = group.FirstOrDefault(x => x.first_name == exc.Key.Item1 && x.last_name == exc.Key.Item2);
+                if (p == null) continue;
+                p.number = exc.Value;
+                used.Add(p.number);
+                withExact.Add(p);
+            }
+
+            foreach (var rn in retiredByTeam)
+            {
+                if (rn.TeamId == group.Key && rn.Number <= 35)
+                    used.Add(rn.Number);
+            }
+
+            foreach (var p in group.Where(x => !withExact.Contains(x) && x.number == 0).OrderByDescending(x => x.overall))
+            {
+                for (int n = 0; n <= 35; n++)
+                {
+                    if (used.Contains(n)) continue;
+                    p.number = n;
+                    used.Add(n);
+                    break;
+                }
+            }
+        }
+    }
+
+    static List<(int TeamId, int Number)> BuildRetiredNumbersByTeam(Dictionary<string, int> teamByAbbr)
+    {
+        var result = new List<(int TeamId, int Number)>();
+        var hof = HallOfFameSeeder.Data;
+        foreach (var (firstName, lastName, number) in RetiredNumberSeeder.Data)
+        {
+            var legend = hof.FirstOrDefault(x => x.first_name == firstName && x.last_name == lastName);
+            if (legend == null) continue;
+            if (teamByAbbr.TryGetValue(legend.team_abbreviation, out var tid))
+                result.Add((tid, number));
+        }
+        foreach (var (firstName, lastName, abbr, number) in VeteranRetiredNumberSeeder.Data)
+        {
+            if (teamByAbbr.TryGetValue(abbr, out var tid))
+                result.Add((tid, number));
+        }
+        return result;
     }
 
     int[] GeneratePositionAttrs(int ovr, string pos, string seed)

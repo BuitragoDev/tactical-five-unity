@@ -1789,6 +1789,7 @@ using System.Threading.Tasks;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
                     player.seasons_with_team = 1;
+                    DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(player);
 
                     AchievementService.EvaluateSignStarFA(_manager.id, _myTeam.id, _season?.id ?? 0, player);
@@ -4159,6 +4160,7 @@ List<int> offeredPickIds = new List<int>();
                     fa.contract_years = years;
                     fa.guaranteed_years = years;
                     fa.seasons_with_team = 1;
+                    DatabaseManager.Instance.AssignJerseyNumber(fa, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(fa);
                     DatabaseManager.Instance.InsertTrade(new TradeData
                     {

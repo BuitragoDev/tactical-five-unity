@@ -1361,6 +1361,61 @@ public partial class DatabaseManager
         }
     }
 
+    /// <summary>
+    /// Determina si un jugador retirado merece que su equipo retire su dorsal.
+    /// Criterio: HOF dinámico (mismo WouldInduct) O (>=10 temporadas en el equipo
+    /// y números de carrera altos, usando los mismos umbrales del Salón de la Fama).
+    /// Solo para retiros dinámicos ocurridos durante la partida.
+    /// </summary>
+    public bool ShouldRetireNumber(PlayerData p)
+    {
+        if (p == null || p.number <= 0) return false;
+        if (WouldInduct(p)) return true;
+        if (p.seasons_with_team < 10) return false;
+        try
+        {
+            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            int pts = hist?.total_points ?? 0;
+            int reb = hist?.total_rebounds ?? 0;
+            int ast = hist?.total_assists ?? 0;
+            int fmvps = Math.Max(p.finals_mvps,
+                _db.Table<FinalsRecord>().Count(f => f.mvp == $"{p.first_name} {p.last_name}"));
+            return HallOfFameHelper.ShouldInduct(p.rings, fmvps, pts, reb, ast);
+        }
+        catch { return false; }
+    }
+
+    /// <summary>
+    /// Captura el dorsal retirado de un jugador antes de que sea borrado de la tabla
+    /// players (se llama en StartNewSeason antes de _db.Delete(p)).
+    /// </summary>
+    void TryRetireNumber(PlayerData p, string seasonLabel)
+    {
+        try
+        {
+            if (!ShouldRetireNumber(p) || p.team_id <= 0) return;
+
+            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            _db.Insert(new RetiredNumberData
+            {
+                team_id = p.team_id,
+                number = p.number,
+                player_id = p.id,
+                first_name = p.first_name,
+                last_name = p.last_name,
+                position = p.position,
+                rings = p.rings,
+                career_points = hist?.total_points ?? 0,
+                induction_season = seasonLabel
+            });
+            Debug.Log($"[DB] Dorsal {p.number} retirado por {p.first_name} {p.last_name} ({seasonLabel}, {p.rings} anillos).");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Error retirando dorsal de {p.first_name} {p.last_name}: {ex.Message}");
+        }
+    }
+
     public void SaveSeasonEndRecords(int seasonId, int managerId)
     {
         var season = GetActiveSeason(managerId);
@@ -2547,6 +2602,7 @@ public partial class DatabaseManager
         foreach (var p in allPlayers.Where(p => p.age >= 40))
         {
             TryInductIntoHallOfFame(p, retireSeasonLabel);
+            TryRetireNumber(p, retireSeasonLabel);
             _db.Delete(p);
         }
 
