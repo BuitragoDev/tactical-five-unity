@@ -668,11 +668,85 @@ using System.Threading.Tasks;
             }
         }
 
-        return DatabaseManager.Instance.GetPlayersByTeam(teamId)
+        var activePool = DatabaseManager.Instance.GetPlayersByTeam(teamId)
             .Where(p => p.injury_days == 0)
             .OrderByDescending(p => p.overall)
             .Take(12)
             .ToList();
+
+        return BuildBalancedLineup(activePool);
+    }
+
+    // Quinteto IA balanceado por posición: mejor jugador de cada posición (primaria o
+    // secundaria) en orden PG->SG->SF->PF->C; huecos cubiertos con posiciones cercanas
+    // y último recurso el mejor overall restante. Los titulares se devuelven primero.
+    List<PlayerData> BuildBalancedLineup(List<PlayerData> pool)
+    {
+        var starters = new PlayerData[PositionCodes.Order.Length];
+        var used = new HashSet<int>();
+
+        // Paso 1: mejor jugador por posición exacta (primaria o secundaria)
+        for (int i = 0; i < PositionCodes.Order.Length; i++)
+        {
+            string pos = PositionCodes.Order[i];
+            var best = pool
+                .Where(p => !used.Contains(p.id) && PlaysPosition(p, pos))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                starters[i] = best;
+                used.Add(best.id);
+            }
+        }
+
+        // Paso 2: rellenar huecos con posiciones cercanas
+        for (int i = 0; i < starters.Length; i++)
+        {
+            if (starters[i] != null) continue;
+            string pos = PositionCodes.Order[i];
+            var best = pool
+                .Where(p => !used.Contains(p.id) && IsNearbyPosition(p, pos))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                starters[i] = best;
+                used.Add(best.id);
+            }
+        }
+
+        // Paso 3: último recurso — mejor overall restante
+        for (int i = 0; i < starters.Length; i++)
+        {
+            if (starters[i] != null) continue;
+            var best = pool
+                .Where(p => !used.Contains(p.id))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                starters[i] = best;
+                used.Add(best.id);
+            }
+        }
+
+        var bench = pool.Where(p => !used.Contains(p.id)).Take(7).ToList();
+        return starters.Where(s => s != null).Concat(bench).ToList();
+    }
+
+    static bool PlaysPosition(PlayerData p, string pos)
+    {
+        return p.position == pos || p.secondary_position == pos;
+    }
+
+    static bool IsNearbyPosition(PlayerData p, string pos)
+    {
+        int idx = System.Array.IndexOf(PositionCodes.Order, pos);
+        var nearby = new List<string>();
+        if (idx > 0) nearby.Add(PositionCodes.Order[idx - 1]);
+        if (idx < PositionCodes.Order.Length - 1) nearby.Add(PositionCodes.Order[idx + 1]);
+        return nearby.Contains(p.position) || nearby.Contains(p.secondary_position);
     }
 
     System.Collections.IEnumerator ProcessGameDayRoutine(bool fastSim = false)
