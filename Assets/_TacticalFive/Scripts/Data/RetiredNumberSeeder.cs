@@ -40,7 +40,7 @@ public static class RetiredNumberSeeder
         ("Willis", "Reed", 19),
         ("Walter", "Frazier", 10),
         ("Earl", "Monroe", 15),
-        // POR
+        // PRT
         ("Clyde", "Drexler", 22),
         ("Bill", "Walton", 32),
         // MIA

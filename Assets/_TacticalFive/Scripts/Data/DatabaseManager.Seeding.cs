@@ -716,13 +716,13 @@ public partial class DatabaseManager
 
             foreach (var rn in retiredByTeam)
             {
-                if (rn.TeamId == group.Key && rn.Number <= 35)
+                if (rn.TeamId == group.Key && rn.Number <= 99)
                     used.Add(rn.Number);
             }
 
             foreach (var p in group.Where(x => !withExact.Contains(x) && x.number == 0).OrderByDescending(x => x.overall))
             {
-                for (int n = 0; n <= 35; n++)
+                for (int n = 1; n <= 99; n++)
                 {
                     if (used.Contains(n)) continue;
                     p.number = n;
