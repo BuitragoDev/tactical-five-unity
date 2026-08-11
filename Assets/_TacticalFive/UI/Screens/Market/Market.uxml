@@ -140,8 +140,11 @@
                                         <ui:Label name="SummaryOtherSalaryIn" class="market-summary-value market-summary-positive" text="$0" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
+                                <ui:VisualElement class="market-summary-col market-summary-col--result">
+                                    <ui:Label class="market-summary-team" text="RESULTADO DE LA OFERTA" />
+                                    <ui:VisualElement name="TradeStatus" class="market-trade-status" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement name="TradeStatus" class="market-trade-status" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 

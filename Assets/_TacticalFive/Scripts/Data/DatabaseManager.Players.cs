@@ -33,8 +33,9 @@ public partial class DatabaseManager
     }
 
     /// <summary>
-    /// Asigna al jugador el menor dorsal libre del equipo (1-99), evitando
-    /// los dorsales retirados y los ya ocupados. Si no encuentra hueco usa 0.
+    /// Asigna al jugador un dorsal del equipo: conserva el actual si está libre y no
+    /// retirado; en caso contrario asigna el menor dorsal libre (1-99), evitando los
+    /// retirados y los ya ocupados. Si no encuentra hueco usa 0.
     /// </summary>
     public void AssignJerseyNumber(PlayerData player, int teamId)
     {
@@ -48,6 +49,9 @@ public partial class DatabaseManager
                              .Where(r => r.team_id == teamId)
                              .ToList())
             used.Add(r.number);
+
+        if (player.number > 0 && !used.Contains(player.number))
+            return;
 
         for (int n = 1; n <= 99; n++)
         {

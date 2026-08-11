@@ -56,6 +56,23 @@ public class TradeHelperTests
     }
 
     [Test]
+    public void PickBonus_ProtectedPick_IsPenalized()
+    {
+        // Pick 1 de R1 sin proteger vale 19; top-4 protegido pierde 8.
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 1, protected_from = 4 }), Is.EqualTo(11));
+        // Pick 30 de R1 base 10; top-5 protegido -> 1 (mínimo).
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 30, protected_from = 5 }), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void PickBonus_ProtectedPick_NeverBelowOne()
+    {
+        // Protección máxima no deja el bonus en 0 ni negativo.
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 1, protected_from = 30 }), Is.GreaterThanOrEqualTo(1));
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 2, pick_number = 60, protected_from = 14 }), Is.EqualTo(1));
+    }
+
+    [Test]
     public void ValidateTrade_FairTrade_HasNoErrors()
     {
         var a = new List<PlayerData> { Player(10_000_000) };

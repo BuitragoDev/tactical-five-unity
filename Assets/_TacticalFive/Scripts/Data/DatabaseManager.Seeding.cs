@@ -1272,7 +1272,10 @@ public partial class DatabaseManager
                 round = 1,
                 pick_number = pickNum++,
                 original_team_id = teamId,
-                current_team_id = teamId
+                current_team_id = teamId,
+                protected_from = 0,
+                is_swap = 0,
+                swap_original_team_id = 0
             });
         }
         foreach (var teamId in orderedTeamIds)
@@ -1283,7 +1286,10 @@ public partial class DatabaseManager
                 round = 2,
                 pick_number = pickNum++,
                 original_team_id = teamId,
-                current_team_id = teamId
+                current_team_id = teamId,
+                protected_from = 0,
+                is_swap = 0,
+                swap_original_team_id = 0
             });
         }
         Debug.Log($"[DB] {orderedTeamIds.Count * 2} draft picks seeded for season {newSeasonId} (previous={previousSeasonId?.ToString() ?? "none"}).");
@@ -1325,7 +1331,8 @@ public partial class DatabaseManager
         _db.Update(pick);
     }
 
-    public void TransferDraftPicks(List<int> pickIds, int fromTeamId, int toTeamId)
+    public void TransferDraftPicks(List<int> pickIds, int fromTeamId, int toTeamId,
+                                   int protectedFrom = 0, int isSwap = 0, int swapOriginalTeamId = 0)
     {
         if (!EnsureDb()) return;
         foreach (var id in pickIds)
@@ -1334,6 +1341,12 @@ public partial class DatabaseManager
             if (pick == null) continue;
             if (pick.current_team_id != fromTeamId) continue;
             pick.current_team_id = toTeamId;
+            if (protectedFrom > 0 || isSwap != 0)
+            {
+                pick.protected_from = protectedFrom;
+                pick.is_swap = isSwap;
+                pick.swap_original_team_id = swapOriginalTeamId;
+            }
             _db.Update(pick);
         }
     }

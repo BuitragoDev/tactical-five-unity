@@ -83,10 +83,33 @@ using System.Linq;
 
     // NBA salary thresholds (use TradeHelper constants as source of truth)
 
+    class PickDropdown
+    {
+        public VisualElement Root;
+        public Button Trigger;
+        public VisualElement List;
+        public Label ValueLabel;
+        public Button SwapItem;
+        public DraftPickData Pick;
+        public int Value;
+    }
+
+    private VisualElement _dropdownOverlay;
+    private PickDropdown _openDropdown;
+
     protected override void OnEnable()
     {
         base.OnEnable();
         InitTableHeaders();
+
+        _dropdownOverlay = new VisualElement();
+        _dropdownOverlay.style.position = Position.Absolute;
+        _dropdownOverlay.style.left = 0;
+        _dropdownOverlay.style.right = 0;
+        _dropdownOverlay.style.top = 0;
+        _dropdownOverlay.style.bottom = 0;
+        _dropdownOverlay.pickingMode = PickingMode.Ignore;
+        _root.Add(_dropdownOverlay);
     }
     protected override void CacheReferences()
     {
@@ -630,7 +653,9 @@ using System.Linq;
 
             int pickId = pk.id;
             string abbr = teamsLookup.TryGetValue(pk.original_team_id, out var a) ? a : "???";
-            var lbl = new Label($"R{pk.round} {abbr}");
+            string baseLabel = $"R{pk.round} {abbr}";
+            string suffix = pk.protected_from > 0 ? $" (PROT top-{pk.protected_from})" : (pk.is_swap == 1 ? " (SWAP)" : "");
+            var lbl = new Label(baseLabel + suffix);
             lbl.AddToClassList("market-pick-label");
             lbl.style.color = new StyleColor(new Color32(236, 240, 241, 255));
             lbl.style.fontSize = 16;
@@ -640,6 +665,17 @@ using System.Linq;
             lbl.style.unityFontStyleAndWeight = FontStyle.Bold;
             row.Add(lbl);
 
+            void RefreshSuffix(DraftPickData target)
+            {
+                string sfx = target.protected_from > 0 ? $" (PROT top-{target.protected_from})" : (target.is_swap == 1 ? " (SWAP)" : "");
+                lbl.text = baseLabel + sfx;
+            }
+
+            PickDropdown dd = null;
+
+            if (isMyTeam)
+                dd = BuildPickDropdown(row, pk, selectedSet, RefreshSuffix);
+
             row.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -648,13 +684,272 @@ using System.Linq;
                 else
                     selectedSet.Add(pickId);
                 row.EnableInClassList("selected", selectedSet.Contains(pickId));
+                if (dd != null)
+                {
+                    if (selectedSet.Contains(pickId))
+                        OpenDropdown(dd);
+                    else
+                        CloseAllDropdowns();
+                }
                 UpdateSummary();
                 CheckTradeStatus();
             });
             if (CursorManager.Instance != null)
                 CursorManager.Instance.RegisterHandCursor(row);
+
             body.Add(row);
         }
+    }
+
+    PickDropdown BuildPickDropdown(VisualElement row, DraftPickData pk, HashSet<int> selectedSet, System.Action<DraftPickData> refreshSuffix)
+    {
+        var root = new VisualElement();
+        root.AddToClassList("market-pick-dropdown");
+        root.style.display = DisplayStyle.Flex;
+
+        var trigger = new Button();
+        trigger.AddToClassList("market-pick-trigger");
+
+        var valueLabel = new Label(pk.protected_from > 0 ? $"Top-{pk.protected_from}" : "Sin proteger");
+        valueLabel.AddToClassList("market-pick-trigger-value");
+        if (pk.is_swap == 1) valueLabel.AddToClassList("market-pick-trigger-value--swap");
+        trigger.Add(valueLabel);
+
+        var arrow = new Label("▾");
+        arrow.AddToClassList("market-pick-trigger-arrow");
+        trigger.Add(arrow);
+
+        var list = new VisualElement();
+        list.AddToClassList("market-pick-dropdown-list");
+        list.style.display = DisplayStyle.None;
+
+        var dd = new PickDropdown
+        {
+            Root = root,
+            Trigger = trigger,
+            List = list,
+            ValueLabel = valueLabel,
+            Pick = pk,
+            Value = pk.protected_from
+        };
+
+        foreach (var prot in new[] { 0, 3, 5, 14 })
+        {
+            var item = new Button();
+            item.AddToClassList("market-pick-dropdown-item");
+            item.text = prot == 0 ? "Sin proteger" : $"Proteger top-{prot}";
+            if (prot == pk.protected_from)
+                item.AddToClassList("market-pick-dropdown-item--selected");
+
+            int captured = prot;
+            item.clicked += () =>
+            {
+                SelectProtection(dd, captured, item, refreshSuffix);
+            };
+
+            CursorManager.Instance?.RegisterHandCursor(item);
+            list.Add(item);
+        }
+
+        if (_selectedTeam != null && _myTeam.id != _selectedTeam.id)
+        {
+            var swapItem = new Button();
+            swapItem.AddToClassList("market-pick-dropdown-item");
+            swapItem.AddToClassList("market-pick-dropdown-item--swap");
+            swapItem.text = pk.is_swap == 1 ? "Swap: SÍ" : "Swap: NO";
+            swapItem.clicked += () => ToggleSwap(dd, swapItem, refreshSuffix);
+            CursorManager.Instance?.RegisterHandCursor(swapItem);
+            list.Add(swapItem);
+            dd.SwapItem = swapItem;
+        }
+
+        trigger.clicked += () =>
+        {
+            if (selectedSet.Contains(pk.id))
+            {
+                if (_openDropdown == dd)
+                    CloseAllDropdowns();
+                else
+                    OpenDropdown(dd);
+            }
+            else
+            {
+                selectedSet.Add(pk.id);
+                row.EnableInClassList("selected", true);
+                OpenDropdown(dd);
+                UpdateSummary();
+                CheckTradeStatus();
+            }
+        };
+        trigger.RegisterCallback<PointerDownEvent>(e => e.StopPropagation());
+        trigger.RegisterCallback<ClickEvent>(e => e.StopPropagation());
+
+        root.Add(trigger);
+        root.Add(list);
+        CursorManager.Instance?.RegisterHandCursor(trigger);
+        row.Add(root);
+        return dd;
+    }
+
+    void SelectProtection(PickDropdown dd, int prot, Button clickedItem, System.Action<DraftPickData> refreshSuffix)
+    {
+        var pick = dd.Pick;
+        bool wasSwap = pick.is_swap == 1;
+        pick.protected_from = Mathf.Clamp(prot, 0, 14);
+        if (wasSwap)
+        {
+            pick.is_swap = 0;
+            pick.swap_original_team_id = 0;
+            if (dd.SwapItem != null)
+            {
+                dd.SwapItem.text = "Swap: NO";
+                dd.SwapItem.RemoveFromClassList("active");
+            }
+            dd.ValueLabel?.RemoveFromClassList("market-pick-trigger-value--swap");
+        }
+        dd.Value = pick.protected_from;
+        dd.ValueLabel.text = pick.protected_from > 0 ? $"Top-{pick.protected_from}" : "Sin proteger";
+        foreach (var b in dd.List.Query<Button>(className: "market-pick-dropdown-item").ToList())
+            b.RemoveFromClassList("market-pick-dropdown-item--selected");
+        clickedItem.AddToClassList("market-pick-dropdown-item--selected");
+        CloseAllDropdowns();
+        refreshSuffix?.Invoke(pick);
+        UpdateSummary();
+        CheckTradeStatus();
+    }
+
+    void ToggleSwap(PickDropdown dd, Button swapItem, System.Action<DraftPickData> refreshSuffix)
+    {
+        var pick = dd.Pick;
+        bool on = pick.is_swap != 1;
+        if (on)
+        {
+            if (_selectedOtherPicks.Count == 0)
+            {
+                ShowTradeNotice("Selecciona antes un pick del otro equipo para activar el Swap.");
+                return;
+            }
+            var partner = _otherPicks?.Where(p => _selectedOtherPicks.Contains(p.id))
+                .OrderBy(p => p.round).ThenBy(p => p.pick_number).FirstOrDefault();
+            if (partner == null) return;
+            pick.is_swap = 1;
+            pick.swap_original_team_id = partner.original_team_id;
+            dd.ValueLabel.text = "Swap";
+        }
+        else
+        {
+            pick.is_swap = 0;
+            pick.swap_original_team_id = 0;
+            dd.ValueLabel.text = dd.Value > 0 ? $"Top-{dd.Value}" : "Sin proteger";
+        }
+        swapItem.text = on ? "Swap: SÍ" : "Swap: NO";
+        swapItem.EnableInClassList("active", on);
+        var swapValLabel = dd.Trigger.Q<Label>(className: "market-pick-trigger-value");
+        if (swapValLabel != null)
+            swapValLabel.EnableInClassList("market-pick-trigger-value--swap", on);
+        refreshSuffix?.Invoke(pick);
+        UpdateSummary();
+        CheckTradeStatus();
+    }
+
+    void ShowTradeNotice(string message)
+    {
+        if (_tradeStatus == null) return;
+        _tradeStatus.Clear();
+
+        var box = new VisualElement();
+        box.AddToClassList("market-trade-status-box");
+        box.AddToClassList("invalid");
+
+        var icon = new Label("⚠");
+        icon.AddToClassList("market-trade-status-icon");
+        box.Add(icon);
+
+        var content = new VisualElement();
+        var title = new Label(message);
+        title.AddToClassList("market-trade-status-title");
+        content.Add(title);
+        box.Add(content);
+
+        _tradeStatus.Add(box);
+    }
+
+    void OpenDropdown(PickDropdown dd)
+    {
+        CloseAllDropdowns();
+        if (dd == null) return;
+
+        _openDropdown = dd;
+        var list = dd.List;
+
+        list.RemoveFromHierarchy();
+        _dropdownOverlay.Add(list);
+
+        var triggerBounds = dd.Trigger.worldBound;
+        list.style.position = Position.Absolute;
+
+        list.style.left = -9999;
+        list.style.top = -9999;
+        list.style.display = DisplayStyle.Flex;
+
+        _root.schedule.Execute(() =>
+        {
+            float listHeight = list.resolvedStyle.height;
+            float top = (triggerBounds.yMin + triggerBounds.yMax) / 2f - listHeight / 2f;
+            if (top < 0) top = 0;
+            if (top + listHeight > _root.worldBound.height)
+                top = _root.worldBound.height - listHeight;
+            float left = triggerBounds.xMax + 4;
+            if (left + list.resolvedStyle.width > _root.worldBound.width)
+                left = triggerBounds.xMin - list.resolvedStyle.width - 4;
+            if (left < 0) left = 0;
+            list.style.left = left;
+            list.style.top = top;
+        }).ExecuteLater(30);
+
+        _root.RegisterCallbackOnce<PointerDownEvent>(OnPointerDownAnywhere);
+    }
+
+    void CloseAllDropdowns()
+    {
+        if (_openDropdown != null)
+        {
+            var list = _openDropdown.List;
+            list.RemoveFromHierarchy();
+            list.style.position = Position.Relative;
+            list.style.left = StyleKeyword.Null;
+            list.style.top = StyleKeyword.Null;
+            list.style.width = StyleKeyword.Null;
+            list.style.display = DisplayStyle.None;
+            _openDropdown.Root.Add(list);
+            _openDropdown = null;
+        }
+    }
+
+    void OnPointerDownAnywhere(PointerDownEvent evt)
+    {
+        if (_openDropdown == null) return;
+
+        var target = evt.target as VisualElement;
+        if (target != null && IsChildOf(target, _openDropdown.List))
+            return;
+        if (target != null && target == _openDropdown.Trigger)
+            return;
+        if (target != null && IsChildOf(target, _openDropdown.Trigger))
+            return;
+
+        CloseAllDropdowns();
+    }
+
+    static bool IsChildOf(VisualElement child, VisualElement parent)
+    {
+        var current = child;
+        while (current != null)
+        {
+            if (current == parent) return true;
+            current = current.parent;
+        }
+        return false;
     }
 
     VisualElement CreateTableHeader()
@@ -1042,15 +1337,26 @@ using System.Linq;
             p.team_id = _myTeam.id;
             DatabaseManager.Instance.UpdatePlayer(p);
         }
+        foreach (var p in mySelected)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, _selectedTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+        foreach (var p in otherSelected)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, _myTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
 
         // Transfer picks
         var myPicksSel = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var otherPicksSel = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         if (myPicksSel.Count > 0)
         {
-            var ids = myPicksSel.Select(p => p.id).ToList();
-            DatabaseManager.Instance.TransferDraftPicks(ids, _myTeam.id, _selectedTeam.id);
             foreach (var pk in myPicksSel)
+            {
+                DatabaseManager.Instance.TransferDraftPicks(new List<int> { pk.id }, _myTeam.id, _selectedTeam.id,
+                    pk.protected_from, pk.is_swap, pk.swap_original_team_id);
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
@@ -1062,6 +1368,7 @@ using System.Linq;
                     pick_id = pk.id,
                     trade_type = "pick_trade"
                 });
+            }
         }
         if (otherPicksSel.Count > 0)
         {
@@ -1763,15 +2070,31 @@ using System.Linq;
             p.team_id = _myTeam.id;
             DatabaseManager.Instance.UpdatePlayer(p);
         }
+        foreach (var p in ownSA)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, _selectedTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+        foreach (var p in mySelected)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, _selectedTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+        foreach (var p in otherSelected)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, _myTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
 
         // 5) Transferir picks
         var myPicksSel = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var otherPicksSel = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         if (myPicksSel.Count > 0)
         {
-            var ids = myPicksSel.Select(p => p.id).ToList();
-            DatabaseManager.Instance.TransferDraftPicks(ids, _myTeam.id, _selectedTeam.id);
             foreach (var pk in myPicksSel)
+            {
+                DatabaseManager.Instance.TransferDraftPicks(new List<int> { pk.id }, _myTeam.id, _selectedTeam.id,
+                    pk.protected_from, pk.is_swap, pk.swap_original_team_id);
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
@@ -1783,6 +2106,7 @@ using System.Linq;
                     pick_id = pk.id,
                     trade_type = "pick_trade"
                 });
+            }
         }
         if (otherPicksSel.Count > 0)
         {

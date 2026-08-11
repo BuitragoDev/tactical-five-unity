@@ -177,10 +177,12 @@ public static class DraftGenerator
             foreach (var c in candidates) generationalPicks.Add(c);
         }
 
+        var round1Owners = BuildSlotOwners(season, 1, draftOrder);
+        var round2Owners = BuildSlotOwners(season, 2, draftOrder);
+
         for (int pick = 0; pick < 60; pick++)
         {
             bool isRound2 = pick >= 30;
-            int round = isRound2 ? 2 : 1;
 
             TeamData team;
             if (isRound2)
@@ -313,12 +315,9 @@ public static class DraftGenerator
             salary = (salary / 100000) * 100000;
 
             int drafTeamId = team.id;
-            var pickRow = DatabaseManager.Instance.Db.Table<DraftPickData>()
-                .FirstOrDefault(p => p.season_id == season.id
-                                     && p.round == round
-                                     && p.original_team_id == team.id);
-            if (pickRow != null)
-                drafTeamId = pickRow.current_team_id;
+            var slotOwners = isRound2 ? round2Owners : round1Owners;
+            if (slotOwners.TryGetValue(pick % 30, out var ownerTeam) && ownerTeam != null)
+                drafTeamId = ownerTeam.id;
 
             var player = new PlayerData
             {
@@ -429,5 +428,84 @@ public static class DraftGenerator
         });
 
         return rows;
+    }
+
+    // Resuelve qué equipo ejecuta cada slot (posición 1-30) de una ronda,
+    // teniendo en cuenta transfers (current_team_id), protección top-N
+    // (protected_from) y derechos de swap (is_swap / swap_original_team_id).
+    static Dictionary<int, TeamData> BuildSlotOwners(SeasonData season, int round, List<TeamData>[] draftOrder)
+    {
+        var owners = new Dictionary<int, TeamData>();
+
+        var picks = DatabaseManager.Instance.Db.Table<DraftPickData>()
+            .Where(p => p.season_id == season.id && p.round == round)
+            .ToList();
+
+        var teamsById = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);
+
+        // Slot position -> pick (persistido) cuyo original_team_id coincide con el equipo del slot.
+        for (int slot = 0; slot < draftOrder.Length; slot++)
+        {
+            var slotTeam = draftOrder[slot]?.FirstOrDefault();
+            if (slotTeam == null) continue;
+
+            var pick = picks.FirstOrDefault(p => p.original_team_id == slotTeam.id);
+            TeamData owner = slotTeam;
+
+            if (pick != null)
+            {
+                if (pick.protected_from > 0 && (slot + 1) <= pick.protected_from)
+                {
+                    // Pick protegido dentro del rango: revierte al equipo original.
+                    owner = slotTeam;
+                }
+                else if (teamsById.TryGetValue(pick.current_team_id, out var current))
+                {
+                    owner = current;
+                }
+            }
+
+            owners[slot] = owner;
+        }
+
+        // Swap: el poseedor (current_team_id) del pick marcado como swap se queda con el
+        // slot mejor (menor índice) entre su pick y el del equipo partner; el propietario
+        // del pick partner se lleva el peor. Aplica solo si la posición del partner es mejor.
+        foreach (var swapPick in picks.Where(p => p.is_swap == 1))
+        {
+            if (swapPick.protected_from > 0) continue;
+
+            var partner = picks.FirstOrDefault(p => p.original_team_id == swapPick.swap_original_team_id);
+            if (partner == null) continue;
+
+            int selfSlot = -1;
+            int partnerSlot = -1;
+            for (int i = 0; i < draftOrder.Length; i++)
+            {
+                var t = draftOrder[i]?.FirstOrDefault();
+                if (t == null) continue;
+                if (t.id == swapPick.original_team_id) selfSlot = i;
+                if (t.id == partner.original_team_id) partnerSlot = i;
+            }
+            if (selfSlot == -1 || partnerSlot == -1 || selfSlot == partnerSlot) continue;
+
+            var swapHolder = teamsById.TryGetValue(swapPick.current_team_id, out var sh)
+                ? sh : slotById(swapPick.current_team_id);
+            var partnerHolder = teamsById.TryGetValue(partner.current_team_id, out var ph)
+                ? ph : slotById(partner.current_team_id);
+
+            if (partnerSlot < selfSlot)
+            {
+                owners[partnerSlot] = swapHolder;
+                owners[selfSlot] = partnerHolder;
+            }
+        }
+
+        return owners;
+    }
+
+    static TeamData slotById(int teamId)
+    {
+        return DatabaseManager.Instance.GetAllTeams().FirstOrDefault(t => t.id == teamId);
     }
 }
