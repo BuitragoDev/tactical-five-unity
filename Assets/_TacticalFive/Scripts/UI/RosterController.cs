@@ -1400,8 +1400,10 @@ bool hasTeamOpt = _teamOptionActive;
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-        // Mover jugador a agentes libres (team_id = 0)
+        // Mover jugador a agentes libres (team_id = 0) y perder Bird rights
         _selectedPlayer.team_id = 0;
+        _selectedPlayer.last_team_id = 0;
+        _selectedPlayer.seasons_with_team = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
         // Descontar penalización del presupuesto
@@ -1491,6 +1493,8 @@ bool hasTeamOpt = _teamOptionActive;
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
         _selectedPlayer.team_id = 0;
+        _selectedPlayer.last_team_id = 0;
+        _selectedPlayer.seasons_with_team = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
         long remainder = remainingSalary;

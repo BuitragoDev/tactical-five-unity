@@ -157,6 +157,45 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
+        <!-- MATCHUP PREVIEW OVERLAY -->
+        <ui:VisualElement name="MatchupPreviewOverlay" class="matchup-preview-overlay" style="display: none;">
+            <ui:VisualElement class="matchup-preview-header">
+                <ui:Label class="matchup-preview-title" text="PRONÓSTICO DEL PARTIDO" />
+                <ui:Label name="PreviewFavorite" class="matchup-preview-favorite" text="" />
+            </ui:VisualElement>
+
+            <ui:VisualElement class="matchup-preview-teams">
+                <ui:VisualElement name="PreviewHomeBlock" class="matchup-preview-team">
+                    <ui:VisualElement name="PreviewHomeLogo" class="matchup-preview-logo" />
+                    <ui:Label name="PreviewHomeName" class="matchup-preview-team-name" text="" />
+                    <ui:Label name="PreviewHomeProb" class="matchup-preview-prob" text="" />
+                </ui:VisualElement>
+                <ui:Label class="matchup-preview-vs" text="VS" />
+                <ui:VisualElement name="PreviewAwayBlock" class="matchup-preview-team">
+                    <ui:VisualElement name="PreviewAwayLogo" class="matchup-preview-logo" />
+                    <ui:Label name="PreviewAwayName" class="matchup-preview-team-name" text="" />
+                    <ui:Label name="PreviewAwayProb" class="matchup-preview-prob" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:VisualElement class="matchup-preview-rosters">
+                <ui:VisualElement class="matchup-preview-roster-col">
+                    <ui:Label class="matchup-preview-roster-title" text="QUINTETO" />
+                    <ui:VisualElement name="PreviewHomeStarters" class="matchup-preview-starter-row" />
+                    <ui:Label class="matchup-preview-roster-title" text="BANQUILLO" />
+                    <ui:VisualElement name="PreviewHomeBench" class="matchup-preview-bench-list" />
+                </ui:VisualElement>
+                <ui:VisualElement class="matchup-preview-roster-col">
+                    <ui:Label class="matchup-preview-roster-title" text="QUINTETO" />
+                    <ui:VisualElement name="PreviewAwayStarters" class="matchup-preview-starter-row" />
+                    <ui:Label class="matchup-preview-roster-title" text="BANQUILLO" />
+                    <ui:VisualElement name="PreviewAwayBench" class="matchup-preview-bench-list" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Button name="BtnStartGame" class="matchup-preview-btn" text="IR AL PARTIDO ►" />
+        </ui:VisualElement>
+
     </ui:VisualElement>
 
 </ui:UXML>

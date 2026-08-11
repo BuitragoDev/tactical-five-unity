@@ -19,7 +19,7 @@ public partial class DatabaseManager
         void Add(int pid, string abbr, string fn, string ln, string pos, int age, string nat,
                  int h, int w, int ovr, int pot, int spd, int sht, int thr, int pas,
                  int drb, int def, int reb, int ath, int iq, int stl, int blk,
-                 long sal, int yrs, bool rookie, int rings = 0, int finalsMvps = 0)
+                 long sal, int yrs, bool rookie, int rings = 0, int finalsMvps = 0, int finalsPlayed = 0, int seasonMvps = 0)
         {
             int teamId = teamByAbbr.TryGetValue(abbr, out var tid) ? tid : 0;
 
@@ -63,6 +63,8 @@ public partial class DatabaseManager
                 is_rookie = rookie ? 1 : 0,
                 rings = rings,
                 finals_mvps = finalsMvps,
+                finals_played = finalsPlayed,
+                season_mvps = seasonMvps,
                 seasons_with_team = Math.Max(1, 5 - yrs),
                 injury_days = 0,
                 injury_type = "",
@@ -95,9 +97,9 @@ public partial class DatabaseManager
 
         // ── BOS ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(15, "BOS", "Jayson",    "Tatum",            "PF", 28, "USA", 203,  95, 94, 96, 97, 96, 99, 91, 96, 94, 94, 96, 94, 94, 75, 54100000, 4, false, 1, 2);
+        Add(15, "BOS", "Jayson",    "Tatum",            "PF", 28, "USA", 203,  95, 94, 96, 97, 96, 99, 91, 96, 94, 94, 96, 94, 94, 75, 54100000, 4, false, 1, 2, 4);
         Add(16, "BOS", "Paul",      "George",           "SF", 36, "USA", 206, 100, 86, 87, 89, 91, 89, 87, 84, 84, 74, 96, 91, 87, 68, 35000000, 2, false);
-        Add(17, "BOS", "Derrick",   "White",            "PG", 32, "USA", 193,  86, 89, 90, 91, 94, 91, 91, 96, 74, 84, 96, 94, 79, 85, 28100000, 3, false, 1, 2);
+        Add(17, "BOS", "Derrick",   "White",            "PG", 32, "USA", 193,  86, 89, 90, 91, 94, 91, 91, 96, 74, 84, 96, 94, 79, 85, 28100000, 3, false, 1, 2, 4);
         Add(18, "BOS", "Payton",    "Pritchard",        "PG", 28, "USA", 185,  88, 84, 90, 84, 94, 84, 89, 83, 78, 84, 89, 74, 74, 74,  7200000, 3, false, 1, 2);
         Add(19, "BOS", "Sam",       "Hauser",           "SF", 28, "USA", 201,  98, 80, 88, 79, 99, 74, 69, 79, 84, 79, 89, 77, 77, 62, 10000000, 4, false, 1, 2);
         Add(20, "BOS", "Neemias",   "Queta",            "C",  27, "PRT", 213, 111, 81, 84, 79, 59, 74, 74, 91, 94, 84, 84, 89, 89, 65, 11000000, 4, false, 1, 1);
@@ -185,13 +187,13 @@ public partial class DatabaseManager
 
         // ── DAL ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(100, "DAL", "Kyrie",      "Irving",         "PG", 34, "USA", 188,  88, 94, 95, 89, 94, 93, 92, 88, 78, 86, 92, 91, 82, 78, 36500000, 2, false, 1, 4);
+        Add(100, "DAL", "Kyrie",      "Irving",         "PG", 34, "USA", 188,  88, 94, 95, 89, 94, 93, 92, 88, 78, 86, 92, 91, 82, 78, 36500000, 2, false, 1, 4, 4);
         Add(101, "DAL", "Cooper",     "Flagg",          "SF", 19, "USA", 206,  92, 90, 99, 88, 86, 80, 86, 84, 89, 91, 86, 84, 82, 80, 13800000, 4, false);
         Add(102, "DAL", "P.J.",       "Washington",     "PF", 27, "USA", 201, 104, 82, 88, 81, 83, 83, 79, 77, 87, 84, 80, 80, 77, 73, 14100000, 2, false);
         Add(103, "DAL", "Santi",      "Aldama",         "PF", 25, "ESP", 211,  98, 80, 88, 79, 81, 83, 78, 76, 80, 80, 78, 78, 74, 73, 12000000, 4, false);
         Add(104, "DAL", "Dereck",     "Lively II",      "C",  22, "USA", 216, 104, 84, 90, 82, 82, 65, 72, 65, 90, 92, 78, 82, 82, 94,  5200000, 2, false);
         Add(105, "DAL", "Daniel",     "Gafford",        "C",  27, "USA", 208, 120, 81, 88, 82, 85, 38, 68, 65, 88, 90, 78, 80, 78, 96, 14300000, 2, false);
-        Add(106, "DAL", "Klay",       "Thompson",       "SG", 36, "USA", 196,  99, 82, 82, 76, 85, 90, 82, 85, 75, 62, 88, 90, 72, 45, 16600000, 2, false, 4, 6);
+        Add(106, "DAL", "Klay",       "Thompson",       "SG", 36, "USA", 196,  99, 82, 82, 76, 85, 90, 82, 85, 75, 62, 88, 90, 72, 45, 16600000, 2, false, 4, 6, 6);
         Add(107, "DAL", "Max",        "Christie",       "SG", 23, "USA", 196,  86, 79, 84, 82, 80, 85, 76, 78, 84, 70, 76, 80, 80, 58,  7700000, 3, false);
         Add(108, "DAL", "Naji",       "Marshall",       "SF", 28, "USA", 198,  99, 80, 84, 81, 80, 80, 78, 78, 82, 78, 78, 80, 80, 61, 17400000, 3, false);
         Add(109, "DAL", "Caleb",      "Martin",         "SF", 30, "USA", 196,  92, 79, 81, 81, 80, 80, 77, 78, 82, 76, 78, 80, 80, 61,  9500000, 2, false);
@@ -203,7 +205,7 @@ public partial class DatabaseManager
 
         // ── DEN ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(118, "DEN", "Nikola",     "Jokic",          "C",  31, "SRB", 211, 129, 98, 99, 98, 99, 99, 99, 98, 99, 99, 99, 99, 97, 94, 62000000, 4, false, 1, 1);
+        Add(118, "DEN", "Nikola",     "Jokic",          "C",  31, "SRB", 211, 129, 98, 99, 98, 99, 99, 99, 98, 99, 99, 99, 99, 97, 94, 62000000, 4, false, 1, 1, 3, 3);
         Add(119, "DEN", "Jamal",      "Murray",         "PG", 29, "CAN", 193,  98, 90, 94, 91, 95, 93, 92, 91, 86, 88, 94, 92, 84, 73, 50000000, 4, false, 1, 1);
         Add(120, "DEN", "Aaron",      "Gordon",         "PF", 31, "USA", 203, 107, 86, 90, 86, 87, 80, 82, 85, 90, 88, 86, 83, 78, 95, 33000000, 3, false, 1, 1);
         Add(121, "DEN", "Cameron",    "Johnson",        "SF", 30, "USA", 203,  95, 85, 89, 84, 88, 92, 84, 86, 84, 84, 81, 80, 86, 75, 23000000, 2, false);
@@ -243,14 +245,14 @@ public partial class DatabaseManager
 
         // ── GSW ── 14 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(151, "GSW", "Stephen",   "Curry",           "PG", 38, "USA", 188,  84, 98, 95, 99, 95, 99, 99, 99, 95, 68, 99, 95, 99, 69, 59600000, 2, false, 4, 6);
+        Add(151, "GSW", "Stephen",   "Curry",           "PG", 38, "USA", 188,  84, 98, 95, 99, 95, 99, 99, 99, 95, 68, 99, 95, 99, 69, 59600000, 2, false, 4, 6, 6, 2);
         Add(152, "GSW", "Jimmy",     "Butler III",      "SF", 37, "USA", 201, 104, 94, 90, 94, 90, 78, 87, 74, 94, 89, 92, 98, 97, 79, 54000000, 2, false);
         Add(153, "GSW", "Kristaps",  "Porzingis",       "C",  31, "LVA", 221, 109, 89, 89, 70, 78, 95, 92, 72, 78, 94, 90, 96, 99, 97, 20000000, 2, false);
-        Add(154, "GSW", "Draymond",  "Green",           "PF", 36, "USA", 198, 104, 86, 86, 88, 78, 84, 80, 64, 84, 99, 90, 80, 82, 82, 26000000, 3, false, 4, 6);
+        Add(154, "GSW", "Draymond",  "Green",           "PF", 36, "USA", 198, 104, 86, 86, 88, 78, 84, 80, 64, 84, 99, 90, 80, 82, 82, 26000000, 3, false, 4, 6, 6);
         Add(155, "GSW", "Brandin",   "Podziemski",      "SG", 23, "USA", 193,  93, 84, 86, 90, 85, 84, 86, 85, 84, 80, 84, 88, 76, 84,  4000000, 2, false);
         Add(156, "GSW", "Moses",     "Moody",           "SG", 24, "USA", 196,  96, 82, 86, 88, 82, 84, 88, 80, 82, 84, 76, 84, 72, 84, 12000000, 3, false);
         Add(157, "GSW", "De'Anthony","Melton",          "SG", 28, "USA", 188,  91, 80, 85, 82, 84, 80, 83, 82, 82, 86, 74, 84, 75, 63,  5500000, 2, false);
-        Add(158, "GSW", "Al",        "Horford",         "C",  40, "DOM", 206, 109, 78, 80, 78, 64, 79, 81, 77, 66, 83, 79, 76, 99, 84,  9000000, 1, false, 1, 2);
+        Add(158, "GSW", "Al",        "Horford",         "C",  40, "DOM", 206, 109, 78, 80, 78, 64, 79, 81, 77, 66, 83, 79, 76, 99, 84,  9000000, 1, false, 1, 2, 4);
         Add(159, "GSW", "Gary",      "Payton II",       "SG", 33, "USA", 188,  88, 77, 84, 77, 84, 79, 69, 69, 73, 93, 69, 83, 75, 92,  9000000, 1, false);
         Add(160, "GSW", "Seth",      "Curry",           "SG", 36, "USA", 188,  76, 74, 84, 77, 79, 82, 93, 78, 80, 69, 59, 85, 86, 36,  5000000, 1, false);
         Add(162, "GSW", "Charles",   "Bassey",          "C",  26, "NGA", 208, 104, 73, 79, 80, 70, 82, 48, 62, 60, 82, 90, 78, 78, 58,  2500000, 2, false);
@@ -260,7 +262,7 @@ public partial class DatabaseManager
 
         // ── HOU ── 16 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(166, "HOU", "Kevin",     "Durant",          "SF", 38, "USA", 211, 109, 96, 93, 96, 98, 96, 95, 75, 75, 95, 98, 98, 85, 75, 54700000, 2, false, 2, 4);
+        Add(166, "HOU", "Kevin",     "Durant",          "SF", 38, "USA", 211, 109, 96, 93, 96, 98, 96, 95, 75, 75, 95, 98, 98, 85, 75, 54700000, 2, false, 2, 4, 3, 1);
         Add(167, "HOU", "Marcus",    "Smart",           "PG", 32, "USA", 193, 100, 81, 81, 79, 79, 79, 80, 79, 88, 79, 69, 84, 86, 59,  7500000, 2, false, 0, 1);
         Add(168, "HOU", "Alperen",   "Sengun",          "C",  24, "TUR", 211, 110, 91, 94, 81, 91, 91, 91, 71, 91, 91, 91, 91, 91, 91, 38000000, 5, false);
         Add(169, "HOU", "Amen",      "Thompson",        "SF", 23, "USA", 201,  97, 87, 92, 92, 87, 76, 76, 86, 86, 88, 86, 86, 88, 86, 11000000, 3, false);
@@ -358,7 +360,7 @@ public partial class DatabaseManager
         // ── MIA ── 12 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(250, "MIA", "Bam",      "Adebayo",          "C",  29, "USA", 206,  78, 80, 90, 76, 98, 72, 78, 80, 90, 90, 90, 92, 99, 90, 51000000, 4, false, 0, 2);
-        Add(251, "MIA", "Giannis",  "Antetokounmpo",    "PF", 32, "GRC", 211,  78, 82, 98, 90, 96, 78, 88, 90, 90, 90, 99, 86, 98, 92, 62000000, 4, false, 1, 1);
+        Add(251, "MIA", "Giannis",  "Antetokounmpo",    "PF", 32, "GRC", 211,  78, 82, 98, 90, 96, 78, 88, 90, 90, 90, 99, 86, 98, 92, 62000000, 4, false, 1, 1, 2, 2);
         Add(252, "MIA", "Andrew",   "Wiggins",          "SF", 31, "CAN", 201,  78, 76, 87, 78, 82, 76, 72, 76, 80, 72, 82, 78, 74, 72, 28000000, 2, false, 1, 1);
         Add(253, "MIA", "Bobby",    "Portis",           "PF", 32, "USA", 208,  78, 72, 82, 70, 84, 76, 68, 66, 72, 94, 76, 80, 64, 98, 13000000, 2, false, 1, 1);
         Add(254, "MIA", "Davion",   "Mitchell",         "PG", 28, "USA", 183,  78, 74, 83, 84, 78, 74, 76, 78, 84, 58, 80, 78, 80, 66,  9000000, 2, false);
@@ -478,10 +480,10 @@ public partial class DatabaseManager
 
         // ── PHI ── 17 jugadores
         // ------------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(480, "PHI", "LeBron",     "James",            "SF", 42, "USA", 206, 113, 90, 90, 82, 94, 88, 96, 91, 87, 84, 94, 95, 94, 85,  4000000, 2, false, 4, 10);
+        Add(480, "PHI", "LeBron",     "James",            "SF", 42, "USA", 206, 113, 90, 90, 82, 94, 88, 96, 91, 87, 84, 94, 95, 94, 85,  4000000, 2, false, 4, 10, 10, 4);
         Add(356, "PHI", "Joel",       "Embiid",           "C",  32, "CMR", 213, 127, 89, 90, 72, 98, 86, 86, 80, 91, 94, 95, 95, 87, 95, 65000000, 5, false);
         Add(357, "PHI", "Tyrese",     "Maxey",            "PG", 26, "USA", 188,  86, 89, 94, 96, 92, 90, 93, 82, 65, 90, 91, 99, 90, 91, 42000000, 5, false);
-        Add(358, "PHI", "Jaylen",     "Brown",            "SG", 29, "USA", 198, 101, 91, 95, 90, 94, 87, 91, 92, 91, 88, 96, 93, 91, 88, 53100000, 4, false, 1, 1);
+        Add(358, "PHI", "Jaylen",     "Brown",            "SG", 29, "USA", 198, 101, 91, 95, 90, 94, 87, 91, 92, 91, 88, 96, 93, 91, 88, 53100000, 4, false, 1, 1, 4);
         Add(359, "PHI", "Dean",       "Wade",             "PF", 30, "USA", 206, 103, 80, 82, 72, 78, 74, 79, 84, 82, 86, 85, 83, 79, 78,  9750000, 4, false);
         Add(360, "PHI", "Anfernee",   "Simons",           "SG", 27, "USA", 191,  82, 82, 85, 92, 92, 87, 93, 70, 54, 88, 84, 84, 88, 70,  6000000, 2, false);
         Add(361, "PHI", "Kyle",       "Lowry",            "PG", 40, "USA", 183,  88, 81, 78, 86, 84, 82, 72, 78, 80, 92, 82, 75, 75, 85,  8000000, 1, false, 1, 1);
@@ -520,7 +522,7 @@ public partial class DatabaseManager
         Add(387, "PRT", "Damian",    "Lillard",         "PG", 36, "USA", 188,  88, 78, 82, 79, 96, 91, 89, 74, 69, 69, 94, 79, 54, 68, 40000000, 2, false);
         Add(388, "PRT", "Scoot",     "Henderson",       "PG", 22, "USA", 191,  90, 74, 89, 84, 89, 84, 84, 74, 89, 84, 74, 84, 29, 70, 12000000, 4, false);
         Add(389, "PRT", "Shaedon",   "Sharpe",          "SG", 23, "CAN", 198,  93, 79, 89, 91, 84, 84, 84, 74, 89, 91, 79, 84, 60, 68, 18000000, 4, false);
-        Add(390, "PRT", "Jrue",      "Holiday",         "PG", 35, "USA", 193,  95, 80, 80, 84, 84, 89, 84, 96, 79, 79, 96, 91, 24, 86, 25000000, 2, false, 2, 3);
+        Add(390, "PRT", "Jrue",      "Holiday",         "PG", 35, "USA", 193,  95, 80, 80, 84, 84, 89, 84, 96, 79, 79, 96, 91, 24, 86, 25000000, 2, false, 2, 3, 4);
         Add(391, "PRT", "Deni",      "Avdija",          "SF", 26, "ISR", 206, 100, 81, 88, 87, 90, 90, 84, 87, 89, 84, 89, 81, 66, 70, 16000000, 3, false);
         Add(392, "PRT", "Toumani",   "Camara",          "SF", 25, "BEL", 198,  98, 77, 82, 74, 69, 69, 69, 91, 84, 87, 87, 87, 51, 82,  8000000, 3, false);
         Add(393, "PRT", "Donovan",   "Clingan",         "C",  22, "USA", 218, 120, 76, 82, 84, 59, 84, 64, 91, 94, 84, 84, 54, 79, 50,  9000000, 4, false);
@@ -570,7 +572,7 @@ public partial class DatabaseManager
 
         // ── TOR ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(433, "TOR", "Kawhi",      "Leonard",        "SF", 35, "USA", 201, 102, 87, 92, 84, 86, 85, 84, 86, 98, 82, 88, 90, 96, 84, 50000000, 2, false, 2, 3);
+        Add(433, "TOR", "Kawhi",      "Leonard",        "SF", 35, "USA", 201, 102, 87, 92, 84, 86, 85, 84, 86, 98, 82, 88, 90, 96, 84, 50000000, 2, false, 2, 3, 3);
         Add(434, "TOR", "Scottie",    "Barnes",         "PF", 25, "USA", 206, 103, 88, 92, 84, 86, 82, 84, 87, 89, 82, 90, 88, 86, 78, 52000000, 5, false);
         Add(435, "TOR", "Immanuel",   "Quickley",       "PG", 27, "USA", 188,  86, 84, 86, 86, 84, 85, 84, 86, 78, 70, 84, 88, 80, 65, 25000000, 4, false);
         Add(436, "TOR", "RJ",         "Barrett",        "SF", 26, "CAN", 201, 100, 82, 88, 82, 94, 80, 78, 81, 80, 82, 84, 86, 78, 69, 20000000, 3, false);
@@ -600,7 +602,7 @@ public partial class DatabaseManager
         Add(456, "UTA", "Cody",       "Williams",       "SF", 21, "USA", 203,  95, 75, 79, 74, 69, 74, 74, 84, 79, 84, 74, 79, 55, 38,  5000000, 4, false);
         Add(457, "UTA", "Kyle",       "Filipowski",     "PF", 22, "USA", 211, 110, 77, 82, 84, 84, 84, 74, 74, 84, 74, 84, 69, 67, 72,  6000000, 4, false);
         Add(458, "UTA", "Oscar",      "Tshiebwe",       "C",  25, "COD", 206, 120, 73, 79, 69, 54, 64, 59, 79, 94, 79, 79, 74, 93, 85,  3000000, 3, false);
-        Add(459, "UTA", "Kevin",      "Love",           "PF", 37, "USA", 203, 113, 74, 74, 79, 84, 84, 74, 74, 84, 64, 84, 69, 54, 45,  8000000, 1, false, 1, 0);
+        Add(459, "UTA", "Kevin",      "Love",           "PF", 37, "USA", 203, 113, 74, 74, 79, 84, 84, 74, 74, 84, 64, 84, 69, 54, 45,  8000000, 1, false, 1, 0, 4);
         Add(460, "UTA", "Svi",        "Mykhailiuk",     "SG", 28, "UKR", 201,  92, 74, 79, 74, 94, 74, 79, 64, 64, 74, 79, 64, 69, 32,  5000000, 2, false);
         Add(461, "UTA", "John",       "Konchar",        "SG", 30, "USA", 196,  95, 75, 79, 69, 74, 79, 69, 84, 84, 79, 84, 84, 40, 35,  6000000, 2, false);
         Add(228, "UTA", "Jaxson",     "Hayes",          "C",  26, "USA", 213, 100, 73, 84, 79, 54, 59, 64, 79, 79, 89, 74, 69, 73, 82,  3000000, 2, false);
@@ -610,7 +612,7 @@ public partial class DatabaseManager
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(463, "WAS", "Trae",        "Young",         "PG", 27, "USA", 185,  82, 92, 92, 94, 99, 99, 96, 79, 84, 94, 99, 84, 90, 38, 53000000, 4, false);
         Add(465, "WAS", "Deandre",     "Ayton",         "C",  28, "BHS", 213, 113, 79, 84, 89, 74, 69, 79, 74, 89, 84, 79, 74, 79, 62,  8100000, 1, false);
-        Add(466, "WAS", "Anthony",     "Davis",         "PF", 33, "USA", 208, 115, 90, 90, 76, 74, 89, 79, 99, 99, 89, 99, 93, 79, 82, 50000000, 4, false, 1, 0);
+        Add(466, "WAS", "Anthony",     "Davis",         "PF", 33, "USA", 208, 115, 90, 90, 76, 74, 89, 79, 99, 99, 89, 99, 93, 79, 82, 50000000, 4, false, 1, 0, 2);
         Add(467, "WAS", "Alex",        "Sarr",          "C",  21, "FRA", 213, 100, 81, 90, 84, 79, 84, 79, 89, 84, 84, 84, 64, 81, 75, 12000000, 5, false);
         Add(110, "WAS", "Khris",       "Middleton",     "SF", 34, "USA", 201, 100, 77, 77, 82, 90, 88, 82, 78, 76, 72, 90, 72, 46, 68,  3000000, 3, false);
         Add(468, "WAS", "Bilal",       "Coulibaly",     "SF", 22, "FRA", 201,  95, 78, 82, 79, 74, 81, 77, 84, 74, 84, 79, 79, 63, 80,  9000000, 4, false);
@@ -628,6 +630,7 @@ public partial class DatabaseManager
         _db.BeginTransaction();
         try
         {
+            AssignSeedJerseyNumbers(players, teamByAbbr);
             foreach (var p in players)
                 _db.Insert(p);
             _db.Commit();
@@ -638,6 +641,115 @@ public partial class DatabaseManager
             _db.Rollback();
             Debug.LogError($"[DB] Error insertando jugadores: {e.Message}");
         }
+    }
+
+    static readonly Dictionary<(string, string), int> exceptions = new()
+    {
+        {("Nikola", "Jokic"), 15},
+        {("Shai", "Gilgeous-Alexander"), 2},
+        {("Giannis", "Antetokounmpo"), 7},
+        {("Luka", "Doncic"), 77},
+        {("Stephen", "Curry"), 30},
+        {("Victor", "Wembanyama"), 1},
+        {("LeBron", "James"), 23},
+        {("Anthony", "Edwards"), 5},
+        {("Jayson", "Tatum"), 0},
+        {("Kevin", "Durant"), 35},
+        {("Joel", "Embiid"), 21},
+        {("Devin", "Booker"), 1},
+        {("Donovan", "Mitchell"), 45},
+        {("Anthony", "Davis"), 3},
+        {("Ja", "Morant"), 12},
+        {("Tyrese", "Haliburton"), 0},
+        {("Jalen", "Brunson"), 11},
+        {("Jaylen", "Brown"), 7},
+        {("Domantas", "Sabonis"), 11},
+        {("Trae", "Young"), 11},
+        {("Damian", "Lillard"), 0},
+        {("Tyrese", "Maxey"), 0},
+        {("Cade", "Cunningham"), 2},
+        {("Karl-Anthony", "Towns"), 32},
+        {("Bam", "Adebayo"), 13},
+        {("De'Aaron", "Fox"), 8},
+        {("Kyrie", "Irving"), 11},
+        {("LaMelo", "Ball"), 1},
+        {("Paolo", "Banchero"), 5},
+        {("Alperen", "Sengun"), 28},
+        {("Jalen", "Williams"), 8},
+        {("Jamal", "Murray"), 27},
+        {("DeMar", "DeRozan"), 10},
+        {("Zion", "Williamson"), 1},
+        {("Scottie", "Barnes"), 4},
+        {("Chet", "Holmgren"), 7},
+        {("Pascal", "Siakam"), 43},
+        {("Evan", "Mobley"), 4},
+        {("Jalen", "Johnson"), 1},
+        {("Desmond", "Bane"), 3},
+        {("Derrick", "White"), 9},
+        {("Franz", "Wagner"), 22},
+        {("Mikal", "Bridges"), 25},
+        {("Brandon", "Ingram"), 14},
+        {("Jaren", "Jackson Jr."), 13},
+        {("Cooper", "Flagg"), 32},
+        {("Darius", "Garland"), 10},
+        {("Jrue", "Holiday"), 4},
+        {("Kristaps", "Porzingis"), 6},
+        {("Lauri", "Markkanen"), 23}
+    };
+
+    static void AssignSeedJerseyNumbers(List<PlayerData> players, Dictionary<string, int> teamByAbbr)
+    {
+        var retiredByTeam = BuildRetiredNumbersByTeam(teamByAbbr);
+
+        foreach (var group in players.Where(p => p.team_id > 0).GroupBy(p => p.team_id))
+        {
+            var used = new HashSet<int>();
+            var withExact = new HashSet<PlayerData>();
+            foreach (var exc in exceptions)
+            {
+                var p = group.FirstOrDefault(x => x.first_name == exc.Key.Item1 && x.last_name == exc.Key.Item2);
+                if (p == null) continue;
+                p.number = exc.Value;
+                used.Add(p.number);
+                withExact.Add(p);
+            }
+
+            foreach (var rn in retiredByTeam)
+            {
+                if (rn.TeamId == group.Key && rn.Number <= 99)
+                    used.Add(rn.Number);
+            }
+
+            foreach (var p in group.Where(x => !withExact.Contains(x) && x.number == 0).OrderByDescending(x => x.overall))
+            {
+                for (int n = 1; n <= 99; n++)
+                {
+                    if (used.Contains(n)) continue;
+                    p.number = n;
+                    used.Add(n);
+                    break;
+                }
+            }
+        }
+    }
+
+    static List<(int TeamId, int Number)> BuildRetiredNumbersByTeam(Dictionary<string, int> teamByAbbr)
+    {
+        var result = new List<(int TeamId, int Number)>();
+        var hof = HallOfFameSeeder.Data;
+        foreach (var (firstName, lastName, number) in RetiredNumberSeeder.Data)
+        {
+            var legend = hof.FirstOrDefault(x => x.first_name == firstName && x.last_name == lastName);
+            if (legend == null) continue;
+            if (teamByAbbr.TryGetValue(legend.team_abbreviation, out var tid))
+                result.Add((tid, number));
+        }
+        foreach (var (firstName, lastName, abbr, number) in VeteranRetiredNumberSeeder.Data)
+        {
+            if (teamByAbbr.TryGetValue(abbr, out var tid))
+                result.Add((tid, number));
+        }
+        return result;
     }
 
     int[] GeneratePositionAttrs(int ovr, string pos, string seed)
@@ -736,7 +848,7 @@ public partial class DatabaseManager
         void AddFA(int pid, string fn, string ln, string pos, int age, string nat,
                   int h, int w, int ovr, int pot, int spd, int sht, int thr, int pas,
                   int drb, int def, int reb, int ath, int iq, int stl, int blk,
-                  long sal, int yrs, int rings = 0, int finalsMvps = 0)
+                  long sal, int yrs, int rings = 0, int finalsMvps = 0, int finalsPlayed = 0, int seasonMvps = 0)
         {
             int calcOvr = (spd + sht + thr + pas + drb + def + reb + ath + iq + stl + blk) / 11;
             if (calcOvr > pot) calcOvr = pot;
@@ -777,6 +889,8 @@ public partial class DatabaseManager
                 is_rookie = 0,
                 rings = rings,
                 finals_mvps = finalsMvps,
+                finals_played = finalsPlayed,
+                season_mvps = seasonMvps,
                 seasons_with_team = 0,
                 injury_days = 0,
                 injury_type = "",
@@ -1158,7 +1272,10 @@ public partial class DatabaseManager
                 round = 1,
                 pick_number = pickNum++,
                 original_team_id = teamId,
-                current_team_id = teamId
+                current_team_id = teamId,
+                protected_from = 0,
+                is_swap = 0,
+                swap_original_team_id = 0
             });
         }
         foreach (var teamId in orderedTeamIds)
@@ -1169,7 +1286,10 @@ public partial class DatabaseManager
                 round = 2,
                 pick_number = pickNum++,
                 original_team_id = teamId,
-                current_team_id = teamId
+                current_team_id = teamId,
+                protected_from = 0,
+                is_swap = 0,
+                swap_original_team_id = 0
             });
         }
         Debug.Log($"[DB] {orderedTeamIds.Count * 2} draft picks seeded for season {newSeasonId} (previous={previousSeasonId?.ToString() ?? "none"}).");
@@ -1211,7 +1331,8 @@ public partial class DatabaseManager
         _db.Update(pick);
     }
 
-    public void TransferDraftPicks(List<int> pickIds, int fromTeamId, int toTeamId)
+    public void TransferDraftPicks(List<int> pickIds, int fromTeamId, int toTeamId,
+                                   int protectedFrom = 0, int isSwap = 0, int swapOriginalTeamId = 0)
     {
         if (!EnsureDb()) return;
         foreach (var id in pickIds)
@@ -1220,6 +1341,12 @@ public partial class DatabaseManager
             if (pick == null) continue;
             if (pick.current_team_id != fromTeamId) continue;
             pick.current_team_id = toTeamId;
+            if (protectedFrom > 0 || isSwap != 0)
+            {
+                pick.protected_from = protectedFrom;
+                pick.is_swap = isSwap;
+                pick.swap_original_team_id = swapOriginalTeamId;
+            }
             _db.Update(pick);
         }
     }

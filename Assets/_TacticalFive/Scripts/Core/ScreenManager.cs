@@ -36,6 +36,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument carteraDocument;
     [SerializeField] private UIDocument seasonSummaryDocument;
     [SerializeField] private UIDocument playerAwardsDocument;
+    [SerializeField] private UIDocument quintosDocument;
     [SerializeField] private UIDocument endSeasonDocument;
     [SerializeField] private UIDocument newSeasonDocument;
     [SerializeField] private UIDocument editorDocument;
@@ -45,6 +46,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument playerProfileDocument;
     [SerializeField] private UIDocument premiosDocument;
     [SerializeField] private UIDocument logrosDocument;
+    [SerializeField] private UIDocument dorsalesDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -169,6 +171,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.PlayerAwards:
                 ShowOnly(playerAwardsDocument);
                 break;
+            case GameScreen.Quintos:
+                ShowOnly(quintosDocument);
+                break;
             case GameScreen.EndSeason:
                 ShowOnly(endSeasonDocument);
                 break;
@@ -187,6 +192,9 @@ public class ScreenManager : MonoBehaviour
 
             case GameScreen.Quinteto:
                 ShowOnly(quintetoDocument);
+                break;
+            case GameScreen.Dorsales:
+                ShowOnly(dorsalesDocument);
                 break;
             case GameScreen.Manager:
                 ShowOnly(managerDocument);
@@ -236,6 +244,7 @@ public class ScreenManager : MonoBehaviour
         if (carteraDocument != null) carteraDocument.gameObject.SetActive(false);
         if (seasonSummaryDocument != null) seasonSummaryDocument.gameObject.SetActive(false);
         if (playerAwardsDocument != null) playerAwardsDocument.gameObject.SetActive(false);
+        if (quintosDocument != null) quintosDocument.gameObject.SetActive(false);
         if (endSeasonDocument != null) endSeasonDocument.gameObject.SetActive(false);
         if (newSeasonDocument != null) newSeasonDocument.gameObject.SetActive(false);
         if (editorDocument != null) editorDocument.gameObject.SetActive(false);
@@ -243,6 +252,7 @@ public class ScreenManager : MonoBehaviour
         if (trainingDocument != null) trainingDocument.gameObject.SetActive(false);
 
         if (quintetoDocument != null) quintetoDocument.gameObject.SetActive(false);
+        if (dorsalesDocument != null) dorsalesDocument.gameObject.SetActive(false);
         if (managerDocument != null) managerDocument.gameObject.SetActive(false);
         if (trajectoryDocument != null) trajectoryDocument.gameObject.SetActive(false);
         if (premiosDocument != null) premiosDocument.gameObject.SetActive(false);

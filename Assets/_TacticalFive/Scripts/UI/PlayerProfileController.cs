@@ -18,6 +18,10 @@ using System.Linq;
     private Label _profileRingsCount;
     private VisualElement _profileFinalsIcon;
     private Label _profileFinalsCount;
+    private VisualElement _profileMvpFinalsIcon;
+    private Label _profileMvpFinalsCount;
+    private VisualElement _profileMvpSeasonIcon;
+    private Label _profileMvpSeasonCount;
 
     private VisualElement _profileSeasonSection;
     private VisualElement _profileSeasonBody;
@@ -45,6 +49,10 @@ using System.Linq;
         _profileRingsCount = _root.Q<Label>("ProfileRingsCount");
         _profileFinalsIcon = _root.Q<VisualElement>("ProfileFinalsIcon");
         _profileFinalsCount = _root.Q<Label>("ProfileFinalsCount");
+        _profileMvpFinalsIcon = _root.Q<VisualElement>("ProfileMvpFinalsIcon");
+        _profileMvpFinalsCount = _root.Q<Label>("ProfileMvpFinalsCount");
+        _profileMvpSeasonIcon = _root.Q<VisualElement>("ProfileMvpSeasonIcon");
+        _profileMvpSeasonCount = _root.Q<Label>("ProfileMvpSeasonCount");
         _profileSeasonSection = _root.Q<VisualElement>("ProfileSeasonSection");
         _profileSeasonBody = _root.Q<VisualElement>("ProfileSeasonBody");
         _profileAttrsSection = _root.Q<VisualElement>("ProfileAttrsSection");
@@ -128,7 +136,17 @@ using System.Linq;
         var finalsSprite = Resources.Load<Sprite>("Icons/vs_icon");
         if (finalsSprite != null)
             _profileFinalsIcon.style.backgroundImage = new StyleBackground(finalsSprite);
-        _profileFinalsCount.text = _player.finals_mvps.ToString();
+        _profileFinalsCount.text = _player.finals_played.ToString();
+
+        var mvpFinalsSprite = Resources.Load<Sprite>("Icons/mvp_finals");
+        if (mvpFinalsSprite != null)
+            _profileMvpFinalsIcon.style.backgroundImage = new StyleBackground(mvpFinalsSprite);
+        _profileMvpFinalsCount.text = _player.finals_mvps.ToString();
+
+        var mvpSeasonSprite = Resources.Load<Sprite>("Icons/trofeo3");
+        if (mvpSeasonSprite != null)
+            _profileMvpSeasonIcon.style.backgroundImage = new StyleBackground(mvpSeasonSprite);
+        _profileMvpSeasonCount.text = _player.season_mvps.ToString();
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _profilePhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;

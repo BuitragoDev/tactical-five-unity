@@ -177,6 +177,27 @@ public class MonthlyManagerAwardRow
     public int diff { get; set; }
 }
 
+public class SeasonPlayerRatingRow
+{
+    public int player_id { get; set; }
+    public double avg_rating { get; set; }
+    public int games { get; set; }
+}
+
+public class CoachMonthRow
+{
+    public int team_id { get; set; }
+    public int mes_count { get; set; }
+}
+
+public class CoachAwardInfo
+{
+    public string CoachName { get; set; }
+    public string TeamName { get; set; }
+    public string TeamKeyword { get; set; }
+    public int EntrenadorMes { get; set; }
+}
+
 public class MonthlyPlayerAwardRow
 {
     public int player_id { get; set; }

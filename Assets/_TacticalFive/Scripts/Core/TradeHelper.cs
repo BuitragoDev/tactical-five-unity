@@ -49,17 +49,30 @@ public static class TradeHelper
     public static int PickBonus(DraftPickData pk)
     {
         if (pk == null) return 0;
+        int bonus;
         if (pk.round == 1)
         {
             int slot = Mathf.Clamp(pk.pick_number, 1, 30);
-            return 10 + (30 - slot) / 3;
+            bonus = 10 + (30 - slot) / 3;
         }
-        if (pk.round == 2)
+        else if (pk.round == 2)
         {
             int slot = Mathf.Clamp(pk.pick_number - 30, 1, 30);
-            return 5 + (30 - slot) / 5;
+            bonus = 5 + (30 - slot) / 5;
         }
-        return 3;
+        else
+        {
+            bonus = 3;
+        }
+
+        // Un pick protegido top-N pierde cuota de valor según la profundidad
+        // del rango protegido; un top-1 colapsa a un mínimo de 1.
+        if (pk.protected_from > 0)
+        {
+            int prot = Mathf.Clamp(pk.protected_from, 1, 30);
+            bonus = Mathf.Max(1, bonus - prot * 2);
+        }
+        return bonus;
     }
 
     // Resuelve el salario efectivo de un jugador en un traspaso:

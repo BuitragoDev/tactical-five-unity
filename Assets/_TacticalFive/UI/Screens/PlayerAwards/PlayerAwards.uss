@@ -268,6 +268,100 @@
     flex-shrink: 0;
 }
 
+/* ── EXTRA ROW (DPOY / Sexto / MIP / Coach) ── */
+.extra-awards-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-bottom: 26px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+.extra-card {
+    background-color: rgb(17, 24, 34);
+    border-width: 1px;
+    padding: 12px 10px;
+    text-align: center;
+    min-width: 230px;
+    align-items: center;
+    margin-right: 12px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+.dpoy-card {
+    border-color: rgb(42, 95, 201);
+}
+.sixth-card {
+    border-color: rgb(42, 95, 201);
+}
+.mip-card {
+    border-color: rgb(142, 160, 23);
+}
+.coach-card {
+    border-color: rgb(212, 160, 23);
+}
+.extra-card-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(122, 138, 170);
+    margin-bottom: 10px;
+    -unity-text-align: middle-center;
+}
+.extra-card .extra-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50px;
+    background-color: rgb(200, 200, 200);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 6px;
+}
+.extra-player-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 1px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.extra-player-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.extra-coach-logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 44px;
+    background-color: rgb(32, 38, 52);
+    background-size: contain;
+    background-position: center;
+    flex-shrink: 0;
+}
+.extra-stat-row {
+    margin-top: 6px;
+}
+.extra-stat-row .award-stat-box {
+    min-width: 56px;
+    min-height: 40px;
+    padding: 4px 8px;
+    margin-right: 6px;
+}
+.extra-stat-lbl-long {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 12px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    white-space: normal;
+}
+
 /* ── QUINTET SECTION ── */
 .award-section {
     margin-top: 26px;

@@ -668,11 +668,85 @@ using System.Threading.Tasks;
             }
         }
 
-        return DatabaseManager.Instance.GetPlayersByTeam(teamId)
+        var activePool = DatabaseManager.Instance.GetPlayersByTeam(teamId)
             .Where(p => p.injury_days == 0)
             .OrderByDescending(p => p.overall)
             .Take(12)
             .ToList();
+
+        return BuildBalancedLineup(activePool);
+    }
+
+    // Quinteto IA balanceado por posición: mejor jugador de cada posición (primaria o
+    // secundaria) en orden PG->SG->SF->PF->C; huecos cubiertos con posiciones cercanas
+    // y último recurso el mejor overall restante. Los titulares se devuelven primero.
+    List<PlayerData> BuildBalancedLineup(List<PlayerData> pool)
+    {
+        var starters = new PlayerData[PositionCodes.Order.Length];
+        var used = new HashSet<int>();
+
+        // Paso 1: mejor jugador por posición exacta (primaria o secundaria)
+        for (int i = 0; i < PositionCodes.Order.Length; i++)
+        {
+            string pos = PositionCodes.Order[i];
+            var best = pool
+                .Where(p => !used.Contains(p.id) && PlaysPosition(p, pos))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                starters[i] = best;
+                used.Add(best.id);
+            }
+        }
+
+        // Paso 2: rellenar huecos con posiciones cercanas
+        for (int i = 0; i < starters.Length; i++)
+        {
+            if (starters[i] != null) continue;
+            string pos = PositionCodes.Order[i];
+            var best = pool
+                .Where(p => !used.Contains(p.id) && IsNearbyPosition(p, pos))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                starters[i] = best;
+                used.Add(best.id);
+            }
+        }
+
+        // Paso 3: último recurso — mejor overall restante
+        for (int i = 0; i < starters.Length; i++)
+        {
+            if (starters[i] != null) continue;
+            var best = pool
+                .Where(p => !used.Contains(p.id))
+                .OrderByDescending(p => p.overall)
+                .FirstOrDefault();
+            if (best != null)
+            {
+                starters[i] = best;
+                used.Add(best.id);
+            }
+        }
+
+        var bench = pool.Where(p => !used.Contains(p.id)).Take(7).ToList();
+        return starters.Where(s => s != null).Concat(bench).ToList();
+    }
+
+    static bool PlaysPosition(PlayerData p, string pos)
+    {
+        return p.position == pos || p.secondary_position == pos;
+    }
+
+    static bool IsNearbyPosition(PlayerData p, string pos)
+    {
+        int idx = System.Array.IndexOf(PositionCodes.Order, pos);
+        var nearby = new List<string>();
+        if (idx > 0) nearby.Add(PositionCodes.Order[idx - 1]);
+        if (idx < PositionCodes.Order.Length - 1) nearby.Add(PositionCodes.Order[idx + 1]);
+        return nearby.Contains(p.position) || nearby.Contains(p.secondary_position);
     }
 
     System.Collections.IEnumerator ProcessGameDayRoutine(bool fastSim = false)
@@ -949,8 +1023,6 @@ using System.Threading.Tasks;
         {
             if (gamesToday.Count > 0)
             {
-                UpdateManagerStats(gameDay);
-
                 QuickNewsGenerator.Generate(_manager, _myTeam, _season, gamesToday, gameDay, _season?.current_date ?? "");
 
                 AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
@@ -1048,6 +1120,8 @@ using System.Threading.Tasks;
                 Debug.Log("[Dashboard] Playoffs finished → Season finished.");
             }
         }
+
+        UpdateManagerStats(gameDay);
 
         ProcessMonthlyPayroll(gameDay);
         ProcessSubscriptionRevenue(gameDay);
@@ -1715,6 +1789,7 @@ using System.Threading.Tasks;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
                     player.seasons_with_team = 1;
+                    DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(player);
 
                     AchievementService.EvaluateSignStarFA(_manager.id, _myTeam.id, _season?.id ?? 0, player);
@@ -1813,6 +1888,7 @@ using System.Threading.Tasks;
                     {
                         player.team_id = _myTeam.id;
                         player.last_team_id = _myTeam.id;
+                        DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
                     }
                     // Si como FA reciente firmó con otro equipo mientras maduraba, cancelar
                     else if (player.team_id != 0 && player.team_id != _myTeam.id)
@@ -3295,6 +3371,7 @@ using System.Threading.Tasks;
                 int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
                 star.guaranteed_years = years;
+                DatabaseManager.Instance.AssignJerseyNumber(star, team.id);
                 DatabaseManager.Instance.UpdatePlayer(star);
 
                 DatabaseManager.Instance.InsertTrade(new TradeData
@@ -3532,6 +3609,17 @@ using System.Threading.Tasks;
             });
         }
 
+        foreach (var p in aSelected)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, teamB.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+        foreach (var p in bSelected)
+        {
+            DatabaseManager.Instance.AssignJerseyNumber(p, teamA.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+
         // Transfer picks
         if (aSelectedPicks != null && aSelectedPicks.Count > 0)
         {
@@ -3615,6 +3703,7 @@ using System.Threading.Tasks;
             player.salary += 2_000_000;
             player.contract_years = years;
             player.guaranteed_years = years;
+            DatabaseManager.Instance.AssignJerseyNumber(player, team.id);
             DatabaseManager.Instance.UpdatePlayer(player);
 
             DatabaseManager.Instance.InsertTrade(new TradeData
@@ -4085,6 +4174,7 @@ List<int> offeredPickIds = new List<int>();
                     fa.contract_years = years;
                     fa.guaranteed_years = years;
                     fa.seasons_with_team = 1;
+                    DatabaseManager.Instance.AssignJerseyNumber(fa, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(fa);
                     DatabaseManager.Instance.InsertTrade(new TradeData
                     {
@@ -4134,6 +4224,18 @@ List<int> offeredPickIds = new List<int>();
                     player_id = p.id,
                     trade_type = "trade"
                 });
+            }
+
+            foreach (var p in ourPlayers)
+            {
+                DatabaseManager.Instance.AssignJerseyNumber(p, offer.team_id_from);
+                DatabaseManager.Instance.UpdatePlayer(p);
+            }
+
+            foreach (var p in theirPlayers)
+            {
+                DatabaseManager.Instance.AssignJerseyNumber(p, _myTeam.id);
+                DatabaseManager.Instance.UpdatePlayer(p);
             }
 
             // Transfer picks
@@ -4818,15 +4920,31 @@ List<int> offeredPickIds = new List<int>();
 
     void UpdateManagerStats(int gameDay)
     {
-        var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
-        var myGames = teamGames.Where(g => g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id).ToList();
+        if (_season == null) return;
 
+        var db = DatabaseManager.Instance.Db;
+        var myGames = db.Table<GameData>()
+            .Where(g => g.manager_id == _manager.id
+                     && g.season_id == _season.id
+                     && g.game_type != "preseason"
+                     && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id)
+                     && g.is_played == 1)
+            .OrderBy(g => g.game_day)
+            .ThenBy(g => g.id)
+            .ToList();
+
+        // Las relaciones solo cambian tras un partido de mi equipo; si hoy mi
+        // equipo no jugó (descanso, play-in/playoff de otros equipos o ya
+        // eliminado), no se deben aplicar cambios.
+        if (!myGames.Any(g => g.game_day == gameDay))
+            return;
+
+        // Trust: based on win percentage
         int wins = myGames.Count(g =>
             (g.home_team_id == _myTeam.id && g.home_score > g.away_score) ||
             (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
         int losses = myGames.Count - wins;
 
-        // Trust: based on win percentage
         float winPct = myGames.Count > 0 ? (float)wins / myGames.Count : 0.5f;
         int trustChange = winPct > 0.5f ? 2 : winPct > 0.4f ? 1 : winPct < 0.2f ? -2 : -1;
         _manager.trust = Mathf.Clamp(_manager.trust + trustChange, 0, 100);

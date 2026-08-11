@@ -1,0 +1,220 @@
+/* ========== DORSALES ========== */
+
+.dorsales-root {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.dorsales-main {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.dorsales-content {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.dorsales-scroll-wrapper {
+    flex-direction: column;
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+/* TABS */
+
+.dorsales-tabs {
+    flex-direction: row;
+    margin-bottom: 20px;
+}
+
+.dorsales-tab {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(200, 210, 230);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 8px 28px;
+    margin-right: 8px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.dorsales-tab:hover {
+    background-color: rgb(30, 36, 50);
+}
+
+.dorsales-tab--active {
+    color: rgb(15, 17, 23);
+    background-color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
+}
+
+.dorsales-tab--active:hover {
+    background-color: rgb(228, 178, 48);
+    border-color: rgb(228, 178, 48);
+    color: rgb(15, 17, 23);
+}
+
+.dorsales-section {
+    flex-direction: column;
+    margin-bottom: 24px;
+}
+
+/* CARDS - DORSALES ACTUALES */
+
+.dorsales-cards {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.dorsales-card {
+    flex-direction: column;
+    align-items: center;
+    width: 140px;
+    margin-right: 16px;
+    margin-bottom: 16px;
+}
+
+.dorsales-card-shirt {
+    width: 110px;
+    height: 110px;
+    justify-content: center;
+    align-items: center;
+}
+
+.dorsales-card-number {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 40px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    margin-top: 30px;
+}
+
+.dorsales-card-number--retired {
+    font-size: 48px;
+    color: rgb(212, 160, 23);
+}
+
+.dorsales-card-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 17px;
+    letter-spacing: 1px;
+    color: rgb(220, 228, 240);
+    -unity-text-align: middle-center;
+    margin-top: 6px;
+    max-width: 140px;
+    white-space: normal;
+}
+
+/* TABLE */
+
+.dorsales-table {
+    flex-direction: column;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dorsales-header-row {
+    flex-direction: row;
+    background-color: rgb(28, 33, 46);
+    padding: 10px 16px;
+}
+
+.dorsales-header-row > Label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+}
+
+.dorsales-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 16px;
+    border-top-width: 1px;
+    border-top-color: rgb(35, 41, 55);
+}
+
+.dorsales-row:hover {
+    background-color: rgb(30, 36, 50);
+}
+
+.dorsales-row > Label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 17px;
+    color: rgb(220, 228, 240);
+}
+
+.dorsales-col-num {
+    width: 60px;
+}
+
+.dorsales-col-name {
+    flex-grow: 1;
+    min-width: 220px;
+}
+
+.dorsales-col-name-ret {
+    flex-grow: 1;
+    min-width: 220px;
+}
+
+.dorsales-col-pos {
+    width: 60px;
+}
+
+.dorsales-col-ovr {
+    width: 80px;
+}
+
+.dorsales-col-rings {
+    width: 90px;
+}
+
+.dorsales-col-points {
+    width: 110px;
+}
+
+.dorsales-col-season {
+    width: 100px;
+}
+
+.dorsales-row-num {
+    width: 60px;
+    font-size: 20px;
+    color: rgb(120, 130, 150);
+}
+
+.dorsales-row-num--filled {
+    color: rgb(220, 228, 240);
+    font-weight: bold;
+}
+
+.dorsales-row-num--retired {
+    color: rgb(212, 160, 23);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.dorsales-empty {
+    padding: 20px 16px;
+    font-size: 17px;
+    color: rgb(140, 150, 170);
+}

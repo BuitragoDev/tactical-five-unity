@@ -30,6 +30,10 @@ using System.Linq;
     private Label _trajectoryRingsCount;
     private VisualElement _trajectoryFinalsIcon;
     private Label _trajectoryFinalsCount;
+    private VisualElement _trajectoryMvpFinalsIcon;
+    private Label _trajectoryMvpFinalsCount;
+    private VisualElement _trajectoryMvpSeasonIcon;
+    private Label _trajectoryMvpSeasonCount;
 
     // Logros
     private VisualElement _trajectoryAwards;
@@ -56,6 +60,10 @@ using System.Linq;
         _trajectoryRingsCount = _root.Q<Label>("TrajectoryRingsCount");
         _trajectoryFinalsIcon = _root.Q<VisualElement>("TrajectoryFinalsIcon");
         _trajectoryFinalsCount = _root.Q<Label>("TrajectoryFinalsCount");
+        _trajectoryMvpFinalsIcon = _root.Q<VisualElement>("TrajectoryMvpFinalsIcon");
+        _trajectoryMvpFinalsCount = _root.Q<Label>("TrajectoryMvpFinalsCount");
+        _trajectoryMvpSeasonIcon = _root.Q<VisualElement>("TrajectoryMvpSeasonIcon");
+        _trajectoryMvpSeasonCount = _root.Q<Label>("TrajectoryMvpSeasonCount");
         _trajectoryAwards = _root.Q<VisualElement>("TrajectoryAwards");
         _trajectoryAwardsBody = _root.Q<VisualElement>("TrajectoryAwardsBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
@@ -139,7 +147,17 @@ using System.Linq;
         var finalsSprite = Resources.Load<Sprite>("Icons/vs_icon");
         if (finalsSprite != null)
             _trajectoryFinalsIcon.style.backgroundImage = new StyleBackground(finalsSprite);
-        _trajectoryFinalsCount.text = _player.finals_mvps.ToString();
+        _trajectoryFinalsCount.text = _player.finals_played.ToString();
+
+        var mvpFinalsSprite = Resources.Load<Sprite>("Icons/mvp_finals");
+        if (mvpFinalsSprite != null)
+            _trajectoryMvpFinalsIcon.style.backgroundImage = new StyleBackground(mvpFinalsSprite);
+        _trajectoryMvpFinalsCount.text = _player.finals_mvps.ToString();
+
+        var mvpSeasonSprite = Resources.Load<Sprite>("Icons/trofeo3");
+        if (mvpSeasonSprite != null)
+            _trajectoryMvpSeasonIcon.style.backgroundImage = new StyleBackground(mvpSeasonSprite);
+        _trajectoryMvpSeasonCount.text = _player.season_mvps.ToString();
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _trajectoryPhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;

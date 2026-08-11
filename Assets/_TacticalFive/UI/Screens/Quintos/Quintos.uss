@@ -1,0 +1,285 @@
+/* ══════════════════════════════════════════
+   QUINTOS — Quintos.uss
+   ══════════════════════════════════════════ */
+
+/* ── ROOT ── */
+.quintos-root {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+/* ── HEADER BRAND ── */
+.quintos-root .header-brand {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-right: 24px;
+}
+.quintos-root .header-brand-icon {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgb(212, 160, 23);
+    color: rgb(0, 0, 0);
+    font-size: 28px;
+    padding: 4px 8px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+.quintos-root .header-brand-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    -unity-text-transform: upper;
+}
+.quintos-root .header-brand-text-gold {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: rgb(212, 160, 23);
+    -unity-text-transform: upper;
+}
+
+/* ── TOP HEADER (PlayerAwards style) ── */
+.quintos-root .top-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background-color: rgb(22, 26, 36);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(212, 160, 23);
+    flex-shrink: 0;
+    min-height: 100px;
+}
+.quintos-root .header-left {
+    flex-direction: row;
+    align-items: center;
+}
+.quintos-root .header-team-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    margin-right: 16px;
+}
+.quintos-root .header-team-info {
+    flex-direction: column;
+}
+.quintos-root .header-team-name-row {
+    flex-direction: row;
+    align-items: baseline;
+}
+.quintos-root .header-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    letter-spacing: 1px;
+    color: rgb(255, 255, 255);
+    -unity-text-transform: upper;
+    margin-right: 12px;
+}
+.quintos-root .header-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+}
+.quintos-root .header-manager-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+}
+.quintos-root .header-right-group {
+    flex-direction: row;
+    align-items: center;
+}
+.quintos-root .header-season-info {
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: 20px;
+}
+.quintos-root .header-date-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    padding: 0 12px;
+    margin-right: 20px;
+    border-left-width: 1px;
+    border-left-color: rgb(42, 51, 71);
+    border-right-width: 1px;
+    border-right-color: rgb(42, 51, 71);
+}
+.quintos-root .header-season-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 1px;
+}
+
+/* ── BOTÓN ACCIÓN ── */
+.quintos-root .btn-action {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 250px;
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 24px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 18px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.quintos-root .btn-action:hover {
+    background-color: rgb(74, 128, 240);
+}
+
+/* ── CONTENT ── */
+.quintos-root .content-area {
+    flex-grow: 1;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+/* ── SUMMARY HEADER ── */
+.quintos-root .summary-header {
+    text-align: center;
+    margin-bottom: 24px;
+    align-items: center;
+}
+.quintos-root .summary-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 36px;
+    letter-spacing: 4px;
+    -unity-text-transform: upper;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+}
+.quintos-root .season-tag {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgb(212, 160, 23);
+    color: rgb(0, 0, 0);
+    font-size: 16px;
+    letter-spacing: 2px;
+    padding: 4px 16px;
+    margin-top: 8px;
+    -unity-text-align: middle-center;
+}
+
+/* ── QUINTET SECTION ── */
+.quintos-root .quintet-section {
+    margin-top: 26px;
+    margin-bottom: 26px;
+    align-items: center;
+}
+.quintos-root .section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    letter-spacing: 3px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 51, 71);
+    -unity-text-align: middle-center;
+}
+.quintos-root .quintet-grid {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.quintos-root .quintet-card {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(17, 24, 34);
+    border-width: 1px;
+    padding: 16px 12px;
+    min-width: 300px;
+    margin-right: 12px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+    flex-grow: 0;
+}
+.quintos-root .quintet-card--five {
+    border-color: rgb(212, 160, 23);
+}
+.quintos-root .quintet-card--rookie {
+    border-color: rgb(42, 95, 201);
+}
+.quintos-root .quintet-card-photo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50px;
+    background-color: rgb(200, 200, 200);
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-card-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
+    padding: 2px 10px;
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-card-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: rgb(208, 216, 232);
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-card-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 11px;
+    color: rgb(122, 138, 170);
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-stat-row {
+    flex-direction: row;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-stat-box {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 2px 10px;
+    min-width: 50px;
+    min-height: 40px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-stat-val {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.quintos-root .quintet-stat-lbl {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}

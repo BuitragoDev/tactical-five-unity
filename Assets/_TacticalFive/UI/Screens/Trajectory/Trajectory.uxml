@@ -43,6 +43,20 @@
                             </ui:VisualElement>
                             <ui:Label class="trajectory-honor-label" text="FINALES" />
                         </ui:VisualElement>
+                        <ui:VisualElement class="trajectory-honor-item" style="margin-left: 100px;">
+                            <ui:VisualElement class="trajectory-honor-row">
+                                <ui:VisualElement name="TrajectoryMvpSeasonIcon" class="trajectory-honor-icon" />
+                                <ui:Label name="TrajectoryMvpSeasonCount" class="trajectory-honor-count" text="0" />
+                            </ui:VisualElement>
+                            <ui:Label class="trajectory-honor-label" text="MVP" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="trajectory-honor-item">
+                            <ui:VisualElement class="trajectory-honor-row">
+                                <ui:VisualElement name="TrajectoryMvpFinalsIcon" class="trajectory-honor-icon" />
+                                <ui:Label name="TrajectoryMvpFinalsCount" class="trajectory-honor-count" text="0" />
+                            </ui:VisualElement>
+                            <ui:Label class="trajectory-honor-label" text="MVP FINALS" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                     <ui:VisualElement class="trajectory-ovr-block">
                         <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />

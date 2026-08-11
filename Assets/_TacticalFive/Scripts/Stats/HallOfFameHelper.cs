@@ -3,9 +3,9 @@ public static class HallOfFameHelper
     // Umbrales de inducción automática al Salón de la Fama.
     public const int RINGS_REQUIRED = 1;
     public const int FINALS_MVP_REQUIRED = 1;
-    public const int CAREER_POINTS_THRESHOLD = 15000;
-    public const int CAREER_REBOUNDS_THRESHOLD = 8000;
-    public const int CAREER_ASSISTS_THRESHOLD = 5000;
+    public const int CAREER_POINTS_THRESHOLD = 30000;
+    public const int CAREER_REBOUNDS_THRESHOLD = 15000;
+    public const int CAREER_ASSISTS_THRESHOLD = 10000;
 
     /// <summary>
     /// Decide si un jugador (retirado) merece entrar en el Salón de la Fama

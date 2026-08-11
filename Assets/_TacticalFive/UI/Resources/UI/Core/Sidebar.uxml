@@ -26,6 +26,9 @@
                 <ui:Button name="SubmenuLesionados" class="nav-submenu-item">
                     <ui:Label text="LESIONADOS" class="nav-submenu-label"/>
                 </ui:Button>
+                <ui:Button name="SubmenuDorsales" class="nav-submenu-item">
+                    <ui:Label text="DORSALES" class="nav-submenu-label"/>
+                </ui:Button>
 
             </ui:VisualElement>
             <ui:Button name="NavCalendar" class="nav-item">
@@ -54,9 +57,6 @@
                 </ui:Button>
                 <ui:Button name="SubmenuPremios" class="nav-submenu-item">
                     <ui:Label text="PREMIOS" class="nav-submenu-label"/>
-                </ui:Button>
-                <ui:Button name="SubmenuLogros" class="nav-submenu-item">
-                    <ui:Label text="LOGROS DEL GM" class="nav-submenu-label"/>
                 </ui:Button>
             </ui:VisualElement>
             <ui:Button name="NavPlayoffs" class="nav-item">
@@ -109,7 +109,16 @@
             <ui:Button name="NavManager" class="nav-item">
                 <ui:VisualElement name="NavManagerIcon" class="nav-icon"/>
                 <ui:Label text="MANAGER" class="nav-label"/>
+                <ui:Label text="▼" class="nav-arrow" />
             </ui:Button>
+            <ui:VisualElement name="ManagerSubmenu" class="nav-submenu">
+                <ui:Button name="SubmenuManager" class="nav-submenu-item">
+                    <ui:Label text="INFO MANAGER" class="nav-submenu-label"/>
+                </ui:Button>
+                <ui:Button name="SubmenuLogros" class="nav-submenu-item">
+                    <ui:Label text="LOGROS DEL GM" class="nav-submenu-label"/>
+                </ui:Button>
+            </ui:VisualElement>
             <ui:Button name="NavMessages" class="nav-item">
                 <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
                 <ui:Label text="NOTICIAS" class="nav-label"/>
