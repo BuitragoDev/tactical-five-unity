@@ -16,7 +16,7 @@
 
 | Need | Mechanism | Example |
 |---|---|---|
-| Reusable UI views | `Resources.Load<VisualTreeAsset>` + `CloneTree()` | `HeaderController.cs:13`, `SidebarController.cs:50` |
+| Reusable UI views | `Resources.Load<VisualTreeAsset>` + `CloneTree()` | `HeaderController.cs:13`, `SidebarController.cs:52` |
 | Lists/rows/tables | C# `new VisualElement()/Label()` appended to a container (`Clear()` + `Add()`) | Every controller's `Build...` methods |
 | Static sprites by key | `Resources.LoadAll<Sprite>` → `Dictionary<string,Sprite>` | Logos, `EndSeasonController.RefreshHeader` |
 | Player photos | `PlayerPhotoHelper.Load(id, field)` (5-source cascade) | Player detail screens |

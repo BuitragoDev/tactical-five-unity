@@ -2,7 +2,7 @@
 
 > Entry point for developers and AI agents working on this project.
 > **Project:** Tactical Five — NBA-management sim (Unity 6, single scene, UI Toolkit, SQLite). All in-game text is Spanish.
-> **Analysis date:** 2026-07-31 · Code base: commit `50b1a86` · Engine `6000.3.15f1`.
+> **Analysis date:** 2026-08-13 · Code base: commit `1d88989` (HEAD) · Engine `6000.3.15f1`. Docs rewritten to match this HEAD (previous docs referenced `50b1a86`).
 
 ## Documentation map
 
@@ -16,20 +16,20 @@
 | Doc | Contents |
 |---|---|
 | [Docs/GAMEPLAY.md](Docs/GAMEPLAY.md) | Every mechanic with exact formulas (simulation, economy, contracts, morale, draft…) |
-| [Docs/SYSTEMS.md](Docs/SYSTEMS.md) | The 16 core systems: responsibilities, files, key methods, risks |
+| [Docs/SYSTEMS.md](Docs/SYSTEMS.md) | The 18 core systems: responsibilities, files, key methods, risks |
 | [Docs/EVENTS.md](Docs/EVENTS.md) | All communication channels: static state, DB messages, PlayerPrefs, UI callbacks |
 
 ### Data & persistence
 | Doc | Contents |
 |---|---|
-| [Docs/DATA_MODEL.md](Docs/DATA_MODEL.md) | All ~40 SQLite tables field-by-field, relations, seeds, migrations |
+| [Docs/DATA_MODEL.md](Docs/DATA_MODEL.md) | All 42 SQLite tables field-by-field, relations, seeds, migrations |
 | [Docs/SAVE_SYSTEM.md](Docs/SAVE_SYSTEM.md) | Slots, `template.db`, save/load flows, versioning, risks |
 
 ### UI
 | Doc | Contents |
 |---|---|
-| [Docs/UI_TOOLKIT.md](Docs/UI_TOOLKIT.md) | PanelSettings/theme, UXML/USS, controller pattern, 39 screens, navigation tree |
-| [Docs/SCENES.md](Docs/SCENES.md) | The single scene, its 40 GameObjects, lifecycle |
+| [Docs/UI_TOOLKIT.md](Docs/UI_TOOLKIT.md) | PanelSettings/theme, UXML/USS, `UIScreenController` base, 41 screens, navigation tree |
+| [Docs/SCENES.md](Docs/SCENES.md) | The single scene, its 44 GameObjects, lifecycle |
 | [Docs/PREFABS.md](Docs/PREFABS.md) | Why there are zero prefabs; runtime instantiation patterns |
 | [Docs/SCRIPTABLE_OBJECTS.md](Docs/SCRIPTABLE_OBJECTS.md) | No game SOs; the PanelSettings + fonts that exist |
 

@@ -9,7 +9,7 @@
 - **No `FOREIGN KEY` constraints anywhere** [F]. Relations are by convention via `*_id` columns. Referential integrity is the app's responsibility.
 - Dates: most are `TEXT` (`"yyyy-MM-dd"`, `"yyyy-MM-dd HH:mm:ss"`), manually formatted. `storeDateTimeAsTicks = true` is set but unused for game data.
 - `PlayerData.id` is **manual, not autoincrement** (seed IDs 1..~600 stable across cloned slots). Other tables autoincrement.
-- No schema-version table; migrations are additive/column-presence based (see §5).
+- **Schema versioning [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`, `DatabaseManager.cs:41,290-291`). Column-based additive migrations still use `PRAGMA table_info`; data migrations use `IsMigrationApplied`/`MarkMigrationApplied`.
 
 ## 2. Relational overview
 
@@ -22,6 +22,7 @@ players 1──N training/offers/player_personalities   players N──N players
 players 1──N finals_player_stats                season_records.*_id → players
 teams   1──1 sponsor activo (sponsor_id in team_settings)
 teams   1──1 tv_channel activo (tv_channel_id in team_settings)
+players 1──1 hof_players (player_id)            teams 1──N retired_numbers (team_id)
 ```
 
 ## 3. Tables (field-by-field)
@@ -30,7 +31,7 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 `id` (PK, manual), `name`, `abbreviation`, `city`, `conference` (East/West), `division`, `arena`, `capacity`, `owner`, `attack`, `defense`, `overall`, `budget`, `reputation` (1–5), `facilities` (1–5), `logo`, `jersey_home`, `jersey_away`, `salary_margin`, `objective` (TEXT: "Campeonato"|"Playoffs"|"Play-In"|"Zona tranquila"|…, migrated), `team_chemistry`, `first_apron_hard_capped` (int 0/1, migrated), `arena_renovation_type/count/cost/end_day` (set via ArenaController), `arena_renovation_end_day`.
 
 ### players (`PlayerData`)
-`id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
+`id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated), `number` (dorsal), `on_trade_block` (0/1, marcado desde Roster → jugador TRANSFERIBLE en Market). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
 - **Honores de carrera (migrados, default 0):** `rings` (campeonatos ganados), `finals_mvps` (MVP de las Finales), `finals_played` (finales disputadas), `season_mvps` (MVP de temporada regular). Se incrementan en `SaveSeasonEndRecords` (ver GAMEPLAY §11). Se muestran como contadores en el header de `PlayerProfile` y `Trajectory` (CAMPEONATOS / FINALES / MVP / MVP FINALS).
 - `GetCalculatedAverage()` returns `round(mean(11 attrs))`. **`overall` is always recomputed from the attributes and capped by `potential`** (seed, training, progression, migration) [F].
 
@@ -44,13 +45,13 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 `id`, `season_id`, `manager_id`, `game_day`, `game_date`, `home_team_id`, `away_team_id`, `home_score`, `away_score`, `is_played` (0/1), `game_type` (`preseason`|`regular`|`playin`|`playoff`|`allstar`), `series_label` (playoff series id). Indexes: `season_id, game_day, is_played, game_type, manager_id`. Plus manual index `IX_Games_Standings(manager_id, game_type, is_played, game_day)`. For All-Star: `home_team_id=-1` (East), `away_team_id=-2` (West).
 
 ### player_game_stats (`PlayerGameStats`)
-`id`, `game_id`, `player_id`, `team_id`, `minutes`, `points`, `fgm, fga, fg3m, fg3a, ftm, fta`, `oreb, dreb, rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `pf`, `rating`, `double_double`, `triple_double`. Indexes on game/player/team.
+`id`, `game_id`, `player_id`, `team_id`, `minutes`, `points`, `fgm, fga, fg3m, fg3a, ftm, fta`, `oreb, dreb, rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `pf`, `rating`, `double_double`, `triple_double`. Indexes on game/player/team (`IX_PlayerGameStats_GameId/PlayerId/TeamId`).
 
 ### game_attendance (`GameAttendanceData`)
 `game_id` (PK, no autoinc), `attendance`, `ticket_price`, `revenue`. Saved by `ProcessGameFinances`; read by results/venue UI.
 
-### league_settings (`LeagueSettingsData`)
-`id`, `salary_cap`, `luxury_tax`, `apron`, `repeater_apron`, `mid_level`, `bi_annual`, `minimum_salary`, `is_active`. Seeded from `TradeHelper` constants + `bi_annual = 5_100_000`. **`apron`/`repeater_apron` are not the same as `TradeHelper.FIRST_APRON/SECOND_APRON` — most UI code uses `TradeHelper` constants, not this table** [D].
+### league_settings (`LeagueSettingsData`, `LeagueSettings.cs`)
+`id`, `salary_cap`, `luxury_tax`, `apron`, `repeater_apron`, `mid_level`, `taxpayer_mid_level` (nueva columna), `bi_annual`, `minimum_salary`, `is_active`. Seeded from `TradeHelper` constants + `bi_annual = 5_100_000`. **`apron`/`repeater_apron` are not the same as `TradeHelper.FIRST_APRON/SECOND_APRON` — most UI code uses `TradeHelper` constants, not this table** [D].
 
 ### season_records (`SeasonRecord`)
 `id`, `season_id`, `champion_id`, `finalist_id`, `finals_result`, `east/west/div1..6_champion_id`, `finals_mvp_id`, `finals_mvp_rating`, `season_mvp_id/rating/games`, `rookie_of_year_id/rating/games`, `best_defender_id`, `sixth_man_id`, `most_improved_id`, `all_star_pg/sg/sf/pf/c_id`, `first_team_pg..c`, `second_team_pg..c`.
@@ -73,7 +74,7 @@ teams   1──1 tv_channel activo (tv_channel_id in team_settings)
 Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bird rights, `team_id_from=0`) + `sign_and_trade` (traspaso inmediato). Sin migración de esquema: `MarketController.ProcessSATrade` y `DashboardController.ShowNextPendingTradeOffer` ejecutan el flujo.
 
 ### draft_picks (`DraftPickData`)
-`id`, `season_id`, `round`, `pick_number`, `original_team_id`, `current_team_id`. Seeded 2×30 per season ordered by reverse standings (or overall for year 1).
+`id`, `season_id`, `round`, `pick_number`, `original_team_id`, `current_team_id`, **`protected_from`** (0 = sin protección; n = protegido de los primeros n puestos, revierte al original dentro del rango), **`is_swap`** (0/1), **`swap_original_team_id`** (equipo con el que se compara; el tenedor del swap recibe la mejor posición). Seeded 2×30 per season ordered by reverse standings (or overall for year 1).
 
 ### training (`TrainingData`)
 `id`, `team_id`, `player_id`, `attribute`, `duration_days`, `days_remaining`, `completed`.
@@ -105,8 +106,21 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 ### player_relationships (`PlayerRelationshipData`)
 `id`, `team_id`, `player_a_id`, `player_b_id`, `bond` (1–99). Symmetric queries via `GetRelationship`.
 
-### coach_ranking (`CoachRankingData`)
+### coach_rankings (`CoachRankingData`)
 `id`, `name`, `team_id`, `status` ("historical"|"active"|"inactive"|"player"), `score`. Seeded ~70 historical + 30 active linked to 2025-26 teams. Updated via `UpdateCoachScore` (ignores historical), `SetCoachInactive`, `ReassignCoachToTeam`, `AddPlayerCoachEntry`.
+
+### hof_players (`HallOfFameData`)
+`id`, `player_id` (0 para leyendas precargadas), `first_name`, `last_name`, `position`, `team_abbreviation`, `rings`, `career_points`, `career_rebounds`, `career_assists`, `career_games`, `finals_mvps`, `induction_season`. Legado: `HallOfFameSeeder` (~100 leyendas). Inducción: `TryInductIntoHallOfFame` en `StartNewSeason`.
+
+### retired_numbers (`RetiredNumberData`)
+`id`, `team_id`, `number`, `player_id` (0 si el jugador ya no existe — siempre tras retiro), `first_name`, `last_name`, `position`, `rings`, `career_points`. Semilla: `RetiredNumberSeeder` (53) + `VeteranRetiredNumberSeeder` (17). `AssignJerseyNumber` reserva números retirados.
+
+### gm_achievements (`GmAchievementData`)
+`id`, `manager_id`, `type` (enum key string, p. ej. `first_win`, `champion`, `reg_wins_60`), `season_id` (nullable), `season_label` (nullable, p. ej. `"2025-26"`), `unlocked_at` ("yyyy-MM-dd HH:mm:ss").
+Índice compuesto **`UNIQUE(manager_id, type)`** (`IX_Achievements_Manager_Type`, definido con `[Indexed(Name, Order, Unique)]`): un desbloqueo por logro y por manager. Escritura idempotente vía `INSERT OR IGNORE` (`DatabaseManager.UnlockAchievement`). *Histórico: el índice nació UNIQUE solo sobre `manager_id`, lo que impedía desbloquear más de un logro por partida; `DatabaseManager.CreateTables` ejecuta `DROP INDEX IF EXISTS` antes de `CreateTable` para regenerar el índice compuesto correcto.* Catálogo de 28 tipos en `AchievementCatalog.All`; la pantalla hace `BackfillCareer` silencioso al abrir para partidas ya avanzadas.
+
+### schema_migrations (internal)
+`name` (TEXT PK), `applied_at` (TEXT). Creada en `RunMigrations`; registra migraciones one-time por slot.
 
 ### Records & history tables
 - `historical_records` (`HistoricalRecordData`): all-time single-game records (9 real: Wilt 100pts, 55 reb, Skiles 30 ast, …).
@@ -122,16 +136,15 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 - `all_star_appearance_seed` (`AllStarAppearanceSeed`): player_name → appearances (correlated by name to `players`).
 - `monthly_awards` (`MonthlyAwardData`): `id, season_id, month_name, award_type ("manager"|"player"|"rookie"), rank, manager_id, player_id, team_id, team_name, player_name, value`.
 
-### gm_achievements (`GmAchievementData`)
-`id`, `manager_id`, `type` (enum key string, p. ej. `first_win`, `champion`, `reg_wins_60`), `season_id` (nullable), `season_label` (nullable, p. ej. `"2025-26"`), `unlocked_at` ("yyyy-MM-dd HH:mm:ss").
-Índice compuesto **`UNIQUE(manager_id, type)`** (`IX_Achievements_Manager_Type`): un desbloqueo por logro y por manager. Escritura idempotente vía `INSERT OR IGNORE` (`DatabaseManager.UnlockAchievement`). *Histórico: el índice nació UNIQUE solo sobre `manager_id`, lo que impedía desbloquear más de un logro por partida; `DatabaseManager.CreateTables` ejecuta `DROP INDEX IF EXISTS` antes de `CreateTable` para regenerar el índice compuesto correcto.* Catálogo de 28 tipos en `AchievementCatalog.All`; la pantalla hace `BackfillCareer` silencioso al abrir para partidas ya avanzadas.
+### DTOs sin tabla (no SQLite / no usados)
+- **`PreseasonGameData` ([Table("preseason_games")]) es código muerto [F]**: la clase existe en `Data/PreseasonGameData.cs` pero **ninguna parte crea la tabla ni la usa** (la pretemporada usa `games.game_type="preseason"`). Candidata a borrado.
 
 ## 4. Seed data
 
 | Seed | Source | Volume | Notes |
 |---|---|---|---|
 | Teams | `SeedTeams` | 30 | Real NBA 2025-26 (division, arena, capacity, owner, attrs, budget, reputation, facilities, logo/jerseys, salary_margin, objective) |
-| League settings | `SeedLeagueSettings` | 1 | TradeHelper constants + bi_annual 5.1M |
+| League settings | `SeedLeagueSettings` | 1 | TradeHelper constants + bi_annual 5.1M + taxpayer_mid_level |
 | Players | `SeedPlayers` | ~490 | 15-16 per team; role thresholds: ≥88 Estrella, ≥78 Titular, ≥68 Banquillo; `overall` recomputed as mean |
 | Free agents | `SeedFreeAgents` | ~142 | `team_id=0`; role thresholds lower (≥80/≥70/≥60) |
 | Sponsors | `SeedSponsors` | 20 | 3 active random |
@@ -142,12 +155,14 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 | Finals/awards/quintets | `SeedPalmaresData` | real data | from `PalmaresSeeder` |
 | All-Star | `SeedAllStarData` | ~90 seed + 20 records | correlated by name |
 | Coaches | `SeedCoachRankings` | ~100 | historical + active |
-| Draft picks | `SeedDraftPicks` | 60/season | reverse standings order |
+| Hall of Fame | `HallOfFameSeeder` | ~100 leyendas | precargadas con `player_id=0` |
+| Dorsales retirados | `RetiredNumberSeeder`/`VeteranRetiredNumberSeeder` | 53 + 17 | leyendas con `player_id=0` |
+| Draft picks | `SeedDraftPicks` | 60/season | reverse standings order + protección/swap |
 | Personalities/relationships | `SeedTeamPersonalities`/`SeedTeamRelationships`/`EnsureTeamRelationshipsSeeded` | per team | non-deterministic `System.Random` |
 
-## 5. Migrations (`RunMigrations`, DatabaseManager.cs:185-527)
+## 5. Migrations (`RunMigrations`, DatabaseManager.cs:286)
 
-**Pattern:** `PRAGMA table_info(table)` → if column missing → `ALTER TABLE ... ADD COLUMN`. Idempotent, additive, no version table.
+**Column-based (idempotente, aditiva):** `PRAGMA table_info(table)` → if column missing → `ALTER TABLE ... ADD COLUMN`.
 
 | Table | Column(s) added | Default |
 |---|---|---|
@@ -172,25 +187,29 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 | `players` | `rings` (campeonatos), `finals_mvps` (MVP de las Finales) | 0 |
 | `players` | `finals_played` (finales disputadas) | 0 |
 | `players` | `season_mvps` (MVP de temporada regular) | 0 |
+| `players` | `number` (dorsal), `on_trade_block` | 0 |
+| `league_settings` | `taxpayer_mid_level` | 0 |
 
-**One-time data migrations (PlayerPrefs, per slot):**
-- `OverallMigration_{slot}`: recompute `overall` for all players as mean of 11 attrs (cap potential).
-- `DraftPicksReset_{slot}`: wipe `draft_picks` and reseed for the active season (using previous season's standings if available).
+**Data migrations (registradas en `schema_migrations`, viven con el slot):**
+- `overall_recalc`: recompute `overall` for all players as mean of 11 attrs (cap potential).
+- `draft_picks_reset`: wipe `draft_picks` and reseed for the active season (using previous season's standings if available).
 
-**Raw SQL migrations:** create `player_season_stats`, `monthly_awards` if missing; set `secondary_position` for existing players; `UPDATE` loops.
+**Raw SQL migrations:** create `player_season_stats`, `monthly_awards` if missing (redundante con `CreateTable`); set `secondary_position` for existing players; `UPDATE` loops.
 
 ## 6. DTOs (non-table classes)
 
-Defined at bottom of `DatabaseManager.cs` (lines ~5458-5609): `PlayerSeasonStatsRow`, `PlayerAwardQueryRow`, `HistoricalStatsAggregateRow`, `PlayerCareerSeasonRow`, `PlayerSeasonStatRow`, `SeasonAwardRow`, `PlayerAwardEntry`, `MonthlyManagerAwardRow`, `MonthlyPlayerAwardRow`. Non-SQLite DTOs: `FinalsMVPDetails`, `PlayerAwardInfo`, `GameSimulator.{PlayerStatSnapshot,TeamStats,GameResult}`, `TradeHelper.TradeResult`, `RosterController.MaxOfferBreakdown`, `DraftGenerator.DraftPickResult`, `GameResultCache` statics.
+- **`DatabaseRows.cs`** (nuevo): `PlayerSeasonStatsRow`, `PlayerAwardQueryRow`, `HistoricalStatsAggregateRow`, `PlayerCareerSeasonRow`, `PlayerSeasonStatRow`, `SeasonAwardRow`, `PlayerAwardEntry`, `MonthlyManagerAwardRow`, `MonthlyPlayerAwardRow` (antes en la cola de `DatabaseManager.cs`).
+- Non-SQLite DTOs: `FinalsMVPDetails`, `PlayerAwardInfo`, `GameSimulator.{PlayerStatSnapshot,TeamStats,GameResult,PlayByPlayEvent,StatDelta,PossessionOutcome}`, `TradeHelper.TradeResult`, `RosterController.MaxOfferBreakdown`, `DraftGenerator.DraftPickResult`, `GameResultCache` statics, `GmAchievementDefinition` (`AchievementCatalog`).
+- **Muertos [F]:** `PreseasonGameData` (tabla nunca creada), `GameSaveManager` helpers obsoletos si los hubiera (ver `TODO_TECHNICAL_DEBT.md`).
 
 ## 7. Data lifecycle (who creates/modifies/consumes)
 
-- **Seed/creates:** `DatabaseManager` (seeders), `SelectTeamController` (ManagerData/SeasonData on new game), `PreseasonController` (schedule), `DraftGenerator` (players/picks), `DashboardController` (games results, finances, attendance, awards, messages), `ArenaController` (renovations), `EndSeasonController` (draft), `StartNewSeason` (new season, aging, FA refills).
-- **Modifies:** all UI controllers through `DatabaseManager`; `GameSimulator` (stats, fatigue, injuries, records); `StartNewSeason` (aging/retirements/contracts/caps).
+- **Seed/creates:** `DatabaseManager` (seeders), `SelectTeamController` (ManagerData/SeasonData on new game), `PreseasonController` (schedule), `DraftGenerator` (players/picks), `DashboardController` (games results, finances, attendance, awards, messages), `ArenaController` (renovations), `EndSeasonController` (draft), `StartNewSeason` (new season, aging, FA refills, HOF inductions, retired numbers).
+- **Modifies:** all UI controllers through `DatabaseManager`; `GameSimulator` (stats, fatigue, injuries, records); `StartNewSeason` (aging/retirements/contracts/caps); `AchievementService` (gm_achievements).
 - **Consumes:** every controller via `DatabaseManager.Instance.*`.
 
 ## 8. Open questions
 
 - `league_settings.apron/repeater_apron` vs `TradeHelper.FIRST/SECOND_APRON`: which value is authoritative? Most UI uses `TradeHelper` [D]; the DB row is created but often ignored. Potential source of drift if constants change.
-- `EmployeeData.skill` vs `reputation`: **resolved** — `EmployeeData` has `reputation` (not `skill`); `GetArenaTicketMultiplier`/`GetRenovationCost` read `reputation`. No open question here.
 - Historical player `overall` column vs computed career averages — which is displayed in `HistorialController`/`StatsController`? ([D] seeded value.)
+- `PreseasonGameData` — ¿código muerto a borrar o WIP de un sistema de pretemporada separado? (ver `TODO_TECHNICAL_DEBT.md`.)

@@ -4,6 +4,8 @@
 > del proyecto. Este documento es la referencia futura del menú de mejoras; cada
 > propuesta está agrupada por frente y priorizada por impacto vs. esfuerzo.
 > Fecha del análisis: 2026-08-02 · Rama de referencia: `crear-mejoras2`.
+> **Actualización (2026-08-13):** estado verificado en HEAD `1d88989`; las columnas
+> "Estado" reflejan lo mergeado en `main`.
 
 ---
 
@@ -27,7 +29,7 @@ Fuentes consultadas: `Docs/PROJECT_OVERVIEW.md`, `Docs/GAMEPLAY.md`,
 El gap más evidente era: **el partido es invisible**. Se simula y solo se ve el resultado.
 
 - ✅ **Play-by-play en vivo / crónica en texto** — **hecho** (`crear-mejoras2`, commit `9c69e09`, mergeado a `main`): toggle "Vista de Partido" (Directa/Play-by-play), overlay inmersivo en MatchDay con marcador acumulado, reloj, barra de progreso, boxscore en vivo ordenado por VAL, totales recalculados, velocidades x1/x3/x5/x10 y botón SALTAR/IR AL RESUMEN. Ver `GAMEPLAY.md` §2.
-- **Logros/trofeos del GM** + palmarés visual enriquecido.
+- ✅ **Logros/trofeos del GM** + palmarés visual enriquecido — **hecho** (28 logros, pantalla Logros, toast; HOF en Palmares; Dorsales).
 - **Más variedad de audio** (solo 7 WAVs, `SYSTEMS.md §S15`).
 
 ## Frente 2 — Profundidad de gestión NBA (lo que los sims "potentes" tienen y aquí falta)
@@ -49,19 +51,18 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
   los mensajes de resultado (`FormatContractYears`); incluye maduración con re-firma de
   FA propio vía Bird rights (`last_team_id`, `IsOwnRecentFA`, modal de re-firma en
   `NewSeasonController`). Queda fino: soft cap / impacto de mercado en la re-firma.
-- **Picks protegidos** y más flexibilidad de transferencia de picks.
+- ✅ **Picks protegidos + swap** — **hecho**: `protected_from`/`is_swap`/`swap_original_team_id` en `DraftPickData`, resolución en `DraftGenerator`, UI en Market.
 - **Trade deadline con evento real** — **hecho** (rama `crear-mejoras2`, commit `649c98e`): modal DEADLINE DAY en Feb 7 que intercepta el btnAction (IR AL MERCADO / CERRAR, una vez por temporada); rush IA con cooldown 3-5 días Feb 1-8, contenders ofrecen picks, tag `[DEADLINE]` en ofertas; badge `⏳ ÚLTIMOS X DÍAS` en Market.
 - **Objetivos de temporada del propietario** con recompensas/cese (ya hay factor
   "objetivo" en asistencia y despido por presupuesto → expandir).
-- **Rest / load management** (los back-to-backs existen, pero no la decisión de descanso).
-- **IR (injury reserve) / G-League / two-way contracts**.
+- ✅ **Rest / load management** — **hecho**: `TF_LoadMgmt_Enabled` (toggle en Quinteto) + back-to-back → modal para descansar hasta 2 jugadores cansados en `DashboardController`.
+- **IR (injury reserve) / G-League / two-way contracts** — **pendiente** (`NEXT_PROPOSALS.md` D).
 
 ## Frente 3 — Simulación & AI (realismo)
 
 - **AI de GMs más inteligente** — **hecho** (rama `crear-mejoras2`): enum `TeamStrategy` (Rebuild/Balanced/Contend) en `DashboardController`; cooldowns y densidad por estrategia (Contend 0.45/6d, Rebuild 0.40/8d, Balanced 0.25/15d; 3-5 en deadline), fire sale de rebuild (`TrySellVeteran`), contender busca upgrades OVR≤90 con pick futuro protegiendo jóvenes, ofertas al usuario según estrategia (`PickTradeTarget`/`BuildOfferPackage`) y Star FA que prioriza contender sobre rebuild (que tankea y no ficha OVR≥85). Ver `SYSTEMS.md` §S.
-- **Analytics avanzados**: PER/WS/eFG/TS%/espaciado por encima del box score actual.
-- **Fog-of-war en valoraciones** (el ojeador da rangos, no OVR exacto) — casa con
-  la pantalla de Ojeadores.
+- ✅ **Analytics avanzados** — **hecho (parcial)**: eFG%, TS% y PER vía `AdvancedStatsHelper` en Stats + PlayerProfile. Queda WS/espaciado por posición.
+- ✅ **Fog-of-war en valoraciones** (el ojeador da rangos, no OVR exacto) — **hecho**: `FogOfWarHelper` + Cartera + PlayerProfile (commit `a924226`).
 - ✅ **Desarrollo/regresión más realista** — declive atlético por posición y mentoring
   de veteranos (**hecho**, commit `2281089`).
 
@@ -75,7 +76,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
   `GetMaxOfferBreakdown(proManagerOnly:true)` y sin activación del hard cap por NT-MLE);
   lógica centralizada en `ObjectiveHelper`. **B20 cerrado.**
 - **Expansión / liga personalizada** vía el editor de `template.db`.
-- **Historial rico**: anillos por jugador, retiro de dorsales, hall of fame.
+- ✅ **Historial rico** — **hecho**: anillos/MVP/MVP-Finales por jugador (contadores en PlayerProfile/Trajectory), retiro de dorsales (pantalla Dorsales), hall of fame (Palmares + EndSeason), quintos de temporada (pantalla Quintos).
 
 ## Frente 5 — Técnico / rendimiento (potencia bajo el capó)
 
@@ -103,11 +104,12 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 | Prioridad | Iniciativa | Frente |
 |---|---|---|
 | **Hecho** | Play-by-play en vivo del partido (commit `9c69e09`) | 1 |
-| **Media-Alta** | Cap sheet (info, hecho) + opciones de contrato + sim "¿y si firmo?" | 2 |
-| **Media** | ProManager diferenciado (B20) | 4 |
-| **Media** | AI de GM más lista + analytics | 3 |
+| **Hecho** | Cap sheet (info) + opciones de contrato TO/PO + re-firma Bird rights + S&T | 2 |
+| **Hecho** | ProManager diferenciado (B20 cerrado) | 4 |
+| **Hecho** | AI de GM más lista + analytics avanzados + fog-of-war | 3 |
 | **Hecho** | Async DB (B8): pre-lote, StartNewSeason y AI trades en hilo de fondo (WAL + conexión ambient) | 5 |
-| **Baja-Media** | Logros, G-League, picks protegidos | 2/4 |
+| **Hecho** | Logros, picks protegidos/swap, load management, HOF, dorsales, quintos | 1/2/4 |
+| **Pendiente** | G-League / IR / contratos two-way (`NEXT_PROPOSALS.md` D) | 2 |
 
 ---
 
@@ -129,3 +131,13 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | Async DB (B8): `StartNewSeason` en hilo de fondo | **Hecho** — conexión ambient `AsyncLocal` + WAL (commit `5bcca3b`) |
 | Async DB (B8): traspasos/fichajes AI en hilo de fondo | **Hecho** — conexión ambient + `System.Random` thread-safe (`_aiRng`) (commit `71775bf`) |
 | Contadores de honores del jugador (CAMPEONATOS/FINALES/MVP/MVP FINALS) | **Hecho** — campos `players.rings/finals_mvps/finals_played/season_mvps`, incremento en `SaveSeasonEndRecords`, contadores en header de PlayerProfile/Trajectory (commits `d52d5cf`, `a32ae75`) |
+| **Matchup preview / pronóstico del partido** | **Hecho** — `MatchupPreview.cs` + panel PRONÓSTICO en MatchDay |
+| **Retiro de dorsales (jersey retirement)** | **Hecho** — `retired_numbers` + seeds (53+17) + pantalla Dorsales + `AssignJerseyNumber` |
+| **Picks protegidos + swap** | **Hecho** — `draft_picks.protected_from/is_swap/swap_original_team_id` + resolución en `DraftGenerator` + UI en Market |
+| **Logros/trofeos del GM** | **Hecho** — catálogo 28 logros (`AchievementCatalog`) + `gm_achievements` + pantalla Logros + toast |
+| **Salón de la Fama** | **Hecho** — `HallOfFameHelper` + `hof_players` (~100 leyendas) + inducción en `StartNewSeason` + panel Palmares |
+| **Analytics avanzados (eFG%/TS%/PER)** | **Hecho** — `AdvancedStatsHelper` en Stats + PlayerProfile |
+| **Load management (descanso en back-to-back)** | **Hecho** — `TF_LoadMgmt_Enabled` (Quinteto) + modal de descanso en Dashboard |
+| **Opciones de contrato TO/PO** | **Hecho** — toggles en renovaciones/FA + `guaranteed_years` + `FormatContractYears` |
+| **Re-firma de FA propio (Bird rights)** | **Hecho** — `last_team_id`/`IsOwnRecentFA` + modal de re-firma en NewSeason |
+| **G-League / IR / contratos two-way** | **Pendiente** — `NEXT_PROPOSALS.md` D |
