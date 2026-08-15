@@ -2,78 +2,52 @@
 
 > Prioritized list of bugs, refactors, duplicates, technical debt, risks, and improvements, each with impact and reference. **[F]** confirmed, **[D]** deduction, **[H]** hypothesis.
 > Priorities: **P0** = can break the app / data loss; **P1** = significant maintenance or correctness burden; **P2** = moderate; **P3** = nice-to-have.
+> Status markers: **DONE** / **PARTIAL** (progress + what remains) / **OPEN**.
 
 ---
 
 ## P0 — Critical
 
-### B1. Duplicate `CursorManager` can destroy the `ScreenManager` GameObject
-- **Type:** bug / fragility.
-- **Detail [F]:** `MainMenu.unity` has two `CursorManager` components — one in the root `CursorManager` GO and one inside the `ScreenManager` GO (with `ScreenManager` and `DatabaseManager`). The singleton guard in `Awake` does `if (Instance != null && Instance != this) { Destroy(gameObject); return; }`. If the instance inside the `ScreenManager` GO loses the race, `Destroy(gameObject)` destroys the whole `ScreenManager` GO (navigation + DB gateway gone). Order is undefined.
-- **Impact:** game-breaking at boot, intermittent.
-- **Fix:** remove one instance; move `DontDestroyOnLoad` responsibility explicitly onto `ScreenManager`/`DatabaseManager` (they currently rely on the co-located `CursorManager`).
-
-### B2. `OverallMigration_{slot}` PlayerPrefs flag is machine-global and never cleared on slot deletion
-- **Type:** data correctness (low severity).
-- **Detail [F]:** migration flags are `PlayerPrefs` keyed by slot number; `DeleteSave` doesn't remove them. Reusing a slot number after delete skips the overall recalculation. Harmless today (new data is correct) but a latent trap.
-- **Impact:** low; flag as "needs care" if migrations evolve.
+_(none open — see resolved B1 below)_
 
 ---
 
 ## P1 — High
 
-### B3. `DatabaseManager` is a 5,600-line monolith
+### B3. `DatabaseManager` is a monolith — **PARTIAL (mostly done)**
 - **Type:** refactor.
-- **Detail [F]:** all persistence, seeding, migrations, awards, records, and chemistry logic live in one class.
-- **Impact:** hard to review, test, extend.
-- **Fix:** split into `TeamRepository`, `PlayerRepository`, `GameRepository`, `FinanceRepository`, `SeasonFlow`, etc., keeping `DatabaseManager` as facade.
+- **Detail [F]:** the main file is now 968 ln (down from ~5,600) split into **9 partial classes** by domain: `.Teams`, `.Players`, `.Staff`, `.Manager`, `.Games`, `.Seeding` (1354 ln), `.Records` (3586 ln), `.Achievements`. `SQLite.cs` (sqlite-net wrapper) is separate.
+- **Remaining:** `DatabaseManager.Records.cs` (3586 ln) and `.Seeding.cs` (1354 ln) are still oversized; DTOs moved out to `DatabaseRows.cs`. Further split optional.
+- **Fix:** split `.Records` into record-checking vs awards vs HOF vs retired-numbers partials.
 
-### B4. Config modal + confirm dialogs duplicated across ~30 controllers
-- **Type:** duplication.
-- **Detail [F]:** the settings modal (3 volume sliders + quality buttons) and "volver al menú / salir" confirm dialogs exist in each screen's UXML/USS and each controller (`ArenaController`, `DashboardController`, `MainMenuController`, `RosterController`, …).
-- **Impact:** any UI change to settings touches dozens of files; drift risk.
-- **Fix:** single `ConfigModalController` + one shared UXML/USS; controllers attach it.
+### B4. Config modal duplication — **DONE**
+- **Detail [F]:** the settings modal (3 volume sliders + quality buttons + sim-mode toggle + exit confirms) is now centralized in `UIScreenController.InitConfigModal`/`OpenConfigModal`/`CloseConfigModal` (base class). `CustomSlider` is the shared slider control.
+- **Note:** the 12 controllers that override `RegisterCallbacks()` without `base` (Editor, EndSeason, GameResults, LoadGame, MainMenu, MatchDay, NewSeason, PlayerAwards, Preseason, Quintos, SeasonSummary, SelectTeam) don't get the config modal via the base — verify each still exposes settings (most are boot/menu/slot screens).
 
-### B5. No UI base controller
-- **Type:** refactor.
-- **Detail [F]:** 39 controllers each duplicate the same `OnEnable` pipeline, full-screen styling, logo dictionaries, and `_manager/_myTeam/_season` loading.
-- **Impact:** ~60% boilerplate duplication.
-- **Fix:** `UIScreenController` base with template methods (`CacheReferences`, `LoadData`, `RegisterCallbacks`, `Refresh`).
+### B5. No UI base controller — **DONE**
+- **Detail [F]:** `UIScreenController` base exists (`Scripts/Core/UIScreenController.cs`, 575 ln); **all 41 controllers inherit it** (`UI_TOOLKIT.md §4`). Provides full-screen, chrome injection (Header/Sidebar), nav wiring, cursors, config modal, `RefreshHeader`.
+- **Remaining quirk:** **12 controllers override `RegisterCallbacks()` without `base`** (see B4 note). `GameResultsController` re-implements nav/submenu/cursor wiring in its override referencing 3 non-existent sidebar elements (`NavRecords`/`NavSponsors`/`NavTV`) — null-safe but confusing.
 
-### B6. `GetTopPlayersByStat` was a stub
-- **Type:** ~~incomplete feature~~ **done.**
-- **Detail [F]:** `DatabaseManager.GetTopPlayersByStat` previously returned the manager's roster sorted by overall. **Fixed** — now aggregates `player_game_stats` in SQL (regular-season games only), see `DatabaseManager.Players.cs:64`. `StatsController.BuildSeasonStats` also moved to a single SQL aggregate (`GetSeasonPlayerStatsAggregates`).
+### B7. `GameScreen.Settings` dead — **DONE**
+- **Detail [F]:** `GameScreen.Settings` and `SettingsController` were **removed** (no enum value, no `settingsDocument`, no controller). Settings live in the per-screen config modal.
 
-### B7. `GameScreen.Settings` dead + `SettingsController` orphaned
-- **Type:** dead code / incomplete wiring.
-- **Detail [F]:** no `case` in `ScreenManager.GoTo`, no `settingsDocument` in scene; `Settings.uxml`/`SettingsController` unused.
-- **Impact:** dead code; confusion about where settings live (they live in the per-screen config modal).
-- **Fix:** either remove or wire it and centralize settings there.
-
-### B8. All DB work is synchronous on main thread; heavy batches block UI
-- **Type:** performance — **mostly resolved.**
-- **Detail [F]:** the bundled `SQLite.cs` is synchronous-only (no `SQLiteAsyncConnection`). **Now** heavy batches run in `Task.Run` with a dedicated `SQLiteConnection` + WAL. `DatabaseManager.RunInBackground` (pre-lote, `33f4e12`) and `RunInBackgroundAsync` (`5bcca3b`, `71775bf`) set an `AsyncLocal` ambient connection so all DB helpers write on the background connection while the coroutine waits. Off main thread: daily injury/physical batch, `StartNewSeason`, AI transfers + star-FA signings (`_aiRng`, `System.Random` thread-safe).
-- **Closed (2026-08):** match-day simulation (`GameSimulator.SimulateGame`) is intentionally left on the main thread — measured fast and stable; B8 is closed with the batches already moved. Draft generation also remains on main thread; revisit only if targeted stalls appear.
-- **Impact:** stutter removed for season start and pre-game batch.
+### B8. All DB work synchronous on main thread — **DONE (mostly)**
+- **Detail [F]:** `SQLiteAsync.cs` was **deleted**; async is internal now: `DatabaseManager.RunInBackground`/`RunInBackgroundAsync` (`_ambientDb` AsyncLocal connection + WAL + `Task.Run`) run the daily injury/physical batch, `StartNewSeason`, and AI transfers/star-FA signings off the main thread (`_aiRng` `System.Random`, thread-safe).
+- **Intentional on main thread:** match simulation (`GameSimulator`) and draft generation — measured fast/stable; revisit only if targeted stalls appear.
 - **Fix (rest):** none required.
 
-### B9. No transactions around most multi-write operations
-- **Type:** data integrity.
-- **Detail [F]:** only schedule/playoff/seed saves wrap writes in transactions. `StartNewSeason`, game-day sims, offer processing do many independent writes.
-- **Impact:** crash mid-flow leaves partial state (game played, no stats; aging applied but caps not raised).
-- **Fix:** wrap day/session flows in transactions.
+### B9. Transactions around multi-write operations — **PARTIAL**
+- **Detail [F]:** `StartNewSeason` and the daily rollover batch are now transactional; schedule/playoff/seed saves already were.
+- **Remaining:** most single-mutation writes and mid-day sequences (game → stats → records) are still untransactional. A crash mid-flow can still leave partial state (game played, no stats).
+- **Fix:** wrap the game-day pipeline and offer-processing in transactions.
 
-### B11. No schema versioning
-- **Type:** maintainability.
-- **Detail [F]:** migrations rely on column presence; two one-time migrations keyed in `PlayerPrefs`.
-- **Impact:** hard to reason about future breaking migrations; slot deletion interactions (B2).
-- **Fix:** adopt `PRAGMA user_version` + ordered migration list.
+### B11. No schema versioning — **DONE**
+- **Detail [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`). Data migrations are named and stored **in the DB** (per-slot, survive slot deletion correctly). Column migrations keep the `PRAGMA table_info` pattern.
 
-### B12. Stringly-typed state everywhere
-- **Type:** robustness.
+### B12. Stringly-typed state everywhere — **OPEN**
 - **Detail [F]:** `phase` ("regular"/"playin"/...), `game_type`, positions, staff positions ("PABELLON"), `trade_type` as raw strings; typos produce silent failures.
 - **Impact:** runtime bugs hard to catch.
-- **Fix:** enums + helper conversions (like `PositionCodes`).
+- **Fix:** enums + helper conversions (like `PositionCodes`). New code should already follow this.
 
 ---
 
@@ -85,9 +59,9 @@
 - **Fix:** static lazy cache.
 
 ### B14. Heavy LINQ aggregations in C# that could be SQL
-- **Detail [F]:** e.g., league leaders computed via `GroupBy` over all `player_game_stats` in memory; standings computed per call.
+- **Detail [F]:** e.g., league leaders/standings computed via in-memory `GroupBy` in places.
 - **Impact:** slower with long careers.
-- **Fix:** move to SQL aggregates.
+- **Fix:** move to SQL aggregates (`GetSeasonPlayerStatsAggregates` already does for one path).
 
 ### B15. Reflection in `CompleteTrainingAndApply`
 - **Detail [F]:** attribute +2 via `typeof(PlayerData).GetProperty`.
@@ -95,7 +69,7 @@
 - **Fix:** switch on attribute name or dictionary.
 
 ### B16. `league_settings.apron/repeater_apron` vs `TradeHelper.FIRST/SECOND_APRON` duplication
-- **Detail [F]:** two sources of truth; UI mostly uses `TradeHelper`.
+- **Detail [F]:** two sources of truth; UI mostly uses `TradeHelper`. (`taxpayer_mid_level` was added to `league_settings` but is unused by most UI too.)
 - **Impact:** drift risk when constants change.
 - **Fix:** single source; seed DB from it.
 
@@ -105,40 +79,57 @@
 - **Fix:** delete or recreate folder.
 
 ### B18. Error handling is `Debug.Log`-heavy with try/catch only in a few places
-- **Detail [F]:** most DB calls unguarded; `catch (Exception)` used only in payroll/message creation.
+- **Detail [F]:** most DB calls unguarded; `catch (Exception)` used in a few places only.
 - **Impact:** crashes on corrupt DB.
 - **Fix:** central exception wrapper returning fallbacks.
 
-### B19. `PlayerPrefs` used for migration flags (see B2) and settings without a settings DTO
-- **Detail [F]:** keys `TF_Audio_*`, `TF_Graphics_Quality`.
+### B19. `PlayerPrefs` for settings without a settings DTO
+- **Detail [F]:** keys `TF_Audio_*`, `TF_Graphics_Quality`, `TF_SimMode`, `TF_PbpSpeed`, `TF_LoadMgmt_Enabled`.
 - **Impact:** no central registry; magic strings.
 - **Fix:** `GameSettings` static wrapper.
 
-### B20. `GameMode.ProManager` has limited behavioral difference
-- **Detail [F]:** ProManager selects only the worst teams (`SelectTeamController` `GetWorstTeams(5)`), limits new-season offers to current team + 3 random from bottom-10, and shows a restrictions modal (`MainMenuController.OpenProModal`). All announced harder rules are now **implemented**: objective-based season-end firing (`ShowObjectiveFiredModal`), easier budget firing (`CheckBudgetWarning` threshold 2), **no NT-MLE** on FA offers (`GetMaxOfferBreakdown`/`CalculateMaxOfferSalary` `proManagerOnly` forces Taxpayer MLE; `MarketController.UpdateFAMaxInfo`/`UpdateFAWarning`/`SendFAOffer`; `DashboardController.ProcessMaturedOffers`) and no NT-MLE hard-cap activation. Objective/rank logic centralized in `ObjectiveHelper`. **B20 closed / done.**
-- **Impact:** resolved.
-- **Fix:** none remaining. Verify balance of the Taxpayer-MLE offer cap in a full season.
+### B20. ProManager difficulty — **DONE / closed**
+- **Detail [F]:** ProManager selects only the worst teams (`GetWorstTeams(5)`), limits new-season offers, shows a restrictions modal. Harder rules implemented: objective-based firing (`ShowObjectiveFiredModal`), easier budget firing (threshold 2), **no NT-MLE** (Taxpayer MLE only via `GetMaxOfferBreakdown`/`CalculateMaxOfferSalary`/`MarketController`), no NT-MLE hard-cap. `ObjectiveHelper` centralizes objective/rank logic.
+- **Fix:** verify balance of the Taxpayer-MLE offer cap in a full season.
+
+### B21. Dead `UIScreenController.LoadSidebarIcons` — **OPEN**
+- **Detail [F]:** the base calls `LoadSidebarIcons()` before the sidebar is attached; the real icons are loaded by `SidebarController.LoadIcons` (`Resources.Load<Texture2D>($"Icons/{kv.Value}")`). Base method is dead.
+- **Fix:** remove the base method + call.
+
+### B22. `FullScreenUI.Awake` duplicates `UIScreenController.MakeFullscreen`
+- **Detail [F]:** both force absolute full-screen on the root. Harmless but redundant.
+- **Fix:** pick one (e.g. keep `FullScreenUI` for the 39 docs that carry it and drop `MakeFullscreen`).
+
+### B23. Double header population
+- **Detail [F]:** base `Refresh()` → `RefreshHeader()` plus `HeaderController.Attach` populate the same header blocks; both run per screen load.
+- **Fix:** make `RefreshHeader` idempotent or call once.
 
 ---
 
 ## P3 — Low / Nice-to-have
 
-- **B21.** No namespaces / Spanish-English mix in code — acceptable, but consider per-area namespaces.
-- **B22.** Comments only in Spanish — fine for current team; document if external contributors join.
-- **B23.** Fonts referenced via `project://database/Assets/...` (editor-absolute) in USS — works in editor builds; verify in built players.
-- **B24.** `_Recovery` scenes leftover in `Assets/_Recovery` (gitignored) — clean up.
-- **B25.** No unit/integration tests (only `com.unity.test-framework` package present, no test assemblies). Add tests for `TradeHelper`, `GameSimulator`, `DatabaseManager` migrations.
-- **B26.** Emoji as icons in UXML (🏟👑💎🛒) — platform font-dependent; consider sprites.
-- **B27.** `PLAN.md` (in repo root, currently uncommitted) documents an improvement plan; some parts already implemented (draft picks, hard cap, luxury tax, buyout). **Sync the plan with the code or delete it.**
-- **B28.** No changelog or versioning policy for `v0.9.0 Beta`.
+- **B30.** No namespaces / Spanish-English mix in code — acceptable, but consider per-area namespaces.
+- **B31.** Comments only in Spanish — fine for current team; document if external contributors join.
+- **B32.** Fonts referenced via `project://database/Assets/...` (editor-absolute) in USS — works in editor builds; verify in built players.
+- **B33.** `_Recovery` scenes leftover in `Assets/_Recovery` (gitignored) — clean up.
+- **B34.** No unit/integration tests (only `com.unity.test-framework` package present, no test assemblies). Add tests for `TradeHelper`, `GameSimulator`, `DatabaseManager` migrations.
+- **B35.** Emoji as icons in UXML (🏟👑💎🛒) — platform font-dependent; consider sprites.
+- **B36.** `PLAN.md` (repo root) documents an improvement plan; several parts are now implemented (draft picks/protections, hard cap, luxury tax, buyout, TO/PO, load management, HOF, achievements). **Sync the plan with the code or delete it.**
+- **B37.** No changelog or versioning policy for `v1.0.0 · Beta`.
+
+### Newly-identified dead/orphan code [F]
+- **`PreseasonGameData`** (`Data/PreseasonGameData.cs`, `[Table("preseason_games")]`) — class exists but **the table is never created and never used** (preseason uses `games.game_type="preseason"`). Delete.
+- **`UI/Screens/LegalNotice/`** (`LegalNotice.uxml` + `.uss`) — orphaned; the legal modal is inline in `MainMenu.uxml` (`BtnLegal`). Delete or rewire.
 
 ---
 
 ## Suggested next actions (ordered)
 
-1. Fix **B1** (remove duplicate CursorManager; explicit `DontDestroyOnLoad`).
-2. Introduce UI base controller (**B5**) and shared config modal (**B4**) — highest maintenance win.
-3. Wire/remove **B7** (Settings dead code).
-4. Add schema versioning (**B11**) and transaction wrappers (**B9**) before any new major feature.
-5. Decide on **B20** (ProManager) and **B27** (PLAN.md sync).
-6. Add tests (**B25**) for the core static helpers.
+1. **B9** — wrap the game-day pipeline in transactions (highest data-integrity value).
+2. **B21/B22/B23** — small base-class cleanups (dead `LoadSidebarIcons`, redundant full-screen, double header) — low risk, reduces confusion.
+3. **B3** — split `DatabaseManager.Records.cs` (3586 ln) further.
+4. **B12** — introduce enums for `phase`/`game_type`/`trade_type` before the next feature that touches them.
+5. **B4 note** — reconcile the 12 controllers overriding `RegisterCallbacks()` without `base` (either standardize or document intent).
+6. **B36** — sync or delete `PLAN.md`.
+7. **B34** — add tests for the core static helpers (`TradeHelper`, `GameSimulator`, migrations).
+8. Clean up the dead code (PreseasonGameData, LegalNotice folder, orphan `.meta`).

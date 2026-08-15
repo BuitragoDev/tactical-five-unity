@@ -43,6 +43,17 @@
 | **Playoffs** | 4×best-of-7 | `PlayoffsGenerator` |
 | **All-Star** | All-Star game | `GameData.game_type="allstar"`, `all_star_records` |
 | **Noticias** | Inbox / news | `MessageData`, `MessagesController` |
+| **Logros** | GM achievements (28, 6 categorías) | `AchievementCatalog`, `GmAchievementData`, `LogrosController` |
+| **Salón de la Fama (HOF)** | Hall of Fame: inducción de leyendas y retirados | `HallOfFameHelper`, `hof_players`, Palmares/EndSeason |
+| **Dorsales retirados** | Jersey retirement by team | `RetiredNumberData`, `DorsalesController`, `AssignJerseyNumber` |
+| **Load management** | Descansar jugadores cansados en back-to-back | `TF_LoadMgmt_Enabled`, `QuintetoController`, `DashboardController` |
+| **Vista de Partido** | Sim mode Directa / Play-by-play | `TF_SimMode`, `GameResultCache.PlayByPlayLogs`, `MatchDayController` |
+| **Quintos (Quintos)** | Season All-Star / Rookie quintets | `QuintosController`, `GetAllStarTeam`/`GetAllRookieTeam` |
+| **Pronóstico (matchup)** | Pre-match forecast (favorito + win prob) | `MatchupPreview`, `MatchDayController` |
+| **Analytics avanzados** | eFG%, TS%, PER | `AdvancedStatsHelper`, `StatsController`, `PlayerProfileController` |
+| **Fog of war** | OVR/atributos ocultos de jugadores no ojeados | `FogOfWarHelper`, `CarteraController`, `PlayerProfileController` |
+| **Picks protegidos / swap** | Draft pick protections & swaps | `DraftPickData.protected_from/is_swap/swap_original_team_id` |
+| **Trade block** | Marcar jugador TRANSFERIBLE | `players.on_trade_block`, `RosterController`, `MarketController` |
 
 ## Roles
 
@@ -73,7 +84,10 @@
 | Class | File | Role |
 |---|---|---|
 | `ScreenManager` | `Scripts/Core/ScreenManager.cs` | Navigation singleton |
-| `DatabaseManager` | `Scripts/Data/DatabaseManager.cs` | DB singleton (facade + seed + migrations) |
+| `DatabaseManager` | `Scripts/Data/DatabaseManager.cs` (9 partials) | DB singleton (facade + seed + migrations) |
+| `UIScreenController` | `Scripts/Core/UIScreenController.cs` | Base class for all 41 screen controllers (chrome, nav, config modal) |
+| `AchievementService` / `AchievementCatalog` | `Scripts/Core/*` | 28 GM achievements + toast queue |
+| `AdvancedStatsHelper` / `FogOfWarHelper` / `HallOfFameHelper` / `MatchupPreview` / `ObjectiveHelper` | `Scripts/Stats/*` | Analytics, scouting fog, HOF, match forecast, objective logic |
 | `GameSaveManager` | `Scripts/Data/GameSaveManager.cs` | Save slots & template |
 | `GameSimulator` | `GameSimulator.cs` | Match engine |
 | `DraftGenerator` | `Scripts/Core/DraftGenerator.cs` | Draft lottery + class |
@@ -101,6 +115,9 @@
 | **Series label** | Playoff series id (`playoff-r1-east-1v8`, …) |
 | **Sender type** | `MessageData.sender_type`: 0 system, 1 player, 2 news |
 | **Transfer window** | Sep 1 → Feb 8 (AI trades active) |
+| **Deadline day / week** | Feb 7 (modal DEADLINE DAY) / Feb 1-8 (rush IA 3-5d) |
 | **Team strategy (IA)** | `TeamStrategy { Rebuild, Balanced, Contend }` — clasifica cada equipo cada ciclo de traspasos (contender=top4 conf o 2+ estrellas; rebuild=últimos 4 o plantilla joven sin estrellas) |
 | **Fisico penalty** | Performance multiplier when fatigue < 30 |
 | **Hard cap flag** | `teams.first_apron_hard_capped` |
+| **Sim mode** | `TF_SimMode` 0 = Directa, 1 = Play-by-play |
+| **Schema version** | `PRAGMA user_version = 2` + `schema_migrations` (named data migrations) |

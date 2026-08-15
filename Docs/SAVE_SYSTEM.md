@@ -21,10 +21,11 @@ All under `Application.persistentDataPath`:
 
 ## 2. Save model
 
-- **SQLite per slot** — the save IS the database (all ~40 tables). No JSON serialization of game state, no `JsonUtility` on game data (only used for `saves.json`).
+- **SQLite per slot** — the save IS the database (45 tables). No JSON serialization of game state, no `JsonUtility` on game data (only used for `saves.json`).
 - **`saves.json` metadata** (`SaveMeta { SaveSlotInfo[] slots }`): `slotNumber, exists, managerName, teamName, teamLogo, seasonYear, currentDate, lastPlayedRealDate, currentGameDay, gameMode`.
-- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` (called from `EditorController.LoadData`). Contains the 13 static tables (`teams, players, league_settings, sponsors, tv_channels, historical_records, team_records, historical_player_stats, finals_records, awards_records, quintet_records, all_star_records, all_star_appearance_seed, trade_data`).
-- **`CloneFromTemplate()`** — copies the 13 static tables via `InsertAll` into a fresh slot (preserving IDs), then creates the dynamic tables (`trade_data, training, personalities, relationships, lineup, trade_offers, draft_picks`). If no template exists, `SeedStaticDataIfNeeded()` seeds the slot directly.
+- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` (Editor flow + boot check). Contains the **15 static tables cloned with data**: `teams, players, league_settings, sponsors, tv_channels, historical_records, team_records, historical_player_stats, finals_records, awards_records, quintet_records, all_star_records, all_star_appearance_seed, trades, hof_players` (plus 7 empty dynamic tables created: `trades`, `training`, `player_personalities`, `player_relationships`, `team_lineup`, `trade_offers`, `draft_picks`).
+- **`CloneFromTemplate()`** (`DatabaseManager.cs:203`) — creates the 7 dynamic tables, then `InsertAll` the 15 static tables preserving IDs. If no template exists, `SeedStaticDataIfNeeded()` seeds the slot directly.
+- **Template build moved off the main thread** (`BuildTemplateDatabaseInBackground`, guarded by `_templateLock`).
 
 ## 3. Save / load flows
 
@@ -35,7 +36,7 @@ All under `Application.persistentDataPath`:
 3. `DatabaseManager.InitSaveSlot(slot)`:
    - close previous connection; set `_activeSaveSlot`;
    - `new SQLiteConnection(dbPath)` (ReadWrite|Create, ticks);
-   - `CreateTables()` → `RunMigrations()`;
+   - `CreateTables()` → `RunMigrations()` (+ `PRAGMA user_version`);
    - if slot empty: clone template (if exists) or seed; else do nothing.
 4. `GoTo(SelectTeam, mode)`.
 5. `SelectTeamController` creates `ManagerData` + `SeasonData`.
@@ -49,7 +50,7 @@ All under `Application.persistentDataPath`:
 
 ### Save slot info refresh
 - `UpdateSlotFromDatabase` reads the active manager/team/season and updates `SaveSlotInfo`.
-- `SaveSlotInfo` is written whenever game state changes at key points: `PreseasonController.OnContinue` (line 429, first commit), `DashboardController.ProcessGameDayRoutine` (line 1023, every day advance), `LoadGameController` (line 193). `GameSaveManager.DeleteSave` also writes (line 192).
+- `SaveSlotInfo` is written whenever game state changes at key points: `PreseasonController.OnContinue` (first commit), `DashboardController.ProcessGameDayRoutine` (every day advance), `LoadGameController`. `GameSaveManager.DeleteSave` also writes.
 
 ### Delete
 `GameSaveManager.DeleteSave(slot)` → deletes `save_{n}.db`, its `PlayerPhotos/{n}/` folder, and removes the slot from `saves.json`.
@@ -57,16 +58,17 @@ All under `Application.persistentDataPath`:
 ### Editor
 `EditorController.LoadData` → `EnsureTemplateDb()` → `InitTemplateSession()` (opens `template.db` as active DB). `CloseTemplateSession()` restores the slot connection. Used to build/refresh the master template.
 
-## 4. AutoSave
+## 4. AutoSave & threading
 
-There is **no explicit autosave timer** [F]. Everything is persisted **immediately** at the moment of each mutation (`DatabaseManager.UpdatePlayer/UpdateGame/UpdateTeam/AddFinanceRecord/...` write synchronously). The only "save on exit" logic is metadata refresh; quitting mid-session without a mutation loses nothing because mutations are already committed.
+- There is **no explicit autosave timer** [F]. Everything is persisted **immediately** at the moment of each mutation (`DatabaseManager.UpdatePlayer/UpdateGame/UpdateTeam/AddFinanceRecord/...` write synchronously). The only "save on exit" logic is metadata refresh; quitting mid-session without a mutation loses nothing because mutations are already committed.
+- **Background work:** heavy operations run off the main thread via `RunInBackground`/`RunInBackgroundAsync` (SQLite WAL mode, AsyncLocal ambient `_ambientDb` connection, `[ThreadStatic]` RNG) — see `ARCHITECTURE.md §7`. Write-heavy batch operations (e.g. `StartNewSeason`, draft) run inside a **transaction**.
 
 ## 5. Versioning & migrations
 
-- **No schema version table, no `PRAGMA user_version`** [F]. Versioning is **additive and idempotent**:
-  - Column presence check: `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
-  - One-time data migrations keyed in `PlayerPrefs`: `OverallMigration_{slot}` (recompute overall = mean of 11 attrs, cap by potential) and `DraftPicksReset_{slot}` (wipe & reseed draft picks for the active season).
-  - **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN`. E.g. adding `players.last_team_id` backfills `last_team_id = team_id` for players currently on a roster (`team_id != 0`).
+- **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2` (`DatabaseManager.cs:41,290-291`). The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state); `PRAGMA user_version` records the schema version.
+- **Additive column migrations stay idempotent:** `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
+- **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `draft_picks_reset` (see `EVENTS.md §4`).
+- **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN` (e.g. `players.last_team_id = team_id` for players on a roster).
 - **Implication:** older saves open fine on newer code; newer saves with extra columns read fine by older code only if older code ignores extra columns (it does — sqlite-net maps known fields only).
 
 ## 6. Exactly what is stored (summary)
@@ -74,19 +76,20 @@ There is **no explicit autosave timer** [F]. Everything is persisted **immediate
 | Category | Tables |
 |---|---|
 | Meta | `saves.json` (slots) |
-| Static content | teams, players, league_settings, sponsors, tv_channels, historical_*, records, palmarés seeds |
+| Static content (template, 15) | teams, players, league_settings, sponsors, tv_channels, historical_records, team_records, historical_player_stats, finals_records, awards_records, quintet_records, all_star_records, all_star_appearance_seed, trades, hof_players |
 | Progress | managers, seasons, games, game_attendance |
 | Per-game | player_game_stats, finals_player_stats, season_game_records |
 | Roster | team_lineup, training, offers, trade_offers, trades, draft_picks, player_personalities, player_relationships |
 | Personnel/economy | employees, scouts, loans, finance_records, team_settings |
-| Media/history | messages, monthly_awards, season_records, all_star_records, coach_ranking, player_season_stats |
+| Media/history | messages, monthly_awards, season_records, all_star_records, coach_rankings, player_season_stats |
+| Legacy | gm_achievements, retired_numbers, schema_migrations, preseason_games |
 
 ## 7. Risks & known issues
 
-- **[F] `PlayerPrefs` migration flags are machine-global, not per-save-slots beyond the number**: `OverallMigration_{slot}` — deleting slot N and creating a new one skips re-running the overall migration (harmless because new data is correct). Multi-slot is fine.
+- **[F] Migration flags now live in the DB** (`schema_migrations`), not machine-global PlayerPrefs — deleting a slot cleanly resets migration state. (The old `OverallMigration_{slot}`/`DraftPicksReset_{slot}` PlayerPrefs keys are gone.)
 - **[D] Clone keeps stable IDs** (`players.id` 1..~600). `AllStarAppearanceSeed` correlates by `player_name` — fine within a slot.
-- **[F] `SQLiteAsync.cs` is unused** → saves are synchronous on the main thread; large `StartNewSeason`/draft ops can stutter.
-- **[F] No transactions around most multi-write operations** (only schedule/seed/playoff saves use transactions). A crash mid-flow can leave partial state (e.g., a game played but no stats).
+- **[F] `SQLiteAsync.cs` was deleted** → async is handled internally by `RunInBackground`/`RunInBackgroundAsync` (WAL + ambient connection). Not all call sites have been migrated off the main thread yet (see `TODO_TECHNICAL_DEBT.md`).
+- **[F] Transactions** now wrap `StartNewSeason` and the daily/day rollover batches; most single-mutation writes remain untransactional (a crash mid-flow can still leave partial state, e.g. a game played but no stats).
 - **Photo persistence:** rookie photos written to `persistentDataPath/PlayerPhotos/{slot}/` (not in Resources) — deleted with the save; the `Resources/PlayerPhotos/` set (602 photos) is static game content.
 - **`first_apron_hard_capped`, `pick_id`, `morale`, `fisico`, `role`, `photo`** are migrated columns — old saves get defaults, so behavior differences on legacy saves are expected.
 

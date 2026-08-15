@@ -3,6 +3,11 @@
 Estado verificado contra el código en la rama `crear-mejoras`. Las entradas marcan
 `[hecho]` o `[pendiente]` con referencia `archivo:línea` cuando aplica.
 
+> **Actualización (2026-08-13):** todas las entradas están **mergeadas en `main`** y
+> verificadas en HEAD `1d88989`. La revisión de la documentación completa está en
+> `Docs/` y `.agent/`. Para trabajo pendiente ver `NEXT_PROPOSALS.md` (G-League/IR) y
+> `Docs/TODO_TECHNICAL_DEBT.md`.
+
 ## Completado
 
 - **[hecho]** Hard cap / aprons: validación de ofertas por apron y activación del
@@ -52,13 +57,14 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
   `.Seeding.cs` (generación de jugadores, draft), `.Records.cs` (históricos/premios/alineaciones);
   las clases fila (POCOs) pasaron a `DatabaseRows.cs`. Split mecánico verificado
   (round-trip exacto + balance de llaves por segmento).
-- **[hecho]** Clase base `UIScreenController` adoptada por las 37 pantallas (antes cada una con su
+- **[hecho]** Clase base `UIScreenController` adoptada por las **41 pantallas** (antes cada una con su
   `OnEnable` duplicado). La base centraliza el fullscreen del root, `LoadData`/`RefreshHeader`
   comunes, la inyección del Sidebar/Header unificados, la navegación y el modal de configuración
   (`InitConfigModal`/`OpenConfigModal`/`CloseConfigModal`). `HeaderController`/`SidebarController`
   quedan como helpers `static` idempotentes. `MainMenuController` overrridea el modal de
   configuración (usa `style.display` frente a las clases CSS de la base). Validado con una
   simulación de temporada completa. `Assets/_TacticalFive/Scripts/Core/UIScreenController.cs`.
+  *Nota: 12 pantallas (boot/menú/slots) overridean `RegisterCallbacks()` sin `base`.*
 
 - **[hecho]** Transacción del día de partido: `ProcessGameDayRoutine` (`DashboardController.cs`)
   se divide en dos bloques atómicos — lote pre-partido (lesiones, fatiga, scouts, entrenos,
