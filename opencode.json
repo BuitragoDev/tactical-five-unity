@@ -7,5 +7,6 @@
     ".agent/SKILLS.md",
     ".agent/MEMORY.md",
     ".agent/GLOSSARY.md"
-  ]
+  ],
+  "lsp": true
 }
