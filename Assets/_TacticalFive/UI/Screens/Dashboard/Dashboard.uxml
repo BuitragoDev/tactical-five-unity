@@ -72,7 +72,10 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="LastGameMeta" class="game-meta-row">
-                                    <ui:VisualElement name="LastGameLocation" class="game-meta-location"/>
+                                    <ui:VisualElement name="LastGameLocation" class="game-meta-location">
+                                    <ui:VisualElement name="LastGameLocationIcon" class="game-meta-location-icon"/>
+                                    <ui:Label name="LastGameLocationText" text="LOCAL" class="game-meta-location-label"/>
+                                </ui:VisualElement>
                                     <ui:Label name="LastGameArena" text="" class="game-meta-arena"/>
                                     <ui:Label name="LastGameType" text="" class="game-meta-type"/>
                                 </ui:VisualElement>
@@ -102,7 +105,10 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="NextGameMeta" class="game-meta-row">
-                                    <ui:VisualElement name="NextGameLocation" class="game-meta-location"/>
+                                    <ui:VisualElement name="NextGameLocation" class="game-meta-location">
+                                    <ui:VisualElement name="NextGameLocationIcon" class="game-meta-location-icon"/>
+                                    <ui:Label name="NextGameLocationText" text="VISITANTE" class="game-meta-location-label"/>
+                                </ui:VisualElement>
                                     <ui:Label name="NextGameArena" text="" class="game-meta-arena"/>
                                     <ui:Label name="NextGameType" text="" class="game-meta-type"/>
                                 </ui:VisualElement>

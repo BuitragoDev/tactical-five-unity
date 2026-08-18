@@ -579,15 +579,10 @@
     border-right-width: 0;
 }
 .game-meta-location {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     flex-direction: row;
     align-items: center;
-    font-size: 16px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
     padding: 6px 12px;
     border-radius: 2px;
-    -unity-text-align: middle-center;
     margin-right: 10px;
     flex-shrink: 0;
 }
@@ -603,11 +598,14 @@
     font-size: 16px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: inherit;
+    color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
 }
 .game-meta-location--home {
     background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
+}
+.game-meta-location--home .game-meta-location-label {
     color: rgb(255, 255, 255);
 }
 .game-meta-location--away {

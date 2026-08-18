@@ -41,6 +41,8 @@ using System.Threading.Tasks;
     private Label _lastGameDate;
     // Meta partidos
     private VisualElement _lastGameLocation;
+    private VisualElement _lastGameLocationIcon;
+    private Label _lastGameLocationText;
     private Label _lastGameArena;
     private Label _lastGameType;
 
@@ -53,6 +55,8 @@ using System.Threading.Tasks;
     private Label _nextAwayName;
     private Label _nextGameDate;
     private VisualElement _nextGameLocation;
+    private VisualElement _nextGameLocationIcon;
+    private Label _nextGameLocationText;
     private Label _nextGameArena;
     private Label _nextGameType;
 
@@ -338,6 +342,8 @@ using System.Threading.Tasks;
         _lastResultBadge = _root.Q<Label>("LastResultBadge");
         _lastGameDate = _root.Q<Label>("LastGameDate");
         _lastGameLocation = _root.Q<VisualElement>("LastGameLocation");
+        _lastGameLocationIcon = _root.Q<VisualElement>("LastGameLocationIcon");
+        _lastGameLocationText = _root.Q<Label>("LastGameLocationText");
         _lastGameArena = _root.Q<Label>("LastGameArena");
         _lastGameType = _root.Q<Label>("LastGameType");
 
@@ -350,6 +356,8 @@ using System.Threading.Tasks;
         _nextAwayName = _root.Q<Label>("NextAwayName");
         _nextGameDate = _root.Q<Label>("NextGameDate");
         _nextGameLocation = _root.Q<VisualElement>("NextGameLocation");
+        _nextGameLocationIcon = _root.Q<VisualElement>("NextGameLocationIcon");
+        _nextGameLocationText = _root.Q<Label>("NextGameLocationText");
         _nextGameArena = _root.Q<Label>("NextGameArena");
         _nextGameType = _root.Q<Label>("NextGameType");
 
@@ -5311,7 +5319,7 @@ List<int> offeredPickIds = new List<int>();
         bool lastIsHome = last.home_team_id == _myTeam.id;
         var lastHomeTeam = _allTeams.Find(t => t.id == last.home_team_id);
 
-        SetGameLocation(_lastGameLocation, lastIsHome);
+        SetGameLocation(_lastGameLocation, _lastGameLocationIcon, _lastGameLocationText, lastIsHome);
 
         _lastGameArena.text = lastHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(lastHomeTeam.id)?.arena ?? ""
@@ -5329,25 +5337,20 @@ List<int> offeredPickIds = new List<int>();
 
     // ── PRÓXIMO PARTIDO ──────────────────────────────────
 
-    void SetGameLocation(VisualElement container, bool isHome)
+    void SetGameLocation(VisualElement container, VisualElement icon, Label label, bool isHome)
     {
         if (container == null) return;
 
-        container.Clear();
         container.RemoveFromClassList("game-meta-location--home");
         container.RemoveFromClassList("game-meta-location--away");
         container.AddToClassList(isHome ? "game-meta-location--home" : "game-meta-location--away");
 
-        var icon = new VisualElement();
-        icon.AddToClassList("game-meta-location-icon");
         var iconTexture = isHome ? _homeIcon : _awayIcon;
-        if (iconTexture != null)
-            icon.style.backgroundImage = new StyleBackground(iconTexture);
-        container.Add(icon);
+        if (icon != null)
+            icon.style.backgroundImage = iconTexture != null ? new StyleBackground(iconTexture) : StyleBackground.None;
 
-        var label = new Label(isHome ? "LOCAL" : "VISITANTE");
-        label.AddToClassList("game-meta-location-label");
-        container.Add(label);
+        if (label != null)
+            label.text = isHome ? "LOCAL" : "VISITANTE";
     }
 
     void RefreshNextGame()
@@ -5385,7 +5388,7 @@ List<int> offeredPickIds = new List<int>();
         bool nextIsHome = next.home_team_id == _myTeam.id;
         var nextHomeTeam = _allTeams.Find(t => t.id == next.home_team_id);
 
-        SetGameLocation(_nextGameLocation, nextIsHome);
+        SetGameLocation(_nextGameLocation, _nextGameLocationIcon, _nextGameLocationText, nextIsHome);
 
         _nextGameArena.text = nextHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(nextHomeTeam.id)?.arena ?? ""
