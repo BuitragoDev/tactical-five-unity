@@ -72,7 +72,7 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="LastGameMeta" class="game-meta-row">
-                                    <ui:Label name="LastGameLocation" text="" class="game-meta-location"/>
+                                    <ui:VisualElement name="LastGameLocation" class="game-meta-location"/>
                                     <ui:Label name="LastGameArena" text="" class="game-meta-arena"/>
                                     <ui:Label name="LastGameType" text="" class="game-meta-type"/>
                                 </ui:VisualElement>
@@ -102,7 +102,7 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="NextGameMeta" class="game-meta-row">
-                                    <ui:Label name="NextGameLocation" text="" class="game-meta-location"/>
+                                    <ui:VisualElement name="NextGameLocation" class="game-meta-location"/>
                                     <ui:Label name="NextGameArena" text="" class="game-meta-arena"/>
                                     <ui:Label name="NextGameType" text="" class="game-meta-type"/>
                                 </ui:VisualElement>
@@ -415,7 +415,7 @@
                 <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
                 <ui:VisualElement class="modal-body">
                     <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Se cerrará la aplicación. Asegúrate de haber guardado tu progreso si lo deseas." />
+                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
                     <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />

@@ -1423,6 +1423,29 @@ public partial class DatabaseManager
         string seasonLabel = $"{season.year_start}-{season.year_end.ToString().Substring(2)}";
         Debug.Log($"[DB] Saving season-end records for {seasonLabel}...");
 
+        // El MIP debe resolverse antes del rollover, cuando la temporada actual
+        // aún está en player_game_stats y la anterior ya puede estar archivada.
+        var mostImproved = GetMostImprovedPlayer(seasonId, managerId);
+        var seasonRecord = _db.Table<SeasonRecord>()
+            .Where(r => r.season_id == seasonId)
+            .FirstOrDefault();
+        if (seasonRecord == null)
+        {
+            seasonRecord = new SeasonRecord
+            {
+                season_id = seasonId,
+                most_improved_id = mostImproved?.PlayerId ?? 0
+            };
+            _db.Insert(seasonRecord);
+        }
+        else if (mostImproved != null && seasonRecord.most_improved_id != mostImproved.PlayerId)
+        {
+            seasonRecord.most_improved_id = mostImproved.PlayerId;
+            _db.Update(seasonRecord);
+        }
+        if (mostImproved != null)
+            Debug.Log($"[DB] Most Improved saved: {mostImproved.PlayerName}");
+
         // ── Finals Record ──
         var finalsGames = _db.Table<GameData>()
             .Where(g => g.manager_id == managerId
@@ -1986,7 +2009,13 @@ public partial class DatabaseManager
     {
         if (!EnsureDb()) return null;
 
-        int prevSeasonId = seasonId - 1;
+        var previousSeason = _db.Table<SeasonData>()
+            .Where(s => s.manager_id == managerId && s.id < seasonId)
+            .OrderByDescending(s => s.id)
+            .FirstOrDefault();
+        if (previousSeason == null) return null;
+
+        int prevSeasonId = previousSeason.id;
         var curRatings = GetSeasonPlayerRatings(seasonId, managerId);
         var prevRatings = GetSeasonPlayerRatings(prevSeasonId, managerId);
         if (prevRatings.Count == 0) return null;
@@ -1998,10 +2027,10 @@ public partial class DatabaseManager
             if (!prevRatings.TryGetValue(cur.player_id, out var prev)) continue;
             if (prev.games < 40 || cur.games < 40) continue;
             float delta = (float)cur.avg_rating - (float)prev.avg_rating;
-            if (delta <= bestDelta) continue;
-            bestDelta = delta;
             var player = GetPlayerById(cur.player_id);
             if (player == null) continue;
+            if (delta <= bestDelta) continue;
+            bestDelta = delta;
             var team = GetTeamById(player.team_id);
             best = new PlayerAwardInfo
             {
@@ -2023,6 +2052,8 @@ public partial class DatabaseManager
     {
         var result = new Dictionary<int, SeasonPlayerRatingRow>();
         if (!EnsureDb() || seasonId <= 0) return result;
+
+        // La temporada activa todavía vive en player_game_stats.
         var rows = _db.Query<SeasonPlayerRatingRow>(@"
             SELECT ps.player_id, AVG(ps.rating) AS avg_rating, COUNT(*) AS games
             FROM player_game_stats ps
@@ -2031,6 +2062,19 @@ public partial class DatabaseManager
               AND g.manager_id = ?
             GROUP BY ps.player_id", seasonId, managerId);
         foreach (var r in rows) result[r.player_id] = r;
+
+        if (result.Count > 0) return result;
+
+        // Tras el rollover, player_game_stats y games se limpian. La copia
+        // agregada por temporada es la fuente histórica equivalente.
+        var archivedRows = _db.Query<SeasonPlayerRatingRow>(@"
+            SELECT player_id,
+                   CAST(total_rating AS REAL) / NULLIF(games, 0) AS avg_rating,
+                   games
+            FROM player_season_stats
+            WHERE season_id = ? AND games > 0", seasonId);
+        foreach (var r in archivedRows) result[r.player_id] = r;
+
         return result;
     }
 

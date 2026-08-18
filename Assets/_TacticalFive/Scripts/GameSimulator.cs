@@ -10,6 +10,10 @@ public static class GameSimulator
         public int player_id;
         public string name;
         public string position;
+        public string secondary_position;
+        public PlayerRole role;
+        public bool starter;
+        public int target_minutes;
         public int overall, shooting, three_point, passing, rebounding, defense, steals_attr, blocks_attr;
         public float minutes;
         public int fgm, fga, fg3m, fg3a, ftm, fta;
@@ -67,6 +71,8 @@ public static class GameSimulator
     {
         var homePS = homePlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
         var awayPS = awayPlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
+        PrepareRotationMetadata(homePS);
+        PrepareRotationMetadata(awayPS);
 
         if (homePS.Count < 2 || awayPS.Count < 2)
         {
@@ -174,7 +180,8 @@ public static class GameSimulator
             if (ps.rebounding >= 95)
             {
                 int curReb = ps.oreb + ps.dreb;
-                int floorReb = Mathf.RoundToInt(ps.minutes / 48f * 10);
+                int floorReb = Mathf.RoundToInt(ps.minutes / 48f * 10f
+                    * GetReboundPositionMultiplier(ps.position, false));
                 if (curReb < floorReb)
                 {
                     int extra = floorReb - curReb;
@@ -185,7 +192,11 @@ public static class GameSimulator
             if (ps.steals_attr >= 90)
                 ps.steals = Mathf.Max(ps.steals, Mathf.RoundToInt(ps.minutes / 48f * 3));
             if (ps.blocks_attr >= 95)
-                ps.blocks = Mathf.Max(ps.blocks, Mathf.RoundToInt(ps.minutes / 48f * 3));
+            {
+                int floorBlocks = Mathf.RoundToInt(ps.minutes / 48f * 3f
+                    * GetBlockPositionMultiplier(ps.position));
+                ps.blocks = Mathf.Max(ps.blocks, floorBlocks);
+            }
         }
 
         // Calcular rating y dobles-dobles DESPUES del suelo de stats
@@ -271,6 +282,8 @@ public static class GameSimulator
             player_id = p.id,
             name = $"{p.first_name} {p.last_name}",
             position = p.position,
+            secondary_position = p.secondary_position,
+            role = p.role,
             overall = p.overall,
             shooting = p.shooting,
             three_point = p.three_point,
@@ -282,6 +295,28 @@ public static class GameSimulator
             minutes = 0,
             fisico = p.fisico
         };
+    }
+
+    static void PrepareRotationMetadata(List<PlayerStatSnapshot> players)
+    {
+        for (int i = 0; i < players.Count; i++)
+        {
+            players[i].starter = i < 5;
+            players[i].target_minutes = GetTargetMinutes(players[i]);
+            if (players[i].fisico < 30)
+                players[i].target_minutes = Mathf.Max(8, players[i].target_minutes - 6);
+        }
+    }
+
+    public static int GetTargetMinutes(PlayerStatSnapshot player)
+    {
+        bool isStar = player.role == PlayerRole.Estrella || player.overall >= 85;
+        if (isStar) return player.starter ? 39 : 28;
+        if (player.starter)
+            return player.role == PlayerRole.Titular || player.overall >= 78 ? 31 : 27;
+        if (player.role == PlayerRole.Titular || player.overall >= 75) return 21;
+        if (player.role == PlayerRole.Banquillo) return 15;
+        return 8;
     }
 
     static PlayerGameStats PS2DB(PlayerStatSnapshot ps, int gameId, int teamId)
@@ -333,8 +368,8 @@ public static class GameSimulator
             float elapsed = pIdx * minsPerPoss;
             if (subIdx < subSchedule.Length && elapsed >= subSchedule[subIdx])
             {
-                homeOn = DoSub(homeOn, homePS.Count);
-                awayOn = DoSub(awayOn, awayPS.Count);
+                homeOn = DoSub(homeOn, homePS, homeMins);
+                awayOn = DoSub(awayOn, awayPS, awayMins);
                 subIdx++;
             }
             foreach (int i in homeOn) homeMins[i] += minsPerPoss;
@@ -387,8 +422,8 @@ public static class GameSimulator
             float elapsed = pIdx * minsPerPoss;
             if (subIdx < subSchedule.Length && elapsed >= subSchedule[subIdx])
             {
-                homeOn = DoSub(homeOn, homePS.Count);
-                awayOn = DoSub(awayOn, awayPS.Count);
+                homeOn = DoSub(homeOn, homePS, homeMins);
+                awayOn = DoSub(awayOn, awayPS, awayMins);
                 subIdx++;
             }
             foreach (int i in homeOn) homeMins[i] += minsPerPoss;
@@ -587,17 +622,29 @@ public static class GameSimulator
 
     static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree)
     {
-        foreach (var d in def)
+        // Un solo intento colectivo: el defensor se elige por atributo y posición,
+        // evitando que el orden de la lista convierta a un base en taponador principal.
+        var blockWeights = def
+            .Select(d => Mathf.Clamp((d.blocks_attr - 60) / 400f, 0, 0.10f)
+                * GetBlockPositionMultiplier(d.position))
+            .ToList();
+        float totalBlockChance = Mathf.Clamp(blockWeights.Sum(), 0f, 0.20f);
+        if (UnityEngine.Random.value < totalBlockChance && totalBlockChance > 0)
         {
-            float blockChance = Mathf.Clamp((d.blocks_attr - 60) / 400f, 0, 0.10f);
-            if (UnityEngine.Random.value < blockChance)
+            float roll = UnityEngine.Random.value * blockWeights.Sum();
+            float cumulative = 0;
+            for (int i = 0; i < def.Count; i++)
             {
-                d.blocks++;
-                return new PossessionOutcome
+                cumulative += blockWeights[i];
+                if (roll <= cumulative)
                 {
-                    pts = 0,
-                    desc = $"{d.name} tapona el tiro de {shooter.name}"
-                };
+                    def[i].blocks++;
+                    return new PossessionOutcome
+                    {
+                        pts = 0,
+                        desc = $"{def[i].name} tapona el tiro de {shooter.name}"
+                    };
+                }
             }
         }
 
@@ -685,8 +732,8 @@ public static class GameSimulator
 
     static string DoReb(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off)
     {
-        float dw = def.Sum(p => Mathf.Pow(p.rebounding, 3));
-        float ow = off.Sum(p => Mathf.Pow(p.rebounding, 2.5f));
+        float dw = def.Sum(p => ReboundWeight(p, false));
+        float ow = off.Sum(p => ReboundWeight(p, true));
         float t = dw + ow;
         if (t <= 0) return null;
 
@@ -697,7 +744,7 @@ public static class GameSimulator
 
     static string AwardReb(List<PlayerStatSnapshot> players, bool defensive)
     {
-        var w = players.Select(p => Mathf.Pow(p.rebounding, 3)).ToList();
+        var w = players.Select(p => ReboundWeight(p, !defensive)).ToList();
         float s = w.Sum();
         if (s <= 0) return null;
         float r = UnityEngine.Random.value * s;
@@ -713,6 +760,52 @@ public static class GameSimulator
             }
         }
         return null;
+    }
+
+    static float ReboundWeight(PlayerStatSnapshot player, bool offensive)
+    {
+        float exponent = offensive ? 2.5f : 3f;
+        return Mathf.Pow(Mathf.Max(1, player.rebounding), exponent)
+            * GetReboundPositionMultiplier(player.position, offensive);
+    }
+
+    public static float GetReboundPositionMultiplier(string position, bool offensive)
+    {
+        if (offensive)
+        {
+            return position switch
+            {
+                "PG" => 0.35f,
+                "SG" => 0.50f,
+                "SF" => 0.75f,
+                "PF" => 1.20f,
+                "C" => 1.40f,
+                _ => 1f
+            };
+        }
+
+        return position switch
+        {
+            "PG" => 0.45f,
+            "SG" => 0.55f,
+            "SF" => 0.80f,
+            "PF" => 1.20f,
+            "C" => 1.35f,
+            _ => 1f
+        };
+    }
+
+    public static float GetBlockPositionMultiplier(string position)
+    {
+        return position switch
+        {
+            "PG" => 0.20f,
+            "SG" => 0.30f,
+            "SF" => 0.55f,
+            "PF" => 1.15f,
+            "C" => 1.30f,
+            _ => 1f
+        };
     }
 
     static string DoTO(List<PlayerStatSnapshot> off, List<PlayerStatSnapshot> def)
@@ -762,49 +855,81 @@ public static class GameSimulator
         return fouler.name;
     }
 
-    static HashSet<int> DoSub(HashSet<int> on, int maxPlayers)
+    static HashSet<int> DoSub(HashSet<int> on, List<PlayerStatSnapshot> players, float[] quarterMinutes)
     {
-        bool isLargeRoster = maxPlayers > 12;
-        int n = isLargeRoster
-            ? Mathf.Min(4, on.Count)
-            : Mathf.Min(UnityEngine.Random.value < 0.5f ? 2 : 3, on.Count);
+        int maxPlayers = players.Count;
+        int n = Mathf.Min(UnityEngine.Random.value < 0.65f ? 1 : 2, on.Count);
         if (n == 0) return on;
 
-        // 75% skill-based: bench worst players (highest index = lowest OVR),
-        // bring in best available bench players
-        // 25% random
-        if (UnityEngine.Random.value < 0.75f)
+        var newSet = new HashSet<int>(on);
+        for (int change = 0; change < n; change++)
         {
-            var outList = on.OrderByDescending(i => i).Take(n).ToList();
-            var newSet = new HashSet<int>(on.Except(outList));
-            // Prioritize bench players (index >= 5) over benched starters (index < 5)
-            // so the rotation reaches deep bench players instead of always cycling starters back
-            var notOnCourt = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i)).ToList();
-            var benchPlayers = notOnCourt.Where(i => i >= 5).ToList();
-            var benchedStarters = notOnCourt.Where(i => i < 5).OrderBy(i => i).ToList();
+            var outgoing = newSet
+                .Where(i => CanRemoveFromRotation(newSet, players, i))
+                .OrderByDescending(i => MinutesRatio(players[i], quarterMinutes[i]))
+                .ThenBy(i => players[i].target_minutes)
+                .ThenBy(i => players[i].overall)
+                .DefaultIfEmpty(-1)
+                .First();
+            if (outgoing < 0) break;
 
-            List<int> selection;
-            if (isLargeRoster)
-                // All-Star: random so all 10 bench players get court time
-                selection = benchPlayers.OrderBy(_ => UnityEngine.Random.value).Take(n).ToList();
-            else
-                // Normal: skill-based, best OVR first (lowest index)
-                selection = benchPlayers.OrderBy(i => i).Take(n).ToList();
+            var incoming = Enumerable.Range(0, maxPlayers)
+                .Where(i => !newSet.Contains(i))
+                .OrderByDescending(i => PositionFit(players[i], players[outgoing]))
+                .ThenByDescending(i => MinutesNeed(players[i], quarterMinutes[i]))
+                .ThenByDescending(i => players[i].overall)
+                .DefaultIfEmpty(-1)
+                .First();
+            if (incoming < 0) break;
 
-            if (selection.Count < n)
-                selection.AddRange(benchedStarters.Take(n - selection.Count));
-
-            foreach (var i in selection)
-                newSet.Add(i);
-            return newSet;
+            newSet.Remove(outgoing);
+            newSet.Add(incoming);
         }
 
-        var outListR = on.OrderBy(_ => UnityEngine.Random.value).Take(n).ToList();
-        var newSetR = new HashSet<int>(on.Except(outListR));
-        var benchR = Enumerable.Range(0, maxPlayers).Where(i => !on.Contains(i)).OrderBy(_ => UnityEngine.Random.value).ToList();
-        foreach (var i in benchR.Take(n))
-            newSetR.Add(i);
-        return newSetR;
+        return newSet;
+    }
+
+    static float MinutesRatio(PlayerStatSnapshot player, float currentQuarterMinutes)
+    {
+        float current = player.minutes + currentQuarterMinutes;
+        return player.target_minutes > 0 ? current / player.target_minutes : current;
+    }
+
+    static float MinutesNeed(PlayerStatSnapshot player, float currentQuarterMinutes)
+    {
+        return Mathf.Max(0, player.target_minutes - player.minutes - currentQuarterMinutes);
+    }
+
+    static bool CanRemoveFromRotation(HashSet<int> on, List<PlayerStatSnapshot> players, int index)
+    {
+        var player = players[index];
+        bool isStar = player.role == PlayerRole.Estrella || player.overall >= 85;
+        if (isStar && player.starter && player.minutes < player.target_minutes * 0.55f)
+            return false;
+
+        if (player.position is "C" or "PF")
+        {
+            int interiors = on.Count(i => players[i].position is "C" or "PF");
+            if (interiors <= 1)
+                return false;
+        }
+
+        return true;
+    }
+
+    static int PositionFit(PlayerStatSnapshot incoming, PlayerStatSnapshot outgoing)
+    {
+        if (PlaysPosition(incoming, outgoing.position)) return 3;
+
+        bool incomingInterior = incoming.position is "C" or "PF";
+        bool outgoingInterior = outgoing.position is "C" or "PF";
+        if (incomingInterior == outgoingInterior) return 2;
+        return 0;
+    }
+
+    static bool PlaysPosition(PlayerStatSnapshot player, string position)
+    {
+        return player.position == position || player.secondary_position == position;
     }
 
     static float[] SubSchedule(int qNum) => qNum switch

@@ -3,7 +3,7 @@
 > **Important architectural fact [F]:** there is **no C# event bus, no `UnityEvent` wiring between systems, and no message broker** in this project. Communication happens through four explicit mechanisms:
 > 1. **DB messages** (`messages` table) — one-way notifications the user reads in the inbox.
 > 2. **Static mutable state** — `GameResultCache`, `ScreenManager.SelectedPlayerId/CurrentMode/CurrentScreen`.
-> 3. **PlayerPrefs** — persisted settings (audio, quality, sim mode, load management) and one-time migration flags.
+> 3. **PlayerPrefs** — persisted settings (audio, quality, sim mode, load management). One-time data migrations are stored in SQLite `schema_migrations`, not PlayerPrefs.
 > 4. **UI Toolkit callbacks** — `ClickEvent`, `KeyDownEvent`, `MouseEnterEvent`, `MouseLeaveEvent`, `ChangeEvent`, coroutines with `WaitUntil` for modal resolution.
 >
 > These are all **point-to-point**; nothing is decoupled via events. This is a design observation (see `CODE_GUIDELINES.md`).

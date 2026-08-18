@@ -86,7 +86,7 @@ Host the entire game: boot/loading, menus, and all 41 management screens as iner
 
 ## 4. Orphan assets
 
-- `Assets/_TacticalFive/UI/Screens/LegalNotice/` — `LegalNotice.uxml` + `LegalNotice.uss` exist but **no controller references them** [F]; the legal modal is now inline in MainMenu. Orphaned assets (see `TODO_TECHNICAL_DEBT.md`).
+- `Assets/_TacticalFive/UI/Screens/LegalNotice/` — `LegalNotice.uxml` is not instantiated and has no controller [F]. `LegalNotice.uss` is imported by MainMenu and other screen UXMLs, so only the UXML is orphaned; the USS is shared style content.
 - `Assets/_TacticalFive/Data/Database.meta` — orphan folder `.meta` (no `Database` folder exists). Harmless; see `TODO_TECHNICAL_DEBT.md`.
 
 ## 5. Open questions

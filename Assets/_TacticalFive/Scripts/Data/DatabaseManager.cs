@@ -145,6 +145,7 @@ public partial class DatabaseManager : MonoBehaviour
     {
         if (File.Exists(TemplateDbPath)) return;
 
+        EnsureTemplateDirectory(TemplateDbPath);
         var oldDb = _db;
         _db = new SQLiteConnection(TemplateDbPath);
         CreateTables();
@@ -164,6 +165,7 @@ public partial class DatabaseManager : MonoBehaviour
     {
         lock (_templateLock)
         {
+            EnsureTemplateDirectory(dbPath);
             var oldDb = _db;
             _db = new SQLiteConnection(dbPath);
             CreateTables();
@@ -177,6 +179,7 @@ public partial class DatabaseManager : MonoBehaviour
 
     public void InitTemplateSession()
     {
+        EnsureTemplateDirectory(TemplateDbPath);
         if (_db != null)
         {
             try { _db.Close(); } catch { }
@@ -186,6 +189,13 @@ public partial class DatabaseManager : MonoBehaviour
         RunMigrations();
         _isTemplateSession = true;
         Debug.Log("[DB] Template session started");
+    }
+
+    private static void EnsureTemplateDirectory(string databasePath)
+    {
+        string directory = Path.GetDirectoryName(databasePath);
+        if (!string.IsNullOrEmpty(directory))
+            Directory.CreateDirectory(directory);
     }
 
     public void CloseTemplateSession()

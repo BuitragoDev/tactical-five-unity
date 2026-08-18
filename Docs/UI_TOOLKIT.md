@@ -1,6 +1,6 @@
 # UI_TOOLKIT — Tactical Five Interface
 
-> Complete analysis of the UI Toolkit stack. **[F]** fact, **[D]** deduction, **[H]** hypothesis. State: HEAD `1d88989`.
+> Complete analysis of the UI Toolkit stack. **[F]** fact, **[D]** deduction, **[H]** hypothesis. State: HEAD `81d9e4f` (2026-08-16).
 
 ## 1. Stack summary
 
@@ -10,7 +10,7 @@
   - `m_ScaleMode: ScaleWithScreenSize`, reference 1920×1080, match 0.5, reference DPI 96.
   - `themeUss` → `TacticalFiveTheme.tss` (the only `.tss`) which `@import`s `Styles/GlobalVariables.uss`, `Styles/Typography.uss`, `Styles/Utilities.uss`.
 - **Every screen** is a root GameObject with `UIDocument` (same PanelSettings) + `FullScreenUI` + its controller MonoBehaviour. **41 screen GameObjects** in `MainMenu.unity`; only 4 active at boot (MainCamera, ScreenManager, CursorManager, LoadingDocument).
-- **Per-screen files:** one folder per screen under `UI/Screens/` containing `<Screen>.uxml` + `<Screen>.uss`. Screens reference shared styles via `<Style>` (guid-based) — see §2.
+- **Per-screen files:** 42 UXML/USS pairs exist under `UI/Screens/`: 41 operational screens plus the uninstantiated `LegalNotice.uxml`; `LegalNotice.uss` is still imported by MainMenu and other screens. Shared USS references mix `project://database/...` and relative paths, not only GUID-style references.
 
 ## 2. Theme & styling architecture
 
@@ -71,6 +71,7 @@ protected virtual void OnEnable()
 **Inheritance quirks (verified):**
 - 17 controllers call `base.RegisterCallbacks()`; **12 override `RegisterCallbacks()` WITHOUT base** (Editor, EndSeason, GameResults, LoadGame, MainMenu, MatchDay, NewSeason, PlayerAwards, Preseason, Quintos, SeasonSummary, SelectTeam) — those screens build their own chrome/nav or are standalone (boot/menu/slot screens). The remaining 12 don't override it (base behavior).
 - `GameResultsController` re-implements nav/submenu/cursor wiring in its override (references `NavRecords`/`NavSponsors`/`NavTV`, which do **not** exist in `Sidebar.uxml` — null-safe `?.`).
+- **Callback lifecycle risk [F]:** screens are disabled with `SetActive(false)` but not destroyed. `OnEnable` calls `RegisterCallback` again and there is no general unregister/guard phase. Repeated navigation may accumulate handlers; confirm with a Unity runtime test before changing the pattern.
 - `BtnActionTarget` is never overridden; `OnBtnActionClicked` overridden by `CalendarController` and `DashboardController`.
 
 ## 5. Screens inventory (41)
@@ -124,7 +125,7 @@ protected virtual void OnEnable()
 - **PLANTILLA** (RosterSubmenu) → Jugadores (Roster), Quinteto, Entrenamiento, Empleados, Lesionados, Dorsales
 - **RESULTADOS** → Calendar, Results, Playoffs
 - **CLASIFICACIÓN** → Standings
-- **LIGA** (PalmaresSubmenu) → Palmares, Records, Premios
+- **LOGROS** (the current `Sidebar.uxml` label for PalmaresSubmenu) → Palmares, Records, Premios
 - **ESTADÍSTICAS** → Stats
 - **MERCADO** (MarketSubmenu) → Ofertas (Market), Cartera, Historial
 - **FINANZAS** (FinanceSubmenu) → Decisiones (Finances), Préstamos (Loans), Patrocinadores (Sponsors), Televisión (TV)
@@ -178,6 +179,13 @@ flowchart TD
 - **Dead `UIScreenController.LoadSidebarIcons`** — runs before the sidebar is attached; sidebar icons are loaded by `SidebarController.LoadIcons`. Cleanup candidate.
 - **Double header population:** base `RefreshHeader` duplicates `HeaderController.Populate`; both execute on each screen load.
 - **`GameResultsController`** re-implements nav referencing 3 non-existent sidebar elements (`NavRecords`/`NavSponsors`/`NavTV`) — harmless (null-safe) but confusing.
+
+## Preguntas abiertas
+
+- ¿La acumulación de callbacks se reproduce en todas las pantallas o algunos controles se reemplazan al hacer `CloneTree`?
+- ¿Debe eliminarse `LegalNotice.uxml` y conservarse solo el USS compartido, o se pretende convertir el aviso legal en pantalla real?
+- ¿La mezcla de rutas USS relativas y `project://database` funciona en todas las plataformas objetivo?
+- ¿La resolución mínima soportada es realmente 1920×1080, dado el uso extensivo de tamaños fijos?
 - **`FullScreenUI` is redundant** with `UIScreenController.MakeFullscreen`.
 - **Manual row building:** no `ListView`/`BindableElement` — rebuilding large lists on every `OnEnable` is cheap here (small datasets) but verbose.
 - **Hardcoded 1920×1080** sizing everywhere (sidebar 200px, panels, grid) — no responsive breakpoints; `ScaleWithScreenSize` match 0.5 handles 16:9 mostly.

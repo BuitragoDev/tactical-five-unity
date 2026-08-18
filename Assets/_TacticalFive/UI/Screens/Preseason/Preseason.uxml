@@ -41,9 +41,12 @@
             <!-- Toggle LOCAL / VISITANTE -->
             <ui:VisualElement class="location-toggle">
                 <ui:Button name="BtnHome" class="toggle-btn toggle-btn--active toggle-btn--left"
-                           text="🏠  LOCAL" />
-                <ui:Button name="BtnAway" class="toggle-btn"
-                           text="✈  VISITANTE" />
+                           text="LOCAL">
+                    <ui:VisualElement name="HomeIcon" class="location-toggle-icon" />
+                </ui:Button>
+                <ui:Button name="BtnAway" class="toggle-btn" text="VISITANTE">
+                    <ui:VisualElement name="AwayIcon" class="location-toggle-icon" />
+                </ui:Button>
             </ui:VisualElement>
 
             <!-- Grid de equipos -->

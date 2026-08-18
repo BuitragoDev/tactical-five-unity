@@ -2,7 +2,7 @@
 
 > Entry point for developers and AI agents working on this project.
 > **Project:** Tactical Five — NBA-management sim (Unity 6, single scene, UI Toolkit, SQLite). All in-game text is Spanish.
-> **Analysis date:** 2026-08-13 · Code base: commit `1d88989` (HEAD) · Engine `6000.3.15f1`. Docs rewritten to match this HEAD (previous docs referenced `50b1a86`).
+> **Analysis date:** 2026-08-16 · Code base: commit `81d9e4f` (HEAD) · Engine `6000.3.15f1`. Docs include an audit delta for behavior that differs from intended rules.
 
 ## Documentation map
 

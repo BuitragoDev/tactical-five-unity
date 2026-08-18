@@ -1,6 +1,6 @@
 # NEXT_PROPOSALS — Mejoras pendientes (en orden de implementación)
 
-Estado: 3/4 completadas (verificado en HEAD `1d88989`).
+Estado: 3/4 completadas (verificado en HEAD `81d9e4f`).
 
 ## A. Previa/pronóstico del partido (Matchup Preview) — **HECHO**
 - [x] Helper `Scripts/Stats/MatchupPreview.cs`: favorito + probabilidad de victoria a

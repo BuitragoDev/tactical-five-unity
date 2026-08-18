@@ -22,6 +22,8 @@ public class DorsalesController : UIScreenController
     private List<RetiredNumberData> _retired;
     private Texture2D _tshirtTex;
     private StyleBackground _tshirtBg;
+    private Texture2D _retiredTshirtTex;
+    private StyleBackground _retiredTshirtBg;
 
     protected override void CacheReferences()
     {
@@ -41,6 +43,9 @@ public class DorsalesController : UIScreenController
         _tshirtTex = Resources.Load<Texture2D>("Icons/tshirt");
         if (_tshirtTex != null)
             _tshirtBg = new StyleBackground(_tshirtTex);
+        _retiredTshirtTex = Resources.Load<Texture2D>("Icons/retired_tshirt");
+        if (_retiredTshirtTex != null)
+            _retiredTshirtBg = new StyleBackground(_retiredTshirtTex);
     }
 
     protected override void RegisterCallbacks()
@@ -130,8 +135,8 @@ public class DorsalesController : UIScreenController
 
             var shirt = new VisualElement();
             shirt.AddToClassList("dorsales-card-shirt");
-            if (_tshirtBg != null)
-                shirt.style.backgroundImage = _tshirtBg;
+            if (_retiredTshirtBg != null)
+                shirt.style.backgroundImage = _retiredTshirtBg;
 
             var number = new Label();
             number.AddToClassList("dorsales-card-number");

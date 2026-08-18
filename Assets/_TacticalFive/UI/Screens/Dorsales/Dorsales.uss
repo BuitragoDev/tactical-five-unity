@@ -106,7 +106,7 @@
 
 .dorsales-card-number--retired {
     font-size: 48px;
-    color: rgb(212, 160, 23);
+    color: rgb(255, 255, 255);
 }
 
 .dorsales-card-name {

@@ -89,12 +89,12 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 
 ## 9. Critical dependencies / invariants
 
-- `overall == round(mean(11 attributes))` capped by `potential` — recomputed in seed, training, progression, migration. Keep it true.
+- `overall` is intended to equal the mean of 11 attributes capped by `potential`, but current code uses integer division and mentoring does not recalculate it. Preserve the intended invariant when touching rating mutations and verify `PlayerData.GetCalculatedAverage()` before changing formulas.
 - Cap/apron constants live in `TradeHelper.cs` (2025-26); `league_settings` copies them; `StartNewSeason` raises them +5%.
 - `GameResultCache.Clear()` at the start of each simulated day — don't forget.
 - Player salary model: `players.salary` annual; `contract_years`; renewal/FA offers mature after 7 days.
 - `first_apron_hard_capped` blocks any transaction above 1st apron after using NT-MLE.
-- The daily pipeline is transactional: `ProcessGameDayRoutine` splits into a pre-game batch and a one-frame sim+bookkeeping transaction. Don't insert `yield return null` inside the sim+bookkeeping block.
+- The normal daily pipeline intends a pre-game batch plus a one-frame sim+bookkeeping transaction. `FastSimRoutine` currently yields while its transaction is open, so do not claim FastSim is fully atomic; do not add more yields inside the transaction.
 
 ## 10. Patterns to AVOID
 

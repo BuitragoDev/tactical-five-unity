@@ -8,7 +8,7 @@
 - `sqlite-net` attributes: `[PrimaryKey]`, `[AutoIncrement]`, `[Indexed]`, `[Table("name")]`, `[Ignore]`.
 - **No `FOREIGN KEY` constraints anywhere** [F]. Relations are by convention via `*_id` columns. Referential integrity is the app's responsibility.
 - Dates: most are `TEXT` (`"yyyy-MM-dd"`, `"yyyy-MM-dd HH:mm:ss"`), manually formatted. `storeDateTimeAsTicks = true` is set but unused for game data.
-- `PlayerData.id` is **manual, not autoincrement** (seed IDs 1..~600 stable across cloned slots). Other tables autoincrement.
+- `PlayerData.id` is **manual, not autoincrement** (seed IDs 1..~600 stable across cloned slots). `TeamData.id` is currently marked `[AutoIncrement]` in `TeamData.cs`; seed data usually supplies stable IDs, but the model does not enforce a manual-ID contract for teams. Other tables autoincrement.
 - **Schema versioning [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`, `DatabaseManager.cs:41,290-291`). Column-based additive migrations still use `PRAGMA table_info`; data migrations use `IsMigrationApplied`/`MarkMigrationApplied`.
 
 ## 2. Relational overview
@@ -28,12 +28,12 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 ## 3. Tables (field-by-field)
 
 ### teams (`TeamData`)
-`id` (PK, manual), `name`, `abbreviation`, `city`, `conference` (East/West), `division`, `arena`, `capacity`, `owner`, `attack`, `defense`, `overall`, `budget`, `reputation` (1–5), `facilities` (1–5), `logo`, `jersey_home`, `jersey_away`, `salary_margin`, `objective` (TEXT: "Campeonato"|"Playoffs"|"Play-In"|"Zona tranquila"|…, migrated), `team_chemistry`, `first_apron_hard_capped` (int 0/1, migrated), `arena_renovation_type/count/cost/end_day` (set via ArenaController), `arena_renovation_end_day`.
+`id` (PK, `[AutoIncrement]` in the model; seeded IDs are expected to remain stable), `name`, `abbreviation`, `city`, `conference` (East/West), `division`, `arena`, `capacity`, `owner`, `attack`, `defense`, `overall`, `budget`, `reputation` (1–5), `facilities` (1–5), `logo`, `jersey_home`, `jersey_away`, `salary_margin`, `objective` (TEXT: "Campeonato"|"Playoffs"|"Play-In"|"Zona tranquila"|…, migrated), `team_chemistry`, `first_apron_hard_capped` (int 0/1, migrated), `arena_renovation_type/count/cost/end_day` (set via ArenaController), `arena_renovation_end_day`.
 
 ### players (`PlayerData`)
 `id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated), `number` (dorsal), `on_trade_block` (0/1, marcado desde Roster → jugador TRANSFERIBLE en Market). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
 - **Honores de carrera (migrados, default 0):** `rings` (campeonatos ganados), `finals_mvps` (MVP de las Finales), `finals_played` (finales disputadas), `season_mvps` (MVP de temporada regular). Se incrementan en `SaveSeasonEndRecords` (ver GAMEPLAY §11). Se muestran como contadores en el header de `PlayerProfile` y `Trajectory` (CAMPEONATOS / FINALES / MVP / MVP FINALS).
-- `GetCalculatedAverage()` returns `round(mean(11 attrs))`. **`overall` is always recomputed from the attributes and capped by `potential`** (seed, training, progression, migration) [F].
+- `GetCalculatedAverage()` currently returns integer `sum / 11`, so it truncates rather than rounds. Training, progression and migrations recalculate/cap `overall`; mentoring currently changes attributes without that recalculation. “Always recomputed” is an intended invariant, not a guaranteed current fact [F].
 
 ### managers (`ManagerData`)
 `id` (AI), `name`, `team_id`, `game_mode`, `created_at`, `lastPlayedRealDate`, `currentGameDay`, `currentDate`, `fan_confidence` (migrated, default 50), `budget_red_warnings` (migrated, default 0), `career_reg_wins/losses`, `career_po_wins/losses`, `championships`, `seasons_completed` (migrated).
@@ -57,7 +57,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id`, `season_id`, `champion_id`, `finalist_id`, `finals_result`, `east/west/div1..6_champion_id`, `finals_mvp_id`, `finals_mvp_rating`, `season_mvp_id/rating/games`, `rookie_of_year_id/rating/games`, `best_defender_id`, `sixth_man_id`, `most_improved_id`, `all_star_pg/sg/sf/pf/c_id`, `first_team_pg..c`, `second_team_pg..c`.
 
 ### finance_records (`FinanceRecord`)
-`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.)
+`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) Current `ProcessTeamLuxuryTax` writes type 10 as a negative amount, unlike the other expense writers; consumers do not normalize this sign [F].
 
 ### messages (`MessageData`)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.

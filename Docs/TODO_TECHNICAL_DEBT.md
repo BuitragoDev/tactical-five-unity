@@ -14,6 +14,60 @@ _(none open — see resolved B1 below)_
 
 ## P1 — High
 
+### B44. Primera apertura del Editor sin directorio de datos — **DONE**
+- **Type:** first-run persistence bug.
+- **Detail [F]:** `EditorController.LoadData` called `DatabaseManager.EnsureTemplateDb`, which opened `Application.persistentDataPath/TacticalFive/template.db` without creating its parent directory. On a fresh profile this produced SQLite `CannotOpen`; creating a Manager/ProManager slot first happened to create the directory and masked the bug.
+- **Fix [F]:** `DatabaseManager.EnsureTemplateDirectory` now runs before template creation, background rebuild and template-session opening. `EditorController.LoadData` catches I/O/database errors, logs them and displays an error toast after the UI is initialized instead of aborting `UIScreenController.OnEnable`.
+- **References:** `DatabaseManager.cs` (`EnsureTemplateDb`, `BuildTemplateDatabaseInBackground`, `InitTemplateSession`), `EditorController.cs` (`LoadData`, `OnEnable`).
+
+### B45. Estado de FastSim residual al iniciar una nueva partida — **DONE**
+- **Type:** stale transient state / coroutine lifecycle.
+- **Detail [F]:** `GameResultCache.FastSimTargetDate` and active Dashboard coroutines could survive an interrupted fast simulation in the same Unity session, causing a new Dashboard to show `DETENER SIMULACIÓN` or resume stale work.
+- **Fix [F]:** new Manager/ProManager flows clear transient result state; `DashboardController.OnDisable` stops coroutines and resets fast-sim flags and target state.
+- **References:** `MainMenuController.cs` (`OnManagerClicked`, `ConfirmProManager`), `DashboardController.cs` (`OnEnable`, `OnDisable`).
+
+### B46. Premio Jugador Más Mejorado vacío tras el primer año — **DONE**
+- **Type:** award calculation / historical-stat source.
+- **Detail [F]:** `GetMostImprovedPlayer` only queried `player_game_stats` for both seasons, while `StartNewSeason` archived the previous season in `player_season_stats` and deleted the raw game rows. The method also assumed `seasonId - 1`, and `season_records.most_improved_id` was never written.
+- **Fix [F]:** the previous real season is resolved by manager; ratings load from raw stats or archived per-season aggregates; the winner is upserted into `season_records` during `SaveSeasonEndRecords`.
+- **References:** `DatabaseManager.Records.cs` (`GetMostImprovedPlayer`, `GetSeasonPlayerRatings`, `SaveSeasonEndRecords`), `PlayerAwardsController.cs`.
+
+### B38. `FastSim` yields inside the day transaction — **OPEN**
+- **Type:** data integrity / coroutine lifecycle.
+- **Detail [F]:** `DashboardController.FastSimRoutine` / `ProcessGameDayRoutine(fastSim:true)` contains `yield return` between `BeginTransaction` and `Commit` (`DashboardController.cs`, around lines 969, 999, 1019, 1169).
+- **Impact:** the connection remains in an open transaction across frames; exceptions, navigation or concurrent DB work can leave locks or partial state. This contradicts the intended atomic day pipeline.
+- **Fix:** keep simulation/bookkeeping transaction work synchronous within one frame, or split into precomputed data plus a short commit transaction with explicit cancellation/rollback tests.
+
+### B39. Template build replaces shared `_dbField` from a worker thread — **OPEN**
+- **Type:** race condition / persistence.
+- **Detail [F]:** `BuildTemplateDatabaseInBackground` temporarily assigns and closes the shared `_dbField` while `EditorController` invokes it from a background flow (`DatabaseManager.cs:163-175`, `EditorController.cs:298-313`). The lock does not protect normal UI queries.
+- **Impact:** a simultaneous query may use the temporary connection or one that is being closed; template and active-save operations are not isolated.
+- **Fix:** use a local connection exclusively for template generation and publish/swap it only on the main thread after completion; block template editing while a save slot is active.
+
+### B40. `overall` derived value is stale/inconsistent — **OPEN**
+- **Type:** gameplay correctness / data invariant.
+- **Detail [F]:** `PlayerData.GetCalculatedAverage()` uses integer division; `DatabaseManager.Records.ApplyMentoring()` changes attributes without recalculating `overall`.
+- **Impact:** sorting, AI evaluation and UI ratings can disagree with the attribute grid by one or more points after mentoring.
+- **Fix:** centralize `RecalculateOverall()` and call it after every attribute mutation; add EditMode tests for truncation/rounding and potential caps.
+
+### B41. Rookies skipped by season progression — **OPEN**
+- **Type:** gameplay correctness.
+- **Detail [F]:** `StartNewSeason` continues before aging/contract progression for `is_rookie == 1` (`DatabaseManager.Records.cs:2632-2638`).
+- **Impact:** rookie age, contract years and team tenure do not advance through the rollover path.
+- **Fix:** separate “newly drafted this season” handling from normal next-season progression and add a two-season regression test.
+
+### B42. Local advantage and injury rating use wrong population — **OPEN**
+- **Type:** simulation correctness.
+- **Detail [F]:** `DashboardController` passes `isMyHomeGame`; `GameSimulator` applies the local bonus only for that flag. Team rating uses player lists that include injured players even though active rotations exclude them.
+- **Impact:** AI league games lack local advantage and injuries can affect rating in addition to removing rotation minutes.
+- **Fix:** pass `isHomeGame = game.home_team_id == homeTeamId`, and derive rating from available players or explicitly document the injury penalty.
+
+### B43. Luxury-tax expense sign disagrees with aggregators — **OPEN**
+- **Type:** economy correctness.
+- **Detail [F]:** `ProcessTeamLuxuryTax` persists `-monthlyTax`, while `GetTotalExpenses` sums expense types as-is.
+- **Impact:** tax can reduce the calculated expense total and inflate displayed balance.
+- **Fix:** standardize expense records as positive and subtract at the balance boundary, or normalize all consumers consistently.
+
 ### B3. `DatabaseManager` is a monolith — **PARTIAL (mostly done)**
 - **Type:** refactor.
 - **Detail [F]:** the main file is now 968 ln (down from ~5,600) split into **9 partial classes** by domain: `.Teams`, `.Players`, `.Staff`, `.Manager`, `.Games`, `.Seeding` (1354 ln), `.Records` (3586 ln), `.Achievements`. `SQLite.cs` (sqlite-net wrapper) is separate.
@@ -37,9 +91,9 @@ _(none open — see resolved B1 below)_
 - **Fix (rest):** none required.
 
 ### B9. Transactions around multi-write operations — **PARTIAL**
-- **Detail [F]:** `StartNewSeason` and the daily rollover batch are now transactional; schedule/playoff/seed saves already were.
-- **Remaining:** most single-mutation writes and mid-day sequences (game → stats → records) are still untransactional. A crash mid-flow can still leave partial state (game played, no stats).
-- **Fix:** wrap the game-day pipeline and offer-processing in transactions.
+- **Detail [F]:** `StartNewSeason` and parts of the daily rollover use transactions; schedule/playoff/seed saves already were. The normal game-day path intends one atomic block, but `FastSimRoutine` yields while that block is open (B38).
+- **Remaining:** most single-mutation writes and some mid-day sequences (game → stats → records) are still untransactional. A crash mid-flow can still leave partial state (game played, no stats).
+- **Fix:** remove yields from the transaction boundary and wrap remaining multi-write offer/game flows with explicit rollback tests.
 
 ### B11. No schema versioning — **DONE**
 - **Detail [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`). Data migrations are named and stored **in the DB** (per-slot, survive slot deletion correctly). Column migrations keep the `PRAGMA table_info` pattern.

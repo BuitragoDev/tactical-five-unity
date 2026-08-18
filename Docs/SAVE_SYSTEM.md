@@ -23,8 +23,8 @@ All under `Application.persistentDataPath`:
 
 - **SQLite per slot** — the save IS the database (45 tables). No JSON serialization of game state, no `JsonUtility` on game data (only used for `saves.json`).
 - **`saves.json` metadata** (`SaveMeta { SaveSlotInfo[] slots }`): `slotNumber, exists, managerName, teamName, teamLogo, seasonYear, currentDate, lastPlayedRealDate, currentGameDay, gameMode`.
-- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` (Editor flow + boot check). Contains the **15 static tables cloned with data**: `teams, players, league_settings, sponsors, tv_channels, historical_records, team_records, historical_player_stats, finals_records, awards_records, quintet_records, all_star_records, all_star_appearance_seed, trades, hof_players` (plus 7 empty dynamic tables created: `trades`, `training`, `player_personalities`, `player_relationships`, `team_lineup`, `trade_offers`, `draft_picks`).
-- **`CloneFromTemplate()`** (`DatabaseManager.cs:203`) — creates the 7 dynamic tables, then `InsertAll` the 15 static tables preserving IDs. If no template exists, `SeedStaticDataIfNeeded()` seeds the slot directly.
+- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` (Editor flow + boot check). The current copy list includes `trades`, while the dynamic-table list also includes `trades`; this is an actual documentation/code ambiguity that must be resolved by deciding whether trade history is seed content or empty per-slot state.
+- **`CloneFromTemplate()`** (`DatabaseManager.cs:203`) — creates dynamic tables, then inserts template data preserving IDs. The clone operation is not wrapped in one transaction [F]; interruption can leave a partially populated slot and `InitSaveSlot` may not retry if it sees data.
 - **Template build moved off the main thread** (`BuildTemplateDatabaseInBackground`, guarded by `_templateLock`).
 
 ## 3. Save / load flows
@@ -61,11 +61,11 @@ All under `Application.persistentDataPath`:
 ## 4. AutoSave & threading
 
 - There is **no explicit autosave timer** [F]. Everything is persisted **immediately** at the moment of each mutation (`DatabaseManager.UpdatePlayer/UpdateGame/UpdateTeam/AddFinanceRecord/...` write synchronously). The only "save on exit" logic is metadata refresh; quitting mid-session without a mutation loses nothing because mutations are already committed.
-- **Background work:** heavy operations run off the main thread via `RunInBackground`/`RunInBackgroundAsync` (SQLite WAL mode, AsyncLocal ambient `_ambientDb` connection, `[ThreadStatic]` RNG) — see `ARCHITECTURE.md §7`. Write-heavy batch operations (e.g. `StartNewSeason`, draft) run inside a **transaction**.
+- **Background work:** heavy operations run off the main thread via `RunInBackground`/`RunInBackgroundAsync` (SQLite WAL mode, AsyncLocal ambient `_ambientDb` connection, `[ThreadStatic]` RNG) — see `ARCHITECTURE.md §7`. `FastSimRoutine` still yields while its day transaction is open, so its atomicity guarantee is not equivalent to the normal single-frame path [F].
 
 ## 5. Versioning & migrations
 
-- **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2` (`DatabaseManager.cs:41,290-291`). The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state); `PRAGMA user_version` records the schema version.
+- **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2` (`DatabaseManager.cs:41,290-291`). The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state). The current code assigns `PRAGMA user_version = 2` unconditionally rather than branching on prior versions; functional migration state is therefore carried mainly by named migrations and column checks.
 - **Additive column migrations stay idempotent:** `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
 - **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `draft_picks_reset` (see `EVENTS.md §4`).
 - **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN` (e.g. `players.last_team_id = team_id` for players on a roster).
@@ -97,3 +97,5 @@ All under `Application.persistentDataPath`:
 
 - Whether `template.db` is intended to ship with the game or be generated at first run on each machine ([D] generated; the Editor flow suggests dev-tool).
 - `saves.json` writes are synchronous `JsonUtility.ToJson` — safe on main thread [F]; no conflict handling between concurrent editor sessions [H].
+- Whether `trades` belongs to the static template copy or the empty dynamic set; current documentation/code classification is inconsistent [F].
+- Whether `BuildTemplateDatabaseInBackground` can overlap normal UI database calls. It temporarily replaces the shared `_dbField` while running on a worker thread, creating a race risk [F].

@@ -20,6 +20,7 @@ public class EditorController : UIScreenController
     private IVisualElementScheduledItem _spinScheduler;
     private bool _isLoading;
     private volatile bool _templateReady;
+    private string _loadError;
 
     // Tabs
     private Button _btnTeams, _btnPlayers;
@@ -139,6 +140,12 @@ public class EditorController : UIScreenController
 
         _loadingSpinner = _root.Q<VisualElement>("LoadingSpinner");
         _loadingSpinner.style.display = DisplayStyle.None;
+
+        if (!string.IsNullOrEmpty(_loadError))
+        {
+            ShowToast(_loadError, isError: true);
+            _loadError = null;
+        }
     }
 
     protected override void CacheReferences()
@@ -228,22 +235,33 @@ public class EditorController : UIScreenController
 
     protected override void LoadData()
     {
-        LoadImages();
-
-        if (DatabaseManager.Instance.Db == null)
+        try
         {
-            DatabaseManager.Instance.EnsureTemplateDb();
-            DatabaseManager.Instance.InitTemplateSession();
+            LoadImages();
+
+            if (DatabaseManager.Instance.Db == null)
+            {
+                DatabaseManager.Instance.EnsureTemplateDb();
+                DatabaseManager.Instance.InitTemplateSession();
+            }
+
+            _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();
+            _allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>().ToList() ?? new List<PlayerData>();
+
+            var teamChoices = new List<string> { "TODOS" };
+            teamChoices.AddRange(_allTeams.Select(t => $"{t.abbreviation} - {t.name}"));
+            SetFilterDropdownItems(_playerTeamFilter, teamChoices.ToArray(), 0);
+
+            SetFilterDropdownItems(_playerPosFilter, new[] { "TODOS", "PG", "SG", "SF", "PF", "C" }, 0);
+            _loadError = null;
         }
-
-        _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();
-        _allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>().ToList() ?? new List<PlayerData>();
-
-        var teamChoices = new List<string> { "TODOS" };
-        teamChoices.AddRange(_allTeams.Select(t => $"{t.abbreviation} - {t.name}"));
-        SetFilterDropdownItems(_playerTeamFilter, teamChoices.ToArray(), 0);
-
-        SetFilterDropdownItems(_playerPosFilter, new[] { "TODOS", "PG", "SG", "SF", "PF", "C" }, 0);
+        catch (System.Exception ex)
+        {
+            _allTeams = new List<TeamData>();
+            _allPlayers = new List<PlayerData>();
+            _loadError = "No se pudo cargar la base de datos del Editor: " + ex.Message;
+            Debug.LogError($"[Editor] Error cargando la base de datos: {ex}");
+        }
     }
 
     protected override void RegisterCallbacks()
@@ -325,6 +343,12 @@ public class EditorController : UIScreenController
         {
             DatabaseManager.Instance.InitTemplateSession();
             LoadData();
+            if (!string.IsNullOrEmpty(_loadError))
+            {
+                ShowToast(_loadError, isError: true);
+                _loadError = null;
+                yield break;
+            }
             Refresh();
             ShowToast("Base de datos restablecida correctamente");
         }

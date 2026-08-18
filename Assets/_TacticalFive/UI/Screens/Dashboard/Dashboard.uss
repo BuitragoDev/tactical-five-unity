@@ -580,6 +580,8 @@
 }
 .game-meta-location {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex-direction: row;
+    align-items: center;
     font-size: 16px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -588,6 +590,21 @@
     -unity-text-align: middle-center;
     margin-right: 10px;
     flex-shrink: 0;
+}
+.game-meta-location-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.game-meta-location-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: inherit;
+    -unity-text-align: middle-center;
 }
 .game-meta-location--home {
     background-color: rgb(42, 95, 201);
@@ -1055,7 +1072,7 @@
 }
 
 .fired-modal-box {
-    width: 520px;
+    width: 720px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
     border-color: rgb(58, 74, 99);
@@ -1081,6 +1098,37 @@
     color: rgb(192, 57, 43);
     margin-bottom: 16px;
     -unity-text-align: middle-center;
+}
+
+.fired-modal-title--negative {
+    color: rgb(192, 57, 43);
+}
+
+.fired-modal-results {
+    width: 100%;
+    margin-bottom: 24px;
+    align-items: center;
+}
+
+.fired-modal-result-line {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 20px;
+    width: 100%;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.fired-modal-result-line--positive {
+    color: rgb(46, 204, 113);
+}
+
+.fired-modal-result-line--negative {
+    color: rgb(231, 76, 60);
+}
+
+.fired-modal-result-line--neutral {
+    color: rgb(179, 190, 214);
 }
 
 .fired-modal-text {
