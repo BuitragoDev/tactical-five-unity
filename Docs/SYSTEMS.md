@@ -110,7 +110,7 @@
 ## S12. Injuries & fatigue
 
 - **Files:** `GameSimulator.INJURY_TYPES` (27 types, weights 60→1, days 1→300), `ProcessGameInjuries` (Dashboard), `ProcessInjuries` (daily recovery batch, background thread).
-- **Fatigue:** `fisico` (default 99) reduced `round(minutes*0.25)` per game (×1.5 on real back-to-back), recovered +8/day (`ProcessFisicoRecovery` in the background batch).
+- **Fatigue:** `fisico` (default 99) reduced `round(minutes*0.30)` per game (×1.5 on real back-to-back), recovered +8/day **only on rest days** (teams without a game that day; background batch reads `game_day == current_game_day`).
 - **Injury risk:** base 0.008/game, ×`(1+(30−fisico)*0.15)` when `fisico<30`; 27 weighted types; injured players excluded from sim; recovery messages on return.
 - **Load management:** `TF_LoadMgmt_Enabled` + back-to-back detection → modal to rest up to 2 tired players (`DashboardController.cs:899-923`).
 

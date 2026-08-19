@@ -804,6 +804,16 @@ using System.Threading.Tasks;
                 conn.BeginTransaction();
                 var recovered = new List<(int id, string first, string last)>();
 
+                var teamsPlayToday = new HashSet<int>();
+                if (gameDay > 0)
+                {
+                    foreach (var g in conn.Table<GameData>().Where(g => g.game_day == gameDay).ToList())
+                    {
+                        teamsPlayToday.Add(g.home_team_id);
+                        teamsPlayToday.Add(g.away_team_id);
+                    }
+                }
+
                 var allTeams = conn.Table<TeamData>().ToList();
                 foreach (var team in allTeams)
                 {
@@ -823,7 +833,7 @@ using System.Threading.Tasks;
                             }
                             conn.Update(p);
                         }
-                        if (p.injury_days <= 0)
+                        if (p.injury_days <= 0 && !teamsPlayToday.Contains(team.id))
                         {
                             p.fisico = Mathf.Min(99, p.fisico + 8);
                             conn.Update(p);
@@ -1542,9 +1552,9 @@ using System.Threading.Tasks;
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
-        var box = new VisualElement();
+var box = new VisualElement();
         box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fastsim-summary-box");
+        box.AddToClassList("load-mgmt-modal-box");
         _firedOverlay.Add(box);
 
         var title = new Label("SIMULACIÓN COMPLETADA");
@@ -2472,7 +2482,7 @@ using System.Threading.Tasks;
             var restBtn = new Button();
             restBtn.text = "DESCANSAR CANSADOS";
             restBtn.AddToClassList("injured-modal-btn");
-            restBtn.AddToClassList("injured-modal-btn--primary");
+            restBtn.AddToClassList("load-mgmt-modal-btn--blue");
             restBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -2492,6 +2502,7 @@ using System.Threading.Tasks;
         var manualBtn = new Button();
         manualBtn.text = "IR AL QUINTETO";
         manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.AddToClassList("load-mgmt-modal-btn--blue");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2504,6 +2515,7 @@ using System.Threading.Tasks;
         var continueBtn = new Button();
         continueBtn.text = "CONTINUAR SIN CAMBIOS";
         continueBtn.AddToClassList("injured-modal-btn");
+        continueBtn.AddToClassList("load-mgmt-modal-btn--green");
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -5346,8 +5358,8 @@ List<int> offeredPickIds = new List<int>();
         container.AddToClassList(isHome ? "game-meta-location--home" : "game-meta-location--away");
 
         var iconTexture = isHome ? _homeIcon : _awayIcon;
-        if (icon != null)
-            icon.style.backgroundImage = iconTexture != null ? new StyleBackground(iconTexture) : StyleBackground.None;
+        if (icon != null && iconTexture != null)
+            icon.style.backgroundImage = new StyleBackground(iconTexture);
 
         if (label != null)
             label.text = isHome ? "LOCAL" : "VISITANTE";

@@ -39,7 +39,7 @@ Implemented by: `SelectTeamController`, `PreseasonController`, `DashboardControl
 
 ### 3.2 Game-day loop (micro)
 User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()` (coroutine, `DashboardController.cs:752`):
-1. **Pre-batch (background threads):** recover injuries/fatigue (`RunInBackground`, +8 `fisico`/day), process scouts+training+renovations, AI market (`ProcessAIMarket` via `RunInBackgroundAsync`). Modals interrupt here: load management (back-to-back rest), empty starters, injured starters.
+1. **Pre-batch (background threads):** recover injuries/fatigue (`RunInBackground`, +8 `fisico`/day solo en días sin partido), process scouts+training+renovations, AI market (`ProcessAIMarket` via `RunInBackgroundAsync`). Modals interrupt here: load management (back-to-back rest), empty starters, injured starters.
 2. Load today's games, simulate each with `GameSimulator.SimulateGame` inside the intended atomic main-thread transaction (the normal path is single frame; `GameResultCache.Clear()` at day start).
 3. Post-simulation: chemistry, quick news, achievements, phase transitions (regular→playin→playoff→finished), manager stats, monthly payroll + subscription revenue, season-end block (archive stats, awards, achievement `EvaluateSeasonEnd`), advance date.
 4. Deadline-day modal (Feb 7), monthly awards (1st of Dec–Apr), budget/objective-fired checks, `SaveSlotInfo` refresh.

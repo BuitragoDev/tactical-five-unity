@@ -54,7 +54,7 @@ If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `reb
 ### Persisted outputs
 - `PlayerGameStats` rows per player; `GameData` updated (scores, quarters, `is_played=1`).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
-- Fatigue: `fisico -= round(minutes*0.25)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day.
+- Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
 - Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (see `SYSTEMS.md §S12`).
 
 ### Play-by-play en vivo (Vista de Partido)
@@ -147,7 +147,7 @@ Win: +4 home / +2 away (+1 if margin ≤5 or ≥20). Loss: −3 home / −2 away
 8 personality types; relationship `bond` 1–99 between player pairs; seeded per team; evolved after games.
 
 ### Injuries & fatigue
-Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured players skip sims; recovery +8/day with inbox messages; psychologist (staff) affects morale.
+Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured players skip sims; recovery +8/day on rest days with inbox messages; psychologist (staff) affects morale.
 
 ## 9. League AI
 

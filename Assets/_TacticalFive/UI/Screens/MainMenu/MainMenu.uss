@@ -563,3 +563,23 @@
 .settings-quality-btn--wide {
     width: 130px;
 }
+.settings-columns {
+    flex-direction: row;
+    align-items: flex-start;
+}
+.settings-columns .settings-section--column {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+.settings-columns .settings-section--column:first-child {
+    margin-right: 24px;
+}
+.settings-columns .settings-section--column .settings-quality-row {
+    flex-direction: column;
+    align-items: flex-start;
+}
+.settings-columns .settings-section--column .settings-quality-row .settings-label {
+    width: auto;
+    white-space: nowrap;
+    margin-bottom: 8px;
+}

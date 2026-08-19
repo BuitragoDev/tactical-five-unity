@@ -1335,6 +1335,21 @@
     margin-left: 6px;
 }
 
+/* Botones del modal de GESTIÓN DE DESCANSO (load management).
+   Solo se aplican dentro de ShowLoadManagementModal para no
+   alterar el modal de quinteto con lesionados. */
+.load-mgmt-modal-box {
+    width: 870px;
+}
+.injured-modal-btn.load-mgmt-modal-btn--blue {
+    background-color: rgb(42, 95, 201);
+    border-color: rgb(42, 95, 201);
+}
+.injured-modal-btn.load-mgmt-modal-btn--green {
+    background-color: rgb(39, 174, 96);
+    border-color: rgb(39, 174, 96);
+}
+
 /* ══ Config modal settings styles (inlined from Settings.uss) ══ */
 
 .settings-section {
@@ -1462,6 +1477,26 @@
 }
 .settings-quality-btn--wide {
     width: 130px;
+}
+.settings-columns {
+    flex-direction: row;
+    align-items: flex-start;
+}
+.settings-columns .settings-section--column {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+.settings-columns .settings-section--column:first-child {
+    margin-right: 24px;
+}
+.settings-columns .settings-section--column .settings-quality-row {
+    flex-direction: column;
+    align-items: flex-start;
+}
+.settings-columns .settings-section--column .settings-quality-row .settings-label {
+    width: auto;
+    white-space: nowrap;
+    margin-bottom: 8px;
 }
 .settings-btn {
     cursor: pointer;

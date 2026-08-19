@@ -367,25 +367,27 @@
                             <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
-                        <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
-                            <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                    <ui:VisualElement class="settings-columns">
+                        <ui:VisualElement class="settings-section settings-section--column">
+                            <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                            <ui:VisualElement class="settings-quality-row">
+                                <ui:Label class="settings-label" text="Calidad" />
+                                <ui:VisualElement class="settings-quality-options">
+                                    <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                                    <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                                    <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                                    <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="SIMULACIÓN" />
-                        <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Vista de Partido" />
-                            <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnSimDirect" class="settings-quality-btn" text="Directa" />
-                                <ui:Button name="ConfigBtnSimPlay" class="settings-quality-btn settings-quality-btn--wide" text="Play-by-play" />
+                        <ui:VisualElement class="settings-section settings-section--column">
+                            <ui:Label class="settings-section-title" text="SIMULACIÓN" />
+                            <ui:VisualElement class="settings-quality-row">
+                                <ui:Label class="settings-label" text="Vista de Partido" />
+                                <ui:VisualElement class="settings-quality-options">
+                                    <ui:Button name="ConfigBtnSimDirect" class="settings-quality-btn" text="Directa" />
+                                    <ui:Button name="ConfigBtnSimPlay" class="settings-quality-btn settings-quality-btn--wide" text="Play-by-play" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
