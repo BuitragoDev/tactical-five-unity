@@ -1555,6 +1555,7 @@ using System.Threading.Tasks;
 var box = new VisualElement();
         box.AddToClassList("fired-modal-box");
         box.AddToClassList("load-mgmt-modal-box");
+        box.AddToClassList("fastsim-summary-box");
         _firedOverlay.Add(box);
 
         var title = new Label("SIMULACIÓN COMPLETADA");
