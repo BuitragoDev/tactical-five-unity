@@ -154,7 +154,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - `ProcessAITransfers` (cycle every ≥10 game days, **3-5 game days during deadline week Feb 1-8**; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 3 per cycle). Each team has a **strategy** (`TeamStrategy`: Contend / Balanced / Rebuild via `GetTeamStrategy`): Contend (top 4 conference or 2+ stars OVR≥85) denser (0.45, 6-day cooldown), hunts upgrades up to OVR 90 including a future pick, protects young (age<26, OVR≥82); Rebuild (bottom 4 or young without stars) sells veterans ≥30 for young/picks (`TrySellVeteran`), 8-day cooldown; Balanced 15-day cooldown. Offers to the player strategy-aware (`PickTradeTarget`/`BuildOfferPackage`). Deadline contenders offer extra picks; titles prefixed `[DEADLINE]`.
 - `ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with strongest teams; priority Contend > Balanced > Rebuild; Rebuild never signs OVR≥85.
 - `EndSeasonController.ProcessAITeamRenewals`: AI renews its expiring players.
-- `StartNewSeason` refills AI rosters to 15 (best teams first), trims to 17 max, aging/progression, +5% caps, re-signs TV/sponsors.
+- `StartNewSeason` refills AI rosters to 15 (best teams first), trims to 17 max, aging/progression, +5% caps, re-signs TV/sponsors. **En NewSeasonController**, antes del control de plantilla >17 del equipo del manager, `CheckRosterAndStart` decrementa un año de contrato y pasa a FA a los no renovados (misma semántica que `StartNewSeason`, que salta ese decremento para el equipo nuevo del manager).
 
 ## 10. Draft
 

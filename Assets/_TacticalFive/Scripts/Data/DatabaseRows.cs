@@ -195,7 +195,7 @@ public class CoachAwardInfo
     public string CoachName { get; set; }
     public string TeamName { get; set; }
     public string TeamKeyword { get; set; }
-    public int EntrenadorMes { get; set; }
+    public string RecordText { get; set; }
 }
 
 public class MonthlyPlayerAwardRow

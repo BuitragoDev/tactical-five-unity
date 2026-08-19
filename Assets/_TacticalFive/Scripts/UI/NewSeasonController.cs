@@ -259,12 +259,9 @@ public class NewSeasonController : UIScreenController
 
     void OnStartSeason()
     {
-        var roster = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
-        if (roster.Count > TradeHelper.MAX_ROSTER)
-        {
-            OpenRosterModal(roster);
-            return;
-        }
+        // El control de plantilla se hace DESPUÉS de resolver opciones y de
+        // decrementar contratos (CheckRosterAndStart), para que los jugadores
+        // en último año no renovados dejen de pertenecer al equipo antes.
         CheckTeamOptions();
     }
 
@@ -295,7 +292,7 @@ public class NewSeasonController : UIScreenController
 
         if (playerOptions.Count == 0)
         {
-            ExecuteStartSeason();
+            CheckRosterAndStart();
             return;
         }
 
@@ -346,6 +343,44 @@ public class NewSeasonController : UIScreenController
         }
 
         OpenPlayerOptionResultModal(results);
+    }
+
+    void CheckRosterAndStart()
+    {
+        // Decrementar contratos de la plantilla seleccionada para que los jugadores
+        // en último año de contrato no renovados pasen a agentes libres ANTES del
+        // control de plantilla (>17). Misma semántica que StartNewSeason.
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        foreach (var p in players)
+        {
+            if (p.is_rookie == 1) continue; // igual que StartNewSeason: los rookies no decrementan
+            int oldTeamId = p.team_id;
+            p.contract_years -= 1;
+            p.guaranteed_years -= 1;
+            if (p.contract_years <= 0)
+            {
+                p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                p.has_player_option = 0;
+                if (oldTeamId != 0 && p.last_team_id == 0)
+                    p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
+                p.team_id = 0; // agente libre
+            }
+            else
+            {
+                p.seasons_with_team += 1; // sigue en el mismo equipo
+            }
+            DatabaseManager.Instance.UpdatePlayer(p);
+        }
+
+        var roster = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+        if (roster.Count > TradeHelper.MAX_ROSTER)
+        {
+            OpenRosterModal(roster);
+            return;
+        }
+        ExecuteStartSeason();
     }
 
     void ExecuteStartSeason()
@@ -464,7 +499,8 @@ public class NewSeasonController : UIScreenController
         {
             PlayClick();
             _rosterOverlay.style.display = DisplayStyle.None;
-            CheckTeamOptions();
+            // Las opciones ya se resolvieron antes del control de plantilla (CheckRosterAndStart)
+            ExecuteStartSeason();
         });
         box.Add(_btnRosterContinue);
 
@@ -764,7 +800,7 @@ public class NewSeasonController : UIScreenController
             if (_reSignCandidates.Count > 0)
                 OpenReSignModal();
             else
-                ExecuteStartSeason();
+                CheckRosterAndStart();
         });
         box.Add(continueBtn);
         CursorManager.Instance?.RegisterHandCursor(continueBtn);
@@ -854,7 +890,7 @@ public class NewSeasonController : UIScreenController
         {
             PlayClick();
             _teamOptionOverlay.style.display = DisplayStyle.None;
-            ExecuteStartSeason();
+            CheckRosterAndStart();
         });
         box.Add(continueBtn);
         CursorManager.Instance?.RegisterHandCursor(continueBtn);

@@ -113,7 +113,7 @@ protected virtual void OnEnable()
 | 33 | LoadGame | `Screens/LoadGame` | `LoadGameController` | Save slots |
 | 34 | Editor | `Screens/Editor` | `EditorController` | Editor (template DB) |
 | 35 | EndSeason | `Screens/EndSeason` | `EndSeasonController` | Retirees, HOF, expiring, draft |
-| 36 | NewSeason | `Screens/NewSeason` | `NewSeasonController` | Post-draft rollover (options, re-signs, trim, StartNewSeason async) |
+| 36 | NewSeason | `Screens/NewSeason` | `NewSeasonController` | Post-draft rollover (options, re-signs, decremento de contratos antes del control de plantilla >17, StartNewSeason async) |
 | 37 | SeasonSummary | `Screens/SeasonSummary` | `SeasonSummaryController` | Season recap |
 | 38 | PlayerAwards | `Screens/PlayerAwards` | `PlayerAwardsController` | Player awards |
 | 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Player season stats + career + attributes + fog-of-war gate + honors |

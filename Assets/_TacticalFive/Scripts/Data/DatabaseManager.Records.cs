@@ -2081,13 +2081,33 @@ public partial class DatabaseManager
     public CoachAwardInfo GetCoachOfTheYear(int seasonId)
     {
         if (!EnsureDb()) return null;
-        var top = _db.Query<CoachMonthRow>(@"
+
+        // Premio basado en el récord de temporada: más victorias en la fase regular.
+        var winRows = _db.Query<MonthlyManagerAwardRow>(@"
+            SELECT t.id AS team_id, t.name AS team_name,
+                   SUM(CASE WHEN (g.home_team_id = t.id AND g.home_score > g.away_score)
+                             OR (g.away_team_id = t.id AND g.away_score > g.home_score) THEN 1 ELSE 0 END) AS wins,
+                   COUNT(*) AS games
+            FROM games g
+            JOIN teams t ON t.id IN (g.home_team_id, g.away_team_id)
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+            GROUP BY t.id", seasonId);
+
+        // Desempate: nº de premios de Entrenador del Mes (rank 1) por equipo.
+        var monthRows = _db.Query<CoachMonthRow>(@"
             SELECT team_id, COUNT(*) AS mes_count
             FROM monthly_awards
             WHERE season_id = ? AND award_type = 'manager' AND rank = 1
-            GROUP BY team_id
-            ORDER BY COUNT(*) DESC
-            LIMIT 1", seasonId).FirstOrDefault();
+            GROUP BY team_id", seasonId);
+        var monthByTeam = new Dictionary<int, int>();
+        foreach (var r in monthRows) monthByTeam[r.team_id] = r.mes_count;
+
+        // Si aun así hay empate (mismas victorias y mismos meses), LINQ es estable
+        // y FirstOrDefault devuelve uno arbitrario.
+        var top = winRows
+            .OrderByDescending(r => r.wins)
+            .ThenByDescending(r => monthByTeam.TryGetValue(r.team_id, out int m) ? m : 0)
+            .FirstOrDefault();
         if (top == null || top.team_id == 0) return null;
 
         var coach = _db.Table<CoachRankingData>()
@@ -2096,12 +2116,14 @@ public partial class DatabaseManager
             coach = _db.Table<CoachRankingData>().FirstOrDefault(c => c.team_id == top.team_id);
 
         var team = GetTeamById(top.team_id);
+        int recordWins = top.wins;
+        int recordLosses = top.games - top.wins;
         return new CoachAwardInfo
         {
             CoachName = coach?.name ?? "",
             TeamName = team?.name ?? "",
             TeamKeyword = team?.logo ?? "",
-            EntrenadorMes = top.mes_count
+            RecordText = $"{recordWins}-{recordLosses}"
         };
     }
 
@@ -2799,6 +2821,14 @@ public partial class DatabaseManager
             }
 
             // 3. Decrement contracts
+            // El equipo del manager ya decrementó contratos y resolvió FAs en
+            // NewSeasonController (CheckRosterAndStart) antes del control de
+            // plantilla — no volver a restar el año.
+            if (p.team_id == newTeamId)
+            {
+                _db.Update(p);
+                continue;
+            }
             p.contract_years -= 1;
             p.guaranteed_years -= 1;
             if (p.contract_years <= 0)
