@@ -24,8 +24,9 @@ public static class SidebarController
         new() { screen = GameScreen.Dorsales,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuDorsales" },
 
         new() { screen = GameScreen.Calendar,    navName = "NavCalendar" },
-        new() { screen = GameScreen.Results,     navName = "NavResults" },
-        new() { screen = GameScreen.Standings,   navName = "NavStandings" },
+        new() { screen = GameScreen.Results,     navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuResultados" },
+        new() { screen = GameScreen.Standings,   navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuClasificacion" },
+        new() { screen = GameScreen.InfoLeague,  navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuInfoLiga" },
         new() { screen = GameScreen.Palmares,    navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPalmares" },
         new() { screen = GameScreen.Records,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuRecords" },
         new() { screen = GameScreen.Premios,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPremios" },
@@ -84,11 +85,12 @@ public static class SidebarController
         {
             var cursorNames = new[]
             {
-                "NavDashboard", "NavRoster", "NavCalendar", "NavStandings",
-                "NavPalmares", "NavResults", "NavPlayoffs", "NavStats",
+                "NavDashboard", "NavRoster", "NavCalendar", "NavCompeticiones",
+                "NavPalmares", "NavPlayoffs", "NavStats",
                 "NavMarket", "NavFinances", "NavArena", "NavManager", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados", "SubmenuDorsales",
+                "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
                 "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
@@ -155,9 +157,8 @@ public static class SidebarController
             {"NavDashboardIcon", "inicio"},
             {"NavRosterIcon", "plantilla"},
             {"NavCalendarIcon", "calendario"},
-            {"NavStandingsIcon", "clasificacion"},
+            {"NavCompeticionesIcon", "competiciones"},
             {"NavPalmaresIcon", "palmares"},
-            {"NavResultsIcon", "resultados"},
             {"NavPlayoffsIcon", "playoff"},
             {"NavStatsIcon", "estadisticas"},
             {"NavMarketIcon", "mercado"},

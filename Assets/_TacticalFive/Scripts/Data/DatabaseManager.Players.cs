@@ -32,6 +32,14 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    public Dictionary<int, long> GetTeamPayrolls()
+    {
+        if (!EnsureDb()) return new Dictionary<int, long>();
+        return _db.Query<PlayerData>("SELECT team_id, salary FROM players WHERE team_id > 0")
+                  .GroupBy(p => p.team_id)
+                  .ToDictionary(g => g.Key, g => g.Sum(p => p.salary));
+    }
+
     /// <summary>
     /// Asigna al jugador un dorsal del equipo: conserva el actual si está libre y no
     /// retirado; en caso contrario asigna el menor dorsal libre (1-99), evitando los

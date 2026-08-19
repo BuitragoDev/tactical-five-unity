@@ -230,12 +230,18 @@ public class MatchDayController : UIScreenController
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
-        _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
+        _root.Q<Button>("NavCompeticiones")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("CompetitionsSubmenu");
+            if (submenu == null) return;
+            submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+        });
+        _root.Q<Button>("SubmenuResultados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Results); });
+        _root.Q<Button>("SubmenuClasificacion")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Standings); });
+        _root.Q<Button>("SubmenuInfoLiga")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.InfoLeague); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
-        _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Playoffs); });
         _root.Q<Button>("NavStats")?.RegisterCallback<ClickEvent>(_ =>
@@ -309,9 +315,10 @@ public class MatchDayController : UIScreenController
             var btnNames = new[] {
                 "BtnContinue", "PbpSkip", "PbpBtnSpeed1", "PbpBtnSpeed3", "PbpBtnSpeed5", "PbpBtnSpeed10",
                 "NavDashboard", "NavRoster", "NavCalendar",
-                "NavStandings", "NavPalmares", "NavResults", "NavPlayoffs",
+                "NavCompeticiones", "NavPalmares", "NavPlayoffs",
                 "NavStats", "NavRecords", "NavMarket", "NavFinances",
                 "NavSponsors", "NavTV", "NavArena", "NavManager", "NavMessages", "BtnReset",
+                "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos"
             };

@@ -47,6 +47,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument premiosDocument;
     [SerializeField] private UIDocument logrosDocument;
     [SerializeField] private UIDocument dorsalesDocument;
+    [SerializeField] private UIDocument infoLeagueDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -211,6 +212,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Logros:
                 ShowOnly(logrosDocument);
                 break;
+            case GameScreen.InfoLeague:
+                ShowOnly(infoLeagueDocument);
+                break;
         }
     }
 
@@ -258,6 +262,7 @@ public class ScreenManager : MonoBehaviour
         if (premiosDocument != null) premiosDocument.gameObject.SetActive(false);
         if (playerProfileDocument != null) playerProfileDocument.gameObject.SetActive(false);
         if (logrosDocument != null) logrosDocument.gameObject.SetActive(false);
+        if (infoLeagueDocument != null) infoLeagueDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }
