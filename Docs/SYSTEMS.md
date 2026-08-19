@@ -118,7 +118,7 @@
 
 - **Files:** `MessageData.cs`, `QuickNewsGenerator.cs`, `MessagesController.cs`.
 - **Sources:** match results, offers (accept/reject), renewals, signings, injuries, recoveries, morale complaints, trade window reminder, renovations, budget warnings, monthly awards, star FA signings, achievements, deadline — all via `AddMessage` (`sender_type`: 0 system, 1 player, 2 news).
-- **Quick news** (`QuickNewsGenerator.Generate`, max 2/day, dedup by title+body+day): season milestones (41/82), streaks ≥5 (±), upsets (avg diff ≥15 and favorite loses), triple-doubles, 40+ point explosions.
+- **Quick news** (`QuickNewsGenerator.Generate`, max 2/day, dedup by title+body+day, generated en `DashboardController.ProcessGameDayRoutine` tras simular el día): season milestones (41/82), streaks ≥5 (±), upsets (avg diff ≥15 and favorite loses), triple-doubles, 40+ point explosions. **5 variantes de texto por evento elegidas al azar** (`UnityEngine.Random`, main thread) con datos reales (equipos, marcador, racha, valoraciones, jugador, stats).
 
 ## S14. Player photos
 
