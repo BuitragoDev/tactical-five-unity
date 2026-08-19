@@ -2,7 +2,7 @@
 
 > **Purpose of this document:** entry point to the whole project. Read this first, then follow the reading order at the bottom.
 
-**Version analyzed:** Unity `6000.3.15f1` (Unity 6), editor build with a single scene, in-app version shown as `v1.0.0 · Beta` (`MainMenu.uxml` footer, line ~102). Code analyzed at HEAD `1d88989` (merge de `crear-mejoras2`, 2026-08-11).
+**Version analyzed:** Unity `6000.3.15f1` (Unity 6), editor build with a single scene, in-app version shown as `v1.0.0 · Beta` (`MainMenu.uxml` footer). Code analyzed at HEAD `81d9e4f` (2026-08-16). Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
 
 **Product:** *Tactical Five* — a single-player NBA-management simulation game, entirely in Spanish, played with mouse/keyboard on desktop (target resolution 1920×1080). It is a "GM mode" (no playable basketball): the player manages a franchise season by season, simulating games and making roster/financial decisions.
 
@@ -39,8 +39,8 @@ Implemented by: `SelectTeamController`, `PreseasonController`, `DashboardControl
 
 ### 3.2 Game-day loop (micro)
 User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()` (coroutine, `DashboardController.cs:752`):
-1. **Pre-batch (background threads):** recover injuries/fatigue (`RunInBackground`, +8 `fisico`/day), process scouts+training+renovations, AI market (`ProcessAIMarket` via `RunInBackgroundAsync`). Modals interrupt here: load management (back-to-back rest), empty starters, injured starters.
-2. Load today's games, simulate each with `GameSimulator.SimulateGame` inside one atomic main-thread transaction (single frame; `GameResultCache.Clear()` at day start).
+1. **Pre-batch (background threads):** recover injuries/fatigue (`RunInBackground`, +8 `fisico`/day solo en días sin partido), process scouts+training+renovations, AI market (`ProcessAIMarket` via `RunInBackgroundAsync`). Modals interrupt here: load management (back-to-back rest), empty starters, injured starters.
+2. Load today's games, simulate each with `GameSimulator.SimulateGame` inside the intended atomic main-thread transaction (the normal path is single frame; `GameResultCache.Clear()` at day start).
 3. Post-simulation: chemistry, quick news, achievements, phase transitions (regular→playin→playoff→finished), manager stats, monthly payroll + subscription revenue, season-end block (archive stats, awards, achievement `EvaluateSeasonEnd`), advance date.
 4. Deadline-day modal (Feb 7), monthly awards (1st of Dec–Apr), budget/objective-fired checks, `SaveSlotInfo` refresh.
 
@@ -89,8 +89,8 @@ Docs/  .agent/            this knowledge base (keep in sync)
 | All persistence through `DatabaseManager.Instance` (SQLite) | `DatabaseManager.cs` |
 | Save slots = `save_{n}.db` + `saves.json`; template = `template.db`; **schema versioned** (`schema_migrations` + `PRAGMA user_version = 2`) | `GameSaveManager.cs`, `DatabaseManager.cs:286` |
 | Salary cap / aprons constants (2025-26) in `TradeHelper.cs`; caps grow +5%/season | `TradeHelper.cs:7-14`, `StartNewSeason` |
-| Season starts Oct 22; 82 games/team; All-Star break Feb 8–14 | `ScheduleGenerator.cs` |
-| `overall` is always the mean of 11 attributes, capped by `potential` | `PlayerData.GetCalculatedAverage()`, migrations |
+| Gameplay targets Oct 22; persisted season is initially Sep 5 and preseason advances the date | `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs` |
+| `overall` is intended to derive from 11 attributes and `potential`, but current integer division and mentoring make the invariant imperfect | `PlayerData.cs`, `DatabaseManager.Records.cs` |
 | No C# event bus — cross-controller communication via DB, `GameResultCache` statics, `PlayerPrefs`, and `ScreenManager` static state | `EVENTS.md` |
 | Audio/volumes/graphics persisted in `PlayerPrefs` keys `TF_Audio_*`, `TF_Graphics_Quality`, `TF_SimMode`, `TF_PbpSpeed`, `TF_LoadMgmt_Enabled` | `AudioManager.cs`, `UIScreenController.cs`, `MatchDayController.cs` |
 | All 41 screen controllers inherit `UIScreenController` (base: fullscreen, header/sidebar injection, nav, config modal, sim-mode toggle) | `UIScreenController.cs` |
@@ -108,7 +108,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 
 - Very mature feature set (41 screens, full season cycle, records/awards/HOF/retired numbers, finances, personnel, morale, injuries, draft, playoffs, GM achievements, play-by-play).
 - Branding/labels: product "TacticalFive", company "BuitragoStudio", version `v1.0.0 Beta`.
-- ~607 commits total; last merge to `main`: `1d88989` (merge de `crear-mejoras2`), containing all the features below.
+- Current audit commit: `81d9e4f` (merge de `crear-mejoras2`, 2026-08-16), containing the feature set below.
 - **Recent features landed since the previous doc snapshot (`50b1a86`):** play-by-play overlay, S&T of own FA (Bird rights), contract options TO/PO with re-sign, trade deadline event, AI GM strategy, GM achievements (28), PlayerProfile screen, advanced analytics (eFG%/TS%/PER), fog-of-war in ratings, async DB (background WAL threads), load management, trade block, Hall of Fame, retired numbers (Dorsales screen), season quintets (Quintos), matchup preview, protected picks + swaps, position-based athletic decline + mentoring, `UIScreenController` base, `DatabaseManager` partial split, `schema_migrations` versioning, atomic game-day transaction.
 - **Resolved debt:** duplicate `CursorManager` fixed (single instance now), `SettingsController`/`SQLiteAsync.cs` deleted, dead `GameScreen.Settings` removed, `GetTopPlayersByStat` real SQL aggregation, B8 (sync DB) closed for heavy batches. See `TODO_TECHNICAL_DEBT.md`.
 
@@ -133,3 +133,11 @@ Game-facing terms are Spanish. A mapping is in `.agent/GLOSSARY.md`.
 
 - Whether `template.db` is meant to ship with the build or be regenerated at first run (Editor flow suggests dev-tool). [D]
 - Whether `GameMode.Editor` (dead) will be revived or removed.
+
+## Current audit delta (HEAD 81d9e4f)
+
+- `[F]` The Input System package and `InputSystem_Actions.inputactions` exist, but scripts use legacy `UnityEngine.Input`; no `InputAction`, `PlayerInput` or `InputSystemUIInputModule` use was found.
+- `[F]` Static analysis found no prefabs, gameplay ScriptableObjects, Addressables, Animator controllers, animation clips or Timeline usage. The active product is a database-backed UI application, not a 3D gameplay scene.
+- `[F]` `OnEnable` re-registers UI callbacks without a general unregister/guard phase. Because screens are hidden rather than destroyed, repeated visits can accumulate callbacks; runtime reproduction is still required to quantify this.
+- `[F]` `FastSimRoutine` yields while its transaction is open, and luxury-tax records are written negative while expense aggregation treats all expense types as positive. Both contradict the intended accounting/atomicity model.
+- `[D]` The highest-risk areas are data integrity during long simulations/template builds, stale derived player ratings, and UI callback lifecycle.

@@ -40,7 +40,9 @@ using System.Threading.Tasks;
     private Label _lastResultBadge;
     private Label _lastGameDate;
     // Meta partidos
-    private Label _lastGameLocation;
+    private VisualElement _lastGameLocation;
+    private VisualElement _lastGameLocationIcon;
+    private Label _lastGameLocationText;
     private Label _lastGameArena;
     private Label _lastGameType;
 
@@ -52,7 +54,9 @@ using System.Threading.Tasks;
     private Label _nextHomeName;
     private Label _nextAwayName;
     private Label _nextGameDate;
-    private Label _nextGameLocation;
+    private VisualElement _nextGameLocation;
+    private VisualElement _nextGameLocationIcon;
+    private Label _nextGameLocationText;
     private Label _nextGameArena;
     private Label _nextGameType;
 
@@ -92,6 +96,8 @@ using System.Threading.Tasks;
 
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Texture2D _homeIcon;
+    private Texture2D _awayIcon;
 
     // Fired modal
     private VisualElement _firedOverlay;
@@ -177,6 +183,10 @@ using System.Threading.Tasks;
         else
         {
             _fastSimTarget = null;
+            _fastSimRunning = false;
+            _fastSimStopRequested = false;
+            _fastSimOfferPauseActive = false;
+            _fastSimAbortOffers = false;
             if (_season != null && _season.id != _deadlineModalSeasonId)
             {
                 _deadlineDayModalShown = false;
@@ -188,6 +198,18 @@ using System.Threading.Tasks;
             ShowPendingRecoveryModal();
             CheckTradeDeadlineModal();
         }
+    }
+
+    private void OnDisable()
+    {
+        // Una simulación interrumpida no debe continuar ni contaminar la siguiente partida.
+        StopAllCoroutines();
+        _fastSimTarget = null;
+        _fastSimRunning = false;
+        _fastSimStopRequested = false;
+        _fastSimOfferPauseActive = false;
+        _fastSimAbortOffers = false;
+        GameResultCache.FastSimTargetDate = null;
     }
 
     void Update()
@@ -214,12 +236,13 @@ using System.Threading.Tasks;
     {
         _achievementToast = new VisualElement();
         _achievementToast.style.position = Position.Absolute;
-        _achievementToast.style.left = Length.Percent(20);
-        _achievementToast.style.right = Length.Percent(20);
-        _achievementToast.style.top = 72;
+        _achievementToast.style.left = 15;
+        _achievementToast.style.right = StyleKeyword.Auto;
+        _achievementToast.style.top = 15;
+        _achievementToast.style.width = Length.Percent(30);
         _achievementToast.style.flexDirection = FlexDirection.Row;
         _achievementToast.style.alignItems = Align.Center;
-        _achievementToast.style.backgroundColor = new StyleColor(new Color(0.09f, 0.12f, 0.19f, 0.97f));
+        _achievementToast.style.backgroundColor = new StyleColor(new Color(0.09f, 0.12f, 0.19f, 1f));
         _achievementToast.style.borderTopWidth = 1;
         _achievementToast.style.borderBottomWidth = 1;
         _achievementToast.style.borderLeftWidth = 1;
@@ -318,7 +341,9 @@ using System.Threading.Tasks;
         _lastAwayScore = _root.Q<Label>("LastAwayScore");
         _lastResultBadge = _root.Q<Label>("LastResultBadge");
         _lastGameDate = _root.Q<Label>("LastGameDate");
-        _lastGameLocation = _root.Q<Label>("LastGameLocation");
+        _lastGameLocation = _root.Q<VisualElement>("LastGameLocation");
+        _lastGameLocationIcon = _root.Q<VisualElement>("LastGameLocationIcon");
+        _lastGameLocationText = _root.Q<Label>("LastGameLocationText");
         _lastGameArena = _root.Q<Label>("LastGameArena");
         _lastGameType = _root.Q<Label>("LastGameType");
 
@@ -330,7 +355,9 @@ using System.Threading.Tasks;
         _nextHomeName = _root.Q<Label>("NextHomeName");
         _nextAwayName = _root.Q<Label>("NextAwayName");
         _nextGameDate = _root.Q<Label>("NextGameDate");
-        _nextGameLocation = _root.Q<Label>("NextGameLocation");
+        _nextGameLocation = _root.Q<VisualElement>("NextGameLocation");
+        _nextGameLocationIcon = _root.Q<VisualElement>("NextGameLocationIcon");
+        _nextGameLocationText = _root.Q<Label>("NextGameLocationText");
         _nextGameArena = _root.Q<Label>("NextGameArena");
         _nextGameType = _root.Q<Label>("NextGameType");
 
@@ -370,6 +397,8 @@ using System.Threading.Tasks;
 
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
         foreach (var s in logos) _logoSprites[s.name] = s;
+        _homeIcon = Resources.Load<Texture2D>("Icons/home_icon");
+        _awayIcon = Resources.Load<Texture2D>("Icons/away_icon");
 
         // Panel "more" buttons
         var moreTex = Resources.Load<Texture2D>("Icons/mas");
@@ -775,6 +804,16 @@ using System.Threading.Tasks;
                 conn.BeginTransaction();
                 var recovered = new List<(int id, string first, string last)>();
 
+                var teamsPlayToday = new HashSet<int>();
+                if (gameDay > 0)
+                {
+                    foreach (var g in conn.Table<GameData>().Where(g => g.game_day == gameDay).ToList())
+                    {
+                        teamsPlayToday.Add(g.home_team_id);
+                        teamsPlayToday.Add(g.away_team_id);
+                    }
+                }
+
                 var allTeams = conn.Table<TeamData>().ToList();
                 foreach (var team in allTeams)
                 {
@@ -794,7 +833,7 @@ using System.Threading.Tasks;
                             }
                             conn.Update(p);
                         }
-                        if (p.injury_days <= 0)
+                        if (p.injury_days <= 0 && !teamsPlayToday.Contains(team.id))
                         {
                             p.fisico = Mathf.Min(99, p.fisico + 8);
                             conn.Update(p);
@@ -1513,9 +1552,9 @@ using System.Threading.Tasks;
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
-        var box = new VisualElement();
+var box = new VisualElement();
         box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fastsim-summary-box");
+        box.AddToClassList("load-mgmt-modal-box");
         _firedOverlay.Add(box);
 
         var title = new Label("SIMULACIÓN COMPLETADA");
@@ -2040,12 +2079,34 @@ using System.Threading.Tasks;
             titleLabel.AddToClassList("fired-modal-title--warning");
         else if (resultType == 1)
             titleLabel.AddToClassList("fired-modal-title--positive");
+        else if (resultType == -1)
+            titleLabel.AddToClassList("fired-modal-title--negative");
         box.Add(titleLabel);
 
-        var textLabel = new Label(text);
-        textLabel.AddToClassList("fired-modal-text");
-        textLabel.style.whiteSpace = WhiteSpace.Normal;
-        box.Add(textLabel);
+        var results = new VisualElement();
+        results.AddToClassList("fired-modal-results");
+        foreach (var rawLine in text.Split('\n'))
+        {
+            if (string.IsNullOrWhiteSpace(rawLine)) continue;
+
+            string line = rawLine.TrimStart();
+            bool positive = line.StartsWith("✓");
+            bool negative = line.StartsWith("✗");
+            if (positive || negative)
+                line = line.Substring(1).TrimStart();
+
+            var lineLabel = new Label(line);
+            lineLabel.AddToClassList("fired-modal-result-line");
+            if (positive)
+                lineLabel.AddToClassList("fired-modal-result-line--positive");
+            else if (negative)
+                lineLabel.AddToClassList("fired-modal-result-line--negative");
+            else
+                lineLabel.AddToClassList("fired-modal-result-line--neutral");
+
+            results.Add(lineLabel);
+        }
+        box.Add(results);
 
         if (_fastSimRunning && _fastSimOfferPauseActive)
         {
@@ -2421,7 +2482,7 @@ using System.Threading.Tasks;
             var restBtn = new Button();
             restBtn.text = "DESCANSAR CANSADOS";
             restBtn.AddToClassList("injured-modal-btn");
-            restBtn.AddToClassList("injured-modal-btn--primary");
+            restBtn.AddToClassList("load-mgmt-modal-btn--blue");
             restBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -2441,6 +2502,7 @@ using System.Threading.Tasks;
         var manualBtn = new Button();
         manualBtn.text = "IR AL QUINTETO";
         manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.AddToClassList("load-mgmt-modal-btn--blue");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2453,6 +2515,7 @@ using System.Threading.Tasks;
         var continueBtn = new Button();
         continueBtn.text = "CONTINUAR SIN CAMBIOS";
         continueBtn.AddToClassList("injured-modal-btn");
+        continueBtn.AddToClassList("load-mgmt-modal-btn--green");
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -5268,10 +5331,7 @@ List<int> offeredPickIds = new List<int>();
         bool lastIsHome = last.home_team_id == _myTeam.id;
         var lastHomeTeam = _allTeams.Find(t => t.id == last.home_team_id);
 
-        _lastGameLocation.text = lastIsHome ? "🏠  LOCAL" : "✈  VISITANTE";
-        _lastGameLocation.RemoveFromClassList("game-meta-location--home");
-        _lastGameLocation.RemoveFromClassList("game-meta-location--away");
-        _lastGameLocation.AddToClassList(lastIsHome ? "game-meta-location--home" : "game-meta-location--away");
+        SetGameLocation(_lastGameLocation, _lastGameLocationIcon, _lastGameLocationText, lastIsHome);
 
         _lastGameArena.text = lastHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(lastHomeTeam.id)?.arena ?? ""
@@ -5288,6 +5348,22 @@ List<int> offeredPickIds = new List<int>();
     }
 
     // ── PRÓXIMO PARTIDO ──────────────────────────────────
+
+    void SetGameLocation(VisualElement container, VisualElement icon, Label label, bool isHome)
+    {
+        if (container == null) return;
+
+        container.RemoveFromClassList("game-meta-location--home");
+        container.RemoveFromClassList("game-meta-location--away");
+        container.AddToClassList(isHome ? "game-meta-location--home" : "game-meta-location--away");
+
+        var iconTexture = isHome ? _homeIcon : _awayIcon;
+        if (icon != null && iconTexture != null)
+            icon.style.backgroundImage = new StyleBackground(iconTexture);
+
+        if (label != null)
+            label.text = isHome ? "LOCAL" : "VISITANTE";
+    }
 
     void RefreshNextGame()
     {
@@ -5324,10 +5400,7 @@ List<int> offeredPickIds = new List<int>();
         bool nextIsHome = next.home_team_id == _myTeam.id;
         var nextHomeTeam = _allTeams.Find(t => t.id == next.home_team_id);
 
-        _nextGameLocation.text = nextIsHome ? "🏠  LOCAL" : "✈  VISITANTE";
-        _nextGameLocation.RemoveFromClassList("game-meta-location--home");
-        _nextGameLocation.RemoveFromClassList("game-meta-location--away");
-        _nextGameLocation.AddToClassList(nextIsHome ? "game-meta-location--home" : "game-meta-location--away");
+        SetGameLocation(_nextGameLocation, _nextGameLocationIcon, _nextGameLocationText, nextIsHome);
 
         _nextGameArena.text = nextHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(nextHomeTeam.id)?.arena ?? ""

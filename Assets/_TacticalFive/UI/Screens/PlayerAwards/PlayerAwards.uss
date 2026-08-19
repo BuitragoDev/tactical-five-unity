@@ -205,18 +205,16 @@
     -unity-text-align: middle-center;
 }
 .award-photo-wrapper {
-    width: 68px;
-    height: 68px;
-    border-radius: 54px;
-    background-color: rgb(200, 200, 200);
+    width: 108px;
+    height: 108px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     margin-bottom: 8px;
 }
 .award-player-photo {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     border-radius: 50px;
     background-size: cover;
     background-position: center;
@@ -309,10 +307,8 @@
     -unity-text-align: middle-center;
 }
 .extra-card .extra-photo {
-    width: 64px;
-    height: 64px;
-    border-radius: 50px;
-    background-color: rgb(200, 200, 200);
+    width: 100px;
+    height: 100px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
@@ -335,10 +331,8 @@
     flex-shrink: 0;
 }
 .extra-coach-logo {
-    width: 52px;
-    height: 52px;
-    border-radius: 44px;
-    background-color: rgb(32, 38, 52);
+    width: 100px;
+    height: 100px;
     background-size: contain;
     background-position: center;
     flex-shrink: 0;

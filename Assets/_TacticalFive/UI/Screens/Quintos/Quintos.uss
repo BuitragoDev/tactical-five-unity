@@ -216,10 +216,9 @@
     border-color: rgb(42, 95, 201);
 }
 .quintos-root .quintet-card-photo {
-    width: 60px;
-    height: 60px;
-    border-radius: 50px;
-    background-color: rgb(200, 200, 200);
+    width: 100px;
+    height: 100px;
+    border-radius: 90px;
     background-size: cover;
     background-position: center;
     margin-bottom: 8px;

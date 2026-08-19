@@ -8,7 +8,7 @@
 - **Version:** `v1.0.0 · Beta` (MainMenu footer).
 - **Engine:** Unity `6000.3.15f1` (Unity 6). **Build:** single scene `MainMenu.unity` only.
 - **Language:** all in-game text is Spanish; code identifiers mix Spanish/English.
-- **Git:** ~607 commits; last analyzed commit `1d88989` (2026-08-11, HEAD).
+- **Git:** last audited commit `81d9e4f` (2026-08-16, HEAD).
 
 ## 2. Goal & core mechanics (as built)
 
@@ -61,7 +61,7 @@
 
 ## 6. Confirmed assumptions
 
-- `overall` = `round(mean(11 attributes))`, capped by `potential` — verified in seeders, migrations, training, progression.
+- `overall` is intended to be the mean of 11 attributes capped by `potential`, but current code uses integer division and mentoring does not recalculate it; verify this invariant before relying on post-mentoring ratings.
 - `PlayerData.id` manual (seed 1..~600) — stable across cloned slots.
 - `league_settings` seeded from `TradeHelper` constants + `bi_annual=5.1M`; `StartNewSeason` raises all caps +5%.
 - Employee `reputation` (1–5) drives ticket multiplier and renovation discounts (not `skill`; `EmployeeData` has no `skill` field).
@@ -96,6 +96,14 @@
 9. **The config modal in the base** — `UIScreenController.InitConfigModal`; the 12 controllers that override `RegisterCallbacks()` without `base` don't get it — keep new screens on the base path.
 10. **`schema_migrations` / `PRAGMA user_version`** — data migrations are named and stored in the DB (per slot); don't reintroduce global `PlayerPrefs` flags.
 11. **Background DB work** — helpers run on the ambient (`AsyncLocal`) connection inside `RunInBackground`/`RunInBackgroundAsync`; don't touch `_db` off the main thread.
+
+## 9. Audit warnings that must remain visible
+
+- `FastSimRoutine` yields while the day transaction is open; do not describe FastSim as fully atomic until the boundary is fixed.
+- `BuildTemplateDatabaseInBackground` temporarily swaps the shared `_dbField` from a worker thread; isolate template generation before allowing concurrent editor/save operations.
+- `StartNewSeason` currently skips rookies in its progression loop.
+- Team ratings include injured players and the local bonus is gated by the user's-home flag in the current Dashboard path.
+- Luxury-tax records are negative while expense aggregation treats expense amounts as positive.
 
 ## 8. Glossary pointer
 

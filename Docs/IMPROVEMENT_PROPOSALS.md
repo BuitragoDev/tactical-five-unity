@@ -4,7 +4,7 @@
 > del proyecto. Este documento es la referencia futura del menú de mejoras; cada
 > propuesta está agrupada por frente y priorizada por impacto vs. esfuerzo.
 > Fecha del análisis: 2026-08-02 · Rama de referencia: `crear-mejoras2`.
-> **Actualización (2026-08-13):** estado verificado en HEAD `1d88989`; las columnas
+> **Actualización (2026-08-16):** estado verificado en HEAD `81d9e4f`; las columnas
 > "Estado" reflejan lo mergeado en `main`.
 
 ---

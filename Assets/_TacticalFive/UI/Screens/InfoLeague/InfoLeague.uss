@@ -1,0 +1,275 @@
+/* ══════════════════════════════════════════
+   INFO LEAGUE — InfoLeague.uss
+   ══════════════════════════════════════════ */
+
+.infoleague-root {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.infoleague-main {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.infoleague-content {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 20px;
+}
+
+/* ── TABS ── */
+.infoleague-tabs {
+    flex-direction: row;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.infoleague-tab {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(200, 210, 230);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 8px 28px;
+    margin-right: 8px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.infoleague-tab:hover {
+    background-color: rgb(30, 36, 50);
+}
+
+.infoleague-tab--active {
+    color: rgb(15, 17, 23);
+    background-color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
+}
+
+.infoleague-tab--active:hover {
+    background-color: rgb(228, 178, 48);
+    border-color: rgb(228, 178, 48);
+    color: rgb(15, 17, 23);
+}
+
+.infoleague-tab-panel {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+/* ── TAB 1: FINANZAS ── */
+.infoleague-finanzas-row {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.infoleague-finanzas {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+}
+
+.infoleague-reglas-scroll {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 0;
+    margin-left: 24px;
+}
+
+.infoleague-finanza-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 12px 18px;
+    margin-bottom: 8px;
+}
+
+.infoleague-finanza-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(122, 138, 170);
+}
+
+.infoleague-finanza-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    -unity-text-align: middle-right;
+}
+
+/* ── REGLAS DEL JUEGO ── */
+.infoleague-reglas {
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 18px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+}
+
+.infoleague-reglas-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+    margin-bottom: 14px;
+    -unity-text-align: middle-left;
+}
+
+.infoleague-regla-titulo {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    margin-top: 10px;
+    -unity-text-align: middle-left;
+}
+
+.infoleague-regla-texto {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(150, 160, 180);
+    margin-top: 4px;
+    -unity-text-align: middle-left;
+}
+
+/* ── TAB 2: EQUIPOS ── */
+.infoleague-columns {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.infoleague-column {
+    flex-direction: column;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-height: 0;
+    margin-right: 20px;
+}
+
+.infoleague-column:last-child {
+    margin-right: 0;
+}
+
+.infoleague-column-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+    margin-bottom: 12px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.infoleague-team-list {
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+.infoleague-team-row {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    padding: 4px 10px;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+.infoleague-team-row--mine {
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+}
+
+.infoleague-team-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.infoleague-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 19px;
+    letter-spacing: 1px;
+    color: rgb(208, 216, 232);
+    margin-left: 12px;
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    overflow: hidden;
+    -unity-text-overflow: ellipsis;
+}
+
+.infoleague-team-stat-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    width: 120px;
+    margin-left: 10px;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    overflow: hidden;
+    -unity-text-overflow: ellipsis;
+    flex-shrink: 0;
+}
+
+.infoleague-team-stat-label--spaced {
+    margin-left: 26px;
+}
+
+.infoleague-team-stat {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 17px;
+    width: 120px;
+    margin-left: 4px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+.infoleague-team-budget {
+    color: rgb(212, 160, 23);
+}
+
+.infoleague-team-margin--positive {
+    color: rgb(39, 174, 96);
+}
+
+.infoleague-team-margin--negative {
+    color: rgb(192, 57, 43);
+}

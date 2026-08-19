@@ -3,7 +3,7 @@
 > Instrucciones de contexto para agentes IA y desarrolladores que trabajan en este proyecto.
 > Este archivo **se carga automáticamente** en cada sesión de opencode (raíz del repo).
 > Es la puerta de entrada a la base de conocimiento completa (`Docs/` + `.agent/`).
-> Estado verificado: HEAD `1d88989` (2026-08-11) · rama `main` · ~607 commits.
+> Estado verificado: HEAD `81d9e4f` (2026-08-16) · rama `main`.
 
 ---
 
@@ -117,7 +117,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 ## 7. Invariantes críticas (no romper)
 
-1. **`overall == round(mean(11 atributos))` capado por `potential`** — se recalcula en seed, training, aging, migración, draft, valoración IA. Mantenlo verdadero siempre.
+1. **`overall` pretende ser `mean(11 atributos)` capado por `potential`**, pero `GetCalculatedAverage()` usa división entera y `ApplyMentoring()` no lo recalcula. Mantenlo consistente y verifica cada mutación de atributos.
 2. **Constantes de cap/apron en `TradeHelper.cs`** (única fuente; `league_settings` es copia; +5%/año).
 3. **`GameResultCache.Clear()` al inicio de cada día simulado** — olvidarlo corrompe el flujo de resultados.
 4. **`seasons.phase` machine:** `preseason → regular → playin → playoff → finished` — conduce dashboard, playoffs, premios.
@@ -185,9 +185,9 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 ## 11. Estado actual del repo
 
-- **Commit:** `1d88989` (2026-08-11) · **Rama:** `main` · ~607 commits.
+- **Commit:** `81d9e4f` (2026-08-16) · **Rama:** `main`.
 - **Versión del juego:** `v1.0.0 · Beta`.
-- **Docs sincronizados con este HEAD** (anteriormente referenciaban `50b1a86`, 104 commits atrás).
+- **Docs sincronizados con este HEAD**; las desviaciones observadas y riesgos abiertos están en `Docs/TODO_TECHNICAL_DEBT.md`.
 - **`PLAN.md`** (raíz): todas sus entradas están implementadas y mergeadas en `main`; úsalo como histórico, no como TODO.
 - **Trabajo pendiente conocido:** G-League / IR / contratos two-way (`NEXT_PROPOSALS.md` D) y la deuda de `Docs/TODO_TECHNICAL_DEBT.md`.
 

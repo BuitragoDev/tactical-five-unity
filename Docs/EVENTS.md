@@ -3,7 +3,7 @@
 > **Important architectural fact [F]:** there is **no C# event bus, no `UnityEvent` wiring between systems, and no message broker** in this project. Communication happens through four explicit mechanisms:
 > 1. **DB messages** (`messages` table) — one-way notifications the user reads in the inbox.
 > 2. **Static mutable state** — `GameResultCache`, `ScreenManager.SelectedPlayerId/CurrentMode/CurrentScreen`.
-> 3. **PlayerPrefs** — persisted settings (audio, quality, sim mode, load management) and one-time migration flags.
+> 3. **PlayerPrefs** — persisted settings (audio, quality, sim mode, load management). One-time data migrations are stored in SQLite `schema_migrations`, not PlayerPrefs.
 > 4. **UI Toolkit callbacks** — `ClickEvent`, `KeyDownEvent`, `MouseEnterEvent`, `MouseLeaveEvent`, `ChangeEvent`, coroutines with `WaitUntil` for modal resolution.
 >
 > These are all **point-to-point**; nothing is decoupled via events. This is a design observation (see `CODE_GUIDELINES.md`).
@@ -54,7 +54,7 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | Remodelación iniciada/completada | `ArenaController`, `DashboardController` | Arena capacity increased |
 | Última semana de traspasos (Feb 1) | `DashboardController.ProcessGameDayRoutine` | Reminder |
 | Simulación rápida hasta fecha | `CalendarController.ConfirmFastSim` → `GameResultCache.FastSimTargetDate` → `DashboardController.FastSimRoutine` | Pausa ante ofertas maduradas/traspasos entrantes (IR A QUINTETO / SEGUIR SIMULANDO); al terminar, modal de resumen simplificado (solo "SIMULACIÓN COMPLETADA" + CERRAR) |
-| Noticias rápidas (hitos/rachas/campanadas/TD/40pts) | `QuickNewsGenerator.Generate` (max 2/day) | Inbox |
+| Noticias rápidas (hitos/rachas/campanadas/TD/40pts) | `QuickNewsGenerator.Generate` (max 2/day, 5 variantes de texto por evento al azar) | Inbox |
 | Premio del mes (Manager/Jugador/Rookie) | `DatabaseManager.EvaluateMonthlyAwards` | Inbox + `monthly_awards` |
 | Trade AI offers to player | `DashboardController.GenerateAITradeOffersForPlayer` → shown via `ShowNextPendingTradeOffer` modal (not inbox) | User accepts/rejects in a modal |
 | Star FA signed by AI | `DashboardController.ProcessStarFreeAgentSignings` | Inbox; player leaves FA pool |

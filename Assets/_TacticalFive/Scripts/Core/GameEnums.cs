@@ -40,7 +40,8 @@ public enum GameScreen
     Trajectory,
     Premios,
     PlayerProfile,
-    Logros
+    Logros,
+    InfoLeague
 }
 
 public enum GameMode

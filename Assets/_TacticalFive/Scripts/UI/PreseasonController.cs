@@ -22,6 +22,8 @@ public class PreseasonController : UIScreenController
     // Bottom
     private Button _btnHome;
     private Button _btnAway;
+    private VisualElement _homeIcon;
+    private VisualElement _awayIcon;
     private VisualElement _teamsGrid;
 
     // Estado
@@ -52,6 +54,8 @@ public class PreseasonController : UIScreenController
         _slotsRow = _root.Q<VisualElement>("SlotsRow");
         _btnHome = _root.Q<Button>("BtnHome");
         _btnAway = _root.Q<Button>("BtnAway");
+        _homeIcon = _root.Q<VisualElement>("HomeIcon");
+        _awayIcon = _root.Q<VisualElement>("AwayIcon");
         _teamsGrid = _root.Q<VisualElement>("TeamsGrid");
     }
 
@@ -67,6 +71,9 @@ public class PreseasonController : UIScreenController
         var logos120 = Resources.LoadAll<Sprite>("Teams/Logos/120x120/");
         foreach (var s in logos120)
             _logoSprites120[s.name] = s;
+
+        SetLocationIcon(_homeIcon, "Icons/home_icon");
+        SetLocationIcon(_awayIcon, "Icons/away_icon");
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();
 
@@ -85,6 +92,17 @@ public class PreseasonController : UIScreenController
         }
 
         BuildTeamsGrid();
+    }
+
+    private static void SetLocationIcon(VisualElement element, string resourcePath)
+    {
+        if (element == null) return;
+
+        var icon = Resources.Load<Texture2D>(resourcePath);
+        if (icon != null)
+            element.style.backgroundImage = new StyleBackground(icon);
+        else
+            Debug.LogWarning($"[Preseason] No se encontró el icono: Resources/{resourcePath}");
     }
 
     protected override void RegisterCallbacks()

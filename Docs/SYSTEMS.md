@@ -1,6 +1,6 @@
 # SYSTEMS — Tactical Five Core Systems
 
-> Each system: responsibility, files, key methods, data used, dependencies, lifecycle, risks. **[F]** = fact, **[D]** = deduction, **[H]** = hypothesis. State: HEAD `1d88989`.
+> Each system: responsibility, files, key methods, data used, dependencies, lifecycle, risks. **[F]** = fact, **[D]** = deduction, **[H]** = hypothesis. State: HEAD `81d9e4f` (2026-08-16).
 
 ---
 
@@ -26,8 +26,8 @@
 - **Files:** `GameSimulator.cs` (936 ln). DTOs: `PlayerStatSnapshot`, `TeamStats`, `GameResult`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome` (nested).
 - **Entry point:** `SimulateGame(GameData, homePlayers, awayPlayers, homeChemistry, awayChemistry, isHome)`.
 - **Play-by-play capture:** la crónica se registra sin alterar el resultado (`PlayByPlayEvent`: quarter, texto en español, marcador acumulado, `timeElapsed`, deltas `StatDelta`) vía `CaptureBox`/`DiffBox` + minutos por jugador; se consume en el overlay de `MatchDayController` cuando `GetSimMode()==1`.
-- **Pipeline:** filter injured → team ratings (mean `clamp(overall + (morale-50)*0.1, 0, 99)`; home chemistry ×0.15, away ×0.10, home court +1.5) → `pace = Clamp(101 + (hR+aR-140)*0.06 + rand(-2,2), 95, 107)` → 4 quarters (`SimQuarter`, `teamPoss = clamp(round(pace/4*rand(0.96,1.04)),22,28)`) + up to 5 OTs (`SimOvertime`, 24 possessions) → elite floors (passing≥95 min assists, rebounding≥95 min boards, steals≥90/blocks≥95) if `minutes≥20` → persist stats (`DeletePlayerGameStatsForGame` + `SavePlayerGameStats`) → `CheckAndUpdateRecords` (except allstar) → fatigue `fisico -= round(minutes*0.25)` (×1.5 on real back-to-back) → `CheckInjuries` (base 0.008, `×(1+(30-fisico)*0.15)` if `fisico<30`).
-- **Simulation internals:** `RunPossession` (turnover prob `0.11 + (defR-offR)*0.0003`; weighted shooter `(overall/100)^2.2 * FisicoPenalty`; shot-type split by position with `three_point` adjustment; defense = best `defense` on floor, `di=(def-70)*0.005`; 3pt FG% `clamp((0.35+(three_point-70)*0.005)*fp-di, 0.28, 0.51)`, 2pt `clamp((0.50+(shooting-70)*0.005)*fp-di*0.25, 0.40, 0.67)`; and-one 6%; foul on miss 18%/14% (3pt/2pt); rebounds `sum(reb^3)` vs `sum(reb^2.5)`; assists 35% weighted `passing^3`; TO handler PG/SG/SF; fouls prefer C/PF). Rotations via `SubSchedule(q)` (75% skill / 25% random).
+  - **Pipeline [F]:** active rotations filter injured players, but team-rating lists currently include them; the `+1.5` home-court bonus is only enabled for the user's home-game flag in the Dashboard call path. Then chemistry → pace → quarters/OT → target-minute rotations → stats → records → fatigue → injuries. See `GAMEPLAY.md §2` for the exact formulas and deviations.
+  - **Simulation internals:** `RunPossession` handles shooting, fouls, rebounds and blocks. Rebounds use attribute exponents plus position multipliers; blocks use one collective chance with weighted defender selection and a 20% cap. Assists remain 35% weighted by `passing^3`; turnovers prefer PG/SG/SF handlers; fouls prefer C/PF. Rotations via `SubSchedule(q)` (75% skill / 25% random).
 - **Data used:** `GameData`, `PlayerData`, `PlayerGameStats`, `INJURY_TYPES` (27 weighted types, "Sobrecarga muscular" w60/1–3d … "Rotura ligamento cruzado anterior" w1/180–300d).
 - **Dependencies:** `DatabaseManager.Instance`, records system.
 - **Risks:** uses `UnityEngine.Random`; single-threaded (main thread, measured fast — intentional). Duplicated team-rating formula with `MatchupPreview` must stay in sync.
@@ -110,7 +110,7 @@
 ## S12. Injuries & fatigue
 
 - **Files:** `GameSimulator.INJURY_TYPES` (27 types, weights 60→1, days 1→300), `ProcessGameInjuries` (Dashboard), `ProcessInjuries` (daily recovery batch, background thread).
-- **Fatigue:** `fisico` (default 99) reduced `round(minutes*0.25)` per game (×1.5 on real back-to-back), recovered +8/day (`ProcessFisicoRecovery` in the background batch).
+- **Fatigue:** `fisico` (default 99) reduced `round(minutes*0.30)` per game (×1.5 on real back-to-back), recovered +8/day **only on rest days** (teams without a game that day; background batch reads `game_day == current_game_day`).
 - **Injury risk:** base 0.008/game, ×`(1+(30−fisico)*0.15)` when `fisico<30`; 27 weighted types; injured players excluded from sim; recovery messages on return.
 - **Load management:** `TF_LoadMgmt_Enabled` + back-to-back detection → modal to rest up to 2 tired players (`DashboardController.cs:899-923`).
 
@@ -118,7 +118,7 @@
 
 - **Files:** `MessageData.cs`, `QuickNewsGenerator.cs`, `MessagesController.cs`.
 - **Sources:** match results, offers (accept/reject), renewals, signings, injuries, recoveries, morale complaints, trade window reminder, renovations, budget warnings, monthly awards, star FA signings, achievements, deadline — all via `AddMessage` (`sender_type`: 0 system, 1 player, 2 news).
-- **Quick news** (`QuickNewsGenerator.Generate`, max 2/day, dedup by title+body+day): season milestones (41/82), streaks ≥5 (±), upsets (avg diff ≥15 and favorite loses), triple-doubles, 40+ point explosions.
+- **Quick news** (`QuickNewsGenerator.Generate`, max 2/day, dedup by title+body+day, generated en `DashboardController.ProcessGameDayRoutine` tras simular el día): season milestones (41/82), streaks ≥5 (±), upsets (avg diff ≥15 and favorite loses), triple-doubles, 40+ point explosions. **5 variantes de texto por evento elegidas al azar** (`UnityEngine.Random`, main thread) con datos reales (equipos, marcador, racha, valoraciones, jugador, stats).
 
 ## S14. Player photos
 

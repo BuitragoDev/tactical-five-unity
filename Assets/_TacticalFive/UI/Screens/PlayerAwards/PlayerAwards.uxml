@@ -145,7 +145,7 @@
                     <ui:VisualElement class="award-stat-row extra-stat-row">
                         <ui:VisualElement class="award-stat-box">
                             <ui:Label name="CoachCount" text="--" class="award-stat-val"/>
-                            <ui:Label text="ENTRENADOR DEL MES" class="extra-stat-lbl-long"/>
+                            <ui:Label text="RÉCORD TEMPORADA" class="extra-stat-lbl-long"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

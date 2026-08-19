@@ -348,6 +348,7 @@ public class MainMenuController : UIScreenController
 
     void OnManagerClicked()
     {
+        ClearTransientGameState();
         int slot = GameSaveManager.FindNextAvailableSlot();
         GameSaveManager.CleanupOrphanDb(slot);
         DatabaseManager.Instance.InitSaveSlot(slot);
@@ -361,10 +362,18 @@ public class MainMenuController : UIScreenController
 
     void ConfirmProManager()
     {
+        ClearTransientGameState();
         int slot = GameSaveManager.FindNextAvailableSlot();
         GameSaveManager.CleanupOrphanDb(slot);
         DatabaseManager.Instance.InitSaveSlot(slot);
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.ProManager);
+    }
+
+    private void ClearTransientGameState()
+    {
+        GameResultCache.FastSimTargetDate = null;
+        GameResultCache.PendingBudgetWarning = false;
+        GameResultCache.Clear();
     }
 
     void OpenProModal()

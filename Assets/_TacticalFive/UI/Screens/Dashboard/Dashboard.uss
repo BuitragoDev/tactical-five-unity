@@ -579,18 +579,33 @@
     border-right-width: 0;
 }
 .game-meta-location {
+    flex-direction: row;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 2px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+.game-meta-location-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+.game-meta-location-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    padding: 6px 12px;
-    border-radius: 2px;
+    color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
-    margin-right: 10px;
-    flex-shrink: 0;
 }
 .game-meta-location--home {
     background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
+}
+.game-meta-location--home .game-meta-location-label {
     color: rgb(255, 255, 255);
 }
 .game-meta-location--away {
@@ -1055,7 +1070,7 @@
 }
 
 .fired-modal-box {
-    width: 520px;
+    width: 720px;
     background-color: rgb(15, 17, 23);
     border-width: 1px;
     border-color: rgb(58, 74, 99);
@@ -1081,6 +1096,37 @@
     color: rgb(192, 57, 43);
     margin-bottom: 16px;
     -unity-text-align: middle-center;
+}
+
+.fired-modal-title--negative {
+    color: rgb(192, 57, 43);
+}
+
+.fired-modal-results {
+    width: 100%;
+    margin-bottom: 24px;
+    align-items: center;
+}
+
+.fired-modal-result-line {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 20px;
+    width: 100%;
+    white-space: normal;
+    -unity-text-align: middle-center;
+    margin-bottom: 4px;
+}
+
+.fired-modal-result-line--positive {
+    color: rgb(46, 204, 113);
+}
+
+.fired-modal-result-line--negative {
+    color: rgb(231, 76, 60);
+}
+
+.fired-modal-result-line--neutral {
+    color: rgb(179, 190, 214);
 }
 
 .fired-modal-text {
@@ -1289,6 +1335,21 @@
     margin-left: 6px;
 }
 
+/* Botones del modal de GESTIÓN DE DESCANSO (load management).
+   Solo se aplican dentro de ShowLoadManagementModal para no
+   alterar el modal de quinteto con lesionados. */
+.load-mgmt-modal-box {
+    width: 870px;
+}
+.injured-modal-btn.load-mgmt-modal-btn--blue {
+    background-color: rgb(42, 95, 201);
+    border-color: rgb(42, 95, 201);
+}
+.injured-modal-btn.load-mgmt-modal-btn--green {
+    background-color: rgb(39, 174, 96);
+    border-color: rgb(39, 174, 96);
+}
+
 /* ══ Config modal settings styles (inlined from Settings.uss) ══ */
 
 .settings-section {
@@ -1416,6 +1477,26 @@
 }
 .settings-quality-btn--wide {
     width: 130px;
+}
+.settings-columns {
+    flex-direction: row;
+    align-items: flex-start;
+}
+.settings-columns .settings-section--column {
+    flex-grow: 1;
+    flex-basis: 0;
+}
+.settings-columns .settings-section--column:first-child {
+    margin-right: 24px;
+}
+.settings-columns .settings-section--column .settings-quality-row {
+    flex-direction: column;
+    align-items: flex-start;
+}
+.settings-columns .settings-section--column .settings-quality-row .settings-label {
+    width: auto;
+    white-space: nowrap;
+    margin-bottom: 8px;
 }
 .settings-btn {
     cursor: pointer;

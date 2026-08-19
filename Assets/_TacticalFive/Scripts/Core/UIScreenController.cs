@@ -82,9 +82,8 @@ public class UIScreenController : MonoBehaviour
             {"NavDashboardIcon", "inicio"},
             {"NavRosterIcon", "plantilla"},
             {"NavCalendarIcon", "calendario"},
-            {"NavStandingsIcon", "clasificacion"},
+            {"NavCompeticionesIcon", "competiciones"},
             {"NavPalmaresIcon", "palmares"},
-            {"NavResultsIcon", "resultados"},
             {"NavPlayoffsIcon", "playoff"},
             {"NavStatsIcon", "estadisticas"},
             {"NavMarketIcon", "mercado"},
@@ -161,8 +160,17 @@ public class UIScreenController : MonoBehaviour
         _root.Q<Button>("SubmenuEntrenamiento")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Training); });
         _root.Q<Button>("NavCalendar")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Calendar); });
-        _root.Q<Button>("NavStandings")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Standings); });
+        _root.Q<Button>("NavCompeticiones")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseAllSubmenus();
+            var submenu = _root.Q<VisualElement>("CompetitionsSubmenu");
+            if (submenu != null)
+                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+        });
+        _root.Q<Button>("SubmenuResultados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Results); });
+        _root.Q<Button>("SubmenuClasificacion")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Standings); });
+        _root.Q<Button>("SubmenuInfoLiga")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.InfoLeague); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -180,8 +188,6 @@ public class UIScreenController : MonoBehaviour
             _root.Q<VisualElement>("ManagerSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Logros);
         });
-        _root.Q<Button>("NavResults")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Playoffs); });
         _root.Q<Button>("NavStats")?.RegisterCallback<ClickEvent>(_ =>
@@ -262,6 +268,7 @@ public class UIScreenController : MonoBehaviour
     protected void CloseAllSubmenus()
     {
         _root.Q<VisualElement>("RosterSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+        _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible");
         _root.Q<VisualElement>("PalmaresSubmenu")?.RemoveFromClassList("nav-submenu--visible");
         _root.Q<VisualElement>("MarketSubmenu")?.RemoveFromClassList("nav-submenu--visible");
         _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible");

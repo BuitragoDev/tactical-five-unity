@@ -4,7 +4,7 @@ Estado verificado contra el código en la rama `crear-mejoras`. Las entradas mar
 `[hecho]` o `[pendiente]` con referencia `archivo:línea` cuando aplica.
 
 > **Actualización (2026-08-13):** todas las entradas están **mergeadas en `main`** y
-> verificadas en HEAD `1d88989`. La revisión de la documentación completa está en
+> verificadas en HEAD `81d9e4f`. La revisión de la documentación completa está en
 > `Docs/` y `.agent/`. Para trabajo pendiente ver `NEXT_PROPOSALS.md` (G-League/IR) y
 > `Docs/TODO_TECHNICAL_DEBT.md`.
 

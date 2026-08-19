@@ -1423,6 +1423,29 @@ public partial class DatabaseManager
         string seasonLabel = $"{season.year_start}-{season.year_end.ToString().Substring(2)}";
         Debug.Log($"[DB] Saving season-end records for {seasonLabel}...");
 
+        // El MIP debe resolverse antes del rollover, cuando la temporada actual
+        // aún está en player_game_stats y la anterior ya puede estar archivada.
+        var mostImproved = GetMostImprovedPlayer(seasonId, managerId);
+        var seasonRecord = _db.Table<SeasonRecord>()
+            .Where(r => r.season_id == seasonId)
+            .FirstOrDefault();
+        if (seasonRecord == null)
+        {
+            seasonRecord = new SeasonRecord
+            {
+                season_id = seasonId,
+                most_improved_id = mostImproved?.PlayerId ?? 0
+            };
+            _db.Insert(seasonRecord);
+        }
+        else if (mostImproved != null && seasonRecord.most_improved_id != mostImproved.PlayerId)
+        {
+            seasonRecord.most_improved_id = mostImproved.PlayerId;
+            _db.Update(seasonRecord);
+        }
+        if (mostImproved != null)
+            Debug.Log($"[DB] Most Improved saved: {mostImproved.PlayerName}");
+
         // ── Finals Record ──
         var finalsGames = _db.Table<GameData>()
             .Where(g => g.manager_id == managerId
@@ -1986,7 +2009,13 @@ public partial class DatabaseManager
     {
         if (!EnsureDb()) return null;
 
-        int prevSeasonId = seasonId - 1;
+        var previousSeason = _db.Table<SeasonData>()
+            .Where(s => s.manager_id == managerId && s.id < seasonId)
+            .OrderByDescending(s => s.id)
+            .FirstOrDefault();
+        if (previousSeason == null) return null;
+
+        int prevSeasonId = previousSeason.id;
         var curRatings = GetSeasonPlayerRatings(seasonId, managerId);
         var prevRatings = GetSeasonPlayerRatings(prevSeasonId, managerId);
         if (prevRatings.Count == 0) return null;
@@ -1998,10 +2027,10 @@ public partial class DatabaseManager
             if (!prevRatings.TryGetValue(cur.player_id, out var prev)) continue;
             if (prev.games < 40 || cur.games < 40) continue;
             float delta = (float)cur.avg_rating - (float)prev.avg_rating;
-            if (delta <= bestDelta) continue;
-            bestDelta = delta;
             var player = GetPlayerById(cur.player_id);
             if (player == null) continue;
+            if (delta <= bestDelta) continue;
+            bestDelta = delta;
             var team = GetTeamById(player.team_id);
             best = new PlayerAwardInfo
             {
@@ -2023,6 +2052,8 @@ public partial class DatabaseManager
     {
         var result = new Dictionary<int, SeasonPlayerRatingRow>();
         if (!EnsureDb() || seasonId <= 0) return result;
+
+        // La temporada activa todavía vive en player_game_stats.
         var rows = _db.Query<SeasonPlayerRatingRow>(@"
             SELECT ps.player_id, AVG(ps.rating) AS avg_rating, COUNT(*) AS games
             FROM player_game_stats ps
@@ -2031,19 +2062,52 @@ public partial class DatabaseManager
               AND g.manager_id = ?
             GROUP BY ps.player_id", seasonId, managerId);
         foreach (var r in rows) result[r.player_id] = r;
+
+        if (result.Count > 0) return result;
+
+        // Tras el rollover, player_game_stats y games se limpian. La copia
+        // agregada por temporada es la fuente histórica equivalente.
+        var archivedRows = _db.Query<SeasonPlayerRatingRow>(@"
+            SELECT player_id,
+                   CAST(total_rating AS REAL) / NULLIF(games, 0) AS avg_rating,
+                   games
+            FROM player_season_stats
+            WHERE season_id = ? AND games > 0", seasonId);
+        foreach (var r in archivedRows) result[r.player_id] = r;
+
         return result;
     }
 
     public CoachAwardInfo GetCoachOfTheYear(int seasonId)
     {
         if (!EnsureDb()) return null;
-        var top = _db.Query<CoachMonthRow>(@"
+
+        // Premio basado en el récord de temporada: más victorias en la fase regular.
+        var winRows = _db.Query<MonthlyManagerAwardRow>(@"
+            SELECT t.id AS team_id, t.name AS team_name,
+                   SUM(CASE WHEN (g.home_team_id = t.id AND g.home_score > g.away_score)
+                             OR (g.away_team_id = t.id AND g.away_score > g.home_score) THEN 1 ELSE 0 END) AS wins,
+                   COUNT(*) AS games
+            FROM games g
+            JOIN teams t ON t.id IN (g.home_team_id, g.away_team_id)
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+            GROUP BY t.id", seasonId);
+
+        // Desempate: nº de premios de Entrenador del Mes (rank 1) por equipo.
+        var monthRows = _db.Query<CoachMonthRow>(@"
             SELECT team_id, COUNT(*) AS mes_count
             FROM monthly_awards
             WHERE season_id = ? AND award_type = 'manager' AND rank = 1
-            GROUP BY team_id
-            ORDER BY COUNT(*) DESC
-            LIMIT 1", seasonId).FirstOrDefault();
+            GROUP BY team_id", seasonId);
+        var monthByTeam = new Dictionary<int, int>();
+        foreach (var r in monthRows) monthByTeam[r.team_id] = r.mes_count;
+
+        // Si aun así hay empate (mismas victorias y mismos meses), LINQ es estable
+        // y FirstOrDefault devuelve uno arbitrario.
+        var top = winRows
+            .OrderByDescending(r => r.wins)
+            .ThenByDescending(r => monthByTeam.TryGetValue(r.team_id, out int m) ? m : 0)
+            .FirstOrDefault();
         if (top == null || top.team_id == 0) return null;
 
         var coach = _db.Table<CoachRankingData>()
@@ -2052,12 +2116,14 @@ public partial class DatabaseManager
             coach = _db.Table<CoachRankingData>().FirstOrDefault(c => c.team_id == top.team_id);
 
         var team = GetTeamById(top.team_id);
+        int recordWins = top.wins;
+        int recordLosses = top.games - top.wins;
         return new CoachAwardInfo
         {
             CoachName = coach?.name ?? "",
             TeamName = team?.name ?? "",
             TeamKeyword = team?.logo ?? "",
-            EntrenadorMes = top.mes_count
+            RecordText = $"{recordWins}-{recordLosses}"
         };
     }
 
@@ -2755,6 +2821,14 @@ public partial class DatabaseManager
             }
 
             // 3. Decrement contracts
+            // El equipo del manager ya decrementó contratos y resolvió FAs en
+            // NewSeasonController (CheckRosterAndStart) antes del control de
+            // plantilla — no volver a restar el año.
+            if (p.team_id == newTeamId)
+            {
+                _db.Update(p);
+                continue;
+            }
             p.contract_years -= 1;
             p.guaranteed_years -= 1;
             if (p.contract_years <= 0)

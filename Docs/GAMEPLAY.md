@@ -1,6 +1,6 @@
 # GAMEPLAY — Tactical Five Mechanics
 
-> Every mechanic with its goal, implementation, data, and exact formulas extracted from code. **[F]** fact, **[D]** deduction, **[H]** hypothesis. Version analyzed: HEAD `1d88989` (2026-08-11).
+> Every mechanic with its goal, implementation, data, and exact formulas extracted from code. **[F]** fact, **[D]** deduction, **[H]** hypothesis. Version analyzed: HEAD `81d9e4f` (2026-08-16).
 
 ---
 
@@ -14,7 +14,7 @@
 | `playoff` | 4 rounds, best-of-7, 2-2-1-1-1 | `PlayoffsGenerator.GeneratePlayoffs` / `AdvancePlayoffSeries` |
 | `finished` | Season over | Dashboard phase transition → `EndSeason` → `Draft` → `NewSeason` |
 
-**Calendar facts:** season start date `Oct 22 of year_start`, end Apr 15; trade deadline reminder on Feb 1; **Deadline Day modal on Feb 7** (intercepts btnAction, once per season: IR AL MERCADO / CERRAR, does not advance the day); All-Star window Feb 8–14; up to 15 games/day; no back-to-backs by design (though real ones can appear); ≤5 games/team/week. — `ScheduleGenerator.cs`, `DashboardController.cs`
+**Calendar facts [F]:** `CreateSeason` and `StartNewSeason` initially persist `Sep 5`; `PreseasonController.OnContinue` moves the date to the first preseason game or `Oct 22`. Regular-season gameplay targets Oct 22–Apr 15. Trade deadline reminder is Feb 1; **Deadline Day modal is Feb 7**; All-Star window Feb 8–14; up to 15 games/day; the scheduler penalizes but does not prohibit back-to-backs; the main scoring path targets ≤5 games/team/week. — `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs`, `ScheduleGenerator.cs`, `DashboardController.cs`
 
 ## 2. Match simulation (core mechanic)
 
@@ -22,8 +22,8 @@
 
 ### Team ratings
 - Player rating = `clamp(overall + (morale − 50) * 0.1, 0, 99)`.
-- Team rating = mean player rating (all healthy players, not only starters).
-- Home bonus: `+1.5` court factor; chemistry: home ×0.15, away ×0.10.
+- Team rating uses the `homePlayers`/`awayPlayers` lists, which include injured players, while active simulation lists filter injuries. Therefore “all healthy players” is the intended rule, not the current implementation [F].
+- The simulator applies `+1.5` only when `isMyHomeGame` is true. In the current Dashboard call path this is the user's home game, so AI-vs-AI and the user's away games do not receive a local bonus [F]. Chemistry: home ×0.15, away ×0.10.
 - `pace = clamp(101 + (homeRating + awayRating − 140) * 0.06 + rand(−2, 2), 95, 107)`.
 
 ### Possession model (`RunPossession`, :505-586)
@@ -34,8 +34,8 @@
 - 3PT FG%: `clamp((0.35 + (three_point−70)*0.005) * fp − di, 0.28, 0.51)`.
 - 2PT FG%: `clamp((0.50 + (shooting−70)*0.005) * fp − di*0.25, 0.40, 0.67)`.
 - And-one: 6% on made 2; 75% FT. Foul on miss: 18% (3pt) / 14% (2pt), 3 FTs on 2P 10% of the time; `ftPct = 0.75 + (overall−70)*0.002`.
-- Blocks: `clamp((blocks−60)/400, 0, 0.10)` per defender.
-- Rebounds: defensive `sum(reb^3)` vs offensive `sum(reb^2.5)`; per-player winner weighted by `reb^3`.
+- Blocks: one collective block roll per missed shot, with each defender weighted by `clamp((blocks−60)/400, 0, 0.10) × position multiplier` and total chance capped at 20%. Multipliers: PG 0.20, SG 0.30, SF 0.55, PF 1.15, C 1.30. The successful defender is selected from those weights, not by list order.
+- Rebounds: defensive `sum(reb^3 × position multiplier)` vs offensive `sum(reb^2.5 × position multiplier)`; the individual winner uses the same context-specific weight. Defensive multipliers: PG 0.45, SG 0.55, SF 0.80, PF 1.20, C 1.35. Offensive multipliers: PG 0.35, SG 0.50, SF 0.75, PF 1.20, C 1.40.
 - Assists: 35% chance, passer weight `passing^3`.
 - Turnovers: handler PG/SG/SF weighted `1/FisicoPenalty`; only 50% become steals, steal weight `steals_attr^3`.
 - Fouls: random C/PF on court.
@@ -43,7 +43,7 @@
 ### Quarters, rotations, overtime
 - 4 quarters via `SimQuarter`; `teamPoss = clamp(round(pace/4 * rand(0.96,1.04)), 22, 28)` per team per quarter.
 - Rotations via `SubSchedule` (Q1/Q3 subs at 4' and 8'; Q2/Q4 at 2',5',8',10.5'). Overtime: 24 possessions (`minsPerPoss = 5/24`), sub at 2.5'. Up to 5 OTs.
-- Substitution policy: 75% skill-based / 25% random (`DoSub`); rosters >12 (All-Star) rotate the bench randomly.
+- Substitution policy: `DoSub` changes 1–2 players at each scheduled stoppage, selecting outgoing players by minutes above their target and incoming players by positional fit, minutes needed and OVR. Stars (`role=Estrella` or OVR≥85) target 39 minutes when starting (38–40 in normal variation), titular starters 27–31, titular bench players 21, bench players 15 and last-resort players 8. A player with `fisico < 30` has its target reduced by 6 minutes, with a floor of 8. Interior coverage is preserved when possible; stars are protected from early substitutions and can return later in the game.
 
 ### Elite floors
 If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `rebounding ≥ 95` → boards floor `round(min/48*10)` (split oreb/dreb half/half); `steals ≥ 90` → steals floor `round(min/48*3)`; `blocks ≥ 95` → blocks floor `round(min/48*3)`. — `GameSimulator.cs:168-189`
@@ -54,7 +54,7 @@ If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `reb
 ### Persisted outputs
 - `PlayerGameStats` rows per player; `GameData` updated (scores, quarters, `is_played=1`).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
-- Fatigue: `fisico -= round(minutes*0.25)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day.
+- Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
 - Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (see `SYSTEMS.md §S12`).
 
 ### Play-by-play en vivo (Vista de Partido)
@@ -147,14 +147,14 @@ Win: +4 home / +2 away (+1 if margin ≤5 or ≥20). Loss: −3 home / −2 away
 8 personality types; relationship `bond` 1–99 between player pairs; seeded per team; evolved after games.
 
 ### Injuries & fatigue
-Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured players skip sims; recovery +8/day with inbox messages; psychologist (staff) affects morale.
+Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured players skip sims; recovery +8/day on rest days with inbox messages; psychologist (staff) affects morale.
 
 ## 9. League AI
 
 - `ProcessAITransfers` (cycle every ≥10 game days, **3-5 game days during deadline week Feb 1-8**; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 3 per cycle). Each team has a **strategy** (`TeamStrategy`: Contend / Balanced / Rebuild via `GetTeamStrategy`): Contend (top 4 conference or 2+ stars OVR≥85) denser (0.45, 6-day cooldown), hunts upgrades up to OVR 90 including a future pick, protects young (age<26, OVR≥82); Rebuild (bottom 4 or young without stars) sells veterans ≥30 for young/picks (`TrySellVeteran`), 8-day cooldown; Balanced 15-day cooldown. Offers to the player strategy-aware (`PickTradeTarget`/`BuildOfferPackage`). Deadline contenders offer extra picks; titles prefixed `[DEADLINE]`.
 - `ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with strongest teams; priority Contend > Balanced > Rebuild; Rebuild never signs OVR≥85.
 - `EndSeasonController.ProcessAITeamRenewals`: AI renews its expiring players.
-- `StartNewSeason` refills AI rosters to 15 (best teams first), trims to 17 max, aging/progression, +5% caps, re-signs TV/sponsors.
+- `StartNewSeason` refills AI rosters to 15 (best teams first), trims to 17 max, aging/progression, +5% caps, re-signs TV/sponsors. **En NewSeasonController**, antes del control de plantilla >17 del equipo del manager, `CheckRosterAndStart` decrementa un año de contrato y pasa a FA a los no renovados (misma semántica que `StartNewSeason`, que salta ese decremento para el equipo nuevo del manager).
 
 ## 10. Draft
 
@@ -170,12 +170,12 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - **Retired numbers** (`DorsalesController`): seed of 53 legends + 17 active veterans (`RetiredNumberSeeder`/`VeteranRetiredNumberSeeder`); `ShouldRetireNumber` (WouldInduct + seasons_with_team ≥10); `TryRetireNumber` at retirement; `AssignJerseyNumber` reserves retired numbers (1–99, avoids taken). Screen shows current roster numbers + retired.
 - Career stats archived per season (`UpdateHistoricalPlayerStatsFromSeason`, `player_season_stats`).
 - Records: historical + team + season single-game via `CheckAndUpdateRecords`; **record-break achievements** hooked inside it.
-- Aging/progression (`StartNewSeason`): band deltas + **position-based athletic decline** (athletic attributes decline faster by position/age) + **mentoring** (veterans boost young players), retirements ≥40, contract expiry → FA.
+- Aging/progression (`StartNewSeason`): the loop skips `is_rookie == 1` before applying age, contract and attribute progression. Non-rookies receive band deltas + position-based athletic decline + mentoring, retirements ≥40 and contract expiry → FA. The broad rule “all players age/progress” is therefore not true for current rookies [F].
 
 ## 12. Player values & role
 
 - `PlayerRole` thresholds: seed players ≥88 Estrella / ≥78 Titular / ≥68 Banquillo; FAs lower (≥80/≥70/≥60).
-- `overall` = mean of 11 attributes (cap potential), recomputed everywhere.
+- `PlayerData.GetCalculatedAverage()` currently computes integer `sum / 11`, so it truncates rather than rounds. `ApplyMentoring()` changes attributes without persisting a recalculated `overall`; training/progression/migration do recalculate it. The invariant stated elsewhere is an intended rule, not an always-true runtime invariant [F].
 - `secondary_position` = adjacent position (PG→SG, SF→PF, PF→C, C→PF); **SG toma Base si `height_cm < 198` y Alero si `≥ 198`** (migration `UPDATE`, `DatabaseManager.cs:405-424`).
 
 ## 13. Fog of war (ojeadores)
@@ -237,3 +237,21 @@ flowchart LR
 - Does the psychologist actually accelerate injury recovery via `treated`? `ProcessPsychologistMorale` suggests morale-only [H].
 - `GetBestPerPosition` only produces the FIRST All-Star/Rookie quintet — is a second team intended? [H] The UI labels say "Mejor Quinteto de la Temporada".
 - `MatchupPreview.RecentFormBonus` only considers the manager's team's last-5 games for both sides (away teams use the same manager's context). Possible imprecision [D].
+
+## Current behavior deviations
+
+- `[F]` Luxury tax is persisted as `amount = -monthlyTax` in `DashboardController.ProcessTeamLuxuryTax`, while `DatabaseManager.GetTotalExpenses` sums record types `>= 5` without normalizing sign. Finance totals can therefore overstate the balance.
+- `[D]` `CalculateAttendance` is called after the current game has been marked played; its recent win percentage may include the game whose attendance is being calculated.
+- `[F]` `FastSimRoutine` contains `yield return` statements between `BeginTransaction` and `Commit`. This contradicts the intended one-frame atomic day pipeline and is a data-integrity risk until fixed and tested.
+
+## Additional open questions
+
+- ¿El bonus de cancha debe aplicarse a cualquier equipo local o solo al equipo del manager?
+- ¿La exclusión de rookies en `StartNewSeason` es intencional o un bug de progresión/contratos?
+- ¿La fórmula de `overall` debe truncar (`sum / 11`) o redondear matemáticamente?
+- ¿El signo negativo del impuesto de lujo es intencional para un gráfico concreto o debe normalizarse en `GetTotalExpenses`?
+
+## Simulación de rebotes y tapones
+
+- `[F]` Before this adjustment, rebound assignment used only the `rebounding` attribute and block assignment used the first defender in iteration order to pass an independent probability check. This allowed high-attribute guards to lead team rebounding or blocking.
+- `[F]` Elite-stat floors now also use the corresponding position multipliers, so an elite guard can still contribute but interior players receive the intended statistical priority.

@@ -219,8 +219,8 @@ public class PlayerAwardsController : UIScreenController
         {
             _coachPlayerName.text = coach.CoachName;
             _coachPlayerTeam.text = coach.TeamName;
-            _coachCount.text = coach.EntrenadorMes.ToString();
-            var coachLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+            _coachCount.text = coach.RecordText;
+            var coachLogos = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
             var coachLogoDict = new Dictionary<string, Sprite>();
             foreach (var s in coachLogos) coachLogoDict[s.name] = s;
             if (coachLogoDict.TryGetValue(coach.TeamKeyword, out var coachSprite))
