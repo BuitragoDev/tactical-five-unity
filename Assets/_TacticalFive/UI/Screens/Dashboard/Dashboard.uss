@@ -793,7 +793,7 @@
     width: 68px;
     height: 68px;
     border-radius: 5px;
-    background-color: rgb(230, 227, 227);
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/mancha_blanca.png");
     background-size: cover;
     background-position: center;
     align-items: center;
@@ -1650,15 +1650,19 @@
 /* ── Resumen de simulación rápida ── */
 .fastsim-summary-box {
     max-height: 600px;
-    border-top-color: rgb(46, 204, 113);
+    border-top-color: rgb(42, 95, 201);
 }
 
 .fastsim-summary-title {
-    color: rgb(46, 204, 113);
+    color: rgb(255, 255, 255);
 }
 
 .fastsim-summary-btn {
     border-radius: 0;
+    flex-grow: 0;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 8px 40px;
 }
 
 /* ── Toast de logro desbloqueado ── */
