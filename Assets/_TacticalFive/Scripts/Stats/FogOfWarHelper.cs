@@ -13,17 +13,23 @@ public static class FogOfWarHelper
     public static string GetOvrDisplay(PlayerData p, int myTeamId, HashSet<int> scoutedIds)
     {
         if (CanViewRatings(p, myTeamId, scoutedIds))
-            return p.GetCalculatedAverage().ToString();
+            return ClampRating(p.GetCalculatedAverage()).ToString();
 
-        int med = p.GetCalculatedAverage();
+        int med = ClampRating(p.GetCalculatedAverage());
         return GetRatingBand(med, p.id);
     }
 
     public static string GetRatingBand(int med, int playerId)
     {
         int offset = (int)((uint)playerId * 2654435761U % BAND_WIDTH);
-        int low = med - offset;
-        int high = low + BAND_WIDTH;
+        int low = ClampRating(med - offset);
+        int high = ClampRating(low + BAND_WIDTH);
         return $"{low}-{high}";
+    }
+
+    static int ClampRating(int rating)
+    {
+        if (rating < 0) return 0;
+        return rating > 99 ? 99 : rating;
     }
 }

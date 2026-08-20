@@ -1,0 +1,203 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../Stats/Stats.uss" />
+    <Style src="Buscador.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
+
+    <ui:VisualElement name="BuscadorRoot" class="buscador-root">
+
+        <!-- ══ MAIN ══ -->
+        <ui:VisualElement class="buscador-main">
+
+            <!-- TOP HEADER -->
+
+            <!-- CONTENT -->
+            <ui:VisualElement name="BuscadorContent" class="buscador-content">
+
+                <!-- FILTERS -->
+                <ui:VisualElement name="BuscadorFilters" class="buscador-filters">
+
+                    <!-- Posición -->
+                    <ui:VisualElement class="buscador-filter-group">
+                        <ui:Label class="buscador-filter-label" text="POSICIÓN" />
+                        <ui:VisualElement class="buscador-filter-options">
+                            <ui:Button name="PosTodos" class="filter-btn filter-btn--active" text="TODOS" />
+                            <ui:Button name="PosPG" class="filter-btn" text="BASE" />
+                            <ui:Button name="PosSG" class="filter-btn" text="ESCOLTA" />
+                            <ui:Button name="PosSF" class="filter-btn" text="ALERO" />
+                            <ui:Button name="PosPF" class="filter-btn" text="ALA-PÍVOT" />
+                            <ui:Button name="PosC" class="filter-btn" text="PÍVOT" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Edad -->
+                    <ui:VisualElement class="buscador-filter-group">
+                        <ui:Label class="buscador-filter-label" text="EDAD" />
+                        <ui:VisualElement class="buscador-filter-options">
+                            <ui:Button name="AgeTodas" class="filter-btn filter-btn--active" text="TODAS" />
+                            <ui:Button name="Age20" class="filter-btn" text="≤ 20" />
+                            <ui:Button name="Age24" class="filter-btn" text="21-24" />
+                            <ui:Button name="Age29" class="filter-btn" text="25-29" />
+                            <ui:Button name="Age30" class="filter-btn" text="30+" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Equipo -->
+                    <ui:VisualElement class="buscador-filter-group">
+                        <ui:Label class="buscador-filter-label" text="EQUIPO" />
+                        <ui:VisualElement class="buscador-filter-options">
+                            <ui:VisualElement name="BuscadorTeamGrid" class="buscador-team-grid" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Media -->
+                    <ui:VisualElement class="buscador-filter-group">
+                        <ui:Label class="buscador-filter-label" text="MEDIA" />
+                        <ui:VisualElement class="buscador-filter-options">
+                            <ui:Button name="OvrTodas" class="filter-btn filter-btn--active" text="TODAS" />
+                            <ui:Button name="Ovr85" class="filter-btn" text="85+" />
+                            <ui:Button name="Ovr80" class="filter-btn" text="80+" />
+                            <ui:Button name="Ovr75" class="filter-btn" text="75+" />
+                            <ui:Button name="Ovr70" class="filter-btn" text="70+" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <!-- Extra -->
+                    <ui:VisualElement class="buscador-filter-group">
+                        <ui:Label class="buscador-filter-label" text="ESTADO" />
+                        <ui:VisualElement class="buscador-filter-options">
+                            <ui:Button name="ToggleOnlyFA" class="filter-btn" text="SOLO AGENTES LIBRES" />
+                            <ui:Button name="BtnClearFilters" class="filter-btn buscador-clear-btn" text="LIMPIAR FILTROS" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- RESULTS -->
+                <ui:VisualElement class="stats-panel">
+                    <ui:VisualElement class="stats-panel-header">
+                        <ui:Label name="PanelTitle" class="stats-title" text="BUSCADOR" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="stats-table-wrapper">
+                        <!-- Fixed header -->
+                        <ui:VisualElement name="BuscadorTableHeader" class="stats-header-row" />
+                        <ui:VisualElement name="BuscadorTableBody" class="stats-table" />
+                        <ui:VisualElement class="buscador-pagination">
+                            <ui:Button name="BtnFirstPage" class="buscador-page-btn buscador-page-jump-btn">
+                                <ui:Image name="FirstPageIcon1" class="buscador-page-icon" />
+                                <ui:Image name="FirstPageIcon2" class="buscador-page-icon" />
+                            </ui:Button>
+                            <ui:Button name="BtnPreviousPage" class="buscador-page-btn">
+                                <ui:Image name="PreviousPageIcon" class="buscador-page-icon" />
+                            </ui:Button>
+                            <ui:Label name="PageLabel" class="buscador-page-label" text="1 de 1" />
+                            <ui:Button name="BtnNextPage" class="buscador-page-btn">
+                                <ui:Image name="NextPageIcon" class="buscador-page-icon" />
+                            </ui:Button>
+                            <ui:Button name="BtnLastPage" class="buscador-page-btn buscador-page-jump-btn">
+                                <ui:Image name="LastPageIcon1" class="buscador-page-icon" />
+                                <ui:Image name="LastPageIcon2" class="buscador-page-icon" />
+                            </ui:Button>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+        <!-- ══ MODAL CONFIGURACIÓN ══ -->
+        <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
+            <ui:VisualElement name="ConfigModalBox" class="modal-box">
+                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+                <ui:VisualElement class="modal-body">
+                    <ui:VisualElement class="settings-section">
+                        <ui:Label class="settings-section-title" text="AUDIO" />
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label class="settings-label" text="Volumen General" />
+                            <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
+                                <ui:VisualElement class="custom-slider-track" />
+                                <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
+                                <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
+                            </ui:VisualElement>
+                            <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label class="settings-label" text="Música" />
+                            <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
+                                <ui:VisualElement class="custom-slider-track" />
+                                <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
+                                <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
+                            </ui:VisualElement>
+                            <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="settings-row">
+                            <ui:Label class="settings-label" text="Efectos" />
+                            <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
+                                <ui:VisualElement class="custom-slider-track" />
+                                <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
+                                <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                            </ui:VisualElement>
+                            <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-section">
+                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                        <ui:VisualElement class="settings-quality-row">
+                            <ui:Label class="settings-label" text="Calidad" />
+                            <ui:VisualElement class="settings-quality-options">
+                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-section">
+                        <ui:Label class="settings-section-title" text="JUEGO" />
+                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
+                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
+        <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
+            <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
+                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
+                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
+        <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
+            <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
+                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
+                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+</ui:UXML>

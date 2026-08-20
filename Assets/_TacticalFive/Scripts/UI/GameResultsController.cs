@@ -89,6 +89,7 @@ public class GameResultsController : UIScreenController
         _root.Q<Button>("SubmenuResultados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("SubmenuClasificacion")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Standings); });
         _root.Q<Button>("SubmenuInfoLiga")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.InfoLeague); });
+        _root.Q<Button>("SubmenuBuscador")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Buscador); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Palmares); });
         _root.Q<Button>("NavPlayoffs")?.RegisterCallback<ClickEvent>(_ =>
@@ -174,6 +175,7 @@ public class GameResultsController : UIScreenController
                 "NavStats", "NavRecords", "NavMarket", "NavFinances",
                 "NavSponsors", "NavTV", "NavCity", "NavManager", "NavMessages", "BtnReset",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
+                "SubmenuBuscador",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos",
                 "SubmenuVerCiudad", "SubmenuPabellon",

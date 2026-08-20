@@ -32,6 +32,14 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    public List<PlayerData> GetAllPlayers()
+    {
+        if (!EnsureDb()) return new List<PlayerData>();
+        return _db.Table<PlayerData>()
+                  .OrderByDescending(p => p.overall)
+                  .ToList();
+    }
+
     public Dictionary<int, long> GetTeamPayrolls()
     {
         if (!EnsureDb()) return new Dictionary<int, long>();

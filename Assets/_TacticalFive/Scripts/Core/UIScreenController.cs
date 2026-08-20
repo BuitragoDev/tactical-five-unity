@@ -171,6 +171,7 @@ public class UIScreenController : MonoBehaviour
         _root.Q<Button>("SubmenuResultados")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Results); });
         _root.Q<Button>("SubmenuClasificacion")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Standings); });
         _root.Q<Button>("SubmenuInfoLiga")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.InfoLeague); });
+        _root.Q<Button>("SubmenuBuscador")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Buscador); });
         _root.Q<Button>("NavPalmares")?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
