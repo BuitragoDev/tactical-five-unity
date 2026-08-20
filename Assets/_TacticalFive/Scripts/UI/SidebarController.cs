@@ -27,6 +27,7 @@ public static class SidebarController
         new() { screen = GameScreen.Results,     navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuResultados" },
         new() { screen = GameScreen.Standings,   navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuClasificacion" },
         new() { screen = GameScreen.InfoLeague,  navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuInfoLiga" },
+        new() { screen = GameScreen.Buscador,    navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuBuscador" },
         new() { screen = GameScreen.Palmares,    navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPalmares" },
         new() { screen = GameScreen.Records,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuRecords" },
         new() { screen = GameScreen.Premios,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPremios" },
@@ -39,7 +40,8 @@ public static class SidebarController
         new() { screen = GameScreen.Loans,       navName = "NavFinances",  submenuName = "FinanceSubmenu",  submenuItemName = "SubmenuPrestamos" },
         new() { screen = GameScreen.Sponsors,    navName = "NavFinances",  submenuName = "FinanceSubmenu",  submenuItemName = "SubmenuSponsors" },
         new() { screen = GameScreen.TV,          navName = "NavFinances",  submenuName = "FinanceSubmenu",  submenuItemName = "SubmenuTV" },
-        new() { screen = GameScreen.Arena,       navName = "NavArena" },
+        new() { screen = GameScreen.TheCity,    navName = "NavCity",     submenuName = "CitySubmenu",     submenuItemName = "SubmenuVerCiudad" },
+        new() { screen = GameScreen.Arena,       navName = "NavCity",     submenuName = "CitySubmenu",     submenuItemName = "SubmenuPabellon" },
         new() { screen = GameScreen.Manager,     navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuManager" },
         new() { screen = GameScreen.Logros,      navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuLogros" },
         new() { screen = GameScreen.Messages,    navName = "NavMessages" },
@@ -87,13 +89,15 @@ public static class SidebarController
             {
                 "NavDashboard", "NavRoster", "NavCalendar", "NavCompeticiones",
                 "NavPalmares", "NavPlayoffs", "NavStats",
-                "NavMarket", "NavFinances", "NavArena", "NavManager", "NavMessages",
+                "NavMarket", "NavFinances", "NavCity", "NavManager", "NavMessages",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados", "SubmenuDorsales",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
+                "SubmenuBuscador",
                 "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
+                "SubmenuVerCiudad", "SubmenuPabellon",
                 "SubmenuManager", "SubmenuLogros",
             };
             foreach (var name in cursorNames)
@@ -163,7 +167,7 @@ public static class SidebarController
             {"NavStatsIcon", "estadisticas"},
             {"NavMarketIcon", "mercado"},
             {"NavFinancesIcon", "finanzas"},
-            {"NavArenaIcon", "pabellon"},
+            {"NavCityIcon", "ciudad"},
             {"NavManagerIcon", "manager"},
             {"NavMessagesIcon", "mensajes"},
         };
