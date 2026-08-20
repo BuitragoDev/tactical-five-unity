@@ -17,7 +17,42 @@
 
             <!-- CITY CONTENT -->
             <ui:VisualElement class="thecity-content">
-
+                <ui:VisualElement class="city-hotspot city-hotspot--hospital">
+                    <ui:Button name="CityHospital" class="city-bubble" text="CENTRO MÉDICO" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--arena">
+                    <ui:Button name="CityArena" class="city-bubble" text="PABELLÓN" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--training">
+                    <ui:Button name="CityTraining" class="city-bubble" text="ENTRENAMIENTO" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--league">
+                    <ui:Button name="CityLeague" class="city-bubble" text="OFICINA DE LA LIGA" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--personnel">
+                    <ui:Button name="CityPersonnel" class="city-bubble" text="OFICINA DE PERSONAL" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--bank">
+                    <ui:Button name="CityBank" class="city-bubble" text="BANCO" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--newspaper">
+                    <ui:Button name="CityNewspaper" class="city-bubble" text="NOTICIAS" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--statistics">
+                    <ui:Button name="CityStatistics" class="city-bubble" text="ESTADÍSTICAS" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
+                <ui:VisualElement class="city-hotspot city-hotspot--museum">
+                    <ui:Button name="CityMuseum" class="city-bubble" text="MUSEO" />
+                    <ui:VisualElement class="city-bubble-tail" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
         </ui:VisualElement>
