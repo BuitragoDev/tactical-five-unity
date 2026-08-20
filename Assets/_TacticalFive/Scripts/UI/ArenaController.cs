@@ -13,6 +13,8 @@ using System.Linq;
     private VisualElement _renovationWarning;
     private Label _renovationWarningText;
     private VisualElement _upgradeCardsContainer;
+    private Texture2D _starTex;
+    private StyleBackground _starBg;
 
     // Renovation config (same as Django)
     private const int MAX_CAPACITY = 50000;
@@ -33,6 +35,10 @@ using System.Linq;
         _renovationWarning = _root.Q<VisualElement>("RenovationWarning");
         _renovationWarningText = _root.Q<Label>("RenovationWarningText");
         _upgradeCardsContainer = _root.Q<VisualElement>("UpgradeCardsContainer");
+
+        _starTex = Resources.Load<Texture2D>("Icons/estrella64px");
+        if (_starTex != null)
+            _starBg = new StyleBackground(_starTex);
     }
     protected override void LoadData()
     {
@@ -139,8 +145,10 @@ using System.Linq;
         // Stars
         for (int i = 1; i <= 5; i++)
         {
-            var star = new Label("⭐");
+            var star = new VisualElement();
             star.AddToClassList("arena-star");
+            if (_starTex != null)
+                star.style.backgroundImage = _starBg;
             if (i <= _myTeam.facilities)
                 star.AddToClassList("arena-star--active");
             else

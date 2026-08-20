@@ -16,12 +16,64 @@
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/TheCity/city_map.png");
+    -unity-background-scale-mode: scale-and-crop;
 }
 
 .thecity-content {
     flex-direction: column;
     flex-grow: 1;
-    padding: 24px 30px;
+    position: relative;
+    padding: 0;
     min-height: 0;
-    overflow: auto;
+    overflow: hidden;
 }
+
+/* ══ CITY HOTSPOTS ══ */
+
+.city-hotspot {
+    position: absolute;
+    width: 210px;
+    height: 58px;
+    align-items: center;
+}
+
+.city-bubble {
+    width: 210px;
+    min-height: 46px;
+    padding: 10px 14px;
+    color: rgb(232, 238, 248);
+    background-color: rgb(17, 24, 34);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 23px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+}
+
+.city-bubble-tail {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    bottom: 0px;
+    left: 98px;
+    background-color: rgb(17, 24, 34);
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-right-color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
+    rotate: 45deg;
+}
+
+/* Posiciones iniciales, referidas al edificio de la imagen de fondo. */
+.city-hotspot--hospital { left: 10%; top: 9%; }
+.city-hotspot--arena { left: 50%; top: 5%; }
+.city-hotspot--training { right: 8%; top: 12%; }
+.city-hotspot--league { left: 60%; top: 31%; }
+.city-hotspot--personnel { left: 18%; top: 37%; }
+.city-hotspot--bank { left: 39%; top: 48%; }
+.city-hotspot--newspaper { left: 7%; top: 59%; }
+.city-hotspot--statistics { left: 28%; top: 66%; }
+.city-hotspot--museum { left: 65%; top: 63%; }
