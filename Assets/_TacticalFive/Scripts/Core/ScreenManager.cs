@@ -48,6 +48,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument logrosDocument;
     [SerializeField] private UIDocument dorsalesDocument;
     [SerializeField] private UIDocument infoLeagueDocument;
+    [SerializeField] private UIDocument theCityDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -215,6 +216,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.InfoLeague:
                 ShowOnly(infoLeagueDocument);
                 break;
+            case GameScreen.TheCity:
+                ShowOnly(theCityDocument);
+                break;
         }
     }
 
@@ -263,6 +267,7 @@ public class ScreenManager : MonoBehaviour
         if (playerProfileDocument != null) playerProfileDocument.gameObject.SetActive(false);
         if (logrosDocument != null) logrosDocument.gameObject.SetActive(false);
         if (infoLeagueDocument != null) infoLeagueDocument.gameObject.SetActive(false);
+        if (theCityDocument != null) theCityDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

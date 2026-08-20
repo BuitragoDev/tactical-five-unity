@@ -110,10 +110,19 @@
                     <ui:Label text="TELEVISIÓN" class="nav-submenu-label"/>
                 </ui:Button>
             </ui:VisualElement>
-            <ui:Button name="NavArena" class="nav-item">
-                <ui:VisualElement name="NavArenaIcon" class="nav-icon"/>
-                <ui:Label text="PABELLÓN" class="nav-label"/>
+            <ui:Button name="NavCity" class="nav-item">
+                <ui:VisualElement name="NavCityIcon" class="nav-icon"/>
+                <ui:Label text="LA CIUDAD" class="nav-label"/>
+                <ui:Label text="▼" class="nav-arrow" />
             </ui:Button>
+            <ui:VisualElement name="CitySubmenu" class="nav-submenu">
+                <ui:Button name="SubmenuVerCiudad" class="nav-submenu-item">
+                    <ui:Label text="VER CIUDAD" class="nav-submenu-label"/>
+                </ui:Button>
+                <ui:Button name="SubmenuPabellon" class="nav-submenu-item">
+                    <ui:Label text="PABELLÓN" class="nav-submenu-label"/>
+                </ui:Button>
+            </ui:VisualElement>
             <ui:Button name="NavManager" class="nav-item">
                 <ui:VisualElement name="NavManagerIcon" class="nav-icon"/>
                 <ui:Label text="MANAGER" class="nav-label"/>

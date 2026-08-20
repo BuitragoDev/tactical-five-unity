@@ -149,8 +149,15 @@ public class GameResultsController : UIScreenController
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Sponsors); });
         _root.Q<Button>("NavTV")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.TV); });
-        _root.Q<Button>("NavArena")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Arena); });
+        _root.Q<Button>("NavCity")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            var submenu = _root.Q<VisualElement>("CitySubmenu");
+            if (submenu == null) return;
+            submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+        });
+        _root.Q<Button>("SubmenuVerCiudad")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CitySubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.TheCity); });
+        _root.Q<Button>("SubmenuPabellon")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CitySubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
         _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
@@ -165,10 +172,11 @@ public class GameResultsController : UIScreenController
                 "BtnDashboard", "NavDashboard", "NavRoster", "NavCalendar",
                 "NavCompeticiones", "NavPalmares", "NavPlayoffs",
                 "NavStats", "NavRecords", "NavMarket", "NavFinances",
-                "NavSponsors", "NavTV", "NavArena", "NavManager", "NavMessages", "BtnReset",
+                "NavSponsors", "NavTV", "NavCity", "NavManager", "NavMessages", "BtnReset",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
-                "SubmenuDecisiones", "SubmenuPrestamos"
+                "SubmenuDecisiones", "SubmenuPrestamos",
+                "SubmenuVerCiudad", "SubmenuPabellon",
             };
             foreach (var name in btnNames)
             {
