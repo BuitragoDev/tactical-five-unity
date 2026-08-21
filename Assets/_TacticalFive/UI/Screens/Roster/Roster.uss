@@ -185,6 +185,43 @@
     color: rgb(240, 190, 50);
 }
 
+.gleague-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(120, 160, 220);
+    letter-spacing: 1px;
+    margin-left: 8px;
+    width: 90px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    transition-property: color;
+    transition-duration: 0.15s;
+}
+
+.gleague-label:hover {
+    color: rgb(190, 220, 255);
+}
+
+.gleague-label--on {
+    color: rgb(190, 220, 255);
+    background-color: rgb(39, 84, 148);
+    border-radius: 3px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.gleague-label--on:hover {
+    color: rgb(255, 255, 255);
+}
+
+.gleague-label--disabled {
+    color: rgb(70, 78, 96);
+}
+
+.gleague-label--disabled:hover {
+    color: rgb(70, 78, 96);
+}
+
 .player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
@@ -195,6 +232,33 @@
 }
 .player-name--injured {
     color: rgb(192, 57, 43);
+}
+
+.player-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 6px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+.player-badge--tw {
+    background-color: rgb(91, 44, 111);
+    color: rgb(229, 174, 240);
+}
+.player-badge--gl {
+    background-color: rgb(39, 84, 148);
+    color: rgb(190, 220, 255);
+}
+.player-badge--ir {
+    background-color: rgb(120, 84, 24);
+    color: rgb(255, 214, 130);
+}
+.player-badge--les {
+    background-color: rgb(181, 42, 37);
+    color: rgb(255, 235, 235);
 }
 .player-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
@@ -233,7 +297,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(208, 216, 232);
-    width: 90px;
+    width: 60px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
@@ -256,17 +320,10 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
-.player-injury-icon {
-    width: 24px;
-    height: 24px;
-    margin-left: 8px;
-    flex-shrink: 0;
-    -unity-background-scale-mode: scale-to-fit;
-}
 
 /* ── RIGHT: detalle jugador ── */
 .player-detail {
-    width: 580px;
+    width: 460px;
     flex-shrink: 0;
     flex-direction: column;
     background-color: rgb(17, 24, 34);
@@ -523,6 +580,35 @@
     -unity-text-align: middle-center;
 }
 
+/* Stats G-League en el detalle del jugador */
+.detail-gleague {
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
+    border-bottom-width: 0;
+    border-left-width: 0;
+    border-right-width: 0;
+    flex-shrink: 0;
+}
+.detail-gleague-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(39, 84, 148);
+    border-radius: 3px;
+    padding: 2px 8px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+.detail-gleague-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(190, 220, 255);
+}
+
 /* Footer contrato / potencial */
 .detail-footer {
     flex-direction: row;
@@ -591,29 +677,10 @@
     -unity-text-align: middle-left;
 }
 
-/* Botón despedir */
-/* Fila de 3 botones: despedir | rescindir | renovar */
+/* Fila de 2 botones: rescindir | renovar */
 .detail-button-row {
     flex-direction: row;
     margin: 12px 16px 0 16px;
-}
-
-.btn-dismiss {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    flex-grow: 1;
-    padding: 18px 4px;
-    background-color: rgb(192, 57, 43);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 18px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    -unity-text-align: middle-center;
-    white-space: normal;
-    flex-shrink: 0;
-}
-.btn-dismiss:hover {
-    background-color: rgb(220, 80, 60);
 }
 
 /* Botón rescisión (buyout) */
@@ -944,6 +1011,12 @@
     color: rgb(248, 196, 64);
     border-color: rgb(248, 196, 64);
     background-color: rgba(248, 196, 64, 0.15);
+}
+
+.renew-toggle-btn--tw-active {
+    color: rgb(190, 220, 255);
+    border-color: rgb(39, 84, 148);
+    background-color: rgba(39, 84, 148, 0.25);
 }
 
 /* ── Spinner (increment/decrement buttons + label) ── */

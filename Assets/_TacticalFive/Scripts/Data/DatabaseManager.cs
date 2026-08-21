@@ -287,6 +287,9 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<GmAchievementData>();
         _db.CreateTable<HallOfFameData>();
         _db.CreateTable<RetiredNumberData>();
+        _db.CreateTable<GLeagueSeasonStat>();
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -766,6 +769,62 @@ public partial class DatabaseManager : MonoBehaviour
         catch (System.Exception ex)
         {
             Debug.LogError($"[DB] Migration error for taxpayer_mid_level: {ex.Message}");
+        }
+
+        // Add two_way_salary to league_settings if missing
+        try
+        {
+            var lsCols2 = _db.Query<ColumnInfo>("PRAGMA table_info(league_settings)");
+            if (!lsCols2.Any(c => c.name == "two_way_salary"))
+            {
+                _db.Execute("ALTER TABLE league_settings ADD COLUMN two_way_salary INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added two_way_salary to league_settings");
+            }
+            _db.Execute($"UPDATE league_settings SET two_way_salary = {TradeHelper.TWO_WAY_SALARY} WHERE two_way_salary = 0 OR two_way_salary IS NULL");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for two_way_salary: {ex.Message}");
+        }
+
+        // Add is_on_ir / is_two_way / g_league_assigned to players if missing
+        try
+        {
+            var pCols2 = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
+            if (!pCols2.Any(c => c.name == "is_on_ir"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN is_on_ir INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added is_on_ir to players");
+            }
+            if (!pCols2.Any(c => c.name == "is_two_way"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN is_two_way INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added is_two_way to players");
+            }
+            if (!pCols2.Any(c => c.name == "g_league_assigned"))
+            {
+                _db.Execute("ALTER TABLE players ADD COLUMN g_league_assigned INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added g_league_assigned to players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for is_on_ir/is_two_way/g_league_assigned: {ex.Message}");
+        }
+
+        // Add is_two_way to offers if missing
+        try
+        {
+            var oCols = _db.Query<ColumnInfo>("PRAGMA table_info(offers)");
+            if (!oCols.Any(c => c.name == "is_two_way"))
+            {
+                _db.Execute("ALTER TABLE offers ADD COLUMN is_two_way INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added is_two_way to offers");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for offers.is_two_way: {ex.Message}");
         }
     }
 

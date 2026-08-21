@@ -319,6 +319,15 @@ public static class DraftGenerator
             if (slotOwners.TryGetValue(pick % 30, out var ownerTeam) && ownerTeam != null)
                 drafTeamId = ownerTeam.id;
 
+            // Rookies de 2ª ronda: contrato two-way si el equipo tiene plazas libres
+            bool asTwoWay = false;
+            if (isRound2)
+            {
+                var twoWayCount = DatabaseManager.Instance.Db.Table<PlayerData>()
+                    .Count(p => p.team_id == drafTeamId && p.is_two_way == 1);
+                asTwoWay = twoWayCount < TradeHelper.MAX_TWO_WAY;
+            }
+
             var player = new PlayerData
             {
                 id = nextId++,
@@ -356,9 +365,10 @@ public static class DraftGenerator
                 injury_days = 0,
                 injury_type = "",
                 treated = 0,
-                salary = (int)salary,
-                contract_years = 4,
-                guaranteed_years = 4,
+                salary = asTwoWay ? (int)TradeHelper.TWO_WAY_SALARY : (int)salary,
+                contract_years = asTwoWay ? 2 : 4,
+                guaranteed_years = asTwoWay ? 2 : 4,
+                is_two_way = asTwoWay ? 1 : 0,
                 is_rookie = 1
             };
 

@@ -16,4 +16,5 @@ public class OfferData
     public int offer_type { get; set; } // 0 = renovación, 1 = fichaje agente libre
     public string status { get; set; } // "pending" | "accepted" | "rejected"
     public int processed { get; set; } // 0 = sin procesar, 1 = resultado mostrado
+    public int is_two_way { get; set; } // 1 = oferta de contrato two-way
 }

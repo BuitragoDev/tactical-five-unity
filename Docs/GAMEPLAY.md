@@ -198,6 +198,26 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - Toast de desbloqueo en el Dashboard (cola `_pendingToasts`, consumida en `Update`).
 - UI: `Logros` con tabs por categoría, grid de 6 columnas y contador `X/total`.
 
+## 16. IR / two-way contracts / G-League (Propuesta D)
+
+`GLeagueHelper` (`Scripts/Core/GLeagueHelper.cs`) + constantes en `TradeHelper` (`TWO_WAY_SALARY = 578_000`, `MAX_TWO_WAY = 2`, `IR_MIN_DAYS = 90`, `IsEligibleForTwoWay` = edad ≤23, `IsEligibleForIR` = `injury_days ≥ 90`).
+
+### IR (reserva de lesionados)
+- `players.is_on_ir` (0/1). Botón PONER/SACAR IR en `InjuredController` (`SetPlayerIR`). PONER IR exige elegibilidad y limpia `g_league_assigned`; SACAR IR exige plantilla < `MAX_ROSTER`.
+- **No cuenta en el tope:** `GetRosterCount(teamId)` excluye `is_on_ir = 1` (usado por firma de FAs, traspasos IA, `StartNewSeason`, `TrimRostersToMaxSize`, mercado).
+- **Recuperación:** en el pre-lote diario (hilo de fondo), al curarse (`injury_days ≤ 0`) se limpia `is_on_ir`. Si un equipo IA queda con >17 activos libera al peor; el usuario recibe el modal "PLANTILLA LLENA" (`ShowPendingIRReleaseModal`/`ReleasePlayerForIR`, buyout `TYPE_BUYOUT`). FastSim pausa ante este modal.
+
+### Contratos two-way
+- `players.is_two_way` / `offers.is_two_way` (0/1). Salario fijo `TWO_WAY_SALARY`, 2 años, máx 2 por equipo, solo edad ≤23. Cuenta dentro del tope de 17 (no añade plaza).
+- Oferta FA del usuario: toggle TWO-WAY en `MarketController` (limpia TO/PO, fija salario/años, salta validación de salary cap en `SendFAOffer`). `ProcessMaturedOffers` salta los checks de cap si `offer.is_two_way == 1` y copia `player.is_two_way` al firmar.
+- IA: `TrySignFreeAgent` firma como two-way cuando la plantilla está llena pero quedan plazas two-way; rookies de 2ª ronda (`DraftGenerator`) con `is_two_way = 1` si el equipo tiene <2.
+
+### G-League (liga de desarrollo ligera)
+- `players.g_league_assigned` (0/1). Botones ASIGNAR G / G-LEAGUE en `RosterController` (`GLeagueHelper.CanAssign` = sano, no IR, no ya asignado; `HasEnoughActive` exige ≥12 activos tras asignar). Al asignar, el jugador sale de la convocatoria activa (slot 2 inactivo).
+- **Desarrollo:** gancho semanal en `ProcessGameDayRoutine` (`ProcessGLeagueDevelopment`, cada 7 días): +1 en un atributo aleatorio hasta `potential`, recalculando `overall`.
+- **Stats procedimentales:** `gleague_season_stats` acumuladas con `AddGLeagueGame`; se muestran en el detalle del jugador de Roster.
+- **Exclusión de la NBA:** jugadores G-League no juegan ni se alinean — filtro `g_league_assigned == 0` en `GetActivePlayers` (simulación), `AutoFixInjuredLineup`, `QuintetoController` (no seleccionables a slots 0/1, badge "G"), `MatchDayController` (previa) y All-Star. Al ir a FA (expiración de contrato, opción rechazada, trim) se limpian `is_two_way`/`is_on_ir`/`g_league_assigned`.
+
 ---
 
 ## Cross-mechanic interaction diagram

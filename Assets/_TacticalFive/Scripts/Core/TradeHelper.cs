@@ -12,6 +12,19 @@ public static class TradeHelper
     public const long T_MLE = 5_700_000;
     public const long MIN_SALARY = 2_000_000;
     public const int MAX_ROSTER = 17;
+    public const long TWO_WAY_SALARY = 578_000;
+    public const int MAX_TWO_WAY = 2;
+    public const int IR_MIN_DAYS = 60;
+
+    public static bool IsEligibleForTwoWay(PlayerData p)
+    {
+        return p != null && p.age <= 23;
+    }
+
+    public static bool IsEligibleForIR(PlayerData p)
+    {
+        return p != null && p.injury_days >= IR_MIN_DAYS;
+    }
 
     static void ValidateTradeSide(
         long salaryOut, long salaryIn, int playersInCount,

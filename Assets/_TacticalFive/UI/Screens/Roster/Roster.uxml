@@ -28,6 +28,10 @@
                     <ui:Label name="SummaryBudget" class="summary-value summary-value--gold" text="" />
                     <ui:Label class="summary-label" text="MASA SALARIAL" />
                 </ui:VisualElement>
+                <ui:VisualElement class="summary-item">
+                    <ui:Label name="SummaryTwoWay" class="summary-value" text="Two-way: 0/2" />
+                    <ui:Label class="summary-label" text="CONTRATOS TWO-WAY" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
             <!-- CONTENT -->
@@ -108,6 +112,12 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
+                            <!-- Stats G-League (solo si el jugador tiene minutos en la liga de desarrollo) -->
+                            <ui:VisualElement name="GLeagueStats" class="detail-gleague" style="display: none;">
+                                <ui:Label class="detail-gleague-label" text="G-LEAGUE" />
+                                <ui:Label name="GLeagueStatsText" class="detail-gleague-text" text="" />
+                            </ui:VisualElement>
+
                             <!-- Footer contrato / rol / potencial -->
                             <ui:VisualElement class="detail-footer">
                                 <ui:VisualElement class="flex-col">
@@ -127,10 +137,8 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
-                            <!-- Botones de acción en 3 columnas -->
+                            <!-- Botones de acción en 2 columnas -->
                             <ui:VisualElement class="detail-button-row">
-                                <ui:Button name="BtnDismiss" class="btn-dismiss"
-                                           text="DESPEDIR JUGADOR" />
                                 <ui:Button name="BtnBuyout" class="btn-buyout"
                                            text="RESCINDIR CONTRATO" />
                                 <ui:Button name="BtnRenew" class="btn-renew"
@@ -173,6 +181,7 @@
                     <ui:VisualElement class="renew-options-toggles">
                         <ui:Button name="RenewTeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
                         <ui:Button name="RenewPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
+                        <ui:Button name="RenewTwoWayToggle" class="renew-toggle-btn" text="TWO-WAY" />
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Label name="RenewText2" class="renew-modal-text" text="" />
@@ -217,21 +226,6 @@
                 <ui:Label name="RenewResultTitle" class="renew-modal-title" text="" />
                 <ui:Label name="RenewResultText1" class="renew-modal-text" text="" />
                 <ui:Label name="RenewResultText2" class="renew-modal-text" text="" />
-            </ui:VisualElement>
-        </ui:VisualElement>
-
-        <!-- ══ MODAL CONFIRMAR DESPIDO ══ -->
-        <ui:VisualElement name="DismissOverlay" class="dismiss-modal-overlay">
-            <ui:VisualElement name="DismissBox" class="dismiss-modal-box">
-                <ui:Label class="dismiss-modal-title" text="DESPEDIR JUGADOR" />
-                <ui:Label name="DismissText1" class="dismiss-modal-text" text="" />
-                <ui:Label name="DismissText2" class="dismiss-modal-text" text="" />
-                <ui:Label class="dismiss-modal-text dismiss-modal-text--warning"
-                          text="El jugador quedará sin equipo como agente libre." />
-                <ui:VisualElement class="dismiss-modal-buttons">
-                    <ui:Button name="BtnDismissCancel"  class="btn-modal-cancel"  text="CANCELAR" />
-                    <ui:Button name="BtnDismissConfirm" class="btn-modal-confirm" text="CONFIRMAR DESPIDO" />
-                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

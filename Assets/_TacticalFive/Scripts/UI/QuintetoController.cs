@@ -136,7 +136,8 @@ using System.Linq;
         var existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
         if (existing.Count == 0)
         {
-            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players);
+            var excluded = new HashSet<int>(_players.Where(p => p.g_league_assigned == 1).Select(p => p.id));
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players, excluded);
         }
         else
         {
@@ -314,6 +315,7 @@ using System.Linq;
             {
                 if (_selectedPlayer != null)
                 {
+                    if (_selectedPlayer.g_league_assigned == 1 && targetSlot <= 1) return;
                     _selectedSlot?.RemoveFromClassList("slot--selected");
                     DatabaseManager.Instance.SetPlayerSlot(_selectedPlayer.id, _myTeam.id, targetSlot, targetSlotIndex);
                     _selectedPlayer = null;
@@ -339,6 +341,8 @@ using System.Linq;
             }
             else
             {
+                if ((_selectedPlayer.g_league_assigned == 1 && targetSlot <= 1)
+                    || (tgtPlayer.g_league_assigned == 1 && targetSlot <= 1)) return;
                 _selectedSlot?.RemoveFromClassList("slot--selected");
                 var srcLineup = _lineup.FirstOrDefault(l => l.player_id == _selectedPlayer.id);
                 if (srcLineup != null)
@@ -428,7 +432,7 @@ using System.Linq;
         {
             PlayClick();
             var injuredIds = new HashSet<int>(_players
-                .Where(p => p.injury_days > 0)
+                .Where(p => p.injury_days > 0 || p.g_league_assigned == 1)
                 .Select(p => p.id));
             DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players, injuredIds);
             _selectedPlayer = null;
@@ -600,6 +604,15 @@ using System.Linq;
         else
             fisicoLbl.AddToClassList("player-card-fisico--low");
         meta.Add(fisicoLbl);
+
+        if (player.g_league_assigned == 1)
+        {
+            var glBadge = new Label();
+            glBadge.AddToClassList("player-card-gl-badge");
+            glBadge.text = "G-LEAGUE";
+            glBadge.tooltip = "Asignado a la G-League";
+            meta.Add(glBadge);
+        }
 
         info.Add(meta);
         card.Add(info);

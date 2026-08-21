@@ -220,6 +220,12 @@
                         <ui:Button name="FAPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
                     </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:VisualElement name="FAFormRowTwoWay" class="renew-form-row renew-options-row" style="display: none;">
+                    <ui:Label class="renew-form-label" text="CONTRATO" />
+                    <ui:VisualElement class="renew-options-toggles">
+                        <ui:Button name="FATwoWayToggle" class="renew-toggle-btn" text="TWO-WAY" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
                 <ui:Label name="FAText2" class="renew-modal-text" text="" />
                 <ui:Label name="FAWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
                 <ui:Label name="FAMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />

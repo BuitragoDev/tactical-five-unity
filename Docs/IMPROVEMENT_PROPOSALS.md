@@ -56,7 +56,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 - **Objetivos de temporada del propietario** con recompensas/cese (ya hay factor
   "objetivo" en asistencia y despido por presupuesto → expandir).
 - ✅ **Rest / load management** — **hecho**: `TF_LoadMgmt_Enabled` (toggle en Quinteto) + back-to-back → modal para descansar hasta 2 jugadores cansados en `DashboardController`.
-- **IR (injury reserve) / G-League / two-way contracts** — **pendiente** (`NEXT_PROPOSALS.md` D).
+- **IR (injury reserve) / G-League / two-way contracts** — **hecho** (`NEXT_PROPOSALS.md` D): reserva de lesionados (`is_on_ir`, no cuenta en tope, modal plantilla llena), contratos two-way (`is_two_way`, salario fijo, máx 2, edad ≤23) y G-League ligera (`g_league_assigned`, desarrollo +1/7 días, stats procedimentales).
 
 ## Frente 3 — Simulación & AI (realismo)
 
@@ -109,7 +109,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 | **Hecho** | AI de GM más lista + analytics avanzados + fog-of-war | 3 |
 | **Hecho** | Async DB (B8): pre-lote, StartNewSeason y AI trades en hilo de fondo (WAL + conexión ambient) | 5 |
 | **Hecho** | Logros, picks protegidos/swap, load management, HOF, dorsales, quintos | 1/2/4 |
-| **Pendiente** | G-League / IR / contratos two-way (`NEXT_PROPOSALS.md` D) | 2 |
+| **Hecho** | G-League / IR / contratos two-way (`NEXT_PROPOSALS.md` D) | 2 |
 
 ---
 
@@ -140,4 +140,4 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | **Load management (descanso en back-to-back)** | **Hecho** — `TF_LoadMgmt_Enabled` (Quinteto) + modal de descanso en Dashboard |
 | **Opciones de contrato TO/PO** | **Hecho** — toggles en renovaciones/FA + `guaranteed_years` + `FormatContractYears` |
 | **Re-firma de FA propio (Bird rights)** | **Hecho** — `last_team_id`/`IsOwnRecentFA` + modal de re-firma en NewSeason |
-| **G-League / IR / contratos two-way** | **Pendiente** — `NEXT_PROPOSALS.md` D |
+| **G-League / IR / contratos two-way** | **Hecho** — `NEXT_PROPOSALS.md` D (IR, two-way, G-League ligera) |

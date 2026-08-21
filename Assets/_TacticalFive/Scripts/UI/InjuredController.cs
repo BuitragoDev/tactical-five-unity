@@ -271,6 +271,7 @@ using System.Linq;
         var hPos = new Label(); hPos.AddToClassList("injured-col-pos"); hPos.text = "POS"; headerRow.Add(hPos);
         var hInjury = new Label(); hInjury.AddToClassList("injured-col-injury"); hInjury.text = "LESI\u00d3N"; headerRow.Add(hInjury);
         var hDays = new Label(); hDays.AddToClassList("injured-col-days"); hDays.text = "D\u00cdAS"; headerRow.Add(hDays);
+        var hIr = new Label(); hIr.AddToClassList("injured-col-ir"); hIr.text = "RESERVA DE LESIONADOS"; headerRow.Add(hIr);
         var hAct = new Label(); hAct.AddToClassList("injured-col-action"); hAct.text = "TRATAR"; headerRow.Add(hAct);
         _injuredTable.Add(headerRow);
 
@@ -316,6 +317,49 @@ using System.Linq;
             daysLbl.text = $"{player.injury_days} d\u00eda{(player.injury_days != 1 ? "s" : "")}";
             row.Add(daysLbl);
 
+            bool onIR = player.is_on_ir == 1;
+            var irBtn = new Button();
+            irBtn.AddToClassList("btn-ir");
+            irBtn.text = onIR ? "SACAR DE RESERVA" : "PONER EN RESERVA";
+            if (onIR)
+            {
+                int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
+                if (rosterCount >= TradeHelper.MAX_ROSTER)
+                {
+                    irBtn.AddToClassList("btn-ir--disabled");
+                    irBtn.SetEnabled(false);
+                    irBtn.text = "LLENA";
+                }
+                else
+                {
+                    irBtn.userData = player;
+                    irBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetPlayerIR(player, false); });
+                }
+            }
+            else if (!TradeHelper.IsEligibleForIR(player))
+            {
+                irBtn.AddToClassList("btn-ir--disabled");
+                irBtn.SetEnabled(false);
+                irBtn.text = "NO APTO";
+            }
+            else
+            {
+                irBtn.userData = player;
+                irBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetPlayerIR(player, true); });
+            }
+            if (irBtn.enabledSelf)
+            {
+                if (CursorManager.Instance != null)
+                {
+                    irBtn.RegisterCallback<MouseEnterEvent>(_ =>
+                        CursorManager.Instance.SetHandCursor());
+                    irBtn.RegisterCallback<MouseLeaveEvent>(_ =>
+                        CursorManager.Instance.SetDefaultCursor());
+                }
+            }
+            if (onIR) irBtn.AddToClassList("btn-ir--on");
+            row.Add(irBtn);
+
             bool alreadyTreated = player.treated == 1;
             var treatBtn = new Button();
             treatBtn.AddToClassList("btn-treat");
@@ -341,6 +385,36 @@ using System.Linq;
 
             _injuredTable.Add(row);
         }
+    }
+
+    // ── IR (RESERVA DE LESIONADOS) ──
+
+    void SetPlayerIR(PlayerData player, bool onIR)
+    {
+        if (onIR)
+        {
+            if (!TradeHelper.IsEligibleForIR(player)) return;
+            player.g_league_assigned = 0;
+        }
+        else
+        {
+            if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER) return;
+        }
+        DatabaseManager.Instance.SetOnIR(player, onIR);
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            title = "RESERVA DE LESIONADOS",
+            body = $"{player.first_name} {player.last_name} ha sido {(onIR ? "colocado en la reserva de lesionados (IR)" : "reactivado de la reserva de lesionados (IR)")}.",
+            game_day = _season?.current_game_day ?? 0,
+            game_date = DatabaseManager.Instance.GetCurrentDateString(_manager.id),
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_sent = DatabaseManager.Instance.GetCurrentDateString(_manager.id),
+            is_read = 0
+        });
+        ReloadData();
+        Refresh();
     }
 
     // ── TREATMENT ──

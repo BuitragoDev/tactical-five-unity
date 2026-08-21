@@ -1,0 +1,196 @@
+/* ══════════════════════════════════════════
+   G-LEAGUE — GLeague.uss
+   (La tabla reutiliza los estilos de Stats.uss)
+   ══════════════════════════════════════════ */
+
+.gleague-root {
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(15, 17, 23);
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+.gleague-main {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.gleague-content {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 16px 24px;
+}
+
+/* ══ RESUMEN ══ */
+
+.gleague-summary {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+    padding: 8px 4px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
+}
+
+.gleague-summary-card {
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 24px;
+    margin-right: 16px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.gleague-summary-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    color: rgb(212, 160, 23);
+    -unity-text-align: middle-center;
+}
+
+.gleague-summary-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: rgb(85, 102, 119);
+    -unity-text-align: middle-center;
+}
+
+.gleague-summary-note {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    margin-left: 8px;
+}
+
+.gleague-summary-note-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(122, 138, 170);
+    white-space: normal;
+}
+
+/* ══ PANELES (2 columnas lado a lado) ══ */
+
+.gleague-tables-row {
+    flex-direction: row;
+    width: 100%;
+    flex-grow: 1;
+    min-height: 0;
+    align-items: stretch;
+}
+
+.gleague-tables-row .stats-panel {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    margin-bottom: 0;
+    margin-right: 20px;
+}
+
+#AssignedPanel {
+    flex-basis: 100px;
+}
+
+#EligiblePanel {
+    margin-right: 0;
+}
+
+/* Columnas más compactas para que quepan las dos tablas lado a lado */
+.gleague-root .col-stat {
+    width: 54px;
+    font-size: 16px;
+}
+
+.gleague-root .col-pos {
+    width: 40px;
+}
+
+.gleague-root .gleague-player {
+    width: 340px;
+}
+
+.gleague-root .gleague-action {
+    width: 84px;
+}
+
+/* Filas más compactas para que quepan 17 jugadores en pantalla */
+.gleague-root .stats-row {
+    padding: 0 16px;
+    min-height: 42px;
+}
+
+.gleague-root .stats-header-row {
+    padding: 6px 16px;
+}
+
+/* ══ AVATAR EN LA COLUMNA JUGADOR ══ */
+
+.gleague-player {
+    flex-direction: row;
+    align-items: center;
+    width: 300px;
+    flex-shrink: 0;
+    -unity-text-align: middle-left;
+}
+
+.gleague-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-color: rgb(42, 51, 71);
+}
+
+.gleague-player-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-left;
+}
+
+/* ══ BOTÓN DE ACCIÓN (RECUPERAR / ASIGNAR) ══ */
+
+.gleague-action {
+    width: 110px;
+    flex-shrink: 0;
+}
+
+.gleague-action-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    background-color: rgb(22, 26, 36);
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-center;
+}
+
+.gleague-action-btn:hover {
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+
+.gleague-action-btn--on {
+    border-color: rgb(39, 84, 148);
+    background-color: rgb(39, 84, 148);
+    color: rgb(190, 220, 255);
+}
+
+.gleague-action-btn--on:hover {
+    border-color: rgb(190, 220, 255);
+    color: rgb(255, 255, 255);
+}

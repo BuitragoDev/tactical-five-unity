@@ -63,6 +63,7 @@ public partial class DatabaseManager
             taxpayer_mid_level = TradeHelper.T_MLE,
             bi_annual = 5_100_000,
             minimum_salary = TradeHelper.MIN_SALARY,
+            two_way_salary = TradeHelper.TWO_WAY_SALARY,
             is_active = 1
         });
     }

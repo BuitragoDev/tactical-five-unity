@@ -66,6 +66,7 @@ Host the entire game: boot/loading, menus, and all 41 management screens as iner
 | EndSeasonDocument | EndSeasonController |
 | NewSeasonDocument | NewSeasonController |
 | QuintosDocument | QuintosController |
+| GLeagueDocument | GLeagueController |
 
 ### Serialization notes
 - `ScreenManager` has **41 serialized `UIDocument` fields** (1:1 with the 41 `GameScreen` enum values; all have cases in `GoTo` — no dead enum values).

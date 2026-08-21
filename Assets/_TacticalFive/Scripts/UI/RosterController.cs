@@ -45,16 +45,9 @@ using System.Linq;
     private Label _statBlk;
     private Label _detailContract;
     private Label _detailPotential;
-    private Button _btnDismiss;
+    private VisualElement _detailGLeague;
+    private Label _gleagueStatsText;
     private Button _btnBuyout;
-
-    // Modal despido
-    private VisualElement _dismissOverlay;
-    private VisualElement _dismissBox;
-    private Label _dismissText1;
-    private Label _dismissText2;
-    private Button _btnDismissCancel;
-    private Button _btnDismissConfirm;
 
     // Modal buyout
     private VisualElement _buyoutOverlay;
@@ -123,8 +116,10 @@ using System.Linq;
     private long _renewOfferSalary;
     private Button _renewTeamOption;
     private Button _renewPlayerOption;
+    private Button _renewTwoWayToggle;
     private bool _teamOptionActive;
     private bool _playerOptionActive;
+    private bool _renewTwoWayActive;
     private List<PlayerData> _players;
     private PlayerData _selectedPlayer;
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -183,16 +178,9 @@ using System.Linq;
         _detailContract = _root.Q<Label>("DetailContract");
         _detailContract.enableRichText = true;
         _detailPotential = _root.Q<Label>("DetailPotential");
-        _btnDismiss = _root.Q<Button>("BtnDismiss");
+        _detailGLeague = _root.Q<VisualElement>("GLeagueStats");
+        _gleagueStatsText = _root.Q<Label>("GLeagueStatsText");
         _btnBuyout = _root.Q<Button>("BtnBuyout");
-
-        // Modal despido
-        _dismissOverlay = _root.Q<VisualElement>("DismissOverlay");
-        _dismissBox = _root.Q<VisualElement>("DismissBox");
-        _dismissText1 = _root.Q<Label>("DismissText1");
-        _dismissText2 = _root.Q<Label>("DismissText2");
-        _btnDismissCancel = _root.Q<Button>("BtnDismissCancel");
-        _btnDismissConfirm = _root.Q<Button>("BtnDismissConfirm");
 
         // Modal buyout
         _buyoutOverlay = _root.Q<VisualElement>("BuyoutOverlay");
@@ -223,6 +211,7 @@ using System.Linq;
         _renewYearsInc = _root.Q<Label>("RenewYearsInc");
         _renewTeamOption = _root.Q<Button>("RenewTeamOption");
         _renewPlayerOption = _root.Q<Button>("RenewPlayerOption");
+        _renewTwoWayToggle = _root.Q<Button>("RenewTwoWayToggle");
         if (_renewPlayerOption != null) _renewPlayerOption.style.marginLeft = 12;
         _renewPendingText = _root.Q<Label>("RenewPendingText");
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
@@ -285,14 +274,6 @@ using System.Linq;
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
-        _btnDismiss?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenDismissModal(); });
-        _btnDismissCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseDismissModal(); });
-        _btnDismissConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmDismiss(); });
-        _dismissOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _dismissOverlay)
-            { PlayClick(); CloseDismissModal(); }
-        });
         _btnBuyout?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenBuyoutModal(); });
         _btnBuyoutStretch?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmBuyout(); });
         _btnBuyoutCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseBuyoutModal(); });
@@ -312,6 +293,7 @@ using System.Linq;
         SetupRenewLongPress(_renewYearsInc, () => StepRenewYears(1));
         _renewTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewOption("team"); });
         _renewPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewOption("player"); });
+        _renewTwoWayToggle?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleRenewTwoWay(); });
         _detailLinkTrajectory?.RegisterCallback<ClickEvent>(_ =>
         {
             if (_selectedPlayer == null) return;
@@ -341,8 +323,6 @@ using System.Linq;
 
         _detailEmpty.style.display = DisplayStyle.Flex;
         _detailScroll.style.display = DisplayStyle.None;
-        _dismissOverlay.style.display = DisplayStyle.None;
-        _dismissBox.style.display = DisplayStyle.None;
         CloseRenewModal();
         CloseRenewBlockModal();
         CloseRenewCooldownModal();
@@ -415,15 +395,34 @@ using System.Linq;
 
     void RefreshSummary()
     {
-        _summaryPlayers.text = _players.Count.ToString();
+        int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
+        _summaryPlayers.text = $"{rosterCount}/{TradeHelper.MAX_ROSTER}";
         int avgOverall = _players.Count > 0
             ? (int)_players.Average(p => p.GetCalculatedAverage()) : 0;
         _summaryOverall.text = avgOverall.ToString();
         long totalPayroll = _players.Sum(p => p.salary);
         _summaryBudget.text = $"${totalPayroll / 1_000_000}M";
+
+        // Contador two-way bajo el resumen
+        int twCount = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id);
+        var twLabel = _root.Q<Label>("SummaryTwoWay");
+        if (twLabel != null)
+            twLabel.text = $"Two-way: {twCount}/{TradeHelper.MAX_TWO_WAY}";
     }
 
     // ── ROSTER LIST ──────────────────────────────────────
+
+    void ReloadRosterList()
+    {
+        _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        BuildRosterList();
+        RefreshSummary();
+        if (_selectedPlayer != null)
+        {
+            var still = _players.FirstOrDefault(p => p.id == _selectedPlayer.id);
+            if (still != null) ShowPlayerDetail(still);
+        }
+    }
 
     void BuildRosterList()
     {
@@ -551,6 +550,34 @@ using System.Linq;
         UpdateRoleIcon(roleIcon, player.role);
 
         row.Add(nameLbl);
+        if (player.injury_days > 0)
+        {
+            var lesBadge = new Label("LES");
+            lesBadge.AddToClassList("player-badge");
+            lesBadge.AddToClassList("player-badge--les");
+            row.Add(lesBadge);
+        }
+        if (player.is_two_way == 1)
+        {
+            var twBadge = new Label("TW");
+            twBadge.AddToClassList("player-badge");
+            twBadge.AddToClassList("player-badge--tw");
+            row.Add(twBadge);
+        }
+        if (player.g_league_assigned == 1)
+        {
+            var glBadge = new Label("GL");
+            glBadge.AddToClassList("player-badge");
+            glBadge.AddToClassList("player-badge--gl");
+            row.Add(glBadge);
+        }
+        if (player.is_on_ir == 1)
+        {
+            var irBadge = new Label("IR");
+            irBadge.AddToClassList("player-badge");
+            irBadge.AddToClassList("player-badge--ir");
+            row.Add(irBadge);
+        }
         row.Add(ovrLbl);
         row.Add(moraleDot);
         row.Add(moLabel);
@@ -582,17 +609,42 @@ using System.Linq;
             CursorManager.Instance.RegisterHandCursor(tradeBlockLbl);
         row.Add(tradeBlockLbl);
 
-        // Columna lesión (imagen o hueco vacío para mantener alineación)
-        var injIcon = new VisualElement();
-        injIcon.AddToClassList("player-injury-icon");
-        if (player.injury_days > 0)
+        // Columna G-League: ASIGNAR / RECUPERAR
+        var glLbl = new Label();
+        glLbl.AddToClassList("gleague-label");
+        bool canAssign = player.g_league_assigned == 0
+            && player.injury_days == 0
+            && player.is_on_ir == 0
+            && GLeagueHelper.HasEnoughActive(_players);
+        if (player.g_league_assigned == 1)
         {
-            var tex = Resources.Load<Texture2D>($"Icons/lesion");
-            if (tex != null)
-                injIcon.style.backgroundImage = new StyleBackground(tex);
-            injIcon.tooltip = $"{player.injury_type} — {player.injury_days} días de baja";
+            glLbl.text = "G-LEAGUE";
+            glLbl.AddToClassList("gleague-label--on");
+            glLbl.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                DatabaseManager.Instance.SetGLeagueAssignment(player, false);
+                ReloadRosterList();
+            });
         }
-        row.Add(injIcon);
+        else if (canAssign)
+        {
+            glLbl.text = "ASIGNAR G";
+            glLbl.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                DatabaseManager.Instance.SetGLeagueAssignment(player, true);
+                ReloadRosterList();
+            });
+        }
+        else
+        {
+            glLbl.text = "—";
+            glLbl.AddToClassList("gleague-label--disabled");
+        }
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(glLbl);
+        row.Add(glLbl);
 
         row.userData = player;
 
@@ -678,6 +730,25 @@ using System.Linq;
         _statAst.text = s.avgAst.ToString("F1");
         _statStl.text = s.avgStl.ToString("F1");
         _statBlk.text = s.avgBlk.ToString("F1");
+
+        // Stats G-League (si tiene minutos en la liga de desarrollo esta temporada)
+        if (_detailGLeague != null && _gleagueStatsText != null)
+        {
+            var glStats = _season != null
+                ? DatabaseManager.Instance.GetGLeagueStats(p.id, _season.id)
+                : null;
+            if (glStats != null && glStats.games > 0)
+            {
+                _detailGLeague.style.display = DisplayStyle.Flex;
+                _gleagueStatsText.text =
+                    $"{glStats.games} partidos · {glStats.points / (float)glStats.games:F1} pts · " +
+                    $"{glStats.rebounds / (float)glStats.games:F1} reb · {glStats.assists / (float)glStats.games:F1} ast";
+            }
+            else
+            {
+                _detailGLeague.style.display = DisplayStyle.None;
+            }
+        }
 
         // Contrato y potencial
         int guaranteed = p.guaranteed_years;
@@ -782,7 +853,32 @@ using System.Linq;
             _playerOptionActive = !_playerOptionActive;
             if (_playerOptionActive) _teamOptionActive = false;
         }
+        if (_teamOptionActive || _playerOptionActive)
+            _renewTwoWayActive = false;
         RefreshRenewOptionToggles();
+        RefreshRenewSpinners();
+    }
+
+    void ToggleRenewTwoWay()
+    {
+        _renewTwoWayActive = !_renewTwoWayActive;
+        if (_renewTwoWayActive)
+        {
+            _teamOptionActive = false;
+            _playerOptionActive = false;
+            _renewSalary = TradeHelper.TWO_WAY_SALARY;
+            _renewYears = 2;
+        }
+        else
+        {
+            long autoSalary = CalculateAutoSalary(_selectedPlayer.salary);
+            _renewSalary = autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary;
+            _renewSalary = (long)(Mathf.Round(_renewSalary / 100_000f) * 100_000);
+            _renewYears = CalculateAutoYears(_selectedPlayer.age);
+        }
+        RefreshRenewOptionToggles();
+        RefreshRenewSpinners();
+        UpdateCapWarning();
     }
 
     void RefreshRenewOptionToggles()
@@ -798,6 +894,12 @@ using System.Linq;
             _renewPlayerOption.RemoveFromClassList("renew-toggle-btn--player-active");
             if (_playerOptionActive)
                 _renewPlayerOption.AddToClassList("renew-toggle-btn--player-active");
+        }
+        if (_renewTwoWayToggle != null)
+        {
+            _renewTwoWayToggle.RemoveFromClassList("renew-toggle-btn--tw-active");
+            if (_renewTwoWayActive)
+                _renewTwoWayToggle.AddToClassList("renew-toggle-btn--tw-active");
         }
     }
 
@@ -849,6 +951,17 @@ using System.Linq;
         _renewYears = CalculateAutoYears(_selectedPlayer.age);
         _teamOptionActive = false;
         _playerOptionActive = false;
+        _renewTwoWayActive = false;
+
+        // Contrato two-way: solo jugadores jóvenes (≤23) y si quedan plazas
+        bool renewTwoWayEligible = TradeHelper.IsEligibleForTwoWay(_selectedPlayer)
+            && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY;
+        if (_renewTwoWayToggle != null)
+        {
+            _renewTwoWayToggle.style.display = renewTwoWayEligible ? DisplayStyle.Flex : DisplayStyle.None;
+            _renewTwoWayToggle.SetEnabled(renewTwoWayEligible);
+        }
+
         RefreshRenewOptionToggles();
         RefreshRenewSpinners();
 
@@ -1096,8 +1209,13 @@ using System.Linq;
         if (_renewYears < 1) _renewYears = 1;
         else if (_renewYears > 5) _renewYears = 5;
 
-        // Validación al enviar: si el salario excede el máximo legal, se ajusta y se informa
-        if (_renewSalary > _renewMaxSalary)
+        // Contrato two-way: salario fijo y duración de 2 años, sin límites de cap
+        if (_renewTwoWayActive)
+        {
+            _renewSalary = TradeHelper.TWO_WAY_SALARY;
+            _renewYears = 2;
+        }
+        else if (_renewSalary > _renewMaxSalary)
         {
             _renewSalary = _renewMaxSalary;
             RefreshRenewSpinners();
@@ -1116,19 +1234,20 @@ using System.Linq;
 
         // Guardar oferta en BD
         int currentDay = _season?.current_game_day ?? 0;
-bool hasTeamOpt = _teamOptionActive;
-            bool hasPlayerOpt = _playerOptionActive;
-            int guarYears = (hasTeamOpt || hasPlayerOpt) ? System.Math.Max(0, _renewOfferYears - 1) : _renewOfferYears;
-            var offer = new OfferData
-            {
-                manager_id = _manager.id,
-                player_id = _selectedPlayer.id,
-                offer_salary = _renewOfferSalary,
-                offer_years = _renewOfferYears,
-                guaranteed_years = guarYears,
-                has_team_option = hasTeamOpt ? 1 : 0,
-                has_player_option = hasPlayerOpt ? 1 : 0,
-                day_sent = currentDay,
+        bool hasTeamOpt = _teamOptionActive && !_renewTwoWayActive;
+        bool hasPlayerOpt = _playerOptionActive && !_renewTwoWayActive;
+        int guarYears = (hasTeamOpt || hasPlayerOpt) ? System.Math.Max(0, _renewOfferYears - 1) : _renewOfferYears;
+        var offer = new OfferData
+        {
+            manager_id = _manager.id,
+            player_id = _selectedPlayer.id,
+            offer_salary = _renewOfferSalary,
+            offer_years = _renewOfferYears,
+            guaranteed_years = guarYears,
+            has_team_option = hasTeamOpt ? 1 : 0,
+            has_player_option = hasPlayerOpt ? 1 : 0,
+            is_two_way = _renewTwoWayActive ? 1 : 0,
+            day_sent = currentDay,
             status = "pending",
             processed = 0
         };
@@ -1225,10 +1344,10 @@ bool hasTeamOpt = _teamOptionActive;
         if (_renewYearsValue != null)
             _renewYearsValue.text = $"{_renewYears} año{(_renewYears > 1 ? "s" : "")}";
 
-        ToggleRenewSpinDisabled(_renewSalaryDec, _renewSalary <= 1_000_000);
-        ToggleRenewSpinDisabled(_renewSalaryInc, _renewSalary >= _renewMaxSalary);
-        ToggleRenewSpinDisabled(_renewYearsDec, _renewYears <= 1);
-        ToggleRenewSpinDisabled(_renewYearsInc, _renewYears >= 5);
+        ToggleRenewSpinDisabled(_renewSalaryDec, _renewTwoWayActive || _renewSalary <= 1_000_000);
+        ToggleRenewSpinDisabled(_renewSalaryInc, _renewTwoWayActive || _renewSalary >= _renewMaxSalary);
+        ToggleRenewSpinDisabled(_renewYearsDec, _renewTwoWayActive || _renewYears <= 1);
+        ToggleRenewSpinDisabled(_renewYearsInc, _renewTwoWayActive || _renewYears >= 5);
     }
 
     void ToggleRenewSpinDisabled(Label el, bool disabled)
@@ -1370,91 +1489,7 @@ bool hasTeamOpt = _teamOptionActive;
             iconElem.style.backgroundImage = null;
     }
 
-    // ── MODAL DESPIDO ─────────────────────────────────────
-
-    void OpenDismissModal()
-    {
-        if (_selectedPlayer == null) return;
-
-        long penalty = (long)(_selectedPlayer.salary * _selectedPlayer.contract_years * 0.5f);
-
-        _dismissText1.text = $"Estás a punto de despedir a {_selectedPlayer.first_name} {_selectedPlayer.last_name}.";
-        _dismissText2.text = $"Penalización por despido: ${penalty / 1_000_000}M (50% salario × años restantes).";
-
-        _dismissOverlay.style.display = DisplayStyle.Flex;
-        _dismissBox.style.display = DisplayStyle.Flex;
-    }
-
-    void CloseDismissModal()
-    {
-        _dismissOverlay.style.display = DisplayStyle.None;
-        _dismissBox.style.display = DisplayStyle.None;
-    }
-
-    void ConfirmDismiss()
-    {
-        if (_selectedPlayer == null) return;
-
-        long penalty = (long)(_selectedPlayer.salary * _selectedPlayer.contract_years * 0.5f);
-        int currentDay = _season?.current_game_day ?? 0;
-        string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
-        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-        // Mover jugador a agentes libres (team_id = 0) y perder Bird rights
-        _selectedPlayer.team_id = 0;
-        _selectedPlayer.last_team_id = 0;
-        _selectedPlayer.seasons_with_team = 0;
-        DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
-
-        // Descontar penalización del presupuesto
-        _myTeam.budget -= penalty;
-        DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
-
-        // Registrar gasto en finanzas
-        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-        {
-            team_id = _myTeam.id,
-            season_id = _season?.id ?? 0,
-            record_type = FinanceRecord.TYPE_DISMISSAL,
-            game_day = currentDay,
-            amount = penalty
-        });
-
-        long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
-        long netBalance = remainingSalary - penalty;
-
-        // Crear mensaje de despido
-        DatabaseManager.Instance.AddMessage(new MessageData
-        {
-            manager_id = _manager.id,
-            sender_type = 0,
-            sender_id = 0,
-            title = "Jugador despedido",
-            body = $"El club ha decidido rescindir el contrato de {playerName} con efecto inmediato.\n\n" +
-                   $"La operación supone una penalización económica de {penalty:N0} €, que ha sido cargada a las cuentas del club.\n\n" +
-                   $"La salida del jugador libera una plaza en la plantilla y su salario dejará de computar a partir de esta fecha.\n\n" +
-                   $"Coste de rescisión: {penalty:N0} €\n" +
-                   $"Ahorro salarial restante: {remainingSalary:N0} €\n" +
-                   $"Balance neto de la operación: {netBalance:N0} €",
-            game_day = currentDay,
-            game_date = now,
-            created_at = now,
-            date_sent = now,
-            is_read = 0
-        });
-
-        Debug.Log($"[Roster] {playerName} despedido. Penalización: ${penalty}.");
-
-        CloseDismissModal();
-
-        // Recargar datos y refrescar
-        _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
-        _selectedPlayer = null;
-        Refresh();
-    }
-
-    // ── RESCISIÓN (BUYOUT) ────────────────────────────────
+    // ── RESCISIÓN (BUYOUT) ──────────────────────────────────
 
     void OpenBuyoutModal()
     {
