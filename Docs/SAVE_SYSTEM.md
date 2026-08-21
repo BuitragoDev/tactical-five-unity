@@ -83,6 +83,7 @@ All under `Application.persistentDataPath`:
 | Personnel/economy | employees, scouts, loans, finance_records, team_settings |
 | Media/history | messages, monthly_awards, season_records, all_star_records, coach_rankings, player_season_stats |
 | Legacy | gm_achievements, retired_numbers, schema_migrations, preseason_games |
+| G-League (Propuesta D) | gleague_season_stats |
 
 ## 7. Risks & known issues
 
@@ -92,6 +93,7 @@ All under `Application.persistentDataPath`:
 - **[F] Transactions** now wrap `StartNewSeason` and the daily/day rollover batches; most single-mutation writes remain untransactional (a crash mid-flow can still leave partial state, e.g. a game played but no stats).
 - **Photo persistence:** rookie photos written to `persistentDataPath/PlayerPhotos/{slot}/` (not in Resources) — deleted with the save; the `Resources/PlayerPhotos/` set (602 photos) is static game content.
 - **`first_apron_hard_capped`, `pick_id`, `morale`, `fisico`, `role`, `photo`** are migrated columns — old saves get defaults, so behavior differences on legacy saves are expected.
+- **Propuesta D migrations (additive columns, default 0):** `players.is_on_ir`, `players.is_two_way`, `players.g_league_assigned`, `offers.is_two_way`, `league_settings.two_way_salary` (backfilled with `TradeHelper.TWO_WAY_SALARY`). New table `gleague_season_stats` created in `CreateTables` (+ `IX_GLeagueStats_PlayerId/SeasonId`).
 
 ## 8. Open questions
 

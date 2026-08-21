@@ -47,6 +47,9 @@ public class PlayerData
     public int finals_mvps { get; set; }
     public int finals_played { get; set; }
     public int season_mvps { get; set; }
+    public int is_on_ir { get; set; }            // 1 = en la reserva de lesionados (no cuenta en el tope de plantilla)
+    public int is_two_way { get; set; }          // 1 = contrato two-way (salario reducido, máx 2/equipo)
+    public int g_league_assigned { get; set; }   // 1 = asignado a la liga de desarrollo (no juega en NBA)
     public PlayerRole role { get; set; } = PlayerRole.UltimoRecurso;
     public string photo { get; set; }
     public int number { get; set; } // dorsal

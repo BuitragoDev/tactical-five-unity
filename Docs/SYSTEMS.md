@@ -153,6 +153,14 @@
 - **FogOfWarHelper:** hides OVR (band), role, and attributes for un-scouted players; scouted ids set by completed scouts (`CarteraController`); consumers: `CarteraController`, `PlayerProfileController`.
 - **MatchupPreview:** forecast ratings + win probability + favorites + stars; consumer: `MatchDayController`.
 
+## S19. IR / two-way / G-League (Propuesta D)
+
+- **Files:** `GLeagueHelper.cs` (reglas puras), `TradeHelper.cs` (`TWO_WAY_SALARY`, `MAX_TWO_WAY`, `IR_MIN_DAYS`, `IsEligibleForTwoWay`, `IsEligibleForIR`), `InjuredController.cs` (IR), `MarketController.cs`/`DashboardController.cs` (two-way), `RosterController.cs`/`QuintetoController.cs` (G-League UI), `DatabaseManager.Players.cs` (`GetRosterCount`, `GetTwoWayCount`, `SetOnIR`, `AddGLeagueGame`, `GetGLeagueStats`, `GetTeamGLeagueStats`).
+- **IR:** `is_on_ir` (no cuenta en tope); botón en Lesionados; recuperación en pre-lote diario con liberación IA / modal plantilla llena para el usuario; FastSim pausa.
+- **Two-way:** sub-tipo de contrato (`is_two_way`), salario fijo, máx 2/equipo, edad ≤23; toggle en oferta FA, firma IA y rookies 2ª ronda; `ProcessMaturedOffers` salta checks de cap.
+- **G-League:** `g_league_assigned`; desarrollo +1 atributo/7 días cap `potential` (`ProcessGLeagueDevelopment` en el paso 2 del día); stats procedimentales en `gleague_season_stats`; exclusión de NBA en `GetActivePlayers`, `QuintetoController`, `MatchDayController` y All-Star.
+- **Invitante:** `GetRosterCount` (excluye IR) sustituyó a los contajes de `GetPlayersByTeam().Count` en los sitios de tope de plantilla (Market, Dashboard, NewSeason, Records).
+
 ---
 
 ## Open questions

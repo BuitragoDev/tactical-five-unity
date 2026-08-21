@@ -178,7 +178,17 @@
 }
 
 .injured-col-action {
-    width: 100px;
+    width: 140px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-center;
+}
+
+.injured-col-ir {
+    width: 210px;
+    margin-right: 15px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 1px;
@@ -246,7 +256,7 @@
     -unity-text-transform: upper;
     padding: 6px 14px;
     -unity-text-align: middle-center;
-    width: 100px;
+    width: 140px;
     border-radius: 4px;
 }
 .btn-treat:hover {
@@ -254,6 +264,36 @@
 }
 
 .btn-treat--disabled {
+    background-color: rgb(42, 51, 71);
+    color: rgb(90, 103, 128);
+}
+
+.btn-ir {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgb(39, 84, 148);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 16px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    padding: 6px 14px;
+    -unity-text-align: middle-center;
+    width: 210px;
+    border-radius: 4px;
+    margin-right: 10px;
+}
+.btn-ir:hover {
+    background-color: rgb(31, 68, 122);
+}
+
+.btn-ir--on {
+    background-color: rgb(39, 174, 96);
+}
+.btn-ir--on:hover {
+    background-color: rgb(30, 140, 78);
+}
+
+.btn-ir--disabled {
     background-color: rgb(42, 51, 71);
     color: rgb(90, 103, 128);
 }

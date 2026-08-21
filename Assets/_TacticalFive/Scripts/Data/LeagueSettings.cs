@@ -13,5 +13,6 @@ public class LeagueSettingsData
     public long taxpayer_mid_level { get; set; }
     public long bi_annual { get; set; }
     public long minimum_salary { get; set; }
+    public long two_way_salary { get; set; }
     public int is_active { get; set; }
 }

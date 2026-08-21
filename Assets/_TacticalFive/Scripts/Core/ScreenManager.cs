@@ -50,6 +50,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument infoLeagueDocument;
     [SerializeField] private UIDocument theCityDocument;
     [SerializeField] private UIDocument buscadorDocument;
+    [SerializeField] private UIDocument gleagueDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -75,6 +76,20 @@ public class ScreenManager : MonoBehaviour
                 if (n.Contains("loading"))
                 {
                     loadingDocument = doc;
+                    break;
+                }
+            }
+        }
+
+        if (gleagueDocument == null)
+        {
+            var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            foreach (var doc in allDocs)
+            {
+                string n = doc.gameObject.name.ToLower();
+                if (n.Contains("gleague"))
+                {
+                    gleagueDocument = doc;
                     break;
                 }
             }
@@ -223,6 +238,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Buscador:
                 ShowOnly(buscadorDocument);
                 break;
+            case GameScreen.GLeague:
+                ShowOnly(gleagueDocument);
+                break;
         }
     }
 
@@ -273,6 +291,7 @@ public class ScreenManager : MonoBehaviour
         if (infoLeagueDocument != null) infoLeagueDocument.gameObject.SetActive(false);
         if (theCityDocument != null) theCityDocument.gameObject.SetActive(false);
         if (buscadorDocument != null) buscadorDocument.gameObject.SetActive(false);
+        if (gleagueDocument != null) gleagueDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

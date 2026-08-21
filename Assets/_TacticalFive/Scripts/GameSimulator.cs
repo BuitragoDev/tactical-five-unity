@@ -1037,10 +1037,10 @@ public static class GameSimulator
         ("Rotura fibrilar grave", 21, 42, 5),
 
         // Graves
-        ("Rotura parcial de ligamentos", 28, 49, 4),
+        ("Rotura parcial de ligamentos", 28, 65, 4),
         ("Rotura de ligamentos", 42, 90, 3),
         ("Rotura de menisco", 35, 70, 3),
-        ("Fractura de mano", 30, 60, 2),
+        ("Fractura de mano", 30, 66, 2),
         ("Fractura de muñeca", 45, 75, 2),
         ("Rotura del tendón de Aquiles", 120, 240, 1),
         ("Rotura del ligamento cruzado anterior", 180, 300, 1),

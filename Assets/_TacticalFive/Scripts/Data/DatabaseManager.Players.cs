@@ -32,6 +32,30 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    /// <summary>Jugadores que cuentan para el tope de plantilla (excluye IR).</summary>
+    public int GetRosterCount(int teamId)
+    {
+        return _db.Table<PlayerData>()
+                  .Where(p => p.team_id == teamId && p.is_on_ir == 0)
+                  .Count();
+    }
+
+    /// <summary>Jugadores con contrato two-way en un equipo.</summary>
+    public int GetTwoWayCount(int teamId)
+    {
+        return _db.Table<PlayerData>()
+                  .Where(p => p.team_id == teamId && p.is_two_way == 1)
+                  .Count();
+    }
+
+    /// <summary>Activa/desactiva la reserva de lesionados (IR) del jugador.</summary>
+    public void SetOnIR(PlayerData player, bool onIR)
+    {
+        if (player == null) return;
+        player.is_on_ir = onIR ? 1 : 0;
+        UpdatePlayer(player);
+    }
+
     public List<PlayerData> GetAllPlayers()
     {
         if (!EnsureDb()) return new List<PlayerData>();
@@ -159,6 +183,77 @@ public partial class DatabaseManager
             if (player != null) result.Add(player);
         }
         return result;
+    }
+
+    // ── G-LEAGUE ─────────────────────────────────────────
+
+    /// <summary>Asigna o recupera a un jugador de la G-League. Al asignar,
+    /// lo saca de la convocatoria activa (slot 0/1) moviéndolo a inactivos.</summary>
+    public void SetGLeagueAssignment(PlayerData player, bool assigned)
+    {
+        if (player == null) return;
+        player.g_league_assigned = assigned ? 1 : 0;
+        UpdatePlayer(player);
+
+        if (assigned)
+        {
+            var cur = GetPlayerLineupSlot(player.id);
+            if (cur != null && cur.slot <= 1)
+            {
+                int nextInact = GetInactive(player.team_id)
+                    .Select(l => l.slot_index).DefaultIfEmpty(-1).Max() + 1;
+                SetPlayerSlot(player.id, player.team_id, 2, nextInact);
+            }
+        }
+    }
+
+    public GLeagueSeasonStat GetGLeagueStats(int playerId, int seasonId)
+    {
+        return _db.Table<GLeagueSeasonStat>()
+                  .Where(s => s.player_id == playerId && s.season_id == seasonId)
+                  .FirstOrDefault();
+    }
+
+    public void AddGLeagueGame(int playerId, int seasonId, int points, int rebounds, int assists,
+                               int steals, int blocks, int turnovers, int rating)
+    {
+        var stat = GetGLeagueStats(playerId, seasonId);
+        if (stat == null)
+        {
+            _db.Insert(new GLeagueSeasonStat
+            {
+                player_id = playerId,
+                season_id = seasonId,
+                games = 2,
+                points = points,
+                rebounds = rebounds,
+                assists = assists,
+                steals = steals,
+                blocks = blocks,
+                turnovers = turnovers,
+                rating = rating
+            });
+        }
+        else
+        {
+            stat.games += 2;
+            stat.points += points;
+            stat.rebounds += rebounds;
+            stat.assists += assists;
+            stat.steals += steals;
+            stat.blocks += blocks;
+            stat.turnovers += turnovers;
+            stat.rating += rating;
+            _db.Update(stat);
+        }
+    }
+
+    public List<GLeagueSeasonStat> GetTeamGLeagueStats(int teamId, int seasonId)
+    {
+        var playerIds = GetPlayersByTeam(teamId).Select(p => p.id).ToList();
+        return _db.Table<GLeagueSeasonStat>()
+                  .Where(s => s.season_id == seasonId && playerIds.Contains(s.player_id))
+                  .ToList();
     }
 
 }

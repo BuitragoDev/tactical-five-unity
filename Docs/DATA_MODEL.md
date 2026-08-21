@@ -33,6 +33,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 ### players (`PlayerData`)
 `id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated), `number` (dorsal), `on_trade_block` (0/1, marcado desde Roster → jugador TRANSFERIBLE en Market). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
 - **Honores de carrera (migrados, default 0):** `rings` (campeonatos ganados), `finals_mvps` (MVP de las Finales), `finals_played` (finales disputadas), `season_mvps` (MVP de temporada regular). Se incrementan en `SaveSeasonEndRecords` (ver GAMEPLAY §11). Se muestran como contadores en el header de `PlayerProfile` y `Trajectory` (CAMPEONATOS / FINALES / MVP / MVP FINALS).
+- **IR / two-way / G-League (migrados, default 0):** `is_on_ir` (1 = en reserva de lesionados, no cuenta en el tope de plantilla), `is_two_way` (1 = contrato two-way, salario `TWO_WAY_SALARY`, máx 2/equipo, edad ≤23), `g_league_assigned` (1 = asignado a la liga de desarrollo, no juega en NBA). Ver GAMEPLAY §14.
 - `GetCalculatedAverage()` currently returns integer `sum / 11`, so it truncates rather than rounds. Training, progression and migrations recalculate/cap `overall`; mentoring currently changes attributes without that recalculation. “Always recomputed” is an intended invariant, not a guaranteed current fact [F].
 
 ### managers (`ManagerData`)
@@ -47,11 +48,14 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 ### player_game_stats (`PlayerGameStats`)
 `id`, `game_id`, `player_id`, `team_id`, `minutes`, `points`, `fgm, fga, fg3m, fg3a, ftm, fta`, `oreb, dreb, rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `pf`, `rating`, `double_double`, `triple_double`. Indexes on game/player/team (`IX_PlayerGameStats_GameId/PlayerId/TeamId`).
 
+### gleague_season_stats (`GLeagueSeasonStat`)
+`id` (autoinc), `player_id`, `season_id`, `games`, `points`, `rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `rating`. Acumulados semanales procedimentales de la liga de desarrollo (ver GAMEPLAY §14); se acumulan con `AddGLeagueGame` (upsert). Índices `IX_GLeagueStats_PlayerId`/`IX_GLeagueStats_SeasonId`.
+
 ### game_attendance (`GameAttendanceData`)
 `game_id` (PK, no autoinc), `attendance`, `ticket_price`, `revenue`. Saved by `ProcessGameFinances`; read by results/venue UI.
 
 ### league_settings (`LeagueSettingsData`, `LeagueSettings.cs`)
-`id`, `salary_cap`, `luxury_tax`, `apron`, `repeater_apron`, `mid_level`, `taxpayer_mid_level` (nueva columna), `bi_annual`, `minimum_salary`, `is_active`. Seeded from `TradeHelper` constants + `bi_annual = 5_100_000`. **`apron`/`repeater_apron` are not the same as `TradeHelper.FIRST_APRON/SECOND_APRON` — most UI code uses `TradeHelper` constants, not this table** [D].
+`id`, `salary_cap`, `luxury_tax`, `apron`, `repeater_apron`, `mid_level`, `taxpayer_mid_level` (nueva columna), `bi_annual`, `minimum_salary`, `two_way_salary` (nueva columna, `TradeHelper.TWO_WAY_SALARY`), `is_active`. Seeded from `TradeHelper` constants + `bi_annual = 5_100_000`. **`apron`/`repeater_apron` are not the same as `TradeHelper.FIRST_APRON/SECOND_APRON` — most UI code uses `TradeHelper` constants, not this table** [D].
 
 ### season_records (`SeasonRecord`)
 `id`, `season_id`, `champion_id`, `finalist_id`, `finals_result`, `east/west/div1..6_champion_id`, `finals_mvp_id`, `finals_mvp_rating`, `season_mvp_id/rating/games`, `rookie_of_year_id/rating/games`, `best_defender_id`, `sixth_man_id`, `most_improved_id`, `all_star_pg/sg/sf/pf/c_id`, `first_team_pg..c`, `second_team_pg..c`.
@@ -63,7 +67,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.
 
 ### offers (`OfferData`)
-`id`, `manager_id`, `player_id`, `offer_salary`, `offer_years`, `guaranteed_years`, `has_team_option` (0/1), `has_player_option` (0/1), `day_sent`, `offer_type` (0=renewal, 1=FA signing), `status` ("pending"/"accepted"/"rejected"), `processed` (0/1). Matured when `processed=0 && currentDay >= day_sent + 7`. When an option is set, `guaranteed_years = max(0, offer_years − 1)`.
+`id`, `manager_id`, `player_id`, `offer_salary`, `offer_years`, `guaranteed_years`, `has_team_option` (0/1), `has_player_option` (0/1), `is_two_way` (0/1, nueva columna), `day_sent`, `offer_type` (0=renewal, 1=FA signing), `status` ("pending"/"accepted"/"rejected"), `processed` (0/1). Matured when `processed=0 && currentDay >= day_sent + 7`. When an option is set, `guaranteed_years = max(0, offer_years − 1)`. When `is_two_way=1`, the offer bypasses salary-cap legality checks at maturity and sets `player.is_two_way` on signing.
 
 ### trade_offers (`TradeOfferData`)
 `id`, `manager_id`, `day_sent`, `team_id_from`, `team_id_to`, `player_ids_out`, `player_ids_in`, `pick_ids_out`, `pick_ids_in` (CSV text, migrated), `processed`, `status`, `trade_type`. Helpers: `GetWantedPlayerIds()`, `GetOfferedPlayerIds()`, `GetWantedPickIds()`, `GetOfferedPickIds()`.
@@ -189,6 +193,11 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 | `players` | `season_mvps` (MVP de temporada regular) | 0 |
 | `players` | `number` (dorsal), `on_trade_block` | 0 |
 | `league_settings` | `taxpayer_mid_level` | 0 |
+| `league_settings` | `two_way_salary` (salario two-way) | `TradeHelper.TWO_WAY_SALARY` |
+| `players` | `is_on_ir` (reserva de lesionados) | 0 |
+| `players` | `is_two_way` (contrato two-way) | 0 |
+| `players` | `g_league_assigned` (asignado a G-League) | 0 |
+| `offers` | `is_two_way` (oferta two-way) | 0 |
 
 **Data migrations (registradas en `schema_migrations`, viven con el slot):**
 - `overall_recalc`: recompute `overall` for all players as mean of 11 attrs (cap potential).

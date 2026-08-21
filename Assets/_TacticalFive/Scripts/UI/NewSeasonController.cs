@@ -327,6 +327,9 @@ public class NewSeasonController : UIScreenController
                 p.guaranteed_years = 0;
                 if (p.last_team_id == 0) p.last_team_id = _selectedTeamId;
                 p.team_id = 0;
+                p.is_two_way = 0;
+                p.is_on_ir = 0;
+                p.g_league_assigned = 0;
                 _reSignCandidates.Add(p);
             }
             p.has_player_option = 0;
@@ -363,6 +366,9 @@ public class NewSeasonController : UIScreenController
                 p.guaranteed_years = 0;
                 p.has_team_option = 0;
                 p.has_player_option = 0;
+                p.is_two_way = 0;
+                p.is_on_ir = 0;
+                p.g_league_assigned = 0;
                 if (oldTeamId != 0 && p.last_team_id == 0)
                     p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                 p.team_id = 0; // agente libre
@@ -375,7 +381,7 @@ public class NewSeasonController : UIScreenController
         }
 
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
-        if (roster.Count > TradeHelper.MAX_ROSTER)
+        if (DatabaseManager.Instance.GetRosterCount(_selectedTeamId) > TradeHelper.MAX_ROSTER)
         {
             OpenRosterModal(roster);
             return;
@@ -442,7 +448,7 @@ public class NewSeasonController : UIScreenController
     void OpenRosterModal(List<PlayerData> roster)
     {
         _rosterPlayers = roster;
-        _rosterActiveCount = roster.Count;
+        _rosterActiveCount = DatabaseManager.Instance.GetRosterCount(_selectedTeamId);
 
         _rosterOverlay.Clear();
         _rosterOverlay.style.display = DisplayStyle.Flex;
@@ -633,7 +639,7 @@ public class NewSeasonController : UIScreenController
         btn.SetEnabled(false);
         btn.AddToClassList("ns-roster-btn--dismissed");
 
-        _rosterActiveCount = _rosterPlayers.Count(p => p.team_id == _selectedTeamId);
+        _rosterActiveCount = DatabaseManager.Instance.GetRosterCount(_selectedTeamId);
         _rosterCountLabel.text = $"Jugadores: {_rosterActiveCount} / {TradeHelper.MAX_ROSTER}";
 
         if (_rosterActiveCount <= TradeHelper.MAX_ROSTER)

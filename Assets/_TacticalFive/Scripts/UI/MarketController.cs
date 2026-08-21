@@ -50,6 +50,10 @@ using System.Linq;
     private bool _faOfferSent;
     private bool _faTeamOptionActive;
     private bool _faPlayerOptionActive;
+    private bool _faTwoWayActive;
+    private VisualElement _faFormRowTwoWay;
+    private Button _faTwoWayToggle;
+    private Label _faFormRowSalaryLabel;
     private VisualElement _tradeSuccessOverlay;
     private VisualElement _tradeSuccessBox;
     private VisualElement _tradeSuccessIcon;
@@ -153,6 +157,9 @@ using System.Linq;
         _faTeamOption = _root.Q<Button>("FATeamOption");
         _faPlayerOption = _root.Q<Button>("FAPlayerOption");
         if (_faPlayerOption != null) _faPlayerOption.style.marginLeft = 12;
+        _faFormRowTwoWay = _root.Q<VisualElement>("FAFormRowTwoWay");
+        _faTwoWayToggle = _root.Q<Button>("FATwoWayToggle");
+        _faFormRowSalaryLabel = _root.Q<Label>("FAFormRowSalary")?.Q<Label>(className: "renew-form-label");
         _tradeSuccessOverlay = _root.Q<VisualElement>("TradeSuccessOverlay");
         _tradeSuccessBox = _root.Q<VisualElement>("TradeSuccessBox");
         _tradeSuccessIcon = _root.Q<VisualElement>("TradeSuccessIcon");
@@ -206,6 +213,7 @@ using System.Linq;
         SetupFALongPress(_faYearsInc, () => StepFAYears(1));
         _faTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("team"); });
         _faPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("player"); });
+        _faTwoWayToggle?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFATwoWay(); });
     }
     protected override void Refresh()
     {
@@ -430,8 +438,8 @@ using System.Linq;
             .Where(p => p.injury_days == 0)
             .OrderByDescending(p => p.GetCalculatedAverage())
             .ToList();
-        _myTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Count;
-        _otherTotalRosterCount = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id).Count;
+        _myTotalRosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
+        _otherTotalRosterCount = DatabaseManager.Instance.GetRosterCount(_selectedTeam.id);
 
         _ownSATFAs = DatabaseManager.Instance.GetFreeAgents()
             .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id))
@@ -1589,11 +1597,12 @@ using System.Linq;
         if (player == null) return;
 
         var myPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
         int pendingCount = DatabaseManager.Instance.GetPendingFAOfferCount(_manager.id);
-        if (myPlayers.Count + pendingCount >= TradeHelper.MAX_ROSTER)
+        if (rosterCount + pendingCount >= TradeHelper.MAX_ROSTER)
         {
             if (_faRosterFullText != null)
-                _faRosterFullText.text = $"No puedes fichar más jugadores. Tu plantilla ({myPlayers.Count}) + ofertas pendientes ({pendingCount}) alcanzaría el máximo de {TradeHelper.MAX_ROSTER}.";
+                _faRosterFullText.text = $"No puedes fichar más jugadores. Tu plantilla ({rosterCount}) + ofertas pendientes ({pendingCount}) alcanzaría el máximo de {TradeHelper.MAX_ROSTER}.";
             if (_faRosterFullIcon != null)
             {
                 var xTex = Resources.Load<Texture2D>("Icons/boton-x-64px");
@@ -1608,7 +1617,14 @@ using System.Linq;
         _faOfferSent = false;
         _faTeamOptionActive = false;
         _faPlayerOptionActive = false;
+        _faTwoWayActive = false;
         RefreshFAOptionToggles();
+
+        // Contrato two-way: solo jugadores jóvenes (≤23) y si quedan plazas
+        bool twoWayEligible = TradeHelper.IsEligibleForTwoWay(player)
+            && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY;
+        if (_faFormRowTwoWay != null)
+            _faFormRowTwoWay.style.display = twoWayEligible ? DisplayStyle.Flex : DisplayStyle.None;
 
         // Calcular límites salariales
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
@@ -1664,30 +1680,39 @@ using System.Linq;
     {
         if (_pendingFAPlayer == null || _faOfferSent) return;
 
-        if (_faSalary < 1_000_000) _faSalary = 1_000_000;
-        if (_faYears < 1) _faYears = 1;
-        else if (_faYears > 5) _faYears = 5;
-        RefreshFASpinners();
-
-        // Validación al enviar: si el salario excede el máximo legal, se ajusta y se informa
-        if (_faSalary > _faMaxSalary)
+        if (_faTwoWayActive)
         {
-            _faSalary = _faMaxSalary;
+            _faSalary = TradeHelper.TWO_WAY_SALARY;
+            _faYears = 2;
             RefreshFASpinners();
-            if (_faWarningText != null)
-            {
-                _faWarningText.text = $"Oferta ajustada al máximo legal: ${_faMaxSalary:N0}.";
-                _faWarningText.style.display = DisplayStyle.Flex;
-            }
         }
-        if (_faMaxSalary < 1_000_000)
+        else
         {
-            if (_faWarningText != null)
+            if (_faSalary < 1_000_000) _faSalary = 1_000_000;
+            if (_faYears < 1) _faYears = 1;
+            else if (_faYears > 5) _faYears = 5;
+            RefreshFASpinners();
+
+            // Validación al enviar: si el salario excede el máximo legal, se ajusta y se informa
+            if (_faSalary > _faMaxSalary)
             {
-                _faWarningText.text = "No puedes ofrecer un contrato a este jugador (sin espacio salarial ni excepciones disponibles).";
-                _faWarningText.style.display = DisplayStyle.Flex;
+                _faSalary = _faMaxSalary;
+                RefreshFASpinners();
+                if (_faWarningText != null)
+                {
+                    _faWarningText.text = $"Oferta ajustada al máximo legal: ${_faMaxSalary:N0}.";
+                    _faWarningText.style.display = DisplayStyle.Flex;
+                }
             }
-            return;
+            if (_faMaxSalary < 1_000_000)
+            {
+                if (_faWarningText != null)
+                {
+                    _faWarningText.text = "No puedes ofrecer un contrato a este jugador (sin espacio salarial ni excepciones disponibles).";
+                    _faWarningText.style.display = DisplayStyle.Flex;
+                }
+                return;
+            }
         }
 
         int salary = (int)_faSalary;
@@ -1708,6 +1733,7 @@ using System.Linq;
             guaranteed_years = guarYears,
             has_team_option = hasTeamOpt ? 1 : 0,
             has_player_option = hasPlayerOpt ? 1 : 0,
+            is_two_way = _faTwoWayActive ? 1 : 0,
             day_sent = _season?.current_game_day ?? 0,
             offer_type = 1,
             status = "pending",
@@ -1720,6 +1746,7 @@ using System.Linq;
         if (_faFormRowSalary != null) _faFormRowSalary.style.display = DisplayStyle.None;
         if (_faFormRowYears != null) _faFormRowYears.style.display = DisplayStyle.None;
         if (_faFormRowOptions != null) _faFormRowOptions.style.display = DisplayStyle.None;
+        if (_faFormRowTwoWay != null) _faFormRowTwoWay.style.display = DisplayStyle.None;
         if (_faWarningText != null) _faWarningText.style.display = DisplayStyle.None;
         if (_faPendingText != null) _faPendingText.style.display = DisplayStyle.Flex;
 
@@ -1736,6 +1763,14 @@ using System.Linq;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         if (leagueSettings == null) return;
+
+        if (_faTwoWayActive)
+        {
+            int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id);
+            _faWarningText.text = $"CONTRATO TWO-WAY: salario fijo (${TradeHelper.TWO_WAY_SALARY:N0}) · 2 años. Plazas two-way: {twoWayCount}/{TradeHelper.MAX_TWO_WAY}. No afecta al salary cap.";
+            _faWarningText.style.display = DisplayStyle.Flex;
+            return;
+        }
 
         long firstApron = leagueSettings.apron > 0 ? leagueSettings.apron : TradeHelper.FIRST_APRON;
         long secondApron = leagueSettings.repeater_apron > 0 ? leagueSettings.repeater_apron : TradeHelper.SECOND_APRON;
@@ -1793,6 +1828,12 @@ using System.Linq;
     void UpdateFAAcceptScore()
     {
         if (_faText2 == null || _pendingFAPlayer == null) return;
+
+        if (_faTwoWayActive)
+        {
+            _faText2.text = "Contrato two-way: sin probabilidad de aceptación (firme por plaza de desarrollo).";
+            return;
+        }
 
         if (_faSalary <= 0 || _faYears < 1)
         {
@@ -1852,15 +1893,49 @@ using System.Linq;
 
     void RefreshFASpinners()
     {
+        if (_faTwoWayActive)
+        {
+            _faSalary = TradeHelper.TWO_WAY_SALARY;
+            _faYears = 2;
+        }
         if (_faSalaryValue != null)
-            _faSalaryValue.text = $"${_faSalary:N0}";
+            _faSalaryValue.text = _faTwoWayActive ? $"${_faSalary:N0} (fijo)" : $"${_faSalary:N0}";
         if (_faYearsValue != null)
             _faYearsValue.text = $"{_faYears} año{(_faYears > 1 ? "s" : "")}";
 
-        ToggleFASpinDisabled(_faSalaryDec, _faSalary <= 1_000_000);
-        ToggleFASpinDisabled(_faSalaryInc, _faSalary >= _faMaxSalary);
-        ToggleFASpinDisabled(_faYearsDec, _faYears <= 1);
-        ToggleFASpinDisabled(_faYearsInc, _faYears >= 5);
+        ToggleFASpinDisabled(_faSalaryDec, _faTwoWayActive || _faSalary <= 1_000_000);
+        ToggleFASpinDisabled(_faSalaryInc, _faTwoWayActive || _faSalary >= _faMaxSalary);
+        ToggleFASpinDisabled(_faYearsDec, _faTwoWayActive || _faYears <= 1);
+        ToggleFASpinDisabled(_faYearsInc, _faTwoWayActive || _faYears >= 5);
+    }
+
+    void ToggleFATwoWay()
+    {
+        _faTwoWayActive = !_faTwoWayActive;
+        if (_faTwoWayActive)
+        {
+            _faTeamOptionActive = false;
+            _faPlayerOptionActive = false;
+            _faSalary = TradeHelper.TWO_WAY_SALARY;
+            _faYears = 2;
+        }
+        else
+        {
+            _faSalary = _pendingFAPlayer != null ? System.Math.Min(_pendingFAPlayer.salary + 2_000_000, _faMaxSalary) : _faMaxSalary;
+            _faSalary = (long)(Mathf.Round(_faSalary / 100_000f) * 100_000);
+            if (_pendingFAPlayer != null)
+            {
+                if (_pendingFAPlayer.age > 35) _faYears = 1;
+                else if (_pendingFAPlayer.age > 32) _faYears = 2;
+                else if (_pendingFAPlayer.age > 28) _faYears = 3;
+                else if (_pendingFAPlayer.age > 25) _faYears = 4;
+                else _faYears = 5;
+            }
+        }
+        RefreshFAOptionToggles();
+        RefreshFASpinners();
+        UpdateFAWarning();
+        UpdateFAAcceptScore();
     }
 
     void ToggleFAOption(string type)
@@ -1875,7 +1950,12 @@ using System.Linq;
             _faPlayerOptionActive = !_faPlayerOptionActive;
             if (_faPlayerOptionActive) _faTeamOptionActive = false;
         }
+        if (_faTeamOptionActive || _faPlayerOptionActive)
+            _faTwoWayActive = false;
         RefreshFAOptionToggles();
+        RefreshFASpinners();
+        UpdateFAWarning();
+        UpdateFAAcceptScore();
     }
 
     void RefreshFAOptionToggles()
@@ -1891,6 +1971,12 @@ using System.Linq;
             _faPlayerOption.RemoveFromClassList("renew-toggle-btn--player-active");
             if (_faPlayerOptionActive)
                 _faPlayerOption.AddToClassList("renew-toggle-btn--player-active");
+        }
+        if (_faTwoWayToggle != null)
+        {
+            _faTwoWayToggle.RemoveFromClassList("renew-toggle-btn--tw-active");
+            if (_faTwoWayActive)
+                _faTwoWayToggle.AddToClassList("renew-toggle-btn--tw-active");
         }
     }
 

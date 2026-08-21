@@ -107,6 +107,11 @@ using System.Threading.Tasks;
     private bool _injuredModalGoToQuinteto;
     private static List<int> _pendingRecoveredIds = new();
 
+    // IR recovery → roster full modal
+    private static List<int> _pendingIRReleaseIds = new();
+    private int _pendingIRReleaseCount;
+    private bool _irReleaseModalResolved;
+
     // Empty lineup modal
     private bool _emptyLineupModalResolved;
     private bool _emptyLineupGoToQuinteto;
@@ -196,6 +201,7 @@ using System.Threading.Tasks;
             CheckBudgetWarning();
             ProcessMaturedOffers();
             ShowPendingRecoveryModal();
+            ShowPendingIRReleaseModal();
             CheckTradeDeadlineModal();
         }
     }
@@ -684,6 +690,7 @@ using System.Threading.Tasks;
                 foreach (var p in allPlayers)
                 {
                     if (p.injury_days > 0) continue;
+                    if (p.g_league_assigned == 1) continue;
                     if (!lineupByPlayer.TryGetValue(p.id, out var ls)) continue;
                     if (ls.slot == 0)
                         startersWithIdx.Add((p, ls.slot_index >= 0 ? ls.slot_index : 999));
@@ -698,7 +705,7 @@ using System.Threading.Tasks;
         }
 
         var activePool = DatabaseManager.Instance.GetPlayersByTeam(teamId)
-            .Where(p => p.injury_days == 0)
+            .Where(p => p.injury_days == 0 && p.g_league_assigned == 0)
             .OrderByDescending(p => p.overall)
             .Take(12)
             .ToList();
@@ -803,6 +810,7 @@ using System.Threading.Tasks;
             {
                 conn.BeginTransaction();
                 var recovered = new List<(int id, string first, string last)>();
+                var recoveredFromIR = new List<int>();
 
                 var teamsPlayToday = new HashSet<int>();
                 if (gameDay > 0)
@@ -828,6 +836,12 @@ using System.Threading.Tasks;
                                 p.injury_days = 0;
                                 p.injury_type = "";
                                 p.treated = 0;
+                                if (p.is_on_ir == 1)
+                                {
+                                    p.is_on_ir = 0;
+                                    if (p.team_id == _myTeam.id)
+                                        recoveredFromIR.Add(p.id);
+                                }
                                 if (p.team_id == _myTeam.id)
                                     recovered.Add((p.id, p.first_name, p.last_name));
                             }
@@ -841,8 +855,28 @@ using System.Threading.Tasks;
                     }
                 }
 
+                // Equipos IA: si recuperar del IR deja la plantilla por encima del
+                // límite, liberan al peor jugador para no quedarse sobre el tope.
+                foreach (var team in allTeams)
+                {
+                    if (team.id == _myTeam.id) continue;
+                    var roster = conn.Table<PlayerData>().Where(p => p.team_id == team.id && p.is_on_ir == 0).ToList();
+                    if (roster.Count <= TradeHelper.MAX_ROSTER) continue;
+                    var worst = roster.OrderBy(p => p.GetCalculatedAverage()).FirstOrDefault();
+                    if (worst == null) continue;
+                    worst.team_id = 0;
+                    worst.contract_years = 0;
+                    worst.guaranteed_years = 0;
+                    worst.has_team_option = 0;
+                    worst.has_player_option = 0;
+                    worst.is_two_way = 0;
+                    worst.is_on_ir = 0;
+                    worst.g_league_assigned = 0;
+                    conn.Update(worst);
+                }
+
                 conn.Commit();
-                return recovered;
+                return (recovered, recoveredFromIR);
             });
 
             while (!recoveryTask.IsCompleted)
@@ -850,7 +884,9 @@ using System.Threading.Tasks;
 
             try
             {
-                var recoveredPlayers = recoveryTask.Result;
+                var recoveryResult = recoveryTask.Result;
+                var recoveredPlayers = recoveryResult.recovered;
+                var recoveredFromIR = recoveryResult.recoveredFromIR;
 
                 if (recoveredPlayers.Count > 0)
                 {
@@ -872,6 +908,18 @@ using System.Threading.Tasks;
                         _pendingRecoveredIds.Add(id);
                     }
                 }
+
+                // Si un jugador del usuario sale del IR y la plantilla queda llena,
+                // se muestra un modal para que decida a quién liberar.
+                _pendingIRReleaseCount = 0;
+                foreach (int id in recoveredFromIR)
+                {
+                    if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) > TradeHelper.MAX_ROSTER)
+                    {
+                        _pendingIRReleaseIds.Add(id);
+                        _pendingIRReleaseCount++;
+                    }
+                }
             }
             catch (System.Exception ex)
             {
@@ -888,6 +936,8 @@ using System.Threading.Tasks;
                 ProcessScouts();
                 ProcessTraining();
                 ProcessRenovations();
+                if (_season != null && _season.current_game_day > 0 && _season.current_game_day % 7 == 0)
+                    ProcessGLeagueDevelopment();
                 db.Commit();
             }
             catch (System.Exception ex)
@@ -1251,6 +1301,7 @@ using System.Threading.Tasks;
         if (gamesToday.Count == 0)
         {
             ShowPendingRecoveryModal();
+            ShowPendingIRReleaseModal();
             ProcessMaturedOffers();
             Debug.Log($"[Dashboard] Día {gameDay} — sin partidos, continúa en Dashboard");
         }
@@ -1402,6 +1453,18 @@ using System.Threading.Tasks;
                 break;
 
             yield return ProcessGameDayRoutine(fastSim: true);
+
+            if (_pendingIRReleaseCount > 0)
+            {
+                _irReleaseModalResolved = false;
+                ShowPendingIRReleaseModal();
+                yield return new WaitUntil(() => _irReleaseModalResolved);
+                if (_pendingIRReleaseCount > 0)
+                {
+                    _fastSimAborted = true;
+                    break;
+                }
+            }
 
             if (_fastSimAborted)
             {
@@ -1728,7 +1791,8 @@ var box = new VisualElement();
                 {
                     // Verificar límite de plantilla
                     var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-                    if (roster.Count + batchSigningsAccepted >= TradeHelper.MAX_ROSTER)
+                    int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
+                    if (rosterCount + batchSigningsAccepted >= TradeHelper.MAX_ROSTER)
                     {
                         rejectedCount++;
                         player.renewal_cooldown_day = _season.current_game_day + 14;
@@ -1767,7 +1831,11 @@ var box = new VisualElement();
                     if (leagueSettings != null)
                     {
                         bool proManagerOnly = _manager.game_mode == "promanager";
-                        if (totalPayroll <= leagueSettings.salary_cap)
+                        if (offer.is_two_way == 1)
+                        {
+                            offerLegal = true;
+                        }
+                        else if (totalPayroll <= leagueSettings.salary_cap)
                         {
                             offerLegal = totalPayroll + offer.offer_salary <= leagueSettings.salary_cap;
                             illegalReason = "sin espacio salarial";
@@ -1828,6 +1896,7 @@ var box = new VisualElement();
                     player.guaranteed_years = offer.guaranteed_years;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
+                    player.is_two_way = offer.is_two_way;
                     player.seasons_with_team = 1;
                     DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(player);
@@ -1918,11 +1987,12 @@ var box = new VisualElement();
                 if (accepted)
                 {
                     acceptedCount++;
-                    player.salary = offer.offer_salary;
+                    player.salary = offer.is_two_way == 1 ? TradeHelper.TWO_WAY_SALARY : offer.offer_salary;
                     player.contract_years = offer.offer_years;
                     player.guaranteed_years = offer.guaranteed_years;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
+                    player.is_two_way = offer.is_two_way;
                     // Re-firma de un FA propio reciente (declinó su opción): devolverlo al equipo
                     if (player.team_id == 0 && DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id))
                     {
@@ -2612,6 +2682,148 @@ var box = new VisualElement();
         }
     }
 
+    void ShowPendingIRReleaseModal()
+    {
+        if (_pendingIRReleaseCount <= 0)
+        {
+            _irReleaseModalResolved = true;
+            return;
+        }
+        _pendingIRReleaseIds.Clear();
+        if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) <= TradeHelper.MAX_ROSTER)
+        {
+            _pendingIRReleaseCount = 0;
+            _irReleaseModalResolved = true;
+            return;
+        }
+
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--positive");
+        _firedOverlay.Add(box);
+
+        var title = new Label("PLANTILLA COMPLETA TRAS RECUPERACI\u00d3N");
+        title.AddToClassList("fired-modal-title");
+        title.AddToClassList("fired-modal-title--positive");
+        box.Add(title);
+
+        var text = new Label("Un jugador en la reserva de lesionados (IR) se ha recuperado y su plaza vuelve a contar. Tu plantilla supera el m\u00e1ximo de " + TradeHelper.MAX_ROSTER + " jugadores: debes liberar a alguien (buyout).");
+        text.AddToClassList("injured-modal-text");
+        box.Add(text);
+
+        var list = new VisualElement();
+        list.AddToClassList("injured-modal-list");
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id)
+            .Where(p => p.is_on_ir == 0)
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+        foreach (var p in players)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("injured-modal-player-row");
+
+            var nameLbl = new Label($"{p.first_name} {p.last_name} — {PositionCodes.GetShort(p.position)} · OVR {p.GetCalculatedAverage()} · ${p.salary:N0}");
+            nameLbl.style.flexGrow = 1;
+            row.Add(nameLbl);
+
+            var releaseBtn = new Button();
+            releaseBtn.text = "LIBERAR";
+            releaseBtn.AddToClassList("injured-modal-btn");
+            releaseBtn.style.backgroundColor = new StyleColor(new Color32(192, 57, 43, 255));
+            releaseBtn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                ReleasePlayerForIR(p);
+            });
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(releaseBtn);
+            row.Add(releaseBtn);
+
+            list.Add(row);
+        }
+        box.Add(list);
+
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("injured-modal-btn-group");
+
+        var cancelBtn = new Button();
+        cancelBtn.text = "IR A PLANTILLA";
+        cancelBtn.AddToClassList("injured-modal-btn");
+        cancelBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+        cancelBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            _irReleaseModalResolved = true;
+            ScreenManager.Instance.GoTo(GameScreen.Roster);
+        });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(cancelBtn);
+        btnGroup.Add(cancelBtn);
+        box.Add(btnGroup);
+    }
+
+    void ReleasePlayerForIR(PlayerData player)
+    {
+        long remainingSalary = player.salary * player.contract_years;
+        int stretchYears = Mathf.Max(1, player.contract_years * 2);
+        long annualPayment = remainingSalary / stretchYears;
+        int currentDay = _season?.current_game_day ?? 0;
+        string playerName = $"{player.first_name} {player.last_name}";
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        player.team_id = 0;
+        player.last_team_id = 0;
+        player.seasons_with_team = 0;
+        player.is_on_ir = 0;
+        player.g_league_assigned = 0;
+        DatabaseManager.Instance.UpdatePlayer(player);
+
+        long remainder = remainingSalary;
+        for (int y = 0; y < stretchYears; y++)
+        {
+            long payment = (y == stretchYears - 1) ? remainder : annualPayment;
+            remainder -= payment;
+            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+            {
+                team_id = _myTeam.id,
+                season_id = _season?.id ?? 0,
+                record_type = FinanceRecord.TYPE_BUYOUT,
+                game_day = currentDay,
+                amount = payment,
+                created_at = now
+            });
+        }
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = "Rescisi\u00f3n de contrato (buyout)",
+            body = $"Se ha rescindido el contrato de {playerName} mediante buyout porque la plantilla superaba el l\u00edmite.\n\n" +
+                   $"Salario restante: {remainingSalary:N0}\n" +
+                   $"Pago progresivo: ${annualPayment:N0} durante {stretchYears} a\u00f1os\n",
+            game_day = currentDay,
+            game_date = now,
+            created_at = now,
+            date_sent = now,
+            is_read = 0
+        });
+
+        _pendingIRReleaseCount--;
+        if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) <= TradeHelper.MAX_ROSTER || _pendingIRReleaseCount <= 0)
+        {
+            _firedOverlay.style.display = DisplayStyle.None;
+            _irReleaseModalResolved = true;
+            return;
+        }
+        ShowPendingIRReleaseModal();
+    }
+
     void CheckTradeDeadlineModal()
     {
         if (_season == null || string.IsNullOrEmpty(_season.current_date)) return;
@@ -2793,19 +3005,19 @@ var box = new VisualElement();
 
         // Non-injured bench players (available for promotion)
         var benchPool = benchLineup
-            .Where(l => playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0)
+            .Where(l => playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0 && p.g_league_assigned == 0)
             .Select(l => playerMap[l.player_id])
             .ToList();
 
         // Non-injured inactive players (available for bench backfill)
         var inactivePool = inactiveLineup
-            .Where(l => playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0)
+            .Where(l => playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0 && p.g_league_assigned == 0)
             .Select(l => playerMap[l.player_id])
             .ToList();
 
         // Unassigned non-injured players
         var unassignedPool = allPlayers
-            .Where(p => p.injury_days == 0 && !lineupIds.Contains(p.id))
+            .Where(p => p.injury_days == 0 && p.g_league_assigned == 0 && !lineupIds.Contains(p.id))
             .OrderByDescending(p => p.overall)
             .ToList();
 
@@ -3116,6 +3328,27 @@ var box = new VisualElement();
         }
     }
 
+    void ProcessGLeagueDevelopment()
+    {
+        if (_season == null || _season.id <= 0) return;
+        int seasonId = _season.id;
+        var assigned = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id)
+            .Where(p => p.g_league_assigned == 1)
+            .ToList();
+        if (assigned.Count == 0) return;
+
+        foreach (var p in assigned)
+        {
+            if (p.injury_days > 0 || p.is_on_ir == 1) continue;
+
+            GLeagueHelper.ProcessDevelopmentTick(p);
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            var stats = GLeagueHelper.GenerateWeeklyStats(p);
+            DatabaseManager.Instance.AddGLeagueGame(p.id, seasonId, stats.pts, stats.reb, stats.ast, stats.stl, stats.blk, stats.tov, stats.rating);
+        }
+    }
+
     // ═══════════════════════════════════════════
     //  AI TRANSFERS
     // ═══════════════════════════════════════════
@@ -3422,7 +3655,7 @@ var box = new VisualElement();
             foreach (var team in teamsByPriority)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-                if (roster.Count >= TradeHelper.MAX_ROSTER) continue;
+                if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_ROSTER) continue;
 
                 // Un equipo en reconstrucción no ficha estrellas top (tankea para el draft)
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
@@ -3737,7 +3970,9 @@ var box = new VisualElement();
     void TrySignFreeAgent(TeamData team, List<PlayerData> roster, string targetPos,
                           List<PlayerData> freeAgents, int seasonId, int gameDay)
     {
-        if (roster.Count >= TradeHelper.MAX_ROSTER) return;
+        int rosterCount = DatabaseManager.Instance.GetRosterCount(team.id);
+        int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(team.id);
+        if (rosterCount >= TradeHelper.MAX_ROSTER && twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
         var pendingSATIds = GetPendingSATIds();
@@ -3758,15 +3993,33 @@ var box = new VisualElement();
 
         foreach (var player in candidates)
         {
+            // Si la plantilla está llena solo se puede fichar con un contrato two-way
+            bool signAsTwoWay = rosterCount >= TradeHelper.MAX_ROSTER;
+            if (signAsTwoWay)
+            {
+                if (twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
+                if (!TradeHelper.IsEligibleForTwoWay(player)) continue;
+            }
+
             int chance = (int)Mathf.Clamp(team.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
             if (_aiRng.Next(0, 100) >= chance) continue;
 
             player.team_id = team.id;
             player.last_team_id = team.id;
-            int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
-            player.salary += 2_000_000;
-            player.contract_years = years;
-            player.guaranteed_years = years;
+            if (signAsTwoWay)
+            {
+                player.is_two_way = 1;
+                player.salary = TradeHelper.TWO_WAY_SALARY;
+                player.contract_years = 2;
+                player.guaranteed_years = 2;
+            }
+            else
+            {
+                int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
+                player.salary += 2_000_000;
+                player.contract_years = years;
+                player.guaranteed_years = years;
+            }
             DatabaseManager.Instance.AssignJerseyNumber(player, team.id);
             DatabaseManager.Instance.UpdatePlayer(player);
 
@@ -3778,10 +4031,10 @@ var box = new VisualElement();
                 team_id_from = 0,
                 team_id_to = team.id,
                 player_id = player.id,
-                trade_type = "free_agent"
+                trade_type = signAsTwoWay ? "free_agent_two_way" : "free_agent"
             });
 
-            Debug.Log($"[AI FA] {team.name} signed {player.first_name} {player.last_name} ({player.position}, {player.overall} OVR)");
+            Debug.Log($"[AI FA] {team.name} signed {player.first_name} {player.last_name} ({player.position}, {player.overall} OVR){(signAsTwoWay ? " — TWO-WAY" : "")}");
             break;
         }
     }
@@ -3825,7 +4078,8 @@ var box = new VisualElement();
             if (aiRoster.Count < 11) continue;
 
             var userRoster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-            if (userRoster.Count < 10 || userRoster.Count >= TradeHelper.MAX_ROSTER) continue;
+            int userRosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
+            if (userRoster.Count < 10 || userRosterCount >= TradeHelper.MAX_ROSTER) continue;
 
             var userHealthy = userRoster.Where(p => p.injury_days == 0).ToList();
             if (userHealthy.Count == 0) continue;
@@ -5876,7 +6130,7 @@ List<int> offeredPickIds = new List<int>();
             .ToHashSet();
 
         var allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>()
-            .Where(p => p.team_id != 0 && p.injury_days == 0)
+            .Where(p => p.team_id != 0 && p.injury_days == 0 && p.g_league_assigned == 0)
             .ToList();
 
         var candidates = allPlayers

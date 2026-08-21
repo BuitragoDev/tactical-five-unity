@@ -3012,7 +3012,8 @@ public partial class DatabaseManager
         {
             var roster = GetPlayersByTeam(team.id);
             long payroll = roster.Sum(p => p.salary);
-            int need = targetRosterSize - roster.Count;
+            int rosterCount = GetRosterCount(team.id);
+            int need = targetRosterSize - rosterCount;
             if (need <= 0) continue;
 
             var posCounts = new Dictionary<string, int>();
@@ -3154,10 +3155,11 @@ public partial class DatabaseManager
         {
             if (team.id == excludeTeamId) continue;
             var roster = GetPlayersByTeam(team.id);
-            if (roster.Count <= maxSize) continue;
+            int rosterCount = GetRosterCount(team.id);
+            if (rosterCount <= maxSize) continue;
 
             var sorted = roster.OrderBy(p => p.GetCalculatedAverage()).ToList();
-            int excess = roster.Count - maxSize;
+            int excess = rosterCount - maxSize;
             for (int i = 0; i < excess; i++)
             {
                 var p = sorted[i];
@@ -3166,6 +3168,9 @@ public partial class DatabaseManager
                 p.guaranteed_years = 0;
                 p.has_team_option = 0;
                 p.has_player_option = 0;
+                p.is_two_way = 0;
+                p.is_on_ir = 0;
+                p.g_league_assigned = 0;
                 _db.Update(p);
             }
         }

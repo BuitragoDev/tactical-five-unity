@@ -359,6 +359,18 @@
     color: rgb(192, 57, 43);
 }
 
+.player-card-gl-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(52, 152, 219);
+    border-radius: 4px;
+    padding-left: 6px;
+    padding-right: 6px;
+    margin-left: 8px;
+    margin-bottom: 2px;
+}
+
 .slot-role-icon {
     width: 32px;
     height: 32px;

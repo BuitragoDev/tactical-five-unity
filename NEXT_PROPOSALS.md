@@ -1,6 +1,6 @@
 # NEXT_PROPOSALS — Mejoras pendientes (en orden de implementación)
 
-Estado: 3/4 completadas (verificado en HEAD `81d9e4f`).
+Estado: 4/4 completadas (verificado en HEAD `81d9e4f`).
 
 ## A. Previa/pronóstico del partido (Matchup Preview) — **HECHO**
 - [x] Helper `Scripts/Stats/MatchupPreview.cs`: favorito + probabilidad de victoria a
@@ -23,7 +23,17 @@ Estado: 3/4 completadas (verificado en HEAD `81d9e4f`).
 - [x] UI: protección/swaps visibles en el mercado de picks de `MarketController`.
 - Encaje: la IA ya valora picks y protege jóvenes (`TradeHelper.PickBonus`).
 
-## D. G-League / IR / contratos two-way — **PENDIENTE** (0%)
-- [ ] Liga de desarrollo, reserva por lesión y contratos two-way.
-- [ ] Toca RosterController, flujo de lesiones (InjuredController) y Dashboard loop.
-- Es el de mayor calado; se hará en último lugar.
+## D. G-League / IR / contratos two-way — **HECHO**
+- [x] **IR (reserva de lesionados):** columna `players.is_on_ir`; botón PONER/SACAR IR en
+      `InjuredController` (baja ≥90 días, `TradeHelper.IsEligibleForIR`); no cuenta en el
+      tope de plantilla (`GetRosterCount` excluye IR). Al recuperarse, si quedan >17 la IA
+      libera al peor y el usuario recibe un modal "PLANTILLA LLENA" (`ShowPendingIRReleaseModal`).
+- [x] **Contratos two-way:** columna `players.is_two_way`/`offers.is_two_way` + salario fijo
+      `TradeHelper.TWO_WAY_SALARY` (máx 2/equipo, edad ≤23). Toggle TWO-WAY en la oferta FA
+      (`MarketController`), firma IA (`TrySignFreeAgent`) y rookies de 2ª ronda (`DraftGenerator`).
+- [x] **G-League ligera:** `GLeagueHelper` (asignar/recuperar, desarrollo +1 atributo/7 días
+      cap `potential`, stats procedimentales); botones ASIGNAR G / G-LEAGUE en `RosterController`,
+      panel de stats en el detalle del jugador, gancho semanal en `ProcessGameDayRoutine`
+      (`ProcessGLeagueDevelopment`), tabla `gleague_season_stats`; jugadores G-League excluidos
+      de quinteto/simulación (`GetActivePlayers`, `QuintetoController`, `MatchDayController`, All-Star).
+- Encaje: sin pantalla nueva; reutiliza Roster/Lesionados/Mercado/Quinteto.

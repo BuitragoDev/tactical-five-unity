@@ -119,6 +119,7 @@ protected virtual void OnEnable()
 | 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Player season stats + career + attributes + fog-of-war gate + honors |
 | 40 | Quintos | `Screens/Quintos` | `QuintosController` | Season All-Star/Rookie quintets |
 | 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career |
+| 42 | GLeague | `Screens/GLeague` | `GLeagueController` | Liga de desarrollo del equipo: asignados con stats de `gleague_season_stats` + elegibles para asignar (reutiliza `GLeagueHelper`) |
 
 **Sidebar navigation (verified, `SidebarController.cs:15-45`):**
 - **INICIO** → Dashboard
@@ -145,7 +146,7 @@ flowchart TD
     Preseason --> Dashboard
     Dashboard -->|sidebar| Roster
     Dashboard --> Quinteto & Training & Employees & Injured & Dorsales
-    Dashboard --> Calendar & Results & Playoffs & Standings & Stats
+    Dashboard --> Calendar & Results & Playoffs & Standings & Stats & GLeague
     Dashboard --> Palmares & Records & Premios & Logros
     Dashboard --> Market & Cartera & Historial
     Dashboard --> Finances & Loans & Sponsors & TV

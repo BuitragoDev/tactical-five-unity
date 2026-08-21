@@ -596,7 +596,7 @@ public class MatchDayController : UIScreenController
         benchList.Clear();
 
         var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(teamId)
-            .Where(p => p.injury_days == 0)
+            .Where(p => p.injury_days == 0 && p.g_league_assigned == 0)
             .OrderByDescending(p => p.overall)
             .ToList();
 

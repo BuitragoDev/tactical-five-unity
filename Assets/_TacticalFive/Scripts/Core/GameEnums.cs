@@ -43,7 +43,8 @@ public enum GameScreen
     Logros,
     InfoLeague,
     TheCity,
-    Buscador
+    Buscador,
+    GLeague
 }
 
 public enum GameMode
