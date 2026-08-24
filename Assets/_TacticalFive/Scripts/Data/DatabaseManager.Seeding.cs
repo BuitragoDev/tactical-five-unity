@@ -185,7 +185,7 @@ public partial class DatabaseManager
         Add(127, "CLE", "Peyton",    "Watson",           "SF", 23, "USA", 201,  91, 81, 88, 84, 78, 68, 73, 77, 85, 79, 77, 75, 75, 86, 22000000, 4, false, 1, 1);
         Add(99,  "CLE", "Meleek",    "Thomas",           "SG", 19, "USA", 191,  86, 65, 79, 74, 75, 72, 75, 69, 72, 60, 72, 72, 69, 64,  2000000, 2, true);
 
-        // ── DAL ── 15 jugadores
+        // ── DAL ── 14 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(100, "DAL", "Kyrie",      "Irving",         "PG", 34, "USA", 188,  88, 94, 95, 89, 94, 93, 92, 88, 78, 86, 92, 91, 82, 78, 36500000, 2, false, 1, 4, 4);
         Add(101, "DAL", "Cooper",     "Flagg",          "SF", 19, "USA", 206,  92, 90, 99, 88, 86, 80, 86, 84, 89, 91, 86, 84, 82, 80, 13800000, 4, false);
@@ -193,7 +193,6 @@ public partial class DatabaseManager
         Add(103, "DAL", "Santi",      "Aldama",         "PF", 25, "ESP", 211,  98, 80, 88, 79, 81, 83, 78, 76, 80, 80, 78, 78, 74, 73, 12000000, 4, false);
         Add(104, "DAL", "Dereck",     "Lively II",      "C",  22, "USA", 216, 104, 84, 90, 82, 82, 65, 72, 65, 90, 92, 78, 82, 82, 94,  5200000, 2, false);
         Add(105, "DAL", "Daniel",     "Gafford",        "C",  27, "USA", 208, 120, 81, 88, 82, 85, 38, 68, 65, 88, 90, 78, 80, 78, 96, 14300000, 2, false);
-        Add(106, "DAL", "Klay",       "Thompson",       "SG", 36, "USA", 196,  99, 82, 82, 76, 85, 90, 82, 85, 75, 62, 88, 90, 72, 45, 16600000, 2, false, 4, 6, 6);
         Add(107, "DAL", "Max",        "Christie",       "SG", 23, "USA", 196,  86, 79, 84, 82, 80, 85, 76, 78, 84, 70, 76, 80, 80, 58,  7700000, 3, false);
         Add(108, "DAL", "Naji",       "Marshall",       "SF", 28, "USA", 198,  99, 80, 84, 81, 80, 80, 78, 78, 82, 78, 78, 80, 80, 61, 17400000, 3, false);
         Add(109, "DAL", "Caleb",      "Martin",         "SF", 30, "USA", 196,  92, 79, 81, 81, 80, 80, 77, 78, 82, 76, 78, 80, 80, 61,  9500000, 2, false);
@@ -203,7 +202,7 @@ public partial class DatabaseManager
         Add(115, "DAL", "Sergio",     "de Larrea",      "SF", 20, "ESP", 203,  91, 68, 87, 84, 79, 69, 73, 73, 69, 63, 67, 86, 75, 54,  3600000, 4, true);
         Add(116, "DAL", "Tobi",       "Lawal",          "PF", 21, "NGA", 203, 102, 66, 80, 72, 78, 63, 63, 69, 68, 74, 64, 60, 64, 75,  2000000, 2, true);
 
-        // ── DEN ── 14 jugadores
+        // ── DEN ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(118, "DEN", "Nikola",     "Jokic",          "C",  31, "SRB", 211, 129, 98, 99, 98, 99, 99, 99, 98, 99, 99, 99, 99, 97, 94, 62000000, 4, false, 1, 1, 3, 3);
         Add(119, "DEN", "Jamal",      "Murray",         "PG", 29, "CAN", 193,  98, 90, 94, 91, 95, 99, 92, 91, 86, 78, 94, 99, 84, 73, 50000000, 4, false, 1, 1);
@@ -219,6 +218,7 @@ public partial class DatabaseManager
         Add(131, "DEN", "Zeke",       "Nnaji",          "PF", 25, "USA", 206, 109, 73, 78, 76, 77, 69, 75, 69, 74, 74, 74, 71, 64, 70,  8000000, 3, false);
         Add(499, "DEN", "Spencer",    "Jones",          "SF", 24, "USA", 206, 100, 79, 80, 74, 87, 71, 71, 79, 81, 81, 81, 81, 84, 74,  6000000, 2, false);
         Add(568, "DEN", "Lonnie",     "Walker",         "SG", 26, "USA", 196,  93, 72, 76, 84, 74, 72, 64, 70, 58, 50, 60, 70, 50, 24,  3300000, 1, false);
+        Add(400, "DEN", "DeMar",      "DeRozan",        "SF", 36, "USA", 201, 100, 86, 89, 79, 90, 95, 82, 88, 62, 69, 86, 89, 79, 65,  3500000, 1, false);
         Add(133, "DEN", "Bryce",      "Hopkins",        "PF", 23, "USA", 203, 100, 72, 80, 84, 72, 69, 68, 70, 70, 72, 70, 68, 69, 66,  2000000, 2, true);
         Add(134, "DEN", "Trevon",     "Brazile",        "PF", 23, "USA", 206,  97, 68, 80, 80, 70, 64, 66, 79, 69, 69, 66, 64, 67, 70,  2000000, 2, true);
 
@@ -358,7 +358,7 @@ public partial class DatabaseManager
         Add(247, "MEM", "Cameron",    "Boozer",         "PF", 19, "USA", 203, 115, 78, 94, 89, 74, 84, 74, 74, 84, 79, 84, 73, 74, 65, 10500000, 4, true);
         Add(248, "MEM", "Karim",      "Lopez",          "SF", 20, "MEX", 203,  95, 72, 81, 74, 64, 69, 69, 69, 74, 79, 64, 72, 79, 58,  4000000, 4, true);
 
-        // ── MIA ── 12 jugadores
+        // ── MIA ── 13 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(250, "MIA", "Bam",      "Adebayo",          "C",  29, "USA", 206,  78, 80, 90, 76, 98, 72, 78, 80, 90, 90, 90, 92, 99, 90, 51000000, 4, false, 0, 2);
         Add(251, "MIA", "Giannis",  "Antetokounmpo",    "PF", 32, "GRC", 211,  78, 82, 98, 90, 96, 78, 78, 90, 90, 90, 99, 96, 98, 92, 62000000, 4, false, 1, 1, 2, 2);
@@ -370,6 +370,7 @@ public partial class DatabaseManager
         Add(257, "MIA", "Simone",   "Fontecchio",       "SF", 31, "ITA", 201,  78, 68, 84, 72, 78, 78, 68, 70, 70, 66, 72, 74, 64, 66,  8000000, 2, false);
         Add(258, "MIA", "Keshad",   "Johnson",          "PF", 24, "USA", 201,  78, 70, 80, 76, 78, 68, 64, 68, 74, 74, 80, 70, 68, 72,  2000000, 3, false);
         Add(259, "MIA", "Dru",      "Smith",            "PG", 28, "USA", 191,  78, 68, 80, 76, 74, 72, 74, 74, 76, 60, 72, 70, 72, 66,  2200000, 1, false);
+        Add(106, "MIA", "Klay",     "Thompson",         "SG", 36, "USA", 196,  99, 82, 82, 76, 85, 90, 82, 85, 75, 62, 88, 90, 72, 45,  7000000, 2, false, 4, 6, 6);
         Add(260, "MIA", "Ryan",     "Conwell",          "SG", 20, "USA", 193,  78, 66, 80, 72, 74, 76, 68, 70, 76, 70, 70, 68, 72, 64,  2000000, 2, true);
         Add(261, "MIA", "Tim",      "Hardaway Jr.",     "SG", 34, "USA", 196,  78, 70, 80, 74, 80, 90, 80, 74, 78, 72, 74, 76, 64, 66,  6500000, 1, false);
 
@@ -906,7 +907,6 @@ public partial class DatabaseManager
         // ── Free Agents ── 140 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         AddFA(77,  "Guerschon",     "Yabusele",         "PF", 30, "FRA", 203, 118, 79, 72, 69, 84, 64, 79, 59, 84, 74, 84, 74, 69, 78,  2000000, 2);
-        AddFA(400, "DeMar",         "DeRozan",          "SF", 36, "USA", 201, 100, 86, 85, 79, 79, 88, 82, 88, 62, 69, 86, 89, 79, 65,  5000000, 2);
         AddFA(227, "Nick",          "Smith Jr.",        "SG", 22, "USA", 188, 84,  76, 84, 85, 87, 75, 87, 89, 69, 55, 87, 85, 71, 26,  3300000, 3);
         AddFA(125, "Jonas",         "Valanciunas",      "C",  34, "LTU", 211, 120, 80, 77, 73, 93, 73, 85, 79, 89, 99, 79, 99, 57, 54, 10000000, 1);
         AddFA(369, "MarJon",        "Beauchamp",        "SF", 25, "USA", 201, 95,  72, 82, 80, 80, 78, 70, 74, 74, 69, 82, 74, 65, 49,  2500000, 3);
@@ -1085,25 +1085,50 @@ public partial class DatabaseManager
 
     void ApplyInitialCareer(PlayerData p)
     {
-        int seasons = Math.Max(0, p.age - 18);
-        if (seasons > 20) seasons = 20;
+        // Carrera sintética realista: el volumen depende de la EDAD (años jugados y
+        // partidos por tramo) y el RITMO de la media de atributos (OVR), no del rol.
+        // Además se capa para que un jugador de roster no supere a los históricos del seeder (P25).
 
+        const int MAX_HIST_PTS = 15535;   // P25 de los 108 históricos del seeder (top ~100)
+        const int MAX_HIST_GAMES = 1600;
+
+        // 1) Partidos jugados acumulados por tramo de edad (no 80/año toda la carrera).
+        int games = 0;
+        for (int s = 18; s < p.age; s++)
+        {
+            if (s < 28) games += 72;
+            else if (s < 33) games += 66;
+            else if (s < 37) games += 55;
+            else games += 40;   // veteranía: menos minutos, pero nunca cesa
+        }
+        if (games > MAX_HIST_GAMES) games = MAX_HIST_GAMES;
+
+        // 2) Ritmo por juego derivado de la media de atributos (OVR 0-99).
         float r = p.overall / 100f;
-        float pg = 0, rb = 0, ast = 0;
+        float pg = Mathf.Max(0f, (p.overall - 50) * 0.36f) + 2f;
+        float rb = 0, ast = 0;
         switch (p.position)
         {
-            case "PG": pg = p.overall * 0.22f;      rb = 3f + 3f * r; ast = p.overall * 0.16f; break;
-            case "SG": pg = p.overall * 0.24f;      rb = 3f + 2f * r; ast = p.overall * 0.06f; break;
-            case "SF": pg = p.overall * 0.22f;      rb = 4f + 3f * r; ast = p.overall * 0.06f; break;
-            case "PF": pg = p.overall * 0.18f;      rb = 6f + 5f * r; ast = p.overall * 0.04f; break;
-            case "C":  pg = p.overall * 0.18f;      rb = 7f + 6f * r; ast = p.overall * 0.04f; break;
-            default:   pg = p.overall * 0.22f;      rb = 4f + 3f * r; ast = p.overall * 0.06f; break;
+            case "PG": rb = 2f + 3f * r * 0.5f; ast = (p.overall - 50) * 0.12f + 2f; break;
+            case "SG": rb = 2f + 2f * r * 0.5f; ast = (p.overall - 50) * 0.08f + 1f; break;
+            case "SF": rb = 3f + 3f * r * 0.5f; ast = (p.overall - 50) * 0.08f + 1f; break;
+            case "PF": rb = 4f + 5f * r * 0.5f; ast = (p.overall - 50) * 0.05f + 1f; break;
+            case "C":  rb = 5f + 6f * r * 0.5f; ast = (p.overall - 50) * 0.05f + 1f; break;
+            default:   rb = 3f + 3f * r * 0.5f; ast = (p.overall - 50) * 0.08f + 1f; break;
         }
 
-        int games = seasons * 80;
         int pts = Mathf.RoundToInt(pg * games);
         int totalReb = Mathf.RoundToInt(rb * games);
         int totalAst = Mathf.RoundToInt(ast * games);
+
+        // 3) Tope duro: un jugador no-syader no puede superar los históricos (P25).
+        if (pts > MAX_HIST_PTS)
+        {
+            float scale = (float)MAX_HIST_PTS / pts;
+            pts = MAX_HIST_PTS;
+            totalReb = Mathf.RoundToInt(totalReb * scale);
+            totalAst = Mathf.RoundToInt(totalAst * scale);
+        }
 
         _db.Update(p);
 

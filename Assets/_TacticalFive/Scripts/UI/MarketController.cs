@@ -1700,7 +1700,7 @@ using System.Linq;
                 RefreshFASpinners();
                 if (_faWarningText != null)
                 {
-                    _faWarningText.text = $"Oferta ajustada al máximo legal: ${_faMaxSalary:N0}.";
+                    _faWarningText.text = $"Oferta ajustada al máximo legal: {FormatMoney(_faMaxSalary)}.";
                     _faWarningText.style.display = DisplayStyle.Flex;
                 }
             }
@@ -1767,7 +1767,7 @@ using System.Linq;
         if (_faTwoWayActive)
         {
             int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id);
-            _faWarningText.text = $"CONTRATO TWO-WAY: salario fijo (${TradeHelper.TWO_WAY_SALARY:N0}) · 2 años. Plazas two-way: {twoWayCount}/{TradeHelper.MAX_TWO_WAY}. No afecta al salary cap.";
+            _faWarningText.text = $"CONTRATO TWO-WAY: salario fijo ({FormatMoney(TradeHelper.TWO_WAY_SALARY)}) · 2 años. Plazas two-way: {twoWayCount}/{TradeHelper.MAX_TWO_WAY}. No afecta al salary cap.";
             _faWarningText.style.display = DisplayStyle.Flex;
             return;
         }
@@ -1784,19 +1784,19 @@ using System.Linq;
 
         if (totalPayroll > secondApron)
         {
-            _faWarningText.text = $"2º APRON: Solo puedes ofrecer el mínimo (${minSalary:N0}) a FAs externos. No puedes usar excepciones.";
+            _faWarningText.text = $"2º APRON: Solo puedes ofrecer el mínimo ({FormatMoney(minSalary)}) a FAs externos. No puedes usar excepciones.";
             _faWarningText.style.display = DisplayStyle.Flex;
         }
         else if (totalPayroll > firstApron)
         {
-            _faWarningText.text = $"1er APRON: Máximo Mid-Level Exception (Taxpayer) (${tMle:N0}). No puedes usar Mid-Level Exception (No Taxpayer).";
+            _faWarningText.text = $"1er APRON: Máximo Mid-Level Exception (Taxpayer) ({FormatMoney(tMle)}). No puedes usar Mid-Level Exception (No Taxpayer).";
             _faWarningText.style.display = DisplayStyle.Flex;
         }
         else if (totalPayroll > leagueSettings.salary_cap)
         {
             if (proManagerOnly)
             {
-                _faWarningText.text = $"MODO PRO: Sin Mid-Level Exception (No Taxpayer). Sobre el cap solo puedes usar la excepción Taxpayer (${tMle:N0}).";
+                _faWarningText.text = $"MODO PRO: Sin Mid-Level Exception (No Taxpayer). Sobre el cap solo puedes usar la excepción Taxpayer ({FormatMoney(tMle)}).";
                 _faWarningText.style.display = DisplayStyle.Flex;
             }
             else
@@ -1804,7 +1804,7 @@ using System.Linq;
                 string hardCapNote = _myTeam.first_apron_hard_capped == 1
                     ? " · HARD CAP ACTIVO"
                     : "";
-                _faWarningText.text = $"Sobre el cap: máximo Mid-Level Exception (No Taxpayer) (${ntMle:N0}){hardCapNote}. Usar Mid-Level Exception (No Taxpayer) activará el hard cap del 1er apron.";
+                _faWarningText.text = $"Sobre el cap: máximo Mid-Level Exception (No Taxpayer) ({FormatMoney(ntMle)}){hardCapNote}. Usar Mid-Level Exception (No Taxpayer) activará el hard cap del 1er apron.";
                 _faWarningText.style.display = DisplayStyle.Flex;
             }
         }
@@ -1858,18 +1858,23 @@ using System.Linq;
         bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
         var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll, false, proManagerOnly);
 
-        string info = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
+        string info = $"Máximo: {FormatMoney(breakdown.finalMax)} — {breakdown.bindingReason}";
         if (!string.IsNullOrEmpty(breakdown.exceptionName))
             info += $" · [{breakdown.exceptionName}]";
 
         long capSpace = settings.salary_cap - totalPayroll;
         if (capSpace >= 0)
-            info += $" · Margen: ${capSpace:N0}";
+            info += $" · Margen: {FormatMoney(capSpace)}";
         else
-            info += $" · Excedido: ${-capSpace:N0}";
+            info += $" · Excedido: {FormatMoney(-capSpace)}";
 
         _faMaxInfo.text = info;
         _faMaxInfo.style.display = DisplayStyle.Flex;
+    }
+
+    string FormatMoney(long amount)
+    {
+        return System.Math.Abs(amount).ToString("N0").Replace(',', '.') + " $";
     }
 
     // ── FA Spinner helpers ──────────────────────────────────
@@ -1899,7 +1904,7 @@ using System.Linq;
             _faYears = 2;
         }
         if (_faSalaryValue != null)
-            _faSalaryValue.text = _faTwoWayActive ? $"${_faSalary:N0} (fijo)" : $"${_faSalary:N0}";
+            _faSalaryValue.text = _faTwoWayActive ? $"{FormatMoney(_faSalary)} (fijo)" : FormatMoney(_faSalary);
         if (_faYearsValue != null)
             _faYearsValue.text = $"{_faYears} año{(_faYears > 1 ? "s" : "")}";
 

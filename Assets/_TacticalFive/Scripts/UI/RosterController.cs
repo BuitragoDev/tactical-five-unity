@@ -80,6 +80,7 @@ using System.Linq;
     private VisualElement _renewFormRowSalary;
     private VisualElement _renewFormRowYears;
     private VisualElement _renewFormRowOptions;
+    private VisualElement _renewFormRowTwoWay;
     private Label _renewWarningText;
     private Label _renewMaxInfo;
     private long _renewMaxSalary;
@@ -130,6 +131,10 @@ using System.Linq;
         if (string.IsNullOrEmpty(secondary)) return main;
         var sec = PositionCodes.GetName(secondary);
         return $"{main} / {sec}";
+    }
+    static string FormatMoney(long amount)
+    {
+        return System.Math.Abs(amount).ToString("N0").Replace(',', '.') + " $";
     }
     protected override void OnEnable()
     {
@@ -217,6 +222,7 @@ using System.Linq;
         _renewFormRowSalary = _root.Q<VisualElement>("RenewFormRowSalary");
         _renewFormRowYears = _root.Q<VisualElement>("RenewFormRowYears");
         _renewFormRowOptions = _root.Q<VisualElement>("RenewFormRowOptions");
+        _renewFormRowTwoWay = _root.Q<VisualElement>("RenewFormRowTwoWay");
         _renewWarningText = _root.Q<Label>("RenewWarningText");
         _renewMaxInfo = _root.Q<Label>("RenewMaxInfo");
 
@@ -725,11 +731,11 @@ using System.Linq;
 
         // Stats temporada
         var s = DatabaseManager.Instance.GetPlayerSeasonStats(p.id, _manager.id);
-        _statPts.text = s.avgPts.ToString("F1");
-        _statReb.text = s.avgReb.ToString("F1");
-        _statAst.text = s.avgAst.ToString("F1");
-        _statStl.text = s.avgStl.ToString("F1");
-        _statBlk.text = s.avgBlk.ToString("F1");
+        _statPts.text = s.avgPts.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statReb.text = s.avgReb.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statAst.text = s.avgAst.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statStl.text = s.avgStl.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statBlk.text = s.avgBlk.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
 
         // Stats G-League (si tiene minutos en la liga de desarrollo esta temporada)
         if (_detailGLeague != null && _gleagueStatsText != null)
@@ -739,10 +745,11 @@ using System.Linq;
                 : null;
             if (glStats != null && glStats.games > 0)
             {
+                var dec = System.Globalization.CultureInfo.InvariantCulture;
                 _detailGLeague.style.display = DisplayStyle.Flex;
                 _gleagueStatsText.text =
-                    $"{glStats.games} partidos · {glStats.points / (float)glStats.games:F1} pts · " +
-                    $"{glStats.rebounds / (float)glStats.games:F1} reb · {glStats.assists / (float)glStats.games:F1} ast";
+                    $"{glStats.games} partidos · {(glStats.points / (float)glStats.games).ToString("F1", dec)} pts · " +
+                    $"{(glStats.rebounds / (float)glStats.games).ToString("F1", dec)} reb · {(glStats.assists / (float)glStats.games).ToString("F1", dec)} ast";
             }
             else
             {
@@ -810,32 +817,22 @@ using System.Linq;
 
         foreach (var (label, val) in attrs)
         {
-            var row = new VisualElement();
-            row.AddToClassList("attr-row");
+            var badge = new VisualElement();
+            badge.AddToClassList("attr-badge");
+            if (val < 40) badge.AddToClassList("attr-badge--low");
+            else if (val < 70) badge.AddToClassList("attr-badge--mid");
 
             var lbl = new Label();
-            lbl.AddToClassList("attr-label");
+            lbl.AddToClassList("attr-badge-label");
             lbl.text = label;
 
-            var barBg = new VisualElement();
-            barBg.AddToClassList("attr-bar-bg");
-
-            var barFill = new VisualElement();
-            barFill.AddToClassList("attr-bar-fill");
-            if (val < 40) barFill.AddToClassList("attr-bar-fill--low");
-            else if (val < 70) barFill.AddToClassList("attr-bar-fill--mid");
-
-            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
-            barBg.Add(barFill);
-
             var valLbl = new Label();
-            valLbl.AddToClassList("attr-val");
+            valLbl.AddToClassList("attr-badge-val");
             valLbl.text = val.ToString();
 
-            row.Add(lbl);
-            row.Add(barBg);
-            row.Add(valLbl);
-            _detailAttrs.Add(row);
+            badge.Add(lbl);
+            badge.Add(valLbl);
+            _detailAttrs.Add(badge);
         }
     }
 
@@ -956,11 +953,10 @@ using System.Linq;
         // Contrato two-way: solo jugadores jóvenes (≤23) y si quedan plazas
         bool renewTwoWayEligible = TradeHelper.IsEligibleForTwoWay(_selectedPlayer)
             && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY;
+        if (_renewFormRowTwoWay != null)
+            _renewFormRowTwoWay.style.display = renewTwoWayEligible ? DisplayStyle.Flex : DisplayStyle.None;
         if (_renewTwoWayToggle != null)
-        {
-            _renewTwoWayToggle.style.display = renewTwoWayEligible ? DisplayStyle.Flex : DisplayStyle.None;
             _renewTwoWayToggle.SetEnabled(renewTwoWayEligible);
-        }
 
         RefreshRenewOptionToggles();
         RefreshRenewSpinners();
@@ -1142,13 +1138,13 @@ using System.Linq;
 
         // Determine binding reason
         if (result.finalMax == result.maxByExp && result.maxByExp <= rawMax)
-            result.bindingReason = $"Máx. por experiencia ({result.maxByExp:N0})";
+            result.bindingReason = $"Máx. por experiencia ({FormatMoney(result.maxByExp)})";
         else if (!isFromSameTeam && totalPayroll > settings.salary_cap)
-            result.bindingReason = $"Excepción {result.exceptionName} (${result.exceptionMax:N0})";
+            result.bindingReason = $"Excepción {result.exceptionName} ({FormatMoney(result.exceptionMax)})";
         else if (result.birdMax >= result.capSpaceMax)
-            result.bindingReason = $"Bird Rights {result.birdTierName} ({result.birdMax:N0})";
+            result.bindingReason = $"Bird Rights {result.birdTierName} ({FormatMoney(result.birdMax)})";
         else
-            result.bindingReason = $"Espacio salarial ({result.capSpaceMax:N0})";
+            result.bindingReason = $"Espacio salarial ({FormatMoney(result.capSpaceMax)})";
 
         return result;
     }
@@ -1196,7 +1192,7 @@ using System.Linq;
         long totalPayroll = _players.Sum(p => p.salary);
         var breakdown = GetMaxOfferBreakdown(_selectedPlayer, settings, totalPayroll);
 
-        _renewMaxInfo.text = $"Máximo: ${breakdown.finalMax:N0} — {breakdown.bindingReason}";
+        _renewMaxInfo.text = $"Máximo: {FormatMoney(breakdown.finalMax)} — {breakdown.bindingReason}";
         _renewMaxInfo.style.display = DisplayStyle.Flex;
     }
 
@@ -1221,7 +1217,7 @@ using System.Linq;
             RefreshRenewSpinners();
             if (_renewWarningText != null)
             {
-                _renewWarningText.text = $"Oferta ajustada al máximo legal: ${_renewMaxSalary:N0}.";
+                _renewWarningText.text = $"Oferta ajustada al máximo legal: {FormatMoney(_renewMaxSalary)}.";
                 _renewWarningText.style.display = DisplayStyle.Flex;
             }
         }
@@ -1258,6 +1254,7 @@ using System.Linq;
         if (_renewFormRowSalary != null) _renewFormRowSalary.style.display = DisplayStyle.None;
         if (_renewFormRowYears != null) _renewFormRowYears.style.display = DisplayStyle.None;
         if (_renewFormRowOptions != null) _renewFormRowOptions.style.display = DisplayStyle.None;
+        if (_renewFormRowTwoWay != null) _renewFormRowTwoWay.style.display = DisplayStyle.None;
         if (_renewText1 != null) _renewText1.style.display = DisplayStyle.None;
         if (_renewText2 != null) _renewText2.style.display = DisplayStyle.None;
         if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.Flex;
@@ -1340,7 +1337,7 @@ using System.Linq;
     void RefreshRenewSpinners()
     {
         if (_renewSalaryValue != null)
-            _renewSalaryValue.text = $"${_renewSalary:N0}";
+            _renewSalaryValue.text = FormatMoney(_renewSalary);
         if (_renewYearsValue != null)
             _renewYearsValue.text = $"{_renewYears} año{(_renewYears > 1 ? "s" : "")}";
 

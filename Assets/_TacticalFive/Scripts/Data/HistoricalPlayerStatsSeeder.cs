@@ -102,6 +102,10 @@ public static class HistoricalPlayerStatsSeeder
         ("Dave", "Bing", "PG", 89, "Detroit Pistons", "DET", "logos/pistons.png", 901, 18327, 3420, 5397, 0, 0, 7029, 15589, 0, 0, 4269, 5591, 120, 0, 2681),
         ("Bob", "Lanier", "C", 89, "Detroit Pistons", "DET", "logos/pistons.png", 959, 19248, 9564, 3007, 861, 1701, 7621, 14029, 0, 0, 4006, 5283, 250, 0, 2481),
         ("Isaiah", "Thomas", "PG", 86, "Denver Nuggets", "DEN", "logos/nuggets.png", 605, 11397, 1623, 3441, 513, 66, 3904, 8608, 1328, 3544, 2261, 2579, 80, 0, 1321),
+        //  gp,  pts,  reb,  ast,  stl,  blk, fgm,  fga,  fg3m,  fg3a,  ftm,  fta, dd,  td,  tov
+        ("José Manuel", "Calderón", "PG", 80, "Toronto Raptors", "TOR", "logos/raptors.png", 895, 7921, 2148, 5148, 716, 71, 3038, 6440, 920, 2260, 925, 1060, 97, 2, 1339),
+        ("Ricky", "Rubio", "PG", 81, "Minnesota Timberwolves", "MIN", "logos/wolves.png", 698, 7570, 2830, 5160, 1226, 94, 2468, 6364, 637, 1969, 1997, 2370, 135, 7, 1768),
+        
         ("Kyrie", "Irving", "PG", 92, "Dallas Mavericks", "DAL", "logos/mavericks.png", 742, 18048, 2872, 4155, 825, 282, 6621, 13713, 1830, 4623, 2976, 3337, 100, 3, 2281),
         ("Kawhi", "Leonard", "SF", 93, "Los Angeles Clippers", "LAC", "logos/clippers.png", 647, 15116, 4429, 2044, 1059, 458, 5604, 11157, 1192, 3074, 2716, 3150, 160, 2, 1281),
         ("Jimmy", "Butler", "SF", 89, "Miami Heat", "MIA", "logos/heat.png", 853, 16094, 4674, 3782, 1350, 399, 5247, 11117, 860, 2583, 4740, 5739, 200, 19, 2181),
