@@ -1252,14 +1252,23 @@
     border-color: rgb(85, 102, 119);
 }
 
-.renew-toggle-btn--team-active {
+.renew-toggle-btn--team-active,
+.renew-toggle-btn--team-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     background-color: rgba(39, 174, 96, 0.15);
 }
 
-.renew-toggle-btn--player-active {
+.renew-toggle-btn--player-active,
+.renew-toggle-btn--player-active:hover {
     color: rgb(248, 196, 64);
     border-color: rgb(248, 196, 64);
     background-color: rgba(248, 196, 64, 0.15);
+}
+
+.renew-toggle-btn--tw-active,
+.renew-toggle-btn--tw-active:hover {
+    color: rgb(190, 220, 255);
+    border-color: rgb(39, 84, 148);
+    background-color: rgba(39, 84, 148, 0.25);
 }

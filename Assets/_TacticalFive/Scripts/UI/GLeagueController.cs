@@ -125,6 +125,7 @@ public class GLeagueController : UIScreenController
             _eligibleHeader.Clear();
             _eligibleHeader.Add(MakeHeaderCell("JUGADOR", "gleague-player"));
             _eligibleHeader.Add(MakeHeaderCell("POS", "col-pos"));
+            _eligibleHeader.Add(MakeHeaderCell("ROL", "col-pos"));
             _eligibleHeader.Add(MakeHeaderCell("EDAD", "col-stat"));
             _eligibleHeader.Add(MakeHeaderCell("MEDIA", "col-stat", true));
             _eligibleHeader.Add(MakeHeaderCell("POT", "col-stat"));
@@ -157,6 +158,7 @@ public class GLeagueController : UIScreenController
             row.Add(MakePlayerCell(p));
 
             row.Add(MakeStatCell(PositionCodes.GetShort(p.position), false, "col-pos"));
+            row.Add(MakeRoleCell(p));
             row.Add(MakeStatCell(p.age.ToString(), false, "col-stat"));
             row.Add(MakeStatCell(p.GetCalculatedAverage().ToString(), true, "col-stat"));
             row.Add(MakeStatCell(p.potential.ToString(), false, "col-stat"));
@@ -212,6 +214,34 @@ public class GLeagueController : UIScreenController
         return cell;
     }
 
+    VisualElement MakeRoleCell(PlayerData p)
+    {
+        var cell = new VisualElement();
+        cell.AddToClassList("gleague-role");
+
+        var icon = new VisualElement();
+        icon.AddToClassList("gleague-role-icon");
+        string iconName = p.role switch
+        {
+            PlayerRole.Estrella => "rol_estrella",
+            PlayerRole.Titular => "rol_titular",
+            PlayerRole.Banquillo => "rol_banquillo",
+            _ => "rol_ultimoRecurso"
+        };
+        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
+        icon.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
+        icon.tooltip = p.role switch
+        {
+            PlayerRole.Estrella => "Estrella",
+            PlayerRole.Titular => "Titular",
+            PlayerRole.Banquillo => "Banquillo",
+            _ => "Último recurso"
+        };
+        cell.Add(icon);
+
+        return cell;
+    }
+
     VisualElement MakeActionCell(string text, bool isOn, System.Action onClick)
     {
         var cell = new VisualElement();
@@ -247,6 +277,6 @@ public class GLeagueController : UIScreenController
     static string PerGame(int? total, int games)
     {
         if (games <= 0 || total == null) return "—";
-        return (total.Value / (float)games).ToString("F1");
+        return (total.Value / (float)games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
     }
 }

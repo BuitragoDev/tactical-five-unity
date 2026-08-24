@@ -52,10 +52,28 @@ using System.Linq;
     private string _currentStat = "puntos";
     private string _currentMode = "season";
     private string _currentDisplay = "totals";
-    private static readonly System.Globalization.CultureInfo _spanishCI = System.Globalization.CultureInfo.InvariantCulture;
+    private static readonly System.Globalization.CultureInfo _spanishCI = CreateDotCulture();
+    private static System.Globalization.CultureInfo CreateDotCulture()
+    {
+        var ci = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
+        ci.NumberFormat.NumberGroupSeparator = ".";
+        ci.NumberFormat.NumberDecimalSeparator = ".";
+        return ci;
+    }
     private List<Button> _statTabs = new();
     private List<Button> _filterBtns = new();
     private List<Button> _modeBtns = new();
+    private Button _previousPageBtn;
+    private Button _nextPageBtn;
+    private Button _firstPageBtn;
+    private Button _lastPageBtn;
+    private Label _pageLabel;
+    private List<StatRow> _currentRows = new();
+    private int _currentPage;
+    private string _pagedStat = "";
+    private bool _pagedAverages;
+    private List<PlayerData> _pagedAllPlayers = new();
+    private const int PAGE_SIZE = 10;
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -81,6 +99,29 @@ using System.Linq;
             var btn = _root.Q<Button>(name);
             if (btn != null) _statTabs.Add(btn);
         }
+
+        _previousPageBtn = _root.Q<Button>("BtnPreviousPage");
+        _nextPageBtn = _root.Q<Button>("BtnNextPage");
+        _firstPageBtn = _root.Q<Button>("BtnFirstPage");
+        _lastPageBtn = _root.Q<Button>("BtnLastPage");
+        _pageLabel = _root.Q<Label>("PageLabel");
+
+        var previousIcon = _root.Q<Image>("PreviousPageIcon");
+        var nextIcon = _root.Q<Image>("NextPageIcon");
+        var previousSprite = Resources.Load<Sprite>("Icons/left_arrow");
+        var nextSprite = Resources.Load<Sprite>("Icons/right_arrow");
+        SetPageIcon(previousIcon, previousSprite);
+        SetPageIcon(nextIcon, nextSprite);
+        SetPageIcon(_root.Q<Image>("FirstPageIcon1"), previousSprite);
+        SetPageIcon(_root.Q<Image>("FirstPageIcon2"), previousSprite);
+        SetPageIcon(_root.Q<Image>("LastPageIcon1"), nextSprite);
+        SetPageIcon(_root.Q<Image>("LastPageIcon2"), nextSprite);
+    }
+
+    void SetPageIcon(Image image, Sprite sprite)
+    {
+        if (image != null && sprite != null)
+            image.style.backgroundImage = new StyleBackground(sprite);
     }
     protected override void LoadData()
     {
@@ -125,6 +166,10 @@ using System.Linq;
         _modeBtns.Add(btnAverages);
         btnTotals?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetDisplay("totals"); });
         btnAverages?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetDisplay("averages"); });
+        _previousPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(-1); });
+        _nextPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(1); });
+        _firstPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(-10); });
+        _lastPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(10); });
     }
     protected override void Refresh()
     {
@@ -212,11 +257,23 @@ using System.Linq;
             _root.Q<Button>("BtnRookies")?.AddToClassList("filter-btn--active");
         else
             _root.Q<Button>("BtnMyTeam")?.AddToClassList("filter-btn--active");
+
+        // Histórico: solo se muestran TOTALES; PROMEDIOS queda deshabilitado
+        var btnAverages = _root.Q<Button>("BtnAverages");
+        bool isHistorical = mode == "historical";
+        if (btnAverages != null)
+            btnAverages.SetEnabled(!isHistorical);
+        if (isHistorical)
+            _currentDisplay = "totals";
+
         ShowStats(_currentStat);
     }
 
     void SetDisplay(string display)
     {
+        // En histórico no se permiten promedios (botón deshabilitado, pero por seguridad)
+        if (_currentMode == "historical" && display == "averages") return;
+
         _currentDisplay = display;
         foreach (var btn in _modeBtns)
         {
@@ -247,6 +304,9 @@ using System.Linq;
             "pcttc" => "TabPctTC",
             "pct3p" => "TabPct3P",
             "pcttl" => "TabPctTL",
+            "efgpct" => "TabEFG",
+            "tspct" => "TabTS",
+            "per" => "TabPER",
             "val" => "TabVal",
             "perdidas" => "TabPerdidas",
             "minutos" => "TabMinutos",
@@ -275,6 +335,12 @@ using System.Linq;
             _root.Q<Button>("BtnTotals")?.AddToClassList("mode-btn--active");
         else
             _root.Q<Button>("BtnAverages")?.AddToClassList("mode-btn--active");
+
+        // Histórico: PROMEDIOS deshabilitado y se muestra siempre TOTALES
+        bool isHistorical = _currentMode == "historical";
+        var averagesBtn = _root.Q<Button>("BtnAverages");
+        if (averagesBtn != null)
+            averagesBtn.SetEnabled(!isHistorical);
     }
 
     void ShowStats(string stat)
@@ -357,13 +423,48 @@ using System.Linq;
 
         // Sort
         var sorted = SortStats(playerAggs, stat, useAverages);
-        var top = sorted.Take(100).ToList();
+
+        // Guardar contexto para el paginado
+        _currentRows = sorted;
+        _pagedStat = stat;
+        _pagedAverages = useAverages;
+        _pagedAllPlayers = allPlayers;
+        _currentPage = 0;
 
         // Build dynamic header
         BuildDynamicHeader(stat, useAverages);
 
-        // Render rows
-        RenderDynamicRows(top, stat, useAverages, allPlayers);
+        // Render current page
+        RenderCurrentPage();
+    }
+
+    void ChangePage(int direction)
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentRows.Count / (float)PAGE_SIZE));
+        _currentPage = Mathf.Clamp(_currentPage + direction, 0, pageCount - 1);
+        RenderCurrentPage();
+    }
+
+    void RenderCurrentPage()
+    {
+        if (_statsBody == null) return;
+
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentRows.Count / (float)PAGE_SIZE));
+        _currentPage = Mathf.Clamp(_currentPage, 0, pageCount - 1);
+        var pageRows = _currentRows
+            .Skip(_currentPage * PAGE_SIZE)
+            .Take(PAGE_SIZE)
+            .ToList();
+
+        _statsBody.Clear();
+        RenderDynamicRows(pageRows, _pagedStat, _pagedAverages, _pagedAllPlayers, _currentPage * PAGE_SIZE);
+
+        if (_pageLabel != null)
+            _pageLabel.text = $"{_currentPage + 1} de {pageCount}";
+        _previousPageBtn?.SetEnabled(_currentPage > 0);
+        _nextPageBtn?.SetEnabled(_currentPage < pageCount - 1);
+        _firstPageBtn?.SetEnabled(_currentPage > 0);
+        _lastPageBtn?.SetEnabled(_currentPage < pageCount - 1);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -703,7 +804,7 @@ using System.Linq;
     // ═══════════════════════════════════════════════════════
     // DYNAMIC ROW RENDERER
     // ═══════════════════════════════════════════════════════
-    void RenderDynamicRows(List<StatRow> top, string stat, bool useAverages, List<PlayerData> allPlayers)
+    void RenderDynamicRows(List<StatRow> top, string stat, bool useAverages, List<PlayerData> allPlayers, int rankOffset = 0)
     {
         for (int i = 0; i < top.Count; i++)
         {
@@ -735,12 +836,15 @@ using System.Linq;
             if (isMyTeam)
                 row.AddToClassList("stats-row--my-team");
 
+            int globalRank = rankOffset + i + 1;
+            bool isLeader = rankOffset == 0 && i == 0;
+
             // Rank with badge for top 3
             var rankContainer = new VisualElement();
             rankContainer.AddToClassList("col-rank");
             var rankLbl = new Label();
-            rankLbl.text = (i + 1).ToString();
-            if (i < 3)
+            rankLbl.text = globalRank.ToString();
+            if (globalRank < 4)
             {
                 rankLbl.AddToClassList("rank-badge-top");
             }
@@ -785,7 +889,7 @@ using System.Linq;
             switch (stat)
             {
                 case "puntos":
-                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
@@ -794,7 +898,7 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "rebotes":
-                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell("—", false, false)); // ROF not tracked
@@ -802,28 +906,28 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "asistencias":
-                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgTov.ToString("N1", _spanishCI) : x.totalTov.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "robos":
-                    row.Add(MakeCell(useAverages ? x.avgStl.ToString("N1", _spanishCI) : x.totalStl.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgStl.ToString("N1", _spanishCI) : x.totalStl.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "tapones":
-                    row.Add(MakeCell(useAverages ? x.avgBlk.ToString("N1", _spanishCI) : x.totalBlk.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgBlk.ToString("N1", _spanishCI) : x.totalBlk.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pcttc":
-                    row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -831,7 +935,7 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pct3p":
-                    row.Add(MakeCell(x.fg3Pct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(x.fg3Pct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -839,7 +943,7 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "pcttl":
-                    row.Add(MakeCell(x.ftPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(x.ftPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -847,7 +951,7 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "efgpct":
-                    row.Add(MakeCell(x.efgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(x.efgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
@@ -855,49 +959,49 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "tspct":
-                    row.Add(MakeCell(x.tsPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, i == 0));
+                    row.Add(MakeCell(x.tsPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "per":
-                    row.Add(MakeCell(x.per.ToString("N1", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.per.ToString("N1", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "val":
-                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.fgPct.ToString("N1", System.Globalization.CultureInfo.InvariantCulture), false, false));
                     break;
                 case "perdidas":
-                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("N1", _spanishCI) : x.totalTov.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgTov.ToString("N1", _spanishCI) : x.totalTov.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "minutos":
-                    row.Add(MakeCell(useAverages ? x.avgMin.ToString("N1", _spanishCI) : x.totalMin.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(useAverages ? x.avgMin.ToString("N1", _spanishCI) : x.totalMin.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "dd":
-                    row.Add(MakeCell(x.totalDd.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.totalDd.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
                 case "td":
-                    row.Add(MakeCell(x.totalTd.ToString("N0", _spanishCI), true, i == 0));
+                    row.Add(MakeCell(x.totalTd.ToString("N0", _spanishCI), true, isLeader));
                     row.Add(MakeCell(x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(x.totalAst.ToString("N0", _spanishCI), false, false));

@@ -115,6 +115,22 @@
     width: 40px;
 }
 
+.gleague-root .gleague-role {
+    width: 40px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gleague-role-icon {
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    flex-shrink: 0;
+}
+
 .gleague-root .gleague-player {
     width: 340px;
 }

@@ -470,11 +470,11 @@ using System.Linq;
         BuildAttrBars(p);
 
         var s = DatabaseManager.Instance.GetPlayerSeasonStats(p.id, _manager.id);
-        _statPts.text = s.avgPts.ToString("F1");
-        _statReb.text = s.avgReb.ToString("F1");
-        _statAst.text = s.avgAst.ToString("F1");
-        _statStl.text = s.avgStl.ToString("F1");
-        _statBlk.text = s.avgBlk.ToString("F1");
+        _statPts.text = s.avgPts.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statReb.text = s.avgReb.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statAst.text = s.avgAst.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statStl.text = s.avgStl.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+        _statBlk.text = s.avgBlk.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
     }
 
     void HidePlayerDetail()

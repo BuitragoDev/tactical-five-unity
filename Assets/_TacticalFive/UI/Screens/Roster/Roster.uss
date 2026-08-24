@@ -476,51 +476,45 @@
 
 /* Atributos */
 .detail-attrs {
-    flex-direction: column;
-    padding: 2px 16px;
-    flex-shrink: 0;
-}
-.attr-row {
     flex-direction: row;
-    align-items: center;
-    margin-bottom: 5px;
-}
-.attr-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    width: 90px;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 2px 12px;
     flex-shrink: 0;
-    -unity-text-align: middle-left;
 }
-.attr-bar-bg {
-    flex-grow: 1;
-    height: 8px;
-    background-color: rgb(28, 33, 48);
-    border-radius: 4px;
-    overflow: hidden;
-    margin: 0 8px;
-}
-.attr-bar-fill {
-    height: 8px;
+.attr-badge {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 46px;
+    padding: 6px 4px;
+    margin: 3px;
     border-radius: 4px;
     background-color: rgb(39, 174, 96);
+    flex-shrink: 0;
 }
-.attr-bar-fill--mid {
+.attr-badge--mid {
     background-color: rgb(212, 160, 23);
 }
-.attr-bar-fill--low {
+.attr-badge--low {
     background-color: rgb(192, 57, 43);
 }
-.attr-val {
+.attr-badge-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
-    width: 32px;
-    -unity-text-align: middle-right;
-    flex-shrink: 0;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+.attr-badge-val {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    margin-top: 2px;
 }
 
 .morale-dot {
@@ -1001,19 +995,22 @@
     border-color: rgb(85, 102, 119);
 }
 
-.renew-toggle-btn--team-active {
+.renew-toggle-btn--team-active,
+.renew-toggle-btn--team-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     background-color: rgba(39, 174, 96, 0.15);
 }
 
-.renew-toggle-btn--player-active {
+.renew-toggle-btn--player-active,
+.renew-toggle-btn--player-active:hover {
     color: rgb(248, 196, 64);
     border-color: rgb(248, 196, 64);
     background-color: rgba(248, 196, 64, 0.15);
 }
 
-.renew-toggle-btn--tw-active {
+.renew-toggle-btn--tw-active,
+.renew-toggle-btn--tw-active:hover {
     color: rgb(190, 220, 255);
     border-color: rgb(39, 84, 148);
     background-color: rgba(39, 84, 148, 0.25);
