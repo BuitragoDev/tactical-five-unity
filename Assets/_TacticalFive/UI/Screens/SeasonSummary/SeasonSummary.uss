@@ -368,7 +368,7 @@
 .gl-champion-card {
     background-color: rgb(17, 24, 34);
     border-width: 2px;
-    border-color: rgb(212, 160, 23);
+    border-color: rgb(0, 188, 180);
     padding: 24px;
     text-align: center;
     align-items: center;
@@ -428,7 +428,7 @@
 .gl-mvp-card {
     background-color: rgb(17, 24, 34);
     border-width: 1px;
-    border-color: rgb(73, 115, 205);
+    border-color: rgb(0, 188, 180);
     padding: 20px;
     text-align: center;
     width: 100%;
