@@ -315,3 +315,193 @@
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
+
+/* ══════════════════════════════════════════
+   G-LEAGUE SECTION
+   ══════════════════════════════════════════ */
+
+.gl-section {
+    width: 100%;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.gl-divider {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 6px;
+    -unity-text-transform: upper;
+    color: rgb(0, 188, 180);
+    border-bottom-width: 2px;
+    border-bottom-color: rgb(0, 188, 180);
+    padding-bottom: 8px;
+    margin-bottom: 28px;
+    -unity-text-align: middle-center;
+    min-width: 400px;
+}
+
+.gl-cards-row {
+    flex-direction: row;
+    justify-content: center;
+    gap: 28px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* ── GL CHAMPION CARD ── */
+.gl-champion-card {
+    background-color: rgb(10, 24, 30);
+    border-width: 2px;
+    border-color: rgb(0, 188, 180);
+    padding: 28px 32px;
+    text-align: center;
+    align-items: center;
+    flex: 1;
+    max-width: 440px;
+}
+
+.gl-card-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(0, 188, 180);
+    margin-bottom: 16px;
+    -unity-text-align: middle-center;
+}
+
+.gl-champion-logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 12px;
+}
+
+.gl-champion-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(0, 188, 180);
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.gl-finals-result-row {
+    flex-direction: column;
+    align-items: center;
+}
+
+.gl-result-label {
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    margin-bottom: 2px;
+}
+
+.gl-result-score {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+}
+
+.gl-result-loser {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+    min-width: 260px;
+}
+
+/* ── GL MVP CARD ── */
+.gl-mvp-card {
+    background-color: rgb(10, 24, 30);
+    border-width: 1px;
+    border-color: rgb(0, 150, 144);
+    padding: 24px;
+    text-align: center;
+    flex: 1;
+    max-width: 440px;
+    align-items: center;
+}
+
+.gl-mvp-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(0, 188, 180);
+    margin-bottom: 12px;
+    -unity-text-align: middle-center;
+}
+
+.gl-mvp-photo-wrapper {
+    width: 90px;
+    height: 90px;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+
+.gl-mvp-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 70px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.gl-mvp-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    min-width: 280px;
+}
+
+.gl-mvp-team {
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+}
+
+.gl-mvp-stat-row {
+    flex-direction: row;
+    justify-content: center;
+    margin-top: 12px;
+}
+
+.gl-mvp-stat-box {
+    flex-direction: column;
+    align-items: center;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(0, 120, 116);
+    padding: 6px 14px;
+    min-width: 70px;
+    min-height: 50px;
+    margin-right: 12px;
+}
+
+.gl-mvp-stat-box .gl-stat-val {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}
+
+.gl-mvp-stat-box .gl-stat-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+}

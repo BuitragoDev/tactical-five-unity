@@ -207,3 +207,18 @@ public class MonthlyPlayerAwardRow
     public double avg_rating { get; set; }
     public int games { get; set; }
 }
+
+public class GLSeasonMVPRow
+{
+    public int player_id { get; set; }
+    public string first_name { get; set; }
+    public string last_name { get; set; }
+    public string position { get; set; }
+    public string team_name { get; set; }
+    public string team_logo { get; set; }
+    public int games { get; set; }
+    public double avg_rating { get; set; }
+    public double avg_pts { get; set; }
+    public double avg_reb { get; set; }
+    public double avg_ast { get; set; }
+}
