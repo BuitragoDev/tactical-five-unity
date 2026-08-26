@@ -970,8 +970,11 @@ using System.Threading.Tasks;
 
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
 
+        // Los partidos G-League comparten game_day con la NBA pero nunca
+        // disparan modales de convocatoria ni navegación de mi equipo: los ids
+        // de filial viven en otro espacio y podrían coincidir numéricamente.
         bool myTeamPlays = gamesToday.Any(g =>
-            g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+            !IsGLeagueGame(g) && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
         bool hasAllStar = gamesToday.Any(g => g.game_type == "allstar");
 
         if (myTeamPlays)
@@ -1110,9 +1113,10 @@ using System.Threading.Tasks;
 
         try
         {
-            if (gamesToday.Count > 0)
+            var nbaGamesToday = gamesToday.Where(g => !IsGLeagueGame(g)).ToList();
+            if (nbaGamesToday.Count > 0)
             {
-                QuickNewsGenerator.Generate(_manager, _myTeam, _season, gamesToday, gameDay, _season?.current_date ?? "");
+                QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, gameDay, _season?.current_date ?? "");
 
                 AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
             }
@@ -1208,6 +1212,16 @@ using System.Threading.Tasks;
                 DatabaseManager.Instance.UpdateSeason(_season);
                 Debug.Log("[Dashboard] Playoffs finished → Season finished.");
             }
+        }
+
+        // ── G-League postseason (competición paralela; no toca seasons.phase) ──
+        try
+        {
+            GLeaguePostSeason.AdvanceIfNeeded(_manager.id, _season, _myTeam?.id ?? 0);
+        }
+        catch (System.Exception exGl)
+        {
+            Debug.LogError($"[Dashboard] Error en postseason G-League: {exGl.Message}\n{exGl.StackTrace}");
         }
 
         UpdateManagerStats(gameDay);
@@ -1322,6 +1336,13 @@ using System.Threading.Tasks;
 
     void ProcessSingleGame(GameData game)
     {
+        // ── Partidos G-League: pipeline propio, sin tocar estado NBA ──
+        if (IsGLeagueGame(game))
+        {
+            ProcessGLeagueGame(game);
+            return;
+        }
+
         List<PlayerData> homePlayers, awayPlayers;
 
         if (game.game_type == "allstar")
@@ -1391,6 +1412,55 @@ using System.Threading.Tasks;
         DatabaseManager.Instance.UpdateRelationshipsAfterGame(
             game.away_team_id, game.id, !homeWon,
             result.away_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
+    }
+
+    // ── G-LEAGUE: SIMULACIÓN DE PARTIDOS DE LA FILIAL ──────
+
+    static bool IsGLeagueGame(GameData g)
+    {
+        return g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR
+            || g.game_type == GLeaguePostSeason.TYPE_PLAYOFF;
+    }
+
+    /// <summary>
+    /// Simula un partido G-League entre dos filiales (prospectos + asignados).
+    /// No persiste en player_game_stats ni aplica lesiones/fatiga/records/moral:
+    /// solo actualiza el GameData y acumula gleague_season_stats.
+    /// </summary>
+    void ProcessGLeagueGame(GameData game)
+    {
+        // Los partidos GL guardan los ids de filial codificados (+GAME_TEAM_ID_OFFSET)
+        var homeTeam = DatabaseManager.Instance.GetGLeagueTeam(GLeagueHelper.DecodeGlTeamId(game.home_team_id));
+        var awayTeam = DatabaseManager.Instance.GetGLeagueTeam(GLeagueHelper.DecodeGlTeamId(game.away_team_id));
+        if (homeTeam == null || awayTeam == null)
+        {
+            Debug.LogError($"[Dashboard] Partido G-League {game.id} con filiales inexistentes ({game.home_team_id}/{game.away_team_id})");
+            game.is_played = 1;
+            DatabaseManager.Instance.UpdateGame(game);
+            return;
+        }
+
+        var prospects = DatabaseManager.Instance.GetAllGLeaguePlayers();
+        var assignedByNba = DatabaseManager.Instance.GetGLeagueAssignedByTeam();
+
+        var homePlayers = GLeagueHelper.BuildAffiliateLineup(homeTeam, prospects, assignedByNba);
+        var awayPlayers = GLeagueHelper.BuildAffiliateLineup(awayTeam, prospects, assignedByNba);
+
+        var myAffiliate = _myTeam != null ? DatabaseManager.Instance.GetGLeagueTeamByNbaTeam(_myTeam.id) : null;
+        bool isMyHomeGame = myAffiliate != null && homeTeam.id == myAffiliate.id;
+
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, isMyHomeGame, persistToDb:false, glLeague:true);
+        DatabaseManager.Instance.UpdateGame(game);
+
+        int seasonId = _season?.id ?? 0;
+        foreach (var ps in result.home_stats.Concat(result.away_stats))
+        {
+            if (ps.minutes <= 0) continue;
+            var (pts, reb, ast, stl, blk, tov) =
+                GLeagueHelper.ClampLine(ps.points, ps.oreb + ps.dreb, ps.assists, ps.steals, ps.blocks, ps.turnovers);
+            DatabaseManager.Instance.AddGLeagueGameStat(ps.player_id, seasonId,
+                pts, reb, ast, stl, blk, tov, ps.rating);
+        }
     }
 
     void HandleDayError(string step, string modalTitle, string modalBody, System.Exception ex, bool fastSim)
@@ -3331,21 +3401,20 @@ var box = new VisualElement();
     void ProcessGLeagueDevelopment()
     {
         if (_season == null || _season.id <= 0) return;
-        int seasonId = _season.id;
         var assigned = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id)
             .Where(p => p.g_league_assigned == 1)
             .ToList();
         if (assigned.Count == 0) return;
 
+        // Tick semanal de desarrollo: +1 atributo hasta el potencial. Las
+        // estadísticas ya no son procedurales: se acumulan por partido real
+        // simulado en ProcessGLeagueGame.
         foreach (var p in assigned)
         {
             if (p.injury_days > 0 || p.is_on_ir == 1) continue;
 
-            GLeagueHelper.ProcessDevelopmentTick(p);
-            DatabaseManager.Instance.UpdatePlayer(p);
-
-            var stats = GLeagueHelper.GenerateWeeklyStats(p);
-            DatabaseManager.Instance.AddGLeagueGame(p.id, seasonId, stats.pts, stats.reb, stats.ast, stats.stl, stats.blk, stats.tov, stats.rating);
+            if (GLeagueHelper.ProcessDevelopmentTick(p))
+                DatabaseManager.Instance.UpdatePlayer(p);
         }
     }
 
@@ -5245,6 +5314,10 @@ List<int> offeredPickIds = new List<int>();
             .Where(g => g.manager_id == _manager.id
                      && g.season_id == _season.id
                      && g.game_type != "preseason"
+                     // Excluir la G-League: sus ids de filial pueden coincidir
+                     // numéricamente con el id de mi equipo NBA.
+                     && g.game_type != GLeagueScheduleGenerator.TYPE_REGULAR
+                     && g.game_type != GLeaguePostSeason.TYPE_PLAYOFF
                      && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id)
                      && g.is_played == 1)
             .OrderBy(g => g.game_day)

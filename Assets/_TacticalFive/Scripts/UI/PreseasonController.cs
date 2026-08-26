@@ -475,6 +475,18 @@ public class PreseasonController : UIScreenController
             var allTeams = DatabaseManager.Instance.GetAllTeams();
             int count = ScheduleGenerator.GenerateSchedule(season, allTeams);
 
+            // Calendario G-League sobre los días con partidos NBA ya programados
+            try
+            {
+                var glTeams = DatabaseManager.Instance.GetGLeagueTeams();
+                if (glTeams.Count > 0)
+                    GLeagueScheduleGenerator.GenerateSchedule(season, glTeams);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[Preseason] Error generando calendario G-League: {ex.Message}");
+            }
+
             // Marcar temporada como generada
             season.generated = 1;
             season.phase = "regular";

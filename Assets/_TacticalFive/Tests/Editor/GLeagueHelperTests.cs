@@ -1,5 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
+
+// ══════════════════════════════════════════════════════
+//  GLeagueHelper — reglas de asignación y desarrollo
+//  (tests originales de la Propuesta D, conservados)
+// ══════════════════════════════════════════════════════
 
 public class GLeagueHelperTests
 {
@@ -123,5 +130,290 @@ public class GLeagueHelperTests
         };
         Assert.That(GLeagueHelper.ProcessDevelopmentTick(notAssigned), Is.False);
         Assert.That(notAssigned.speed, Is.EqualTo(50));
+    }
+}
+
+// ══════════════════════════════════════════════════════
+//  Liga completa: calendario / clasificación / postseason
+// ══════════════════════════════════════════════════════
+
+public class GLeagueScheduleGeneratorTests
+{
+    const int Offset = GLeagueHelper.GAME_TEAM_ID_OFFSET;
+
+    static List<GLeagueTeamData> ThirtyTeams()
+    {
+        var teams = new List<GLeagueTeamData>();
+        for (int i = 1; i <= 30; i++)
+            teams.Add(new GLeagueTeamData
+            {
+                id = i,
+                name = $"Filial {i}",
+                conference = i <= 15 ? "East" : "West"
+            });
+        return teams;
+    }
+
+    // Días NBA (game_day 1-based): días alternos del 1 nov 2025 al 19 mar 2026
+    static IEnumerable<int> NbaDays()
+    {
+        var start = new DateTime(2025, 10, 22);
+        for (var d = new DateTime(2025, 11, 1); d <= new DateTime(2026, 3, 19); d = d.AddDays(2))
+            yield return (int)(d - start).TotalDays + 1;
+    }
+
+    static SeasonData Season() => new SeasonData { id = 1, manager_id = 1, year_start = 2025, year_end = 2026 };
+
+    // ── DoubleRoundRobin ─────────────────────────────────
+
+    [Test]
+    public void DoubleRoundRobin_15Teams_30RondasDe7Partidos()
+    {
+        var rounds = GLeagueScheduleGenerator.DoubleRoundRobin(
+            ThirtyTeams().Where(t => t.conference == "East").ToList());
+
+        Assert.That(rounds.Count, Is.EqualTo(30));
+        foreach (var round in rounds)
+        {
+            Assert.That(round.Count, Is.EqualTo(7));
+            var teamsInRound = round.SelectMany(m => new[] { m.home, m.away }).Distinct().ToList();
+            Assert.That(teamsInRound.Count, Is.EqualTo(14)); // nadie repite en la jornada
+        }
+    }
+
+    [Test]
+    public void DoubleRoundRobin_CadaParejaSeEnfrentaDosVecesConLocaliaInvertida()
+    {
+        var teams = ThirtyTeams().Where(t => t.conference == "East").ToList();
+        var rounds = GLeagueScheduleGenerator.DoubleRoundRobin(teams);
+        var all = rounds.SelectMany(r => r).ToList();
+
+        Assert.That(all.Count, Is.EqualTo(30 * 7));
+
+        foreach (var pair in all.GroupBy(m => m.home < m.away ? (m.home, m.away) : (m.away, m.home)))
+            Assert.That(pair.Count(), Is.EqualTo(2), $"Par {pair.Key} debe jugarse 2 veces");
+
+        // Localía invertida entre vuelta y vuelta
+        foreach (var pair in all.GroupBy(m => m.home < m.away ? (m.home, m.away) : (m.away, m.home)))
+        {
+            var homes = pair.Select(m => m.home).Distinct().ToList();
+            Assert.That(homes.Count, Is.EqualTo(2), "Cada equipo debe ser local una vez");
+        }
+    }
+
+    // ── BuildSchedule ────────────────────────────────────
+
+    [Test]
+    public void BuildSchedule_28PartidosPorEquipo()
+    {
+        var teams = ThirtyTeams();
+        var games = GLeagueScheduleGenerator.BuildSchedule(Season(), teams, NbaDays());
+
+        Assert.That(games.Count, Is.EqualTo(420));
+
+        foreach (var team in teams)
+        {
+            int played = games.Count(g =>
+                GLeagueHelper.DecodeGlTeamId(g.home_team_id) == team.id
+                || GLeagueHelper.DecodeGlTeamId(g.away_team_id) == team.id);
+            Assert.That(played, Is.EqualTo(GLeagueScheduleGenerator.GAMES_PER_TEAM),
+                $"Filial {team.name} debe jugar 28 partidos");
+        }
+    }
+
+    [Test]
+    public void BuildSchedule_NingunEquipoJuegaDosVecesElMismoDia()
+    {
+        var teams = ThirtyTeams();
+        var games = GLeagueScheduleGenerator.BuildSchedule(Season(), teams, NbaDays());
+
+        var seen = new HashSet<(int team, int day)>();
+        foreach (var g in games)
+        {
+            Assert.That(seen.Add((GLeagueHelper.DecodeGlTeamId(g.home_team_id), g.game_day)), Is.True);
+            Assert.That(seen.Add((GLeagueHelper.DecodeGlTeamId(g.away_team_id), g.game_day)), Is.True);
+        }
+    }
+
+    [Test]
+    public void BuildSchedule_SoloDiasDisponibles_YFueraDeSemanaAllStar()
+    {
+        var allowed = new HashSet<int>(NbaDays());
+        var start = new DateTime(2025, 10, 22);
+        var games = GLeagueScheduleGenerator.BuildSchedule(Season(), ThirtyTeams(), allowed);
+
+        foreach (var g in games)
+        {
+            Assert.That(allowed.Contains(g.game_day), Is.True, $"game_day {g.game_day} no tiene NBA");
+            var date = start.AddDays(g.game_day - 1);
+            bool allStarBreak = date.Month == 2 && date.Day >= 8 && date.Day <= 14;
+            Assert.That(allStarBreak, Is.False, "La semana All-Star debe quedar vacía");
+        }
+    }
+
+    [Test]
+    public void BuildSchedule_TiposYCodificacionCorrectos()
+    {
+        var games = GLeagueScheduleGenerator.BuildSchedule(Season(), ThirtyTeams(), NbaDays());
+        var sample = games.First();
+
+        Assert.That(sample.game_type, Is.EqualTo(GLeagueScheduleGenerator.TYPE_REGULAR));
+        Assert.That(sample.is_played, Is.EqualTo(0));
+        Assert.That(sample.home_team_id, Is.GreaterThanOrEqualTo(Offset + 1));
+        Assert.That(sample.home_team_id, Is.LessThanOrEqualTo(Offset + 30));
+        Assert.That(sample.series_label, Is.EqualTo(""));
+        Assert.That(sample.game_date, Does.Match(@"^\d{4}-\d{2}-\d{2}$"));
+    }
+
+    // ── PickSpreadDates ──────────────────────────────────
+
+    [Test]
+    public void PickSpreadDates_MenosFechasQueJornadas_Cicla()
+    {
+        var result = GLeagueScheduleGenerator.PickSpreadDates(new List<int> { 5, 10 }, 5);
+        Assert.That(result.Count, Is.EqualTo(5));
+        Assert.That(result, Has.Member(5).And.Member(10));
+    }
+
+    [Test]
+    public void PickSpreadDates_OrdenPreservado()
+    {
+        var days = Enumerable.Range(0, 100).ToList();
+        var result = GLeagueScheduleGenerator.PickSpreadDates(days, 10);
+        Assert.That(result, Is.Ordered);
+        Assert.That(result.Count, Is.EqualTo(10));
+    }
+}
+
+public class GLeagueStandingsTests
+{
+    static List<GLeagueTeamData> FourEastTeams() => new List<GLeagueTeamData>
+    {
+        new GLeagueTeamData { id = 1, name = "A", conference = "East" },
+        new GLeagueTeamData { id = 2, name = "B", conference = "East" },
+        new GLeagueTeamData { id = 3, name = "C", conference = "East" },
+        new GLeagueTeamData { id = 4, name = "D", conference = "East" },
+    };
+
+    static GameData GlGame(int home, int away, int hs, int as_, string type = "gleague", int played = 1)
+        => new GameData
+        {
+            home_team_id = GLeagueHelper.EncodeGlTeamId(home),
+            away_team_id = GLeagueHelper.EncodeGlTeamId(away),
+            home_score = hs,
+            away_score = as_,
+            game_type = type,
+            is_played = played,
+            game_date = "2025-12-01",
+            game_day = 50
+        };
+
+    [Test]
+    public void Compute_DescodificaIdsYCuentaSoloJugados()
+    {
+        var teams = FourEastTeams();
+        var games = new List<GameData>
+        {
+            GlGame(1, 2, 100, 90),
+            GlGame(3, 1, 80, 110),
+            GlGame(2, 4, 95, 95 + 20),   // gana 4
+            GlGame(4, 3, 70, 60),        // jugado pero veremos
+            GlGame(1, 4, 50, 50, played: 0), // no jugado: ignora
+            GlGame(2, 3, 88, 80, type: "playoff"), // tipo NBA: ignora
+        };
+
+        var table = GLeagueStandings.Compute(teams, games);
+
+        Assert.That(table[0].teamId, Is.EqualTo(1)); // 2-0
+        Assert.That(table[0].wins, Is.EqualTo(2));
+        Assert.That(table[1].teamId, Is.EqualTo(4)); // 2-0 también, mejor dif? A dif +40, D dif +25 y -10...
+        Assert.That(table.Any(r => r.teamId == 3 && r.wins == 0), Is.True);
+
+        // Nadie acumuló el partido no jugado ni el de otro tipo
+        Assert.That(table.Sum(r => r.wins + r.losses), Is.EqualTo(8));
+    }
+
+    [Test]
+    public void StreakText_UltimasCincoMasRecienteAlFinal()
+    {
+        var row = new GLeagueStandingRow();
+        row.results.AddRange(new[] { true, true, false, true });
+        Assert.That(GLeagueStandings.StreakText(row), Is.EqualTo("VVDV"));
+
+        var longRow = new GLeagueStandingRow();
+        longRow.results.AddRange(new[] { false, false, false, false, true, true, true, true, true, true });
+        Assert.That(GLeagueStandings.StreakText(longRow, 5), Is.EqualTo("VVVVV"));
+        Assert.That(GLeagueStandings.StreakText(new GLeagueStandingRow()), Is.EqualTo("—"));
+    }
+}
+
+public class GLeaguePostSeasonTests
+{
+    static List<GLeagueTeamData> SmallLeague()
+    {
+        var teams = new List<GLeagueTeamData>();
+        for (int i = 1; i <= 6; i++) teams.Add(new GLeagueTeamData { id = i, name = $"E{i}", conference = "East" });
+        for (int i = 7; i <= 12; i++) teams.Add(new GLeagueTeamData { id = i, name = $"W{i}", conference = "West" });
+        return teams;
+    }
+
+    static GameData Played(string type, int home, int away, int hs, int as_, string label = "")
+        => new GameData
+        {
+            game_type = type,
+            series_label = label,
+            home_team_id = GLeagueHelper.EncodeGlTeamId(home),
+            away_team_id = GLeagueHelper.EncodeGlTeamId(away),
+            home_score = hs,
+            away_score = as_,
+            is_played = 1,
+            game_day = 100,
+            game_date = "2026-03-25"
+        };
+
+    [Test]
+    public void ComputeRegularSeeds_OrdenPorConferencia()
+    {
+        var teams = SmallLeague();
+        var games = new List<GameData>
+        {
+            Played(GLeagueScheduleGenerator.TYPE_REGULAR, 1, 2, 100, 80),
+            Played(GLeagueScheduleGenerator.TYPE_REGULAR, 3, 4, 90, 95),
+            Played(GLeagueScheduleGenerator.TYPE_REGULAR, 7, 8, 120, 60),
+        };
+
+        var seeds = GLeaguePostSeason.ComputeRegularSeeds(teams, games);
+
+        // Solo los que tienen partidos reciben seed
+        Assert.That(seeds.ContainsKey(1), Is.True);
+        Assert.That(seeds.ContainsKey(7), Is.True);
+        Assert.That(seeds.ContainsKey(9), Is.False);
+
+        // El 7 tiene 100% y va antes que cualquier Este en SU conferencia,
+        // las seeds son independientes por conferencia: ambos líderes son seed 1
+        Assert.That(seeds[1].seed, Is.EqualTo(1));
+        Assert.That(seeds[7].seed, Is.EqualTo(1));
+        Assert.That(seeds[1].winPct, Is.EqualTo(1f).Within(0.001f));
+    }
+
+    [Test]
+    public void WinnerOf_GanaLocalEmpateVaALocal()
+    {
+        var g = Played("gleague", 3, 4, 101, 99);
+        Assert.That(GLeaguePostSeasonTestsAccess.WinnerForTest(g), Is.EqualTo(3));
+
+        var tie = Played("gleague", 5, 6, 100, 100);
+        Assert.That(GLeaguePostSeasonTestsAccess.WinnerForTest(tie), Is.EqualTo(5));
+    }
+}
+
+/// <summary>Acceso a la semántica de WinnerOf (privada) para tests.</summary>
+public static class GLeaguePostSeasonTestsAccess
+{
+    public static int WinnerForTest(GameData g)
+    {
+        return g.home_score >= g.away_score
+            ? GLeagueHelper.DecodeGlTeamId(g.home_team_id)
+            : GLeagueHelper.DecodeGlTeamId(g.away_team_id);
     }
 }

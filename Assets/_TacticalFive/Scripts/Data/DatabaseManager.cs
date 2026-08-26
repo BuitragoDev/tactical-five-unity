@@ -84,6 +84,10 @@ public partial class DatabaseManager : MonoBehaviour
             SeedStaticDataIfNeeded();
         }
 
+        // Las partidas existentes (creadas antes de la G-League) también
+        // necesitan sus filiales y prospectos.
+        EnsureGLeagueSeeded();
+
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
     }
 
@@ -288,8 +292,13 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<HallOfFameData>();
         _db.CreateTable<RetiredNumberData>();
         _db.CreateTable<GLeagueSeasonStat>();
+        _db.CreateTable<GLeagueTeamData>();
+        _db.CreateTable<GLeaguePlayerData>();
+        _db.CreateTable<GLeagueChampionData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeaguePlayers_TeamId ON gleague_players(gleague_team_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueChampions_Manager ON gleague_champions(manager_id, season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -930,6 +939,8 @@ public partial class DatabaseManager : MonoBehaviour
             SeedRetiredNumbers();
             SeedVeteranRetiredNumbers();
         }
+
+        EnsureGLeagueSeeded();
 
         SeedActivePlayerCareers();
     }

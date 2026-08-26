@@ -67,12 +67,12 @@ public static class GameSimulator
     }
 
     public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
-        int homeChemistry = 50, int awayChemistry = 50, bool isHome = false)
+        int homeChemistry = 50, int awayChemistry = 50, bool isHome = false, bool persistToDb = true, bool glLeague = false)
     {
         var homePS = homePlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
         var awayPS = awayPlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
-        PrepareRotationMetadata(homePS);
-        PrepareRotationMetadata(awayPS);
+        PrepareRotationMetadata(homePS, glLeague);
+        PrepareRotationMetadata(awayPS, glLeague);
 
         if (homePS.Count < 2 || awayPS.Count < 2)
         {
@@ -125,7 +125,7 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal);
+            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague);
             homeTotal += hPts; awayTotal += aPts;
             quarters.Add((hPts, aPts));
         }
@@ -142,7 +142,7 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal);
+            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal, glLeague);
             homeTotal += hOT; awayTotal += aOT;
             quarters.Add((hOT, aOT));
         }
@@ -216,48 +216,58 @@ public static class GameSimulator
         }
 
         // Guardar estadísticas para TODOS los tipos de partido
-        // (la pantalla Stats filtra solo temporada regular)
-        DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
-        foreach (var ps in homePS)
-            DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.home_team_id));
-        foreach (var ps in awayPS)
-            DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.away_team_id));
+        // (la pantalla Stats filtra solo temporada regular).
+        // Los partidos G-League no escriben en player_game_stats: sus stats
+        // viven en gleague_season_stats y las gestiona el llamador.
+        if (persistToDb)
+        {
+            DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
+            foreach (var ps in homePS)
+                DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.home_team_id));
+            foreach (var ps in awayPS)
+                DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.away_team_id));
+        }
 
         // Check and update records (exclude All-Star — no records should count)
-        if (game.game_type != "allstar")
+        if (persistToDb && game.game_type != "allstar")
         {
             DatabaseManager.Instance.CheckAndUpdateRecords(game, homePS, game.home_team_id);
             DatabaseManager.Instance.CheckAndUpdateRecords(game, awayPS, game.away_team_id);
         }
 
-        // Fatiga post-partido
-        bool homeBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
-            .Any(g => (g.home_team_id == game.home_team_id || g.away_team_id == game.home_team_id)
-                   && g.is_played == 1 && g.game_day == game.game_day - 1);
-        bool awayBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
-            .Any(g => (g.home_team_id == game.away_team_id || g.away_team_id == game.away_team_id)
-                   && g.is_played == 1 && g.game_day == game.game_day - 1);
-        foreach (var ps in homePS)
+        // Fatiga post-partido (los partidos G-League no desgastan el físico:
+        // los prospectos ni existen en players, y a los asignados no se les
+        // aplica doble desgaste por jugar en dos competiciones)
+        if (persistToDb)
         {
-            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
-            if (player == null) continue;
-            int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
-            if (homeBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
-            player.fisico = Mathf.Max(0, player.fisico - loss);
-            DatabaseManager.Instance.UpdatePlayer(player);
-        }
-        foreach (var ps in awayPS)
-        {
-            var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
-            if (player == null) continue;
-            int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
-            if (awayBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
-            player.fisico = Mathf.Max(0, player.fisico - loss);
-            DatabaseManager.Instance.UpdatePlayer(player);
+            bool homeBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => (g.home_team_id == game.home_team_id || g.away_team_id == game.home_team_id)
+                       && g.is_played == 1 && g.game_day == game.game_day - 1);
+            bool awayBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => (g.home_team_id == game.away_team_id || g.away_team_id == game.away_team_id)
+                       && g.is_played == 1 && g.game_day == game.game_day - 1);
+            foreach (var ps in homePS)
+            {
+                var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
+                if (player == null) continue;
+                int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
+                if (homeBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
+                player.fisico = Mathf.Max(0, player.fisico - loss);
+                DatabaseManager.Instance.UpdatePlayer(player);
+            }
+            foreach (var ps in awayPS)
+            {
+                var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
+                if (player == null) continue;
+                int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
+                if (awayBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
+                player.fisico = Mathf.Max(0, player.fisico - loss);
+                DatabaseManager.Instance.UpdatePlayer(player);
+            }
         }
 
-        var homeInjuries = CheckInjuries(homePS);
-        var awayInjuries = CheckInjuries(awayPS);
+        var homeInjuries = persistToDb ? CheckInjuries(homePS) : new List<(int player_id, string type, int days)>();
+        var awayInjuries = persistToDb ? CheckInjuries(awayPS) : new List<(int player_id, string type, int days)>();
 
         var result = new GameResult
         {
@@ -297,21 +307,22 @@ public static class GameSimulator
         };
     }
 
-    static void PrepareRotationMetadata(List<PlayerStatSnapshot> players)
+    static void PrepareRotationMetadata(List<PlayerStatSnapshot> players, bool glLeague = false)
     {
         for (int i = 0; i < players.Count; i++)
         {
             players[i].starter = i < 5;
-            players[i].target_minutes = GetTargetMinutes(players[i]);
+            players[i].target_minutes = GetTargetMinutes(players[i], glLeague);
             if (players[i].fisico < 30)
                 players[i].target_minutes = Mathf.Max(8, players[i].target_minutes - 6);
         }
     }
 
-    public static int GetTargetMinutes(PlayerStatSnapshot player)
+    public static int GetTargetMinutes(PlayerStatSnapshot player, bool glLeague = false)
     {
         bool isStar = player.role == PlayerRole.Estrella || player.overall >= 85;
-        if (isStar) return player.starter ? 39 : 28;
+        // En G-League la estrella juega menos minutos aún, repartiendo carga con más banquillo.
+        if (isStar) return glLeague ? (player.starter ? 31 : 22) : (player.starter ? 39 : 28);
         if (player.starter)
             return player.role == PlayerRole.Titular || player.overall >= 78 ? 31 : 27;
         if (player.role == PlayerRole.Titular || player.overall >= 75) return 21;
@@ -349,7 +360,7 @@ public static class GameSimulator
         };
     }
 
-    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0)
+    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false)
     {
         int homePts = 0, awayPts = 0;
         int teamPoss = Mathf.Clamp(Mathf.RoundToInt(pace / 4 * UnityEngine.Random.Range(0.96f, 1.04f)), 22, 28);
@@ -378,7 +389,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < 0.5f)
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague);
                 homePts += outHome.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -389,7 +400,7 @@ public static class GameSimulator
             else
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague);
                 awayPts += outAway.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -405,7 +416,7 @@ public static class GameSimulator
         return (homePts, awayPts);
     }
 
-    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0)
+    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false)
     {
         int homePts = 0, awayPts = 0;
         int totalPoss = 24;
@@ -432,7 +443,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < 0.5f)
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague);
                 homePts += outHome.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -443,7 +454,7 @@ public static class GameSimulator
             else
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague);
                 awayPts += outAway.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -463,6 +474,22 @@ public static class GameSimulator
     {
         if (fisico >= 30) return 1f;
         return 0.75f + (fisico / 30f) * 0.25f;
+    }
+
+    /// <summary>Factor de compresión para la G-League: acerca los pesos de uso/rebote
+    /// hacia la media del quinteto, evitando que una estrella NBA (OVR ~80) domine por
+    /// completo frente a prospectos (~50) — p.ej. 40 PPP / 18 RPP. 0 = reparto
+    /// totalmente igualitario (~20% cada uno); 1 = sin cambios.</summary>
+    const float GL_COMPRESS = 0.2f;
+
+    /// <summary>Acerca cada peso hacia la media de la lista (conserva el orden pero
+    /// reduce el abismo estrella/resto). Solo se usa en partidos G-League.</summary>
+    static void CompressWeights(List<float> weights, float factor)
+    {
+        if (weights == null || weights.Count < 2) return;
+        float mean = weights.Sum() / weights.Count;
+        for (int i = 0; i < weights.Count; i++)
+            weights[i] = Mathf.Max(0.0001f, mean + (weights[i] - mean) * factor);
     }
 
     static void AddLog(List<PlayByPlayEvent> log, int quarter, string desc, int homeScore, int awayScore, float elapsed, List<StatDelta> deltas = null)
@@ -537,7 +564,7 @@ public static class GameSimulator
         if (amount != 0) deltas.Add(new StatDelta { player_id = player_id, stat = stat, amount = amount });
     }
 
-    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR)
+    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR, bool glLeague = false)
     {
         var off = offIds.Select(i => offAll[i]).ToList();
         var def = defIds.Select(i => defAll[i]).ToList();
@@ -553,7 +580,7 @@ public static class GameSimulator
             };
         }
 
-        var shooter = PickShooter(off);
+        var shooter = PickShooter(off, glLeague);
         if (shooter == null)
             return new PossessionOutcome { pts = 0, desc = "Pérdida" };
 
@@ -570,7 +597,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < pct)
             {
                 shooter.fg3m++; shooter.fgm++; shooter.points += 3;
-                string astr = DoAst(off, shooter);
+                string astr = DoAst(off, shooter, glLeague);
                 return new PossessionOutcome
                 {
                     pts = 3,
@@ -579,7 +606,7 @@ public static class GameSimulator
                         : $"{shooter.name} encesta un triple"
                 };
             }
-            return MissHandler(def, off, shooter, true);
+            return MissHandler(def, off, shooter, true, glLeague);
         }
 
         float fp2 = FisicoPenalty(shooter.fisico);
@@ -589,7 +616,7 @@ public static class GameSimulator
         if (UnityEngine.Random.value < pct2)
         {
             shooter.fgm++; shooter.points += 2;
-            string astr = DoAst(off, shooter);
+            string astr = DoAst(off, shooter, glLeague);
             if (UnityEngine.Random.value < 0.06f)
             {
                 string foulName = DoFoul(def);
@@ -617,10 +644,10 @@ public static class GameSimulator
                     : $"{shooter.name} anota de dos"
             };
         }
-        return MissHandler(def, off, shooter, false);
+        return MissHandler(def, off, shooter, false, glLeague);
     }
 
-    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree)
+    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree, bool glLeague = false)
     {
         // Un solo intento colectivo: el defensor se elige por atributo y posición,
         // evitando que el orden de la lista convierta a un base en taponador principal.
@@ -670,7 +697,7 @@ public static class GameSimulator
             return new PossessionOutcome { pts = made, desc = ftDesc };
         }
 
-        string rebName = DoReb(def, off);
+        string rebName = DoReb(def, off, glLeague);
         return new PossessionOutcome
         {
             pts = 0,
@@ -680,10 +707,11 @@ public static class GameSimulator
         };
     }
 
-    static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court)
+    static PlayerStatSnapshot PickShooter(List<PlayerStatSnapshot> court, bool glLeague = false)
     {
         if (court.Count == 0) return null;
         var weights = court.Select(p => Mathf.Pow(p.overall / 100f, 2.2f) * FisicoPenalty(p.fisico)).ToList();
+        if (glLeague) CompressWeights(weights, GL_COMPRESS);
         float total = weights.Sum();
         if (total <= 0) return court[UnityEngine.Random.Range(0, court.Count)];
         float r = UnityEngine.Random.value * total;
@@ -712,12 +740,15 @@ public static class GameSimulator
         return UnityEngine.Random.value < adj ? "3" : "2";
     }
 
-    static string DoAst(List<PlayerStatSnapshot> court, PlayerStatSnapshot scorer)
+    static string DoAst(List<PlayerStatSnapshot> court, PlayerStatSnapshot scorer, bool glLeague = false)
     {
-        if (UnityEngine.Random.value >= 0.35f) return null;
+        // En la G-League hay más canastas asistidas (reparto más coral del ataque):
+        // sin el reparto extra, los líderes no llegan ni a 4 APP porque el star
+        // acapara los tiros y quedan pocas canastas ajenas que asistir.
+        if (UnityEngine.Random.value >= (glLeague ? 0.60f : 0.35f)) return null;
         var others = court.Where(p => p != scorer).ToList();
         if (others.Count == 0) return null;
-        var w = others.Select(p => Mathf.Pow(Mathf.Max(1, p.passing), 3)).ToList();
+        var w = others.Select(p => Mathf.Pow(Mathf.Max(1, p.passing), 3f)).ToList();
         float t = w.Sum();
         if (t <= 0) return null;
         float r = UnityEngine.Random.value * t;
@@ -730,28 +761,35 @@ public static class GameSimulator
         return null;
     }
 
-    static string DoReb(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off)
+    static string DoReb(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, bool glLeague = false)
     {
-        float dw = def.Sum(p => ReboundWeight(p, false));
-        float ow = off.Sum(p => ReboundWeight(p, true));
-        float t = dw + ow;
+        var dw = def.Select(p => ReboundWeight(p, false)).ToList();
+        var ow = off.Select(p => ReboundWeight(p, true)).ToList();
+        if (glLeague)
+        {
+            CompressWeights(dw, GL_COMPRESS);
+            CompressWeights(ow, GL_COMPRESS);
+        }
+        float dSum = dw.Sum();
+        float oSum = ow.Sum();
+        float t = dSum + oSum;
         if (t <= 0) return null;
 
-        if (UnityEngine.Random.value * t < dw)
-            return AwardReb(def, true);
-        return AwardReb(off, false);
+        if (UnityEngine.Random.value * t < dSum)
+            return AwardReb(def, dw, true);
+        return AwardReb(off, ow, false);
     }
 
-    static string AwardReb(List<PlayerStatSnapshot> players, bool defensive)
+    static string AwardReb(List<PlayerStatSnapshot> players, List<float> weights, bool defensive)
     {
-        var w = players.Select(p => ReboundWeight(p, !defensive)).ToList();
-        float s = w.Sum();
+        if (players.Count == 0) return null;
+        float s = weights.Sum();
         if (s <= 0) return null;
         float r = UnityEngine.Random.value * s;
         float c = 0;
         for (int i = 0; i < players.Count; i++)
         {
-            c += w[i];
+            c += weights[i];
             if (r <= c)
             {
                 if (defensive) players[i].dreb++;
