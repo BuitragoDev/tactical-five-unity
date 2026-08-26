@@ -192,39 +192,45 @@ public class SeasonSummaryController : UIScreenController
     {
         if (_glSection == null) return;
 
+        _glSection.style.display = DisplayStyle.Flex;
+
         var champions = DatabaseManager.Instance.GetGLeagueChampions(_manager.id);
         var glChamp = champions.FirstOrDefault(c => c.season_id == _season.id);
 
-        if (glChamp == null)
+        if (glChamp != null)
         {
-            _glSection.style.display = DisplayStyle.None;
-            return;
+            _glChampionName.text = glChamp.team_name.ToUpper();
+            if (_logoSpritesLarge.TryGetValue(glChamp.team_name, out var glLogo))
+                _glChampionLogo.style.backgroundImage = new StyleBackground(glLogo);
+
+            var finalGame = DatabaseManager.Instance.GetGLFinalGame(_manager.id, _season.id);
+            if (finalGame != null)
+            {
+                int homeId = GLeagueHelper.DecodeGlTeamId(finalGame.home_team_id);
+                int awayId = GLeagueHelper.DecodeGlTeamId(finalGame.away_team_id);
+                var homeTeam = DatabaseManager.Instance.GetGLeagueTeam(homeId);
+                var awayTeam = DatabaseManager.Instance.GetGLeagueTeam(awayId);
+
+                _glFinalsResult.text = $"{finalGame.home_score}-{finalGame.away_score}";
+
+                bool homeWon = finalGame.home_score > finalGame.away_score;
+                var loserTeam = homeWon ? awayTeam : homeTeam;
+                _glFinalsLoser.text = loserTeam != null ? $"vs {loserTeam.name.ToUpper()}" : "";
+            }
+            else
+            {
+                _glFinalsResult.text = "--";
+                _glFinalsLoser.text = "";
+            }
+        }
+        else
+        {
+            _glChampionName.text = "—";
+            _glChampionLogo.style.backgroundImage = null;
+            _glFinalsResult.text = "--";
+            _glFinalsLoser.text = "Sin datos";
         }
 
-        _glSection.style.display = DisplayStyle.Flex;
-
-        // Champion
-        _glChampionName.text = glChamp.team_name.ToUpper();
-        if (_logoSpritesLarge.TryGetValue(glChamp.team_name, out var glLogo))
-            _glChampionLogo.style.backgroundImage = new StyleBackground(glLogo);
-
-        // Final score
-        var finalGame = DatabaseManager.Instance.GetGLFinalGame(_manager.id, _season.id);
-        if (finalGame != null)
-        {
-            int homeId = GLeagueHelper.DecodeGlTeamId(finalGame.home_team_id);
-            int awayId = GLeagueHelper.DecodeGlTeamId(finalGame.away_team_id);
-            var homeTeam = DatabaseManager.Instance.GetGLeagueTeam(homeId);
-            var awayTeam = DatabaseManager.Instance.GetGLeagueTeam(awayId);
-
-            _glFinalsResult.text = $"{finalGame.home_score}-{finalGame.away_score}";
-
-            bool homeWon = finalGame.home_score > finalGame.away_score;
-            var loserTeam = homeWon ? awayTeam : homeTeam;
-            _glFinalsLoser.text = loserTeam != null ? $"vs {loserTeam.name.ToUpper()}" : "";
-        }
-
-        // Season MVP
         var mvp = DatabaseManager.Instance.GetGLSeasonMVP(_manager.id, _season.id);
         if (mvp != null)
         {
@@ -234,7 +240,6 @@ public class SeasonSummaryController : UIScreenController
             _glMvpReb.text = mvp.avg_reb.ToString("F1");
             _glMvpVal.text = mvp.avg_rating.ToString("F1");
 
-            // Foto: prospects (>=500000) no tienen foto, avatar gris
             if (mvp.player_id >= GLeagueHelper.PROSPECT_ID_OFFSET)
             {
                 _glMvpPhoto.style.backgroundImage = null;

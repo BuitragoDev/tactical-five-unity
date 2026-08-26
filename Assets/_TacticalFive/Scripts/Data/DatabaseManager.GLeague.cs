@@ -203,7 +203,7 @@ public partial class DatabaseManager
 
     public GLSeasonMVPRow GetGLSeasonMVP(int managerId, int seasonId)
     {
-        // Primero: prospectos (player_id >= 500000)
+        // Primero: prospectos (player_id >= 500000, offset en gleague_season_stats)
         var prospectMVP = _db.Query<GLSeasonMVPRow>(@"
             SELECT gs.player_id, gp.first_name, gp.last_name, gp.position,
                    gt.name as team_name, gt.logo as team_logo,
@@ -213,10 +213,10 @@ public partial class DatabaseManager
                    CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
                    CAST(gs.assists AS REAL)/gs.games as avg_ast
             FROM gleague_season_stats gs
-            JOIN gleague_players gp ON gs.player_id = gp.id
+            JOIN gleague_players gp ON gs.player_id = gp.id + 500000
             JOIN gleague_teams gt ON gp.gleague_team_id = gt.id
             WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id >= 500000
-            ORDER BY avg_rating DESC LIMIT 1", seasonId).FirstOrDefault();
+            ORDER BY CAST(gs.rating AS REAL)/gs.games DESC LIMIT 1", seasonId).FirstOrDefault();
 
         if (prospectMVP != null) return prospectMVP;
 
@@ -233,6 +233,6 @@ public partial class DatabaseManager
             JOIN players p ON gs.player_id = p.id
             JOIN teams t ON p.team_id = t.id
             WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id < 500000
-            ORDER BY avg_rating DESC LIMIT 1", seasonId).FirstOrDefault();
+            ORDER BY CAST(gs.rating AS REAL)/gs.games DESC LIMIT 1", seasonId).FirstOrDefault();
     }
 }
