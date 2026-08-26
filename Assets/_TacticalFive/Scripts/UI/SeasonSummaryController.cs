@@ -194,13 +194,21 @@ public class SeasonSummaryController : UIScreenController
 
         _glSection.style.display = DisplayStyle.Flex;
 
+        // Red de seguridad: si la G-League terminó la liga regular pero la
+        // postemporada no llegó a completarse (p.ej. el bucle diario acabó antes),
+        // completar el bracket para que exista campeón y final disputada.
+        if (_season != null)
+            GLeaguePostSeason.CompletePostSeason(_season, _manager.id);
+
         var champions = DatabaseManager.Instance.GetGLeagueChampions(_manager.id);
         var glChamp = champions.FirstOrDefault(c => c.season_id == _season.id);
 
         if (glChamp != null)
         {
             _glChampionName.text = glChamp.team_name.ToUpper();
-            if (_logoSpritesLarge.TryGetValue(glChamp.team_name, out var glLogo))
+
+            var championTeam = DatabaseManager.Instance.GetGLeagueTeam(glChamp.gleague_team_id);
+            if (championTeam != null && _logoSpritesLarge.TryGetValue(championTeam.logo, out var glLogo))
                 _glChampionLogo.style.backgroundImage = new StyleBackground(glLogo);
 
             var finalGame = DatabaseManager.Instance.GetGLFinalGame(_manager.id, _season.id);

@@ -340,4 +340,119 @@ public static class GLeaguePostSeason
         }
         return result;
     }
+
+    // ── BACKFILL / AUTO-COMPLETADO ───────────────────────
+
+    /// <summary>
+    /// Genera y simula la postemporada completa de G-League en una sola pasada
+    /// para que SIEMPRE exista un campeón al terminar la liga regular, sin
+    /// depender de que el bucle diario llegue a procesar cada ronda. Útil como
+    /// red de seguridad (p.ej. al abrir SeasonSummary) para temporadas cuyo
+    /// calendario diario ya ha terminado. NO toca seasons.phase.
+    /// </summary>
+    public static void CompletePostSeason(SeasonData season, int managerId)
+    {
+        if (season == null) return;
+        var db = DatabaseManager.Instance;
+
+        var glTeams = db.GetGLeagueTeams();
+        if (glTeams.Count == 0) return;
+
+        var glGames = db.GetAllGLeagueGames(managerId);
+        if (!glGames.Any()) return;
+
+        bool regularDone = !glGames.Any(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR && g.is_played == 0);
+        if (!regularDone) return;
+
+        // Si ya hay campeón, nada que hacer.
+        if (db.GetGLeagueChampions(managerId).Any(c => c.season_id == season.id)) return;
+
+        var regularGames = glGames.Where(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR).ToList();
+        var allProspects = db.GetAllGLeaguePlayers();
+        var assignedByNba = db.GetGLeagueAssignedByTeam();
+
+        // Bucle de generación: avanzar ronda a ronda hasta tener la Gran Final.
+        var poGames = glGames.Where(g => g.game_type == TYPE_PLAYOFF).ToList();
+        var finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
+
+        int guard = 0;
+        while (finalGame == null && guard++ < 20)
+        {
+            var pending = poGames.Where(g => g.is_played == 0).ToList();
+            if (pending.Count > 0)
+            {
+                SimulatePlayoffGames(season, managerId, pending, allProspects, assignedByNba);
+                // re-evaluar la final tras simular
+                finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
+                continue;
+            }
+
+            if (poGames.Count == 0)
+            {
+                GenerateQuarterfinals(season, managerId, glTeams, regularGames);
+            }
+            else
+            {
+                int nextDay = PickNextPendingDay(managerId, poGames.Max(g => g.game_day));
+                switch (NextMissingRound(poGames))
+                {
+                    case "sf":
+                        GenerateSemifinals(season, managerId, poGames,
+                            ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList()), nextDay);
+                        break;
+                    case "cf":
+                        GenerateConferenceFinals(season, managerId, poGames,
+                            ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList()), nextDay);
+                        break;
+                    case "final":
+                        GenerateGrandFinal(season, managerId, poGames,
+                            ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList()), nextDay);
+                        break;
+                    default:
+                        return;
+                }
+            }
+
+            var updated = db.GetAllGLeagueGames(managerId);
+            poGames = updated.Where(g => g.game_type == TYPE_PLAYOFF).ToList();
+            finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
+        }
+
+        if (finalGame != null)
+            RecordChampionIfNeeded(season, managerId, finalGame, glTeams, 0);
+    }
+
+    /// <summary>Simula una lista de partidos de playoffs G-League (sin tocar stats
+    /// NBA ni estado de jugadores; acumula gleague_season_stats como en liga).</summary>
+    static void SimulatePlayoffGames(SeasonData season, int managerId, List<GameData> games,
+        List<GLeaguePlayerData> allProspects, Dictionary<int, List<PlayerData>> assignedByNba)
+    {
+        var db = DatabaseManager.Instance;
+        foreach (var game in games)
+        {
+            var homeTeam = db.GetGLeagueTeam(GLeagueHelper.DecodeGlTeamId(game.home_team_id));
+            var awayTeam = db.GetGLeagueTeam(GLeagueHelper.DecodeGlTeamId(game.away_team_id));
+            if (homeTeam == null || awayTeam == null)
+            {
+                game.is_played = 1;
+                db.UpdateGame(game);
+                continue;
+            }
+
+            var homePlayers = GLeagueHelper.BuildAffiliateLineup(homeTeam, allProspects, assignedByNba);
+            var awayPlayers = GLeagueHelper.BuildAffiliateLineup(awayTeam, allProspects, assignedByNba);
+
+            var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, false,
+                persistToDb: false, glLeague: true);
+            db.UpdateGame(game);
+
+            foreach (var ps in result.home_stats.Concat(result.away_stats))
+            {
+                if (ps.minutes <= 0) continue;
+                var (pts, reb, ast, stl, blk, tov) =
+                    GLeagueHelper.ClampLine(ps.points, ps.oreb + ps.dreb, ps.assists, ps.steals, ps.blocks, ps.turnovers);
+                db.AddGLeagueGameStat(ps.player_id, season.id, pts, reb, ast, stl, blk, tov, ps.rating);
+            }
+        }
+    }
 }

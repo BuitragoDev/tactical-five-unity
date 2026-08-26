@@ -179,7 +179,6 @@
 .columns-row {
     flex-direction: row;
     flex-grow: 1;
-    gap: 32px;
     align-items: flex-start;
 }
 
@@ -187,6 +186,10 @@
     flex-direction: column;
     flex: 1;
     align-items: center;
+}
+
+.column--gl {
+    margin-left: 32px;
 }
 
 .column-title {

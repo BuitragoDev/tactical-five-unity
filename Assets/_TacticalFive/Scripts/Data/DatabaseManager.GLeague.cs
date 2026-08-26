@@ -115,6 +115,18 @@ public partial class DatabaseManager
     public void SaveGLeagueGames(List<GameData> games)
     {
         if (games.Count == 0) return;
+
+        // Si ya hay una transacción abierta (p.ej. el día de partido), no abrir
+        // una anidada: sqlite-net lanza InvalidOperationException y la generación
+        // de playoffs de G-League fallaría silenciosamente. Inserta directamente.
+        if (_db.IsInTransaction)
+        {
+            foreach (var g in games)
+                _db.Insert(g);
+            Debug.Log($"[DB] {games.Count} partidos G-League guardados (tx existente).");
+            return;
+        }
+
         _db.BeginTransaction();
         try
         {
