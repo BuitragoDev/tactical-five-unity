@@ -154,24 +154,15 @@
 .content-area {
     flex-grow: 1;
     flex-direction: column;
-    align-items: center;
-    padding: 40px 20px;
+    padding: 24px 32px;
     overflow-y: auto;
 }
 
 /* ── SUMMARY HEADER ── */
 .summary-header {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
     align-items: center;
-}
-.summary-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 48px;
-    letter-spacing: 4px;
-    -unity-text-transform: upper;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
 }
 .season-tag {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -184,16 +175,60 @@
     -unity-text-align: middle-center;
 }
 
+/* ── TWO-COLUMN LAYOUT ── */
+.columns-row {
+    flex-direction: row;
+    flex-grow: 1;
+    gap: 32px;
+    align-items: flex-start;
+}
+
+.column {
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+}
+
+.column-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 4px;
+    -unity-text-transform: upper;
+    padding-bottom: 6px;
+    margin-bottom: 20px;
+    -unity-text-align: middle-center;
+    min-width: 300px;
+    border-bottom-width: 2px;
+}
+.column-title--nba {
+    color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
+}
+.column-title--gl {
+    color: rgb(0, 188, 180);
+    border-bottom-color: rgb(0, 188, 180);
+}
+
+.card-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    margin-bottom: 8px;
+    -unity-text-align: middle-center;
+}
+
 /* ── CHAMPION CARD ── */
 .champion-card {
     background-color: rgb(17, 24, 34);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
-    padding: 40px;
+    padding: 24px;
     text-align: center;
-    margin-bottom: 24px;
-    min-width: 500px;
+    margin-bottom: 20px;
     align-items: center;
+    width: 100%;
 }
 .champion-logo {
     width: 120px;
@@ -241,9 +276,9 @@
     background-color: rgb(17, 24, 34);
     border-width: 1px;
     border-color: rgb(73, 115, 205);
-    padding: 24px;
+    padding: 20px;
     text-align: center;
-    min-width: 500px;
+    width: 100%;
     align-items: center;
 }
 .mvp-photo-wrapper {
@@ -320,31 +355,9 @@
    G-LEAGUE SECTION
    ══════════════════════════════════════════ */
 
-.gl-section {
-    width: 100%;
+.gl-cards-col {
+    flex-direction: column;
     align-items: center;
-    margin-top: 40px;
-}
-
-.gl-divider {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 32px;
-    letter-spacing: 6px;
-    -unity-text-transform: upper;
-    color: rgb(0, 188, 180);
-    border-bottom-width: 2px;
-    border-bottom-color: rgb(0, 188, 180);
-    padding-bottom: 8px;
-    margin-bottom: 28px;
-    -unity-text-align: middle-center;
-    min-width: 400px;
-}
-
-.gl-cards-row {
-    flex-direction: row;
-    justify-content: center;
-    gap: 28px;
-    align-items: flex-start;
     width: 100%;
 }
 
@@ -353,11 +366,11 @@
     background-color: rgb(10, 24, 30);
     border-width: 2px;
     border-color: rgb(0, 188, 180);
-    padding: 28px 32px;
+    padding: 24px;
     text-align: center;
     align-items: center;
-    flex: 1;
-    max-width: 440px;
+    width: 100%;
+    margin-bottom: 20px;
 }
 
 .gl-card-title {
@@ -421,10 +434,9 @@
     background-color: rgb(10, 24, 30);
     border-width: 1px;
     border-color: rgb(0, 150, 144);
-    padding: 24px;
+    padding: 20px;
     text-align: center;
-    flex: 1;
-    max-width: 440px;
+    width: 100%;
     align-items: center;
 }
 
