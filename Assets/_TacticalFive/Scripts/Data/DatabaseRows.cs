@@ -221,4 +221,6 @@ public class GLSeasonMVPRow
     public double avg_pts { get; set; }
     public double avg_reb { get; set; }
     public double avg_ast { get; set; }
+    public double avg_stl { get; set; }
+    public double avg_blk { get; set; }
 }

@@ -326,6 +326,7 @@
     flex-direction: row;
     justify-content: center;
     margin-top: 12px;
+    flex-wrap: wrap;
 }
 .mvp-stat-box {
     flex-direction: column;
@@ -482,6 +483,7 @@
     flex-direction: row;
     justify-content: center;
     margin-top: 12px;
+    flex-wrap: wrap;
 }
 
 .gl-mvp-stat-box {

@@ -405,6 +405,46 @@ public class GLeaguePostSeasonTests
         var tie = Played("gleague", 5, 6, 100, 100);
         Assert.That(GLeaguePostSeasonTestsAccess.WinnerForTest(tie), Is.EqualTo(5));
     }
+
+    [Test]
+    public void SeriesScoreForTeam_SumaSoloJugados()
+    {
+        // Serie mejor de 3 entre 2 y 3. G1 gana local(2), G2 gana visitante(3), G3 se genera 2-1: serie 2-1.
+        var serie = new List<GameData>
+        {
+            Played("gleague_playoff", 2, 3, 110, 90, "gl-final"),
+            Played("gleague_playoff", 2, 3, 90, 100, "gl-final"),
+            Played("gleague_playoff", 2, 3, 105, 98, "gl-final"),
+        };
+
+        // Para el equipo 2 (local del G1) el parcial es 2-1.
+        Assert.That(GLeaguePostSeason.SeriesScoreForTeam(serie, 2), Is.EqualTo("2-1"));
+        Assert.That(GLeaguePostSeason.SeriesScoreForTeam(serie, 3), Is.EqualTo("1-2"));
+
+        // Un partido sin jugar no suma.
+        var unfinished = new List<GameData>
+        {
+            Played("gleague_playoff", 2, 3, 110, 90, "gl-final"),
+            new GameData { game_type = "gleague_playoff", series_label = "gl-final",
+                home_team_id = GLeagueHelper.EncodeGlTeamId(2), away_team_id = GLeagueHelper.EncodeGlTeamId(3),
+                is_played = 0, home_score = 0, away_score = 0 }
+        };
+        Assert.That(GLeaguePostSeason.SeriesScoreForTeam(unfinished, 2), Is.EqualTo("1-0"));
+    }
+
+    [Test]
+    public void SeriesResult_FormatoLocalVisitante()
+    {
+        var serie = new List<GameData>
+        {
+            Played("gleague_playoff", 4, 5, 90, 110, "gl-cf-east"),
+            Played("gleague_playoff", 4, 5, 100, 95, "gl-cf-east"),
+            Played("gleague_playoff", 4, 5, 80, 99, "gl-cf-east"),
+        };
+        // local(4) ganó G1 y G3; visitante(5) ganó G2 → 2-1 (local-visitante)
+        Assert.That(GLeaguePostSeason.SeriesResult(serie), Is.EqualTo("2-1"));
+        Assert.That(GLeaguePostSeason.SeriesResult(new List<GameData>()), Is.EqualTo("0-0"));
+    }
 }
 
 /// <summary>Acceso a la semántica de WinnerOf (privada) para tests.</summary>

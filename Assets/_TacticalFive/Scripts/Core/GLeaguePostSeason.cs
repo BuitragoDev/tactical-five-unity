@@ -4,10 +4,13 @@ using System.Linq;
 using UnityEngine;
 
 /// <summary>
-/// Postemporada G-League: eliminatoria directa por conferencias (QF → SF → CF)
-/// más Gran Final entre campeones de conferencia. Cada ronda se genera cuando
-/// la anterior está completa, fechada en el siguiente día con partidos
-/// pendientes. Es una competición PARALELA: nunca modifica seasons.phase.
+/// Postemporada G-League: eliminatoria por conferencias (QF → SF → CF) más
+/// Gran Final entre campeones de liga. Cada serie es al MEJOR DE 3 (el primero
+/// que llegue a 2 victorias avanza; si queda 1-1 se disputa el 3º partido).
+/// Todos los partidos de una serie comparten series_label; se generan de forma
+/// incremental (partido 1, luego 2 si hace falta, luego 3 si queda 1-1),
+/// fechados en el siguiente día con actividad. Competición PARALELA: nunca
+/// modifica seasons.phase.
 ///
 /// Convenciones de series_label:
 ///   gl-qf-east-1 … gl-qf-east-4   (cuartos; 1v8, 4v5, 2v7, 3v6)
@@ -19,11 +22,15 @@ public static class GLeaguePostSeason
 {
     public const string TYPE_PLAYOFF = "gleague_playoff";
     public const int TEAMS_PER_CONFERENCE = 8;
+    public const int SERIES_WIN_NEEDED = 2; // best of 3 → primero a 2
+    public const int SERIES_MAX_GAMES = 3;
 
     const string LBL_QF = "gl-qf";
     const string LBL_SF = "gl-sf";
     const string LBL_CF = "gl-cf";
     const string LBL_FINAL = "gl-final";
+
+    static readonly string[] RoundOrder = { LBL_QF, LBL_SF, LBL_CF, LBL_FINAL };
 
     /// <summary>Punto de entrada diario. Debe llamarse DENTRO de la transacción
     /// del día, tras las transiciones de fase NBA.</summary>
@@ -37,66 +44,259 @@ public static class GLeaguePostSeason
 
         var glGames = db.GetAllGLeagueGames(managerId);
 
-        // Sin competición GL esta temporada (slot antiguo con calendario ya
-        // generado antes de esta feature): no avisar cada día.
+        // Sin competición GL esta temporada: no avisar cada día.
         if (!glGames.Any()) return;
 
         bool regularDone = !glGames.Any(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR && g.is_played == 0);
         if (!regularDone) return;
 
         var poGames = glGames.Where(g => g.game_type == TYPE_PLAYOFF).ToList();
+        var regularGames = glGames.Where(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR).ToList();
 
-        // Sin bracket y liga regular terminada → generar cuartos
+        // Gran Final decidida → registrar campeón (idempotente).
+        var finalSeries = SeriesGames(poGames, LBL_FINAL);
+        if (finalSeries.Any() && SeriesDecided(finalSeries))
+        {
+            RecordChampionIfNeeded(season, managerId, finalSeries, glTeams, myNbaTeamId);
+            return;
+        }
+
+        // Sin bracket y liga regular terminada → crear cuartos de final.
         if (poGames.Count == 0)
         {
-            GenerateQuarterfinals(season, managerId, glTeams,
-                glGames.Where(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR).ToList());
+            GenerateRoundNextGames(season, managerId, glTeams, poGames, regularGames, LBL_QF);
             return;
         }
 
-        // Ronda en curso → esperar a que termine
-        if (poGames.Any(g => g.is_played == 0)) return;
-
-        // Bracket completo y final jugada → registrar campeón (una sola vez)
-        var finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
-        if (finalGame != null)
-        {
-            RecordChampionIfNeeded(season, managerId, finalGame, glTeams, myNbaTeamId);
-            return;
-        }
-
-        // Avanzar la siguiente ronda pendiente
-        var seeds = ComputeRegularSeeds(glTeams,
-            glGames.Where(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR && g.is_played == 1).ToList());
-        int nextDay = PickNextPendingDay(managerId, poGames.Max(g => g.game_day));
-
-        switch (NextMissingRound(poGames))
-        {
-            case "sf":
-                GenerateSemifinals(season, managerId, poGames, seeds, nextDay);
-                break;
-            case "cf":
-                GenerateConferenceFinals(season, managerId, poGames, seeds, nextDay);
-                break;
-            case "final":
-                GenerateGrandFinal(season, managerId, poGames, seeds, nextDay);
-                break;
-        }
+        // Avanzar la ronda en curso (generar el siguiente partido pendiente).
+        string round = NextRoundToAdvance(poGames);
+        if (round == null) return;
+        GenerateRoundNextGames(season, managerId, glTeams, poGames, regularGames, round);
     }
 
-    static string NextMissingRound(List<GameData> poGames)
+    /// <summary>Ronda que debe avanzarse: la primera con series sin decidir, o la
+    /// siguiente por crear cuando la actual ya está cerrada. null si no hay nada
+    /// pendiente (la Gran Final ya está decidida).</summary>
+    static string NextRoundToAdvance(List<GameData> poGames)
     {
-        var qf = poGames.Where(g => g.series_label.StartsWith(LBL_QF)).ToList();
-        if (qf.Count == 0 || qf.Any(g => g.is_played == 0)) return null;
-        if (!poGames.Any(g => g.series_label.StartsWith(LBL_SF))) return "sf";
+        foreach (var prefix in RoundOrder)
+        {
+            if (!poGames.Any(g => g.series_label.StartsWith(prefix)))
+                return prefix; // ronda aún no creada
+            if (!RoundDecided(poGames, prefix))
+                return prefix; // ronda en curso sin decidir
+        }
+        return null;
+    }
 
-        var sf = poGames.Where(g => g.series_label.StartsWith(LBL_SF)).ToList();
-        if (sf.Any(g => g.is_played == 0)) return null;
-        if (!poGames.Any(g => g.series_label.StartsWith(LBL_CF))) return "cf";
+    static bool RoundDecided(List<GameData> poGames, string prefix)
+    {
+        var round = poGames.Where(g => g.series_label.StartsWith(prefix)).ToList();
+        if (round.Count == 0) return false;
+        return round.GroupBy(g => g.series_label).All(sg => SeriesDecided(sg.ToList()));
+    }
 
-        var cf = poGames.Where(g => g.series_label.StartsWith(LBL_CF)).ToList();
-        if (cf.Any(g => g.is_played == 0)) return null;
-        return "final";
+    // ── GENERACIÓN DE PARTIDOS DE UNA RONDA ──────────────
+
+    /// <summary>Genera el siguiente partido de cada serie de la ronda que lo
+    /// necesite (no creada → partido 1; en curso y sin decidir → partido 2/3).</summary>
+    static void GenerateRoundNextGames(SeasonData season, int managerId,
+        List<GLeagueTeamData> glTeams, List<GameData> poGames, List<GameData> regularGames, string roundPrefix)
+    {
+        var seeds = ComputeRegularSeeds(glTeams,
+            regularGames.Where(g => g.is_played == 1).ToList());
+
+        var matchups = BuildRoundMatchups(roundPrefix, glTeams, poGames, regularGames);
+        if (matchups.Count == 0) return;
+
+        var newGames = new List<GameData>();
+        foreach (var (a, b, label) in matchups)
+        {
+            var g = MakeNextSeriesGame(season, managerId, a, b, label, seeds, poGames);
+            if (g != null) newGames.Add(g);
+        }
+
+        if (newGames.Count > 0)
+            AssignDayAndSave(season, managerId, newGames, RoundLabel(roundPrefix));
+    }
+
+    /// <summary>Emparejamientos (a, b ordenados por mejor seed como posible local,
+    /// label de serie) de una ronda, a partir de los ganadores de la ronda previa.</summary>
+    static List<(int a, int b, string label)> BuildRoundMatchups(string roundPrefix,
+        List<GLeagueTeamData> glTeams, List<GameData> poGames, List<GameData> regularGames)
+    {
+        var result = new List<(int, int, string)>();
+
+        if (roundPrefix == LBL_QF)
+        {
+            var seeds = ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList());
+
+            foreach (var conf in new[] { "East", "West" })
+            {
+                var confTeams = glTeams.Where(t => t.conference == conf).ToList();
+                var ranked = seeds.Where(kv => kv.Value.seed > 0 && confTeams.Any(t => t.id == kv.Key))
+                    .OrderBy(kv => kv.Value.seed)
+                    .Take(TEAMS_PER_CONFERENCE)
+                    .ToList();
+
+                if (ranked.Count < TEAMS_PER_CONFERENCE)
+                {
+                    Debug.LogWarning($"[GLeague] {conf}: solo {ranked.Count} equipos elegibles para playoffs.");
+                    continue;
+                }
+
+                int[][] pairs =
+                {
+                    new[] { 0, 7 }, // 1 v 8
+                    new[] { 3, 4 }, // 4 v 5
+                    new[] { 1, 6 }, // 2 v 7
+                    new[] { 2, 5 }, // 3 v 6
+                };
+
+                for (int i = 0; i < pairs.Length; i++)
+                {
+                    var higher = ranked[pairs[i][0]];
+                    var lower = ranked[pairs[i][1]];
+                    result.Add((higher.Key, lower.Key, $"{LBL_QF}-{conf.ToLower()}-{i + 1}"));
+                }
+            }
+            return result;
+        }
+
+        if (roundPrefix == LBL_SF)
+        {
+            foreach (var conf in new[] { "East", "West" })
+            {
+                for (int band = 1; band <= 2; band++)
+                {
+                    var w1 = SeriesWinner(SeriesGames(poGames, $"{LBL_QF}-{conf.ToLower()}-{(band - 1) * 2 + 1}"));
+                    var w2 = SeriesWinner(SeriesGames(poGames, $"{LBL_QF}-{conf.ToLower()}-{(band - 1) * 2 + 2}"));
+                    if (w1 == 0 || w2 == 0) continue;
+                    string suffix = band == 1 ? "a" : "b";
+                    result.Add((w1, w2, $"{LBL_SF}-{conf.ToLower()}-{suffix}"));
+                }
+            }
+            return result;
+        }
+
+        if (roundPrefix == LBL_CF)
+        {
+            foreach (var conf in new[] { "East", "West" })
+            {
+                var w1 = SeriesWinner(SeriesGames(poGames, $"{LBL_SF}-{conf.ToLower()}-a"));
+                var w2 = SeriesWinner(SeriesGames(poGames, $"{LBL_SF}-{conf.ToLower()}-b"));
+                if (w1 == 0 || w2 == 0) continue;
+                result.Add((w1, w2, $"{LBL_CF}-{conf.ToLower()}"));
+            }
+            return result;
+        }
+
+        if (roundPrefix == LBL_FINAL)
+        {
+            var east = SeriesWinner(SeriesGames(poGames, $"{LBL_CF}-east"));
+            var west = SeriesWinner(SeriesGames(poGames, $"{LBL_CF}-west"));
+            if (east == 0 || west == 0) return result;
+            result.Add((east, west, LBL_FINAL));
+        }
+
+        return result;
+    }
+
+    /// <summary>Devuelve el siguiente partido de la serie (o null si no procede).
+    /// El mejor seed es local en los partidos impares (1 y 3); el peor en el 2.</summary>
+    static GameData MakeNextSeriesGame(SeasonData season, int managerId, int a, int b,
+        string label, Dictionary<int, (int seed, float winPct)> seeds, List<GameData> poGames)
+    {
+        var series = SeriesGames(poGames, label);
+
+        // Serie no creada → partido 1 (local el mejor seed).
+        if (series.Count == 0)
+            return MakeGameBetterSeedHome(season, managerId, a, b, label, seeds);
+
+        if (SeriesDecided(series)) return null; // serie resuelta; no más partidos
+
+        int homeId = GLeagueHelper.DecodeGlTeamId(series[0].home_team_id); // mejor seed (local del G1)
+        int awayId = GLeagueHelper.DecodeGlTeamId(series[0].away_team_id);
+        int nextNum = series.Count + 1;
+
+        int home = (nextNum % 2 == 1) ? homeId : awayId;   // 1,3 → mejor; 2 → peor
+        int away = (nextNum % 2 == 1) ? awayId : homeId;
+        return MakeGame(season, managerId, home, away, label);
+    }
+
+    // ── LÓGICA DE SERIES (mejor de 3) ────────────────────
+
+    static List<GameData> SeriesGames(List<GameData> poGames, string label)
+        => poGames.Where(g => g.series_label == label).ToList();
+
+    /// <summary>true si alguna de las dos filiales ya tiene SERIES_WIN_NEEDED
+    /// victorias (o se han jugado los máximos partidos).</summary>
+    static bool SeriesDecided(List<GameData> series)
+    {
+        if (series.Count == 0) return false;
+        int homeId = GLeagueHelper.DecodeGlTeamId(series[0].home_team_id);
+        int awayId = GLeagueHelper.DecodeGlTeamId(series[0].away_team_id);
+        return DecideWinner(series, homeId, awayId) != 0;
+    }
+
+    /// <summary>Equipo ganador de la serie (id de filial sin codificar), o 0.</summary>
+    static int SeriesWinner(List<GameData> series)
+    {
+        if (series == null || series.Count == 0) return 0;
+        int homeId = GLeagueHelper.DecodeGlTeamId(series[0].home_team_id);
+        int awayId = GLeagueHelper.DecodeGlTeamId(series[0].away_team_id);
+        return DecideWinner(series, homeId, awayId);
+    }
+
+    static int DecideWinner(List<GameData> series, int homeId, int awayId)
+    {
+        int wh = 0, wa = 0;
+        foreach (var g in series)
+        {
+            if (g.is_played != 1) continue;
+            int w = WinnerOf(g);
+            if (w == homeId) wh++;
+            else if (w == awayId) wa++;
+        }
+        if (wh >= SERIES_WIN_NEEDED) return homeId;
+        if (wa >= SERIES_WIN_NEEDED) return awayId;
+        return 0;
+    }
+
+    /// <summary>Parcial de la serie como "2-1" (victorias del equipo local y
+    /// visitante de esta serie).</summary>
+    public static string SeriesResult(List<GameData> series)
+    {
+        if (series == null || series.Count == 0) return "0-0";
+        int homeId = GLeagueHelper.DecodeGlTeamId(series[0].home_team_id);
+        int awayId = GLeagueHelper.DecodeGlTeamId(series[0].away_team_id);
+        int wh = 0, wa = 0;
+        foreach (var g in series)
+        {
+            if (g.is_played != 1) continue;
+            int w = WinnerOf(g);
+            if (w == homeId) wh++;
+            else if (w == awayId) wa++;
+        }
+        return $"{wh}-{wa}";
+    }
+
+    /// <summary>Parcial de la serie "victorias del equipo dado - victorias del rival".</summary>
+    public static string SeriesScoreForTeam(List<GameData> series, int teamId)
+    {
+        if (series == null || series.Count == 0) return "0-0";
+        int homeId = GLeagueHelper.DecodeGlTeamId(series[0].home_team_id);
+        int awayId = GLeagueHelper.DecodeGlTeamId(series[0].away_team_id);
+        int otherId = homeId == teamId ? awayId : homeId;
+        int wins = 0, otherWins = 0;
+        foreach (var g in series)
+        {
+            if (g.is_played != 1) continue;
+            int w = WinnerOf(g);
+            if (w == teamId) wins++;
+            else if (w == otherId) otherWins++;
+        }
+        return $"{wins}-{otherWins}";
     }
 
     /// <summary>Primer día futuro con partidos pendientes (cualquier competición)
@@ -110,108 +310,6 @@ public static class GLeaguePostSeason
             .OrderBy(d => d)
             .ToList();
         return days.Count > 0 ? days[0] : minDayExclusive + 1;
-    }
-
-    // ── GENERADORES DE RONDAS ────────────────────────────
-
-    static void GenerateQuarterfinals(SeasonData season, int managerId,
-        List<GLeagueTeamData> glTeams, List<GameData> regularGames)
-    {
-        var seeds = ComputeRegularSeeds(glTeams, regularGames);
-
-        var games = new List<GameData>();
-        foreach (var conf in new[] { "East", "West" })
-        {
-            var ranked = seeds.Where(kv => kv.Value.seed > 0
-                    && glTeams.First(t => t.id == kv.Key).conference == conf)
-                .OrderBy(kv => kv.Value.seed)
-                .Take(TEAMS_PER_CONFERENCE)
-                .ToList();
-
-            if (ranked.Count < TEAMS_PER_CONFERENCE)
-            {
-                Debug.LogWarning($"[GLeague] {conf}: solo {ranked.Count} equipos elegibles para playoffs.");
-                continue;
-            }
-
-            int[][] pairs =
-            {
-                new[] { 0, 7 }, // 1 v 8
-                new[] { 3, 4 }, // 4 v 5
-                new[] { 1, 6 }, // 2 v 7
-                new[] { 2, 5 }, // 3 v 6
-            };
-
-            for (int i = 0; i < pairs.Length; i++)
-            {
-                var higher = ranked[pairs[i][0]];
-                var lower  = ranked[pairs[i][1]];
-                games.Add(MakeGame(season, managerId, higher.Key, lower.Key,
-                    $"{LBL_QF}-{conf.ToLower()}-{i + 1}"));
-            }
-        }
-
-        if (games.Count == 0) return;
-        AssignDateAndSave(season, managerId, games, "cuartos de final");
-    }
-
-    static void GenerateSemifinals(SeasonData season, int managerId, List<GameData> poGames,
-        Dictionary<int, (int seed, float winPct)> seeds, int gameDay)
-    {
-        var games = new List<GameData>();
-        foreach (var conf in new[] { "East", "West" })
-        {
-            var qfWinners = new List<int>();
-            for (int slot = 1; slot <= 4; slot++)
-            {
-                var g = poGames.FirstOrDefault(x => x.series_label == $"{LBL_QF}-{conf.ToLower()}-{slot}");
-                if (g == null) return; // falta algo; no avanzar a medias
-                qfWinners.Add(WinnerOf(g));
-            }
-
-            // SF-a: ganador qf1 vs ganador qf2 · SF-b: ganador qf3 vs ganador qf4
-            games.Add(MakeGameBetterSeedHome(season, managerId, qfWinners[0], qfWinners[1],
-                $"{LBL_SF}-{conf.ToLower()}-a", seeds));
-            games.Add(MakeGameBetterSeedHome(season, managerId, qfWinners[2], qfWinners[3],
-                $"{LBL_SF}-{conf.ToLower()}-b", seeds));
-        }
-
-        AssignDateAndSave(season, managerId, games, "semifinales", gameDay);
-    }
-
-    static void GenerateConferenceFinals(SeasonData season, int managerId, List<GameData> poGames,
-        Dictionary<int, (int seed, float winPct)> seeds, int gameDay)
-    {
-        var games = new List<GameData>();
-        foreach (var conf in new[] { "East", "West" })
-        {
-            var winners = new List<int>();
-            foreach (var suffix in new[] { "a", "b" })
-            {
-                var g = poGames.FirstOrDefault(x => x.series_label == $"{LBL_SF}-{conf.ToLower()}-{suffix}");
-                if (g == null) return;
-                winners.Add(WinnerOf(g));
-            }
-
-            games.Add(MakeGameBetterSeedHome(season, managerId, winners[0], winners[1],
-                $"{LBL_CF}-{conf.ToLower()}", seeds));
-        }
-
-        AssignDateAndSave(season, managerId, games, "finales de conferencia", gameDay);
-    }
-
-    static void GenerateGrandFinal(SeasonData season, int managerId, List<GameData> poGames,
-        Dictionary<int, (int seed, float winPct)> seeds, int gameDay)
-    {
-        var eastChamp = WinnerOf(poGames.FirstOrDefault(g => g.series_label == $"{LBL_CF}-east"));
-        var westChamp = WinnerOf(poGames.FirstOrDefault(g => g.series_label == $"{LBL_CF}-west"));
-        if (eastChamp == 0 || westChamp == 0) return;
-
-        var games = new List<GameData>
-        {
-            MakeGameBetterSeedHome(season, managerId, eastChamp, westChamp, LBL_FINAL, seeds)
-        };
-        AssignDateAndSave(season, managerId, games, "la Gran Final", gameDay);
     }
 
     // ── UTILIDADES ───────────────────────────────────────
@@ -245,16 +343,13 @@ public static class GLeaguePostSeason
         return MakeGame(season, managerId, aHome ? teamA : teamB, aHome ? teamB : teamA, label);
     }
 
-    /// <summary>Fija día y fecha comunes para toda la ronda y persiste.</summary>
-    static void AssignDateAndSave(SeasonData season, int managerId, List<GameData> games,
-        string roundName, int forcedDay = -1)
+    /// <summary>Persiste una tanda de partidos, fechados todos en el siguiente día
+    /// libre.</summary>
+    static void AssignDayAndSave(SeasonData season, int managerId, List<GameData> games, string roundName)
     {
         if (games.Count == 0) return;
 
-        int gameDay = forcedDay > 0
-            ? forcedDay
-            : PickNextPendingDay(managerId, LastScheduledGlDay(managerId));
-
+        int gameDay = PickNextPendingDay(managerId, LastScheduledGlDay(managerId));
         var seasonStart = new DateTime(season.year_start, 10, 22);
         string dateStr = seasonStart.AddDays(gameDay - 1).ToString("yyyy-MM-dd");
 
@@ -278,6 +373,18 @@ public static class GLeaguePostSeason
         return glDays.Count > 0 ? glDays.Max() : 0;
     }
 
+    static string RoundLabel(string prefix)
+    {
+        switch (prefix)
+        {
+            case LBL_QF: return "cuartos de final";
+            case LBL_SF: return "semifinales";
+            case LBL_CF: return "finales de conferencia";
+            case LBL_FINAL: return "la Gran Final";
+            default: return prefix;
+        }
+    }
+
     /// <summary>Ganador de una eliminatoria (ids de filial SIN codificar).</summary>
     static int WinnerOf(GameData g)
     {
@@ -287,13 +394,13 @@ public static class GLeaguePostSeason
             : GLeagueHelper.DecodeGlTeamId(g.away_team_id);
     }
 
-    static void RecordChampionIfNeeded(SeasonData season, int managerId, GameData finalGame,
+    static void RecordChampionIfNeeded(SeasonData season, int managerId, List<GameData> finalSeries,
         List<GLeagueTeamData> glTeams, int myNbaTeamId)
     {
         var db = DatabaseManager.Instance;
         if (db.GetGLeagueChampions(managerId).Any(c => c.season_id == season.id)) return;
 
-        int championId = WinnerOf(finalGame);
+        int championId = SeriesWinner(finalSeries);
         var championTeam = glTeams.FirstOrDefault(t => t.id == championId);
         if (championTeam == null) return;
 
@@ -306,6 +413,14 @@ public static class GLeaguePostSeason
             team_name = championTeam.name
         });
 
+        string partial = SeriesResult(finalSeries);
+        // "2-1" → victorias del campeón y del finalista
+        int champWins = CountTeamWins(finalSeries, championId);
+        int finalistId = GLeagueHelper.DecodeGlTeamId(finalSeries[0].home_team_id) == championId
+            ? GLeagueHelper.DecodeGlTeamId(finalSeries[0].away_team_id)
+            : GLeagueHelper.DecodeGlTeamId(finalSeries[0].home_team_id);
+        string score = $"{champWins}-{CountTeamWins(finalSeries, finalistId)}";
+
         bool isMyAffiliate = myNbaTeamId > 0 && championTeam.nba_team_id == myNbaTeamId;
         db.AddMessage(new MessageData
         {
@@ -316,8 +431,8 @@ public static class GLeaguePostSeason
                 ? $"¡{championTeam.name}, tu filial, campeón de la G-League!"
                 : $"{championTeam.name} campeón de la G-League",
             body = isMyAffiliate
-                ? $"Tu filial {championTeam.name} se ha proclamado campeona de la G-League tras ganar la Gran Final por {finalGame.home_score}-{finalGame.away_score}. El proyecto de desarrollo da sus frutos."
-                : $"{championTeam.name} ha ganado la Gran Final de la G-League por {finalGame.home_score}-{finalGame.away_score}.",
+                ? $"Tu filial {championTeam.name} se ha proclamado campeona de la G-League tras ganar la Gran Final por {score}. El proyecto de desarrollo da sus frutos."
+                : $"{championTeam.name} ha ganado la Gran Final de la G-League por {score}.",
             game_day = season.current_game_day,
             game_date = season.current_date ?? "",
             created_at = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -325,6 +440,9 @@ public static class GLeaguePostSeason
             is_read = 0
         });
     }
+
+    static int CountTeamWins(List<GameData> series, int teamId)
+        => series.Count(g => g.is_played == 1 && WinnerOf(g) == teamId);
 
     /// <summary>Diccionario teamId → (seed dentro de su conferencia, Win% global).</summary>
     public static Dictionary<int, (int seed, float winPct)> ComputeRegularSeeds(
@@ -346,9 +464,8 @@ public static class GLeaguePostSeason
     /// <summary>
     /// Genera y simula la postemporada completa de G-League en una sola pasada
     /// para que SIEMPRE exista un campeón al terminar la liga regular, sin
-    /// depender de que el bucle diario llegue a procesar cada ronda. Útil como
-    /// red de seguridad (p.ej. al abrir SeasonSummary) para temporadas cuyo
-    /// calendario diario ya ha terminado. NO toca seasons.phase.
+    /// depender de que el bucle diario llegue a procesar cada ronda. Red de
+    /// seguridad (p.ej. al abrir SeasonSummary). NO toca seasons.phase.
     /// </summary>
     public static void CompletePostSeason(SeasonData season, int managerId)
     {
@@ -364,62 +481,39 @@ public static class GLeaguePostSeason
         bool regularDone = !glGames.Any(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR && g.is_played == 0);
         if (!regularDone) return;
 
-        // Si ya hay campeón, nada que hacer.
         if (db.GetGLeagueChampions(managerId).Any(c => c.season_id == season.id)) return;
 
         var regularGames = glGames.Where(g => g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR).ToList();
         var allProspects = db.GetAllGLeaguePlayers();
         var assignedByNba = db.GetGLeagueAssignedByTeam();
 
-        // Bucle de generación: avanzar ronda a ronda hasta tener la Gran Final.
-        var poGames = glGames.Where(g => g.game_type == TYPE_PLAYOFF).ToList();
-        var finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
-
         int guard = 0;
-        while (finalGame == null && guard++ < 20)
+        while (guard++ < 40)
         {
-            var pending = poGames.Where(g => g.is_played == 0).ToList();
-            if (pending.Count > 0)
+            var poGames = db.GetAllGLeagueGames(managerId).Where(g => g.game_type == TYPE_PLAYOFF).ToList();
+
+            var finalSeries = SeriesGames(poGames, LBL_FINAL);
+            if (finalSeries.Any() && SeriesDecided(finalSeries))
             {
-                SimulatePlayoffGames(season, managerId, pending, allProspects, assignedByNba);
-                // re-evaluar la final tras simular
-                finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
-                continue;
+                RecordChampionIfNeeded(season, managerId, finalSeries, glTeams, 0);
+                return;
             }
 
             if (poGames.Count == 0)
-            {
-                GenerateQuarterfinals(season, managerId, glTeams, regularGames);
-            }
+                GenerateRoundNextGames(season, managerId, glTeams, poGames, regularGames, LBL_QF);
             else
             {
-                int nextDay = PickNextPendingDay(managerId, poGames.Max(g => g.game_day));
-                switch (NextMissingRound(poGames))
-                {
-                    case "sf":
-                        GenerateSemifinals(season, managerId, poGames,
-                            ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList()), nextDay);
-                        break;
-                    case "cf":
-                        GenerateConferenceFinals(season, managerId, poGames,
-                            ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList()), nextDay);
-                        break;
-                    case "final":
-                        GenerateGrandFinal(season, managerId, poGames,
-                            ComputeRegularSeeds(glTeams, regularGames.Where(g => g.is_played == 1).ToList()), nextDay);
-                        break;
-                    default:
-                        return;
-                }
+                string round = NextRoundToAdvance(poGames);
+                if (round == null) return;
+                GenerateRoundNextGames(season, managerId, glTeams, poGames, regularGames, round);
             }
 
-            var updated = db.GetAllGLeagueGames(managerId);
-            poGames = updated.Where(g => g.game_type == TYPE_PLAYOFF).ToList();
-            finalGame = poGames.FirstOrDefault(g => g.series_label == LBL_FINAL && g.is_played == 1);
+            var pending = db.GetAllGLeagueGames(managerId)
+                .Where(g => g.game_type == TYPE_PLAYOFF && g.is_played == 0)
+                .ToList();
+            if (pending.Count > 0)
+                SimulatePlayoffGames(season, managerId, pending, allProspects, assignedByNba);
         }
-
-        if (finalGame != null)
-            RecordChampionIfNeeded(season, managerId, finalGame, glTeams, 0);
     }
 
     /// <summary>Simula una lista de partidos de playoffs G-League (sin tocar stats

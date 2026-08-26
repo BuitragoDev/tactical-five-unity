@@ -206,11 +206,13 @@ public partial class DatabaseManager
 
     // ── RESUMEN DE TEMPORADA ─────────────────────────────
 
-    public GameData GetGLFinalGame(int managerId, int seasonId)
+    /// <summary>Todos los partidos de la Gran Final G-League de la temporada
+    /// (última ronda, mejor de 3: comparten series_label='gl-final').</summary>
+    public List<GameData> GetGLFinalSeries(int managerId, int seasonId)
     {
         return _db.Query<GameData>(
-            "SELECT * FROM games WHERE manager_id=? AND season_id=? AND game_type='gleague_playoff' AND series_label='gl-final' AND is_played=1 LIMIT 1",
-            managerId, seasonId).FirstOrDefault();
+            "SELECT * FROM games WHERE manager_id=? AND season_id=? AND game_type='gleague_playoff' AND series_label='gl-final' ORDER BY game_day, id",
+            managerId, seasonId);
     }
 
     public GLSeasonMVPRow GetGLSeasonMVP(int managerId, int seasonId)
@@ -223,7 +225,9 @@ public partial class DatabaseManager
                    CAST(gs.rating AS REAL)/gs.games as avg_rating,
                    CAST(gs.points AS REAL)/gs.games as avg_pts,
                    CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
-                   CAST(gs.assists AS REAL)/gs.games as avg_ast
+                   CAST(gs.assists AS REAL)/gs.games as avg_ast,
+                   CAST(gs.steals AS REAL)/gs.games as avg_stl,
+                   CAST(gs.blocks AS REAL)/gs.games as avg_blk
             FROM gleague_season_stats gs
             JOIN gleague_players gp ON gs.player_id = gp.id + 500000
             JOIN gleague_teams gt ON gp.gleague_team_id = gt.id
@@ -240,7 +244,9 @@ public partial class DatabaseManager
                    CAST(gs.rating AS REAL)/gs.games as avg_rating,
                    CAST(gs.points AS REAL)/gs.games as avg_pts,
                    CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
-                   CAST(gs.assists AS REAL)/gs.games as avg_ast
+                   CAST(gs.assists AS REAL)/gs.games as avg_ast,
+                   CAST(gs.steals AS REAL)/gs.games as avg_stl,
+                   CAST(gs.blocks AS REAL)/gs.games as avg_blk
             FROM gleague_season_stats gs
             JOIN players p ON gs.player_id = p.id
             JOIN teams t ON p.team_id = t.id

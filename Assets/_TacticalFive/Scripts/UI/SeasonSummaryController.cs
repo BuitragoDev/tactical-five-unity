@@ -25,6 +25,8 @@ public class SeasonSummaryController : UIScreenController
     private Label _mvpPts;
     private Label _mvpReb;
     private Label _mvpAst;
+    private Label _mvpStl;
+    private Label _mvpBlk;
 
     // GL Summary
     private VisualElement _glSection;
@@ -37,7 +39,9 @@ public class SeasonSummaryController : UIScreenController
     private Label _glMvpTeam;
     private Label _glMvpPts;
     private Label _glMvpReb;
-    private Label _glMvpVal;
+    private Label _glMvpAst;
+    private Label _glMvpStl;
+    private Label _glMvpBlk;
 
     private List<TeamData> _allTeams = new();
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -67,6 +71,8 @@ public class SeasonSummaryController : UIScreenController
         _mvpPts = _root.Q<Label>("MvpPts");
         _mvpReb = _root.Q<Label>("MvpReb");
         _mvpAst = _root.Q<Label>("MvpAst");
+        _mvpStl = _root.Q<Label>("MvpStl");
+        _mvpBlk = _root.Q<Label>("MvpBlk");
 
         // GL
         _glSection = _root.Q<VisualElement>("GLSection");
@@ -79,7 +85,9 @@ public class SeasonSummaryController : UIScreenController
         _glMvpTeam = _root.Q<Label>("GLMvpTeam");
         _glMvpPts = _root.Q<Label>("GLMvpPts");
         _glMvpReb = _root.Q<Label>("GLMvpReb");
-        _glMvpVal = _root.Q<Label>("GLMvpVal");
+        _glMvpAst = _root.Q<Label>("GLMvpAst");
+        _glMvpStl = _root.Q<Label>("GLMvpStl");
+        _glMvpBlk = _root.Q<Label>("GLMvpBlk");
     }
 
     protected override void LoadData()
@@ -180,10 +188,12 @@ public class SeasonSummaryController : UIScreenController
             {
                 Texture2D tex = PlayerPhotoHelper.Load(mvpDetails.PlayerId, mvpDetails.Photo);
                 _mvpPhoto.style.backgroundImage = new StyleBackground(tex);
-                _mvpTeam.text = mvpDetails.TeamName;
+                _mvpTeam.text = string.IsNullOrEmpty(mvpDetails.TeamName) ? "" : mvpDetails.TeamName.ToUpper();
                 _mvpPts.text = mvpDetails.AvgPts.ToString("F1");
                 _mvpReb.text = mvpDetails.AvgReb.ToString("F1");
                 _mvpAst.text = mvpDetails.AvgAst.ToString("F1");
+                _mvpStl.text = mvpDetails.AvgStl.ToString("F1");
+                _mvpBlk.text = mvpDetails.AvgBlk.ToString("F1");
             }
         }
     }
@@ -211,19 +221,19 @@ public class SeasonSummaryController : UIScreenController
             if (championTeam != null && _logoSpritesLarge.TryGetValue(championTeam.logo, out var glLogo))
                 _glChampionLogo.style.backgroundImage = new StyleBackground(glLogo);
 
-            var finalGame = DatabaseManager.Instance.GetGLFinalGame(_manager.id, _season.id);
-            if (finalGame != null)
+            // La Gran Final es al mejor de 3: mostrar el parcial (p.ej. "2-1")
+            // y al finalista.
+            var finalSeries = DatabaseManager.Instance.GetGLFinalSeries(_manager.id, _season.id);
+            if (finalSeries.Count > 0)
             {
-                int homeId = GLeagueHelper.DecodeGlTeamId(finalGame.home_team_id);
-                int awayId = GLeagueHelper.DecodeGlTeamId(finalGame.away_team_id);
-                var homeTeam = DatabaseManager.Instance.GetGLeagueTeam(homeId);
-                var awayTeam = DatabaseManager.Instance.GetGLeagueTeam(awayId);
+                int champId = glChamp.gleague_team_id;
+                _glFinalsResult.text = GLeaguePostSeason.SeriesScoreForTeam(finalSeries, champId);
 
-                _glFinalsResult.text = $"{finalGame.home_score}-{finalGame.away_score}";
-
-                bool homeWon = finalGame.home_score > finalGame.away_score;
-                var loserTeam = homeWon ? awayTeam : homeTeam;
-                _glFinalsLoser.text = loserTeam != null ? $"vs {loserTeam.name.ToUpper()}" : "";
+                int finalistId = GLeagueHelper.DecodeGlTeamId(finalSeries[0].home_team_id) == champId
+                    ? GLeagueHelper.DecodeGlTeamId(finalSeries[0].away_team_id)
+                    : GLeagueHelper.DecodeGlTeamId(finalSeries[0].home_team_id);
+                var finalistTeam = DatabaseManager.Instance.GetGLeagueTeam(finalistId);
+                _glFinalsLoser.text = finalistTeam != null ? $"vs {finalistTeam.name.ToUpper()}" : "";
             }
             else
             {
@@ -243,10 +253,12 @@ public class SeasonSummaryController : UIScreenController
         if (mvp != null)
         {
             _glMvpName.text = $"{mvp.first_name.ToUpper()} {mvp.last_name.ToUpper()}";
-            _glMvpTeam.text = mvp.team_name;
+            _glMvpTeam.text = string.IsNullOrEmpty(mvp.team_name) ? "" : mvp.team_name.ToUpper();
             _glMvpPts.text = mvp.avg_pts.ToString("F1");
             _glMvpReb.text = mvp.avg_reb.ToString("F1");
-            _glMvpVal.text = mvp.avg_rating.ToString("F1");
+            _glMvpAst.text = mvp.avg_ast.ToString("F1");
+            _glMvpStl.text = mvp.avg_stl.ToString("F1");
+            _glMvpBlk.text = mvp.avg_blk.ToString("F1");
 
             if (mvp.player_id >= GLeagueHelper.PROSPECT_ID_OFFSET)
             {
@@ -270,7 +282,9 @@ public class SeasonSummaryController : UIScreenController
             _glMvpTeam.text = "";
             _glMvpPts.text = "--";
             _glMvpReb.text = "--";
-            _glMvpVal.text = "--";
+            _glMvpAst.text = "--";
+            _glMvpStl.text = "--";
+            _glMvpBlk.text = "--";
         }
     }
 

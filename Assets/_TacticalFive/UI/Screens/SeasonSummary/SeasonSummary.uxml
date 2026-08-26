@@ -61,6 +61,14 @@
                                 <ui:Label name="MvpAst" text="--" class="stat-val"/>
                                 <ui:Label text="AST" class="stat-label"/>
                             </ui:VisualElement>
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpStl" text="--" class="stat-val"/>
+                                <ui:Label text="ROB" class="stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpBlk" text="--" class="stat-val"/>
+                                <ui:Label text="TAP" class="stat-label"/>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -92,12 +100,20 @@
                                     <ui:Label name="GLMvpReb" text="--" class="gl-stat-val"/>
                                     <ui:Label text="REB" class="gl-stat-label"/>
                                 </ui:VisualElement>
-                                <ui:VisualElement class="gl-mvp-stat-box">
-                                    <ui:Label name="GLMvpVal" text="--" class="gl-stat-val"/>
-                                    <ui:Label text="VAL" class="gl-stat-label"/>
-                                </ui:VisualElement>
+                            <ui:VisualElement class="gl-mvp-stat-box">
+                                <ui:Label name="GLMvpAst" text="--" class="gl-stat-val"/>
+                                <ui:Label text="AST" class="gl-stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="gl-mvp-stat-box">
+                                <ui:Label name="GLMvpStl" text="--" class="gl-stat-val"/>
+                                <ui:Label text="ROB" class="gl-stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="gl-mvp-stat-box">
+                                <ui:Label name="GLMvpBlk" text="--" class="gl-stat-val"/>
+                                <ui:Label text="TAP" class="gl-stat-label"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
+                    </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
