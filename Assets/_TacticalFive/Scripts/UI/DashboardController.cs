@@ -1452,14 +1452,19 @@ using System.Threading.Tasks;
         var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, isMyHomeGame, persistToDb:false, glLeague:true);
         DatabaseManager.Instance.UpdateGame(game);
 
-        int seasonId = _season?.id ?? 0;
-        foreach (var ps in result.home_stats.Concat(result.away_stats))
+        // Solo acumular stats de liga regular en gleague_season_stats;
+        // los playoffs no se incluyen en las estadísticas de la pestaña.
+        if (game.game_type == GLeagueScheduleGenerator.TYPE_REGULAR)
         {
-            if (ps.minutes <= 0) continue;
-            var (pts, reb, ast, stl, blk, tov) =
-                GLeagueHelper.ClampLine(ps.points, ps.oreb + ps.dreb, ps.assists, ps.steals, ps.blocks, ps.turnovers);
-            DatabaseManager.Instance.AddGLeagueGameStat(ps.player_id, seasonId,
-                pts, reb, ast, stl, blk, tov, ps.rating);
+            int seasonId = _season?.id ?? 0;
+            foreach (var ps in result.home_stats.Concat(result.away_stats))
+            {
+                if (ps.minutes <= 0) continue;
+                var (pts, reb, ast, stl, blk, tov) =
+                    GLeagueHelper.ClampLine(ps.points, ps.oreb + ps.dreb, ps.assists, ps.steals, ps.blocks, ps.turnovers);
+                DatabaseManager.Instance.AddGLeagueGameStat(ps.player_id, seasonId,
+                    pts, reb, ast, stl, blk, tov, ps.rating);
+            }
         }
     }
 

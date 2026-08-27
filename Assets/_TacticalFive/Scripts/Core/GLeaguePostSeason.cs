@@ -521,7 +521,7 @@ public static class GLeaguePostSeason
     }
 
     /// <summary>Simula una lista de partidos de playoffs G-League (sin tocar stats
-    /// NBA ni estado de jugadores; acumula gleague_season_stats como en liga).</summary>
+    /// NBA, sin acumular gleague_season_stats — solo liga regular).</summary>
     static void SimulatePlayoffGames(SeasonData season, int managerId, List<GameData> games,
         List<GLeaguePlayerData> allProspects, Dictionary<int, List<PlayerData>> assignedByNba)
     {
@@ -543,14 +543,6 @@ public static class GLeaguePostSeason
             var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, false,
                 persistToDb: false, glLeague: true);
             db.UpdateGame(game);
-
-            foreach (var ps in result.home_stats.Concat(result.away_stats))
-            {
-                if (ps.minutes <= 0) continue;
-                var (pts, reb, ast, stl, blk, tov) =
-                    GLeagueHelper.ClampLine(ps.points, ps.oreb + ps.dreb, ps.assists, ps.steals, ps.blocks, ps.turnovers);
-                db.AddGLeagueGameStat(ps.player_id, season.id, pts, reb, ast, stl, blk, tov, ps.rating);
-            }
         }
     }
 }
