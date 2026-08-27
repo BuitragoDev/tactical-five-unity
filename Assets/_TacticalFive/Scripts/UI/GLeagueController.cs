@@ -28,7 +28,7 @@ public class GLeagueController : UIScreenController
     private VisualElement _resultsBody;
     private VisualElement _resultsHeader;
     private Label _resultsAffiliate;
-    private VisualElement _leadersPts, _leadersReb, _leadersAst, _leadersStl, _leadersBlk, _leadersVal;
+    private VisualElement _leadersPts, _leadersReb, _leadersAst, _leadersStl, _leadersVal;
 
     // ── Datos ──
     private List<PlayerData> _players = new();
@@ -75,7 +75,6 @@ public class GLeagueController : UIScreenController
         _leadersReb = _root.Q<VisualElement>("LeadersReb");
         _leadersAst = _root.Q<VisualElement>("LeadersAst");
         _leadersStl = _root.Q<VisualElement>("LeadersStl");
-        _leadersBlk = _root.Q<VisualElement>("LeadersBlk");
         _leadersVal = _root.Q<VisualElement>("LeadersVal");
     }
 
@@ -594,7 +593,6 @@ public class GLeagueController : UIScreenController
         BuildLeaderPanel(_leadersReb, s => s.rebounds);
         BuildLeaderPanel(_leadersAst, s => s.assists);
         BuildLeaderPanel(_leadersStl, s => s.steals);
-        BuildLeaderPanel(_leadersBlk, s => s.blocks);
         BuildLeaderPanel(_leadersVal, s => s.rating);
     }
 
@@ -642,7 +640,10 @@ public class GLeagueController : UIScreenController
         var info = new VisualElement();
         info.AddToClassList("gl-leader-info");
 
-        var nameLbl = new Label(_glNames.TryGetValue(stat.player_id, out var n) ? n : "—");
+        string playerName = _glNames.TryGetValue(stat.player_id, out var n) ? n : "—";
+        string posShort = PositionCodes.GetShort(stat.position);
+        string nameText = string.IsNullOrEmpty(posShort) ? playerName : $"{playerName} · {posShort}";
+        var nameLbl = new Label(nameText);
         nameLbl.AddToClassList("gl-leader-name");
         info.Add(nameLbl);
 
