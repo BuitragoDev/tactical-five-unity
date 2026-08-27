@@ -23,6 +23,7 @@ public class GLeaguePlayerData
     public int iq { get; set; }
     public int steals { get; set; }
     public int blocks { get; set; }
+    public string photo { get; set; }
 
     public int GetCalculatedAverage()
     {

@@ -115,6 +115,7 @@ public static class GLeagueSeeder
                 iq = attrs["iq"],
                 steals = attrs["steals"],
                 blocks = attrs["blocks"],
+                photo = $"Default/default{Rng.Next(1, 101)}",
             });
         }
 

@@ -835,6 +835,21 @@ public partial class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for offers.is_two_way: {ex.Message}");
         }
+
+        // Add photo to gleague_players if missing
+        try
+        {
+            var glCols = _db.Query<ColumnInfo>("PRAGMA table_info(gleague_players)");
+            if (!glCols.Any(c => c.name == "photo"))
+            {
+                _db.Execute("ALTER TABLE gleague_players ADD COLUMN photo TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added photo to gleague_players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for gleague_players.photo: {ex.Message}");
+        }
     }
 
     bool IsMigrationApplied(string name)

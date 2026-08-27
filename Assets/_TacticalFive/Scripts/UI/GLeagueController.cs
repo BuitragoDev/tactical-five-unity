@@ -185,7 +185,7 @@ public class GLeagueController : UIScreenController
             int simId = GLeagueHelper.ProspectSimId(gp);
             _glNames[simId] = $"{gp.first_name} {gp.last_name}";
             _glTeamOfPlayer[simId] = gp.gleague_team_id;
-            _glPhotos[simId] = ("", false);
+            _glPhotos[simId] = (gp.photo ?? "", false);
         }
     }
 
@@ -248,7 +248,10 @@ public class GLeagueController : UIScreenController
                 var stat = _season != null
                     ? DatabaseManager.Instance.GetGLeagueStats(GLeagueHelper.ProspectSimId(gp), _season.id)
                     : null;
-                rows.Add((gp.overall, $"{gp.first_name} {gp.last_name}", null,
+                Texture2D glPhoto = !string.IsNullOrEmpty(gp.photo)
+                    ? Resources.Load<Texture2D>($"PlayerPhotos/{gp.photo}")
+                    : null;
+                rows.Add((gp.overall, $"{gp.first_name} {gp.last_name}", glPhoto,
                     PositionCodes.GetShort(gp.position), gp.age, stat, null));
             }
         }
@@ -626,7 +629,7 @@ public class GLeagueController : UIScreenController
 
         var avatar = new VisualElement();
         avatar.AddToClassList("gl-leader-avatar");
-        if (_glPhotos.TryGetValue(stat.player_id, out var photoInfo) && photoInfo.isReal)
+        if (_glPhotos.TryGetValue(stat.player_id, out var photoInfo) && !string.IsNullOrEmpty(photoInfo.photo))
         {
             var tex = PlayerPhotoHelper.Load(stat.player_id, photoInfo.photo);
             if (tex != null)
