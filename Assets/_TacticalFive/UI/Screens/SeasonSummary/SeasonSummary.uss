@@ -235,8 +235,8 @@
     width: 100%;
 }
 .champion-logo {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
     margin-bottom: 16px;
 }
 .champion-name {
@@ -392,8 +392,8 @@
 }
 
 .gl-champion-logo {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
     margin-bottom: 16px;
 }
 
@@ -478,6 +478,7 @@
 }
 
 .gl-mvp-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 14px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;

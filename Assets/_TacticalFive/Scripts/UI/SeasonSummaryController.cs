@@ -45,6 +45,7 @@ public class SeasonSummaryController : UIScreenController
 
     private List<TeamData> _allTeams = new();
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _logoSpritesMedium = new();
     private Dictionary<string, Sprite> _logoSpritesLarge = new();
 
     protected override void OnEnable()
@@ -100,6 +101,10 @@ public class SeasonSummaryController : UIScreenController
         foreach (var s in logos64)
             _logoSprites[s.name] = s;
 
+        var logos100 = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
+        foreach (var s in logos100)
+            _logoSpritesMedium[s.name] = s;
+
         var logos120 = Resources.LoadAll<Sprite>("Teams/Logos/120x120");
         foreach (var s in logos120)
             _logoSpritesLarge[s.name] = s;
@@ -108,6 +113,11 @@ public class SeasonSummaryController : UIScreenController
         foreach (var s in glLogos64)
             if (!_logoSprites.ContainsKey(s.name))
                 _logoSprites[s.name] = s;
+
+        var glLogos100 = Resources.LoadAll<Sprite>("Teams/GLeague/100x100");
+        foreach (var s in glLogos100)
+            if (!_logoSpritesMedium.ContainsKey(s.name))
+                _logoSpritesMedium[s.name] = s;
 
         var glLogos120 = Resources.LoadAll<Sprite>("Teams/GLeague/120x120");
         foreach (var s in glLogos120)
@@ -164,7 +174,7 @@ public class SeasonSummaryController : UIScreenController
         if (champTeam != null)
         {
             _championName.text = champTeam.name.ToUpper();
-            SetTeamLogo(_championLogo, champTeam.logo);
+            SetTeamLogoMedium(_championLogo, champTeam.logo);
         }
         else
         {
@@ -218,7 +228,7 @@ public class SeasonSummaryController : UIScreenController
             _glChampionName.text = glChamp.team_name.ToUpper();
 
             var championTeam = DatabaseManager.Instance.GetGLeagueTeam(glChamp.gleague_team_id);
-            if (championTeam != null && _logoSprites.TryGetValue(championTeam.logo, out var glLogo))
+            if (championTeam != null && _logoSpritesMedium.TryGetValue(championTeam.logo, out var glLogo))
                 _glChampionLogo.style.backgroundImage = new StyleBackground(glLogo);
 
             // La Gran Final es al mejor de 3: mostrar el parcial (p.ej. "2-1")
@@ -301,6 +311,15 @@ public class SeasonSummaryController : UIScreenController
         if (elem == null || string.IsNullOrEmpty(logoName)) return;
         if (_logoSprites.TryGetValue(logoName, out var sprite))
             elem.style.backgroundImage = new StyleBackground(sprite);
+    }
+
+    void SetTeamLogoMedium(VisualElement elem, string logoName)
+    {
+        if (elem == null || string.IsNullOrEmpty(logoName)) return;
+        if (_logoSpritesMedium.TryGetValue(logoName, out var sprite))
+            elem.style.backgroundImage = new StyleBackground(sprite);
+        else if (_logoSprites.TryGetValue(logoName, out var fallback))
+            elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
     void SetTeamLogoLarge(VisualElement elem, string logoName)
