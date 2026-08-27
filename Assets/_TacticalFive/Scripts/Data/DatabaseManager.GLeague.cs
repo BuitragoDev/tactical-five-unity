@@ -87,6 +87,11 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    public GLeaguePlayerData GetGLeaguePlayerById(int id)
+    {
+        return _db.Table<GLeaguePlayerData>().Where(p => p.id == id).FirstOrDefault();
+    }
+
     public List<GLeaguePlayerData> GetAllGLeaguePlayers()
     {
         return _db.Table<GLeaguePlayerData>().ToList();
