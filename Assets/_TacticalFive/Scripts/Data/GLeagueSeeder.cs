@@ -12,7 +12,7 @@ public static class GLeagueSeeder
     // de fondo (BuildTemplateDatabaseInBackground), así que se usa System.Random
     // thread-static (nunca UnityEngine.Random, solo main-thread).
     [ThreadStatic] private static System.Random _rng;
-    static System.Random Rng => _rng ??= new System.Random();
+    internal static System.Random Rng => _rng ??= new System.Random();
 
     // (nombre filial, abreviatura NBA matriz, conferencia, clave de logo)
     public static readonly (string name, string nbaAbbr, string conference, string logo)[] Teams =
