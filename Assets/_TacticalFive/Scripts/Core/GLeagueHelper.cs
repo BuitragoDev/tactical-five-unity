@@ -57,28 +57,6 @@ public static class GLeagueHelper
         return true;
     }
 
-    /// <summary>Genera unas estadísticas procedimentales semanales para un jugador en G-League.</summary>
-    public static (int pts, int reb, int ast, int stl, int blk, int tov, int rating) GenerateWeeklyStats(PlayerData p)
-    {
-        if (p == null) return (0, 0, 0, 0, 0, 0, 0);
-
-        float ovr = p.GetCalculatedAverage();
-        float gamesThisWeek = 2; // 2 partidos de desarrollo por semana
-
-        int pts = (int)((ovr * 0.22f) * gamesThisWeek + UnityEngine.Random.Range(-3, 4));
-        int reb = (int)((ovr * 0.09f) * gamesThisWeek + UnityEngine.Random.Range(-1, 2));
-        int ast = (int)((ovr * 0.08f) * gamesThisWeek + UnityEngine.Random.Range(-1, 2));
-        int stl = (int)(UnityEngine.Random.Range(1, 4));
-        int blk = (int)(UnityEngine.Random.Range(0, 3));
-        int tov = (int)(UnityEngine.Random.Range(2, 5));
-        int rating = (int)UnityEngine.Random.Range(8, 16) + (int)(ovr * 0.2f);
-
-        pts = Mathf.Max(0, pts);
-        reb = Mathf.Max(0, reb);
-        ast = Mathf.Max(0, ast);
-        return (pts, reb, ast, stl, blk, tov, rating);
-    }
-
     static int GetAttr(PlayerData p, string name)
     {
         switch (name)
@@ -117,5 +95,115 @@ public static class GLeagueHelper
         }
         // Recalcular overall tras la mejora (mantiene la invariante media de 11 atributos)
         p.overall = System.Math.Min(p.potential, p.GetCalculatedAverage());
+    }
+
+    // ── LIGA COMPLETA (filiales y prospectos) ────────────
+
+    /// <summary>Offset reservado para los ids de prospectos al simular: evita
+    /// colisiones con la tabla players en cualquier referencia cruzada.</summary>
+    public const int PROSPECT_ID_OFFSET = 500000;
+
+    /// <summary>
+    /// Offset aplicado a los ids de filial almacenados en games.home_team_id /
+    /// away_team_id. Los partidos G-League se guardan codificados (id + 1000)
+    /// para que NINGUNA query histórica que compare contra ids de equipos NBA
+    /// (1..30) pueda confundir un partido de la filial con uno del equipo matriz.
+    /// </summary>
+    public const int GAME_TEAM_ID_OFFSET = 1000;
+
+    public static bool IsProspectId(int simId) => simId >= PROSPECT_ID_OFFSET;
+
+    public static int ProspectRowId(int simId) => simId - PROSPECT_ID_OFFSET;
+
+    public static int ProspectSimId(GLeaguePlayerData p) => PROSPECT_ID_OFFSET + p.id;
+
+    /// <summary>Codifica un id de filial para almacenarlo en una fila GameData.</summary>
+    public static int EncodeGlTeamId(int gleagueTeamId) => GAME_TEAM_ID_OFFSET + gleagueTeamId;
+
+    /// <summary>Descodifica el id de equipo almacenado en un GameData:
+    /// devuelve el id de filial si está codificado, o el valor tal cual.</summary>
+    public static int DecodeGlTeamId(int storedId)
+        => storedId >= GAME_TEAM_ID_OFFSET ? storedId - GAME_TEAM_ID_OFFSET : storedId;
+
+    public static string PlayerName(PlayerData p) => $"{p.first_name} {p.last_name}";
+
+    /// <summary>
+    /// Limita la línea estadística individual de un partido G-League a valores
+    /// realistas. El simulador premia mucho a un único jugador NBA cuando se
+    /// enfrenta a plantillas de prospectos (OVR ~50) — un asignado de 80 OVR
+    /// puede anotar 60-70 pts. Esto acota el box individual sin alterar el
+    /// marcador del equipo ni los demás sub-sistemas.
+    /// </summary>
+    public static (int pts, int reb, int ast, int stl, int blk, int tov) ClampLine(
+        int pts, int reb, int ast, int stl, int blk, int tov)
+    {
+        return (
+            Mathf.Clamp(pts, 0, 42),
+            Mathf.Clamp(reb, 0, 18),
+            Mathf.Clamp(ast, 0, 14),
+            Mathf.Clamp(stl, 0, 6),
+            Mathf.Clamp(blk, 0, 6),
+            Mathf.Clamp(tov, 0, 8)
+        );
+    }    /// <summary>Mapea un prospecto a PlayerData transitorio para el simulador.
+    /// NUNCA se persiste: los prospectos viven en gleague_players.</summary>
+    public static PlayerData ToSimPlayer(GLeaguePlayerData gp)
+    {
+        return new PlayerData
+        {
+            id = ProspectSimId(gp),
+            team_id = gp.gleague_team_id,
+            first_name = gp.first_name,
+            last_name = gp.last_name,
+            position = gp.position,
+            age = gp.age,
+            overall = gp.overall,
+            potential = gp.potential,
+            speed = gp.speed,
+            shooting = gp.shooting,
+            three_point = gp.three_point,
+            passing = gp.passing,
+            dribbling = gp.dribbling,
+            defense = gp.defense,
+            rebounding = gp.rebounding,
+            athleticism = gp.athleticism,
+            iq = gp.iq,
+            steals = gp.steals,
+            blocks = gp.blocks,
+            morale = 60,
+            fisico = 99,
+            injury_days = 0
+        };
+    }
+
+    /// <summary>
+    /// Convocatoria de una filial: prospectos de su plantilla + jugadores NBA
+    /// asignados y sanos del equipo matriz. Top 12 por overall (los 5 primeros
+    /// salen de titulares en el simulador).
+    /// </summary>
+    public static List<PlayerData> BuildAffiliateLineup(
+        GLeagueTeamData affiliate,
+        List<GLeaguePlayerData> allProspects,
+        Dictionary<int, List<PlayerData>> assignedByNbaTeam)
+    {
+        var pool = new List<PlayerData>();
+
+        if (assignedByNbaTeam != null && affiliate.nba_team_id != 0
+            && assignedByNbaTeam.TryGetValue(affiliate.nba_team_id, out var assigned))
+        {
+            foreach (var p in assigned)
+            {
+                if (p != null && p.injury_days == 0 && p.is_on_ir == 0)
+                    pool.Add(p);
+            }
+        }
+
+        foreach (var gp in allProspects)
+        {
+            if (gp.gleague_team_id == affiliate.id)
+                pool.Add(ToSimPlayer(gp));
+        }
+
+        return pool.OrderByDescending(p => p.overall).Take(12).ToList();
     }
 }

@@ -43,13 +43,22 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id`, `year_start`, `year_end`, `is_active` (0/1), `current_game_day`, `game_mode`, `phase` (`preseason`|`regular`|`playin`|`playoff`|`finished`), `manager_id`, `generated` (0/1), `current_date` ("yyyy-MM-dd"), `last_ai_trade_day` (migrated, default -999).
 
 ### games (`GameData`)
-`id`, `season_id`, `manager_id`, `game_day`, `game_date`, `home_team_id`, `away_team_id`, `home_score`, `away_score`, `is_played` (0/1), `game_type` (`preseason`|`regular`|`playin`|`playoff`|`allstar`), `series_label` (playoff series id). Indexes: `season_id, game_day, is_played, game_type, manager_id`. Plus manual index `IX_Games_Standings(manager_id, game_type, is_played, game_day)`. For All-Star: `home_team_id=-1` (East), `away_team_id=-2` (West).
+`id`, `season_id`, `manager_id`, `game_day`, `game_date`, `home_team_id`, `away_team_id`, `home_score`, `away_score`, `is_played` (0/1), `game_type` (`preseason`|`regular`|`playin`|`playoff`|`allstar`|`gleague`|`gleague_playoff`), `series_label` (playoff series id; G-League: `gl-qf-east-N`, `gl-sf-{conf}-{a,b}`, `gl-cf-{conf}`, `gl-final`). Indexes: `season_id, game_day, is_played, game_type, manager_id`. Plus manual index `IX_Games_Standings(manager_id, game_type, is_played, game_day)`. For All-Star: `home_team_id=-1` (East), `away_team_id=-2` (West). **Partidos G-League: los ids de filial van codificados `+GLeagueHelper.GAME_TEAM_ID_OFFSET (1000)`** (ver GAMEPLAY §16).
 
 ### player_game_stats (`PlayerGameStats`)
 `id`, `game_id`, `player_id`, `team_id`, `minutes`, `points`, `fgm, fga, fg3m, fg3a, ftm, fta`, `oreb, dreb, rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `pf`, `rating`, `double_double`, `triple_double`. Indexes on game/player/team (`IX_PlayerGameStats_GameId/PlayerId/TeamId`).
 
 ### gleague_season_stats (`GLeagueSeasonStat`)
-`id` (autoinc), `player_id`, `season_id`, `games`, `points`, `rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `rating`. Acumulados semanales procedimentales de la liga de desarrollo (ver GAMEPLAY §14); se acumulan con `AddGLeagueGame` (upsert). Índices `IX_GLeagueStats_PlayerId`/`IX_GLeagueStats_SeasonId`.
+`id` (autoinc), `player_id`, `season_id`, `games`, `points`, `rebounds`, `assists`, `steals`, `blocks`, `turnovers`, `rating`. Acumulados **por partido real simulado** de la G-League (`AddGLeagueGameStat`, games += 1; ver GAMEPLAY §16). `player_id` puede ser un jugador NBA real (asignado) o un prospecto con id = fila + `PROSPECT_ID_OFFSET (500000)`. Índices `IX_GLeagueStats_PlayerId`/`IX_GLeagueStats_SeasonId`.
+
+### gleague_teams (`GLeagueTeamData`)
+`id` (autoinc), `name` (filial real, ej. "Maine Celtics"), `abbreviation` (iniciales), `conference` (`East`/`West`), `logo` (clave PNG en `Teams/GLeague/{size}`, ej. `celtics_gleague`), `nba_team_id` (franquicia matriz). 30 filiales sembradas una vez por slot (`EnsureGLeagueSeeded`).
+
+### gleague_players (`GLeaguePlayerData`)
+`id` (autoinc), `gleague_team_id`, `first_name`, `last_name`, `position`, `age`, `overall`, `potential` + los 11 atributos (`speed…blocks`). 11 prospectos por filial generados en el seeding (`GLeagueSeeder.GenerateProspects`); persisten entre temporadas. Nunca se escriben en `players`; para simular se mapean a `PlayerData` transitorios con id = fila + `PROSPECT_ID_OFFSET`.
+
+### gleague_champions (`GLeagueChampionData`)
+`id` (autoinc), `manager_id`, `season_id`, `season` (año final), `gleague_team_id`, `team_name`. Un registro por temporada (guard UNIQUE lógico en `SaveGLeagueChampion`); lo escribe `GLeaguePostSeason.RecordChampionIfNeeded` al ganar la Gran Final.
 
 ### game_attendance (`GameAttendanceData`)
 `game_id` (PK, no autoinc), `attendance`, `ticket_price`, `revenue`. Saved by `ProcessGameFinances`; read by results/venue UI.

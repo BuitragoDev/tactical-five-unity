@@ -119,7 +119,7 @@ protected virtual void OnEnable()
 | 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Player season stats + career + attributes + fog-of-war gate + honors |
 | 40 | Quintos | `Screens/Quintos` | `QuintosController` | Season All-Star/Rookie quintets |
 | 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career |
-| 42 | GLeague | `Screens/GLeague` | `GLeagueController` | Liga de desarrollo del equipo: asignados con stats de `gleague_season_stats` + elegibles para asignar (reutiliza `GLeagueHelper`) |
+| 42 | GLeague | `Screens/GLeague` | `GLeagueController` | G-League con 4 pestañas: PLANTILLA (plantilla completa de la filial — prospectos + asignados NBA — con RECUPERAR en los asignados, y elegibles), RESULTADOS (la tabla de partidos del filial por fecha), CLASIFICACIÓN (Este/Oeste, corte playoff) y ESTADÍSTICAS (top-5 promedios); reutiliza clases de Stats.uss y Standings.uss |
 
 **Sidebar navigation (verified, `SidebarController.cs:15-45`):**
 - **INICIO** → Dashboard

@@ -33,6 +33,12 @@ using System.Linq;
     private Label _fastSimConfirmText;
     private Button _fastSimConfirmBtn;
     private Button _fastSimCancelBtn;
+
+    // G-League: para mostrar sus partidos en el detalle del día
+    private List<GLeagueTeamData> _glTeams = new();
+    private GLeagueTeamData _myAffiliate;
+    private Dictionary<string, Sprite> _glLogoSprites32 = new();
+
     private static readonly string[] MonthNames = {
         "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
@@ -68,11 +74,14 @@ using System.Linq;
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
-        
-        
+        foreach (var s in Resources.LoadAll<Sprite>("Teams/GLeague/32x32"))
+            _glLogoSprites32[s.name] = s;
 
-        
-        
+        _glTeams = DatabaseManager.Instance.GetGLeagueTeams();
+        _myAffiliate = _myTeam != null
+            ? _glTeams.FirstOrDefault(t => t.nba_team_id == _myTeam.id)
+            : null;
+
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetAllGames(_manager.id);
         ComputeSimRange();
@@ -361,6 +370,12 @@ using System.Linq;
 
     void OnDaySelected(int day, string dateStr, List<GameData> games)
     {
+        // Solo mostrar partidos NBA en el detalle del día: excluimos los de G-League.
+        games = games
+            .Where(g => g.game_type != GLeagueScheduleGenerator.TYPE_REGULAR
+                     && g.game_type != GLeaguePostSeason.TYPE_PLAYOFF)
+            .ToList();
+
         _selectedDayTitle.text = $"{day} / {MonthNames[_currentMonthDate.Month].ToUpper()} / {_currentMonthDate.Year}";
         _selectedDayGames.Clear();
         _targetDate = null;
@@ -385,11 +400,58 @@ using System.Linq;
             {
                 var row = new VisualElement();
                 row.AddToClassList("selected-game-row");
-                bool isMyGame = g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id;
+                bool isGlGame = g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR
+                             || g.game_type == GLeaguePostSeason.TYPE_PLAYOFF;
+                bool isMyGame = !isGlGame && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id);
+                if (isGlGame && _myAffiliate != null
+                    && (GLeagueHelper.DecodeGlTeamId(g.home_team_id) == _myAffiliate.id
+                        || GLeagueHelper.DecodeGlTeamId(g.away_team_id) == _myAffiliate.id))
+                    isMyGame = true;
                 if (isMyGame || g.game_type == "allstar") row.AddToClassList("selected-game-row--my-game");
                 if (g.is_played == 1) row.AddToClassList("selected-game-row--played");
 
-                if (g.game_type == "allstar")
+                string awayAbbr, homeAbbr;
+                Sprite awaySprite = null, homeSprite = null;
+
+                if (isGlGame)
+                {
+                    // Los partidos GL guardan ids de filial codificados (+offset)
+                    var glHome = _glTeams.FirstOrDefault(t => t.id == GLeagueHelper.DecodeGlTeamId(g.home_team_id));
+                    var glAway = _glTeams.FirstOrDefault(t => t.id == GLeagueHelper.DecodeGlTeamId(g.away_team_id));
+                    homeAbbr = glHome?.abbreviation ?? "???";
+                    awayAbbr = glAway?.abbreviation ?? "???";
+                    if (glHome != null) _glLogoSprites32.TryGetValue(glHome.logo, out homeSprite);
+                    if (glAway != null) _glLogoSprites32.TryGetValue(glAway.logo, out awaySprite);
+
+                    var teamsBlock = new VisualElement();
+                    teamsBlock.AddToClassList("selected-game-teams");
+
+                    var awayLogo = new VisualElement();
+                    awayLogo.AddToClassList("selected-game-team-logo");
+                    if (awaySprite != null) awayLogo.style.backgroundImage = new StyleBackground(awaySprite);
+                    teamsBlock.Add(awayLogo);
+
+                    var awayName = new Label(awayAbbr);
+                    awayName.AddToClassList("selected-game-team-name");
+                    teamsBlock.Add(awayName);
+
+                    var vs = new Label();
+                    vs.AddToClassList("selected-game-vs");
+                    vs.text = "@";
+                    teamsBlock.Add(vs);
+
+                    var homeLogo = new VisualElement();
+                    homeLogo.AddToClassList("selected-game-team-logo");
+                    if (homeSprite != null) homeLogo.style.backgroundImage = new StyleBackground(homeSprite);
+                    teamsBlock.Add(homeLogo);
+
+                    var homeName = new Label(homeAbbr);
+                    homeName.AddToClassList("selected-game-team-name");
+                    teamsBlock.Add(homeName);
+
+                    row.Add(teamsBlock);
+                }
+                else if (g.game_type == "allstar")
                 {
                     var teamsBlock = new VisualElement();
                     teamsBlock.AddToClassList("selected-game-teams");
@@ -461,6 +523,8 @@ using System.Linq;
                     "regular" => "REGULAR",
                     "playin" => "PLAY-IN",
                     "playoff" => "PLAYOFF",
+                    GLeagueScheduleGenerator.TYPE_REGULAR => "G-LEAGUE",
+                    GLeaguePostSeason.TYPE_PLAYOFF => "G-LEAGUE PLAYOFF",
                     _ => g.game_type.ToUpper()
                 };
                 row.Add(type);

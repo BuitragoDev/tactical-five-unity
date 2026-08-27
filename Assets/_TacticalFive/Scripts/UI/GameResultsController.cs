@@ -218,14 +218,19 @@ public class GameResultsController : UIScreenController
         }
     }
 
+    static bool IsGLeagueGame(GameData g)
+    {
+        return g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR
+            || g.game_type == GLeaguePostSeason.TYPE_PLAYOFF;
+    }
+
     void LoadResults()
     {
         if (_season == null) return;
-
         int gameDay = GameResultCache.LastGameDay > 0 ? GameResultCache.LastGameDay : _season.current_game_day;
         
         var gamesToday = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, gameDay)
-            .Where(g => g.is_played == 1).ToList();
+            .Where(g => g.is_played == 1 && !IsGLeagueGame(g)).ToList();
         _gamesBody.Clear();
 
         var allPlayerStats = new List<PlayerGameStats>();

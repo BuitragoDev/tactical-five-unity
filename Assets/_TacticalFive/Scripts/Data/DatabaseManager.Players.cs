@@ -214,40 +214,6 @@ public partial class DatabaseManager
                   .FirstOrDefault();
     }
 
-    public void AddGLeagueGame(int playerId, int seasonId, int points, int rebounds, int assists,
-                               int steals, int blocks, int turnovers, int rating)
-    {
-        var stat = GetGLeagueStats(playerId, seasonId);
-        if (stat == null)
-        {
-            _db.Insert(new GLeagueSeasonStat
-            {
-                player_id = playerId,
-                season_id = seasonId,
-                games = 2,
-                points = points,
-                rebounds = rebounds,
-                assists = assists,
-                steals = steals,
-                blocks = blocks,
-                turnovers = turnovers,
-                rating = rating
-            });
-        }
-        else
-        {
-            stat.games += 2;
-            stat.points += points;
-            stat.rebounds += rebounds;
-            stat.assists += assists;
-            stat.steals += steals;
-            stat.blocks += blocks;
-            stat.turnovers += turnovers;
-            stat.rating += rating;
-            _db.Update(stat);
-        }
-    }
-
     public List<GLeagueSeasonStat> GetTeamGLeagueStats(int teamId, int seasonId)
     {
         var playerIds = GetPlayersByTeam(teamId).Select(p => p.id).ToList();

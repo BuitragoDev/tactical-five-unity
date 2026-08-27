@@ -4,6 +4,7 @@
 
     <Style src="../Dashboard/Dashboard.uss" />
     <Style src="../Stats/Stats.uss" />
+    <Style src="../Standings/Standings.uss" />
     <Style src="../LegalNotice/LegalNotice.uss" />
     <Style src="GLeague.uss" />
 
@@ -15,43 +16,125 @@
             <!-- CONTENT -->
             <ui:VisualElement name="GLeagueContent" class="gleague-content">
 
-                <!-- RESUMEN -->
-                <ui:VisualElement class="gleague-summary">
-                    <ui:VisualElement class="gleague-summary-card">
-                        <ui:Label name="SummaryAssigned" class="gleague-summary-value" text="0" />
-                        <ui:Label class="gleague-summary-label" text="ASIGNADOS A G-LEAGUE" />
+                <!-- PESTAÑAS -->
+                <ui:VisualElement class="gleague-tabs">
+                    <ui:Button name="TabPlantilla" class="standings-tab standings-tab--active" text="PLANTILLA" />
+                    <ui:Button name="TabResultados" class="standings-tab" text="RESULTADOS" />
+                    <ui:Button name="TabClasificacion" class="standings-tab" text="CLASIFICACIÓN" />
+                    <ui:Button name="TabEstadisticas" class="standings-tab" text="ESTADÍSTICAS" />
+                </ui:VisualElement>
+
+                <!-- ══ PÁGINA 1 · PLANTILLA ══ -->
+                <ui:VisualElement name="PagePlantilla" class="gleague-page">
+
+                    <!-- RESUMEN -->
+                    <ui:VisualElement class="gleague-summary">
+                        <ui:VisualElement class="gleague-summary-card">
+                            <ui:Label name="SummaryAssigned" class="gleague-summary-value" text="0" />
+                            <ui:Label class="gleague-summary-label" text="ASIGNADOS A G-LEAGUE" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="gleague-summary-card">
+                            <ui:Label name="SummaryTwoWay" class="gleague-summary-value" text="0" />
+                            <ui:Label class="gleague-summary-label" text="CONTRATOS TWO-WAY" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="gleague-summary-note">
+                            <ui:Label class="gleague-summary-note-text" text="Los jugadores asignados a la G-League no juegan en la NBA y mejoran +1 atributo cada 7 días (hasta su potencial)." />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="gleague-summary-card">
-                        <ui:Label name="SummaryTwoWay" class="gleague-summary-value" text="0" />
-                        <ui:Label class="gleague-summary-label" text="CONTRATOS TWO-WAY" />
+
+                    <ui:VisualElement class="gleague-tables-row">
+                    <!-- ASIGNADOS -->
+                    <ui:VisualElement name="AssignedPanel" class="stats-panel">
+                        <ui:VisualElement class="stats-panel-header">
+                            <ui:Label name="AssignedTitle" class="stats-title" text="ASIGNADOS A G-LEAGUE" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="stats-table-wrapper">
+                            <ui:VisualElement name="AssignedHeader" class="stats-header-row" />
+                            <ui:VisualElement name="AssignedBody" class="stats-table" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="gleague-summary-note">
-                        <ui:Label class="gleague-summary-note-text" text="Los jugadores asignados a la G-League no juegan en la NBA y mejoran +1 atributo cada 7 días (hasta su potencial)." />
+
+                    <!-- ELEGIBLES -->
+                    <ui:VisualElement name="EligiblePanel" class="stats-panel">
+                        <ui:VisualElement class="stats-panel-header">
+                            <ui:Label class="stats-title" text="ELEGIBLES PARA ASIGNAR" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="stats-table-wrapper">
+                            <ui:VisualElement name="EligibleHeader" class="stats-header-row" />
+                            <ui:VisualElement name="EligibleBody" class="stats-table" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- ══ PÁGINA 2 · RESULTADOS ══ -->
+                <ui:VisualElement name="PageResultados" class="gleague-page" style="display:none">
+                    <ui:VisualElement class="stats-panel gl-results-panel">
+                        <ui:VisualElement class="stats-panel-header">
+                            <ui:Label class="stats-title" text="RESULTADOS G-LEAGUE" />
+                            <ui:Label name="ResultsAffiliate" class="gl-results-affiliate" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="ResultsHeader" class="gl-table-header" />
+                        <ui:VisualElement class="gl-results-scroll-wrap">
+                            <ui:ScrollView class="gl-results-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
+                                <ui:VisualElement name="ResultsBody" class="gl-table-body" />
+                            </ui:ScrollView>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <ui:VisualElement class="gleague-tables-row">
-                <!-- ASIGNADOS -->
-                <ui:VisualElement name="AssignedPanel" class="stats-panel">
-                    <ui:VisualElement class="stats-panel-header">
-                        <ui:Label class="stats-title" text="ASIGNADOS A G-LEAGUE" />
+                <!-- ══ PÁGINA 3 · CLASIFICACIÓN ══ -->
+                <ui:VisualElement name="PageClasificacion" class="gleague-page" style="display:none">
+                    <ui:VisualElement class="standings-tabs">
+                        <ui:Button name="GlTabEast" class="standings-tab standings-tab--active" text="CONFERENCIA ESTE" />
+                        <ui:Button name="GlTabWest" class="standings-tab" text="CONFERENCIA OESTE" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="stats-table-wrapper">
-                        <ui:VisualElement name="AssignedHeader" class="stats-header-row" />
-                        <ui:VisualElement name="AssignedBody" class="stats-table" />
-                    </ui:VisualElement>
+
+                    <ui:ScrollView class="standings-scroll"
+                                   horizontal-scrolling-enabled="false"
+                                   mode="Vertical">
+                        <ui:VisualElement class="standings-table-container">
+                            <ui:VisualElement class="standings-header-row">
+                                <ui:Label class="col-rank col-stat--header" text="#" />
+                                <ui:VisualElement class="col-logo-space" />
+                                <ui:Label class="col-team-name col-stat--header" text="FILIAL" />
+                                <ui:Label class="col-stat col-stat--header" text="PJ" />
+                                <ui:Label class="col-stat col-stat--header" text="G" />
+                                <ui:Label class="col-stat col-stat--header" text="P" />
+                                <ui:Label class="col-stat col-stat--header" text="%" />
+                                <ui:Label class="col-diff col-stat--header" text="DIF" />
+                                <ui:Label class="col-streak col-stat--header" text="RACHA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="GlStandingsBody" class="standings-table" />
+                        </ui:VisualElement>
+                    </ui:ScrollView>
                 </ui:VisualElement>
 
-                <!-- ELEGIBLES -->
-                <ui:VisualElement name="EligiblePanel" class="stats-panel">
-                    <ui:VisualElement class="stats-panel-header">
-                        <ui:Label class="stats-title" text="ELEGIBLES PARA ASIGNAR" />
+                <!-- ══ PÁGINA 4 · ESTADÍSTICAS ══ -->
+                <ui:VisualElement name="PageEstadisticas" class="gleague-page" style="display:none">
+                    <ui:VisualElement class="gl-leaders-row">
+                        <ui:VisualElement name="PanelPts" class="stats-panel gl-leader-panel">
+                            <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="PUNTOS POR PARTIDO" /></ui:VisualElement>
+                            <ui:VisualElement name="LeadersPts" class="stats-table gl-leader-body" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PanelReb" class="stats-panel gl-leader-panel">
+                            <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="REBOTES POR PARTIDO" /></ui:VisualElement>
+                            <ui:VisualElement name="LeadersReb" class="stats-table gl-leader-body" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PanelAst" class="stats-panel gl-leader-panel">
+                            <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="ASISTENCIAS POR PARTIDO" /></ui:VisualElement>
+                            <ui:VisualElement name="LeadersAst" class="stats-table gl-leader-body" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PanelStl" class="stats-panel gl-leader-panel">
+                            <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="ROBOS POR PARTIDO" /></ui:VisualElement>
+                            <ui:VisualElement name="LeadersStl" class="stats-table gl-leader-body" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PanelBlk" class="stats-panel gl-leader-panel">
+                            <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="TAPONES POR PARTIDO" /></ui:VisualElement>
+                            <ui:VisualElement name="LeadersBlk" class="stats-table gl-leader-body" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="stats-table-wrapper">
-                        <ui:VisualElement name="EligibleHeader" class="stats-header-row" />
-                        <ui:VisualElement name="EligibleBody" class="stats-table" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
                 </ui:VisualElement>
 
             </ui:VisualElement>

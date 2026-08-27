@@ -84,6 +84,10 @@ public partial class DatabaseManager : MonoBehaviour
             SeedStaticDataIfNeeded();
         }
 
+        // Las partidas existentes (creadas antes de la G-League) también
+        // necesitan sus filiales y prospectos.
+        EnsureGLeagueSeeded();
+
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
     }
 
@@ -288,8 +292,13 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<HallOfFameData>();
         _db.CreateTable<RetiredNumberData>();
         _db.CreateTable<GLeagueSeasonStat>();
+        _db.CreateTable<GLeagueTeamData>();
+        _db.CreateTable<GLeaguePlayerData>();
+        _db.CreateTable<GLeagueChampionData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeaguePlayers_TeamId ON gleague_players(gleague_team_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueChampions_Manager ON gleague_champions(manager_id, season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_Standings ON games(manager_id, game_type, is_played, game_day)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
@@ -826,6 +835,21 @@ public partial class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for offers.is_two_way: {ex.Message}");
         }
+
+        // Add photo to gleague_players if missing
+        try
+        {
+            var glCols = _db.Query<ColumnInfo>("PRAGMA table_info(gleague_players)");
+            if (!glCols.Any(c => c.name == "photo"))
+            {
+                _db.Execute("ALTER TABLE gleague_players ADD COLUMN photo TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added photo to gleague_players");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for gleague_players.photo: {ex.Message}");
+        }
     }
 
     bool IsMigrationApplied(string name)
@@ -930,6 +954,8 @@ public partial class DatabaseManager : MonoBehaviour
             SeedRetiredNumbers();
             SeedVeteranRetiredNumbers();
         }
+
+        EnsureGLeagueSeeded();
 
         SeedActivePlayerCareers();
     }

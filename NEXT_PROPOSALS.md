@@ -32,8 +32,17 @@ Estado: 4/4 completadas (verificado en HEAD `81d9e4f`).
       `TradeHelper.TWO_WAY_SALARY` (máx 2/equipo, edad ≤23). Toggle TWO-WAY en la oferta FA
       (`MarketController`), firma IA (`TrySignFreeAgent`) y rookies de 2ª ronda (`DraftGenerator`).
 - [x] **G-League ligera:** `GLeagueHelper` (asignar/recuperar, desarrollo +1 atributo/7 días
-      cap `potential`, stats procedimentales); botones ASIGNAR G / G-LEAGUE en `RosterController`,
+      cap `potential`); botones ASIGNAR G / G-LEAGUE en `RosterController`,
       panel de stats en el detalle del jugador, gancho semanal en `ProcessGameDayRoutine`
       (`ProcessGLeagueDevelopment`), tabla `gleague_season_stats`; jugadores G-League excluidos
       de quinteto/simulación (`GetActivePlayers`, `QuintetoController`, `MatchDayController`, All-Star).
+- [x] **G-League como liga completa** (ampliación rama `gleague`): 30 filiales reales
+      (`gleague_teams`) + 11 prospectos cada una (`gleague_players`); calendario propio de 28
+      partidos/filial solo en días NBA (nov→mar, pausa All-Star) con `GLeagueScheduleGenerator`;
+      simulación diaria vía `ProcessGLeagueGame` (`SimulateGame(persistToDb:false)`, sin
+      player_game_stats/records/fatiga/lesiones; stats por partido en `gleague_season_stats`);
+      clasificación en memoria (`GLeagueStandings`); playoffs eliminatorios QF→SF→CF→Gran Final
+      (`GLeaguePostSeason`, campeón en `gleague_champions`); pantalla GLeague con 4 pestañas
+      (PLANTILLA/RESULTADOS/CLASIFICACIÓN/ESTADÍSTICAS). Los ids de filial van codificados
+      en `games` (+1000, `DecodeGlTeamId`); la postseason nunca toca `seasons.phase`.
 - Encaje: sin pantalla nueva; reutiliza Roster/Lesionados/Mercado/Quinteto.

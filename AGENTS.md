@@ -127,6 +127,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 8. **No tocar `_db` directamente fuera del main thread** — usar la conexión ambient de `RunInBackground`/`RunInBackgroundAsync`.
 9. **Los contratos de jugador:** `salary` anual, `contract_years`, ofertas maduran a los 7 días; TO/PO mutuamente excluyentes → `guaranteed_years = max(0, years − 1)`.
 10. **Ventana de traspasos IA:** Sep 1 → Feb 8; deadline día = **7 de febrero**; semana deadline = Feb 1–8 (rush IA 3–5 días).
+11. **Ids G-League codificados:** los GameData con `game_type=gleague/gleague_playoff` guardan home/away = id de filial `+GAME_TEAM_ID_OFFSET (1000)`; descodificar SIEMPRE con `GLeagueHelper.DecodeGlTeamId`. Los prospectos simulan con id `+PROSPECT_ID_OFFSET (500000)`. La postseason GL (`GLeaguePostSeason`) nunca toca `seasons.phase`.
 
 ---
 

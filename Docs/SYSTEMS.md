@@ -153,12 +153,14 @@
 - **FogOfWarHelper:** hides OVR (band), role, and attributes for un-scouted players; scouted ids set by completed scouts (`CarteraController`); consumers: `CarteraController`, `PlayerProfileController`.
 - **MatchupPreview:** forecast ratings + win probability + favorites + stars; consumer: `MatchDayController`.
 
-## S19. IR / two-way / G-League (Propuesta D)
+## S19. IR / two-way / G-League (Propuesta D + liga completa)
 
-- **Files:** `GLeagueHelper.cs` (reglas puras), `TradeHelper.cs` (`TWO_WAY_SALARY`, `MAX_TWO_WAY`, `IR_MIN_DAYS`, `IsEligibleForTwoWay`, `IsEligibleForIR`), `InjuredController.cs` (IR), `MarketController.cs`/`DashboardController.cs` (two-way), `RosterController.cs`/`QuintetoController.cs` (G-League UI), `DatabaseManager.Players.cs` (`GetRosterCount`, `GetTwoWayCount`, `SetOnIR`, `AddGLeagueGame`, `GetGLeagueStats`, `GetTeamGLeagueStats`).
+- **Files:** `GLeagueHelper.cs` (reglas puras), `GLeagueScheduleGenerator.cs`, `GLeaguePostSeason.cs`, `GLeagueStandings.cs` (puros), `GLeagueSeeder.cs`, `TradeHelper.cs` (`TWO_WAY_SALARY`, `MAX_TWO_WAY`, `IR_MIN_DAYS`, `IsEligibleForTwoWay`, `IsEligibleForIR`), `InjuredController.cs` (IR), `MarketController.cs`/`DashboardController.cs` (two-way), `RosterController.cs`/`QuintetoController.cs`/`GLeagueController.cs` (UI), `DatabaseManager.Players.cs` (`GetRosterCount`, `GetTwoWayCount`, `SetOnIR`, `GetGLeagueStats`, `GetTeamGLeagueStats`), `DatabaseManager.GLeague.cs` (CRUD filiales/prospectos/partidos/stats/campeones).
 - **IR:** `is_on_ir` (no cuenta en tope); botón en Lesionados; recuperación en pre-lote diario con liberación IA / modal plantilla llena para el usuario; FastSim pausa.
 - **Two-way:** sub-tipo de contrato (`is_two_way`), salario fijo, máx 2/equipo, edad ≤23; toggle en oferta FA, firma IA y rookies 2ª ronda; `ProcessMaturedOffers` salta checks de cap.
-- **G-League:** `g_league_assigned`; desarrollo +1 atributo/7 días cap `potential` (`ProcessGLeagueDevelopment` en el paso 2 del día); stats procedimentales en `gleague_season_stats`; exclusión de NBA en `GetActivePlayers`, `QuintetoController`, `MatchDayController` y All-Star.
+- **G-League (asignaciones):** `g_league_assigned`; desarrollo +1 atributo/7 días cap `potential` (`ProcessGLeagueDevelopment` en el paso 2 del día); exclusión de NBA en `GetActivePlayers`, `QuintetoController`, `MatchDayController` y All-Star.
+- **G-League (liga completa):** 30 filiales (`gleague_teams`) con 11 prospectos cada una (`gleague_players`); calendario de 28 partidos/filial solo en días NBA nov→mar (`GLeagueScheduleGenerator`); partidos simulados diarios vía `ProcessGLeagueGame` con `SimulateGame(persistToDb:false)` — sin player_game_stats/records/fatiga/lesiones; stats acumuladas por partido en `gleague_season_stats`; playoffs eliminatorios QF→SF→CF→Final (`GLeaguePostSeason`) con campeón en `gleague_champions`; UI de 4 pestañas en la pantalla GLeague. Detalle completo y fórmulas: GAMEPLAY §16.
+- **Invariante clave:** los GameData GL guardan ids de filial codificados `+GAME_TEAM_ID_OFFSET (1000)`; descodificar con `DecodeGlTeamId`. Los prospectos usan ids de simulación `+PROSPECT_ID_OFFSET (500000)`.
 - **Invitante:** `GetRosterCount` (excluye IR) sustituyó a los contajes de `GetPlayersByTeam().Count` en los sitios de tope de plantilla (Market, Dashboard, NewSeason, Records).
 
 ---

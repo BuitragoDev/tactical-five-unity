@@ -7,4 +7,6 @@ public class FinalsMVPDetails
     public float AvgPts { get; set; }
     public float AvgReb { get; set; }
     public float AvgAst { get; set; }
+    public float AvgStl { get; set; }
+    public float AvgBlk { get; set; }
 }

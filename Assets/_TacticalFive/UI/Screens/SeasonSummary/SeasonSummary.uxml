@@ -27,37 +27,93 @@
         </ui:VisualElement>
         <ui:VisualElement name="ContentArea" class="content-area">
             <ui:VisualElement class="summary-header">
-                <ui:Label text="Campeón de la NBA" class="summary-title"/>
                 <ui:Label name="SeasonTag" text="" class="season-tag"/>
             </ui:VisualElement>
-            <ui:VisualElement name="ChampionCard" class="champion-card">
-                <ui:VisualElement name="ChampionLogo" class="champion-logo"/>
-                <ui:Label name="ChampionName" text="" class="champion-name"/>
-                <ui:VisualElement name="FinalsResultRow" class="finals-result-row">
-                    <ui:Label text="Resultado Finales" class="result-label"/>
-                    <ui:Label name="FinalsResult" text="" class="result-score"/>
-                    <ui:Label name="FinalsLoser" text="" class="result-loser"/>
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="FinalsMVPCard" class="finals-mvp-card">
-                <ui:Label text="MVP de las Finales" class="mvp-label"/>
-                <ui:VisualElement class="mvp-photo-wrapper">
-                    <ui:VisualElement name="MvpPhoto" class="mvp-photo"/>
-                </ui:VisualElement>
-                <ui:Label name="MvpName" text="" class="mvp-name"/>
-                <ui:Label name="MvpTeam" text="" class="mvp-team"/>
-                <ui:VisualElement name="MvpStatsRow" class="mvp-stat-row">
-                    <ui:VisualElement class="mvp-stat-box">
-                        <ui:Label name="MvpPts" text="--" class="stat-val"/>
-                        <ui:Label text="PTS" class="stat-label"/>
+            <ui:VisualElement class="columns-row">
+                <ui:VisualElement class="column column--nba">
+                    <ui:Label text="NBA" class="column-title column-title--nba"/>
+                    <ui:VisualElement name="ChampionCard" class="champion-card">
+                        <ui:Label text="Campeón de la NBA" class="card-subtitle"/>
+                        <ui:VisualElement name="ChampionLogo" class="champion-logo"/>
+                        <ui:Label name="ChampionName" text="" class="champion-name"/>
+                        <ui:VisualElement name="FinalsResultRow" class="finals-result-row">
+                            <ui:Label name="FinalsResult" text="" class="result-score"/>
+                            <ui:Label name="FinalsLoser" text="" class="result-loser"/>
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="mvp-stat-box">
-                        <ui:Label name="MvpReb" text="--" class="stat-val"/>
-                        <ui:Label text="REB" class="stat-label"/>
+                    <ui:VisualElement name="FinalsMVPCard" class="finals-mvp-card">
+                        <ui:Label text="MVP de las Finales" class="mvp-label"/>
+                        <ui:VisualElement class="mvp-photo-wrapper">
+                            <ui:VisualElement name="MvpPhoto" class="mvp-photo"/>
+                        </ui:VisualElement>
+                        <ui:Label name="MvpName" text="" class="mvp-name"/>
+                        <ui:Label name="MvpTeam" text="" class="mvp-team"/>
+                        <ui:VisualElement name="MvpStatsRow" class="mvp-stat-row">
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpPts" text="--" class="stat-val"/>
+                                <ui:Label text="PTS" class="stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpReb" text="--" class="stat-val"/>
+                                <ui:Label text="REB" class="stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpAst" text="--" class="stat-val"/>
+                                <ui:Label text="AST" class="stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpStl" text="--" class="stat-val"/>
+                                <ui:Label text="ROB" class="stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="mvp-stat-box">
+                                <ui:Label name="MvpBlk" text="--" class="stat-val"/>
+                                <ui:Label text="TAP" class="stat-label"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="mvp-stat-box">
-                        <ui:Label name="MvpAst" text="--" class="stat-val"/>
-                        <ui:Label text="AST" class="stat-label"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="column column--gl">
+                    <ui:Label text="G-LEAGUE" class="column-title column-title--gl"/>
+                    <ui:VisualElement name="GLSection" class="gl-cards-col">
+                        <ui:VisualElement name="GLChampionCard" class="gl-champion-card">
+                            <ui:Label text="Campeón de la G-League" class="gl-card-title"/>
+                            <ui:VisualElement name="GLChampionLogo" class="gl-champion-logo"/>
+                            <ui:Label name="GLChampionName" text="" class="gl-champion-name"/>
+                            <ui:VisualElement name="GLFinalsResultRow" class="gl-finals-result-row">
+                                <ui:Label name="GLFinalsResult" text="" class="gl-result-score"/>
+                                <ui:Label name="GLFinalsLoser" text="" class="gl-result-loser"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="GLMVPCard" class="gl-mvp-card">
+                            <ui:Label text="MVP de la Temporada" class="gl-mvp-label"/>
+                            <ui:VisualElement class="gl-mvp-photo-wrapper">
+                                <ui:VisualElement name="GLMvpPhoto" class="gl-mvp-photo"/>
+                            </ui:VisualElement>
+                            <ui:Label name="GLMvpName" text="" class="gl-mvp-name"/>
+                            <ui:Label name="GLMvpTeam" text="" class="gl-mvp-team"/>
+                            <ui:VisualElement name="GLMvpStatsRow" class="gl-mvp-stat-row">
+                                <ui:VisualElement class="gl-mvp-stat-box">
+                                    <ui:Label name="GLMvpPts" text="--" class="gl-stat-val"/>
+                                    <ui:Label text="PTS" class="gl-stat-label"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="gl-mvp-stat-box">
+                                    <ui:Label name="GLMvpReb" text="--" class="gl-stat-val"/>
+                                    <ui:Label text="REB" class="gl-stat-label"/>
+                                </ui:VisualElement>
+                            <ui:VisualElement class="gl-mvp-stat-box">
+                                <ui:Label name="GLMvpAst" text="--" class="gl-stat-val"/>
+                                <ui:Label text="AST" class="gl-stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="gl-mvp-stat-box">
+                                <ui:Label name="GLMvpStl" text="--" class="gl-stat-val"/>
+                                <ui:Label text="ROB" class="gl-stat-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="gl-mvp-stat-box">
+                                <ui:Label name="GLMvpBlk" text="--" class="gl-stat-val"/>
+                                <ui:Label text="TAP" class="gl-stat-label"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

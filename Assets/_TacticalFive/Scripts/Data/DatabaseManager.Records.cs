@@ -1792,6 +1792,8 @@ public partial class DatabaseManager
                 AvgPts = g.Average(s => s.points),
                 AvgReb = g.Average(s => s.rebounds),
                 AvgAst = g.Average(s => s.assists),
+                AvgStl = g.Average(s => s.steals),
+                AvgBlk = g.Average(s => s.blocks),
                 GamesPlayed = g.Count()
             })
             .Where(x => x.GamesPlayed >= 2)
@@ -1813,7 +1815,9 @@ public partial class DatabaseManager
             TeamName = champTeam?.name ?? "",
             AvgPts = (float)topPlayer.AvgPts,
             AvgReb = (float)topPlayer.AvgReb,
-            AvgAst = (float)topPlayer.AvgAst
+            AvgAst = (float)topPlayer.AvgAst,
+            AvgStl = (float)topPlayer.AvgStl,
+            AvgBlk = (float)topPlayer.AvgBlk
         };
     }
 
@@ -2978,6 +2982,9 @@ public partial class DatabaseManager
         _db.Execute("DELETE FROM messages");
         _db.Execute("DELETE FROM game_attendance");
         _db.Execute("DELETE FROM finance_records");
+
+        // 5a. Ciclo de vida G-League (envejecimiento, retiro, progresión, re-seeding)
+        AdvanceGLeagueLifecycle();
 
         // 5b. Trim AI teams to max 17
         TrimRostersToMaxSize(17, newTeamId);

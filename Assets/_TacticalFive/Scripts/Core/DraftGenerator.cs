@@ -12,7 +12,7 @@ public static class DraftGenerator
         public PlayerData Player { get; set; }
     }
 
-    private static readonly string[] FirstNames = {
+    public static readonly string[] FirstNames = {
         "James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph",
         "Thomas", "Charles", "Christopher", "Daniel", "Matthew", "Anthony", "Mark",
         "Donald", "Steven", "Paul", "Andrew", "Joshua", "Kenneth", "Kevin", "Brian",
@@ -33,7 +33,7 @@ public static class DraftGenerator
         "Domantas", "Victor", "Shai", "Deni", "Jusuf", "Sekou", "Mamadi",
     };
 
-    private static readonly string[] LastNames = {
+    public static readonly string[] LastNames = {
         "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
         "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson",
         "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson",
