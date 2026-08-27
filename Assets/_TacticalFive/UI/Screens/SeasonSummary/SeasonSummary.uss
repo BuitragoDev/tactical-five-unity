@@ -234,8 +234,8 @@
     width: 100%;
 }
 .champion-logo {
-    width: 120px;
-    height: 120px;
+    width: 64px;
+    height: 64px;
     margin-bottom: 16px;
 }
 .champion-name {
@@ -388,8 +388,8 @@
 }
 
 .gl-champion-logo {
-    width: 120px;
-    height: 120px;
+    width: 64px;
+    height: 64px;
     margin-bottom: 16px;
 }
 

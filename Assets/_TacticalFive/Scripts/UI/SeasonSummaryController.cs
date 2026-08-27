@@ -164,7 +164,7 @@ public class SeasonSummaryController : UIScreenController
         if (champTeam != null)
         {
             _championName.text = champTeam.name.ToUpper();
-            SetTeamLogoLarge(_championLogo, champTeam.logo);
+            SetTeamLogo(_championLogo, champTeam.logo);
         }
         else
         {
@@ -218,7 +218,7 @@ public class SeasonSummaryController : UIScreenController
             _glChampionName.text = glChamp.team_name.ToUpper();
 
             var championTeam = DatabaseManager.Instance.GetGLeagueTeam(glChamp.gleague_team_id);
-            if (championTeam != null && _logoSpritesLarge.TryGetValue(championTeam.logo, out var glLogo))
+            if (championTeam != null && _logoSprites.TryGetValue(championTeam.logo, out var glLogo))
                 _glChampionLogo.style.backgroundImage = new StyleBackground(glLogo);
 
             // La Gran Final es al mejor de 3: mostrar el parcial (p.ej. "2-1")
