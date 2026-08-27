@@ -272,8 +272,27 @@ public class SeasonSummaryController : UIScreenController
 
             if (mvp.player_id >= GLeagueHelper.PROSPECT_ID_OFFSET)
             {
-                _glMvpPhoto.style.backgroundImage = null;
-                _glMvpPhoto.style.backgroundColor = new Color(0.3f, 0.3f, 0.35f);
+                int prospectId = mvp.player_id - GLeagueHelper.PROSPECT_ID_OFFSET;
+                var glPlayer = DatabaseManager.Instance.GetGLeaguePlayerById(prospectId);
+                if (glPlayer != null && !string.IsNullOrEmpty(glPlayer.photo))
+                {
+                    Texture2D tex = Resources.Load<Texture2D>($"PlayerPhotos/{glPlayer.photo}");
+                    if (tex != null)
+                    {
+                        _glMvpPhoto.style.backgroundImage = new StyleBackground(tex);
+                        _glMvpPhoto.style.backgroundColor = Color.clear;
+                    }
+                    else
+                    {
+                        _glMvpPhoto.style.backgroundImage = null;
+                        _glMvpPhoto.style.backgroundColor = new Color(0.3f, 0.3f, 0.35f);
+                    }
+                }
+                else
+                {
+                    _glMvpPhoto.style.backgroundImage = null;
+                    _glMvpPhoto.style.backgroundColor = new Color(0.3f, 0.3f, 0.35f);
+                }
             }
             else
             {
