@@ -222,41 +222,38 @@ public partial class DatabaseManager
 
     public GLSeasonMVPRow GetGLSeasonMVP(int managerId, int seasonId)
     {
-        // Primero: prospectos (player_id >= 500000, offset en gleague_season_stats)
-        var prospectMVP = _db.Query<GLSeasonMVPRow>(@"
-            SELECT gs.player_id, gp.first_name, gp.last_name, gp.position,
-                   gt.name as team_name, gt.logo as team_logo,
-                   gs.games,
-                   CAST(gs.rating AS REAL)/gs.games as avg_rating,
-                   CAST(gs.points AS REAL)/gs.games as avg_pts,
-                   CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
-                   CAST(gs.assists AS REAL)/gs.games as avg_ast,
-                   CAST(gs.steals AS REAL)/gs.games as avg_stl,
-                   CAST(gs.blocks AS REAL)/gs.games as avg_blk
-            FROM gleague_season_stats gs
-            JOIN gleague_players gp ON gs.player_id = gp.id + 500000
-            JOIN gleague_teams gt ON gp.gleague_team_id = gt.id
-            WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id >= 500000
-            ORDER BY CAST(gs.rating AS REAL)/gs.games DESC LIMIT 1", seasonId).FirstOrDefault();
-
-        if (prospectMVP != null) return prospectMVP;
-
-        // Segundo: jugadores NBA asignados (player_id < 500000)
+        // Unificar prospectos y NBA asignados en una sola query para elegir
+        // al jugador con mayor valoración media, sin priorizar un tipo sobre otro.
         return _db.Query<GLSeasonMVPRow>(@"
-            SELECT gs.player_id, p.first_name, p.last_name, p.position,
-                   t.name as team_name, t.logo as team_logo,
-                   gs.games,
-                   CAST(gs.rating AS REAL)/gs.games as avg_rating,
-                   CAST(gs.points AS REAL)/gs.games as avg_pts,
-                   CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
-                   CAST(gs.assists AS REAL)/gs.games as avg_ast,
-                   CAST(gs.steals AS REAL)/gs.games as avg_stl,
-                   CAST(gs.blocks AS REAL)/gs.games as avg_blk
-            FROM gleague_season_stats gs
-            JOIN players p ON gs.player_id = p.id
-            JOIN teams t ON p.team_id = t.id
-            WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id < 500000
-            ORDER BY CAST(gs.rating AS REAL)/gs.games DESC LIMIT 1", seasonId).FirstOrDefault();
+            SELECT * FROM (
+                SELECT gs.player_id, gp.first_name, gp.last_name, gp.position,
+                       gt.name as team_name, gt.logo as team_logo,
+                       gs.games,
+                       CAST(gs.rating AS REAL)/gs.games as avg_rating,
+                       CAST(gs.points AS REAL)/gs.games as avg_pts,
+                       CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
+                       CAST(gs.assists AS REAL)/gs.games as avg_ast,
+                       CAST(gs.steals AS REAL)/gs.games as avg_stl,
+                       CAST(gs.blocks AS REAL)/gs.games as avg_blk
+                FROM gleague_season_stats gs
+                JOIN gleague_players gp ON gs.player_id = gp.id + 500000
+                JOIN gleague_teams gt ON gp.gleague_team_id = gt.id
+                WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id >= 500000
+                UNION ALL
+                SELECT gs.player_id, p.first_name, p.last_name, p.position,
+                       t.name as team_name, t.logo as team_logo,
+                       gs.games,
+                       CAST(gs.rating AS REAL)/gs.games as avg_rating,
+                       CAST(gs.points AS REAL)/gs.games as avg_pts,
+                       CAST(gs.rebounds AS REAL)/gs.games as avg_reb,
+                       CAST(gs.assists AS REAL)/gs.games as avg_ast,
+                       CAST(gs.steals AS REAL)/gs.games as avg_stl,
+                       CAST(gs.blocks AS REAL)/gs.games as avg_blk
+                FROM gleague_season_stats gs
+                JOIN players p ON gs.player_id = p.id
+                JOIN teams t ON p.team_id = t.id
+                WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id < 500000
+            ) ORDER BY avg_rating DESC LIMIT 1", seasonId, seasonId).FirstOrDefault();
     }
 
     // ── CICLO DE VIDA ANUAL G-LEAGUE ─────────────────────
