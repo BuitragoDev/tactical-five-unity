@@ -42,6 +42,7 @@ public class GLeagueController : UIScreenController
     private Dictionary<int, string> _glNames = new();
     private Dictionary<int, int> _glTeamOfPlayer = new();
     private Dictionary<int, (string photo, bool isReal)> _glPhotos = new();
+    private Dictionary<int, string> _glPositions = new();
 
     protected override void CacheReferences()
     {
@@ -168,6 +169,7 @@ public class GLeagueController : UIScreenController
         _glNames.Clear();
         _glTeamOfPlayer.Clear();
         _glPhotos.Clear();
+        _glPositions.Clear();
 
         var affiliateByNba = _glTeams.ToDictionary(t => t.nba_team_id, t => t.id);
 
@@ -177,6 +179,7 @@ public class GLeagueController : UIScreenController
             if (affiliateByNba.TryGetValue(p.team_id, out var glId))
                 _glTeamOfPlayer[p.id] = glId;
             _glPhotos[p.id] = (p.photo, true);
+            _glPositions[p.id] = p.position;
         }
 
         var prospects = DatabaseManager.Instance.GetAllGLeaguePlayers();
@@ -186,6 +189,7 @@ public class GLeagueController : UIScreenController
             _glNames[simId] = $"{gp.first_name} {gp.last_name}";
             _glTeamOfPlayer[simId] = gp.gleague_team_id;
             _glPhotos[simId] = (gp.photo ?? "", false);
+            _glPositions[simId] = gp.position;
         }
     }
 
@@ -641,7 +645,7 @@ public class GLeagueController : UIScreenController
         info.AddToClassList("gl-leader-info");
 
         string playerName = _glNames.TryGetValue(stat.player_id, out var n) ? n : "—";
-        string posShort = PositionCodes.GetShort(stat.position);
+        string posShort = _glPositions.TryGetValue(stat.player_id, out var pos) ? PositionCodes.GetShort(pos) : "";
         string nameText = string.IsNullOrEmpty(posShort) ? playerName : $"{playerName} · {posShort}";
         var nameLbl = new Label(nameText);
         nameLbl.AddToClassList("gl-leader-name");
