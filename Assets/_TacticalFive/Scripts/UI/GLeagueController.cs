@@ -629,7 +629,7 @@ public class GLeagueController : UIScreenController
 
         var avatar = new VisualElement();
         avatar.AddToClassList("gl-leader-avatar");
-        if (_glPhotos.TryGetValue(stat.player_id, out var photoInfo) && !string.IsNullOrEmpty(photoInfo.photo))
+        if (_glPhotos.TryGetValue(stat.player_id, out var photoInfo) && (photoInfo.isReal || !string.IsNullOrEmpty(photoInfo.photo)))
         {
             var tex = PlayerPhotoHelper.Load(stat.player_id, photoInfo.photo);
             if (tex != null)
