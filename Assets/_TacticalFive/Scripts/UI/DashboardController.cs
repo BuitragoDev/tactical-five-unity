@@ -1462,8 +1462,12 @@ using System.Threading.Tasks;
                 if (ps.minutes <= 0) continue;
                 var (pts, reb, ast, stl, blk, tov) =
                     GLeagueHelper.ClampLine(ps.points, ps.oreb + ps.dreb, ps.assists, ps.steals, ps.blocks, ps.turnovers);
+                int missedFg = Mathf.Clamp(ps.fga - ps.fgm, 0, 30);
+                int missedFt = Mathf.Clamp(ps.fta - ps.ftm, 0, 10);
+                int pf = Mathf.Clamp(ps.pf, 0, 6);
+                int clampedRating = pts + reb + ast + stl + blk - missedFg - missedFt - tov - pf;
                 DatabaseManager.Instance.AddGLeagueGameStat(ps.player_id, seasonId,
-                    pts, reb, ast, stl, blk, tov, ps.rating);
+                    pts, reb, ast, stl, blk, tov, clampedRating);
             }
         }
     }
