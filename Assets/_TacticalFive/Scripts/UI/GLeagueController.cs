@@ -28,7 +28,7 @@ public class GLeagueController : UIScreenController
     private VisualElement _resultsBody;
     private VisualElement _resultsHeader;
     private Label _resultsAffiliate;
-    private VisualElement _leadersPts, _leadersReb, _leadersAst, _leadersStl, _leadersBlk;
+    private VisualElement _leadersPts, _leadersReb, _leadersAst, _leadersStl, _leadersBlk, _leadersVal;
 
     // ── Datos ──
     private List<PlayerData> _players = new();
@@ -76,6 +76,7 @@ public class GLeagueController : UIScreenController
         _leadersAst = _root.Q<VisualElement>("LeadersAst");
         _leadersStl = _root.Q<VisualElement>("LeadersStl");
         _leadersBlk = _root.Q<VisualElement>("LeadersBlk");
+        _leadersVal = _root.Q<VisualElement>("LeadersVal");
     }
 
     protected override void LoadData()
@@ -594,6 +595,7 @@ public class GLeagueController : UIScreenController
         BuildLeaderPanel(_leadersAst, s => s.assists);
         BuildLeaderPanel(_leadersStl, s => s.steals);
         BuildLeaderPanel(_leadersBlk, s => s.blocks);
+        BuildLeaderPanel(_leadersVal, s => s.rating);
     }
 
     void BuildLeaderPanel(VisualElement body, System.Func<GLeagueSeasonStat, int> selector)

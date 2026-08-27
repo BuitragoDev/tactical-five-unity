@@ -134,6 +134,10 @@
                             <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="TAPONES POR PARTIDO" /></ui:VisualElement>
                             <ui:VisualElement name="LeadersBlk" class="stats-table gl-leader-body" />
                         </ui:VisualElement>
+                        <ui:VisualElement name="PanelVal" class="stats-panel gl-leader-panel">
+                            <ui:VisualElement class="stats-panel-header"><ui:Label class="stats-title" text="VALORACION POR PARTIDO" /></ui:VisualElement>
+                            <ui:VisualElement name="LeadersVal" class="stats-table gl-leader-body" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
