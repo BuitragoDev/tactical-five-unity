@@ -53,7 +53,7 @@ public static class GLeagueSeeder
     };
 
     /// <summary>Jugadores prospecto por filial.</summary>
-    public const int PLAYERS_PER_TEAM = 11;
+    public const int PLAYERS_PER_TEAM = 12;
 
     static readonly string[] Positions = { "PG", "SG", "SF", "PF", "C" };
 
