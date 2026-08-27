@@ -370,6 +370,12 @@ using System.Linq;
 
     void OnDaySelected(int day, string dateStr, List<GameData> games)
     {
+        // Solo mostrar partidos NBA en el detalle del día: excluimos los de G-League.
+        games = games
+            .Where(g => g.game_type != GLeagueScheduleGenerator.TYPE_REGULAR
+                     && g.game_type != GLeaguePostSeason.TYPE_PLAYOFF)
+            .ToList();
+
         _selectedDayTitle.text = $"{day} / {MonthNames[_currentMonthDate.Month].ToUpper()} / {_currentMonthDate.Year}";
         _selectedDayGames.Clear();
         _targetDate = null;
