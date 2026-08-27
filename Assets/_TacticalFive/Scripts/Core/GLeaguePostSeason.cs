@@ -419,7 +419,11 @@ public static class GLeaguePostSeason
         int finalistId = GLeagueHelper.DecodeGlTeamId(finalSeries[0].home_team_id) == championId
             ? GLeagueHelper.DecodeGlTeamId(finalSeries[0].away_team_id)
             : GLeagueHelper.DecodeGlTeamId(finalSeries[0].home_team_id);
-        string score = $"{champWins}-{CountTeamWins(finalSeries, finalistId)}";
+        int finalistWins = CountTeamWins(finalSeries, finalistId);
+        string score = $"{champWins}-{finalistWins}";
+
+        var finalistTeam = glTeams.FirstOrDefault(t => t.id == finalistId);
+        string finalistName = finalistTeam?.name ?? "su rival";
 
         bool isMyAffiliate = myNbaTeamId > 0 && championTeam.nba_team_id == myNbaTeamId;
         db.AddMessage(new MessageData
@@ -431,8 +435,8 @@ public static class GLeaguePostSeason
                 ? $"¡{championTeam.name}, tu filial, campeón de la G-League!"
                 : $"{championTeam.name} campeón de la G-League",
             body = isMyAffiliate
-                ? $"Tu filial {championTeam.name} se ha proclamado campeona de la G-League tras ganar la Gran Final por {score}. El proyecto de desarrollo da sus frutos."
-                : $"{championTeam.name} ha ganado la Gran Final de la G-League por {score}.",
+                ? $"Tu filial {championTeam.name} se ha proclamado campeona de la G-League tras vencer a {finalistName} en la Gran Final por {score}. El proyecto de desarrollo da sus frutos."
+                : $"{championTeam.name} ha vencido a {finalistName} en la Gran Final de la G-League por {score}.",
             game_day = season.current_game_day,
             game_date = season.current_date ?? "",
             created_at = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
