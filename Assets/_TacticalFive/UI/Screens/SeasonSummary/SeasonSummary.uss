@@ -224,6 +224,7 @@
 
 /* ── CHAMPION CARD ── */
 .champion-card {
+    flex-direction: column;
     background-color: rgb(17, 24, 34);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
@@ -276,6 +277,7 @@
 
 /* ── FINALS MVP CARD ── */
 .finals-mvp-card {
+    flex-direction: column;
     background-color: rgb(17, 24, 34);
     border-width: 1px;
     border-color: rgb(73, 115, 205);
@@ -317,6 +319,7 @@
     min-width: 320px;
 }
 .mvp-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 14px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
@@ -367,6 +370,7 @@
 
 /* ── GL CHAMPION CARD ── */
 .gl-champion-card {
+    flex-direction: column;
     background-color: rgb(17, 24, 34);
     border-width: 2px;
     border-color: rgb(0, 188, 180);
@@ -427,6 +431,7 @@
 
 /* ── GL MVP CARD ── */
 .gl-mvp-card {
+    flex-direction: column;
     background-color: rgb(17, 24, 34);
     border-width: 1px;
     border-color: rgb(0, 188, 180);
