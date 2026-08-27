@@ -172,7 +172,7 @@
     border-radius: 4px;
     margin-right: 10px;
     flex-shrink: 0;
-    background-color: rgb(42, 51, 71);
+    background-color: rgb(205, 205, 206);
 }
 
 .gleague-player-name {
@@ -408,7 +408,7 @@
     border-radius: 4px;
     margin-right: 10px;
     flex-shrink: 0;
-    background-color: rgb(42, 51, 71);
+    background-color: rgb(205, 205, 206);
 }
 
 .gl-leader-info {

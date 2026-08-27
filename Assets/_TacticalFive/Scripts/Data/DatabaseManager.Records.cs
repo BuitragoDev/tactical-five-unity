@@ -2983,6 +2983,9 @@ public partial class DatabaseManager
         _db.Execute("DELETE FROM game_attendance");
         _db.Execute("DELETE FROM finance_records");
 
+        // 5a. Ciclo de vida G-League (envejecimiento, retiro, progresión, re-seeding)
+        AdvanceGLeagueLifecycle();
+
         // 5b. Trim AI teams to max 17
         TrimRostersToMaxSize(17, newTeamId);
 

@@ -253,4 +253,114 @@ public partial class DatabaseManager
             WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id < 500000
             ORDER BY CAST(gs.rating AS REAL)/gs.games DESC LIMIT 1", seasonId).FirstOrDefault();
     }
+
+    // ── CICLO DE VIDA ANUAL G-LEAGUE ─────────────────────
+
+    /// <summary>
+    /// Ejecuta el ciclo de vida anual de la G-League al inicio de cada nueva temporada:
+    /// 1. Limpia stats de temporada anterior
+    /// 2. Envejece prospectos (+1 año)
+    /// 3. Retira prospectos >= 26 años
+    /// 4. Progresa atributos de prospectos jóvenes
+    /// 5. Rellena equipos con < 12 prospectos
+    /// Llamar dentro de la transacción de StartNewSeason.
+    /// </summary>
+    internal void AdvanceGLeagueLifecycle()
+    {
+        // 1. Limpiar stats de temporada anterior
+        _db.Execute("DELETE FROM gleague_season_stats");
+        _db.Execute("DELETE FROM gleague_champions");
+        Debug.Log("[DB] G-League: stats y campeones de temporada anterior eliminados.");
+
+        // 2. Envejecer prospectos (+1 año)
+        var allProspects = _db.Table<GLeaguePlayerData>().ToList();
+        foreach (var p in allProspects)
+            p.age += 1;
+        _db.UpdateAll(allProspects);
+        Debug.Log($"[DB] G-League: {allProspects.Count} prospectos envejecidos +1 año.");
+
+        // 3. Retirar prospectos >= 26 años
+        var retired = allProspects.Where(p => p.age >= 26).ToList();
+        if (retired.Count > 0)
+        {
+            foreach (var p in retired)
+                _db.Delete(p);
+            Debug.Log($"[DB] G-League: {retired.Count} prospectos retirados (>= 26 años).");
+        }
+
+        // 4. Progresión de atributos para jóvenes
+        var active = _db.Table<GLeaguePlayerData>().ToList();
+        int progressed = 0;
+        foreach (var p in active)
+        {
+            int attrsToImprove = p.age <= 22 ? 2 : p.age <= 25 ? 1 : 0;
+            if (attrsToImprove <= 0) continue;
+
+            var attrNames = new[] { "speed", "shooting", "three_point", "passing", "dribbling",
+                                    "defense", "rebounding", "athleticism", "iq", "steals", "blocks" };
+
+            for (int i = 0; i < attrsToImprove; i++)
+            {
+                string attr = attrNames[GLeagueSeeder.Rng.Next(0, attrNames.Length)];
+                int current = attr switch
+                {
+                    "speed" => p.speed,
+                    "shooting" => p.shooting,
+                    "three_point" => p.three_point,
+                    "passing" => p.passing,
+                    "dribbling" => p.dribbling,
+                    "defense" => p.defense,
+                    "rebounding" => p.rebounding,
+                    "athleticism" => p.athleticism,
+                    "iq" => p.iq,
+                    "steals" => p.steals,
+                    "blocks" => p.blocks,
+                    _ => 0
+                };
+                int newVal = Mathf.Min(current + 1, p.potential);
+                switch (attr)
+                {
+                    case "speed": p.speed = newVal; break;
+                    case "shooting": p.shooting = newVal; break;
+                    case "three_point": p.three_point = newVal; break;
+                    case "passing": p.passing = newVal; break;
+                    case "dribbling": p.dribbling = newVal; break;
+                    case "defense": p.defense = newVal; break;
+                    case "rebounding": p.rebounding = newVal; break;
+                    case "athleticism": p.athleticism = newVal; break;
+                    case "iq": p.iq = newVal; break;
+                    case "steals": p.steals = newVal; break;
+                    case "blocks": p.blocks = newVal; break;
+                }
+            }
+
+            // Recalcular overall
+            int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling
+                    + p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
+            p.overall = Mathf.Min(p.potential, sum / 11);
+            progressed++;
+        }
+        if (progressed > 0)
+        {
+            _db.UpdateAll(active);
+            Debug.Log($"[DB] G-League: {progressed} prospectos con atributos mejorados.");
+        }
+
+        // 5. Rellenar equipos con < 12 prospectos
+        var glTeams = _db.Table<GLeagueTeamData>().ToList();
+        int totalAdded = 0;
+        foreach (var team in glTeams)
+        {
+            int count = _db.Table<GLeaguePlayerData>()
+                .Count(gp => gp.gleague_team_id == team.id);
+            int need = GLeagueSeeder.PLAYERS_PER_TEAM - count;
+            if (need <= 0) continue;
+
+            var newProspects = GLeagueSeeder.GenerateProspects(team.id);
+            _db.InsertAll(newProspects.Take(need));
+            totalAdded += need;
+        }
+        if (totalAdded > 0)
+            Debug.Log($"[DB] G-League: {totalAdded} nuevos prospectos generados para equipos incompletos.");
+    }
 }
