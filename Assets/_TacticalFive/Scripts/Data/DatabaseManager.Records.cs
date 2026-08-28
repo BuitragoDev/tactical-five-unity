@@ -3436,26 +3436,56 @@ public partial class DatabaseManager
 
         var posOrder = new[] { "PG", "SG", "SF", "PF", "C" };
 
-        // Assign best player at each position as starter (excluding forced-inactive)
+        // Greedy global assignment: in each pass pick the (position, player) pair
+        // with the highest OVR, then lock both. This avoids the sequential greedy
+        // trap where a versatile player is consumed by an early position slot,
+        // forcing a weaker player into a later slot.
+        var starters = new PlayerData[posOrder.Length];
+        var used = new HashSet<int>();
+
+        for (int pass = 0; pass < posOrder.Length; pass++)
+        {
+            int bestPos = -1;
+            int bestPlayerIdx = -1;
+            int bestOvr = -1;
+
+            for (int si = 0; si < posOrder.Length; si++)
+            {
+                if (starters[si] != null) continue;
+
+                for (int pi = 0; pi < players.Count; pi++)
+                {
+                    var p = players[pi];
+                    if (used.Contains(p.id) || forceInactive.Contains(p.id)) continue;
+                    if (p.position != posOrder[si] && p.secondary_position != posOrder[si]) continue;
+
+                    if (p.overall >= bestOvr)
+                    {
+                        bestOvr = p.overall;
+                        bestPos = si;
+                        bestPlayerIdx = pi;
+                    }
+                }
+            }
+
+            if (bestPos >= 0 && bestPlayerIdx >= 0)
+            {
+                starters[bestPos] = players[bestPlayerIdx];
+                used.Add(players[bestPlayerIdx].id);
+            }
+        }
+
         for (int si = 0; si < posOrder.Length; si++)
         {
-            var best = players
-                .Where(p => (p.position == posOrder[si] || p.secondary_position == posOrder[si])
-                            && !assigned.Contains(p.id)
-                            && !forceInactive.Contains(p.id))
-                .OrderByDescending(p => p.overall)
-                .FirstOrDefault();
-            if (best != null)
+            if (starters[si] == null) continue;
+            _db.Insert(new LineupData
             {
-                _db.Insert(new LineupData
-                {
-                    player_id = best.id,
-                    team_id = teamId,
-                    slot = 0,
-                    slot_index = si
-                });
-                assigned.Add(best.id);
-            }
+                player_id = starters[si].id,
+                team_id = teamId,
+                slot = 0,
+                slot_index = si
+            });
+            assigned.Add(starters[si].id);
         }
 
         // Fill bench with the next best unassigned players (excluding forced-inactive)
