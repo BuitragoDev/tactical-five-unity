@@ -241,7 +241,7 @@ public partial class DatabaseManager
                 WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id >= 500000
                 UNION ALL
                 SELECT gs.player_id, p.first_name, p.last_name, p.position,
-                       t.name as team_name, t.logo as team_logo,
+                       gt.name as team_name, gt.logo as team_logo,
                        gs.games,
                        CAST(gs.rating AS REAL)/gs.games as avg_rating,
                        CAST(gs.points AS REAL)/gs.games as avg_pts,
@@ -251,7 +251,7 @@ public partial class DatabaseManager
                        CAST(gs.blocks AS REAL)/gs.games as avg_blk
                 FROM gleague_season_stats gs
                 JOIN players p ON gs.player_id = p.id
-                JOIN teams t ON p.team_id = t.id
+                JOIN gleague_teams gt ON gt.nba_team_id = p.team_id
                 WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id < 500000
             ) ORDER BY avg_rating DESC LIMIT 1", seasonId, seasonId).FirstOrDefault();
     }
