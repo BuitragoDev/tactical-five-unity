@@ -28,7 +28,7 @@ public class GLeagueController : UIScreenController
     private VisualElement _resultsBody;
     private VisualElement _resultsHeader;
     private Label _resultsAffiliate;
-    private VisualElement _leadersPts, _leadersReb, _leadersAst, _leadersStl, _leadersVal;
+    private VisualElement _leadersPts, _leadersReb, _leadersAst, _leadersVal;
 
     // ── Datos ──
     private List<PlayerData> _players = new();
@@ -75,7 +75,6 @@ public class GLeagueController : UIScreenController
         _leadersPts = _root.Q<VisualElement>("LeadersPts");
         _leadersReb = _root.Q<VisualElement>("LeadersReb");
         _leadersAst = _root.Q<VisualElement>("LeadersAst");
-        _leadersStl = _root.Q<VisualElement>("LeadersStl");
         _leadersVal = _root.Q<VisualElement>("LeadersVal");
     }
 
@@ -596,7 +595,6 @@ public class GLeagueController : UIScreenController
         BuildLeaderPanel(_leadersPts, s => s.points);
         BuildLeaderPanel(_leadersReb, s => s.rebounds);
         BuildLeaderPanel(_leadersAst, s => s.assists);
-        BuildLeaderPanel(_leadersStl, s => s.steals);
         BuildLeaderPanel(_leadersVal, s => s.rating);
     }
 
