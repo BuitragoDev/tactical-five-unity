@@ -45,30 +45,33 @@
     flex-direction: row;
     flex-wrap: wrap;
     margin-bottom: 14px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
 }
 
 .logros-tab {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
-    font-size: 14px;
-    color: rgb(180, 196, 224);
-    background-color: rgba(30, 34, 48, 0.9);
-    border-width: 1px;
-    border-color: rgb(45, 52, 74);
-    border-radius: 6px;
-    padding: 6px 12px;
-    margin-right: 8px;
-    margin-bottom: 8px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(122, 138, 170);
+    background-color: transparent;
+    border-width: 0;
+    border-bottom-width: 3px;
+    border-bottom-color: transparent;
+    padding: 10px 16px;
+    margin-right: 2px;
 }
 
 .logros-tab:hover {
-    background-color: rgba(45, 52, 74, 0.9);
+    color: rgb(208, 216, 232);
 }
 
 .logros-tab--active,
 .logros-tab--active:hover {
-    color: rgb(15, 17, 23);
-    background-color: rgb(255, 183, 77);
-    border-color: rgb(255, 183, 77);
+    color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
+    background-color: transparent;
 }
 
 .logros-scroll-wrapper {

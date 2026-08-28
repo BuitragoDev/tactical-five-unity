@@ -179,6 +179,8 @@
 
 .stats-table {
     flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
 }
 
 /* ══ TABLE ROWS ══ */
