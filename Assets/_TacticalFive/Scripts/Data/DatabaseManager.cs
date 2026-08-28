@@ -850,6 +850,21 @@ public partial class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for gleague_players.photo: {ex.Message}");
         }
+
+        // employees.nationality
+        try
+        {
+            var empCols = _db.Query<ColumnInfo>("PRAGMA table_info(employees)");
+            if (!empCols.Any(c => c.name == "nationality"))
+            {
+                _db.Execute("ALTER TABLE employees ADD COLUMN nationality TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added nationality to employees");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for employees.nationality: {ex.Message}");
+        }
     }
 
     bool IsMigrationApplied(string name)

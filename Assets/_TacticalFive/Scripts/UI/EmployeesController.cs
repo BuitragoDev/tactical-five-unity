@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
-    public class EmployeesController : UIScreenController
+
+public class EmployeesController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Employees;
 
@@ -16,9 +17,25 @@ using System.Linq;
     private Label _headerSeason;
     private Label _headerDate;
 
-    // Staff grid
-    private VisualElement _myStaffBody;
-    private VisualElement _marketBody;
+    // Pages
+    private VisualElement _pageEmpleados;
+    private VisualElement _pageMercado;
+
+    // Tab buttons
+    private Button _tabEmpleados;
+    private Button _tabMercado;
+
+    // Staff table
+    private VisualElement _staffTableBody;
+
+    // Market
+    private Button _marketTabASISTENTE;
+    private Button _marketTabMEDICO;
+    private Button _marketTabFINANCIERO;
+    private Button _marketTabOJEADOR;
+    private Button _marketTabPSICOLOGO;
+    private Button _marketTabPABELLON;
+    private VisualElement _marketTableBody;
 
     // Hire modal
     private VisualElement _hireOverlay;
@@ -41,23 +58,36 @@ using System.Linq;
     private EmployeeData _selectedCandidate;
     private EmployeeData _selectedFireEmployee;
     private bool _isFiring;
+    private string _activeTab = "empleados";
+    private string _activeMarketTab = "ASISTENTE";
     private Dictionary<string, Sprite> _logoSprites = new();
     private Texture2D _starTex;
     private StyleBackground _starBg;
-    private StyleBackground _empleadoBg;
+
     private static readonly Dictionary<string, string> PositionLabels = new()
     {
         { "ASISTENTE", "ASISTENTE" },
-        { "MEDICO", "SERVICIO M\u00c9DICO" },
+        { "MEDICO", "SERVICIO MÉDICO" },
         { "FINANCIERO", "FINANCIERO" },
         { "OJEADOR", "OJEADOR" },
-        { "PSICOLOGO", "PSIC\u00d3LOGO" },
-        { "PABELLON", "ENCARGADO DEL PABELL\u00d3N" }
+        { "PSICOLOGO", "PSICÓLOGO" },
+        { "PABELLON", "ENCARGADO DEL PABELLÓN" }
     };
     private static readonly string[] PositionOrder = { "ASISTENTE", "MEDICO", "FINANCIERO", "OJEADOR", "PSICOLOGO", "PABELLON" };
     private static readonly int REFRESH_INTERVAL = 30;
+    private static readonly int CANDIDATES_PER_POSITION = 5;
+
+    private static readonly (string code, string name)[] Nationalities = {
+        ("USA", "Estados Unidos"), ("ESP", "España"), ("FRA", "Francia"),
+        ("ITA", "Italia"), ("DEU", "Alemania"), ("GBR", "Reino Unido"),
+        ("GRC", "Grecia"), ("SRB", "Serbia"), ("HRV", "Croacia"),
+        ("AUS", "Australia"), ("BRA", "Brasil"), ("ARG", "Argentina"),
+        ("CAN", "Canadá"), ("NGA", "Nigeria"), ("SEN", "Senegal"),
+        ("CMR", "Camerún"), ("LTU", "Lituania"), ("LVA", "Letonia"),
+        ("TUR", "Turquía"), ("NOR", "Noruega")
+    };
+
     private static readonly string[] FirstNames = {
-        // Ingleses (90)
         "James", "John", "William", "George", "Thomas", "Charles", "Henry", "Edward", "Harry", "Arthur",
         "Jack", "Oliver", "Noah", "Jacob", "Leo", "Oscar", "Alfie", "Freddie", "Theo", "Archie",
         "Charlie", "Finley", "Harrison", "Ethan", "Joseph", "Samuel", "Daniel", "Matthew", "Luke", "Adam",
@@ -67,13 +97,11 @@ using System.Linq;
         "Dylan", "Logan", "Mason", "Aiden", "Tyler", "Cameron", "Jordan", "Zachary", "Aaron", "Elliot",
         "Blake", "Cole", "Dominic", "Evan", "Isaac", "Max", "Patrick", "Philip", "Ross", "Spencer",
         "Tristan", "Wesley", "Xavier", "Owen", "Caleb", "Nathaniel", "Vincent", "Harvey", "Riley", "Toby",
-
-        // Otros países (10)
         "Luca", "Matteo", "Giovanni", "Carlos", "Miguel",
         "Alejandro", "Pierre", "Jean", "Hans", "Erik"
     };
+
     private static readonly string[] LastNames = {
-        // Ingleses (90)
         "Smith", "Jones", "Taylor", "Brown", "Williams", "Wilson", "Johnson", "Davies", "Robinson", "Wright",
         "Thompson", "Evans", "Walker", "White", "Roberts", "Green", "Hall", "Wood", "Jackson", "Clarke",
         "Turner", "Harris", "Edwards", "Martin", "Cooper", "Hill", "Ward", "Morris", "Moore", "Clark",
@@ -83,11 +111,10 @@ using System.Linq;
         "Shaw", "Webb", "Foster", "Butler", "Chapman", "Pearson", "Armstrong", "Reynolds", "Stephens", "Payne",
         "Gardner", "Spencer", "Hunter", "Fox", "Gibson", "Harvey", "Palmer", "Warren", "Knight", "Mason",
         "Ellis", "Bishop", "Porter", "George", "West", "Grant", "Black", "Fisher", "Holmes", "Stone",
-
-        // Otros países (10)
         "Garcia", "Martinez", "Rossi", "Bianchi", "Dubois",
         "Moreau", "Muller", "Schmidt", "Andersen", "Johansson"
     };
+
     protected override void CacheReferences()
     {
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
@@ -99,8 +126,21 @@ using System.Linq;
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
 
-        _myStaffBody = _root.Q<VisualElement>("MyStaffBody");
-        _marketBody = _root.Q<VisualElement>("MarketBody");
+        _pageEmpleados = _root.Q<VisualElement>("PageEmpleados");
+        _pageMercado = _root.Q<VisualElement>("PageMercado");
+
+        _tabEmpleados = _root.Q<Button>("TabEmpleados");
+        _tabMercado = _root.Q<Button>("TabMercado");
+
+        _staffTableBody = _root.Q<VisualElement>("StaffTableBody");
+
+        _marketTabASISTENTE = _root.Q<Button>("MarketTabASISTENTE");
+        _marketTabMEDICO = _root.Q<Button>("MarketTabMEDICO");
+        _marketTabFINANCIERO = _root.Q<Button>("MarketTabFINANCIERO");
+        _marketTabOJEADOR = _root.Q<Button>("MarketTabOJEADOR");
+        _marketTabPSICOLOGO = _root.Q<Button>("MarketTabPSICOLOGO");
+        _marketTabPABELLON = _root.Q<Button>("MarketTabPABELLON");
+        _marketTableBody = _root.Q<VisualElement>("MarketTableBody");
 
         _hireOverlay = _root.Q<VisualElement>("HireOverlay");
         _hireTitle = _root.Q<Label>("HireTitle");
@@ -115,6 +155,7 @@ using System.Linq;
         _hireResultText = _root.Q<Label>("HireResultText");
         _btnHireResultOk = _root.Q<Button>("BtnHireResultOk");
     }
+
     protected override void LoadData()
     {
         base.LoadData();
@@ -125,11 +166,7 @@ using System.Linq;
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
         if (_starTex != null)
             _starBg = new StyleBackground(_starTex);
-        _empleadoBg = new StyleBackground(Resources.Load<Texture2D>("Icons/empleado"));
 
-        
-        
-        
         _myStaff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         EnsureCandidates();
     }
@@ -154,36 +191,39 @@ using System.Linq;
 
             foreach (var pos in PositionOrder)
             {
-                for (int i = 0; i < 3; i++)
+                for (int i = 0; i < CANDIDATES_PER_POSITION; i++)
                 {
                     int rep = Random.Range(1, 6);
                     var emp = new EmployeeData
                     {
                         team_id = 0,
                         position = pos,
-                        first_name = GenerateFirstName(pos),
+                        first_name = GenerateFirstName(),
                         last_name = GenerateLastName(),
                         reputation = rep,
                         salary = GenerateSalary(pos, rep),
                         contract_years = Random.Range(1, 4),
-                        candidate_day = currentDay
+                        candidate_day = currentDay,
+                        nationality = Nationalities[Random.Range(0, Nationalities.Length)].code
                     };
                     DatabaseManager.Instance.InsertEmployee(emp);
                     _candidates.Add(emp);
                 }
             }
         }
+        else
+        {
+            foreach (var pos in PositionOrder)
+            {
+                int count = _candidates.Count(c => c.position == pos);
+                if (count < CANDIDATES_PER_POSITION)
+                    RefillCandidates(pos, currentDay);
+            }
+        }
     }
 
-    string GenerateFirstName(string position)
-    {
-        return FirstNames[Random.Range(0, FirstNames.Length)];
-    }
-
-    string GenerateLastName()
-    {
-        return LastNames[Random.Range(0, LastNames.Length)];
-    }
+    string GenerateFirstName() => FirstNames[Random.Range(0, FirstNames.Length)];
+    string GenerateLastName() => LastNames[Random.Range(0, LastNames.Length)];
 
     long GenerateSalary(string position, int reputation)
     {
@@ -212,6 +252,7 @@ using System.Linq;
         long raw = min + (long)((max - min) * t);
         return (raw / step) * step;
     }
+
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
@@ -228,23 +269,38 @@ using System.Linq;
             if (e.target == _hireResultOverlay)
             { PlayClick(); CloseHireResultModal(); }
         });
+
+        _tabEmpleados?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("empleados"); });
+        _tabMercado?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("mercado"); });
+
+        _marketTabASISTENTE?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowMarketTab("ASISTENTE"); });
+        _marketTabMEDICO?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowMarketTab("MEDICO"); });
+        _marketTabFINANCIERO?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowMarketTab("FINANCIERO"); });
+        _marketTabOJEADOR?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowMarketTab("OJEADOR"); });
+        _marketTabPSICOLOGO?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowMarketTab("PSICOLOGO"); });
+        _marketTabPABELLON?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowMarketTab("PABELLON"); });
+
         if (CursorManager.Instance == null) return;
         var cursor = CursorManager.Instance;
         cursor.RegisterHandCursor(_btnHireCancel);
         cursor.RegisterHandCursor(_btnHireConfirm);
         cursor.RegisterHandCursor(_btnHireResultOk);
     }
+
     protected override void Refresh()
     {
+        _activeTab = "empleados";
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Employees] RefreshHeader error: {ex.Message}"); }
+        ShowTab(_activeTab);
         BuildStaff();
-        BuildMarket();
+        BuildMarketTable();
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuEmpleados")?.AddToClassList("nav-submenu-item--active");
 
         _hireOverlay.style.display = DisplayStyle.None;
         _hireResultOverlay.style.display = DisplayStyle.None;
     }
+
     protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
@@ -300,186 +356,318 @@ using System.Linq;
         _btnAction.text = "MENÚ PRINCIPAL";
     }
 
-    void BuildStaff()
-    {
-        _myStaffBody.Clear();
+    // ── TAB MANAGEMENT ──
 
-        if (_myStaff.Count == 0)
+    void ShowTab(string tab)
+    {
+        _activeTab = tab;
+
+        _tabEmpleados.RemoveFromClassList("employees-tab--active");
+        _tabMercado.RemoveFromClassList("employees-tab--active");
+
+        if (tab == "empleados")
         {
-            var emptyLbl = new Label();
-            emptyLbl.text = "No tienes personal contratado.";
-            emptyLbl.style.color = new StyleColor(new Color32(122, 138, 170, 255));
-            emptyLbl.style.fontSize = 16;
-            emptyLbl.style.marginTop = 10;
-            _myStaffBody.Add(emptyLbl);
-            return;
+            _tabEmpleados.AddToClassList("employees-tab--active");
+            _pageEmpleados.style.display = DisplayStyle.Flex;
+            _pageMercado.style.display = DisplayStyle.None;
+        }
+        else
+        {
+            _tabMercado.AddToClassList("employees-tab--active");
+            _pageEmpleados.style.display = DisplayStyle.None;
+            _pageMercado.style.display = DisplayStyle.Flex;
+        }
+    }
+
+    void ShowMarketTab(string position)
+    {
+        _activeMarketTab = position;
+
+        _marketTabASISTENTE.RemoveFromClassList("market-tab--active");
+        _marketTabMEDICO.RemoveFromClassList("market-tab--active");
+        _marketTabFINANCIERO.RemoveFromClassList("market-tab--active");
+        _marketTabOJEADOR.RemoveFromClassList("market-tab--active");
+        _marketTabPSICOLOGO.RemoveFromClassList("market-tab--active");
+        _marketTabPABELLON.RemoveFromClassList("market-tab--active");
+
+        switch (position)
+        {
+            case "ASISTENTE": _marketTabASISTENTE.AddToClassList("market-tab--active"); break;
+            case "MEDICO": _marketTabMEDICO.AddToClassList("market-tab--active"); break;
+            case "FINANCIERO": _marketTabFINANCIERO.AddToClassList("market-tab--active"); break;
+            case "OJEADOR": _marketTabOJEADOR.AddToClassList("market-tab--active"); break;
+            case "PSICOLOGO": _marketTabPSICOLOGO.AddToClassList("market-tab--active"); break;
+            case "PABELLON": _marketTabPABELLON.AddToClassList("market-tab--active"); break;
         }
 
-        var posIndex = PositionOrder.Select((p, i) => (p, i)).ToDictionary(x => x.p, x => x.i);
-        foreach (var emp in _myStaff.OrderBy(e => posIndex.TryGetValue(e.position, out var idx) ? idx : 999))
+        BuildMarketTable();
+    }
+
+    // ── BUILD STAFF TABLE ──
+
+    void BuildStaff()
+    {
+        _staffTableBody.Clear();
+
+        foreach (var pos in PositionOrder)
         {
-            var card = new VisualElement();
-            card.AddToClassList("staff-card");
+            var emp = _myStaff.FirstOrDefault(e => e.position == pos);
+            var row = new VisualElement();
+            row.AddToClassList("emp-table-row");
 
-            var icon = new VisualElement();
-            icon.AddToClassList("staff-card-icon");
-            icon.style.backgroundImage = _empleadoBg;
-            card.Add(icon);
+            // NOMBRE
+            var nameCol = new Label();
+            nameCol.AddToClassList("emp-col");
+            nameCol.AddToClassList("emp-col--nombre");
+            if (emp != null)
+            {
+                nameCol.text = $"{emp.first_name} {emp.last_name}";
+                nameCol.AddToClassList("emp-employee-name");
+            }
+            else
+            {
+                nameCol.text = "—";
+                nameCol.AddToClassList("emp-empty-text");
+            }
+            row.Add(nameCol);
 
-            var info = new VisualElement();
-            info.AddToClassList("staff-card-info");
+            // PUESTO
+            var posCol = new Label();
+            posCol.AddToClassList("emp-col");
+            posCol.AddToClassList("emp-col--puesto");
+            posCol.text = PositionLabels.TryGetValue(pos, out var lbl) ? lbl : pos;
+            row.Add(posCol);
 
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("staff-card-name");
-            nameLbl.text = $"{emp.first_name} {emp.last_name}".ToUpper();
-            info.Add(nameLbl);
+            // NACIONALIDAD
+            var natCol = new VisualElement();
+            natCol.AddToClassList("emp-col");
+            natCol.AddToClassList("emp-col--nacionalidad");
+            if (emp != null && !string.IsNullOrEmpty(emp.nationality))
+            {
+                var natCell = new VisualElement();
+                natCell.AddToClassList("nat-cell");
 
-            var posLbl = new Label();
-            posLbl.AddToClassList("staff-card-position");
-            posLbl.text = PositionLabels.TryGetValue(emp.position, out var lbl) ? lbl : emp.position;
-            info.Add(posLbl);
+                var flag = new VisualElement();
+                flag.AddToClassList("flag-icon");
+                var flagTex = Resources.Load<Texture2D>($"Flags/{emp.nationality}");
+                if (flagTex != null)
+                    flag.style.backgroundImage = new StyleBackground(flagTex);
+                natCell.Add(flag);
 
-            // Reputation stars + salary in one row
-            var starsSalaryRow = new VisualElement();
-            starsSalaryRow.style.flexDirection = FlexDirection.Row;
-            starsSalaryRow.style.alignItems = Align.Center;
-            starsSalaryRow.style.marginTop = 4;
+                var natName = new Label();
+                string countryName = "";
+                foreach (var n in Nationalities)
+                {
+                    if (n.code == emp.nationality) { countryName = n.name; break; }
+                }
+                natName.text = countryName;
+                natName.AddToClassList("emp-col");
+                natCell.Add(natName);
 
+                natCol.Add(natCell);
+            }
+            else
+            {
+                var emptyNat = new Label();
+                emptyNat.text = "—";
+                emptyNat.AddToClassList("emp-empty-text");
+                natCol.Add(emptyNat);
+            }
+            row.Add(natCol);
+
+            // REPUTACIÓN
+            var repCol = new VisualElement();
+            repCol.AddToClassList("emp-col");
+            repCol.AddToClassList("emp-col--reputacion");
+            if (emp != null)
+            {
+                var starsRow = new VisualElement();
+                starsRow.AddToClassList("emp-stars");
+                for (int i = 0; i < 5; i++)
+                {
+                    var star = new VisualElement();
+                    star.AddToClassList(i < emp.reputation ? "emp-star" : "emp-star--empty");
+                    if (_starTex != null)
+                        star.style.backgroundImage = _starBg;
+                    starsRow.Add(star);
+                }
+                repCol.Add(starsRow);
+            }
+            else
+            {
+                var emptyRep = new Label();
+                emptyRep.text = "—";
+                emptyRep.AddToClassList("emp-empty-text");
+                repCol.Add(emptyRep);
+            }
+            row.Add(repCol);
+
+            // SUELDO
+            var salaryCol = new Label();
+            salaryCol.AddToClassList("emp-col");
+            salaryCol.AddToClassList("emp-col--sueldo");
+            salaryCol.text = emp != null ? FormatSalary(emp.salary) : "—";
+            if (emp == null) salaryCol.AddToClassList("emp-empty-text");
+            row.Add(salaryCol);
+
+            // CONTRATO
+            var contractCol = new Label();
+            contractCol.AddToClassList("emp-col");
+            contractCol.AddToClassList("emp-col--contrato");
+            if (emp != null)
+            {
+                string plural = emp.contract_years != 1 ? "S" : "";
+                contractCol.text = $"{emp.contract_years} AÑO{plural}";
+            }
+            else
+            {
+                contractCol.text = "—";
+                contractCol.AddToClassList("emp-empty-text");
+            }
+            row.Add(contractCol);
+
+            // ACCIONES
+            var actionCol = new VisualElement();
+            actionCol.AddToClassList("emp-col");
+            actionCol.AddToClassList("emp-col--acciones");
+            if (emp != null)
+            {
+                var fireBtn = new Button();
+                fireBtn.AddToClassList("btn-fire-table");
+                fireBtn.text = "DESPEDIR";
+                var captured = emp;
+                fireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnFireClicked(captured); });
+                if (CursorManager.Instance != null)
+                {
+                    fireBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                    fireBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+                }
+                actionCol.Add(fireBtn);
+            }
+            row.Add(actionCol);
+
+            _staffTableBody.Add(row);
+        }
+    }
+
+    // ── BUILD MARKET TABLE ──
+
+    void BuildMarketTable()
+    {
+        _marketTableBody.Clear();
+
+        var posCandidates = _candidates
+            .Where(c => c.position == _activeMarketTab)
+            .OrderByDescending(c => c.reputation)
+            .ToList();
+
+        foreach (var candidate in posCandidates)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("emp-table-row");
+
+            // NOMBRE
+            var nameCol = new Label();
+            nameCol.AddToClassList("emp-col");
+            nameCol.AddToClassList("emp-col--nombre");
+            nameCol.text = $"{candidate.first_name} {candidate.last_name}";
+            nameCol.AddToClassList("emp-employee-name");
+            row.Add(nameCol);
+
+            // NACIONALIDAD
+            var natCol = new VisualElement();
+            natCol.AddToClassList("emp-col");
+            natCol.AddToClassList("emp-col--nacionalidad");
+            var natCell = new VisualElement();
+            natCell.AddToClassList("nat-cell");
+
+            var flag = new VisualElement();
+            flag.AddToClassList("flag-icon");
+            if (!string.IsNullOrEmpty(candidate.nationality))
+            {
+                var flagTex = Resources.Load<Texture2D>($"Flags/{candidate.nationality}");
+                if (flagTex != null)
+                    flag.style.backgroundImage = new StyleBackground(flagTex);
+            }
+            natCell.Add(flag);
+
+            var natName = new Label();
+            string countryName = "";
+            foreach (var n in Nationalities)
+            {
+                if (n.code == candidate.nationality) { countryName = n.name; break; }
+            }
+            natName.text = countryName;
+            natName.AddToClassList("emp-col");
+            natCell.Add(natName);
+
+            natCol.Add(natCell);
+            row.Add(natCol);
+
+            // REPUTACIÓN
+            var repCol = new VisualElement();
+            repCol.AddToClassList("emp-col");
+            repCol.AddToClassList("emp-col--reputacion");
             var starsRow = new VisualElement();
-            starsRow.AddToClassList("staff-card-stars");
-            starsRow.style.flexGrow = 1;
+            starsRow.AddToClassList("emp-stars");
             for (int i = 0; i < 5; i++)
             {
                 var star = new VisualElement();
-                star.AddToClassList(i < emp.reputation ? "staff-card-star" : "staff-card-star--empty");
+                star.AddToClassList(i < candidate.reputation ? "emp-star" : "emp-star--empty");
                 if (_starTex != null)
                     star.style.backgroundImage = _starBg;
                 starsRow.Add(star);
             }
-            starsSalaryRow.Add(starsRow);
+            repCol.Add(starsRow);
+            row.Add(repCol);
 
-            var salaryLbl = new Label();
-            salaryLbl.AddToClassList("staff-card-salary");
-            salaryLbl.text = FormatSalary(emp.salary);
-            starsSalaryRow.Add(salaryLbl);
+            // SUELDO
+            var salaryCol = new Label();
+            salaryCol.AddToClassList("emp-col");
+            salaryCol.AddToClassList("emp-col--sueldo");
+            salaryCol.text = FormatSalary(candidate.salary);
+            row.Add(salaryCol);
 
-            info.Add(starsSalaryRow);
+            // CONTRATO
+            var contractCol = new Label();
+            contractCol.AddToClassList("emp-col");
+            contractCol.AddToClassList("emp-col--contrato");
+            string plural = candidate.contract_years != 1 ? "S" : "";
+            contractCol.text = $"{candidate.contract_years} AÑO{plural}";
+            row.Add(contractCol);
 
-            var fireBtn = new Button();
-            fireBtn.AddToClassList("btn-fire");
-            fireBtn.text = "DESPEDIR";
-            var captured = emp;
-            fireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnFireClicked(captured); });
+            // ACCIONES
+            var actionCol = new VisualElement();
+            actionCol.AddToClassList("emp-col");
+            actionCol.AddToClassList("emp-col--acciones");
+
+            bool hasExisting = _myStaff.Any(e => e.position == candidate.position);
+            var hireBtn = new Button();
+            hireBtn.AddToClassList(hasExisting ? "btn-replace-table" : "btn-hire-table");
+            hireBtn.text = hasExisting ? "REEMPLAZAR" : "CONTRATAR";
+            var capturedCandidate = candidate;
+            hireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnHireClicked(capturedCandidate); });
             if (CursorManager.Instance != null)
             {
-                fireBtn.RegisterCallback<MouseEnterEvent>(_ =>
-                    CursorManager.Instance.SetHandCursor());
-                fireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
-                    CursorManager.Instance.SetDefaultCursor());
+                hireBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                hireBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
             }
-            info.Add(fireBtn);
+            actionCol.Add(hireBtn);
+            row.Add(actionCol);
 
-            card.Add(info);
-            _myStaffBody.Add(card);
+            _marketTableBody.Add(row);
         }
-    }
 
-    void BuildMarket()
-    {
-        _marketBody.Clear();
-
-        var columns = new VisualElement();
-        columns.AddToClassList("market-columns");
-
-        var leftCol = new VisualElement();
-        leftCol.AddToClassList("market-column");
-        var rightCol = new VisualElement();
-        rightCol.AddToClassList("market-column");
-
-        int half = PositionOrder.Length / 2;
-        for (int i = 0; i < PositionOrder.Length; i++)
+        if (posCandidates.Count == 0)
         {
-            var pos = PositionOrder[i];
-            var posCandidates = _candidates
-                .Where(c => c.position == pos)
-                .OrderByDescending(c => c.reputation)
-                .ToList();
-
-            if (posCandidates.Count == 0) continue;
-
-            var group = new VisualElement();
-            group.AddToClassList("market-pos-group");
-
-            var header = new Label();
-            header.AddToClassList("market-pos-header");
-            bool hasStaff = _myStaff.Any(e => e.position == pos);
-            if (hasStaff)
-                header.AddToClassList("market-pos-header--hired");
-            header.text = PositionLabels.TryGetValue(pos, out var lbl) ? lbl : pos;
-            group.Add(header);
-
-            var cardsRow = new VisualElement();
-            cardsRow.AddToClassList("market-candidates-row");
-            foreach (var candidate in posCandidates)
-            {
-                var card = BuildCandidateCard(candidate);
-                cardsRow.Add(card);
-            }
-            group.Add(cardsRow);
-
-            if (i < half)
-                leftCol.Add(group);
-            else
-                rightCol.Add(group);
+            var emptyRow = new VisualElement();
+            emptyRow.AddToClassList("emp-table-row");
+            var emptyLabel = new Label();
+            emptyLabel.text = "No hay candidatos disponibles para este puesto.";
+            emptyLabel.AddToClassList("emp-empty-text");
+            emptyRow.Add(emptyLabel);
+            _marketTableBody.Add(emptyRow);
         }
-
-        columns.Add(leftCol);
-        columns.Add(rightCol);
-        _marketBody.Add(columns);
-    }
-
-    VisualElement BuildCandidateCard(EmployeeData candidate)
-    {
-        var card = new VisualElement();
-        card.AddToClassList("market-candidate");
-
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("market-candidate-name");
-        nameLbl.text = $"{candidate.first_name} {candidate.last_name}".ToUpper();
-        card.Add(nameLbl);
-
-        var metaLbl = new Label();
-        metaLbl.AddToClassList("market-candidate-meta");
-        string plural = candidate.contract_years != 1 ? "s" : "";
-        metaLbl.text = $"{candidate.contract_years} a\u00f1o{plural} \u00b7 {FormatSalary(candidate.salary)}".ToUpper();
-        card.Add(metaLbl);
-
-        var starsRow = new VisualElement();
-        starsRow.AddToClassList("market-candidate-stars");
-        for (int i = 0; i < 5; i++)
-        {
-            var star = new VisualElement();
-            star.AddToClassList(i < candidate.reputation ? "market-candidate-star" : "market-candidate-star--empty");
-            if (_starTex != null)
-                star.style.backgroundImage = _starBg;
-            starsRow.Add(star);
-        }
-        card.Add(starsRow);
-
-        var hireBtn = new Button();
-        hireBtn.AddToClassList("btn-hire");
-        hireBtn.text = "CONTRATAR";
-        hireBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnHireClicked(candidate); });
-        if (CursorManager.Instance != null)
-        {
-            hireBtn.RegisterCallback<MouseEnterEvent>(_ =>
-                CursorManager.Instance.SetHandCursor());
-            hireBtn.RegisterCallback<MouseLeaveEvent>(_ =>
-                CursorManager.Instance.SetDefaultCursor());
-        }
-        card.Add(hireBtn);
-
-        return card;
     }
 
     // ── HIRING ──
@@ -492,26 +680,25 @@ using System.Linq;
         string name = $"{candidate.first_name} {candidate.last_name}";
         string salaryText = FormatSalary(candidate.salary);
         string yearPlural = candidate.contract_years != 1 ? "s" : "";
-        string yearsText = $"{candidate.contract_years} a\u00f1o{yearPlural}";
+        string yearsText = $"{candidate.contract_years} año{yearPlural}";
 
-        // Check if we already have someone in this position
         var existing = _myStaff.FirstOrDefault(e => e.position == candidate.position);
         if (existing != null)
         {
+            long penalty = (long)(existing.salary * existing.contract_years * 0.5f);
             _hireTitle.text = "REEMPLAZAR EMPLEADO";
             _hireText1.text = $"Ya tienes un {posLabel}: {existing.first_name} {existing.last_name}.";
             _hireText2.text = $"¿Deseas reemplazarlo por {name}?";
+            _hireText3.text = $"Indemnización: {FormatSalary(penalty)} · Salario: {salaryText} · Duración: {yearsText}";
         }
         else
         {
             _hireTitle.text = "CONTRATAR EMPLEADO";
             _hireText1.text = $"Vas a contratar a {name} como {posLabel}.";
             _hireText2.text = "";
+            _hireText3.text = $"Salario: {salaryText} · Duración: {yearsText}";
         }
 
-        _hireText3.text = $"Salario: {salaryText} \u00b7 Duraci\u00f3n: {yearsText}";
-
-        // Stars row in modal
         var oldStars = _hireOverlay.Q<VisualElement>("HireModalStars");
         if (oldStars != null)
             oldStars.RemoveFromHierarchy();
@@ -535,6 +722,7 @@ using System.Linq;
             text3.parent.Insert(idx + 1, modalStars);
         }
 
+        _btnHireConfirm.text = existing != null ? "REEMPLAZAR" : "CONTRATAR";
         _hireOverlay.style.display = DisplayStyle.Flex;
     }
 
@@ -547,12 +735,13 @@ using System.Linq;
         string name = $"{emp.first_name} {emp.last_name}";
         string salaryText = FormatSalary(emp.salary);
         string yearPlural = emp.contract_years != 1 ? "s" : "";
-        string yearsText = $"{emp.contract_years} a\u00f1o{yearPlural}";
+        string yearsText = $"{emp.contract_years} año{yearPlural}";
+        long penalty = (long)(emp.salary * emp.contract_years * 0.5f);
 
         _hireTitle.text = "DESPEDIR EMPLEADO";
         _hireText1.text = $"¿Estás seguro de que quieres despedir a {name}?";
         _hireText2.text = $"Puesto: {posLabel}";
-        _hireText3.text = $"Salario: {salaryText} \u00b7 Contrato: {yearsText}";
+        _hireText3.text = $"Salario: {salaryText} · Contrato: {yearsText} · Indemnización: {FormatSalary(penalty)}";
 
         var modalStars = _hireOverlay.Q<VisualElement>("HireModalStars");
         if (modalStars != null)
@@ -591,7 +780,6 @@ using System.Linq;
         string posLabel = PositionLabels.TryGetValue(_selectedCandidate.position, out var lbl) ? lbl : _selectedCandidate.position;
         string salaryText = FormatSalary(_selectedCandidate.salary);
 
-        // Remove existing employee in same position (fire them)
         var existing = _myStaff.FirstOrDefault(e => e.position == _selectedCandidate.position);
         if (existing != null)
         {
@@ -612,7 +800,6 @@ using System.Linq;
             _myStaff.Remove(existing);
         }
 
-        // Assign candidate to team
         _selectedCandidate.team_id = _myTeam.id;
         _selectedCandidate.candidate_day = 0;
         DatabaseManager.Instance.UpdateEmployee(_selectedCandidate);
@@ -620,10 +807,9 @@ using System.Linq;
         _candidates.Remove(_selectedCandidate);
 
         int posCount = _candidates.Count(c => c.position == _selectedCandidate.position);
-        if (posCount < 3)
+        if (posCount < CANDIDATES_PER_POSITION)
             RefillCandidates(_selectedCandidate.position, currentDay);
 
-        // Signing bonus
         long signingCost = _selectedCandidate.salary;
         _myTeam.budget -= signingCost;
         DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
@@ -655,8 +841,6 @@ using System.Linq;
         Debug.Log($"[Employees] {name} contratado como {posLabel} por {salaryText}.");
 
         _selectedCandidate = null;
-
-        // Refresh
         Refresh();
         ShowHireResult(true, name, posLabel);
     }
@@ -670,6 +854,19 @@ using System.Linq;
         int currentDay = _season?.current_game_day ?? 0;
         string name = $"{_selectedFireEmployee.first_name} {_selectedFireEmployee.last_name}";
         string posLabel = PositionLabels.TryGetValue(_selectedFireEmployee.position, out var lbl) ? lbl : _selectedFireEmployee.position;
+        long penalty = (long)(_selectedFireEmployee.salary * _selectedFireEmployee.contract_years * 0.5f);
+
+        _myTeam.budget -= penalty;
+        DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
+
+        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+        {
+            team_id = _myTeam.id,
+            season_id = _season?.id ?? 0,
+            record_type = FinanceRecord.TYPE_DISMISSAL,
+            game_day = currentDay,
+            amount = penalty
+        });
 
         DatabaseManager.Instance.DeleteEmployee(_selectedFireEmployee.id);
         _myStaff.Remove(_selectedFireEmployee);
@@ -681,7 +878,7 @@ using System.Linq;
             sender_type = 0,
             sender_id = 0,
             title = "Empleado despedido",
-            body = $"Se ha despedido a {name} ({posLabel}).",
+            body = $"Se ha despedido a {name} ({posLabel}). Indemnización pagada: {FormatSalary(penalty)}.",
             game_day = currentDay,
             game_date = now,
             created_at = now,
@@ -689,7 +886,7 @@ using System.Linq;
             is_read = 0
         });
 
-        Debug.Log($"[Employees] {name} despedido.");
+        Debug.Log($"[Employees] {name} despedido. Indemnización: {FormatSalary(penalty)}.");
 
         _isFiring = false;
         _btnHireConfirm.text = "CONTRATAR";
@@ -698,13 +895,13 @@ using System.Linq;
         Refresh();
 
         _hireResultTitle.text = "EMPLEADO DESPEDIDO";
-        _hireResultText.text = $"{name} ya no trabaja para tu equipo.";
+        _hireResultText.text = $"{name} ya no trabaja para tu equipo. Indemnización pagada: {FormatSalary(penalty)}.";
         _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
 
     void RefillCandidates(string position, int currentDay)
     {
-        int toAdd = 3 - _candidates.Count(c => c.position == position);
+        int toAdd = CANDIDATES_PER_POSITION - _candidates.Count(c => c.position == position);
         for (int i = 0; i < toAdd; i++)
         {
             int rep = Random.Range(1, 6);
@@ -712,12 +909,13 @@ using System.Linq;
             {
                 team_id = 0,
                 position = position,
-                first_name = GenerateFirstName(position),
+                first_name = GenerateFirstName(),
                 last_name = GenerateLastName(),
                 reputation = rep,
                 salary = GenerateSalary(position, rep),
                 contract_years = Random.Range(1, 4),
-                candidate_day = currentDay
+                candidate_day = currentDay,
+                nationality = Nationalities[Random.Range(0, Nationalities.Length)].code
             };
             DatabaseManager.Instance.InsertEmployee(emp);
             _candidates.Add(emp);
@@ -726,7 +924,7 @@ using System.Linq;
 
     string FormatSalary(long salary)
     {
-        return "$" + salary.ToString("N0").Replace(',', '.');
+        return salary.ToString("N0").Replace(',', '.') + " $";
     }
 
     void ShowHireResult(bool success, string name, string positionLabel)

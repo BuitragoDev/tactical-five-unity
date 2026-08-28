@@ -187,7 +187,7 @@ public static class CountryCodes
         { "UGA", "Uganda" },
         { "UKR", "Ucrania" },
         { "ARE", "Emiratos Árabes Unidos" },
-        { "GBR", "Reino Unido" },
+        { "GBR", "Inglaterra" },
         { "USA", "Estados Unidos" },
         { "URY", "Uruguay" },
         { "UZB", "Uzbekistán" },

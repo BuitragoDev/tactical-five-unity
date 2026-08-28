@@ -13,4 +13,5 @@ public class EmployeeData
     public int reputation { get; set; }
     public int contract_years { get; set; }
     public int candidate_day { get; set; }
+    public string nationality { get; set; }
 }
