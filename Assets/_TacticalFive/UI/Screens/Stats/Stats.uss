@@ -33,35 +33,32 @@
     flex-wrap: wrap;
     margin-bottom: 12px;
     flex-shrink: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
 }
 
 .stats-tab {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
-    letter-spacing: 1.5px;
-    padding: 10px 20px;
-    background-color: rgb(22, 26, 36);
-    border-color: rgb(42, 51, 71);
-    border-width: 1px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    padding: 10px 16px;
+    background-color: transparent;
+    border-width: 0;
+    border-bottom-width: 3px;
+    border-bottom-color: transparent;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
-    margin-right: 4px;
-    margin-bottom: 4px;
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-left-radius: 2px;
-    border-bottom-right-radius: 2px;
+    margin-right: 2px;
 }
 
 .stats-tab:hover {
     color: rgb(208, 216, 232);
-    border-color: rgb(85, 102, 119);
 }
 
 .stats-tab--active {
     color: rgb(212, 160, 23);
-    border-color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.08);
+    border-bottom-color: rgb(212, 160, 23);
 }
 
 /* ══ FILTER ROW ══ */
@@ -83,13 +80,16 @@
 }
 
 .filter-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
-    letter-spacing: 1px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
     padding: 8px 16px;
     background-color: transparent;
     border-width: 0;
-    color: rgb(85, 102, 119);
+    border-bottom-width: 3px;
+    border-bottom-color: transparent;
+    color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
     margin-right: 2px;
 }
@@ -99,19 +99,13 @@
 }
 
 .filter-btn--active {
-    color: rgb(42, 95, 201);
-    border-color: rgb(42, 95, 201);
-    background-color: rgba(42, 95, 201, 0.08);
-    border-width: 1px;
-    border-radius: 4px;
+    color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
 }
 
 .mode-btn--active {
-    color: rgb(39, 174, 96);
-    border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.08);
-    border-width: 1px;
-    border-radius: 4px;
+    color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
 }
 
 /* ══ STATS PANEL ══ */
