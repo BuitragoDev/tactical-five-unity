@@ -119,6 +119,7 @@ public class GLeagueController : UIScreenController
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[GLeague] RefreshHeader error: {ex.Message}"); }
+        _currentTab = "plantilla";
         ShowTab(_currentTab);
     }
 
