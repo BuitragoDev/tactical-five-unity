@@ -399,28 +399,28 @@
     color: rgb(122, 138, 170);
     margin-top: 2px;
 }
-.detail-link-trajectory {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
-    color: rgb(42, 95, 201);
-    margin-top: 4px;
-    cursor: pointer;
-    -unity-text-align: middle-left;
+.detail-link-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    background-color: rgb(42, 95, 201);
+    border-width: 0;
+    padding: 8px 0;
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    margin-right: 4px;
+    border-radius: 4px;
 }
-.detail-link-trajectory:hover {
-    color: rgb(82, 135, 241);
+.detail-link-btn:hover {
+    background-color: rgb(74, 128, 240);
 }
 
 .detail-links-row {
     flex-direction: row;
     align-items: center;
-    margin-top: 4px;
-}
-
-.detail-link-separator {
-    color: rgb(42, 95, 201);
-    font-size: 14px;
-    margin: 0 6px;
+    margin-top: 8px;
 }
 .detail-ovr-block {
     flex-direction: column;

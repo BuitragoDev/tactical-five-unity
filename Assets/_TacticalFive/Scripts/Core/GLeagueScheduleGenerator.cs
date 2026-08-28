@@ -154,6 +154,7 @@ public static class GLeagueScheduleGenerator
     public static List<List<(int home, int away)>> DoubleRoundRobin(List<GLeagueTeamData> teams)
     {
         var firstHalf = SingleRoundRobin(teams.Select(t => t.id).ToList());
+        PostProcessHomeAway(firstHalf, teams.Count);
         var result = new List<List<(int home, int away)>>(firstHalf);
         foreach (var round in firstHalf)
             result.Add(round.Select(m => (m.away, m.home)).ToList());
@@ -165,6 +166,9 @@ public static class GLeagueScheduleGenerator
     /// añade un dorsal ficticio (byedummy, -1) para que la rotación sea par:
     /// se generan N jornadas con N/2 partidos y un descanso por jornada. Así
     /// cada equipo juega contra los otros N-1 exactamente una vez.
+    ///
+    /// La localía se asigna por defecto (equipo en posición i = local) y se
+    /// corrige en PostProcessHomeAway para garantizar alternancia.
     /// </summary>
     static List<List<(int home, int away)>> SingleRoundRobin(List<int> ids)
     {
@@ -182,8 +186,7 @@ public static class GLeagueScheduleGenerator
                 int home = rotation[i];
                 int away = rotation[m - 1 - i];
                 if (home == -1 || away == -1) continue;   // jornada con bye
-                // Alternar localía según la ronda para equilibrar
-                round.Add((r + i) % 2 == 0 ? (home, away) : (away, home));
+                round.Add((home, away));
             }
             rounds.Add(round);
 
@@ -193,6 +196,63 @@ public static class GLeagueScheduleGenerator
             rotation.Insert(1, last);
         }
         return rounds;
+    }
+
+    /// <summary>
+    /// Post-procesa las rondas para que cada equipo alterne local/visitante.
+    /// La fórmula original (r+i)%2 produce rachas de14 local seguidos porque
+    /// la posición i de ciertos equipos avanza correlacionadamente con r.
+    /// Esta función corrige las rachas iterativamente.
+    /// </summary>
+    static void PostProcessHomeAway(List<List<(int home, int away)>> rounds, int totalTeams)
+    {
+        // Construir el mapa round→index para poder modificar rondas
+        for (int iter = 0; iter < 20; iter++)
+        {
+            bool fixedAny = false;
+
+            for (int t = 0; t < totalTeams; t++)
+            {
+                int teamId = -1;
+
+                // Recoger partidos de este equipo en orden cronológico
+                var teamGames = new List<(int roundIdx, int matchIdx, int home, int away)>();
+                for (int r = 0; r < rounds.Count; r++)
+                {
+                    for (int mi = 0; mi < rounds[r].Count; mi++)
+                    {
+                        var (h, a) = rounds[r][mi];
+                        if (h == t || a == t)
+                        {
+                            if (teamId == -1) teamId = h == t ? h : a;
+                            teamGames.Add((r, mi, h, a));
+                        }
+                    }
+                }
+
+                if (teamGames.Count < 3) continue;
+
+                // Detectar rachas de3+ del mismo tipo
+                for (int i = 0; i < teamGames.Count - 2; i++)
+                {
+                    bool curHome = teamGames[i].home == teamId;
+                    bool nextHome = teamGames[i + 1].home == teamId;
+                    bool next2Home = teamGames[i + 2].home == teamId;
+
+                    if (curHome == nextHome && nextHome == next2Home)
+                    {
+                        // Intercambiar home/away del juego del medio (i+1)
+                        var g = teamGames[i + 1];
+                        var (h, a) = rounds[g.roundIdx][g.matchIdx];
+                        rounds[g.roundIdx][g.matchIdx] = (a, h);
+                        fixedAny = true;
+                        i++; // saltar el que acabamos de cambiar
+                    }
+                }
+            }
+
+            if (!fixedAny) break;
+        }
     }
 
     /// <summary>Selecciona `count` fechas repartidas uniformemente (orden preservado).

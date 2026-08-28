@@ -69,9 +69,8 @@
                                     <ui:Label name="DetailPlayerPos"  class="detail-player-pos"  text="" />
                                     <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
                                     <ui:VisualElement class="detail-links-row">
-                        <ui:Label name="DetailLinkTrajectory" class="detail-link-trajectory" text="VER TRAYECTORIA" />
-                        <ui:Label class="detail-link-separator" text="·" />
-                        <ui:Label name="DetailLinkProfile" class="detail-link-trajectory" text="VER PERFIL DEL JUGADOR" />
+                        <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="VER TRAYECTORIA" />
+                        <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="VER PERFIL DEL JUGADOR" />
                     </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="detail-ovr-block">
