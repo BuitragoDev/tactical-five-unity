@@ -100,7 +100,8 @@ public class PremiosController : UIScreenController
     void AddHeaderCell(VisualElement parent, string text, string cls)
     {
         var label = new Label(text);
-        label.AddToClassList(cls);
+        foreach (var c in cls.Split(' '))
+            label.AddToClassList(c);
         parent.Add(label);
     }
 
@@ -211,7 +212,8 @@ public class PremiosController : UIScreenController
     void AddDataCell(VisualElement parent, string text, string cls)
     {
         var label = new Label(text);
-        label.AddToClassList(cls);
+        foreach (var c in cls.Split(' '))
+            label.AddToClassList(c);
         parent.Add(label);
     }
 
