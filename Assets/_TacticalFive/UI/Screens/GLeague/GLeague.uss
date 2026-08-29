@@ -226,6 +226,8 @@
     flex-direction: row;
     flex-shrink: 0;
     margin-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
 }
 
 .gleague-tabs .standings-tab {
