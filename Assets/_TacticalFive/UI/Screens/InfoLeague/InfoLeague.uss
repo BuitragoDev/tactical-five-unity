@@ -30,39 +30,39 @@
     flex-direction: row;
     margin-bottom: 20px;
     flex-shrink: 0;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
 }
 
 .infoleague-tab {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(200, 210, 230);
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    padding: 8px 28px;
-    margin-right: 8px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
+    padding: 10px 16px;
+    background-color: transparent;
+    border-width: 0;
+    border-bottom-width: 3px;
+    border-bottom-color: transparent;
+    color: rgb(122, 138, 170);
+    -unity-text-align: middle-center;
+    margin-right: 2px;
 }
 
 .infoleague-tab:hover {
-    background-color: rgb(30, 36, 50);
+    color: rgb(208, 216, 232);
 }
 
 .infoleague-tab--active {
-    color: rgb(15, 17, 23);
-    background-color: rgb(212, 160, 23);
-    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
+    background-color: transparent;
 }
 
 .infoleague-tab--active:hover {
-    background-color: rgb(228, 178, 48);
-    border-color: rgb(228, 178, 48);
-    color: rgb(15, 17, 23);
+    color: rgb(212, 160, 23);
+    border-bottom-color: rgb(212, 160, 23);
+    background-color: transparent;
 }
 
 .infoleague-tab-panel {
