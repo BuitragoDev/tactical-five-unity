@@ -74,15 +74,15 @@
     font-size: 13px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-    padding: 0 4px;
+    -unity-text-align: middle-left;
+    padding: 0 6px;
 }
 
 .premios-th-month      { width: 100px; flex-shrink: 0; }
-.premios-th-photo      { width: 50px;  flex-shrink: 0; }
-.premios-th-name       { flex-grow: 1; min-width: 0; -unity-text-align: middle-left; }
-.premios-th-team       { width: 180px; flex-shrink: 0; -unity-text-align: middle-left; }
-.premios-th-stat       { width: 70px;  flex-shrink: 0; }
+.premios-th-photo      { width: 50px;  flex-shrink: 0; -unity-text-align: middle-center; }
+.premios-th-name       { width: 200px; flex-shrink: 0; }
+.premios-th-team       { width: 180px; flex-shrink: 0; }
+.premios-th-stat       { width: 50px;  flex-shrink: 0; -unity-text-align: middle-center; }
 
 /* Data rows */
 .premios-data-row {
@@ -107,8 +107,8 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 15px;
     color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
-    padding: 0 4px;
+    -unity-text-align: middle-left;
+    padding: 0 6px;
 }
 
 .premios-td-month {
@@ -135,9 +135,8 @@
 
 .premios-td-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    flex-grow: 1;
-    min-width: 0;
-    -unity-text-align: middle-left;
+    width: 200px;
+    flex-shrink: 0;
     overflow: hidden;
     text-overflow: ellipsis;
 }
@@ -146,14 +145,14 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     width: 180px;
     flex-shrink: 0;
-    -unity-text-align: middle-left;
     color: rgb(130, 146, 175);
 }
 
 .premios-td-stat {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    width: 70px;
+    width: 50px;
     flex-shrink: 0;
+    -unity-text-align: middle-center;
 }
 
 .premios-td-stat-value {
