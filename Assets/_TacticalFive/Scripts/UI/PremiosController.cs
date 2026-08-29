@@ -32,14 +32,6 @@ public class PremiosController : UIScreenController
         _tabRookie?.RegisterCallback<ClickEvent>(OnTabRookie);
     }
 
-    protected override void UnregisterCallbacks()
-    {
-        base.UnregisterCallbacks();
-        _tabManager?.UnregisterCallback<ClickEvent>(OnTabManager);
-        _tabPlayer?.UnregisterCallback<ClickEvent>(OnTabPlayer);
-        _tabRookie?.UnregisterCallback<ClickEvent>(OnTabRookie);
-    }
-
     void OnTabManager(ClickEvent evt) => SwitchTab("manager");
     void OnTabPlayer(ClickEvent evt) => SwitchTab("player");
     void OnTabRookie(ClickEvent evt) => SwitchTab("rookie");
