@@ -110,7 +110,7 @@ public class PremiosController : UIScreenController
         var row = new VisualElement();
         row.AddToClassList("premios-data-row");
 
-        var winner = awards.FirstOrDefault(a => a.rank == 1);
+        var winner = awards.FirstOrDefault(a => a.rank == 1 && a.award_type == _activeTab);
 
         // Month
         AddDataCell(row, month.ToUpper(), "premios-td premios-td-month");
