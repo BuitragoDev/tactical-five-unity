@@ -6,149 +6,357 @@ using System.Globalization;
 
 public class PremiosController : UIScreenController
 {
-    VisualElement _body;
+    VisualElement _tableHeader;
+    VisualElement _tableBody;
+    Button _tabManager;
+    Button _tabPlayer;
+    Button _tabRookie;
+    string _activeTab = "manager";
 
     protected override GameScreen ScreenId => GameScreen.Premios;
 
     protected override void CacheReferences()
     {
-        _body = _root.Q<VisualElement>("PremiosBody");
+        _tableHeader = _root.Q<VisualElement>("PremiosTableHeader");
+        _tableBody = _root.Q<VisualElement>("PremiosTableBody");
+        _tabManager = _root.Q<Button>("TabManager");
+        _tabPlayer = _root.Q<Button>("TabPlayer");
+        _tabRookie = _root.Q<Button>("TabRookie");
+    }
+
+    protected override void RegisterCallbacks()
+    {
+        base.RegisterCallbacks();
+        _tabManager?.RegisterCallback<ClickEvent>(OnTabManager);
+        _tabPlayer?.RegisterCallback<ClickEvent>(OnTabPlayer);
+        _tabRookie?.RegisterCallback<ClickEvent>(OnTabRookie);
+    }
+
+    protected override void UnregisterCallbacks()
+    {
+        base.UnregisterCallbacks();
+        _tabManager?.UnregisterCallback<ClickEvent>(OnTabManager);
+        _tabPlayer?.UnregisterCallback<ClickEvent>(OnTabPlayer);
+        _tabRookie?.UnregisterCallback<ClickEvent>(OnTabRookie);
+    }
+
+    void OnTabManager(ClickEvent evt) => SwitchTab("manager");
+    void OnTabPlayer(ClickEvent evt) => SwitchTab("player");
+    void OnTabRookie(ClickEvent evt) => SwitchTab("rookie");
+
+    void SwitchTab(string tab)
+    {
+        _activeTab = tab;
+        _tabManager?.EnableInClassList("standings-tab--active", tab == "manager");
+        _tabPlayer?.EnableInClassList("standings-tab--active", tab == "player");
+        _tabRookie?.EnableInClassList("standings-tab--active", tab == "rookie");
+        Refresh();
     }
 
     protected override void Refresh()
     {
-        if (_season == null || _body == null) return;
+        if (_season == null || _tableBody == null) return;
 
         var title = _root.Q<Label>("PremiosTitle");
         if (title != null)
             title.text = $"PREMIOS MENSUALES {_season.year_start}-{_season.year_end}";
 
-        _body.Clear();
-
         var awards = DatabaseManager.Instance.GetMonthlyAwardsForSeason(_season.id);
-
-        var corrupted = awards.GroupBy(a => a.month_name).Where(g => g.Count() > 9).ToList();
-        if (corrupted.Any())
-        {
-            var db = DatabaseManager.Instance.Db;
-            foreach (var group in corrupted)
-            {
-                var ordered = group.OrderBy(a => a.id).ToList();
-                var extraIds = ordered.Skip(9).Select(a => a.id).ToList();
-                Debug.LogWarning($"[Premios] Mes '{group.Key}' tiene {group.Count()} entradas, limpiando {extraIds.Count} duplicados");
-                db.Execute($"DELETE FROM monthly_awards WHERE id IN ({string.Join(",", extraIds)})");
-            }
-            awards = DatabaseManager.Instance.GetMonthlyAwardsForSeason(_season.id);
-        }
 
         string[] monthOrder = { "Noviembre", "Diciembre", "Enero", "Febrero", "Marzo", "Abril" };
 
-        var awardsList = awards.ToList();
+        BuildHeader();
 
-        for (int i = 0; i < monthOrder.Length; i += 2)
+        _tableBody.Clear();
+
+        foreach (var month in monthOrder)
         {
-            var row = new VisualElement();
-            row.AddToClassList("premios-months-row");
+            var monthAwards = awards.Where(a =>
+                string.Equals(a.month_name, month, System.StringComparison.OrdinalIgnoreCase)).ToList();
 
-            BuildMonthColumn(row, monthOrder[i], awardsList);
-            if (i + 1 < monthOrder.Length)
-                BuildMonthColumn(row, monthOrder[i + 1], awardsList);
-
-            _body.Add(row);
+            BuildRow(month, monthAwards);
         }
     }
 
-    void BuildMonthColumn(VisualElement row, string month, List<MonthlyAwardData> awards)
+    void BuildHeader()
     {
-        var section = new VisualElement();
-        section.AddToClassList("premios-month-section");
+        _tableHeader.Clear();
 
-        var monthLabel = new Label(month);
-        monthLabel.AddToClassList("premios-month-title");
-        section.Add(monthLabel);
+        AddHeaderCell(_tableHeader, "MES", "premios-th premios-th-month");
+        AddHeaderCell(_tableHeader, "", "premios-th premios-th-photo");
+        AddHeaderCell(_tableHeader, "NOMBRE", "premios-th premios-th-name");
+        AddHeaderCell(_tableHeader, "EQUIPO", "premios-th premios-th-team");
 
-        var monthAwards = awards.Where(a =>
-            string.Equals(a.month_name, month, System.StringComparison.OrdinalIgnoreCase)).ToList();
-
-        if (monthAwards.Count == 0)
+        if (_activeTab == "manager")
         {
-            var pending = new Label("Pendiente");
-            pending.AddToClassList("premios-pending");
-            section.Add(pending);
+            AddHeaderCell(_tableHeader, "V", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "D", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "%", "premios-th premios-th-stat");
         }
         else
         {
-            BuildWinnersRow(section, monthAwards);
+            AddHeaderCell(_tableHeader, "PTOS", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "REB", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "ASIS", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "ROB", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "TAP", "premios-th premios-th-stat");
+            AddHeaderCell(_tableHeader, "VAL", "premios-th premios-th-stat");
         }
-
-        row.Add(section);
     }
 
-    void BuildWinnersRow(VisualElement section, IEnumerable<MonthlyAwardData> monthAwards)
+    void AddHeaderCell(VisualElement parent, string text, string cls)
     {
-        var managerWinner = monthAwards.FirstOrDefault(a => a.award_type == "manager" && a.rank == 1);
-        var playerWinner = monthAwards.FirstOrDefault(a => a.award_type == "player" && a.rank == 1);
-        var rookieWinner = monthAwards.FirstOrDefault(a => a.award_type == "rookie" && a.rank == 1);
+        var label = new Label(text);
+        label.AddToClassList(cls);
+        parent.Add(label);
+    }
 
+    void BuildRow(string month, List<MonthlyAwardData> awards)
+    {
         var row = new VisualElement();
-        row.AddToClassList("premios-winners-row");
+        row.AddToClassList("premios-data-row");
 
-        string managerName = null;
-        if (managerWinner != null && managerWinner.team_id.HasValue)
+        var winner = awards.FirstOrDefault(a => a.rank == 1);
+
+        // Month
+        AddDataCell(row, month.ToUpper(), "premios-td premios-td-month");
+
+        // Photo / Logo
+        var photoCell = new VisualElement();
+        photoCell.AddToClassList("premios-td-photo");
+        if (winner != null)
         {
-            managerName = DatabaseManager.Instance.GetManagerNameByTeamId(managerWinner.team_id.Value);
-            if (string.IsNullOrEmpty(managerName))
-                managerName = managerWinner.team_name;
+            if (_activeTab == "manager" && winner.team_id.HasValue)
+            {
+                var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+                var team = DatabaseManager.Instance.GetTeamById(winner.team_id.Value);
+                if (team != null)
+                {
+                    var logo = logos.FirstOrDefault(s => s.name == team.logo);
+                    if (logo != null)
+                    {
+                        var img = new Image();
+                        img.sprite = logo;
+                        img.AddToClassList("premios-td-photo-img");
+                        photoCell.Add(img);
+                    }
+                }
+            }
+            else if (winner.player_id.HasValue)
+            {
+                var player = DatabaseManager.Instance.GetPlayerById(winner.player_id.Value);
+                if (player != null)
+                {
+                    Texture2D tex = PlayerPhotoHelper.Load(player.id, player.photo);
+                    if (tex != null)
+                    {
+                        var img = new Image();
+                        img.image = tex;
+                        img.AddToClassList("premios-td-photo-img");
+                        photoCell.Add(img);
+                    }
+                }
+            }
         }
+        row.Add(photoCell);
 
-        BuildCard(row, "MANAGER DEL MES",
-            managerName,
-            managerWinner != null ? managerWinner.team_name : null,
-            managerWinner != null ? (managerWinner.value * 100).ToString("F1", CultureInfo.InvariantCulture) + "% VIC" : null);
-
-        BuildCard(row, "JUGADOR DEL MES",
-            playerWinner != null ? playerWinner.player_name : null,
-            playerWinner != null ? playerWinner.team_name : null,
-            playerWinner != null ? playerWinner.value.ToString("F1", CultureInfo.InvariantCulture) + " VAL" : null);
-
-        BuildCard(row, "ROOKIE DEL MES",
-            rookieWinner != null ? rookieWinner.player_name : null,
-            rookieWinner != null ? rookieWinner.team_name : null,
-            rookieWinner != null ? rookieWinner.value.ToString("F1", CultureInfo.InvariantCulture) + " VAL" : null);
-
-        section.Add(row);
-    }
-
-    void BuildCard(VisualElement row, string label, string name, string team, string stat)
-    {
-        var card = new VisualElement();
-        card.AddToClassList("premios-card");
-
-        var catLabel = new Label(label);
-        catLabel.AddToClassList("premios-card-label");
-        card.Add(catLabel);
-
-        if (name != null)
+        // Name
+        if (winner != null)
         {
-            var nameLabel = new Label(name);
-            nameLabel.AddToClassList("premios-card-name");
-            card.Add(nameLabel);
-
-            var teamLabel = new Label(team);
-            teamLabel.AddToClassList("premios-card-team");
-            card.Add(teamLabel);
-
-            var statLabel = new Label(stat);
-            statLabel.AddToClassList("premios-card-stat");
-            card.Add(statLabel);
+            string name = _activeTab == "manager"
+                ? DatabaseManager.Instance.GetManagerNameByTeamId(winner.team_id ?? 0) ?? winner.team_name
+                : winner.player_name;
+            AddDataCell(row, name ?? "—", "premios-td premios-td-name");
         }
         else
         {
-            var emptyLabel = new Label("—");
-            emptyLabel.AddToClassList("premios-card-empty");
-            card.Add(emptyLabel);
+            AddDataCell(row, "—", "premios-td premios-td-empty");
         }
 
-        row.Add(card);
+        // Team
+        AddDataCell(row, winner?.team_name ?? "—", "premios-td premios-td-team");
+
+        // Stats
+        if (_activeTab == "manager")
+        {
+            if (winner != null && winner.team_id.HasValue)
+            {
+                var record = GetManagerMonthRecord(winner.team_id.Value, month);
+                AddDataCell(row, record.wins.ToString(), "premios-td premios-td-stat");
+                AddDataCell(row, record.losses.ToString(), "premios-td premios-td-stat");
+                AddDataCell(row, record.winPct.ToString("F1", CultureInfo.InvariantCulture), "premios-td premios-td-stat");
+            }
+            else
+            {
+                AddDataCell(row, "—", "premios-td premios-td-empty");
+                AddDataCell(row, "—", "premios-td premios-td-empty");
+                AddDataCell(row, "—", "premios-td premios-td-empty");
+            }
+        }
+        else
+        {
+            if (winner != null && winner.player_id.HasValue)
+            {
+                var stats = GetPlayerMonthStats(winner.player_id.Value, month);
+                AddStatCell(row, stats.points);
+                AddStatCell(row, stats.rebounds);
+                AddStatCell(row, stats.assists);
+                AddStatCell(row, stats.steals);
+                AddStatCell(row, stats.blocks);
+                AddStatCell(row, stats.rating);
+            }
+            else
+            {
+                for (int i = 0; i < 6; i++)
+                    AddDataCell(row, "—", "premios-td premios-td-empty");
+            }
+        }
+
+        _tableBody.Add(row);
+    }
+
+    void AddDataCell(VisualElement parent, string text, string cls)
+    {
+        var label = new Label(text);
+        label.AddToClassList(cls);
+        parent.Add(label);
+    }
+
+    void AddStatCell(VisualElement parent, float value)
+    {
+        var cell = new Label(value.ToString("F1", CultureInfo.InvariantCulture));
+        cell.AddToClassList("premios-td");
+        cell.AddToClassList("premios-td-stat");
+        cell.AddToClassList("premios-td-stat-value");
+        parent.Add(cell);
+    }
+
+    struct MonthRecord
+    {
+        public int wins;
+        public int losses;
+        public float winPct;
+    }
+
+    MonthRecord GetManagerMonthRecord(int teamId, string monthName)
+    {
+        var result = new MonthRecord();
+        if (_season == null) return result;
+
+        string startDate = GetMonthStartDate(monthName);
+        string endDate = GetMonthEndDate(monthName);
+
+        if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate)) return result;
+
+        var db = DatabaseManager.Instance.Db;
+        var games = db.Query<GameData>(@"
+            SELECT * FROM games
+            WHERE season_id = ? AND is_played = 1 AND game_type = 'regular'
+              AND game_date >= ? AND game_date <= ?
+              AND (home_team_id = ? OR away_team_id = ?)",
+            _season.id, startDate, endDate, teamId, teamId);
+
+        foreach (var g in games)
+        {
+            bool won = (g.home_team_id == teamId && g.home_score > g.away_score) ||
+                       (g.away_team_id == teamId && g.away_score > g.home_score);
+            if (won) result.wins++;
+            else result.losses++;
+        }
+
+        int total = result.wins + result.losses;
+        result.winPct = total > 0 ? (float)result.wins / total * 100f : 0f;
+        return result;
+    }
+
+    struct MonthPlayerStats
+    {
+        public float points;
+        public float rebounds;
+        public float assists;
+        public float steals;
+        public float blocks;
+        public float rating;
+    }
+
+    MonthPlayerStats GetPlayerMonthStats(int playerId, string monthName)
+    {
+        var result = new MonthPlayerStats();
+        if (_season == null) return result;
+
+        string startDate = GetMonthStartDate(monthName);
+        string endDate = GetMonthEndDate(monthName);
+
+        if (string.IsNullOrEmpty(startDate) || string.IsNullOrEmpty(endDate)) return result;
+
+        var db = DatabaseManager.Instance.Db;
+        var row = db.Query<MonthlyPlayerStatRow>(@"
+            SELECT AVG(ps.points) AS points, AVG(ps.rebounds) AS rebounds,
+                   AVG(ps.assists) AS assists, AVG(ps.steals) AS steals,
+                   AVG(ps.blocks) AS blocks, AVG(ps.rating) AS rating
+            FROM player_game_stats ps
+            JOIN games g ON ps.game_id = g.id
+            WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
+              AND g.game_date >= ? AND g.game_date <= ?
+              AND ps.player_id = ?",
+            _season.id, startDate, endDate, playerId).FirstOrDefault();
+
+        if (row != null)
+        {
+            result.points = row.points;
+            result.rebounds = row.rebounds;
+            result.assists = row.assists;
+            result.steals = row.steals;
+            result.blocks = row.blocks;
+            result.rating = row.rating;
+        }
+
+        return result;
+    }
+
+    public class MonthlyPlayerStatRow
+    {
+        public float points { get; set; }
+        public float rebounds { get; set; }
+        public float assists { get; set; }
+        public float steals { get; set; }
+        public float blocks { get; set; }
+        public float rating { get; set; }
+    }
+
+    string GetMonthStartDate(string monthName)
+    {
+        if (_season == null) return null;
+        int year = monthName == "Noviembre" || monthName == "Diciembre"
+            ? _season.year_start : _season.year_end;
+
+        return monthName.ToLower() switch
+        {
+            "noviembre" => $"{year}-11-01",
+            "diciembre" => $"{year}-12-01",
+            "enero"     => $"{year}-01-01",
+            "febrero"   => $"{year}-02-01",
+            "marzo"     => $"{year}-03-01",
+            "abril"     => $"{year}-04-01",
+            _ => null
+        };
+    }
+
+    string GetMonthEndDate(string monthName)
+    {
+        if (_season == null) return null;
+        int year = monthName == "Noviembre" || monthName == "Diciembre"
+            ? _season.year_start : _season.year_end;
+
+        return monthName.ToLower() switch
+        {
+            "noviembre" => $"{year}-11-30",
+            "diciembre" => $"{year}-12-31",
+            "enero"     => $"{year}-01-31",
+            "febrero"   => $"{year}-02-28",
+            "marzo"     => $"{year}-03-31",
+            "abril"     => $"{year}-04-30",
+            _ => null
+        };
     }
 }

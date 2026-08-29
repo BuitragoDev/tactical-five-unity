@@ -4,6 +4,7 @@
 
     <Style src="Premios.uss" />
     <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../Standings/Standings.uss" />
     <Style src="../LegalNotice/LegalNotice.uss" />
 
     <ui:VisualElement name="PremiosRoot" class="premios-root">
@@ -14,10 +15,17 @@
 
                 <ui:Label name="PremiosTitle" class="premios-title" text="PREMIOS MENSUALES" />
 
-                <ui:VisualElement class="premios-scroll-wrapper">
-                    <ui:ScrollView name="PremiosScroll" class="premios-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
-                        <ui:VisualElement name="PremiosBody" class="premios-body" />
-                    </ui:ScrollView>
+                <!-- PESTAÑAS -->
+                <ui:VisualElement class="premios-tabs">
+                    <ui:Button name="TabManager" class="standings-tab standings-tab--active" text="MANAGER DEL MES" />
+                    <ui:Button name="TabPlayer" class="standings-tab" text="JUGADOR DEL MES" />
+                    <ui:Button name="TabRookie" class="standings-tab" text="ROOKIE DEL MES" />
+                </ui:VisualElement>
+
+                <!-- TABLA -->
+                <ui:VisualElement class="premios-table-wrapper">
+                    <ui:VisualElement name="PremiosTableHeader" class="premios-table-header" />
+                    <ui:VisualElement name="PremiosTableBody" class="premios-table-body" />
                 </ui:VisualElement>
 
             </ui:VisualElement>
