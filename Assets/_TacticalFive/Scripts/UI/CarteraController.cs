@@ -27,7 +27,7 @@ public class CarteraController : UIScreenController
     private Dictionary<string, Sprite> _logoSprites = new();
 
     private string _activeTab = "ojear";
-    private const int MAX_SCOUTS = 3;
+    private const int MAX_SCOUTS = 6;
     private int _expandedSlotIndex = -1;
     private HashSet<int> _scoutedPlayerIds;
 
@@ -513,7 +513,7 @@ public class CarteraController : UIScreenController
                 var sep1 = new Label();
                 sep1.text = " - ";
                 sep1.style.color = Color.white;
-                sep1.style.fontSize = 18;
+                sep1.style.fontSize = 14;
                 sep1.style.marginLeft = 4;
                 sep1.style.marginRight = 4;
                 header.Add(sep1);
@@ -526,13 +526,13 @@ public class CarteraController : UIScreenController
                 var sep2 = new Label();
                 sep2.text = " - ";
                 sep2.style.color = Color.white;
-                sep2.style.fontSize = 18;
+                sep2.style.fontSize = 14;
                 sep2.style.marginLeft = 4;
                 sep2.style.marginRight = 4;
                 header.Add(sep2);
 
                 var medLbl = new Label();
-                medLbl.AddToClassList("player-row-ovr");
+                medLbl.AddToClassList("scout-slot-header-med");
                 medLbl.text = $"{FogOfWarHelper.GetOvrDisplay(player, _myTeam.id, _scoutedPlayerIds)} MED";
                 int med = player.GetCalculatedAverage();
                 if (med > 84) medLbl.AddToClassList("player-ovr--high");
@@ -608,44 +608,34 @@ public class CarteraController : UIScreenController
         topRow.Add(photo);
 
         var attrCol = new VisualElement();
-        attrCol.AddToClassList("scout-attr-column");
+        attrCol.AddToClassList("cartera-attr-badges");
 
         var attrs = new[]
         {
-            ("Tiro", p.shooting), ("Triple", p.three_point), ("Pase", p.passing),
-            ("Bote", p.dribbling), ("Defensa", p.defense), ("Rebote", p.rebounding),
-            ("Velocidad", p.speed), ("Atletismo", p.athleticism), ("IQ", p.iq),
-            ("Robos", p.steals), ("Tapones", p.blocks),
+            ("TIRO", p.shooting), ("TRIPLE", p.three_point), ("PASE", p.passing),
+            ("BOTE", p.dribbling), ("DEFENSA", p.defense), ("REBOTE", p.rebounding),
+            ("VELOCIDAD", p.speed), ("ATLETISMO", p.athleticism), ("IQ", p.iq),
+            ("ROBOS", p.steals), ("TAPONES", p.blocks),
         };
 
         foreach (var (label, val) in attrs)
         {
-            var row = new VisualElement();
-            row.AddToClassList("scout-attr-row");
+            var badge = new VisualElement();
+            badge.AddToClassList("cartera-attr-badge");
+            if (val < 40) badge.AddToClassList("cartera-attr-badge--low");
+            else if (val < 70) badge.AddToClassList("cartera-attr-badge--mid");
 
             var lbl = new Label();
-            lbl.AddToClassList("scout-attr-label");
+            lbl.AddToClassList("cartera-attr-badge-label");
             lbl.text = label;
 
-            var barBg = new VisualElement();
-            barBg.AddToClassList("scout-attr-bar-bg");
-
-            var barFill = new VisualElement();
-            barFill.AddToClassList("scout-attr-bar-fill");
-            if (val < 50) barFill.AddToClassList("scout-attr-bar-fill--low");
-            else if (val < 70) barFill.AddToClassList("scout-attr-bar-fill--mid");
-
-            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
-            barBg.Add(barFill);
-
             var valLbl = new Label();
-            valLbl.AddToClassList("scout-attr-val");
+            valLbl.AddToClassList("cartera-attr-badge-val");
             valLbl.text = val.ToString();
 
-            row.Add(lbl);
-            row.Add(barBg);
-            row.Add(valLbl);
-            attrCol.Add(row);
+            badge.Add(lbl);
+            badge.Add(valLbl);
+            attrCol.Add(badge);
         }
 
         topRow.Add(attrCol);
@@ -695,15 +685,18 @@ public class CarteraController : UIScreenController
 
     void BuildInformesHeader()
     {
-        AddCell(_informesTableHeader, "", "cartera-th cartera-th-photo");
-        AddCell(_informesTableHeader, "NOMBRE", "cartera-th cartera-th-name");
-        AddCell(_informesTableHeader, "POS", "cartera-th cartera-th-pos");
-        AddCell(_informesTableHeader, "EDAD", "cartera-th cartera-th-age");
-        AddCell(_informesTableHeader, "MEDIA", "cartera-th cartera-th-ovr");
-        AddCell(_informesTableHeader, "SALARIO", "cartera-th cartera-th-salary");
-        AddCell(_informesTableHeader, "EQUIPO", "cartera-th cartera-th-team");
-        AddCell(_informesTableHeader, "DÍA", "cartera-th cartera-th-day");
-        AddCell(_informesTableHeader, "", "cartera-th cartera-th-action");
+        AddCell(_informesTableHeader, "#", "cartera-th cartera-col-photo");
+        AddCell(_informesTableHeader, "NOMBRE", "cartera-th cartera-col-name");
+        AddCell(_informesTableHeader, "POS", "cartera-th cartera-col-pos");
+        AddCell(_informesTableHeader, "EDAD", "cartera-th cartera-col-age");
+        AddCell(_informesTableHeader, "MEDIA", "cartera-th cartera-col-ovr");
+        AddCell(_informesTableHeader, "SALARIO", "cartera-th cartera-col-salary");
+        AddCell(_informesTableHeader, "EQUIPO", "cartera-th cartera-col-team");
+        AddCell(_informesTableHeader, "DÍA", "cartera-th cartera-col-day");
+
+        var actionSpacer = new VisualElement();
+        actionSpacer.AddToClassList("cartera-col-action");
+        _informesTableHeader.Add(actionSpacer);
     }
 
     VisualElement BuildInformeRow(PlayerData p, int scoutedDay)
@@ -713,7 +706,9 @@ public class CarteraController : UIScreenController
 
         // Photo
         var photoCell = new VisualElement();
-        photoCell.AddToClassList("cartera-td cartera-td-photo");
+        photoCell.AddToClassList("cartera-td");
+        photoCell.AddToClassList("cartera-col-photo");
+        photoCell.AddToClassList("cartera-td-photo-center");
         Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
         if (tex != null)
         {
@@ -724,13 +719,13 @@ public class CarteraController : UIScreenController
         }
         row.Add(photoCell);
 
-        AddCell(row, $"{p.first_name} {p.last_name}".ToUpper(), "cartera-td cartera-td-name");
-        AddCell(row, PositionCodes.GetShort(p.position), "cartera-td cartera-td-pos");
-        AddCell(row, $"{p.age}", "cartera-td cartera-td-age");
+        AddCell(row, $"{p.first_name} {p.last_name}".ToUpper(), "cartera-td cartera-col-name cartera-td-ellipsis");
+        AddCell(row, PositionCodes.GetShort(p.position), "cartera-td cartera-col-pos");
+        AddCell(row, $"{p.age}", "cartera-td cartera-col-age");
 
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("cartera-td");
-        ovrLbl.AddToClassList("cartera-td-ovr");
+        ovrLbl.AddToClassList("cartera-col-ovr");
         ovrLbl.text = FogOfWarHelper.GetOvrDisplay(p, _myTeam.id, _scoutedPlayerIds);
         int med = p.GetCalculatedAverage();
         if (med > 84) ovrLbl.AddToClassList("player-ovr--high");
@@ -738,15 +733,18 @@ public class CarteraController : UIScreenController
         else ovrLbl.AddToClassList("player-ovr--low");
         row.Add(ovrLbl);
 
-        AddCell(row, FormatSalary(p.salary), "cartera-td cartera-td-salary");
+        AddCell(row, FormatSalary(p.salary), "cartera-td cartera-col-salary");
 
         var team = DatabaseManager.Instance.GetTeamById(p.team_id);
-        AddCell(row, team != null ? team.name : "LIBRE", "cartera-td cartera-td-team");
-        AddCell(row, scoutedDay.ToString(), "cartera-td cartera-td-day");
+        AddCell(row, team != null ? team.name : "LIBRE", "cartera-td cartera-col-team cartera-td-muted");
+
+        var scoutedDate = new System.DateTime(_season.year_start, 10, 22).AddDays(scoutedDay - 1);
+        AddCell(row, scoutedDate.ToString("dd/MM/yyyy"), "cartera-td cartera-col-day cartera-td-muted");
 
         // Ver perfil
         var viewBtn = new Button();
-        viewBtn.AddToClassList("cartera-td cartera-td-action cartera-view-btn");
+        viewBtn.AddToClassList("cartera-col-action");
+        viewBtn.AddToClassList("player-row-view");
         viewBtn.text = "VER PERFIL";
         var captured = p;
         viewBtn.RegisterCallback<ClickEvent>(evt =>

@@ -22,7 +22,7 @@
     flex-grow: 1;
     padding: 20px 24px;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
 /* ── TOPBAR / TABS ── */
@@ -43,6 +43,10 @@
 
 .cartera-page--column {
     flex-direction: column;
+    width: 100%;
+    height: 0;
+    flex-shrink: 1;
+    align-self: stretch;
 }
 
 /* ── SECTION TITLES ── */
@@ -319,26 +323,35 @@
 /* ── SCOUT SLOTS ── */
 
 .scout-slots {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    width: 100%;
+    align-self: stretch;
 }
 
 .scout-slot {
     flex-direction: column;
+    width: 49%;
+    min-width: 0;
+    flex-shrink: 0;
+    align-self: flex-start;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     border-radius: 4px;
     padding: 14px;
-    margin-bottom: 8px;
+    margin: 0 0.5% 8px 0.5%;
 }
 
 .scout-slot-header {
     flex-direction: row;
     align-items: center;
+    flex-wrap: wrap;
     margin-bottom: 6px;
     cursor: pointer;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 24px;
+    font-size: 16px;
     color: rgb(208, 216, 232);
     -unity-text-transform: upper;
 }
@@ -348,32 +361,42 @@
 }
 
 .scout-slot-header-arrow {
-    font-size: 18px;
+    font-size: 14px;
     color: rgb(122, 138, 170);
-    margin-right: 8px;
-    width: 16px;
+    margin-right: 6px;
+    width: 12px;
     -unity-text-align: middle-center;
 }
 
 .scout-slot-header-name {
-    font-size: 24px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     -unity-text-transform: upper;
     flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .scout-slot-header-pos {
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     margin-left: 8px;
 }
 
 .scout-slot-header-age {
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    margin-left: 8px;
+}
+
+.scout-slot-header-med {
+    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     margin-left: 8px;
 }
 
@@ -387,69 +410,60 @@
 }
 
 .scout-player-photo {
-    width: 120px;
-    height: 120px;
-    border-radius: 64px;
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
     background-color: rgb(200, 200, 200);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
-    margin-right: 16px;
+    margin-right: 12px;
+    margin-top: 5px;
 }
 
-.scout-attr-column {
-    flex-direction: column;
+/* ── ATTR BADGES ── */
+
+.cartera-attr-badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 2px 0;
     flex: 1;
     min-width: 0;
 }
 
-.scout-attr-row {
-    flex-direction: row;
+.cartera-attr-badge {
+    flex-direction: column;
     align-items: center;
-    margin-bottom: 4px;
-}
-
-.scout-attr-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    width: 75px;
-    flex-shrink: 0;
-    -unity-text-align: middle-left;
-}
-
-.scout-attr-bar-bg {
-    flex-grow: 1;
-    height: 7px;
-    background-color: rgb(28, 33, 48);
-    border-radius: 3px;
-    overflow: hidden;
-    margin: 0 6px;
-}
-
-.scout-attr-bar-fill {
-    height: 7px;
-    border-radius: 3px;
+    justify-content: center;
+    width: 100px;
+    height: 64px;
+    padding: 6px 4px;
+    margin: 3px;
+    border-radius: 4px;
     background-color: rgb(39, 174, 96);
-}
-
-.scout-attr-bar-fill--mid {
-    background-color: rgb(212, 160, 23);
-}
-
-.scout-attr-bar-fill--low {
-    background-color: rgb(192, 57, 43);
-}
-
-.scout-attr-val {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(208, 216, 232);
-    width: 28px;
-    -unity-text-align: middle-right;
     flex-shrink: 0;
+}
+
+.cartera-attr-badge--mid { background-color: rgb(191, 142, 16); }
+.cartera-attr-badge--low { background-color: rgb(192, 57, 43); }
+
+.cartera-attr-badge-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    letter-spacing: 0.5px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+}
+
+.cartera-attr-badge-val {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 32px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+    white-space: nowrap;
+    margin-top: 2px;
 }
 
 .scout-card-bottom {
@@ -614,6 +628,8 @@
 .cartera-table-wrapper {
     flex-direction: column;
     flex-grow: 1;
+    height: 0;
+    flex-shrink: 1;
     min-height: 0;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
@@ -625,43 +641,68 @@
 .cartera-table-header {
     flex-direction: row;
     align-items: center;
-    padding: 8px 12px;
+    padding: 6px 12px;
     background-color: rgb(17, 24, 34);
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     flex-shrink: 0;
 }
 
+.cartera-table-body-viewport {
+    flex-grow: 1;
+    flex-shrink: 1;
+    height: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.cartera-table-scroll {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+.cartera-table-scroll .unity-scroll-view__content-container {
+    flex-direction: column;
+    min-height: 0;
+}
+
 .cartera-table-body {
     flex-direction: column;
-    flex-grow: 1;
     min-height: 0;
-    overflow-y: auto;
 }
 
 .cartera-th {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-left;
     padding: 0 6px;
 }
 
-.cartera-th-photo   { width: 60px;  flex-shrink: 0; -unity-text-align: middle-center; }
-.cartera-th-name    { width: 220px; flex-shrink: 0; }
-.cartera-th-pos     { width: 60px;  flex-shrink: 0; }
-.cartera-th-age     { width: 60px;  flex-shrink: 0; }
-.cartera-th-ovr     { width: 70px;  flex-shrink: 0; }
-.cartera-th-salary  { width: 110px; flex-shrink: 0; }
-.cartera-th-team    { width: 180px; flex-shrink: 0; }
-.cartera-th-day     { width: 80px;  flex-shrink: 0; }
-.cartera-th-action  { width: 90px;  flex-shrink: 0; }
+/* Anchos de columna compartidos (cabecera y filas) */
+.cartera-col-photo  { width: 60px;  flex: 0 0 60px; }
+.cartera-col-name   { width: 220px; flex: 0 0 220px; }
+.cartera-col-pos    { width: 60px;  flex: 0 0 60px; }
+.cartera-col-age    { width: 60px;  flex: 0 0 60px; }
+.cartera-col-ovr    { width: 70px;  flex: 0 0 70px; }
+.cartera-col-salary { width: 110px; flex: 0 0 110px; }
+.cartera-col-team   { width: 180px; flex: 0 0 280px; }
+.cartera-col-day    { width: 100px; flex: 0 0 100px; }
+.cartera-col-action { width: 96px;  flex: 0 0 96px; }
 
 .cartera-info-row {
     flex-direction: row;
     align-items: center;
-    padding: 6px 12px;
+    height: 42px;
+    min-height: 42px;
+    max-height: 42px;
+    flex-shrink: 0;
+    padding: 0 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.4);
 }
@@ -676,28 +717,22 @@
 
 .cartera-td {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-left;
     padding: 0 6px;
 }
 
 .cartera-td-photo-img {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 4px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
-.cartera-td-photo   { width: 60px;  flex-shrink: 0; align-items: center; justify-content: center; }
-.cartera-td-name    { width: 220px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; }
-.cartera-td-pos     { width: 60px;  flex-shrink: 0; }
-.cartera-td-age     { width: 60px;  flex-shrink: 0; }
-.cartera-td-ovr     { width: 70px;  flex-shrink: 0; }
-.cartera-td-salary  { width: 110px; flex-shrink: 0; }
-.cartera-td-team    { width: 180px; flex-shrink: 0; color: rgb(130, 146, 175); }
-.cartera-td-day     { width: 80px;  flex-shrink: 0; color: rgb(130, 146, 175); }
-.cartera-td-action  { width: 90px;  flex-shrink: 0; }
+.cartera-td-photo-center { align-items: center; justify-content: center; }
+.cartera-td-ellipsis     { overflow: hidden; text-overflow: ellipsis; }
+.cartera-td-muted        { color: rgb(130, 146, 175); }
 
 .cartera-view-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -712,6 +747,11 @@
 
 .cartera-view-btn:hover {
     color: rgb(120, 170, 255);
+}
+
+.cartera-col-action.player-row-view {
+    margin-left: 0;
+    font-size: 16px;
 }
 
 .cartera-empty {
