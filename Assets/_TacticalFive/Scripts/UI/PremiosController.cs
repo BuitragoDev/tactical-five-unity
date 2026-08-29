@@ -38,6 +38,7 @@ public class PremiosController : UIScreenController
 
     void SwitchTab(string tab)
     {
+        PlayClick();
         _activeTab = tab;
         _tabManager?.EnableInClassList("standings-tab--active", tab == "manager");
         _tabPlayer?.EnableInClassList("standings-tab--active", tab == "player");

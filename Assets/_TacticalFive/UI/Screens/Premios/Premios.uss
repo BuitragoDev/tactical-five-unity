@@ -134,6 +134,7 @@
 }
 
 .premios-td-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     flex-grow: 1;
     min-width: 0;
     -unity-text-align: middle-left;
@@ -142,6 +143,7 @@
 }
 
 .premios-td-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     width: 180px;
     flex-shrink: 0;
     -unity-text-align: middle-left;
@@ -149,6 +151,7 @@
 }
 
 .premios-td-stat {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 70px;
     flex-shrink: 0;
 }
