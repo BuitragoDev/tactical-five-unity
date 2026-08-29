@@ -171,15 +171,15 @@ public class PremiosController : UIScreenController
             {
                 name = winner.player_name;
             }
-            AddDataCell(row, name ?? "—", "premios-td premios-td-name");
+            AddDataCell(row, name ?? "", "premios-td premios-td-name");
         }
         else
         {
-            AddDataCell(row, "—", "premios-td premios-td-empty");
+            AddDataCell(row, "", "premios-td premios-td-empty");
         }
 
         // Team
-        AddDataCell(row, winner?.team_name ?? "—", "premios-td premios-td-team");
+        AddDataCell(row, winner?.team_name ?? "", "premios-td premios-td-team");
 
         // Stats
         if (_activeTab == "manager")
@@ -193,9 +193,9 @@ public class PremiosController : UIScreenController
             }
             else
             {
-                AddDataCell(row, "—", "premios-td premios-td-empty");
-                AddDataCell(row, "—", "premios-td premios-td-empty");
-                AddDataCell(row, "—", "premios-td premios-td-empty");
+                AddDataCell(row, "", "premios-td premios-td-empty");
+                AddDataCell(row, "", "premios-td premios-td-empty");
+                AddDataCell(row, "", "premios-td premios-td-empty");
             }
         }
         else
@@ -213,7 +213,7 @@ public class PremiosController : UIScreenController
             else
             {
                 for (int i = 0; i < 6; i++)
-                    AddDataCell(row, "—", "premios-td premios-td-empty");
+            AddDataCell(row, "", "premios-td premios-td-empty");
             }
         }
 
