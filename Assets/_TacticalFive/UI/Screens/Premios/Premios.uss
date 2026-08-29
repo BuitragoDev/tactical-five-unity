@@ -71,7 +71,7 @@
 /* Header columns */
 .premios-th {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-left;
@@ -79,7 +79,7 @@
 }
 
 .premios-th-month      { width: 100px; flex-shrink: 0; }
-.premios-th-photo      { width: 50px;  flex-shrink: 0; -unity-text-align: middle-center; }
+.premios-th-photo      { width: 70px;  flex-shrink: 0; -unity-text-align: middle-center; }
 .premios-th-name       { width: 200px; flex-shrink: 0; }
 .premios-th-team       { width: 180px; flex-shrink: 0; }
 .premios-th-stat       { width: 50px;  flex-shrink: 0; -unity-text-align: middle-center; }
@@ -105,7 +105,7 @@
 /* Data columns */
 .premios-td {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-text-align: middle-left;
     padding: 0 6px;
@@ -113,7 +113,7 @@
 
 .premios-td-month {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     width: 100px;
@@ -121,15 +121,15 @@
 }
 
 .premios-td-photo {
-    width: 50px;
+    width: 70px;
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
 }
 
 .premios-td-photo-img {
-    width: 36px;
-    height: 36px;
+    width: 64px;
+    height: 64px;
     border-radius: 4px;
 }
 
@@ -157,7 +157,7 @@
 
 .premios-td-stat-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(100, 200, 255);
 }
 
