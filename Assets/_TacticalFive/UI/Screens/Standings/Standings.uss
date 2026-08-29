@@ -111,7 +111,7 @@
     flex-direction: row;
     margin-bottom: 16px;
     flex-shrink: 0;
-    border-bottom-width: 3px;
+    border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
 }
 

@@ -45,7 +45,7 @@
     flex-direction: row;
     flex-wrap: wrap;
     margin-bottom: 14px;
-    border-bottom-width: 3px;
+    border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
 }
 
