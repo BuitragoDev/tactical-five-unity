@@ -157,9 +157,20 @@ public class PremiosController : UIScreenController
         // Name
         if (winner != null)
         {
-            string name = _activeTab == "manager"
-                ? DatabaseManager.Instance.GetManagerNameByTeamId(winner.team_id ?? 0) ?? winner.team_name
-                : winner.player_name;
+            string name;
+            if (_activeTab == "manager")
+            {
+                name = DatabaseManager.Instance.GetManagerNameByTeamId(winner.team_id ?? 0) ?? winner.team_name;
+            }
+            else if (winner.player_id.HasValue)
+            {
+                var player = DatabaseManager.Instance.GetPlayerById(winner.player_id.Value);
+                name = player != null ? $"{player.first_name} {player.last_name}" : winner.player_name;
+            }
+            else
+            {
+                name = winner.player_name;
+            }
             AddDataCell(row, name ?? "—", "premios-td premios-td-name");
         }
         else
@@ -311,12 +322,12 @@ public class PremiosController : UIScreenController
 
     public class MonthlyPlayerStatRow
     {
-        public float points { get; set; }
-        public float rebounds { get; set; }
-        public float assists { get; set; }
-        public float steals { get; set; }
-        public float blocks { get; set; }
-        public float rating { get; set; }
+        public double points { get; set; }
+        public double rebounds { get; set; }
+        public double assists { get; set; }
+        public double steals { get; set; }
+        public double blocks { get; set; }
+        public double rating { get; set; }
     }
 
     string GetMonthStartDate(string monthName)
