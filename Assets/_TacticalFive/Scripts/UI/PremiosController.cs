@@ -309,12 +309,12 @@ public class PremiosController : UIScreenController
 
         if (row != null)
         {
-            result.points = row.points;
-            result.rebounds = row.rebounds;
-            result.assists = row.assists;
-            result.steals = row.steals;
-            result.blocks = row.blocks;
-            result.rating = row.rating;
+            result.points = (float)row.points;
+            result.rebounds = (float)row.rebounds;
+            result.assists = (float)row.assists;
+            result.steals = (float)row.steals;
+            result.blocks = (float)row.blocks;
+            result.rating = (float)row.rating;
         }
 
         return result;
