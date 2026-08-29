@@ -25,25 +25,16 @@
                 <ui:VisualElement name="PageOjear" class="cartera-page">
                     <!-- LEFT COLUMN -->
                     <ui:VisualElement class="cartera-left">
-                        <ui:Label class="section-title" text="SELECCIONA UN EQUIPO" />
-                        <ui:VisualElement name="TeamList" class="team-list" />
-                        <ui:VisualElement name="SalaryMarginBox" class="salary-margin-box" style="display: none;">
-                            <ui:Label name="SalaryMarginTitle" class="salary-margin-title" text="" />
-                            <ui:Label name="SalaryMarginValue" class="salary-margin-value" text="" />
-                        </ui:VisualElement>
-                        <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 12px;" />
-                        <ui:VisualElement class="player-list-sortbar">
-                            <ui:Button name="SortMedia" class="sort-btn sort-btn--active" text="MEDIA" />
-                            <ui:Button name="SortEdad" class="sort-btn" text="EDAD" />
-                            <ui:Button name="SortSalario" class="sort-btn" text="SALARIO" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="PlayerList" class="player-list" />
+                        <ui:Label class="section-title" text="OJEADOR" />
+                        <ui:VisualElement name="OjeadorBody" class="ojeador-body" />
+                        <ui:Label class="section-title" text="SELECCIONA UN EQUIPO" style="margin-top: 18px;" />
+                        <ui:ScrollView name="TeamList" class="team-list" horizontal-scrolling-enabled="false" mode="Vertical" />
                     </ui:VisualElement>
 
                     <!-- RIGHT COLUMN -->
                     <ui:VisualElement class="cartera-right">
-                        <ui:Label class="section-title" text="OJEADOR" />
-                        <ui:VisualElement name="OjeadorBody" class="ojeador-body" />
+                        <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 18px;" />
+                        <ui:VisualElement name="PlayerList" class="player-list" />
                     </ui:VisualElement>
                 </ui:VisualElement>
 

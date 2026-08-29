@@ -12,29 +12,21 @@ public class CarteraController : UIScreenController
     private VisualElement _playerList;
     private VisualElement _ojeadorBody;
     private VisualElement _scoutSlots;
-    private VisualElement _salaryMarginBox;
-    private Label _salaryMarginTitle;
-    private Label _salaryMarginValue;
     private VisualElement _pageOjear;
     private VisualElement _pageCartera;
     private VisualElement _pageInformes;
     private Button _tabOjear;
     private Button _tabCartera;
     private Button _tabInformes;
-    private Button _sortMedia;
-    private Button _sortEdad;
-    private Button _sortSalario;
     private VisualElement _informesTableHeader;
     private VisualElement _informesTableBody;
 
     private List<TeamData> _allTeams;
     private List<ScoutData> _scouts;
     private TeamData _selectedTeam;
-    private PlayerData _selectedPlayer;
     private Dictionary<string, Sprite> _logoSprites = new();
 
     private string _activeTab = "ojear";
-    private string _sortBy = "media"; // media | edad | salario
     private const int MAX_SCOUTS = 3;
     private int _expandedSlotIndex = -1;
     private HashSet<int> _scoutedPlayerIds;
@@ -48,9 +40,6 @@ public class CarteraController : UIScreenController
         _teamList = _root.Q<VisualElement>("TeamList");
         _selectedTeamLabel = _root.Q<Label>("SelectedTeamLabel");
         _playerList = _root.Q<VisualElement>("PlayerList");
-        _salaryMarginBox = _root.Q<VisualElement>("SalaryMarginBox");
-        _salaryMarginTitle = _root.Q<Label>("SalaryMarginTitle");
-        _salaryMarginValue = _root.Q<Label>("SalaryMarginValue");
         _ojeadorBody = _root.Q<VisualElement>("OjeadorBody");
         _scoutSlots = _root.Q<VisualElement>("ScoutSlots");
         _pageOjear = _root.Q<VisualElement>("PageOjear");
@@ -59,9 +48,6 @@ public class CarteraController : UIScreenController
         _tabOjear = _root.Q<Button>("TabOjear");
         _tabCartera = _root.Q<Button>("TabCartera");
         _tabInformes = _root.Q<Button>("TabInformes");
-        _sortMedia = _root.Q<Button>("SortMedia");
-        _sortEdad = _root.Q<Button>("SortEdad");
-        _sortSalario = _root.Q<Button>("SortSalario");
         _informesTableHeader = _root.Q<VisualElement>("InformesTableHeader");
         _informesTableBody = _root.Q<VisualElement>("InformesTableBody");
     }
@@ -88,9 +74,7 @@ public class CarteraController : UIScreenController
         catch { DatabaseManager.Instance.Db.CreateTable<ScoutData>(); _scouts = new(); }
 
         _selectedTeam = null;
-        _selectedPlayer = null;
         _activeTab = "ojear";
-        _sortBy = "media";
         _expandedSlotIndex = -1;
     }
 
@@ -100,9 +84,6 @@ public class CarteraController : UIScreenController
         _tabOjear?.RegisterCallback<ClickEvent>(_ => ShowTab("ojear"));
         _tabCartera?.RegisterCallback<ClickEvent>(_ => ShowTab("cartera"));
         _tabInformes?.RegisterCallback<ClickEvent>(_ => ShowTab("informes"));
-        _sortMedia?.RegisterCallback<ClickEvent>(_ => SetSort("media"));
-        _sortEdad?.RegisterCallback<ClickEvent>(_ => SetSort("edad"));
-        _sortSalario?.RegisterCallback<ClickEvent>(_ => SetSort("salario"));
     }
 
     void ShowTab(string tab)
@@ -122,16 +103,6 @@ public class CarteraController : UIScreenController
     {
         if (page == null) return;
         page.style.display = show ? DisplayStyle.Flex : DisplayStyle.None;
-    }
-
-    void SetSort(string sort)
-    {
-        PlayClick();
-        _sortBy = sort;
-        _sortMedia?.EnableInClassList("sort-btn--active", sort == "media");
-        _sortEdad?.EnableInClassList("sort-btn--active", sort == "edad");
-        _sortSalario?.EnableInClassList("sort-btn--active", sort == "salario");
-        BuildPlayerList();
     }
 
     protected override void Refresh()
@@ -282,43 +253,40 @@ public class CarteraController : UIScreenController
     {
         _teamList.Clear();
 
+        var container = _teamList.Q<VisualElement>("unity-content-container");
+        if (container == null) container = _teamList;
+
         foreach (var team in _allTeams)
         {
-            var row = new VisualElement();
-            row.AddToClassList("team-select-row");
+            var tile = new VisualElement();
+            tile.AddToClassList("team-select-tile");
             if (_selectedTeam != null && _selectedTeam.id == team.id)
-                row.AddToClassList("team-select-row--selected");
+                tile.AddToClassList("team-select-tile--selected");
 
             var logoImg = new VisualElement();
-            logoImg.AddToClassList("team-select-logo");
+            logoImg.AddToClassList("team-select-tile-logo");
             if (_logoSprites.TryGetValue(team.logo, out var sprite))
                 logoImg.style.backgroundImage = new StyleBackground(sprite);
-            row.Add(logoImg);
+            tile.Add(logoImg);
 
             var abbrev = new Label();
-            abbrev.AddToClassList("team-select-abbrev");
+            abbrev.AddToClassList("team-select-tile-abbrev");
             abbrev.text = team.abbreviation;
-            row.Add(abbrev);
-
-            var name = new Label();
-            name.AddToClassList("team-select-name");
-            name.text = team.name;
-            row.Add(name);
+            tile.Add(abbrev);
 
             var captured = team;
-            row.RegisterCallback<ClickEvent>(_ =>
+            tile.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
                 _selectedTeam = captured;
-                _selectedPlayer = null;
                 BuildTeamList();
                 BuildPlayerList();
             });
 
             if (CursorManager.Instance != null)
-                CursorManager.Instance.RegisterHandCursor(row);
+                CursorManager.Instance.RegisterHandCursor(tile);
 
-            _teamList.Add(row);
+            container.Add(tile);
         }
     }
 
@@ -330,57 +298,26 @@ public class CarteraController : UIScreenController
 
         if (_selectedTeam == null)
         {
-            if (_salaryMarginBox != null) _salaryMarginBox.style.display = DisplayStyle.None;
             _selectedTeamLabel.text = "Selecciona un equipo para ver sus jugadores";
             return;
         }
 
-        // Salary margin
-        if (_salaryMarginBox != null)
-        {
-            _salaryMarginBox.style.display = DisplayStyle.Flex;
-            if (_salaryMarginTitle != null)
-                _salaryMarginTitle.text = $"MARGEN SALARIAL DE {_selectedTeam.name.ToUpper()}";
-            if (_salaryMarginValue != null)
-            {
-                var teamPlayers = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id);
-                long teamPayroll = teamPlayers.Sum(p => p.salary);
-                var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-                long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-                long margin = salaryCap - teamPayroll;
-                string absFormatted = System.Math.Abs(margin).ToString("N0").Replace(',', '.');
-                _salaryMarginValue.text = margin >= 0 ? $"+{absFormatted} $" : $"-{absFormatted} $";
-                _salaryMarginValue.RemoveFromClassList("salary-margin-value--positive");
-                _salaryMarginValue.RemoveFromClassList("salary-margin-value--negative");
-                _salaryMarginValue.AddToClassList(margin >= 0 ? "salary-margin-value--positive" : "salary-margin-value--negative");
-            }
-        }
-
         _selectedTeamLabel.text = "SELECCIONA UN JUGADOR PARA OJEAR";
 
-        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id).ToList();
-        players = _sortBy switch
-        {
-            "edad" => players.OrderBy(p => p.age).ToList(),
-            "salario" => players.OrderByDescending(p => p.salary).ToList(),
-            _ => players.OrderByDescending(p => p.GetCalculatedAverage()).ToList()
-        };
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeam.id)
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
 
         for (int i = 0; i < players.Count; i++)
         {
             _playerList.Add(BuildPlayerRow(players[i]));
         }
-
-        if (_selectedPlayer != null)
-            _playerList.Add(BuildScoutButton(_selectedPlayer));
     }
 
     VisualElement BuildPlayerRow(PlayerData p)
     {
         var row = new VisualElement();
         row.AddToClassList("player-row");
-        if (_selectedPlayer != null && _selectedPlayer.id == p.id)
-            row.AddToClassList("player-row--selected");
 
         // Photo
         var photo = new VisualElement();
@@ -389,14 +326,17 @@ public class CarteraController : UIScreenController
         if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
         row.Add(photo);
 
-        // Main (name + meta)
+        // Main (name + datos)
         var main = new VisualElement();
         main.AddToClassList("player-row-main");
+
+        var nameRow = new VisualElement();
+        nameRow.AddToClassList("player-row-name-row");
 
         var nameLbl = new Label();
         nameLbl.AddToClassList("player-row-name");
         nameLbl.text = $"{p.first_name} {p.last_name}".ToUpper();
-        main.Add(nameLbl);
+        nameRow.Add(nameLbl);
 
         var metaLbl = new Label();
         metaLbl.AddToClassList("player-row-meta");
@@ -404,7 +344,9 @@ public class CarteraController : UIScreenController
         if (!string.IsNullOrEmpty(p.secondary_position))
             posText += $"/{PositionCodes.GetShort(p.secondary_position)}";
         metaLbl.text = $"{posText} · {p.age} años · {p.height_cm}cm · {(p.is_rookie == 1 ? "Rookie · " : "")}{CountryCodes.GetName(p.nationality)}";
-        main.Add(metaLbl);
+        nameRow.Add(metaLbl);
+
+        main.Add(nameRow);
 
         row.Add(main);
 
@@ -428,10 +370,13 @@ public class CarteraController : UIScreenController
 
         row.Add(stats);
 
+        // OJEAR button (per fila)
+        row.Add(BuildScoutButton(p, true));
+
         // Ver perfil button
         var viewBtn = new Button();
         viewBtn.AddToClassList("player-row-view");
-        viewBtn.text = "PERFIL";
+        viewBtn.text = "VER PERFIL";
         var captured = p;
         viewBtn.RegisterCallback<ClickEvent>(evt =>
         {
@@ -443,20 +388,13 @@ public class CarteraController : UIScreenController
         if (CursorManager.Instance != null) CursorManager.Instance.RegisterHandCursor(viewBtn);
         row.Add(viewBtn);
 
-        row.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            _selectedPlayer = captured;
-            BuildPlayerList();
-        });
-        if (CursorManager.Instance != null) CursorManager.Instance.RegisterHandCursor(row);
-
         return row;
     }
 
-    VisualElement BuildScoutButton(PlayerData player)
+    VisualElement BuildScoutButton(PlayerData player, bool inRow = false)
     {
         var scoutBtn = new Button();
+        scoutBtn.AddToClassList("btn-scout");
         bool hasOjeador = GetOjeador() != null;
         bool slotsFull = _scouts.Count >= MAX_SCOUTS;
         bool alreadyScouting = _scouts.Any(s => s.player_id == player.id);
@@ -464,28 +402,26 @@ public class CarteraController : UIScreenController
         if (alreadyScouting)
         {
             scoutBtn.AddToClassList("btn-scout--disabled");
-            scoutBtn.text = "YA EN CARTERA";
-            scoutBtn.SetEnabled(false);
+            scoutBtn.text = "OJEANDO";
         }
         else if (!hasOjeador)
         {
             scoutBtn.AddToClassList("btn-scout--disabled");
             scoutBtn.text = "SIN OJEADOR";
-            scoutBtn.SetEnabled(false);
         }
         else
         {
-            scoutBtn.AddToClassList("btn-scout");
-            scoutBtn.text = $"OJEAR A {player.first_name.ToUpper()} {player.last_name.ToUpper()}";
+            scoutBtn.text = "OJEAR";
             var captured = player;
-            scoutBtn.RegisterCallback<ClickEvent>(_ =>
+            scoutBtn.RegisterCallback<ClickEvent>(evt =>
             {
-                PlayClick();
-                if (slotsFull) ShowScoutFullModal();
+                if (inRow && evt != null) evt.StopPropagation();
+                if (slotsFull) { PlayClick(); ShowScoutFullModal(); }
                 else StartScout(captured);
             });
         }
 
+        if (inRow) scoutBtn.AddToClassList("btn-scout--row");
         if (CursorManager.Instance != null) CursorManager.Instance.RegisterHandCursor(scoutBtn);
         return scoutBtn;
     }
@@ -518,8 +454,7 @@ public class CarteraController : UIScreenController
 
         DatabaseManager.Instance.InsertScout(scout);
         _scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
-        _selectedPlayer = null;
-        Refresh();
+        ShowTab("cartera");
     }
 
     // ═══════════ CARTERA (slots) ═══════════

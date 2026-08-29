@@ -78,7 +78,7 @@
     padding: 0 6px;
 }
 
-.premios-th-month      { width: 100px; flex-shrink: 0; }
+.premios-th-month      { width: 150px; flex-shrink: 0; }
 .premios-th-photo      { width: 70px;  flex-shrink: 0; -unity-text-align: middle-center; }
 .premios-th-name       { width: 200px; flex-shrink: 0; }
 .premios-th-team       { width: 180px; flex-shrink: 0; }
@@ -116,7 +116,7 @@
     font-size: 16px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
-    width: 100px;
+    width: 150px;
     flex-shrink: 0;
 }
 
