@@ -30,6 +30,15 @@
     -unity-text-align: middle-center;
 }
 
+/* ── TABS ── */
+.premios-tabs {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(28, 33, 48);
+}
+
 /* ── TABLE ── */
 .premios-table-wrapper {
     flex-direction: column;
