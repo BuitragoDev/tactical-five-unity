@@ -33,7 +33,7 @@
     flex-wrap: wrap;
     margin-bottom: 12px;
     flex-shrink: 0;
-    border-bottom-width: 1px;
+    border-bottom-width: 3px;
     border-bottom-color: rgb(28, 33, 48);
 }
 
@@ -70,7 +70,7 @@
     margin-bottom: 12px;
     flex-shrink: 0;
     padding: 8px 0;
-    border-bottom-width: 1px;
+    border-bottom-width: 3px;
     border-bottom-color: rgb(28, 33, 48);
 }
 
