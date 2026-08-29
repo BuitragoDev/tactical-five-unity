@@ -68,9 +68,7 @@ using System.Linq;
         int playerId = ScreenManager.SelectedPlayerId;
         _player = DatabaseManager.Instance.GetPlayerById(playerId);
 
-        var scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam != null ? _myTeam.id : 0);
-        _scoutedPlayerIds = new HashSet<int>(
-            scouts.Where(s => s.completed == 1).Select(s => s.player_id));
+        _scoutedPlayerIds = DatabaseManager.Instance.GetScoutedPlayerIds(_myTeam != null ? _myTeam.id : 0);
     }
 
     protected override void RegisterCallbacks()

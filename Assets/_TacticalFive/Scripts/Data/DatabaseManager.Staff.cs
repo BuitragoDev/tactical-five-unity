@@ -107,4 +107,40 @@ public partial class DatabaseManager
         _db.Delete<ScoutData>(id);
     }
 
+    // ── SCOUTED PLAYERS (conocimiento persistente) ─────────
+
+    public HashSet<int> GetScoutedPlayerIds(int teamId)
+    {
+        if (!EnsureDb()) return new HashSet<int>();
+        return new HashSet<int>(
+            _db.Table<ScoutedPlayerData>()
+               .Where(s => s.team_id == teamId)
+               .Select(s => s.player_id)
+               .ToList());
+    }
+
+    public bool IsPlayerScouted(int teamId, int playerId)
+    {
+        if (!EnsureDb()) return false;
+        return _db.Table<ScoutedPlayerData>()
+                  .Where(s => s.team_id == teamId && s.player_id == playerId)
+                  .Any();
+    }
+
+    public void MarkPlayerScouted(int teamId, int playerId, int scoutedDay)
+    {
+        if (!EnsureDb()) return;
+        _db.Execute("INSERT OR IGNORE INTO scouted_players (team_id, player_id, scouted_day) VALUES (?, ?, ?)",
+            teamId, playerId, scoutedDay);
+    }
+
+    public List<ScoutedPlayerData> GetScoutedPlayers(int teamId)
+    {
+        if (!EnsureDb()) return new List<ScoutedPlayerData>();
+        return _db.Table<ScoutedPlayerData>()
+                  .Where(s => s.team_id == teamId)
+                  .OrderByDescending(s => s.scouted_day)
+                  .ToList();
+    }
+
 }

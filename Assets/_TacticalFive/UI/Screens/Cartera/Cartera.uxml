@@ -1,37 +1,69 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
     <Style src="Cartera.uss" />
     <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../Standings/Standings.uss" />
     <Style src="../LegalNotice/LegalNotice.uss" />
 
     <ui:VisualElement name="CarteraRoot" class="cartera-root">
 
-        <!-- SIDEBAR -->
-
         <!-- MAIN -->
         <ui:VisualElement class="cartera-main">
-            <!-- TOP HEADER -->
 
             <!-- CONTENT -->
             <ui:VisualElement class="cartera-content">
-                <!-- LEFT COLUMN -->
-                <ui:VisualElement class="cartera-left">
-                    <ui:Label class="section-title" text="SELECCIONA UN EQUIPO" />
-                    <ui:VisualElement name="TeamList" class="team-list" />
-                    <ui:VisualElement name="SalaryMarginBox" class="salary-margin-box" style="display: none;">
-                        <ui:Label name="SalaryMarginTitle" class="salary-margin-title" text="" />
-                        <ui:Label name="SalaryMarginValue" class="salary-margin-value" text="" />
+
+                <!-- PESTAÑAS -->
+                <ui:VisualElement class="cartera-topbar">
+                    <ui:VisualElement class="standings-tabs cartera-tabs">
+                        <ui:Button name="TabOjear" class="standings-tab standings-tab--active" text="OJEAR" />
+                        <ui:Button name="TabCartera" class="standings-tab" text="CARTERA" />
+                        <ui:Button name="TabInformes" class="standings-tab" text="INFORMES" />
                     </ui:VisualElement>
-                    <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 12px;" />
-                    <ui:VisualElement name="PlayerList" class="player-list" />
                 </ui:VisualElement>
 
-                <!-- RIGHT COLUMN -->
-                <ui:VisualElement class="cartera-right">
-                    <ui:Label class="section-title" text="OJEADOR" />
-                    <ui:VisualElement name="OjeadorBody" class="ojeador-body" />
-                    <ui:Label class="section-title" text="JUGADORES EN CARTERA" style="margin-top: 16px;" />
+                <!-- ══ PÁGINA OJEAR ══ -->
+                <ui:VisualElement name="PageOjear" class="cartera-page">
+                    <!-- LEFT COLUMN -->
+                    <ui:VisualElement class="cartera-left">
+                        <ui:Label class="section-title" text="SELECCIONA UN EQUIPO" />
+                        <ui:VisualElement name="TeamList" class="team-list" />
+                        <ui:VisualElement name="SalaryMarginBox" class="salary-margin-box" style="display: none;">
+                            <ui:Label name="SalaryMarginTitle" class="salary-margin-title" text="" />
+                            <ui:Label name="SalaryMarginValue" class="salary-margin-value" text="" />
+                        </ui:VisualElement>
+                        <ui:Label name="SelectedTeamLabel" class="section-title" text="" style="margin-top: 12px;" />
+                        <ui:VisualElement class="player-list-sortbar">
+                            <ui:Button name="SortMedia" class="sort-btn sort-btn--active" text="MEDIA" />
+                            <ui:Button name="SortEdad" class="sort-btn" text="EDAD" />
+                            <ui:Button name="SortSalario" class="sort-btn" text="SALARIO" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PlayerList" class="player-list" />
+                    </ui:VisualElement>
+
+                    <!-- RIGHT COLUMN -->
+                    <ui:VisualElement class="cartera-right">
+                        <ui:Label class="section-title" text="OJEADOR" />
+                        <ui:VisualElement name="OjeadorBody" class="ojeador-body" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- ══ PÁGINA CARTERA ══ -->
+                <ui:VisualElement name="PageCartera" class="cartera-page cartera-page--column" style="display: none;">
+                    <ui:Label class="section-title" text="JUGADORES EN CARTERA" />
+                    <ui:Label class="section-subtitle" text="Jugadores que estás ojeando o cuyo informe ya está disponible." />
                     <ui:VisualElement name="ScoutSlots" class="scout-slots" />
                 </ui:VisualElement>
+
+                <!-- ══ PÁGINA INFORMES ══ -->
+                <ui:VisualElement name="PageInformes" class="cartera-page cartera-page--column" style="display: none;">
+                    <ui:Label class="section-title" text="INFORMES DE OJEO" />
+                    <ui:Label class="section-subtitle" text="Historial de jugadores que has ojeado. El conocimiento se mantiene aunque los retires de la cartera." />
+                    <ui:VisualElement class="cartera-table-wrapper">
+                        <ui:VisualElement name="InformesTableHeader" class="cartera-table-header" />
+                        <ui:VisualElement name="InformesTableBody" class="cartera-table-body" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>

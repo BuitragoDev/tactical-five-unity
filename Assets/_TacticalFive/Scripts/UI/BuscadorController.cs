@@ -97,12 +97,7 @@ public class BuscadorController : UIScreenController
 
         _scoutedIds = new HashSet<int>();
         if (_myTeam != null)
-        {
-            var scouts = DatabaseManager.Instance.GetScoutsByTeam(_myTeam.id);
-            foreach (var s in scouts)
-                if (s.completed == 1)
-                    _scoutedIds.Add(s.player_id);
-        }
+            _scoutedIds = DatabaseManager.Instance.GetScoutedPlayerIds(_myTeam.id);
     }
 
     protected override void RegisterCallbacks()

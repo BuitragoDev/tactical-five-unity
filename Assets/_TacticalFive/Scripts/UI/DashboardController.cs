@@ -3362,6 +3362,7 @@ var box = new VisualElement();
         {
             s.completed = 1;
             DatabaseManager.Instance.UpdateScout(s);
+            DatabaseManager.Instance.MarkPlayerScouted(_myTeam.id, s.player_id, s.end_day);
         }
     }
 

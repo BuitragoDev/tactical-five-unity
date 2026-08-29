@@ -99,7 +99,7 @@ protected virtual void OnEnable()
 | 19 | Premios | `Screens/Premios` | `PremiosController` | Monthly awards |
 | 20 | Logros | `Screens/Logros` | `LogrosController` | GM achievements: tabs + grid + counter |
 | 21 | Market | `Screens/Market` | `MarketController` | Trades + FA market (TO/PO toggles, S&T, deadline banner) |
-| 22 | Cartera | `Screens/Cartera` | `CarteraController` | Player wallet/contracts + scouts + fog-of-war |
+| 22 | Cartera | `Screens/Cartera` | `CarteraController` | Scouting FM-style: 3 tabs (OJEAR/CARTERA/INFORMES), selector de equipos, filas ricas, fog-of-war |
 | 23 | Historial | `Screens/Historial` | `HistorialController` | Trade history |
 | 24 | Finances | `Screens/Finances` | `FinancesController` | P&L + Cap sheet |
 | 25 | Loans | `Screens/Loans` | `LoansController` | Loans |

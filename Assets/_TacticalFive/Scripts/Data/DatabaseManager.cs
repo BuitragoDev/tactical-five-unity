@@ -865,6 +865,36 @@ public partial class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for employees.nationality: {ex.Message}");
         }
+
+        // scouted_players (conocimiento persistente de ojeadores)
+        try
+        {
+            _db.Execute(@"
+                CREATE TABLE IF NOT EXISTS scouted_players (
+                    team_id INTEGER NOT NULL,
+                    player_id INTEGER NOT NULL,
+                    scouted_day INTEGER DEFAULT 0,
+                    PRIMARY KEY (team_id, player_id)
+                )");
+            Debug.Log("[DB] Migration: ensured scouted_players table");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for scouted_players: {ex.Message}");
+        }
+
+        // Backfill: migrar ojeos ya completados de la tabla `scouts` a `scouted_players`
+        // (idempotente gracias a INSERT OR IGNORE + PK compuesta).
+        try
+        {
+            _db.Execute(@"
+                INSERT OR IGNORE INTO scouted_players (team_id, player_id, scouted_day)
+                SELECT team_id, player_id, end_day FROM scouts WHERE completed = 1");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error backfilling scouted_players: {ex.Message}");
+        }
     }
 
     bool IsMigrationApplied(string name)

@@ -101,6 +101,9 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 ### scouts (`ScoutData`)
 `id`, `team_id`, `slot`, `name`, `salary`, `contract_years`.
 
+### scouted_players (`ScoutedPlayerData`)
+Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scouted_day` (día en que se completó el ojeo), PK compuesta `(team_id, player_id)`. Un jugador ojeado permanece con atributos visibles aunque se retire de la cartera. Se escribe al completarse un scout (`ProcessScouts`) y se rellena desde `scouts` donde `completed=1` en la migración.
+
 ### loans (`LoanData`)
 `id`, `team_id`, `slot`, `name`, `amount`, `total_debt`, `remaining_months`, `interest_rate`, `monthly_payment`.
 
