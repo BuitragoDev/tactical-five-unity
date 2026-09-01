@@ -4501,35 +4501,96 @@ List<int> offeredPickIds = new List<int>();
         var teamAbbrs = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("trade-offer-modal-box");
+        box.AddToClassList("trade-modal-box");
         _firedOverlay.Add(box);
+
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
+
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        var subtitle = new Label("OFERTA DE TRASPASO");
+        subtitle.AddToClassList("trade-modal-subtitle");
+        headerLeft.Add(subtitle);
 
         var titleText = IsDeadlineWeek() ? "[DEADLINE] PROPUESTA DE INTERCAMBIO" : "PROPUESTA DE INTERCAMBIO";
         var title = new Label(titleText);
-        title.AddToClassList("fired-modal-title");
-        box.Add(title);
+        title.AddToClassList("trade-modal-title");
+        headerLeft.Add(title);
+        header.Add(headerLeft);
 
-        var columns = new VisualElement();
-        columns.AddToClassList("trade-offer-columns");
-        box.Add(columns);
+        var headerRight = new VisualElement();
+        headerRight.AddToClassList("trade-modal-header-right");
 
-        var leftCol = BuildPlayerColumn("TÚ ENVÍAS", _myTeam.name, ourPlayers);
-        columns.Add(leftCol);
+        string phaseLabel = _season?.phase == "regular" ? "TEMPORADA REGULAR"
+            : _season?.phase == "preseason" ? "PRETEMPORADA"
+            : _season?.phase == "playin" ? "PLAY-IN"
+            : _season?.phase == "playoff" ? "PLAYOFFS"
+            : "TEMPORADA REGULAR";
+        var phaseBadge = new Label(phaseLabel);
+        phaseBadge.AddToClassList("trade-modal-phase-badge");
+        headerRight.Add(phaseBadge);
 
-        var rightCol = BuildPlayerColumn("TÚ RECIBES", teamName, theirPlayers);
-        columns.Add(rightCol);
+        var closeBtn = new Button();
+        closeBtn.text = "✕";
+        closeBtn.AddToClassList("trade-modal-close-btn");
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
+            _firedOverlay.style.display = DisplayStyle.None;
+            if (_fastSimOfferPauseActive)
+            {
+                _tradeOfferModalResolved = true;
+                _tradeOfferAccepted = false;
+            }
+            else
+                ShowNextPendingTradeOffer();
+        });
+        headerRight.Add(closeBtn);
+        header.Add(headerRight);
+        box.Add(header);
 
-        BuildTradePickRows(leftCol, ourPicks, "RONDAS QUE ENTREGAS", teamAbbrs);
-        BuildTradePickRows(rightCol, theirPicks, "RONDAS QUE RECIBES", teamAbbrs);
+        // ── Teams row ──
+        var teamsRow = new VisualElement();
+        teamsRow.AddToClassList("trade-modal-teams");
 
+        // Pre-compute totals for cap room calculation
+        long ourSalaryTotal = ourPlayers.Sum(p => p.salary);
+        long theirSalaryTotal = theirPlayers.Sum(p => p.salary);
+
+        // Left: your team (what you send)
+        var leftPanel = BuildTradeTeamPanel(_myTeam, ourPlayers, ourPicks, teamAbbrs, isSending: true, otherSideSalary: theirSalaryTotal);
+        teamsRow.Add(leftPanel);
+
+        // Swap icon
+        var swapIcon = new VisualElement();
+        swapIcon.AddToClassList("trade-modal-swap");
+        var mercadoSprite = Resources.Load<Sprite>("Icons/swap_blue");
+        if (mercadoSprite != null)
+            swapIcon.style.backgroundImage = new StyleBackground(mercadoSprite);
+        teamsRow.Add(swapIcon);
+
+        // Right: their team (what you receive)
+        var rightPanel = BuildTradeTeamPanel(aiTeam, theirPlayers, theirPicks, teamAbbrs, isSending: false, otherSideSalary: ourSalaryTotal);
+        teamsRow.Add(rightPanel);
+
+        box.Add(teamsRow);
+
+        // ── Analysis section ──
+        var analysisSection = BuildTradeAnalysis(ourPlayers, theirPlayers, aiTeam);
+        box.Add(analysisSection);
+
+        // ── Buttons ──
         var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
+        btnGroup.AddToClassList("trade-modal-buttons");
 
         var rejectBtn = new Button();
-        rejectBtn.text = "RECHAZAR";
-        rejectBtn.AddToClassList("injured-modal-btn");
-        rejectBtn.style.backgroundColor = new StyleColor(new Color(0.753f, 0.224f, 0.169f));
+        rejectBtn.text = "RECHAZAR OFERTA";
+        rejectBtn.AddToClassList("trade-modal-btn");
+        rejectBtn.AddToClassList("trade-modal-btn--reject");
         rejectBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -4546,9 +4607,9 @@ List<int> offeredPickIds = new List<int>();
         btnGroup.Add(rejectBtn);
 
         var acceptBtn = new Button();
-        acceptBtn.text = "ACEPTAR";
-        acceptBtn.AddToClassList("injured-modal-btn");
-        acceptBtn.style.backgroundColor = new StyleColor(new Color(0.153f, 0.682f, 0.376f));
+        acceptBtn.text = "ACEPTAR INTERCAMBIO";
+        acceptBtn.AddToClassList("trade-modal-btn");
+        acceptBtn.AddToClassList("trade-modal-btn--accept");
         acceptBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -4710,94 +4771,342 @@ List<int> offeredPickIds = new List<int>();
                 ShowNextPendingTradeOffer();
         });
         btnGroup.Add(acceptBtn);
-
         box.Add(btnGroup);
 
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(rejectBtn);
             CursorManager.Instance.RegisterHandCursor(acceptBtn);
+            CursorManager.Instance.RegisterHandCursor(closeBtn);
         }
     }
 
-    VisualElement BuildPlayerColumn(string label, string teamName, List<PlayerData> players)
+    // ═══════════════════════════════════════════
+    //  TRADE OFFER MODAL — BUILDERS
+    // ═══════════════════════════════════════════
+
+    VisualElement BuildTradeTeamPanel(TeamData team, List<PlayerData> players,
+                                       List<DraftPickData> picks, Dictionary<int, string> teamAbbrs,
+                                       bool isSending, long otherSideSalary = 0)
     {
-        var col = new VisualElement();
-        col.AddToClassList("trade-offer-col");
+        var panel = new VisualElement();
+        panel.AddToClassList("trade-modal-team-panel");
 
-        var header = new Label(label);
-        header.AddToClassList("trade-offer-col-header");
-        col.Add(header);
+        // Team header: logo + name + action label
+        var teamHeader = new VisualElement();
+        teamHeader.AddToClassList("trade-modal-team-header");
 
-        var teamLabel = new Label(teamName);
-        teamLabel.AddToClassList("trade-offer-col-team");
-        col.Add(teamLabel);
+        var logo = new VisualElement();
+        logo.AddToClassList("trade-modal-team-logo");
+        if (team != null && !string.IsNullOrEmpty(team.logo))
+            SetTeamLogo(logo, team.logo, "64x64");
+        teamHeader.Add(logo);
 
+        var teamInfo = new VisualElement();
+        teamInfo.AddToClassList("trade-modal-team-info");
+
+        var nameLbl = new Label(team != null ? team.name.ToUpper() : "?");
+        nameLbl.AddToClassList("trade-modal-team-name");
+        teamInfo.Add(nameLbl);
+
+        var actionLbl = new Label("Envía");
+        actionLbl.AddToClassList("trade-modal-team-action");
+        teamInfo.Add(actionLbl);
+
+        teamHeader.Add(teamInfo);
+        panel.Add(teamHeader);
+
+        // Player cards
         foreach (var p in players)
         {
-            var card = new VisualElement();
-            card.AddToClassList("trade-offer-player-card");
-
-            var photo = new VisualElement();
-            photo.AddToClassList("trade-offer-photo");
-            Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
-            if (tex != null)
-                photo.style.backgroundImage = new StyleBackground(tex);
-            card.Add(photo);
-
-            var info = new VisualElement();
-            info.AddToClassList("trade-offer-player-info");
-
-            var nameRow = new VisualElement();
-            nameRow.AddToClassList("trade-offer-player-name-row");
-
-            var nameLbl = new Label($"{p.first_name} {p.last_name}");
-            nameLbl.AddToClassList("trade-offer-player-name");
-            nameRow.Add(nameLbl);
-
-            var ovrLbl = new Label(p.overall.ToString());
-            ovrLbl.AddToClassList("trade-offer-player-ovr");
-            if (p.overall >= 80)
-                ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
-            else if (p.overall >= 60)
-                ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
-            else
-                ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
-            nameRow.Add(ovrLbl);
-
-            info.Add(nameRow);
-
-            var posAge = new Label($"{PositionCodes.GetShort(p.position)}  ·  {p.age} años");
-            posAge.AddToClassList("trade-offer-player-detail");
-            info.Add(posAge);
-
-            var salaryLbl = new Label(SalaryStr(p.salary));
-            salaryLbl.AddToClassList("trade-offer-player-salary");
-            info.Add(salaryLbl);
-
-            card.Add(info);
-            col.Add(card);
+            var card = BuildTradePlayerCard(p);
+            panel.Add(card);
         }
 
-        return col;
+        // Picks
+        if (picks != null && picks.Count > 0)
+        {
+            var picksSection = new VisualElement();
+            picksSection.AddToClassList("trade-modal-picks-section");
+            var allTeams = DatabaseManager.Instance.GetAllTeams();
+            int draftYear = _season?.year_end ?? System.DateTime.Now.Year;
+            foreach (var pk in picks.OrderBy(p => p.round).ThenBy(p => p.pick_number))
+            {
+                var origTeam = allTeams.FirstOrDefault(t => t.id == pk.original_team_id);
+                string teamName = origTeam != null ? origTeam.name : "???";
+                var pickLbl = new Label($"Ronda {pk.round} {draftYear} - {teamName}");
+                pickLbl.AddToClassList("trade-modal-picks-label");
+                picksSection.Add(pickLbl);
+            }
+            panel.Add(picksSection);
+        }
+
+        // Salary summary bar
+        var salaryBar = new VisualElement();
+        salaryBar.AddToClassList("trade-modal-salary-bar");
+
+        long totalSalary = players.Sum(p => p.salary);
+        var salaryItem = new VisualElement();
+        salaryItem.AddToClassList("trade-modal-salary-item");
+
+        var salaryLabel = new Label(isSending ? "SALARIO TOTAL SALIENTE" : "SALARIO TOTAL ENTRANTE");
+        salaryLabel.AddToClassList("trade-modal-salary-label");
+        salaryItem.Add(salaryLabel);
+
+        var salaryValue = new Label(FormatMoneyShort(totalSalary));
+        salaryValue.AddToClassList("trade-modal-salary-value");
+        salaryValue.AddToClassList("trade-modal-salary-value--positive");
+        salaryItem.Add(salaryValue);
+        salaryBar.Add(salaryItem);
+
+        // Cap room resultante — each team's own cap room
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+
+        if (isSending)
+        {
+            // My team's cap room after sending these players and receiving the other side
+            long myCurrentPayroll = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+            long myCapRoom = (salaryCap - myCurrentPayroll) + totalSalary - otherSideSalary;
+            long capRoomAfter = myCapRoom;
+
+            var capItem = new VisualElement();
+            capItem.AddToClassList("trade-modal-salary-item");
+
+            var capLabel = new Label("CAP ROOM RESULTANTE");
+            capLabel.AddToClassList("trade-modal-salary-label");
+            capItem.Add(capLabel);
+
+            string capText = (capRoomAfter >= 0 ? "+" : "-") + FormatMoneyShort(System.Math.Abs(capRoomAfter));
+            var capValue = new Label(capText);
+            capValue.AddToClassList("trade-modal-salary-value");
+            capValue.AddToClassList(capRoomAfter >= 0
+                ? "trade-modal-salary-value--positive"
+                : "trade-modal-salary-value--negative");
+            capItem.Add(capValue);
+            salaryBar.Add(capItem);
+        }
+        else
+        {
+            // AI team's cap room after receiving these players and sending the other side
+            long aiCurrentPayroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(x => x.salary);
+            long aiCapRoom = (salaryCap - aiCurrentPayroll) + totalSalary - otherSideSalary;
+            long capRoomAfter = aiCapRoom;
+
+            var capItem = new VisualElement();
+            capItem.AddToClassList("trade-modal-salary-item");
+
+            var capLabel = new Label("CAP ROOM RESULTANTE");
+            capLabel.AddToClassList("trade-modal-salary-label");
+            capItem.Add(capLabel);
+
+            string capText = (capRoomAfter >= 0 ? "+" : "-") + FormatMoneyShort(System.Math.Abs(capRoomAfter));
+            var capValue = new Label(capText);
+            capValue.AddToClassList("trade-modal-salary-value");
+            capValue.AddToClassList(capRoomAfter >= 0
+                ? "trade-modal-salary-value--positive"
+                : "trade-modal-salary-value--negative");
+            capItem.Add(capValue);
+            salaryBar.Add(capItem);
+        }
+
+        panel.Add(salaryBar);
+
+        return panel;
     }
 
-    void BuildTradePickRows(VisualElement col, List<DraftPickData> picks,
-                            string headerText, Dictionary<int, string> teamAbbrs)
+    VisualElement BuildTradePlayerCard(PlayerData p)
     {
-        if (picks == null || picks.Count == 0) return;
+        var card = new VisualElement();
+        card.AddToClassList("trade-modal-player-card");
 
-        var header = new Label(headerText);
-        header.AddToClassList("trade-offer-picks-header");
-        col.Add(header);
+        // Photo
+        var photo = new VisualElement();
+        photo.AddToClassList("trade-modal-player-photo");
+        Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (tex != null)
+            photo.style.backgroundImage = new StyleBackground(tex);
+        card.Add(photo);
 
-        foreach (var pk in picks.OrderBy(p => p.round).ThenBy(p => p.pick_number))
-        {
-            string abr = teamAbbrs.TryGetValue(pk.original_team_id, out var a) ? a : "???";
-            var pickLbl = new Label($"R{pk.round} · {abr}");
-            pickLbl.AddToClassList("trade-offer-picks-label");
-            col.Add(pickLbl);
-        }
+        // Info
+        var info = new VisualElement();
+        info.AddToClassList("trade-modal-player-info");
+
+        var nameLbl = new Label($"{p.first_name} {p.last_name}");
+        nameLbl.AddToClassList("trade-modal-player-name");
+        info.Add(nameLbl);
+
+        string stars = p.overall >= 85 ? " ★★★" : p.overall >= 75 ? " ★★" : p.overall >= 65 ? " ★" : "";
+        var metaLbl = new Label($"{PositionCodes.GetShort(p.position)} | {p.age} años{stars}");
+        metaLbl.AddToClassList("trade-modal-player-meta");
+        info.Add(metaLbl);
+
+        string yearsText = p.contract_years == 1 ? "1 AÑO RESTANTE" : $"{p.contract_years} AÑOS RESTANTES";
+        var contractLbl = new Label($"{SalaryStr(p.salary)}  ·  {yearsText}");
+        contractLbl.AddToClassList("trade-modal-player-contract");
+        info.Add(contractLbl);
+
+        card.Add(info);
+
+        // OVR column
+        var ovrCol = new VisualElement();
+        ovrCol.AddToClassList("trade-modal-player-ovr-col");
+
+        var ovrLbl = new Label(p.overall.ToString());
+        ovrLbl.AddToClassList("trade-modal-player-ovr");
+        if (p.overall >= 80)
+            ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
+        else if (p.overall >= 60)
+            ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        else
+            ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
+        ovrCol.Add(ovrLbl);
+
+        var ovrSub = new Label("MED");
+        ovrSub.AddToClassList("trade-modal-player-ovr-label");
+        ovrCol.Add(ovrSub);
+
+        card.Add(ovrCol);
+
+        return card;
+    }
+
+    VisualElement BuildTradeAnalysis(List<PlayerData> ourPlayers, List<PlayerData> theirPlayers, TeamData aiTeam)
+    {
+        var section = new VisualElement();
+        section.AddToClassList("trade-modal-analysis");
+
+        var titleLbl = new Label("ANÁLISIS DE LA OPERACIÓN");
+        titleLbl.AddToClassList("trade-modal-analysis-title");
+        section.Add(titleLbl);
+
+        var row = new VisualElement();
+        row.AddToClassList("trade-modal-analysis-row");
+
+        // ── 1. Impacto de Equipo ──
+        var impactCard = new VisualElement();
+        impactCard.AddToClassList("trade-modal-analysis-card");
+
+        var impactLabel = new Label("IMPACTO DE EQUIPO");
+        impactLabel.AddToClassList("trade-modal-analysis-label");
+        impactCard.Add(impactLabel);
+
+        // Compute net OVR change
+        float ourAvg = ourPlayers.Count > 0 ? (float)ourPlayers.Average(p => p.overall) : 0;
+        float theirAvg = theirPlayers.Count > 0 ? (float)theirPlayers.Average(p => p.overall) : 0;
+        int netImpact = Mathf.RoundToInt(theirAvg - ourAvg);
+        // Factor in roster depth change
+        int depthDelta = theirPlayers.Count - ourPlayers.Count;
+
+        string impactText = (netImpact >= 0 ? "+" : "") + netImpact.ToString();
+        var impactValue = new Label(impactText);
+        impactValue.AddToClassList("trade-modal-analysis-value");
+        impactValue.AddToClassList(netImpact > 0
+            ? "trade-modal-analysis-value--positive"
+            : netImpact < 0
+                ? "trade-modal-analysis-value--negative"
+                : "trade-modal-analysis-value--neutral");
+        impactCard.Add(impactValue);
+
+        string impactDesc = netImpact > 0
+            ? "Mejora la calidad de la plantilla"
+            : netImpact < 0
+                ? "Pierdes calidad media"
+                : "Calidad similar";
+        if (depthDelta > 0) impactDesc += " y profundidad";
+        else if (depthDelta < 0) impactDesc += " pero pierdes profundidad";
+
+        var impactDescLbl = new Label(impactDesc);
+        impactDescLbl.AddToClassList("trade-modal-analysis-desc");
+        impactCard.Add(impactDescLbl);
+
+        row.Add(impactCard);
+
+        // ── 2. Química del Equipo ──
+        var chemCard = new VisualElement();
+        chemCard.AddToClassList("trade-modal-analysis-card");
+
+        var chemLabel = new Label("QUÍMICA DEL EQUIPO");
+        chemLabel.AddToClassList("trade-modal-analysis-label");
+        chemCard.Add(chemLabel);
+
+        int currentChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
+        // Simulate chemistry impact: players leaving/arriving shift chemistry
+        // Players arriving with high morale boost it, low morale hurts
+        float avgMoraleIn = theirPlayers.Count > 0 ? (float)theirPlayers.Average(p => p.morale) : 50;
+        float avgMoraleOut = ourPlayers.Count > 0 ? (float)ourPlayers.Average(p => p.morale) : 50;
+        int chemShift = Mathf.RoundToInt((avgMoraleIn - avgMoraleOut) * 0.15f);
+        int projectedChem = Mathf.Clamp(currentChem + chemShift, 0, 100);
+
+        var chemCircle = new VisualElement();
+        chemCircle.AddToClassList("trade-modal-chem-circle");
+        var chemValue = new Label($"{projectedChem}%");
+        chemValue.AddToClassList("trade-modal-chem-value");
+        chemCircle.Add(chemValue);
+        chemCard.Add(chemCircle);
+
+        string chemDesc;
+        if (chemShift > 2) chemDesc = "Mejora notable";
+        else if (chemShift > 0) chemDesc = "Ligera mejora";
+        else if (chemShift == 0) chemDesc = "Sin cambios significativos";
+        else if (chemShift > -3) chemDesc = "Ligero deterioro";
+        else chemDesc = "Deterioro notable";
+
+        var chemDescLbl = new Label(chemDesc);
+        chemDescLbl.AddToClassList("trade-modal-analysis-desc");
+        chemCard.Add(chemDescLbl);
+
+        row.Add(chemCard);
+
+        // ── 3. Flexibilidad Futura ──
+        var flexCard = new VisualElement();
+        flexCard.AddToClassList("trade-modal-analysis-card");
+
+        var flexLabel = new Label("FLEXIBILIDAD FUTURA");
+        flexLabel.AddToClassList("trade-modal-analysis-label");
+        flexCard.Add(flexLabel);
+
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        long currentPayroll = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+        long salaryIn = theirPlayers.Sum(p => p.salary);
+        long salaryOut = ourPlayers.Sum(p => p.salary);
+        long newPayroll = currentPayroll - salaryOut + salaryIn;
+        long newCapRoom = salaryCap - newPayroll;
+
+        // Count expiring contracts (flexibility indicator)
+        int expiringOut = ourPlayers.Count(p => p.contract_years <= 1);
+        int expiringIn = theirPlayers.Count(p => p.contract_years <= 1);
+        int flexScore = (expiringIn - expiringOut) + (newCapRoom > 0 ? 1 : -1);
+
+        string flexText = (flexScore >= 0 ? "+" : "") + flexScore.ToString();
+        var flexValue = new Label(flexText);
+        flexValue.AddToClassList("trade-modal-analysis-value");
+        flexValue.AddToClassList(flexScore > 0
+            ? "trade-modal-analysis-value--positive"
+            : flexScore < 0
+                ? "trade-modal-analysis-value--negative"
+                : "trade-modal-analysis-value--neutral");
+        flexCard.Add(flexValue);
+
+        string flexDesc = newCapRoom > 0
+            ? "Ganas espacio salarial a futuro"
+            : "Menos espacio salarial a futuro";
+
+        var flexDescLbl = new Label(flexDesc);
+        flexDescLbl.AddToClassList("trade-modal-analysis-desc");
+        flexCard.Add(flexDescLbl);
+
+        row.Add(flexCard);
+
+        section.Add(row);
+        return section;
+    }
+
+    string FormatMoneyShort(long amount)
+    {
+        float millions = amount / 1_000_000f;
+        return $"${millions:F2}M";
     }
 
     string SalaryStr(long salary)
