@@ -95,7 +95,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
   bloqueos puntuales).
 - **Caché de logos/estática** (`TODO_TECHNICAL_DEBT.md` B13) y `ListView` en tablas.
 - Cerrar TODO pendiente: `Settings` muerto (`B7`), `CursorManager` duplicado (`B1`),
-  tests para `GameSimulator`/migraciones (ya hay 17 para `TradeHelper`).
+  tests para `GameSimulator.SimulateGame`/migraciones (ya hay 78 tests para helpers estáticos).
 
 ---
 
@@ -141,3 +141,23 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | **Opciones de contrato TO/PO** | **Hecho** — toggles en renovaciones/FA + `guaranteed_years` + `FormatContractYears` |
 | **Re-firma de FA propio (Bird rights)** | **Hecho** — `last_team_id`/`IsOwnRecentFA` + modal de re-firma en NewSeason |
 | **G-League / IR / contratos two-way** | **Hecho** — `NEXT_PROPOSALS.md` D (IR, two-way, G-League ligera) |
+
+---
+
+## Próximas propuestas (pendientes)
+
+Basado en `TODO_TECHNICAL_DEBT.md` y el estado actual del proyecto (HEAD `81d9e4f`):
+
+| Prioridad | Iniciativa | Ref | Frente |
+|---|---|---|---|
+| **P1** | FastSim transacción atómica (elimin yield del bloque transaccional) | B38 | Técnico |
+| **P1** | Template build race condition (aislar conexión de template) | B39 | Técnico |
+| **P1** | `overall` stale tras mentoring (centralizar `RecalculateOverall`) | B40 | Gameplay |
+| **P1** | Rookies skipped en `StartNewSeason` (regresión de progresión) | B41 | Gameplay |
+| **P1** | Enums para `phase`/`game_type`/`trade_type` (B12) | B12 | Técnico |
+| **P2** | Caché de logos estáticos (`Resources.LoadAll` en cada `OnEnable`) | B13 | Performance |
+| **P2** | Tests para `DatabaseManager` migrations y `GameSimulator.SimulateGame` | B34 | Testing |
+| **P2** | Split `DatabaseManager.Records.cs` (3586 ln) | B3 | Refactor |
+| **P2** | Reconciliar 12 controllers sin `base.RegisterCallbacks()` | B4 note | Consistencia |
+| **P3** | Sync o delete `PLAN.md` | B36 | Limpieza |
+| **P3** | Limpiar código muerto (`PreseasonGameData`, `LegalNotice/`, `.meta` huérfano) | — | Limpieza |

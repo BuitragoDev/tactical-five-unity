@@ -987,6 +987,28 @@ using System.Threading.Tasks;
                 DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers);
             }
 
+            // Check for injured players FIRST — most urgent before lineup decisions
+            var injured = GetInjuredActiveLineupPlayers();
+            if (injured.Count > 0)
+            {
+                if (fastSim)
+                {
+                    _fastSimAborted = true;
+                    _fastSimAbortInjured = injured;
+                    yield break;
+                }
+                _injuredModalResolved = false;
+                _injuredModalGoToQuinteto = false;
+                ShowInjuredLineupModal(injured);
+                yield return new WaitUntil(() => _injuredModalResolved);
+                if (_injuredModalGoToQuinteto)
+                {
+                    HideLoading();
+                    ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                    yield break;
+                }
+            }
+
             // Check for tired players (load management) — skipped on fast‑sim re‑entry
             if (!skipPreBatch && PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1)
             {
@@ -1029,27 +1051,6 @@ using System.Threading.Tasks;
                 ShowEmptyLineupModal(emptySlots);
                 yield return new WaitUntil(() => _emptyLineupModalResolved);
                 if (_emptyLineupGoToQuinteto)
-                {
-                    HideLoading();
-                    ScreenManager.Instance.GoTo(GameScreen.Quinteto);
-                    yield break;
-                }
-            }
-
-            var injured = GetInjuredActiveLineupPlayers();
-            if (injured.Count > 0)
-            {
-                if (fastSim)
-                {
-                    _fastSimAborted = true;
-                    _fastSimAbortInjured = injured;
-                    yield break;
-                }
-                _injuredModalResolved = false;
-                _injuredModalGoToQuinteto = false;
-                ShowInjuredLineupModal(injured);
-                yield return new WaitUntil(() => _injuredModalResolved);
-                if (_injuredModalGoToQuinteto)
                 {
                     HideLoading();
                     ScreenManager.Instance.GoTo(GameScreen.Quinteto);
@@ -1548,15 +1549,13 @@ using System.Threading.Tasks;
             if (_fastSimAborted)
             {
                 bool autoFixed = false;
-                if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
+                if (_fastSimAbortInjured.Count > 0)
                 {
-                    _loadMgmtModalResolved = false;
-                    _loadMgmtModalGoToQuinteto = false;
-                    ShowLoadManagementModal(_loadMgmtTiredPlayers, _loadMgmtIsB2B);
-                    yield return new WaitUntil(() => _loadMgmtModalResolved);
-                    _loadMgmtTiredPlayers.Clear();
-                    _loadMgmtIsB2B = false;
-                    if (_loadMgmtModalGoToQuinteto)
+                    _injuredModalResolved = false;
+                    _injuredModalGoToQuinteto = false;
+                    ShowInjuredLineupModal(_fastSimAbortInjured);
+                    yield return new WaitUntil(() => _injuredModalResolved);
+                    if (_injuredModalGoToQuinteto)
                     {
                         _fastSimRunning = false;
                         SetSidebarNavigationEnabled(true);
@@ -1582,13 +1581,15 @@ using System.Threading.Tasks;
                     }
                     autoFixed = true;
                 }
-                else if (_fastSimAbortInjured.Count > 0)
+                else if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
                 {
-                    _injuredModalResolved = false;
-                    _injuredModalGoToQuinteto = false;
-                    ShowInjuredLineupModal(_fastSimAbortInjured);
-                    yield return new WaitUntil(() => _injuredModalResolved);
-                    if (_injuredModalGoToQuinteto)
+                    _loadMgmtModalResolved = false;
+                    _loadMgmtModalGoToQuinteto = false;
+                    ShowLoadManagementModal(_loadMgmtTiredPlayers, _loadMgmtIsB2B);
+                    yield return new WaitUntil(() => _loadMgmtModalResolved);
+                    _loadMgmtTiredPlayers.Clear();
+                    _loadMgmtIsB2B = false;
+                    if (_loadMgmtModalGoToQuinteto)
                     {
                         _fastSimRunning = false;
                         SetSidebarNavigationEnabled(true);
@@ -2520,36 +2521,156 @@ var box = new VisualElement();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fired-modal-box--warning");
+        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("injury-modal-box");
         _firedOverlay.Add(box);
 
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
+
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        var subtitle = new Label("AVISO");
+        subtitle.AddToClassList("trade-modal-subtitle");
+        subtitle.AddToClassList("injury-modal-text-lg");
+        subtitle.style.color = new StyleColor(new Color32(231, 76, 60, 255));
+        headerLeft.Add(subtitle);
+
         var title = new Label("JUGADORES LESIONADOS");
-        title.AddToClassList("fired-modal-title");
-        title.AddToClassList("fired-modal-title--warning");
-        box.Add(title);
+        title.AddToClassList("trade-modal-title");
+        headerLeft.Add(title);
+        header.Add(headerLeft);
+        box.Add(header);
 
-        var text = new Label("Tienes jugadores lesionados convocados.\nResuelve antes del partido:");
-        text.AddToClassList("injured-modal-text");
-        box.Add(text);
+        // ── Injured players ──
+        var playerList = new VisualElement();
+        playerList.AddToClassList("injury-modal-player-list");
 
-        var list = new VisualElement();
-        list.AddToClassList("injured-modal-list");
         foreach (var (li, p) in injured)
         {
-            var slotLabel = li.slot == 0 ? "TITULAR" : "BANQUILLO";
-            var row = new Label($"{p.first_name} {p.last_name} — {PositionCodes.GetShort(p.position)} ({slotLabel})");
-            row.AddToClassList("injured-modal-player-row");
-            list.Add(row);
-        }
-        box.Add(list);
+            var card = new VisualElement();
+            card.AddToClassList("trade-modal-player-card");
+            card.AddToClassList("injury-modal-card");
 
+            // Photo
+            var photo = new VisualElement();
+            photo.AddToClassList("trade-modal-player-photo");
+            Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
+            if (tex != null)
+                photo.style.backgroundImage = new StyleBackground(tex);
+            card.Add(photo);
+
+            // Info
+            var info = new VisualElement();
+            info.AddToClassList("trade-modal-player-info");
+
+            var nameLbl = new Label($"{p.first_name} {p.last_name}");
+            nameLbl.AddToClassList("trade-modal-player-name");
+            nameLbl.AddToClassList("injury-modal-text-lg");
+            info.Add(nameLbl);
+
+            string stars = p.overall >= 85 ? " ★★★" : p.overall >= 75 ? " ★★" : p.overall >= 65 ? " ★" : "";
+            var metaLbl = new Label($"{PositionCodes.GetShort(p.position)} | {p.age} años{stars}");
+            metaLbl.AddToClassList("trade-modal-player-meta");
+            metaLbl.AddToClassList("injury-modal-text-lg");
+            info.Add(metaLbl);
+
+            // Injury badge
+            var injuryBadge = new VisualElement();
+            injuryBadge.AddToClassList("injury-modal-badge");
+
+            var injuryTypeLbl = new Label(p.injury_type);
+            injuryTypeLbl.AddToClassList("injury-modal-badge-text");
+            injuryBadge.Add(injuryTypeLbl);
+
+            var injuryDaysLbl = new Label($"{p.injury_days} días");
+            injuryDaysLbl.AddToClassList("injury-modal-badge-days");
+            injuryBadge.Add(injuryDaysLbl);
+
+            info.Add(injuryBadge);
+
+            // Slot label
+            string slotLabel = li.slot == 0 ? "TITULAR" : "BANQUILLO";
+            var slotLbl = new Label(slotLabel);
+            slotLbl.AddToClassList("injury-modal-slot");
+            if (li.slot == 0)
+                slotLbl.AddToClassList("injury-modal-slot--starter");
+            info.Add(slotLbl);
+
+            card.Add(info);
+
+            // OVR column
+            var ovrCol = new VisualElement();
+            ovrCol.AddToClassList("trade-modal-player-ovr-col");
+
+            var ovrLbl = new Label(p.overall.ToString());
+            ovrLbl.AddToClassList("trade-modal-player-ovr");
+            if (p.overall >= 80)
+                ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
+            else if (p.overall >= 60)
+                ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+            else
+                ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
+            ovrCol.Add(ovrLbl);
+
+            var ovrSub = new Label("MED");
+            ovrSub.AddToClassList("trade-modal-player-ovr-label");
+            ovrCol.Add(ovrSub);
+
+            card.Add(ovrCol);
+
+            // Treat button
+            var treatBtn = new Button();
+            bool alreadyTreated = p.treated == 1;
+            var medico = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
+                .FirstOrDefault(e => e.position == "MEDICO");
+            bool hasMedico = medico != null;
+            treatBtn.text = alreadyTreated ? "TRATADO" : "TRATAR\nLESIÓN";
+            treatBtn.AddToClassList("injury-modal-treat-btn");
+            if (alreadyTreated || !hasMedico)
+            {
+                treatBtn.AddToClassList("injury-modal-treat-btn--done");
+                treatBtn.SetEnabled(false);
+            }
+            else
+            {
+                treatBtn.RegisterCallback<ClickEvent>(_ =>
+                {
+                    PlayClick();
+                    float pct = medico.reputation switch
+                    {
+                        5 => Random.Range(0.25f, 0.40f),
+                        4 => Random.Range(0.20f, 0.32f),
+                        3 => Random.Range(0.15f, 0.25f),
+                        2 => Random.Range(0.10f, 0.18f),
+                        _ => Random.Range(0.05f, 0.12f),
+                    };
+                    int newDays = Mathf.CeilToInt(p.injury_days * (1f - pct));
+                    p.injury_days = Mathf.Clamp(newDays, 1, p.injury_days);
+                    p.treated = 1;
+                    DatabaseManager.Instance.UpdatePlayer(p);
+                    treatBtn.text = "TRATADO";
+                    treatBtn.AddToClassList("injury-modal-treat-btn--done");
+                    treatBtn.SetEnabled(false);
+                });
+            }
+            card.Add(treatBtn);
+
+            playerList.Add(card);
+        }
+
+        box.Add(playerList);
+
+        // ── Buttons ──
         var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
+        btnGroup.AddToClassList("trade-modal-buttons");
 
         var manualBtn = new Button();
         manualBtn.text = "CAMBIAR MANUALMENTE";
-        manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.AddToClassList("trade-modal-btn");
+        manualBtn.AddToClassList("trade-modal-btn--manual");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2560,9 +2681,9 @@ var box = new VisualElement();
         btnGroup.Add(manualBtn);
 
         var autoBtn = new Button();
-        autoBtn.text = "CAMBIAR AUTOMÁTICAMENTE";
-        autoBtn.AddToClassList("injured-modal-btn");
-        autoBtn.AddToClassList("injured-modal-btn--primary");
+        autoBtn.text = "REEMPLAZAR AUTOMÁTICAMENTE";
+        autoBtn.AddToClassList("trade-modal-btn");
+        autoBtn.AddToClassList("trade-modal-btn--reject");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2571,8 +2692,13 @@ var box = new VisualElement();
             _firedOverlay.style.display = DisplayStyle.None;
         });
         btnGroup.Add(autoBtn);
-
         box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(manualBtn);
+            CursorManager.Instance.RegisterHandCursor(autoBtn);
+        }
     }
 
     void ShowLoadManagementModal(List<(LineupData li, PlayerData p)> tiredPlayers, bool isB2B)
@@ -2703,36 +2829,106 @@ var box = new VisualElement();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fired-modal-box--positive");
+        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("recovery-modal-box");
         _firedOverlay.Add(box);
 
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
+
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        var subtitle = new Label("LISTO");
+        subtitle.AddToClassList("trade-modal-subtitle");
+        subtitle.AddToClassList("recovery-modal-subtitle");
+        headerLeft.Add(subtitle);
+
         var title = new Label("JUGADOR(ES) RECUPERADO(S)");
-        title.AddToClassList("fired-modal-title");
-        title.AddToClassList("fired-modal-title--positive");
-        box.Add(title);
+        title.AddToClassList("trade-modal-title");
+        title.AddToClassList("recovery-modal-title");
+        headerLeft.Add(title);
+        header.Add(headerLeft);
+        box.Add(header);
 
-        var text = new Label("Los siguientes jugadores se han recuperado de sus lesiones y vuelven a estar disponibles:");
-        text.AddToClassList("injured-modal-text");
-        box.Add(text);
+        // ── Player cards ──
+        var playerList = new VisualElement();
+        playerList.AddToClassList("injury-modal-player-list");
 
-        var list = new VisualElement();
-        list.AddToClassList("injured-modal-list");
         foreach (var p in recovered)
         {
-            var row = new Label($"{p.first_name} {p.last_name} — {PositionCodes.GetShort(p.position)}");
-            row.AddToClassList("injured-modal-player-row");
-            list.Add(row);
-        }
-        box.Add(list);
+            var card = new VisualElement();
+            card.AddToClassList("trade-modal-player-card");
+            card.AddToClassList("recovery-modal-card");
 
+            // Photo
+            var photo = new VisualElement();
+            photo.AddToClassList("trade-modal-player-photo");
+            Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
+            if (tex != null)
+                photo.style.backgroundImage = new StyleBackground(tex);
+            card.Add(photo);
+
+            // Info
+            var info = new VisualElement();
+            info.AddToClassList("trade-modal-player-info");
+
+            var nameLbl = new Label($"{p.first_name} {p.last_name}");
+            nameLbl.AddToClassList("trade-modal-player-name");
+            nameLbl.AddToClassList("injury-modal-text-lg");
+            info.Add(nameLbl);
+
+            string stars = p.overall >= 85 ? " ★★★" : p.overall >= 75 ? " ★★" : p.overall >= 65 ? " ★" : "";
+            var metaLbl = new Label($"{PositionCodes.GetShort(p.position)} | {p.age} años{stars}");
+            metaLbl.AddToClassList("trade-modal-player-meta");
+            metaLbl.AddToClassList("injury-modal-text-lg");
+            info.Add(metaLbl);
+
+            // Recovery badge
+            var badge = new VisualElement();
+            badge.AddToClassList("recovery-modal-badge");
+
+            var badgeText = new Label("RECUPERADO — DISPONIBLE");
+            badgeText.AddToClassList("recovery-modal-badge-text");
+            badge.Add(badgeText);
+
+            info.Add(badge);
+
+            card.Add(info);
+
+            // OVR column
+            var ovrCol = new VisualElement();
+            ovrCol.AddToClassList("trade-modal-player-ovr-col");
+
+            var ovrLbl = new Label(p.overall.ToString());
+            ovrLbl.AddToClassList("trade-modal-player-ovr");
+            if (p.overall >= 80)
+                ovrLbl.style.color = new StyleColor(new Color32(39, 174, 96, 255));
+            else if (p.overall >= 60)
+                ovrLbl.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+            else
+                ovrLbl.style.color = new StyleColor(new Color32(192, 57, 43, 255));
+            ovrCol.Add(ovrLbl);
+
+            var ovrSub = new Label("MED");
+            ovrSub.AddToClassList("trade-modal-player-ovr-label");
+            ovrCol.Add(ovrSub);
+
+            card.Add(ovrCol);
+
+            playerList.Add(card);
+        }
+        box.Add(playerList);
+
+        // ── Buttons ──
         var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
+        btnGroup.AddToClassList("trade-modal-buttons");
 
         var goBtn = new Button();
         goBtn.text = "IR A QUINTETO";
-        goBtn.AddToClassList("injured-modal-btn");
-        goBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+        goBtn.AddToClassList("trade-modal-btn");
+        goBtn.AddToClassList("trade-modal-btn--manual");
         goBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2743,8 +2939,8 @@ var box = new VisualElement();
 
         var closeBtn = new Button();
         closeBtn.text = "CERRAR";
-        closeBtn.AddToClassList("injured-modal-btn");
-        closeBtn.style.marginLeft = 8;
+        closeBtn.AddToClassList("trade-modal-btn");
+        closeBtn.AddToClassList("trade-modal-btn--reject");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();

@@ -166,7 +166,7 @@ _(none open — see resolved B1 below)_
 - **B31.** Comments only in Spanish — fine for current team; document if external contributors join.
 - **B32.** Fonts referenced via `project://database/Assets/...` (editor-absolute) in USS — works in editor builds; verify in built players.
 - **B33.** `_Recovery` scenes leftover in `Assets/_Recovery` (gitignored) — clean up.
-- **B34.** No unit/integration tests (only `com.unity.test-framework` package present, no test assemblies). Add tests for `TradeHelper`, `GameSimulator`, `DatabaseManager` migrations.
+- **B34.** Tests unitarios: 78 `[Test]` en 7 archivos (`TradeHelperTests`=20, `GLLeagueHelperTests`=22, `AdvancedStatsHelperTests`=11, `ObjectiveHelperTests`=10, `HallOfFameHelperTests`=9, `GameSimulatorTests`=4, `EditModeSmokeTests`=2). Sin test runner CLI. `GameSimulatorTests` solo testeable para helpers estáticos (position multipliers, target minutes). Pendiente: tests para `DatabaseManager` migrations y `GameSimulator.SimulateGame` completo.
 - **B35.** Emoji as icons in UXML (🏟👑💎🛒) — platform font-dependent; consider sprites.
 - **B36.** `PLAN.md` (repo root) documents an improvement plan; several parts are now implemented (draft picks/protections, hard cap, luxury tax, buyout, TO/PO, load management, HOF, achievements). **Sync the plan with the code or delete it.**
 - **B37.** No changelog or versioning policy for `v1.0.0 · Beta`.
@@ -185,5 +185,5 @@ _(none open — see resolved B1 below)_
 4. **B12** — introduce enums for `phase`/`game_type`/`trade_type` before the next feature that touches them.
 5. **B4 note** — reconcile the 12 controllers overriding `RegisterCallbacks()` without `base` (either standardize or document intent).
 6. **B36** — sync or delete `PLAN.md`.
-7. **B34** — add tests for the core static helpers (`TradeHelper`, `GameSimulator`, migrations).
+7. **B34** — tests existen para helpers estáticos (78 tests); pendiente: tests para `DatabaseManager` migrations y `GameSimulator.SimulateGame` completo.
 8. Clean up the dead code (PreseasonGameData, LegalNotice folder, orphan `.meta`).

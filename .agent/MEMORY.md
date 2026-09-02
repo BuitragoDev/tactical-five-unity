@@ -36,7 +36,7 @@
 
 **Pending / incomplete (identified):**
 - `PreseasonGameData` (`preseason_games`) is **dead code** — table never created, never used.
-- `PLAN.md` (repo root) — nearly all items implemented; **not synced with code** (see `TODO_TECHNICAL_DEBT.md` B36).
+- `PLAN.md` (repo root, commit `f914930`) — all items implemented and merged in `main`; serves as historical reference only. For pending work see `NEXT_PROPOSALS.md` and `Docs/TODO_TECHNICAL_DEBT.md`.
 
 ## 4. Known bugs / risks (see `TODO_TECHNICAL_DEBT.md` for full list)
 
@@ -117,5 +117,5 @@ Terms in `.agent/GLOSSARY.md`. Quick ones: Plantilla=roster, Traspaso=trade, Fic
 
 - `Assets/_Recovery/` contains leftover recovery scenes (gitignored) — not used.
 - `Assets/_TacticalFive/Data/Database.meta` is an orphan folder meta — harmless.
-- `PLAN.md` exists at root and is **not committed** (working-tree only as of analysis). Decide its fate (sync with code or delete).
+- `PLAN.md` (raíz, commit `f914930`): todas sus entradas están implementadas y mergeadas en `main`; úsalo como histórico, no como TODO.
 - Documentation lives in `Docs/` and `.agent/` — keep in sync with code changes.

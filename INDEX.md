@@ -16,7 +16,7 @@
 | Doc | Contents |
 |---|---|
 | [Docs/GAMEPLAY.md](Docs/GAMEPLAY.md) | Every mechanic with exact formulas (simulation, economy, contracts, morale, draft…) |
-| [Docs/SYSTEMS.md](Docs/SYSTEMS.md) | The 18 core systems: responsibilities, files, key methods, risks |
+| [Docs/SYSTEMS.md](Docs/SYSTEMS.md) | The 19 core systems: responsibilities, files, key methods, risks |
 | [Docs/EVENTS.md](Docs/EVENTS.md) | All communication channels: static state, DB messages, PlayerPrefs, UI callbacks |
 
 ### Data & persistence

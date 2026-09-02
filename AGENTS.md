@@ -67,7 +67,7 @@
 | **Sin prefabs y sin ScriptableObjects de juego.** Contenido = seeders + tablas SQLite; vistas = UXML+USS | Para nueva entidad → tabla+seeder; para vista nueva → UXML+USS. |
 | **Sin event bus** (ni `Action`/`UnityEvent` entre sistemas). Comunicación: mensajes DB (`MessageData`), estado estático (`GameResultCache`, `ScreenManager.*`, cola de toasts de `AchievementService`), `PlayerPrefs` (solo settings), callbacks UI | No inventes un sistema de eventos. Sigue los canales existentes. |
 | **Todos los controllers heredan `UIScreenController`** (base en `Scripts/Core/UIScreenController.cs`, 575 ln): fullscreen, inyección Header/Sidebar, navegación, cursores, modal de configuración, `RefreshHeader` | Nuevas pantallas: hereda la base y sobreescribe solo lo que difiera. |
-| **Reglas de juego en clases static puras:** `GameSimulator`, `TradeHelper`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `QuickNewsGenerator`, `AchievementService`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `MatchupPreview`, `ObjectiveHelper` | Reglas nuevas → helper static; controllers delgados. |
+| **Reglas de juego en clases static puras:** `GameSimulator`, `TradeHelper`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `QuickNewsGenerator`, `AchievementService`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `MatchupPreview`, `ObjectiveHelper`, `GLeagueHelper` | Reglas nuevas → helper static; controllers delgados. |
 | **Simulación no determinista** (`UnityEngine.Random` en main thread; `System.Random` thread-static `_aiRng`/`Rng` en hilos de fondo) | No esperes resultados reproducibles. |
 | **Async DB:** los lotes pesados van fuera del main thread vía `RunInBackground`/`RunInBackgroundAsync` (WAL + conexión ambient `AsyncLocal` + `Task.Run`). La simulación de partido y el draft se quedan en main thread **intencionadamente** | Los helpers de DB escriben en la conexión ambient del lote; **no toques `_db` fuera del main thread**. |
 | **Schema versionado:** `schema_migrations` (migraciones de datos por nombre) + `PRAGMA user_version = 2`; migraciones de columnas aditivas vía `PRAGMA table_info` | Migración nueva: o `ALTER TABLE ADD COLUMN` (schema) o registro en `schema_migrations` (datos). |
@@ -150,8 +150,8 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **No hay lint ni typecheck** (C# se compila solo en el editor de Unity). No hay test runner CLI configurado en `package.json`.
 
-**Tests unitarios (EditMode, Unity Test Runner):** 52 `[Test]` en `Assets/_TacticalFive/Tests/Editor/`:
-- `TradeHelperTests.cs` (20) · `AdvancedStatsHelperTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `EditModeSmokeTests.cs` (2)
+**Tests unitarios (EditMode, Unity Test Runner):** 78 `[Test]` en 7 archivos `Assets/_TacticalFive/Tests/Editor/`:
+- `TradeHelperTests.cs` (20) · `GLLeagueHelperTests.cs` (22) · `AdvancedStatsHelperTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `GameSimulatorTests.cs` (4) · `EditModeSmokeTests.cs` (2)
 
 **Correr en el editor:** *Window → General → Test Runner → EditMode → Run All*.
 
@@ -161,7 +161,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 ```
 (Linux: típicamente `/opt/unity/Editor/Unity` o similar.)
 
-**Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance` y **no es testeable en EditMode** sin refactor.
+**Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance` y **no es testeable en EditMode** sin refactor. `GameSimulatorTests.cs` (4 tests) solo cubre helpers públicos estáticos (position multipliers, target minutes).
 
 **Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, migraciones): corre el Test Runner EditMode.
 
@@ -181,6 +181,10 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 | `Scripts/UI/RosterController.cs` | Plantilla, renovaciones, buyouts, trade block |
 | `Scripts/UI/MarketController.cs` | Traspasos, FA, S&T, deadline |
 | `Scripts/Core/GameEnums.cs` | `GameScreen` (41), `GameMode` |
+| `Scripts/Core/GLeagueHelper.cs` | Reglas G-League: asignación, desarrollo, codificación ids |
+| `Scripts/Core/GLeagueScheduleGenerator.cs` | Calendario G-League (28 partidos/filial) |
+| `Scripts/Core/GLeaguePostSeason.cs` | Playoffs G-League (QF→SF→CF→Final, mejor de 3) |
+| `Scripts/Core/GLeagueStandings.cs` | Clasificación G-League (en memoria) |
 
 ---
 

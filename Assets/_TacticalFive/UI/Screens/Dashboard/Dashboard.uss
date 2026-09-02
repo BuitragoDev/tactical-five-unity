@@ -1670,9 +1670,9 @@
 }
 
 .trade-modal-player-photo {
-    width: 52px;
-    height: 52px;
-    border-radius: 26px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
     background-color: rgb(34, 36, 42);
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
@@ -1903,13 +1903,14 @@
     border-width: 2px;
     flex-grow: 1;
     -unity-text-align: middle-center;
+    margin-left: 6px;
+    margin-right: 6px;
 }
 
 .trade-modal-btn--reject {
     background-color: rgba(192, 57, 43, 0.10);
     border-color: rgb(192, 57, 43);
     color: rgb(231, 76, 60);
-    margin-right: 12px;
 }
 
 .trade-modal-btn--reject:hover {
@@ -1924,6 +1925,16 @@
 
 .trade-modal-btn--accept:hover {
     background-color: rgb(46, 204, 113);
+}
+
+.trade-modal-btn--manual {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+}
+
+.trade-modal-btn--manual:hover {
+    background-color: rgba(42, 95, 201, 0.25);
 }
 
 /* ── Resumen de simulación rápida ── */
@@ -1952,4 +1963,133 @@
 .toast-achievement-desc {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
     -unity-font-style: bold;
+}
+
+/* ══ INJURY MODAL ══ */
+
+.injury-modal-box {
+    border-color: rgb(192, 57, 43);
+}
+
+.injury-modal-player-list {
+    flex-direction: column;
+    padding: 0 32px;
+}
+
+.injury-modal-card {
+    border-left: 3px solid rgb(192, 57, 43);
+}
+
+.injury-modal-badge {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgba(192, 57, 43, 0.15);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 6px;
+}
+
+.injury-modal-badge-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 18px;
+    color: rgb(231, 76, 60);
+}
+
+.injury-modal-badge-days {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(231, 76, 60);
+    margin-left: 8px;
+}
+
+.injury-modal-slot {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: rgb(140, 150, 175);
+    margin-top: 4px;
+}
+
+.injury-modal-slot--starter {
+    color: rgb(231, 76, 60);
+}
+
+.injury-modal-text-lg {
+    font-size: 18px;
+}
+
+.injury-modal-treat-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    border-width: 2px;
+    border-color: rgb(231, 76, 60);
+    background-color: rgba(231, 76, 60, 0.12);
+    color: rgb(231, 76, 60);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    margin-left: 12px;
+    align-self: center;
+}
+
+.injury-modal-treat-btn:hover {
+    background-color: rgba(231, 76, 60, 0.25);
+}
+
+.injury-modal-treat-btn--done {
+    border-color: rgb(100, 110, 135);
+    background-color: rgba(100, 110, 135, 0.10);
+    color: rgb(100, 110, 135);
+}
+
+.injury-modal-treat-btn--done:hover {
+    background-color: rgba(100, 110, 135, 0.10);
+}
+
+/* ══ Recovery modal (green theme) ══ */
+
+.recovery-modal-box {
+    border-color: rgb(39, 174, 96);
+    border-top-color: rgb(39, 174, 96);
+}
+
+.recovery-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: rgb(39, 174, 96);
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.recovery-modal-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: rgb(39, 174, 96);
+    margin-bottom: 12px;
+    -unity-text-align: middle-left;
+}
+
+.recovery-modal-card {
+    border-left: 3px solid rgb(39, 174, 96);
+}
+
+.recovery-modal-badge {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(39, 174, 96, 0.15);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 6px;
+}
+
+.recovery-modal-badge-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 18px;
+    color: rgb(46, 204, 113);
 }

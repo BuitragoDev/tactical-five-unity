@@ -112,7 +112,7 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 - ~~`SQLiteAsync`~~ — **deleted**; async is internal (`RunInBackground`/`RunInBackgroundAsync`).
 - **`PreseasonGameData`** (`preseason_games`) is **dead code** — table never created, never used. Don't reference it.
 - **`UIScreenController.LoadSidebarIcons` is dead** — the real icons load in `SidebarController.LoadIcons`.
-- `PLAN.md` at repo root describes features; nearly all are implemented — verify against code before trusting it.
+- `PLAN.md` (raíz, commit `f914930`): todas sus entradas están implementadas y mergeadas en `main`; úsalo como histórico, no como TODO.
 
 ## 12. Keeping this knowledge base in sync
 
