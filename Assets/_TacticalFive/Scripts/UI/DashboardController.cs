@@ -124,6 +124,7 @@ using System.Threading.Tasks;
 
     // Simulación rápida (hasta una fecha elegida en el Calendario)
     private System.DateTime? _fastSimTarget;
+    private string _fastSimStartDate;
     private bool _fastSimAborted;
     private List<int> _fastSimAbortEmptySlots = new();
     private List<(LineupData li, PlayerData p)> _fastSimAbortInjured = new();
@@ -1531,6 +1532,8 @@ using System.Threading.Tasks;
             CursorManager.Instance.RegisterHandCursor(_btnAction);
         SetSidebarNavigationEnabled(false);
 
+        _fastSimStartDate = _season?.current_date;
+
         while (_season.phase != "finished")
         {
             if (_fastSimStopRequested) break;
@@ -1716,43 +1719,144 @@ using System.Threading.Tasks;
 
         if (!_fastSimAborted && !_fastSimStopRequested)
         {
-            ShowFastSimSummary();
+            // Calcular W/L del período simulado
+            string endDate = _season?.current_date ?? _fastSimTarget?.ToString("yyyy-MM-dd") ?? "";
+            int wins = 0, losses = 0;
+            if (_allGames != null && _myTeam != null)
+            {
+                var periodGames = _allGames
+                    .Where(g => !string.IsNullOrEmpty(g.game_date)
+                            && string.Compare(g.game_date, _fastSimStartDate, System.StringComparison.Ordinal) >= 0
+                            && string.Compare(g.game_date, endDate, System.StringComparison.Ordinal) <= 0
+                            && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
+                    .ToList();
+                wins = periodGames.Count(g =>
+                    (g.home_team_id == _myTeam.id && g.home_score > g.away_score)
+                    || (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
+                losses = periodGames.Count - wins;
+            }
+            ShowFastSimSummary(_fastSimStartDate, endDate, wins, losses);
         }
     }
 
-    void ShowFastSimSummary()
+    void ShowFastSimSummary(string startDate, string endDate, int wins, int losses)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
-var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("load-mgmt-modal-box");
-        box.AddToClassList("fastsim-summary-box");
+        var box = new VisualElement();
+        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("fastsim-modal-box");
         _firedOverlay.Add(box);
 
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
+
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        var subtitle = new Label("RESUMEN DE PERÍODO");
+        subtitle.AddToClassList("trade-modal-subtitle");
+        subtitle.AddToClassList("fastsim-modal-subtitle");
+        headerLeft.Add(subtitle);
+
         var title = new Label("SIMULACIÓN COMPLETADA");
-        title.AddToClassList("fired-modal-title");
-        title.AddToClassList("fastsim-summary-title");
-        box.Add(title);
+        title.AddToClassList("trade-modal-title");
+        title.AddToClassList("fastsim-modal-title");
+        headerLeft.Add(title);
+        header.Add(headerLeft);
+        box.Add(header);
+
+        // ── Fechas ──
+        var datesRow = new VisualElement();
+        datesRow.AddToClassList("fastsim-modal-dates");
+
+        var dateIcon = new Label("📅");
+        dateIcon.AddToClassList("fastsim-modal-dates-icon");
+        datesRow.Add(dateIcon);
+
+        string fmtStart = FormatDateShort(startDate);
+        string fmtEnd = FormatDateShort(endDate);
+        var dateText = new Label($"{fmtStart}  →  {fmtEnd}");
+        dateText.AddToClassList("fastsim-modal-dates-text");
+        datesRow.Add(dateText);
+        box.Add(datesRow);
+
+        // ── Stats: W / L ──
+        var statsRow = new VisualElement();
+        statsRow.AddToClassList("fastsim-modal-stats");
+
+        // Wins
+        var winCol = new VisualElement();
+        winCol.AddToClassList("fastsim-modal-stat-col");
+
+        var winNum = new Label(wins.ToString());
+        winNum.AddToClassList("fastsim-modal-stat-num");
+        winNum.AddToClassList("fastsim-modal-stat-num--win");
+        winCol.Add(winNum);
+
+        var winLabel = new Label("GANADOS");
+        winLabel.AddToClassList("fastsim-modal-stat-label");
+        winCol.Add(winLabel);
+        statsRow.Add(winCol);
+
+        // Separator
+        var sep = new Label("-");
+        sep.AddToClassList("fastsim-modal-stat-sep");
+        statsRow.Add(sep);
+
+        // Losses
+        var lossCol = new VisualElement();
+        lossCol.AddToClassList("fastsim-modal-stat-col");
+
+        var lossNum = new Label(losses.ToString());
+        lossNum.AddToClassList("fastsim-modal-stat-num");
+        lossNum.AddToClassList("fastsim-modal-stat-num--loss");
+        lossCol.Add(lossNum);
+
+        var lossLabel = new Label("PERDIDOS");
+        lossLabel.AddToClassList("fastsim-modal-stat-label");
+        lossCol.Add(lossLabel);
+        statsRow.Add(lossCol);
+
+        box.Add(statsRow);
+
+        // ── Detail text ──
+        int total = wins + losses;
+        string detail = total > 0
+            ? $"{total} partidos simulados · {wins} ganados · {losses} perdidos"
+            : "Sin partidos jugados en este período";
+        var detailLbl = new Label(detail);
+        detailLbl.AddToClassList("fastsim-modal-detail");
+        box.Add(detailLbl);
+
+        // ── Button ──
+        var btnGroup = new VisualElement();
+        btnGroup.AddToClassList("trade-modal-buttons");
 
         var btn = new Button();
         btn.text = "CERRAR";
-        btn.AddToClassList("injured-modal-btn");
-        btn.AddToClassList("fastsim-summary-btn");
-        btn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+        btn.AddToClassList("trade-modal-btn");
+        btn.AddToClassList("trade-modal-btn--manual");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
         btnGroup.Add(btn);
         box.Add(btnGroup);
 
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(btn);
+    }
+
+    string FormatDateShort(string isoDate)
+    {
+        if (string.IsNullOrEmpty(isoDate)) return "—";
+        if (System.DateTime.TryParse(isoDate, out System.DateTime dt))
+            return dt.ToString("dd/MM/yyyy");
+        return isoDate;
     }
 
     void ShowLoading()
@@ -2486,36 +2590,89 @@ var box = new VisualElement();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fired-modal-box--warning");
+        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("empty-modal-box");
         _firedOverlay.Add(box);
 
-        var title = new Label("5 TITULAR INCOMPLETO");
-        title.AddToClassList("fired-modal-title");
-        title.AddToClassList("fired-modal-title--warning");
-        box.Add(title);
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
 
-        var text = new Label("Hay puestos del quinteto titular sin jugador asignado. Revisa la convocatoria antes del partido:");
-        text.AddToClassList("fired-modal-text");
-        box.Add(text);
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        var subtitle = new Label("AVISO");
+        subtitle.AddToClassList("trade-modal-subtitle");
+        subtitle.AddToClassList("empty-modal-subtitle");
+        headerLeft.Add(subtitle);
+
+        var title = new Label("QUINTETO INCOMPLETO");
+        title.AddToClassList("trade-modal-title");
+        title.AddToClassList("empty-modal-title");
+        headerLeft.Add(title);
+        header.Add(headerLeft);
+        box.Add(header);
+
+        // ── Empty position cards ──
+        var playerList = new VisualElement();
+        playerList.AddToClassList("injury-modal-player-list");
 
         var posNames = new[] { "Base", "Escolta", "Alero", "Ala-Pívot", "Pívot" };
-        var list = new VisualElement();
-        list.AddToClassList("injured-modal-list");
+        var posShort = new[] { "B", "E", "A", "AP", "P" };
+
         foreach (var si in emptySlots)
         {
-            var row = new Label(posNames[si]);
-            row.AddToClassList("injured-modal-player-row");
-            list.Add(row);
-        }
-        box.Add(list);
+            var card = new VisualElement();
+            card.AddToClassList("trade-modal-player-card");
+            card.AddToClassList("empty-modal-card");
 
+            // Slot icon placeholder
+            var slotIcon = new VisualElement();
+            slotIcon.AddToClassList("empty-modal-slot-icon");
+
+            var iconText = new Label(posShort[si]);
+            iconText.AddToClassList("empty-modal-slot-icon-text");
+            slotIcon.Add(iconText);
+            card.Add(slotIcon);
+
+            // Info
+            var info = new VisualElement();
+            info.AddToClassList("trade-modal-player-info");
+
+            var nameLbl = new Label(posNames[si]);
+            nameLbl.AddToClassList("trade-modal-player-name");
+            nameLbl.AddToClassList("injury-modal-text-lg");
+            info.Add(nameLbl);
+
+            var metaLbl = new Label("Quinteto titular — slot vacío");
+            metaLbl.AddToClassList("trade-modal-player-meta");
+            metaLbl.AddToClassList("injury-modal-text-lg");
+            info.Add(metaLbl);
+
+            // Badge
+            var badge = new VisualElement();
+            badge.AddToClassList("empty-modal-badge");
+
+            var badgeText = new Label("SIN ASIGNAR");
+            badgeText.AddToClassList("empty-modal-badge-text");
+            badge.Add(badgeText);
+
+            info.Add(badge);
+
+            card.Add(info);
+
+            playerList.Add(card);
+        }
+        box.Add(playerList);
+
+        // ── Buttons ──
         var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
+        btnGroup.AddToClassList("trade-modal-buttons");
 
         var manualBtn = new Button();
         manualBtn.text = "REVISAR MANUALMENTE";
-        manualBtn.AddToClassList("injured-modal-btn");
+        manualBtn.AddToClassList("trade-modal-btn");
+        manualBtn.AddToClassList("trade-modal-btn--manual");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2527,8 +2684,8 @@ var box = new VisualElement();
 
         var autoBtn = new Button();
         autoBtn.text = "AUTO-RELLENAR";
-        autoBtn.AddToClassList("injured-modal-btn");
-        autoBtn.AddToClassList("injured-modal-btn--primary");
+        autoBtn.AddToClassList("trade-modal-btn");
+        autoBtn.AddToClassList("trade-modal-btn--reject");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2543,6 +2700,12 @@ var box = new VisualElement();
         btnGroup.Add(autoBtn);
 
         box.Add(btnGroup);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(manualBtn);
+            CursorManager.Instance.RegisterHandCursor(autoBtn);
+        }
     }
 
     void ShowInjuredLineupModal(List<(LineupData li, PlayerData p)> injured)

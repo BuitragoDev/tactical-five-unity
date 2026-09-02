@@ -2093,3 +2093,172 @@
     font-size: 18px;
     color: rgb(46, 204, 113);
 }
+
+/* ══ Empty lineup modal (red/urgent theme) ══ */
+
+.empty-modal-box {
+    border-color: rgb(192, 57, 43);
+    border-top-color: rgb(192, 57, 43);
+}
+
+.empty-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: rgb(192, 57, 43);
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.empty-modal-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: rgb(192, 57, 43);
+    margin-bottom: 12px;
+    -unity-text-align: middle-left;
+}
+
+.empty-modal-card {
+    border-left: 3px solid rgb(192, 57, 43);
+}
+
+.empty-modal-slot-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    background-color: rgba(192, 57, 43, 0.08);
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.empty-modal-slot-icon-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(192, 57, 43);
+    -unity-text-align: middle-center;
+}
+
+.empty-modal-badge {
+    flex-direction: row;
+    align-items: center;
+    background-color: rgba(192, 57, 43, 0.15);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-top: 6px;
+}
+
+.empty-modal-badge-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 18px;
+    color: rgb(231, 76, 60);
+}
+
+/* ══ Fast-sim summary modal (blue theme) ══ */
+
+.fastsim-modal-box {
+    border-color: rgb(42, 95, 201);
+    border-top-color: rgb(42, 95, 201);
+    width: 520px;
+}
+
+.fastsim-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 3px;
+    color: rgb(255, 255, 255);
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.fastsim-modal-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    color: rgb(42, 95, 201);
+    margin-bottom: 12px;
+    -unity-text-align: middle-left;
+}
+
+.fastsim-modal-dates {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 1px;
+    border-color: rgba(42, 95, 201, 0.25);
+    border-radius: 6px;
+    padding: 12px 20px;
+    margin: 0 32px 20px 32px;
+    align-self: stretch;
+}
+
+.fastsim-modal-dates-icon {
+    font-size: 20px;
+    margin-right: 10px;
+}
+
+.fastsim-modal-dates-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+}
+
+.fastsim-modal-stats {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.fastsim-modal-stat-col {
+    align-items: center;
+    padding: 0 24px;
+}
+
+.fastsim-modal-stat-num {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 48px;
+    letter-spacing: 2px;
+    -unity-text-align: middle-center;
+}
+
+.fastsim-modal-stat-num--win {
+    color: rgb(39, 174, 96);
+}
+
+.fastsim-modal-stat-num--loss {
+    color: rgb(192, 57, 43);
+}
+
+.fastsim-modal-stat-sep {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 36px;
+    color: rgb(100, 110, 135);
+    padding: 0 4px;
+    align-self: center;
+    margin-top: -8px;
+}
+
+.fastsim-modal-stat-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: rgb(140, 150, 175);
+    -unity-text-align: middle-center;
+    margin-top: 2px;
+}
+
+.fastsim-modal-detail {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(140, 150, 175);
+    -unity-text-align: middle-center;
+    margin-bottom: 20px;
+}
