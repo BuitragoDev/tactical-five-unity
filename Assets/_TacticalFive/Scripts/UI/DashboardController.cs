@@ -137,6 +137,9 @@ using System.Threading.Tasks;
     private bool _offerModalGoToQuinteto;
     private bool _tradeOfferModalResolved;
     private bool _tradeOfferAccepted;
+    private bool _fastSimAbortRecovered;
+    private bool _recoveryModalResolved;
+    private bool _recoveryModalGoToQuinteto;
 
     private VisualElement _deadlineDayOverlay;
     private bool _deadlineDayActive;
@@ -968,6 +971,15 @@ using System.Threading.Tasks;
             }
         }
 
+        // Si hay jugadores recuperados y estamos en fast-sim, interrumpir
+        // para mostrar el modal (mismo patrón que lesionados/vacíos).
+        if (fastSim && _pendingRecoveredIds.Count > 0)
+        {
+            _fastSimAborted = true;
+            _fastSimAbortRecovered = true;
+            yield break;
+        }
+
         var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
 
         // Los partidos G-League comparten game_day con la NBA pero nunca
@@ -1295,7 +1307,6 @@ using System.Threading.Tasks;
             // el refresh se hace al final. Si hay ofertas maduradas o propuestas
             // de traspaso pendientes, se aborta el día para mostrarlas con la
             // simulación parada (el día ya está commiteado).
-            _pendingRecoveredIds.Clear();
             var matured = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day);
             var pendingTrades = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
             if (matured.Count > 0 || pendingTrades.Count > 0)
@@ -1505,6 +1516,7 @@ using System.Threading.Tasks;
         _fastSimAbortEmptySlots = new List<int>();
         _fastSimAbortInjured = new List<(LineupData, PlayerData)>();
         _fastSimAbortOffers = false;
+        _fastSimAbortRecovered = false;
         _fastSimOfferPauseActive = false;
         _offerModalGoToQuinteto = false;
 
@@ -1564,6 +1576,24 @@ using System.Threading.Tasks;
                         yield break;
                     }
                     autoFixed = true;
+                }
+                else if (_fastSimAbortRecovered)
+                {
+                    _recoveryModalResolved = false;
+                    _recoveryModalGoToQuinteto = false;
+                    ShowPendingRecoveryModal();
+                    yield return new WaitUntil(() => _recoveryModalResolved);
+                    if (_recoveryModalGoToQuinteto)
+                    {
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                        yield break;
+                    }
+                    _fastSimAborted = false;
+                    _fastSimAbortRecovered = false;
+                    continue;
                 }
                 else if (_fastSimAbortEmptySlots.Count > 0)
                 {
@@ -2933,7 +2963,15 @@ var box = new VisualElement();
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
-            ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+            if (_fastSimRunning)
+            {
+                _recoveryModalGoToQuinteto = true;
+                _recoveryModalResolved = true;
+            }
+            else
+            {
+                ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+            }
         });
         btnGroup.Add(goBtn);
 
@@ -2945,6 +2983,11 @@ var box = new VisualElement();
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
+            if (_fastSimRunning)
+            {
+                _recoveryModalGoToQuinteto = false;
+                _recoveryModalResolved = true;
+            }
         });
         btnGroup.Add(closeBtn);
 
