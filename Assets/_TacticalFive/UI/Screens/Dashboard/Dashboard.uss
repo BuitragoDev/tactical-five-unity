@@ -414,6 +414,7 @@
 /* Row 1: Game panels wider, team stats narrower */
 .panel-game--third {
     flex: 1 1 0%;
+    flex-shrink: 1;
     min-width: 0;
 }
 .panel-game--third:last-child {
@@ -428,6 +429,7 @@
 /* Row 2: 3-column layout with center vertical container */
 .panels-row--grow {
     flex-direction: row;
+    flex-wrap: nowrap;
     flex-grow: 1;
     min-height: 0;
     align-items: stretch;
@@ -435,17 +437,25 @@
 
 /* Left: Clasificación */
 .panel-standings--col {
-    flex: 0 0 380px;
-    min-width: 380px;
+    width: 450px;
+    flex-shrink: 0;
     margin-right: 16px;
 }
 
 /* Center: vertical stack (PlayerStats + Relaciones) */
 .center-column {
-    flex: 1 1 0%;
+    flex-grow: 1;
+    flex-shrink: 1;
     flex-direction: column;
     min-width: 0;
     margin-right: 16px;
+}
+
+/* Right: Noticias */
+.panel-messages--col {
+    width: 450px;
+    flex-shrink: 0;
+    margin-right: 0;
 }
 .center-column > .panel {
     margin-right: 0;
@@ -460,16 +470,6 @@
     margin-right: 0;
 }
 
-/* Right: Noticias */
-.panel-messages--col {
-    flex: 0 0 320px;
-    min-width: 320px;
-    margin-right: 0;
-}
-
-.panel-game .panel-header {
-    padding: 8px 18px;
-}
 .panel-game .panel-body {
     padding: 4px 18px 0 18px;
 }
@@ -477,7 +477,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
+    padding: 8px 18px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     border-top-width: 0;
@@ -706,7 +706,7 @@
    ══════════════════════════════════════════ */
 .panel-standings {
     flex: 1 1 0%;
-    min-width: 0;
+    min-width: 500px;
 }
 
 .conf-tabs {
@@ -837,7 +837,7 @@
 }
 .stat-card {
     width: 49%;
-    padding: 8px 12px;
+    padding: 2px 6px;
     margin: 2px;
     background-color: rgb(17, 24, 34);
     border-color: rgb(28, 40, 56);
@@ -856,25 +856,22 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    width: 60px;
-    margin-right: 10px;
+    width: 100px;
+    margin-right: 14px;
 }
 
 .stat-card-photo-wrapper {
-    width: 68px;
-    height: 68px;
+    width: 100px;
+    height: 100px;
     border-radius: 5px;
-    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/mancha_blanca.png");
-    background-size: cover;
-    background-position: center;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
 
 .stat-card-photo {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
     border-radius: 50px;
     background-size: cover;
     background-position: center;
@@ -883,7 +880,7 @@
 
 .stat-card-right {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     flex-grow: 1;
 }
@@ -925,7 +922,7 @@
    ══════════════════════════════════════════ */
 .panel-messages {
     flex: 1 1 0%;
-    min-width: 0;
+    min-width: 600px;
     min-height: 180px;
 }
 .messages-scroll {
@@ -946,25 +943,44 @@
     padding: 8px 18px;
 }
 .message-item {
-    flex-direction: column;
+    flex-direction: row;
+    align-items: flex-start;
     flex-shrink: 0;
-    padding: 8px 0;
+    min-height: 70px;
+    padding: 3px 0;
     border-bottom-width: 1px;
     border-bottom-color: rgb(28, 33, 48);
 }
+.message-item-icon {
+    width: 100px;
+    height: 100px;
+    background-color: rgb(42, 95, 201);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+.message-item-text {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
 .message-item-subject {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .message-item-body {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(122, 138, 170);
     white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ══════════════════════════════════════════
@@ -1112,7 +1128,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-around;
-    padding: 6px 0;
+    padding: 0;
 }
 .board-col {
     flex-direction: column;
@@ -1128,8 +1144,8 @@
     background-color: rgba(212, 160, 23, 0.15);
     align-items: center;
     justify-content: center;
-    margin-top: 10px;
-    margin-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
     flex-shrink: 0;
 }
 .board-circle-val {
@@ -1148,7 +1164,7 @@
 }
 .board-col-sep {
     width: 0px;
-    height: 136px;
+    height: 0px;
     background-color: rgb(42, 51, 71);
     flex-shrink: 0;
 }

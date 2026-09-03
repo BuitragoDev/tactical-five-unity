@@ -389,6 +389,32 @@ using System.Threading.Tasks;
 
         // Mensajes
         _messagesBody = _root.Q<VisualElement>("MessagesBody");
+
+        // Forzar anchos de columnas Row 2 (USS flex no es fiable en build)
+        var standingsPanel = _root.Q<VisualElement>("PanelStandings");
+        if (standingsPanel != null)
+        {
+            standingsPanel.style.width = 450;
+            standingsPanel.style.minWidth = 450;
+            standingsPanel.style.maxWidth = 450;
+            standingsPanel.style.flexGrow = 0;
+            standingsPanel.style.flexShrink = 0;
+        }
+        var centerCol = _root.Q<VisualElement>(className: "center-column");
+        if (centerCol != null)
+        {
+            centerCol.style.flexGrow = 1;
+            centerCol.style.flexShrink = 1;
+        }
+        var messagesPanel = _root.Q<VisualElement>("PanelMessages");
+        if (messagesPanel != null)
+        {
+            messagesPanel.style.width = 450;
+            messagesPanel.style.minWidth = 450;
+            messagesPanel.style.maxWidth = 450;
+            messagesPanel.style.flexGrow = 0;
+            messagesPanel.style.flexShrink = 0;
+        }
     }
     protected override void LoadData()
     {
@@ -6836,21 +6862,29 @@ List<int> offeredPickIds = new List<int>();
 
         var latest = all.OrderByDescending(m => m.id)
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
-                        .Take(8).ToList();
+                        .Take(3).ToList();
 
         foreach (var msg in latest)
         {
             var item = new VisualElement();
             item.AddToClassList("message-item");
 
+            var icon = new VisualElement();
+            icon.AddToClassList("message-item-icon");
+            item.Add(icon);
+
+            var textBlock = new VisualElement();
+            textBlock.AddToClassList("message-item-text");
+
             var subj = new Label(msg.title ?? "Sin asunto");
             subj.AddToClassList("message-item-subject");
-            item.Add(subj);
+            textBlock.Add(subj);
 
             var body = new Label(msg.body ?? "");
             body.AddToClassList("message-item-body");
-            item.Add(body);
+            textBlock.Add(body);
 
+            item.Add(textBlock);
             _messagesBody.Add(item);
 
             if (msg.is_read == 0)

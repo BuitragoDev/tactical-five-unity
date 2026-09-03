@@ -1551,10 +1551,7 @@ using System.Linq;
             sender_type = 0,
             sender_id = 0,
             title = "Rescisión de contrato (buyout)",
-            body = $"Se ha rescindido el contrato de {playerName} mediante buyout.\n\n" +
-                   $"Salario restante: {remainingSalary:N0}\n" +
-                   $"Pago progresivo: ${annualPayment:N0} durante {stretchYears} años\n" +
-                   $"Total pagado: {remainingSalary:N0}\n\n" +
+            body = $"Se ha rescindido el contrato de {playerName} mediante buyout.\n" +
                    $"El jugador queda libre y puede firmar por cualquier equipo.",
             game_day = currentDay,
             game_date = now,

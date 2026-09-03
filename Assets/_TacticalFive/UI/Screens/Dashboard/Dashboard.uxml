@@ -162,7 +162,6 @@
                         <ui:VisualElement name="PanelStandings" class="panel panel-standings panel-standings--col">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
-                                    <ui:VisualElement name="BtnStandingsMore" class="panel-more-btn"/>
                                     <ui:Label text="CLASIFICACIÓN" class="panel-title"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="conf-tabs">
@@ -192,7 +191,6 @@
                             <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats panel-player-stats--center">
                                 <ui:VisualElement class="panel-header">
                                     <ui:VisualElement class="panel-header-left">
-                                        <ui:VisualElement name="BtnPlayerStatsMore" class="panel-more-btn"/>
                                         <ui:Label text="ESTADÍSTICAS DE JUGADORES" class="panel-title"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
@@ -204,7 +202,6 @@
                                                     <ui:VisualElement class="stat-card-photo-wrapper">
                                                         <ui:VisualElement name="StatScorerPhoto" class="stat-card-photo"/>
                                                     </ui:VisualElement>
-                                                    <ui:Label text="PTS" class="stat-card-abbr"/>
                                                 </ui:VisualElement>
                                                 <ui:VisualElement class="stat-card-right">
                                                     <ui:Label name="StatScorer" text="--" class="stat-card-val"/>
@@ -219,7 +216,6 @@
                                                     <ui:VisualElement class="stat-card-photo-wrapper">
                                                         <ui:VisualElement name="StatRebounderPhoto" class="stat-card-photo"/>
                                                     </ui:VisualElement>
-                                                    <ui:Label text="REB" class="stat-card-abbr"/>
                                                 </ui:VisualElement>
                                                 <ui:VisualElement class="stat-card-right">
                                                     <ui:Label name="StatRebounder" text="--" class="stat-card-val"/>
@@ -234,7 +230,6 @@
                                                     <ui:VisualElement class="stat-card-photo-wrapper">
                                                         <ui:VisualElement name="StatAssisterPhoto" class="stat-card-photo"/>
                                                     </ui:VisualElement>
-                                                    <ui:Label text="ASI" class="stat-card-abbr"/>
                                                 </ui:VisualElement>
                                                 <ui:VisualElement class="stat-card-right">
                                                     <ui:Label name="StatAssister" text="--" class="stat-card-val"/>
@@ -249,7 +244,6 @@
                                                     <ui:VisualElement class="stat-card-photo-wrapper">
                                                         <ui:VisualElement name="StatStealerPhoto" class="stat-card-photo"/>
                                                     </ui:VisualElement>
-                                                    <ui:Label text="ROB" class="stat-card-abbr"/>
                                                 </ui:VisualElement>
                                                 <ui:VisualElement class="stat-card-right">
                                                     <ui:Label name="StatStealer" text="--" class="stat-card-val"/>
@@ -264,7 +258,6 @@
                                                     <ui:VisualElement class="stat-card-photo-wrapper">
                                                         <ui:VisualElement name="StatBlockerPhoto" class="stat-card-photo"/>
                                                     </ui:VisualElement>
-                                                    <ui:Label text="TAP" class="stat-card-abbr"/>
                                                 </ui:VisualElement>
                                                 <ui:VisualElement class="stat-card-right">
                                                     <ui:Label name="StatBlocker" text="--" class="stat-card-val"/>
@@ -279,7 +272,6 @@
                                                     <ui:VisualElement class="stat-card-photo-wrapper">
                                                         <ui:VisualElement name="StatRatedPhoto" class="stat-card-photo"/>
                                                     </ui:VisualElement>
-                                                    <ui:Label text="VAL" class="stat-card-abbr"/>
                                                 </ui:VisualElement>
                                                 <ui:VisualElement class="stat-card-right">
                                                     <ui:Label name="StatRated" text="--" class="stat-card-val"/>
