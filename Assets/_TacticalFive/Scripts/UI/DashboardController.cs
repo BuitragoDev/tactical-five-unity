@@ -428,7 +428,7 @@ using System.Threading.Tasks;
 
         if (_noticiasSprites.Count == 0)
         {
-            var nombres = new[] { "contratado", "despedido", "entrenamiento", "lesionados", "obras-finalizadas", "pago-nominas", "prestamo-bancario", "renovacion", "traspaso" };
+            var nombres = new[] { "contratado", "despedido", "entrenamiento", "lesionados", "obras-finalizadas", "pago-nominas", "prestamo-bancario", "renovacion", "traspaso", "bienvenida", "recuperado", "quejas" };
             foreach (var n in nombres)
             {
                 var tex = Resources.Load<Texture2D>("Noticias/" + n);
@@ -6997,10 +6997,13 @@ List<int> offeredPickIds = new List<int>();
     string GetNoticiasKey(string title)
     {
         if (string.IsNullOrEmpty(title)) return null;
+        if (title.StartsWith("Bienvenido")) return "bienvenida";
+        if (title.StartsWith("Recuperado")) return "recuperado";
+        if (title.StartsWith("Queja") || title.StartsWith("Preocupación")) return "quejas";
         if (title.StartsWith("Fichaje:")) return "contratado";
         if (title.Contains("cancelado") || title.Contains("rechazado") || title.Contains("despedido")) return "despedido";
         if (title.Contains("Entrenamiento")) return "entrenamiento";
-        if (title.Contains("Lesión") || title.Contains("Recuperado") || title.Contains("RESERVA")) return "lesionados";
+        if (title.Contains("Lesión") || title.Contains("RESERVA")) return "lesionados";
         if (title.Contains("Remodelación")) return "obras-finalizadas";
         if (title.Contains("nóminas") || title.Contains("abonos")) return "pago-nominas";
         if (title.Contains("Préstamo")) return "prestamo-bancario";
