@@ -88,9 +88,11 @@ using System.Threading.Tasks;
     private List<TeamData> _allTeams;
     private List<GameData> _allGames;
     private List<PlayerData> _players = new();
+    private Dictionary<string, PlayerData> _playerByName = new();
 
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
+    private static Dictionary<string, Texture2D> _noticiasSprites = new();
 
     // Fired modal
     private VisualElement _firedOverlay;
@@ -423,6 +425,16 @@ using System.Threading.Tasks;
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
+        if (_noticiasSprites.Count == 0)
+        {
+            var nombres = new[] { "contratado", "despedido", "entrenamiento", "lesionados", "obras-finalizadas", "pago-nominas", "prestamo-bancario", "renovacion", "traspaso" };
+            foreach (var n in nombres)
+            {
+                var tex = Resources.Load<Texture2D>("Noticias/" + n);
+                if (tex != null) _noticiasSprites[n] = tex;
+            }
+        }
+
         // Panel "more" buttons
         var moreTex = Resources.Load<Texture2D>("Icons/mas");
         if (moreTex != null)
@@ -444,6 +456,10 @@ using System.Threading.Tasks;
             _currentConf = _myTeam.conference == "East" ? "East" : "West";
 
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+
+        _playerByName.Clear();
+        foreach (var p in DatabaseManager.Instance.GetAllPlayers())
+            _playerByName[$"{p.first_name} {p.last_name}"] = p;
     }
     protected override void RegisterCallbacks()
     {
@@ -6862,7 +6878,7 @@ List<int> offeredPickIds = new List<int>();
 
         var latest = all.OrderByDescending(m => m.id)
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
-                        .Take(3).ToList();
+                        .Take(4).ToList();
 
         foreach (var msg in latest)
         {
@@ -6871,6 +6887,7 @@ List<int> offeredPickIds = new List<int>();
 
             var icon = new VisualElement();
             icon.AddToClassList("message-item-icon");
+            SetNewsImage(icon, msg);
             item.Add(icon);
 
             var textBlock = new VisualElement();
@@ -6890,6 +6907,58 @@ List<int> offeredPickIds = new List<int>();
             if (msg.is_read == 0)
                 DatabaseManager.Instance.MarkMessageRead(msg.id);
         }
+    }
+
+    void SetNewsImage(VisualElement icon, MessageData msg)
+    {
+        Texture2D tex = null;
+
+        if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Resultado:"))
+        {
+            string rivalName = msg.title.Substring("Resultado: ".Length);
+            int parenIdx = rivalName.IndexOf(" (");
+            if (parenIdx > 0) rivalName = rivalName.Substring(0, parenIdx);
+            var rival = _allTeams?.FirstOrDefault(t => t.name == rivalName);
+            if (rival != null && _logoSprites.TryGetValue(rival.logo, out var sprite))
+            {
+                icon.style.backgroundImage = new StyleBackground(sprite);
+                return;
+            }
+        }
+        else if (msg.sender_type == 2)
+        {
+            if (msg.body != null && (msg.title == "TRIPLE-DOBLE" || msg.title == "EXPLOSIÓN"))
+            {
+                string playerName = msg.body.Split(new[] { " firmó", " anotó", " de " }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim();
+                if (!string.IsNullOrEmpty(playerName) && _playerByName.TryGetValue(playerName, out var player))
+                    tex = PlayerPhotoHelper.Load(player.id, player.photo);
+            }
+            if (tex == null) tex = _noticiasSprites.GetValueOrDefault("entrenamiento");
+        }
+        else
+        {
+            string key = GetNoticiasKey(msg.title);
+            if (key != null) tex = _noticiasSprites.GetValueOrDefault(key);
+        }
+
+        if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
+    }
+
+    string GetNoticiasKey(string title)
+    {
+        if (string.IsNullOrEmpty(title)) return null;
+        if (title.StartsWith("Fichaje:")) return "contratado";
+        if (title.Contains("cancelado") || title.Contains("rechazado") || title.Contains("despedido")) return "despedido";
+        if (title.Contains("Entrenamiento")) return "entrenamiento";
+        if (title.Contains("Lesión") || title.Contains("Recuperado") || title.Contains("RESERVA")) return "lesionados";
+        if (title.Contains("Remodelación")) return "obras-finalizadas";
+        if (title.Contains("nóminas") || title.Contains("abonos")) return "pago-nominas";
+        if (title.Contains("Préstamo")) return "prestamo-bancario";
+        if (title.Contains("renovado") || title.Contains("Re-firma") || title.Contains("Oferta rechazada")) return "renovacion";
+        if (title.Contains("Traspaso") || title.Contains("Sign & Trade") || title.Contains("Intercambio")
+            || title.Contains("Última semana") || title.Contains("OFERTAS") || title.Contains("Rescisión")
+            || title.Contains("Hard cap") || title.Contains("buyout")) return "traspaso";
+        return null;
     }
 
     void SetCircle(VisualElement circle, Label val, int value)
