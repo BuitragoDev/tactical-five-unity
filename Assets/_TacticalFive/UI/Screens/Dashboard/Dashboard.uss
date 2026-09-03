@@ -954,10 +954,10 @@
 .message-item-icon {
     width: 100px;
     height: 100px;
-    background-color: rgb(42, 95, 201);
     border-radius: 4px;
     flex-shrink: 0;
     margin-right: 10px;
+    overflow: hidden;
 }
 .message-item-text {
     flex-direction: column;
