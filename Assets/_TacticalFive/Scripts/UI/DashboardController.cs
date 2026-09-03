@@ -6912,8 +6912,6 @@ List<int> offeredPickIds = new List<int>();
 
     void SetNewsImage(VisualElement icon, MessageData msg)
     {
-        Texture2D tex = null;
-
         if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Resultado:"))
         {
             string rivalName = msg.title.Substring("Resultado: ".Length);
@@ -6928,21 +6926,72 @@ List<int> offeredPickIds = new List<int>();
         }
         else if (msg.sender_type == 2)
         {
-            if (msg.body != null && (msg.title == "TRIPLE-DOBLE" || msg.title == "EXPLOSIÓN"))
+            if (msg.title == "TRIPLE-DOBLE" || msg.title == "EXPLOSIÓN")
             {
-                string playerName = msg.body.Split(new[] { " firmó", " anotó", " de " }, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim();
-                if (!string.IsNullOrEmpty(playerName) && _playerByName.TryGetValue(playerName, out var player))
-                    tex = PlayerPhotoHelper.Load(player.id, player.photo);
+                string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
+                if (playerName != null && _playerByName.TryGetValue(playerName, out var player))
+                {
+                    var tex = PlayerPhotoHelper.Load(player.id, player.photo);
+                    if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return; }
+                }
             }
-            if (tex == null) tex = _noticiasSprites.GetValueOrDefault("entrenamiento");
+            else
+            {
+                string teamName = ExtractFirstTeamFromBody(msg.body);
+                if (teamName != null)
+                {
+                    var team = _allTeams?.FirstOrDefault(t => t.name == teamName);
+                    if (team != null && _logoSprites.TryGetValue(team.logo, out var sprite))
+                    {
+                        icon.style.backgroundImage = new StyleBackground(sprite);
+                        return;
+                    }
+                }
+            }
         }
         else
         {
             string key = GetNoticiasKey(msg.title);
-            if (key != null) tex = _noticiasSprites.GetValueOrDefault(key);
+            if (key != null)
+            {
+                var tex = _noticiasSprites.GetValueOrDefault(key);
+                if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return; }
+            }
         }
+    }
 
-        if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
+    string ExtractFirstFromBody(string body, IEnumerable<string> knownNames)
+    {
+        if (string.IsNullOrEmpty(body)) return null;
+        int earliest = int.MaxValue;
+        string found = null;
+        foreach (var name in knownNames)
+        {
+            int idx = body.IndexOf(name, StringComparison.Ordinal);
+            if (idx >= 0 && idx < earliest)
+            {
+                earliest = idx;
+                found = name;
+            }
+        }
+        return found;
+    }
+
+    string ExtractFirstTeamFromBody(string body)
+    {
+        if (string.IsNullOrEmpty(body) || _allTeams == null) return null;
+        int earliest = int.MaxValue;
+        string found = null;
+        foreach (var team in _allTeams)
+        {
+            int idx = body.IndexOf(team.name, StringComparison.Ordinal);
+            if (idx >= 0 && idx < earliest)
+            {
+                earliest = idx;
+                found = team.name;
+            }
+        }
+        return found;
     }
 
     string GetNoticiasKey(string title)
