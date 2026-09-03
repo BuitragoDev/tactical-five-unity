@@ -2010,7 +2010,7 @@ using System.Threading.Tasks;
             int gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(player.id, _season.id);
             int teamChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
             float acceptScore = RosterController.CalculateAcceptScore(player, offer.offer_salary, offer.offer_years, gamesPlayed, teamChem);
-            bool accepted = Random.Range(1, 101) <= acceptScore;
+            bool accepted = UnityEngine.Random.Range(1, 101) <= acceptScore;
 
             string playerName = $"{player.first_name} {player.last_name}";
             string salaryText = $"${offer.offer_salary / 1_000_000}M/año";
@@ -2888,11 +2888,11 @@ using System.Threading.Tasks;
                     PlayClick();
                     float pct = medico.reputation switch
                     {
-                        5 => Random.Range(0.25f, 0.40f),
-                        4 => Random.Range(0.20f, 0.32f),
-                        3 => Random.Range(0.15f, 0.25f),
-                        2 => Random.Range(0.10f, 0.18f),
-                        _ => Random.Range(0.05f, 0.12f),
+                        5 => UnityEngine.Random.Range(0.25f, 0.40f),
+                        4 => UnityEngine.Random.Range(0.20f, 0.32f),
+                        3 => UnityEngine.Random.Range(0.15f, 0.25f),
+                        2 => UnityEngine.Random.Range(0.10f, 0.18f),
+                        _ => UnityEngine.Random.Range(0.05f, 0.12f),
                     };
                     int newDays = Mathf.CeilToInt(p.injury_days * (1f - pct));
                     p.injury_days = Mathf.Clamp(newDays, 1, p.injury_days);
