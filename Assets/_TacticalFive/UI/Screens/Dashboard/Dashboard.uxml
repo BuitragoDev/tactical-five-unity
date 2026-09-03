@@ -41,11 +41,11 @@
             </ui:VisualElement>
             <ui:ScrollView name="ContentScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="content-scroll">
                 <ui:VisualElement class="panels-grid">
+                    <!-- ROW 1: ÚLTIMO PARTIDO + PRÓXIMO PARTIDO + ESTADÍSTICAS DEL EQUIPO -->
                     <ui:VisualElement class="panels-row">
-                        <ui:VisualElement name="PanelLastGame" class="panel panel-game">
+                        <ui:VisualElement name="PanelLastGame" class="panel panel-game panel-game--third">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
-                                    <ui:VisualElement name="BtnLastGameMore" class="panel-more-btn"/>
                                     <ui:Label text="ÚLTIMO PARTIDO" class="panel-title"/>
                                 </ui:VisualElement>
                                 <ui:Label name="LastGameDate" text="" class="panel-date"/>
@@ -56,6 +56,7 @@
                                     <ui:VisualElement name="LastGameHome" class="game-team-block">
                                         <ui:VisualElement name="LastHomeLog" class="game-team-logo-lg"/>
                                         <ui:Label name="LastHomeName" text="" class="game-team-name-lg"/>
+                                        <ui:Label name="LastHomeRecord" text="" class="game-team-record"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="game-score-block">
                                         <ui:VisualElement style="flex-direction: row; align-items: center;">
@@ -68,22 +69,21 @@
                                     <ui:VisualElement name="LastGameAway" class="game-team-block">
                                         <ui:VisualElement name="LastAwayLog" class="game-team-logo-lg"/>
                                         <ui:Label name="LastAwayName" text="" class="game-team-name-lg"/>
+                                        <ui:Label name="LastAwayRecord" text="" class="game-team-record"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="LastGameMeta" class="game-meta-row">
-                                    <ui:VisualElement name="LastGameLocation" class="game-meta-location">
-                                        <ui:VisualElement name="LastGameLocationIcon" class="game-meta-location-icon"/>
-                                        <ui:Label name="LastGameLocationText" text="LOCAL" class="game-meta-location-label"/>
-                                    </ui:VisualElement>
-                                    <ui:Label name="LastGameArena" text="" class="game-meta-arena"/>
-                                    <ui:Label name="LastGameType" text="" class="game-meta-type"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="LastGameMeta" class="game-meta-row">
+                                <ui:Label name="LastGameArena" text="" class="game-meta-arena"/>
+                                <ui:VisualElement class="game-meta-footer">
+                                    <ui:Label text="VER RESUMEN" class="panel-footer-link"/>
+                                    <ui:Label text="→" class="panel-footer-arrow"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="PanelNextGame" class="panel panel-game">
+                        <ui:VisualElement name="PanelNextGame" class="panel panel-game panel-game--third">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
-                                    <ui:VisualElement name="BtnNextGameMore" class="panel-more-btn"/>
                                     <ui:Label text="PRÓXIMO PARTIDO" class="panel-title"/>
                                 </ui:VisualElement>
                                 <ui:Label name="NextGameDate" text="" class="panel-date"/>
@@ -94,6 +94,7 @@
                                     <ui:VisualElement name="NextGameHome" class="game-team-block">
                                         <ui:VisualElement name="NextHomeLog" class="game-team-logo-lg"/>
                                         <ui:Label name="NextHomeName" text="" class="game-team-name-lg"/>
+                                        <ui:Label name="NextHomeRecord" text="" class="game-team-record"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="game-score-block">
                                         <ui:Label text="VS" class="game-vs-text"/>
@@ -101,21 +102,64 @@
                                     <ui:VisualElement name="NextGameAway" class="game-team-block">
                                         <ui:VisualElement name="NextAwayLog" class="game-team-logo-lg"/>
                                         <ui:Label name="NextAwayName" text="" class="game-team-name-lg"/>
+                                        <ui:Label name="NextAwayRecord" text="" class="game-team-record"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="NextGameMeta" class="game-meta-row">
-                                    <ui:VisualElement name="NextGameLocation" class="game-meta-location">
-                                        <ui:VisualElement name="NextGameLocationIcon" class="game-meta-location-icon"/>
-                                        <ui:Label name="NextGameLocationText" text="VISITANTE" class="game-meta-location-label"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement name="NextGameMeta" class="game-meta-row">
+                                <ui:Label name="NextGameArena" text="" class="game-meta-arena"/>
+                                <ui:VisualElement class="game-meta-footer">
+                                    <ui:Label text="VER PREVIA" class="panel-footer-link"/>
+                                    <ui:Label text="→" class="panel-footer-arrow"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PanelTeamStats" class="panel panel-team-stats panel-team-stats--third">
+                            <ui:VisualElement class="panel-body">
+                                <ui:VisualElement class="team-stat-row">
+                                    <ui:VisualElement class="team-stat-trophy-icon"/>
+                                    <ui:VisualElement class="team-stat-info">
+                                        <ui:Label text="Objetivo de la temporada" class="team-stat-title"/>
+                                        <ui:Label name="TeamObjective" text="--" class="team-stat-subtitle"/>
                                     </ui:VisualElement>
-                                    <ui:Label name="NextGameArena" text="" class="game-meta-arena"/>
-                                    <ui:Label name="NextGameType" text="" class="game-meta-type"/>
+                                    <ui:VisualElement name="TeamObjectiveStatus" class="team-stat-status-icon"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="team-stat-row">
+                                    <ui:VisualElement name="TeamStatsLogo" class="team-stat-logo"/>
+                                    <ui:VisualElement class="team-stat-info">
+                                        <ui:Label text="Media equipo" class="team-stat-title"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="team-stat-ring">
+                                        <ui:Label name="TeamOverallRingVal" text="--" class="team-stat-ring-val"/>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="team-stat-row">
+                                    <ui:VisualElement name="TeamChemistryIcon" class="team-stat-logo"/>
+                                    <ui:VisualElement class="team-stat-info">
+                                        <ui:Label text="Química equipo" class="team-stat-title"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="team-stat-ring">
+                                        <ui:Label name="TeamChemistryRingVal" text="--" class="team-stat-ring-val"/>
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="team-stat-row team-stat-row--last">
+                                    <ui:VisualElement class="team-stat-arena-icon"/>
+                                    <ui:VisualElement class="team-stat-info">
+                                        <ui:Label name="TeamArenaName" text="Pabellón" class="team-stat-title"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="team-stat-right-group">
+                                        <ui:VisualElement name="TeamReputationStars" class="team-stat-stars"/>
+                                        <ui:Label name="TeamArenaCapacity" text="--" class="team-stat-capacity"/>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="panels-row">
-                        <ui:VisualElement name="PanelStandings" class="panel panel-standings">
+
+                    <!-- ROW 2: CLASIFICACIÓN | [ESTADÍSTICAS JUGADORES + RELACIONES] | NOTICIAS -->
+                    <ui:VisualElement class="panels-row panels-row--grow">
+                        <!-- IZQUIERDA: CLASIFICACIÓN -->
+                        <ui:VisualElement name="PanelStandings" class="panel panel-standings panel-standings--col">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
                                     <ui:VisualElement name="BtnStandingsMore" class="panel-more-btn"/>
@@ -137,9 +181,15 @@
                                 <ui:Label text="RACHA" class="col-streak col-stat--header"/>
                             </ui:VisualElement>
                             <ui:VisualElement name="StandingsBody" class="standings-table"/>
+                            <ui:VisualElement class="panel-footer">
+                                <ui:Label text="VER CLASIFICACIÓN COMPLETA" class="panel-footer-link"/>
+                                <ui:Label text="→" class="panel-footer-arrow"/>
+                            </ui:VisualElement>
                         </ui:VisualElement>
+
+                        <!-- CENTRO: ESTADÍSTICAS JUGADORES + RELACIONES (vertical) -->
                         <ui:VisualElement class="center-column">
-                            <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats">
+                            <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats panel-player-stats--center">
                                 <ui:VisualElement class="panel-header">
                                     <ui:VisualElement class="panel-header-left">
                                         <ui:VisualElement name="BtnPlayerStatsMore" class="panel-more-btn"/>
@@ -241,7 +291,7 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement name="PanelBoard" class="panel panel-board">
+                            <ui:VisualElement name="PanelBoard" class="panel panel-board panel-board--center">
                                 <ui:VisualElement class="panel-header">
                                     <ui:Label text="RELACIONES" class="panel-title"/>
                                 </ui:VisualElement>
@@ -271,59 +321,20 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement class="right-column">
-                            <ui:VisualElement name="PanelTeamStats" class="panel panel-team-stats">
-                                <ui:VisualElement class="panel-header">
-                                    <ui:Label text="ESTADÍSTICAS DEL EQUIPO" class="panel-title"/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="panel-body">
-                                    <ui:VisualElement class="team-stat-row">
-                                        <ui:VisualElement class="team-stat-trophy-icon"/>
-                                        <ui:VisualElement class="team-stat-info">
-                                            <ui:Label text="Objetivo de la temporada" class="team-stat-title"/>
-                                            <ui:Label name="TeamObjective" text="--" class="team-stat-subtitle"/>
-                                        </ui:VisualElement>
-                                        <ui:VisualElement name="TeamObjectiveStatus" class="team-stat-status-icon"/>
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="team-stat-row">
-                                        <ui:VisualElement name="TeamStatsLogo" class="team-stat-logo"/>
-                                        <ui:VisualElement class="team-stat-info">
-                                            <ui:Label text="Media equipo" class="team-stat-title"/>
-                                            <ui:Label name="TeamOverallLabel" text="--" class="team-stat-subtitle"/>
-                                        </ui:VisualElement>
-                                        <ui:VisualElement name="TeamOverallRing" class="team-stat-ring">
-                                            <ui:Label name="TeamOverallRingVal" text="--" class="team-stat-ring-val"/>
-                                        </ui:VisualElement>
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="team-stat-row">
-                                        <ui:VisualElement name="TeamChemistryIcon" class="team-stat-logo"/>
-                                        <ui:VisualElement class="team-stat-info">
-                                            <ui:Label text="Química equipo" class="team-stat-title"/>
-                                            <ui:Label name="TeamChemistryLabel" text="--" class="team-stat-subtitle"/>
-                                        </ui:VisualElement>
-                                        <ui:VisualElement name="TeamChemistryRing" class="team-stat-ring">
-                                            <ui:Label name="TeamChemistryRingVal" text="--" class="team-stat-ring-val"/>
-                                        </ui:VisualElement>
-                                    </ui:VisualElement>
-                                    <ui:VisualElement class="team-stat-row">
-                                        <ui:VisualElement class="team-stat-arena-icon"/>
-                                        <ui:VisualElement class="team-stat-info">
-                                            <ui:Label name="TeamArenaName" text="Pabellón" class="team-stat-title"/>
-                                            <ui:Label name="TeamArenaCapacity" text="--" class="team-stat-subtitle"/>
-                                        </ui:VisualElement>
-                                        <ui:VisualElement name="TeamReputationStars" class="team-stat-stars"/>
-                                    </ui:VisualElement>
+
+                        <!-- DERECHA: NOTICIAS -->
+                        <ui:VisualElement name="PanelMessages" class="panel panel-messages panel-messages--col">
+                            <ui:VisualElement class="panel-header">
+                                <ui:VisualElement class="panel-header-left">
+                                    <ui:Label text="NOTICIAS" class="panel-title"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement name="PanelMessages" class="panel panel-messages">
-                                <ui:VisualElement class="panel-header">
-                                    <ui:VisualElement class="panel-header-left">
-                                        <ui:Label text="NOTICIAS" class="panel-title"/>
-                                    </ui:VisualElement>
-                                </ui:VisualElement>
-                                <ui:ScrollView name="MessagesScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="messages-scroll">
-                                    <ui:VisualElement name="MessagesBody" class="messages-body"/>
-                                </ui:ScrollView>
+                            <ui:ScrollView name="MessagesScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="messages-scroll">
+                                <ui:VisualElement name="MessagesBody" class="messages-body"/>
+                            </ui:ScrollView>
+                            <ui:VisualElement class="panel-footer">
+                                <ui:Label text="VER TODAS LAS NOTICIAS" class="panel-footer-link"/>
+                                <ui:Label text="→" class="panel-footer-arrow"/>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>

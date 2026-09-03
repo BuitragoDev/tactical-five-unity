@@ -34,17 +34,14 @@ using System.Threading.Tasks;
     private VisualElement _lastHomeLog;
     private VisualElement _lastAwayLog;
     private Label _lastHomeName;
+    private Label _lastHomeRecord;
     private Label _lastAwayName;
+    private Label _lastAwayRecord;
     private Label _lastHomeScore;
     private Label _lastAwayScore;
     private Label _lastResultBadge;
     private Label _lastGameDate;
-    // Meta partidos
-    private VisualElement _lastGameLocation;
-    private VisualElement _lastGameLocationIcon;
-    private Label _lastGameLocationText;
     private Label _lastGameArena;
-    private Label _lastGameType;
 
     // Próximo partido
     private Label _noNextGame;
@@ -52,13 +49,11 @@ using System.Threading.Tasks;
     private VisualElement _nextHomeLog;
     private VisualElement _nextAwayLog;
     private Label _nextHomeName;
+    private Label _nextHomeRecord;
     private Label _nextAwayName;
+    private Label _nextAwayRecord;
     private Label _nextGameDate;
-    private VisualElement _nextGameLocation;
-    private VisualElement _nextGameLocationIcon;
-    private Label _nextGameLocationText;
     private Label _nextGameArena;
-    private Label _nextGameType;
 
     // Clasificación
     private Button _tabEast;
@@ -96,8 +91,6 @@ using System.Threading.Tasks;
 
     // Sprites
     private Dictionary<string, Sprite> _logoSprites = new();
-    private Texture2D _homeIcon;
-    private Texture2D _awayIcon;
 
     // Fired modal
     private VisualElement _firedOverlay;
@@ -346,16 +339,14 @@ using System.Threading.Tasks;
         _lastHomeLog = _root.Q<VisualElement>("LastHomeLog");
         _lastAwayLog = _root.Q<VisualElement>("LastAwayLog");
         _lastHomeName = _root.Q<Label>("LastHomeName");
+        _lastHomeRecord = _root.Q<Label>("LastHomeRecord");
         _lastAwayName = _root.Q<Label>("LastAwayName");
+        _lastAwayRecord = _root.Q<Label>("LastAwayRecord");
         _lastHomeScore = _root.Q<Label>("LastHomeScore");
         _lastAwayScore = _root.Q<Label>("LastAwayScore");
         _lastResultBadge = _root.Q<Label>("LastResultBadge");
         _lastGameDate = _root.Q<Label>("LastGameDate");
-        _lastGameLocation = _root.Q<VisualElement>("LastGameLocation");
-        _lastGameLocationIcon = _root.Q<VisualElement>("LastGameLocationIcon");
-        _lastGameLocationText = _root.Q<Label>("LastGameLocationText");
         _lastGameArena = _root.Q<Label>("LastGameArena");
-        _lastGameType = _root.Q<Label>("LastGameType");
 
         // Próximo partido
         _noNextGame = _root.Q<Label>("NoNextGame");
@@ -363,13 +354,11 @@ using System.Threading.Tasks;
         _nextHomeLog = _root.Q<VisualElement>("NextHomeLog");
         _nextAwayLog = _root.Q<VisualElement>("NextAwayLog");
         _nextHomeName = _root.Q<Label>("NextHomeName");
+        _nextHomeRecord = _root.Q<Label>("NextHomeRecord");
         _nextAwayName = _root.Q<Label>("NextAwayName");
+        _nextAwayRecord = _root.Q<Label>("NextAwayRecord");
         _nextGameDate = _root.Q<Label>("NextGameDate");
-        _nextGameLocation = _root.Q<VisualElement>("NextGameLocation");
-        _nextGameLocationIcon = _root.Q<VisualElement>("NextGameLocationIcon");
-        _nextGameLocationText = _root.Q<Label>("NextGameLocationText");
         _nextGameArena = _root.Q<Label>("NextGameArena");
-        _nextGameType = _root.Q<Label>("NextGameType");
 
         // Clasificación
         _tabEast = _root.Q<Button>("TabEast");
@@ -407,8 +396,6 @@ using System.Threading.Tasks;
 
         var logos = Resources.LoadAll<Sprite>("Teams/Logos");
         foreach (var s in logos) _logoSprites[s.name] = s;
-        _homeIcon = Resources.Load<Texture2D>("Icons/home_icon");
-        _awayIcon = Resources.Load<Texture2D>("Icons/away_icon");
 
         // Panel "more" buttons
         var moreTex = Resources.Load<Texture2D>("Icons/mas");
@@ -467,6 +454,30 @@ using System.Threading.Tasks;
             var btn = _root.Q<VisualElement>(name);
             if (btn == null) continue;
             btn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(screen); });
+        }
+
+        // Panel footer links (query by link text)
+        var footerLinkTexts = new (string text, GameScreen screen)[]
+        {
+            ("VER RESUMEN", GameScreen.Results),
+            ("VER PREVIA", GameScreen.MatchDay),
+            ("VER CLASIFICACIÓN COMPLETA", GameScreen.Standings),
+            ("VER TODAS LAS NOTICIAS", GameScreen.Messages),
+        };
+        var allClickables = _root.Query(className: "panel-footer").ToList();
+        allClickables.AddRange(_root.Query(className: "game-meta-footer").ToList());
+        foreach (var clickable in allClickables)
+        {
+            var linkLabel = clickable.Q<Label>(className: "panel-footer-link");
+            if (linkLabel == null) continue;
+            foreach (var (text, screen) in footerLinkTexts)
+            {
+                if (linkLabel.text == text)
+                {
+                    clickable.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(screen); });
+                    break;
+                }
+            }
         }
     }
 
@@ -6353,6 +6364,9 @@ List<int> offeredPickIds = new List<int>();
         _lastHomeScore.text = last.home_score.ToString();
         _lastAwayScore.text = last.away_score.ToString();
 
+        if (_lastHomeRecord != null) _lastHomeRecord.text = GetTeamRecordShort(last.home_team_id);
+        if (_lastAwayRecord != null) _lastAwayRecord.text = GetTeamRecordShort(last.away_team_id);
+
         // Force layout recalculation after scores are set to prevent overflow on first load
         _lastGameResult?.MarkDirtyRepaint();
 
@@ -6377,42 +6391,32 @@ List<int> offeredPickIds = new List<int>();
         _lastResultBadge.AddToClassList(won ? "badge-win" : "badge-loss");
 
         // Meta
-        bool lastIsHome = last.home_team_id == _myTeam.id;
         var lastHomeTeam = _allTeams.Find(t => t.id == last.home_team_id);
-
-        SetGameLocation(_lastGameLocation, _lastGameLocationIcon, _lastGameLocationText, lastIsHome);
 
         _lastGameArena.text = lastHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(lastHomeTeam.id)?.arena ?? ""
             : "";
+    }
 
-        _lastGameType.text = last.game_type switch
+    string GetTeamRecordShort(int teamId)
+    {
+        int w = 0, l = 0;
+        foreach (var g in _allGames)
         {
-            "preseason" => "AMISTOSO",
-            "regular" => "TEMPORADA REGULAR",
-            "playin" => "PLAY-IN",
-            "playoff" => "PLAYOFFS",
-            _ => last.game_type.ToUpper()
-        };
+            if (g.is_played != 1 || g.game_type != "regular") continue;
+            if (g.home_team_id == teamId)
+            {
+                if (g.home_score > g.away_score) w++; else l++;
+            }
+            else if (g.away_team_id == teamId)
+            {
+                if (g.away_score > g.home_score) w++; else l++;
+            }
+        }
+        return $"{w} - {l}";
     }
 
     // ── PRÓXIMO PARTIDO ──────────────────────────────────
-
-    void SetGameLocation(VisualElement container, VisualElement icon, Label label, bool isHome)
-    {
-        if (container == null) return;
-
-        container.RemoveFromClassList("game-meta-location--home");
-        container.RemoveFromClassList("game-meta-location--away");
-        container.AddToClassList(isHome ? "game-meta-location--home" : "game-meta-location--away");
-
-        var iconTexture = isHome ? _homeIcon : _awayIcon;
-        if (icon != null && iconTexture != null)
-            icon.style.backgroundImage = new StyleBackground(iconTexture);
-
-        if (label != null)
-            label.text = isHome ? "LOCAL" : "VISITANTE";
-    }
 
     void RefreshNextGame()
     {
@@ -6436,6 +6440,8 @@ List<int> offeredPickIds = new List<int>();
         SetTeamLogo(_nextAwayLog, away?.logo, "64x64");
         _nextHomeName.text = home?.name.ToUpper() ?? "";
         _nextAwayName.text = away?.name.ToUpper() ?? "";
+        if (_nextHomeRecord != null) _nextHomeRecord.text = GetTeamRecordShort(next.home_team_id);
+        if (_nextAwayRecord != null) _nextAwayRecord.text = GetTeamRecordShort(next.away_team_id);
         try
         {
             _nextGameDate.text = System.DateTime.Parse(next.game_date).ToString("dd/MM/yyyy");
@@ -6446,23 +6452,11 @@ List<int> offeredPickIds = new List<int>();
         }
 
         // Meta
-        bool nextIsHome = next.home_team_id == _myTeam.id;
         var nextHomeTeam = _allTeams.Find(t => t.id == next.home_team_id);
-
-        SetGameLocation(_nextGameLocation, _nextGameLocationIcon, _nextGameLocationText, nextIsHome);
 
         _nextGameArena.text = nextHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(nextHomeTeam.id)?.arena ?? ""
             : "";
-
-        _nextGameType.text = next.game_type switch
-        {
-            "preseason" => "AMISTOSO",
-            "regular" => "TEMPORADA REGULAR",
-            "playin" => "PLAY-IN",
-            "playoff" => "PLAYOFFS",
-            _ => next.game_type.ToUpper()
-        };
     }
 
     // ── CLASIFICACIÓN ────────────────────────────────────
@@ -6477,7 +6471,7 @@ List<int> offeredPickIds = new List<int>();
         else _tabWest.AddToClassList("conf-tab--active");
 
         var confTeams = _allTeams.Where(t => t.conference == conf).ToList();
-        var standings = BuildStandings(confTeams);
+        var standings = BuildStandings(confTeams).Take(10).ToList();
 
         _standingsBody.Clear();
 
