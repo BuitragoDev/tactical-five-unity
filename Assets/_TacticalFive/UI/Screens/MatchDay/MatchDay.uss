@@ -1155,9 +1155,14 @@
 .mpv-bench-card {
     flex-direction: row;
     align-items: center;
-    padding: 3px 8px;
-    margin-bottom: 2px;
-    width: 50%;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    width: calc(50% - 4px);
+    background-color: #1c2130;
+    border-width: 1px;
+    border-color: #2a3347;
+    border-radius: 6px;
 }
 
 .mpv-bench-name {
