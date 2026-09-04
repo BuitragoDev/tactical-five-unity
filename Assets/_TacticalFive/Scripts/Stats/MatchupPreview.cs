@@ -14,8 +14,8 @@ public static class MatchupPreview
         public int conferenceRank;
         public string conferenceName;
         public List<char> last10 = new();
-        public float offRating, defRating, pace, netRating;
-        public int offRank, defRank, paceRank, netRank;
+        public float offRating, defRating;
+        public int offRank, defRank;
         public List<PlayerData> starters = new();
         public List<PlayerData> bench = new();
         public List<PlayerData> injured = new();
@@ -41,7 +41,7 @@ public static class MatchupPreview
     }
 
     public static PreviewResult Compute(int homeTeamId, int awayTeamId, bool isHome,
-        int managerId, int seasonId)
+        int managerId, int seasonId, string gameDate)
     {
         var db = DatabaseManager.Instance;
         var allTeams = db.GetAllTeams();
@@ -89,11 +89,27 @@ public static class MatchupPreview
         ComputeKeyPlayers(homeSide, db, homeTeamId, managerId, seasonId);
         ComputeKeyPlayers(awaySide, db, awayTeamId, managerId, seasonId);
 
-        ComputeAllTeamRatings(standingsGames, allTeams, db, managerId, seasonId,
-            out var offRatings, out var defRatings, out var paces, out var netRatings);
+        var offRatings = new Dictionary<int, float>();
+        var defRatings = new Dictionary<int, float>();
+        foreach (var team in allTeams)
+        {
+            var teamGames = standingsGames.Where(g =>
+                (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
+            if (teamGames.Count == 0) continue;
+            float totalScored = 0, totalAllowed = 0;
+            foreach (var g in teamGames)
+            {
+                bool isH = g.home_team_id == team.id;
+                totalScored += isH ? g.home_score : g.away_score;
+                totalAllowed += isH ? g.away_score : g.home_score;
+            }
+            int n = teamGames.Count;
+            offRatings[team.id] = totalScored / n;
+            defRatings[team.id] = totalAllowed / n;
+        }
 
-        AssignRanks(homeSide, offRatings, defRatings, paces, netRatings);
-        AssignRanks(awaySide, offRatings, defRatings, paces, netRatings);
+        AssignRanks(homeSide, offRatings, defRatings);
+        AssignRanks(awaySide, offRatings, defRatings);
 
         return new PreviewResult
         {
@@ -107,7 +123,10 @@ public static class MatchupPreview
             awayStars = awayPlayers.OrderByDescending(p => p.overall).Take(3).ToList(),
             home = homeSide,
             away = awaySide,
-            gameDate = DateTime.Now.ToString("dd MMM yyyy").ToUpper(),
+            gameDate = !string.IsNullOrEmpty(gameDate)
+                ? DateTime.Parse(gameDate).ToString("dd MMM yyyy",
+                    new System.Globalization.CultureInfo("es-ES")).ToUpper()
+                : "",
             arenaName = homeTeam?.arena ?? "",
             arenaCity = homeTeam?.city ?? "",
         };
@@ -175,58 +194,16 @@ public static class MatchupPreview
         {
             side.offRating = totalPtsScored / gameCount;
             side.defRating = totalPtsAllowed / gameCount;
-            side.pace = (totalPtsScored + totalPtsAllowed) / (2f * gameCount) * 2.2f;
-            side.netRating = side.offRating - side.defRating;
-        }
-    }
-
-    static void ComputeAllTeamRatings(List<GameData> standingsGames,
-        List<TeamData> allTeams, DatabaseManager db,
-        int managerId, int seasonId,
-        out Dictionary<int, float> offRatings,
-        out Dictionary<int, float> defRatings,
-        out Dictionary<int, float> paces,
-        out Dictionary<int, float> netRatings)
-    {
-        offRatings = new Dictionary<int, float>();
-        defRatings = new Dictionary<int, float>();
-        paces = new Dictionary<int, float>();
-        netRatings = new Dictionary<int, float>();
-
-        foreach (var team in allTeams)
-        {
-            var teamGames = standingsGames.Where(g =>
-                (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
-            if (teamGames.Count == 0) continue;
-
-            float totalScored = 0, totalAllowed = 0;
-            foreach (var g in teamGames)
-            {
-                bool isHome = g.home_team_id == team.id;
-                totalScored += isHome ? g.home_score : g.away_score;
-                totalAllowed += isHome ? g.away_score : g.home_score;
-            }
-            int n = teamGames.Count;
-            float off = totalScored / n;
-            float def = totalAllowed / n;
-            offRatings[team.id] = off;
-            defRatings[team.id] = def;
-            paces[team.id] = (totalScored + totalAllowed) / (2f * n) * 2.2f;
-            netRatings[team.id] = off - def;
         }
     }
 
     static void AssignRanks(TeamPreviewSide side,
         Dictionary<int, float> offRatings,
-        Dictionary<int, float> defRatings,
-        Dictionary<int, float> paces,
-        Dictionary<int, float> netRatings)
+        Dictionary<int, float> defRatings)
     {
         var allTeamIds = offRatings.Keys.ToList();
         side.offRank = GetRank(side.offRating, allTeamIds, offRatings, ascending: false);
         side.defRank = GetRank(side.defRating, allTeamIds, defRatings, ascending: true);
-        side.paceRank = GetRank(side.pace, allTeamIds, paces, ascending: false);
-        side.netRank = GetRank(side.netRating, allTeamIds, netRatings, ascending: false);
     }
 
     static int GetRank(float value, List<int> teamIds, Dictionary<int, float> ratings, bool ascending)

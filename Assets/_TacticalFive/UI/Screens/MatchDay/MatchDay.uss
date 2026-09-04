@@ -983,10 +983,6 @@
     letter-spacing: 1px;
 }
 
-.mpv-stat-val--net {
-    color: #d4a017;
-}
-
 .mpv-stat-rank {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 13px;

@@ -217,16 +217,6 @@
                         <ui:Label name="MPVHomeDef" class="mpv-stat-val" text="" />
                         <ui:Label name="MPVHomeDefRank" class="mpv-stat-rank" text="" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="mpv-stat-card">
-                        <ui:Label class="mpv-stat-label" text="RITMO" />
-                        <ui:Label name="MPVHomePace" class="mpv-stat-val" text="" />
-                        <ui:Label name="MPVHomePaceRank" class="mpv-stat-rank" text="" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="mpv-stat-card">
-                        <ui:Label class="mpv-stat-label" text="NET RATING" />
-                        <ui:Label name="MPVHomeNet" class="mpv-stat-val mpv-stat-val--net" text="" />
-                        <ui:Label name="MPVHomeNetRank" class="mpv-stat-rank" text="" />
-                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- CENTER: BAJAS -->
@@ -254,16 +244,6 @@
                         <ui:Label class="mpv-stat-label" text="DEFENSA" />
                         <ui:Label name="MPVAwayDef" class="mpv-stat-val" text="" />
                         <ui:Label name="MPVAwayDefRank" class="mpv-stat-rank" text="" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="mpv-stat-card">
-                        <ui:Label class="mpv-stat-label" text="RITMO" />
-                        <ui:Label name="MPVAwayPace" class="mpv-stat-val" text="" />
-                        <ui:Label name="MPVAwayPaceRank" class="mpv-stat-rank" text="" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="mpv-stat-card">
-                        <ui:Label class="mpv-stat-label" text="NET RATING" />
-                        <ui:Label name="MPVAwayNet" class="mpv-stat-val mpv-stat-val--net" text="" />
-                        <ui:Label name="MPVAwayNetRank" class="mpv-stat-rank" text="" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

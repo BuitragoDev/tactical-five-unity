@@ -28,9 +28,7 @@ public class MatchDayController : UIScreenController
     private VisualElement _mpvHomeLast10, _mpvAwayLast10;
     private Label _mpvDate, _mpvArena, _mpvCity;
     private Label _mpvHomeOff, _mpvHomeOffRank, _mpvHomeDef, _mpvHomeDefRank;
-    private Label _mpvHomePace, _mpvHomePaceRank, _mpvHomeNet, _mpvHomeNetRank;
     private Label _mpvAwayOff, _mpvAwayOffRank, _mpvAwayDef, _mpvAwayDefRank;
-    private Label _mpvAwayPace, _mpvAwayPaceRank, _mpvAwayNet, _mpvAwayNetRank;
     private VisualElement _mpvHomeBajas, _mpvAwayBajas;
     private VisualElement _mpvHomeStarters, _mpvAwayStarters;
     private VisualElement _mpvHomeBench, _mpvAwayBench;
@@ -178,12 +176,8 @@ public class MatchDayController : UIScreenController
         _mpvCity = _root.Q<Label>("MPVCity");
         _mpvHomeOff = _root.Q<Label>("MPVHomeOff"); _mpvHomeOffRank = _root.Q<Label>("MPVHomeOffRank");
         _mpvHomeDef = _root.Q<Label>("MPVHomeDef"); _mpvHomeDefRank = _root.Q<Label>("MPVHomeDefRank");
-        _mpvHomePace = _root.Q<Label>("MPVHomePace"); _mpvHomePaceRank = _root.Q<Label>("MPVHomePaceRank");
-        _mpvHomeNet = _root.Q<Label>("MPVHomeNet"); _mpvHomeNetRank = _root.Q<Label>("MPVHomeNetRank");
         _mpvAwayOff = _root.Q<Label>("MPVAwayOff"); _mpvAwayOffRank = _root.Q<Label>("MPVAwayOffRank");
         _mpvAwayDef = _root.Q<Label>("MPVAwayDef"); _mpvAwayDefRank = _root.Q<Label>("MPVAwayDefRank");
-        _mpvAwayPace = _root.Q<Label>("MPVAwayPace"); _mpvAwayPaceRank = _root.Q<Label>("MPVAwayPaceRank");
-        _mpvAwayNet = _root.Q<Label>("MPVAwayNet"); _mpvAwayNetRank = _root.Q<Label>("MPVAwayNetRank");
         _mpvHomeBajas = _root.Q<VisualElement>("MPVHomeBajas");
         _mpvAwayBajas = _root.Q<VisualElement>("MPVAwayBajas");
         _mpvHomeStarters = _root.Q<VisualElement>("MPVHomeStarters");
@@ -590,7 +584,7 @@ public class MatchDayController : UIScreenController
         }
 
         var preview = MatchupPreview.Compute(myGame.home_team_id, myGame.away_team_id,
-            myGame.home_team_id == _myTeam.id, _manager.id, _season.id);
+            myGame.home_team_id == _myTeam.id, _manager.id, _season.id, myGame.game_date);
 
         _previewShown = true;
         _mpvOverlay.style.display = DisplayStyle.Flex;
@@ -626,21 +620,13 @@ public class MatchDayController : UIScreenController
 
         SetStatLabel(_mpvHomeOff, $"{h.offRating:F1}");
         SetStatLabel(_mpvHomeDef, $"{h.defRating:F1}");
-        SetStatLabel(_mpvHomePace, $"{h.pace:F1}");
-        SetNetRating(_mpvHomeNet, h.netRating);
         SetStatLabel(_mpvHomeOffRank, $"{h.offRank}º NBA");
         SetStatLabel(_mpvHomeDefRank, $"{h.defRank}º NBA");
-        SetStatLabel(_mpvHomePaceRank, $"{h.paceRank}º NBA");
-        SetStatLabel(_mpvHomeNetRank, $"{h.netRank}º NBA");
 
         SetStatLabel(_mpvAwayOff, $"{a.offRating:F1}");
         SetStatLabel(_mpvAwayDef, $"{a.defRating:F1}");
-        SetStatLabel(_mpvAwayPace, $"{a.pace:F1}");
-        SetNetRating(_mpvAwayNet, a.netRating);
         SetStatLabel(_mpvAwayOffRank, $"{a.offRank}º NBA");
         SetStatLabel(_mpvAwayDefRank, $"{a.defRank}º NBA");
-        SetStatLabel(_mpvAwayPaceRank, $"{a.paceRank}º NBA");
-        SetStatLabel(_mpvAwayNetRank, $"{a.netRank}º NBA");
 
         BuildBajas(_mpvHomeBajas, h.injured);
         BuildBajas(_mpvAwayBajas, a.injured);
@@ -657,12 +643,6 @@ public class MatchDayController : UIScreenController
     void SetStatLabel(Label lbl, string text)
     {
         if (lbl != null) lbl.text = text;
-    }
-
-    void SetNetRating(Label lbl, float val)
-    {
-        if (lbl == null) return;
-        lbl.text = val >= 0 ? $"+{val:F1}" : $"{val:F1}";
     }
 
     void BuildLast10(VisualElement container, List<char> results)
