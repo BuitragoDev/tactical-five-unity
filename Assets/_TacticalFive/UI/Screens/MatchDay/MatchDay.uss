@@ -1101,7 +1101,7 @@
 
 .mpv-starter-card {
     flex: 1;
-    height: 220px;
+    height: 240px;
     background-color: #1c2130;
     border-width: 1px;
     border-color: #2a3347;
@@ -1116,8 +1116,8 @@
 .mpv-starter-card:last-child { margin-right: 0; }
 
 .mpv-starter-photo {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
     margin-bottom: 8px;
     background-size: contain;
     background-position: center;
@@ -1225,8 +1225,8 @@
 }
 
 .mpv-key-photo {
-    width: 50px;
-    height: 50px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background-size: contain;
     background-position: center;
