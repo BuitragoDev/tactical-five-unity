@@ -821,10 +821,9 @@
 
 .mpv-conf {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
-    color: #7a8aaa;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
+    font-size: 16px;
+    color: #ffffff;
+    margin-top: 2px;
 }
 
 .mpv-streak-row {
