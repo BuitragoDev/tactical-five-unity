@@ -163,9 +163,6 @@
             <!-- FAVORITE BADGE -->
             <ui:Label name="MPVFavorite" class="mpv-favorite" text="" />
 
-            <!-- DIVIDER -->
-            <ui:VisualElement class="mpv-divider" />
-
             <!-- 3-COLUMN LAYOUT -->
             <ui:VisualElement class="mpv-3cols">
 
@@ -173,8 +170,8 @@
                 <ui:VisualElement class="mpv-col">
                     <ui:VisualElement class="mpv-col-header">
                         <ui:VisualElement name="MPVHomeLogo" class="mpv-logo-lg" />
-                    <ui:VisualElement class="mpv-team-info">
-                        <ui:Label name="MPVHomeName" class="mpv-team-name" text="" />
+                        <ui:VisualElement class="mpv-team-info">
+                            <ui:Label name="MPVHomeName" class="mpv-team-name" text="" />
                             <ui:Label name="MPVHomeRecord" class="mpv-record" text="" />
                             <ui:Label name="MPVHomeConf" class="mpv-conf" text="" />
                             <ui:VisualElement class="mpv-streak-row">
@@ -183,6 +180,7 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    <ui:VisualElement class="mpv-divider" />
 
                     <ui:VisualElement class="mpv-col-stats">
                         <ui:VisualElement class="mpv-stat-card">
@@ -235,8 +233,8 @@
                 <!-- ═══ RIGHT: AWAY ═══ -->
                 <ui:VisualElement class="mpv-col">
                     <ui:VisualElement class="mpv-col-header mpv-col-header--right">
-                    <ui:VisualElement class="mpv-team-info mpv-team-info--right">
-                        <ui:Label name="MPVAwayName" class="mpv-team-name" text="" />
+                        <ui:VisualElement class="mpv-team-info mpv-team-info--right">
+                            <ui:Label name="MPVAwayName" class="mpv-team-name" text="" />
                             <ui:Label name="MPVAwayRecord" class="mpv-record" text="" />
                             <ui:Label name="MPVAwayConf" class="mpv-conf" text="" />
                             <ui:VisualElement class="mpv-streak-row mpv-streak-row--right">
@@ -246,6 +244,7 @@
                         </ui:VisualElement>
                         <ui:VisualElement name="MPVAwayLogo" class="mpv-logo-lg" />
                     </ui:VisualElement>
+                    <ui:VisualElement class="mpv-divider" />
 
                     <ui:VisualElement class="mpv-col-stats">
                         <ui:VisualElement class="mpv-stat-card">
