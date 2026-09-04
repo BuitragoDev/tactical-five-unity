@@ -284,13 +284,13 @@ public static class MatchupPreview
         var topBlk = allStats.OrderByDescending(x => x.avgBlk).First();
 
         side.keyPts = players.FirstOrDefault(p => p.id == topPts.player_id);
-        side.keyPtsVal = topPts.avgPts;
+        side.keyPtsVal = (float)topPts.avgPts;
         side.keyReb = players.FirstOrDefault(p => p.id == topReb.player_id);
-        side.keyRebVal = topReb.avgReb;
+        side.keyRebVal = (float)topReb.avgReb;
         side.keyAst = players.FirstOrDefault(p => p.id == topAst.player_id);
-        side.keyAstVal = topAst.avgAst;
+        side.keyAstVal = (float)topAst.avgAst;
         side.keyBlk = players.FirstOrDefault(p => p.id == topBlk.player_id);
-        side.keyBlkVal = topBlk.avgBlk;
+        side.keyBlkVal = (float)topBlk.avgBlk;
     }
 
     static int TeamRating(List<PlayerData> players)
