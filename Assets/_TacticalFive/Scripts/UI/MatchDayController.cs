@@ -772,7 +772,7 @@ public class MatchDayController : UIScreenController
         if (row == null) return;
         row.Clear();
 
-        // Home side
+        // Home player (photo + name)
         var homeSide = new VisualElement();
         homeSide.AddToClassList("mpv-key-player");
         if (homePlayer != null)
@@ -786,25 +786,27 @@ public class MatchDayController : UIScreenController
             name.AddToClassList("mpv-key-name");
             homeSide.Add(name);
         }
+        row.Add(homeSide);
+
+        // Home stat (fixed position next to center)
         var homeStat = new Label($"{homeVal:F1}");
         homeStat.AddToClassList("mpv-key-stat");
-        homeStat.AddToClassList("mpv-key-stat--left");
-        homeSide.Add(homeStat);
-        row.Add(homeSide);
+        row.Add(homeStat);
 
         // Center label
         var center = new Label(statLabel);
         center.AddToClassList("mpv-key-label");
         row.Add(center);
 
-        // Away side
+        // Away stat (fixed position next to center)
+        var awayStat = new Label($"{awayVal:F1}");
+        awayStat.AddToClassList("mpv-key-stat");
+        row.Add(awayStat);
+
+        // Away player (name + photo)
         var awaySide = new VisualElement();
         awaySide.AddToClassList("mpv-key-player");
         awaySide.AddToClassList("mpv-key-player--right");
-        var awayStat = new Label($"{awayVal:F1}");
-        awayStat.AddToClassList("mpv-key-stat");
-        awayStat.AddToClassList("mpv-key-stat--right");
-        awaySide.Add(awayStat);
         if (awayPlayer != null)
         {
             var name = new Label($"{awayPlayer.first_name[0]}. {awayPlayer.last_name.ToUpper()}");
