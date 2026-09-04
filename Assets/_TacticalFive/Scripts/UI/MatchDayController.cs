@@ -782,7 +782,7 @@ public class MatchDayController : UIScreenController
             var tex = PlayerPhotoHelper.Load(homePlayer.id, homePlayer.photo);
             if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
             homeSide.Add(photo);
-            var name = new Label(homePlayer.last_name.ToUpper());
+            var name = new Label($"{homePlayer.first_name[0]}. {homePlayer.last_name.ToUpper()}");
             name.AddToClassList("mpv-key-name");
             homeSide.Add(name);
         }
@@ -807,7 +807,7 @@ public class MatchDayController : UIScreenController
         awaySide.Add(awayStat);
         if (awayPlayer != null)
         {
-            var name = new Label(awayPlayer.last_name.ToUpper());
+            var name = new Label($"{awayPlayer.first_name[0]}. {awayPlayer.last_name.ToUpper()}");
             name.AddToClassList("mpv-key-name");
             awaySide.Add(name);
             var photo = new VisualElement();

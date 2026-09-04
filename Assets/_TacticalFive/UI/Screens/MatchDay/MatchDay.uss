@@ -1152,7 +1152,7 @@
 
 .mpv-starter-ovr {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
+    font-size: 24px;
     color: #d4a017;
 }
 
