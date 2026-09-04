@@ -1041,7 +1041,7 @@
 .mpv-baja-item {
     flex-direction: row;
     align-items: center;
-    padding: 6px 8px;
+    padding: 2px 8px;
     background-color: #141824;
     border-width: 1px;
     border-color: #2a3347;
