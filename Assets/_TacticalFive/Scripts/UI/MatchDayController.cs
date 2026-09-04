@@ -30,6 +30,7 @@ public class MatchDayController : UIScreenController
     private Label _mpvHomeOff, _mpvHomeOffRank, _mpvHomeDef, _mpvHomeDefRank;
     private Label _mpvAwayOff, _mpvAwayOffRank, _mpvAwayDef, _mpvAwayDefRank;
     private VisualElement _mpvHomeBajas, _mpvAwayBajas;
+    private Label _mpvHomeBajasTitle, _mpvAwayBajasTitle;
     private VisualElement _mpvHomeStarters, _mpvAwayStarters;
     private VisualElement _mpvHomeBench, _mpvAwayBench;
     private VisualElement _mpvKeyRow1, _mpvKeyRow2, _mpvKeyRow3, _mpvKeyRow4;
@@ -180,6 +181,8 @@ public class MatchDayController : UIScreenController
         _mpvAwayDef = _root.Q<Label>("MPVAwayDef"); _mpvAwayDefRank = _root.Q<Label>("MPVAwayDefRank");
         _mpvHomeBajas = _root.Q<VisualElement>("MPVHomeBajas");
         _mpvAwayBajas = _root.Q<VisualElement>("MPVAwayBajas");
+        _mpvHomeBajasTitle = _root.Q<Label>("MPVHomeBajasTitle");
+        _mpvAwayBajasTitle = _root.Q<Label>("MPVAwayBajasTitle");
         _mpvHomeStarters = _root.Q<VisualElement>("MPVHomeStarters");
         _mpvAwayStarters = _root.Q<VisualElement>("MPVAwayStarters");
         _mpvHomeBench = _root.Q<VisualElement>("MPVHomeBench");
@@ -628,6 +631,8 @@ public class MatchDayController : UIScreenController
         SetStatLabel(_mpvAwayOffRank, $"{a.offRank}º NBA");
         SetStatLabel(_mpvAwayDefRank, $"{a.defRank}º NBA");
 
+        if (_mpvHomeBajasTitle != null) _mpvHomeBajasTitle.text = home.name.ToUpper();
+        if (_mpvAwayBajasTitle != null) _mpvAwayBajasTitle.text = away.name.ToUpper();
         BuildBajas(_mpvHomeBajas, h.injured);
         BuildBajas(_mpvAwayBajas, a.injured);
 

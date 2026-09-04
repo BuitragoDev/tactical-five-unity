@@ -213,11 +213,11 @@
                     <ui:Label class="mpv-bajas-title" text="BAJAS" />
                     <ui:VisualElement class="mpv-bajas-cols">
                         <ui:VisualElement class="mpv-bajas-col">
-                            <ui:Label class="mpv-bajas-col-title" text="LOCAL" />
+                            <ui:Label name="MPVHomeBajasTitle" class="mpv-bajas-col-title" text="" />
                             <ui:VisualElement name="MPVHomeBajas" class="mpv-bajas-list" />
                         </ui:VisualElement>
                         <ui:VisualElement class="mpv-bajas-col">
-                            <ui:Label class="mpv-bajas-col-title" text="VISITANTE" />
+                            <ui:Label name="MPVAwayBajasTitle" class="mpv-bajas-col-title" text="" />
                             <ui:VisualElement name="MPVAwayBajas" class="mpv-bajas-list" />
                         </ui:VisualElement>
                     </ui:VisualElement>
