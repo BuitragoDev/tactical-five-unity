@@ -603,8 +603,8 @@ public class MatchDayController : UIScreenController
         var h = preview.home;
         var a = preview.away;
 
-        SetLogo(_mpvHomeLogo, home.logo, "120x120");
-        SetLogo(_mpvAwayLogo, away.logo, "120x120");
+        SetLogo(_mpvHomeLogo, home.logo);
+        SetLogo(_mpvAwayLogo, away.logo);
         if (_mpvHomeCity != null) _mpvHomeCity.text = home.city?.ToUpper() ?? "";
         if (_mpvHomeName != null) _mpvHomeName.text = h.teamName;
         if (_mpvHomeRecord != null) _mpvHomeRecord.text = $"{h.wins}-{h.losses}";
