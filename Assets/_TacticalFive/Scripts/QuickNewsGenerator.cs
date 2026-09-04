@@ -102,7 +102,7 @@ public static class QuickNewsGenerator
             string body = myTeamGames == 41
                 ? PickVariant(HitoMidVariants, myTeam.name, wins, losses)
                 : PickVariant(HitoEndVariants, myTeam.name, wins, losses);
-            SaveNews(manager, gameDay, gameDate, "HITO", body);
+            SaveNews(manager, gameDay, gameDate, "Hito", body);
             newsCount++;
         }
 
@@ -119,27 +119,27 @@ public static class QuickNewsGenerator
             if (newsCount < 2 && homeStreak >= 5)
             {
                 string score = $"{game.home_score}-{game.away_score}";
-                if (SaveNews(manager, gameDay, gameDate, "RACHA DE VICTORIAS",
+                if (SaveNews(manager, gameDay, gameDate, "Racha de Victorias",
                     PickVariant(WinStreakVariants, homeTeam.name, homeStreak, awayTeam.name, score)))
                     { newsCount++; continue; }
             }
             if (newsCount < 2 && awayStreak >= 5)
             {
                 string score = $"{game.home_score}-{game.away_score}";
-                if (SaveNews(manager, gameDay, gameDate, "RACHA DE VICTORIAS",
+                if (SaveNews(manager, gameDay, gameDate, "Racha de Victorias",
                     PickVariant(WinStreakVariants, awayTeam.name, awayStreak, homeTeam.name, score)))
                     { newsCount++; continue; }
             }
 
             if (newsCount < 2 && homeStreak <= -5)
             {
-                if (SaveNews(manager, gameDay, gameDate, "MALA RACHA",
+                if (SaveNews(manager, gameDay, gameDate, "Mala Racha",
                     PickVariant(LoseStreakVariants, homeTeam.name, -homeStreak)))
                     { newsCount++; continue; }
             }
             if (newsCount < 2 && awayStreak <= -5)
             {
-                if (SaveNews(manager, gameDay, gameDate, "MALA RACHA",
+                if (SaveNews(manager, gameDay, gameDate, "Mala Racha",
                     PickVariant(LoseStreakVariants, awayTeam.name, -awayStreak)))
                     { newsCount++; continue; }
             }
@@ -156,7 +156,7 @@ public static class QuickNewsGenerator
                 int winAvg = homeWon ? homeAvg : awayAvg;
                 int loseAvg = homeWon ? awayAvg : homeAvg;
                 string score = $"{game.home_score}-{game.away_score}";
-                if (SaveNews(manager, gameDay, gameDate, "CAMPANADA",
+                if (SaveNews(manager, gameDay, gameDate, "Campanada",
                     PickVariant(UpsetVariants, winner.name, loser.name, score, winAvg, loseAvg)))
                     { newsCount++; continue; }
             }
@@ -183,7 +183,7 @@ public static class QuickNewsGenerator
                     if (ps.steals >= 10) tdParts.Add($"{ps.steals} rob");
                     if (ps.blocks >= 10) tdParts.Add($"{ps.blocks} tap");
 
-                    if (SaveNews(manager, gameDay, gameDate, "TRIPLE-DOBLE",
+                    if (SaveNews(manager, gameDay, gameDate, "Triple-Doble",
                         PickVariant(TripleDoubleVariants, $"{player.first_name} {player.last_name}", string.Join(" + ", tdParts.Take(3)), opponent.name)))
                         { newsCount++; continue; }
                 }
@@ -193,7 +193,7 @@ public static class QuickNewsGenerator
                     var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                     if (player == null) continue;
                     var opponent = game.home_team_id == player.team_id ? awayTeam : homeTeam;
-                    if (SaveNews(manager, gameDay, gameDate, "EXPLOSIÓN",
+                    if (SaveNews(manager, gameDay, gameDate, "Explosión",
                         PickVariant(ExplosionVariants, $"{player.first_name} {player.last_name}", ps.points, opponent.name)))
                         { newsCount++; continue; }
                 }
