@@ -1006,7 +1006,7 @@
 .mpv-bajas-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
-    color: #7a8aaa;
+    color: #d4a017;
     letter-spacing: 2px;
     margin-bottom: 8px;
 }
@@ -1097,7 +1097,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
-    color: #7a8aaa;
+    color: #d4a017;
     margin-top: 8px;
     margin-bottom: 6px;
 }
@@ -1208,7 +1208,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
-    color: #7a8aaa;
+    color: #d4a017;
     margin-bottom: 10px;
 }
 
