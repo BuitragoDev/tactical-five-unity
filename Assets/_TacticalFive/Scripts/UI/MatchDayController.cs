@@ -729,7 +729,7 @@ public class MatchDayController : UIScreenController
         if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
         card.Add(photo);
 
-        var posLbl = new Label(PositionCodes.GetShort(p.position));
+        var posLbl = new Label(PositionCodes.GetName(p.position));
         posLbl.AddToClassList("mpv-starter-pos");
         card.Add(posLbl);
 
