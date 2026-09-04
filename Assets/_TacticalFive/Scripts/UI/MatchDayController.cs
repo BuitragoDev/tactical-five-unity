@@ -639,10 +639,10 @@ public class MatchDayController : UIScreenController
         BuildPreviewRoster(_mpvHomeStarters, _mpvHomeBench, h.starters, h.bench);
         BuildPreviewRoster(_mpvAwayStarters, _mpvAwayBench, a.starters, a.bench);
 
-        BuildKeyPlayerRow(_mpvKeyRow1, "PTS", h.keyPts, h.keyPtsVal, a.keyPts, a.keyPtsVal);
-        BuildKeyPlayerRow(_mpvKeyRow2, "REB", h.keyReb, h.keyRebVal, a.keyReb, a.keyRebVal);
-        BuildKeyPlayerRow(_mpvKeyRow3, "AST", h.keyAst, h.keyAstVal, a.keyAst, a.keyAstVal);
-        BuildKeyPlayerRow(_mpvKeyRow4, "BLK", h.keyBlk, h.keyBlkVal, a.keyBlk, a.keyBlkVal);
+        BuildKeyPlayerRow(_mpvKeyRow1, "PUNTOS", h.keyPts, h.keyPtsVal, a.keyPts, a.keyPtsVal);
+        BuildKeyPlayerRow(_mpvKeyRow2, "REBOTES", h.keyReb, h.keyRebVal, a.keyReb, a.keyRebVal);
+        BuildKeyPlayerRow(_mpvKeyRow3, "ASIST.", h.keyAst, h.keyAstVal, a.keyAst, a.keyAstVal);
+        BuildKeyPlayerRow(_mpvKeyRow4, "TAPONES", h.keyBlk, h.keyBlkVal, a.keyBlk, a.keyBlkVal);
     }
 
     void SetStatLabel(Label lbl, string text)

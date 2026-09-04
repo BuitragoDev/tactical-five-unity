@@ -1245,7 +1245,7 @@
 
 .mpv-key-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: #ffffff;
     margin-left: 6px;
     margin-right: 6px;
@@ -1262,8 +1262,8 @@
 
 .mpv-key-stat {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
-    color: #ffffff;
+    font-size: 18px;
+    color: #d4a017;
     width: 50px;
     flex-shrink: 0;
     -unity-text-align: middle-center;
@@ -1274,10 +1274,10 @@
 
 .mpv-key-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: #7a8aaa;
-    width: 40px;
+    width: 60px;
     flex-shrink: 0;
     -unity-text-align: middle-center;
     margin: 0 6px;
