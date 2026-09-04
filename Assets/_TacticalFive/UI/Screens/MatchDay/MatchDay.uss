@@ -972,7 +972,7 @@
 
 .mpv-stat-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 18px;
     color: #7a8aaa;
     letter-spacing: 1px;
     margin-bottom: 4px;
@@ -980,14 +980,14 @@
 
 .mpv-stat-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 26px;
+    font-size: 32px;
     color: #ffffff;
     letter-spacing: 1px;
 }
 
 .mpv-stat-rank {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 18px;
     color: #7a8aaa;
     margin-top: 2px;
 }
@@ -995,7 +995,7 @@
 /* ── Bajas ── */
 .mpv-bajas-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 22px;
     color: #7a8aaa;
     letter-spacing: 2px;
     margin-bottom: 8px;
@@ -1021,7 +1021,7 @@
 
 .mpv-bajas-col-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     color: #7a8aaa;
     letter-spacing: 1px;
     margin-bottom: 4px;
@@ -1196,7 +1196,7 @@
 /* ── Key Players (center column) ── */
 .mpv-key-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 22px;
     letter-spacing: 2px;
     color: #7a8aaa;
     margin-bottom: 10px;
