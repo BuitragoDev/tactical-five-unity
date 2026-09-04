@@ -1148,7 +1148,8 @@
 
 /* ── Bench ── */
 .mpv-bench-list {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .mpv-bench-card {
@@ -1156,6 +1157,7 @@
     align-items: center;
     padding: 3px 8px;
     margin-bottom: 2px;
+    width: 50%;
 }
 
 .mpv-bench-name {
