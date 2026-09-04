@@ -247,7 +247,7 @@ public static class MatchupPreview
             .Select(l => availablePlayers.FirstOrDefault(p => p.id == l.player_id))
             .Where(p => p != null && p.injury_days == 0 && p.g_league_assigned == 0
                        && !starterIds.Contains(p.id))
-            .Take(6)
+            .Take(7)
             .ToList();
 
         if (lineupBench.Count > 0)
@@ -255,7 +255,7 @@ public static class MatchupPreview
 
         return availablePlayers
             .Where(p => !starterIds.Contains(p.id))
-            .OrderByDescending(p => p.overall).Take(6).ToList();
+            .OrderByDescending(p => p.overall).Take(7).ToList();
     }
 
     static void ComputeKeyPlayers(TeamPreviewSide side, DatabaseManager db,
