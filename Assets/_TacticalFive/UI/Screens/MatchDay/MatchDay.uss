@@ -814,14 +814,14 @@
 
 .mpv-record {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
+    font-size: 24px;
     color: #ffffff;
     letter-spacing: 1px;
 }
 
 .mpv-conf {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: #ffffff;
     margin-top: 2px;
 }
