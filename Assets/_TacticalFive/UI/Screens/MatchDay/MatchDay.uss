@@ -1101,7 +1101,7 @@
 
 .mpv-starter-card {
     flex: 1;
-    height: 240px;
+    height: 255px;
     background-color: #1c2130;
     border-width: 1px;
     border-color: #2a3347;
