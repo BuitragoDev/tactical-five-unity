@@ -621,13 +621,13 @@ public class MatchDayController : UIScreenController
         if (_mpvArena != null) _mpvArena.text = preview.arenaName?.ToUpper() ?? "";
         if (_mpvCity != null) _mpvCity.text = preview.arenaCity?.ToUpper() ?? "";
 
-        SetStatLabel(_mpvHomeOff, $"{h.offRating:F1}");
-        SetStatLabel(_mpvHomeDef, $"{h.defRating:F1}");
+        SetStatLabel(_mpvHomeOff, h.offRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
+        SetStatLabel(_mpvHomeDef, h.defRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
         SetStatLabel(_mpvHomeOffRank, $"{h.offRank}º NBA");
         SetStatLabel(_mpvHomeDefRank, $"{h.defRank}º NBA");
 
-        SetStatLabel(_mpvAwayOff, $"{a.offRating:F1}");
-        SetStatLabel(_mpvAwayDef, $"{a.defRating:F1}");
+        SetStatLabel(_mpvAwayOff, a.offRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
+        SetStatLabel(_mpvAwayDef, a.defRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
         SetStatLabel(_mpvAwayOffRank, $"{a.offRank}º NBA");
         SetStatLabel(_mpvAwayDefRank, $"{a.defRank}º NBA");
 
@@ -789,7 +789,7 @@ public class MatchDayController : UIScreenController
         row.Add(homeSide);
 
         // Home stat (fixed position next to center)
-        var homeStat = new Label($"{homeVal:F1}");
+        var homeStat = new Label(homeVal.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
         homeStat.AddToClassList("mpv-key-stat");
         row.Add(homeStat);
 
@@ -799,7 +799,7 @@ public class MatchDayController : UIScreenController
         row.Add(center);
 
         // Away stat (fixed position next to center)
-        var awayStat = new Label($"{awayVal:F1}");
+        var awayStat = new Label(awayVal.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
         awayStat.AddToClassList("mpv-key-stat");
         row.Add(awayStat);
 
