@@ -1115,7 +1115,7 @@
     height: 255px;
     background-color: #1c2130;
     border-width: 1px;
-    border-color: #d4a017;
+    border-color: #7a6520;
     border-radius: 8px;
     padding: 8px 4px;
     margin-right: 4px;
