@@ -282,7 +282,7 @@ public static class MatchupPreview
                 avgBlk = g.Average(s => s.blocks),
                 games = g.Count()
             })
-            .Where(x => x.games >= 3)
+            .Where(x => x.games >= 1)
             .ToList();
 
         if (allStats.Count == 0) return;

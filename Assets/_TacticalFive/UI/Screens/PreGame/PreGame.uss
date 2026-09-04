@@ -1,0 +1,517 @@
+/* ══════════════════════════════════════════
+   PRE GAME — PreGame.uss
+   ══════════════════════════════════════════ */
+
+/* ── ROOT ── */
+.pregame-root {
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background-color: #0f1117;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+
+/* ── CONTENT ── */
+.pregame-content {
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 12px 24px;
+    overflow: hidden;
+}
+
+/* ══════════════════════════════════════════
+   MATCHUP PREVIEW (moved from MatchDay)
+   ══════════════════════════════════════════ */
+
+.mpv-logo-lg {
+    width: 150px;
+    height: 150px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+    margin: 10px 20px;
+}
+
+.mpv-team-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.mpv-team-info--right {
+    align-items: flex-end;
+}
+
+.mpv-city {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: #7a8aaa;
+    letter-spacing: 1px;
+}
+
+.mpv-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 36px;
+    color: #ffffff;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.mpv-record {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.mpv-conf {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: #7a8aaa;
+    margin-top: 2px;
+}
+
+.mpv-streak-row {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.mpv-streak-row--right {
+    justify-content: flex-end;
+}
+
+.mpv-streak-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: #7a8aaa;
+    letter-spacing: 1px;
+    margin-right: 8px;
+}
+
+.mpv-streak-dots {
+    flex-direction: row;
+    align-items: center;
+}
+
+.mpv-streak-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    -unity-text-align: middle-center;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: #ffffff;
+    margin-right: 3px;
+    justify-content: center;
+    align-items: center;
+}
+
+.mpv-streak-dot--win { background-color: #27ae60; }
+.mpv-streak-dot--loss { background-color: #c0392b; }
+
+/* ── Center Info ── */
+.mpv-date {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: #d4a017;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.mpv-arena {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: #ffffff;
+    letter-spacing: 1px;
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
+}
+
+.mpv-vs {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    color: #2a3347;
+    margin-bottom: 57px;
+    border-width: 0px;
+}
+
+/* ── Favorite Badge ── */
+.mpv-favorite {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: #d4a017;
+    letter-spacing: 2px;
+    -unity-text-align: middle-right;
+    align-self: flex-end;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+}
+
+/* ── 3-Column Layout ── */
+.mpv-3cols {
+    flex-direction: row;
+    align-items: stretch;
+    flex-grow: 1;
+    width: 100%;
+    min-height: 0;
+}
+
+.mpv-col {
+    flex: 1;
+    flex-direction: column;
+    padding: 0 12px;
+    overflow: hidden;
+}
+
+.mpv-col--center {
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 10px;
+}
+
+.mpv-col-header {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-bottom: 10px;
+    width: 100%;
+}
+
+.mpv-col-header--right {
+    justify-content: flex-end;
+}
+
+.mpv-col-header--right .mpv-team-info {
+    align-items: flex-end;
+}
+
+.mpv-col-stats {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+}
+
+/* ── Stat Cards ── */
+.mpv-stat-card {
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 16px;
+    background-color: #141824;
+    border-width: 1px;
+    border-color: #2a3347;
+    border-radius: 6px;
+    margin: 0 4px;
+    flex: 1;
+}
+
+.mpv-stat-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: #7a8aaa;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.mpv-stat-val {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 32px;
+    color: #ffffff;
+    letter-spacing: 1px;
+}
+
+.mpv-stat-rank {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: #7a8aaa;
+    margin-top: 2px;
+}
+
+/* ── Bajas ── */
+.mpv-bajas-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    color: #d4a017;
+    letter-spacing: 2px;
+    margin-top: 10px;
+    margin-bottom: 8px;
+}
+
+.mpv-bajas-list {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+}
+
+.mpv-bajas-cols {
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.mpv-bajas-col {
+    flex: 1;
+    flex-direction: column;
+    padding: 0 4px;
+}
+
+.mpv-bajas-col-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: #7a8aaa;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    -unity-text-align: middle-center;
+}
+
+.mpv-baja-item {
+    flex-direction: row;
+    align-items: center;
+    padding: 2px 8px;
+    background-color: #141824;
+    border-width: 1px;
+    border-color: #2a3347;
+    border-radius: 6px;
+    margin-bottom: 4px;
+}
+
+.mpv-baja-photo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-size: contain;
+    background-position: center;
+    flex-shrink: 0;
+    margin-right: 8px;
+}
+
+.mpv-baja-info {
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.mpv-baja-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: #c0392b;
+}
+
+.mpv-baja-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: #7a8aaa;
+}
+
+.mpv-baja-status {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    letter-spacing: 1px;
+    margin-right: 8px;
+}
+
+.mpv-baja-status--doubt { color: #d4a017; }
+.mpv-baja-status--out { color: #c0392b; }
+
+.mpv-baja-injury {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: #7a8aaa;
+}
+
+/* ── Roster titles (inside columns) ── */
+.mpv-roster-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: #d4a017;
+    margin-top: 8px;
+    margin-bottom: 6px;
+}
+
+/* ── Starter Cards ── */
+.mpv-starter-row {
+    flex-direction: row;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.mpv-starter-card {
+    flex: 1;
+    height: 255px;
+    background-color: #1c2130;
+    border-width: 1px;
+    border-color: #7a6520;
+    border-radius: 8px;
+    padding: 8px 4px;
+    margin-right: 4px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.mpv-starter-card:last-child { margin-right: 0; }
+
+.mpv-starter-photo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 8px;
+    background-size: contain;
+    background-position: center;
+}
+
+.mpv-starter-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: #7a8aaa;
+    margin-bottom: 4px;
+}
+
+.mpv-starter-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: #ffffff;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    line-height: 0.9;
+    flex-grow: 1;
+}
+
+.mpv-starter-ovr {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: #d4a017;
+}
+
+/* ── Bench ── */
+.mpv-bench-list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.mpv-bench-card {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+    margin-right: 4px;
+    background-color: #1c2130;
+    border-width: 1px;
+    border-color: #2a3347;
+    border-radius: 6px;
+    flex-basis: 47%;
+    flex-grow: 0;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
+.mpv-bench-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: #ffffff;
+    flex-grow: 1;
+    margin-right: 6px;
+}
+
+.mpv-bench-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: #7a8aaa;
+    width: 90px;
+    -unity-text-align: middle-left;
+}
+
+.mpv-bench-ovr {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: #d4a017;
+    width: 36px;
+    -unity-text-align: middle-right;
+}
+
+/* ── Key Players (center column) ── */
+.mpv-key-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: #d4a017;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.mpv-key-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 0;
+    border-bottom-width: 1px;
+    border-bottom-color: #2a3347;
+}
+
+.mpv-key-row:last-child { border-bottom-width: 0; }
+
+.mpv-key-player {
+    flex-direction: row;
+    align-items: center;
+    flex: 1;
+}
+
+.mpv-key-player--right {
+    justify-content: flex-end;
+}
+
+.mpv-key-photo {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-size: contain;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.mpv-key-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: #ffffff;
+    margin-left: 6px;
+    margin-right: 6px;
+    flex-shrink: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.mpv-key-player--right .mpv-key-name {
+    margin-left: 6px;
+    margin-right: 0;
+}
+
+.mpv-key-stat {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: #d4a017;
+    width: 50px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.mpv-key-stat--left { -unity-text-align: middle-right; }
+.mpv-key-stat--right { -unity-text-align: middle-left; }
+
+.mpv-key-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: #7a8aaa;
+    width: 60px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    margin: 0 6px;
+}

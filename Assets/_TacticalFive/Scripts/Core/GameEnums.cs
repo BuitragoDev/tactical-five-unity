@@ -21,6 +21,7 @@ public enum GameScreen
     Arena,
     Messages,
     MatchDay,
+    PreGame,
     GameResults,
     LoadGame,
     Employees,

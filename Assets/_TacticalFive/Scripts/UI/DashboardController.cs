@@ -204,6 +204,14 @@ using System.Threading.Tasks;
             ShowPendingIRReleaseModal();
             CheckTradeDeadlineModal();
         }
+
+        // PreGame → simular día y navegar a MatchDay
+        if (_simulateFromPreGame)
+        {
+            _simulateFromPreGame = false;
+            ShowLoading();
+            _root.schedule.Execute(() => StartCoroutine(ProcessGameDayRoutine(skipPreBatch: true))).ExecuteLater(0);
+        }
     }
 
     private void OnDisable()
@@ -503,7 +511,7 @@ using System.Threading.Tasks;
         var footerLinkTexts = new (string text, GameScreen screen)[]
         {
             ("VER RESUMEN", GameScreen.Results),
-            ("VER PREVIA", GameScreen.MatchDay),
+                ("VER PREVIA", GameScreen.PreGame),
             ("VER CLASIFICACIÓN COMPLETA", GameScreen.Standings),
             ("VER TODAS LAS NOTICIAS", GameScreen.Messages),
         };
@@ -729,7 +737,21 @@ using System.Threading.Tasks;
         }
 
         ShowLoading();
-        StartCoroutine(ProcessGameDayRoutine());
+        StartCoroutine(ProcessGameDayRoutine(navigateToPreGame: true));
+    }
+
+    // Flag estático: PreGame → Dashboard solicita simulación al reactivarse
+    internal static bool _simulateFromPreGame;
+
+    /// <summary>
+    /// Called by PreGameController to simulate the game day and navigate to MatchDay.
+    /// Since Dashboard is inactive here, we set a flag and navigate back;
+    /// DashboardController.OnEnable picks it up and starts the coroutine.
+    /// </summary>
+    public static void RequestSimulateAndGoToMatchDay()
+    {
+        _simulateFromPreGame = true;
+        ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }
 
     List<PlayerData> GetActivePlayers(int teamId)
@@ -843,7 +865,7 @@ using System.Threading.Tasks;
         return nearby.Contains(p.position) || nearby.Contains(p.secondary_position);
     }
 
-    System.Collections.IEnumerator ProcessGameDayRoutine(bool fastSim = false)
+    System.Collections.IEnumerator ProcessGameDayRoutine(bool fastSim = false, bool skipPreBatch = false, bool navigateToPreGame = false)
     {
         int gameDay = FindNextGameDay();
         Debug.Log($"[GameDay] ProcessGameDayRoutine started. gameDay={gameDay}");
@@ -858,10 +880,10 @@ using System.Threading.Tasks;
 
         // En una simulación rápida reanudada tras el modal de alineación, el
         // pre-lote del día ya se commiteó antes del aborto; se evita re-ejecutarlo.
-        bool skipPreBatch = fastSim && _fastSimSkipPreBatch;
+        bool effectiveSkipPreBatch = skipPreBatch || (fastSim && _fastSimSkipPreBatch);
         _fastSimSkipPreBatch = false;
 
-        if (!skipPreBatch)
+        if (!effectiveSkipPreBatch)
         {
             // Paso 1: lesiones y recuperaciones (background)
             var recoveryTask = DatabaseManager.Instance.RunInBackground(conn =>
@@ -1077,7 +1099,7 @@ using System.Threading.Tasks;
             }
 
             // Check for tired players (load management) — skipped on fast‑sim re‑entry
-            if (!skipPreBatch && PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1)
+            if (!effectiveSkipPreBatch && PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1)
             {
                 _loadMgmtIsB2B = IsMyTeamBackToBack(gameDay);
                 _loadMgmtTiredPlayers = GetTiredActivePlayers();
@@ -1124,6 +1146,17 @@ using System.Threading.Tasks;
                     yield break;
                 }
             }
+        }
+
+        // ── PreGame: navegar ANTES de simular ──
+        if (navigateToPreGame && myTeamPlays)
+        {
+            Refresh();
+            GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
+            HideLoading();
+            Debug.Log($"[Dashboard] Día {gameDay} — pre-lote listo → PreGame (sin simular)");
+            ScreenManager.Instance.GoTo(GameScreen.PreGame);
+            yield break;
         }
 
         db.BeginTransaction();
@@ -1389,10 +1422,20 @@ using System.Threading.Tasks;
         else if (myTeamPlays || hasAllStar)
         {
             if (hasAllStar)
+            {
                 Debug.Log($"[Dashboard] Día {gameDay} — All-Star Game → MatchDay");
+                ScreenManager.Instance.GoTo(GameScreen.MatchDay);
+            }
+            else if (navigateToPreGame)
+            {
+                Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → PreGame");
+                ScreenManager.Instance.GoTo(GameScreen.PreGame);
+            }
             else
+            {
                 Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → MatchDay");
-            ScreenManager.Instance.GoTo(GameScreen.MatchDay);
+                ScreenManager.Instance.GoTo(GameScreen.MatchDay);
+            }
         }
         else
         {
@@ -1483,7 +1526,7 @@ using System.Threading.Tasks;
 
     // ── G-LEAGUE: SIMULACIÓN DE PARTIDOS DE LA FILIAL ──────
 
-    static bool IsGLeagueGame(GameData g)
+    public static bool IsGLeagueGame(GameData g)
     {
         return g.game_type == GLeagueScheduleGenerator.TYPE_REGULAR
             || g.game_type == GLeaguePostSeason.TYPE_PLAYOFF;

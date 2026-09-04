@@ -29,6 +29,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument arenaDocument;
     [SerializeField] private UIDocument messagesDocument;
     [SerializeField] private UIDocument matchDayDocument;
+    [SerializeField] private UIDocument preGameDocument;
     [SerializeField] private UIDocument gameResultsDocument;
     [SerializeField] private UIDocument loadGameDocument;
     [SerializeField] private UIDocument employeesDocument;
@@ -168,6 +169,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.MatchDay:
                 ShowOnly(matchDayDocument);
                 break;
+            case GameScreen.PreGame:
+                ShowOnly(preGameDocument);
+                break;
             case GameScreen.GameResults:
                 ShowOnly(gameResultsDocument);
                 break;
@@ -267,6 +271,7 @@ public class ScreenManager : MonoBehaviour
         if (arenaDocument != null) arenaDocument.gameObject.SetActive(false);
         if (messagesDocument != null) messagesDocument.gameObject.SetActive(false);
         if (matchDayDocument != null) matchDayDocument.gameObject.SetActive(false);
+        if (preGameDocument != null) preGameDocument.gameObject.SetActive(false);
         if (gameResultsDocument != null) gameResultsDocument.gameObject.SetActive(false);
         if (loadGameDocument != null) loadGameDocument.gameObject.SetActive(false);
         if (employeesDocument != null) employeesDocument.gameObject.SetActive(false);
