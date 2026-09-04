@@ -170,9 +170,8 @@
                 <ui:VisualElement class="mpv-col">
                     <ui:VisualElement class="mpv-col-header">
                         <ui:VisualElement name="MPVHomeLogo" class="mpv-logo-lg" />
-                        <ui:VisualElement class="mpv-team-info">
-                            <ui:Label name="MPVHomeCity" class="mpv-city" text="" />
-                            <ui:Label name="MPVHomeName" class="mpv-team-name" text="" />
+                    <ui:VisualElement class="mpv-team-info">
+                        <ui:Label name="MPVHomeName" class="mpv-team-name" text="" />
                             <ui:Label name="MPVHomeRecord" class="mpv-record" text="" />
                             <ui:Label name="MPVHomeConf" class="mpv-conf" text="" />
                             <ui:VisualElement class="mpv-streak-row">
@@ -233,9 +232,8 @@
                 <!-- ═══ RIGHT: AWAY ═══ -->
                 <ui:VisualElement class="mpv-col">
                     <ui:VisualElement class="mpv-col-header mpv-col-header--right">
-                        <ui:VisualElement class="mpv-team-info mpv-team-info--right">
-                            <ui:Label name="MPVAwayCity" class="mpv-city" text="" />
-                            <ui:Label name="MPVAwayName" class="mpv-team-name" text="" />
+                    <ui:VisualElement class="mpv-team-info mpv-team-info--right">
+                        <ui:Label name="MPVAwayName" class="mpv-team-name" text="" />
                             <ui:Label name="MPVAwayRecord" class="mpv-record" text="" />
                             <ui:Label name="MPVAwayConf" class="mpv-conf" text="" />
                             <ui:VisualElement class="mpv-streak-row mpv-streak-row--right">
