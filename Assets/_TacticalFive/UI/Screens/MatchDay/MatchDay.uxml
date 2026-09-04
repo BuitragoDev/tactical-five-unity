@@ -208,8 +208,6 @@
                     <ui:Label class="mpv-city-label" name="MPVCity" text="" />
                     <ui:Label class="mpv-vs" text="VS" />
 
-                    <ui:VisualElement class="mpv-divider" />
-
                     <ui:Label class="mpv-bajas-title" text="BAJAS" />
                     <ui:VisualElement class="mpv-bajas-cols">
                         <ui:VisualElement class="mpv-bajas-col">

@@ -778,8 +778,8 @@
 }
 
 .mpv-logo-lg {
-    width: 200px;
-    height: 200px;
+    width: 150px;
+    height: 150px;
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
@@ -906,6 +906,7 @@
     font-size: 28px;
     color: #2a3347;
     margin-bottom: 57px;
+    border-width: 0px;
 }
 
 /* ── Favorite Badge ── */
