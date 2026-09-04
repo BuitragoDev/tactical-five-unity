@@ -849,7 +849,7 @@
 
 .mpv-streak-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     color: #7a8aaa;
     letter-spacing: 1px;
     margin-right: 8px;
@@ -861,12 +861,12 @@
 }
 
 .mpv-streak-dot {
-    width: 22px;
-    height: 22px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
     -unity-text-align: middle-center;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 18px;
     color: #ffffff;
     margin-right: 3px;
     justify-content: center;

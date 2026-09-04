@@ -660,7 +660,7 @@ public class MatchDayController : UIScreenController
             dot.AddToClassList("mpv-streak-dot");
             dot.AddToClassList(r == 'G' ? "mpv-streak-dot--win" : "mpv-streak-dot--loss");
             var lbl = new Label(r.ToString());
-            lbl.style.fontSize = 11;
+            lbl.style.fontSize = 18;
             lbl.style.color = new Color(1, 1, 1, 0.9f);
             lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
             dot.Add(lbl);
