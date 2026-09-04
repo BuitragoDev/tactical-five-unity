@@ -1150,6 +1150,7 @@
 .mpv-bench-list {
     flex-direction: row;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .mpv-bench-card {
@@ -1162,9 +1163,10 @@
     border-width: 1px;
     border-color: #2a3347;
     border-radius: 6px;
-    flex-basis: 48%;
-    flex-grow: 0;
+    flex-basis: 47%;
+    flex-grow: 1;
     flex-shrink: 0;
+    min-width: 0;
 }
 
 .mpv-bench-name {
