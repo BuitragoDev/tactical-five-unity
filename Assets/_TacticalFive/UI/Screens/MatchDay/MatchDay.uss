@@ -784,7 +784,7 @@
     background-position: center;
     background-repeat: no-repeat;
     flex-shrink: 0;
-    margin: 10px;
+    margin: 10px 20px;
 }
 
 .mpv-team-info {
