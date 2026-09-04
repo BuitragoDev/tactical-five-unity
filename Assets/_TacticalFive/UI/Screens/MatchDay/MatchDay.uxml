@@ -195,7 +195,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:Label class="mpv-roster-title" text="QUINTETO PROBABLE" />
+                    <ui:Label class="mpv-roster-title" text="QUINTETO" />
                     <ui:VisualElement name="MPVHomeStarters" class="mpv-starter-row" />
                     <ui:Label class="mpv-roster-title" text="BANQUILLO" />
                     <ui:VisualElement name="MPVHomeBench" class="mpv-bench-list" />
@@ -259,7 +259,7 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:Label class="mpv-roster-title" text="QUINTETO PROBABLE" />
+                    <ui:Label class="mpv-roster-title" text="QUINTETO" />
                     <ui:VisualElement name="MPVAwayStarters" class="mpv-starter-row" />
                     <ui:Label class="mpv-roster-title" text="BANQUILLO" />
                     <ui:VisualElement name="MPVAwayBench" class="mpv-bench-list" />

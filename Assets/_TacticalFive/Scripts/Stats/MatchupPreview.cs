@@ -79,10 +79,10 @@ public static class MatchupPreview
         var awaySide = BuildSide(awayTeam, awayPlayers, allAwayPlayers, awayTeamId,
             standingsGames, allTeams, db, managerId, seasonId, homePlayers, awayPlayers);
 
-        homeSide.starters = GetStarters(homePlayers, db, homeTeamId);
-        awaySide.starters = GetStarters(awayPlayers, db, awayTeamId);
-        homeSide.bench = homePlayers.Except(homeSide.starters).OrderByDescending(p => p.overall).Take(6).ToList();
-        awaySide.bench = awayPlayers.Except(awaySide.starters).OrderByDescending(p => p.overall).Take(6).ToList();
+        homeSide.starters = GetStartersFromLineup(homePlayers, db, homeTeamId);
+        awaySide.starters = GetStartersFromLineup(awayPlayers, db, awayTeamId);
+        homeSide.bench = GetBenchFromLineup(homePlayers, db, homeTeamId, homeSide.starters);
+        awaySide.bench = GetBenchFromLineup(awayPlayers, db, awayTeamId, awaySide.starters);
         homeSide.injured = allHomePlayers.Where(p => p.injury_days > 0).OrderByDescending(p => p.overall).Take(3).ToList();
         awaySide.injured = allAwayPlayers.Where(p => p.injury_days > 0).OrderByDescending(p => p.overall).Take(3).ToList();
 
@@ -217,15 +217,45 @@ public static class MatchupPreview
         return rank;
     }
 
-    static List<PlayerData> GetStarters(List<PlayerData> availablePlayers, DatabaseManager db, int teamId)
+    static List<PlayerData> GetStartersFromLineup(
+        List<PlayerData> availablePlayers, DatabaseManager db, int teamId)
     {
+        var lineupStarters = db.GetStarters(teamId)
+            .OrderBy(l => l.slot_index)
+            .Select(l => availablePlayers.FirstOrDefault(p => p.id == l.player_id))
+            .Where(p => p != null && p.injury_days == 0 && p.g_league_assigned == 0)
+            .ToList();
+
+        if (lineupStarters.Count == 5)
+            return lineupStarters;
+
         return availablePlayers
             .OrderByDescending(p => p.overall)
             .GroupBy(p => p.position)
             .Select(g => g.First())
             .OrderBy(p => Array.IndexOf(PositionCodes.Order, p.position))
-            .Take(5)
+            .Take(5).ToList();
+    }
+
+    static List<PlayerData> GetBenchFromLineup(
+        List<PlayerData> availablePlayers, DatabaseManager db,
+        int teamId, List<PlayerData> starters)
+    {
+        var starterIds = new HashSet<int>(starters.Select(p => p.id));
+        var lineupBench = db.GetBench(teamId)
+            .OrderBy(l => l.slot_index)
+            .Select(l => availablePlayers.FirstOrDefault(p => p.id == l.player_id))
+            .Where(p => p != null && p.injury_days == 0 && p.g_league_assigned == 0
+                       && !starterIds.Contains(p.id))
+            .Take(6)
             .ToList();
+
+        if (lineupBench.Count > 0)
+            return lineupBench;
+
+        return availablePlayers
+            .Where(p => !starterIds.Contains(p.id))
+            .OrderByDescending(p => p.overall).Take(6).ToList();
     }
 
     static void ComputeKeyPlayers(TeamPreviewSide side, DatabaseManager db,
