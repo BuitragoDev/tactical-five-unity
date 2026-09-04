@@ -264,6 +264,8 @@ public static class MatchupPreview
         var players = db.GetPlayersByTeam(teamId).Where(p => p.injury_days == 0 && p.g_league_assigned == 0).ToList();
         if (players.Count == 0) return;
 
+        var allTeamPlayers = db.GetPlayersByTeam(teamId);
+
         var seasonGames = db.GetSeasonGames(managerId, seasonId)
             .Where(g => g.is_played == 1).ToList();
         var gameIds = seasonGames.Select(g => g.id).ToList();
@@ -290,13 +292,13 @@ public static class MatchupPreview
         var topAst = allStats.OrderByDescending(x => x.avgAst).First();
         var topBlk = allStats.OrderByDescending(x => x.avgBlk).First();
 
-        side.keyPts = players.FirstOrDefault(p => p.id == topPts.player_id);
+        side.keyPts = allTeamPlayers.FirstOrDefault(p => p.id == topPts.player_id);
         side.keyPtsVal = (float)topPts.avgPts;
-        side.keyReb = players.FirstOrDefault(p => p.id == topReb.player_id);
+        side.keyReb = allTeamPlayers.FirstOrDefault(p => p.id == topReb.player_id);
         side.keyRebVal = (float)topReb.avgReb;
-        side.keyAst = players.FirstOrDefault(p => p.id == topAst.player_id);
+        side.keyAst = allTeamPlayers.FirstOrDefault(p => p.id == topAst.player_id);
         side.keyAstVal = (float)topAst.avgAst;
-        side.keyBlk = players.FirstOrDefault(p => p.id == topBlk.player_id);
+        side.keyBlk = allTeamPlayers.FirstOrDefault(p => p.id == topBlk.player_id);
         side.keyBlkVal = (float)topBlk.avgBlk;
     }
 
