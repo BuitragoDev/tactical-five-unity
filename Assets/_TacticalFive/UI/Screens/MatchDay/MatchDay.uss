@@ -822,7 +822,7 @@
 .mpv-conf {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
-    color: #ffffff;
+    color: #7a8aaa;
     margin-top: 2px;
 }
 
