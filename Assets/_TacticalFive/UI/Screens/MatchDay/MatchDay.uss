@@ -906,7 +906,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 28px;
     color: #2a3347;
-    margin-bottom: 80px;
+    margin-bottom: 57px;
 }
 
 /* ── Favorite Badge ── */
@@ -1095,7 +1095,7 @@
 /* ── Roster titles (inside columns) ── */
 .mpv-roster-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 22px;
     letter-spacing: 2px;
     color: #7a8aaa;
     margin-top: 8px;
