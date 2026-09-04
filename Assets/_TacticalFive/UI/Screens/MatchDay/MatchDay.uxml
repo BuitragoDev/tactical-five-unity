@@ -163,6 +163,9 @@
             <!-- FAVORITE BADGE -->
             <ui:Label name="MPVFavorite" class="mpv-favorite" text="" />
 
+            <!-- DIVIDER -->
+            <ui:VisualElement class="mpv-divider" />
+
             <!-- 3-COLUMN LAYOUT -->
             <ui:VisualElement class="mpv-3cols">
 
