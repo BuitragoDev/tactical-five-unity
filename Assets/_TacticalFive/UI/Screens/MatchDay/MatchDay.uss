@@ -830,8 +830,12 @@
 .mpv-streak-row {
     flex-direction: row;
     align-items: center;
-    margin-top: 4px;
+    margin-top: 20px;
     margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom-width: 1px;
+    border-bottom-color: #2a3347;
+    width: 100%;
 }
 
 .mpv-streak-row--right {
