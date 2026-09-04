@@ -1175,7 +1175,7 @@
     border-color: #2a3347;
     border-radius: 6px;
     flex-basis: 47%;
-    flex-grow: 1;
+    flex-grow: 0;
     flex-shrink: 0;
     min-width: 0;
 }
