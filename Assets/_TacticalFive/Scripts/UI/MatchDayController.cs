@@ -623,13 +623,13 @@ public class MatchDayController : UIScreenController
 
         SetStatLabel(_mpvHomeOff, h.offRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
         SetStatLabel(_mpvHomeDef, h.defRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
-        SetStatLabel(_mpvHomeOffRank, $"{h.offRank}º NBA");
-        SetStatLabel(_mpvHomeDefRank, $"{h.defRank}º NBA");
+        SetStatLabel(_mpvHomeOffRank, $"{h.offRank}º EN LA COMPETICIÓN");
+        SetStatLabel(_mpvHomeDefRank, $"{h.defRank}º EN LA COMPETICIÓN");
 
         SetStatLabel(_mpvAwayOff, a.offRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
         SetStatLabel(_mpvAwayDef, a.defRating.ToString("F1", System.Globalization.CultureInfo.InvariantCulture));
-        SetStatLabel(_mpvAwayOffRank, $"{a.offRank}º NBA");
-        SetStatLabel(_mpvAwayDefRank, $"{a.defRank}º NBA");
+        SetStatLabel(_mpvAwayOffRank, $"{a.offRank}º EN LA COMPETICIÓN");
+        SetStatLabel(_mpvAwayDefRank, $"{a.defRank}º EN LA COMPETICIÓN");
 
         if (_mpvHomeBajasTitle != null) _mpvHomeBajasTitle.text = home.name.ToUpper();
         if (_mpvAwayBajasTitle != null) _mpvAwayBajasTitle.text = away.name.ToUpper();
