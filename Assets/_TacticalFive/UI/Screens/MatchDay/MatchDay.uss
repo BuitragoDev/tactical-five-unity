@@ -1101,6 +1101,7 @@
 
 .mpv-starter-card {
     flex: 1;
+    height: 200px;
     background-color: #1c2130;
     border-width: 1px;
     border-color: #2a3347;
@@ -1109,6 +1110,7 @@
     margin-right: 4px;
     flex-direction: column;
     align-items: center;
+    justify-content: flex-start;
 }
 
 .mpv-starter-card:last-child { margin-right: 0; }
@@ -1135,7 +1137,7 @@
     -unity-text-align: middle-center;
     white-space: normal;
     line-height: 0.9;
-    margin-bottom: 4px;
+    flex-grow: 1;
 }
 
 .mpv-starter-ovr {
