@@ -19,14 +19,22 @@ public class MatchDayController : UIScreenController
     // My team badges
     private Label _homeMyTeamBadge, _awayMyTeamBadge;
 
-    // Matchup preview
-    private VisualElement _matchupPreviewOverlay;
-    private Label _previewFavorite;
-    private VisualElement _previewHomeLogo, _previewAwayLogo;
-    private Label _previewHomeName, _previewAwayName;
-    private Label _previewHomeProb, _previewAwayProb;
-    private VisualElement _previewHomeStarters, _previewAwayStarters;
-    private VisualElement _previewHomeBench, _previewAwayBench;
+    // Matchup preview (new)
+    private VisualElement _mpvOverlay;
+    private Label _mpvFavorite;
+    private VisualElement _mpvHomeLogo, _mpvAwayLogo;
+    private Label _mpvHomeCity, _mpvHomeName, _mpvHomeRecord, _mpvHomeConf;
+    private Label _mpvAwayCity, _mpvAwayName, _mpvAwayRecord, _mpvAwayConf;
+    private VisualElement _mpvHomeLast10, _mpvAwayLast10;
+    private Label _mpvDate, _mpvArena, _mpvCity;
+    private Label _mpvHomeOff, _mpvHomeOffRank, _mpvHomeDef, _mpvHomeDefRank;
+    private Label _mpvHomePace, _mpvHomePaceRank, _mpvHomeNet, _mpvHomeNetRank;
+    private Label _mpvAwayOff, _mpvAwayOffRank, _mpvAwayDef, _mpvAwayDefRank;
+    private Label _mpvAwayPace, _mpvAwayPaceRank, _mpvAwayNet, _mpvAwayNetRank;
+    private VisualElement _mpvHomeBajas, _mpvAwayBajas;
+    private VisualElement _mpvHomeStarters, _mpvAwayStarters;
+    private VisualElement _mpvHomeBench, _mpvAwayBench;
+    private VisualElement _mpvKeyRow1, _mpvKeyRow2, _mpvKeyRow3, _mpvKeyRow4;
     private Button _btnStartGame;
     private bool _previewShown;
 
@@ -151,18 +159,41 @@ public class MatchDayController : UIScreenController
         _awayMyTeamBadge = _root.Q<Label>("AwayMyTeamBadge");
 
         // Matchup preview
-        _matchupPreviewOverlay = _root.Q<VisualElement>("MatchupPreviewOverlay");
-        _previewFavorite = _root.Q<Label>("PreviewFavorite");
-        _previewHomeLogo = _root.Q<VisualElement>("PreviewHomeLogo");
-        _previewAwayLogo = _root.Q<VisualElement>("PreviewAwayLogo");
-        _previewHomeName = _root.Q<Label>("PreviewHomeName");
-        _previewAwayName = _root.Q<Label>("PreviewAwayName");
-        _previewHomeProb = _root.Q<Label>("PreviewHomeProb");
-        _previewAwayProb = _root.Q<Label>("PreviewAwayProb");
-        _previewHomeStarters = _root.Q<VisualElement>("PreviewHomeStarters");
-        _previewAwayStarters = _root.Q<VisualElement>("PreviewAwayStarters");
-        _previewHomeBench = _root.Q<VisualElement>("PreviewHomeBench");
-        _previewAwayBench = _root.Q<VisualElement>("PreviewAwayBench");
+        _mpvOverlay = _root.Q<VisualElement>("MatchupPreviewOverlay");
+        _mpvFavorite = _root.Q<Label>("MPVFavorite");
+        _mpvHomeLogo = _root.Q<VisualElement>("MPVHomeLogo");
+        _mpvAwayLogo = _root.Q<VisualElement>("MPVAwayLogo");
+        _mpvHomeCity = _root.Q<Label>("MPVHomeCity");
+        _mpvHomeName = _root.Q<Label>("MPVHomeName");
+        _mpvHomeRecord = _root.Q<Label>("MPVHomeRecord");
+        _mpvHomeConf = _root.Q<Label>("MPVHomeConf");
+        _mpvAwayCity = _root.Q<Label>("MPVAwayCity");
+        _mpvAwayName = _root.Q<Label>("MPVAwayName");
+        _mpvAwayRecord = _root.Q<Label>("MPVAwayRecord");
+        _mpvAwayConf = _root.Q<Label>("MPVAwayConf");
+        _mpvHomeLast10 = _root.Q<VisualElement>("MPVHomeLast10");
+        _mpvAwayLast10 = _root.Q<VisualElement>("MPVAwayLast10");
+        _mpvDate = _root.Q<Label>("MPVDate");
+        _mpvArena = _root.Q<Label>("MPVArena");
+        _mpvCity = _root.Q<Label>("MPVCity");
+        _mpvHomeOff = _root.Q<Label>("MPVHomeOff"); _mpvHomeOffRank = _root.Q<Label>("MPVHomeOffRank");
+        _mpvHomeDef = _root.Q<Label>("MPVHomeDef"); _mpvHomeDefRank = _root.Q<Label>("MPVHomeDefRank");
+        _mpvHomePace = _root.Q<Label>("MPVHomePace"); _mpvHomePaceRank = _root.Q<Label>("MPVHomePaceRank");
+        _mpvHomeNet = _root.Q<Label>("MPVHomeNet"); _mpvHomeNetRank = _root.Q<Label>("MPVHomeNetRank");
+        _mpvAwayOff = _root.Q<Label>("MPVAwayOff"); _mpvAwayOffRank = _root.Q<Label>("MPVAwayOffRank");
+        _mpvAwayDef = _root.Q<Label>("MPVAwayDef"); _mpvAwayDefRank = _root.Q<Label>("MPVAwayDefRank");
+        _mpvAwayPace = _root.Q<Label>("MPVAwayPace"); _mpvAwayPaceRank = _root.Q<Label>("MPVAwayPaceRank");
+        _mpvAwayNet = _root.Q<Label>("MPVAwayNet"); _mpvAwayNetRank = _root.Q<Label>("MPVAwayNetRank");
+        _mpvHomeBajas = _root.Q<VisualElement>("MPVHomeBajas");
+        _mpvAwayBajas = _root.Q<VisualElement>("MPVAwayBajas");
+        _mpvHomeStarters = _root.Q<VisualElement>("MPVHomeStarters");
+        _mpvAwayStarters = _root.Q<VisualElement>("MPVAwayStarters");
+        _mpvHomeBench = _root.Q<VisualElement>("MPVHomeBench");
+        _mpvAwayBench = _root.Q<VisualElement>("MPVAwayBench");
+        _mpvKeyRow1 = _root.Q<VisualElement>("MPVKeyRow1");
+        _mpvKeyRow2 = _root.Q<VisualElement>("MPVKeyRow2");
+        _mpvKeyRow3 = _root.Q<VisualElement>("MPVKeyRow3");
+        _mpvKeyRow4 = _root.Q<VisualElement>("MPVKeyRow4");
         _btnStartGame = _root.Q<Button>("BtnStartGame");
 
         // Header
@@ -549,12 +580,12 @@ public class MatchDayController : UIScreenController
 
     void ShowMatchupPreview(GameData myGame, TeamData home, TeamData away, bool isAllStar)
     {
-        if (_matchupPreviewOverlay == null) return;
+        if (_mpvOverlay == null) return;
 
         _previewShown = false;
         if (isAllStar || home == null || away == null)
         {
-            _matchupPreviewOverlay.style.display = DisplayStyle.None;
+            _mpvOverlay.style.display = DisplayStyle.None;
             return;
         }
 
@@ -562,79 +593,172 @@ public class MatchDayController : UIScreenController
             myGame.home_team_id == _myTeam.id, _manager.id, _season.id);
 
         _previewShown = true;
-        _matchupPreviewOverlay.style.display = DisplayStyle.Flex;
-        if (_previewFavorite != null)
+        _mpvOverlay.style.display = DisplayStyle.Flex;
+
+        if (_mpvFavorite != null)
         {
             if (string.IsNullOrEmpty(preview.favoriteName))
-            {
-                _previewFavorite.text = "PARTIDO EQUILIBRADO";
-            }
+                _mpvFavorite.text = "";
             else
-            {
-                string favorite = preview.favoriteName.ToUpper();
-                string favRole = preview.isHomeFavorite ? "LOCAL" : "VISITANTE";
-                _previewFavorite.text = $"FAVORITO: {favorite}  ({favRole})";
-            }
+                _mpvFavorite.text = $"FAVORITO {preview.favoriteName.ToUpper()}";
         }
 
-        SetLogo(_previewHomeLogo, home.logo, "64x64");
-        SetLogo(_previewAwayLogo, away.logo, "64x64");
-        _previewHomeName.text = home.name.ToUpper();
-        _previewAwayName.text = away.name.ToUpper();
-        _previewHomeProb.text = $"{preview.homeWinProb * 100f:F0}%";
-        _previewAwayProb.text = $"{preview.awayWinProb * 100f:F0}%";
+        var h = preview.home;
+        var a = preview.away;
 
-        var starters = GameResultCache.GameStarters.GetValueOrDefault(myGame.id) ?? new HashSet<int>();
-        BuildPreviewRoster(_previewHomeStarters, _previewHomeBench, home, myGame.home_team_id, starters);
-        BuildPreviewRoster(_previewAwayStarters, _previewAwayBench, away, myGame.away_team_id, starters);
+        SetLogo(_mpvHomeLogo, home.logo, "120x120");
+        SetLogo(_mpvAwayLogo, away.logo, "120x120");
+        if (_mpvHomeCity != null) _mpvHomeCity.text = home.city?.ToUpper() ?? "";
+        if (_mpvHomeName != null) _mpvHomeName.text = h.teamName;
+        if (_mpvHomeRecord != null) _mpvHomeRecord.text = $"{h.wins}-{h.losses}";
+        if (_mpvHomeConf != null) _mpvHomeConf.text = $"{h.conferenceRank}º EN CONFERENCIA {h.conferenceName}";
+        if (_mpvAwayCity != null) _mpvAwayCity.text = away.city?.ToUpper() ?? "";
+        if (_mpvAwayName != null) _mpvAwayName.text = a.teamName;
+        if (_mpvAwayRecord != null) _mpvAwayRecord.text = $"{a.wins}-{a.losses}";
+        if (_mpvAwayConf != null) _mpvAwayConf.text = $"{a.conferenceRank}º EN CONFERENCIA {a.conferenceName}";
+
+        BuildLast10(_mpvHomeLast10, h.last10);
+        BuildLast10(_mpvAwayLast10, a.last10);
+
+        if (_mpvDate != null) _mpvDate.text = preview.gameDate;
+        if (_mpvArena != null) _mpvArena.text = preview.arenaName?.ToUpper() ?? "";
+        if (_mpvCity != null) _mpvCity.text = preview.arenaCity?.ToUpper() ?? "";
+
+        SetStatLabel(_mpvHomeOff, $"{h.offRating:F1}");
+        SetStatLabel(_mpvHomeDef, $"{h.defRating:F1}");
+        SetStatLabel(_mpvHomePace, $"{h.pace:F1}");
+        SetNetRating(_mpvHomeNet, h.netRating);
+        SetStatLabel(_mpvHomeOffRank, $"{h.offRank}º NBA");
+        SetStatLabel(_mpvHomeDefRank, $"{h.defRank}º NBA");
+        SetStatLabel(_mpvHomePaceRank, $"{h.paceRank}º NBA");
+        SetStatLabel(_mpvHomeNetRank, $"{h.netRank}º NBA");
+
+        SetStatLabel(_mpvAwayOff, $"{a.offRating:F1}");
+        SetStatLabel(_mpvAwayDef, $"{a.defRating:F1}");
+        SetStatLabel(_mpvAwayPace, $"{a.pace:F1}");
+        SetNetRating(_mpvAwayNet, a.netRating);
+        SetStatLabel(_mpvAwayOffRank, $"{a.offRank}º NBA");
+        SetStatLabel(_mpvAwayDefRank, $"{a.defRank}º NBA");
+        SetStatLabel(_mpvAwayPaceRank, $"{a.paceRank}º NBA");
+        SetStatLabel(_mpvAwayNetRank, $"{a.netRank}º NBA");
+
+        BuildBajas(_mpvHomeBajas, h.injured);
+        BuildBajas(_mpvAwayBajas, a.injured);
+
+        BuildPreviewRoster(_mpvHomeStarters, _mpvHomeBench, h.starters, h.bench);
+        BuildPreviewRoster(_mpvAwayStarters, _mpvAwayBench, a.starters, a.bench);
+
+        BuildKeyPlayerRow(_mpvKeyRow1, "PTS", h.keyPts, h.keyPtsVal, a.keyPts, a.keyPtsVal);
+        BuildKeyPlayerRow(_mpvKeyRow2, "REB", h.keyReb, h.keyRebVal, a.keyReb, a.keyRebVal);
+        BuildKeyPlayerRow(_mpvKeyRow3, "AST", h.keyAst, h.keyAstVal, a.keyAst, a.keyAstVal);
+        BuildKeyPlayerRow(_mpvKeyRow4, "BLK", h.keyBlk, h.keyBlkVal, a.keyBlk, a.keyBlkVal);
     }
 
-    void BuildPreviewRoster(VisualElement starterRow, VisualElement benchList, TeamData team, int teamId, HashSet<int> starters)
+    void SetStatLabel(Label lbl, string text)
     {
-        if (starterRow == null || benchList == null || team == null) return;
+        if (lbl != null) lbl.text = text;
+    }
+
+    void SetNetRating(Label lbl, float val)
+    {
+        if (lbl == null) return;
+        lbl.text = val >= 0 ? $"+{val:F1}" : $"{val:F1}";
+    }
+
+    void BuildLast10(VisualElement container, List<char> results)
+    {
+        if (container == null) return;
+        container.Clear();
+        foreach (var r in results)
+        {
+            var dot = new VisualElement();
+            dot.AddToClassList("mpv-streak-dot");
+            dot.AddToClassList(r == 'G' ? "mpv-streak-dot--win" : "mpv-streak-dot--loss");
+            var lbl = new Label(r.ToString());
+            lbl.style.fontSize = 11;
+            lbl.style.color = new Color(1, 1, 1, 0.9f);
+            lbl.style.unityTextAlign = TextAnchor.MiddleCenter;
+            dot.Add(lbl);
+            container.Add(dot);
+        }
+    }
+
+    void BuildBajas(VisualElement container, List<PlayerData> injured)
+    {
+        if (container == null) return;
+        container.Clear();
+        foreach (var p in injured)
+        {
+            var item = new VisualElement();
+            item.AddToClassList("mpv-baja-item");
+
+            var photo = new VisualElement();
+            photo.AddToClassList("mpv-baja-photo");
+            var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+            if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
+            item.Add(photo);
+
+            var info = new VisualElement();
+            info.AddToClassList("mpv-baja-info");
+            info.Add(new Label($"{p.first_name.ToUpper()} {p.last_name.ToUpper()}") { name = "", style = { fontSize = 15, unityFont = Resources.Load<Font>("Fonts/Saira_Condensed-Bold") } });
+            info.Add(new Label(PositionCodes.GetName(p.position)) { style = { fontSize = 13, color = new Color(0.48f, 0.54f, 0.67f) } });
+            item.Add(info);
+
+            var status = p.injury_days <= 3 ? "Dudoso" : "Baja";
+            var statusCls = p.injury_days <= 3 ? "mpv-baja-status--doubt" : "mpv-baja-status--out";
+            var statusLbl = new Label(status);
+            statusLbl.AddToClassList("mpv-baja-status");
+            statusLbl.AddToClassList(statusCls);
+            item.Add(statusLbl);
+
+            var injuryDesc = new Label(InjuryDescription(p.injury_days));
+            injuryDesc.AddToClassList("mpv-baja-injury");
+            item.Add(injuryDesc);
+
+            container.Add(item);
+        }
+    }
+
+    string InjuryDescription(int days)
+    {
+        if (days <= 3) return "Dolor lumbar";
+        if (days <= 7) return "Esguince de tobillo";
+        if (days <= 14) return "Distensión muscular";
+        return "Lesión grave";
+    }
+
+    void BuildPreviewRoster(VisualElement starterRow, VisualElement benchList,
+        List<PlayerData> starters, List<PlayerData> bench)
+    {
+        if (starterRow == null || benchList == null) return;
         starterRow.Clear();
         benchList.Clear();
 
-        var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(teamId)
-            .Where(p => p.injury_days == 0 && p.g_league_assigned == 0)
-            .OrderByDescending(p => p.overall)
-            .ToList();
-
-        var startingFive = allPlayers
-            .Where(p => starters.Contains(p.id))
-            .OrderBy(p => System.Array.IndexOf(PositionCodes.Order, p.position))
-            .ToList();
-        var bench = allPlayers
-            .Where(p => !starters.Contains(p.id))
-            .OrderByDescending(p => p.overall)
-            .Take(7)
-            .ToList();
-
-        foreach (var p in startingFive) starterRow.Add(BuildStarterCard(p));
+        foreach (var p in starters) starterRow.Add(BuildStarterCard(p));
         foreach (var p in bench) benchList.Add(BuildBenchRow(p));
     }
 
     VisualElement BuildStarterCard(PlayerData p)
     {
         var card = new VisualElement();
-        card.AddToClassList("matchup-preview-starter-card");
+        card.AddToClassList("mpv-starter-card");
 
         var photo = new VisualElement();
-        photo.AddToClassList("matchup-preview-starter-photo");
-        Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
-        photo.style.backgroundImage = new StyleBackground(tex);
+        photo.AddToClassList("mpv-starter-photo");
+        var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
         card.Add(photo);
 
-        var nameLbl = new Label { text = $"{p.first_name.ToUpper()}\n{p.last_name.ToUpper()}" };
-        nameLbl.AddToClassList("matchup-preview-starter-name");
-        card.Add(nameLbl);
-
-        var posLbl = new Label { text = PositionCodes.GetName(p.position) };
-        posLbl.AddToClassList("matchup-preview-starter-pos");
+        var posLbl = new Label(PositionCodes.GetShort(p.position));
+        posLbl.AddToClassList("mpv-starter-pos");
         card.Add(posLbl);
 
-        var ovrLbl = new Label { text = $"MEDIA {p.overall}" };
-        ovrLbl.AddToClassList("matchup-preview-starter-ovr");
+        var nameLbl = new Label($"{p.first_name.ToUpper()}\n{p.last_name.ToUpper()}");
+        nameLbl.AddToClassList("mpv-starter-name");
+        card.Add(nameLbl);
+
+        var ovrLbl = new Label($"{p.overall}");
+        ovrLbl.AddToClassList("mpv-starter-ovr");
         card.Add(ovrLbl);
 
         return card;
@@ -643,27 +767,75 @@ public class MatchDayController : UIScreenController
     VisualElement BuildBenchRow(PlayerData p)
     {
         var row = new VisualElement();
-        row.AddToClassList("matchup-preview-bench-card");
+        row.AddToClassList("mpv-bench-card");
 
-        var photo = new VisualElement();
-        photo.AddToClassList("matchup-preview-bench-photo");
-        Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
-        photo.style.backgroundImage = new StyleBackground(tex);
-        row.Add(photo);
-
-        var nameLbl = new Label { text = $"{p.first_name.ToUpper()} {p.last_name.ToUpper()}" };
-        nameLbl.AddToClassList("matchup-preview-roster-name");
+        var nameLbl = new Label($"{p.first_name.ToUpper()} {p.last_name.ToUpper()}");
+        nameLbl.AddToClassList("mpv-bench-name");
         row.Add(nameLbl);
 
-        var posLbl = new Label { text = PositionCodes.GetName(p.position) };
-        posLbl.AddToClassList("matchup-preview-roster-pos");
+        var posLbl = new Label(PositionCodes.GetName(p.position));
+        posLbl.AddToClassList("mpv-bench-pos");
         row.Add(posLbl);
 
-        var ovrLbl = new Label { text = $"{p.overall}" };
-        ovrLbl.AddToClassList("matchup-preview-roster-ovr");
+        var ovrLbl = new Label($"{p.overall}");
+        ovrLbl.AddToClassList("mpv-bench-ovr");
         row.Add(ovrLbl);
 
         return row;
+    }
+
+    void BuildKeyPlayerRow(VisualElement row, string statLabel,
+        PlayerData homePlayer, float homeVal,
+        PlayerData awayPlayer, float awayVal)
+    {
+        if (row == null) return;
+        row.Clear();
+
+        // Home side
+        var homeSide = new VisualElement();
+        homeSide.AddToClassList("mpv-key-player");
+        if (homePlayer != null)
+        {
+            var photo = new VisualElement();
+            photo.AddToClassList("mpv-key-photo");
+            var tex = PlayerPhotoHelper.Load(homePlayer.id, homePlayer.photo);
+            if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
+            homeSide.Add(photo);
+            var name = new Label(homePlayer.last_name.ToUpper());
+            name.AddToClassList("mpv-key-name");
+            homeSide.Add(name);
+        }
+        var homeStat = new Label($"{homeVal:F1}");
+        homeStat.AddToClassList("mpv-key-stat");
+        homeStat.AddToClassList("mpv-key-stat--left");
+        homeSide.Add(homeStat);
+        row.Add(homeSide);
+
+        // Center label
+        var center = new Label(statLabel);
+        center.AddToClassList("mpv-key-label");
+        row.Add(center);
+
+        // Away side
+        var awaySide = new VisualElement();
+        awaySide.AddToClassList("mpv-key-player");
+        awaySide.AddToClassList("mpv-key-player--right");
+        var awayStat = new Label($"{awayVal:F1}");
+        awayStat.AddToClassList("mpv-key-stat");
+        awayStat.AddToClassList("mpv-key-stat--right");
+        awaySide.Add(awayStat);
+        if (awayPlayer != null)
+        {
+            var name = new Label(awayPlayer.last_name.ToUpper());
+            name.AddToClassList("mpv-key-name");
+            awaySide.Add(name);
+            var photo = new VisualElement();
+            photo.AddToClassList("mpv-key-photo");
+            var tex = PlayerPhotoHelper.Load(awayPlayer.id, awayPlayer.photo);
+            if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
+            awaySide.Add(photo);
+        }
+        row.Add(awaySide);
     }
 
     void BuildBoxTable(VisualElement body, VisualElement footer, List<PlayerGameStats> stats, bool isHome, GameData game, int mvpPlayerId, HashSet<int> starters)
@@ -759,8 +931,8 @@ public class MatchDayController : UIScreenController
 
     void OnStartGame()
     {
-        if (_matchupPreviewOverlay != null)
-            _matchupPreviewOverlay.style.display = DisplayStyle.None;
+        if (_mpvOverlay != null)
+            _mpvOverlay.style.display = DisplayStyle.None;
         _previewShown = false;
         TryPlayByPlay();
     }

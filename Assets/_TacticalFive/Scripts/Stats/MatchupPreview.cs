@@ -1,9 +1,28 @@
 using UnityEngine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 public static class MatchupPreview
 {
+    public class TeamPreviewSide
+    {
+        public string teamName;
+        public string cityName;
+        public string logo;
+        public int wins, losses;
+        public int conferenceRank;
+        public string conferenceName;
+        public List<char> last10 = new();
+        public float offRating, defRating, pace, netRating;
+        public int offRank, defRank, paceRank, netRank;
+        public List<PlayerData> starters = new();
+        public List<PlayerData> bench = new();
+        public List<PlayerData> injured = new();
+        public PlayerData keyPts, keyReb, keyAst, keyBlk;
+        public float keyPtsVal, keyRebVal, keyAstVal, keyBlkVal;
+    }
+
     public class PreviewResult
     {
         public int homeRating;
@@ -14,15 +33,26 @@ public static class MatchupPreview
         public bool isHomeFavorite;
         public List<PlayerData> homeStars = new();
         public List<PlayerData> awayStars = new();
+        public TeamPreviewSide home;
+        public TeamPreviewSide away;
+        public string gameDate;
+        public string arenaName;
+        public string arenaCity;
     }
 
-    /// <summary>Pronóstico previo al partido: ratings, probabilidad de victoria y estrellas de cada equipo.</summary>
     public static PreviewResult Compute(int homeTeamId, int awayTeamId, bool isHome,
         int managerId, int seasonId)
     {
         var db = DatabaseManager.Instance;
-        var homePlayers = db.GetPlayersByTeam(homeTeamId).Where(p => p.injury_days == 0).ToList();
-        var awayPlayers = db.GetPlayersByTeam(awayTeamId).Where(p => p.injury_days == 0).ToList();
+        var allTeams = db.GetAllTeams();
+        var homeTeam = db.GetTeamById(homeTeamId);
+        var awayTeam = db.GetTeamById(awayTeamId);
+
+        var homePlayers = db.GetPlayersByTeam(homeTeamId).Where(p => p.injury_days == 0 && p.g_league_assigned == 0).ToList();
+        var awayPlayers = db.GetPlayersByTeam(awayTeamId).Where(p => p.injury_days == 0 && p.g_league_assigned == 0).ToList();
+
+        var allHomePlayers = db.GetPlayersByTeam(homeTeamId);
+        var allAwayPlayers = db.GetPlayersByTeam(awayTeamId);
 
         int homeR = TeamRating(homePlayers);
         int awayR = TeamRating(awayPlayers);
@@ -39,12 +69,31 @@ public static class MatchupPreview
         float diff = homeR - awayR;
         float homeProb = 1f / (1f + Mathf.Exp(-diff * 0.08f));
 
-        var homeTeam = db.GetTeamById(homeTeamId);
-        var awayTeam = db.GetTeamById(awayTeamId);
-
-        // Solo declarar favorito si hay una ventaja clara; si está prácticamente
-        // empatado (50/50) no se declara ningún favorito.
         bool hasFavorite = Mathf.Abs(homeProb - 0.5f) > 0.005f;
+
+        var standingsGames = db.GetStandingsGames(managerId)
+            .Where(g => g.is_played == 1).ToList();
+
+        var homeSide = BuildSide(homeTeam, homePlayers, allHomePlayers, homeTeamId,
+            standingsGames, allTeams, db, managerId, seasonId, homePlayers, awayPlayers);
+        var awaySide = BuildSide(awayTeam, awayPlayers, allAwayPlayers, awayTeamId,
+            standingsGames, allTeams, db, managerId, seasonId, homePlayers, awayPlayers);
+
+        homeSide.starters = GetStarters(homePlayers, db, homeTeamId);
+        awaySide.starters = GetStarters(awayPlayers, db, awayTeamId);
+        homeSide.bench = homePlayers.Except(homeSide.starters).OrderByDescending(p => p.overall).Take(6).ToList();
+        awaySide.bench = awayPlayers.Except(awaySide.starters).OrderByDescending(p => p.overall).Take(6).ToList();
+        homeSide.injured = allHomePlayers.Where(p => p.injury_days > 0).OrderByDescending(p => p.overall).Take(3).ToList();
+        awaySide.injured = allAwayPlayers.Where(p => p.injury_days > 0).OrderByDescending(p => p.overall).Take(3).ToList();
+
+        ComputeKeyPlayers(homeSide, db, homeTeamId, managerId, seasonId);
+        ComputeKeyPlayers(awaySide, db, awayTeamId, managerId, seasonId);
+
+        ComputeAllTeamRatings(standingsGames, allTeams, db, managerId, seasonId,
+            out var offRatings, out var defRatings, out var paces, out var netRatings);
+
+        AssignRanks(homeSide, offRatings, defRatings, paces, netRatings);
+        AssignRanks(awaySide, offRatings, defRatings, paces, netRatings);
 
         return new PreviewResult
         {
@@ -56,7 +105,192 @@ public static class MatchupPreview
             isHomeFavorite = hasFavorite && homeProb >= 0.5f,
             homeStars = homePlayers.OrderByDescending(p => p.overall).Take(3).ToList(),
             awayStars = awayPlayers.OrderByDescending(p => p.overall).Take(3).ToList(),
+            home = homeSide,
+            away = awaySide,
+            gameDate = DateTime.Now.ToString("dd MMM yyyy").ToUpper(),
+            arenaName = homeTeam?.arena ?? "",
+            arenaCity = homeTeam?.city ?? "",
         };
+    }
+
+    static TeamPreviewSide BuildSide(TeamData team, List<PlayerData> availablePlayers,
+        List<PlayerData> allPlayers, int teamId,
+        List<GameData> standingsGames, List<TeamData> allTeams,
+        DatabaseManager db, int managerId, int seasonId,
+        List<PlayerData> homePlayers, List<PlayerData> awayPlayers)
+    {
+        var side = new TeamPreviewSide();
+        if (team == null) return side;
+
+        side.teamName = team.name.ToUpper();
+        side.cityName = team.city?.ToUpper() ?? "";
+        side.logo = team.logo;
+
+        var teamGames = standingsGames.Where(g =>
+            (g.home_team_id == teamId || g.away_team_id == teamId)).ToList();
+        side.wins = teamGames.Count(g =>
+            (g.home_team_id == teamId && g.home_score > g.away_score) ||
+            (g.away_team_id == teamId && g.away_score > g.home_score));
+        side.losses = teamGames.Count(g => g.home_score != g.away_score) - side.wins;
+        if (side.wins + side.losses == 0) { side.wins = 0; side.losses = 0; }
+
+        side.conferenceRank = ObjectiveHelper.GetConferenceRank(teamId, team.conference, allTeams, standingsGames);
+        side.conferenceName = team.conference == "East" ? "ESTE" : "OESTE";
+
+        var lastGames = teamGames.OrderByDescending(g => g.game_day).Take(10).ToList();
+        foreach (var g in lastGames)
+        {
+            bool won = (g.home_team_id == teamId && g.home_score > g.away_score) ||
+                       (g.away_team_id == teamId && g.away_score > g.home_score);
+            side.last10.Add(won ? 'G' : 'P');
+        }
+        side.last10.Reverse();
+
+        ComputeTeamStats(side, teamId, standingsGames, db);
+
+        return side;
+    }
+
+    static void ComputeTeamStats(TeamPreviewSide side, int teamId,
+        List<GameData> standingsGames, DatabaseManager db)
+    {
+        var teamGames = standingsGames.Where(g =>
+            (g.home_team_id == teamId || g.away_team_id == teamId)).ToList();
+        if (teamGames.Count == 0) return;
+
+        float totalPtsScored = 0, totalPtsAllowed = 0;
+        int gameCount = 0;
+
+        foreach (var g in teamGames)
+        {
+            bool isHome = g.home_team_id == teamId;
+            int scored = isHome ? g.home_score : g.away_score;
+            int allowed = isHome ? g.away_score : g.home_score;
+            totalPtsScored += scored;
+            totalPtsAllowed += allowed;
+            gameCount++;
+        }
+
+        if (gameCount > 0)
+        {
+            side.offRating = totalPtsScored / gameCount;
+            side.defRating = totalPtsAllowed / gameCount;
+            side.pace = (totalPtsScored + totalPtsAllowed) / (2f * gameCount) * 2.2f;
+            side.netRating = side.offRating - side.defRating;
+        }
+    }
+
+    static void ComputeAllTeamRatings(List<GameData> standingsGames,
+        List<TeamData> allTeams, DatabaseManager db,
+        int managerId, int seasonId,
+        out Dictionary<int, float> offRatings,
+        out Dictionary<int, float> defRatings,
+        out Dictionary<int, float> paces,
+        out Dictionary<int, float> netRatings)
+    {
+        offRatings = new Dictionary<int, float>();
+        defRatings = new Dictionary<int, float>();
+        paces = new Dictionary<int, float>();
+        netRatings = new Dictionary<int, float>();
+
+        foreach (var team in allTeams)
+        {
+            var teamGames = standingsGames.Where(g =>
+                (g.home_team_id == team.id || g.away_team_id == team.id)).ToList();
+            if (teamGames.Count == 0) continue;
+
+            float totalScored = 0, totalAllowed = 0;
+            foreach (var g in teamGames)
+            {
+                bool isHome = g.home_team_id == team.id;
+                totalScored += isHome ? g.home_score : g.away_score;
+                totalAllowed += isHome ? g.away_score : g.home_score;
+            }
+            int n = teamGames.Count;
+            float off = totalScored / n;
+            float def = totalAllowed / n;
+            offRatings[team.id] = off;
+            defRatings[team.id] = def;
+            paces[team.id] = (totalScored + totalAllowed) / (2f * n) * 2.2f;
+            netRatings[team.id] = off - def;
+        }
+    }
+
+    static void AssignRanks(TeamPreviewSide side,
+        Dictionary<int, float> offRatings,
+        Dictionary<int, float> defRatings,
+        Dictionary<int, float> paces,
+        Dictionary<int, float> netRatings)
+    {
+        var allTeamIds = offRatings.Keys.ToList();
+        side.offRank = GetRank(side.offRating, allTeamIds, offRatings, ascending: false);
+        side.defRank = GetRank(side.defRating, allTeamIds, defRatings, ascending: true);
+        side.paceRank = GetRank(side.pace, allTeamIds, paces, ascending: false);
+        side.netRank = GetRank(side.netRating, allTeamIds, netRatings, ascending: false);
+    }
+
+    static int GetRank(float value, List<int> teamIds, Dictionary<int, float> ratings, bool ascending)
+    {
+        int rank = 1;
+        foreach (var tid in teamIds)
+        {
+            if (!ratings.TryGetValue(tid, out var v)) continue;
+            if (ascending ? v < value : v > value) rank++;
+        }
+        return rank;
+    }
+
+    static List<PlayerData> GetStarters(List<PlayerData> availablePlayers, DatabaseManager db, int teamId)
+    {
+        return availablePlayers
+            .OrderByDescending(p => p.overall)
+            .GroupBy(p => p.position)
+            .Select(g => g.First())
+            .OrderBy(p => Array.IndexOf(PositionCodes.Order, p.position))
+            .Take(5)
+            .ToList();
+    }
+
+    static void ComputeKeyPlayers(TeamPreviewSide side, DatabaseManager db,
+        int teamId, int managerId, int seasonId)
+    {
+        var players = db.GetPlayersByTeam(teamId).Where(p => p.injury_days == 0 && p.g_league_assigned == 0).ToList();
+        if (players.Count == 0) return;
+
+        var seasonGames = db.GetSeasonGames(managerId, seasonId)
+            .Where(g => g.is_played == 1).ToList();
+        var gameIds = seasonGames.Select(g => g.id).ToList();
+        if (gameIds.Count == 0) return;
+
+        var allStats = db.GetGamePlayerStatsBatch(gameIds)
+            .Where(s => s.team_id == teamId && s.minutes > 0)
+            .GroupBy(s => s.player_id)
+            .Select(g => new {
+                player_id = g.Key,
+                avgPts = g.Average(s => s.points),
+                avgReb = g.Average(s => s.rebounds),
+                avgAst = g.Average(s => s.assists),
+                avgBlk = g.Average(s => s.blocks),
+                games = g.Count()
+            })
+            .Where(x => x.games >= 3)
+            .ToList();
+
+        if (allStats.Count == 0) return;
+
+        var topPts = allStats.OrderByDescending(x => x.avgPts).First();
+        var topReb = allStats.OrderByDescending(x => x.avgReb).First();
+        var topAst = allStats.OrderByDescending(x => x.avgAst).First();
+        var topBlk = allStats.OrderByDescending(x => x.avgBlk).First();
+
+        side.keyPts = players.FirstOrDefault(p => p.id == topPts.player_id);
+        side.keyPtsVal = topPts.avgPts;
+        side.keyReb = players.FirstOrDefault(p => p.id == topReb.player_id);
+        side.keyRebVal = topReb.avgReb;
+        side.keyAst = players.FirstOrDefault(p => p.id == topAst.player_id);
+        side.keyAstVal = topAst.avgAst;
+        side.keyBlk = players.FirstOrDefault(p => p.id == topBlk.player_id);
+        side.keyBlkVal = topBlk.avgBlk;
     }
 
     static int TeamRating(List<PlayerData> players)

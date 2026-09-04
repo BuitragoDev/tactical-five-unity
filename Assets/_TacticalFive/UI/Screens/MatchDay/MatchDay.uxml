@@ -28,172 +28,198 @@
                     </ui:VisualElement>
                     <ui:Label name="HeaderDate" class="header-date-label" text="" />
                     <ui:Label name="HeaderGameDay" class="header-game-day-label" text="" />
-                    <ui:Button name="BtnContinue" class="btn-action" text="CONTINUAR" />
+                    <ui:Button name="ConfigBtn" class="header-config-btn" text="⚙" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <!-- CONTENT -->
-            <ui:ScrollView class="matchday-scroll"
-                           horizontal-scrolling-enabled="false"
-                           mode="Vertical">
-                <ui:VisualElement class="matchday-content">
+            <!-- SCORE / PREVIEW AREA -->
+            <ui:VisualElement class="matchday-content">
 
-                    <!-- Match Banner -->
-                    <ui:VisualElement name="MatchBanner" class="match-banner">
-                        <ui:VisualElement class="match-teams">
-                            <ui:VisualElement name="HomeTeamBlock" class="match-team">
-                                <ui:VisualElement name="HomeLogo" class="match-team-logo" />
-                                <ui:Label name="HomeName" class="match-team-name" text="" />
-                                <ui:Label name="HomeMyTeamBadge" class="my-team-badge" text="MI EQUIPO" style="display: none;" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="match-score">
-                                <ui:Label name="HomeScore" class="score-home" text="" />
-                                <ui:Label class="score-sep" text="-" />
-                                <ui:Label name="AwayScore" class="score-away" text="" />
-                            </ui:VisualElement>
-                            <ui:VisualElement name="AwayTeamBlock" class="match-team">
-                                <ui:VisualElement name="AwayLogo" class="match-team-logo" />
-                                <ui:Label name="AwayName" class="match-team-name" text="" />
-                                <ui:Label name="AwayMyTeamBadge" class="my-team-badge" text="MI EQUIPO" style="display: none;" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="match-venue">
-                            <ui:Label name="VenueLabel" class="match-venue-label" text="" />
-                        </ui:VisualElement>
+                <ui:VisualElement class="matchday-score-row">
+                    <ui:VisualElement class="matchday-team-block">
+                        <ui:VisualElement name="HomeLogo" class="matchday-logo" />
+                        <ui:Label name="HomeName" class="matchday-team-name" text="" />
                     </ui:VisualElement>
-
-                    <!-- Box Scores -->
-                    <ui:VisualElement class="box-scores">
-                        <ui:VisualElement name="HomeBoxScore" class="box-score-panel" style="margin-right: 20px;">
-                            <ui:VisualElement class="box-score-header">
-                                <ui:VisualElement name="HomeBoxLogo" class="box-logo" />
-                                <ui:Label name="HomeBoxName" class="box-team-name" text="" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="box-table-wrapper">
-                                <ui:VisualElement class="box-table-header">
-                                    <ui:Label class="col-player col-stat--header" text="Jugador" />
-                                    <ui:Label class="col-min col-stat--header" text="MIN" />
-                                    <ui:Label class="col-pts col-stat--header" text="PTS" />
-                                    <ui:Label class="col-fg col-stat--header" text="TC" />
-                                    <ui:Label class="col-3p col-stat--header" text="3P" />
-                                    <ui:Label class="col-ft col-stat--header" text="TL" />
-                                    <ui:Label class="col-reb col-stat--header" text="REB" />
-                                    <ui:Label class="col-ast col-stat--header" text="AST" />
-                                    <ui:Label class="col-stl col-stat--header" text="ROB" />
-                                    <ui:Label class="col-blk col-stat--header" text="TAP" />
-                                    <ui:Label class="col-to col-stat--header" text="PER" />
-                                    <ui:Label class="col-pf col-stat--header" text="FP" />
-                                    <ui:Label class="col-val col-stat--header" text="VAL" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="HomeBoxBody" class="box-table-body" />
-                                <ui:VisualElement name="HomeBoxFooter" class="box-table-footer" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement name="AwayBoxScore" class="box-score-panel">
-                            <ui:VisualElement class="box-score-header">
-                                <ui:VisualElement name="AwayBoxLogo" class="box-logo" />
-                                <ui:Label name="AwayBoxName" class="box-team-name" text="" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="box-table-wrapper">
-                                <ui:VisualElement class="box-table-header">
-                                    <ui:Label class="col-player col-stat--header" text="Jugador" />
-                                    <ui:Label class="col-min col-stat--header" text="MIN" />
-                                    <ui:Label class="col-pts col-stat--header" text="PTS" />
-                                    <ui:Label class="col-fg col-stat--header" text="TC" />
-                                    <ui:Label class="col-3p col-stat--header" text="3P" />
-                                    <ui:Label class="col-ft col-stat--header" text="TL" />
-                                    <ui:Label class="col-reb col-stat--header" text="REB" />
-                                    <ui:Label class="col-ast col-stat--header" text="AST" />
-                                    <ui:Label class="col-stl col-stat--header" text="ROB" />
-                                    <ui:Label class="col-blk col-stat--header" text="TAP" />
-                                    <ui:Label class="col-to col-stat--header" text="PER" />
-                                    <ui:Label class="col-pf col-stat--header" text="FP" />
-                                    <ui:Label class="col-val col-stat--header" text="VAL" />
-                                </ui:VisualElement>
-                                <ui:VisualElement name="AwayBoxBody" class="box-table-body" />
-                                <ui:VisualElement name="AwayBoxFooter" class="box-table-footer" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
+                    <ui:VisualElement class="matchday-center-block">
+                        <ui:Label name="ScoreText" class="matchday-score" text="" />
+                        <ui:Label name="VenueLabel" class="matchday-venue" text="" />
                     </ui:VisualElement>
-
+                    <ui:VisualElement class="matchday-team-block">
+                        <ui:VisualElement name="AwayLogo" class="matchday-logo" />
+                        <ui:Label name="AwayName" class="matchday-team-name" text="" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-            </ui:ScrollView>
 
-        </ui:VisualElement>
+                <!-- MATCHDAY BOXSCORE / RESULT -->
+                <ui:VisualElement class="matchday-boxscore-area">
+                    <ui:VisualElement class="matchday-boxscore-col">
+                        <ui:VisualElement class="matchday-boxscore-header">
+                            <ui:VisualElement name="HomeBoxLogo" class="matchday-boxscore-logo" />
+                            <ui:Label name="HomeBoxName" class="matchday-boxscore-name" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="HomeBoxBody" class="matchday-boxscore-body" />
+                        <ui:VisualElement name="HomeBoxFooter" class="matchday-boxscore-footer" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="matchday-boxscore-col">
+                        <ui:VisualElement class="matchday-boxscore-header">
+                            <ui:VisualElement name="AwayBoxLogo" class="matchday-boxscore-logo" />
+                            <ui:Label name="AwayBoxName" class="matchday-boxscore-name" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="AwayBoxBody" class="matchday-boxscore-body" />
+                        <ui:VisualElement name="AwayBoxFooter" class="matchday-boxscore-footer" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
 
-        <!-- PLAY-BY-PLAY OVERLAY -->
-        <ui:VisualElement name="PlayByPlayOverlay" class="pbp-overlay" style="display: none;">
-            <ui:VisualElement class="pbp-header">
-                <ui:VisualElement class="pbp-team-side pbp-team-side--home">
-                    <ui:Label name="PbpHomeName" class="pbp-team" text="" />
-                    <ui:VisualElement name="PbpHomeLogo" class="pbp-team-logo" />
-                </ui:VisualElement>
-                <ui:Label name="PbpScore" class="pbp-score" text="0 - 0" />
-                <ui:VisualElement class="pbp-team-side pbp-team-side--away">
-                    <ui:VisualElement name="PbpAwayLogo" class="pbp-team-logo" />
-                    <ui:Label name="PbpAwayName" class="pbp-team" text="" />
-                </ui:VisualElement>
+                <!-- HOME MY TEAM BADGE -->
+                <ui:Label name="HomeMyTeamBadge" class="matchday-myteam-badge" text="" style="display: none;" />
+                <ui:Label name="AwayMyTeamBadge" class="matchday-myteam-badge matchday-myteam-badge--right" text="" style="display: none;" />
+
+                <ui:Button name="BtnContinue" class="matchday-continue-btn" text="CONTINUAR ►" />
             </ui:VisualElement>
-            <ui:VisualElement class="pbp-meta-row">
-                <ui:Label name="PbpQuarter" class="pbp-quarter" text="" />
-                <ui:Label name="PbpClock" class="pbp-clock" text="12:00" />
-            </ui:VisualElement>
-            <ui:VisualElement class="pbp-progress">
-                <ui:VisualElement name="PbpProgressFill" class="pbp-progress-fill" />
-                <ui:Label name="PbpProgressLabel" class="pbp-progress-label" text="0%" />
-            </ui:VisualElement>
-            <ui:Label name="PbpText" class="pbp-text" text="" />
-            <ui:VisualElement name="PbpBoxes" class="pbp-boxes">
-                <ui:VisualElement name="PbpHomeBox" class="pbp-box-panel" />
-                <ui:VisualElement name="PbpAwayBox" class="pbp-box-panel" />
-            </ui:VisualElement>
-            <ui:VisualElement class="pbp-controls">
-                <ui:Button name="PbpBtnSpeed1" class="pbp-speed-btn" text="x1" />
-                <ui:Button name="PbpBtnSpeed3" class="pbp-speed-btn" text="x3" />
-                <ui:Button name="PbpBtnSpeed5" class="pbp-speed-btn pbp-speed-btn--active" text="x5" />
-                <ui:Button name="PbpBtnSpeed10" class="pbp-speed-btn" text="x10" />
-                <ui:VisualElement class="pbp-spacer" />
-                <ui:Button name="PbpSkip" class="pbp-skip" text="SALTAR ►" />
-            </ui:VisualElement>
+
         </ui:VisualElement>
 
         <!-- MATCHUP PREVIEW OVERLAY -->
-        <ui:VisualElement name="MatchupPreviewOverlay" class="matchup-preview-overlay" style="display: none;">
-            <ui:VisualElement class="matchup-preview-header">
-                <ui:Label class="matchup-preview-title" text="PRONÓSTICO DEL PARTIDO" />
-                <ui:Label name="PreviewFavorite" class="matchup-preview-favorite" text="" />
+        <ui:VisualElement name="MatchupPreviewOverlay" class="mpv-overlay" style="display: none;">
+
+            <!-- TEAM HEADERS -->
+            <ui:VisualElement class="mpv-headers">
+                <!-- HOME HEADER -->
+                <ui:VisualElement class="mpv-team-header">
+                    <ui:VisualElement name="MPVHomeLogo" class="mpv-logo-lg" />
+                    <ui:VisualElement class="mpv-team-info">
+                        <ui:Label name="MPVHomeCity" class="mpv-city" text="" />
+                        <ui:Label name="MPVHomeName" class="mpv-team-name" text="" />
+                        <ui:Label name="MPVHomeRecord" class="mpv-record" text="" />
+                        <ui:Label name="MPVHomeConf" class="mpv-conf" text="" />
+                        <ui:VisualElement class="mpv-streak-row">
+                            <ui:Label class="mpv-streak-label" text="ÚLTIMOS 10" />
+                            <ui:VisualElement name="MPVHomeLast10" class="mpv-streak-dots" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- CENTER: DATE / ARENA / VS -->
+                <ui:VisualElement class="mpv-center-info">
+                    <ui:Label name="MPVDate" class="mpv-date" text="" />
+                    <ui:Label name="MPVArena" class="mpv-arena" text="" />
+                    <ui:Label name="MPVCity" class="mpv-city-label" text="" />
+                    <ui:Label class="mpv-vs" text="VS" />
+                </ui:VisualElement>
+
+                <!-- AWAY HEADER -->
+                <ui:VisualElement class="mpv-team-header mpv-team-header--right">
+                    <ui:VisualElement class="mpv-team-info mpv-team-info--right">
+                        <ui:Label name="MPVAwayCity" class="mpv-city" text="" />
+                        <ui:Label name="MPVAwayName" class="mpv-team-name" text="" />
+                        <ui:Label name="MPVAwayRecord" class="mpv-record" text="" />
+                        <ui:Label name="MPVAwayConf" class="mpv-conf" text="" />
+                        <ui:VisualElement class="mpv-streak-row mpv-streak-row--right">
+                            <ui:Label class="mpv-streak-label" text="ÚLTIMOS 10" />
+                            <ui:VisualElement name="MPVAwayLast10" class="mpv-streak-dots" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="MPVAwayLogo" class="mpv-logo-lg" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement class="matchup-preview-teams">
-                <ui:VisualElement name="PreviewHomeBlock" class="matchup-preview-team">
-                    <ui:VisualElement name="PreviewHomeLogo" class="matchup-preview-logo" />
-                    <ui:Label name="PreviewHomeName" class="matchup-preview-team-name" text="" />
-                    <ui:Label name="PreviewHomeProb" class="matchup-preview-prob" text="" />
+            <!-- FAVORITE BADGE -->
+            <ui:Label name="MPVFavorite" class="mpv-favorite" text="" />
+
+            <!-- STATS ROW -->
+            <ui:VisualElement class="mpv-stats-row">
+                <ui:VisualElement class="mpv-stats-team">
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="ATAQUE" />
+                        <ui:Label name="MPVHomeOff" class="mpv-stat-val" text="" />
+                        <ui:Label name="MPVHomeOffRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="DEFENSA" />
+                        <ui:Label name="MPVHomeDef" class="mpv-stat-val" text="" />
+                        <ui:Label name="MPVHomeDefRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="RITMO" />
+                        <ui:Label name="MPVHomePace" class="mpv-stat-val" text="" />
+                        <ui:Label name="MPVHomePaceRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="NET RATING" />
+                        <ui:Label name="MPVHomeNet" class="mpv-stat-val mpv-stat-val--net" text="" />
+                        <ui:Label name="MPVHomeNetRank" class="mpv-stat-rank" text="" />
+                    </ui>
                 </ui:VisualElement>
-                <ui:Label class="matchup-preview-vs" text="VS" />
-                <ui:VisualElement name="PreviewAwayBlock" class="matchup-preview-team">
-                    <ui:VisualElement name="PreviewAwayLogo" class="matchup-preview-logo" />
-                    <ui:Label name="PreviewAwayName" class="matchup-preview-team-name" text="" />
-                    <ui:Label name="PreviewAwayProb" class="matchup-preview-prob" text="" />
+
+                <!-- CENTER: BAJAS -->
+                <ui:VisualElement class="mpv-bajas">
+                    <ui:Label class="mpv-bajas-title" text="BAJAS" />
+                    <ui:VisualElement class="mpv-bajas-cols">
+                        <ui:VisualElement class="mpv-bajas-col">
+                            <ui:Label class="mpv-bajas-col-title" text="ATAQUE" />
+                            <ui:VisualElement name="MPVHomeBajas" class="mpv-bajas-list" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="mpv-bajas-col">
+                            <ui:Label class="mpv-bajas-col-title" text="DEFENSA" />
+                            <ui:VisualElement name="MPVAwayBajas" class="mpv-bajas-list" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <ui:VisualElement class="mpv-stats-team mpv-stats-team--right">
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="ATAQUE" />
+                        <ui:Label name="MPVAwayOff" class="mpv-stat-val" text="" />
+                        <ui:Label name="MPVAwayOffRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="DEFENSA" />
+                        <ui:Label name="MPVAwayDef" class="mpv-stat-val" text="" />
+                        <ui:Label name="MPVAwayDefRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="RITMO" />
+                        <ui:Label name="MPVAwayPace" class="mpv-stat-val" text="" />
+                        <ui:Label name="MPVAwayPaceRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="mpv-stat-card">
+                        <ui:Label class="mpv-stat-label" text="NET RATING" />
+                        <ui:Label name="MPVAwayNet" class="mpv-stat-val mpv-stat-val--net" text="" />
+                        <ui:Label name="MPVAwayNetRank" class="mpv-stat-rank" text="" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:VisualElement class="matchup-preview-rosters">
-                <ui:VisualElement class="matchup-preview-roster-col">
-                    <ui:Label class="matchup-preview-roster-title" text="QUINTETO" />
-                    <ui:VisualElement name="PreviewHomeStarters" class="matchup-preview-starter-row" />
-                    <ui:Label class="matchup-preview-roster-title" text="BANQUILLO" />
-                    <ui:VisualElement name="PreviewHomeBench" class="matchup-preview-bench-list" />
+            <!-- QUINTETO + KEY PLAYERS + BANQUILLO ROW -->
+            <ui:VisualElement class="mpv-bottom-row">
+                <!-- HOME ROSTER -->
+                <ui:VisualElement class="mpv-roster-col">
+                    <ui:Label class="mpv-roster-title" text="QUINTETO PROBABLE" />
+                    <ui:VisualElement name="MPVHomeStarters" class="mpv-starter-row" />
+                    <ui:Label class="mpv-roster-title" text="BANQUILLO" />
+                    <ui:VisualElement name="MPVHomeBench" class="mpv-bench-list" />
                 </ui:VisualElement>
-                <ui:VisualElement class="matchup-preview-roster-col">
-                    <ui:Label class="matchup-preview-roster-title" text="QUINTETO" />
-                    <ui:VisualElement name="PreviewAwayStarters" class="matchup-preview-starter-row" />
-                    <ui:Label class="matchup-preview-roster-title" text="BANQUILLO" />
-                    <ui:VisualElement name="PreviewAwayBench" class="matchup-preview-bench-list" />
+
+                <!-- KEY PLAYERS -->
+                <ui:VisualElement class="mpv-key-players">
+                    <ui:Label class="mpv-key-title" text="JUGADORES CLAVE" />
+                    <ui:VisualElement name="MPVKeyRow1" class="mpv-key-row" />
+                    <ui:VisualElement name="MPVKeyRow2" class="mpv-key-row" />
+                    <ui:VisualElement name="MPVKeyRow3" class="mpv-key-row" />
+                    <ui:VisualElement name="MPVKeyRow4" class="mpv-key-row" />
+                </ui:VisualElement>
+
+                <!-- AWAY ROSTER -->
+                <ui:VisualElement class="mpv-roster-col mpv-roster-col--right">
+                    <ui:Label class="mpv-roster-title" text="QUINTETO PROBABLE" />
+                    <ui:VisualElement name="MPVAwayStarters" class="mpv-starter-row" />
+                    <ui:Label class="mpv-roster-title" text="BANQUILLO" />
+                    <ui:VisualElement name="MPVAwayBench" class="mpv-bench-list" />
                 </ui:VisualElement>
             </ui:VisualElement>
 
-            <ui:Button name="BtnStartGame" class="matchup-preview-btn" text="IR AL PARTIDO ►" />
+            <!-- BUTTON -->
+            <ui:Button name="BtnStartGame" class="mpv-start-btn" text="IR AL PARTIDO ►" />
         </ui:VisualElement>
 
     </ui:VisualElement>
