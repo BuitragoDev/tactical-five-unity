@@ -1158,11 +1158,13 @@
     padding: 4px 8px;
     margin-bottom: 4px;
     margin-right: 4px;
-    width: calc(50% - 4px);
     background-color: #1c2130;
     border-width: 1px;
     border-color: #2a3347;
     border-radius: 6px;
+    flex-basis: 48%;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
 .mpv-bench-name {
