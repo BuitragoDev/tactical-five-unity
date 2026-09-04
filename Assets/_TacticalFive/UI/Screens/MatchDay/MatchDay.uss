@@ -1210,6 +1210,7 @@
     font-size: 22px;
     letter-spacing: 2px;
     color: #d4a017;
+    margin-top: 20px;
     margin-bottom: 10px;
 }
 
