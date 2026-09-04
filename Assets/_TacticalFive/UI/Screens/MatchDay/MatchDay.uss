@@ -1,6 +1,7 @@
 /* ── MATCHDAY SCREEN ──────────────────────────── */
 
 .matchday-root {
+    position: relative;
     flex-direction: row;
     width: 100%;
     height: 100%;
@@ -768,7 +769,7 @@
 .mpv-overlay {
     position: absolute;
     left: 0; right: 0; top: 0; bottom: 0;
-    background-color: #0b0e16ee;
+    background-color: #0b0e16;
     flex-direction: column;
     align-items: stretch;
     padding: 20px 32px;
