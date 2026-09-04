@@ -683,22 +683,9 @@ public class MatchDayController : UIScreenController
             if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
             item.Add(photo);
 
-            var info = new VisualElement();
-            info.AddToClassList("mpv-baja-info");
-            info.Add(new Label($"{p.first_name.ToUpper()} {p.last_name.ToUpper()}") { name = "", style = { fontSize = 15, unityFont = Resources.Load<Font>("Fonts/Saira_Condensed-Bold") } });
-            info.Add(new Label(PositionCodes.GetName(p.position)) { style = { fontSize = 13, color = new Color(0.48f, 0.54f, 0.67f) } });
-            item.Add(info);
-
-            var status = p.injury_days <= 3 ? "Dudoso" : "Baja";
-            var statusCls = p.injury_days <= 3 ? "mpv-baja-status--doubt" : "mpv-baja-status--out";
-            var statusLbl = new Label(status);
-            statusLbl.AddToClassList("mpv-baja-status");
-            statusLbl.AddToClassList(statusCls);
-            item.Add(statusLbl);
-
-            var injuryDesc = new Label(InjuryDescription(p.injury_days));
-            injuryDesc.AddToClassList("mpv-baja-injury");
-            item.Add(injuryDesc);
+            var nameLbl = new Label($"{p.first_name[0]}. {p.last_name.ToUpper()}");
+            nameLbl.AddToClassList("mpv-baja-name");
+            item.Add(nameLbl);
 
             container.Add(item);
         }

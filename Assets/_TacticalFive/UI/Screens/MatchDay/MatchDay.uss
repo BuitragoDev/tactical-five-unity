@@ -1050,8 +1050,8 @@
 }
 
 .mpv-baja-photo {
-    width: 40px;
-    height: 40px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background-size: contain;
     background-position: center;
@@ -1066,8 +1066,8 @@
 
 .mpv-baja-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 15px;
-    color: #ffffff;
+    font-size: 16px;
+    color: #c0392b;
 }
 
 .mpv-baja-pos {
