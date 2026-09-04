@@ -733,7 +733,7 @@ public class MatchDayController : UIScreenController
         posLbl.AddToClassList("mpv-starter-pos");
         card.Add(posLbl);
 
-        var nameLbl = new Label($"{p.first_name.ToUpper()}\n{p.last_name.ToUpper()}");
+        var nameLbl = new Label($"{FormatPlayerName(p)}");
         nameLbl.AddToClassList("mpv-starter-name");
         card.Add(nameLbl);
 
@@ -749,7 +749,7 @@ public class MatchDayController : UIScreenController
         var row = new VisualElement();
         row.AddToClassList("mpv-bench-card");
 
-        var nameLbl = new Label($"{p.first_name.ToUpper()} {p.last_name.ToUpper()}");
+        var nameLbl = new Label($"{FormatPlayerName(p)}");
         nameLbl.AddToClassList("mpv-bench-name");
         row.Add(nameLbl);
 
@@ -762,6 +762,15 @@ public class MatchDayController : UIScreenController
         row.Add(ovrLbl);
 
         return row;
+    }
+
+    string FormatPlayerName(PlayerData p)
+    {
+        var first = p.first_name?.Trim();
+        var last = p.last_name?.Trim().ToUpper();
+        if (string.IsNullOrEmpty(first) || string.IsNullOrEmpty(last))
+            return $"{first} {last}";
+        return $"{first[0]}. {last}";
     }
 
     void BuildKeyPlayerRow(VisualElement row, string statLabel,
