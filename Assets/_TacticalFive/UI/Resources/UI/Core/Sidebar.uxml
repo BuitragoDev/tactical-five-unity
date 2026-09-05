@@ -50,9 +50,6 @@
                 <ui:Button name="SubmenuInfoLiga" class="nav-submenu-item">
                     <ui:Label text="INFO LIGA" class="nav-submenu-label"/>
                 </ui:Button>
-                <ui:Button name="SubmenuBuscador" class="nav-submenu-item">
-                    <ui:Label text="BUSCADOR" class="nav-submenu-label"/>
-                </ui:Button>
                 <ui:Button name="SubmenuGLeague" class="nav-submenu-item">
                     <ui:Label text="G-LEAGUE" class="nav-submenu-label"/>
                 </ui:Button>
@@ -95,6 +92,9 @@
                 </ui:Button>
                 <ui:Button name="SubmenuHistorial" class="nav-submenu-item">
                     <ui:Label text="HISTORIAL" class="nav-submenu-label"/>
+                </ui:Button>
+                <ui:Button name="SubmenuBuscador" class="nav-submenu-item">
+                    <ui:Label text="BUSCADOR" class="nav-submenu-label"/>
                 </ui:Button>
             </ui:VisualElement>
             <ui:Button name="NavFinances" class="nav-item">

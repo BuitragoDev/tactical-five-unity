@@ -1283,112 +1283,84 @@
     color: rgb(0, 0, 0);
 }
 
-/* ══ DEADLINE DAY & SUMMARY OVERLAYS ══ */
+/* ══ DEADLINE DAY MODAL ══ */
 
-.deadline-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.88);
-    align-items: center;
-    justify-content: center;
-    display: none;
-    z-index: 600;
+.deadline-modal-box {
+    border-color: rgb(212, 160, 23);
 }
 
-.deadline-box {
-    width: 580px;
-    background-color: rgb(15, 17, 23);
-    border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 4px;
-    border-top-color: rgb(212, 160, 23);
-    padding: 36px;
+.deadline-modal-subtitle {
+    color: rgb(212, 160, 23);
+}
+
+.deadline-modal-op-list {
+    padding: 0 32px;
+    max-height: 420px;
+    overflow: scroll;
+    overflow-clip: initial;
+}
+
+.deadline-modal-card {
+    border-color: rgba(212, 160, 23, 0.25);
+}
+
+.deadline-modal-icon {
+    background-color: rgba(212, 160, 23, 0.10);
+}
+
+.deadline-modal-icon-text {
+    font-size: 32px;
+    -unity-text-align: middle-center;
+}
+
+.deadline-modal-badge {
     flex-direction: column;
     align-items: center;
+    padding: 6px 14px;
+    border-radius: 6px;
+    margin-left: 12px;
+    flex-shrink: 0;
 }
 
-.deadline-icon {
-    font-size: 48px;
-    -unity-text-align: middle-center;
-    margin-bottom: 4px;
+.deadline-modal-badge--trade {
+    background-color: rgba(42, 95, 201, 0.15);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
 }
 
-.deadline-title {
+.deadline-modal-badge--fa {
+    background-color: rgba(212, 160, 23, 0.15);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+}
+
+.deadline-modal-badge--sat {
+    background-color: rgba(155, 89, 182, 0.15);
+    border-width: 1px;
+    border-color: rgb(155, 89, 182);
+}
+
+.deadline-modal-badge-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 34px;
-    letter-spacing: 4px;
-    color: rgb(212, 160, 23);
-    margin-bottom: 12px;
-    -unity-text-transform: upper;
-    -unity-text-align: middle-center;
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: rgb(200, 210, 230);
 }
 
-.deadline-subtitle {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(179, 190, 214);
-    -unity-text-align: middle-center;
-    margin-bottom: 20px;
-    white-space: normal;
-}
-
-.deadline-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 20px;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
-    margin-bottom: 8px;
-    white-space: normal;
-}
-
-.deadline-btn-group {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: 16px;
-}
-
-.deadline-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
-    letter-spacing: 2px;
-    border-width: 0;
-    border-radius: 4px;
-    padding: 12px 28px;
-    margin-left: 6px;
-    margin-right: 6px;
-    cursor: pointer;
-}
-
-.deadline-btn--primary {
-    background-color: rgb(42, 95, 201);
-    color: white;
-}
-
-.deadline-btn--warning {
-    background-color: rgb(212, 160, 23);
-    color: rgb(0, 0, 0);
-}
-
-.deadline-btn--danger {
-    background-color: rgb(192, 57, 43);
-    color: white;
-}
-
-.deadline-summary-stats {
-    margin: 8px 0 20px 0;
-    padding: 16px;
-    background-color: rgb(22, 26, 36);
-    border-radius: 4px;
-    align-items: center;
-}
-
-.deadline-stat-row {
+.deadline-modal-empty {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
-    color: rgb(208, 216, 232);
+    color: rgb(140, 150, 175);
     -unity-text-align: middle-center;
-    margin-bottom: 6px;
+    padding: 24px 0;
+}
+
+.deadline-modal-hint {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(140, 150, 175);
+    -unity-text-align: middle-center;
+    padding: 0 32px 8px 32px;
     white-space: normal;
 }
 

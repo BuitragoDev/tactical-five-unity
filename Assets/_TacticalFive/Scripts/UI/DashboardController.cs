@@ -138,7 +138,6 @@ using System.Threading.Tasks;
     private bool _recoveryModalResolved;
     private bool _recoveryModalGoToQuinteto;
 
-    private VisualElement _deadlineDayOverlay;
     private bool _deadlineDayActive;
     private bool _deadlineDayModalShown;
     private int _deadlineModalSeasonId;
@@ -161,10 +160,6 @@ using System.Threading.Tasks;
         _firedOverlay = new VisualElement();
         _firedOverlay.AddToClassList("fired-modal-overlay");
         _root.Add(_firedOverlay);
-
-        _deadlineDayOverlay = new VisualElement();
-        _deadlineDayOverlay.AddToClassList("deadline-overlay");
-        _root.Add(_deadlineDayOverlay);
 
         CreateAchievementToast();
 
@@ -324,7 +319,6 @@ using System.Threading.Tasks;
     bool IsAnyModalOpen()
     {
         if (_firedOverlay != null && _firedOverlay.style.display == DisplayStyle.Flex) return true;
-        if (_deadlineDayOverlay != null && _deadlineDayOverlay.style.display == DisplayStyle.Flex) return true;
         if (_configModalOverlay != null && _configModalOverlay.ClassListContains("modal-overlay--visible")) return true;
         if (_configMainMenuConfirmOverlay != null && _configMainMenuConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
         if (_configExitConfirmOverlay != null && _configExitConfirmOverlay.ClassListContains("modal-overlay--visible")) return true;
@@ -3480,74 +3474,192 @@ using System.Threading.Tasks;
     void ShowDeadlineDayModal()
     {
         _deadlineDayActive = true;
-        _deadlineDayOverlay.Clear();
-        _deadlineDayOverlay.style.display = DisplayStyle.Flex;
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("deadline-box");
-        _deadlineDayOverlay.Add(box);
+        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("deadline-modal-box");
+        _firedOverlay.Add(box);
 
-        var icon = new Label("\u23F0");
-        icon.AddToClassList("deadline-icon");
-        box.Add(icon);
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
+
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        var subtitle = new Label("AVISO");
+        subtitle.AddToClassList("trade-modal-subtitle");
+        subtitle.AddToClassList("deadline-modal-subtitle");
+        headerLeft.Add(subtitle);
 
         var title = new Label("DEADLINE DAY");
-        title.AddToClassList("deadline-title");
-        box.Add(title);
+        title.AddToClassList("trade-modal-title");
+        headerLeft.Add(title);
+        header.Add(headerLeft);
+        box.Add(header);
 
+        // ── Operations list ──
         var pendingTrades = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id) ?? new List<TradeOfferData>();
         var pendingSATIds = GetPendingSATIds();
         var maturedOffers = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day) ?? new List<OfferData>();
 
-        var countText = "";
-        if (pendingTrades.Count > 0)
-            countText += $"  \u2022  {pendingTrades.Count} oferta(s) de traspaso pendiente(s)\n";
-        if (pendingSATIds.Count > 0)
-            countText += $"  \u2022  {pendingSATIds.Count} sign-and-trade(s) pendiente(s)\n";
-        if (maturedOffers.Count > 0)
-            countText += $"  \u2022  {maturedOffers.Count} oferta(s) de FA por resolver\n";
+        var opList = new VisualElement();
+        opList.AddToClassList("deadline-modal-op-list");
 
-        if (string.IsNullOrEmpty(countText))
-            countText = "  No tienes operaciones pendientes.";
+        if (pendingTrades.Count == 0 && pendingSATIds.Count == 0 && maturedOffers.Count == 0)
+        {
+            var emptyLbl = new Label("No tienes operaciones pendientes.");
+            emptyLbl.AddToClassList("deadline-modal-empty");
+            opList.Add(emptyLbl);
+        }
+        else
+        {
+            var allTeams = DatabaseManager.Instance.GetAllTeams();
+            var teamDict = allTeams.ToDictionary(t => t.id);
 
-        var stats = new Label(countText.TrimEnd());
-        stats.AddToClassList("deadline-text");
-        stats.style.whiteSpace = WhiteSpace.Normal;
-        box.Add(stats);
+            // ── Trade offers ──
+            foreach (var offer in pendingTrades)
+            {
+                var card = new VisualElement();
+                card.AddToClassList("trade-modal-player-card");
+                card.AddToClassList("deadline-modal-card");
 
-        var subtitle = new Label("\u00DAltima oportunidad para realizar traspasos antes del cierre.");
-        subtitle.AddToClassList("deadline-subtitle");
-        box.Add(subtitle);
+                var photo = new VisualElement();
+                photo.AddToClassList("trade-modal-player-photo");
+                photo.AddToClassList("deadline-modal-icon");
+                var iconLbl = new Label("\U0001F504");
+                iconLbl.AddToClassList("deadline-modal-icon-text");
+                photo.Add(iconLbl);
+                card.Add(photo);
 
+                var info = new VisualElement();
+                info.AddToClassList("trade-modal-player-info");
+
+                string teamName = teamDict.TryGetValue(offer.team_id_from, out var t) ? t.name : "Desconocido";
+                var nameLbl = new Label(teamName.ToUpper());
+                nameLbl.AddToClassList("trade-modal-player-name");
+                info.Add(nameLbl);
+
+                var wantedIds = offer.GetWantedPlayerIds();
+                var offeredIds = offer.GetOfferedPlayerIds();
+                var wantedPicks = offer.GetWantedPickIds();
+                var offeredPicks = offer.GetOfferedPickIds();
+
+                var wantedNames = wantedIds.Select(id => DatabaseManager.Instance.GetPlayerById(id))
+                    .Where(p => p != null).Select(p => $"{p.first_name} {p.last_name}").ToList();
+                var offeredNames = offeredIds.Select(id => DatabaseManager.Instance.GetPlayerById(id))
+                    .Where(p => p != null).Select(p => $"{p.first_name} {p.last_name}").ToList();
+
+                string detail = "";
+                if (wantedNames.Count > 0) detail += $"Te pide: {string.Join(", ", wantedNames)}";
+                if (wantedPicks.Count > 0) detail += (detail.Length > 0 ? "\n" : "") + $"Te pide: {wantedPicks.Count} pick(s)";
+                if (offeredNames.Count > 0) detail += (detail.Length > 0 ? "\n" : "") + $"Te ofrece: {string.Join(", ", offeredNames)}";
+                if (offeredPicks.Count > 0) detail += (detail.Length > 0 ? "\n" : "") + $"Te ofrece: {offeredPicks.Count} pick(s)";
+
+                var metaLbl = new Label(detail);
+                metaLbl.AddToClassList("trade-modal-player-meta");
+                metaLbl.style.whiteSpace = WhiteSpace.Normal;
+                info.Add(metaLbl);
+                card.Add(info);
+
+                var badge = new VisualElement();
+                badge.AddToClassList("deadline-modal-badge");
+                badge.AddToClassList("deadline-modal-badge--trade");
+                var badgeText = new Label("TRASPASO");
+                badgeText.AddToClassList("deadline-modal-badge-text");
+                badge.Add(badgeText);
+                card.Add(badge);
+
+                opList.Add(card);
+            }
+
+            // ── Matured FA offers ──
+            foreach (var offer in maturedOffers)
+            {
+                bool isSAT = pendingSATIds.Contains(offer.player_id);
+
+                var card = new VisualElement();
+                card.AddToClassList("trade-modal-player-card");
+                card.AddToClassList("deadline-modal-card");
+
+                var photo = new VisualElement();
+                photo.AddToClassList("trade-modal-player-photo");
+                photo.AddToClassList("deadline-modal-icon");
+                var iconLbl = new Label(isSAT ? "\U0001F91D" : "\U0001F4CB");
+                iconLbl.AddToClassList("deadline-modal-icon-text");
+                photo.Add(iconLbl);
+                card.Add(photo);
+
+                var info = new VisualElement();
+                info.AddToClassList("trade-modal-player-info");
+
+                var player = DatabaseManager.Instance.GetPlayerById(offer.player_id);
+                string playerName = player != null ? $"{player.first_name} {player.last_name}" : $"Jugador #{offer.player_id}";
+                var nameLbl = new Label(playerName.ToUpper());
+                nameLbl.AddToClassList("trade-modal-player-name");
+                info.Add(nameLbl);
+
+                string salaryStr = offer.offer_salary >= 1_000_000
+                    ? $"${offer.offer_salary / 1_000_000f:F1}M"
+                    : $"${offer.offer_salary / 1_000f:N0}K";
+                string optionStr = "";
+                if (offer.has_team_option == 1) optionStr = " (TO último año)";
+                else if (offer.has_player_option == 1) optionStr = " (PO último año)";
+                string twoWayStr = offer.is_two_way == 1 ? " · TWO-WAY" : "";
+                var metaLbl = new Label($"{salaryStr} × {offer.offer_years} años{optionStr}{twoWayStr}");
+                metaLbl.AddToClassList("trade-modal-player-meta");
+                info.Add(metaLbl);
+                card.Add(info);
+
+                var badge = new VisualElement();
+                badge.AddToClassList("deadline-modal-badge");
+                badge.AddToClassList(isSAT ? "deadline-modal-badge--sat" : "deadline-modal-badge--fa");
+                var badgeText = new Label(isSAT ? "SIGN & TRADE" : "OFERTA FA");
+                badgeText.AddToClassList("deadline-modal-badge-text");
+                badge.Add(badgeText);
+                card.Add(badge);
+
+                opList.Add(card);
+            }
+        }
+        box.Add(opList);
+
+        // ── Subtitle ──
+        var hint = new Label("Última oportunidad para realizar traspasos antes del cierre.");
+        hint.AddToClassList("deadline-modal-hint");
+        box.Add(hint);
+
+        // ── Buttons ──
         var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("deadline-btn-group");
+        btnGroup.AddToClassList("trade-modal-buttons");
 
         var marketBtn = new Button();
         marketBtn.text = "IR AL MERCADO";
-        marketBtn.AddToClassList("deadline-btn");
-        marketBtn.AddToClassList("deadline-btn--primary");
+        marketBtn.AddToClassList("trade-modal-btn");
+        marketBtn.AddToClassList("trade-modal-btn--manual");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _deadlineDayActive = false;
-            _deadlineDayOverlay.style.display = DisplayStyle.None;
+            _firedOverlay.style.display = DisplayStyle.None;
             ScreenManager.Instance.GoTo(GameScreen.Market);
         });
         btnGroup.Add(marketBtn);
 
         var closeBtn = new Button();
         closeBtn.text = "CERRAR";
-        closeBtn.AddToClassList("deadline-btn");
-        closeBtn.AddToClassList("deadline-btn--danger");
+        closeBtn.AddToClassList("trade-modal-btn");
+        closeBtn.AddToClassList("trade-modal-btn--reject");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _deadlineDayActive = false;
-            _deadlineDayOverlay.style.display = DisplayStyle.None;
+            _firedOverlay.style.display = DisplayStyle.None;
             RefreshActionButton();
         });
         btnGroup.Add(closeBtn);
-
         box.Add(btnGroup);
 
         if (CursorManager.Instance != null)

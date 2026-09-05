@@ -83,6 +83,13 @@ public class PreGameController : UIScreenController
             PlayClick();
             DashboardController.RequestSimulateAndGoToMatchDay();
         });
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.SetDefaultCursor();
+            CursorManager.Instance.RegisterHandCursor(_btnBack);
+            CursorManager.Instance.RegisterHandCursor(_btnGoMatch);
+        }
     }
 
     protected override void Refresh()

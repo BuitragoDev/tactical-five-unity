@@ -27,7 +27,7 @@ public static class SidebarController
         new() { screen = GameScreen.Results,     navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuResultados" },
         new() { screen = GameScreen.Standings,   navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuClasificacion" },
         new() { screen = GameScreen.InfoLeague,  navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuInfoLiga" },
-        new() { screen = GameScreen.Buscador,    navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuBuscador" },
+        new() { screen = GameScreen.Buscador,    navName = "NavMarket",    submenuName = "MarketSubmenu",   submenuItemName = "SubmenuBuscador" },
         new() { screen = GameScreen.GLeague,     navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuGLeague" },
         new() { screen = GameScreen.Palmares,    navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuPalmares" },
         new() { screen = GameScreen.Records,     navName = "NavPalmares",  submenuName = "PalmaresSubmenu", submenuItemName = "SubmenuRecords" },
