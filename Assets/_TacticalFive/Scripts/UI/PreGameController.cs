@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
-using System.Linq;
 
 public class PreGameController : UIScreenController
 {
@@ -110,12 +109,9 @@ public class PreGameController : UIScreenController
     {
         if (_season == null || _myTeam == null) return;
 
-        // Usar current_date para calcular el gameDay (mismo criterio que FindNextGameDay)
-        int gameDay = DateToGameDay(System.DateTime.Parse(_season.current_date));
-        var gamesToday = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, gameDay);
-        var myGame = gamesToday.FirstOrDefault(g =>
-            !DashboardController.IsGLeagueGame(g) &&
-            (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+        // Usar el mismo criterio que el panel "Próximo Partido" del Dashboard:
+        // el próximo partido no jugado del equipo, sin depender de current_date.
+        var myGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
         if (myGame == null) return;
 
         if (_headerTitleType != null)
@@ -187,16 +183,7 @@ public class PreGameController : UIScreenController
         BuildKeyPlayerRow(_mpvKeyRow4, "TAPONES", h.keyBlk, h.keyBlkVal, a.keyBlk, a.keyBlkVal);
     }
 
-    // ── Helpers (moved from MatchDayController) ──
-
-    int DateToGameDay(System.DateTime date)
-    {
-        var seasonStart = new System.DateTime(_season.year_start, 10, 22);
-        if (date >= seasonStart)
-            return (int)(date - seasonStart).TotalDays + 1;
-        else
-            return -(int)(seasonStart - date).TotalDays;
-    }
+    // ── Helpers ──
 
     void SetStatLabel(Label lbl, string text)
     {

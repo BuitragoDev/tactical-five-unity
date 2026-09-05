@@ -157,6 +157,7 @@ using System.Threading.Tasks;
     protected override void OnEnable()
     {
         base.OnEnable();
+        _deadlineDayActive = false;
         _firedOverlay = new VisualElement();
         _firedOverlay.AddToClassList("fired-modal-overlay");
         _root.Add(_firedOverlay);
@@ -7036,10 +7037,12 @@ List<int> offeredPickIds = new List<int>();
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
                         .Take(3).ToList();
 
+        int idx = 0;
         foreach (var msg in latest)
         {
             var item = new VisualElement();
             item.AddToClassList("message-item");
+            if (idx > 0) item.AddToClassList("message-item--spaced");
 
             var icon = new VisualElement();
             icon.AddToClassList("message-item-icon");
@@ -7062,6 +7065,7 @@ List<int> offeredPickIds = new List<int>();
 
             if (msg.is_read == 0)
                 DatabaseManager.Instance.MarkMessageRead(msg.id);
+            idx++;
         }
     }
 
@@ -7079,9 +7083,34 @@ List<int> offeredPickIds = new List<int>();
                 return;
             }
         }
+        else if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Patrocinador firmado:"))
+        {
+            string sponsorName = msg.title.Substring("Patrocinador firmado: ".Length).ToLower();
+            var sponsor = DatabaseManager.Instance.Db.Table<SponsorData>()
+                .FirstOrDefault(s => s.team_id == _myTeam.id && s.is_active == 1
+                                  && s.name.ToLower() == sponsorName);
+            if (sponsor != null)
+            {
+                var sponsorTex = Resources.Load<Texture2D>(sponsor.logo?.Replace(".png", ""));
+                if (sponsorTex != null) { icon.style.backgroundImage = new StyleBackground(sponsorTex); return; }
+            }
+        }
+        else if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Derechos televisivos firmados:"))
+        {
+            string channelName = msg.title.Substring("Derechos televisivos firmados: ".Length).ToLower();
+            var channel = DatabaseManager.Instance.Db.Table<TvChannelData>()
+                .FirstOrDefault(c => c.team_id == _myTeam.id && c.is_active == 1
+                                   && c.name.ToLower() == channelName);
+            if (channel != null)
+            {
+                var channelTex = Resources.Load<Texture2D>(channel.logo?.Replace(".png", ""));
+                if (channelTex != null) { icon.style.backgroundImage = new StyleBackground(channelTex); return; }
+            }
+        }
         else if (msg.sender_type == 2)
         {
-            if (msg.title == "TRIPLE-DOBLE" || msg.title == "EXPLOSIÓN")
+            if (string.Equals(msg.title, "TRIPLE-DOBLE", System.StringComparison.OrdinalIgnoreCase)
+             || string.Equals(msg.title, "EXPLOSIÓN", System.StringComparison.OrdinalIgnoreCase))
             {
                 string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
                 if (playerName != null && _playerByName.TryGetValue(playerName, out var player))
@@ -7156,6 +7185,7 @@ List<int> offeredPickIds = new List<int>();
         if (title.StartsWith("Recuperado")) return "recuperado";
         if (title.StartsWith("Queja") || title.StartsWith("Preocupación")) return "quejas";
         if (title.StartsWith("Fichaje:")) return "contratado";
+        if (title.Contains("Nuevo empleado")) return "contratado";
         if (title.Contains("cancelado") || title.Contains("rechazado") || title.Contains("despedido")) return "despedido";
         if (title.Contains("Entrenamiento")) return "entrenamiento";
         if (title.Contains("Lesión") || title.Contains("RESERVA")) return "lesionados";

@@ -35,7 +35,7 @@ public class BuscadorController : UIScreenController
     private string _sortColumn = "media";
     private bool _sortDescending = true;
 
-    private const int PAGE_SIZE = 12;
+    private const int PAGE_SIZE = 11;
     private int _currentPage;
 
     protected override void CacheReferences()

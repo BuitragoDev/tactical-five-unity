@@ -180,8 +180,8 @@ using System.Linq;
             manager_id = _manager.id,
             sender_type = 1,
             sender_id = 0,
-            title = $"PATROCINADOR FIRMADO: {sponsor.name.ToUpper()}",
-            body = $"Se ha firmado un nuevo patrocinio con {sponsor.name}.\n\nIngreso inicial: ${sponsor.initial_income:N0}",
+            title = $"Patrocinador firmado: {sponsor.name.ToUpper()}",
+            body = $"Se ha firmado un nuevo patrocinio con {sponsor.name}.\nIngreso inicial: ${sponsor.initial_income:N0}",
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             is_read = 0
         };
