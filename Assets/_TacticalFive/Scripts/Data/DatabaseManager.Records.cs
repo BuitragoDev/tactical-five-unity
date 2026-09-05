@@ -3435,46 +3435,172 @@ public partial class DatabaseManager
         var forceInactive = forceInactiveIds ?? new HashSet<int>();
 
         var posOrder = new[] { "PG", "SG", "SF", "PF", "C" };
-
-        // Greedy global assignment: in each pass pick the (position, player) pair
-        // with the highest OVR, then lock both. This avoids the sequential greedy
-        // trap where a versatile player is consumed by an early position slot,
-        // forcing a weaker player into a later slot.
         var starters = new PlayerData[posOrder.Length];
         var used = new HashSet<int>();
 
+        PlayerData[] available = players.Where(p => !forceInactive.Contains(p.id)).ToArray();
+
+        // ── Phase 1: primary position assignment (greedy by OVR) ──
+        // Each pass assigns the best available player whose PRIMARY position matches
+        // the highest-OVR unfilled slot. This ensures natural starters get priority.
         for (int pass = 0; pass < posOrder.Length; pass++)
         {
             int bestPos = -1;
-            int bestPlayerIdx = -1;
+            int bestIdx = -1;
             int bestOvr = -1;
 
             for (int si = 0; si < posOrder.Length; si++)
             {
                 if (starters[si] != null) continue;
-
-                for (int pi = 0; pi < players.Count; pi++)
+                for (int pi = 0; pi < available.Length; pi++)
                 {
-                    var p = players[pi];
-                    if (used.Contains(p.id) || forceInactive.Contains(p.id)) continue;
-                    if (p.position != posOrder[si] && p.secondary_position != posOrder[si]) continue;
-
-                    if (p.overall >= bestOvr)
+                    var p = available[pi];
+                    if (used.Contains(p.id)) continue;
+                    if (p.position != posOrder[si]) continue;
+                    if (p.overall > bestOvr)
                     {
                         bestOvr = p.overall;
                         bestPos = si;
-                        bestPlayerIdx = pi;
+                        bestIdx = pi;
                     }
                 }
             }
 
-            if (bestPos >= 0 && bestPlayerIdx >= 0)
+            if (bestPos >= 0 && bestIdx >= 0)
             {
-                starters[bestPos] = players[bestPlayerIdx];
-                used.Add(players[bestPlayerIdx].id);
+                starters[bestPos] = available[bestIdx];
+                used.Add(available[bestIdx].id);
             }
         }
 
+        // ── Phase 2: secondary position fill ──
+        // For empty slots, try players whose SECONDARY position matches.
+        for (int pass = 0; pass < posOrder.Length; pass++)
+        {
+            int bestPos = -1;
+            int bestIdx = -1;
+            int bestOvr = -1;
+
+            for (int si = 0; si < posOrder.Length; si++)
+            {
+                if (starters[si] != null) continue;
+                for (int pi = 0; pi < available.Length; pi++)
+                {
+                    var p = available[pi];
+                    if (used.Contains(p.id)) continue;
+                    if (p.secondary_position != posOrder[si]) continue;
+                    if (p.overall > bestOvr)
+                    {
+                        bestOvr = p.overall;
+                        bestPos = si;
+                        bestIdx = pi;
+                    }
+                }
+            }
+
+            if (bestPos >= 0 && bestIdx >= 0)
+            {
+                starters[bestPos] = available[bestIdx];
+                used.Add(available[bestIdx].id);
+            }
+        }
+
+        // ── Phase 2b: swap pass — upgrade starters with better secondary-position bench players ──
+        // If a bench player whose secondary matches a starter slot has higher OVR, swap them.
+        // The displaced starter re-enters the pool and may be recaptured in later rounds.
+        for (int round = 0; round < 3; round++)
+        {
+            bool swapped = false;
+            for (int si = 0; si < posOrder.Length; si++)
+            {
+                if (starters[si] == null) continue;
+                for (int pi = 0; pi < available.Length; pi++)
+                {
+                    var p = available[pi];
+                    if (used.Contains(p.id)) continue;
+                    if (p.secondary_position != posOrder[si]) continue;
+                    if (p.overall > starters[si].overall)
+                    {
+                        used.Remove(starters[si].id);
+                        starters[si] = p;
+                        used.Add(p.id);
+                        swapped = true;
+                        break;
+                    }
+                }
+            }
+            if (!swapped) break;
+        }
+
+        // ── Phase 3: similar-position fallback ──
+        // For slots still empty, try the best player from an adjacent/similar position.
+        // PG↔SG, PF↔C, SF→SG (if ≤201cm) or SF→PF (if >201cm).
+        for (int si = 0; si < posOrder.Length; si++)
+        {
+            if (starters[si] != null) continue;
+
+            string targetPos = posOrder[si];
+            string fallbackPos1 = null;
+            string fallbackPos2 = null;
+            int heightThreshold = 0;
+
+            switch (targetPos)
+            {
+                case "PG": fallbackPos1 = "SG"; break;
+                case "SG": fallbackPos1 = "PG"; break;
+                case "SF": fallbackPos1 = "SG"; fallbackPos2 = "PF"; heightThreshold = 201; break;
+                case "PF": fallbackPos1 = "C"; break;
+                case "C":  fallbackPos1 = "PF"; break;
+            }
+
+            // Try primary=fallbackPos1 (primary first, then secondary, height-preferred for SF)
+            var candidates = available
+                .Where(p => !used.Contains(p.id) && (p.position == fallbackPos1 || p.secondary_position == fallbackPos1))
+                .OrderByDescending(p => p.position == fallbackPos1 ? 1 : 0)
+                .ThenByDescending(p => p.overall)
+                .ToList();
+
+            if (targetPos == "SF" && heightThreshold > 0)
+            {
+                // For SF, prefer SG ≤201cm or PF >201cm; don't enforce strictly,
+                // just order them: exact-height match first, then any.
+                var sgShort = candidates.Where(p => p.height_cm <= heightThreshold);
+                var sgAny = candidates.Where(p => p.height_cm > heightThreshold);
+                candidates = sgShort.Concat(sgAny).ToList();
+            }
+
+            if (candidates.Count > 0)
+            {
+                starters[si] = candidates[0];
+                used.Add(candidates[0].id);
+                continue;
+            }
+
+            // Try fallbackPos2 (for SF: the other wing position)
+            if (fallbackPos2 != null)
+            {
+                var candidates2 = available
+                    .Where(p => !used.Contains(p.id) && (p.position == fallbackPos2 || p.secondary_position == fallbackPos2))
+                    .OrderByDescending(p => p.position == fallbackPos2 ? 1 : 0)
+                    .ThenByDescending(p => p.overall)
+                    .ToList();
+
+                if (targetPos == "SF" && heightThreshold > 0)
+                {
+                    var pfTall = candidates2.Where(p => p.height_cm > heightThreshold);
+                    var pfAny = candidates2.Where(p => p.height_cm <= heightThreshold);
+                    candidates2 = pfTall.Concat(pfAny).ToList();
+                }
+
+                if (candidates2.Count > 0)
+                {
+                    starters[si] = candidates2[0];
+                    used.Add(candidates2[0].id);
+                }
+            }
+        }
+
+        // ── Persist starters ──
         for (int si = 0; si < posOrder.Length; si++)
         {
             if (starters[si] == null) continue;
@@ -3488,7 +3614,7 @@ public partial class DatabaseManager
             assigned.Add(starters[si].id);
         }
 
-        // Fill bench with the next best unassigned players (excluding forced-inactive)
+        // ── Bench: next best unassigned players (up to 12 total active) ──
         var remaining = players
             .Where(p => !assigned.Contains(p.id) && !forceInactive.Contains(p.id))
             .OrderByDescending(p => p.overall)
@@ -3508,7 +3634,7 @@ public partial class DatabaseManager
             assigned.Add(remaining[i].id);
         }
 
-        // Inactive slots: forced-inactive players first, then remaining (capped at 5 total)
+        // ── Inactive: forced-inactive first, then overflow (max 5) ──
         int inactIdx = 0;
         const int maxInactive = 5;
 
