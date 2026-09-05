@@ -2435,65 +2435,119 @@ using System.Threading.Tasks;
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
+        // ── Box ──
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        if (resultType == 0)
-            box.AddToClassList("fired-modal-box--warning");
-        else if (resultType == 1)
-            box.AddToClassList("fired-modal-box--positive");
+        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("offer-result-modal-box");
+        if (resultType == 1)
+            box.AddToClassList("offer-result-modal-box--positive");
+        else if (resultType == 0)
+            box.AddToClassList("offer-result-modal-box--warning");
+        else if (resultType == -1)
+            box.AddToClassList("offer-result-modal-box--negative");
         _firedOverlay.Add(box);
 
-        var icon = new VisualElement();
-        icon.AddToClassList("fired-modal-icon");
-        var iconTex = Resources.Load<Texture2D>("Icons/boton-i-64px");
-        if (iconTex != null)
-            icon.style.backgroundImage = new StyleBackground(iconTex);
-        box.Add(icon);
+        // ── Header ──
+        var header = new VisualElement();
+        header.AddToClassList("trade-modal-header");
+
+        var headerLeft = new VisualElement();
+        headerLeft.AddToClassList("trade-modal-header-left");
+
+        string subtitleText = resultType == 1 ? "COMPLETADO" : resultType == 0 ? "AVISO" : "ERROR";
+        var subtitle = new Label(subtitleText);
+        subtitle.AddToClassList("trade-modal-subtitle");
+        subtitle.AddToClassList("offer-result-modal-subtitle");
+        if (resultType == 1)
+            subtitle.AddToClassList("offer-result-modal-subtitle--positive");
+        else if (resultType == 0)
+            subtitle.AddToClassList("offer-result-modal-subtitle--warning");
+        else if (resultType == -1)
+            subtitle.AddToClassList("offer-result-modal-subtitle--negative");
+        headerLeft.Add(subtitle);
 
         var titleLabel = new Label(title);
-        titleLabel.AddToClassList("fired-modal-title");
-        if (resultType == 0)
-            titleLabel.AddToClassList("fired-modal-title--warning");
-        else if (resultType == 1)
-            titleLabel.AddToClassList("fired-modal-title--positive");
+        titleLabel.AddToClassList("trade-modal-title");
+        titleLabel.AddToClassList("offer-result-modal-title");
+        if (resultType == 1)
+            titleLabel.AddToClassList("offer-result-modal-title--positive");
+        else if (resultType == 0)
+            titleLabel.AddToClassList("offer-result-modal-title--warning");
         else if (resultType == -1)
-            titleLabel.AddToClassList("fired-modal-title--negative");
-        box.Add(titleLabel);
+            titleLabel.AddToClassList("offer-result-modal-title--negative");
+        headerLeft.Add(titleLabel);
+        header.Add(headerLeft);
+        box.Add(header);
 
-        var results = new VisualElement();
-        results.AddToClassList("fired-modal-results");
+        // ── Operation list ──
+        var opList = new VisualElement();
+        opList.AddToClassList("offer-result-modal-op-list");
         foreach (var rawLine in text.Split('\n'))
         {
             if (string.IsNullOrWhiteSpace(rawLine)) continue;
 
             string line = rawLine.TrimStart();
-            bool positive = line.StartsWith("✓");
-            bool negative = line.StartsWith("✗");
-            if (positive || negative)
+            string badgeText = null;
+            string cardMod = "neutral";
+            string badgeMod = null;
+
+            if (line.StartsWith("\u2713"))
+            {
                 line = line.Substring(1).TrimStart();
+                badgeText = "ACEPTADA";
+                cardMod = "positive";
+                badgeMod = "positive";
+            }
+            else if (line.StartsWith("\u2717"))
+            {
+                line = line.Substring(1).TrimStart();
+                badgeText = "RECHAZADA";
+                cardMod = "negative";
+                badgeMod = "negative";
+            }
+            else if (line.StartsWith("\u26A0"))
+            {
+                line = line.Substring(1).TrimStart();
+                badgeText = "AVISO";
+                cardMod = "warning";
+                badgeMod = "warning";
+            }
+
+            var card = new VisualElement();
+            card.AddToClassList("offer-result-modal-op-card");
+            card.AddToClassList($"offer-result-modal-op-card--{cardMod}");
 
             var lineLabel = new Label(line);
-            lineLabel.AddToClassList("fired-modal-result-line");
-            if (positive)
-                lineLabel.AddToClassList("fired-modal-result-line--positive");
-            else if (negative)
-                lineLabel.AddToClassList("fired-modal-result-line--negative");
-            else
-                lineLabel.AddToClassList("fired-modal-result-line--neutral");
+            lineLabel.AddToClassList("offer-result-modal-op-text");
+            card.Add(lineLabel);
 
-            results.Add(lineLabel);
+            if (badgeText != null)
+            {
+                var badge = new VisualElement();
+                badge.AddToClassList("offer-result-modal-op-badge");
+                badge.AddToClassList($"offer-result-modal-op-badge--{badgeMod}");
+
+                var badgeLbl = new Label(badgeText);
+                badgeLbl.AddToClassList("offer-result-modal-op-badge-text");
+                badgeLbl.AddToClassList($"offer-result-modal-op-badge-text--{badgeMod}");
+                badge.Add(badgeLbl);
+                card.Add(badge);
+            }
+
+            opList.Add(card);
         }
-        box.Add(results);
+        box.Add(opList);
 
+        // ── Buttons ──
         if (_fastSimRunning && _fastSimOfferPauseActive)
         {
             var btnGroup = new VisualElement();
-            btnGroup.AddToClassList("injured-modal-btn-group");
+            btnGroup.AddToClassList("trade-modal-buttons");
 
             var goToQuintetoBtn = new Button();
             goToQuintetoBtn.text = "IR A QUINTETO";
-            goToQuintetoBtn.AddToClassList("injured-modal-btn");
-            goToQuintetoBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+            goToQuintetoBtn.AddToClassList("trade-modal-btn");
+            goToQuintetoBtn.AddToClassList("trade-modal-btn--manual");
             goToQuintetoBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -2505,8 +2559,8 @@ using System.Threading.Tasks;
 
             var continueBtn = new Button();
             continueBtn.text = "SEGUIR SIMULANDO";
-            continueBtn.AddToClassList("injured-modal-btn");
-            continueBtn.style.backgroundColor = new StyleColor(new Color(0.153f, 0.682f, 0.376f));
+            continueBtn.AddToClassList("trade-modal-btn");
+            continueBtn.AddToClassList("trade-modal-btn--reject");
             continueBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -2526,17 +2580,22 @@ using System.Threading.Tasks;
         }
         else
         {
+            var btnGroup = new VisualElement();
+            btnGroup.AddToClassList("trade-modal-buttons");
+
             var btn = new Button();
             btn.text = "CERRAR";
-            btn.AddToClassList("fired-modal-btn");
-            btn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
+            btn.AddToClassList("trade-modal-btn");
+            btn.AddToClassList("trade-modal-btn--reject");
             btn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
                 _firedOverlay.style.display = DisplayStyle.None;
                 ShowNextPendingTradeOffer();
             });
-            box.Add(btn);
+            btnGroup.Add(btn);
+
+            box.Add(btnGroup);
 
             if (CursorManager.Instance != null)
                 CursorManager.Instance.RegisterHandCursor(btn);
