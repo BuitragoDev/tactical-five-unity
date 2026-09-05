@@ -121,6 +121,7 @@
     color: #d4a017;
     letter-spacing: 1px;
     margin-bottom: 4px;
+    -unity-text-align: middle-center;
 }
 
 .mpv-arena {
@@ -138,6 +139,7 @@
     color: #2a3347;
     margin-bottom: 57px;
     border-width: 0px;
+    -unity-text-align: middle-center;
 }
 
 /* ── Favorite Badge ── */
@@ -169,7 +171,7 @@
 }
 
 .mpv-col--center {
-    align-items: center;
+    align-items: stretch;
     justify-content: flex-start;
     padding-top: 10px;
 }
@@ -211,6 +213,16 @@
     flex: 1;
 }
 
+.mpv-stat-card--ataque {
+    background-color: #0e2a1a;
+    border-color: #1a6a3a;
+}
+
+.mpv-stat-card--defensa {
+    background-color: #2a0e0e;
+    border-color: #6a1a1a;
+}
+
 .mpv-stat-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
@@ -233,13 +245,33 @@
     margin-top: 2px;
 }
 
+/* ── Panel (bounded section) ── */
+.mpv-panel {
+    flex-direction: column;
+    padding: 10px 12px;
+    background-color: #111520;
+    border-width: 1px;
+    border-color: #2a3347;
+    border-radius: 6px;
+    margin-top: 10px;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.mpv-panel--center {
+    margin-top: 20px;
+}
+
+.mpv-panel--bajas {
+    margin-top: 22px;
+}
+
 /* ── Bajas ── */
 .mpv-bajas-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     color: #d4a017;
     letter-spacing: 2px;
-    margin-top: 10px;
     margin-bottom: 8px;
 }
 
@@ -392,6 +424,7 @@
 .mpv-bench-list {
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: space-between;
     width: 100%;
 }
 
@@ -407,7 +440,6 @@
     border-radius: 6px;
     flex-basis: 47%;
     flex-grow: 0;
-    flex-shrink: 0;
     min-width: 0;
 }
 
@@ -441,7 +473,6 @@
     font-size: 22px;
     letter-spacing: 2px;
     color: #d4a017;
-    margin-top: 20px;
     margin-bottom: 10px;
 }
 

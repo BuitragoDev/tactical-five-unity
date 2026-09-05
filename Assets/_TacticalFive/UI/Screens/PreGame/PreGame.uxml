@@ -42,47 +42,53 @@
                     </ui:VisualElement>
 
                     <ui:VisualElement class="mpv-col-stats">
-                        <ui:VisualElement class="mpv-stat-card">
+                        <ui:VisualElement class="mpv-stat-card mpv-stat-card--ataque">
                             <ui:Label class="mpv-stat-label" text="ATAQUE" />
                             <ui:Label name="MPVHomeOff" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVHomeOffRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
-                        <ui:VisualElement class="mpv-stat-card">
+                        <ui:VisualElement class="mpv-stat-card mpv-stat-card--defensa">
                             <ui:Label class="mpv-stat-label" text="DEFENSA" />
                             <ui:Label name="MPVHomeDef" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVHomeDefRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:Label class="mpv-roster-title" text="QUINTETO" />
-                    <ui:VisualElement name="MPVHomeStarters" class="mpv-starter-row" />
-                    <ui:Label class="mpv-roster-title" text="BANQUILLO" />
-                    <ui:VisualElement name="MPVHomeBench" class="mpv-bench-list" />
+                    <ui:VisualElement class="mpv-panel">
+                        <ui:Label class="mpv-roster-title" text="QUINTETO" />
+                        <ui:VisualElement name="MPVHomeStarters" class="mpv-starter-row" />
+                        <ui:Label class="mpv-roster-title" text="BANQUILLO" />
+                        <ui:VisualElement name="MPVHomeBench" class="mpv-bench-list" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- CENTER: BAJAS / KEY PLAYERS -->
+                <!-- CENTER: date / arena / VS / BAJAS / KEY PLAYERS -->
                 <ui:VisualElement class="mpv-col mpv-col--center">
                     <ui:Label class="mpv-date" name="MPVDate" text="" />
                     <ui:Label class="mpv-arena" name="MPVArena" text="" />
                     <ui:Label class="mpv-vs" text="VS" />
 
-                    <ui:Label class="mpv-bajas-title" text="BAJAS" />
-                    <ui:VisualElement class="mpv-bajas-cols">
-                        <ui:VisualElement class="mpv-bajas-col">
-                            <ui:Label name="MPVHomeBajasTitle" class="mpv-bajas-col-title" text="" />
-                            <ui:VisualElement name="MPVHomeBajas" class="mpv-bajas-list" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="mpv-bajas-col">
-                            <ui:Label name="MPVAwayBajasTitle" class="mpv-bajas-col-title" text="" />
-                            <ui:VisualElement name="MPVAwayBajas" class="mpv-bajas-list" />
+                    <ui:VisualElement class="mpv-panel mpv-panel--center mpv-panel--bajas">
+                        <ui:Label class="mpv-bajas-title" text="BAJAS" />
+                        <ui:VisualElement class="mpv-bajas-cols">
+                            <ui:VisualElement class="mpv-bajas-col">
+                                <ui:Label name="MPVHomeBajasTitle" class="mpv-bajas-col-title" text="" />
+                                <ui:VisualElement name="MPVHomeBajas" class="mpv-bajas-list" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="mpv-bajas-col">
+                                <ui:Label name="MPVAwayBajasTitle" class="mpv-bajas-col-title" text="" />
+                                <ui:VisualElement name="MPVAwayBajas" class="mpv-bajas-list" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:Label class="mpv-key-title" text="JUGADORES CLAVE" />
-                    <ui:VisualElement name="MPVKeyRow1" class="mpv-key-row" />
-                    <ui:VisualElement name="MPVKeyRow2" class="mpv-key-row" />
-                    <ui:VisualElement name="MPVKeyRow3" class="mpv-key-row" />
-                    <ui:VisualElement name="MPVKeyRow4" class="mpv-key-row" />
+                    <ui:VisualElement class="mpv-panel mpv-panel--center">
+                        <ui:Label class="mpv-key-title" text="JUGADORES CLAVE" />
+                        <ui:VisualElement name="MPVKeyRow1" class="mpv-key-row" />
+                        <ui:VisualElement name="MPVKeyRow2" class="mpv-key-row" />
+                        <ui:VisualElement name="MPVKeyRow3" class="mpv-key-row" />
+                        <ui:VisualElement name="MPVKeyRow4" class="mpv-key-row" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- RIGHT: AWAY -->
@@ -102,25 +108,28 @@
                     <ui:VisualElement class="mpv-divider" />
 
                     <ui:VisualElement class="mpv-col-stats">
-                        <ui:VisualElement class="mpv-stat-card">
+                        <ui:VisualElement class="mpv-stat-card mpv-stat-card--ataque">
                             <ui:Label class="mpv-stat-label" text="ATAQUE" />
                             <ui:Label name="MPVAwayOff" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVAwayOffRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
-                        <ui:VisualElement class="mpv-stat-card">
+                        <ui:VisualElement class="mpv-stat-card mpv-stat-card--defensa">
                             <ui:Label class="mpv-stat-label" text="DEFENSA" />
                             <ui:Label name="MPVAwayDef" class="mpv-stat-val" text="" />
                             <ui:Label name="MPVAwayDefRank" class="mpv-stat-rank" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <ui:Label class="mpv-roster-title" text="QUINTETO" />
-                    <ui:VisualElement name="MPVAwayStarters" class="mpv-starter-row" />
-                    <ui:Label class="mpv-roster-title" text="BANQUILLO" />
-                    <ui:VisualElement name="MPVAwayBench" class="mpv-bench-list" />
+                    <ui:VisualElement class="mpv-panel">
+                        <ui:Label class="mpv-roster-title" text="QUINTETO" />
+                        <ui:VisualElement name="MPVAwayStarters" class="mpv-starter-row" />
+                        <ui:Label class="mpv-roster-title" text="BANQUILLO" />
+                        <ui:VisualElement name="MPVAwayBench" class="mpv-bench-list" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
             </ui:VisualElement>
+
         </ui:VisualElement>
 
     </ui:VisualElement>

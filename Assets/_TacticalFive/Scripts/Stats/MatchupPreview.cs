@@ -267,7 +267,7 @@ public static class MatchupPreview
         var allTeamPlayers = db.GetPlayersByTeam(teamId);
 
         var seasonGames = db.GetSeasonGames(managerId, seasonId)
-            .Where(g => g.is_played == 1).ToList();
+            .Where(g => g.is_played == 1 && g.game_type == "regular").ToList();
         var gameIds = seasonGames.Select(g => g.id).ToList();
         if (gameIds.Count == 0) return;
 
