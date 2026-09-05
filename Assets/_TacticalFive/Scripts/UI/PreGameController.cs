@@ -20,6 +20,7 @@ public class PreGameController : UIScreenController
     private VisualElement _mpvKeyRow1, _mpvKeyRow2, _mpvKeyRow3, _mpvKeyRow4;
 
     private Button _btnBack, _btnGoMatch;
+    private Label _headerTitleType;
 
     private List<TeamData> _allTeams;
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -58,6 +59,7 @@ public class PreGameController : UIScreenController
 
         _btnBack = _root.Q<Button>("BtnBack");
         _btnGoMatch = _root.Q<Button>("BtnGoMatch");
+        _headerTitleType = _root.Q<Label>("HeaderTitleType");
     }
 
     protected override void LoadData()
@@ -108,6 +110,19 @@ public class PreGameController : UIScreenController
             !DashboardController.IsGLeagueGame(g) &&
             (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
         if (myGame == null) return;
+
+        if (_headerTitleType != null)
+        {
+            _headerTitleType.text = myGame.game_type switch
+            {
+                "preseason" => "AMISTOSO",
+                "regular" => "LIGA REGULAR",
+                "playin" => "PLAY-IN",
+                "playoff" => "PLAYOFF",
+                "allstar" => "ALL-STAR",
+                _ => myGame.game_type.ToUpper()
+            };
+        }
 
         var home = _allTeams.Find(t => t.id == myGame.home_team_id);
         var away = _allTeams.Find(t => t.id == myGame.away_team_id);

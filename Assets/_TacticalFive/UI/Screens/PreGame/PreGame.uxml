@@ -11,7 +11,7 @@
         <ui:VisualElement name="Header" class="header">
             <ui:Button name="BtnBack" text="VOLVER" class="btn-back"/>
             <ui:VisualElement class="header-title">
-                <ui:Label text="LIGA" class="header-title-white"/>
+                <ui:Label name="HeaderTitleType" text="LIGA" class="header-title-white"/>
                 <ui:Label text="· PREVIA DEL PARTIDO" class="header-title-gold"/>
             </ui:VisualElement>
             <ui:Button name="BtnGoMatch" text="IR AL PARTIDO" class="btn-continue"/>
