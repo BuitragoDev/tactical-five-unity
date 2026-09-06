@@ -271,8 +271,9 @@ public static class MatchupPreview
         var gameIds = seasonGames.Select(g => g.id).ToList();
         if (gameIds.Count == 0) return;
 
+        var currentPlayerIds = new HashSet<int>(players.Select(p => p.id));
         var allStats = db.GetGamePlayerStatsBatch(gameIds)
-            .Where(s => s.team_id == teamId && s.minutes > 0)
+            .Where(s => s.team_id == teamId && s.minutes > 0 && currentPlayerIds.Contains(s.player_id))
             .GroupBy(s => s.player_id)
             .Select(g => new {
                 player_id = g.Key,
