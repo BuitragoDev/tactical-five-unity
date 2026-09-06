@@ -1527,6 +1527,10 @@ using System.Linq;
         _selectedPlayer.team_id = 0;
         _selectedPlayer.last_team_id = 0;
         _selectedPlayer.seasons_with_team = 0;
+        _selectedPlayer.g_league_assigned = 0;
+        _selectedPlayer.is_on_ir = 0;
+        _selectedPlayer.is_two_way = 0;
+        _selectedPlayer.on_trade_block = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
         long remainder = remainingSalary;

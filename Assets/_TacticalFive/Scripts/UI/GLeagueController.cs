@@ -605,7 +605,7 @@ public class GLeagueController : UIScreenController
         body.Clear();
 
         var ranked = _glStats
-            .Where(s => s.games > 0)
+            .Where(s => s.games > 0 && _glNames.ContainsKey(s.player_id))
             .Select(s => new { stat = s, avg = selector(s) / (float)s.games })
             .OrderByDescending(x => x.avg)
             .Take(8)

@@ -2128,6 +2128,10 @@ using System.Linq;
         {
             p.team_id = _selectedTeam.id;
             p.last_team_id = _selectedTeam.id;
+            p.g_league_assigned = 0;
+            p.is_on_ir = 0;
+            p.is_two_way = 0;
+            p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
 
             DatabaseManager.Instance.InsertTrade(new TradeData
@@ -2154,11 +2158,19 @@ using System.Linq;
         foreach (var p in mySelected)
         {
             p.team_id = _selectedTeam.id;
+            p.g_league_assigned = 0;
+            p.is_on_ir = 0;
+            p.is_two_way = 0;
+            p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
         }
         foreach (var p in otherSelected)
         {
             p.team_id = _myTeam.id;
+            p.g_league_assigned = 0;
+            p.is_on_ir = 0;
+            p.is_two_way = 0;
+            p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
         }
         foreach (var p in ownSA)

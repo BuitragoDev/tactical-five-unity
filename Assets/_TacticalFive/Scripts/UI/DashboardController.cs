@@ -4685,6 +4685,10 @@ using System.Threading.Tasks;
         foreach (var p in aSelected)
         {
             p.team_id = teamB.id;
+            p.g_league_assigned = 0;
+            p.is_on_ir = 0;
+            p.is_two_way = 0;
+            p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
@@ -4702,6 +4706,10 @@ using System.Threading.Tasks;
         foreach (var p in bSelected)
         {
             p.team_id = teamA.id;
+            p.g_league_assigned = 0;
+            p.is_on_ir = 0;
+            p.is_two_way = 0;
+            p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
