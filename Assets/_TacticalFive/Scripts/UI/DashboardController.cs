@@ -1292,6 +1292,36 @@ using System.Threading.Tasks;
                     Debug.LogError("[Dashboard] allPlayInPlayed but GeneratePlayoffs returned 0 games!");
                 }
             }
+            else if (_myTeam != null)
+            {
+                bool hasPlayedPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id
+                           && g.game_type == "playin"
+                           && g.is_played == 1
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+                bool hasRemainingPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id
+                           && g.game_type == "playin"
+                           && g.is_played == 0
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+                if (hasPlayedPlayIn && !hasRemainingPlayIn)
+                {
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 0,
+                        sender_id = 0,
+                        title = "Eliminación en Play-In",
+                        body = $"Tu equipo {_myTeam.name} ha sido eliminado del Play-In. No logró clasificar a los Playoffs.",
+                        game_day = gameDay,
+                        game_date = _season?.current_date ?? "",
+                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        is_read = 0
+                    });
+                    Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Play-In.");
+                }
+            }
         }
 
         if (_season.phase == "playoff")
@@ -1307,6 +1337,36 @@ using System.Threading.Tasks;
                 _season.phase = "finished";
                 DatabaseManager.Instance.UpdateSeason(_season);
                 Debug.Log("[Dashboard] Playoffs finished → Season finished.");
+            }
+            else if (_myTeam != null)
+            {
+                bool hasPlayedPlayoffs = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id
+                           && g.game_type == "playoff"
+                           && g.is_played == 1
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+                bool hasRemainingPlayoffs = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id
+                           && g.game_type == "playoff"
+                           && g.is_played == 0
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+                if (hasPlayedPlayoffs && !hasRemainingPlayoffs)
+                {
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 0,
+                        sender_id = 0,
+                        title = "Eliminación en Playoffs",
+                        body = $"Tu equipo {_myTeam.name} ha sido eliminado de los Playoffs. La temporada ha terminado.",
+                        game_day = gameDay,
+                        game_date = _season?.current_date ?? "",
+                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        is_read = 0
+                    });
+                    Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Playoffs.");
+                }
             }
         }
 

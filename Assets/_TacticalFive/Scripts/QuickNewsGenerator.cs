@@ -78,7 +78,7 @@ public static class QuickNewsGenerator
     public static void Generate(ManagerData manager, TeamData myTeam, SeasonData season, List<GameData> gamesToday, int gameDay, string gameDate)
     {
         if (season == null || gamesToday == null || gamesToday.Count == 0) return;
-        if (season.phase != "regular") return;
+        if (season.phase == "finished" || season.phase == "preseason") return;
 
         var allStandingsGames = DatabaseManager.Instance.GetStandingsGames(manager.id);
         var allTeams = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);
