@@ -410,7 +410,7 @@ public static class PlayoffsGenerator
         }
     }
 
-    static int GetSeriesWinner(SeasonData season, int managerId, string seriesLabel)
+    public static int GetSeriesWinner(SeasonData season, int managerId, string seriesLabel)
     {
         var games = DatabaseManager.Instance.Db.Table<GameData>()
             .Where(g => g.manager_id == managerId && g.series_label == seriesLabel && g.is_played == 1)

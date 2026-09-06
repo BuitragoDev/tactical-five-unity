@@ -1304,7 +1304,30 @@ using System.Threading.Tasks;
                            && g.game_type == "playin"
                            && g.is_played == 0
                            && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+
+                bool teamWonAnyPlayIn = false;
                 if (hasPlayedPlayIn && !hasRemainingPlayIn)
+                {
+                    var myPlayInGames = DatabaseManager.Instance.Db.Table<GameData>()
+                        .Where(g => g.manager_id == _manager.id
+                               && g.game_type == "playin"
+                               && g.is_played == 1
+                               && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
+                        .ToList();
+
+                    foreach (var g in myPlayInGames)
+                    {
+                        bool iWon = (g.home_team_id == _myTeam.id && g.home_score > g.away_score)
+                                  || (g.away_team_id == _myTeam.id && g.away_score > g.home_score);
+                        if (iWon)
+                        {
+                            teamWonAnyPlayIn = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (hasPlayedPlayIn && !hasRemainingPlayIn && !teamWonAnyPlayIn)
                 {
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
@@ -1350,7 +1373,27 @@ using System.Threading.Tasks;
                            && g.game_type == "playoff"
                            && g.is_played == 0
                            && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+
+                bool teamWonLastSeries = false;
                 if (hasPlayedPlayoffs && !hasRemainingPlayoffs)
+                {
+                    string lastSeriesLabel = DatabaseManager.Instance.Db.Table<GameData>()
+                        .Where(g => g.manager_id == _manager.id
+                               && g.game_type == "playoff"
+                               && g.is_played == 1
+                               && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
+                        .OrderByDescending(g => g.game_day)
+                        .Select(g => g.series_label)
+                        .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(lastSeriesLabel))
+                    {
+                        int winner = PlayoffsGenerator.GetSeriesWinner(_season, _manager.id, lastSeriesLabel);
+                        teamWonLastSeries = (winner == _myTeam.id);
+                    }
+                }
+
+                if (hasPlayedPlayoffs && !hasRemainingPlayoffs && !teamWonLastSeries)
                 {
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
