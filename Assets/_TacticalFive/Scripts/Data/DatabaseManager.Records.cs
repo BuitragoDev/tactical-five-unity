@@ -1986,11 +1986,10 @@ public partial class DatabaseManager
             JOIN games g ON ps.game_id = g.id
             JOIN players p ON ps.player_id = p.id
             JOIN teams t ON p.team_id = t.id
-            JOIN team_lineup l ON l.player_id = p.id AND l.slot = 1
             WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
               AND g.manager_id = ?
             GROUP BY ps.player_id
-            HAVING COUNT(*) >= 40
+            HAVING COUNT(*) >= 40 AND CAST(SUM(ps.minutes) AS REAL) / COUNT(*) < 28
             ORDER BY avg_rating DESC
             LIMIT 1";
         var row = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId).FirstOrDefault();
