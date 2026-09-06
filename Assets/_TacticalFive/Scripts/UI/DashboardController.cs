@@ -431,7 +431,7 @@ using System.Threading.Tasks;
 
         if (_noticiasSprites.Count == 0)
         {
-            var nombres = new[] { "contratado", "despedido", "entrenamiento", "lesionados", "obras-finalizadas", "pago-nominas", "prestamo-bancario", "renovacion", "traspaso", "bienvenida", "recuperado", "quejas" };
+            var nombres = new[] { "contratado", "despedido", "rechazado", "entrenamiento", "lesionados", "obras-finalizadas", "pago-nominas", "prestamo-bancario", "renovacion", "traspaso", "bienvenida", "recuperado", "quejas" };
             foreach (var n in nombres)
             {
                 var tex = Resources.Load<Texture2D>("Noticias/" + n);
@@ -7277,6 +7277,24 @@ List<int> offeredPickIds = new List<int>();
                 if (channelTex != null) { icon.style.backgroundImage = new StyleBackground(channelTex); return; }
             }
         }
+        else if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Fichaje:"))
+        {
+            string playerName = msg.title.Substring("Fichaje: ".Length).Trim();
+            if (_playerByName.TryGetValue(playerName, out var p))
+            {
+                var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+                if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return; }
+            }
+        }
+        else if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Hard cap activado"))
+        {
+            string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
+            if (playerName != null && _playerByName.TryGetValue(playerName, out var p))
+            {
+                var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+                if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return; }
+            }
+        }
         else if (msg.sender_type == 2)
         {
             if (string.Equals(msg.title, "TRIPLE-DOBLE", System.StringComparison.OrdinalIgnoreCase)
@@ -7356,6 +7374,7 @@ List<int> offeredPickIds = new List<int>();
         if (title.StartsWith("Queja") || title.StartsWith("Preocupación")) return "quejas";
         if (title.StartsWith("Fichaje:")) return "contratado";
         if (title.Contains("Nuevo empleado")) return "contratado";
+        if (title.StartsWith("Fichaje rechazado")) return "rechazado";
         if (title.Contains("cancelado") || title.Contains("rechazado") || title.Contains("despedido")) return "despedido";
         if (title.Contains("Entrenamiento")) return "entrenamiento";
         if (title.Contains("Lesión") || title.Contains("RESERVA")) return "lesionados";

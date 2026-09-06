@@ -955,12 +955,13 @@
     margin-top: 20px;
 }
 .message-item-icon {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     border-radius: 4px;
     flex-shrink: 0;
     margin-right: 10px;
     overflow: hidden;
+    align-self: center;
 }
 .message-item-text {
     flex-direction: column;
