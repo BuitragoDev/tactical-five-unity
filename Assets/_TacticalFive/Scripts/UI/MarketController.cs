@@ -66,6 +66,14 @@ using System.Linq;
     private List<DraftPickData> _myPicks;
     private List<DraftPickData> _otherPicks;
     private List<PlayerData> _freeAgents = new();
+    private List<PlayerData> _currentFARows = new();
+    private int _faCurrentPage;
+    private const int FA_PAGE_SIZE = 10;
+    private Button _faPreviousPageBtn;
+    private Button _faNextPageBtn;
+    private Button _faFirstPageBtn;
+    private Button _faLastPageBtn;
+    private Label _faPageLabel;
     private int _myTotalRosterCount;
     private int _otherTotalRosterCount;
     private TeamData _selectedTeam;
@@ -167,6 +175,21 @@ using System.Linq;
         _tradeSuccessText1 = _root.Q<Label>("TradeSuccessText1");
         _tradeSuccessText2 = _root.Q<Label>("TradeSuccessText2");
 
+        _faPreviousPageBtn = _root.Q<Button>("BtnFAPreviousPage");
+        _faNextPageBtn = _root.Q<Button>("BtnFANextPage");
+        _faFirstPageBtn = _root.Q<Button>("BtnFAFirstPage");
+        _faLastPageBtn = _root.Q<Button>("BtnFALastPage");
+        _faPageLabel = _root.Q<Label>("FAPageLabel");
+
+        var faPrevSprite = Resources.Load<Sprite>("Icons/left_arrow");
+        var faNextSprite = Resources.Load<Sprite>("Icons/right_arrow");
+        SetFAPageIcon(_root.Q<Image>("FAPreviousPageIcon"), faPrevSprite);
+        SetFAPageIcon(_root.Q<Image>("FANextPageIcon"), faNextSprite);
+        SetFAPageIcon(_root.Q<Image>("FAFirstPageIcon1"), faPrevSprite);
+        SetFAPageIcon(_root.Q<Image>("FAFirstPageIcon2"), faPrevSprite);
+        SetFAPageIcon(_root.Q<Image>("FALastPageIcon1"), faNextSprite);
+        SetFAPageIcon(_root.Q<Image>("FALastPageIcon2"), faNextSprite);
+
         if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
     }
     protected override void LoadData()
@@ -214,6 +237,11 @@ using System.Linq;
         _faTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("team"); });
         _faPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("player"); });
         _faTwoWayToggle?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFATwoWay(); });
+
+        _faPreviousPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(-1); });
+        _faNextPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(1); });
+        _faFirstPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(-10); });
+        _faLastPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(10); });
     }
     protected override void Refresh()
     {
@@ -494,6 +522,14 @@ using System.Linq;
     void PopulateTableHeader(VisualElement header)
     {
         header.Clear();
+
+        if (header == _freeAgentsTableHeader)
+        {
+            var photo = new Label("");
+            photo.AddToClassList("market-table-header-label");
+            photo.AddToClassList("market-table-header-photo");
+            header.Add(photo);
+        }
 
         var name = new Label("JUGADOR");
         name.AddToClassList("market-table-header-label");
@@ -1516,76 +1552,136 @@ using System.Linq;
     //  FREE AGENTS
     // ═══════════════════════════════════════════
 
+    void SetFAPageIcon(Image image, Sprite sprite)
+    {
+        if (image != null && sprite != null)
+            image.style.backgroundImage = new StyleBackground(sprite);
+    }
+
     void BuildFreeAgents()
     {
-        _freeAgentsBody.Clear();
-
-        var visible = _freeAgents?.Where(p =>
+        _currentFARows = _freeAgents?.Where(p =>
         {
             int cd = p.renewal_cooldown_day;
             return cd <= 0 || _season == null || _season.current_game_day >= cd;
-        }).ToList();
+        }).ToList() ?? new List<PlayerData>();
 
-        if (visible == null || visible.Count == 0)
+        _faCurrentPage = 0;
+        RenderFAPage();
+    }
+
+    void ChangeFAPage(int direction)
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentFARows.Count / (float)FA_PAGE_SIZE));
+        _faCurrentPage = Mathf.Clamp(_faCurrentPage + direction, 0, pageCount - 1);
+        RenderFAPage();
+    }
+
+    void RenderFAPage()
+    {
+        _freeAgentsBody.Clear();
+
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentFARows.Count / (float)FA_PAGE_SIZE));
+        _faCurrentPage = Mathf.Clamp(_faCurrentPage, 0, pageCount - 1);
+
+        var pageRows = _currentFARows
+            .Skip(_faCurrentPage * FA_PAGE_SIZE)
+            .Take(FA_PAGE_SIZE)
+            .ToList();
+
+        if (pageRows.Count == 0)
         {
             var empty = new Label("No hay agentes libres disponibles");
             empty.AddToClassList("market-empty-fa");
             _freeAgentsBody.Add(empty);
-            return;
+        }
+        else
+        {
+            var pendingSet = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+            foreach (var player in pageRows)
+                BuildFARow(player, pendingSet);
         }
 
-        var pendingSet = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
+        if (_faPageLabel != null)
+            _faPageLabel.text = $"{_faCurrentPage + 1} de {pageCount}";
+        _faPreviousPageBtn?.SetEnabled(_faCurrentPage > 0);
+        _faNextPageBtn?.SetEnabled(_faCurrentPage < pageCount - 1);
+        _faFirstPageBtn?.SetEnabled(_faCurrentPage > 0);
+        _faLastPageBtn?.SetEnabled(_faCurrentPage < pageCount - 1);
+    }
 
-        foreach (var player in visible)
-        {
-            var row = new VisualElement();
-            row.AddToClassList("market-fa-row");
+    void BuildFARow(PlayerData player, HashSet<int> pendingSet)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("market-fa-row");
 
-            var name = new Label($"{player.first_name} {player.last_name}");
-            name.AddToClassList("market-fa-col-name");
-            row.Add(name);
+        var photo = new VisualElement();
+        photo.AddToClassList("market-fa-col-photo");
+        var tex = PlayerPhotoHelper.Load(player.id, player.photo);
+        if (tex != null)
+            photo.style.backgroundImage = new StyleBackground(tex);
+        row.Add(photo);
+
+        var name = new Label($"{player.first_name} {player.last_name}");
+        name.AddToClassList("market-fa-col-name");
+        row.Add(name);
 
         var pos = new Label(PositionCodes.GetShort(player.position));
-            pos.AddToClassList("market-fa-col-pos");
-            row.Add(pos);
+        pos.AddToClassList("market-fa-col-pos");
+        row.Add(pos);
 
-            var ovr = new Label(player.GetCalculatedAverage().ToString());
-            ovr.AddToClassList("market-fa-col-ovr");
-            int ovrVal = player.GetCalculatedAverage();
-            if (ovrVal > 84)
-                ovr.AddToClassList("market-fa-col-ovr--high");
-            else if (ovrVal >= 70)
-                ovr.AddToClassList("market-fa-col-ovr--mid");
-            else
-                ovr.AddToClassList("market-fa-col-ovr--low");
-            row.Add(ovr);
+        var ovr = new Label(player.GetCalculatedAverage().ToString());
+        ovr.AddToClassList("market-fa-col-ovr");
+        int ovrVal = player.GetCalculatedAverage();
+        if (ovrVal > 84)
+            ovr.AddToClassList("market-fa-col-ovr--high");
+        else if (ovrVal >= 70)
+            ovr.AddToClassList("market-fa-col-ovr--mid");
+        else
+            ovr.AddToClassList("market-fa-col-ovr--low");
+        row.Add(ovr);
 
-            var salary = new Label($"${player.salary:N0}");
-            salary.AddToClassList("market-fa-col-salary");
-            row.Add(salary);
+        var salary = new Label($"${player.salary:N0}");
+        salary.AddToClassList("market-fa-col-salary");
+        row.Add(salary);
 
-            var actionCell = new VisualElement();
-            actionCell.AddToClassList("market-fa-col-action");
-            var btn = new Button();
-            btn.AddToClassList("market-btn-fa-sign");
-            int playerId = player.id;
-            if (pendingSet.Contains(playerId))
-            {
-                btn.text = "NEGOCIANDO";
-                btn.SetEnabled(false);
-            }
-            else
-            {
-                btn.text = "FIRMAR";
-                btn.clicked += () => { PlayClick(); OnSignPlayer(playerId); };
-            }
-            if (CursorManager.Instance != null)
-                CursorManager.Instance.RegisterHandCursor(btn);
-            actionCell.Add(btn);
-            row.Add(actionCell);
+        var actionCell = new VisualElement();
+        actionCell.AddToClassList("market-fa-col-action");
 
-            _freeAgentsBody.Add(row);
+        int playerId = player.id;
+
+        var btnSign = new Button();
+        btnSign.AddToClassList("market-btn-fa-sign");
+        if (pendingSet.Contains(playerId))
+        {
+            btnSign.text = "NEGOCIANDO";
+            btnSign.SetEnabled(false);
         }
+        else
+        {
+            btnSign.text = "HACER OFERTA";
+            btnSign.clicked += () => { PlayClick(); OnSignPlayer(playerId); };
+        }
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(btnSign);
+        actionCell.Add(btnSign);
+
+        var btnProfile = new Button();
+        btnProfile.AddToClassList("market-btn-fa-profile");
+        btnProfile.text = "VER PERFIL";
+        btnProfile.clicked += () =>
+        {
+            PlayClick();
+            ScreenManager.SelectedPlayerId = playerId;
+            ScreenManager.Instance.GoTo(GameScreen.PlayerProfile);
+        };
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(btnProfile);
+        actionCell.Add(btnProfile);
+
+        row.Add(actionCell);
+
+        _freeAgentsBody.Add(row);
     }
 
     void OnSignPlayer(int playerId)

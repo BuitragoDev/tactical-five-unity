@@ -215,7 +215,7 @@
 
 .market-fa-panel {
     width: 50%;
-    align-self: flex-start;
+    flex-grow: 1;
     min-height: 0;
     margin-top: 16px;
 }
@@ -258,6 +258,10 @@
 
 .market-fa-content {
     flex-direction: column;
+    flex-grow: 1;
+    align-content: flex-start;
+    min-height: 0;
+    overflow: hidden;
 }
 
 /* ── TRADE TABLE ── */
@@ -560,9 +564,14 @@
 .market-fa-row {
     flex-direction: row;
     align-items: center;
-    padding: 16px 20px;
+    padding: 4px 20px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.3);
+    height: 48px;
+    min-height: 48px;
+    max-height: 48px;
+    flex-grow: 0;
+    flex-shrink: 0;
 }
 
 .market-fa-row:hover {
@@ -616,8 +625,22 @@
 }
 
 .market-fa-col-action {
-    width: 120px;
+    width: 220px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
     -unity-text-align: middle-center;
+}
+
+.market-fa-col-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 4px;
+    margin-right: 12px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
 }
 
 .market-btn-fa-sign {
@@ -625,15 +648,14 @@
     border-width: 0;
     color: rgb(255, 255, 255);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 1px;
     -unity-text-transform: upper;
-    padding: 11px 16px;
+    padding: 8px 12px;
     border-radius: 4px;
     cursor: pointer;
     min-height: 24px;
-    margin-left: 10px;
 }
 
 .market-btn-fa-sign:hover {
@@ -644,6 +666,26 @@
     background-color: rgb(100, 100, 100);
     cursor: default;
     opacity: 0.85;
+}
+
+.market-btn-fa-profile {
+    background-color: rgb(39, 84, 148);
+    border-width: 0;
+    color: rgb(255, 255, 255);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    min-height: 24px;
+    margin-left: 6px;
+}
+
+.market-btn-fa-profile:hover {
+    background-color: rgb(52, 112, 192);
 }
 
 .market-empty-fa {
@@ -794,7 +836,7 @@
 }
 .market-deadline-countdown-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 14px;
     color: rgb(0, 0, 0);
     letter-spacing: 1px;
     -unity-text-align: middle-center;
@@ -889,7 +931,7 @@
 }
 
 .market-table-header-action {
-    width: 120px;
+    width: 220px;
     -unity-text-align: middle-center;
 }
 
@@ -1271,4 +1313,74 @@
     color: rgb(190, 220, 255);
     border-color: rgb(39, 84, 148);
     background-color: rgba(39, 84, 148, 0.25);
+}
+
+/* ── TABLE HEADER PHOTO ── */
+.market-table-header-photo {
+    width: 52px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+/* ══ PAGINACIÓN FA (10 resultados por página) ══ */
+.market-pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 48px;
+    padding: 6px 24px;
+    background-color: rgb(17, 24, 34);
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
+}
+
+.market-page-btn {
+    width: 38px;
+    height: 32px;
+    padding: 6px;
+    margin: 0 12px;
+    align-items: center;
+    justify-content: center;
+    color: rgb(122, 138, 170);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 3px;
+    -unity-text-align: middle-center;
+}
+
+.market-page-btn:hover {
+    color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
+}
+
+.market-page-jump-btn {
+    width: 64px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+.market-page-icon {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.market-page-btn:disabled {
+    color: rgb(55, 65, 84);
+    background-color: rgb(17, 24, 34);
+    border-color: rgb(28, 33, 48);
+}
+
+.market-page-label {
+    min-width: 80px;
+    height: 24px;
+    flex-shrink: 0;
+    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
 }
