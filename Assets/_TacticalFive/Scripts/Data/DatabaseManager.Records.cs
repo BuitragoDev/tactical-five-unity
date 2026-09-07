@@ -1830,7 +1830,7 @@ public partial class DatabaseManager
 
     public PlayerAwardInfo GetRookieOfYear(int seasonId, int managerId)
     {
-        return QueryTopPlayer(seasonId, managerId, true, 65);
+        return QueryTopPlayer(seasonId, managerId, true, 40);
     }
 
     public List<PlayerAwardInfo> GetAllStarTeam(int seasonId, int managerId)
@@ -1840,7 +1840,7 @@ public partial class DatabaseManager
 
     public List<PlayerAwardInfo> GetAllRookieTeam(int seasonId, int managerId)
     {
-        return GetBestPerPosition(seasonId, managerId, true, 65);
+        return GetBestPerPosition(seasonId, managerId, true, 40);
     }
 
     PlayerAwardInfo QueryTopPlayer(int seasonId, int managerId, bool? rookieOnly, int minGames)

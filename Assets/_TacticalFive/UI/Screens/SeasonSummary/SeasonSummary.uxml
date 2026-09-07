@@ -14,7 +14,7 @@
             <ui:VisualElement class="ss-header-right">
                 <ui:Label name="HeaderSeason" class="ss-header-season" text=""/>
                 <ui:Label name="HeaderDate" class="ss-header-date" text=""/>
-                <ui:Button name="BtnGoToAwards" class="ss-btn-awards" text="IR A PREMIOS →"/>
+                <ui:Button name="BtnGoToAwards" class="ss-btn-awards" text="IR A PREMIOS"/>
             </ui:VisualElement>
         </ui:VisualElement>
 

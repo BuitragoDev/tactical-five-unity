@@ -2,50 +2,92 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 
 public class PlayerAwardsController : UIScreenController
 {
-    // Header
+    // ── Header ──
     private VisualElement _headerTeamLogo;
     private Label _headerTeamName;
     private Label _headerManagerName;
     private Label _headerSeason;
     private Label _headerDate;
 
-    // Content
+    // ── Screen Header ──
     private Label _seasonTag;
-    private VisualElement _mvpPlayerPhoto;
-    private Label _mvpPlayerName;
-    private Label _mvpPlayerTeam;
+
+    // ── MVP ──
+    private VisualElement _mvpBadgeIcon;
+    private VisualElement _mvpPhoto;
+    private VisualElement _mvpTeamLogo;
+    private Label _mvpName;
+    private Label _mvpTeam;
     private Label _mvpPts;
     private Label _mvpReb;
     private Label _mvpAst;
-    private VisualElement _rookiePlayerPhoto;
-    private Label _rookiePlayerName;
-    private Label _rookiePlayerTeam;
+
+    // ── DPOY ──
+    private VisualElement _dpoyBadgeIcon;
+    private VisualElement _dpoyPhoto;
+    private VisualElement _dpoyTeamLogo;
+    private Label _dpoyName;
+    private Label _dpoyTeam;
+    private Label _dpoyPts;
+    private Label _dpoyReb;
+    private Label _dpoyBlk;
+
+    // ── Rookie ──
+    private VisualElement _rookieBadgeIcon;
+    private VisualElement _rookiePhoto;
+    private VisualElement _rookieTeamLogo;
+    private Label _rookieName;
+    private Label _rookieTeam;
     private Label _rookiePts;
     private Label _rookieReb;
     private Label _rookieAst;
-    private VisualElement _dpoyPlayerPhoto;
-    private Label _dpoyPlayerName;
-    private Label _dpoyPlayerTeam;
-    private Label _dpoyStl;
-    private Label _dpoyBlk;
-    private VisualElement _sixthPlayerPhoto;
-    private Label _sixthPlayerName;
-    private Label _sixthPlayerTeam;
+
+    // ── Sixth Man ──
+    private VisualElement _sixthBadgeIcon;
+    private VisualElement _sixthPhoto;
+    private VisualElement _sixthTeamLogo;
+    private Label _sixthName;
+    private Label _sixthTeam;
     private Label _sixthPts;
     private Label _sixthReb;
     private Label _sixthAst;
-    private VisualElement _mipPlayerPhoto;
-    private Label _mipPlayerName;
-    private Label _mipPlayerTeam;
-    private Label _mipNow;
-    private Label _mipPrev;
-    private VisualElement _coachPlayerPhoto;
-    private Label _coachPlayerName;
-    private Label _coachPlayerTeam;
-    private Label _coachCount;
+
+    // ── MIP ──
+    private VisualElement _mipBadgeIcon;
+    private VisualElement _mipPhoto;
+    private VisualElement _mipTeamLogo;
+    private Label _mipName;
+    private Label _mipTeam;
+    private Label _mipPts;
+    private Label _mipReb;
+    private Label _mipAst;
+
+    // ── Coach ──
+    private VisualElement _coachBadgeIcon;
+    private VisualElement _coachPhoto;
+    private Label _coachName;
+    private Label _coachTeam;
+    private Label _coachRecord;
+
+    // ── Best Team ──
+    private VisualElement _bestBadgeIcon;
+    private VisualElement _bestTeamLogo;
+    private Label _bestTeamName;
+    private Label _bestTeamRecord;
+
+    // ── Worst Team ──
+    private VisualElement _worstBadgeIcon;
+    private VisualElement _worstTeamLogo;
+    private Label _worstTeamName;
+    private Label _worstTeamRecord;
+
+    // ── Caches ──
+    private Dictionary<string, Sprite> _logos64;
+    private Dictionary<string, Sprite> _logos100;
 
     protected override void OnEnable()
     {
@@ -55,49 +97,84 @@ public class PlayerAwardsController : UIScreenController
 
     protected override void CacheReferences()
     {
+        // Header
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
         _headerManagerName = _root.Q<Label>("HeaderManagerName");
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
+
+        // Screen Header
         _seasonTag = _root.Q<Label>("SeasonTag");
-        _mvpPlayerPhoto = _root.Q<VisualElement>("MvpPlayerPhoto");
-        _mvpPlayerName = _root.Q<Label>("MvpPlayerName");
-        _mvpPlayerTeam = _root.Q<Label>("MvpPlayerTeam");
+
+        // MVP
+        _mvpBadgeIcon = _root.Q<VisualElement>("MvpBadgeIcon");
+        _mvpPhoto = _root.Q<VisualElement>("MvpPhoto");
+        _mvpTeamLogo = _root.Q<VisualElement>("MvpTeamLogo");
+        _mvpName = _root.Q<Label>("MvpName");
+        _mvpTeam = _root.Q<Label>("MvpTeam");
         _mvpPts = _root.Q<Label>("MvpPts");
         _mvpReb = _root.Q<Label>("MvpReb");
         _mvpAst = _root.Q<Label>("MvpAst");
-        _rookiePlayerPhoto = _root.Q<VisualElement>("RookiePlayerPhoto");
-        _rookiePlayerName = _root.Q<Label>("RookiePlayerName");
-        _rookiePlayerTeam = _root.Q<Label>("RookiePlayerTeam");
+
+        // DPOY
+        _dpoyBadgeIcon = _root.Q<VisualElement>("DpoyBadgeIcon");
+        _dpoyPhoto = _root.Q<VisualElement>("DpoyPhoto");
+        _dpoyTeamLogo = _root.Q<VisualElement>("DpoyTeamLogo");
+        _dpoyName = _root.Q<Label>("DpoyName");
+        _dpoyTeam = _root.Q<Label>("DpoyTeam");
+        _dpoyPts = _root.Q<Label>("DpoyPts");
+        _dpoyReb = _root.Q<Label>("DpoyReb");
+        _dpoyBlk = _root.Q<Label>("DpoyBlk");
+
+        // Rookie
+        _rookieBadgeIcon = _root.Q<VisualElement>("RookieBadgeIcon");
+        _rookiePhoto = _root.Q<VisualElement>("RookiePhoto");
+        _rookieTeamLogo = _root.Q<VisualElement>("RookieTeamLogo");
+        _rookieName = _root.Q<Label>("RookieName");
+        _rookieTeam = _root.Q<Label>("RookieTeam");
         _rookiePts = _root.Q<Label>("RookiePts");
         _rookieReb = _root.Q<Label>("RookieReb");
         _rookieAst = _root.Q<Label>("RookieAst");
-        _dpoyPlayerPhoto = _root.Q<VisualElement>("DpoyPlayerPhoto");
-        _dpoyPlayerName = _root.Q<Label>("DpoyPlayerName");
-        _dpoyPlayerTeam = _root.Q<Label>("DpoyPlayerTeam");
-        _dpoyStl = _root.Q<Label>("DpoyStl");
-        _dpoyBlk = _root.Q<Label>("DpoyBlk");
-        _sixthPlayerPhoto = _root.Q<VisualElement>("SixthPlayerPhoto");
-        _sixthPlayerName = _root.Q<Label>("SixthPlayerName");
-        _sixthPlayerTeam = _root.Q<Label>("SixthPlayerTeam");
+
+        // Sixth Man
+        _sixthBadgeIcon = _root.Q<VisualElement>("SixthBadgeIcon");
+        _sixthPhoto = _root.Q<VisualElement>("SixthPhoto");
+        _sixthTeamLogo = _root.Q<VisualElement>("SixthTeamLogo");
+        _sixthName = _root.Q<Label>("SixthName");
+        _sixthTeam = _root.Q<Label>("SixthTeam");
         _sixthPts = _root.Q<Label>("SixthPts");
         _sixthReb = _root.Q<Label>("SixthReb");
         _sixthAst = _root.Q<Label>("SixthAst");
-        _mipPlayerPhoto = _root.Q<VisualElement>("MipPlayerPhoto");
-        _mipPlayerName = _root.Q<Label>("MipPlayerName");
-        _mipPlayerTeam = _root.Q<Label>("MipPlayerTeam");
-        _mipNow = _root.Q<Label>("MipNow");
-        _mipPrev = _root.Q<Label>("MipPrev");
-        _coachPlayerPhoto = _root.Q<VisualElement>("CoachPlayerPhoto");
-        _coachPlayerName = _root.Q<Label>("CoachPlayerName");
-        _coachPlayerTeam = _root.Q<Label>("CoachPlayerTeam");
-        _coachCount = _root.Q<Label>("CoachCount");
-    }
 
-    protected override void LoadData()
-    {
-        base.LoadData();
+        // MIP
+        _mipBadgeIcon = _root.Q<VisualElement>("MipBadgeIcon");
+        _mipPhoto = _root.Q<VisualElement>("MipPhoto");
+        _mipTeamLogo = _root.Q<VisualElement>("MipTeamLogo");
+        _mipName = _root.Q<Label>("MipName");
+        _mipTeam = _root.Q<Label>("MipTeam");
+        _mipPts = _root.Q<Label>("MipPts");
+        _mipReb = _root.Q<Label>("MipReb");
+        _mipAst = _root.Q<Label>("MipAst");
+
+        // Coach
+        _coachBadgeIcon = _root.Q<VisualElement>("CoachBadgeIcon");
+        _coachPhoto = _root.Q<VisualElement>("CoachPhoto");
+        _coachName = _root.Q<Label>("CoachName");
+        _coachTeam = _root.Q<Label>("CoachTeam");
+        _coachRecord = _root.Q<Label>("CoachRecord");
+
+        // Best Team
+        _bestBadgeIcon = _root.Q<VisualElement>("BestBadgeIcon");
+        _bestTeamLogo = _root.Q<VisualElement>("BestTeamLogo");
+        _bestTeamName = _root.Q<Label>("BestTeamName");
+        _bestTeamRecord = _root.Q<Label>("BestTeamRecord");
+
+        // Worst Team
+        _worstBadgeIcon = _root.Q<VisualElement>("WorstBadgeIcon");
+        _worstTeamLogo = _root.Q<VisualElement>("WorstTeamLogo");
+        _worstTeamName = _root.Q<Label>("WorstTeamName");
+        _worstTeamRecord = _root.Q<Label>("WorstTeamRecord");
     }
 
     protected override void RegisterCallbacks()
@@ -113,18 +190,32 @@ public class PlayerAwardsController : UIScreenController
     protected override void Refresh()
     {
         if (_season == null || _manager == null) return;
+
+        LoadLogoCaches();
         RefreshHeader();
-        RefreshContent();
+        RefreshScreenHeader();
+        RefreshPlayerAwards();
+        RefreshTeamAwards();
     }
 
-    protected override void RefreshHeader()
+    // ── Logo caches ──
+    void LoadLogoCaches()
+    {
+        _logos64 = new Dictionary<string, Sprite>();
+        foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/64x64"))
+            _logos64[s.name] = s;
+
+        _logos100 = new Dictionary<string, Sprite>();
+        foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/100x100"))
+            _logos100[s.name] = s;
+    }
+
+    // ── Header ──
+    void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
-        var logoDict = new Dictionary<string, Sprite>();
-        foreach (var s in logos) logoDict[s.name] = s;
-        if (logoDict.TryGetValue(_myTeam.logo, out var sprite))
+        if (_logos64.TryGetValue(_myTeam.logo, out var sprite))
             _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
         _headerTeamName.text = _myTeam.name.ToUpper();
@@ -137,96 +228,198 @@ public class PlayerAwardsController : UIScreenController
         }
     }
 
-    void RefreshContent()
+    // ── Screen Header ──
+    void RefreshScreenHeader()
     {
         string seasonLabel = $"{_season.year_start}-{_season.year_end.ToString().Substring(2)}";
         _seasonTag.text = seasonLabel;
+    }
 
-        var allTeams = DatabaseManager.Instance.GetAllTeams();
-        var abbrevByKeyword = new Dictionary<string, string>();
-        foreach (var t in allTeams)
-            if (!string.IsNullOrEmpty(t.logo))
-                abbrevByKeyword[t.logo] = t.abbreviation;
+    // ── Badge icons ──
+    void LoadBadgeIcon(VisualElement icon, string resourceName)
+    {
+        var tex = Resources.Load<Texture2D>($"Icons/{resourceName}");
+        if (tex != null)
+            icon.style.backgroundImage = new StyleBackground(tex);
+    }
 
+    // ── Player awards ──
+    void RefreshPlayerAwards()
+    {
         int seasonId = _season.id;
         int managerId = _manager.id;
 
+        // Badge icons
+        LoadBadgeIcon(_mvpBadgeIcon, "mejor_jugador");
+        LoadBadgeIcon(_dpoyBadgeIcon, "mejor_defensor");
+        LoadBadgeIcon(_rookieBadgeIcon, "mejor_novato");
+        LoadBadgeIcon(_sixthBadgeIcon, "mejor_sexto");
+        LoadBadgeIcon(_mipBadgeIcon, "estadisticas");
+
+        // MVP
         var mvp = DatabaseManager.Instance.GetRegularSeasonMVP(seasonId, managerId);
         if (mvp != null)
         {
-            string mvpAbbrev = abbrevByKeyword.TryGetValue(mvp.TeamKeyword, out var ma) ? ma : "";
-            _mvpPlayerName.text = string.IsNullOrEmpty(mvpAbbrev) ? mvp.PlayerName : $"{mvp.PlayerName} ({mvpAbbrev})";
-            _mvpPlayerTeam.style.display = DisplayStyle.None;
-            Texture2D mvpTex = PlayerPhotoHelper.Load(mvp.PlayerId, mvp.Photo);
-            _mvpPlayerPhoto.style.backgroundImage = new StyleBackground(mvpTex);
+            _mvpName.text = mvp.PlayerName.ToUpper();
+            _mvpTeam.text = mvp.TeamName.ToUpper();
             _mvpPts.text = mvp.AvgPts.ToString("F1");
             _mvpReb.text = mvp.AvgReb.ToString("F1");
             _mvpAst.text = mvp.AvgAst.ToString("F1");
+            SetPlayerPhoto(_mvpPhoto, mvp.PlayerId, mvp.Photo);
+            SetTeamLogoOverlay(_mvpTeamLogo, mvp.TeamKeyword);
         }
 
-        var rookie = DatabaseManager.Instance.GetRookieOfYear(seasonId, managerId);
-        if (rookie != null)
-        {
-            string rookieAbbrev = abbrevByKeyword.TryGetValue(rookie.TeamKeyword, out var ra) ? ra : "";
-            _rookiePlayerName.text = string.IsNullOrEmpty(rookieAbbrev) ? rookie.PlayerName : $"{rookie.PlayerName} ({rookieAbbrev})";
-            _rookiePlayerTeam.style.display = DisplayStyle.None;
-            Texture2D rookieTex = PlayerPhotoHelper.Load(rookie.PlayerId, rookie.Photo);
-            _rookiePlayerPhoto.style.backgroundImage = new StyleBackground(rookieTex);
-            _rookiePts.text = rookie.AvgPts.ToString("F1");
-            _rookieReb.text = rookie.AvgReb.ToString("F1");
-            _rookieAst.text = rookie.AvgAst.ToString("F1");
-        }
-
+        // DPOY — avg_pts=steals, avg_reb=blocks, avg_ast=0
         var dpoy = DatabaseManager.Instance.GetBestDefensivePlayer(seasonId, managerId);
         if (dpoy != null)
         {
-            string dpoyAbbrev = abbrevByKeyword.TryGetValue(dpoy.TeamKeyword, out var da) ? da : "";
-            _dpoyPlayerName.text = string.IsNullOrEmpty(dpoyAbbrev) ? dpoy.PlayerName : $"{dpoy.PlayerName} ({dpoyAbbrev})";
-            _dpoyPlayerTeam.text = dpoy.TeamName;
-            Texture2D dpoyTex = PlayerPhotoHelper.Load(dpoy.PlayerId, dpoy.Photo);
-            _dpoyPlayerPhoto.style.backgroundImage = new StyleBackground(dpoyTex);
-            _dpoyStl.text = dpoy.AvgPts.ToString("F1");
-            _dpoyBlk.text = dpoy.AvgReb.ToString("F1");
+            _dpoyName.text = dpoy.PlayerName.ToUpper();
+            _dpoyTeam.text = dpoy.TeamName.ToUpper();
+            _dpoyPts.text = dpoy.AvgPts.ToString("F1");
+            _dpoyReb.text = dpoy.AvgReb.ToString("F1");
+            _dpoyBlk.text = "--";
+            SetPlayerPhoto(_dpoyPhoto, dpoy.PlayerId, dpoy.Photo);
+            SetTeamLogoOverlay(_dpoyTeamLogo, dpoy.TeamKeyword);
         }
 
+        // Rookie
+        var rookie = DatabaseManager.Instance.GetRookieOfYear(seasonId, managerId);
+        if (rookie != null)
+        {
+            _rookieName.text = rookie.PlayerName.ToUpper();
+            _rookieTeam.text = rookie.TeamName.ToUpper();
+            _rookiePts.text = rookie.AvgPts.ToString("F1");
+            _rookieReb.text = rookie.AvgReb.ToString("F1");
+            _rookieAst.text = rookie.AvgAst.ToString("F1");
+            SetPlayerPhoto(_rookiePhoto, rookie.PlayerId, rookie.Photo);
+            SetTeamLogoOverlay(_rookieTeamLogo, rookie.TeamKeyword);
+        }
+
+        // Sixth Man
         var sixth = DatabaseManager.Instance.GetSixthMan(seasonId, managerId);
         if (sixth != null)
         {
-            string sixthAbbrev = abbrevByKeyword.TryGetValue(sixth.TeamKeyword, out var sa) ? sa : "";
-            _sixthPlayerName.text = string.IsNullOrEmpty(sixthAbbrev) ? sixth.PlayerName : $"{sixth.PlayerName} ({sixthAbbrev})";
-            _sixthPlayerTeam.text = sixth.TeamName;
-            Texture2D sixthTex = PlayerPhotoHelper.Load(sixth.PlayerId, sixth.Photo);
-            _sixthPlayerPhoto.style.backgroundImage = new StyleBackground(sixthTex);
+            _sixthName.text = sixth.PlayerName.ToUpper();
+            _sixthTeam.text = sixth.TeamName.ToUpper();
             _sixthPts.text = sixth.AvgPts.ToString("F1");
             _sixthReb.text = sixth.AvgReb.ToString("F1");
             _sixthAst.text = sixth.AvgAst.ToString("F1");
+            SetPlayerPhoto(_sixthPhoto, sixth.PlayerId, sixth.Photo);
+            SetTeamLogoOverlay(_sixthTeamLogo, sixth.TeamKeyword);
         }
 
+        // MIP
         var mip = DatabaseManager.Instance.GetMostImprovedPlayer(seasonId, managerId);
         if (mip != null)
         {
-            string mipAbbrev = abbrevByKeyword.TryGetValue(mip.TeamKeyword, out var ia) ? ia : "";
-            _mipPlayerName.text = string.IsNullOrEmpty(mipAbbrev) ? mip.PlayerName : $"{mip.PlayerName} ({mipAbbrev})";
-            _mipPlayerTeam.text = mip.TeamName;
-            Texture2D mipTex = PlayerPhotoHelper.Load(mip.PlayerId, mip.Photo);
-            _mipPlayerPhoto.style.backgroundImage = new StyleBackground(mipTex);
-            _mipNow.text = mip.AvgPts.ToString("F1");
-            _mipPrev.text = mip.AvgReb.ToString("F1");
+            _mipName.text = mip.PlayerName.ToUpper();
+            _mipTeam.text = mip.TeamName.ToUpper();
+            _mipPts.text = mip.AvgPts.ToString("F1");
+            _mipReb.text = mip.AvgReb.ToString("F1");
+            _mipAst.text = mip.AvgAst.ToString("F1");
+            SetPlayerPhoto(_mipPhoto, mip.PlayerId, mip.Photo);
+            SetTeamLogoOverlay(_mipTeamLogo, mip.TeamKeyword);
         }
+    }
 
+    // ── Team / Staff awards ──
+    void RefreshTeamAwards()
+    {
+        int seasonId = _season.id;
+        int managerId = _manager.id;
+
+        // Badge icons
+        LoadBadgeIcon(_coachBadgeIcon, "mejor_entrenador");
+        LoadBadgeIcon(_bestBadgeIcon, "mejor_equipo");
+        LoadBadgeIcon(_worstBadgeIcon, "peor_equipo");
+
+        // Coach
         var coach = DatabaseManager.Instance.GetCoachOfTheYear(seasonId);
         if (coach != null)
         {
-            _coachPlayerName.text = coach.CoachName;
-            _coachPlayerTeam.text = coach.TeamName;
-            _coachCount.text = coach.RecordText;
-            var coachLogos = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
-            var coachLogoDict = new Dictionary<string, Sprite>();
-            foreach (var s in coachLogos) coachLogoDict[s.name] = s;
-            if (coachLogoDict.TryGetValue(coach.TeamKeyword, out var coachSprite))
-                _coachPlayerPhoto.style.backgroundImage = new StyleBackground(coachSprite);
-            else
-                _coachPlayerPhoto.style.backgroundImage = null;
+            _coachName.text = coach.CoachName.ToUpper();
+            _coachTeam.text = coach.TeamName.ToUpper();
+            _coachRecord.text = coach.RecordText;
+            if (_logos100.TryGetValue(coach.TeamKeyword, out var coachLogo))
+                _coachPhoto.style.backgroundImage = new StyleBackground(coachLogo);
         }
+
+        // Compute standings for best/worst team
+        var games = DatabaseManager.Instance.GetStandingsGames(managerId);
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+
+        var winsDict = new Dictionary<int, int>();
+        var lossesDict = new Dictionary<int, int>();
+        var pfDict = new Dictionary<int, int>();
+        var paDict = new Dictionary<int, int>();
+        foreach (var t in allTeams)
+        {
+            winsDict[t.id] = 0;
+            lossesDict[t.id] = 0;
+            pfDict[t.id] = 0;
+            paDict[t.id] = 0;
+        }
+
+        foreach (var g in games)
+        {
+            if (winsDict.ContainsKey(g.home_team_id))
+            {
+                bool homeWon = g.home_score > g.away_score;
+                winsDict[g.home_team_id] += homeWon ? 1 : 0;
+                lossesDict[g.home_team_id] += homeWon ? 0 : 1;
+                pfDict[g.home_team_id] += g.home_score;
+                paDict[g.home_team_id] += g.away_score;
+            }
+            if (winsDict.ContainsKey(g.away_team_id))
+            {
+                bool awayWon = g.away_score > g.home_score;
+                winsDict[g.away_team_id] += awayWon ? 1 : 0;
+                lossesDict[g.away_team_id] += awayWon ? 0 : 1;
+                pfDict[g.away_team_id] += g.away_score;
+                paDict[g.away_team_id] += g.home_score;
+            }
+        }
+
+        var sorted = allTeams
+            .Where(t => winsDict[t.id] + lossesDict[t.id] > 0)
+            .OrderByDescending(t => (float)winsDict[t.id] / (winsDict[t.id] + lossesDict[t.id]))
+            .ThenBy(t => lossesDict[t.id])
+            .ThenByDescending(t => winsDict[t.id])
+            .ThenByDescending(t => pfDict[t.id] - paDict[t.id])
+            .ToList();
+
+        // Best team
+        if (sorted.Count > 0)
+        {
+            var best = sorted[0];
+            _bestTeamName.text = best.name.ToUpper();
+            _bestTeamRecord.text = $"{winsDict[best.id]} - {lossesDict[best.id]}";
+            if (_logos100.TryGetValue(best.logo, out var bestLogo))
+                _bestTeamLogo.style.backgroundImage = new StyleBackground(bestLogo);
+        }
+
+        // Worst team
+        if (sorted.Count > 0)
+        {
+            var worst = sorted[sorted.Count - 1];
+            _worstTeamName.text = worst.name.ToUpper();
+            _worstTeamRecord.text = $"{winsDict[worst.id]} - {lossesDict[worst.id]}";
+            if (_logos100.TryGetValue(worst.logo, out var worstLogo))
+                _worstTeamLogo.style.backgroundImage = new StyleBackground(worstLogo);
+        }
+    }
+
+    // ── Helpers ──
+    void SetPlayerPhoto(VisualElement photoEl, int playerId, string photoField)
+    {
+        Texture2D tex = PlayerPhotoHelper.Load(playerId, photoField);
+        if (tex != null)
+            photoEl.style.backgroundImage = new StyleBackground(tex);
+    }
+
+    void SetTeamLogoOverlay(VisualElement logoEl, string teamKeyword)
+    {
+        if (!string.IsNullOrEmpty(teamKeyword) && _logos64.TryGetValue(teamKeyword, out var logo))
+            logoEl.style.backgroundImage = new StyleBackground(logo);
     }
 }

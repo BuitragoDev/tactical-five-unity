@@ -1,155 +1,229 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/_TacticalFive/UI/Screens/PlayerAwards/PlayerAwards.uss?fileID=7433441132597879392&amp;guid=d84a42483e87475d908d9da695768c14&amp;type=3#PlayerAwards"/>
-    <ui:VisualElement name="PlayerAwardsRoot" class="player-awards-root">
-        <ui:VisualElement name="TopHeader" class="top-header">
-            <ui:VisualElement class="header-left">
-                <ui:VisualElement class="header-brand">
-                    <ui:Label text="TF" class="header-brand-icon"/>
-                    <ui:Label text="TACTICAL" class="header-brand-text"/>
-                    <ui:Label text="FIVE" class="header-brand-text-gold"/>
-                </ui:VisualElement>
-                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
-                <ui:VisualElement class="header-team-info">
-                    <ui:VisualElement class="header-team-name-row">
-                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
-                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(PREMIOS DE JUGADORES)"/>
-                    </ui:VisualElement>
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/PlayerAwards/PlayerAwards.uss"/>
+    <ui:VisualElement name="PlayerAwardsRoot" class="pa-root">
+
+        <!-- HEADER (SeasonSummary style) -->
+        <ui:VisualElement class="pa-header">
+            <ui:VisualElement class="pa-header-left">
+                <ui:VisualElement name="HeaderTeamLogo" class="pa-header-logo"/>
+                <ui:VisualElement class="pa-header-info">
+                    <ui:Label name="HeaderTeamName" class="pa-header-team" text=""/>
+                    <ui:Label name="HeaderManagerName" class="pa-header-manager" text=""/>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement class="header-right-group">
-                <ui:VisualElement class="header-season-info">
-                    <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
-                </ui:VisualElement>
-                <ui:Label name="HeaderDate" class="header-date-label" text=""/>
-                <ui:Button name="BtnGoQuintos" class="btn-action" text="VER QUINTETOS"/>
+            <ui:VisualElement class="pa-header-right">
+                <ui:Label name="HeaderSeason" class="pa-header-season" text=""/>
+                <ui:Label name="HeaderDate" class="pa-header-date" text=""/>
+                <ui:Button name="BtnGoQuintos" class="pa-btn-quintos" text="VER QUINTETOS"/>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="ContentArea" class="content-area">
-            <ui:VisualElement class="summary-header">
-                <ui:Label text="Premios Individuales" class="summary-title"/>
-                <ui:Label name="SeasonTag" text="" class="season-tag"/>
-            </ui:VisualElement>
-            <ui:VisualElement name="AwardsRow" class="awards-row">
-                <ui:VisualElement name="MvpCard" class="award-card mvp-card">
-                    <ui:Label text="MVP de la Temporada" class="award-label"/>
-                    <ui:VisualElement class="award-photo-wrapper">
-                        <ui:VisualElement name="MvpPlayerPhoto" class="award-player-photo"/>
-                    </ui:VisualElement>
-                    <ui:Label name="MvpPlayerName" text="" class="award-player-name"/>
-                    <ui:Label name="MvpPlayerTeam" text="" class="award-player-team"/>
-                    <ui:VisualElement class="award-stat-row">
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="MvpPts" text="--" class="award-stat-val"/>
-                            <ui:Label text="PTS" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="MvpReb" text="--" class="award-stat-val"/>
-                            <ui:Label text="REB" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="MvpAst" text="--" class="award-stat-val"/>
-                            <ui:Label text="AST" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
+
+        <!-- SCREEN HEADER -->
+        <ui:VisualElement class="pa-screen-header">
+            <ui:VisualElement class="pa-screen-overlay"/>
+            <ui:VisualElement class="pa-screen-title-group">
+                <ui:VisualElement class="pa-screen-title-row">
+                    <ui:Label text="PREMIOS INDIVIDUALES" class="pa-screen-title"/>
+                    <ui:Label name="SeasonTag" text="" class="pa-season-badge"/>
                 </ui:VisualElement>
-                <ui:VisualElement name="RookieCard" class="award-card rookie-card">
-                    <ui:Label text="Rookie del Año" class="award-label"/>
-                    <ui:VisualElement class="award-photo-wrapper">
-                        <ui:VisualElement name="RookiePlayerPhoto" class="award-player-photo"/>
-                    </ui:VisualElement>
-                    <ui:Label name="RookiePlayerName" text="" class="award-player-name"/>
-                    <ui:Label name="RookiePlayerTeam" text="" class="award-player-team"/>
-                    <ui:VisualElement class="award-stat-row">
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="RookiePts" text="--" class="award-stat-val"/>
-                            <ui:Label text="PTS" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="RookieReb" text="--" class="award-stat-val"/>
-                            <ui:Label text="REB" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="RookieAst" text="--" class="award-stat-val"/>
-                            <ui:Label text="AST" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="ExtraAwardsRow" class="extra-awards-row">
-                <ui:VisualElement name="DpoyCard" class="extra-card dpoy-card">
-                    <ui:Label text="Mejor Defensor" class="extra-card-title"/>
-                    <ui:VisualElement class="award-photo-wrapper extra-photo">
-                        <ui:VisualElement name="DpoyPlayerPhoto" class="award-player-photo"/>
-                    </ui:VisualElement>
-                    <ui:Label name="DpoyPlayerName" text="" class="extra-player-name"/>
-                    <ui:Label name="DpoyPlayerTeam" text="" class="extra-player-team"/>
-                    <ui:VisualElement class="award-stat-row extra-stat-row">
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="DpoyStl" text="--" class="award-stat-val"/>
-                            <ui:Label text="ROB" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="DpoyBlk" text="--" class="award-stat-val"/>
-                            <ui:Label text="TAP" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="extra-card sixth-card">
-                    <ui:Label text="Sexto Hombre" class="extra-card-title"/>
-                    <ui:VisualElement class="award-photo-wrapper extra-photo">
-                        <ui:VisualElement name="SixthPlayerPhoto" class="award-player-photo"/>
-                    </ui:VisualElement>
-                    <ui:Label name="SixthPlayerName" text="" class="extra-player-name"/>
-                    <ui:Label name="SixthPlayerTeam" text="" class="extra-player-team"/>
-                    <ui:VisualElement class="award-stat-row extra-stat-row">
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="SixthPts" text="--" class="award-stat-val"/>
-                            <ui:Label text="PTS" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="SixthReb" text="--" class="award-stat-val"/>
-                            <ui:Label text="REB" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="SixthAst" text="--" class="award-stat-val"/>
-                            <ui:Label text="AST" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="extra-card mip-card">
-                    <ui:Label text="Jugador Más Mejorado" class="extra-card-title"/>
-                    <ui:VisualElement class="award-photo-wrapper extra-photo">
-                        <ui:VisualElement name="MipPlayerPhoto" class="award-player-photo"/>
-                    </ui:VisualElement>
-                    <ui:Label name="MipPlayerName" text="" class="extra-player-name"/>
-                    <ui:Label name="MipPlayerTeam" text="" class="extra-player-team"/>
-                    <ui:VisualElement class="award-stat-row extra-stat-row">
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="MipNow" text="--" class="award-stat-val"/>
-                            <ui:Label text="AHORA" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="MipPrev" text="--" class="award-stat-val"/>
-                            <ui:Label text="ANTES" class="award-stat-lbl"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement class="extra-card coach-card">
-                    <ui:Label text="Entrenador del Año" class="extra-card-title"/>
-                    <ui:VisualElement class="award-photo-wrapper extra-photo">
-                        <ui:VisualElement name="CoachPlayerPhoto" class="extra-coach-logo"/>
-                    </ui:VisualElement>
-                    <ui:Label name="CoachPlayerName" text="" class="extra-player-name"/>
-                    <ui:Label name="CoachPlayerTeam" text="" class="extra-player-team"/>
-                    <ui:VisualElement class="award-stat-row extra-stat-row">
-                        <ui:VisualElement class="award-stat-box">
-                            <ui:Label name="CoachCount" text="--" class="award-stat-val"/>
-                            <ui:Label text="RÉCORD TEMPORADA" class="extra-stat-lbl-long"/>
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <ui:Label text="MEJORES JUGADORES DE LA TEMPORADA" class="pa-screen-subtitle"/>
             </ui:VisualElement>
         </ui:VisualElement>
+
+        <!-- PLAYER AWARDS ROW -->
+        <ui:VisualElement class="pa-awards-content">
+            <ui:VisualElement class="pa-player-row">
+
+                <!-- MVP -->
+                <ui:VisualElement class="pa-player-card pa-player-card--gold">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="MvpBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="MVP DE LA TEMPORADA" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-photo-area">
+                        <ui:VisualElement name="MvpPhoto" class="pa-player-photo"/>
+                        <ui:VisualElement name="MvpTeamLogo" class="pa-team-logo-overlay"/>
+                    </ui:VisualElement>
+                    <ui:Label name="MvpName" text="" class="pa-player-name"/>
+                    <ui:Label name="MvpTeam" text="" class="pa-player-team"/>
+                    <ui:VisualElement class="pa-stats-row">
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="MvpPts" text="--" class="pa-stat-val"/>
+                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="MvpReb" text="--" class="pa-stat-val"/>
+                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="MvpAst" text="--" class="pa-stat-val"/>
+                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- DPOY -->
+                <ui:VisualElement class="pa-player-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="DpoyBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="MEJOR DEFENSOR" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-photo-area">
+                        <ui:VisualElement name="DpoyPhoto" class="pa-player-photo"/>
+                        <ui:VisualElement name="DpoyTeamLogo" class="pa-team-logo-overlay"/>
+                    </ui:VisualElement>
+                    <ui:Label name="DpoyName" text="" class="pa-player-name"/>
+                    <ui:Label name="DpoyTeam" text="" class="pa-player-team"/>
+                    <ui:VisualElement class="pa-stats-row">
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="DpoyPts" text="--" class="pa-stat-val"/>
+                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="DpoyReb" text="--" class="pa-stat-val"/>
+                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="DpoyBlk" text="--" class="pa-stat-val"/>
+                            <ui:Label text="BLK" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- ROOKIE -->
+                <ui:VisualElement class="pa-player-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="RookieBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="MEJOR NOVATO" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-photo-area">
+                        <ui:VisualElement name="RookiePhoto" class="pa-player-photo"/>
+                        <ui:VisualElement name="RookieTeamLogo" class="pa-team-logo-overlay"/>
+                    </ui:VisualElement>
+                    <ui:Label name="RookieName" text="" class="pa-player-name"/>
+                    <ui:Label name="RookieTeam" text="" class="pa-player-team"/>
+                    <ui:VisualElement class="pa-stats-row">
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="RookiePts" text="--" class="pa-stat-val"/>
+                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="RookieReb" text="--" class="pa-stat-val"/>
+                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="RookieAst" text="--" class="pa-stat-val"/>
+                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- SIXTH MAN -->
+                <ui:VisualElement class="pa-player-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="SixthBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="MEJOR SEXTO HOMBRE" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-photo-area">
+                        <ui:VisualElement name="SixthPhoto" class="pa-player-photo"/>
+                        <ui:VisualElement name="SixthTeamLogo" class="pa-team-logo-overlay"/>
+                    </ui:VisualElement>
+                    <ui:Label name="SixthName" text="" class="pa-player-name"/>
+                    <ui:Label name="SixthTeam" text="" class="pa-player-team"/>
+                    <ui:VisualElement class="pa-stats-row">
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="SixthPts" text="--" class="pa-stat-val"/>
+                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="SixthReb" text="--" class="pa-stat-val"/>
+                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="SixthAst" text="--" class="pa-stat-val"/>
+                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- MIP -->
+                <ui:VisualElement class="pa-player-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="MipBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="JUGADOR MÁS MEJORADO" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-photo-area">
+                        <ui:VisualElement name="MipPhoto" class="pa-player-photo"/>
+                        <ui:VisualElement name="MipTeamLogo" class="pa-team-logo-overlay"/>
+                    </ui:VisualElement>
+                    <ui:Label name="MipName" text="" class="pa-player-name"/>
+                    <ui:Label name="MipTeam" text="" class="pa-player-team"/>
+                    <ui:VisualElement class="pa-stats-row">
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="MipPts" text="--" class="pa-stat-val"/>
+                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="MipReb" text="--" class="pa-stat-val"/>
+                            <ui:Label text="REB" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="pa-stat-box">
+                            <ui:Label name="MipAst" text="--" class="pa-stat-val"/>
+                            <ui:Label text="AST" class="pa-stat-lbl"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+            <!-- TEAM / STAFF AWARDS ROW -->
+            <ui:VisualElement class="pa-team-row">
+
+                <!-- COACH -->
+                <ui:VisualElement class="pa-team-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="CoachBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="ENTRENADOR DEL AÑO" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-team-card-body">
+                        <ui:VisualElement name="CoachPhoto" class="pa-big-team-logo"/>
+                        <ui:Label name="CoachName" text="" class="pa-player-name"/>
+                        <ui:Label name="CoachTeam" text="" class="pa-player-team"/>
+                        <ui:Label name="CoachRecord" text="" class="pa-record-val"/>
+                        <ui:Label name="CoachRecordLabel" text="RÉCORD" class="pa-record-lbl"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- BEST TEAM -->
+                <ui:VisualElement class="pa-team-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="BestBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="MEJOR EQUIPO" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-team-card-body">
+                        <ui:VisualElement name="BestTeamLogo" class="pa-big-team-logo"/>
+                        <ui:Label name="BestTeamName" text="" class="pa-player-name"/>
+                        <ui:Label name="BestTeamRecord" text="" class="pa-record-val"/>
+                        <ui:Label text="TEMPORADA REGULAR" class="pa-record-lbl"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- WORST TEAM -->
+                <ui:VisualElement class="pa-team-card">
+                    <ui:VisualElement class="pa-card-badge-row">
+                        <ui:VisualElement name="WorstBadgeIcon" class="pa-badge-icon"/>
+                        <ui:Label text="PEOR EQUIPO" class="pa-badge-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="pa-team-card-body">
+                        <ui:VisualElement name="WorstTeamLogo" class="pa-big-team-logo"/>
+                        <ui:Label name="WorstTeamName" text="" class="pa-player-name"/>
+                        <ui:Label name="WorstTeamRecord" text="" class="pa-record-val"/>
+                        <ui:Label text="TEMPORADA REGULAR" class="pa-record-lbl"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>

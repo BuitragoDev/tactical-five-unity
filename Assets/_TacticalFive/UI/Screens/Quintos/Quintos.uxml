@@ -1,43 +1,279 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Quintos/Quintos.uss?fileID=7433441132597879392&amp;guid=7e5e6ea5522b1e64d8f96796ac0406c2&amp;type=3#Quintos"/>
-    <ui:VisualElement name="QuintosRoot" class="quintos-root">
-        <ui:VisualElement name="TopHeader" class="top-header">
-            <ui:VisualElement class="header-left">
-                <ui:VisualElement class="header-brand">
-                    <ui:Label text="TF" class="header-brand-icon"/>
-                    <ui:Label text="TACTICAL" class="header-brand-text"/>
-                    <ui:Label text="FIVE" class="header-brand-text-gold"/>
-                </ui:VisualElement>
-                <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
-                <ui:VisualElement class="header-team-info">
-                    <ui:VisualElement class="header-team-name-row">
-                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
-                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(MEJORES QUINTETOS)"/>
-                    </ui:VisualElement>
-                    <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
+    <Style src="project://database/Assets/_TacticalFive/UI/Screens/Quintos/Quintos.uss"/>
+    <ui:VisualElement name="QuintosRoot" class="qt-root">
+
+        <!-- HEADER (PlayerAwards style) -->
+        <ui:VisualElement class="qt-header">
+            <ui:VisualElement class="qt-header-left">
+                <ui:VisualElement name="HeaderTeamLogo" class="qt-header-logo"/>
+                <ui:VisualElement class="qt-header-info">
+                    <ui:Label name="HeaderTeamName" class="qt-header-team" text=""/>
+                    <ui:Label name="HeaderManagerName" class="qt-header-manager" text=""/>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement class="header-right-group">
-                <ui:VisualElement class="header-season-info">
-                    <ui:Label name="HeaderSeason" class="header-season-label" text=""/>
-                </ui:VisualElement>
-                <ui:Label name="HeaderDate" class="header-date-label" text=""/>
-                <ui:Button name="BtnEndSeason" class="btn-action" text="FIN DE TEMPORADA"/>
+            <ui:VisualElement class="qt-header-right">
+                <ui:Label name="HeaderSeason" class="qt-header-season" text=""/>
+                <ui:Label name="HeaderDate" class="qt-header-date" text=""/>
+                <ui:Button name="BtnEndSeason" class="qt-btn-end" text="FIN DE TEMPORADA"/>
             </ui:VisualElement>
         </ui:VisualElement>
-        <ui:VisualElement name="ContentArea" class="content-area">
-            <ui:VisualElement class="summary-header">
-                <ui:Label text="Mejores Quintetos" class="summary-title"/>
-                <ui:Label name="SeasonTag" text="" class="season-tag"/>
+
+        <!-- SCREEN HEADER -->
+        <ui:VisualElement class="qt-screen-header">
+            <ui:VisualElement class="qt-screen-overlay"/>
+            <ui:VisualElement class="qt-screen-title-group">
+                <ui:Label text="MEJORES QUINTETOS DE TEMPORADA" class="qt-screen-title"/>
+                <ui:Label text="Mejores Quintetos" class="qt-screen-subtitle"/>
             </ui:VisualElement>
-            <ui:VisualElement name="QuintetSection" class="quintet-section">
-                <ui:Label text="Mejor Quinteto de la Temporada" class="section-title"/>
-                <ui:VisualElement name="QuintetGrid" class="quintet-grid"/>
+        </ui:VisualElement>
+
+        <!-- CONTENT: 2 COLUMNS -->
+        <ui:VisualElement class="qt-content">
+
+            <!-- ALL-NBA QUINTET -->
+            <ui:VisualElement class="qt-panel qt-panel--gold">
+                <ui:VisualElement class="qt-panel-header">
+                    <ui:VisualElement class="qt-panel-title-group">
+                        <ui:Label text="MEJOR QUINTETO" class="qt-panel-title"/>
+                        <ui:Label text="DE LA TEMPORADA" class="qt-panel-subtitle qt-panel-subtitle--gold"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-trophy-badge qt-trophy-badge--gold">
+                        <ui:Label text="ALL-NBA" class="qt-trophy-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label text="Los cinco mejores jugadores de la temporada regular." class="qt-panel-desc"/>
+
+                <!-- TOP ROW: P + AP -->
+                <ui:VisualElement class="qt-row qt-row--top">
+                    <ui:VisualElement class="qt-player-card qt-player-card--gold">
+                        <ui:Label name="FivePos_P" text="P" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:VisualElement name="FivePhoto_P" class="qt-player-photo"/>
+                        <ui:Label name="FiveName_P" text="" class="qt-player-name"/>
+                        <ui:Label name="FiveTeam_P" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FivePts_P" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveReb_P" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveAst_P" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-player-card qt-player-card--gold">
+                        <ui:Label name="FivePos_AP" text="AP" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:VisualElement name="FivePhoto_AP" class="qt-player-photo"/>
+                        <ui:Label name="FiveName_AP" text="" class="qt-player-name"/>
+                        <ui:Label name="FiveTeam_AP" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FivePts_AP" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveReb_AP" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveAst_AP" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- BOTTOM ROW: AL + B + E -->
+                <ui:VisualElement class="qt-row qt-row--bottom">
+                    <ui:VisualElement class="qt-player-card qt-player-card--gold">
+                        <ui:Label name="FivePos_AL" text="AL" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:VisualElement name="FivePhoto_AL" class="qt-player-photo"/>
+                        <ui:Label name="FiveName_AL" text="" class="qt-player-name"/>
+                        <ui:Label name="FiveTeam_AL" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FivePts_AL" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveReb_AL" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveAst_AL" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-player-card qt-player-card--gold">
+                        <ui:Label name="FivePos_B" text="B" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:VisualElement name="FivePhoto_B" class="qt-player-photo"/>
+                        <ui:Label name="FiveName_B" text="" class="qt-player-name"/>
+                        <ui:Label name="FiveTeam_B" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FivePts_B" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveReb_B" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveAst_B" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-player-card qt-player-card--gold">
+                        <ui:Label name="FivePos_E" text="E" class="qt-pos-badge qt-pos-badge--gold"/>
+                        <ui:VisualElement name="FivePhoto_E" class="qt-player-photo"/>
+                        <ui:Label name="FiveName_E" text="" class="qt-player-name"/>
+                        <ui:Label name="FiveTeam_E" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FivePts_E" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveReb_E" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="FiveAst_E" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
-            <ui:VisualElement name="RookieSection" class="quintet-section">
-                <ui:Label text="Mejor Quinteto de Rookies" class="section-title"/>
-                <ui:VisualElement name="RookieGrid" class="quintet-grid"/>
+
+            <!-- ROOKIE QUINTET -->
+            <ui:VisualElement class="qt-panel qt-panel--blue">
+                <ui:VisualElement class="qt-panel-header">
+                    <ui:VisualElement class="qt-panel-title-group">
+                        <ui:Label text="MEJOR QUINTETO" class="qt-panel-title"/>
+                        <ui:Label text="DE ROOKIES" class="qt-panel-subtitle qt-panel-subtitle--blue"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-trophy-badge qt-trophy-badge--blue">
+                        <ui:Label text="ROOKIE TEAM" class="qt-trophy-label"/>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label text="Los cinco mejores jugadores novatos de la temporada." class="qt-panel-desc"/>
+
+                <!-- TOP ROW: P + AP -->
+                <ui:VisualElement class="qt-row qt-row--top">
+                    <ui:VisualElement class="qt-player-card qt-player-card--blue">
+                        <ui:Label name="RookPos_P" text="P" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:VisualElement name="RookPhoto_P" class="qt-player-photo"/>
+                        <ui:Label name="RookName_P" text="" class="qt-player-name"/>
+                        <ui:Label name="RookTeam_P" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookPts_P" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookReb_P" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookAst_P" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-player-card qt-player-card--blue">
+                        <ui:Label name="RookPos_AP" text="AP" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:VisualElement name="RookPhoto_AP" class="qt-player-photo"/>
+                        <ui:Label name="RookName_AP" text="" class="qt-player-name"/>
+                        <ui:Label name="RookTeam_AP" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookPts_AP" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookReb_AP" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookAst_AP" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- BOTTOM ROW: AL + B + E -->
+                <ui:VisualElement class="qt-row qt-row--bottom">
+                    <ui:VisualElement class="qt-player-card qt-player-card--blue">
+                        <ui:Label name="RookPos_AL" text="AL" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:VisualElement name="RookPhoto_AL" class="qt-player-photo"/>
+                        <ui:Label name="RookName_AL" text="" class="qt-player-name"/>
+                        <ui:Label name="RookTeam_AL" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookPts_AL" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookReb_AL" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookAst_AL" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-player-card qt-player-card--blue">
+                        <ui:Label name="RookPos_B" text="B" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:VisualElement name="RookPhoto_B" class="qt-player-photo"/>
+                        <ui:Label name="RookName_B" text="" class="qt-player-name"/>
+                        <ui:Label name="RookTeam_B" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookPts_B" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookReb_B" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookAst_B" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="qt-player-card qt-player-card--blue">
+                        <ui:Label name="RookPos_E" text="E" class="qt-pos-badge qt-pos-badge--blue"/>
+                        <ui:VisualElement name="RookPhoto_E" class="qt-player-photo"/>
+                        <ui:Label name="RookName_E" text="" class="qt-player-name"/>
+                        <ui:Label name="RookTeam_E" text="" class="qt-player-team"/>
+                        <ui:VisualElement class="qt-stats-row">
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookPts_E" text="--" class="qt-stat-val"/>
+                                <ui:Label text="PTS" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookReb_E" text="--" class="qt-stat-val"/>
+                                <ui:Label text="REB" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="qt-stat-box">
+                                <ui:Label name="RookAst_E" text="--" class="qt-stat-val"/>
+                                <ui:Label text="AST" class="qt-stat-lbl"/>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
+
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
