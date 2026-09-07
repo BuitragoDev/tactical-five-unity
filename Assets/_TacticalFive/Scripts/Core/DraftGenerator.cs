@@ -12,6 +12,15 @@ public static class DraftGenerator
         public PlayerData Player { get; set; }
     }
 
+    public class DraftPickSlot
+    {
+        public int PickIndex { get; set; }       // 0-based (0..59)
+        public int PickNumber { get; set; }      // 1-based (1..60)
+        public TeamData Team { get; set; }
+        public bool IsUserPick { get; set; }
+        public bool IsRound2 { get; set; }
+    }
+
     public static readonly string[] FirstNames = {
         "James", "John", "Robert", "Michael", "William", "David", "Richard", "Joseph",
         "Thomas", "Charles", "Christopher", "Daniel", "Matthew", "Anthony", "Mark",
@@ -517,5 +526,329 @@ public static class DraftGenerator
     static TeamData slotById(int teamId)
     {
         return DatabaseManager.Instance.GetAllTeams().FirstOrDefault(t => t.id == teamId);
+    }
+
+    // ── INTERACTIVE DRAFT SUPPORT ────────────────────────────────────
+
+    public static (List<DraftPickSlot> order, string classLabel, float classQuality)
+        GenerateDraftOrder(SeasonData season, int managerId, int userTeamId)
+    {
+        var standings = GetFinalStandings(season, managerId);
+        var teamsById = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);
+
+        var allTeamsOrdered = standings
+            .OrderBy(s => s.wins)
+            .ThenByDescending(s => s.losses)
+            .Select(s => teamsById[s.teamId])
+            .Where(t => t != null)
+            .ToList();
+
+        var lotteryTeams = allTeamsOrdered.Take(14).ToList();
+        var nonLotteryTeams = allTeamsOrdered.Skip(14).ToList();
+
+        double[] odds = {
+            0.140, 0.140, 0.140, 0.125, 0.105,
+            0.090, 0.075, 0.060, 0.045, 0.030,
+            0.020, 0.015, 0.010, 0.005
+        };
+
+        var draftOrder = new List<TeamData>[30];
+        var available = new List<TeamData>(lotteryTeams);
+        var usedOdds = odds.Take(lotteryTeams.Count).ToList();
+
+        for (int pick = 0; pick < 14; pick++)
+        {
+            var pool = new List<TeamData>();
+            for (int j = 0; j < available.Count; j++)
+            {
+                int entries = (int)(usedOdds[j] * 1000);
+                for (int e = 0; e < entries; e++)
+                    pool.Add(available[j]);
+            }
+            int idx = UnityEngine.Random.Range(0, pool.Count);
+            var winner = pool[idx];
+            draftOrder[pick] = new List<TeamData> { winner };
+            int removedIdx = available.IndexOf(winner);
+            available.RemoveAt(removedIdx);
+            usedOdds.RemoveAt(removedIdx);
+        }
+
+        for (int pick = 14; pick < 30; pick++)
+        {
+            int idx = pick - 14;
+            if (idx < nonLotteryTeams.Count)
+                draftOrder[pick] = new List<TeamData> { nonLotteryTeams[idx] };
+        }
+
+        var round1Owners = BuildSlotOwners(season, 1, draftOrder);
+        var round2Owners = BuildSlotOwners(season, 2, draftOrder);
+
+        var order = new List<DraftPickSlot>();
+        for (int pick = 0; pick < 60; pick++)
+        {
+            bool isRound2 = pick >= 30;
+            TeamData team;
+            if (isRound2)
+                team = draftOrder[pick - 30]?.FirstOrDefault();
+            else
+                team = draftOrder[pick]?.FirstOrDefault();
+            if (team == null) continue;
+
+            int drafTeamId = team.id;
+            var slotOwners = isRound2 ? round2Owners : round1Owners;
+            if (slotOwners.TryGetValue(pick % 30, out var ownerTeam) && ownerTeam != null)
+                drafTeamId = ownerTeam.id;
+
+            var actualTeam = teamsById.ContainsKey(drafTeamId) ? teamsById[drafTeamId] : team;
+
+            order.Add(new DraftPickSlot
+            {
+                PickIndex = pick,
+                PickNumber = pick + 1,
+                Team = actualTeam,
+                IsUserPick = actualTeam.id == userTeamId,
+                IsRound2 = isRound2
+            });
+        }
+
+        float classQuality;
+        string classLabel;
+        float classRoll = UnityEngine.Random.value;
+        if (classRoll < 0.15f) { classQuality = -3f; classLabel = "weak"; }
+        else if (classRoll < 0.70f) { classQuality = 0f; classLabel = "normal"; }
+        else if (classRoll < 0.90f) { classQuality = 2f; classLabel = "strong"; }
+        else { classQuality = 4f; classLabel = "historic"; }
+
+        return (order, classLabel, classQuality);
+    }
+
+    public static List<DraftProspect> GenerateProspectPool(string classLabel, float classQuality, int count = 75)
+    {
+        var generationalPicks = new HashSet<int>();
+        if (classLabel == "historic")
+        {
+            int genCount = UnityEngine.Random.value < 0.5f ? 1 : 2;
+            var candidates = Enumerable.Range(0, 14).OrderBy(_ => UnityEngine.Random.value).Take(genCount);
+            foreach (var c in candidates) generationalPicks.Add(c);
+        }
+
+        var prospects = new List<DraftProspect>();
+        for (int i = 0; i < count; i++)
+        {
+            float baseAvg;
+            if (i < 5)
+                baseAvg = 83f - (i * 2f) + UnityEngine.Random.Range(-2f, 3f);
+            else if (i < 14)
+                baseAvg = 75f - ((i - 5) * 15f / 9f) + UnityEngine.Random.Range(-2f, 3f);
+            else if (i < 30)
+                baseAvg = 65f - ((i - 14) * 10f / 16f) + UnityEngine.Random.Range(-2f, 3f);
+            else
+                baseAvg = 58f - ((i - 30) * 15f / 44f) + UnityEngine.Random.Range(-3f, 3f);
+
+            baseAvg += classQuality;
+
+            bool isGenerational = generationalPicks.Contains(i);
+            if (isGenerational)
+                baseAvg = Mathf.Max(baseAvg, 86f + UnityEngine.Random.Range(-2f, 5f));
+            else if (i < 5)
+                isGenerational = UnityEngine.Random.value < 0.03f;
+            else if (i < 14)
+                isGenerational = UnityEngine.Random.value < 0.01f;
+            if (isGenerational)
+                baseAvg = Mathf.Max(baseAvg, 86f + UnityEngine.Random.Range(-2f, 5f));
+
+            string position = Positions[UnityEngine.Random.Range(0, Positions.Length)];
+            var modifiers = PositionModifiers[position];
+            var heightRange = PositionHeight[position];
+            var weightRange = PositionWeight[position];
+
+            int height = UnityEngine.Random.Range(heightRange.min, heightRange.max + 1);
+            int weight = UnityEngine.Random.Range(weightRange.min, weightRange.max + 1);
+
+            int age;
+            float ageRoll = UnityEngine.Random.value;
+            if (ageRoll < 0.20f) age = UnityEngine.Random.Range(18, 20);
+            else if (ageRoll < 0.80f) age = UnityEngine.Random.Range(19, 22);
+            else age = UnityEngine.Random.Range(22, 25);
+
+            bool hasTrait = UnityEngine.Random.value < 0.30f;
+            string trait = "";
+            if (hasTrait)
+            {
+                string[] traits = { "shooter", "scorer", "defender", "athlete", "playmaker", "rim_protector" };
+                trait = traits[UnityEngine.Random.Range(0, traits.Length)];
+            }
+
+            var attrs = new Dictionary<string, int>();
+            foreach (var attr in new[] { "speed", "shooting", "three_point", "passing", "ball_handling",
+                                           "defense", "rebounding", "athleticism", "iq", "steals", "blocks" })
+            {
+                int mod = modifiers.ContainsKey(attr) ? modifiers[attr] : 0;
+                int roll = UnityEngine.Random.Range(-5, 6);
+                int traitBonus = 0;
+                if (hasTrait)
+                {
+                    traitBonus = trait switch
+                    {
+                        "shooter" when attr == "three_point" || attr == "shooting" => 8,
+                        "scorer" when attr == "shooting" || attr == "ball_handling" => 8,
+                        "defender" when attr == "defense" || attr == "steals" || attr == "blocks" => 8,
+                        "athlete" when attr == "athleticism" || attr == "speed" => 8,
+                        "playmaker" when attr == "passing" || attr == "iq" => 8,
+                        "rim_protector" when attr == "blocks" || attr == "rebounding" => 8,
+                        _ => 0
+                    };
+                }
+                attrs[attr] = (int)Mathf.Clamp(baseAvg + mod + roll + traitBonus, 30, 99);
+            }
+
+            int overall = (int)System.Math.Round(attrs.Values.Average());
+
+            int potential;
+            if (isGenerational)
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(5, 14));
+            else if (i < 3)
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(8, 21));
+            else if (i < 30)
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(5, 17));
+            else
+                potential = Mathf.Min(99, overall + UnityEngine.Random.Range(3, 15));
+            if (overall > potential) overall = potential;
+
+            string nationality = UnityEngine.Random.value < 0.9f ? "USA" : GetRandomNationality();
+            string college = NCAATeams.Names[UnityEngine.Random.Range(0, NCAATeams.Names.Length)];
+
+            prospects.Add(new DraftProspect
+            {
+                first_name = FirstNames[UnityEngine.Random.Range(0, FirstNames.Length)],
+                last_name = LastNames[UnityEngine.Random.Range(0, LastNames.Length)],
+                position = position,
+                secondary_position = position switch
+                {
+                    "PG" => "SG",
+                    "SG" => height < 198 ? "PG" : "SF",
+                    "SF" => "PF",
+                    "PF" => "C",
+                    "C" => "PF",
+                    _ => ""
+                },
+                age = age,
+                nationality = nationality,
+                college = college,
+                height_cm = height,
+                weight_kg = weight,
+                overall = overall,
+                potential = potential,
+                speed = attrs["speed"],
+                shooting = attrs["shooting"],
+                three_point = attrs["three_point"],
+                passing = attrs["passing"],
+                dribbling = attrs["ball_handling"],
+                defense = attrs["defense"],
+                rebounding = attrs["rebounding"],
+                athleticism = attrs["athleticism"],
+                iq = attrs["iq"],
+                steals = attrs["steals"],
+                blocks = attrs["blocks"],
+                trait = trait,
+                is_generational = isGenerational
+            });
+        }
+
+        return prospects.OrderByDescending(p => p.overall).ToList();
+    }
+
+    public static PlayerData AssignPick(DraftPickSlot slot, DraftProspect prospect, Dictionary<int, TeamData> teamsById)
+    {
+        int drafTeamId = slot.Team.id;
+
+        bool isRound2 = slot.IsRound2;
+        bool asTwoWay = false;
+        if (isRound2)
+        {
+            var twoWayCount = DatabaseManager.Instance.Db.Table<PlayerData>()
+                .Count(p => p.team_id == drafTeamId && p.is_two_way == 1);
+            asTwoWay = twoWayCount < TradeHelper.MAX_TWO_WAY;
+        }
+
+        long salary;
+        if (prospect.is_generational)
+            salary = (long)UnityEngine.Random.Range(9000000, 15000001);
+        else if (!isRound2 && slot.PickNumber <= 3)
+            salary = (long)UnityEngine.Random.Range(7000000, 12000001);
+        else if (!isRound2)
+            salary = (long)UnityEngine.Random.Range(3000000, 8000001);
+        else
+            salary = (long)UnityEngine.Random.Range(1500000, 4000001);
+        salary = (salary / 100000) * 100000;
+
+        int nextId = DatabaseManager.Instance.Db.Table<PlayerData>().Any()
+            ? DatabaseManager.Instance.Db.Table<PlayerData>().Max(p => p.id) + 1
+            : 1;
+
+        var player = new PlayerData
+        {
+            id = nextId,
+            team_id = drafTeamId,
+            first_name = prospect.first_name,
+            last_name = prospect.last_name,
+            position = prospect.position,
+            secondary_position = prospect.secondary_position,
+            age = prospect.age,
+            nationality = prospect.nationality,
+            college = prospect.college,
+            height_cm = prospect.height_cm,
+            weight_kg = prospect.weight_kg,
+            overall = prospect.overall,
+            potential = prospect.potential,
+            speed = prospect.speed,
+            shooting = prospect.shooting,
+            three_point = prospect.three_point,
+            passing = prospect.passing,
+            dribbling = prospect.dribbling,
+            defense = prospect.defense,
+            rebounding = prospect.rebounding,
+            athleticism = prospect.athleticism,
+            iq = prospect.iq,
+            steals = prospect.steals,
+            blocks = prospect.blocks,
+            injury_days = 0,
+            injury_type = "",
+            treated = 0,
+            salary = asTwoWay ? (int)TradeHelper.TWO_WAY_SALARY : (int)salary,
+            contract_years = asTwoWay ? 2 : 4,
+            guaranteed_years = asTwoWay ? 2 : 4,
+            is_two_way = asTwoWay ? 1 : 0,
+            is_rookie = 1
+        };
+
+        DatabaseManager.Instance.AssignJerseyNumber(player, drafTeamId);
+        DatabaseManager.Instance.Db.Insert(player);
+        PlayerPhotoHelper.CreateRookiePhoto(player.id);
+        return player;
+    }
+
+    public static int AISelectProspect(List<DraftProspect> available, DraftPickSlot slot)
+    {
+        if (available.Count == 0) return 0;
+
+        var team = slot.Team;
+        var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
+        var posCounts = new Dictionary<string, int> { ["PG"] = 0, ["SG"] = 0, ["SF"] = 0, ["PF"] = 0, ["C"] = 0 };
+        foreach (var p in roster)
+        {
+            if (posCounts.ContainsKey(p.position))
+                posCounts[p.position]++;
+        }
+
+        string weakestPos = posCounts.OrderBy(kv => kv.Value).First().Key;
+
+        for (int i = 0; i < available.Count; i++)
+        {
+            if (available[i].position == weakestPos && available[i].overall >= 70)
+                return i;
+        }
+
+        return 0;
     }
 }

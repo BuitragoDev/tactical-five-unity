@@ -224,3 +224,31 @@ public class GLSeasonMVPRow
     public double avg_stl { get; set; }
     public double avg_blk { get; set; }
 }
+
+public class DraftProspect
+{
+    public string first_name { get; set; }
+    public string last_name { get; set; }
+    public string position { get; set; }
+    public string secondary_position { get; set; }
+    public int age { get; set; }
+    public string nationality { get; set; }
+    public string college { get; set; }
+    public int height_cm { get; set; }
+    public int weight_kg { get; set; }
+    public int overall { get; set; }
+    public int potential { get; set; }
+    public int speed { get; set; }
+    public int shooting { get; set; }
+    public int three_point { get; set; }
+    public int passing { get; set; }
+    public int dribbling { get; set; }
+    public int defense { get; set; }
+    public int rebounding { get; set; }
+    public int athleticism { get; set; }
+    public int iq { get; set; }
+    public int steals { get; set; }
+    public int blocks { get; set; }
+    public string trait { get; set; }
+    public bool is_generational { get; set; }
+}
