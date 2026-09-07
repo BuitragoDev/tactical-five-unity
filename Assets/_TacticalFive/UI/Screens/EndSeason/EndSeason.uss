@@ -409,8 +409,11 @@
 }
 
 /* ── PROSPECT LIST ── */
-.draft-prospect-scroll {
+.draft-list-body {
     flex-grow: 1;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
 }
 .draft-prospect {
     flex-direction: row;
@@ -679,9 +682,6 @@
 }
 
 /* ── DRAFT LOG ── */
-.draft-log-scroll {
-    flex-grow: 1;
-}
 .draft-log-entry {
     flex-direction: row;
     align-items: center;
@@ -847,4 +847,53 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(208, 216, 232);
+}
+
+/* ══ PAGINATION ══ */
+.draft-pagination {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    min-height: 40px;
+    padding: 4px 12px;
+    background-color: rgb(17, 24, 34);
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
+}
+.draft-page-btn {
+    width: 34px;
+    height: 28px;
+    padding: 4px;
+    margin: 0 8px;
+    align-items: center;
+    justify-content: center;
+    color: rgb(122, 138, 170);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 3px;
+    -unity-text-align: middle-center;
+}
+.draft-page-btn:hover {
+    color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
+}
+.draft-page-btn:disabled {
+    color: rgb(55, 65, 84);
+    background-color: rgb(17, 24, 34);
+    border-color: rgb(28, 33, 48);
+}
+.draft-page-icon {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 12px;
+}
+.draft-page-label {
+    min-width: 60px;
+    height: 24px;
+    flex-shrink: 0;
+    font-size: 14px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
 }

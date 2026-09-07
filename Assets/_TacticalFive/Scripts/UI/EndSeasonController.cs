@@ -34,7 +34,7 @@ public class EndSeasonController : UIScreenController
     private VisualElement _draftProgressFill;
     private Label _draftClassLabel;
     private Label _prospectCount;
-    private ScrollView _prospectList;
+    private VisualElement _prospectList;
     private Label _draftPickRound;
     private Label _draftPickNumber;
     private VisualElement _draftPickTeamLogo;
@@ -63,7 +63,31 @@ public class EndSeasonController : UIScreenController
     private Label _draftAttrBlocks;
     private Button _btnDraftPick;
     private Button _btnAutoPick;
-    private ScrollView _draftLog;
+    private VisualElement _draftLog;
+
+    // ── Pagination ──
+    private Button _btnProspectPrev;
+    private Button _btnProspectNext;
+    private Label _prospectPageLabel;
+    private Button _btnLogPrev;
+    private Button _btnLogNext;
+    private Label _logPageLabel;
+    private int _prospectPage;
+    private int _logPage;
+    private List<DraftLogEntry> _logEntries = new();
+    private const int PAGE_SIZE = 10;
+
+    private class DraftLogEntry
+    {
+        public int PickNumber;
+        public string TeamLogo;
+        public string TeamName;
+        public string Position;
+        public string FirstName;
+        public string LastName;
+        public int Overall;
+        public bool IsUserPick;
+    }
 
     // ── State ──
     private Dictionary<string, Sprite> _logo32;
@@ -93,6 +117,10 @@ public class EndSeasonController : UIScreenController
             CursorManager.Instance.RegisterHandCursor(_btnLottery);
             CursorManager.Instance.RegisterHandCursor(_btnDraftPick);
             CursorManager.Instance.RegisterHandCursor(_btnAutoPick);
+            CursorManager.Instance.RegisterHandCursor(_btnProspectPrev);
+            CursorManager.Instance.RegisterHandCursor(_btnProspectNext);
+            CursorManager.Instance.RegisterHandCursor(_btnLogPrev);
+            CursorManager.Instance.RegisterHandCursor(_btnLogNext);
         }
     }
 
@@ -118,7 +146,7 @@ public class EndSeasonController : UIScreenController
         _draftProgressFill = _root.Q<VisualElement>("DraftProgressFill");
         _draftClassLabel = _root.Q<Label>("DraftClassLabel");
         _prospectCount = _root.Q<Label>("ProspectCount");
-        _prospectList = _root.Q<ScrollView>("ProspectList");
+        _prospectList = _root.Q<VisualElement>("ProspectList");
         _draftPickRound = _root.Q<Label>("DraftPickRound");
         _draftPickNumber = _root.Q<Label>("DraftPickNumber");
         _draftPickTeamLogo = _root.Q<VisualElement>("DraftPickTeamLogo");
@@ -147,7 +175,14 @@ public class EndSeasonController : UIScreenController
         _draftAttrBlocks = _root.Q<Label>("DraftAttrBlocks");
         _btnDraftPick = _root.Q<Button>("BtnDraftPick");
         _btnAutoPick = _root.Q<Button>("BtnAutoPick");
-        _draftLog = _root.Q<ScrollView>("DraftLog");
+        _draftLog = _root.Q<VisualElement>("DraftLog");
+
+        _btnProspectPrev = _root.Q<Button>("BtnProspectPrev");
+        _btnProspectNext = _root.Q<Button>("BtnProspectNext");
+        _prospectPageLabel = _root.Q<Label>("ProspectPageLabel");
+        _btnLogPrev = _root.Q<Button>("BtnLogPrev");
+        _btnLogNext = _root.Q<Button>("BtnLogNext");
+        _logPageLabel = _root.Q<Label>("LogPageLabel");
     }
 
     protected override void LoadData()
@@ -196,6 +231,11 @@ public class EndSeasonController : UIScreenController
             if (_draftState == DraftState.UserPicking)
                 AutoPick();
         });
+
+        _btnProspectPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeProspectPage(-1); });
+        _btnProspectNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeProspectPage(1); });
+        _btnLogPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeLogPage(-1); });
+        _btnLogNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeLogPage(1); });
     }
 
     protected override void Refresh()
@@ -253,6 +293,9 @@ public class EndSeasonController : UIScreenController
         _currentPickIndex = 0;
         _selectedProspect = null;
         _draftRunning = true;
+        _prospectPage = 0;
+        _logPage = 0;
+        _logEntries.Clear();
 
         // Switch UI to draft room
         _preDraftHeader.style.display = DisplayStyle.None;
@@ -315,6 +358,8 @@ public class EndSeasonController : UIScreenController
         }
 
         _draftState = DraftState.Complete;
+        _draftProgressFill.style.width = Length.Percent(100);
+        _draftProgressText.text = $"Pick {_draftOrder.Count} / {_draftOrder.Count}";
         _btnDraftPick.style.display = DisplayStyle.None;
         _btnAutoPick.style.display = DisplayStyle.None;
         _prospectCount.text = "0";
@@ -343,15 +388,26 @@ public class EndSeasonController : UIScreenController
 
     void UpdateProspectList()
     {
-        _prospectList.Clear();
         _prospectCount.text = _availableProspects.Count.ToString();
 
-        for (int i = 0; i < _availableProspects.Count; i++)
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_availableProspects.Count / PAGE_SIZE));
+        _prospectPage = Mathf.Clamp(_prospectPage, 0, pageCount - 1);
+
+        var pageItems = _availableProspects
+            .Skip(_prospectPage * PAGE_SIZE)
+            .Take(PAGE_SIZE)
+            .ToList();
+
+        _prospectList.Clear();
+        int baseIndex = _prospectPage * PAGE_SIZE;
+
+        for (int i = 0; i < pageItems.Count; i++)
         {
-            var p = _availableProspects[i];
+            var p = pageItems[i];
+            int globalIndex = baseIndex + i;
             var row = new VisualElement();
             row.AddToClassList("draft-prospect");
-            if (i < 3) row.AddToClassList("draft-prospect--top");
+            if (globalIndex < 3) row.AddToClassList("draft-prospect--top");
 
             var pos = new Label();
             pos.AddToClassList("draft-prospect-pos");
@@ -376,7 +432,7 @@ public class EndSeasonController : UIScreenController
             else med.AddToClassList("draft-prospect-med--low");
             row.Add(med);
 
-            int capturedIndex = i;
+            int capturedIndex = globalIndex;
             row.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -388,6 +444,46 @@ public class EndSeasonController : UIScreenController
 
             _prospectList.Add(row);
         }
+
+        _prospectPageLabel.text = $"{_prospectPage + 1} de {pageCount}";
+        _btnProspectPrev.SetEnabled(_prospectPage > 0);
+        _btnProspectNext.SetEnabled(_prospectPage < pageCount - 1);
+    }
+
+    void ChangeProspectPage(int delta)
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_availableProspects.Count / PAGE_SIZE));
+        _prospectPage = Mathf.Clamp(_prospectPage + delta, 0, pageCount - 1);
+        _selectedProspect = null;
+        _btnDraftPick.SetEnabled(false);
+        _draftPlayerCard.style.display = DisplayStyle.None;
+        UpdateProspectList();
+    }
+
+    void ChangeLogPage(int delta)
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_logEntries.Count / PAGE_SIZE));
+        _logPage = Mathf.Clamp(_logPage + delta, 0, pageCount - 1);
+        RenderLogPage();
+    }
+
+    void RenderLogPage()
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_logEntries.Count / PAGE_SIZE));
+        _logPage = Mathf.Clamp(_logPage, 0, pageCount - 1);
+
+        var pageItems = _logEntries
+            .Skip(_logPage * PAGE_SIZE)
+            .Take(PAGE_SIZE)
+            .ToList();
+
+        _draftLog.Clear();
+        foreach (var entry in pageItems)
+            _draftLog.Add(BuildLogEntryRow(entry));
+
+        _logPageLabel.text = $"{_logPage + 1} de {pageCount}";
+        _btnLogPrev.SetEnabled(_logPage > 0);
+        _btnLogNext.SetEnabled(_logPage < pageCount - 1);
     }
 
     void SelectProspect(int index)
@@ -435,13 +531,12 @@ public class EndSeasonController : UIScreenController
         _draftAttrSteals.text = p.steals.ToString();
         _draftAttrBlocks.text = p.blocks.ToString();
 
-        // Highlight in list
+        // Highlight in list (global index → local page index)
+        int localIndex = index - _prospectPage * PAGE_SIZE;
         for (int i = 0; i < _prospectList.childCount; i++)
-        {
             _prospectList[i].RemoveFromClassList("draft-prospect--selected");
-        }
-        if (index < _prospectList.childCount)
-            _prospectList[index].AddToClassList("draft-prospect--selected");
+        if (localIndex >= 0 && localIndex < _prospectList.childCount)
+            _prospectList[localIndex].AddToClassList("draft-prospect--selected");
     }
 
     void ExecutePick(DraftProspect prospect)
@@ -472,36 +567,56 @@ public class EndSeasonController : UIScreenController
 
     void AddLogEntry(DraftGenerator.DraftPickSlot slot, DraftProspect prospect, PlayerData player)
     {
-        var entry = new VisualElement();
-        entry.AddToClassList("draft-log-entry");
-        if (slot.IsUserPick) entry.AddToClassList("draft-log-entry--user");
+        _logEntries.Add(new DraftLogEntry
+        {
+            PickNumber = slot.PickNumber,
+            TeamLogo = slot.Team.logo,
+            TeamName = slot.Team.name,
+            Position = prospect.position,
+            FirstName = prospect.first_name,
+            LastName = prospect.last_name,
+            Overall = prospect.overall,
+            IsUserPick = slot.IsUserPick
+        });
+
+        // Auto-advance to last page so new entries are visible
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_logEntries.Count / PAGE_SIZE));
+        _logPage = pageCount - 1;
+        RenderLogPage();
+    }
+
+    VisualElement BuildLogEntryRow(DraftLogEntry entry)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("draft-log-entry");
+        if (entry.IsUserPick) row.AddToClassList("draft-log-entry--user");
 
         var num = new Label();
         num.AddToClassList("draft-log-num");
-        num.text = $"#{slot.PickNumber}";
-        entry.Add(num);
+        num.text = $"#{entry.PickNumber}";
+        row.Add(num);
 
         var logo = new VisualElement();
         logo.AddToClassList("draft-log-logo");
-        if (_logo32.TryGetValue(slot.Team.logo, out var sprite))
+        if (_logo32.TryGetValue(entry.TeamLogo, out var sprite))
             logo.style.backgroundImage = new StyleBackground(sprite);
-        entry.Add(logo);
+        row.Add(logo);
 
         var info = new VisualElement();
         info.AddToClassList("draft-log-info");
 
         var teamLbl = new Label();
         teamLbl.AddToClassList("draft-log-team");
-        teamLbl.text = $"{slot.Team.name.ToUpper()} — {PositionCodes.GetShort(prospect.position)}";
+        teamLbl.text = $"{entry.TeamName.ToUpper()} — {PositionCodes.GetShort(entry.Position)}";
         info.Add(teamLbl);
 
         var playerLbl = new Label();
         playerLbl.AddToClassList("draft-log-player");
-        playerLbl.text = $"{prospect.first_name} {prospect.last_name}  ·  MED: {prospect.overall}";
+        playerLbl.text = $"{entry.FirstName} {entry.LastName}  ·  MED: {entry.Overall}";
         info.Add(playerLbl);
 
-        entry.Add(info);
-        _draftLog.Add(entry);
+        row.Add(info);
+        return row;
     }
 
     // ════════════════════════════════════════════════════════════════

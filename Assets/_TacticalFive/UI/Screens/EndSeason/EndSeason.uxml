@@ -76,7 +76,16 @@
                             <ui:Label text="PROSPECTOS DISPONIBLES" class="draft-col-title"/>
                             <ui:Label name="ProspectCount" class="draft-col-count" text="75"/>
                         </ui:VisualElement>
-                        <ui:ScrollView name="ProspectList" class="draft-prospect-scroll" mode="Vertical"/>
+                        <ui:VisualElement name="ProspectList" class="draft-list-body"/>
+                        <ui:VisualElement class="draft-pagination">
+                            <ui:Button name="BtnProspectPrev" class="draft-page-btn">
+                                <ui:Label text="◀" class="draft-page-icon"/>
+                            </ui:Button>
+                            <ui:Label name="ProspectPageLabel" class="draft-page-label" text="1 de 1"/>
+                            <ui:Button name="BtnProspectNext" class="draft-page-btn">
+                                <ui:Label text="▶" class="draft-page-icon"/>
+                            </ui:Button>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- CENTER: Current Pick -->
@@ -169,7 +178,16 @@
                         <ui:VisualElement class="draft-col-header">
                             <ui:Label text="ORDEN DEL DRAFT" class="draft-col-title"/>
                         </ui:VisualElement>
-                        <ui:ScrollView name="DraftLog" class="draft-log-scroll" mode="Vertical"/>
+                        <ui:VisualElement name="DraftLog" class="draft-list-body"/>
+                        <ui:VisualElement class="draft-pagination">
+                            <ui:Button name="BtnLogPrev" class="draft-page-btn">
+                                <ui:Label text="◀" class="draft-page-icon"/>
+                            </ui:Button>
+                            <ui:Label name="LogPageLabel" class="draft-page-label" text="1 de 1"/>
+                            <ui:Button name="BtnLogNext" class="draft-page-btn">
+                                <ui:Label text="▶" class="draft-page-icon"/>
+                            </ui:Button>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
