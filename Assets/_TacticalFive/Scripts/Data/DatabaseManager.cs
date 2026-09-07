@@ -295,6 +295,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<GLeagueTeamData>();
         _db.CreateTable<GLeaguePlayerData>();
         _db.CreateTable<GLeagueChampionData>();
+        _db.CreateTable<SeasonAttendanceSummaryData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeaguePlayers_TeamId ON gleague_players(gleague_team_id)");
@@ -894,6 +895,39 @@ public partial class DatabaseManager : MonoBehaviour
         catch (System.Exception ex)
         {
             Debug.LogError($"[DB] Migration error backfilling scouted_players: {ex.Message}");
+        }
+
+        // Add gleague_team_id to gleague_season_stats if missing
+        try
+        {
+            var glStatCols = _db.Query<ColumnInfo>("PRAGMA table_info(gleague_season_stats)");
+            if (!glStatCols.Any(c => c.name == "gleague_team_id"))
+            {
+                _db.Execute("ALTER TABLE gleague_season_stats ADD COLUMN gleague_team_id INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added gleague_team_id to gleague_season_stats");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for gleague_season_stats.gleague_team_id: {ex.Message}");
+        }
+
+        // season_attendance_summary (resumen de asistencia por temporada)
+        try
+        {
+            _db.Execute(@"
+                CREATE TABLE IF NOT EXISTS season_attendance_summary (
+                    season_id INTEGER PRIMARY KEY,
+                    manager_id INTEGER NOT NULL,
+                    total_attendance INTEGER DEFAULT 0,
+                    total_capacity INTEGER DEFAULT 0,
+                    occupancy_pct REAL DEFAULT 0
+                )");
+            Debug.Log("[DB] Migration: ensured season_attendance_summary table");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for season_attendance_summary: {ex.Message}");
         }
     }
 

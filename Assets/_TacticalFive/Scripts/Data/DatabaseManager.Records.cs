@@ -2974,6 +2974,50 @@ public partial class DatabaseManager
             }
         }
 
+        // 5. Archive attendance summary before clearing
+        try
+        {
+            var oldSeasonData = _db.Find<SeasonData>(oldSeasonId);
+            if (oldSeasonData != null)
+            {
+                var gameIds = _db.Table<GameData>()
+                    .Where(g => g.season_id == oldSeasonId && g.is_played == 1)
+                    .Select(g => g.id)
+                    .ToList();
+
+                long totalAtt = 0;
+                long totalCap = 0;
+                foreach (var gid in gameIds)
+                {
+                    var att = _db.Table<GameAttendanceData>().Where(a => a.game_id == gid).FirstOrDefault();
+                    if (att != null && att.attendance > 0)
+                    {
+                        totalAtt += att.attendance;
+                        var game = _db.Table<GameData>().Where(g => g.id == gid).FirstOrDefault();
+                        if (game != null)
+                        {
+                            var homeTeam = _db.Table<TeamData>().Where(t => t.id == game.home_team_id).FirstOrDefault();
+                            if (homeTeam != null) totalCap += homeTeam.capacity;
+                        }
+                    }
+                }
+
+                float occPct = totalCap > 0 ? (float)totalAtt / totalCap * 100f : 0;
+                _db.InsertOrReplace(new SeasonAttendanceSummaryData
+                {
+                    season_id = oldSeasonId,
+                    manager_id = managerId,
+                    total_attendance = (int)totalAtt,
+                    total_capacity = (int)totalCap,
+                    occupancy_pct = occPct
+                });
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Error archiving attendance summary: {ex.Message}");
+        }
+
         // 5. Clear tables
         _db.Execute("DELETE FROM player_game_stats");
         _db.Execute("DELETE FROM finals_player_stats");

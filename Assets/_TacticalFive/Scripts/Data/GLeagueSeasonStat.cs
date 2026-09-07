@@ -15,4 +15,5 @@ public class GLeagueSeasonStat
     public int blocks { get; set; }
     public int turnovers { get; set; }
     public int rating { get; set; }
+    public int gleague_team_id { get; set; }
 }

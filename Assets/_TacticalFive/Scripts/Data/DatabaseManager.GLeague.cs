@@ -158,7 +158,7 @@ public partial class DatabaseManager
 
     /// <summary>Acumula el box score de UN partido disputado en la G-League (games += 1).</summary>
     public void AddGLeagueGameStat(int playerId, int seasonId, int points, int rebounds, int assists,
-                                   int steals, int blocks, int turnovers, int rating)
+                                   int steals, int blocks, int turnovers, int rating, int gleagueTeamId = 0)
     {
         var stat = GetGLeagueStats(playerId, seasonId);
         if (stat == null)
@@ -174,7 +174,8 @@ public partial class DatabaseManager
                 steals = steals,
                 blocks = blocks,
                 turnovers = turnovers,
-                rating = rating
+                rating = rating,
+                gleague_team_id = gleagueTeamId
             });
         }
         else
@@ -187,6 +188,8 @@ public partial class DatabaseManager
             stat.blocks += blocks;
             stat.turnovers += turnovers;
             stat.rating += rating;
+            if (stat.gleague_team_id == 0 && gleagueTeamId != 0)
+                stat.gleague_team_id = gleagueTeamId;
             _db.Update(stat);
         }
     }
@@ -251,8 +254,9 @@ public partial class DatabaseManager
                        CAST(gs.blocks AS REAL)/gs.games as avg_blk
                 FROM gleague_season_stats gs
                 JOIN players p ON gs.player_id = p.id
-                JOIN gleague_teams gt ON gt.nba_team_id = p.team_id
+                JOIN gleague_teams gt ON gt.id = gs.gleague_team_id
                 WHERE gs.season_id=? AND gs.games > 15 AND gs.player_id < 500000
+                  AND gs.gleague_team_id > 0
             ) ORDER BY avg_rating DESC LIMIT 1", seasonId, seasonId).FirstOrDefault();
     }
 
