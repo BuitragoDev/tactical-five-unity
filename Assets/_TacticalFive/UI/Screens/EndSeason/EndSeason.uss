@@ -665,7 +665,7 @@
 }
 .draft-prospect-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(255, 255, 255);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -673,7 +673,7 @@
 }
 .draft-prospect-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -681,20 +681,32 @@
 }
 .draft-prospect-med {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
     min-width: 32px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
     margin-left: 6px;
 }
 .draft-prospect-med--high {
+    background-color: rgba(39, 174, 96, 0.20);
+    border-width: 1px;
+    border-color: rgb(39, 174, 96);
     color: rgb(39, 174, 96);
+    padding: 2px 6px;
 }
 .draft-prospect-med--mid {
+    background-color: rgba(212, 160, 23, 0.20);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
+    padding: 2px 6px;
 }
 .draft-prospect-med--low {
+    background-color: rgba(192, 57, 43, 0.20);
+    border-width: 1px;
+    border-color: rgb(192, 57, 43);
     color: rgb(192, 57, 43);
+    padding: 2px 6px;
 }
 
 /* ── CENTER: PLAYER CARD ── */

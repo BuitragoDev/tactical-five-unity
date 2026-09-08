@@ -448,7 +448,7 @@ public class EndSeasonController : UIScreenController
             info.Add(nameLbl);
             var meta = new Label();
             meta.AddToClassList("draft-prospect-meta");
-            meta.text = $"{p.college}  ·  {p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age}a";
+            meta.text = $"{p.college}  ·  {p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age} años";
             info.Add(meta);
             row.Add(info);
 
