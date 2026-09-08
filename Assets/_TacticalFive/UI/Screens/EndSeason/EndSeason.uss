@@ -616,9 +616,13 @@
     opacity: 0.7;
 }
 .draft-col-count {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
-    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    background-color: rgba(42, 95, 201, 0.20);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(42, 95, 201);
+    padding: 2px 8px;
     margin-left: auto;
 }
 
