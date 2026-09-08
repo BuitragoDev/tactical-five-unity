@@ -1055,7 +1055,7 @@
 }
 .draft-log-med {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 24px;
     padding: 2px 6px;
     flex-shrink: 0;
     margin-left: 6px;
