@@ -538,7 +538,7 @@
 }
 .draft-banner-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(160, 170, 190);
 }
 .draft-banner-pick-box {
