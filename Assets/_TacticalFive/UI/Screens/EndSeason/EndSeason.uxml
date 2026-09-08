@@ -139,7 +139,7 @@
                             <ui:VisualElement class="draft-card-top">
                                 <ui:VisualElement class="draft-card-pick-box">
                                     <ui:Label name="DraftCardPickNum" class="draft-card-pick-num" text="#1"/>
-                                    <ui:Label name="DraftCardPickPos" class="draft-card-pick-pos" text="B"/>
+                                    <ui:Label name="DraftCardPickPos" class="draft-card-pick-pos" text=""/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-card-info">
                                     <ui:Label name="DraftCardName" class="draft-card-name" text="Selecciona un prospecto"/>
@@ -147,8 +147,7 @@
                                     <ui:Label name="DraftCardBio" class="draft-card-bio" text=""/>
                                 </ui:VisualElement>
                                 <ui:VisualElement name="DraftCardPhoto" class="draft-card-photo"/>
-                                <ui:VisualElement class="draft-card-ovr-badge">
-                                    <ui:Label class="draft-card-ovr-label" text="VALORACION GENERAL"/>
+                                <ui:VisualElement name="DraftCardOvrBadge" class="draft-card-ovr-badge">
                                     <ui:Label name="DraftCardOvr" class="draft-card-ovr-value" text="--"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>

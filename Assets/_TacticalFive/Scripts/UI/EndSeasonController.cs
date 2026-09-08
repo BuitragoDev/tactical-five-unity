@@ -57,6 +57,7 @@ public class EndSeasonController : UIScreenController
     private Label _draftCardCollege;
     private Label _draftCardBio;
     private VisualElement _draftCardPhoto;
+    private VisualElement _draftCardOvrBadge;
     private Label _draftCardOvr;
     private Label _draftStatShooting;
     private Label _draftStat3pt;
@@ -192,6 +193,7 @@ public class EndSeasonController : UIScreenController
         _draftCardCollege = _root.Q<Label>("DraftCardCollege");
         _draftCardBio = _root.Q<Label>("DraftCardBio");
         _draftCardPhoto = _root.Q<VisualElement>("DraftCardPhoto");
+        _draftCardOvrBadge = _root.Q<VisualElement>("DraftCardOvrBadge");
         _draftCardOvr = _root.Q<Label>("DraftCardOvr");
         _draftStatShooting = _root.Q<Label>("DraftStatShooting");
         _draftStat3pt = _root.Q<Label>("DraftStat3pt");
@@ -417,6 +419,12 @@ public class EndSeasonController : UIScreenController
         bool isRound2 = slot.IsRound2;
         _draftBannerRound.text = isRound2 ? "Ronda 2" : "Ronda 1";
         _draftBannerPick.text = $"Pick {slot.PickNumber}";
+        _draftCardPickNum.text = $"#{slot.PickNumber}";
+        _draftCardPickPos.text = "";
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--high");
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--mid");
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--low");
+        _draftCardOvr.text = "--";
     }
 
     void UpdateProspectList()
@@ -543,6 +551,15 @@ public class EndSeasonController : UIScreenController
         _draftCardCollege.text = p.college;
         _draftCardBio.text = $"{p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age} años  ·  {CountryCodes.GetName(p.nationality)}";
         _draftCardOvr.text = p.overall.ToString();
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--high");
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--mid");
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--low");
+        if (p.overall > 84)
+            _draftCardOvrBadge.AddToClassList("draft-card-ovr-badge--high");
+        else if (p.overall >= 70)
+            _draftCardOvrBadge.AddToClassList("draft-card-ovr-badge--mid");
+        else
+            _draftCardOvrBadge.AddToClassList("draft-card-ovr-badge--low");
 
         int photoIdx = Mathf.Abs(p.GetHashCode()) % Mathf.Max(1, _defaultPhotos.Length);
         if (_defaultPhotos.Length > 0)

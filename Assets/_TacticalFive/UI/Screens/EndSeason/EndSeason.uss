@@ -779,13 +779,13 @@
 }
 .draft-card-college {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     margin-bottom: 4px;
 }
 .draft-card-bio {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(160, 170, 190);
 }
 .draft-card-photo {
@@ -803,18 +803,34 @@
     margin-left: 16px;
     flex-shrink: 0;
 }
-.draft-card-ovr-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 10px;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    color: rgb(160, 170, 190);
-    margin-bottom: 4px;
-}
 .draft-card-ovr-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 42px;
+    font-size: 36px;
+    padding: 4px 12px;
+}
+.draft-card-ovr-badge--high {
+    background-color: rgba(39, 174, 96, 0.20);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+}
+.draft-card-ovr-badge--high .draft-card-ovr-value {
+    color: rgb(39, 174, 96);
+}
+.draft-card-ovr-badge--mid {
+    background-color: rgba(212, 160, 23, 0.20);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+}
+.draft-card-ovr-badge--mid .draft-card-ovr-value {
     color: rgb(212, 160, 23);
+}
+.draft-card-ovr-badge--low {
+    background-color: rgba(192, 57, 43, 0.20);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+}
+.draft-card-ovr-badge--low .draft-card-ovr-value {
+    color: rgb(192, 57, 43);
 }
 
 /* ── STAT BOXES ── */
