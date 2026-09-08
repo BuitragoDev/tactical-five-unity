@@ -677,7 +677,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex-grow: 1;
     min-width: 0;
 }
 .draft-prospect-pos {
@@ -687,7 +686,7 @@
     color: rgb(255, 255, 255);
     padding: 2px 6px;
     flex-shrink: 0;
-    margin-left: 6px;
+    margin-left: 12px;
 }
 .draft-prospect-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
