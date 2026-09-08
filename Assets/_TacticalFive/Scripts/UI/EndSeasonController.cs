@@ -454,6 +454,10 @@ public class EndSeasonController : UIScreenController
             nameLbl.AddToClassList("draft-prospect-name");
             nameLbl.text = $"{p.first_name} {p.last_name}";
             info.Add(nameLbl);
+            var posLbl = new Label();
+            posLbl.AddToClassList("draft-prospect-pos");
+            posLbl.text = PositionCodes.GetShort(p.position);
+            info.Add(posLbl);
             var meta = new Label();
             meta.AddToClassList("draft-prospect-meta");
             meta.text = $"{p.college}  ·  {p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age} años";
