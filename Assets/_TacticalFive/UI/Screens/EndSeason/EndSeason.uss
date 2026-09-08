@@ -18,7 +18,7 @@
     border-bottom-width: 2px;
     border-bottom-color: rgb(212, 160, 23);
     flex-shrink: 0;
-    min-height: 100px;
+    min-height: 80px;
 }
 .end-season-root .header-left {
     flex-direction: row;
@@ -165,7 +165,7 @@
 /* ── PAGE HEADER ── */
 .end-season-root .end-season-header {
     align-items: center;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
 .end-season-root .page-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -185,8 +185,19 @@
     margin-top: 8px;
     -unity-text-align: middle-center;
 }
+.end-season-root .page-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(122, 138, 170);
+    margin-top: 10px;
+    -unity-text-align: middle-center;
+}
 
-/* ── PRE-DRAFT SPLIT LAYOUT ── */
+/* ═══════════════════════════════════════════════════════════════════
+   PRE-DRAFT SPLIT LAYOUT
+   ═══════════════════════════════════════════════════════════════════ */
 .end-season-split {
     flex-direction: row;
     flex-grow: 1;
@@ -196,7 +207,7 @@
 .es-lists-col {
     flex: 1;
     flex-direction: column;
-    margin-right: 24px;
+    margin-right: 20px;
     overflow: hidden;
     min-height: 0;
 }
@@ -207,96 +218,265 @@
     min-height: 0;
 }
 
-/* ── PANELS ── */
+/* ── PANELS (base) ── */
 .es-panel {
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    padding: 16px;
-    margin-bottom: 20px;
+    position: relative;
     overflow: hidden;
     flex-direction: column;
     flex-grow: 1;
     flex-basis: 0;
     min-height: 0;
+    margin-bottom: 16px;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
 }
+.es-panel:last-child {
+    margin-bottom: 0;
+}
+
+/* ── OVERLAY ── */
+.es-panel-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(22, 26, 36, 0.95);
+}
+
+/* ── PANEL CONTENT (above overlay) ── */
+.es-panel-content {
+    position: relative;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 18px 20px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ── PANEL BACKGROUNDS ── */
+.es-panel--retiring {
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/retirados_fondo.png");
+    background-size: cover;
+    background-position: center;
+}
+.es-panel--fame {
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/hallOfFame_fondo.png");
+    background-size: cover;
+    background-position: center;
+}
+.es-panel--draft {
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/draft_fondo.png");
+    background-size: cover;
+    background-position: center;
+}
+
+/* ── PANEL TITLES ── */
 .es-panel-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     padding-bottom: 8px;
     border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
+    border-bottom-color: rgba(212, 160, 23, 0.3);
     flex-shrink: 0;
 }
 
-/* ── PLAYER LIST ── */
-.es-scroll-wrapper {
-    flex-grow: 1;
-    flex-shrink: 1;
-    overflow: hidden;
-    min-height: 200px;
-}
-.es-player-scroll {
-    flex-grow: 1;
-}
-.es-player-row {
+/* ═══════════════════════════════════════════════════════════════════
+   PLAYER LIST (pre-draft, 4-column grid)
+   ═══════════════════════════════════════════════════════════════════ */
+.es-player-list {
     flex-direction: row;
-    align-items: center;
-    padding: 8px 10px;
-    background-color: rgb(28, 33, 48);
-    border-width: 1px;
-    border-color: transparent;
-    margin-bottom: 4px;
-    flex-shrink: 0;
-    min-height: 40px;
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    overflow: hidden;
+    min-height: 0;
 }
-.es-mini-logo {
-    width: 32px;
-    height: 32px;
+
+/* ── PLAYER CARD (retiring) ── */
+.es-player-row {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px 12px 8px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    margin-right: 4px;
     flex-shrink: 0;
-    margin-right: 12px;
+    width: 194px;
+}
+.es-player-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-bottom: 8px;
 }
 .es-player-name {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(208, 216, 232);
-    flex-grow: 1;
-}
-.es-player-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
-    background-color: rgb(42, 95, 201);
     color: rgb(255, 255, 255);
-    padding: 2px 8px;
-    margin-right: 12px;
-    flex-shrink: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    -unity-text-align: middle-center;
+    margin-bottom: 2px;
 }
 .es-player-age {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(122, 138, 170);
+    font-size: 16px;
+    color: rgb(160, 170, 190);
+    margin-bottom: 6px;
+}
+.es-player-bottom-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+.es-player-pos {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
+    padding: 2px 8px;
     flex-shrink: 0;
 }
-.es-player-fame-row .es-player-credentials {
-    min-width: 220px;
-    -unity-text-align: middle-center;
-    font-size: 16px;
-    color: rgb(212, 212, 212);
+.es-player-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-left: 18px;
 }
-.es-player-fame-row .es-player-fame {
-    font-size: 16px;
-    font-weight: bold;
-    color: rgb(212, 160, 23);
+.es-player-team-abbr {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    margin-left: 18px;
+    flex-shrink: 0;
 }
+.es-player-team-col {
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ── HOF CARD ── */
+.es-player-fame-row {
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 8px 12px 8px;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    margin-right: 4px;
+    flex-shrink: 0;
+    width: 194px;
+}
+
+/* ── EMPTY STATE ── */
 .es-empty {
     -unity-text-align: middle-center;
     color: rgb(122, 138, 170);
     padding: 16px;
-    font-size: 13px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PRE-DRAFT PAGINATION (arrows beside cards)
+   ═══════════════════════════════════════════════════════════════════ */
+.es-pre-pagination-row {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    align-items: stretch;
+}
+.es-pre-page-btn {
+    width: 36px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    color: rgb(122, 138, 170);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    margin-right: 8px;
+    -unity-text-align: middle-center;
+}
+.es-pre-page-btn:last-child {
+    margin-right: 0;
+    margin-left: 8px;
+}
+.es-pre-page-btn:hover {
+    color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
+}
+.es-pre-page-btn:disabled {
+    color: rgb(55, 65, 84);
+    background-color: rgb(17, 24, 34);
+    border-color: rgb(28, 33, 48);
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DRAFT CARD (right column)
+   ═══════════════════════════════════════════════════════════════════ */
+.es-draft-card-content {
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 0 16px 16px 16px;
+}
+.es-draft-year {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 96px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 2px;
+    position: absolute;
+    top: 78px;
+    left: 20px;
+}
+.es-draft-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 96px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 2px;
+    position: absolute;
+    top: 10px;
+    left: 20px;
+}
+.es-draft-subtitle {
+    display: none;
+}
+.es-draft-features {
+    flex-direction: row;
+    width: 100%;
+    padding: 0 16px;
+    margin-bottom: 16px;
+    position: absolute;
+    bottom: 80px;
+    left: 0;
+}
+.es-draft-feature {
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+}
+.es-draft-feature-icon {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+.es-draft-feature-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: rgb(255, 255, 255);
+    margin-bottom: 2px;
+    -unity-text-align: middle-center;
+}
+.es-draft-feature-sub {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(160, 170, 190);
+    -unity-text-align: middle-center;
 }
 
 /* ── DRAFT BUTTON (pre-draft) ── */
@@ -305,13 +485,13 @@
     border-width: 0;
     color: rgb(0, 0, 0);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 20px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 12px 28px;
+    padding: 14px 0;
     -unity-text-align: middle-center;
     flex-shrink: 0;
-    margin-bottom: 16px;
+    width: 100%;
 }
 .btn-draft:hover {
     background-color: rgb(240, 192, 64);
@@ -849,7 +1029,7 @@
     color: rgb(208, 216, 232);
 }
 
-/* ══ PAGINATION ══ */
+/* ══ PAGINATION (shared) ══ */
 .draft-pagination {
     flex-direction: row;
     align-items: center;

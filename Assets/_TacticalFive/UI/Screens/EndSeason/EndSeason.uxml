@@ -4,17 +4,9 @@
         <!-- TOP HEADER -->
         <ui:VisualElement name="TopHeader" class="top-header">
             <ui:VisualElement class="header-left">
-                <ui:VisualElement class="header-brand">
-                    <ui:Label text="TF" class="header-brand-icon"/>
-                    <ui:Label text="TACTICAL" class="header-brand-text"/>
-                    <ui:Label text="FIVE" class="header-brand-text-gold"/>
-                </ui:VisualElement>
                 <ui:VisualElement name="HeaderTeamLogo" class="header-team-logo"/>
                 <ui:VisualElement class="header-team-info">
-                    <ui:VisualElement class="header-team-name-row">
-                        <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
-                        <ui:Label name="HeaderSubtitle" class="header-subtitle" text="(FIN DE TEMPORADA)"/>
-                    </ui:VisualElement>
+                    <ui:Label name="HeaderTeamName" class="header-team-name" text=""/>
                     <ui:Label name="HeaderManagerName" class="header-manager-name" text=""/>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -24,36 +16,84 @@
                 </ui:VisualElement>
                 <ui:Label name="HeaderDate" class="header-date-label" text=""/>
                 <ui:Button name="BtnLottery" class="btn-lottery" text="LOTERIA DRAFT"/>
-                <ui:Button name="BtnNextSeason" class="btn-action" text="PROXIMA TEMPORADA"/>
+                <ui:Button name="BtnNextSeason" class="btn-action" text="FINALIZAR DRAFT"/>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- CONTENT -->
         <ui:VisualElement name="ContentArea" class="content-area">
-            <!-- PAGE HEADER (shown before draft starts) -->
+            <!-- PAGE TITLE (shown before draft starts) -->
             <ui:VisualElement name="PreDraftHeader" class="end-season-header">
                 <ui:Label text="Fin de Temporada" class="page-title"/>
                 <ui:Label name="SeasonTag" text="" class="season-tag"/>
+                <ui:Label name="PageSubtitle" text="CIERRE DE UNA ERA, COMIENZO DE UNA NUEVA." class="page-subtitle"/>
             </ui:VisualElement>
 
-            <!-- PRE-DRAFT: retiring + fame lists (hidden once draft starts) -->
+            <!-- PRE-DRAFT: retiring + fame lists + draft card (hidden once draft starts) -->
             <ui:VisualElement name="PreDraftContent" class="end-season-split">
+                <!-- LEFT COLUMN: Retiring + Hall of Fame -->
                 <ui:VisualElement class="es-lists-col">
-                    <ui:VisualElement class="es-panel">
-                        <ui:Label text="Jugadores que se Retiran" class="es-panel-title"/>
-                        <ui:VisualElement class="es-scroll-wrapper">
-                            <ui:ScrollView name="RetiringList" class="es-player-scroll" mode="Vertical"/>
+                    <!-- Retiring Panel -->
+                    <ui:VisualElement class="es-panel es-panel--retiring">
+                        <ui:VisualElement class="es-panel-overlay"/>
+                        <ui:VisualElement class="es-panel-content">
+                            <ui:Label text="JUGADORES RETIRADOS" class="es-panel-title"/>
+                            <ui:VisualElement class="es-pre-pagination-row">
+                                <ui:Button name="BtnRetiringPrev" class="es-pre-page-btn">
+                                    <ui:Label text="◀" class="draft-page-icon"/>
+                                </ui:Button>
+                                <ui:VisualElement name="RetiringList" class="es-player-list"/>
+                                <ui:Button name="BtnRetiringNext" class="es-pre-page-btn">
+                                    <ui:Label text="▶" class="draft-page-icon"/>
+                                </ui:Button>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="FamePanel" class="es-panel">
-                        <ui:Label text="Salon de la Fama - Nuevas inducciones" class="es-panel-title"/>
-                        <ui:VisualElement class="es-scroll-wrapper">
-                            <ui:ScrollView name="FameList" class="es-player-scroll" mode="Vertical"/>
+                    <!-- Hall of Fame Panel -->
+                    <ui:VisualElement name="FamePanel" class="es-panel es-panel--fame">
+                        <ui:VisualElement class="es-panel-overlay"/>
+                        <ui:VisualElement class="es-panel-content">
+                            <ui:Label text="SALÓN DE LA FAMA" class="es-panel-title"/>
+                            <ui:VisualElement class="es-pre-pagination-row">
+                                <ui:Button name="BtnFamePrev" class="es-pre-page-btn">
+                                    <ui:Label text="◀" class="draft-page-icon"/>
+                                </ui:Button>
+                                <ui:VisualElement name="FameList" class="es-player-list"/>
+                                <ui:Button name="BtnFameNext" class="es-pre-page-btn">
+                                    <ui:Label text="▶" class="draft-page-icon"/>
+                                </ui:Button>
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
+
+                <!-- RIGHT COLUMN: Draft Card -->
                 <ui:VisualElement class="es-draft-col">
-                    <ui:Button name="BtnDraft" class="btn-draft" text="EMPEZAR DRAFT"/>
+                    <ui:VisualElement class="es-panel es-panel--draft">
+                        <ui:VisualElement class="es-panel-overlay"/>
+                        <ui:VisualElement class="es-panel-content es-draft-card-content">
+                            <ui:Label name="DraftYearTitle" class="es-draft-title" text="DRAFT"/>
+                            <ui:Label name="DraftYearLabel" class="es-draft-year" text="2025"/>
+                            <ui:VisualElement class="es-draft-features">
+                                <ui:VisualElement class="es-draft-feature">
+                                    <ui:Label text="👥" class="es-draft-feature-icon"/>
+                                    <ui:Label text="NUEVOS TALENTOS" class="es-draft-feature-title"/>
+                                    <ui:Label text="75 PROSPECTOS DISPONIBLES" class="es-draft-feature-sub"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="es-draft-feature">
+                                    <ui:Label text="📈" class="es-draft-feature-icon"/>
+                                    <ui:Label text="NUEVAS OPORTUNIDADES" class="es-draft-feature-title"/>
+                                    <ui:Label text="EL FUTURO DE TU FRANQUICIA" class="es-draft-feature-sub"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="es-draft-feature">
+                                    <ui:Label text="⭐" class="es-draft-feature-icon"/>
+                                    <ui:Label text="GRANDES HISTORIAS" class="es-draft-feature-title"/>
+                                    <ui:Label text="NACEN AQUÍ" class="es-draft-feature-sub"/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:Button name="BtnDraft" class="btn-draft" text="EMPEZAR DRAFT 2027"/>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
 

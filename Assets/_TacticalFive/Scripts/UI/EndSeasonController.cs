@@ -18,8 +18,8 @@ public class EndSeasonController : UIScreenController
 
     // ── Pre-draft ──
     private Label _seasonTag;
-    private ScrollView _retiringList;
-    private ScrollView _fameList;
+    private VisualElement _retiringList;
+    private VisualElement _fameList;
     private Button _btnDraft;
     private Button _btnNextSeason;
     private Button _btnLottery;
@@ -27,6 +27,19 @@ public class EndSeasonController : UIScreenController
     private VisualElement _famePanel;
     private VisualElement _preDraftHeader;
     private VisualElement _preDraftContent;
+    private Label _draftYearLabel;
+    private Label _draftYearTitle;
+
+    // ── Pre-draft pagination ──
+    private Button _btnRetiringPrev;
+    private Button _btnRetiringNext;
+    private Button _btnFamePrev;
+    private Button _btnFameNext;
+    private int _retiringPage;
+    private int _famePage;
+    private List<PlayerData> _retiringPlayers = new();
+    private List<PlayerData> _famePlayers = new();
+    private const int PRE_DRAFT_PAGE_SIZE = 4;
 
     // ── Draft room ──
     private VisualElement _draftRoom;
@@ -65,7 +78,7 @@ public class EndSeasonController : UIScreenController
     private Button _btnAutoPick;
     private VisualElement _draftLog;
 
-    // ── Pagination ──
+    // ── Draft pagination ──
     private Button _btnProspectPrev;
     private Button _btnProspectNext;
     private Label _prospectPageLabel;
@@ -121,6 +134,10 @@ public class EndSeasonController : UIScreenController
             CursorManager.Instance.RegisterHandCursor(_btnProspectNext);
             CursorManager.Instance.RegisterHandCursor(_btnLogPrev);
             CursorManager.Instance.RegisterHandCursor(_btnLogNext);
+            CursorManager.Instance.RegisterHandCursor(_btnRetiringPrev);
+            CursorManager.Instance.RegisterHandCursor(_btnRetiringNext);
+            CursorManager.Instance.RegisterHandCursor(_btnFamePrev);
+            CursorManager.Instance.RegisterHandCursor(_btnFameNext);
         }
     }
 
@@ -132,14 +149,21 @@ public class EndSeasonController : UIScreenController
         _headerSeason = _root.Q<Label>("HeaderSeason");
         _headerDate = _root.Q<Label>("HeaderDate");
         _seasonTag = _root.Q<Label>("SeasonTag");
-        _retiringList = _root.Q<ScrollView>("RetiringList");
-        _fameList = _root.Q<ScrollView>("FameList");
+        _draftYearLabel = _root.Q<Label>("DraftYearLabel");
+        _draftYearTitle = _root.Q<Label>("DraftYearTitle");
+        _retiringList = _root.Q<VisualElement>("RetiringList");
+        _fameList = _root.Q<VisualElement>("FameList");
         _btnDraft = _root.Q<Button>("BtnDraft");
         _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _btnLottery = _root.Q<Button>("BtnLottery");
         _famePanel = _root.Q<VisualElement>("FamePanel");
         _preDraftHeader = _root.Q<VisualElement>("PreDraftHeader");
         _preDraftContent = _root.Q<VisualElement>("PreDraftContent");
+
+        _btnRetiringPrev = _root.Q<Button>("BtnRetiringPrev");
+        _btnRetiringNext = _root.Q<Button>("BtnRetiringNext");
+        _btnFamePrev = _root.Q<Button>("BtnFamePrev");
+        _btnFameNext = _root.Q<Button>("BtnFameNext");
 
         _draftRoom = _root.Q<VisualElement>("DraftRoom");
         _draftProgressText = _root.Q<Label>("DraftProgressText");
@@ -236,6 +260,10 @@ public class EndSeasonController : UIScreenController
         _btnProspectNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeProspectPage(1); });
         _btnLogPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeLogPage(-1); });
         _btnLogNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeLogPage(1); });
+        _btnRetiringPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeRetiringPage(-1); });
+        _btnRetiringNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeRetiringPage(1); });
+        _btnFamePrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFamePage(-1); });
+        _btnFameNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFamePage(1); });
     }
 
     protected override void Refresh()
@@ -269,6 +297,8 @@ public class EndSeasonController : UIScreenController
     {
         string seasonLabel = $"{_season.year_start}-{_season.year_end.ToString().Substring(2)}";
         _seasonTag.text = seasonLabel;
+        _draftYearTitle.text = "DRAFT";
+        _draftYearLabel.text = _season.year_end.ToString();
         LoadRetiringPlayers();
         LoadFamePlayers();
         _btnDraft.text = $"EMPEZAR DRAFT {_season.year_end}";
@@ -620,108 +650,204 @@ public class EndSeasonController : UIScreenController
     }
 
     // ════════════════════════════════════════════════════════════════
-    //  RETIRING / FAME / RENEWALS (unchanged)
+    //  RETIRING / FAME / PAGINATION
     // ════════════════════════════════════════════════════════════════
 
     void LoadRetiringPlayers()
     {
+        _retiringPlayers = DatabaseManager.Instance.GetRetiringPlayers();
+        _retiringPage = 0;
+        RenderRetiringPage();
+    }
+
+    void LoadFamePlayers()
+    {
+        _famePlayers = DatabaseManager.Instance.GetRetiringHallOfFameMembers();
+        _famePage = 0;
+        RenderFamePage();
+    }
+
+    void ChangeRetiringPage(int delta)
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_retiringPlayers.Count / PRE_DRAFT_PAGE_SIZE));
+        _retiringPage = Mathf.Clamp(_retiringPage + delta, 0, pageCount - 1);
+        RenderRetiringPage();
+    }
+
+    void ChangeFamePage(int delta)
+    {
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_famePlayers.Count / PRE_DRAFT_PAGE_SIZE));
+        _famePage = Mathf.Clamp(_famePage + delta, 0, pageCount - 1);
+        RenderFamePage();
+    }
+
+    void RenderRetiringPage()
+    {
         _retiringList.Clear();
-        var players = DatabaseManager.Instance.GetRetiringPlayers();
-        if (players.Count == 0)
+
+        if (_retiringPlayers.Count == 0)
         {
             var empty = new Label();
             empty.AddToClassList("es-empty");
             empty.text = "No hay jugadores que se retiren esta temporada";
             _retiringList.Add(empty);
+            _btnRetiringPrev.SetEnabled(false);
+            _btnRetiringNext.SetEnabled(false);
             return;
         }
-        foreach (var p in players)
+
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_retiringPlayers.Count / PRE_DRAFT_PAGE_SIZE));
+        _retiringPage = Mathf.Clamp(_retiringPage, 0, pageCount - 1);
+
+        var pageItems = _retiringPlayers
+            .Skip(_retiringPage * PRE_DRAFT_PAGE_SIZE)
+            .Take(PRE_DRAFT_PAGE_SIZE)
+            .ToList();
+
+        foreach (var p in pageItems)
             _retiringList.Add(BuildPlayerRow(p));
+
+        _btnRetiringPrev.SetEnabled(_retiringPage > 0);
+        _btnRetiringNext.SetEnabled(_retiringPage < pageCount - 1);
     }
 
-    void LoadFamePlayers()
+    void RenderFamePage()
     {
         _fameList.Clear();
-        var inductees = DatabaseManager.Instance.GetRetiringHallOfFameMembers();
-        if (inductees.Count == 0)
+
+        if (_famePlayers.Count == 0)
         {
             var empty = new Label();
             empty.AddToClassList("es-empty");
             empty.text = "Ningun jugador entra al Salon de la Fama esta temporada";
             _fameList.Add(empty);
+            _btnFamePrev.SetEnabled(false);
+            _btnFameNext.SetEnabled(false);
             return;
         }
-        foreach (var p in inductees)
+
+        int pageCount = Mathf.Max(1, Mathf.CeilToInt((float)_famePlayers.Count / PRE_DRAFT_PAGE_SIZE));
+        _famePage = Mathf.Clamp(_famePage, 0, pageCount - 1);
+
+        var pageItems = _famePlayers
+            .Skip(_famePage * PRE_DRAFT_PAGE_SIZE)
+            .Take(PRE_DRAFT_PAGE_SIZE)
+            .ToList();
+
+        foreach (var p in pageItems)
             _fameList.Add(BuildFameRow(p));
+
+        _btnFamePrev.SetEnabled(_famePage > 0);
+        _btnFameNext.SetEnabled(_famePage < pageCount - 1);
     }
 
     VisualElement BuildPlayerRow(PlayerData p)
     {
-        var row = new VisualElement();
-        row.AddToClassList("es-player-row");
+        var card = new VisualElement();
+        card.AddToClassList("es-player-row");
 
-        if (p.team_id != 0)
-        {
-            var logo = new VisualElement();
-            logo.AddToClassList("es-mini-logo");
-            var team = DatabaseManager.Instance.GetTeamById(p.team_id);
-            if (team != null && _logo32.TryGetValue(team.logo, out var sprite))
-                logo.style.backgroundImage = new StyleBackground(sprite);
-            row.Add(logo);
-        }
+        // Player photo
+        var photo = new VisualElement();
+        photo.AddToClassList("es-player-photo");
+        var photoTex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (photoTex != null)
+            photo.style.backgroundImage = new StyleBackground(photoTex);
+        card.Add(photo);
 
+        // Name
         var nameLbl = new Label();
         nameLbl.AddToClassList("es-player-name");
         nameLbl.text = $"{p.first_name} {p.last_name}";
-        row.Add(nameLbl);
+        card.Add(nameLbl);
+
+        // Age
+        var ageLbl = new Label();
+        ageLbl.AddToClassList("es-player-age");
+        ageLbl.text = $"{p.age} años";
+        card.Add(ageLbl);
+
+        // Bottom row: position badge + team logo + team abbreviation
+        var bottomRow = new VisualElement();
+        bottomRow.AddToClassList("es-player-bottom-row");
 
         var posLbl = new Label();
         posLbl.AddToClassList("es-player-pos");
         posLbl.text = PositionCodes.GetShort(p.position);
-        row.Add(posLbl);
+        bottomRow.Add(posLbl);
 
-        var ageLbl = new Label();
-        ageLbl.AddToClassList("es-player-age");
-        ageLbl.text = $"{p.age} años";
-        row.Add(ageLbl);
+        if (p.team_id != 0)
+        {
+            var team = DatabaseManager.Instance.GetTeamById(p.team_id);
+            if (team != null)
+            {
+                var logo = new VisualElement();
+                logo.AddToClassList("es-player-logo");
+                if (_logo32.TryGetValue(team.logo, out var sprite))
+                    logo.style.backgroundImage = new StyleBackground(sprite);
+                bottomRow.Add(logo);
 
-        return row;
+                var teamAbbr = new Label();
+                teamAbbr.AddToClassList("es-player-team-abbr");
+                teamAbbr.text = team.abbreviation;
+                bottomRow.Add(teamAbbr);
+            }
+        }
+
+        card.Add(bottomRow);
+        return card;
     }
 
     VisualElement BuildFameRow(PlayerData p)
     {
-        var row = new VisualElement();
-        row.AddToClassList("es-player-row");
-        row.AddToClassList("es-player-fame-row");
+        var card = new VisualElement();
+        card.AddToClassList("es-player-row");
+        card.AddToClassList("es-player-fame-row");
 
-        if (p.team_id != 0)
-        {
-            var logo = new VisualElement();
-            logo.AddToClassList("es-mini-logo");
-            var team = DatabaseManager.Instance.GetTeamById(p.team_id);
-            if (team != null && _logo32.TryGetValue(team.logo, out var sprite))
-                logo.style.backgroundImage = new StyleBackground(sprite);
-            row.Add(logo);
-        }
+        // Player photo
+        var photo = new VisualElement();
+        photo.AddToClassList("es-player-photo");
+        var photoTex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (photoTex != null)
+            photo.style.backgroundImage = new StyleBackground(photoTex);
+        card.Add(photo);
 
+        // Name
         var nameLbl = new Label();
         nameLbl.AddToClassList("es-player-name");
         nameLbl.text = $"{p.first_name} {p.last_name}";
-        row.Add(nameLbl);
+        card.Add(nameLbl);
 
-        var credentialsLbl = new Label();
-        credentialsLbl.AddToClassList("es-player-credentials");
-        credentialsLbl.text = p.rings > 0 || p.finals_mvps > 0
-            ? $"{p.rings} anillo(s)  ·  {p.finals_mvps} Finales MVP"
-            : "";
-        row.Add(credentialsLbl);
+        // "Clase del XXXX"
+        var classLbl = new Label();
+        classLbl.AddToClassList("es-player-age");
+        classLbl.text = $"Clase del {_season.year_end}";
+        card.Add(classLbl);
 
-        var fameLbl = new Label();
-        fameLbl.AddToClassList("es-player-fame");
-        fameLbl.text = "Salon de la Fama";
-        row.Add(fameLbl);
+        // Team logo + team abbreviation (stacked vertically)
+        var teamCol = new VisualElement();
+        teamCol.AddToClassList("es-player-team-col");
 
-        return row;
+        if (p.team_id != 0)
+        {
+            var team = DatabaseManager.Instance.GetTeamById(p.team_id);
+            if (team != null)
+            {
+                var logo = new VisualElement();
+                logo.AddToClassList("es-player-logo");
+                if (_logo32.TryGetValue(team.logo, out var sprite))
+                    logo.style.backgroundImage = new StyleBackground(sprite);
+                teamCol.Add(logo);
+
+                var teamAbbr = new Label();
+                teamAbbr.AddToClassList("es-player-team-abbr");
+                teamAbbr.text = team.abbreviation;
+                teamCol.Add(teamAbbr);
+            }
+        }
+
+        card.Add(teamCol);
+
+        return card;
     }
 
     void ProcessAITeamRenewals()
