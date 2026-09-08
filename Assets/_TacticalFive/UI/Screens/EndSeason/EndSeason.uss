@@ -1031,7 +1031,6 @@
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
-    justify-content: center;
 }
 .draft-log-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
