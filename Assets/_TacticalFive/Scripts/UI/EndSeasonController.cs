@@ -91,7 +91,7 @@ public class EndSeasonController : UIScreenController
     private int _prospectPage;
     private int _logPage;
     private List<DraftLogEntry> _logEntries = new();
-    private const int PAGE_SIZE = 10;
+    private const int PAGE_SIZE = 9;
 
     // ── Default photos for rookies ──
     private Sprite[] _defaultPhotos;
