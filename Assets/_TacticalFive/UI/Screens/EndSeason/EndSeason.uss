@@ -1015,11 +1015,11 @@
 }
 .draft-log-num {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
-    min-width: 30px;
+    min-width: 36px;
     flex-shrink: 0;
-    margin-right: 6px;
+    margin-right: 8px;
 }
 .draft-log-logo {
     width: 64px;
