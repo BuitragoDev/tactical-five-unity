@@ -858,7 +858,7 @@
 }
 .draft-needs-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -872,11 +872,15 @@
 }
 .draft-needs-row {
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
 }
 .draft-need {
     flex-direction: column;
     align-items: center;
+    margin-right: 20px;
+}
+.draft-need:last-child {
+    margin-right: 0;
 }
 .draft-need-badge {
     width: 40px;
@@ -892,7 +896,7 @@
 }
 .draft-need-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
 }
 .draft-need-badge--high {
