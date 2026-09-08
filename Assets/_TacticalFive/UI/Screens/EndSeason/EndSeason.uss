@@ -601,7 +601,7 @@
 }
 .draft-col-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
