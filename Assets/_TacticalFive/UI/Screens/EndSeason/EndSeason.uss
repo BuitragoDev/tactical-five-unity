@@ -663,7 +663,6 @@
     margin-right: 10px;
     background-size: cover;
     background-position: center;
-    background-color: rgb(42, 51, 71);
 }
 .draft-prospect-info {
     flex-direction: column;
@@ -775,7 +774,6 @@
     margin-left: 16px;
     background-size: cover;
     background-position: top;
-    background-color: rgb(42, 51, 71);
 }
 .draft-card-ovr-badge {
     flex-direction: column;
