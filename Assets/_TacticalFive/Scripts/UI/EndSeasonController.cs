@@ -350,6 +350,8 @@ public class EndSeasonController : UIScreenController
         _draftRoom.style.display = DisplayStyle.Flex;
         _draftLog.Clear();
 
+        UpdateTeamNeeds();
+
         StartCoroutine(DraftCoroutine());
     }
 
@@ -546,8 +548,6 @@ public class EndSeasonController : UIScreenController
         _draftStatOrg.text = org.ToString();
 
         _draftCardDesc.text = GeneratePlayerDescription(p);
-
-        UpdateTeamNeeds();
 
         int localIndex = index - _prospectPage * PAGE_SIZE;
         for (int i = 0; i < _prospectList.childCount; i++)
@@ -890,23 +890,24 @@ public class EndSeasonController : UIScreenController
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         var posPlayers = new Dictionary<string, List<int>>
         {
-            { "BASE", new List<int>() },
-            { "ESCOLTA", new List<int>() },
-            { "ALERO", new List<int>() },
-            { "ALA-PIVOT", new List<int>() },
-            { "PIVOT", new List<int>() }
+            { "PG", new List<int>() },
+            { "SG", new List<int>() },
+            { "SF", new List<int>() },
+            { "PF", new List<int>() },
+            { "C", new List<int>() }
         };
         foreach (var pl in roster)
         {
-            if (posPlayers.ContainsKey(pl.position))
-                posPlayers[pl.position].Add(pl.GetCalculatedAverage());
+            string pos = pl.position?.ToUpper();
+            if (pos != null && posPlayers.ContainsKey(pos))
+                posPlayers[pos].Add(pl.GetCalculatedAverage());
         }
 
-        SetNeedBadge(_draftNeedPG, _draftNeedPGVal, posPlayers["BASE"]);
-        SetNeedBadge(_draftNeedSG, _draftNeedSGVal, posPlayers["ESCOLTA"]);
-        SetNeedBadge(_draftNeedSF, _draftNeedSFVal, posPlayers["ALERO"]);
-        SetNeedBadge(_draftNeedPF, _draftNeedPFVal, posPlayers["ALA-PIVOT"]);
-        SetNeedBadge(_draftNeedC, _draftNeedCVal, posPlayers["PIVOT"]);
+        SetNeedBadge(_draftNeedPG, _draftNeedPGVal, posPlayers["PG"]);
+        SetNeedBadge(_draftNeedSG, _draftNeedSGVal, posPlayers["SG"]);
+        SetNeedBadge(_draftNeedSF, _draftNeedSFVal, posPlayers["SF"]);
+        SetNeedBadge(_draftNeedPF, _draftNeedPFVal, posPlayers["PF"]);
+        SetNeedBadge(_draftNeedC, _draftNeedCVal, posPlayers["C"]);
     }
 
     void SetNeedBadge(VisualElement badge, Label valLabel, List<int> ovrs)

@@ -178,10 +178,8 @@
 
                             <!-- Team Needs -->
                             <ui:VisualElement class="draft-team-needs">
-                                <ui:VisualElement class="draft-needs-header">
-                                    <ui:VisualElement name="DraftTeamLogo" class="draft-team-logo"/>
-                                    <ui:Label class="draft-needs-title" text="NECESIDADES DEL EQUIPO"/>
-                                </ui:VisualElement>
+                                <ui:Label class="draft-needs-title" text="NECESIDADES DEL EQUIPO"/>
+                                <ui:VisualElement name="DraftTeamLogo" class="draft-team-logo"/>
                                 <ui:VisualElement class="draft-needs-row">
                                     <ui:VisualElement class="draft-need">
                                         <ui:VisualElement name="DraftNeedPG" class="draft-need-badge">

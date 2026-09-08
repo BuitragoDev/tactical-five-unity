@@ -848,6 +848,7 @@
 /* ── TEAM NEEDS ── */
 .draft-team-needs {
     flex-direction: column;
+    align-items: center;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
@@ -855,23 +856,19 @@
     margin-bottom: 10px;
     flex-shrink: 0;
 }
-.draft-needs-header {
-    flex-direction: row;
-    align-items: center;
-    margin-bottom: 10px;
-}
-.draft-team-logo {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
-    margin-right: 12px;
-}
 .draft-needs-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 13px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
+    margin-bottom: 8px;
+}
+.draft-team-logo {
+    width: 64px;
+    height: 64px;
+    flex-shrink: 0;
+    margin-bottom: 10px;
 }
 .draft-needs-row {
     flex-direction: row;
