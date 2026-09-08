@@ -996,13 +996,13 @@
 .draft-log-entry {
     flex-direction: row;
     align-items: center;
-    padding: 8px 10px;
+    padding: 6px 8px;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     margin-bottom: 2px;
     flex-shrink: 0;
-    min-height: 52px;
+    min-height: 56px;
 }
 .draft-log-entry--user {
     border-left-width: 3px;
@@ -1031,6 +1031,7 @@
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
+    justify-content: center;
 }
 .draft-log-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
