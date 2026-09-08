@@ -58,10 +58,14 @@ public class EndSeasonController : UIScreenController
     private Label _draftCardBio;
     private VisualElement _draftCardPhoto;
     private Label _draftCardOvr;
-    private Label _draftStatAtk;
-    private Label _draftStatDef;
-    private Label _draftStatReb;
-    private Label _draftStatOrg;
+    private Label _draftStatShooting;
+    private Label _draftStat3pt;
+    private Label _draftStatPassing;
+    private Label _draftStatDribbling;
+    private Label _draftStatDefense;
+    private Label _draftStatRebounding;
+    private Label _draftStatSteals;
+    private Label _draftStatBlocks;
     private Label _draftCardDesc;
     // Team needs
     private VisualElement _draftTeamLogo;
@@ -189,10 +193,14 @@ public class EndSeasonController : UIScreenController
         _draftCardBio = _root.Q<Label>("DraftCardBio");
         _draftCardPhoto = _root.Q<VisualElement>("DraftCardPhoto");
         _draftCardOvr = _root.Q<Label>("DraftCardOvr");
-        _draftStatAtk = _root.Q<Label>("DraftStatAtk");
-        _draftStatDef = _root.Q<Label>("DraftStatDef");
-        _draftStatReb = _root.Q<Label>("DraftStatReb");
-        _draftStatOrg = _root.Q<Label>("DraftStatOrg");
+        _draftStatShooting = _root.Q<Label>("DraftStatShooting");
+        _draftStat3pt = _root.Q<Label>("DraftStat3pt");
+        _draftStatPassing = _root.Q<Label>("DraftStatPassing");
+        _draftStatDribbling = _root.Q<Label>("DraftStatDribbling");
+        _draftStatDefense = _root.Q<Label>("DraftStatDefense");
+        _draftStatRebounding = _root.Q<Label>("DraftStatRebounding");
+        _draftStatSteals = _root.Q<Label>("DraftStatSteals");
+        _draftStatBlocks = _root.Q<Label>("DraftStatBlocks");
         _draftCardDesc = _root.Q<Label>("DraftCardDesc");
         // Team needs
         _draftTeamLogo = _root.Q<VisualElement>("DraftTeamLogo");
@@ -533,14 +541,14 @@ public class EndSeasonController : UIScreenController
         if (_defaultPhotos.Length > 0)
             _draftCardPhoto.style.backgroundImage = new StyleBackground(_defaultPhotos[photoIdx]);
 
-        int atk = Mathf.RoundToInt((p.shooting + p.three_point) / 2f);
-        int def = Mathf.RoundToInt((p.defense + p.steals + p.blocks) / 3f);
-        int reb = p.rebounding;
-        int org = Mathf.RoundToInt((p.passing + p.iq + p.dribbling) / 3f);
-        _draftStatAtk.text = atk.ToString();
-        _draftStatDef.text = def.ToString();
-        _draftStatReb.text = reb.ToString();
-        _draftStatOrg.text = org.ToString();
+        _draftStatShooting.text = p.shooting.ToString();
+        _draftStat3pt.text = p.three_point.ToString();
+        _draftStatPassing.text = p.passing.ToString();
+        _draftStatDribbling.text = p.dribbling.ToString();
+        _draftStatDefense.text = p.defense.ToString();
+        _draftStatRebounding.text = p.rebounding.ToString();
+        _draftStatSteals.text = p.steals.ToString();
+        _draftStatBlocks.text = p.blocks.ToString();
 
         _draftCardDesc.text = GeneratePlayerDescription(p);
 

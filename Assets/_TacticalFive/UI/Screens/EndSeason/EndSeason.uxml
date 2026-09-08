@@ -156,20 +156,36 @@
                             <!-- Stat boxes -->
                             <ui:VisualElement class="draft-stat-boxes">
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="ATAQUE"/>
-                                    <ui:Label name="DraftStatAtk" class="draft-stat-value" text="--"/>
+                                    <ui:Label class="draft-stat-label" text="TIRO"/>
+                                    <ui:Label name="DraftStatShooting" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="TRIPLE"/>
+                                    <ui:Label name="DraftStat3pt" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="PASES"/>
+                                    <ui:Label name="DraftStatPassing" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="BOTE"/>
+                                    <ui:Label name="DraftStatDribbling" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
                                     <ui:Label class="draft-stat-label" text="DEFENSA"/>
-                                    <ui:Label name="DraftStatDef" class="draft-stat-value" text="--"/>
+                                    <ui:Label name="DraftStatDefense" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
                                     <ui:Label class="draft-stat-label" text="REBOTES"/>
-                                    <ui:Label name="DraftStatReb" class="draft-stat-value" text="--"/>
+                                    <ui:Label name="DraftStatRebounding" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="draft-stat-box">
-                                    <ui:Label class="draft-stat-label" text="ORGANIZACION"/>
-                                    <ui:Label name="DraftStatOrg" class="draft-stat-value" text="--"/>
+                                    <ui:Label class="draft-stat-label" text="ROBOS"/>
+                                    <ui:Label name="DraftStatSteals" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="TAPONES"/>
+                                    <ui:Label name="DraftStatBlocks" class="draft-stat-value" text="--"/>
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
