@@ -991,13 +991,14 @@
 }
 .btn-auto-pick {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 280px;
     background-color: rgb(42, 95, 201);
     border-width: 0;
     color: rgb(255, 255, 255);
-    font-size: 14px;
-    letter-spacing: 1px;
+    font-size: 18px;
+    letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 10px 20px;
+    padding: 12px 24px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
     margin-left: 12px;
