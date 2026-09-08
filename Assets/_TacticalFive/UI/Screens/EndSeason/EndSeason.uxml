@@ -99,13 +99,17 @@
 
             <!-- DRAFT ROOM (hidden until draft starts) -->
             <ui:VisualElement name="DraftRoom" class="draft-room" style="display: none;">
-                <!-- PROGRESS BAR -->
-                <ui:VisualElement class="draft-progress-bar">
-                    <ui:Label name="DraftProgressText" class="draft-progress-text" text="Pick 1 / 60"/>
-                    <ui:VisualElement class="draft-progress-track">
-                        <ui:VisualElement name="DraftProgressFill" class="draft-progress-fill"/>
+                <!-- BANNER -->
+                <ui:VisualElement class="draft-banner">
+                    <ui:VisualElement class="draft-banner-overlay"/>
+                    <ui:VisualElement class="draft-banner-left">
+                        <ui:Label class="draft-banner-title" text="DRAFT DE LA NBA"/>
+                        <ui:Label class="draft-banner-subtitle" text="Selecciona el próximo gran talento de la NBA"/>
                     </ui:VisualElement>
-                    <ui:Label name="DraftClassLabel" class="draft-class-label" text="Clase: normal"/>
+                    <ui:VisualElement class="draft-banner-pick-box">
+                        <ui:Label name="DraftBannerRound" class="draft-banner-round" text="Ronda 1"/>
+                        <ui:Label name="DraftBannerPick" class="draft-banner-pick" text="Pick 1"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- 3-COLUMN LAYOUT -->
@@ -113,8 +117,8 @@
                     <!-- LEFT: Available Prospects -->
                     <ui:VisualElement class="draft-col-left">
                         <ui:VisualElement class="draft-col-header">
-                            <ui:Label text="PROSPECTOS DISPONIBLES" class="draft-col-title"/>
-                            <ui:Label name="ProspectCount" class="draft-col-count" text="75"/>
+                            <ui:Label text="JUGADORES DISPONIBLES" class="draft-col-title"/>
+                            <ui:Label name="ProspectCount" class="draft-col-count" text="60"/>
                         </ui:VisualElement>
                         <ui:VisualElement name="ProspectList" class="draft-list-body"/>
                         <ui:VisualElement class="draft-pagination">
@@ -128,88 +132,88 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- CENTER: Current Pick -->
+                    <!-- CENTER: Player Card + Team Needs -->
                     <ui:VisualElement class="draft-col-center">
-                        <ui:VisualElement class="draft-current-pick">
-                            <ui:VisualElement class="draft-pick-number-box">
-                                <ui:Label name="DraftPickRound" class="draft-pick-round" text="R1"/>
-                                <ui:Label name="DraftPickNumber" class="draft-pick-number" text="#1"/>
+                        <ui:VisualElement name="DraftPlayerCard" class="draft-player-card">
+                            <!-- Top: pick box, name, photo, OVR -->
+                            <ui:VisualElement class="draft-card-top">
+                                <ui:VisualElement class="draft-card-pick-box">
+                                    <ui:Label name="DraftCardPickNum" class="draft-card-pick-num" text="#1"/>
+                                    <ui:Label name="DraftCardPickPos" class="draft-card-pick-pos" text="B"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-card-info">
+                                    <ui:Label name="DraftCardName" class="draft-card-name" text="Selecciona un prospecto"/>
+                                    <ui:Label name="DraftCardCollege" class="draft-card-college" text=""/>
+                                    <ui:Label name="DraftCardBio" class="draft-card-bio" text=""/>
+                                </ui:VisualElement>
+                                <ui:VisualElement name="DraftCardPhoto" class="draft-card-photo"/>
+                                <ui:VisualElement class="draft-card-ovr-badge">
+                                    <ui:Label class="draft-card-ovr-label" text="VALORACION GENERAL"/>
+                                    <ui:Label name="DraftCardOvr" class="draft-card-ovr-value" text="--"/>
+                                </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement class="draft-pick-team">
-                                <ui:VisualElement name="DraftPickTeamLogo" class="draft-pick-team-logo"/>
-                                <ui:Label name="DraftPickTeamName" class="draft-pick-team-name" text=""/>
-                            </ui:VisualElement>
-                        </ui:VisualElement>
 
-                        <!-- Player Card (shown when prospect selected) -->
-                        <ui:VisualElement name="DraftPlayerCard" class="draft-player-card" style="display: none;">
-                            <ui:Label name="DraftPlayerName" class="draft-player-card-name" text=""/>
-                            <ui:VisualElement class="draft-player-card-meta">
-                                <ui:Label name="DraftPlayerPosition" class="draft-player-card-pos" text=""/>
-                                <ui:Label name="DraftPlayerSecPos" class="draft-player-card-sec-pos" text=""/>
-                                <ui:Label name="DraftPlayerAge" class="draft-player-card-detail" text=""/>
-                                <ui:Label name="DraftPlayerHeight" class="draft-player-card-detail" text=""/>
-                                <ui:Label name="DraftPlayerWeight" class="draft-player-card-detail" text=""/>
-                                <ui:Label name="DraftPlayerNationality" class="draft-player-card-detail" text=""/>
-                                <ui:Label name="DraftPlayerCollege" class="draft-player-card-detail" text=""/>
+                            <!-- Stat boxes -->
+                            <ui:VisualElement class="draft-stat-boxes">
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="ATAQUE"/>
+                                    <ui:Label name="DraftStatAtk" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="DEFENSA"/>
+                                    <ui:Label name="DraftStatDef" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="REBOTES"/>
+                                    <ui:Label name="DraftStatReb" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="draft-stat-box">
+                                    <ui:Label class="draft-stat-label" text="ORGANIZACION"/>
+                                    <ui:Label name="DraftStatOrg" class="draft-stat-value" text="--"/>
+                                </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:Label name="DraftPlayerTrait" class="draft-player-card-trait" text="" style="display: none;"/>
-                            <ui:VisualElement class="draft-player-card-attrs">
-                                <ui:VisualElement class="draft-attr draft-attr-med">
-                                    <ui:Label text="MED" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrMed" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="VEL" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrSpeed" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="TIR" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrShooting" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="3PT" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttr3pt" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="PAS" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrPassing" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="MAN" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrDribbling" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="DEF" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrDefense" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="REB" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrRebounding" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="ATL" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrAthleticism" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="IQ" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrIQ" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="ROB" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrSteals" class="draft-attr-val" text=""/>
-                                </ui:VisualElement>
-                                <ui:VisualElement class="draft-attr">
-                                    <ui:Label text="TAP" class="draft-attr-lbl"/>
-                                    <ui:Label name="DraftAttrBlocks" class="draft-attr-val" text=""/>
+
+                            <!-- Description -->
+                            <ui:Label name="DraftCardDesc" class="draft-card-desc" text=""/>
+
+                            <!-- Team Needs -->
+                            <ui:VisualElement class="draft-team-needs">
+                                <ui:Label class="draft-needs-title" text="NECESIDADES DEL EQUIPO"/>
+                                <ui:VisualElement class="draft-needs-row">
+                                    <ui:VisualElement class="draft-need">
+                                        <ui:VisualElement name="DraftNeedPG" class="draft-need-icon draft-need-icon--filled">
+                                            <ui:Label class="draft-need-check" text="✓"/>
+                                        </ui:VisualElement>
+                                        <ui:Label class="draft-need-pos" text="B"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="draft-need">
+                                        <ui:VisualElement name="DraftNeedSG" class="draft-need-icon draft-need-icon--filled">
+                                            <ui:Label class="draft-need-check" text="✓"/>
+                                        </ui:VisualElement>
+                                        <ui:Label class="draft-need-pos" text="E"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="draft-need">
+                                        <ui:VisualElement name="DraftNeedSF" class="draft-need-icon draft-need-icon--empty"/>
+                                        <ui:Label class="draft-need-pos" text="AL"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="draft-need">
+                                        <ui:VisualElement name="DraftNeedPF" class="draft-need-icon draft-need-icon--filled">
+                                            <ui:Label class="draft-need-check" text="✓"/>
+                                        </ui:VisualElement>
+                                        <ui:Label class="draft-need-pos" text="AP"/>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="draft-need">
+                                        <ui:VisualElement name="DraftNeedC" class="draft-need-icon draft-need-icon--empty"/>
+                                        <ui:Label class="draft-need-pos" text="P"/>
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
 
                         <!-- Action Buttons -->
                         <ui:VisualElement class="draft-actions">
-                            <ui:Button name="BtnDraftPick" class="btn-draft-pick" text="SELECCIONAR" style="display: none;"/>
-                            <ui:Button name="BtnAutoPick" class="btn-auto-pick" text="ELEGIR MEJOR" style="display: none;"/>
+                            <ui:Button name="BtnDraftPick" class="btn-draft-pick" text="SELECCIONAR JUGADOR"/>
+                            <ui:Button name="BtnAutoPick" class="btn-auto-pick" text="AUTO"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
 

@@ -43,39 +43,36 @@ public class EndSeasonController : UIScreenController
 
     // ── Draft room ──
     private VisualElement _draftRoom;
-    private Label _draftProgressText;
-    private VisualElement _draftProgressFill;
-    private Label _draftClassLabel;
+    // Banner
+    private Label _draftBannerRound;
+    private Label _draftBannerPick;
+    // Prospect list
     private Label _prospectCount;
     private VisualElement _prospectList;
-    private Label _draftPickRound;
-    private Label _draftPickNumber;
-    private VisualElement _draftPickTeamLogo;
-    private Label _draftPickTeamName;
+    // Player card
     private VisualElement _draftPlayerCard;
-    private Label _draftPlayerName;
-    private Label _draftPlayerPosition;
-    private Label _draftPlayerSecPos;
-    private Label _draftPlayerAge;
-    private Label _draftPlayerHeight;
-    private Label _draftPlayerWeight;
-    private Label _draftPlayerNationality;
-    private Label _draftPlayerCollege;
-    private Label _draftPlayerTrait;
-    private Label _draftAttrMed;
-    private Label _draftAttrSpeed;
-    private Label _draftAttrShooting;
-    private Label _draftAttr3pt;
-    private Label _draftAttrPassing;
-    private Label _draftAttrDribbling;
-    private Label _draftAttrDefense;
-    private Label _draftAttrRebounding;
-    private Label _draftAttrAthleticism;
-    private Label _draftAttrIQ;
-    private Label _draftAttrSteals;
-    private Label _draftAttrBlocks;
+    private Label _draftCardPickNum;
+    private Label _draftCardPickPos;
+    private Label _draftCardName;
+    private Label _draftCardCollege;
+    private Label _draftCardBio;
+    private VisualElement _draftCardPhoto;
+    private Label _draftCardOvr;
+    private Label _draftStatAtk;
+    private Label _draftStatDef;
+    private Label _draftStatReb;
+    private Label _draftStatOrg;
+    private Label _draftCardDesc;
+    // Team needs
+    private VisualElement _draftNeedPG;
+    private VisualElement _draftNeedSG;
+    private VisualElement _draftNeedSF;
+    private VisualElement _draftNeedPF;
+    private VisualElement _draftNeedC;
+    // Actions
     private Button _btnDraftPick;
     private Button _btnAutoPick;
+    // Draft log
     private VisualElement _draftLog;
 
     // ── Draft pagination ──
@@ -89,6 +86,10 @@ public class EndSeasonController : UIScreenController
     private int _logPage;
     private List<DraftLogEntry> _logEntries = new();
     private const int PAGE_SIZE = 10;
+
+    // ── Default photos for rookies ──
+    private Sprite[] _defaultPhotos;
+    private System.Random _draftRng = new();
 
     private class DraftLogEntry
     {
@@ -166,37 +167,33 @@ public class EndSeasonController : UIScreenController
         _btnFameNext = _root.Q<Button>("BtnFameNext");
 
         _draftRoom = _root.Q<VisualElement>("DraftRoom");
-        _draftProgressText = _root.Q<Label>("DraftProgressText");
-        _draftProgressFill = _root.Q<VisualElement>("DraftProgressFill");
-        _draftClassLabel = _root.Q<Label>("DraftClassLabel");
+        // Banner
+        _draftBannerRound = _root.Q<Label>("DraftBannerRound");
+        _draftBannerPick = _root.Q<Label>("DraftBannerPick");
+        // Prospect list
         _prospectCount = _root.Q<Label>("ProspectCount");
         _prospectList = _root.Q<VisualElement>("ProspectList");
-        _draftPickRound = _root.Q<Label>("DraftPickRound");
-        _draftPickNumber = _root.Q<Label>("DraftPickNumber");
-        _draftPickTeamLogo = _root.Q<VisualElement>("DraftPickTeamLogo");
-        _draftPickTeamName = _root.Q<Label>("DraftPickTeamName");
+        // Player card
         _draftPlayerCard = _root.Q<VisualElement>("DraftPlayerCard");
-        _draftPlayerName = _root.Q<Label>("DraftPlayerName");
-        _draftPlayerPosition = _root.Q<Label>("DraftPlayerPosition");
-        _draftPlayerSecPos = _root.Q<Label>("DraftPlayerSecPos");
-        _draftPlayerAge = _root.Q<Label>("DraftPlayerAge");
-        _draftPlayerHeight = _root.Q<Label>("DraftPlayerHeight");
-        _draftPlayerWeight = _root.Q<Label>("DraftPlayerWeight");
-        _draftPlayerNationality = _root.Q<Label>("DraftPlayerNationality");
-        _draftPlayerCollege = _root.Q<Label>("DraftPlayerCollege");
-        _draftPlayerTrait = _root.Q<Label>("DraftPlayerTrait");
-        _draftAttrMed = _root.Q<Label>("DraftAttrMed");
-        _draftAttrSpeed = _root.Q<Label>("DraftAttrSpeed");
-        _draftAttrShooting = _root.Q<Label>("DraftAttrShooting");
-        _draftAttr3pt = _root.Q<Label>("DraftAttr3pt");
-        _draftAttrPassing = _root.Q<Label>("DraftAttrPassing");
-        _draftAttrDribbling = _root.Q<Label>("DraftAttrDribbling");
-        _draftAttrDefense = _root.Q<Label>("DraftAttrDefense");
-        _draftAttrRebounding = _root.Q<Label>("DraftAttrRebounding");
-        _draftAttrAthleticism = _root.Q<Label>("DraftAttrAthleticism");
-        _draftAttrIQ = _root.Q<Label>("DraftAttrIQ");
-        _draftAttrSteals = _root.Q<Label>("DraftAttrSteals");
-        _draftAttrBlocks = _root.Q<Label>("DraftAttrBlocks");
+        _draftCardPickNum = _root.Q<Label>("DraftCardPickNum");
+        _draftCardPickPos = _root.Q<Label>("DraftCardPickPos");
+        _draftCardName = _root.Q<Label>("DraftCardName");
+        _draftCardCollege = _root.Q<Label>("DraftCardCollege");
+        _draftCardBio = _root.Q<Label>("DraftCardBio");
+        _draftCardPhoto = _root.Q<VisualElement>("DraftCardPhoto");
+        _draftCardOvr = _root.Q<Label>("DraftCardOvr");
+        _draftStatAtk = _root.Q<Label>("DraftStatAtk");
+        _draftStatDef = _root.Q<Label>("DraftStatDef");
+        _draftStatReb = _root.Q<Label>("DraftStatReb");
+        _draftStatOrg = _root.Q<Label>("DraftStatOrg");
+        _draftCardDesc = _root.Q<Label>("DraftCardDesc");
+        // Team needs
+        _draftNeedPG = _root.Q<VisualElement>("DraftNeedPG");
+        _draftNeedSG = _root.Q<VisualElement>("DraftNeedSG");
+        _draftNeedSF = _root.Q<VisualElement>("DraftNeedSF");
+        _draftNeedPF = _root.Q<VisualElement>("DraftNeedPF");
+        _draftNeedC = _root.Q<VisualElement>("DraftNeedC");
+        // Actions
         _btnDraftPick = _root.Q<Button>("BtnDraftPick");
         _btnAutoPick = _root.Q<Button>("BtnAutoPick");
         _draftLog = _root.Q<VisualElement>("DraftLog");
@@ -217,6 +214,8 @@ public class EndSeasonController : UIScreenController
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         _logo32 = new Dictionary<string, Sprite>();
         foreach (var s in logos) _logo32[s.name] = s;
+
+        _defaultPhotos = Resources.LoadAll<Sprite>("PlayerPhotos/Default");
 
         ProcessAITeamRenewals();
         _btnNextSeason.SetEnabled(false);
@@ -334,15 +333,6 @@ public class EndSeasonController : UIScreenController
         _draftRoom.style.display = DisplayStyle.Flex;
         _draftLog.Clear();
 
-        string classText = classLabel switch
-        {
-            "historic" => "Clase: HISTORICA",
-            "strong" => "Clase: Fuerte",
-            "weak" => "Clase: Debil",
-            _ => "Clase: Normal"
-        };
-        _draftClassLabel.text = classText;
-
         StartCoroutine(DraftCoroutine());
     }
 
@@ -362,7 +352,6 @@ public class EndSeasonController : UIScreenController
                 _btnDraftPick.style.display = DisplayStyle.Flex;
                 _btnAutoPick.style.display = DisplayStyle.Flex;
                 _btnDraftPick.SetEnabled(false);
-                _draftPlayerCard.style.display = DisplayStyle.None;
 
                 yield return null;
                 while (_draftState == DraftState.UserPicking)
@@ -373,7 +362,6 @@ public class EndSeasonController : UIScreenController
                 _draftState = DraftState.AIPicking;
                 _btnDraftPick.style.display = DisplayStyle.None;
                 _btnAutoPick.style.display = DisplayStyle.None;
-                _draftPlayerCard.style.display = DisplayStyle.None;
 
                 yield return new WaitForSeconds(0.4f);
 
@@ -388,13 +376,9 @@ public class EndSeasonController : UIScreenController
         }
 
         _draftState = DraftState.Complete;
-        _draftProgressFill.style.width = Length.Percent(100);
-        _draftProgressText.text = $"Pick {_draftOrder.Count} / {_draftOrder.Count}";
         _btnDraftPick.style.display = DisplayStyle.None;
         _btnAutoPick.style.display = DisplayStyle.None;
         _prospectCount.text = "0";
-        _draftPlayerCard.style.display = DisplayStyle.None;
-        _draftPickTeamName.text = "DRAFT COMPLETADO";
         _btnNextSeason.text = "FINALIZAR DRAFT";
         _btnNextSeason.SetEnabled(true);
 
@@ -404,16 +388,8 @@ public class EndSeasonController : UIScreenController
     void UpdatePickUI(DraftGenerator.DraftPickSlot slot)
     {
         bool isRound2 = slot.IsRound2;
-        _draftPickRound.text = isRound2 ? "R2" : "R1";
-        _draftPickNumber.text = $"#{slot.PickNumber}";
-
-        float pct = (float)_currentPickIndex / _draftOrder.Count;
-        _draftProgressFill.style.width = Length.Percent(pct * 100);
-        _draftProgressText.text = $"Pick {_currentPickIndex + 1} / {_draftOrder.Count}";
-
-        if (_logo32.TryGetValue(slot.Team.logo, out var logo))
-            _draftPickTeamLogo.style.backgroundImage = new StyleBackground(logo);
-        _draftPickTeamName.text = slot.Team.name.ToUpper();
+        _draftBannerRound.text = isRound2 ? "Ronda 2" : "Ronda 1";
+        _draftBannerPick.text = $"Pick {slot.PickNumber}";
     }
 
     void UpdateProspectList()
@@ -437,21 +413,29 @@ public class EndSeasonController : UIScreenController
             int globalIndex = baseIndex + i;
             var row = new VisualElement();
             row.AddToClassList("draft-prospect");
-            if (globalIndex < 3) row.AddToClassList("draft-prospect--top");
 
-            var pos = new Label();
-            pos.AddToClassList("draft-prospect-pos");
-            pos.text = PositionCodes.GetShort(p.position);
-            row.Add(pos);
+            var num = new Label();
+            num.AddToClassList("draft-prospect-num");
+            num.text = $"#{globalIndex + 1}";
+            row.Add(num);
 
+            var photo = new VisualElement();
+            photo.AddToClassList("draft-prospect-photo");
+            int photoIdx = Mathf.Abs(p.GetHashCode()) % Mathf.Max(1, _defaultPhotos.Length);
+            if (_defaultPhotos.Length > 0)
+                photo.style.backgroundImage = new StyleBackground(_defaultPhotos[photoIdx]);
+            row.Add(photo);
+
+            var info = new VisualElement();
+            info.AddToClassList("draft-prospect-info");
             var nameLbl = new Label();
             nameLbl.AddToClassList("draft-prospect-name");
             nameLbl.text = $"{p.first_name} {p.last_name}";
-            row.Add(nameLbl);
-
-            var info = new Label();
-            info.AddToClassList("draft-prospect-info");
-            info.text = $"{p.age}a · {p.height_cm}cm";
+            info.Add(nameLbl);
+            var meta = new Label();
+            meta.AddToClassList("draft-prospect-meta");
+            meta.text = $"{p.college}  ·  {p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age}a";
+            info.Add(meta);
             row.Add(info);
 
             var med = new Label();
@@ -486,7 +470,6 @@ public class EndSeasonController : UIScreenController
         _prospectPage = Mathf.Clamp(_prospectPage + delta, 0, pageCount - 1);
         _selectedProspect = null;
         _btnDraftPick.SetEnabled(false);
-        _draftPlayerCard.style.display = DisplayStyle.None;
         UpdateProspectList();
     }
 
@@ -522,46 +505,33 @@ public class EndSeasonController : UIScreenController
         _selectedProspect = _availableProspects[index];
         _btnDraftPick.SetEnabled(true);
 
-        _draftPlayerCard.style.display = DisplayStyle.Flex;
         var p = _selectedProspect;
-        _draftPlayerName.text = $"{p.first_name} {p.last_name}";
-        _draftPlayerPosition.text = PositionCodes.GetShort(p.position);
-        if (!string.IsNullOrEmpty(p.secondary_position))
-        {
-            _draftPlayerSecPos.text = PositionCodes.GetShort(p.secondary_position);
-            _draftPlayerSecPos.style.display = DisplayStyle.Flex;
-        }
-        else
-            _draftPlayerSecPos.style.display = DisplayStyle.None;
+        var slot = _draftOrder[_currentPickIndex];
 
-        _draftPlayerAge.text = $"{p.age} años";
-        _draftPlayerHeight.text = $"{p.height_cm}cm";
-        _draftPlayerWeight.text = $"{p.weight_kg}kg";
-        _draftPlayerNationality.text = CountryCodes.GetName(p.nationality);
-        _draftPlayerCollege.text = p.college;
+        _draftCardPickNum.text = $"#{slot.PickNumber}";
+        _draftCardPickPos.text = PositionCodes.GetShort(p.position);
+        _draftCardName.text = $"{p.first_name} {p.last_name}";
+        _draftCardCollege.text = p.college;
+        _draftCardBio.text = $"{p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age} años  ·  {CountryCodes.GetName(p.nationality)}";
+        _draftCardOvr.text = p.overall.ToString();
 
-        if (!string.IsNullOrEmpty(p.trait))
-        {
-            _draftPlayerTrait.style.display = DisplayStyle.Flex;
-            _draftPlayerTrait.text = $"Trait: {p.trait.Replace("_", " ").ToUpper()}";
-        }
-        else
-            _draftPlayerTrait.style.display = DisplayStyle.None;
+        int photoIdx = Mathf.Abs(p.GetHashCode()) % Mathf.Max(1, _defaultPhotos.Length);
+        if (_defaultPhotos.Length > 0)
+            _draftCardPhoto.style.backgroundImage = new StyleBackground(_defaultPhotos[photoIdx]);
 
-        _draftAttrMed.text = p.overall.ToString();
-        _draftAttrSpeed.text = p.speed.ToString();
-        _draftAttrShooting.text = p.shooting.ToString();
-        _draftAttr3pt.text = p.three_point.ToString();
-        _draftAttrPassing.text = p.passing.ToString();
-        _draftAttrDribbling.text = p.dribbling.ToString();
-        _draftAttrDefense.text = p.defense.ToString();
-        _draftAttrRebounding.text = p.rebounding.ToString();
-        _draftAttrAthleticism.text = p.athleticism.ToString();
-        _draftAttrIQ.text = p.iq.ToString();
-        _draftAttrSteals.text = p.steals.ToString();
-        _draftAttrBlocks.text = p.blocks.ToString();
+        int atk = Mathf.RoundToInt((p.shooting + p.three_point) / 2f);
+        int def = Mathf.RoundToInt((p.defense + p.steals + p.blocks) / 3f);
+        int reb = p.rebounding;
+        int org = Mathf.RoundToInt((p.passing + p.iq + p.dribbling) / 3f);
+        _draftStatAtk.text = atk.ToString();
+        _draftStatDef.text = def.ToString();
+        _draftStatReb.text = reb.ToString();
+        _draftStatOrg.text = org.ToString();
 
-        // Highlight in list (global index → local page index)
+        _draftCardDesc.text = GeneratePlayerDescription(p);
+
+        UpdateTeamNeeds();
+
         int localIndex = index - _prospectPage * PAGE_SIZE;
         for (int i = 0; i < _prospectList.childCount; i++)
             _prospectList[i].RemoveFromClassList("draft-prospect--selected");
@@ -637,12 +607,12 @@ public class EndSeasonController : UIScreenController
 
         var teamLbl = new Label();
         teamLbl.AddToClassList("draft-log-team");
-        teamLbl.text = $"{entry.TeamName.ToUpper()} — {PositionCodes.GetShort(entry.Position)}";
+        teamLbl.text = entry.TeamName.ToUpper();
         info.Add(teamLbl);
 
         var playerLbl = new Label();
         playerLbl.AddToClassList("draft-log-player");
-        playerLbl.text = $"{entry.FirstName} {entry.LastName}  ·  MED: {entry.Overall}";
+        playerLbl.text = $"{entry.FirstName} {entry.LastName}  ·  {entry.Overall} MED";
         info.Add(playerLbl);
 
         row.Add(info);
@@ -848,6 +818,90 @@ public class EndSeasonController : UIScreenController
         card.Add(teamCol);
 
         return card;
+    }
+
+    // ════════════════════════════════════════════════════════════════
+    //  DRAFT HELPERS
+    // ════════════════════════════════════════════════════════════════
+
+    string GeneratePlayerDescription(DraftProspect p)
+    {
+        var parts = new List<string>();
+
+        var topAttrs = new List<(string name, int val)>
+        {
+            ("tiro", p.shooting),
+            ("triple", p.three_point),
+            ("pases", p.passing),
+            ("bote", p.dribbling),
+            ("defensa", p.defense),
+            ("rebotes", p.rebounding),
+            ("rapidez", p.speed),
+            ("atletismo", p.athleticism),
+            ("inteligencia", p.iq),
+            ("robos", p.steals),
+            ("tapones", p.blocks)
+        };
+        var top3 = topAttrs.OrderByDescending(a => a.val).Take(3).ToList();
+
+        if (p.overall >= 85)
+            parts.Add("Un prospecto de elite con potencial de estrella.");
+        else if (p.overall >= 78)
+            parts.Add("Un jugador con gran potencial para ser titular.");
+        else if (p.overall >= 70)
+            parts.Add("Un jugador sólido que puede aportar al equipo.");
+        else
+            parts.Add("Un prospecto de desarrollo con margen de mejora.");
+
+        if (top3.Count >= 2)
+            parts.Add($"Destaca en {top3[0].name} ({top3[0].val}), {top3[1].name} ({top3[1].val}) y {top3[2].name} ({top3[2].val}).");
+
+        if (!string.IsNullOrEmpty(p.trait))
+        {
+            string traitName = p.trait.Replace("_", " ");
+            parts.Add($"Rasgo: {traitName.ToUpper()}.");
+        }
+
+        return string.Join(" ", parts);
+    }
+
+    void UpdateTeamNeeds()
+    {
+        var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var posCount = new Dictionary<string, int>
+        {
+            { "BASE", 0 }, { "ESCOLTA", 0 }, { "ALERO", 0 }, { "ALA-PIVOT", 0 }, { "PIVOT", 0 }
+        };
+        foreach (var pl in roster)
+        {
+            if (posCount.ContainsKey(pl.position))
+                posCount[pl.position]++;
+        }
+
+        SetNeedIcon(_draftNeedPG, posCount["BASE"] < 2);
+        SetNeedIcon(_draftNeedSG, posCount["ESCOLTA"] < 2);
+        SetNeedIcon(_draftNeedSF, posCount["ALERO"] < 2);
+        SetNeedIcon(_draftNeedPF, posCount["ALA-PIVOT"] < 2);
+        SetNeedIcon(_draftNeedC, posCount["PIVOT"] < 2);
+    }
+
+    void SetNeedIcon(VisualElement icon, bool needed)
+    {
+        icon.RemoveFromClassList("draft-need-icon--filled");
+        icon.RemoveFromClassList("draft-need-icon--empty");
+        icon.Clear();
+        if (needed)
+        {
+            icon.AddToClassList("draft-need-icon--empty");
+        }
+        else
+        {
+            icon.AddToClassList("draft-need-icon--filled");
+            var check = new Label();
+            check.AddToClassList("draft-need-check");
+            check.text = "✓";
+            icon.Add(check);
+        }
     }
 
     void ProcessAITeamRenewals()
