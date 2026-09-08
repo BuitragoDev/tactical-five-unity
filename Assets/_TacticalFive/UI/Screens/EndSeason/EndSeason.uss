@@ -1051,8 +1051,8 @@
 }
 .draft-log-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(122, 138, 170);
+    font-size: 18px;
+    color: rgb(212, 160, 23);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
