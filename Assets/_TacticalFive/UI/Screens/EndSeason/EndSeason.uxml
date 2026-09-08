@@ -178,32 +178,39 @@
 
                             <!-- Team Needs -->
                             <ui:VisualElement class="draft-team-needs">
-                                <ui:Label class="draft-needs-title" text="NECESIDADES DEL EQUIPO"/>
+                                <ui:VisualElement class="draft-needs-header">
+                                    <ui:VisualElement name="DraftTeamLogo" class="draft-team-logo"/>
+                                    <ui:Label class="draft-needs-title" text="NECESIDADES DEL EQUIPO"/>
+                                </ui:VisualElement>
                                 <ui:VisualElement class="draft-needs-row">
                                     <ui:VisualElement class="draft-need">
-                                        <ui:VisualElement name="DraftNeedPG" class="draft-need-icon draft-need-icon--filled">
-                                            <ui:Label class="draft-need-check" text="✓"/>
+                                        <ui:VisualElement name="DraftNeedPG" class="draft-need-badge">
+                                            <ui:Label name="DraftNeedPGVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
                                         <ui:Label class="draft-need-pos" text="B"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
-                                        <ui:VisualElement name="DraftNeedSG" class="draft-need-icon draft-need-icon--filled">
-                                            <ui:Label class="draft-need-check" text="✓"/>
+                                        <ui:VisualElement name="DraftNeedSG" class="draft-need-badge">
+                                            <ui:Label name="DraftNeedSGVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
                                         <ui:Label class="draft-need-pos" text="E"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
-                                        <ui:VisualElement name="DraftNeedSF" class="draft-need-icon draft-need-icon--empty"/>
+                                        <ui:VisualElement name="DraftNeedSF" class="draft-need-badge">
+                                            <ui:Label name="DraftNeedSFVal" class="draft-need-val" text="--"/>
+                                        </ui:VisualElement>
                                         <ui:Label class="draft-need-pos" text="AL"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
-                                        <ui:VisualElement name="DraftNeedPF" class="draft-need-icon draft-need-icon--filled">
-                                            <ui:Label class="draft-need-check" text="✓"/>
+                                        <ui:VisualElement name="DraftNeedPF" class="draft-need-badge">
+                                            <ui:Label name="DraftNeedPFVal" class="draft-need-val" text="--"/>
                                         </ui:VisualElement>
                                         <ui:Label class="draft-need-pos" text="AP"/>
                                     </ui:VisualElement>
                                     <ui:VisualElement class="draft-need">
-                                        <ui:VisualElement name="DraftNeedC" class="draft-need-icon draft-need-icon--empty"/>
+                                        <ui:VisualElement name="DraftNeedC" class="draft-need-badge">
+                                            <ui:Label name="DraftNeedCVal" class="draft-need-val" text="--"/>
+                                        </ui:VisualElement>
                                         <ui:Label class="draft-need-pos" text="P"/>
                                     </ui:VisualElement>
                                 </ui:VisualElement>

@@ -64,11 +64,17 @@ public class EndSeasonController : UIScreenController
     private Label _draftStatOrg;
     private Label _draftCardDesc;
     // Team needs
+    private VisualElement _draftTeamLogo;
     private VisualElement _draftNeedPG;
     private VisualElement _draftNeedSG;
     private VisualElement _draftNeedSF;
     private VisualElement _draftNeedPF;
     private VisualElement _draftNeedC;
+    private Label _draftNeedPGVal;
+    private Label _draftNeedSGVal;
+    private Label _draftNeedSFVal;
+    private Label _draftNeedPFVal;
+    private Label _draftNeedCVal;
     // Actions
     private Button _btnDraftPick;
     private Button _btnAutoPick;
@@ -105,6 +111,7 @@ public class EndSeasonController : UIScreenController
 
     // ── State ──
     private Dictionary<string, Sprite> _logo32;
+    private Dictionary<string, Sprite> _logo64;
     private DraftState _draftState;
     private int _currentPickIndex;
     private List<DraftGenerator.DraftPickSlot> _draftOrder;
@@ -188,11 +195,17 @@ public class EndSeasonController : UIScreenController
         _draftStatOrg = _root.Q<Label>("DraftStatOrg");
         _draftCardDesc = _root.Q<Label>("DraftCardDesc");
         // Team needs
+        _draftTeamLogo = _root.Q<VisualElement>("DraftTeamLogo");
         _draftNeedPG = _root.Q<VisualElement>("DraftNeedPG");
         _draftNeedSG = _root.Q<VisualElement>("DraftNeedSG");
         _draftNeedSF = _root.Q<VisualElement>("DraftNeedSF");
         _draftNeedPF = _root.Q<VisualElement>("DraftNeedPF");
         _draftNeedC = _root.Q<VisualElement>("DraftNeedC");
+        _draftNeedPGVal = _root.Q<Label>("DraftNeedPGVal");
+        _draftNeedSGVal = _root.Q<Label>("DraftNeedSGVal");
+        _draftNeedSFVal = _root.Q<Label>("DraftNeedSFVal");
+        _draftNeedPFVal = _root.Q<Label>("DraftNeedPFVal");
+        _draftNeedCVal = _root.Q<Label>("DraftNeedCVal");
         // Actions
         _btnDraftPick = _root.Q<Button>("BtnDraftPick");
         _btnAutoPick = _root.Q<Button>("BtnAutoPick");
@@ -214,6 +227,10 @@ public class EndSeasonController : UIScreenController
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         _logo32 = new Dictionary<string, Sprite>();
         foreach (var s in logos) _logo32[s.name] = s;
+
+        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        _logo64 = new Dictionary<string, Sprite>();
+        foreach (var s in logos64) _logo64[s.name] = s;
 
         _defaultPhotos = Resources.LoadAll<Sprite>("PlayerPhotos/Default");
 
@@ -867,41 +884,53 @@ public class EndSeasonController : UIScreenController
 
     void UpdateTeamNeeds()
     {
+        if (_myTeam != null && _logo64 != null && _logo64.TryGetValue(_myTeam.logo, out var teamLogo))
+            _draftTeamLogo.style.backgroundImage = new StyleBackground(teamLogo);
+
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        var posCount = new Dictionary<string, int>
+        var posPlayers = new Dictionary<string, List<int>>
         {
-            { "BASE", 0 }, { "ESCOLTA", 0 }, { "ALERO", 0 }, { "ALA-PIVOT", 0 }, { "PIVOT", 0 }
+            { "BASE", new List<int>() },
+            { "ESCOLTA", new List<int>() },
+            { "ALERO", new List<int>() },
+            { "ALA-PIVOT", new List<int>() },
+            { "PIVOT", new List<int>() }
         };
         foreach (var pl in roster)
         {
-            if (posCount.ContainsKey(pl.position))
-                posCount[pl.position]++;
+            if (posPlayers.ContainsKey(pl.position))
+                posPlayers[pl.position].Add(pl.GetCalculatedAverage());
         }
 
-        SetNeedIcon(_draftNeedPG, posCount["BASE"] < 2);
-        SetNeedIcon(_draftNeedSG, posCount["ESCOLTA"] < 2);
-        SetNeedIcon(_draftNeedSF, posCount["ALERO"] < 2);
-        SetNeedIcon(_draftNeedPF, posCount["ALA-PIVOT"] < 2);
-        SetNeedIcon(_draftNeedC, posCount["PIVOT"] < 2);
+        SetNeedBadge(_draftNeedPG, _draftNeedPGVal, posPlayers["BASE"]);
+        SetNeedBadge(_draftNeedSG, _draftNeedSGVal, posPlayers["ESCOLTA"]);
+        SetNeedBadge(_draftNeedSF, _draftNeedSFVal, posPlayers["ALERO"]);
+        SetNeedBadge(_draftNeedPF, _draftNeedPFVal, posPlayers["ALA-PIVOT"]);
+        SetNeedBadge(_draftNeedC, _draftNeedCVal, posPlayers["PIVOT"]);
     }
 
-    void SetNeedIcon(VisualElement icon, bool needed)
+    void SetNeedBadge(VisualElement badge, Label valLabel, List<int> ovrs)
     {
-        icon.RemoveFromClassList("draft-need-icon--filled");
-        icon.RemoveFromClassList("draft-need-icon--empty");
-        icon.Clear();
-        if (needed)
+        badge.RemoveFromClassList("draft-need-badge--high");
+        badge.RemoveFromClassList("draft-need-badge--mid");
+        badge.RemoveFromClassList("draft-need-badge--low");
+
+        if (ovrs.Count == 0)
         {
-            icon.AddToClassList("draft-need-icon--empty");
+            valLabel.text = "SIN";
+            badge.AddToClassList("draft-need-badge--low");
+            return;
         }
+
+        int avg = Mathf.RoundToInt((float)ovrs.Average());
+        valLabel.text = avg.ToString();
+
+        if (avg > 84)
+            badge.AddToClassList("draft-need-badge--high");
+        else if (avg >= 70)
+            badge.AddToClassList("draft-need-badge--mid");
         else
-        {
-            icon.AddToClassList("draft-need-icon--filled");
-            var check = new Label();
-            check.AddToClassList("draft-need-check");
-            check.text = "✓";
-            icon.Add(check);
-        }
+            badge.AddToClassList("draft-need-badge--low");
     }
 
     void ProcessAITeamRenewals()
