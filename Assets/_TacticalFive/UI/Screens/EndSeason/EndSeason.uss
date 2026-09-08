@@ -570,19 +570,20 @@
     min-height: 0;
     overflow: hidden;
     padding: 12px;
-    gap: 12px;
 }
 .draft-col-left {
     flex: 3;
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+    margin-right: 12px;
 }
 .draft-col-center {
     flex: 5;
     flex-direction: column;
     min-height: 0;
     overflow: hidden;
+    margin-right: 12px;
 }
 .draft-col-right {
     flex: 3;
@@ -799,7 +800,6 @@
 /* ── STAT BOXES ── */
 .draft-stat-boxes {
     flex-direction: row;
-    gap: 10px;
     margin-bottom: 10px;
     flex-shrink: 0;
 }
@@ -811,6 +811,10 @@
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     padding: 10px 8px;
+    margin-right: 10px;
+}
+.draft-stat-box:last-child {
+    margin-right: 0;
 }
 .draft-stat-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
