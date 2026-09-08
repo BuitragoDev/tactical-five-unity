@@ -658,8 +658,8 @@
     margin-right: 8px;
 }
 .draft-prospect-photo {
-    width: 44px;
-    height: 44px;
+    width: 64px;
+    height: 64px;
     border-radius: 4px;
     flex-shrink: 0;
     margin-right: 10px;

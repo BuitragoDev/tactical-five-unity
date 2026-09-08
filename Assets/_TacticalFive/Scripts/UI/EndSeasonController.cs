@@ -433,11 +433,6 @@ public class EndSeasonController : UIScreenController
             var row = new VisualElement();
             row.AddToClassList("draft-prospect");
 
-            var num = new Label();
-            num.AddToClassList("draft-prospect-num");
-            num.text = $"#{globalIndex + 1}";
-            row.Add(num);
-
             var photo = new VisualElement();
             photo.AddToClassList("draft-prospect-photo");
             int photoIdx = Mathf.Abs(p.GetHashCode()) % Mathf.Max(1, _defaultPhotos.Length);
