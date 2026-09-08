@@ -504,6 +504,14 @@
     flex-direction: column;
     flex-grow: 1;
     min-height: 0;
+    margin: -24px -28px;
+}
+.draft-columns {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    padding: 12px 28px;
 }
 
 /* ── BANNER ── */
@@ -511,7 +519,7 @@
     position: relative;
     flex-direction: row;
     align-items: center;
-    padding: 20px 32px;
+    padding: 20px 28px;
     background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/banner_premios.png");
     background-size: cover;
     background-position: center;
@@ -565,14 +573,6 @@
     color: rgb(255, 255, 255);
 }
 
-/* ── 3-COLUMN LAYOUT ── */
-.draft-columns {
-    flex-direction: row;
-    flex-grow: 1;
-    min-height: 0;
-    overflow: hidden;
-    padding: 12px;
-}
 .draft-col-left {
     flex: 3;
     flex-direction: column;
