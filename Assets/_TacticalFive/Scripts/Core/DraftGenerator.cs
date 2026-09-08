@@ -399,7 +399,7 @@ public static class DraftGenerator
     {
         var nationalities = new[] {
             "GER", "BRA", "GMB", "TGO", "AUS", "PNG", "AUT", "BAH", "NGA", "BEL",
-            "MLI", "BIH", "CMR", "CAN", "HTI", "CHN", "CRO", "SLO", "ESP", "FIN",
+            "MLI", "BIH", "CMR", "CAN", "HTI", "CHN", "HRV", "SLO", "ESP", "FIN",
             "FRA", "BEN", "MTQ", "CIV", "GUI", "MAR", "COD", "SEN", "GEO", "GRE",
             "ISR", "ITA", "JAM", "JPN", "LAT", "LTU", "MNE", "TUR", "NZL", "NED",
             "POR", "GNB", "GBR", "POL", "CZE", "DOM", "RUS", "LCA", "SRB", "SWE",
