@@ -1035,6 +1035,7 @@
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
+    min-width: 0;
 }
 .draft-log-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -1046,7 +1047,7 @@
 }
 .draft-log-player {
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
 }
 .draft-log-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");

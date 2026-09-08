@@ -630,16 +630,16 @@ public class EndSeasonController : UIScreenController
         playerLbl.text = $"{entry.FirstName} {entry.LastName}";
         playerRow.Add(playerLbl);
 
+        info.Add(playerRow);
+        row.Add(info);
+
         var medLbl = new Label();
         medLbl.AddToClassList("draft-log-med");
         medLbl.text = entry.Overall.ToString();
         if (entry.Overall > 84) medLbl.AddToClassList("draft-log-med--high");
         else if (entry.Overall >= 70) medLbl.AddToClassList("draft-log-med--mid");
         else medLbl.AddToClassList("draft-log-med--low");
-        playerRow.Add(medLbl);
-
-        info.Add(playerRow);
-        row.Add(info);
+        row.Add(medLbl);
         return row;
     }
 
