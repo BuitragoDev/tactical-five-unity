@@ -511,14 +511,13 @@
     position: relative;
     flex-direction: row;
     align-items: center;
-    padding: 24px 32px;
+    padding: 20px 32px;
     background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/banner_premios.png");
     background-size: cover;
     background-position: center;
     border-bottom-width: 2px;
     border-bottom-color: rgb(212, 160, 23);
     flex-shrink: 0;
-    min-height: 90px;
     overflow: hidden;
 }
 .draft-banner-overlay {
