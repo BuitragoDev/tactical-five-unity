@@ -897,7 +897,7 @@
 }
 .draft-need-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 24px;
 }
 .draft-need-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
