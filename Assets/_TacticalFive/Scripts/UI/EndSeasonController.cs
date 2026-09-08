@@ -610,7 +610,7 @@ public class EndSeasonController : UIScreenController
 
         var logo = new VisualElement();
         logo.AddToClassList("draft-log-logo");
-        if (_logo32.TryGetValue(entry.TeamLogo, out var sprite))
+        if (_logo64.TryGetValue(entry.TeamLogo, out var sprite))
             logo.style.backgroundImage = new StyleBackground(sprite);
         row.Add(logo);
 
@@ -622,11 +622,23 @@ public class EndSeasonController : UIScreenController
         teamLbl.text = entry.TeamName.ToUpper();
         info.Add(teamLbl);
 
-        var playerLbl = new Label();
-        playerLbl.AddToClassList("draft-log-player");
-        playerLbl.text = $"{entry.FirstName} {entry.LastName}  ·  {entry.Overall} MED";
-        info.Add(playerLbl);
+        var playerRow = new VisualElement();
+        playerRow.AddToClassList("draft-log-player");
 
+        var playerLbl = new Label();
+        playerLbl.AddToClassList("draft-log-player-name");
+        playerLbl.text = $"{entry.FirstName} {entry.LastName}";
+        playerRow.Add(playerLbl);
+
+        var medLbl = new Label();
+        medLbl.AddToClassList("draft-log-med");
+        medLbl.text = entry.Overall.ToString();
+        if (entry.Overall > 84) medLbl.AddToClassList("draft-log-med--high");
+        else if (entry.Overall >= 70) medLbl.AddToClassList("draft-log-med--mid");
+        else medLbl.AddToClassList("draft-log-med--low");
+        playerRow.Add(medLbl);
+
+        info.Add(playerRow);
         row.Add(info);
         return row;
     }
