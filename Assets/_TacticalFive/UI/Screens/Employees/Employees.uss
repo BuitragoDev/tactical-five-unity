@@ -506,7 +506,6 @@
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);
-    -unity-text-align: middle-center;
 }
 
 .emp-detail-body {
@@ -601,7 +600,6 @@
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);
-    -unity-text-align: middle-center;
 }
 
 .emp-detail-description {
