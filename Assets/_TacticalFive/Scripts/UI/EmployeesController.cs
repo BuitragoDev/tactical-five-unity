@@ -1004,7 +1004,7 @@ public class EmployeesController : UIScreenController
 
         _detailDescription.text = PositionDescriptions.TryGetValue(emp.position, out var desc) ? desc : "";
 
-        _detailRow.style.display = DisplayStyle.Flex;
+        _detailPanel.style.display = DisplayStyle.Flex;
 
         foreach (var row in _staffTableBody.Children())
             row.RemoveFromClassList("emp-table-row--selected");
@@ -1017,7 +1017,7 @@ public class EmployeesController : UIScreenController
     void HideEmployeeDetail()
     {
         _selectedStaffEmployee = null;
-        _detailRow.style.display = DisplayStyle.None;
+        _detailPanel.style.display = DisplayStyle.None;
         foreach (var row in _staffTableBody.Children())
             row.RemoveFromClassList("emp-table-row--selected");
     }

@@ -66,9 +66,9 @@
                 </ui:VisualElement>
 
                 <!-- ══ EMPLOYEE DETAIL ROW ══ -->
-                <ui:VisualElement name="EmployeeDetailRow" class="emp-detail-row" style="display: none;">
+                <ui:VisualElement name="EmployeeDetailRow" class="emp-detail-row">
                     <ui:VisualElement name="EmpDetailLeft" class="emp-detail-left"/>
-                    <ui:VisualElement name="EmployeeDetailPanel" class="emp-detail-panel">
+                    <ui:VisualElement name="EmployeeDetailPanel" class="emp-detail-panel" style="display: none;">
                         <ui:VisualElement class="emp-detail-header">
                             <ui:Label name="EmpDetailPosition" class="emp-detail-position" text=""/>
                         </ui:VisualElement>
