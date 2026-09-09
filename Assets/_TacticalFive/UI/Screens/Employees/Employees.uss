@@ -490,7 +490,7 @@
     flex-direction: column;
     margin-top: 16px;
     border-width: 1px;
-    border-color: rgb(28, 33, 48);
+    border-color: rgb(120, 95, 30);
     background-color: rgb(15, 17, 23);
     width: 50%;
 }
