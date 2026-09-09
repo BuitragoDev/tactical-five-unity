@@ -1280,8 +1280,14 @@ public class EndSeasonController : UIScreenController
         })
         .OrderBy(s => s.WinPct)
         .ThenBy(s => s.Wins)
-        .Take(14)
         .ToList();
+
+        var lotterySlots = standings.Take(14).ToList();
+
+        var r1Picks = DatabaseManager.Instance.Db.Table<DraftPickData>()
+            .Where(p => p.season_id == _season.id && p.round == 1)
+            .ToList();
+        var teamsById = allTeams.ToDictionary(t => t.id);
 
         double[] odds = {
             0.140, 0.140, 0.140, 0.125, 0.105,
@@ -1290,8 +1296,26 @@ public class EndSeasonController : UIScreenController
         };
 
         var result = new List<(TeamData, string, double)>();
-        for (int i = 0; i < standings.Count && i < odds.Length; i++)
-            result.Add((standings[i].Team, $"{(odds[i] * 100).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%", odds[i]));
+        for (int i = 0; i < lotterySlots.Count && i < odds.Length; i++)
+        {
+            var slotTeam = lotterySlots[i].Team;
+            var pick = r1Picks.FirstOrDefault(p => p.original_team_id == slotTeam.id);
+            TeamData owner = slotTeam;
+
+            if (pick != null)
+            {
+                if (pick.protected_from > 0 && (i + 1) <= pick.protected_from)
+                {
+                    owner = slotTeam;
+                }
+                else if (teamsById.TryGetValue(pick.current_team_id, out var current))
+                {
+                    owner = current;
+                }
+            }
+
+            result.Add((owner, $"{(odds[i] * 100).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%", odds[i]));
+        }
         return result;
     }
 }
