@@ -528,8 +528,8 @@
 }
 
 .emp-detail-left-logo {
-    width: 200px;
-    height: 200px;
+    width: 120px;
+    height: 120px;
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
