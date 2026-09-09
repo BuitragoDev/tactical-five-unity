@@ -542,7 +542,7 @@
 }
 
 .emp-detail-left-quote {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Kindergarten SDF.asset");
     font-size: 24px;
     line-height: 30px;
     color: rgb(110, 180, 255);
