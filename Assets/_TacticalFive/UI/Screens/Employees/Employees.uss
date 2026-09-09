@@ -489,11 +489,14 @@
 .emp-detail-row {
     flex-direction: row;
     margin-top: 16px;
+    min-height: 300px;
+    flex-shrink: 0;
 }
 
 .emp-detail-left {
     flex: 1;
     margin-right: 16px;
+    min-height: 300px;
     border-width: 1px;
     border-color: rgb(120, 95, 30);
     background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/background1.png");
