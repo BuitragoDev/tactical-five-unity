@@ -1208,7 +1208,7 @@ public class EndSeasonController : UIScreenController
         for (int i = 0; i < teams.Count; i++)
         {
             var target = i < 7 ? col1 : col2;
-            target.Add(BuildLotteryRow(i + 1, teams[i].team, teams[i].pct));
+            target.Add(BuildLotteryRow(i + 1, teams[i].team, teams[i].pct, teams[i].pctNum));
         }
 
         var closeBtn = new Button();
@@ -1223,33 +1223,45 @@ public class EndSeasonController : UIScreenController
         CursorManager.Instance?.RegisterHandCursor(closeBtn);
     }
 
-    VisualElement BuildLotteryRow(int rank, TeamData team, string pct)
+    VisualElement BuildLotteryRow(int rank, TeamData team, string pct, double pctNum)
     {
         var row = new VisualElement();
         row.AddToClassList("lottery-row");
 
+        var content = new VisualElement();
+        content.AddToClassList("lottery-row-content");
+        row.Add(content);
+
         var rankLbl = new Label($"#{rank}");
         rankLbl.AddToClassList("lottery-rank");
-        row.Add(rankLbl);
+        content.Add(rankLbl);
 
         var logo = new VisualElement();
         logo.AddToClassList("lottery-logo");
-        if (_logo32.TryGetValue(team.logo, out var sprite))
+        if (_logo64.TryGetValue(team.logo, out var sprite))
             logo.style.backgroundImage = new StyleBackground(sprite);
-        row.Add(logo);
+        content.Add(logo);
 
         var nameLbl = new Label(team.name);
         nameLbl.AddToClassList("lottery-name");
-        row.Add(nameLbl);
+        content.Add(nameLbl);
 
         var pctLbl = new Label(pct);
         pctLbl.AddToClassList("lottery-pct");
-        row.Add(pctLbl);
+        content.Add(pctLbl);
+
+        var barContainer = new VisualElement();
+        barContainer.AddToClassList("lottery-bar-container");
+        var barFill = new VisualElement();
+        barFill.AddToClassList("lottery-bar-fill");
+        barFill.style.width = Length.Percent(Mathf.Min(100f, (float)(pctNum * 100.0 / 0.14 * 100.0)));
+        barContainer.Add(barFill);
+        row.Add(barContainer);
 
         return row;
     }
 
-    List<(TeamData team, string pct)> BuildLotteryOrder()
+    List<(TeamData team, string pct, double pctNum)> BuildLotteryOrder()
     {
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
@@ -1276,9 +1288,9 @@ public class EndSeasonController : UIScreenController
             0.020, 0.015, 0.010, 0.005
         };
 
-        var result = new List<(TeamData, string)>();
+        var result = new List<(TeamData, string, double)>();
         for (int i = 0; i < standings.Count && i < odds.Length; i++)
-            result.Add((standings[i].Team, $"{odds[i] * 100:F1}%"));
+            result.Add((standings[i].Team, $"{odds[i] * 100:F1}%", odds[i]));
         return result;
     }
 }
