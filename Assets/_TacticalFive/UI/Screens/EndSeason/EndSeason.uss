@@ -1289,6 +1289,7 @@
     border-color: rgb(42, 95, 201);
     color: rgb(74, 128, 240);
     -unity-text-transform: upper;
+    -unity-text-align: middle-center;
     margin-top: 24px;
     width: 100%;
 }
