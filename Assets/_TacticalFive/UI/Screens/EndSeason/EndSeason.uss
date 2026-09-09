@@ -464,6 +464,14 @@
     font-size: 28px;
     margin-bottom: 6px;
 }
+.es-draft-feature-icon-img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 .es-draft-feature-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;

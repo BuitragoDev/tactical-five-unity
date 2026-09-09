@@ -339,6 +339,21 @@ public class EndSeasonController : UIScreenController
         LoadRetiringPlayers();
         LoadFamePlayers();
         _btnDraft.text = $"EMPEZAR DRAFT {_season.year_end}";
+
+        var iconTalents = _root.Q<VisualElement>("DraftIconTalents");
+        var iconOpps = _root.Q<VisualElement>("DraftIconOpps");
+        var iconStories = _root.Q<VisualElement>("DraftIconStories");
+        LoadDraftIcon(iconTalents, "asistencia_icon");
+        LoadDraftIcon(iconOpps, "estadisticas");
+        LoadDraftIcon(iconStories, "mejor_novato");
+    }
+
+    void LoadDraftIcon(VisualElement el, string iconName)
+    {
+        if (el == null) return;
+        var tex = Resources.Load<Sprite>($"Icons/{iconName}");
+        if (tex != null)
+            el.style.backgroundImage = new StyleBackground(tex);
     }
 
     // ════════════════════════════════════════════════════════════════

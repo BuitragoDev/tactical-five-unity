@@ -76,17 +76,17 @@
                             <ui:Label name="DraftYearLabel" class="es-draft-year" text="2025"/>
                             <ui:VisualElement class="es-draft-features">
                                 <ui:VisualElement class="es-draft-feature">
-                                    <ui:Label text="👥" class="es-draft-feature-icon"/>
+                                    <ui:VisualElement name="DraftIconTalents" class="es-draft-feature-icon-img"/>
                                     <ui:Label text="NUEVOS TALENTOS" class="es-draft-feature-title"/>
                                     <ui:Label text="75 PROSPECTOS DISPONIBLES" class="es-draft-feature-sub"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="es-draft-feature">
-                                    <ui:Label text="📈" class="es-draft-feature-icon"/>
+                                    <ui:VisualElement name="DraftIconOpps" class="es-draft-feature-icon-img"/>
                                     <ui:Label text="NUEVAS OPORTUNIDADES" class="es-draft-feature-title"/>
                                     <ui:Label text="EL FUTURO DE TU FRANQUICIA" class="es-draft-feature-sub"/>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="es-draft-feature">
-                                    <ui:Label text="⭐" class="es-draft-feature-icon"/>
+                                    <ui:VisualElement name="DraftIconStories" class="es-draft-feature-icon-img"/>
                                     <ui:Label text="GRANDES HISTORIAS" class="es-draft-feature-title"/>
                                     <ui:Label text="NACEN AQUÍ" class="es-draft-feature-sub"/>
                                 </ui:VisualElement>
