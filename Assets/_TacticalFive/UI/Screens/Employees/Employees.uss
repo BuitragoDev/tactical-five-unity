@@ -543,8 +543,8 @@
 
 .emp-detail-left-quote {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Kindergarten.ttf");
-    font-size: 20px;
-    line-height: 30px;
+    font-size: 18px;
+    line-height: 26px;
     color: rgb(110, 180, 255);
     white-space: normal;
 }
@@ -555,7 +555,7 @@
 
 .emp-detail-left-teamname {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Kindergarten.ttf");
-    font-size: 20px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
 }
 
