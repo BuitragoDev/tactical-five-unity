@@ -1217,7 +1217,7 @@
     margin-right: 16px;
 }
 .lottery-column:last-child {
-    margin-right: 0;
+    margin-right: -16px;
 }
 .lottery-row {
     flex-direction: column;
