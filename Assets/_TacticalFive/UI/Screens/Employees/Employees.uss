@@ -494,6 +494,11 @@
 
 .emp-detail-left {
     flex: 1;
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/background1.png");
+    background-size: cover;
+    background-position: center;
 }
 
 /* ── EMPLOYEE DETAIL PANEL ── */
