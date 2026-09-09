@@ -72,8 +72,8 @@
                         <ui:VisualElement class="emp-detail-left-content">
                             <ui:VisualElement name="EmpDetailLeftLogo" class="emp-detail-left-logo"/>
                             <ui:VisualElement class="emp-detail-left-text">
-                                <ui:Label class="emp-detail-left-quote" text="&quot;El éxito no es un accidente, es el resultado de un gran equipo,"/>
-                                <ui:Label class="emp-detail-left-quote emp-detail-left-quote--second" text=" el resultado de un gran equipo.&quot;"/>
+                                <ui:Label class="emp-detail-left-quote" text="&quot;El éxito no es un accidente,"/>
+                                <ui:Label class="emp-detail-left-quote emp-detail-left-quote--second" text=" es el resultado de un gran equipo.&quot;"/>
                                 <ui:Label name="EmpDetailLeftTeamName" class="emp-detail-left-teamname" text=""/>
                             </ui:VisualElement>
                         </ui:VisualElement>

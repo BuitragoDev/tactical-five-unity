@@ -534,7 +534,7 @@
     background-position: center;
     background-repeat: no-repeat;
     flex-shrink: 0;
-    margin-right: 24px;
+    margin-right: 50px;
 }
 
 .emp-detail-left-text {
