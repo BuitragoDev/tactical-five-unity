@@ -606,6 +606,7 @@ public class EndSeasonController : UIScreenController
 
         _currentPickIndex++;
         _draftState = DraftState.Idle;
+        ClearPlayerCard();
     }
 
     void AutoPick()
@@ -620,6 +621,29 @@ public class EndSeasonController : UIScreenController
 
         _currentPickIndex++;
         _draftState = DraftState.Idle;
+        ClearPlayerCard();
+    }
+
+    void ClearPlayerCard()
+    {
+        _draftCardPickPos.text = "";
+        _draftCardName.text = "Selecciona un prospecto";
+        _draftCardCollege.text = "";
+        _draftCardBio.text = "";
+        _draftCardOvr.text = "--";
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--high");
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--mid");
+        _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--low");
+        _draftCardPhoto.style.backgroundImage = StyleKeyword.Null;
+        _draftStatShooting.text = "--";
+        _draftStat3pt.text = "--";
+        _draftStatPassing.text = "--";
+        _draftStatDribbling.text = "--";
+        _draftStatDefense.text = "--";
+        _draftStatRebounding.text = "--";
+        _draftStatSteals.text = "--";
+        _draftStatBlocks.text = "--";
+        _draftCardDesc.text = "";
     }
 
     void AddLogEntry(DraftGenerator.DraftPickSlot slot, DraftProspect prospect, PlayerData player)
