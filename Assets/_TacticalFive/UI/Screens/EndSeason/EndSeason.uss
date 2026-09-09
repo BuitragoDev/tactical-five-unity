@@ -1190,7 +1190,6 @@
     border-top-color: rgb(212, 160, 23);
     padding: 32px;
     flex-direction: column;
-    align-items: center;
 }
 .lottery-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -1210,6 +1209,7 @@
 .lottery-grid {
     flex-direction: row;
     width: 100%;
+    margin-bottom: 4px;
 }
 .lottery-column {
     flex: 1;
