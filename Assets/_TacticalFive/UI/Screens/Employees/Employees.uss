@@ -543,7 +543,7 @@
 
 .emp-detail-left-quote {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Kindergarten.ttf");
-    font-size: 24px;
+    font-size: 22px;
     line-height: 30px;
     color: rgb(110, 180, 255);
     white-space: normal;
