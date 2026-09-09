@@ -484,15 +484,26 @@
     color: rgb(192, 57, 43);
 }
 
+/* ── EMPLOYEE DETAIL ROW ── */
+
+.emp-detail-row {
+    flex-direction: row;
+    margin-top: 16px;
+    gap: 16px;
+}
+
+.emp-detail-left {
+    flex: 1;
+}
+
 /* ── EMPLOYEE DETAIL PANEL ── */
 
 .emp-detail-panel {
     flex-direction: column;
-    margin-top: 16px;
+    flex: 1;
     border-width: 1px;
     border-color: rgb(120, 95, 30);
     background-color: rgb(15, 17, 23);
-    width: 50%;
 }
 
 .emp-detail-header {

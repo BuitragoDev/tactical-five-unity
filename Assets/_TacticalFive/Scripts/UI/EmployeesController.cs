@@ -66,6 +66,7 @@ public class EmployeesController : UIScreenController
     private StyleBackground _starBg;
 
     // Detail panel
+    private VisualElement _detailRow;
     private VisualElement _detailPanel;
     private Label _detailPosition;
     private VisualElement _detailPhoto;
@@ -177,6 +178,7 @@ public class EmployeesController : UIScreenController
         _hireResultText = _root.Q<Label>("HireResultText");
         _btnHireResultOk = _root.Q<Button>("BtnHireResultOk");
 
+        _detailRow = _root.Q<VisualElement>("EmployeeDetailRow");
         _detailPanel = _root.Q<VisualElement>("EmployeeDetailPanel");
         _detailPosition = _root.Q<Label>("EmpDetailPosition");
         _detailPhoto = _root.Q<VisualElement>("EmpDetailPhoto");
@@ -1002,7 +1004,7 @@ public class EmployeesController : UIScreenController
 
         _detailDescription.text = PositionDescriptions.TryGetValue(emp.position, out var desc) ? desc : "";
 
-        _detailPanel.style.display = DisplayStyle.Flex;
+        _detailRow.style.display = DisplayStyle.Flex;
 
         foreach (var row in _staffTableBody.Children())
             row.RemoveFromClassList("emp-table-row--selected");
@@ -1015,7 +1017,7 @@ public class EmployeesController : UIScreenController
     void HideEmployeeDetail()
     {
         _selectedStaffEmployee = null;
-        _detailPanel.style.display = DisplayStyle.None;
+        _detailRow.style.display = DisplayStyle.None;
         foreach (var row in _staffTableBody.Children())
             row.RemoveFromClassList("emp-table-row--selected");
     }

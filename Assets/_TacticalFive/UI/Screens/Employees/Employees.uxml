@@ -35,8 +35,10 @@
                     <!-- Table body: 6 rows (one per position) -->
                     <ui:VisualElement name="StaffTableBody" class="emp-table-body" />
 
-                    <!-- ══ EMPLOYEE DETAIL PANEL ══ -->
-                    <ui:VisualElement name="EmployeeDetailPanel" class="emp-detail-panel" style="display: none;">
+                    <!-- ══ EMPLOYEE DETAIL ROW ══ -->
+                    <ui:VisualElement name="EmployeeDetailRow" class="emp-detail-row" style="display: none;">
+                        <ui:VisualElement name="EmpDetailLeft" class="emp-detail-left"/>
+                        <ui:VisualElement name="EmployeeDetailPanel" class="emp-detail-panel">
                         <ui:VisualElement class="emp-detail-header">
                             <ui:Label name="EmpDetailPosition" class="emp-detail-position" text=""/>
                         </ui:VisualElement>
@@ -61,6 +63,7 @@
                             <ui:Label class="emp-detail-info-title" text="INFO"/>
                         </ui:VisualElement>
                         <ui:Label name="EmpDetailDescription" class="emp-detail-description" text=""/>
+                    </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>
