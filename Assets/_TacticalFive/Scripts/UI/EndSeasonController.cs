@@ -1202,6 +1202,7 @@ public class EndSeasonController : UIScreenController
         col1.AddToClassList("lottery-column");
         var col2 = new VisualElement();
         col2.AddToClassList("lottery-column");
+        col2.AddToClassList("lottery-column--last");
         grid.Add(col1);
         grid.Add(col2);
 
