@@ -978,7 +978,7 @@ public class EmployeesController : UIScreenController
         _detailName.text = $"{emp.first_name} {emp.last_name}";
         _detailSalary.text = FormatSalary(emp.salary);
 
-        var photoTex = Resources.Load<Texture2D>("Icons/empleado");
+        var photoTex = Resources.Load<Texture2D>("Icons/avatar");
         if (photoTex != null)
             _detailPhoto.style.backgroundImage = new StyleBackground(photoTex);
 

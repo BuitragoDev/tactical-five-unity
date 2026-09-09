@@ -492,6 +492,7 @@
     border-width: 1px;
     border-color: rgb(28, 33, 48);
     background-color: rgb(15, 17, 23);
+    width: 50%;
 }
 
 .emp-detail-header {
