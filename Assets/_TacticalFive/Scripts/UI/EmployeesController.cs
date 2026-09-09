@@ -57,12 +57,34 @@ public class EmployeesController : UIScreenController
     private List<EmployeeData> _candidates;
     private EmployeeData _selectedCandidate;
     private EmployeeData _selectedFireEmployee;
+    private EmployeeData _selectedStaffEmployee;
     private bool _isFiring;
     private string _activeTab = "empleados";
     private string _activeMarketTab = "ASISTENTE";
     private Dictionary<string, Sprite> _logoSprites = new();
     private Texture2D _starTex;
     private StyleBackground _starBg;
+
+    // Detail panel
+    private VisualElement _detailPanel;
+    private Label _detailPosition;
+    private VisualElement _detailPhoto;
+    private VisualElement _detailFlag;
+    private Label _detailName;
+    private VisualElement _detailStars;
+    private Label _detailSalary;
+    private Label _detailDescription;
+
+    private static readonly Dictionary&lt;string, string&gt; PositionDescriptions = new()
+    {
+        { "ASISTENTE", "El asistente del entrenador principal se encarga de apoyar en las tareas diarias del equipo. Ayuda en la preparacion de los partidos, el analisis de rivales y la gestion del vestuario. Un buen asistente mejora la eficiencia del entrenamiento y la cohesion del grupo." },
+        { "MEDICO", "El servicio medico se encarga de la salud fisica de los jugadores. Trata lesiones, supervisa recuperaciones y establece protocolos de prevencion. Un medico de mayor nivel reduce el tiempo de recuperacion y previene lesiones futuras." },
+        { "FINANCIERO", "El financiero gestiona el presupuesto del equipo, supervisa gastos y busca oportunidades de ahorro. Un buen financiero permite obtener descuentos en contrataciones y mejorar la salud economica del franquicia." },
+        { "OJEADOR", "El ojeador es el encargado de identificar talento para el draft y el mercado de agentes libres. Un ojeador de mayor nivel revela mas atributos de los prospectos y permite tomar mejores decisiones de seleccion." },
+        { "PSICOLOGO", "El psicologo cuida el bienestar emocional de los jugadores. Mejora la moral, gestiona conflictos internos y fortalece la cohesión del grupo. Un psicologo de mayor nivel tiene un efecto mas positivo en el ambiente del equipo." },
+        { "PABELLON", "El encargado del pabellon gestiona las instalaciones del equipo, la venta de entradas y los ingresos por abonos. Un pabellon mejor administrado genera mas ingresos por taquilla y mas patrocinios."
+        }
+    };
 
     private static readonly Dictionary<string, string> PositionLabels = new()
     {
@@ -154,6 +176,15 @@ public class EmployeesController : UIScreenController
         _hireResultTitle = _root.Q<Label>("HireResultTitle");
         _hireResultText = _root.Q<Label>("HireResultText");
         _btnHireResultOk = _root.Q<Button>("BtnHireResultOk");
+
+        _detailPanel = _root.Q<VisualElement>("EmployeeDetailPanel");
+        _detailPosition = _root.Q<Label>("EmpDetailPosition");
+        _detailPhoto = _root.Q<VisualElement>("EmpDetailPhoto");
+        _detailFlag = _root.Q<VisualElement>("EmpDetailFlag");
+        _detailName = _root.Q<Label>("EmpDetailName");
+        _detailStars = _root.Q<VisualElement>("EmpDetailStars");
+        _detailSalary = _root.Q<Label>("EmpDetailSalary");
+        _detailDescription = _root.Q<Label>("EmpDetailDescription");
     }
 
     protected override void LoadData()
@@ -299,6 +330,7 @@ public class EmployeesController : UIScreenController
 
         _hireOverlay.style.display = DisplayStyle.None;
         _hireResultOverlay.style.display = DisplayStyle.None;
+        HideEmployeeDetail();
     }
 
     protected override void RefreshHeader()
@@ -361,6 +393,7 @@ public class EmployeesController : UIScreenController
     void ShowTab(string tab)
     {
         _activeTab = tab;
+        HideEmployeeDetail();
 
         _tabEmpleados.RemoveFromClassList("employees-tab--active");
         _tabMercado.RemoveFromClassList("employees-tab--active");
@@ -545,6 +578,18 @@ public class EmployeesController : UIScreenController
                 actionCol.Add(fireBtn);
             }
             row.Add(actionCol);
+
+            if (emp != null)
+            {
+                var captured = emp;
+                row.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowEmployeeDetail(captured); });
+                row.AddToClassList("emp-table-row--clickable");
+                if (CursorManager.Instance != null)
+                {
+                    row.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                    row.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+                }
+            }
 
             _staffTableBody.Add(row);
         }
@@ -920,6 +965,59 @@ public class EmployeesController : UIScreenController
             DatabaseManager.Instance.InsertEmployee(emp);
             _candidates.Add(emp);
         }
+    }
+
+    // ── EMPLOYEE DETAIL PANEL ──
+
+    void ShowEmployeeDetail(EmployeeData emp)
+    {
+        _selectedStaffEmployee = emp;
+
+        string posLabel = PositionLabels.TryGetValue(emp.position, out var lbl) ? lbl : emp.position;
+        _detailPosition.text = posLabel;
+        _detailName.text = $"{emp.first_name} {emp.last_name}";
+        _detailSalary.text = FormatSalary(emp.salary);
+
+        var photoTex = Resources.Load<Texture2D>("Icons/empleado");
+        if (photoTex != null)
+            _detailPhoto.style.backgroundImage = new StyleBackground(photoTex);
+
+        _detailFlag.style.backgroundImage = StyleKeyword.Null;
+        if (!string.IsNullOrEmpty(emp.nationality))
+        {
+            var flagTex = Resources.Load<Texture2D>($"Flags/{emp.nationality}");
+            if (flagTex != null)
+                _detailFlag.style.backgroundImage = new StyleBackground(flagTex);
+        }
+
+        _detailStars.Clear();
+        for (int i = 0; i < 5; i++)
+        {
+            var star = new VisualElement();
+            star.AddToClassList(i < emp.reputation ? "emp-detail-star" : "emp-detail-star--empty");
+            if (_starTex != null)
+                star.style.backgroundImage = _starBg;
+            _detailStars.Add(star);
+        }
+
+        _detailDescription.text = PositionDescriptions.TryGetValue(emp.position, out var desc) ? desc : "";
+
+        _detailPanel.style.display = DisplayStyle.Flex;
+
+        foreach (var row in _staffTableBody.Children())
+            row.RemoveFromClassList("emp-table-row--selected");
+
+        int idx = System.Array.IndexOf(PositionOrder, emp.position);
+        if (idx >= 0 && idx < _staffTableBody.childCount)
+            _staffTableBody[idx].AddToClassList("emp-table-row--selected");
+    }
+
+    void HideEmployeeDetail()
+    {
+        _selectedStaffEmployee = null;
+        _detailPanel.style.display = DisplayStyle.None;
+        foreach (var row in _staffTableBody.Children())
+            row.RemoveFromClassList("emp-table-row--selected");
     }
 
     string FormatSalary(long salary)

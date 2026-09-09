@@ -35,6 +35,34 @@
                     <!-- Table body: 6 rows (one per position) -->
                     <ui:VisualElement name="StaffTableBody" class="emp-table-body" />
 
+                    <!-- ══ EMPLOYEE DETAIL PANEL ══ -->
+                    <ui:VisualElement name="EmployeeDetailPanel" class="emp-detail-panel" style="display: none;">
+                        <ui:VisualElement class="emp-detail-header">
+                            <ui:Label name="EmpDetailPosition" class="emp-detail-position" text=""/>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="emp-detail-body">
+                            <ui:VisualElement name="EmpDetailPhoto" class="emp-detail-photo"/>
+                            <ui:VisualElement class="emp-detail-info">
+                                <ui:VisualElement class="emp-detail-name-row">
+                                    <ui:VisualElement name="EmpDetailFlag" class="emp-detail-flag"/>
+                                    <ui:Label name="EmpDetailName" class="emp-detail-name" text=""/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="emp-detail-stat-row">
+                                    <ui:Label class="emp-detail-label" text="Nivel:"/>
+                                    <ui:VisualElement name="EmpDetailStars" class="emp-detail-stars"/>
+                                </ui:VisualElement>
+                                <ui:VisualElement class="emp-detail-stat-row">
+                                    <ui:Label class="emp-detail-label" text="Salario"/>
+                                    <ui:Label name="EmpDetailSalary" class="emp-detail-salary" text=""/>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="emp-detail-info-header">
+                            <ui:Label class="emp-detail-info-title" text="INFO"/>
+                        </ui:VisualElement>
+                        <ui:Label name="EmpDetailDescription" class="emp-detail-description" text=""/>
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
                 <!-- ══ PAGE: MERCADO ══ -->

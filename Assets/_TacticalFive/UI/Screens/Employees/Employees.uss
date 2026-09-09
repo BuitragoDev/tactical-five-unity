@@ -181,6 +181,14 @@
 .emp-table-row:hover {
     background-color: rgb(22, 26, 36);
 }
+.emp-table-row--clickable {
+    cursor: hand;
+}
+.emp-table-row--selected {
+    background-color: rgb(28, 33, 52);
+    border-left-width: 3px;
+    border-left-color: rgb(42, 95, 201);
+}
 
 .emp-col {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
@@ -474,6 +482,136 @@
 }
 .hire-modal-title--negative {
     color: rgb(192, 57, 43);
+}
+
+/* ── EMPLOYEE DETAIL PANEL ── */
+
+.emp-detail-panel {
+    flex-direction: column;
+    margin-top: 16px;
+    border-width: 1px;
+    border-color: rgb(28, 33, 48);
+    background-color: rgb(15, 17, 23);
+}
+
+.emp-detail-header {
+    background: linear-gradient(to right, rgb(100, 20, 20), rgb(140, 40, 30));
+    padding: 10px 20px;
+}
+
+.emp-detail-position {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 3px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.emp-detail-body {
+    flex-direction: row;
+    padding: 20px;
+    background-color: rgb(22, 26, 36);
+}
+
+.emp-detail-photo {
+    width: 120px;
+    height: 140px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+    margin-right: 24px;
+    background-color: rgb(30, 34, 46);
+    border-radius: 6px;
+}
+
+.emp-detail-info {
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.emp-detail-name-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    background-color: rgb(28, 33, 48);
+    border-radius: 4px;
+}
+
+.emp-detail-flag {
+    width: 32px;
+    height: 24px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.emp-detail-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(255, 255, 255);
+}
+
+.emp-detail-stat-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    margin-bottom: 4px;
+}
+
+.emp-detail-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(122, 138, 170);
+}
+
+.emp-detail-stars {
+    flex-direction: row;
+    align-items: center;
+}
+
+.emp-detail-star {
+    width: 20px;
+    height: 20px;
+    -unity-background-scale-mode: scale-to-fit;
+    margin-right: 2px;
+}
+
+.emp-detail-star--empty {
+    opacity: 0.25;
+}
+
+.emp-detail-salary {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    color: rgb(39, 174, 96);
+}
+
+.emp-detail-info-header {
+    background: linear-gradient(to right, rgb(100, 20, 20), rgb(140, 40, 30));
+    padding: 8px 20px;
+}
+
+.emp-detail-info-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 3px;
+    -unity-text-transform: upper;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+
+.emp-detail-description {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    line-height: 22px;
+    color: rgb(179, 190, 214);
+    padding: 16px 20px;
+    white-space: normal;
 }
 
 /* ── LEGACY (kept for sidebar compat) ── */
