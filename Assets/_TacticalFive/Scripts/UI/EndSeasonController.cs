@@ -1254,7 +1254,7 @@ public class EndSeasonController : UIScreenController
         barContainer.AddToClassList("lottery-bar-container");
         var barFill = new VisualElement();
         barFill.AddToClassList("lottery-bar-fill");
-        barFill.style.width = Length.Percent(Mathf.Min(100f, (float)(pctNum * 100.0 / 0.14 * 100.0)));
+        barFill.style.width = Length.Percent((float)(50.0 + (pctNum - 0.005) / (0.14 - 0.005) * 50.0));
         barContainer.Add(barFill);
         row.Add(barContainer);
 
