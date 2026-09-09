@@ -75,7 +75,7 @@ public class EmployeesController : UIScreenController
     private Label _detailSalary;
     private Label _detailDescription;
 
-    private static readonly Dictionary&lt;string, string&gt; PositionDescriptions = new()
+    private static readonly Dictionary<string, string> PositionDescriptions = new()
     {
         { "ASISTENTE", "El asistente del entrenador principal se encarga de apoyar en las tareas diarias del equipo. Ayuda en la preparacion de los partidos, el analisis de rivales y la gestion del vestuario. Un buen asistente mejora la eficiencia del entrenamiento y la cohesion del grupo." },
         { "MEDICO", "El servicio medico se encarga de la salud fisica de los jugadores. Trata lesiones, supervisa recuperaciones y establece protocolos de prevencion. Un medico de mayor nivel reduce el tiempo de recuperacion y previene lesiones futuras." },
