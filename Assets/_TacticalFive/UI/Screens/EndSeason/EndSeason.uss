@@ -1280,18 +1280,19 @@
 }
 .lottery-close-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
     font-size: 18px;
     letter-spacing: 2px;
+    padding: 14px 48px;
+    border-radius: 8px;
+    border-width: 2px;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(231, 76, 60);
     -unity-text-transform: upper;
-    padding: 10px 32px;
-    border-radius: 4px;
     margin-top: 24px;
 }
 .lottery-close-btn:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(192, 57, 43, 0.25);
 }
 .lottery-draft-row {
     min-height: 64px;
