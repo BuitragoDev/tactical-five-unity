@@ -554,8 +554,8 @@
 }
 
 .emp-detail-left-teamname {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Kindergarten.ttf");
+    font-size: 20px;
     color: rgb(122, 138, 170);
 }
 
