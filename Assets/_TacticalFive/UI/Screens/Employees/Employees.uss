@@ -489,19 +489,22 @@
 .emp-detail-row {
     flex-direction: row;
     margin-top: 16px;
-    min-height: 300px;
+    min-height: 350px;
+    max-height: 350px;
     flex-shrink: 0;
 }
 
 .emp-detail-left {
     flex: 1;
     margin-right: 16px;
-    min-height: 300px;
+    min-height: 350px;
+    max-height: 350px;
     border-width: 1px;
     border-color: rgb(120, 95, 30);
     background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/background1.png");
     background-size: cover;
     background-position: center;
+    overflow: hidden;
 }
 
 /* ── EMPLOYEE DETAIL PANEL ── */
@@ -509,9 +512,12 @@
 .emp-detail-panel {
     flex-direction: column;
     flex: 1;
+    min-height: 350px;
+    max-height: 350px;
     border-width: 1px;
     border-color: rgb(120, 95, 30);
     background-color: rgb(15, 17, 23);
+    overflow: hidden;
 }
 
 .emp-detail-header {
