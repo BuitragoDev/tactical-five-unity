@@ -1285,14 +1285,15 @@
     padding: 14px 48px;
     border-radius: 8px;
     border-width: 2px;
-    background-color: rgba(192, 57, 43, 0.10);
-    border-color: rgb(192, 57, 43);
-    color: rgb(231, 76, 60);
+    background-color: rgba(42, 95, 201, 0.15);
+    border-color: rgb(42, 95, 201);
+    color: rgb(74, 128, 240);
     -unity-text-transform: upper;
     margin-top: 24px;
+    width: 100%;
 }
 .lottery-close-btn:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgba(42, 95, 201, 0.30);
 }
 .lottery-draft-row {
     min-height: 64px;
