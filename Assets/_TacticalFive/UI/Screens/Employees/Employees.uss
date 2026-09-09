@@ -516,6 +516,49 @@
     background-color: rgba(15, 17, 23, 0.95);
 }
 
+.emp-detail-left-content {
+    flex-direction: row;
+    align-items: center;
+    padding: 24px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.emp-detail-left-logo {
+    width: 200px;
+    height: 200px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+    margin-right: 24px;
+}
+
+.emp-detail-left-text {
+    flex-direction: column;
+}
+
+.emp-detail-left-quote {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Italic.ttf");
+    font-size: 24px;
+    line-height: 30px;
+    color: rgb(110, 180, 255);
+    white-space: normal;
+}
+
+.emp-detail-left-quote--second {
+    margin-bottom: 12px;
+}
+
+.emp-detail-left-teamname {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+}
+
 /* ── EMPLOYEE DETAIL PANEL ── */
 
 .emp-detail-panel {

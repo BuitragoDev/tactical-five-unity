@@ -76,6 +76,11 @@ public class EmployeesController : UIScreenController
     private Label _detailSalary;
     private Label _detailDescription;
 
+    // Left detail panel
+    private VisualElement _leftLogo;
+    private Label _leftTeamName;
+    private Dictionary<string, Sprite> _logos;
+
     private static readonly Dictionary<string, string> PositionDescriptions = new()
     {
         { "ASISTENTE", "El asistente del entrenador principal se encarga de apoyar en las tareas diarias del equipo. Ayuda en la preparacion de los partidos, el analisis de rivales y la gestion del vestuario. Un buen asistente mejora la eficiencia del entrenamiento y la cohesion del grupo." },
@@ -187,6 +192,9 @@ public class EmployeesController : UIScreenController
         _detailStars = _root.Q<VisualElement>("EmpDetailStars");
         _detailSalary = _root.Q<Label>("EmpDetailSalary");
         _detailDescription = _root.Q<Label>("EmpDetailDescription");
+
+        _leftLogo = _root.Q<VisualElement>("EmpDetailLeftLogo");
+        _leftTeamName = _root.Q<Label>("EmpDetailLeftTeamName");
     }
 
     protected override void LoadData()
@@ -195,6 +203,15 @@ public class EmployeesController : UIScreenController
 
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos) _logoSprites[s.name] = s;
+
+        var logos200 = Resources.LoadAll<Sprite>("Teams/Logos/200x200");
+        _logos = new Dictionary<string, Sprite>();
+        foreach (var s in logos200) _logos[s.name] = s;
+
+        if (_logos.TryGetValue(_myTeam.logo, out var teamLogo))
+            _leftLogo.style.backgroundImage = new StyleBackground(teamLogo);
+
+        _leftTeamName.text = $"— {_myTeam.name}";
 
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
         if (_starTex != null)
