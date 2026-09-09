@@ -132,8 +132,12 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- CENTER: Player Card + Team Needs -->
+                    <!-- CENTER: My Picks + Player Card + Team Needs -->
                     <ui:VisualElement class="draft-col-center">
+                        <ui:VisualElement name="DraftMyPicksPanel" class="draft-my-picks-panel">
+                            <ui:VisualElement name="DraftMyPicksLogo" class="draft-my-picks-logo"/>
+                            <ui:VisualElement name="DraftMyPicksBadges" class="draft-my-picks-badges"/>
+                        </ui:VisualElement>
                         <ui:VisualElement name="DraftPlayerCard" class="draft-player-card">
                             <!-- Top: pick box, name, photo, OVR -->
                             <ui:VisualElement class="draft-card-top">

@@ -730,6 +730,48 @@
     padding: 2px 6px;
 }
 
+/* ── CENTER: MY PICKS PANEL ── */
+.draft-my-picks-panel {
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+}
+.draft-my-picks-logo {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+.draft-my-picks-badges {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-left: 16px;
+    flex-grow: 1;
+}
+.draft-my-pick-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.15);
+    color: rgb(212, 160, 23);
+    padding: 4px 10px;
+    margin-right: 8px;
+    margin-bottom: 4px;
+}
+.draft-my-pick-badge--current {
+    background-color: rgba(212, 160, 23, 0.20);
+    border-color: rgb(212, 160, 23);
+    color: rgb(255, 255, 255);
+}
+.draft-my-pick-badge--used {
+    opacity: 0.35;
+}
+
 /* ── CENTER: PLAYER CARD ── */
 .draft-player-card {
     flex-direction: column;
@@ -1247,7 +1289,7 @@
     flex-shrink: 0;
     min-height: 40px;
     padding: 4px 12px;
-    background-color: rgb(17, 24, 34);
+    
     border-top-width: 1px;
     border-top-color: rgb(42, 51, 71);
 }

@@ -46,6 +46,9 @@ public class EndSeasonController : UIScreenController
     // Banner
     private Label _draftBannerRound;
     private Label _draftBannerPick;
+    // My picks panel
+    private VisualElement _draftMyPicksLogo;
+    private VisualElement _draftMyPicksBadges;
     // Prospect list
     private Label _prospectCount;
     private VisualElement _prospectList;
@@ -117,6 +120,7 @@ public class EndSeasonController : UIScreenController
     // ── State ──
     private Dictionary<string, Sprite> _logo32;
     private Dictionary<string, Sprite> _logo64;
+    private Dictionary<string, Sprite> _logo80;
     private DraftState _draftState;
     private int _currentPickIndex;
     private List<DraftGenerator.DraftPickSlot> _draftOrder;
@@ -182,6 +186,9 @@ public class EndSeasonController : UIScreenController
         // Banner
         _draftBannerRound = _root.Q<Label>("DraftBannerRound");
         _draftBannerPick = _root.Q<Label>("DraftBannerPick");
+        // My picks panel
+        _draftMyPicksLogo = _root.Q<VisualElement>("DraftMyPicksLogo");
+        _draftMyPicksBadges = _root.Q<VisualElement>("DraftMyPicksBadges");
         // Prospect list
         _prospectCount = _root.Q<Label>("ProspectCount");
         _prospectList = _root.Q<VisualElement>("ProspectList");
@@ -241,6 +248,10 @@ public class EndSeasonController : UIScreenController
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         _logo64 = new Dictionary<string, Sprite>();
         foreach (var s in logos64) _logo64[s.name] = s;
+
+        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
+        _logo80 = new Dictionary<string, Sprite>();
+        foreach (var s in logos80) _logo80[s.name] = s;
 
         _defaultPhotos = Resources.LoadAll<Sprite>("PlayerPhotos/Default");
 
@@ -360,6 +371,7 @@ public class EndSeasonController : UIScreenController
         _draftRoom.style.display = DisplayStyle.Flex;
         _draftLog.Clear();
 
+        UpdateMyPicksPanel();
         UpdateTeamNeeds();
 
         StartCoroutine(DraftCoroutine());
@@ -425,6 +437,7 @@ public class EndSeasonController : UIScreenController
         _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--mid");
         _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--low");
         _draftCardOvr.text = "--";
+        UpdateMyPicksPanel();
     }
 
     void UpdateProspectList()
@@ -882,43 +895,147 @@ public class EndSeasonController : UIScreenController
 
     string GeneratePlayerDescription(DraftProspect p)
     {
+        // Semilla estable por jugador basada en sus atributos (sin depender de un id)
+        int seed = p.overall * 1000 + p.shooting * 100 + p.iq * 10 + p.defense;
+        var rng = new System.Random(seed);
         var parts = new List<string>();
 
+        // --- 1. Atributos destacados ---
         var topAttrs = new List<(string name, int val)>
         {
-            ("tiro", p.shooting),
-            ("triple", p.three_point),
-            ("pases", p.passing),
-            ("bote", p.dribbling),
-            ("defensa", p.defense),
-            ("rebotes", p.rebounding),
-            ("rapidez", p.speed),
-            ("atletismo", p.athleticism),
-            ("inteligencia", p.iq),
-            ("robos", p.steals),
-            ("tapones", p.blocks)
+            ("el tiro exterior", p.shooting),
+            ("el triple", p.three_point),
+            ("la visión de pase", p.passing),
+            ("el manejo de balón", p.dribbling),
+            ("la defensa", p.defense),
+            ("el rebote", p.rebounding),
+            ("la velocidad", p.speed),
+            ("el atletismo", p.athleticism),
+            ("la inteligencia de juego", p.iq),
+            ("la capacidad de robo", p.steals),
+            ("el instinto taponador", p.blocks)
         };
-        var top3 = topAttrs.OrderByDescending(a => a.val).Take(3).ToList();
+        var ranked = topAttrs.OrderByDescending(a => a.val).ToList();
+        var top3 = ranked.Take(3).ToList();
+        var weakest = ranked.Last();
 
-        if (p.overall >= 85)
-            parts.Add("Un prospecto de elite con potencial de estrella.");
+        // --- 2. Apertura según overall, con variantes para evitar repetición ---
+        string opening;
+        if (p.overall >= 90)
+        {
+            var options = new[]
+            {
+                "Los ojeadores llevan meses hablando de este prospecto: un jugador de franquicia capaz de cambiar el rumbo de cualquier proyecto desde el día uno.",
+                "Pocas veces llega un talento así al Draft. Tiene el perfil de un futuro All-Star y encabeza todas las mock drafts por una razón.",
+                "Es la clase de jugador por el que un equipo hace tanking una temporada entera: techo de superestrella y un dominio del juego impropio de su edad."
+            };
+            opening = options[rng.Next(options.Length)];
+        }
+        else if (p.overall >= 85)
+        {
+            var options = new[]
+            {
+                "Llega al Draft como uno de los nombres más contrastados: un prospecto de élite con argumentos de sobra para ser franchise player.",
+                "Con un nivel de producción constante durante toda la temporada, se perfila como una pieza capaz de liderar una rotación desde su primer año.",
+                "Combina talento y madurez de juego poco habituales, lo que le sitúa entre los prospectos más codiciados de esta clase."
+            };
+            opening = options[rng.Next(options.Length)];
+        }
         else if (p.overall >= 78)
-            parts.Add("Un jugador con gran potencial para ser titular.");
+        {
+            var options = new[]
+            {
+                "Tiene el perfil de un titular NBA a corto o medio plazo, con un juego ya bastante pulido para su edad.",
+                "Los informes coinciden: llega con la base suficiente para asentarse como titular en cuanto se le dé continuidad.",
+                "No destaca por un único aspecto espectacular, sino por la solidez general de su juego, algo que suele traducirse bien en minutos reales."
+            };
+            opening = options[rng.Next(options.Length)];
+        }
         else if (p.overall >= 70)
-            parts.Add("Un jugador sólido que puede aportar al equipo.");
+        {
+            var options = new[]
+            {
+                "Encaja en el perfil de jugador de rotación: aporta consistencia sin ser el foco principal del ataque.",
+                "Sin ser un nombre llamativo, es de esos fichajes que un buen director deportivo sabe aprovechar en el rol adecuado.",
+                "Llega como una apuesta razonable: producción de rotación garantizada y margen para dar un salto si el desarrollo acompaña."
+            };
+            opening = options[rng.Next(options.Length)];
+        }
         else
-            parts.Add("Un prospecto de desarrollo con margen de mejora.");
+        {
+            var options = new[]
+            {
+                "Es un proyecto a largo plazo: las herramientas físicas están ahí, pero necesitará tiempo, minutos en G-League y paciencia por parte del staff.",
+                "Todavía lejos de la rotación NBA, representa una apuesta de desarrollo típica de mitad-final de Draft.",
+                "Tiene carencias evidentes en su juego actual, pero algunos scouts creen que hay techo suficiente para justificar la inversión."
+            };
+            opening = options[rng.Next(options.Length)];
+        }
+        parts.Add(opening);
 
-        if (top3.Count >= 2)
-            parts.Add($"Destaca en {top3[0].name} ({top3[0].val}), {top3[1].name} ({top3[1].val}) y {top3[2].name} ({top3[2].val}).");
+        // --- 3. Fortalezas concretas, en tono de informe ---
+        if (top3.Count >= 3)
+        {
+            parts.Add($"Su mayor arma es {top3[0].name} ({top3[0].val}), respaldado por {top3[1].name} ({top3[1].val}) y {top3[2].name} ({top3[2].val}).");
+        }
 
+        // --- 4. Punto débil, para dar contraste realista ---
+        if (weakest.val <= 65)
+        {
+            parts.Add($"Como contrapartida, {weakest.name} ({weakest.val}) es el aspecto que más deberá trabajar para no ser explotado por rivales NBA.");
+        }
+
+        // --- 5. Rasgo especial, integrado en la frase en vez de como etiqueta suelta ---
         if (!string.IsNullOrEmpty(p.trait))
         {
-            string traitName = p.trait.Replace("_", " ");
-            parts.Add($"Rasgo: {traitName.ToUpper()}.");
+            string traitText = DescribeTrait(p.trait);
+            if (!string.IsNullOrEmpty(traitText))
+                parts.Add(traitText);
         }
 
         return string.Join(" ", parts);
+    }
+
+    string DescribeTrait(string trait)
+    {
+        switch (trait)
+        {
+            case "clutch":
+                return "Además, tiene fama de responder en los momentos decisivos: los focos no le pesan.";
+            case "leader":
+                return "Los compañeros de universidad destacan su liderazgo dentro y fuera de la pista, algo que no siempre aparece en una ficha técnica.";
+            case "high_motor":
+                return "Juega cada posesión al máximo esfuerzo, un rasgo que suele hacer felices a los entrenadores de rotación.";
+            case "injury_prone":
+                return "El único punto de cautela es su historial físico: varios informes médicos recomiendan vigilar su carga de minutos.";
+            case "gym_rat":
+                return "Su ética de trabajo es prácticamente legendaria en su universidad, y eso suele traducirse en una curva de mejora rápida.";
+            case "streaky_shooter":
+                return "Cuando entra en racha es imparable desde el perímetro, aunque su consistencia noche a noche sigue siendo una incógnita.";
+            default:
+                return $"Rasgo destacado: {trait.Replace("_", " ")}.";
+        }
+    }
+
+    void UpdateMyPicksPanel()
+    {
+        if (_logo80 != null && _logo80.TryGetValue(_myTeam.logo, out var teamLogo))
+            _draftMyPicksLogo.style.backgroundImage = new StyleBackground(teamLogo);
+
+        _draftMyPicksBadges.Clear();
+        var userPicks = _draftOrder.Where(s => s.IsUserPick).ToList();
+        for (int i = 0; i < userPicks.Count; i++)
+        {
+            var slot = userPicks[i];
+            string roundLabel = slot.IsRound2 ? "R2" : "R1";
+            var badge = new Label($"{roundLabel} Pick {slot.PickNumber}");
+            badge.AddToClassList("draft-my-pick-badge");
+            if (slot.PickIndex == _currentPickIndex)
+                badge.AddToClassList("draft-my-pick-badge--current");
+            else if (slot.PickIndex < _currentPickIndex)
+                badge.AddToClassList("draft-my-pick-badge--used");
+            _draftMyPicksBadges.Add(badge);
+        }
     }
 
     void UpdateTeamNeeds()
