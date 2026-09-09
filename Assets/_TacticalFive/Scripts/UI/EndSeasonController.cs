@@ -1290,7 +1290,7 @@ public class EndSeasonController : UIScreenController
 
         var result = new List<(TeamData, string, double)>();
         for (int i = 0; i < standings.Count && i < odds.Length; i++)
-            result.Add((standings[i].Team, $"{odds[i] * 100:F1}%", odds[i]));
+            result.Add((standings[i].Team, $"{(odds[i] * 100).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%", odds[i]));
         return result;
     }
 }
