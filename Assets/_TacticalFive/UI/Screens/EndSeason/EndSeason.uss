@@ -1194,7 +1194,7 @@
 }
 .lottery-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 32px;
+    font-size: 48px;
     letter-spacing: 4px;
     color: rgb(212, 160, 23);
     margin-bottom: 8px;
@@ -1202,7 +1202,7 @@
 }
 .lottery-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     margin-bottom: 24px;
     -unity-text-align: middle-center;
