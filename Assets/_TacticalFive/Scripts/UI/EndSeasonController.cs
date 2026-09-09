@@ -1209,7 +1209,7 @@ public class EndSeasonController : UIScreenController
         for (int i = 0; i < teams.Count; i++)
         {
             var target = i < 7 ? col1 : col2;
-            target.Add(BuildLotteryRow(i + 1, teams[i].team, teams[i].pct, teams[i].pctNum));
+            target.Add(BuildLotteryRow(teams[i].pickNumber, teams[i].team, teams[i].pct, teams[i].pctNum));
         }
 
         var closeBtn = new Button();
@@ -1224,7 +1224,7 @@ public class EndSeasonController : UIScreenController
         CursorManager.Instance?.RegisterHandCursor(closeBtn);
     }
 
-    VisualElement BuildLotteryRow(int rank, TeamData team, string pct, double pctNum)
+    VisualElement BuildLotteryRow(int pickNumber, TeamData team, string pct, double pctNum)
     {
         var row = new VisualElement();
         row.AddToClassList("lottery-row");
@@ -1233,7 +1233,7 @@ public class EndSeasonController : UIScreenController
         content.AddToClassList("lottery-row-content");
         row.Add(content);
 
-        var rankLbl = new Label($"#{rank}");
+        var rankLbl = new Label($"#{pickNumber}");
         rankLbl.AddToClassList("lottery-rank");
         content.Add(rankLbl);
 
@@ -1262,7 +1262,7 @@ public class EndSeasonController : UIScreenController
         return row;
     }
 
-    List<(TeamData team, string pct, double pctNum)> BuildLotteryOrder()
+    List<(int pickNumber, TeamData team, string pct, double pctNum)> BuildLotteryOrder()
     {
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
@@ -1295,7 +1295,7 @@ public class EndSeasonController : UIScreenController
             0.020, 0.015, 0.010, 0.005
         };
 
-        var result = new List<(TeamData, string, double)>();
+        var result = new List<(int pickNumber, TeamData team, string pct, double pctNum)>();
         for (int i = 0; i < lotterySlots.Count && i < odds.Length; i++)
         {
             var slotTeam = lotterySlots[i].Team;
@@ -1314,7 +1314,7 @@ public class EndSeasonController : UIScreenController
                 }
             }
 
-            result.Add((owner, $"{(odds[i] * 100).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%", odds[i]));
+            result.Add((i + 1, owner, $"{(odds[i] * 100).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}%", odds[i]));
         }
         return result;
     }
