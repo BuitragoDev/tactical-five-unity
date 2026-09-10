@@ -144,8 +144,24 @@
 /* ══ AUTO LINEUP BUTTON ══ */
 
 .lineup-auto-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    background-color: rgb(42, 95, 201);
+    color: white;
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 4px;
+    padding: 12px 16px;
+    cursor: pointer;
+    -unity-text-align: middle-center;
     margin-top: 0;
     margin-bottom: 0;
+}
+
+.lineup-auto-btn:hover {
+    background-color: rgb(60, 120, 240);
+    border-color: rgb(60, 120, 240);
 }
 
 /* ══ STARTER SLOTS ══ */
@@ -233,14 +249,43 @@
 
 .load-mgmt-btn {
     flex: 1;
-    height: 44px;
-    min-width: 0;
-    padding: 8px 16px;
-    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
+    background-color: rgb(42, 51, 71);
+    color: white;
+    border-width: 1px;
+    border-color: rgb(58, 74, 99);
+    border-radius: 4px;
+    padding: 12px 16px;
+    cursor: pointer;
+    -unity-text-align: middle-center;
+    margin-right: 6px;
 }
 
-.load-mgmt-btn.load-mgmt-btn--active {
-    color: rgb(255, 255, 255);
+.load-mgmt-btn--on {
+    background-color: rgb(42, 95, 201);
+    border-color: rgb(42, 95, 201);
+    margin-right: 6px;
+}
+
+.load-mgmt-btn--off {
+    background-color: rgb(192, 57, 43);
+    border-color: rgb(192, 57, 43);
+    margin-right: 0;
+    margin-left: 6px;
+}
+
+.load-mgmt-btn--on.load-mgmt-btn--active {
+    background-color: rgb(25, 135, 84);
+    border-color: rgb(25, 135, 84);
+    color: rgb(15, 17, 23);
+}
+
+.load-mgmt-btn--off.load-mgmt-btn--active {
+    background-color: rgb(25, 135, 84);
+    border-color: rgb(25, 135, 84);
+    color: rgb(15, 17, 23);
 }
 
 /* ══ PLAYER CARDS ══ */

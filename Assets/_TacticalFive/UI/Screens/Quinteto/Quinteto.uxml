@@ -80,8 +80,8 @@
 
                         <!-- ══ LOAD MANAGEMENT ══ -->
                         <ui:VisualElement class="load-mgmt-row">
-                            <ui:Button name="LoadMgmtBtnOn" class="modal-btn modal-btn--primary load-mgmt-btn" text="GESTIONAR DESCANSOS" />
-                            <ui:Button name="LoadMgmtBtnOff" class="modal-btn modal-btn--danger load-mgmt-btn" text="NO GESTIONAR DESCANSOS" />
+                            <ui:Button name="LoadMgmtBtnOn" class="load-mgmt-btn load-mgmt-btn--on" text="GESTIONAR DESCANSOS" />
+                            <ui:Button name="LoadMgmtBtnOff" class="load-mgmt-btn load-mgmt-btn--off" text="NO GESTIONAR DESCANSOS" />
                         </ui:VisualElement>
 
                         <!-- ══ DETAIL PANEL ══ -->
