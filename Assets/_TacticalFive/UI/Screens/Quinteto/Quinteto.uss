@@ -294,7 +294,7 @@
     border-radius: 4px;
     flex-grow: 1;
     flex-shrink: 0;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .player-card:hover {
