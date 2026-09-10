@@ -116,6 +116,7 @@
     background-size: contain;
     background-position: center top;
     background-repeat: no-repeat;
+    padding: 10px;
 }
 
 .court-card {
