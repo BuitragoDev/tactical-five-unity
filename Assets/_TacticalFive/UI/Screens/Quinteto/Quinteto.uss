@@ -277,23 +277,11 @@
 }
 
 .lineup-col--right-panel .load-mgmt-btn--on.load-mgmt-btn--active {
-    background-color: rgb(39, 174, 96);
-    border-color: rgb(39, 174, 96);
-    color: rgb(255, 255, 255);
-}
-
-.lineup-col--right-panel .load-mgmt-btn--on.load-mgmt-btn--active:hover {
-    background-color: rgb(46, 204, 113);
+    border-color: rgb(212, 160, 23);
 }
 
 .lineup-col--right-panel .load-mgmt-btn--off.load-mgmt-btn--active {
-    background-color: rgb(39, 174, 96);
-    border-color: rgb(39, 174, 96);
-    color: rgb(255, 255, 255);
-}
-
-.lineup-col--right-panel .load-mgmt-btn--off.load-mgmt-btn--active:hover {
-    background-color: rgb(46, 204, 113);
+    border-color: rgb(212, 160, 23);
 }
 
 /* ══ PLAYER CARDS ══ */
