@@ -254,45 +254,45 @@
     -unity-text-align: middle-center;
 }
 
-.load-mgmt-btn--on {
-    background-color: rgba(42, 95, 201, 0.10);
-    border-color: rgb(42, 95, 201);
-    color: rgb(120, 160, 230);
+.lineup-col--right-panel .load-mgmt-btn--on {
+    background-color: rgba(39, 174, 96, 0.10);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 210, 140);
     margin-right: 6px;
 }
 
-.load-mgmt-btn--on:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+.lineup-col--right-panel .load-mgmt-btn--on:hover {
+    background-color: rgba(39, 174, 96, 0.25);
 }
 
-.load-mgmt-btn--off {
-    background-color: rgba(192, 57, 43, 0.10);
-    border-color: rgb(192, 57, 43);
-    color: rgb(231, 76, 60);
+.lineup-col--right-panel .load-mgmt-btn--off {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
     margin-left: 6px;
 }
 
-.load-mgmt-btn--off:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+.lineup-col--right-panel .load-mgmt-btn--off:hover {
+    background-color: rgba(42, 95, 201, 0.25);
 }
 
-.load-mgmt-btn--on.load-mgmt-btn--active {
+.lineup-col--right-panel .load-mgmt-btn--on.load-mgmt-btn--active {
     background-color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     color: rgb(255, 255, 255);
 }
 
-.load-mgmt-btn--on.load-mgmt-btn--active:hover {
+.lineup-col--right-panel .load-mgmt-btn--on.load-mgmt-btn--active:hover {
     background-color: rgb(46, 204, 113);
 }
 
-.load-mgmt-btn--off.load-mgmt-btn--active {
+.lineup-col--right-panel .load-mgmt-btn--off.load-mgmt-btn--active {
     background-color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     color: rgb(255, 255, 255);
 }
 
-.load-mgmt-btn--off.load-mgmt-btn--active:hover {
+.lineup-col--right-panel .load-mgmt-btn--off.load-mgmt-btn--active:hover {
     background-color: rgb(46, 204, 113);
 }
 
