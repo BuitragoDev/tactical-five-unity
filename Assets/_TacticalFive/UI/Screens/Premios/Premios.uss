@@ -27,7 +27,7 @@
     color: white;
     font-weight: bold;
     margin-bottom: 20px;
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 /* ── TABS ── */

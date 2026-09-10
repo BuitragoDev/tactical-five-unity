@@ -8,24 +8,25 @@
 
     <ui:VisualElement name="QuintetoRoot" class="quinteto-root">
 
-        <!-- ══ SIDEBAR ══ -->
-
         <!-- ══ MAIN CONTENT ══ -->
         <ui:VisualElement name="QuintetoMain" class="quinteto-main">
 
-            <!-- TOP HEADER (reutilizamos clases del dashboard) -->
             <!-- Lineup content -->
             <ui:VisualElement name="LineupContent" class="lineup-content">
 
                 <!-- Left column + right panel -->
                 <ui:VisualElement name="LineupColumns" class="lineup-columns">
 
-                    <!-- Column 1: Starters + Court, 400px -->
+                    <!-- Column 1: Starters + Court -->
                     <ui:VisualElement class="lineup-col lineup-col--left">
 
-                        <ui:VisualElement class="lineup-col-section">
-                            <ui:Label class="lineup-col-title" text="TITULARES" />
-                            <ui:VisualElement name="StartersList" class="lineup-col-list">
+                        <!-- ══ TITULARES ══ -->
+                        <ui:VisualElement class="lineup-section">
+                            <ui:VisualElement class="lineup-section-header">
+                                <ui:Label class="lineup-section-title" text="TITULARES" />
+                                <ui:Label class="lineup-section-subtitle" text="5 JUGADORES EN LA PISTA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="StartersList" class="lineup-section-body">
                                 <ui:VisualElement name="StarterSlotPG" class="starter-slot" data-pos="PG">
                                     <ui:Label class="starter-slot-label" text="B" />
                                 </ui:VisualElement>
@@ -44,33 +45,49 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
 
-                        <ui:VisualElement class="lineup-col-section">
+                        <!-- ══ COURT ══ -->
+                        <ui:VisualElement class="lineup-section lineup-section--court">
                             <ui:VisualElement name="CourtContainer" class="court-container" />
                         </ui:VisualElement>
 
+                        <!-- ══ AUTO LINEUP BUTTON ══ -->
+                        <ui:Button name="AutoLineupBtn" class="modal-btn modal-btn--primary lineup-auto-btn" text="_CONVOCATORIA AUTOMÁTICA" />
+
                     </ui:VisualElement>
 
-                    <!-- Column 2: Bench + Inactive, 400px -->
+                    <!-- Column 2: Bench + Inactive -->
                     <ui:VisualElement class="lineup-col lineup-col--mid">
 
-                        <ui:VisualElement class="lineup-col-section">
-                            <ui:Label class="lineup-col-title" text="BANQUILLO" />
-                            <ui:VisualElement name="BenchList" class="lineup-col-list lineup-col-list--drop" />
+                        <!-- ══ BANQUILLO ══ -->
+                        <ui:VisualElement class="lineup-section">
+                            <ui:VisualElement class="lineup-section-header">
+                                <ui:Label class="lineup-section-title" text="BANQUILLO" />
+                                <ui:Label class="lineup-section-subtitle" text="7 JUGADORES DISPONIBLES" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="BenchList" class="lineup-section-body lineup-section-body--drop" />
                         </ui:VisualElement>
 
-                        <ui:VisualElement class="lineup-col-section">
-                            <ui:Label class="lineup-col-title" text="NO CONVOCADOS" />
-                            <ui:VisualElement name="InactiveList" class="lineup-col-list lineup-col-list--drop" />
+                        <!-- ══ NO CONVOCADOS ══ -->
+                        <ui:VisualElement class="lineup-section">
+                            <ui:VisualElement class="lineup-section-header">
+                                <ui:Label class="lineup-section-title" text="NO CONVOCADOS" />
+                                <ui:Label class="lineup-section-subtitle" text="6 JUGADORES NO SELECCIONADOS" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="InactiveList" class="lineup-section-body lineup-section-body--drop" />
                         </ui:VisualElement>
 
                     </ui:VisualElement>
 
                     <!-- Right panel: player detail on hover -->
                     <ui:VisualElement class="lineup-col lineup-col--right-panel">
+
+                        <!-- ══ LOAD MANAGEMENT ══ -->
                         <ui:VisualElement class="load-mgmt-row">
-                            <ui:Button name="LoadMgmtBtnOn" class="load-mgmt-btn load-mgmt-btn--on" text="GESTIONAR DESCANSOS" />
-                            <ui:Button name="LoadMgmtBtnOff" class="load-mgmt-btn load-mgmt-btn--off" text="NO GESTIONAR DESCANSOS" />
+                            <ui:Button name="LoadMgmtBtnOn" class="modal-btn modal-btn--primary load-mgmt-btn" text="GESTIONAR DESCANSOS" />
+                            <ui:Button name="LoadMgmtBtnOff" class="modal-btn modal-btn--danger load-mgmt-btn" text="NO GESTIONAR DESCANSOS" />
                         </ui:VisualElement>
+
+                        <!-- ══ DETAIL PANEL ══ -->
                         <ui:VisualElement name="DetailEmpty" class="detail-empty">
                             <ui:Label class="detail-empty-text" text="PASA EL RATÓN SOBRE UN JUGADOR" />
                         </ui:VisualElement>
@@ -123,93 +140,93 @@
 
     </ui:VisualElement>
 
-        <!-- ══ MODAL CONFIGURACIÓN ══ -->
-        <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
-            <ui:VisualElement name="ConfigModalBox" class="modal-box">
-                <ui:Label class="modal-title" text="CONFIGURACIÓN" />
-                <ui:VisualElement class="modal-body">
-                    <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="AUDIO" />
-                        <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Volumen General" />
-                            <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
-                                <ui:VisualElement class="custom-slider-track" />
-                                <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
-                                <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
-                            </ui:VisualElement>
-                            <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+    <!-- ══ MODAL CONFIGURACIÓN ══ -->
+    <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigModalBox" class="modal-box">
+            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:VisualElement class="modal-body">
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
                         </ui:VisualElement>
-                        <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Música" />
-                            <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
-                                <ui:VisualElement class="custom-slider-track" />
-                                <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
-                                <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
-                            </ui:VisualElement>
-                            <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="settings-row">
-                            <ui:Label class="settings-label" text="Efectos" />
-                            <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
-                                <ui:VisualElement class="custom-slider-track" />
-                                <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
-                                <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
-                            </ui:VisualElement>
-                            <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
-                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="GRÁFICOS" />
-                        <ui:VisualElement class="settings-quality-row">
-                            <ui:Label class="settings-label" text="Calidad" />
-                            <ui:VisualElement class="settings-quality-options">
-                                <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
-                                <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
-                                <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
-                                <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
-                            </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Música" />
+                        <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
                         </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
                     </ui:VisualElement>
-                    <ui:VisualElement class="settings-section">
-                        <ui:Label class="settings-section-title" text="JUEGO" />
-                        <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
-                        <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:VisualElement class="settings-quality-row">
+                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:VisualElement class="settings-quality-options">
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="JUEGO" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                </ui:VisualElement>
             </ui:VisualElement>
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
         </ui:VisualElement>
+    </ui:VisualElement>
 
-        <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
-        <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
-            <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
-                <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
-                    <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
-                </ui:VisualElement>
-                <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
-                    <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
-                </ui:VisualElement>
+    <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
+    <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
+                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
             </ui:VisualElement>
         </ui:VisualElement>
+    </ui:VisualElement>
 
-        <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
-        <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
-            <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
-                <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
-                <ui:VisualElement class="modal-body">
-                    <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
-                    <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
-                </ui:VisualElement>
-                <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
-                    <ui:VisualElement class="modal-spacer" />
-                    <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
-                </ui:VisualElement>
+    <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
+    <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
+                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
             </ui:VisualElement>
         </ui:VisualElement>
+    </ui:VisualElement>
 
 </ui:UXML>
