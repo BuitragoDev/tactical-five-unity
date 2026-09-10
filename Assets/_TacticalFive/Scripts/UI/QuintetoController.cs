@@ -585,7 +585,7 @@ using System.Linq;
         var ovrLbl = new Label();
         ovrLbl.AddToClassList("player-card-badge");
         int cardOvr = player.GetCalculatedAverage();
-        ovrLbl.text = $"{cardOvr} MED";
+        ovrLbl.text = $"{cardOvr} MEDIA";
         if (cardOvr > 84)
             ovrLbl.AddToClassList("player-card-badge--high");
         else if (cardOvr >= 70)
@@ -597,7 +597,7 @@ using System.Linq;
         var fisicoLbl = new Label();
         fisicoLbl.AddToClassList("player-card-badge");
         int fisicoVal = player.fisico;
-        fisicoLbl.text = $"FIS:{fisicoVal}";
+        fisicoLbl.text = $"{fisicoVal} FISICO";
         if (fisicoVal >= 60)
             fisicoLbl.AddToClassList("player-card-badge--high");
         else if (fisicoVal >= 30)
