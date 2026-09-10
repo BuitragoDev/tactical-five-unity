@@ -69,6 +69,10 @@
     margin-bottom: 16px;
 }
 
+.lineup-section--court {
+    padding: 10px;
+}
+
 
 .lineup-section-header {
     flex-direction: row;
@@ -116,7 +120,6 @@
     background-size: contain;
     background-position: center top;
     background-repeat: no-repeat;
-    margin: 10px;
 }
 
 .court-card {
@@ -141,7 +144,8 @@
 /* ══ AUTO LINEUP BUTTON ══ */
 
 .lineup-auto-btn {
-    margin: 0 10px 10px 10px;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 /* ══ STARTER SLOTS ══ */
