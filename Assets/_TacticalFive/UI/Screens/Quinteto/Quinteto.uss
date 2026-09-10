@@ -616,7 +616,7 @@
     border-radius: 4px;
     padding: 6px 10px;
     margin-right: 6px;
-    width: 70px;
+    width: 90px;
 }
 
 .season-stat-val {
