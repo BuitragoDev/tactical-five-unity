@@ -168,6 +168,7 @@
     background-color: rgb(22, 26, 36);
     border: 1px solid rgb(40, 48, 62);
     border-radius: 4px;
+    margin-bottom: 6px;
 }
 
 .starter-slot--empty {
@@ -194,6 +195,7 @@
     background-color: rgb(22, 26, 36);
     border: 1px solid rgb(40, 48, 62);
     border-radius: 4px;
+    margin-bottom: 6px;
 }
 .bench-slot--empty, .inactive-slot--empty {
     border-style: dashed;
