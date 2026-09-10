@@ -45,8 +45,8 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
 
-                        <!-- ══ COURT ══ -->
-                        <ui:VisualElement class="lineup-section lineup-section--court">
+                        <!-- ══ COURT + AUTO LINEUP ══ -->
+                        <ui:VisualElement class="lineup-section">
                             <ui:VisualElement name="CourtContainer" class="court-container" />
                         </ui:VisualElement>
 

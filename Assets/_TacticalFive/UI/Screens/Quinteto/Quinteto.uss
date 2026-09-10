@@ -69,10 +69,6 @@
     margin-bottom: 16px;
 }
 
-.lineup-section--court {
-    border-color: rgb(42, 95, 201);
-    background-color: rgb(18, 21, 28);
-}
 
 .lineup-section-header {
     flex-direction: row;
