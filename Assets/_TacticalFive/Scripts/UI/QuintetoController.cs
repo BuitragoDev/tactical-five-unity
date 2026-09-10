@@ -574,35 +574,36 @@ using System.Linq;
         meta.AddToClassList("player-card-meta");
 
         var posLbl = new Label();
-        posLbl.AddToClassList("player-card-pos");
+        posLbl.AddToClassList("player-card-badge");
+        posLbl.AddToClassList("player-card-badge--pos");
         var posStr = PositionCodes.GetShort(player.position);
         if (!string.IsNullOrEmpty(player.secondary_position))
-            posStr += $" / {PositionCodes.GetShort(player.secondary_position)}";
-        posLbl.text = $"{posStr} - ";
+            posStr += $"/{PositionCodes.GetShort(player.secondary_position)}";
+        posLbl.text = posStr;
         meta.Add(posLbl);
 
         var ovrLbl = new Label();
-        ovrLbl.AddToClassList("player-card-ovr");
+        ovrLbl.AddToClassList("player-card-badge");
         int cardOvr = player.GetCalculatedAverage();
-        ovrLbl.text = $" {cardOvr} MED";
+        ovrLbl.text = $"{cardOvr} MED";
         if (cardOvr > 84)
-            ovrLbl.AddToClassList("player-card-ovr--high");
+            ovrLbl.AddToClassList("player-card-badge--high");
         else if (cardOvr >= 70)
-            ovrLbl.AddToClassList("player-card-ovr--mid");
+            ovrLbl.AddToClassList("player-card-badge--mid");
         else
-            ovrLbl.AddToClassList("player-card-ovr--low");
+            ovrLbl.AddToClassList("player-card-badge--low");
         meta.Add(ovrLbl);
 
         var fisicoLbl = new Label();
-        fisicoLbl.AddToClassList("player-card-fisico");
+        fisicoLbl.AddToClassList("player-card-badge");
         int fisicoVal = player.fisico;
-        fisicoLbl.text = $" FIS:{fisicoVal}";
+        fisicoLbl.text = $"FIS:{fisicoVal}";
         if (fisicoVal >= 60)
-            fisicoLbl.AddToClassList("player-card-fisico--high");
+            fisicoLbl.AddToClassList("player-card-badge--high");
         else if (fisicoVal >= 30)
-            fisicoLbl.AddToClassList("player-card-fisico--mid");
+            fisicoLbl.AddToClassList("player-card-badge--mid");
         else
-            fisicoLbl.AddToClassList("player-card-fisico--low");
+            fisicoLbl.AddToClassList("player-card-badge--low");
         meta.Add(fisicoLbl);
 
         if (player.g_league_assigned == 1)

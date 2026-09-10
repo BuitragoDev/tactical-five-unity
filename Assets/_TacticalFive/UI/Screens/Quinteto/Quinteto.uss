@@ -332,48 +332,49 @@
 
 .player-card-meta {
     flex-direction: row;
-    gap: 8px;
+    align-items: center;
+    gap: 6px;
     margin-top: 2px;
 }
 
-.player-card-pos {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(130, 130, 130);
-}
+/* ══ PLAYER CARD BADGES ══ */
 
-.player-card-ovr {
+.player-card-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    color: rgb(255, 255, 255);
+    font-size: 13px;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
 }
 
-.player-card-ovr--high {
-    color: rgb(39, 174, 96);
-}
-.player-card-ovr--mid {
-    color: rgb(212, 160, 23);
-}
-.player-card-ovr--low {
-    color: rgb(192, 57, 43);
+.player-card-badge--pos {
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(120, 160, 230);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
 }
 
-.player-card-fisico {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    margin-left: 18px;
+.player-card-badge--high {
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(100, 210, 140);
+    border-width: 1px;
+    border-color: rgb(39, 174, 96);
 }
 
-.player-card-fisico--high {
-    color: rgb(39, 174, 96);
+.player-card-badge--mid {
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(230, 190, 70);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
 }
 
-.player-card-fisico--mid {
-    color: rgb(212, 160, 23);
-}
-
-.player-card-fisico--low {
-    color: rgb(192, 57, 43);
+.player-card-badge--low {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(231, 100, 85);
+    border-width: 1px;
+    border-color: rgb(192, 57, 43);
 }
 
 .player-card-gl-badge {
