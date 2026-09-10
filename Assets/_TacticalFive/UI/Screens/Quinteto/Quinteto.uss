@@ -42,13 +42,11 @@
 }
 
 .lineup-col--left {
-    gap: 16px;
     overflow-y: auto;
     margin-right: 30px;
 }
 
 .lineup-col--mid {
-    gap: 16px;
     overflow-y: auto;
     margin-right: 16px;
 }
@@ -68,6 +66,7 @@
     background-color: rgb(18, 21, 28);
     border-radius: 4px;
     overflow: hidden;
+    margin-bottom: 16px;
 }
 
 .lineup-section--court {
