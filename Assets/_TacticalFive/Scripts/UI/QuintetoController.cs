@@ -426,8 +426,6 @@ using System.Linq;
 
         var autoBtn = new Button();
         autoBtn.name = "AutoLineupBtn";
-        autoBtn.AddToClassList("modal-btn");
-        autoBtn.AddToClassList("modal-btn--primary");
         autoBtn.AddToClassList("lineup-auto-btn");
         autoBtn.text = "CONVOCATORIA AUTOM\u00c1TICA";
         autoBtn.RegisterCallback<ClickEvent>(_ =>
