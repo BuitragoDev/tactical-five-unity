@@ -616,19 +616,19 @@
     border-radius: 4px;
     padding: 6px 10px;
     margin-right: 6px;
-    width: 48px;
+    width: 56px;
 }
 
 .season-stat-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
+    font-size: 32px;
     color: rgb(212, 160, 23);
     -unity-text-align: middle-center;
 }
 
 .season-stat-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 18px;
     letter-spacing: 1px;
     text-transform: uppercase;
     color: rgb(85, 102, 119);
