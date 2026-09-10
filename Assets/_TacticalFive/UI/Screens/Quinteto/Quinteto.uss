@@ -451,7 +451,6 @@
     min-height: 0;
     border-width: 1px;
     border-color: rgb(120, 95, 30);
-    border-top-width: 0;
 }
 
 .detail-top {
