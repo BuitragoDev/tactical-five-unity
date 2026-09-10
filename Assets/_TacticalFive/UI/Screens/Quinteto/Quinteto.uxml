@@ -50,9 +50,6 @@
                             <ui:VisualElement name="CourtContainer" class="court-container" />
                         </ui:VisualElement>
 
-                        <!-- ══ AUTO LINEUP BUTTON ══ -->
-                        <ui:Button name="AutoLineupBtn" class="modal-btn modal-btn--primary lineup-auto-btn" text="_CONVOCATORIA AUTOMÁTICA" />
-
                     </ui:VisualElement>
 
                     <!-- Column 2: Bench + Inactive -->

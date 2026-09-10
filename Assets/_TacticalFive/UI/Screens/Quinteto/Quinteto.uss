@@ -42,13 +42,13 @@
 }
 
 .lineup-col--left {
-    gap: 12px;
+    gap: 16px;
     overflow-y: auto;
     margin-right: 30px;
 }
 
 .lineup-col--mid {
-    gap: 12px;
+    gap: 16px;
     overflow-y: auto;
     margin-right: 16px;
 }
@@ -235,6 +235,9 @@
 .load-mgmt-btn {
     flex: 1;
     height: 44px;
+    min-width: 0;
+    padding: 8px 16px;
+    font-size: 16px;
 }
 
 .load-mgmt-btn.load-mgmt-btn--active {
