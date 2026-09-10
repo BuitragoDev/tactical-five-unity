@@ -30,6 +30,7 @@ using System.Linq;
     private Label _detailPosBadge;
     private Label _detailPlayerName;
     private Label _detailPlayerMeta;
+    private VisualElement _detailPhoto;
     private Label _detailOvr;
     private VisualElement _detailAttrs;
     private Label _statPts;
@@ -75,6 +76,7 @@ using System.Linq;
         _detailPosBadge = _root.Q<Label>("DetailPosBadge");
         _detailPlayerName = _root.Q<Label>("DetailPlayerName");
         _detailPlayerMeta = _root.Q<Label>("DetailPlayerMeta");
+        _detailPhoto = _root.Q<VisualElement>("DetailPhoto");
         _detailOvr = _root.Q<Label>("DetailOvr");
         _detailAttrs = _root.Q<VisualElement>("DetailAttrs");
         _statPts = _root.Q<Label>("StatPts");
@@ -455,6 +457,13 @@ using System.Linq;
             : $"{PositionCodes.GetName(p.position)} / {PositionCodes.GetName(p.secondary_position)}";
         _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
         _detailPlayerMeta.text = $"{PlayerAge(p)} años · {CountryCodes.GetName(p.nationality)}";
+
+        var photoTex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (photoTex != null)
+            _detailPhoto.style.backgroundImage = new StyleBackground(photoTex);
+        else
+            _detailPhoto.style.backgroundImage = StyleKeyword.Null;
+
         int detOvr = p.GetCalculatedAverage();
         _detailOvr.text = detOvr.ToString();
         _detailOvr.RemoveFromClassList("detail-ovr--high");

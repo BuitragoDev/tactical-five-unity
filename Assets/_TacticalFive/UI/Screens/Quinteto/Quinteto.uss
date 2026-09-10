@@ -456,7 +456,6 @@
 .detail-top {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
     padding: 18px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
@@ -464,17 +463,6 @@
     border-left-width: 0;
     border-right-width: 0;
     flex-shrink: 0;
-}
-
-.detail-pos-badge {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(255, 255, 255);
-    background-color: rgb(42, 95, 201);
-    padding: 4px 10px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-    margin-right: 12px;
 }
 
 .detail-name-block {
@@ -494,16 +482,41 @@
 
 .detail-player-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
+    margin-bottom: 6px;
+}
+
+.detail-pos-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.25);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    padding: 2px 10px;
+    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    align-self: flex-start;
+}
+
+.detail-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    margin-left: 12px;
+    margin-right: 12px;
+    background-color: rgb(40, 48, 62);
 }
 
 .detail-ovr-block {
     flex-direction: column;
     align-items: center;
     flex-shrink: 0;
-    margin-left: 12px;
 }
 
 .detail-ovr-val {
@@ -597,6 +610,12 @@
     border-left-width: 0;
     border-right-width: 0;
     flex-shrink: 0;
+    background-color: rgba(42, 95, 201, 0.08);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 4px;
+    margin: 12px 16px;
+    width: 280px;
 }
 
 .season-stat-card {
