@@ -116,7 +116,7 @@
     background-size: contain;
     background-position: center top;
     background-repeat: no-repeat;
-    padding: 10px;
+    margin: 10px;
 }
 
 .court-card {
@@ -141,8 +141,7 @@
 /* ══ AUTO LINEUP BUTTON ══ */
 
 .lineup-auto-btn {
-    width: 100%;
-    margin-top: 4px;
+    margin: 0 10px 10px 10px;
 }
 
 /* ══ STARTER SLOTS ══ */
