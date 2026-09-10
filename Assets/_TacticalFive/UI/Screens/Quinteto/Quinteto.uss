@@ -333,7 +333,6 @@
 .player-card-meta {
     flex-direction: row;
     align-items: center;
-    gap: 6px;
     margin-top: 2px;
 }
 
@@ -347,6 +346,7 @@
     border-radius: 3px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
+    margin-right: 6px;
 }
 
 .player-card-badge--pos {
