@@ -354,6 +354,7 @@
     color: rgb(120, 160, 230);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
+    width: 60px;
 }
 
 .player-card-badge--high {
@@ -361,6 +362,7 @@
     color: rgb(100, 210, 140);
     border-width: 1px;
     border-color: rgb(39, 174, 96);
+    width: 70px;
 }
 
 .player-card-badge--mid {
@@ -368,6 +370,7 @@
     color: rgb(230, 190, 70);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
+    width: 70px;
 }
 
 .player-card-badge--low {
@@ -375,6 +378,7 @@
     color: rgb(231, 100, 85);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
+    width: 70px;
 }
 
 .player-card-gl-badge {
