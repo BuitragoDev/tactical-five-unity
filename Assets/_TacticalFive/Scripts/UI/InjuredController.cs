@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
-    public class InjuredController : UIScreenController
+
+public class InjuredController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Injured;
 
@@ -21,8 +22,8 @@ using System.Linq;
     private VisualElement _medStaffCard;
     private VisualElement _medStaffEmpty;
 
-    // Injured table
-    private VisualElement _injuredTable;
+    // Injured cards
+    private VisualElement _injuredCards;
 
     // League injured modal
     private VisualElement _leagueInjuredOverlay;
@@ -42,9 +43,17 @@ using System.Linq;
     private EmployeeData _medico;
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites32 = new();
+    private Dictionary<string, Texture2D> _injuryIcons = new();
     private Texture2D _starTex;
     private StyleBackground _starBg;
     private StyleBackground _empleadoBg;
+    private Texture2D _calendarTex;
+    private Texture2D _personTex;
+
+    // Pagination
+    private int _currentPage;
+    private const int ITEMS_PER_PAGE = 6;
+
     protected override void CacheReferences()
     {
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
@@ -59,7 +68,7 @@ using System.Linq;
         _medStaffBody = _root.Q<VisualElement>("MedStaffBody");
         _medStaffCard = _root.Q<VisualElement>("MedStaffCard");
         _medStaffEmpty = _root.Q<VisualElement>("MedStaffEmpty");
-        _injuredTable = _root.Q<VisualElement>("InjuredTable");
+        _injuredCards = _root.Q<VisualElement>("InjuredCards");
 
         _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
         _leagueInjuredScroll = _root.Q<ScrollView>("LeagueInjuredScroll");
@@ -71,6 +80,7 @@ using System.Linq;
         _treatmentResultText = _root.Q<Label>("TreatmentResultText");
         _btnTreatmentOk = _root.Q<Button>("BtnTreatmentOk");
     }
+
     protected override void LoadData()
     {
         base.LoadData();
@@ -84,11 +94,19 @@ using System.Linq;
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
         if (_starTex != null)
             _starBg = new StyleBackground(_starTex);
-        _empleadoBg = new StyleBackground(Resources.Load<Texture2D>("Icons/empleado"));
+        _empleadoBg = new StyleBackground(Resources.Load<Texture2D>("Icons/avatar"));
 
-        
-        
-        
+        _calendarTex = Resources.Load<Texture2D>("Icons/calendar");
+        _personTex = Resources.Load<Texture2D>("Icons/person");
+
+        _injuryIcons.Clear();
+        var icons = Resources.LoadAll<Texture2D>("Icons/");
+        foreach (var tex in icons)
+        {
+            if (tex.name.StartsWith("lesion"))
+                _injuryIcons[tex.name] = tex;
+        }
+
         ReloadData();
     }
 
@@ -96,10 +114,12 @@ using System.Linq;
     {
         _allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         _injuredPlayers = _allPlayers.Where(p => p.injury_days > 0).ToList();
+        _currentPage = 0;
 
         var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         _medico = staff.FirstOrDefault(e => e.position == "MEDICO");
     }
+
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
@@ -117,15 +137,17 @@ using System.Linq;
         cursor.RegisterHandCursor(_btnLeagueInjured);
         cursor.RegisterHandCursor(_btnLeagueInjuredClose);
     }
+
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Injured] RefreshHeader error: {ex.Message}"); }
         BuildMedicalStaff();
-        BuildInjuredTable();
+        BuildInjuredCards();
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuLesionados")?.AddToClassList("nav-submenu-item--active");
         _treatmentResultOverlay.style.display = DisplayStyle.None;
     }
+
     protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
@@ -142,7 +164,6 @@ using System.Linq;
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         long totalPayroll = _allPlayers.Sum(p => p.salary);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
@@ -178,6 +199,8 @@ using System.Linq;
 
         _btnAction.text = "MENÚ PRINCIPAL";
     }
+
+    // ── MEDICAL STAFF ──
 
     void BuildMedicalStaff()
     {
@@ -258,133 +281,446 @@ using System.Linq;
         }
     }
 
-    void BuildInjuredTable()
+    // ── INJURED CARDS ──
+
+    void BuildInjuredCards()
     {
-        _injuredTable.Clear();
+        _injuredCards.Clear();
 
-        // Header row
-        var headerRow = new VisualElement();
-        headerRow.AddToClassList("injured-header-row");
+        int total = _injuredPlayers.Count;
 
-        var hNum = new Label(); hNum.AddToClassList("injured-col-num"); hNum.text = "#"; headerRow.Add(hNum);
-        var hName = new Label(); hName.AddToClassList("injured-col-name"); hName.text = "JUGADOR"; headerRow.Add(hName);
-        var hPos = new Label(); hPos.AddToClassList("injured-col-pos"); hPos.text = "POS"; headerRow.Add(hPos);
-        var hInjury = new Label(); hInjury.AddToClassList("injured-col-injury"); hInjury.text = "LESI\u00d3N"; headerRow.Add(hInjury);
-        var hDays = new Label(); hDays.AddToClassList("injured-col-days"); hDays.text = "D\u00cdAS"; headerRow.Add(hDays);
-        var hIr = new Label(); hIr.AddToClassList("injured-col-ir"); hIr.text = "RESERVA DE LESIONADOS"; headerRow.Add(hIr);
-        var hAct = new Label(); hAct.AddToClassList("injured-col-action"); hAct.text = "TRATAR"; headerRow.Add(hAct);
-        _injuredTable.Add(headerRow);
-
-        if (_injuredPlayers.Count == 0)
+        if (total == 0)
         {
+            var emptyWrapper = new VisualElement();
+            emptyWrapper.AddToClassList("injured-empty-card");
+
+            var emptyInner = new VisualElement();
+            emptyInner.AddToClassList("injured-empty-inner");
+
+            if (_personTex != null)
+            {
+                var emptyIcon = new VisualElement();
+                emptyIcon.AddToClassList("injured-empty-icon");
+                emptyIcon.style.backgroundImage = new StyleBackground(_personTex);
+                emptyInner.Add(emptyIcon);
+            }
+
             var emptyLbl = new Label();
-            emptyLbl.AddToClassList("injured-empty");
-            emptyLbl.text = "No hay jugadores lesionados.";
-            _injuredTable.Add(emptyLbl);
+            emptyLbl.AddToClassList("injured-empty-text");
+            emptyLbl.text = "No hay m\u00e1s jugadores lesionados\nen la plantilla";
+            emptyInner.Add(emptyLbl);
+
+            emptyWrapper.Add(emptyInner);
+            _injuredCards.Add(emptyWrapper);
             return;
         }
 
+        int totalPages = Mathf.CeilToInt((float)total / ITEMS_PER_PAGE);
+        if (totalPages < 1) totalPages = 1;
+        if (_currentPage >= totalPages) _currentPage = totalPages - 1;
+        if (_currentPage < 0) _currentPage = 0;
+
+        int startIdx = _currentPage * ITEMS_PER_PAGE;
+        int endIdx = Mathf.Min(startIdx + ITEMS_PER_PAGE, total);
+
         bool hasMedico = _medico != null;
 
-        for (int i = 0; i < _injuredPlayers.Count; i++)
+        for (int i = startIdx; i < endIdx; i++)
         {
             var player = _injuredPlayers[i];
-            var row = new VisualElement();
-            row.AddToClassList("injured-row");
+            bool isRecovered = player.injury_days == 0;
+            bool alreadyTreated = player.treated == 1;
+            bool onIR = player.is_on_ir == 1;
 
-            var numLbl = new Label();
-            numLbl.AddToClassList("injured-row-num");
-            numLbl.text = (i + 1).ToString("D2");
-            row.Add(numLbl);
+            var cardWrapper = new VisualElement();
+            cardWrapper.AddToClassList("injury-card");
+            cardWrapper.AddToClassList(isRecovered ? "injury-card--recovered" : "injury-card--injured");
 
-            var nameLbl = new Label();
-            nameLbl.AddToClassList("injured-row-name");
-            nameLbl.text = $"{player.first_name} {player.last_name}".ToUpper();
-            row.Add(nameLbl);
+            var card = new VisualElement();
+            card.AddToClassList("injury-card-inner");
+
+            // ── HEADER ──
+            var header = new VisualElement();
+            header.AddToClassList("card-header");
+
+            var jerseyLbl = new Label();
+            jerseyLbl.AddToClassList("card-jersey");
+            jerseyLbl.text = $"#{player.number}";
+            header.Add(jerseyLbl);
 
             var posLbl = new Label();
-            posLbl.AddToClassList("injured-row-pos");
+            posLbl.AddToClassList("card-position");
             posLbl.text = PositionCodes.GetShort(player.position);
-            row.Add(posLbl);
+            header.Add(posLbl);
 
-            var injuryLbl = new Label();
-            injuryLbl.AddToClassList("injured-row-injury");
-            injuryLbl.text = string.IsNullOrEmpty(player.injury_type) ? "LESI\u00d3N" : player.injury_type;
-            row.Add(injuryLbl);
+            var nameLbl = new Label();
+            nameLbl.AddToClassList("card-name");
+            nameLbl.text = $"{player.first_name} {player.last_name}".ToUpper();
+            header.Add(nameLbl);
+
+            if (!string.IsNullOrEmpty(player.nationality))
+            {
+                var flagTex = Resources.Load<Texture2D>($"Flags/{player.nationality}");
+                if (flagTex != null)
+                {
+                    var flag = new VisualElement();
+                    flag.AddToClassList("card-flag");
+                    flag.style.backgroundImage = new StyleBackground(flagTex);
+                    header.Add(flag);
+                }
+            }
+
+            var statusLbl = new Label();
+            statusLbl.AddToClassList("card-status");
+            if (isRecovered)
+            {
+                statusLbl.AddToClassList("card-status--recovered");
+                statusLbl.text = "\u2713 RECUPERADO";
+            }
+            else
+            {
+                statusLbl.AddToClassList("card-status--injured");
+                statusLbl.text = "+ LESIONADO";
+            }
+            header.Add(statusLbl);
+
+            card.Add(header);
+
+            // ── BODY ──
+            var body = new VisualElement();
+            body.AddToClassList("card-body");
+
+            var photo = new VisualElement();
+            photo.AddToClassList("card-photo");
+            var photoTex = PlayerPhotoHelper.Load(player.id, player.photo);
+            if (photoTex != null)
+                photo.style.backgroundImage = new StyleBackground(photoTex);
+            body.Add(photo);
+
+            var injuryIconBg = new VisualElement();
+            injuryIconBg.AddToClassList("card-injury-icon");
+            if (isRecovered)
+                injuryIconBg.AddToClassList("card-injury-icon--recovered");
+
+            var injuryIconImg = new VisualElement();
+            injuryIconImg.AddToClassList("card-injury-icon-img");
+            var iconTex = GetInjuryIcon(player.injury_type, isRecovered);
+            if (iconTex != null)
+                injuryIconImg.style.backgroundImage = new StyleBackground(iconTex);
+            injuryIconBg.Add(injuryIconImg);
+            body.Add(injuryIconBg);
+
+            var injuryInfo = new VisualElement();
+            injuryInfo.AddToClassList("card-injury-info");
+
+            var injuryName = new Label();
+            injuryName.AddToClassList("card-injury-name");
+            if (isRecovered)
+                injuryName.AddToClassList("card-injury-name--recovered");
+            injuryName.text = isRecovered
+                ? "Fase final de recuperaci\u00f3n"
+                : (string.IsNullOrEmpty(player.injury_type) ? "Lesi\u00f3n" : player.injury_type);
+            injuryInfo.Add(injuryName);
+
+            var subtitleLbl = new Label();
+            subtitleLbl.AddToClassList("card-injury-subtitle");
+            subtitleLbl.text = "Duraci\u00f3n estimada";
+            injuryInfo.Add(subtitleLbl);
+
+            var daysRow = new VisualElement();
+            daysRow.AddToClassList("card-injury-days");
+
+            if (_calendarTex != null)
+            {
+                var calIcon = new VisualElement();
+                calIcon.AddToClassList("card-injury-days-icon");
+                calIcon.style.backgroundImage = new StyleBackground(_calendarTex);
+                daysRow.Add(calIcon);
+            }
 
             var daysLbl = new Label();
-            daysLbl.AddToClassList("injured-row-days");
+            daysLbl.AddToClassList("card-injury-days-text");
+            if (isRecovered)
+                daysLbl.AddToClassList("card-injury-days-text--recovered");
             daysLbl.text = $"{player.injury_days} d\u00eda{(player.injury_days != 1 ? "s" : "")}";
-            row.Add(daysLbl);
+            daysRow.Add(daysLbl);
 
-            bool onIR = player.is_on_ir == 1;
-            var irBtn = new Button();
-            irBtn.AddToClassList("btn-ir");
-            irBtn.text = onIR ? "SACAR DE RESERVA" : "PONER EN RESERVA";
-            if (onIR)
+            injuryInfo.Add(daysRow);
+            body.Add(injuryInfo);
+
+            card.Add(body);
+
+            // ── FOOTER ──
+            var footer = new VisualElement();
+            footer.AddToClassList("card-footer");
+
+            var severity = new VisualElement();
+            severity.AddToClassList("card-severity");
+
+            if (_injuryIcons.TryGetValue("lesion_ritmoCardiaco", out var heartTex))
             {
-                int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
-                if (rosterCount >= TradeHelper.MAX_ROSTER)
+                var heartIcon = new VisualElement();
+                heartIcon.style.width = 32;
+                heartIcon.style.height = 32;
+                heartIcon.style.marginRight = 6;
+                heartIcon.style.flexShrink = 0;
+                heartIcon.style.backgroundImage = new StyleBackground(heartTex);
+                heartIcon.style.unityBackgroundScaleMode = ScaleMode.ScaleToFit;
+                severity.Add(heartIcon);
+            }
+
+            var sevLabel = new Label();
+            sevLabel.AddToClassList("card-severity-label");
+            string sevText = GetSeverityLabel(player.injury_days);
+            sevLabel.text = sevText;
+            if (isRecovered || player.injury_days == 0)
+                sevLabel.AddToClassList("card-severity-label--safe");
+            else if (player.injury_days <= 3)
+                sevLabel.AddToClassList("card-severity-label--leve");
+            else if (player.injury_days <= 14)
+                sevLabel.AddToClassList("card-severity-label--moderada");
+            else
+                sevLabel.AddToClassList("card-severity-label--severa");
+            severity.Add(sevLabel);
+
+            var bar = new VisualElement();
+            bar.AddToClassList("card-severity-bar");
+            int segments = GetSeveritySegments(player.injury_days);
+            string segColor = isRecovered || player.injury_days == 0
+                ? "green"
+                : (player.injury_days <= 14 ? "orange" : "red");
+            for (int s = 0; s < 4; s++)
+            {
+                var seg = new VisualElement();
+                seg.AddToClassList("severity-segment");
+                if (s < segments)
                 {
-                    irBtn.AddToClassList("btn-ir--disabled");
-                    irBtn.SetEnabled(false);
-                    irBtn.text = "LLENA";
+                    seg.AddToClassList(segColor == "green" ? "severity-segment--filled-green"
+                        : segColor == "orange" ? "severity-segment--filled-orange"
+                        : "severity-segment--filled-red");
+                }
+                bar.Add(seg);
+            }
+            severity.Add(bar);
+            footer.Add(severity);
+
+            // ── BUTTONS ──
+            var buttons = new VisualElement();
+            buttons.AddToClassList("card-buttons");
+
+            if (isRecovered)
+            {
+                var aptoBtn = new Button();
+                aptoBtn.AddToClassList("btn-card-apt");
+                aptoBtn.text = "APTO";
+                aptoBtn.SetEnabled(false);
+                aptoBtn.AddToClassList("btn-card-no-apt--disabled");
+                buttons.Add(aptoBtn);
+            }
+            else
+            {
+                var noAptBtn = new Button();
+                noAptBtn.AddToClassList("btn-card-no-apt");
+                noAptBtn.text = "PONER NO APTO";
+                if (onIR)
+                {
+                    int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
+                    if (rosterCount >= TradeHelper.MAX_ROSTER)
+                    {
+                        noAptBtn.AddToClassList("btn-card-no-apt--disabled");
+                        noAptBtn.SetEnabled(false);
+                        noAptBtn.text = "LLENA";
+                    }
+                    else
+                    {
+                        noAptBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetPlayerIR(player, false); });
+                    }
+                }
+                else if (!TradeHelper.IsEligibleForIR(player))
+                {
+                    noAptBtn.AddToClassList("btn-card-no-apt--disabled");
+                    noAptBtn.SetEnabled(false);
                 }
                 else
                 {
-                    irBtn.userData = player;
-                    irBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetPlayerIR(player, false); });
+                    noAptBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetPlayerIR(player, true); });
                 }
-            }
-            else if (!TradeHelper.IsEligibleForIR(player))
-            {
-                irBtn.AddToClassList("btn-ir--disabled");
-                irBtn.SetEnabled(false);
-                irBtn.text = "NO APTO";
-            }
-            else
-            {
-                irBtn.userData = player;
-                irBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetPlayerIR(player, true); });
-            }
-            if (irBtn.enabledSelf)
-            {
-                if (CursorManager.Instance != null)
+                if (noAptBtn.enabledSelf && CursorManager.Instance != null)
                 {
-                    irBtn.RegisterCallback<MouseEnterEvent>(_ =>
-                        CursorManager.Instance.SetHandCursor());
-                    irBtn.RegisterCallback<MouseLeaveEvent>(_ =>
-                        CursorManager.Instance.SetDefaultCursor());
+                    noAptBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                    noAptBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
                 }
-            }
-            if (onIR) irBtn.AddToClassList("btn-ir--on");
-            row.Add(irBtn);
+                if (onIR) noAptBtn.text = "PONER APTO";
+                buttons.Add(noAptBtn);
 
-            bool alreadyTreated = player.treated == 1;
-            var treatBtn = new Button();
-            treatBtn.AddToClassList("btn-treat");
-            treatBtn.text = alreadyTreated ? "TRATADO" : "TRATAR";
-            if (!hasMedico || alreadyTreated)
-            {
-                treatBtn.AddToClassList("btn-treat--disabled");
-                treatBtn.SetEnabled(false);
-            }
-            else
-            {
-                treatBtn.userData = player;
-                treatBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnTreat(player); });
-                if (CursorManager.Instance != null)
+                var treatBtn = new Button();
+                treatBtn.AddToClassList("btn-card-treat");
+                if (alreadyTreated)
                 {
-                    treatBtn.RegisterCallback<MouseEnterEvent>(_ =>
-                        CursorManager.Instance.SetHandCursor());
-                    treatBtn.RegisterCallback<MouseLeaveEvent>(_ =>
-                        CursorManager.Instance.SetDefaultCursor());
+                    treatBtn.AddToClassList("btn-card-treat--done");
+                    treatBtn.text = "TRATADO";
+                    treatBtn.SetEnabled(false);
                 }
+                else
+                {
+                    treatBtn.text = "TRATAR";
+                    if (!hasMedico)
+                    {
+                        treatBtn.AddToClassList("btn-card-treat--disabled");
+                        treatBtn.SetEnabled(false);
+                    }
+                    else
+                    {
+                        treatBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnTreat(player); });
+                        if (CursorManager.Instance != null)
+                        {
+                            treatBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                            treatBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+                        }
+                    }
+                }
+                buttons.Add(treatBtn);
             }
-            row.Add(treatBtn);
 
-            _injuredTable.Add(row);
+            footer.Add(buttons);
+            card.Add(footer);
+
+            cardWrapper.Add(card);
+            _injuredCards.Add(cardWrapper);
         }
+
+        // ── PAGINATION BAR ──
+        if (totalPages > 1)
+        {
+            var paginator = new VisualElement();
+            paginator.AddToClassList("injured-paginator");
+
+            var btnPrev = new Button();
+            btnPrev.AddToClassList("injured-paginator-btn");
+            btnPrev.text = "\u25C0";
+            btnPrev.SetEnabled(_currentPage > 0);
+            if (_currentPage == 0) btnPrev.AddToClassList("injured-paginator-btn--disabled");
+            int prevPage = _currentPage - 1;
+            btnPrev.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(prevPage); });
+            if (CursorManager.Instance != null)
+            {
+                btnPrev.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                btnPrev.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+            }
+            paginator.Add(btnPrev);
+
+            var pageLbl = new Label();
+            pageLbl.AddToClassList("injured-paginator-label");
+            pageLbl.text = $"{_currentPage + 1} / {totalPages}";
+            paginator.Add(pageLbl);
+
+            var btnNext = new Button();
+            btnNext.AddToClassList("injured-paginator-btn");
+            btnNext.text = "\u25B6";
+            btnNext.SetEnabled(_currentPage < totalPages - 1);
+            if (_currentPage >= totalPages - 1) btnNext.AddToClassList("injured-paginator-btn--disabled");
+            int nextPage = _currentPage + 1;
+            btnNext.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(nextPage); });
+            if (CursorManager.Instance != null)
+            {
+                btnNext.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                btnNext.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+            }
+            paginator.Add(btnNext);
+
+            _injuredCards.Add(paginator);
+        }
+    }
+
+    void GoToPage(int page)
+    {
+        _currentPage = page;
+        BuildInjuredCards();
+    }
+
+    // ── HELPERS ──
+
+    Texture2D GetInjuryIcon(string injuryType, bool isRecovered)
+    {
+        if (isRecovered)
+        {
+            if (_injuryIcons.TryGetValue("lesion_ritmoCardiaco", out var heartTex))
+                return heartTex;
+            return _injuryIcons.Values.FirstOrDefault();
+        }
+
+        if (string.IsNullOrEmpty(injuryType))
+            return _injuryIcons.TryGetValue("lesion", out var defTex) ? defTex : null;
+
+        string lower = injuryType.ToLowerInvariant();
+
+        if (lower.Contains("sobrecarga") || lower.Contains("calambre") || lower.Contains("distensi")
+            || lower.Contains("contractura") || lower.Contains("fibrilar"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_muscular", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("esguince"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_pie", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("fractura") || lower.Contains("contusi"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_fractura", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("tendinitis") || lower.Contains("fascitis") || lower.Contains("gemelo")
+            || lower.Contains("aquiles"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_tendon", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("lumbalgia"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_espalda", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("menisco") || lower.Contains("ligamento") || lower.Contains("cruzado"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_rodilla", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("luxaci") || lower.Contains("hombro"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_hombro", out var tex))
+                return tex;
+        }
+
+        if (lower.Contains("subluxaci") || lower.Contains("dedo"))
+        {
+            if (_injuryIcons.TryGetValue("lesion_mano", out var tex))
+                return tex;
+        }
+
+        return _injuryIcons.TryGetValue("lesion", out var fallbackTex) ? fallbackTex : null;
+    }
+
+    string GetSeverityLabel(int injuryDays)
+    {
+        if (injuryDays <= 0) return "SIN RIESGO";
+        if (injuryDays <= 3) return "LEVE";
+        if (injuryDays <= 14) return "MODERADA";
+        return "SEVERA";
+    }
+
+    int GetSeveritySegments(int injuryDays)
+    {
+        if (injuryDays <= 0) return 4;
+        if (injuryDays <= 3) return 1;
+        if (injuryDays <= 14) return 2;
+        return 3;
     }
 
     // ── IR (RESERVA DE LESIONADOS) ──
@@ -445,6 +781,7 @@ using System.Linq;
     {
         _treatmentResultOverlay.style.display = DisplayStyle.None;
     }
+
     // ── LEAGUE INJURED ──
 
     void OpenLeagueInjuredModal()

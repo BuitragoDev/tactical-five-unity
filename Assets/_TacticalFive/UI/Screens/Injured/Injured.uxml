@@ -33,7 +33,7 @@
                     <!-- INJURED PLAYERS -->
                     <ui:VisualElement name="InjuredSection" class="injured-section">
                         <ui:Label class="section-title" text="JUGADORES LESIONADOS" />
-                        <ui:VisualElement name="InjuredTable" class="injured-table" />
+                        <ui:VisualElement name="InjuredCards" class="injured-cards" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>
@@ -50,7 +50,7 @@
                 <ui:Label name="TreatmentResultTitle" class="injured-modal-title" text="" />
                 <ui:Label name="TreatmentResultText" class="injured-modal-text" text="" />
                 <ui:VisualElement class="injured-modal-buttons">
-                    <ui:Button name="BtnTreatmentOk" class="btn-modal-ok" text="ENTENDIDO" />
+                    <ui:Button name="BtnTreatmentOk" class="btn-action" text="CERRAR" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

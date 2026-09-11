@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   INJURED — Injured.uss
+   INJURED — Injured.uss (card layout)
    ══════════════════════════════════════════ */
 
 .injured-root {
@@ -61,8 +61,8 @@
 }
 
 .med-staff-icon {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     margin-right: 14px;
     flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
@@ -114,195 +114,436 @@
     opacity: 0.25;
 }
 
-/* ── INJURED TABLE ── */
+/* ── INJURED CARDS ── */
 
 .injured-section {
     flex-direction: column;
     flex-grow: 1;
 }
 
-.injured-table {
+.injured-cards {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin: 0 -8px;
+}
+
+/* ── CARD ── */
+
+.injury-card {
+    flex-basis: 33.33%;
+    min-width: 0;
+    padding: 0 8px;
+    margin-bottom: 16px;
+}
+
+.injury-card-inner {
     flex-direction: column;
-}
-
-.injured-header-row {
-    flex-direction: row;
-    background-color: rgb(20, 28, 48);
-    padding: 10px 14px;
-    margin-bottom: 4px;
-}
-
-.injured-col-num {
-    width: 40px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.injured-col-name {
-    width: 300px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-left;
-}
-
-.injured-col-pos {
-    width: 70px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.injured-col-injury {
-    flex: 1;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-left;
-}
-
-.injured-col-days {
-    width: 80px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.injured-col-action {
-    width: 140px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.injured-col-ir {
-    width: 210px;
-    margin-right: 15px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
-    letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    -unity-text-align: middle-center;
-}
-
-.injured-row {
-    flex-direction: row;
-    align-items: center;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
-    padding: 10px 14px;
-    margin-bottom: 4px;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.injured-row-num {
-    width: 40px;
+.injury-card--injured .injury-card-inner {
+    border-top-width: 3px;
+    border-top-color: rgb(192, 57, 43);
+}
+
+.injury-card--recovered .injury-card-inner {
+    border-top-width: 3px;
+    border-top-color: rgb(39, 174, 96);
+}
+
+/* ── CARD HEADER ── */
+
+.card-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 12px 14px 8px;
+}
+
+.card-jersey {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(208, 216, 232);
+    background-color: rgb(30, 40, 60);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-right: 6px;
+    -unity-text-align: middle-center;
+    min-width: 28px;
+}
+
+.card-position {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(42, 95, 201);
+    border-radius: 4px;
+    padding: 2px 10px;
+    margin-right: 10px;
+    -unity-text-align: middle-center;
+    min-width: 28px;
+}
+
+.card-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(255, 255, 255);
+    -unity-text-transform: upper;
+    flex-grow: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-status {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-left: 6px;
+}
+
+.card-status--injured {
+    color: rgb(230, 120, 100);
+    background-color: rgba(192, 57, 43, 0.15);
+}
+
+.card-status--recovered {
+    color: rgb(100, 200, 140);
+    background-color: rgba(39, 174, 96, 0.15);
+}
+
+/* ── CARD BODY ── */
+
+.card-body {
+    flex-direction: row;
+    align-items: center;
+    padding: 4px 14px 12px;
+}
+
+.card-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 14px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+    background-color: rgb(30, 35, 48);
+}
+
+.card-injury-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background-color: rgba(192, 57, 43, 0.15);
+    margin-right: 14px;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-injury-icon--recovered {
+    background-color: rgba(39, 174, 96, 0.15);
+}
+
+.card-injury-icon-img {
+    width: 36px;
+    height: 36px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-injury-info {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.card-injury-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(192, 57, 43);
+    white-space: normal;
+}
+
+.card-injury-name--recovered {
+    color: rgb(100, 200, 140);
+}
+
+.card-injury-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    margin-top: 2px;
+}
+
+.card-injury-days {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.card-injury-days-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-injury-days-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(192, 57, 43);
+}
+
+.card-injury-days-text--recovered {
+    color: rgb(100, 200, 140);
+}
+
+/* ── CARD FOOTER ── */
+
+.card-footer {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 14px 12px;
+}
+
+.card-flag {
+    width: 36px;
+    height: 24px;
+    margin-left: 6px;
+    margin-right: 2px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.card-severity {
+    flex-direction: row;
+    align-items: center;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.card-severity-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 1px;
+    margin-right: 8px;
+    flex-shrink: 0;
+}
+
+.card-severity-label--leve {
+    color: rgb(212, 160, 23);
+}
+
+.card-severity-label--moderada {
+    color: rgb(212, 160, 23);
+}
+
+.card-severity-label--severa {
+    color: rgb(192, 57, 43);
+}
+
+.card-severity-label--safe {
+    color: rgb(39, 174, 96);
+}
+
+.card-severity-bar {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.severity-segment {
+    width: 14px;
+    height: 6px;
+    margin-right: 3px;
+    border-radius: 2px;
+    background-color: rgb(42, 51, 71);
+}
+
+.severity-segment--filled-red {
+    background-color: rgb(192, 57, 43);
+}
+
+.severity-segment--filled-orange {
+    background-color: rgb(212, 160, 23);
+}
+
+.severity-segment--filled-green {
+    background-color: rgb(39, 174, 96);
+}
+
+/* ── CARD BUTTONS ── */
+
+.card-buttons {
+    flex-direction: row;
+    align-items: center;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.btn-card-no-apt {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 150, 230);
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    -unity-text-align: middle-center;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+}
+.btn-card-no-apt:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+}
+
+.btn-card-apt {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    -unity-text-align: middle-center;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+}
+.btn-card-apt:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+}
+
+.btn-card-treat {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    -unity-text-align: middle-center;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-left: 6px;
+    min-width: 0;
+    white-space: nowrap;
+}
+.btn-card-treat:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+}
+
+.btn-card-treat--disabled {
+    background-color: rgba(42, 51, 71, 0.10);
+    border-color: rgb(42, 51, 71);
+    color: rgb(90, 103, 128);
+}
+
+.btn-card-treat--done {
+    background-color: rgba(39, 174, 96, 0.15);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+}
+.btn-card-treat--done:hover {
+    background-color: rgba(39, 174, 96, 0.15);
+}
+
+.btn-card-no-apt--disabled {
+    background-color: rgba(42, 51, 71, 0.10);
+    border-color: rgb(42, 51, 71);
+    color: rgb(90, 103, 128);
+}
+
+/* ── EMPTY STATE ── */
+
+.injured-empty-card {
+    flex-basis: 33.33%;
+    min-width: 0;
+    padding: 0 8px;
+    margin-bottom: 16px;
+}
+
+.injured-empty-inner {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 8px;
+    padding: 32px 16px;
+    min-height: 200px;
+}
+
+.injured-empty-icon {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 12px;
+    -unity-background-scale-mode: scale-to-fit;
+    opacity: 0.3;
+}
+
+.injured-empty-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 14px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
+    white-space: normal;
 }
 
-.injured-row-name {
-    width: 300px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
+/* ── PAGINATOR ── */
+
+.injured-paginator {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    margin-top: 12px;
+    padding: 8px 0;
 }
 
-.injured-row-pos {
-    width: 70px;
+.injured-paginator-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(122, 138, 170);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 150, 230);
+    font-size: 14px;
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 40px;
     -unity-text-align: middle-center;
 }
-
-.injured-row-injury {
-    flex: 1;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(192, 57, 43);
-    -unity-text-align: middle-left;
+.injured-paginator-btn:hover {
+    background-color: rgba(42, 95, 201, 0.25);
 }
 
-.injured-row-days {
-    width: 80px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    color: rgb(192, 57, 43);
-    -unity-text-align: middle-center;
-}
-
-.btn-treat {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(181, 42, 37);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 16px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    padding: 6px 14px;
-    -unity-text-align: middle-center;
-    width: 140px;
-    border-radius: 4px;
-}
-.btn-treat:hover {
-    background-color: rgb(145, 32, 32);
-}
-
-.btn-treat--disabled {
-    background-color: rgb(42, 51, 71);
+.injured-paginator-btn--disabled {
+    background-color: rgba(42, 51, 71, 0.10);
+    border-color: rgb(42, 51, 71);
     color: rgb(90, 103, 128);
 }
 
-.btn-ir {
+.injured-paginator-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(39, 84, 148);
-    border-width: 0;
-    color: rgb(255, 255, 255);
     font-size: 16px;
-    letter-spacing: 1px;
-    -unity-text-transform: upper;
-    padding: 6px 14px;
+    color: rgb(179, 190, 214);
+    margin-left: 16px;
+    margin-right: 16px;
     -unity-text-align: middle-center;
-    width: 210px;
-    border-radius: 4px;
-    margin-right: 10px;
-}
-.btn-ir:hover {
-    background-color: rgb(31, 68, 122);
-}
-
-.btn-ir--on {
-    background-color: rgb(39, 174, 96);
-}
-.btn-ir--on:hover {
-    background-color: rgb(30, 140, 78);
-}
-
-.btn-ir--disabled {
-    background-color: rgb(42, 51, 71);
-    color: rgb(90, 103, 128);
-}
-
-.injured-empty {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    color: rgb(122, 138, 170);
-    margin-top: 10px;
 }
 
 /* ── TREATMENT RESULT MODAL ── */
@@ -318,28 +559,28 @@
 
 .injured-modal-box {
     width: 480px;
-    background-color: rgb(15, 17, 23);
+    background-color: rgb(13, 14, 18);
     border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 3px;
-    border-top-color: rgb(39, 174, 96);
-    padding: 28px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 12px;
+    padding: 32px;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
 }
 
 .injured-modal-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 28px;
-    letter-spacing: 4px;
-    color: rgb(39, 174, 96);
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
     margin-bottom: 16px;
     -unity-text-align: middle-center;
 }
 
 .injured-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 20px;
     color: rgb(179, 190, 214);
     -unity-text-align: middle-center;
     margin-bottom: 12px;
@@ -348,22 +589,8 @@
 
 .injured-modal-buttons {
     flex-direction: row;
-    margin-top: 16px;
-}
-
-.btn-modal-ok {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(179, 190, 214);
-    font-size: 18px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    padding: 10px 24px;
-    -unity-text-align: middle-center;
-}
-.btn-modal-ok:hover {
-    background-color: rgb(52, 115, 231);
+    width: 100%;
+    margin-top: 24px;
 }
 
 /* ── LEAGUE INJURED BUTTON ── */
@@ -372,17 +599,18 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
-    background-color: rgb(42, 95, 201);
-    color: white;
-    border-width: 0;
-    border-radius: 4px;
+    background-color: rgba(42, 95, 201, 0.10);
+    color: rgb(100, 150, 230);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 8px;
     padding: 12px;
     cursor: pointer;
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
 .btn-league-injured:hover {
-    background-color: rgb(52, 115, 231);
+    background-color: rgba(42, 95, 201, 0.25);
 }
 
 /* ── LEAGUE INJURED MODAL ── */
@@ -511,10 +739,11 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgb(42, 95, 201);
-    color: white;
-    border-width: 0;
-    border-radius: 4px;
+    background-color: rgba(42, 95, 201, 0.10);
+    color: rgb(100, 150, 230);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 6px;
     padding: 10px;
     cursor: pointer;
     -unity-text-align: middle-center;
@@ -522,5 +751,5 @@
 }
 
 .btn-hire:hover {
-    background-color: rgb(52, 115, 231);
+    background-color: rgba(42, 95, 201, 0.25);
 }
