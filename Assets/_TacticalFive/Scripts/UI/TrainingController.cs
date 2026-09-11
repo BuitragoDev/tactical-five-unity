@@ -34,6 +34,8 @@ using System.Linq;
     private VisualElement _noAsistenteOverlay;
     private Button _btnNoAsistenteOk;
     private Button _btnAutoTrain;
+    private Button _btnResetTraining;
+    private ScrollView _rightScroll;
 
     // Data
     private List<PlayerData> _players;
@@ -106,6 +108,9 @@ using System.Linq;
         _noAsistenteOverlay = _root.Q<VisualElement>("NoAsistenteOverlay");
         _btnNoAsistenteOk = _root.Q<Button>("BtnNoAsistenteOk");
         _btnAutoTrain = _root.Q<Button>("BtnAutoTrain");
+        _btnResetTraining = _root.Q<Button>("BtnResetTraining");
+
+        _rightScroll = _root.Q<ScrollView>("TrainingRightScroll");
 
         _trainingPlayerInfo = _root.Q<VisualElement>("TrainingPlayerInfo");
         _trainingPlayerName = _root.Q<Label>("TrainingPlayerName");
@@ -121,7 +126,7 @@ using System.Linq;
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
         if (_starTex != null)
             _starBg = new StyleBackground(_starTex);
-        _empleadoBg = new StyleBackground(Resources.Load<Texture2D>("Icons/empleado"));
+        _empleadoBg = new StyleBackground(Resources.Load<Texture2D>("Icons/avatar"));
 
         
         
@@ -142,6 +147,7 @@ using System.Linq;
             _noAsistenteOverlay.RemoveFromClassList("training-modal-overlay--visible");
         });
         _btnAutoTrain?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnAutoAssign(); });
+        _btnResetTraining?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnResetTraining(); });
     }
     protected override void Refresh()
     {
@@ -207,100 +213,130 @@ using System.Linq;
     {
         _trainingBody.Clear();
 
-        foreach (var pos in PositionCodes.Order)
+        var sorted = _players
+            .OrderBy(p => System.Array.IndexOf(PositionCodes.Order, p.position))
+            .ThenByDescending(p => p.overall)
+            .ToList();
+
+        var grid = new VisualElement();
+        grid.AddToClassList("training-cards-grid");
+
+        foreach (var player in sorted)
         {
-            var posPlayers = _players
-                .Where(p => p.position == pos)
-                .OrderByDescending(p => p.overall)
-                .ToList();
-
-            if (posPlayers.Count == 0) continue;
-
-            var posHeader = new VisualElement();
-            posHeader.AddToClassList("pos-header");
-
-            var badge = new Label();
-            badge.AddToClassList("pos-badge");
-            badge.text = PositionCodes.GetShort(pos);
-
-            var label = new Label();
-            label.AddToClassList("pos-label");
-            label.text = PositionCodes.GetName(pos);
-
-            posHeader.Add(badge);
-            posHeader.Add(label);
-
-            var section = new VisualElement();
-            section.AddToClassList("pos-section");
-            section.Add(posHeader);
-
-            foreach (var player in posPlayers)
-            {
-                var row = CreateTrainingRow(player);
-                section.Add(row);
-            }
-
-            _trainingBody.Add(section);
+            var card = CreatePlayerCard(player);
+            grid.Add(card);
         }
+
+        _trainingBody.Add(grid);
     }
 
-    VisualElement CreateTrainingRow(PlayerData player)
+    VisualElement CreatePlayerCard(PlayerData player)
     {
-        var row = new VisualElement();
-        row.AddToClassList("training-row");
+        var card = new VisualElement();
+        card.AddToClassList("training-card");
 
-        var nameLbl = new Label();
-        nameLbl.AddToClassList("training-row-name");
-        nameLbl.text = player.is_rookie == 1
-            ? $"{player.first_name} {player.last_name} (R)"
-            : $"{player.first_name} {player.last_name}";
+        // Top row: photo (left) + info (right)
+        var topRow = new VisualElement();
+        topRow.AddToClassList("training-card-top-row");
 
-        var ovrLbl = new Label();
-        ovrLbl.AddToClassList("training-row-ovr");
+        // Photo
+        var photo = new VisualElement();
+        photo.AddToClassList("training-card-photo");
+        var tex = PlayerPhotoHelper.Load(player.id, player.photo);
+        if (tex != null)
+            photo.style.backgroundImage = new StyleBackground(tex);
+        topRow.Add(photo);
+
+        // Info (name + badges)
+        var info = new VisualElement();
+        info.AddToClassList("training-card-info");
+
+        // Name
+        var nameContainer = new VisualElement();
+        nameContainer.AddToClassList("training-card-name");
+
+        var firstNameLbl = new Label();
+        firstNameLbl.AddToClassList("training-card-firstname");
+        firstNameLbl.text = player.first_name?.ToUpper() ?? "";
+        nameContainer.Add(firstNameLbl);
+
+        var lastNameLbl = new Label();
+        lastNameLbl.AddToClassList("training-card-lastname");
+        lastNameLbl.text = player.last_name?.ToUpper() ?? "";
+        nameContainer.Add(lastNameLbl);
+
+        info.Add(nameContainer);
+
+        // Badges row: position + MED
+        var badgesRow = new VisualElement();
+        badgesRow.AddToClassList("training-card-bottom");
+
+        var posBadge = new VisualElement();
+        posBadge.AddToClassList("training-card-pos-badge");
+        var posBadgeLbl = new Label();
+        posBadgeLbl.AddToClassList("training-card-pos-badge-label");
+        string posText = PositionCodes.GetShort(player.position);
+        if (!string.IsNullOrEmpty(player.secondary_position))
+            posText += $" / {PositionCodes.GetShort(player.secondary_position)}";
+        posBadgeLbl.text = posText;
+        posBadge.Add(posBadgeLbl);
+        badgesRow.Add(posBadge);
+
         int ovrVal = player.overall;
-        ovrLbl.text = ovrVal.ToString();
-        if (ovrVal > 84)
-            ovrLbl.AddToClassList("training-row-ovr--high");
-        else if (ovrVal >= 70)
-            ovrLbl.AddToClassList("training-row-ovr--mid");
-        else
-            ovrLbl.AddToClassList("training-row-ovr--low");
+        var medBadge = new VisualElement();
+        medBadge.AddToClassList("training-card-med-badge");
+        if (ovrVal > 84) medBadge.AddToClassList("training-card-med-badge--high");
+        else if (ovrVal >= 70) medBadge.AddToClassList("training-card-med-badge--mid");
+        else medBadge.AddToClassList("training-card-med-badge--low");
 
-        row.Add(nameLbl);
+        var medLbl = new Label();
+        medLbl.AddToClassList("training-card-med-badge-label");
+        if (ovrVal > 84) medLbl.AddToClassList("training-card-med-badge-label--high");
+        else if (ovrVal >= 70) medLbl.AddToClassList("training-card-med-badge-label--mid");
+        else medLbl.AddToClassList("training-card-med-badge-label--low");
+        medLbl.text = $"MED {ovrVal}";
+        medBadge.Add(medLbl);
+        badgesRow.Add(medBadge);
+
+        info.Add(badgesRow);
+        topRow.Add(info);
+        card.Add(topRow);
+
+        // Bottom: training badge (full width)
+        var badgeContainer = new VisualElement();
+        badgeContainer.AddToClassList("training-card-badge");
 
         var active = _activeTraining.FirstOrDefault(t => t.player_id == player.id);
         if (active != null)
         {
-            var badgeContainer = new VisualElement();
-            badgeContainer.AddToClassList("training-badge");
-
             if (AttrColors.TryGetValue(active.attribute, out var badgeColor))
                 badgeContainer.style.backgroundColor = new StyleColor(badgeColor);
 
             var badgeLbl = new Label();
-            badgeLbl.AddToClassList("training-badge-label");
-            badgeLbl.text = BadgeAbbr.TryGetValue(active.attribute, out var abbr) ? abbr : "TR";
+            badgeLbl.AddToClassList("training-card-badge-label");
+            badgeLbl.text = AttrDisplay.TryGetValue(active.attribute, out var attrName) ? attrName : active.attribute.ToUpper();
             badgeContainer.Add(badgeLbl);
-            row.Add(badgeContainer);
+        }
+        else
+        {
+            badgeContainer.AddToClassList("training-card-badge--none");
+            var badgeLbl = new Label();
+            badgeLbl.AddToClassList("training-card-badge-label");
+            badgeLbl.text = "SIN ENTRENAMIENTO";
+            badgeContainer.Add(badgeLbl);
         }
 
-        row.Add(ovrLbl);
+        card.Add(badgeContainer);
 
-        var ovrTextLbl = new Label();
-        ovrTextLbl.AddToClassList("training-row-ovr-text");
-        ovrTextLbl.text = "MED";
-        row.Add(ovrTextLbl);
-
-        row.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnPlayerSelected(player, row); });
+        // Click handler
+        card.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnPlayerSelected(player, card); });
         if (CursorManager.Instance != null)
         {
-            row.RegisterCallback<MouseEnterEvent>(_ =>
-                CursorManager.Instance.SetHandCursor());
-            row.RegisterCallback<MouseLeaveEvent>(_ =>
-                CursorManager.Instance.SetDefaultCursor());
+            card.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+            card.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
         }
 
-        return row;
+        return card;
     }
 
     void BuildAsistenteCard()
@@ -376,13 +412,13 @@ using System.Linq;
         }
     }
 
-    void OnPlayerSelected(PlayerData player, VisualElement row)
+    void OnPlayerSelected(PlayerData player, VisualElement card)
     {
         _selectedPlayer = player;
 
-        _trainingBody.Query<VisualElement>(className: "training-row--selected")
-            .ForEach(e => e.RemoveFromClassList("training-row--selected"));
-        row.AddToClassList("training-row--selected");
+        _trainingBody.Query<VisualElement>(className: "training-card--selected")
+            .ForEach(e => e.RemoveFromClassList("training-card--selected"));
+        card.AddToClassList("training-card--selected");
 
         if (_asistente != null)
             ShowAttrTable(player);
@@ -400,7 +436,7 @@ using System.Linq;
 
         _trainingPlayerInfo.AddToClassList("training-player-info--visible");
         _trainingPlayerName.text = $"{player.first_name} {player.last_name}".ToUpper();
-        _trainingPlayerMeta.text = $"{player.age} años · {CountryCodes.GetName(player.nationality)} · {player.height_cm / 100f:F2}m · {player.weight_kg}kg{(player.is_rookie == 1 ? " · Rookie" : "")}";
+        _trainingPlayerMeta.text = $"{PositionCodes.GetName(player.position)} · {player.age} años · {CountryCodes.GetName(player.nationality)} · {player.height_cm / 100f:F2}m · {player.weight_kg}kg{(player.is_rookie == 1 ? " · Rookie" : "")}";
 
         var activeTraining = _activeTraining.FirstOrDefault(t => t.player_id == player.id);
 
@@ -459,6 +495,12 @@ using System.Linq;
 
             var valLbl = new Label();
             valLbl.AddToClassList("training-attr-value");
+            if (val > 84)
+                valLbl.AddToClassList("training-attr-value--high");
+            else if (val >= 70)
+                valLbl.AddToClassList("training-attr-value--mid");
+            else
+                valLbl.AddToClassList("training-attr-value--low");
             valLbl.text = val.ToString();
 
             row.Add(btn);
@@ -471,6 +513,7 @@ using System.Linq;
     void ShowEmptyState()
     {
         _trainingEmpty.style.display = DisplayStyle.Flex;
+        _rightScroll.style.display = DisplayStyle.None;
         _attrPanel.style.display = DisplayStyle.None;
         _trainingPlayerInfo.RemoveFromClassList("training-player-info--visible");
     }
@@ -478,6 +521,7 @@ using System.Linq;
     void ShowRightPanel()
     {
         _trainingEmpty.style.display = DisplayStyle.None;
+        _rightScroll.style.display = DisplayStyle.Flex;
     }
 
     void OnAssignTraining(PlayerData player, string attribute)
@@ -516,7 +560,7 @@ using System.Linq;
 
         _activeTraining = DatabaseManager.Instance.GetTeamTraining(_myTeam.id);
         BuildPlayerList();
-        OnPlayerSelected(player, _trainingBody.Query<VisualElement>(className: "training-row--selected").First());
+        OnPlayerSelected(player, _trainingBody.Query<VisualElement>(className: "training-card--selected").First());
     }
     private static readonly Dictionary<string, string[]> PrimaryAttrs = new()
     {
@@ -542,6 +586,15 @@ using System.Linq;
         { "PF", new[] { "dribbling", "steals" } },
         { "C",  new[] { "three_point", "dribbling", "steals" } },
     };
+
+    void OnResetTraining()
+    {
+        DatabaseManager.Instance.DeleteTeamTraining(_myTeam.id);
+        _activeTraining = DatabaseManager.Instance.GetTeamTraining(_myTeam.id);
+        _selectedPlayer = null;
+        ShowEmptyState();
+        BuildPlayerList();
+    }
 
     void OnAutoAssign()
     {
@@ -602,9 +655,9 @@ using System.Linq;
 
         if (_selectedPlayer != null)
         {
-            var row = _trainingBody.Query<VisualElement>(className: "training-row--selected").First();
-            if (row != null)
-                OnPlayerSelected(_selectedPlayer, row);
+            var card = _trainingBody.Query<VisualElement>(className: "training-card--selected").First();
+            if (card != null)
+                OnPlayerSelected(_selectedPlayer, card);
         }
     }
 

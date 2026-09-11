@@ -32,10 +32,6 @@
     flex-grow: 1;
 }
 
-.training-body {
-    flex-direction: column;
-}
-
 .training-right {
     width: 500px;
 }
@@ -43,6 +39,10 @@
 .training-right-body {
     flex-direction: column;
     height: 100%;
+}
+
+.training-right-scroll {
+    flex-grow: 1;
 }
 
 /* ══ POSITION SECTION ══ */
@@ -80,87 +80,195 @@
     letter-spacing: 2px;
 }
 
-/* ══ TRAINING PLAYER ROW ══ */
-.training-row {
+/* ══ PLANTILLA SECTION ══ */
+.training-section {
+    flex-direction: column;
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    background-color: rgb(18, 21, 28);
+    border-radius: 4px;
+    margin-bottom: 16px;
+}
+
+.training-section-header {
     flex-direction: row;
     align-items: center;
-    padding: 6px 8px;
-    background-color: rgb(22, 26, 36);
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(28, 33, 48);
-    border-top-width: 0;
-    border-left-width: 0;
-    border-right-width: 0;
+    border-bottom-color: rgb(120, 95, 30);
+}
+
+.training-section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+}
+
+.training-section-body {
+    padding: 8px;
+}
+
+/* ══ TRAINING PLAYER CARD ══ */
+.training-cards-grid {
+    flex-wrap: wrap;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.training-card {
+    flex-direction: column;
+    width: 24%;
+    flex-grow: 0;
+    flex-shrink: 1;
+    flex-basis: auto;
+    min-width: 0;
+    background-color: rgb(18, 24, 38);
+    border-width: 1px;
+    border-color: rgb(50, 90, 160);
+    border-radius: 6px;
+    margin-bottom: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
+    padding: 10px;
     cursor: pointer;
 }
 
-.training-row:hover {
-    background-color: rgb(28, 33, 48);
+.training-card:hover {
+    background-color: rgb(22, 30, 48);
+    border-color: rgb(50, 75, 120);
 }
 
-.training-row--selected {
-    background-color: rgb(20, 28, 48);
-    border-left-width: 3px;
-    border-left-color: rgb(42, 95, 201);
+.training-card--selected {
+    background-color: rgb(20, 32, 55);
+    border-color: rgb(212, 160, 23);
+    border-width: 2px;
 }
 
-.training-row--selected:hover {
-    background-color: rgb(20, 28, 48);
+.training-card--selected:hover {
+    background-color: rgb(20, 32, 55);
+    border-color: rgb(212, 160, 23);
 }
 
-.training-row-name {
+.training-card-top-row {
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.training-card-photo {
+    width: 100px;
+    height: 100px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.training-card-info {
+    flex-direction: column;
+    align-items: flex-start;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.training-card-name {
+    flex-direction: column;
+}
+
+.training-card-firstname {
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+}
+
+.training-card-lastname {
     font-size: 18px;
     color: rgb(208, 216, 232);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    flex-grow: 1;
-    margin-left: 8px;
 }
 
-.training-row-ovr {
-    font-size: 18px;
-    color: rgb(122, 138, 170);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    width: 32px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
+.training-card-bottom {
+    flex-direction: row;
+    align-items: center;
+    margin-top: 4px;
 }
 
-.training-row-ovr--high {
-    color: rgb(39, 174, 96);
-}
-.training-row-ovr--mid {
-    color: rgb(212, 160, 23);
-}
-.training-row-ovr--low {
-    color: rgb(192, 57, 43);
-}
-
-.training-row-ovr-text {
-    font-size: 16px;
-    color: rgb(80, 94, 120);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    width: 28px;
-    margin-left: 4px;
-    -unity-text-align: middle-left;
-    flex-shrink: 0;
-}
-
-.training-badge {
-    width: 40px;
-    height: 24px;
+.training-card-pos-badge {
+    height: 22px;
+    padding: 0 8px;
     background-color: rgb(42, 95, 201);
     border-radius: 4px;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-    margin-left: 8px;
 }
 
-.training-badge-label {
-    font-size: 12px;
+.training-card-pos-badge-label {
+    font-size: 16px;
     color: white;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     -unity-text-align: middle-center;
+}
+
+.training-card-med-badge {
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    flex-shrink: 0;
+}
+
+.training-card-med-badge--high {
+    background-color: rgba(39, 174, 96, 0.25);
+}
+.training-card-med-badge--mid {
+    background-color: rgba(212, 160, 23, 0.25);
+}
+.training-card-med-badge--low {
+    background-color: rgba(192, 57, 43, 0.25);
+}
+
+.training-card-med-badge-label {
+    font-size: 16px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    -unity-text-align: middle-center;
+}
+
+.training-card-med-badge-label--high {
+    color: rgb(39, 174, 96);
+}
+.training-card-med-badge-label--mid {
+    color: rgb(212, 160, 23);
+}
+.training-card-med-badge-label--low {
+    color: rgb(192, 57, 43);
+}
+
+.training-card-badge {
+    width: 100%;
+    padding: 0 8px;
+    border-radius: 4px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 6px;
+}
+
+.training-card-badge-label {
+    font-size: 18px;
+    color: white;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    -unity-text-align: middle-center;
+    letter-spacing: 0.5px;
+}
+
+.training-card-badge--none {
+    background-color: rgb(42, 51, 71);
+}
+
+.training-card-badge--none .training-card-badge-label {
+    color: rgb(122, 138, 170);
 }
 
 /* ══ STAFF CARD (asistente) ══ */
@@ -180,8 +288,8 @@
 }
 
 .training-staff-icon {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
     margin-right: 12px;
@@ -293,21 +401,22 @@
 .training-attr-panel {
     flex-direction: column;
     flex-grow: 1;
-    background-color: rgb(22, 26, 36);
     border-width: 1px;
-    border-color: rgb(42, 51, 71);
+    border-color: rgb(120, 95, 30);
+    background-color: rgb(18, 21, 28);
     border-radius: 4px;
     overflow: hidden;
 }
 
 .training-attr-title {
     font-size: 16px;
-    color: rgb(122, 138, 170);
+    color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     letter-spacing: 2px;
-    padding: 12px 14px;
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
+    border-bottom-color: rgb(120, 95, 30);
 }
 
 .training-attr-scroll {
@@ -377,38 +486,84 @@
     flex-shrink: 0;
 }
 
+.training-attr-value--high {
+    color: rgb(39, 174, 96);
+}
+
+.training-attr-value--mid {
+    color: rgb(212, 160, 23);
+}
+
+.training-attr-value--low {
+    color: rgb(192, 57, 43);
+}
+
+/* ══ BUTTONS ROW ══ */
+.training-btn-row {
+    flex-direction: row;
+    width: 100%;
+    flex-shrink: 0;
+    margin-top: 8px;
+    margin-bottom: 8px;
+}
+
 /* ══ AUTO BUTTON ══ */
 .training-btn-auto {
-    width: 100%;
-    height: 36px;
+    flex-grow: 1;
+    flex-basis: 0;
     flex-shrink: 0;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 3px;
-    color: white;
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    border-radius: 4px;
-    margin-top: 8px;
-    cursor: pointer;
+    font-size: 24px;
+    letter-spacing: 2px;
+    padding: 14px 48px;
+    border-radius: 8px;
+    border-width: 2px;
     -unity-text-align: middle-center;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+    cursor: pointer;
+    margin-right: 6px;
 }
 
 .training-btn-auto:hover {
-    background-color: rgb(52, 115, 231);
+    background-color: rgba(42, 95, 201, 0.25);
+}
+
+/* ══ RESETEAR BUTTON ══ */
+.training-btn-reset {
+    flex-grow: 1;
+    flex-basis: 0;
+    flex-shrink: 0;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    letter-spacing: 2px;
+    padding: 14px 48px;
+    border-radius: 8px;
+    border-width: 2px;
+    -unity-text-align: middle-center;
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
+    cursor: pointer;
+    margin-left: 6px;
+}
+
+.training-btn-reset:hover {
+    background-color: rgba(100, 110, 130, 0.25);
 }
 
 /* ══ EMPTY STATE ══ */
 .training-empty {
     display: flex;
-    flex-grow: 1;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    -unity-text-align: middle-center;
+    -unity-text-align: upper-center;
     font-size: 20px;
     color: rgb(58, 74, 99);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     letter-spacing: 2px;
+    margin-top: 8px;
 }
 
 /* ══ MODAL ══ */

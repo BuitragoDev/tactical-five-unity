@@ -161,6 +161,13 @@ public partial class DatabaseManager
         _db.Insert(training);
     }
 
+    public void DeleteTeamTraining(int teamId)
+    {
+        _db.Table<TrainingData>()
+            .Where(t => t.team_id == teamId && t.completed == 0)
+            .Delete();
+    }
+
     public void CompleteTraining(int id)
     {
         var t = _db.Table<TrainingData>().FirstOrDefault(x => x.id == id);

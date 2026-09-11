@@ -20,7 +20,12 @@
                 <!-- LEFT PANEL -->
                 <ui:VisualElement class="training-left">
                     <ui:ScrollView name="TrainingScroll" class="training-scroll">
-                        <ui:VisualElement name="TrainingBody" class="training-body" />
+                        <ui:VisualElement class="training-section">
+                            <ui:VisualElement class="training-section-header">
+                                <ui:Label class="training-section-title" text="PLANTILLA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="TrainingBody" class="training-section-body training-cards-grid" />
+                        </ui:VisualElement>
                     </ui:ScrollView>
                 </ui:VisualElement>
 
@@ -32,19 +37,22 @@
                             <ui:VisualElement name="AsistenteCard" class="training-staff-card" />
                             <ui:VisualElement name="NoAsistente" class="training-no-staff" />
                         </ui:VisualElement>
-                        <!-- Player info -->
-                        <ui:VisualElement name="TrainingPlayerInfo" class="training-player-info">
-                            <ui:Label name="TrainingPlayerName" class="training-player-name" text="" />
-                            <ui:Label name="TrainingPlayerMeta" class="training-player-meta" text="" />
+                        <!-- Fixed buttons -->
+                        <ui:VisualElement class="training-btn-row">
+                            <ui:Button name="BtnAutoTrain" class="training-btn-auto" text="AUTO" />
+                            <ui:Button name="BtnResetTraining" class="training-btn-reset" text="RESETEAR" />
                         </ui:VisualElement>
-                        <!-- Attr table -->
-                        <ui:VisualElement name="TrainingAttrPanel" class="training-attr-panel">
-                            <ui:Label name="AttrPanelTitle" class="training-attr-title" text="ENTRENAMIENTOS DISPONIBLES" />
-                            <ui:ScrollView name="TrainingAttrScroll" class="training-attr-scroll">
+                        <!-- Scrollable content below buttons -->
+                        <ui:ScrollView name="TrainingRightScroll" class="training-right-scroll">
+                            <ui:VisualElement name="TrainingPlayerInfo" class="training-player-info">
+                                <ui:Label name="TrainingPlayerName" class="training-player-name" text="" />
+                                <ui:Label name="TrainingPlayerMeta" class="training-player-meta" text="" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="TrainingAttrPanel" class="training-attr-panel">
+                                <ui:Label name="AttrPanelTitle" class="training-attr-title" text="ENTRENAMIENTOS DISPONIBLES" />
                                 <ui:VisualElement name="TrainingAttrBody" class="training-attr-body" />
-                            </ui:ScrollView>
-                        </ui:VisualElement>
-                        <ui:Button name="BtnAutoTrain" class="training-btn-auto" text="AUTO" />
+                            </ui:VisualElement>
+                        </ui:ScrollView>
                         <!-- Empty state -->
                         <ui:Label name="TrainingEmpty" class="training-empty" text="SELECCIONA UN JUGADOR" />
                     </ui:VisualElement>
