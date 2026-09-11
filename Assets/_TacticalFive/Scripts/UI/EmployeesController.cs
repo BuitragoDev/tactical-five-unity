@@ -48,6 +48,7 @@ public class EmployeesController : UIScreenController
 
     // Hire result modal
     private VisualElement _hireResultOverlay;
+    private VisualElement _hireResultBox;
     private Label _hireResultTitle;
     private Label _hireResultText;
     private Button _btnHireResultOk;
@@ -179,6 +180,7 @@ public class EmployeesController : UIScreenController
         _btnHireConfirm = _root.Q<Button>("BtnHireConfirm");
 
         _hireResultOverlay = _root.Q<VisualElement>("HireResultOverlay");
+        _hireResultBox = _root.Q<VisualElement>("HireResultBox");
         _hireResultTitle = _root.Q<Label>("HireResultTitle");
         _hireResultText = _root.Q<Label>("HireResultText");
         _btnHireResultOk = _root.Q<Button>("BtnHireResultOk");
@@ -960,6 +962,11 @@ public class EmployeesController : UIScreenController
 
         _hireResultTitle.text = "EMPLEADO DESPEDIDO";
         _hireResultText.text = $"{name} ya no trabaja para tu equipo. Indemnización pagada: {FormatSalary(penalty)}.";
+        _hireResultBox.RemoveFromClassList("hire-modal-box--negative");
+        _hireResultBox.AddToClassList("hire-modal-box--negative");
+        _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
+        _btnHireResultOk.AddToClassList("btn-modal-cancel");
+        _btnHireResultOk.text = "CERRAR";
         _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
 
@@ -1046,17 +1053,22 @@ public class EmployeesController : UIScreenController
 
     void ShowHireResult(bool success, string name, string positionLabel)
     {
+        _hireResultBox.RemoveFromClassList("hire-modal-box--negative");
         if (success)
         {
             _hireResultTitle.text = "CONTRATACIÓN COMPLETADA";
             _hireResultText.text = $"{name} se ha unido a tu equipo como {positionLabel}.";
+            _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
+            _btnHireResultOk.AddToClassList("btn-modal-confirm");
         }
         else
         {
             _hireResultTitle.text = "CONTRATACIÓN FALLIDA";
             _hireResultText.text = "No se ha podido completar la contratación.";
+            _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
+            _btnHireResultOk.AddToClassList("btn-modal-cancel");
         }
-
+        _btnHireResultOk.text = "CERRAR";
         _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
 

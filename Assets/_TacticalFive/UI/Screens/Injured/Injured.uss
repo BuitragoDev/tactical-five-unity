@@ -114,6 +114,13 @@
     opacity: 0.25;
 }
 
+.med-staff-recovery {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    margin-top: 8px;
+}
+
 /* ── INJURED CARDS ── */
 
 .injured-section {

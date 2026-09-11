@@ -241,13 +241,15 @@ public class InjuredController : UIScreenController
 
             var recoveryText = _medico.reputation switch
             {
-                5 => "RECUPERA: 25%-40%",
-                4 => "RECUPERA: 20%-32%",
-                3 => "RECUPERA: 15%-25%",
-                2 => "RECUPERA: 10%-18%",
-                _ => "RECUPERA: 5%-12%"
+                5 => "Recupera: 25%-40%",
+                4 => "Recupera: 20%-32%",
+                3 => "Recupera: 15%-25%",
+                2 => "Recupera: 10%-18%",
+                _ => "Recupera: 5%-12%"
             };
-            info.Add(new Label(recoveryText));
+            var recoveryLbl = new Label(recoveryText);
+            recoveryLbl.AddToClassList("med-staff-recovery");
+            info.Add(recoveryLbl);
 
             _medStaffCard.Add(info);
         }
