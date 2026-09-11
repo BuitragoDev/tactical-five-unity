@@ -102,10 +102,6 @@ using System.Linq;
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
-        _root.Q<Button>("TrajectoryBackBtn")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Roster); });
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.RegisterHandCursor(_root.Q<Button>("TrajectoryBackBtn"));
     }
     protected override void Refresh()
     {

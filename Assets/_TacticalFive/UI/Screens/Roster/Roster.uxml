@@ -68,15 +68,17 @@
                                     <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
                                     <ui:Label name="DetailPlayerPos"  class="detail-player-pos"  text="" />
                                     <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
-                                    <ui:VisualElement class="detail-links-row">
-                        <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="VER TRAYECTORIA" />
-                        <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="VER PERFIL DEL JUGADOR" />
-                    </ui:VisualElement>
                                 </ui:VisualElement>
                                 <ui:VisualElement class="detail-ovr-block">
                                     <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />
                                     <ui:Label class="detail-ovr-label" text="MED" />
                                 </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <!-- Botones link -->
+                            <ui:VisualElement class="detail-links-row">
+                                <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="VER TRAYECTORIA" />
+                                <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="VER PERFIL DEL JUGADOR" />
                             </ui:VisualElement>
 
                             <!-- Salud -->
@@ -193,7 +195,7 @@
                 <ui:Label name="RenewMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
                 <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
                 <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewCancel"  class="btn-modal-cancel"  text="CERRAR" />
+                    <ui:Button name="BtnRenewCancel"  class="btn-modal-confirm btn-modal-confirm--danger" text="CERRAR" />
                     <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="ENVIAR OFERTA" />
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -206,7 +208,7 @@
                 <ui:Label name="RenewCooldownTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
                 <ui:Label name="RenewCooldownText" class="renew-modal-text" text="" />
                 <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewCooldownOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                    <ui:Button name="BtnRenewCooldownOk" class="btn-modal-confirm btn-modal-confirm--danger" text="CERRAR" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -218,7 +220,7 @@
                 <ui:Label name="RenewBlockTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
                 <ui:Label name="RenewBlockText" class="renew-modal-text" text="" />
                 <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewBlockOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                    <ui:Button name="BtnRenewBlockOk" class="btn-modal-confirm btn-modal-confirm--danger" text="CERRAR" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -243,8 +245,8 @@
                       style="margin-top: 8px; font-size: 18px;"
                       text="El jugador quedará libre. El salario restante se reparte en pagos anuales progresivos durante el doble de años pendientes." />
             <ui:VisualElement class="dismiss-modal-buttons">
-              <ui:Button name="BtnBuyoutCancel" class="btn-modal-cancel" text="CANCELAR" />
-              <ui:Button name="BtnBuyoutStretch" class="btn-modal-confirm" text="CONFIRMAR RESCISIÓN" />
+              <ui:Button name="BtnBuyoutCancel" class="btn-modal-confirm btn-modal-confirm--danger" text="CANCELAR" />
+               <ui:Button name="BtnBuyoutStretch" class="btn-modal-confirm" text="CONFIRMAR RESCISIÓN" />
             </ui:VisualElement>
           </ui:VisualElement>
         </ui:VisualElement>

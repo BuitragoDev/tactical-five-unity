@@ -15,7 +15,6 @@
             <ui:VisualElement class="trajectory-content">
 
                 <!-- Cabecera del jugador -->
-                <ui:Button name="TrajectoryBackBtn" class="trajectory-back-btn" text="VOLVER A JUGADORES" />
                 <ui:VisualElement class="trajectory-header">
                     <ui:VisualElement name="TrajectoryPhoto" class="trajectory-photo" />
                     <ui:VisualElement class="trajectory-name-block">

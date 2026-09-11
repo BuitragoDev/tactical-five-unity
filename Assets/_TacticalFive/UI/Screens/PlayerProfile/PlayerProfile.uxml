@@ -12,9 +12,6 @@
         <ui:VisualElement class="playerprofile-main">
             <ui:VisualElement class="playerprofile-content">
 
-                <!-- Back button -->
-                <ui:Button name="PlayerProfileBackBtn" class="playerprofile-back-btn" text="VOLVER A ESTADÍSTICAS" />
-
                 <!-- Player header -->
                 <ui:VisualElement class="playerprofile-header">
                     <ui:VisualElement name="ProfilePhoto" class="playerprofile-photo" />

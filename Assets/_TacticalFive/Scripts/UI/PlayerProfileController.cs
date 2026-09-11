@@ -74,8 +74,6 @@ using System.Linq;
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
-        _root.Q<Button>("PlayerProfileBackBtn")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Stats); });
         _root.Q<Button>("ProfileTrajectoryBtn")?.RegisterCallback<ClickEvent>(_ =>
         {
             if (_player == null) return;

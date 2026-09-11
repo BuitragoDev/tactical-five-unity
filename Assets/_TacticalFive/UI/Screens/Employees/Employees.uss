@@ -295,50 +295,53 @@
 
 .btn-fire-table {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(140, 40, 30);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 16px;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    font-size: 14px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
-    padding: 5px 10px;
+    padding: 6px 14px;
     -unity-text-align: middle-center;
-    border-radius: 3px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 .btn-fire-table:hover {
-    background-color: rgb(192, 57, 43);
+    background-color: rgba(192, 57, 43, 0.25);
 }
 
 .btn-hire-table {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(5, 115, 51);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 16px;
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    font-size: 14px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
-    padding: 5px 10px;
+    padding: 6px 14px;
     -unity-text-align: middle-center;
-    border-radius: 3px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 .btn-hire-table:hover {
-    background-color: rgb(8, 141, 64);
+    background-color: rgba(39, 174, 96, 0.25);
 }
 
 .btn-replace-table {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(180, 100, 20);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 16px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    color: rgb(230, 190, 70);
+    font-size: 14px;
     letter-spacing: 1px;
-    -unity-text-transform: upper;
-    padding: 5px 10px;
+    padding: 6px 14px;
     -unity-text-align: middle-center;
-    border-radius: 3px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 .btn-replace-table:hover {
-    background-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.25);
 }
 
 /* ── MARKET SUB-TABS ── */
@@ -412,29 +415,29 @@
 }
 
 .hire-modal-box {
-    width: 550px;
-    background-color: rgb(15, 17, 23);
+    width: 720px;
+    background-color: rgb(13, 14, 18);
     border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 3px;
-    border-top-color: rgb(39, 174, 96);
-    padding: 28px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 12px;
+    padding: 32px;
     flex-direction: column;
     align-items: center;
+    overflow: hidden;
 }
 
 .hire-modal-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 28px;
-    letter-spacing: 4px;
-    color: rgb(39, 174, 96);
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
     margin-bottom: 16px;
     -unity-text-align: middle-center;
 }
 
 .hire-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 20px;
     color: rgb(179, 190, 214);
     -unity-text-align: middle-center;
     margin-bottom: 12px;
@@ -443,45 +446,59 @@
 
 .hire-modal-buttons {
     flex-direction: row;
-    margin-top: 16px;
+    width: 100%;
+    align-self: stretch;
+    margin-top: 24px;
 }
 
 .btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 18px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    padding: 10px 24px;
+    flex-grow: 1;
+    flex-basis: 0;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
     -unity-text-align: middle-center;
-    margin-right: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: normal;
 }
 .btn-modal-cancel:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(192, 57, 43, 0.25);
 }
 
 .btn-modal-confirm {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(5, 115, 51);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 18px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    padding: 10px 24px;
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 6px;
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
     -unity-text-align: middle-center;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: normal;
 }
 .btn-modal-confirm:hover {
-    background-color: rgb(8, 141, 64);
+    background-color: rgba(39, 174, 96, 0.25);
 }
 
 .hire-modal-box--negative {
-    border-top-color: rgb(192, 57, 43);
+    border-color: rgb(192, 57, 43);
 }
 .hire-modal-title--negative {
-    color: rgb(192, 57, 43);
+    color: rgb(255, 255, 255);
 }
 
 /* ── EMPLOYEE DETAIL ROW ── */

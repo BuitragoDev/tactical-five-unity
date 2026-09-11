@@ -30,6 +30,139 @@
 | Logos | `Resources.LoadAll<Sprite>("Teams/Logos/{size}x{size}")` into `Dictionary<string,Sprite>` | every controller with team logos |
 | Modals | overlay + box elements; toggle `DisplayStyle.Flex/None`; register close buttons | `UIScreenController.InitConfigModal`; `RosterController` modals |
 
+## 2.1 Modern modal styles (from Dashboard/Roster)
+
+Estos son los estilos estándar para modales y botones de acción. **Copiar siempre de aquí**, no inventar nuevos estilos.
+
+### Modal box
+
+```css
+.trade-modal-box {
+    width: 720px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(180, 140, 40);   /* cambiar por color de estado */
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+```
+
+Variantes de color de borde:
+- **Rojo (peligro/rescisión):** `border-color: rgb(192, 57, 43)`
+- **Verde (positivo/renovar):** `border-color: rgb(39, 174, 96)`
+- **Dorado (advertencia):** `border-color: rgb(212, 160, 23)`
+- **Azul (informativo):** `border-color: rgb(42, 95, 201)`
+
+### Modal title
+
+```css
+.modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+```
+
+### Modal text
+
+```css
+.modal-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+```
+
+### Button row
+
+```css
+.btn-row {
+    flex-direction: row;
+    width: 100%;
+    align-self: stretch;
+    margin-top: 24px;
+}
+```
+
+**No usar `gap`** — UI Toolkit no lo soporta. Separar botones con `margin-left: 6px`.
+
+### Action buttons (outline moderno)
+
+Botón de acción principal:
+
+```css
+.btn-action {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 6px;
+    background-color: rgba(39, 174, 96, 0.10);   /* verde */
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    -unity-text-align: middle-center;
+    border-radius: 8px;
+    min-width: 0;
+    white-space: normal;
+    cursor: pointer;
+}
+.btn-action:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+}
+```
+
+Botón de peligro/rescisión:
+
+```css
+.btn-action--danger {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+.btn-action--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
+}
+```
+
+**Regla:** botones de cerrar/cancelar → rojo (`--danger`); botones de confirmar/continuar → verde.
+
+### Section headers (tipo Quinteto/Entrenamiento)
+
+Para paneles con cabecera estilo dorado/marrón:
+
+```css
+.section {
+    flex-direction: column;
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    background-color: rgb(18, 21, 28);
+    border-radius: 4px;
+}
+.section-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(120, 95, 30);
+}
+.section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+}
+```
+
 ## 3. How to add a new UI screen
 
 1. **UXML:** create `UI/Screens/MyScreen/MyScreen.uxml` (root element, ids for dynamic parts, `<Style src=...>` pointing at your USS + shared styles).
