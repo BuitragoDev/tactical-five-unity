@@ -197,13 +197,6 @@ public class DorsalesController : UIScreenController
     void BuildPaginator(int totalPages)
     {
         _paginatorRetirados.Clear();
-
-        if (totalPages <= 1)
-        {
-            _paginatorRetirados.style.display = DisplayStyle.None;
-            return;
-        }
-
         _paginatorRetirados.style.display = DisplayStyle.Flex;
 
         var btnPrev = new Button();
