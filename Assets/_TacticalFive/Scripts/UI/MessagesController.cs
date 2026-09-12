@@ -147,7 +147,7 @@ public class MessagesController : UIScreenController
             return;
         }
 
-        var query = _filteredMessages = _allMessages.AsEnumerable();
+        IEnumerable<MessageData> query = _allMessages;
 
         if (_activeCategory != "TODAS")
         {
@@ -163,11 +163,10 @@ public class MessagesController : UIScreenController
             );
         }
 
-        query = _sortAsc
+        _filteredMessages = (_sortAsc
             ? query.OrderBy(m => m.id)
-            : query.OrderByDescending(m => m.id);
-
-        _filteredMessages = query.ToList();
+            : query.OrderByDescending(m => m.id))
+            .ToList();
         BuildNewsCards();
     }
 
