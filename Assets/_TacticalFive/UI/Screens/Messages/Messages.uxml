@@ -38,10 +38,6 @@
                         <ui:Button name="FilterPrensa" class="messages-filter-tab" text="PRENSA" />
                     </ui:VisualElement>
                     <ui:VisualElement class="messages-toolbar-right">
-                        <ui:VisualElement class="messages-sort-box">
-                            <ui:Label class="messages-sort-icon" text="&#9660;" />
-                            <ui:DropdownField name="SortDropdown" class="messages-sort-dropdown" />
-                        </ui:VisualElement>
                         <ui:VisualElement class="messages-search-box">
                             <ui:Label class="messages-search-icon" text="&#128269;" />
                             <ui:TextField name="SearchField" class="messages-search-field" placeholder-text="Buscar noticias..." />

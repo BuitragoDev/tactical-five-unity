@@ -13,7 +13,6 @@ public class MessagesController : UIScreenController
     private VisualElement _messagesBody;
     private VisualElement _paginator;
     private TextField _searchField;
-    private DropdownField _sortDropdown;
     private Button _btnPrev;
     private Button _btnNext;
     private Label _pageLabel;
@@ -28,7 +27,6 @@ public class MessagesController : UIScreenController
     private List<MessageData> _filteredMessages;
     private string _activeCategory = "TODAS";
     private string _searchQuery = "";
-    private bool _sortAsc = false;
     private int _currentPage = 0;
 
     private readonly Dictionary<string, Sprite> _logoSprites = new();
@@ -43,7 +41,6 @@ public class MessagesController : UIScreenController
         _messagesBody = _root.Q<VisualElement>("MessagesBody");
         _paginator = _root.Q<VisualElement>("Paginator");
         _searchField = _root.Q<TextField>("SearchField");
-        _sortDropdown = _root.Q<DropdownField>("SortDropdown");
 
         _filterTabs[0] = _root.Q<Button>("FilterTodas");
         _filterTabs[1] = _root.Q<Button>("FilterClub");
@@ -114,18 +111,6 @@ public class MessagesController : UIScreenController
             ApplyFilters();
         });
 
-        if (_sortDropdown != null)
-        {
-            _sortDropdown.choices = new List<string> { "Más recientes", "Más antiguos" };
-            _sortDropdown.value = "Más recientes";
-            _sortDropdown.RegisterValueChangedCallback(evt =>
-            {
-                _sortAsc = evt.newValue == "Más antiguos";
-                _currentPage = 0;
-                ApplyFilters();
-            });
-        }
-
         var filterNames = new[] { "TODAS", "CLUB", "LIGA", "TRASPASOS", "LESIONES", "PRENSA" };
         for (int i = 0; i < _filterTabs.Length; i++)
         {
@@ -189,10 +174,7 @@ public class MessagesController : UIScreenController
             );
         }
 
-        _filteredMessages = (_sortAsc
-            ? query.OrderBy(m => m.id)
-            : query.OrderByDescending(m => m.id))
-            .ToList();
+        _filteredMessages = query.OrderByDescending(m => m.id).ToList();
         BuildNewsCards();
     }
 
