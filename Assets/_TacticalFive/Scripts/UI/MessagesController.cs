@@ -24,6 +24,8 @@ public class MessagesController : UIScreenController
     private Label _newsDetailTitle;
     private Label _newsDetailBody;
     private Label _newsDetailEmpty;
+    private VisualElement _newsDetailFooter;
+    private Button _btnDeleteNews;
 
     private List<MessageData> _allMessages;
     private List<MessageData> _filteredMessages;
@@ -59,6 +61,8 @@ public class MessagesController : UIScreenController
         _newsDetailBody = _root.Q<Label>("NewsDetailBody");
         _newsDetailDate = _root.Q<Label>("NewsDetailDate");
         _newsDetailEmpty = _root.Q<Label>("NewsDetailEmpty");
+        _newsDetailFooter = _root.Q<VisualElement>("NewsDetailFooter");
+        _btnDeleteNews = _root.Q<Button>("BtnDeleteNews");
     }
 
     protected override void LoadData()
@@ -115,6 +119,17 @@ public class MessagesController : UIScreenController
             });
             if (CursorManager.Instance != null)
                 CursorManager.Instance.RegisterHandCursor(_filterTabs[i]);
+        }
+
+        if (_btnDeleteNews != null)
+        {
+            _btnDeleteNews.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                DeleteSelectedMessage();
+            });
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(_btnDeleteNews);
         }
     }
 
@@ -354,11 +369,13 @@ public class MessagesController : UIScreenController
         if (msg == null)
         {
             if (_newsDetailContent != null) _newsDetailContent.style.display = DisplayStyle.None;
+            if (_newsDetailFooter != null) _newsDetailFooter.style.display = DisplayStyle.None;
             if (_newsDetailEmpty != null) _newsDetailEmpty.style.display = DisplayStyle.Flex;
             return;
         }
 
         if (_newsDetailContent != null) _newsDetailContent.style.display = DisplayStyle.Flex;
+        if (_newsDetailFooter != null) _newsDetailFooter.style.display = DisplayStyle.Flex;
         if (_newsDetailEmpty != null) _newsDetailEmpty.style.display = DisplayStyle.None;
 
         if (_newsDetailTitle != null) _newsDetailTitle.text = msg.title ?? "Sin asunto";
@@ -372,6 +389,19 @@ public class MessagesController : UIScreenController
             _newsDetailPhoto.style.backgroundImage = null;
             SetNewsImage(_newsDetailPhoto, msg);
         }
+    }
+
+    // ── DELETE ──
+
+    void DeleteSelectedMessage()
+    {
+        if (_selectedMessageId <= 0) return;
+
+        DatabaseManager.Instance.DeleteMessage(_selectedMessageId);
+        _selectedMessageId = 0;
+        _allMessages = DatabaseManager.Instance.GetMessages(_manager.id);
+        ApplyFilters();
+        ShowNewsDetail(null);
     }
 
     // ── CATEGORY ──
