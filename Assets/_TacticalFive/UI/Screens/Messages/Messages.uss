@@ -460,6 +460,13 @@
     flex-shrink: 0;
 }
 
+.news-detail-footer .btn-action {
+    font-size: 13px;
+    padding: 6px 14px;
+    min-width: 0;
+    flex-grow: 0;
+}
+
 .news-card--selected {
     border-color: rgb(42, 95, 201);
     background-color: rgb(28, 33, 48);
