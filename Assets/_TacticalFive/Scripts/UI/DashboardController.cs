@@ -7237,12 +7237,10 @@ List<int> offeredPickIds = new List<int>();
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
                         .Take(3).ToList();
 
-        int idx = 0;
         foreach (var msg in latest)
         {
             var item = new VisualElement();
             item.AddToClassList("message-item");
-            if (idx > 0) item.AddToClassList("message-item--spaced");
 
             var icon = new VisualElement();
             icon.AddToClassList("message-item-icon");
@@ -7265,7 +7263,6 @@ List<int> offeredPickIds = new List<int>();
 
             if (msg.is_read == 0)
                 DatabaseManager.Instance.MarkMessageRead(msg.id);
-            idx++;
         }
     }
 
@@ -7568,7 +7565,11 @@ List<int> offeredPickIds = new List<int>();
         int idx = normalized.IndexOf("\n\n", StringComparison.Ordinal);
         string preview = idx < 0 ? normalized : normalized.Substring(0, idx).Trim();
         if (idx >= 0 && preview.Length > 0)
-            preview += "\u2026";
+        {
+            char lastChar = preview[preview.Length - 1];
+            if (lastChar != '.' && lastChar != '!' && lastChar != '?' && lastChar != '\u2026')
+                preview += "\u2026";
+        }
         return preview;
     }
 
