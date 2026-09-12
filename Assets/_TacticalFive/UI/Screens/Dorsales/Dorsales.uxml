@@ -24,7 +24,7 @@
                                 <ui:VisualElement name="IconActuales" class="dorsales-panel-icon" />
                                 <ui:VisualElement class="dorsales-panel-header-text">
                                     <ui:Label class="dorsales-panel-title" text="DORSALES ACTUALES" />
-                                    <ui:Label class="dorsales-panel-subtitle" text="NÚMEROS DISPONIBLES PARA LA PLANTILLA" />
+                                    <ui:Label class="dorsales-panel-subtitle" text="NÚMEROS DE LA PLANTILLA" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                             <ui:VisualElement class="dorsales-panel-header-right">

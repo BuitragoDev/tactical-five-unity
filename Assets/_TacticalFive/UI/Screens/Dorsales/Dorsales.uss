@@ -121,14 +121,14 @@
 .dorsales-card {
     flex-direction: column;
     align-items: center;
-    width: 140px;
+    width: 160px;
     margin-right: 12px;
     margin-bottom: 8px;
     background-color: rgb(20, 24, 34);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     border-radius: 8px;
-    padding: 12px 8px 10px 8px;
+    padding: 4px 8px 4px 8px;
 }
 
 .dorsales-card:hover {

@@ -68,7 +68,7 @@
                             <ui:Label name="NewsDetailBody" class="news-detail-body" text="" />
                         </ui:VisualElement>
                         <ui:VisualElement name="NewsDetailFooter" class="news-detail-footer">
-                            <ui:Button name="BtnDeleteNews" text="BORRAR" class="news-delete-button" />
+                            <ui:Button name="BtnDeleteNews" text="BORRAR NOTICIA" class="news-delete-button" />
                         </ui:VisualElement>
                         <ui:Label name="NewsDetailEmpty" class="news-detail-empty" text="Selecciona una noticia para ver el detalle." />
                     </ui:VisualElement>
