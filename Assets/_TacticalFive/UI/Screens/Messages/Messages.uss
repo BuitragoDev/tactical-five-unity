@@ -146,17 +146,20 @@
     min-height: 0;
 }
 
-.messages-scroll .unity-scroll-view__content-viewport {
+.messages-root .messages-scroll .unity-scroll-view__content-viewport {
     overflow: hidden;
+    padding: 0;
 }
 
-.messages-scroll .unity-scroll-view__content-container {
+.messages-root .messages-scroll .unity-scroll-view__content-container {
     flex-grow: 1;
+    padding: 0;
 }
 
-.messages-body {
+.messages-root .messages-body {
     flex-direction: column;
     width: 100%;
+    padding: 0;
 }
 
 /* ── NEWS CARD ── */
