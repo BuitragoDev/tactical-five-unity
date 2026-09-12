@@ -73,7 +73,8 @@ public class MessagesController : UIScreenController
             var nombres = new[] {
                 "contratado", "despedido", "rechazado", "entrenamiento", "lesionados",
                 "obras-finalizadas", "pago-nominas", "prestamo-bancario", "renovacion",
-                "traspaso", "bienvenida", "recuperado", "quejas"
+                "traspaso", "bienvenida", "recuperado", "quejas", "premios",
+                "eliminacion", "remodelacion"
             };
             foreach (var n in nombres)
             {
@@ -377,6 +378,9 @@ public class MessagesController : UIScreenController
 
     string GetCategory(MessageData msg)
     {
+        if (!string.IsNullOrEmpty(msg.category))
+            return msg.category;
+
         string t = msg.title ?? "";
         string b = msg.body ?? "";
 
@@ -472,6 +476,186 @@ public class MessagesController : UIScreenController
     // ── NEWS IMAGE ──
 
     void SetNewsImage(VisualElement icon, MessageData msg)
+    {
+        // Prioridad: news_type (nuevo) → lógica por título (retrocompatibilidad)
+        if (!string.IsNullOrEmpty(msg.news_type))
+        {
+            if (SetNewsImageByType(icon, msg)) return;
+        }
+
+        SetNewsImageByTitle(icon, msg);
+    }
+
+    bool SetNewsImageByType(VisualElement icon, MessageData msg)
+    {
+        string nt = msg.news_type;
+
+        if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
+            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION)
+        {
+            string teamName = ExtractFirstTeamFromBody(msg.body);
+            if (teamName != null)
+            {
+                var team = _allTeams?.FirstOrDefault(t => t.name == teamName);
+                if (team != null && _logoSprites.TryGetValue(team.logo, out var sprite))
+                {
+                    icon.style.backgroundImage = new StyleBackground(sprite);
+                    return true;
+                }
+            }
+            if (nt == NewsType.CAMPANADA)
+            {
+                var tex = _noticiasSprites.GetValueOrDefault("rechazado");
+                if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+            }
+            return false;
+        }
+
+        if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
+            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP)
+        {
+            string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
+            if (playerName != null && _playerByName.TryGetValue(playerName, out var p))
+            {
+                var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+                if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+            }
+        }
+
+        if (nt == NewsType.FICHAJE_RECHAZADO || nt == NewsType.FICHAJE_CANCELADO
+            || nt == NewsType.OFERTA_RECHAZADA || nt == NewsType.REFIRMA_CANCELADA
+            || nt == NewsType.DESPEDIDO || nt == NewsType.EMPLEADO_DESPEDIDO)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("despedido");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.RENOVACION || nt == NewsType.REFIRMA_ENVIADA
+            || nt == NewsType.AGENTE_LIBRE)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("renovacion");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.ENTRENAMIENTO)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("entrenamiento");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.RECUPERACION)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("recuperado");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.LESION || nt == NewsType.RESERVA_IR)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("lesionados");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.INTERCAMBIO || nt == NewsType.TRASPASO || nt == NewsType.SIGN_AND_TRADE
+            || nt == NewsType.DEADLINE_SEMANA || nt == NewsType.BUYOUT)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("traspaso");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.EMPLEADO_CONTRATADO)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("contratado");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.NOMINA || nt == NewsType.ABONOS)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("pago-nominas");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.PATROCINIO)
+        {
+            string sponsorName = ExtractFirstFromBody(msg.body,
+                DatabaseManager.Instance.Db.Table<SponsorData>()
+                    .Where(s => s.team_id == _myTeam.id && s.is_active == 1)
+                    .Select(s => s.name).ToList());
+            if (sponsorName != null)
+            {
+                var sponsor = DatabaseManager.Instance.Db.Table<SponsorData>()
+                    .FirstOrDefault(s => s.team_id == _myTeam.id && s.is_active == 1
+                                      && s.name == sponsorName);
+                if (sponsor != null)
+                {
+                    var sponsorTex = Resources.Load<Texture2D>(sponsor.logo?.Replace(".png", ""));
+                    if (sponsorTex != null) { icon.style.backgroundImage = new StyleBackground(sponsorTex); return true; }
+                }
+            }
+            var texS = _noticiasSprites.GetValueOrDefault("pago-nominas");
+            if (texS != null) { icon.style.backgroundImage = new StyleBackground(texS); return true; }
+        }
+
+        if (nt == NewsType.TV)
+        {
+            string channelName = ExtractFirstFromBody(msg.body,
+                DatabaseManager.Instance.Db.Table<TvChannelData>()
+                    .Where(c => c.team_id == _myTeam.id && c.is_active == 1)
+                    .Select(c => c.name).ToList());
+            if (channelName != null)
+            {
+                var channel = DatabaseManager.Instance.Db.Table<TvChannelData>()
+                    .FirstOrDefault(c => c.team_id == _myTeam.id && c.is_active == 1
+                                       && c.name == channelName);
+                if (channel != null)
+                {
+                    var channelTex = Resources.Load<Texture2D>(channel.logo?.Replace(".png", ""));
+                    if (channelTex != null) { icon.style.backgroundImage = new StyleBackground(channelTex); return true; }
+                }
+            }
+            var texT = _noticiasSprites.GetValueOrDefault("pago-nominas");
+            if (texT != null) { icon.style.backgroundImage = new StyleBackground(texT); return true; }
+        }
+
+        if (nt == NewsType.PRESTAMO_CONCEDIDO || nt == NewsType.PRESTAMO_SALDADO)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("prestamo-bancario");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.REMODELACION_INICIADA || nt == NewsType.REMODELACION_COMPLETADA)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("obras-finalizadas");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.BIENVENIDA)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("bienvenida");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.ELIMINACION_PLAYIN || nt == NewsType.ELIMINACION_PLAYOFFS)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("eliminacion");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.PREMIOS_MES)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("premios");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION)
+        {
+            var tex = _noticiasSprites.GetValueOrDefault("quejas");
+            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+        }
+
+        return false;
+    }
+
+    void SetNewsImageByTitle(VisualElement icon, MessageData msg)
     {
         if (msg.sender_type == 1 && msg.title != null && msg.title.StartsWith("Resultado:"))
         {

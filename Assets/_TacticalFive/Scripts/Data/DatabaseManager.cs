@@ -929,6 +929,26 @@ public partial class DatabaseManager : MonoBehaviour
         {
             Debug.LogError($"[DB] Migration error for season_attendance_summary: {ex.Message}");
         }
+
+        // messages.category + news_type (noticias explícitas)
+        try
+        {
+            var msgCols = _db.Query<ColumnInfo>("PRAGMA table_info(messages)");
+            if (!msgCols.Any(c => c.name == "category"))
+            {
+                _db.Execute("ALTER TABLE messages ADD COLUMN category TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added category to messages");
+            }
+            if (!msgCols.Any(c => c.name == "news_type"))
+            {
+                _db.Execute("ALTER TABLE messages ADD COLUMN news_type TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added news_type to messages");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for messages.category/news_type: {ex.Message}");
+        }
     }
 
     bool IsMigrationApplied(string name)

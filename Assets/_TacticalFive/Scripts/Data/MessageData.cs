@@ -15,4 +15,6 @@ public class MessageData
     public string created_at { get; set; }
     public string date_sent { get; set; }
     public int is_read { get; set; }
+    public string category { get; set; }
+    public string news_type { get; set; }
 }
