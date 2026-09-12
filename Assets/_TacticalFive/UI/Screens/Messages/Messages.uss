@@ -36,6 +36,7 @@
 .messages-list-col {
     flex-direction: column;
     flex-shrink: 0;
+    min-width: 500px;
     min-height: 0;
 }
 
