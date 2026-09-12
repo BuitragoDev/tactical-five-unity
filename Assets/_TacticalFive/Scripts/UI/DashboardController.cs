@@ -6369,8 +6369,10 @@ List<int> offeredPickIds = new List<int>();
         string mvpName = mvp != null ? $"{mvp.name}" : "";
 
         // Top scorer of the game
-        var allStats = (result.home_stats ?? new List<PlayerGameStats>())
-            .Concat(result.away_stats ?? new List<PlayerGameStats>());
+        var homeScorers = result.home_stats;
+        var awayScorers = result.away_stats;
+        var allStats = (homeScorers != null ? homeScorers.AsEnumerable() : Enumerable.Empty<GameSimulator.PlayerStatSnapshot>())
+            .Concat(awayScorers != null ? awayScorers.AsEnumerable() : Enumerable.Empty<GameSimulator.PlayerStatSnapshot>());
         var topScorer = allStats.OrderByDescending(s => s.points).FirstOrDefault();
         string topScorerName = topScorer?.name ?? mvpName;
         int topScorerPts = topScorer?.points ?? 0;
