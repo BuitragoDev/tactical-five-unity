@@ -74,7 +74,7 @@ public class MessagesController : UIScreenController
     {
         base.LoadData();
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         if (_noticiasSprites.Count == 0)
