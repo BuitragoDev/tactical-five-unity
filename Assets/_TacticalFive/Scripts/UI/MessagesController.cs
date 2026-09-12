@@ -22,6 +22,7 @@ public class MessagesController : UIScreenController
     private VisualElement _newsModalPhoto;
     private Label _newsModalTitle;
     private Label _newsModalBody;
+    private Label _newsModalDate;
 
     private List<MessageData> _allMessages;
     private List<MessageData> _filteredMessages;
@@ -55,6 +56,7 @@ public class MessagesController : UIScreenController
         _newsModalPhoto = _root.Q<VisualElement>("NewsModalPhoto");
         _newsModalTitle = _root.Q<Label>("NewsModalTitle");
         _newsModalBody = _root.Q<Label>("NewsModalBody");
+        _newsModalDate = _root.Q<Label>("NewsModalDate");
 
         var newsModalClose = _root.Q<Button>("NewsModalClose");
         if (newsModalClose != null)
@@ -340,6 +342,18 @@ public class MessagesController : UIScreenController
 
         _newsModalTitle.text = msg.title ?? "Sin asunto";
         _newsModalBody.text = msg.body ?? "";
+
+        if (_newsModalDate != null)
+        {
+            try
+            {
+                _newsModalDate.text = DateTime.Parse(msg.game_date ?? msg.date_sent).ToString("dd/MM/yyyy");
+            }
+            catch
+            {
+                _newsModalDate.text = msg.game_date ?? "";
+            }
+        }
 
         _newsModalPhoto.style.backgroundImage = null;
         SetNewsImage(_newsModalPhoto, msg);
