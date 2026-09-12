@@ -466,7 +466,7 @@
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 1px;
     padding: 6px 14px;
     -unity-text-align: middle-center;
