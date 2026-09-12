@@ -102,7 +102,7 @@
 .dorsales-panel-count-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 24px;
-    color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
 }
 
 /* ── CARDS ── */
