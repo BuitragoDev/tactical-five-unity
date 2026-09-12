@@ -7,7 +7,7 @@ public class DorsalesController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Dorsales;
 
-    private const int ITEMS_PER_ROW = 8;
+    private const int ITEMS_PER_ROW = 9;
     private const int ITEMS_PER_PAGE = 20;
 
     // Panels
