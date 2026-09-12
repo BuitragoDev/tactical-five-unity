@@ -19,17 +19,45 @@
             <ui:VisualElement class="messages-content">
 
                 <!-- Title -->
-                <ui:VisualElement class="messages-title-row">
-                    <ui:Label class="messages-icon" text="📫" />
-                    <ui:Label class="messages-title" text="BANDEJA DE ENTRADA" />
+                <ui:VisualElement class="messages-header-row">
+                    <ui:Label class="messages-header-icon" text="&#128227;" />
+                    <ui:VisualElement class="messages-header-text">
+                        <ui:Label class="messages-title" text="NOTICIAS" />
+                        <ui:Label class="messages-subtitle" text="LO ÚLTIMO EN EL MUNDO DEL BALONCESTO" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- Message list -->
+                <!-- Toolbar -->
+                <ui:VisualElement class="messages-toolbar">
+                    <ui:VisualElement name="FilterTabs" class="messages-filter-tabs">
+                        <ui:Button name="FilterTodas" class="messages-filter-tab messages-filter-tab--active" text="TODAS" />
+                        <ui:Button name="FilterClub" class="messages-filter-tab" text="CLUB" />
+                        <ui:Button name="FilterLiga" class="messages-filter-tab" text="LIGA" />
+                        <ui:Button name="FilterTraspasos" class="messages-filter-tab" text="TRASPASOS" />
+                        <ui:Button name="FilterLesiones" class="messages-filter-tab" text="LESIONES" />
+                        <ui:Button name="FilterPrensa" class="messages-filter-tab" text="PRENSA" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="messages-toolbar-right">
+                        <ui:VisualElement class="messages-sort-box">
+                            <ui:Label class="messages-sort-icon" text="&#9660;" />
+                            <ui:DropdownField name="SortDropdown" class="messages-sort-dropdown" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="messages-search-box">
+                            <ui:Label class="messages-search-icon" text="&#128269;" />
+                            <ui:TextField name="SearchField" class="messages-search-field" placeholder-text="Buscar noticias..." />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- News list -->
                 <ui:ScrollView class="messages-scroll"
                                horizontal-scrolling-enabled="false"
                                mode="Vertical">
                     <ui:VisualElement name="MessagesBody" class="messages-body" />
                 </ui:ScrollView>
+
+                <!-- Paginator -->
+                <ui:VisualElement name="Paginator" class="messages-paginator" />
 
             </ui:VisualElement>
 
