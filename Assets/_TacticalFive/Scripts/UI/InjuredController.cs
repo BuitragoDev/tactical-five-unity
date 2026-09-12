@@ -24,6 +24,7 @@ public class InjuredController : UIScreenController
 
     // Injured cards
     private VisualElement _injuredCards;
+    private VisualElement _injuredPaginator;
 
     // League injured modal
     private VisualElement _leagueInjuredOverlay;
@@ -69,6 +70,7 @@ public class InjuredController : UIScreenController
         _medStaffCard = _root.Q<VisualElement>("MedStaffCard");
         _medStaffEmpty = _root.Q<VisualElement>("MedStaffEmpty");
         _injuredCards = _root.Q<VisualElement>("InjuredCards");
+        _injuredPaginator = _root.Q<VisualElement>("InjuredPaginator");
 
         _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
         _leagueInjuredScroll = _root.Q<ScrollView>("LeagueInjuredScroll");
@@ -288,6 +290,9 @@ public class InjuredController : UIScreenController
     void BuildInjuredCards()
     {
         _injuredCards.Clear();
+        _injuredPaginator?.Clear();
+        if (_injuredPaginator != null)
+            _injuredPaginator.style.display = DisplayStyle.None;
 
         int total = _injuredPlayers.Count;
 
@@ -592,10 +597,9 @@ public class InjuredController : UIScreenController
         }
 
         // ── PAGINATION BAR ──
-        if (totalPages > 1)
+        if (totalPages > 1 && _injuredPaginator != null)
         {
-            var paginator = new VisualElement();
-            paginator.AddToClassList("injured-paginator");
+            _injuredPaginator.style.display = DisplayStyle.Flex;
 
             var btnPrev = new Button();
             btnPrev.AddToClassList("injured-paginator-btn");
@@ -609,12 +613,12 @@ public class InjuredController : UIScreenController
                 btnPrev.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
                 btnPrev.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
             }
-            paginator.Add(btnPrev);
+            _injuredPaginator.Add(btnPrev);
 
             var pageLbl = new Label();
             pageLbl.AddToClassList("injured-paginator-label");
             pageLbl.text = $"{_currentPage + 1} / {totalPages}";
-            paginator.Add(pageLbl);
+            _injuredPaginator.Add(pageLbl);
 
             var btnNext = new Button();
             btnNext.AddToClassList("injured-paginator-btn");
@@ -628,9 +632,7 @@ public class InjuredController : UIScreenController
                 btnNext.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
                 btnNext.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
             }
-            paginator.Add(btnNext);
-
-            _injuredCards.Add(paginator);
+            _injuredPaginator.Add(btnNext);
         }
     }
 

@@ -515,8 +515,9 @@
 .injured-paginator {
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     align-self: stretch;
+    flex-shrink: 0;
     margin-top: 12px;
     padding: 8px 0;
 }
@@ -546,7 +547,7 @@
 
 .injured-paginator-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 20px;
     color: rgb(179, 190, 214);
     margin-left: 16px;
     margin-right: 16px;

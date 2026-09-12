@@ -38,6 +38,8 @@
 
                 </ui:VisualElement>
 
+                <ui:VisualElement name="InjuredPaginator" class="injured-paginator" />
+
                 <ui:Button name="BtnLeagueInjured" class="btn-league-injured" text="VER LESIONADOS DE LA LIGA" />
 
             </ui:VisualElement>
