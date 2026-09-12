@@ -508,12 +508,14 @@ public class PreseasonController : UIScreenController
                     sender_type = 1,
                     sender_id = 0,
                     title = $"Bienvenido a {_myTeam.name}",
-                    body = $"Hola {_manager.name}, bienvenido como nuevo entrenador de {_myTeam.name}. La directiva confía en ti para llevar al equipo lo más alto posible. ¡Buena suerte en esta temporada!",
+                    body = NewsTexts.Bienvenida(_myTeam.name, _manager.name, 0),
                     game_day = firstGame != null ? firstGame.game_day : 0,
                     game_date = firstGameDate,
                     created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    is_read = 0
+                    is_read = 0,
+                    category = NewsCategory.LIGA,
+                    news_type = NewsType.BIENVENIDA
                 };
                 DatabaseManager.Instance.AddMessage(welcomeMsg);
             }

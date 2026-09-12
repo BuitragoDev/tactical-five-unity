@@ -1334,15 +1334,17 @@ using System.Threading.Tasks;
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
                         manager_id = _manager.id,
-                        sender_type = 0,
+                        sender_type = 1,
                         sender_id = 0,
                         title = "Eliminación en Play-In",
-                        body = $"Tu equipo {_myTeam.name} ha sido eliminado del Play-In. No logró clasificar a los Playoffs.",
+                        body = NewsTexts.EliminacionPlayin(_myTeam.name, 0),
                         game_day = gameDay,
                         game_date = _season?.current_date ?? "",
                         created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.LIGA,
+                        news_type = NewsType.ELIMINACION_PLAYIN
                     });
                     Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Play-In.");
                 }
@@ -1400,15 +1402,17 @@ using System.Threading.Tasks;
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
                         manager_id = _manager.id,
-                        sender_type = 0,
+                        sender_type = 1,
                         sender_id = 0,
                         title = "Eliminación en Playoffs",
-                        body = $"Tu equipo {_myTeam.name} ha sido eliminado de los Playoffs. La temporada ha terminado.",
+                        body = NewsTexts.EliminacionPlayoffs(_myTeam.name, "", 0, 0),
                         game_day = gameDay,
                         game_date = _season?.current_date ?? "",
                         created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.LIGA,
+                        news_type = NewsType.ELIMINACION_PLAYOFFS
                     });
                     Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Playoffs.");
                 }
@@ -6186,12 +6190,16 @@ List<int> offeredPickIds = new List<int>();
                         sender_type = 1,
                         sender_id = player.id,
                         title = title,
-                        body = body,
+                        body = newMorale < 10
+                            ? NewsTexts.Queja(_myTeam.name, $"{player.first_name} {player.last_name} la falta de minutos")
+                            : NewsTexts.Preocupacion(_myTeam.name, $"{player.first_name} {player.last_name} la falta de minutos"),
                         game_day = gameDay,
                         game_date = gameDate,
                         created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.PRENSA,
+                        news_type = newMorale < 10 ? NewsType.QUEJA : NewsType.PREOCUPACION
                     });
                 }
             }
@@ -6531,7 +6539,9 @@ List<int> offeredPickIds = new List<int>();
             game_date = _season.current_date,
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.LIGA,
+            news_type = NewsType.PREMIOS_MES
         });
     }
 
