@@ -322,7 +322,7 @@
 
 .messages-paginator-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 22px;
     color: rgb(208, 216, 232);
     margin-left: 16px;
     margin-right: 16px;
