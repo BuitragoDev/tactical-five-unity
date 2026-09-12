@@ -419,7 +419,7 @@
 
 .news-detail-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 22px;
     color: rgb(255, 255, 255);
     letter-spacing: 1px;
     -unity-text-align: middle-left;
@@ -431,7 +431,7 @@
 
 .news-detail-body {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(179, 190, 214);
     white-space: normal;
     -unity-text-align: middle-left;
