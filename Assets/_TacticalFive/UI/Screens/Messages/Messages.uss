@@ -258,13 +258,13 @@
 
 .news-card-body {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     margin-bottom: 2px;
-    max-height: 42px;
+    max-height: 56px;
 }
 
 /* ── Card Arrow ── */
