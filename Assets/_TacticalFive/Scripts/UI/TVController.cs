@@ -180,9 +180,11 @@ using System.Linq;
             sender_type = 1,
             sender_id = 0,
             title = $"Derechos televisivos firmados: {channel.name.ToUpper()}",
-            body = $"Se ha firmado un nuevo contrato con {channel.name}.\nIngreso inicial: ${channel.initial_income:N0}",
+            body = NewsTexts.TV(channel.name, _myTeam.name, channel.initial_income),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.TV
         };
         DatabaseManager.Instance.AddMessage(msg);
 

@@ -371,13 +371,17 @@ using System.Linq;
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
             title = $"Remodelación iniciada: {info.name}",
-            body = $"Se ha iniciado la remodelación \"{info.name}\". Duración: {info.durationWeeks} semanas. Finalizará el {endDate:dd/MM/yyyy}.",
+            body = NewsTexts.RemodelacionIniciada(_myTeam.name, info.name, discountedCost),
             game_day = currentDay,
             game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(currentDay - 1).ToString("yyyy-MM-dd"),
             created_at = nowStr,
             date_sent = nowStr,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.REMODELACION_INICIADA
         });
 
         LoadData();

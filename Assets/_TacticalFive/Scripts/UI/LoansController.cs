@@ -557,15 +557,17 @@ using System.Linq;
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = "Pr\u00e9stamo bancario concedido",
-            body = $"Se ha concedido un pr\u00e9stamo de {FormatLoanAmount(amount)} a {months} meses al {rate*100:F1}% de inter\u00e9s. Cuota mensual: {FormatLoanAmount(monthly)}.",
+            body = NewsTexts.PrestamoConcedido(_myTeam.name, amount, months),
             game_day = _season?.current_game_day ?? 0,
             game_date = now,
             created_at = now,
             date_sent = now,
             is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.PRESTAMO_CONCEDIDO
         });
 
         Debug.Log($"[Loans] Pr\u00e9stamo {slotIndex}: {FormatLoanAmount(amount)} a {months} meses, cuota {FormatLoanAmount(monthly)}");
@@ -602,15 +604,17 @@ using System.Linq;
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = "Pr\u00e9stamo bancario saldado",
-            body = $"Se ha saldado el pr\u00e9stamo del slot {loan.slot + 1}. Importe total devuelto: {FormatLoanAmount(remainingTotal)}.",
+            body = NewsTexts.PrestamoSaldado(_myTeam.name, remainingTotal),
             game_day = _season?.current_game_day ?? 0,
             game_date = now,
             created_at = now,
             date_sent = now,
             is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.PRESTAMO_SALDADO
         });
 
         Debug.Log($"[Loans] Pr\u00e9stamo {loan.slot} saldado: {FormatLoanAmount(remainingTotal)}");

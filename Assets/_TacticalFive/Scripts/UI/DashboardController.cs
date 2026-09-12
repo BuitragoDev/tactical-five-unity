@@ -5985,13 +5985,17 @@ List<int> offeredPickIds = new List<int>();
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
             title = $"Remodelación completada: {info.name}",
-            body = $"La remodelación \"{info.name}\" ha finalizado. Se han añadido {info.capacityBonus} asientos. Coste total: {team.arena_renovation_cost:N0} $.",
+            body = NewsTexts.RemodelacionCompletada(_myTeam.name, info.name),
             game_day = _season.current_game_day,
             game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(_season.current_game_day - 1).ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.REMODELACION_COMPLETADA
         });
     }
 
@@ -6586,12 +6590,14 @@ List<int> offeredPickIds = new List<int>();
                 sender_type = 1,
                 sender_id = 0,
                 title = "Pago de n\u00f3minas",
-                body = $"Se han pagado las n\u00f3minas del mes de {monthName} por un total de ${monthlyPayroll:N0}.",
+                body = NewsTexts.Nomina(_myTeam.name, monthlyPayroll, 0),
                 game_day = gameDay,
                 game_date = gameDate.ToString("yyyy-MM-dd"),
                 created_at = now,
                 date_sent = now,
-                is_read = 0
+                is_read = 0,
+                category = NewsCategory.CLUB,
+                news_type = NewsType.NOMINA
             };
             DatabaseManager.Instance.AddMessage(msg);
         }
@@ -6706,12 +6712,14 @@ List<int> offeredPickIds = new List<int>();
                 sender_type = 1,
                 sender_id = 0,
                 title = "Campaña de abonos cerrada",
-                body = $"Se ha cerrado la campaña de abonados de la temporada. Se han vendido {numSubscribers:N0} abonos a un precio de ${finSettings.subscription_price:N0} cada uno, obteniendo un ingreso total de ${subAmount:N0}.",
+                body = NewsTexts.Abonos(_myTeam.name, numSubscribers, subAmount),
                 game_day = gameDay,
                 game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1).ToString("yyyy-MM-dd"),
                 created_at = now,
                 date_sent = now,
-                is_read = 0
+                is_read = 0,
+                category = NewsCategory.CLUB,
+                news_type = NewsType.ABONOS
             });
         }
     }
