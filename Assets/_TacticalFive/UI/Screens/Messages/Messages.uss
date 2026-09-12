@@ -75,7 +75,7 @@
 
 .messages-filter-tab {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     background-color: rgb(22, 26, 36);
