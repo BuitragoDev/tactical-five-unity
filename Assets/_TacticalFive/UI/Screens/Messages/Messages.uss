@@ -114,7 +114,7 @@
     border-radius: 6px;
     padding: 8px 12px;
     margin-left: 12px;
-    min-width: 360px;
+    min-width: 410px;
 }
 
 .messages-search-icon {
@@ -327,9 +327,9 @@
 /* ── EMPTY STATE ── */
 .messages-empty {
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    padding: 60px 40px;
+    padding: 60px 0;
 }
 
 .messages-empty-icon {
@@ -342,7 +342,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(85, 102, 119);
-    -unity-text-align: middle-center;
+    -unity-text-align: middle-left;
 }
 
 /* ── NEWS MODAL ── */
