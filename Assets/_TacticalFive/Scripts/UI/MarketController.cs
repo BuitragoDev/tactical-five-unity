@@ -1491,12 +1491,16 @@ using System.Linq;
             sender_type = 1,
             sender_id = 0,
             title = satApplied ? $"Traspaso + Sign & Trade: {_selectedTeam.name}" : $"Traspaso aceptado: {_selectedTeam.name}",
-            body = $"El traspaso ha sido aceptado. Envías: {myNames}. Recibes: {otherNames}.{satNote}",
+            body = satApplied
+                ? NewsTexts.SignAndTrade(myNames, _myTeam.name, _selectedTeam.name, 0)
+                : NewsTexts.Traspaso(_myTeam.name, myNames, _selectedTeam.name, otherNames, otherPicksText),
             game_day = _season?.current_game_day ?? 0,
             game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.TRASPASOS,
+            news_type = satApplied ? NewsType.SIGN_AND_TRADE : NewsType.TRASPASO
         });
 
         _selectedMyPlayers.Clear();
@@ -2368,14 +2372,16 @@ using System.Linq;
             sender_type = 1,
             sender_id = 0,
             title = $"Sign & Trade: {saNames} → {_selectedTeam.name}",
-            body = $"Has firmado a {saNames} con Bird rights y los has traspasado de inmediato a {_selectedTeam.name}." +
+            body = NewsTexts.SignAndTrade(saNames, _myTeam.name, _selectedTeam.name, 0) +
                    (myNames.Length > 0 ? $" Además envías: {myNames}." : "") +
                    $" Recibes: {otherNames}{otherPicksText}.",
             game_day = _season?.current_game_day ?? 0,
             game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.TRASPASOS,
+            news_type = NewsType.SIGN_AND_TRADE
         });
 
         _selectedMyPlayers.Clear();

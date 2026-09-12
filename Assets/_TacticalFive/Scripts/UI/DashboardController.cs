@@ -1449,13 +1449,17 @@ using System.Threading.Tasks;
                 DatabaseManager.Instance.AddMessage(new MessageData
                 {
                     manager_id = _manager.id,
+                    sender_type = 2,
+                    sender_id = 0,
                     title = "Última semana de traspasos",
-                    body = "El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.",
+                    body = NewsTexts.DeadlineSemana(),
                     game_day = _season.current_game_day,
                     game_date = _season.current_date,
                     created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    is_read = 0
+                    is_read = 0,
+                    category = NewsCategory.TRASPASOS,
+                    news_type = NewsType.DEADLINE_SEMANA
                 });
                 if (!fastSim)
                     ShowTradeDeadlineModal();
@@ -2371,12 +2375,14 @@ using System.Threading.Tasks;
                             sender_type = 1,
                             sender_id = 0,
                             title = "Hard cap activado",
-                            body = hardCapMsg,
+                            body = NewsTexts.HardCap(playerName, _myTeam.name),
                             game_day = _season.current_game_day,
                             game_date = nowStr,
                             created_at = nowStr,
                             date_sent = nowStr,
-                            is_read = 0
+                            is_read = 0,
+                            category = NewsCategory.TRASPASOS,
+                            news_type = NewsType.HARD_CAP
                         });
                     }
                 }
@@ -3550,17 +3556,18 @@ using System.Threading.Tasks;
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
-            title = "Rescisi\u00f3n de contrato (buyout)",
-            body = $"Se ha rescindido el contrato de {playerName} mediante buyout porque la plantilla superaba el l\u00edmite.\n\n" +
-                   $"Salario restante: {remainingSalary:N0}\n" +
-                   $"Pago progresivo: ${annualPayment:N0} durante {stretchYears} a\u00f1os\n",
+            title = "Rescisión de contrato (buyout)",
+            body = NewsTexts.Buyout(playerName, _myTeam.name) +
+                   $"\n\nSalario restante: ${remainingSalary:N0}\nPago progresivo: ${annualPayment:N0} durante {stretchYears} años.",
             game_day = currentDay,
             game_date = now,
             created_at = now,
             date_sent = now,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.TRASPASOS,
+            news_type = NewsType.BUYOUT
         });
 
         _pendingIRReleaseCount--;
@@ -5548,12 +5555,14 @@ List<int> offeredPickIds = new List<int>();
                 sender_type = 1,
                 sender_id = 0,
                 title = "Intercambio aceptado",
-                body = $"Has intercambiado a {ourNames}{ourPicksText} por {theirNames}{theirPicksText} con {teamName}.{satMsg}",
+                body = NewsTexts.Intercambio(teamName, ourNames + ourPicksText, _myTeam.name, theirNames + theirPicksText, ""),
                 game_day = _season.current_game_day,
                 game_date = now,
                 created_at = now,
                 date_sent = now,
-                is_read = 0
+                is_read = 0,
+                category = NewsCategory.TRASPASOS,
+                news_type = NewsType.INTERCAMBIO
             });
 
             DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 1);

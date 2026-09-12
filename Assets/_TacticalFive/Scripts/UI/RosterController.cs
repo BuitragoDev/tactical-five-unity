@@ -1552,16 +1552,17 @@ using System.Linq;
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = "Rescisión de contrato (buyout)",
-            body = $"Se ha rescindido el contrato de {playerName} mediante buyout.\n" +
-                   $"El jugador queda libre y puede firmar por cualquier equipo.",
+            body = NewsTexts.Buyout(playerName, _myTeam.name),
             game_day = currentDay,
             game_date = now,
             created_at = now,
             date_sent = now,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.TRASPASOS,
+            news_type = NewsType.BUYOUT
         });
 
         Debug.Log($"[Roster] {playerName} buyout. ${remainingSalary} stretched over {stretchYears} years.");
