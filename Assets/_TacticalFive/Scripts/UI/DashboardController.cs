@@ -6326,57 +6326,20 @@ List<int> offeredPickIds = new List<int>();
         var mvp = myStats.OrderByDescending(s => s.points).FirstOrDefault();
         string mvpName = mvp != null ? $"{mvp.name}" : "";
 
-        // Text variants
-        string body;
-        int variant = UnityEngine.Random.Range(0, 5);
-        if (won)
-        {
-            switch (variant)
-            {
-                case 0:
-                    body = $"Gran victoria contra {rivalName} por {myScore}-{rivalScore}.";
-                    break;
-                case 1:
-                    body = $"El equipo se impuso a {rivalName} con un resultado de {myScore}-{rivalScore}.";
-                    break;
-                case 2:
-                    body = $"Buen triunfo ante {rivalName}: {myScore}-{rivalScore}.";
-                    break;
-                case 3:
-                    body = $"Victoria importante frente a {rivalName} ({myScore}-{rivalScore}).";
-                    break;
-                default:
-                    body = $"El {rivalName} sucumbe ante nosotros: {myScore}-{rivalScore}.";
-                    break;
-            }
-        }
-        else
-        {
-            switch (variant)
-            {
-                case 0:
-                    body = $"Derrota ante {rivalName} por {rivalScore}-{myScore}.";
-                    break;
-                case 1:
-                    body = $"El equipo cae contra {rivalName} ({rivalScore}-{myScore}).";
-                    break;
-                case 2:
-                    body = $"Dura derrota frente a {rivalName}: {rivalScore}-{myScore}.";
-                    break;
-                case 3:
-                    body = $"No pudimos con {rivalName}. Resultado: {rivalScore}-{myScore}.";
-                    break;
-                default:
-                    body = $"{rivalName} se lleva la victoria: {rivalScore}-{myScore}.";
-                    break;
-            }
-        }
+        // Top scorer of the game
+        var allStats = (result.home_stats ?? new List<PlayerGameStats>())
+            .Concat(result.away_stats ?? new List<PlayerGameStats>());
+        var topScorer = allStats.OrderByDescending(s => s.points).FirstOrDefault();
+        string topScorerName = topScorer?.name ?? mvpName;
+        int topScorerPts = topScorer?.points ?? 0;
 
+        string body = NewsTexts.Resultado(_myTeam.name, myScore, rivalName, rivalScore,
+            game.game_date ?? "", topScorerName, topScorerPts);
         body += $"\nPabellón: {arenaName} — Asistencia: {attendance:N0} espectadores.";
         if (!string.IsNullOrEmpty(mvpName))
             body += $"\nMVP del partido: {mvpName}.";
 
-        var msg = new MessageData
+        DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
             sender_type = 1,
@@ -6387,9 +6350,10 @@ List<int> offeredPickIds = new List<int>();
             game_date = game.game_date,
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
-        };
-        DatabaseManager.Instance.AddMessage(msg);
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.RESULTADO
+        });
     }
 
     void ProcessGameInjuries(GameSimulator.GameResult result, string gameDate)

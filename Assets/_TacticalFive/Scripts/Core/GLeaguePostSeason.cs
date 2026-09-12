@@ -426,6 +426,9 @@ public static class GLeaguePostSeason
         string finalistName = finalistTeam?.name ?? "su rival";
 
         bool isMyAffiliate = myNbaTeamId > 0 && championTeam.nba_team_id == myNbaTeamId;
+        string championTeamName = isMyAffiliate
+            ? championTeam.name
+            : DatabaseManager.Instance.GetTeamById(championTeam.nba_team_id)?.name ?? championTeam.name;
         db.AddMessage(new MessageData
         {
             manager_id = managerId,
@@ -434,14 +437,14 @@ public static class GLeaguePostSeason
             title = isMyAffiliate
                 ? $"¡{championTeam.name}, tu filial, campeón de la G-League!"
                 : $"{championTeam.name} campeón de la G-League",
-            body = isMyAffiliate
-                ? $"Tu filial {championTeam.name} se ha proclamado campeona de la G-League tras vencer a {finalistName} en la Gran Final por {score}. El proyecto de desarrollo da sus frutos."
-                : $"{championTeam.name} ha vencido a {finalistName} en la Gran Final de la G-League por {score}.",
+            body = NewsTexts.GLeagueChampion(championTeamName, finalistName, champWins, finalistWins),
             game_day = season.current_game_day,
             game_date = season.current_date ?? "",
             created_at = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.LIGA,
+            news_type = NewsType.GLEAGUE_CHAMPION
         });
     }
 
