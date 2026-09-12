@@ -380,35 +380,56 @@ public class MessagesController : UIScreenController
     {
         string t = msg.title ?? "";
         string b = msg.body ?? "";
-        string combined = t + " " + b;
 
         if (msg.sender_type == 2)
         {
-            if (t.Contains("Premios del Mes") || t.Contains("All-Star") || t.Contains("Playoffs")
-                || t.Contains("Play-In") || t.Contains("Draft") || t.Contains("Racha")
-                || t.Contains("Campanada") || t.Contains("TRIPLE-DOBLE") || t.Contains("EXPLOSIÓN")
-                || t.Contains("Resultado"))
+            if (t.Contains("Hito", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Premios del Mes", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("All-Star", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Playoffs", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Play-In", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Draft", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Racha", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Campanada", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Triple-Doble", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Explosión", StringComparison.OrdinalIgnoreCase)
+                || t.Contains("Resultado", StringComparison.OrdinalIgnoreCase))
                 return "LIGA";
             return "CLUB";
         }
 
-        if (t.Contains("Lesión") || t.Contains("RESERVA") || t.Contains("Recuperado")
-            || t.Contains("recuperado") || t.Contains("TRATAR"))
+        if (t.Contains("Lesión", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("RESERVA", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Recuperado", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("TRATAR", StringComparison.OrdinalIgnoreCase))
             return "LESIONES";
 
-        if (t.Contains("Traspaso") || t.Contains("Sign & Trade") || t.Contains("Intercambio")
-            || t.Contains("OFERTAS") || t.Contains("Rescisión") || t.Contains("Hard cap")
-            || t.Contains("buyout") || t.Contains("Última semana") || t.Contains("TRANSF")
-            || t.Contains("transferible"))
+        if (t.Contains("Traspaso", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Sign & Trade", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Intercambio", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("OFERTAS", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Rescisión", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Hard cap", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("buyout", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Última semana", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("transferible", StringComparison.OrdinalIgnoreCase))
             return "TRASPASOS";
 
-        if (t.Contains("Resultado:") || t.Contains("Racha") || t.Contains("Campanada")
-            || t.Contains("TRIPLE-DOBLE") || t.Contains("EXPLOSIÓN") || t.Contains("Premios del Mes")
-            || t.Contains("All-Star") || t.Contains("Playoffs") || t.Contains("Play-In")
-            || t.Contains("Draft") || t.Contains("Jornada"))
+        if (t.Contains("Resultado:", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Racha", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Campanada", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Triple-Doble", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Explosión", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Premios del Mes", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("All-Star", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Playoffs", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Play-In", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Draft", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Jornada", StringComparison.OrdinalIgnoreCase))
             return "LIGA";
 
-        if (t.Contains("Queja") || t.Contains("Preocupación"))
+        if (t.Contains("Queja", StringComparison.OrdinalIgnoreCase)
+            || t.Contains("Preocupación", StringComparison.OrdinalIgnoreCase))
             return "PRENSA";
 
         return "CLUB";
