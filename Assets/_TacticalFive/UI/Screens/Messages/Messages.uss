@@ -460,11 +460,35 @@
     flex-shrink: 0;
 }
 
-.news-detail-footer .btn-action {
+.btn-action {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: transparent;
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     font-size: 13px;
+    letter-spacing: 1px;
     padding: 6px 14px;
+    -unity-text-align: middle-center;
+    border-radius: 8px;
     min-width: 0;
-    flex-grow: 0;
+    white-space: normal;
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+}
+
+.btn-action--danger {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+
+.btn-action--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 .news-card--selected {
