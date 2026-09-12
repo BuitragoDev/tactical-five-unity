@@ -744,14 +744,21 @@ public class InjuredController : UIScreenController
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
-            title = "RESERVA DE LESIONADOS",
-            body = $"{player.first_name} {player.last_name} ha sido {(onIR ? "colocado en la reserva de lesionados (IR)" : "reactivado de la reserva de lesionados (IR)")}.",
+            sender_type = 1,
+            sender_id = 0,
+            title = onIR
+                ? $"RESERVA DE LESIONADOS: {player.first_name} {player.last_name}"
+                : $"REACTIVADO: {player.first_name} {player.last_name}",
+            body = onIR
+                ? NewsTexts.ReservaIR($"{player.first_name} {player.last_name}", "lesión", 0)
+                : NewsTexts.Recuperacion($"{player.first_name} {player.last_name}", "lesión", 0),
             game_day = _season?.current_game_day ?? 0,
             game_date = DatabaseManager.Instance.GetCurrentDateString(_manager.id),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = DatabaseManager.Instance.GetCurrentDateString(_manager.id),
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.LESIONES,
+            news_type = onIR ? NewsType.RESERVA_IR : NewsType.RECUPERACION
         });
         ReloadData();
         Refresh();

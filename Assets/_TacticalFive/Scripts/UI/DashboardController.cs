@@ -973,12 +973,14 @@ using System.Threading.Tasks;
                             sender_type = 1,
                             sender_id = 0,
                             title = $"Recuperado: {first} {last}",
-                            body = $"{first} {last} se ha recuperado de su lesión y vuelve a estar disponible.",
+                            body = NewsTexts.Recuperacion($"{first} {last}", "lesión muscular", 0),
                             game_day = gameDay,
                             game_date = _season?.current_date ?? "",
                             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                            is_read = 0
+                            is_read = 0,
+                            category = NewsCategory.LESIONES,
+                            news_type = NewsType.RECUPERACION
                         });
                         _pendingRecoveredIds.Add(id);
                     }
@@ -6369,13 +6371,17 @@ List<int> offeredPickIds = new List<int>();
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
                         manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = 0,
                         title = $"Lesión: {player.first_name} {player.last_name}",
-                        body = $"{player.first_name} {player.last_name} ha sufrido {inj.type}. Estará de baja {inj.days} días.",
+                        body = NewsTexts.Lesion($"{player.first_name} {player.last_name}", inj.type, inj.days, false),
                         game_day = _season.current_game_day,
                         game_date = gameDate,
                         created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                         date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.LESIONES,
+                        news_type = NewsType.LESION
                     });
                 }
             }
