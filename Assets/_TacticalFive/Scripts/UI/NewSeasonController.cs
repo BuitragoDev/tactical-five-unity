@@ -619,20 +619,18 @@ public class NewSeasonController : UIScreenController
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = "Jugador despedido",
-            body = $"El club ha decidido rescindir el contrato de {playerName} con efecto inmediato.\n\n" +
-                   $"La operación supone una penalización económica de {penalty:N0} €, que ha sido cargada a las cuentas del club.\n\n" +
-                   $"La salida del jugador libera una plaza en la plantilla y su salario dejará de computar a partir de esta fecha.\n\n" +
-                   $"Coste de rescisión: {penalty:N0} €\n" +
-                   $"Ahorro salarial restante: {remainingSalary:N0} €\n" +
-                   $"Balance neto de la operación: {netBalance:N0} €",
+            body = NewsTexts.Despedido(playerName, _myTeam.name) +
+                   $"\n\nCoste de rescisión: {penalty:N0} $\nAhorro salarial restante: {remainingSalary:N0} $\nBalance neto de la operación: {netBalance:N0} $",
             game_day = currentDay,
             game_date = now,
             created_at = now,
             date_sent = now,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.DESPEDIDO
         });
 
         btn.text = "DESPEDIDO";
@@ -949,7 +947,7 @@ public class NewSeasonController : UIScreenController
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = offer != null ? $"Re-firma enviada: {playerName}" : $"Agente libre: {playerName}",
             body = body,
@@ -957,7 +955,9 @@ public class NewSeasonController : UIScreenController
             game_date = now,
             created_at = now,
             date_sent = now,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = offer != null ? NewsType.REFIRMA_ENVIADA : NewsType.AGENTE_LIBRE
         });
     }
 

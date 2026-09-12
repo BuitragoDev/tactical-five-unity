@@ -893,15 +893,17 @@ public class EmployeesController : UIScreenController
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = "Nuevo empleado contratado",
-            body = $"Se ha contratado a {name} como {posLabel} con un salario de {salaryText}.",
+            body = NewsTexts.EmpleadoContratado(name, posLabel, _myTeam.name),
             game_day = currentDay,
             game_date = now,
             created_at = now,
             date_sent = now,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.EMPLEADO_CONTRATADO
         });
 
         Debug.Log($"[Employees] {name} contratado como {posLabel} por {salaryText}.");
@@ -941,15 +943,17 @@ public class EmployeesController : UIScreenController
         DatabaseManager.Instance.AddMessage(new MessageData
         {
             manager_id = _manager.id,
-            sender_type = 0,
+            sender_type = 1,
             sender_id = 0,
             title = "Empleado despedido",
-            body = $"Se ha despedido a {name} ({posLabel}). Indemnización pagada: {FormatSalary(penalty)}.",
+            body = NewsTexts.EmpleadoDespedido(name, posLabel, _myTeam.name),
             game_day = currentDay,
             game_date = now,
             created_at = now,
             date_sent = now,
-            is_read = 0
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.EMPLEADO_DESPEDIDO
         });
 
         Debug.Log($"[Employees] {name} despedido. Indemnización: {FormatSalary(penalty)}.");

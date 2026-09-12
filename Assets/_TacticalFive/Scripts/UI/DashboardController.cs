@@ -2203,12 +2203,14 @@ using System.Threading.Tasks;
                         sender_type = 1,
                         sender_id = 0,
                         title = $"Fichaje cancelado: {playerName}",
-                        body = $"Tu oferta por {playerName} ha sido cancelada porque el jugador ha fichado por {teamName}.",
+                        body = NewsTexts.FichajeCancelado(playerName, teamName),
                         game_day = _season.current_game_day,
                         game_date = nowStr,
                         created_at = nowStr,
                         date_sent = nowStr,
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.CLUB,
+                        news_type = NewsType.FICHAJE_CANCELADO
                     });
                     DatabaseManager.Instance.MarkOfferProcessed(offer.id);
                     continue;
@@ -2233,12 +2235,14 @@ using System.Threading.Tasks;
                             sender_type = 1,
                             sender_id = 0,
                             title = $"Fichaje rechazado: {playerName}",
-                            body = $"Tu oferta a {playerName} ha sido rechazada porque tu plantilla está completa ({TradeHelper.MAX_ROSTER} jugadores).",
+                            body = NewsTexts.FichajeRechazado(playerName, _myTeam.name, $"la plantilla está completa ({TradeHelper.MAX_ROSTER} jugadores)"),
                             game_day = _season.current_game_day,
                             game_date = nowStr,
                             created_at = nowStr,
                             date_sent = nowStr,
-                            is_read = 0
+                            is_read = 0,
+                            category = NewsCategory.CLUB,
+                            news_type = NewsType.FICHAJE_RECHAZADO
                         });
                         DatabaseManager.Instance.MarkOfferProcessed(offer.id);
                         continue;
@@ -2303,12 +2307,14 @@ using System.Threading.Tasks;
                             sender_type = 1,
                             sender_id = 0,
                             title = $"Fichaje rechazado: {playerName}",
-                            body = $"Tu oferta a {playerName} ha sido rechazada ({illegalReason}).",
+                            body = NewsTexts.FichajeRechazado(playerName, _myTeam.name, illegalReason),
                             game_day = _season.current_game_day,
                             game_date = nowStr,
                             created_at = nowStr,
                             date_sent = nowStr,
-                            is_read = 0
+                            is_read = 0,
+                            category = NewsCategory.CLUB,
+                            news_type = NewsType.FICHAJE_RECHAZADO
                         });
                         DatabaseManager.Instance.MarkOfferProcessed(offer.id);
                         continue;
@@ -2349,12 +2355,14 @@ using System.Threading.Tasks;
                         sender_type = 1,
                         sender_id = 0,
                         title = $"Fichaje: {playerName}",
-                        body = $"{playerName} ha firmado con tu equipo. Contrato: {salaryText} durante {yearsText}.",
+                        body = NewsTexts.Fichaje(playerName, _myTeam.name, (int)offer.offer_salary, offer.offer_years),
                         game_day = _season.current_game_day,
                         game_date = nowStr,
                         created_at = nowStr,
                         date_sent = nowStr,
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.CLUB,
+                        news_type = NewsType.FICHAJE
                     });
 
                     // Activación del hard cap si se usó NT-MLE (>cap, ≤1er apron).
@@ -2400,12 +2408,15 @@ using System.Threading.Tasks;
                         sender_type = 1,
                         sender_id = 0,
                         title = $"Fichaje rechazado: {playerName}",
-                        body = $"{playerName} ha rechazado tu oferta de {salaryText} durante {yearsText}. Podrás intentarlo de nuevo dentro de 14 días.",
+                        body = NewsTexts.FichajeRechazado(playerName, _myTeam.name, $"oferta de {salaryText} durante {yearsText}") +
+                               " Podrás intentarlo de nuevo dentro de 14 días.",
                         game_day = _season.current_game_day,
                         game_date = nowStr,
                         created_at = nowStr,
                         date_sent = nowStr,
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.CLUB,
+                        news_type = NewsType.FICHAJE_RECHAZADO
                     });
                 }
             }
@@ -2439,15 +2450,17 @@ using System.Threading.Tasks;
                         DatabaseManager.Instance.AddMessage(new MessageData
                         {
                             manager_id = _manager.id,
-                            sender_type = 0,
+                            sender_type = 1,
                             sender_id = 0,
                             title = $"Re-firma cancelada: {playerName}",
-                            body = $"Tu oferta de re-firma a {playerName} ha sido cancelada porque el jugador ha fichado por {DatabaseManager.Instance.GetTeamById(player.team_id)?.name ?? "otro equipo"}.",
+                            body = NewsTexts.RefirmaCancelada(playerName, _myTeam.name),
                             game_day = _season.current_game_day,
                             game_date = nowStr,
                             created_at = nowStr,
                             date_sent = nowStr,
-                            is_read = 0
+                            is_read = 0,
+                            category = NewsCategory.CLUB,
+                            news_type = NewsType.REFIRMA_CANCELADA
                         });
                         DatabaseManager.Instance.MarkOfferProcessed(offer.id);
                         continue;
@@ -2461,15 +2474,17 @@ using System.Threading.Tasks;
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
                         manager_id = _manager.id,
-                        sender_type = 0,
+                        sender_type = 1,
                         sender_id = 0,
                         title = $"Contrato renovado: {playerName}",
-                        body = $"{playerName} ha aceptado tu oferta de renovación. Nuevo contrato: {salaryText} durante {yearsText}.",
+                        body = NewsTexts.Renovacion(playerName, _myTeam.name, (int)offer.offer_salary, offer.offer_years),
                         game_day = _season.current_game_day,
                         game_date = nowStr,
                         created_at = nowStr,
                         date_sent = nowStr,
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.CLUB,
+                        news_type = NewsType.RENOVACION
                     });
                 }
                 else
@@ -2483,15 +2498,17 @@ using System.Threading.Tasks;
                     DatabaseManager.Instance.AddMessage(new MessageData
                     {
                         manager_id = _manager.id,
-                        sender_type = 0,
+                        sender_type = 1,
                         sender_id = 0,
                         title = $"Oferta rechazada: {playerName}",
-                        body = $"{playerName} ha rechazado tu oferta de {salaryText} durante {yearsText}.",
+                        body = NewsTexts.OfertaRechazada(playerName, _myTeam.name),
                         game_day = _season.current_game_day,
                         game_date = nowStr,
                         created_at = nowStr,
                         date_sent = nowStr,
-                        is_read = 0
+                        is_read = 0,
+                        category = NewsCategory.CLUB,
+                        news_type = NewsType.OFERTA_RECHAZADA
                     });
                 }
             }
@@ -4177,15 +4194,17 @@ using System.Threading.Tasks;
                 DatabaseManager.Instance.AddMessage(new MessageData
                 {
                     manager_id = _manager.id,
-                    sender_type = 0,
+                    sender_type = 1,
                     sender_id = 0,
                     title = "Entrenamiento completado",
-                    body = $"{player.first_name} {player.last_name} ha completado el entrenamiento de {attrName} y ha mejorado su rendimiento.",
+                    body = NewsTexts.Entrenamiento($"{player.first_name} {player.last_name}", attrName, 0, 0),
                     game_day = _season.current_game_day,
                     game_date = _season.current_date,
                     created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                    is_read = 0
+                    is_read = 0,
+                    category = NewsCategory.CLUB,
+                    news_type = NewsType.ENTRENAMIENTO
                 });
             }
         }
