@@ -17,22 +17,41 @@
                 <!-- SCROLLABLE WRAPPER -->
                 <ui:VisualElement class="dorsales-scroll-wrapper">
 
-                    <!-- TABS -->
-                    <ui:VisualElement class="dorsales-tabs">
-                        <ui:Button name="BtnTabActuales" class="dorsales-tab" text="ACTUALES" />
-                        <ui:Button name="BtnTabRetirados" class="dorsales-tab" text="RETIRADOS" />
-                    </ui:VisualElement>
-
-                    <!-- CURRENT NUMBERS -->
-                    <ui:VisualElement name="TabActuales" class="dorsales-section">
-                        <ui:Label class="section-title" text="DORSALES DE LA PLANTILLA" />
+                    <!-- ══ DORSALES ACTUALES ══ -->
+                    <ui:VisualElement name="PanelActuales" class="dorsales-panel">
+                        <ui:VisualElement class="dorsales-panel-header">
+                            <ui:VisualElement class="dorsales-panel-header-left">
+                                <ui:VisualElement name="IconActuales" class="dorsales-panel-icon" />
+                                <ui:VisualElement class="dorsales-panel-header-text">
+                                    <ui:Label class="dorsales-panel-title" text="DORSALES ACTUALES" />
+                                    <ui:Label class="dorsales-panel-subtitle" text="NÚMEROS DISPONIBLES PARA LA PLANTILLA" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="dorsales-panel-header-right">
+                                <ui:Label class="dorsales-panel-count-label" text="ACTIVOS" />
+                                <ui:Label name="CountActivos" class="dorsales-panel-count-value" text="0/0" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                         <ui:VisualElement name="TablaActuales" class="dorsales-cards" />
                     </ui:VisualElement>
 
-                    <!-- RETIRED NUMBERS -->
-                    <ui:VisualElement name="TabRetirados" class="dorsales-section" style="display: none;">
-                        <ui:Label class="section-title" text="DORSALES RETIRADOS" />
+                    <!-- ══ DORSALES RETIRADOS ══ -->
+                    <ui:VisualElement name="PanelRetirados" class="dorsales-panel">
+                        <ui:VisualElement class="dorsales-panel-header">
+                            <ui:VisualElement class="dorsales-panel-header-left">
+                                <ui:VisualElement name="IconRetirados" class="dorsales-panel-icon" />
+                                <ui:VisualElement class="dorsales-panel-header-text">
+                                    <ui:Label class="dorsales-panel-title" text="DORSALES RETIRADOS" />
+                                    <ui:Label class="dorsales-panel-subtitle" text="HISTÓRICOS QUE NUNCA SE VOLVERÁN A UTILIZAR" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <ui:VisualElement class="dorsales-panel-header-right">
+                                <ui:Label class="dorsales-panel-count-label" text="RETIRADOS" />
+                                <ui:Label name="CountRetirados" class="dorsales-panel-count-value" text="0" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                         <ui:VisualElement name="TablaRetirados" class="dorsales-cards" />
+                        <ui:VisualElement name="PaginatorRetirados" class="dorsales-paginator" />
                     </ui:VisualElement>
 
                 </ui:VisualElement>

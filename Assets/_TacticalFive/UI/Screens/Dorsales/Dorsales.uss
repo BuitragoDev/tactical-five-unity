@@ -1,4 +1,6 @@
-/* ========== DORSALES ========== */
+/* ══════════════════════════════════════════
+   DORSALES — Dorsales.uss
+   ══════════════════════════════════════════ */
 
 .dorsales-root {
     flex-direction: row;
@@ -19,7 +21,7 @@
 .dorsales-content {
     flex-direction: column;
     flex-grow: 1;
-    padding: 20px;
+    padding: 20px 30px;
 }
 
 .dorsales-scroll-wrapper {
@@ -29,192 +31,195 @@
     min-height: 0;
 }
 
-/* TABS */
+/* ── PANEL ── */
 
-.dorsales-tabs {
-    flex-direction: row;
-    margin-bottom: 20px;
-}
-
-.dorsales-tab {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    color: rgb(200, 210, 230);
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    padding: 8px 28px;
-    margin-right: 8px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-bottom-left-radius: 6px;
-    border-bottom-right-radius: 6px;
-}
-
-.dorsales-tab:hover {
-    background-color: rgb(30, 36, 50);
-}
-
-.dorsales-tab--active {
-    color: rgb(15, 17, 23);
-    background-color: rgb(212, 160, 23);
-    border-color: rgb(212, 160, 23);
-}
-
-.dorsales-tab--active:hover {
-    background-color: rgb(228, 178, 48);
-    border-color: rgb(228, 178, 48);
-    color: rgb(15, 17, 23);
-}
-
-.dorsales-section {
+.dorsales-panel {
     flex-direction: column;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(30, 40, 60);
+    border-radius: 12px;
+    padding: 0;
     margin-bottom: 24px;
+    overflow: hidden;
 }
 
-/* CARDS - DORSALES ACTUALES */
+/* ── PANEL HEADER ── */
+
+.dorsales-panel-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(30, 40, 60);
+    background-color: rgba(20, 25, 38, 0.6);
+}
+
+.dorsales-panel-header-left {
+    flex-direction: row;
+    align-items: center;
+}
+
+.dorsales-panel-icon {
+    width: 44px;
+    height: 44px;
+    margin-right: 16px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
+}
+
+.dorsales-panel-header-text {
+    flex-direction: column;
+}
+
+.dorsales-panel-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+
+.dorsales-panel-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    margin-top: 2px;
+}
+
+.dorsales-panel-header-right {
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.dorsales-panel-count-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
+}
+
+.dorsales-panel-count-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(42, 95, 201);
+}
+
+/* ── CARDS ── */
 
 .dorsales-cards {
+    flex-direction: column;
+    padding: 16px 24px;
+}
+
+.dorsales-row {
     flex-direction: row;
     flex-wrap: wrap;
+    margin-bottom: 12px;
 }
 
 .dorsales-card {
     flex-direction: column;
     align-items: center;
     width: 140px;
-    margin-right: 16px;
-    margin-bottom: 16px;
+    margin-right: 12px;
+    margin-bottom: 8px;
+    background-color: rgb(20, 24, 34);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 8px;
+    padding: 12px 8px 10px 8px;
+}
+
+.dorsales-card:hover {
+    border-color: rgb(74, 100, 140);
+    background-color: rgb(25, 30, 42);
 }
 
 .dorsales-card-shirt {
-    width: 110px;
-    height: 110px;
+    width: 100px;
+    height: 100px;
     justify-content: center;
     align-items: center;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .dorsales-card-number {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 40px;
+    font-size: 36px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
-    margin-top: 30px;
+    margin-top: 20px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
 .dorsales-card-number--retired {
-    font-size: 48px;
+    font-size: 40px;
     color: rgb(255, 255, 255);
 }
 
 .dorsales-card-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 17px;
-    letter-spacing: 1px;
-    color: rgb(220, 228, 240);
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    color: rgb(180, 190, 210);
     -unity-text-align: middle-center;
     margin-top: 6px;
-    max-width: 140px;
+    max-width: 130px;
     white-space: normal;
 }
 
-/* TABLE */
+/* ── PAGINATOR ── */
 
-.dorsales-table {
-    flex-direction: column;
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.dorsales-header-row {
-    flex-direction: row;
-    background-color: rgb(28, 33, 46);
-    padding: 10px 16px;
-}
-
-.dorsales-header-row > Label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 15px;
-    letter-spacing: 1px;
-    color: rgb(212, 160, 23);
-}
-
-.dorsales-row {
+.dorsales-paginator {
     flex-direction: row;
     align-items: center;
-    padding: 10px 16px;
-    border-top-width: 1px;
-    border-top-color: rgb(35, 41, 55);
+    justify-content: center;
+    padding: 12px 24px 18px 24px;
+    flex-shrink: 0;
 }
 
-.dorsales-row:hover {
-    background-color: rgb(30, 36, 50);
+.dorsales-paginator-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: transparent;
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 150, 230);
+    font-size: 14px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    -unity-text-align: middle-center;
+    min-width: 0;
 }
 
-.dorsales-row > Label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 17px;
-    color: rgb(220, 228, 240);
+.dorsales-paginator-btn:hover {
+    background-color: rgba(42, 95, 201, 0.15);
 }
 
-.dorsales-col-num {
-    width: 60px;
+.dorsales-paginator-btn--disabled {
+    border-color: rgb(42, 51, 71);
+    color: rgb(60, 70, 90);
+    cursor: default;
 }
 
-.dorsales-col-name {
-    flex-grow: 1;
-    min-width: 220px;
+.dorsales-paginator-btn--disabled:hover {
+    background-color: transparent;
 }
 
-.dorsales-col-name-ret {
-    flex-grow: 1;
-    min-width: 220px;
-}
-
-.dorsales-col-pos {
-    width: 60px;
-}
-
-.dorsales-col-ovr {
-    width: 80px;
-}
-
-.dorsales-col-rings {
-    width: 90px;
-}
-
-.dorsales-col-points {
-    width: 110px;
-}
-
-.dorsales-col-season {
-    width: 100px;
-}
-
-.dorsales-row-num {
-    width: 60px;
+.dorsales-paginator-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 20px;
-    color: rgb(120, 130, 150);
+    color: rgb(208, 216, 232);
+    margin-left: 16px;
+    margin-right: 16px;
 }
 
-.dorsales-row-num--filled {
-    color: rgb(220, 228, 240);
-    font-weight: bold;
-}
-
-.dorsales-row-num--retired {
-    color: rgb(212, 160, 23);
-    font-size: 24px;
-    font-weight: bold;
-}
+/* ── EMPTY ── */
 
 .dorsales-empty {
-    padding: 20px 16px;
+    padding: 20px 0;
     font-size: 17px;
     color: rgb(140, 150, 170);
+    -unity-text-align: middle-center;
 }

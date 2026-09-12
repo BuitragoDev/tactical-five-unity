@@ -7,151 +7,241 @@ public class DorsalesController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Dorsales;
 
-    // Tabs
-    private Button _btnTabActuales;
-    private Button _btnTabRetirados;
-    private VisualElement _tabActuales;
-    private VisualElement _tabRetirados;
+    private const int ITEMS_PER_ROW = 8;
+    private const int ITEMS_PER_PAGE = 20;
 
-    // Tables
+    // Panels
+    private VisualElement _panelActuales;
+    private VisualElement _panelRetirados;
     private VisualElement _tablaActuales;
     private VisualElement _tablaRetirados;
+    private VisualElement _paginatorRetirados;
+
+    // Counters
+    private Label _countActivos;
+    private Label _countRetirados;
 
     // Data
     private List<PlayerData> _players;
     private List<RetiredNumberData> _retired;
-    private Texture2D _tshirtTex;
     private StyleBackground _tshirtBg;
-    private Texture2D _retiredTshirtTex;
     private StyleBackground _retiredTshirtBg;
+
+    // Pagination
+    private int _currentPage;
 
     protected override void CacheReferences()
     {
-        _btnTabActuales = _root.Q<Button>("BtnTabActuales");
-        _btnTabRetirados = _root.Q<Button>("BtnTabRetirados");
-        _tabActuales = _root.Q<VisualElement>("TabActuales");
-        _tabRetirados = _root.Q<VisualElement>("TabRetirados");
+        _panelActuales = _root.Q<VisualElement>("PanelActuales");
+        _panelRetirados = _root.Q<VisualElement>("PanelRetirados");
         _tablaActuales = _root.Q<VisualElement>("TablaActuales");
         _tablaRetirados = _root.Q<VisualElement>("TablaRetirados");
+        _paginatorRetirados = _root.Q<VisualElement>("PaginatorRetirados");
+        _countActivos = _root.Q<Label>("CountActivos");
+        _countRetirados = _root.Q<Label>("CountRetirados");
     }
 
     protected override void LoadData()
     {
         base.LoadData();
-        _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        _retired = DatabaseManager.Instance.GetRetiredNumbers(_myTeam.id);
-        _tshirtTex = Resources.Load<Texture2D>("Icons/tshirt");
-        if (_tshirtTex != null)
-            _tshirtBg = new StyleBackground(_tshirtTex);
-        _retiredTshirtTex = Resources.Load<Texture2D>("Icons/retired_tshirt");
-        if (_retiredTshirtTex != null)
-            _retiredTshirtBg = new StyleBackground(_retiredTshirtTex);
-    }
 
-    protected override void RegisterCallbacks()
-    {
-        base.RegisterCallbacks();
-        _btnTabActuales?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectTab(0); });
-        _btnTabRetirados?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectTab(1); });
+        var tshirtTex = Resources.Load<Texture2D>("Icons/tshirt");
+        if (tshirtTex != null) _tshirtBg = new StyleBackground(tshirtTex);
+
+        var retiredTex = Resources.Load<Texture2D>("Icons/retired_tshirt");
+        if (retiredTex != null) _retiredTshirtBg = new StyleBackground(retiredTex);
+
+        var iconActuales = _root.Q<VisualElement>("IconActuales");
+        if (iconActuales != null && tshirtTex != null)
+            iconActuales.style.backgroundImage = new StyleBackground(tshirtTex);
+
+        var iconRetirados = _root.Q<VisualElement>("IconRetirados");
+        if (iconRetirados != null && retiredTex != null)
+            iconRetirados.style.backgroundImage = new StyleBackground(retiredTex);
     }
 
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Dorsales] RefreshHeader error: {ex.Message}"); }
-        SelectTab(0);
-        BuildTablaActuales();
-        BuildTablaRetirados();
+        _currentPage = 0;
+        BuildPanelActuales();
+        BuildPanelRetirados();
     }
 
-    void SelectTab(int index)
-    {
-        bool showActuales = index == 0;
-        _btnTabActuales?.EnableInClassList("dorsales-tab--active", showActuales);
-        _btnTabRetirados?.EnableInClassList("dorsales-tab--active", !showActuales);
-        if (_tabActuales != null) _tabActuales.style.display = showActuales ? DisplayStyle.Flex : DisplayStyle.None;
-        if (_tabRetirados != null) _tabRetirados.style.display = showActuales ? DisplayStyle.None : DisplayStyle.Flex;
-    }
+    // ── ACTUALES ──────────────────────────────────────
 
-    void BuildTablaActuales()
+    void BuildPanelActuales()
     {
         _tablaActuales.Clear();
-
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var sorted = _players.Where(p => p.number > 0).OrderBy(p => p.number).ToList();
 
-        if (_players.Count == 0)
+        if (_countActivos != null)
+            _countActivos.text = $"{sorted.Count}/{_players.Count}";
+
+        if (sorted.Count == 0)
         {
-            var empty = new Label();
+            var empty = new Label("No hay jugadores con dorsal asignado.");
             empty.AddToClassList("dorsales-empty");
-            empty.text = "No hay jugadores en la plantilla.";
             _tablaActuales.Add(empty);
             return;
         }
 
-        foreach (var p in _players.OrderBy(p => p.number).ThenByDescending(p => p.overall))
+        for (int row = 0; row < sorted.Count; row += ITEMS_PER_ROW)
         {
-            var card = new VisualElement();
-            card.AddToClassList("dorsales-card");
+            int count = Mathf.Min(ITEMS_PER_ROW, sorted.Count - row);
+            var slice = sorted.GetRange(row, count);
 
-            var shirt = new VisualElement();
-            shirt.AddToClassList("dorsales-card-shirt");
-            if (_tshirtBg != null)
-                shirt.style.backgroundImage = _tshirtBg;
+            var rowEl = new VisualElement();
+            rowEl.AddToClassList("dorsales-row");
 
-            var number = new Label();
-            number.AddToClassList("dorsales-card-number");
-            number.text = p.number.ToString();
-            shirt.Add(number);
+            foreach (var p in slice)
+                rowEl.Add(CreatePlayerCard(p));
 
-            card.Add(shirt);
-
-            var name = new Label();
-            name.AddToClassList("dorsales-card-name");
-            name.text = $"{p.first_name} {p.last_name}".ToUpper();
-            card.Add(name);
-
-            _tablaActuales.Add(card);
+            _tablaActuales.Add(rowEl);
         }
     }
 
-    void BuildTablaRetirados()
+    VisualElement CreatePlayerCard(PlayerData p)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("dorsales-card");
+
+        var shirt = new VisualElement();
+        shirt.AddToClassList("dorsales-card-shirt");
+        if (_tshirtBg != null)
+            shirt.style.backgroundImage = _tshirtBg;
+
+        var number = new Label(p.number.ToString());
+        number.AddToClassList("dorsales-card-number");
+        shirt.Add(number);
+
+        card.Add(shirt);
+
+        var name = new Label($"{p.first_name} {p.last_name}".ToUpper());
+        name.AddToClassList("dorsales-card-name");
+        card.Add(name);
+
+        return card;
+    }
+
+    // ── RETIRADOS ─────────────────────────────────────
+
+    void BuildPanelRetirados()
     {
         _tablaRetirados.Clear();
-
         _retired = DatabaseManager.Instance.GetRetiredNumbers(_myTeam.id);
+
+        if (_countRetirados != null)
+            _countRetirados.text = _retired.Count.ToString();
 
         if (_retired.Count == 0)
         {
-            var empty = new Label();
+            _paginatorRetirados.style.display = DisplayStyle.None;
+            var empty = new Label("Este equipo aún no ha retirado ningún dorsal.");
             empty.AddToClassList("dorsales-empty");
-            empty.text = "Este equipo a\u00fan no ha retirado ning\u00fan dorsal.";
             _tablaRetirados.Add(empty);
             return;
         }
 
-        foreach (var r in _retired)
+        int totalPages = Mathf.CeilToInt((float)_retired.Count / ITEMS_PER_PAGE);
+        if (_currentPage >= totalPages) _currentPage = totalPages - 1;
+
+        int start = _currentPage * ITEMS_PER_PAGE;
+        int end = Mathf.Min(start + ITEMS_PER_PAGE, _retired.Count);
+        var page = _retired.GetRange(start, end - start);
+
+        for (int row = 0; row < page.Count; row += ITEMS_PER_ROW)
         {
-            var card = new VisualElement();
-            card.AddToClassList("dorsales-card");
+            int count = Mathf.Min(ITEMS_PER_ROW, page.Count - row);
+            var slice = page.GetRange(row, count);
 
-            var shirt = new VisualElement();
-            shirt.AddToClassList("dorsales-card-shirt");
-            if (_retiredTshirtBg != null)
-                shirt.style.backgroundImage = _retiredTshirtBg;
+            var rowEl = new VisualElement();
+            rowEl.AddToClassList("dorsales-row");
 
-            var number = new Label();
-            number.AddToClassList("dorsales-card-number");
-            number.AddToClassList("dorsales-card-number--retired");
-            number.text = r.number.ToString();
-            shirt.Add(number);
+            foreach (var r in slice)
+                rowEl.Add(CreateRetiredCard(r));
 
-            card.Add(shirt);
-
-            var name = new Label();
-            name.AddToClassList("dorsales-card-name");
-            name.text = r.FullName.ToUpper();
-            card.Add(name);
-
-            _tablaRetirados.Add(card);
+            _tablaRetirados.Add(rowEl);
         }
+
+        BuildPaginator(totalPages);
+    }
+
+    VisualElement CreateRetiredCard(RetiredNumberData r)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("dorsales-card");
+
+        var shirt = new VisualElement();
+        shirt.AddToClassList("dorsales-card-shirt");
+        if (_retiredTshirtBg != null)
+            shirt.style.backgroundImage = _retiredTshirtBg;
+
+        var number = new Label(r.number.ToString());
+        number.AddToClassList("dorsales-card-number");
+        number.AddToClassList("dorsales-card-number--retired");
+        shirt.Add(number);
+
+        card.Add(shirt);
+
+        var name = new Label(r.FullName.ToUpper());
+        name.AddToClassList("dorsales-card-name");
+        card.Add(name);
+
+        return card;
+    }
+
+    // ── PAGINATOR ─────────────────────────────────────
+
+    void BuildPaginator(int totalPages)
+    {
+        _paginatorRetirados.Clear();
+
+        if (totalPages <= 1)
+        {
+            _paginatorRetirados.style.display = DisplayStyle.None;
+            return;
+        }
+
+        _paginatorRetirados.style.display = DisplayStyle.Flex;
+
+        var btnPrev = new Button();
+        btnPrev.AddToClassList("dorsales-paginator-btn");
+        btnPrev.text = "\u25C0";
+        btnPrev.SetEnabled(_currentPage > 0);
+        if (_currentPage <= 0) btnPrev.AddToClassList("dorsales-paginator-btn--disabled");
+        int prevPage = _currentPage - 1;
+        btnPrev.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(prevPage); });
+        if (CursorManager.Instance != null)
+        {
+            btnPrev.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+            btnPrev.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+        }
+        _paginatorRetirados.Add(btnPrev);
+
+        var pageLbl = new Label($"{_currentPage + 1} / {totalPages}");
+        pageLbl.AddToClassList("dorsales-paginator-label");
+        _paginatorRetirados.Add(pageLbl);
+
+        var btnNext = new Button();
+        btnNext.AddToClassList("dorsales-paginator-btn");
+        btnNext.text = "\u25B6";
+        btnNext.SetEnabled(_currentPage < totalPages - 1);
+        if (_currentPage >= totalPages - 1) btnNext.AddToClassList("dorsales-paginator-btn--disabled");
+        int nextPage = _currentPage + 1;
+        btnNext.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(nextPage); });
+        if (CursorManager.Instance != null)
+        {
+            btnNext.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+            btnNext.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+        }
+        _paginatorRetirados.Add(btnNext);
+    }
+
+    void GoToPage(int page)
+    {
+        _currentPage = page;
+        BuildPanelRetirados();
     }
 }
