@@ -50,7 +50,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 18px 24px;
+    padding: 0px 24px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(30, 40, 60);
     background-color: rgba(20, 25, 38, 0.6);
@@ -82,7 +82,7 @@
 
 .dorsales-panel-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
 }
@@ -94,7 +94,7 @@
 
 .dorsales-panel-count-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
 }
@@ -146,10 +146,10 @@
 
 .dorsales-card-number {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 36px;
+    font-size: 48px;
     color: rgb(255, 255, 255);
     -unity-text-align: middle-center;
-    margin-top: 20px;
+    margin-top: 32px;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
 }
 
@@ -160,7 +160,7 @@
 
 .dorsales-card-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     letter-spacing: 0.5px;
     color: rgb(180, 190, 210);
     -unity-text-align: middle-center;
@@ -174,7 +174,7 @@
 .dorsales-paginator {
     flex-direction: row;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 12px 24px 18px 24px;
     flex-shrink: 0;
 }
@@ -219,7 +219,7 @@
 
 .dorsales-empty {
     padding: 20px 0;
-    font-size: 17px;
+    font-size: 18px;
     color: rgb(140, 150, 170);
     -unity-text-align: middle-center;
 }
