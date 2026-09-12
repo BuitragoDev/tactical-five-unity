@@ -235,6 +235,10 @@ public class MessagesController : UIScreenController
         var badgeRow = new VisualElement();
         badgeRow.AddToClassList("news-card-badge-row");
 
+        var dateBadge = new Label(GetNewsDate(msg));
+        dateBadge.AddToClassList("news-card-date");
+        badgeRow.Add(dateBadge);
+
         string category = GetCategory(msg);
         var badge = new Label(GetCategoryLabel(category));
         badge.AddToClassList("news-card-badge");
@@ -428,6 +432,15 @@ public class MessagesController : UIScreenController
             "PRENSA" => "PRENSA",
             _ => "CLUB"
         };
+    }
+
+    string GetNewsDate(MessageData msg)
+    {
+        string raw = msg.game_date ?? msg.date_sent;
+        if (string.IsNullOrEmpty(raw)) return "";
+        if (DateTime.TryParse(raw, out var date))
+            return date.ToString("dd/MM/yyyy");
+        return raw;
     }
 
     string GetCategoryBadgeClass(string category)
