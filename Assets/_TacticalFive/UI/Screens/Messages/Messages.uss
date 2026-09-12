@@ -63,7 +63,7 @@
 .messages-toolbar {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     margin-bottom: 16px;
     flex-shrink: 0;
 }
@@ -104,11 +104,6 @@
     background-color: rgb(52, 105, 211);
 }
 
-.messages-toolbar-right {
-    flex-direction: row;
-    align-items: center;
-}
-
 /* Search bar */
 .messages-search-box {
     flex-direction: row;
@@ -118,6 +113,7 @@
     border-color: rgb(42, 51, 71);
     border-radius: 6px;
     padding: 8px 12px;
+    margin-left: 12px;
     min-width: 360px;
 }
 
