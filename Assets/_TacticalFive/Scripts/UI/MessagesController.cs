@@ -17,17 +17,20 @@ public class MessagesController : UIScreenController
     private Button _btnNext;
     private Label _pageLabel;
 
-    private VisualElement _newsModalOverlay;
-    private VisualElement _newsModalPhoto;
-    private Label _newsModalTitle;
-    private Label _newsModalBody;
-    private Label _newsModalDate;
+    private VisualElement _newsDetailPanel;
+    private VisualElement _newsDetailContent;
+    private VisualElement _newsDetailPhoto;
+    private Label _newsDetailDate;
+    private Label _newsDetailTitle;
+    private Label _newsDetailBody;
+    private Label _newsDetailEmpty;
 
     private List<MessageData> _allMessages;
     private List<MessageData> _filteredMessages;
     private string _activeCategory = "TODAS";
     private string _searchQuery = "";
     private int _currentPage = 0;
+    private int _selectedMessageId = 0;
 
     private readonly Dictionary<string, Sprite> _logoSprites = new();
     private readonly Dictionary<string, Texture2D> _noticiasSprites = new();
@@ -49,25 +52,13 @@ public class MessagesController : UIScreenController
         _filterTabs[4] = _root.Q<Button>("FilterLesiones");
         _filterTabs[5] = _root.Q<Button>("FilterPrensa");
 
-        _newsModalOverlay = _root.Q<VisualElement>("NewsModalOverlay");
-        _newsModalPhoto = _root.Q<VisualElement>("NewsModalPhoto");
-        _newsModalTitle = _root.Q<Label>("NewsModalTitle");
-        _newsModalBody = _root.Q<Label>("NewsModalBody");
-        _newsModalDate = _root.Q<Label>("NewsModalDate");
-
-        var newsModalClose = _root.Q<Button>("NewsModalClose");
-        if (newsModalClose != null)
-        {
-            newsModalClose.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseNewsModal(); });
-            if (CursorManager.Instance != null)
-                CursorManager.Instance.RegisterHandCursor(newsModalClose);
-        }
-
-        if (_newsModalOverlay != null)
-            _newsModalOverlay.RegisterCallback<ClickEvent>(e =>
-            {
-                if (e.target == _newsModalOverlay) CloseNewsModal();
-            });
+        _newsDetailPanel = _root.Q<VisualElement>("NewsDetailPanel");
+        _newsDetailContent = _root.Q<VisualElement>("NewsDetailContent");
+        _newsDetailPhoto = _root.Q<VisualElement>("NewsDetailPhoto");
+        _newsDetailTitle = _root.Q<Label>("NewsDetailTitle");
+        _newsDetailBody = _root.Q<Label>("NewsDetailBody");
+        _newsDetailDate = _root.Q<Label>("NewsDetailDate");
+        _newsDetailEmpty = _root.Q<Label>("NewsDetailEmpty");
     }
 
     protected override void LoadData()
@@ -194,8 +185,13 @@ public class MessagesController : UIScreenController
             empty.Add(lbl);
             _messagesBody.Add(empty);
             _paginator.style.display = DisplayStyle.None;
+            ShowNewsDetail(null);
             return;
         }
+
+        // Keep the current selection if it is still present; otherwise select the first one
+        if (_filteredMessages.All(m => m.id != _selectedMessageId))
+            _selectedMessageId = _filteredMessages[0].id;
 
         int totalPages = Mathf.CeilToInt((float)_filteredMessages.Count / ITEMS_PER_PAGE);
         if (_currentPage >= totalPages) _currentPage = totalPages - 1;
@@ -215,14 +211,20 @@ public class MessagesController : UIScreenController
         }
 
         BuildPaginator(totalPages);
+
+        var selected = _filteredMessages.FirstOrDefault(m => m.id == _selectedMessageId);
+        ShowNewsDetail(selected);
     }
 
     VisualElement CreateNewsCard(MessageData msg)
     {
         var card = new VisualElement();
+        card.userData = msg.id;
         card.AddToClassList("news-card");
         if (msg.is_read == 0)
             card.AddToClassList("news-card--unread");
+        if (msg.id == _selectedMessageId)
+            card.AddToClassList("news-card--selected");
 
         var photo = new VisualElement();
         photo.AddToClassList("news-card-photo");
@@ -261,7 +263,7 @@ public class MessagesController : UIScreenController
         card.Add(arrow);
 
         var msgRef = msg;
-        card.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenNewsModal(msgRef); });
+        card.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectNews(msgRef); });
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(card);
 
@@ -320,44 +322,55 @@ public class MessagesController : UIScreenController
         BuildNewsCards();
     }
 
-    // ── NEWS MODAL ──
+    // ── NEWS DETAIL ──
 
-    void OpenNewsModal(MessageData msg)
+    void SelectNews(MessageData msg)
     {
-        if (_newsModalOverlay == null) return;
+        if (msg == null) return;
 
-        _newsModalTitle.text = msg.title ?? "Sin asunto";
-        _newsModalBody.text = msg.body ?? "";
+        _selectedMessageId = msg.id;
 
-        if (_newsModalDate != null)
+        UpdateSelectedHighlight();
+        ShowNewsDetail(msg);
+    }
+
+    void UpdateSelectedHighlight()
+    {
+        if (_messagesBody == null) return;
+        foreach (var child in _messagesBody.Children())
         {
-            try
+            if (child.userData is int id)
             {
-                _newsModalDate.text = DateTime.Parse(msg.game_date ?? msg.date_sent).ToString("dd/MM/yyyy");
+                child.EnableInClassList("news-card--selected", id == _selectedMessageId);
             }
-            catch
-            {
-                _newsModalDate.text = msg.game_date ?? "";
-            }
-        }
-
-        _newsModalPhoto.style.backgroundImage = null;
-        SetNewsImage(_newsModalPhoto, msg);
-
-        _newsModalOverlay.style.display = DisplayStyle.Flex;
-
-        if (msg.is_read == 0)
-        {
-            DatabaseManager.Instance.MarkMessageRead(msg.id);
-            msg.is_read = 1;
-            ApplyFilters();
         }
     }
 
-    void CloseNewsModal()
+    void ShowNewsDetail(MessageData msg)
     {
-        if (_newsModalOverlay != null)
-            _newsModalOverlay.style.display = DisplayStyle.None;
+        if (_newsDetailPanel == null) return;
+
+        if (msg == null)
+        {
+            if (_newsDetailContent != null) _newsDetailContent.style.display = DisplayStyle.None;
+            if (_newsDetailEmpty != null) _newsDetailEmpty.style.display = DisplayStyle.Flex;
+            return;
+        }
+
+        if (_newsDetailContent != null) _newsDetailContent.style.display = DisplayStyle.Flex;
+        if (_newsDetailEmpty != null) _newsDetailEmpty.style.display = DisplayStyle.None;
+
+        if (_newsDetailTitle != null) _newsDetailTitle.text = msg.title ?? "Sin asunto";
+        if (_newsDetailBody != null) _newsDetailBody.text = msg.body ?? "";
+
+        if (_newsDetailDate != null)
+            _newsDetailDate.text = GetNewsDate(msg);
+
+        if (_newsDetailPhoto != null)
+        {
+            _newsDetailPhoto.style.backgroundImage = null;
+            SetNewsImage(_newsDetailPhoto, msg);
+        }
     }
 
     // ── CATEGORY ──

@@ -43,32 +43,40 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- News list -->
-                <ui:ScrollView class="messages-scroll"
-                               horizontal-scrolling-enabled="false"
-                               mode="Vertical">
-                    <ui:VisualElement name="MessagesBody" class="messages-body" />
-                </ui:ScrollView>
+                <!-- Content: list + detail -->
+                <ui:VisualElement class="messages-content-row">
 
-                <!-- Paginator -->
-                <ui:VisualElement name="Paginator" class="messages-paginator" />
+                    <!-- List column -->
+                    <ui:VisualElement class="messages-list-col">
+                        <!-- News list -->
+                        <ui:ScrollView class="messages-scroll"
+                                       horizontal-scrolling-enabled="false"
+                                       mode="Vertical">
+                            <ui:VisualElement name="MessagesBody" class="messages-body" />
+                        </ui:ScrollView>
+
+                        <!-- Paginator -->
+                        <ui:VisualElement name="Paginator" class="messages-paginator" />
+                    </ui:VisualElement>
+
+                    <!-- Detail panel -->
+                    <ui:VisualElement name="NewsDetailPanel" class="news-detail-panel">
+                        <ui:VisualElement name="NewsDetailContent" class="news-detail-content">
+                            <ui:VisualElement name="NewsDetailPhoto" class="news-detail-photo" />
+                            <ui:Label name="NewsDetailDate" class="news-detail-date" text="" />
+                            <ui:Label name="NewsDetailTitle" class="news-detail-title" text="" />
+                            <ui:Label name="NewsDetailBody" class="news-detail-body" text="" />
+                        </ui:VisualElement>
+                        <ui:Label name="NewsDetailEmpty" class="news-detail-empty" text="Selecciona una noticia para ver el detalle." />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
 
             </ui:VisualElement>
 
         </ui:VisualElement>
 
     </ui:VisualElement>
-
-        <!-- ══ MODAL NOTICIA ══ -->
-        <ui:VisualElement name="NewsModalOverlay" class="modal-overlay">
-            <ui:VisualElement name="NewsModalBox" class="news-modal-box">
-                <ui:Label name="NewsModalDate" class="news-modal-date" text="" />
-                <ui:VisualElement name="NewsModalPhoto" class="news-modal-photo" />
-                <ui:Label name="NewsModalTitle" class="news-modal-title" text="" />
-                <ui:Label name="NewsModalBody" class="news-modal-body" text="" />
-                <ui:Button name="NewsModalClose" class="news-modal-close" text="CERRAR" />
-            </ui:VisualElement>
-        </ui:VisualElement>
 
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
         <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
