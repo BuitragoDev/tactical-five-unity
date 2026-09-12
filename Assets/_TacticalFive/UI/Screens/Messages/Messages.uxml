@@ -68,10 +68,8 @@
         <!-- ══ MODAL NOTICIA ══ -->
         <ui:VisualElement name="NewsModalOverlay" class="modal-overlay">
             <ui:VisualElement name="NewsModalBox" class="news-modal-box">
-                <ui:VisualElement name="NewsModalPhotoWrapper" class="news-modal-photo-wrapper">
-                    <ui:VisualElement name="NewsModalPhoto" class="news-modal-photo" />
-                    <ui:Label name="NewsModalDate" class="news-modal-date" text="" />
-                </ui:VisualElement>
+                <ui:Label name="NewsModalDate" class="news-modal-date" text="" />
+                <ui:VisualElement name="NewsModalPhoto" class="news-modal-photo" />
                 <ui:Label name="NewsModalTitle" class="news-modal-title" text="" />
                 <ui:Label name="NewsModalBody" class="news-modal-body" text="" />
                 <ui:Button name="NewsModalClose" class="news-modal-close" text="CERRAR" />
