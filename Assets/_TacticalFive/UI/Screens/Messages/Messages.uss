@@ -118,26 +118,27 @@
     border-color: rgb(42, 51, 71);
     border-radius: 6px;
     padding: 8px 12px;
-    min-width: 240px;
+    min-width: 360px;
 }
 
 .messages-search-icon {
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     margin-right: 8px;
 }
 
 .messages-search-field {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     background-color: transparent;
     border-width: 0;
-    min-width: 200px;
+    min-width: 300px;
 }
 
 .messages-search-field::placeholder {
     color: rgb(85, 102, 119);
+    font-size: 18px;
 }
 
 /* ── SCROLL ── */
