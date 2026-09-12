@@ -8,7 +8,7 @@ public class MessagesController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Messages;
 
-    private const int ITEMS_PER_PAGE = 5;
+    private const int ITEMS_PER_PAGE = 4;
 
     private VisualElement _messagesBody;
     private VisualElement _paginator;
@@ -17,6 +17,11 @@ public class MessagesController : UIScreenController
     private Button _btnPrev;
     private Button _btnNext;
     private Label _pageLabel;
+
+    private VisualElement _newsModalOverlay;
+    private VisualElement _newsModalPhoto;
+    private Label _newsModalTitle;
+    private Label _newsModalBody;
 
     private List<MessageData> _allMessages;
     private List<MessageData> _filteredMessages;
@@ -45,6 +50,25 @@ public class MessagesController : UIScreenController
         _filterTabs[3] = _root.Q<Button>("FilterTraspasos");
         _filterTabs[4] = _root.Q<Button>("FilterLesiones");
         _filterTabs[5] = _root.Q<Button>("FilterPrensa");
+
+        _newsModalOverlay = _root.Q<VisualElement>("NewsModalOverlay");
+        _newsModalPhoto = _root.Q<VisualElement>("NewsModalPhoto");
+        _newsModalTitle = _root.Q<Label>("NewsModalTitle");
+        _newsModalBody = _root.Q<Label>("NewsModalBody");
+
+        var newsModalClose = _root.Q<Button>("NewsModalClose");
+        if (newsModalClose != null)
+        {
+            newsModalClose.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseNewsModal(); });
+            if (CursorManager.Instance != null)
+                CursorManager.Instance.RegisterHandCursor(newsModalClose);
+        }
+
+        if (_newsModalOverlay != null)
+            _newsModalOverlay.RegisterCallback<ClickEvent>(e =>
+            {
+                if (e.target == _newsModalOverlay) CloseNewsModal();
+            });
     }
 
     protected override void LoadData()
@@ -242,23 +266,16 @@ public class MessagesController : UIScreenController
         body.AddToClassList("news-card-body");
         textBlock.Add(body);
 
-        var meta = new VisualElement();
-        meta.AddToClassList("news-card-meta");
-
-        var catLabel = new Label(GetCategoryLabel(category).ToUpper());
-        catLabel.AddToClassList("news-card-category");
-        meta.Add(catLabel);
-
-        var timeLabel = new Label(GetRelativeTime(msg.date_sent ?? msg.game_date));
-        timeLabel.AddToClassList("news-card-time");
-        meta.Add(timeLabel);
-
-        textBlock.Add(meta);
         card.Add(textBlock);
 
         var arrow = new Label("\u203A");
         arrow.AddToClassList("news-card-arrow");
         card.Add(arrow);
+
+        var msgRef = msg;
+        card.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenNewsModal(msgRef); });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(card);
 
         return card;
     }
@@ -313,6 +330,34 @@ public class MessagesController : UIScreenController
     {
         _currentPage = page;
         BuildNewsCards();
+    }
+
+    // ── NEWS MODAL ──
+
+    void OpenNewsModal(MessageData msg)
+    {
+        if (_newsModalOverlay == null) return;
+
+        _newsModalTitle.text = msg.title ?? "Sin asunto";
+        _newsModalBody.text = msg.body ?? "";
+
+        _newsModalPhoto.style.backgroundImage = null;
+        SetNewsImage(_newsModalPhoto, msg);
+
+        _newsModalOverlay.style.display = DisplayStyle.Flex;
+
+        if (msg.is_read == 0)
+        {
+            DatabaseManager.Instance.MarkMessageRead(msg.id);
+            msg.is_read = 1;
+            ApplyFilters();
+        }
+    }
+
+    void CloseNewsModal()
+    {
+        if (_newsModalOverlay != null)
+            _newsModalOverlay.style.display = DisplayStyle.None;
     }
 
     // ── CATEGORY ──
