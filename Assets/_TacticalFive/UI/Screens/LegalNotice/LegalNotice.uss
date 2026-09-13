@@ -94,16 +94,19 @@
     letter-spacing: 3px;
     width: 200px;
     -unity-text-transform: upper;
-    color: rgb(255, 255, 255);
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
+    color: rgb(120, 160, 230);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 8px;
     padding: 12px 32px;
     margin-top: 28px;
     -unity-text-align: middle-center;
 }
 
 .modal-close:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 
 /* ── ACCIONES MODAL ── */

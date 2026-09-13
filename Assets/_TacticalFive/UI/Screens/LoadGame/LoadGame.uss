@@ -66,18 +66,22 @@
 .btn-back {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 250px;
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
     font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 10px 26px;
+    border-radius: 8px;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .btn-back:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 
 /* ══ TITLE ══ */
@@ -221,33 +225,44 @@
 
 .btn-load {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     font-size: 18px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
     padding: 12px 40px;
     min-width: 160px;
+    border-radius: 8px;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .btn-load:hover {
-    background-color: rgb(58, 128, 240);
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
 }
 
 .btn-delete {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: transparent;
-    border-width: 1px;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
     border-color: rgb(192, 57, 43);
-    color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
     font-size: 18px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
     padding: 12px 36px;
     min-width: 160px;
+    border-radius: 8px;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .btn-delete:hover {
-    background-color: rgba(192, 57, 43, 0.1);
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 /* ══ EMPTY STATE ══ */
