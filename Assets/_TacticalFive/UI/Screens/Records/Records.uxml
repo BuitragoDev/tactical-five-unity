@@ -18,6 +18,15 @@
             <!-- RECORDS CONTENT -->
             <ui:VisualElement class="records-content">
 
+                <!-- PAGE HEADER -->
+                <ui:VisualElement class="records-header">
+                    <ui:VisualElement name="RecordsHeaderIcon" class="records-header-icon" />
+                    <ui:VisualElement class="records-header-text">
+                        <ui:Label class="records-title" text="RECORDS" />
+                        <ui:Label name="RecordsSubtitle" class="records-subtitle" text="MÁXIMOS HISTÓRICOS DEL EQUIPO" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
                 <!-- Filter tabs -->
                 <ui:VisualElement class="records-tabs">
                     <ui:Button name="TabTeam"       class="records-tab records-tab--active" text="MI EQUIPO" />
@@ -25,16 +34,9 @@
                     <ui:Button name="TabHistorical" class="records-tab" text="HISTÓRICO" />
                 </ui:VisualElement>
 
-                <!-- Records table -->
-                <ui:VisualElement class="records-panel">
-                    <ui:VisualElement class="records-header-row">
-                        <ui:Label class="records-col records-col--stat" text="ESTADÍSTICA" />
-                        <ui:Label class="records-col records-col--value" text="VALOR" />
-                        <ui:Label class="records-col records-col--player" text="JUGADOR" />
-                        <ui:Label name="HeaderTeamCol" class="records-col records-col--team" text="EQUIPO" />
-                        <ui:Label class="records-col records-col--date" text="FECHA" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="RecordsBody" class="records-table" />
+                <!-- Records grid (3 x 3) -->
+                <ui:VisualElement class="records-scroll">
+                    <ui:VisualElement name="RecordsBody" class="records-grid" />
                 </ui:VisualElement>
 
             </ui:VisualElement>

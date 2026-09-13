@@ -2,18 +2,27 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
 using System.Linq;
-    public class RecordsController : UIScreenController
+
+public class RecordsController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Records;
+
     private Button _tabTeam;
     private Button _tabSeason;
     private Button _tabHistorical;
     private VisualElement _recordsBody;
-    private VisualElement _headerTeamCol;
+    private VisualElement _recordsHeaderIcon;
+    private Label _recordsSubtitle;
+
     private List<TeamData> _allTeams;
     private Dictionary<string, Sprite> _logoSprites = new();
     private Dictionary<string, Sprite> _logoSprites64 = new();
+    private Dictionary<string, Texture2D> _statIcons = new();
+    private Texture2D _recordIcon;
+    private Sprite _calendarSprite;
+
     private string _currentFilter = "team";
+
     private static readonly Dictionary<string, string> StatLabels = new()
     {
         { "points", "PUNTOS" },
@@ -26,18 +35,35 @@ using System.Linq;
         { "ftm", "TIROS LIBRES" },
         { "turnovers", "PÉRDIDAS" }
     };
+
+    private static readonly Dictionary<string, string> StatSubtitles = new()
+    {
+        { "points", "MÁXIMO DE PUNTOS EN UN PARTIDO" },
+        { "rebounds", "MÁXIMO DE REBOTES EN UN PARTIDO" },
+        { "assists", "MÁXIMO DE ASISTENCIAS EN UN PARTIDO" },
+        { "steals", "MÁXIMO DE ROBOS EN UN PARTIDO" },
+        { "blocks", "MÁXIMO DE TAPONES EN UN PARTIDO" },
+        { "fgm", "MÁXIMO DE TIROS DE CAMPO EN UN PARTIDO" },
+        { "fg3m", "MÁXIMO DE TRIPLES EN UN PARTIDO" },
+        { "ftm", "MÁXIMO DE TIROS LIBRES EN UN PARTIDO" },
+        { "turnovers", "MÁXIMO DE PÉRDIDAS EN UN PARTIDO" }
+    };
+
     private static readonly string[] StatOrder = {
         "points", "rebounds", "assists", "steals", "blocks",
         "fgm", "fg3m", "ftm", "turnovers"
     };
+
     protected override void CacheReferences()
     {
         _tabTeam = _root.Q<Button>("TabTeam");
         _tabSeason = _root.Q<Button>("TabSeason");
         _tabHistorical = _root.Q<Button>("TabHistorical");
         _recordsBody = _root.Q<VisualElement>("RecordsBody");
-        _headerTeamCol = _root.Q<VisualElement>("HeaderTeamCol");
+        _recordsHeaderIcon = _root.Q<VisualElement>("RecordsHeaderIcon");
+        _recordsSubtitle = _root.Q<Label>("RecordsSubtitle");
     }
+
     protected override void LoadData()
     {
         base.LoadData();
@@ -48,13 +74,26 @@ using System.Linq;
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
-        
-        
+        _statIcons["points"] = Resources.Load<Texture2D>("Icons/puntos");
+        _statIcons["rebounds"] = Resources.Load<Texture2D>("Icons/rebote");
+        _statIcons["assists"] = Resources.Load<Texture2D>("Icons/pase");
+        _statIcons["steals"] = Resources.Load<Texture2D>("Icons/robo");
+        _statIcons["blocks"] = Resources.Load<Texture2D>("Icons/tapones");
+        _statIcons["fgm"] = Resources.Load<Texture2D>("Icons/basket_icon");
+        _statIcons["fg3m"] = Resources.Load<Texture2D>("Icons/basket_icon");
+        _statIcons["ftm"] = Resources.Load<Texture2D>("Icons/basket_icon");
+        _statIcons["turnovers"] = Resources.Load<Texture2D>("Icons/perdidas");
 
-        
-        
+        _recordIcon = Resources.Load<Texture2D>("Icons/record_icon");
+        _calendarSprite = Resources.Load<Sprite>("Icons/calendario");
+
+        var headerIcon = Resources.Load<Texture2D>("Icons/records");
+        if (headerIcon != null && _recordsHeaderIcon != null)
+            _recordsHeaderIcon.style.backgroundImage = new StyleBackground(headerIcon);
+
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
+
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
@@ -76,11 +115,13 @@ using System.Linq;
 
         Refresh();
     }
+
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Records] RefreshHeader error: {ex.Message}"); }
         BuildRecords();
     }
+
     protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
@@ -110,7 +151,7 @@ using System.Linq;
         var chemLabel = _root.Q<Label>("HeaderChemistry");
         if (chemLabel != null)
         {
-            chemLabel.text = $"{chemistry.ToString()}%";
+            chemLabel.text = $"{chemistry}%";
             chemLabel.RemoveFromClassList("header-stat-value--gold");
             chemLabel.RemoveFromClassList("header-stat-value--negative");
             if (chemistry < 40)
@@ -133,8 +174,7 @@ using System.Linq;
     void BuildRecords()
     {
         _recordsBody.Clear();
-
-        _headerTeamCol.style.display = DisplayStyle.Flex;
+        UpdateSubtitle();
 
         if (_currentFilter == "team")
             BuildTeamRecords();
@@ -142,6 +182,17 @@ using System.Linq;
             BuildSeasonRecords();
         else
             BuildHistoricalRecords();
+    }
+
+    void UpdateSubtitle()
+    {
+        if (_recordsSubtitle == null) return;
+        _recordsSubtitle.text = _currentFilter switch
+        {
+            "season" => "MEJORES REGISTROS DE LA TEMPORADA",
+            "historical" => "MEJORES REGISTROS DE LA HISTORIA",
+            _ => "MÁXIMOS HISTÓRICOS DEL EQUIPO"
+        };
     }
 
     void BuildTeamRecords()
@@ -154,8 +205,7 @@ using System.Linq;
         foreach (var stat in StatOrder)
         {
             if (!byStat.TryGetValue(stat, out var rec)) continue;
-            var row = CreateRow(stat, rec.player_name, rec.value.ToString(), rec.game_date, null);
-            _recordsBody.Add(row);
+            _recordsBody.Add(CreateCard(stat, rec.player_name, rec.value.ToString(), rec.game_date, _myTeam, count == 0));
             count++;
         }
 
@@ -172,9 +222,8 @@ using System.Linq;
         foreach (var stat in StatOrder)
         {
             if (!byStat.TryGetValue(stat, out var rec)) continue;
-            var team = _allTeams?.Find(t => t.id == rec.team_id);
-            var row = CreateRow(stat, rec.player_name, rec.value.ToString(), rec.game_date, team);
-            _recordsBody.Add(row);
+            var team = _allTeams?.Find(t => t.id == rec.team_id) ?? _myTeam;
+            _recordsBody.Add(CreateCard(stat, rec.player_name, rec.value.ToString(), rec.game_date, team, count == 0));
             count++;
         }
 
@@ -186,44 +235,116 @@ using System.Linq;
         var records = DatabaseManager.Instance.GetAllHistoricalRecords();
         var byStat = records.ToDictionary(r => r.stat_type, r => r);
 
+        int count = 0;
         foreach (var stat in StatOrder)
         {
             if (!byStat.TryGetValue(stat, out var rec)) continue;
             var team = _allTeams?.Find(t => t.abbreviation == rec.team_abbreviation);
-            var row = CreateRow(stat, rec.player_name, rec.value.ToString(), rec.game_date, team);
-            _recordsBody.Add(row);
+            _recordsBody.Add(CreateCard(stat, rec.player_name, rec.value.ToString(), rec.game_date, team, count == 0));
+            count++;
         }
+
+        if (count == 0) ShowEmpty("No hay récords históricos todavía.");
     }
 
-    VisualElement CreateRow(string statType, string playerName, string value, string gameDate, TeamData team)
+    VisualElement CreateCard(string statType, string playerName, string value, string gameDate, TeamData team, bool featured)
     {
-        var row = new VisualElement();
-        row.AddToClassList("record-row");
+        var card = new VisualElement();
+        card.AddToClassList("record-card");
+        if (featured) card.AddToClassList("record-card--featured");
 
-        var statLbl = new Label();
-        statLbl.AddToClassList("record-stat");
-        statLbl.text = StatLabels.TryGetValue(statType, out var label) ? label : statType;
-        row.Add(statLbl);
+        var inner = new VisualElement();
+        inner.AddToClassList("record-card-inner");
+
+        // Watermark
+        if (_recordIcon != null)
+        {
+            var watermark = new VisualElement();
+            watermark.AddToClassList("record-card-watermark");
+            watermark.style.backgroundImage = new StyleBackground(_recordIcon);
+            inner.Add(watermark);
+        }
+
+        // Head: badge + titles
+        var head = new VisualElement();
+        head.AddToClassList("record-card-head");
+
+        var badge = new VisualElement();
+        badge.AddToClassList("record-card-badge");
+        _statIcons.TryGetValue(statType, out var statIcon);
+        if (statIcon != null)
+        {
+            var badgeImg = new VisualElement();
+            badgeImg.AddToClassList("record-card-badge-img");
+            badgeImg.style.backgroundImage = new StyleBackground(statIcon);
+            badge.Add(badgeImg);
+        }
+        head.Add(badge);
+
+        var headText = new VisualElement();
+        headText.AddToClassList("record-card-head-text");
+
+        var title = new Label();
+        title.AddToClassList("record-card-title");
+        title.text = StatLabels.TryGetValue(statType, out var label) ? label : statType;
+        headText.Add(title);
+
+        var subtitle = new Label();
+        subtitle.AddToClassList("record-card-subtitle");
+        subtitle.text = StatSubtitles.TryGetValue(statType, out var sub) ? sub : "";
+        headText.Add(subtitle);
+
+        head.Add(headText);
+        inner.Add(head);
+
+        // Body: value + info
+        var body = new VisualElement();
+        body.AddToClassList("record-card-body");
 
         var valLbl = new Label();
-        valLbl.AddToClassList("record-value");
+        valLbl.AddToClassList("record-card-value");
         valLbl.text = value;
-        row.Add(valLbl);
+        body.Add(valLbl);
+
+        var info = new VisualElement();
+        info.AddToClassList("record-card-info");
 
         var playerLbl = new Label();
-        playerLbl.AddToClassList("record-player");
+        playerLbl.AddToClassList("record-card-player");
         playerLbl.text = playerName;
-        row.Add(playerLbl);
+        info.Add(playerLbl);
 
+        // Team row
+        var teamRow = new VisualElement();
+        teamRow.AddToClassList("record-card-team-row");
+
+        var teamLogo = new VisualElement();
+        teamLogo.AddToClassList("record-card-team-logo");
+        string logoName = team?.logo ?? _myTeam?.logo;
+        if (!string.IsNullOrEmpty(logoName) && _logoSprites.TryGetValue(logoName, out var logoSprite))
+            teamLogo.style.backgroundImage = new StyleBackground(logoSprite);
+        teamRow.Add(teamLogo);
+
+        var teamName = new Label();
+        teamName.AddToClassList("record-card-team-name");
+        teamName.text = team?.name ?? _myTeam?.name ?? "";
+        teamRow.Add(teamName);
+        info.Add(teamRow);
+
+        // Date row
+        var dateRow = new VisualElement();
+        dateRow.AddToClassList("record-card-date-row");
+
+        if (_calendarSprite != null)
         {
-            var teamLbl = new Label();
-            teamLbl.AddToClassList("record-team");
-            teamLbl.text = team?.name ?? _myTeam?.name ?? "";
-            row.Add(teamLbl);
+            var calIcon = new VisualElement();
+            calIcon.AddToClassList("record-card-date-icon");
+            calIcon.style.backgroundImage = new StyleBackground(_calendarSprite);
+            dateRow.Add(calIcon);
         }
 
         var dateLbl = new Label();
-        dateLbl.AddToClassList("record-date");
+        dateLbl.AddToClassList("record-card-date");
         try
         {
             var dt = System.DateTime.Parse(gameDate);
@@ -233,9 +354,14 @@ using System.Linq;
         {
             dateLbl.text = gameDate;
         }
-        row.Add(dateLbl);
+        dateRow.Add(dateLbl);
+        info.Add(dateRow);
 
-        return row;
+        body.Add(info);
+        inner.Add(body);
+
+        card.Add(inner);
+        return card;
     }
 
     void ShowEmpty(string message)

@@ -1989,8 +1989,11 @@ using System.Threading.Tasks;
         var datesRow = new VisualElement();
         datesRow.AddToClassList("fastsim-modal-dates");
 
-        var dateIcon = new Label("📅");
+        var dateIcon = new VisualElement();
         dateIcon.AddToClassList("fastsim-modal-dates-icon");
+        var dateIconTex = Resources.Load<Texture2D>("Icons/calendario");
+        if (dateIconTex != null)
+            dateIcon.style.backgroundImage = new StyleBackground(dateIconTex);
         datesRow.Add(dateIcon);
 
         string fmtStart = FormatDateShort(startDate);
