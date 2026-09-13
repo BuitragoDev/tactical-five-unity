@@ -1157,26 +1157,26 @@ public partial class DatabaseManager
     {
         var sponsors = new List<SponsorData>
         {
-            new SponsorData { name = "Apple",             logo = "Patrocinadores/1.png", initial_income = 128000000, home_game_income = 850000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Beats",             logo = "Patrocinadores/2.png",  initial_income = 118000000, home_game_income = 550000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Billboard",         logo = "Patrocinadores/3.png",  initial_income = 121000000, home_game_income = 620000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "BMW",               logo = "Patrocinadores/4.png",  initial_income = 122000000, home_game_income = 650000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Bridgestone",       logo = "Patrocinadores/5.png", initial_income = 118000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Domino's Pizza",    logo = "Patrocinadores/6.png",  initial_income = 120000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "MasterCard",        logo = "Patrocinadores/7.png",  initial_income = 115000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Etihad Airways",    logo = "Patrocinadores/8.png",  initial_income = 116000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Good Year",         logo = "Patrocinadores/9.png", initial_income = 114000000, home_game_income = 420000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Zoom",              logo = "Patrocinadores/10.png", initial_income = 119000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Unicef",            logo = "Patrocinadores/11.png", initial_income = 114500000, home_game_income = 430000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Razer",             logo = "Patrocinadores/12.png", initial_income = 114500000, home_game_income = 430000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Starbucks",         logo = "Patrocinadores/13.png",  initial_income = 117000000, home_game_income = 500000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Lenovo",            logo = "Patrocinadores/14.png", initial_income = 118000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Airbnb",            logo = "Patrocinadores/15.png", initial_income = 113000000, home_game_income = 390000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "McDonald's",        logo = "Patrocinadores/16.png",  initial_income = 115000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Nvidia",            logo = "Patrocinadores/17.png", initial_income = 124000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Qatar Airways",     logo = "Patrocinadores/18.png", initial_income = 116000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "SONY",              logo = "Patrocinadores/19.png", initial_income = 126000000, home_game_income = 780000, contract_years = 1, is_active = 0, team_id = 0 },
-            new SponsorData { name = "Netflix",           logo = "Patrocinadores/20.png",  initial_income = 124000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Apple",             logo = "Patrocinadores/1.png",  initial_income = 28000000, home_game_income = 850000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Beats",             logo = "Patrocinadores/2.png",  initial_income = 18000000, home_game_income = 550000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Billboard",         logo = "Patrocinadores/3.png",  initial_income = 21000000, home_game_income = 620000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "BMW",               logo = "Patrocinadores/4.png",  initial_income = 22000000, home_game_income = 650000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Bridgestone",       logo = "Patrocinadores/5.png",  initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Domino's Pizza",    logo = "Patrocinadores/6.png",  initial_income = 20000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "MasterCard",        logo = "Patrocinadores/7.png",  initial_income = 15000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Etihad Airways",    logo = "Patrocinadores/8.png",  initial_income = 16000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Good Year",         logo = "Patrocinadores/9.png",  initial_income = 14000000, home_game_income = 420000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Zoom",              logo = "Patrocinadores/10.png", initial_income = 19000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Unicef",            logo = "Patrocinadores/11.png", initial_income = 14500000, home_game_income = 430000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Razer",             logo = "Patrocinadores/12.png", initial_income = 14500000, home_game_income = 430000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Starbucks",         logo = "Patrocinadores/13.png", initial_income = 17000000, home_game_income = 500000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Lenovo",            logo = "Patrocinadores/14.png", initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Airbnb",            logo = "Patrocinadores/15.png", initial_income = 13000000, home_game_income = 390000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "McDonald's",        logo = "Patrocinadores/16.png", initial_income = 15000000, home_game_income = 450000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Nvidia",            logo = "Patrocinadores/17.png", initial_income = 24000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Qatar Airways",     logo = "Patrocinadores/18.png", initial_income = 16000000, home_game_income = 480000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "SONY",              logo = "Patrocinadores/19.png", initial_income = 26000000, home_game_income = 780000, contract_years = 1, is_active = 0, team_id = 0 },
+            new SponsorData { name = "Netflix",           logo = "Patrocinadores/20.png", initial_income = 24000000, home_game_income = 720000, contract_years = 1, is_active = 0, team_id = 0 },
         };
 
         foreach (var s in sponsors)
@@ -1202,16 +1202,16 @@ public partial class DatabaseManager
     {
         var channels = new List<TvChannelData>
         {
-            new TvChannelData { name = "DAZN",      logo = "Televisiones/1.png",   initial_income = 122000000, home_game_income = 650000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2500000, viewership_multiplier = 1.8f },
-            new TvChannelData { name = "TV5",       logo = "Televisiones/2.png",   initial_income = 118000000, home_game_income = 550000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 1200000, viewership_multiplier = 1.2f },
-            new TvChannelData { name = "FOX",       logo = "Televisiones/3.png",  initial_income = 118000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2200000, viewership_multiplier = 1.6f },
-            new TvChannelData { name = "Movistar",  logo = "Televisiones/4.png",   initial_income = 117000000, home_game_income = 500000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2200000, viewership_multiplier = 1.6f },
-            new TvChannelData { name = "NBC",       logo = "Televisiones/5.png",   initial_income = 121000000, home_game_income = 620000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2600000, viewership_multiplier = 1.8f },
-            new TvChannelData { name = "CBS",       logo = "Televisiones/6.png",   initial_income = 120000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2500000, viewership_multiplier = 1.8f },
-            new TvChannelData { name = "ESPN",      logo = "Televisiones/7.png",  initial_income = 126000000, home_game_income = 780000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 3000000, viewership_multiplier = 2.0f },
-            new TvChannelData { name = "Sky",       logo = "Televisiones/8.png",   initial_income = 118000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2300000, viewership_multiplier = 1.7f },
-            new TvChannelData { name = "ITV",       logo = "Televisiones/9.png",  initial_income = 114000000, home_game_income = 420000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2000000, viewership_multiplier = 1.5f },
-            new TvChannelData { name = "Hulu",      logo = "Televisiones/10.png",  initial_income = 119000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2100000, viewership_multiplier = 1.5f }
+            new TvChannelData { name = "DAZN",      logo = "Televisiones/1.png",   initial_income = 22000000, home_game_income = 650000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2500000, viewership_multiplier = 1.8f },
+            new TvChannelData { name = "TV5",       logo = "Televisiones/2.png",   initial_income = 18000000, home_game_income = 550000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 1200000, viewership_multiplier = 1.2f },
+            new TvChannelData { name = "FOX",       logo = "Televisiones/3.png",   initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2200000, viewership_multiplier = 1.6f },
+            new TvChannelData { name = "Movistar",  logo = "Televisiones/4.png",   initial_income = 17000000, home_game_income = 500000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2200000, viewership_multiplier = 1.6f },
+            new TvChannelData { name = "NBC",       logo = "Televisiones/5.png",   initial_income = 21000000, home_game_income = 620000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2600000, viewership_multiplier = 1.8f },
+            new TvChannelData { name = "CBS",       logo = "Televisiones/6.png",   initial_income = 20000000, home_game_income = 600000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2500000, viewership_multiplier = 1.8f },
+            new TvChannelData { name = "ESPN",      logo = "Televisiones/7.png",   initial_income = 26000000, home_game_income = 780000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 3000000, viewership_multiplier = 2.0f },
+            new TvChannelData { name = "Sky",       logo = "Televisiones/8.png",   initial_income = 18000000, home_game_income = 540000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2300000, viewership_multiplier = 1.7f },
+            new TvChannelData { name = "ITV",       logo = "Televisiones/9.png",   initial_income = 14000000, home_game_income = 420000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2000000, viewership_multiplier = 1.5f },
+            new TvChannelData { name = "Hulu",      logo = "Televisiones/10.png",  initial_income = 19000000, home_game_income = 570000, contract_years = 1, is_active = 0, team_id = 0, broadcast_fee = 2100000, viewership_multiplier = 1.5f }
         };
 
         foreach (var c in channels)
