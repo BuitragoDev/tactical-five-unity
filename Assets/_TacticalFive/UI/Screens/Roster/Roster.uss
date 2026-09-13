@@ -93,9 +93,9 @@
     flex-direction: row;
     align-items: center;
     padding: 8px 12px;
-    background-color: rgb(17, 24, 34);
+    background-color: rgba(120, 95, 30, 0.15);
     border-left-width: 3px;
-    border-left-color: rgb(42, 95, 201);
+    border-left-color: rgb(120, 95, 30);
     border-top-width: 0;
     border-bottom-width: 0;
     border-right-width: 0;
@@ -117,18 +117,18 @@
     font-size: 16px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
-    background-color: rgb(42, 95, 201);
+    background-color: rgb(120, 95, 30);
     padding: 2px 8px;
     margin-right: 10px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
 }
 .pos-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: rgb(122, 138, 170);
+    color: rgb(212, 160, 23);
 }
 
 /* Fila de jugador */

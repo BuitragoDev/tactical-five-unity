@@ -50,7 +50,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
+    padding: 0px 14px;
     background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
@@ -75,14 +75,14 @@
 
 .dorsales-panel-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 24px;
     letter-spacing: 2px;
     color: rgb(212, 160, 23);
 }
 
 .dorsales-panel-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(255, 255, 255);
     margin-top: 2px;
 }
@@ -94,7 +94,7 @@
 
 .dorsales-panel-count-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
 }

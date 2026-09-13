@@ -13,27 +13,73 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="results-main">
 
-            <!-- TOP HEADER -->
-
-            <!-- RESULTS CONTENT -->
-            <ui:ScrollView name="ResultsContent" class="results-content"
-                           horizontal-scrolling-enabled="false"
-                           mode="Vertical">
-
-                <!-- Date navigator -->
-                <ui:VisualElement class="results-date-nav">
-                    <ui:Button name="BtnPrevDate" class="results-nav-btn" text="◀" />
-                    <ui:Label name="CurrentDateLabel" class="results-date-display" text="" />
-                    <ui:Button name="BtnNextDate" class="results-nav-btn" text="▶" />
+            <!-- PAGE HEADER -->
+            <ui:VisualElement class="results-header">
+                <ui:VisualElement class="results-header-left">
+                    <ui:VisualElement name="ResultsHeaderIcon" class="results-header-icon" />
+                    <ui:VisualElement class="results-header-text">
+                        <ui:Label class="results-title" text="RESULTADOS" />
+                        <ui:Label class="results-subtitle" text="TODOS LOS PARTIDOS DE LA TEMPORADA" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
+                <ui:Button name="BtnHoy" class="results-today-btn" text="Hoy" />
+            </ui:VisualElement>
 
-                <!-- Results list -->
-                <ui:VisualElement name="ResultsBody" class="results-body" />
+            <!-- DATE NAVIGATOR -->
+            <ui:VisualElement class="results-date-nav">
+                <ui:Button name="BtnPrevDate" class="results-nav-btn" text="◀" />
+                <ui:VisualElement class="results-date-center">
+                    <ui:VisualElement name="ResultsDateIcon" class="results-date-icon" />
+                    <ui:Label name="CurrentDateLabel" class="results-date-display" text="" />
+                </ui:VisualElement>
+                <ui:Button name="BtnNextDate" class="results-nav-btn" text="▶" />
+            </ui:VisualElement>
 
-            </ui:ScrollView>
+            <!-- RESULTS GRID (scrollable) -->
+            <ui:VisualElement name="ResultsContent" class="results-scroll">
+                <ui:VisualElement name="ResultsBody" class="results-grid" />
+            </ui:VisualElement>
+
+            <!-- GAMES PAGINATOR -->
+            <ui:VisualElement name="ResultsPaginator" class="results-paginator" />
 
         </ui:VisualElement>
 
+    </ui:VisualElement>
+
+    <!-- ══ MODAL DETALLES DE PARTIDO ══ -->
+    <ui:VisualElement name="MatchModalOverlay" class="match-modal-overlay">
+        <ui:VisualElement name="MatchModalBox" class="match-modal-box">
+
+            <!-- HEADER -->
+            <ui:VisualElement class="match-modal-header">
+                <ui:VisualElement class="match-modal-header-text">
+                    <ui:Label name="MatchModalSubtitle" class="match-modal-subtitle" text="" />
+                    <ui:Label name="MatchModalTitle" class="match-modal-title" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- ARENA -->
+            <ui:VisualElement class="match-modal-arena">
+                <ui:VisualElement name="MatchArenaImage" class="match-modal-arena-image" />
+                <ui:VisualElement class="match-modal-arena-info">
+                    <ui:Label name="MatchArenaName" class="match-modal-arena-name" text="" />
+                    <ui:Label name="MatchArenaAttendance" class="match-modal-arena-attendance" text="" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <!-- TEAMS (lado a lado) -->
+            <ui:VisualElement class="match-modal-teams">
+                <ui:VisualElement name="MatchHomeCol" class="match-modal-team-col" />
+                <ui:VisualElement name="MatchAwayCol" class="match-modal-team-col" />
+            </ui:VisualElement>
+
+            <!-- FOOTER -->
+            <ui:VisualElement class="match-modal-actions">
+                <ui:Button name="BtnMatchCloseFooter" class="match-modal-btn" text="CERRAR" />
+            </ui:VisualElement>
+
+        </ui:VisualElement>
     </ui:VisualElement>
 
         <!-- ══ MODAL CONFIGURACIÓN ══ -->
