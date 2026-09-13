@@ -114,38 +114,44 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 10px;
     width: 100%;
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 150, 230);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 22px;
     font-weight: 600;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    padding: 14px;
-    border-radius: 6px;
+    padding: 14px 20px;
+    border-radius: 8px;
     cursor: pointer;
     flex-shrink: 0;
     margin-top: 12px;
 }
 
 .market-btn-negotiate:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    border-color: rgb(74, 128, 240);
+    color: rgb(150, 190, 255);
 }
 
 .market-btn-negotiate-icon {
-    font-size: 20px;
+    display: none;
 }
 
 .market-btn-negotiate-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(255, 255, 255);
+    color: rgb(100, 150, 230);
+}
+
+.market-btn-negotiate:hover .market-btn-negotiate-text {
+    color: rgb(150, 190, 255);
 }
 
 /* ── TRADE PANELS ── */
@@ -644,48 +650,54 @@
 }
 
 .market-btn-fa-sign {
-    background-color: rgb(39, 174, 96);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 1px;
     -unity-text-transform: upper;
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 8px 14px;
+    border-radius: 6px;
     cursor: pointer;
     min-height: 24px;
 }
 
 .market-btn-fa-sign:hover {
-    background-color: rgb(46, 204, 113);
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
 }
 
 .market-btn-fa-sign:disabled {
-    background-color: rgb(100, 100, 100);
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(120, 130, 150);
     cursor: default;
-    opacity: 0.85;
+    opacity: 0.7;
 }
 
 .market-btn-fa-profile {
-    background-color: rgb(39, 84, 148);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 150, 230);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: 1px;
     -unity-text-transform: upper;
-    padding: 8px 12px;
-    border-radius: 4px;
+    padding: 8px 14px;
+    border-radius: 6px;
     cursor: pointer;
     min-height: 24px;
     margin-left: 6px;
 }
 
 .market-btn-fa-profile:hover {
-    background-color: rgb(52, 112, 192);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 
 .market-empty-fa {

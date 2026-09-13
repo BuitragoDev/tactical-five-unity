@@ -126,30 +126,35 @@
     font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(22, 26, 36);
-    background-color: rgb(248, 196, 64);
-    border-width: 0;
-    border-radius: 4px;
-    padding: 12px 0;
+    color: rgb(100, 200, 140);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 8px;
+    padding: 12px 20px;
     width: 100%;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .sponsor-card-btn:hover {
-    background-color: rgb(255, 210, 80);
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
 }
 
 .sponsor-card-btn:active {
-    background-color: rgb(230, 175, 50);
+    background-color: rgba(39, 174, 96, 0.35);
 }
 
 .sponsor-card-btn--disabled {
-    background-color: rgb(60, 60, 60);
-    color: rgb(120, 120, 120);
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(120, 130, 150);
 }
 
 .sponsor-card-btn--disabled:hover {
-    background-color: rgb(60, 60, 60);
+    background-color: rgba(100, 110, 130, 0.10);
+    color: rgb(120, 130, 150);
 }
 
 /* ── Info Message ── */

@@ -6,17 +6,6 @@ using System.Linq;
 {
     protected override GameScreen ScreenId => GameScreen.Loans;
 
-    // Header
-    private VisualElement _headerTeamLogo;
-    private Label _headerTeamName;
-    private Label _headerManagerName;
-    private Label _headerBudget;
-    private Label _headerPayroll;
-    private Label _headerMargin;
-    private Label _headerChemistry;
-    private Label _headerSeason;
-    private Label _headerDate;
-
     // Financial staff
     private VisualElement _finStaffBody;
 
@@ -33,7 +22,7 @@ using System.Linq;
     private Dictionary<string, Sprite> _logoSprites = new();
     private Texture2D _starTex;
     private StyleBackground _starBg;
-    private StyleBackground _empleadoBg;
+    private StyleBackground _avatarBg;
     private float _currentRate;
     private const long MIN_AMOUNT = 500_000;
     private const long MAX_AMOUNT = 50_000_000;
@@ -42,16 +31,6 @@ using System.Linq;
     private const int MAX_MONTHS = 24;
     protected override void CacheReferences()
     {
-        _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
-        _headerTeamName = _root.Q<Label>("HeaderTeamName");
-        _headerManagerName = _root.Q<Label>("HeaderManagerName");
-        _headerBudget = _root.Q<Label>("HeaderBudget");
-        _headerPayroll = _root.Q<Label>("HeaderPayroll");
-        _headerMargin = _root.Q<Label>("HeaderMargin");
-        _headerChemistry = _root.Q<Label>("HeaderChemistry");
-        _headerSeason = _root.Q<Label>("HeaderSeason");
-        _headerDate = _root.Q<Label>("HeaderDate");
-
         _finStaffBody = _root.Q<VisualElement>("FinStaffBody");
         _loansContainer = _root.Q<VisualElement>("LoansContainer");
     }
@@ -65,7 +44,7 @@ using System.Linq;
         _starTex = Resources.Load<Texture2D>("Icons/star_24px");
         if (_starTex != null)
             _starBg = new StyleBackground(_starTex);
-        _empleadoBg = new StyleBackground(Resources.Load<Texture2D>("Icons/empleado"));
+        _avatarBg = new StyleBackground(Resources.Load<Texture2D>("Icons/avatar"));
 
         
         
@@ -105,45 +84,57 @@ using System.Linq;
     protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
-        if (_headerTeamName == null) return;
+
+        // El header se inyecta en runtime por HeaderController.Attach (en RegisterCallbacks),
+        // por lo que hay que resolver sus elementos en cada refresh en lugar de cachearlos.
+        var headerTeamLogo    = _root.Q<VisualElement>("HeaderTeamLogo");
+        var headerTeamName    = _root.Q<Label>("HeaderTeamName");
+        var headerManagerName = _root.Q<Label>("HeaderManagerName");
+        var headerBudget      = _root.Q<Label>("HeaderBudget");
+        var headerPayroll     = _root.Q<Label>("HeaderPayroll");
+        var headerMargin      = _root.Q<Label>("HeaderMargin");
+        var headerChemistry   = _root.Q<Label>("HeaderChemistry");
+        var headerSeason      = _root.Q<Label>("HeaderSeason");
+        var headerDate        = _root.Q<Label>("HeaderDate");
+        if (headerBudget == null) return;
 
         if (_logoSprites.TryGetValue(_myTeam.logo, out var sprite))
-            _headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
+            headerTeamLogo.style.backgroundImage = new StyleBackground(sprite);
 
-        _headerTeamName.text = _myTeam.name.ToUpper();
-        _headerManagerName.text = $"Manager: {_manager.name}";
+        headerTeamName.text = _myTeam.name.ToUpper();
+        headerManagerName.text = $"Manager: {_manager.name}";
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         long totalPayroll = players.Sum(p => p.salary);
 
-        _headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
-        _headerBudget.style.color = _myTeam.budget < 0
+        headerBudget.text = $"${_myTeam.budget / 1_000_000}M";
+        headerBudget.style.color = _myTeam.budget < 0
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
-        _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
+        headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         long margin = salaryCap - totalPayroll;
         string marginText = margin >= 0 ? $"+${margin / 1_000_000}M" : $"-${Mathf.Abs((int)(margin / 1_000_000))}M";
-        _headerMargin.text = marginText;
+        headerMargin.text = marginText;
 
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        _headerChemistry.text = $"{chemistry}%";
-        _headerChemistry.RemoveFromClassList("header-stat-value--gold");
-        _headerChemistry.RemoveFromClassList("header-stat-value--negative");
+        headerChemistry.text = $"{chemistry}%";
+        headerChemistry.RemoveFromClassList("header-stat-value--gold");
+        headerChemistry.RemoveFromClassList("header-stat-value--negative");
         if (chemistry < 40)
-            _headerChemistry.AddToClassList("header-stat-value--negative");
+            headerChemistry.AddToClassList("header-stat-value--negative");
         else if (chemistry < 70)
-            _headerChemistry.AddToClassList("header-stat-value--gold");
+            headerChemistry.AddToClassList("header-stat-value--gold");
 
-        _headerMargin.RemoveFromClassList("header-stat-value--negative");
-        if (margin < 0) _headerMargin.AddToClassList("header-stat-value--negative");
+        headerMargin.RemoveFromClassList("header-stat-value--negative");
+        if (margin < 0) headerMargin.AddToClassList("header-stat-value--negative");
 
         if (_season != null)
         {
-            _headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
-            _headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
+            headerSeason.text = $"Temporada {_season.year_start}-{_season.year_end}";
+            headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
         _btnAction.text = "MENÚ PRINCIPAL";
@@ -160,7 +151,7 @@ using System.Linq;
 
             var icon = new VisualElement();
             icon.AddToClassList("fin-staff-icon");
-            icon.style.backgroundImage = _empleadoBg;
+            icon.style.backgroundImage = _avatarBg;
             card.Add(icon);
 
             var info = new VisualElement();
