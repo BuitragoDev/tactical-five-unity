@@ -2829,10 +2829,6 @@ using System.Threading.Tasks;
         box.AddToClassList("fired-modal-box");
         _firedOverlay.Add(box);
 
-        var icon = new VisualElement();
-        icon.AddToClassList("fired-modal-icon");
-        box.Add(icon);
-
         var title = new Label("DESPIDO");
         title.AddToClassList("fired-modal-title");
         box.Add(title);
@@ -4057,10 +4053,6 @@ using System.Threading.Tasks;
         box.AddToClassList("fired-modal-box");
         _firedOverlay.Add(box);
 
-        var icon = new VisualElement();
-        icon.AddToClassList("fired-modal-icon");
-        box.Add(icon);
-
         var title = new Label("DESPIDO");
         title.AddToClassList("fired-modal-title");
         box.Add(title);
@@ -4091,10 +4083,6 @@ using System.Threading.Tasks;
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box");
         _firedOverlay.Add(box);
-
-        var icon = new VisualElement();
-        icon.AddToClassList("fired-modal-icon");
-        box.Add(icon);
 
         var title = new Label("DESPIDO");
         title.AddToClassList("fired-modal-title");
