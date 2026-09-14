@@ -168,6 +168,7 @@ public class PreseasonController : UIScreenController
 
     void RefreshSlots()
     {
+        if (CursorManager.Instance != null) CursorManager.Instance.SetDefaultCursor();
         _slotsRow.Clear();
 
         for (int i = 0; i < MAX_GAMES; i++)
