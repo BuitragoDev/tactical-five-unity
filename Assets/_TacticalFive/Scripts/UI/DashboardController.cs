@@ -1917,6 +1917,19 @@ using System.Threading.Tasks;
             }
             _fastSimAutoFixAttempts = 0;
 
+            // ── Aviso financiero / despido durante FastSim ──
+            if (GameResultCache.PendingBudgetWarning)
+            {
+                _fastSimRunning = false;
+                SetSidebarNavigationEnabled(true);
+                CheckBudgetWarning();
+                yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
+                if (_season == null) yield break;
+                _fastSimRunning = true;
+                SetSidebarNavigationEnabled(false);
+                SetActionBtn("DETENER SIMULACIÓN", "");
+            }
+
             // Refrescar cabecera (fecha) y paneles del Dashboard tras cada día
             _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
             _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
