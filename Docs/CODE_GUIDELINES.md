@@ -163,6 +163,70 @@ Para paneles con cabecera estilo dorado/marrón:
 }
 ```
 
+### Screen title panel (tipo Roster)
+
+Para la cabecera principal de una pantalla, usar un panel de ancho completo con
+borde dorado, fondo marrón translúcido, icono a la izquierda, título blanco y
+subtítulo dorado. El patrón actual de Roster es:
+
+```xml
+<ui:VisualElement class="screen-header panel--gold">
+    <ui:VisualElement class="screen-header-row">
+        <ui:VisualElement name="ScreenIcon" class="screen-icon" />
+        <ui:Label class="screen-title" text="JUGADORES" />
+    </ui:VisualElement>
+    <ui:Label class="screen-subtitle" text="" />
+</ui:VisualElement>
+```
+
+```css
+.screen-header.panel--gold {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 16px 20px 12px 20px;
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(120, 95, 30, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.screen-header-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+}
+.screen-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.screen-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: rgb(255, 255, 255);
+}
+.screen-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    padding: 0 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+}
+```
+
+Reglas del patrón:
+- El selector combinado `.screen-header.panel--gold` debe ser más específico que el `.panel--gold` compartido para conservar el borde dorado cuando el USS de Dashboard se carga después.
+- No añadir `border-top` o `border-bottom` adicionales al `screen-header-row` o al subtítulo: el panel exterior debe tener un único borde dorado.
+- Cargar el icono desde `Resources` en `LoadData`, por ejemplo `Resources.Load<Texture2D>("Icons/plantilla_icon")`, y asignarlo a `style.backgroundImage`.
+- Mantener márgenes `16px 20px 12px 20px` para alinear la cabecera con los paneles de contenido.
+
 ## 3. How to add a new UI screen
 
 1. **UXML:** create `UI/Screens/MyScreen/MyScreen.uxml` (root element, ids for dynamic parts, `<Style src=...>` pointing at your USS + shared styles).
