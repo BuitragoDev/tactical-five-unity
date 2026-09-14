@@ -295,33 +295,33 @@
     -unity-text-align: middle-center;
 }
 
-.lineup-col--right-panel .load-mgmt-btn--on {
+.load-mgmt-btn--on {
     background-color: rgba(39, 174, 96, 0.10);
     border-color: rgb(39, 174, 96);
     color: rgb(100, 210, 140);
     margin-right: 6px;
 }
 
-.lineup-col--right-panel .load-mgmt-btn--on:hover {
+.load-mgmt-btn--on:hover {
     background-color: rgba(39, 174, 96, 0.25);
 }
 
-.lineup-col--right-panel .load-mgmt-btn--off {
+.load-mgmt-btn--off {
     background-color: rgba(42, 95, 201, 0.10);
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
     margin-left: 6px;
 }
 
-.lineup-col--right-panel .load-mgmt-btn--off:hover {
+.load-mgmt-btn--off:hover {
     background-color: rgba(42, 95, 201, 0.25);
 }
 
-.lineup-col--right-panel .load-mgmt-btn--on.load-mgmt-btn--active {
+.load-mgmt-btn--on.load-mgmt-btn--active {
     border-color: rgb(212, 160, 23);
 }
 
-.lineup-col--right-panel .load-mgmt-btn--off.load-mgmt-btn--active {
+.load-mgmt-btn--off.load-mgmt-btn--active {
     border-color: rgb(212, 160, 23);
 }
 

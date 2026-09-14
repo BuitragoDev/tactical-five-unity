@@ -61,7 +61,7 @@
 
                     </ui:VisualElement>
 
-                    <!-- Column 2: Bench only -->
+                    <!-- Column 2: Bench + Load Management -->
                     <ui:VisualElement class="lineup-col lineup-col--mid">
 
                         <!-- ══ BANQUILLO ══ -->
@@ -73,9 +73,15 @@
                             <ui:VisualElement name="BenchList" class="lineup-section-body lineup-section-body--drop" />
                         </ui:VisualElement>
 
+                        <!-- ══ LOAD MANAGEMENT ══ -->
+                        <ui:VisualElement class="load-mgmt-row">
+                            <ui:Button name="LoadMgmtBtnOn" class="load-mgmt-btn load-mgmt-btn--on" text="GESTIONAR DESCANSOS" />
+                            <ui:Button name="LoadMgmtBtnOff" class="load-mgmt-btn load-mgmt-btn--off" text="NO GESTIONAR DESCANSOS" />
+                        </ui:VisualElement>
+
                     </ui:VisualElement>
 
-                    <!-- Right panel: NO CONVOCADOS + load mgmt + detail -->
+                    <!-- Right panel: NO CONVOCADOS + detail -->
                     <ui:VisualElement class="lineup-col lineup-col--right-panel">
 
                         <!-- ══ NO CONVOCADOS ══ -->
@@ -85,12 +91,6 @@
                                 <ui:Label class="lineup-section-subtitle" text="6 JUGADORES NO SELECCIONADOS" />
                             </ui:VisualElement>
                             <ui:VisualElement name="InactiveList" class="lineup-section-body lineup-section-body--drop" />
-                        </ui:VisualElement>
-
-                        <!-- ══ LOAD MANAGEMENT ══ -->
-                        <ui:VisualElement class="load-mgmt-row">
-                            <ui:Button name="LoadMgmtBtnOn" class="load-mgmt-btn load-mgmt-btn--on" text="GESTIONAR DESCANSOS" />
-                            <ui:Button name="LoadMgmtBtnOff" class="load-mgmt-btn load-mgmt-btn--off" text="NO GESTIONAR DESCANSOS" />
                         </ui:VisualElement>
 
                         <!-- ══ DETAIL PANEL ══ -->
