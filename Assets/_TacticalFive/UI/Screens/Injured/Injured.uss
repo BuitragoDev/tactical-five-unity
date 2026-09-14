@@ -49,6 +49,8 @@
     font-size: 32px;
     letter-spacing: 3px;
     color: rgb(255, 255, 255);
+    flex-grow: 1;
+    white-space: normal;
 }
 .screen-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");

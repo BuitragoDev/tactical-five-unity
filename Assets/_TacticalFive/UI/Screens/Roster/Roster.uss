@@ -52,6 +52,8 @@
     letter-spacing: 3px;
     text-transform: uppercase;
     color: rgb(255, 255, 255);
+    flex-grow: 1;
+    white-space: normal;
 }
 .roster-screen-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
