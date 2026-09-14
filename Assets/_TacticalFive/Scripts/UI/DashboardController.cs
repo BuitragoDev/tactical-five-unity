@@ -2772,10 +2772,6 @@ using System.Threading.Tasks;
         box.AddToClassList("fired-modal-box--warning");
         _firedOverlay.Add(box);
 
-        var icon = new VisualElement();
-        icon.AddToClassList("fired-modal-icon");
-        box.Add(icon);
-
         var title = new Label("AVISO FINANCIERO");
         title.AddToClassList("fired-modal-title");
         title.AddToClassList("fired-modal-title--warning");
@@ -2790,7 +2786,7 @@ using System.Threading.Tasks;
 
         var btn = new Button();
         btn.text = "CONTINUAR";
-        btn.AddToClassList("fired-modal-btn");
+        btn.AddToClassList("fired-modal-btn--warning");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
