@@ -671,7 +671,9 @@
     padding: 0 14px;
     background-color: rgb(20, 28, 48);
     flex-shrink: 0;
-    width: 100%;
+    width: auto;
+    align-self: stretch;
+    margin: 0 12px;
     height: 32px;
     align-items: center;
 }
@@ -719,6 +721,7 @@
     height: 380px;
     flex-shrink: 0;
     overflow: hidden;
+    padding: 0 12px;
 }
 .league-injured-scroll {
     width: 100%;
@@ -804,4 +807,31 @@
 
 .btn-hire:hover {
     background-color: rgba(42, 95, 201, 0.25);
+}
+
+/* ── LEAGUE INJURED MODAL — modern gold border ── */
+#LeagueInjuredBox {
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+}
+#LeagueInjuredBox .modal-title {
+    padding: 20px 24px 16px;
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
+}
+#BtnLeagueInjuredClose {
+    margin: 16px 24px 20px;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 160, 230);
+    border-radius: 8px;
+}
+#BtnLeagueInjuredClose:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(140, 190, 255);
 }
