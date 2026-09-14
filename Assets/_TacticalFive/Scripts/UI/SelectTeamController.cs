@@ -143,11 +143,6 @@ public class SelectTeamController : UIScreenController
 
         _btnShowSquad?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowSquadModal(); });
         _btnCloseSquad?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseSquadModal(); });
-        _squadModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _squadModalOverlay)
-            { PlayClick(); CloseSquadModal(); }
-        });
 
         // Listener del nombre del manager
         _managerInput?.RegisterValueChangedCallback(_ => ValidateContinue());
