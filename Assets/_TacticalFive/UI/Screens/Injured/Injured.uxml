@@ -13,6 +13,15 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="injured-main">
 
+            <!-- ══ SCREEN HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="ScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="GESTIÓN DE JUGADORES LESIONADOS" />
+                </ui:VisualElement>
+                <ui:Label name="ScreenSubtitle" class="screen-subtitle" text="" />
+            </ui:VisualElement>
+
             <!-- TOP HEADER -->
 
             <!-- CONTENT -->
