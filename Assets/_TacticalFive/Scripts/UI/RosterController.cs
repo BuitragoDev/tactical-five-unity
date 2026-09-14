@@ -277,6 +277,15 @@ using System.Linq;
                 _renewIcon.style.backgroundImage = new StyleBackground(contractTex);
         }
 
+        // Icono PLANTILLA en cabecera de pantalla
+        var screenIcon = _root.Q<VisualElement>("RosterScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/plantilla_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
     }
     protected override void RegisterCallbacks()
