@@ -1922,7 +1922,7 @@ using System.Threading.Tasks;
             {
                 _fastSimRunning = false;
                 SetSidebarNavigationEnabled(true);
-                CheckBudgetWarning();
+                CheckBudgetWarning(true);
                 yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
                 if (_season == null) yield break;
                 _fastSimRunning = true;
@@ -2145,7 +2145,7 @@ using System.Threading.Tasks;
             _myTeam.budget = team.budget;
     }
 
-    void CheckBudgetWarning()
+    void CheckBudgetWarning(bool fastSim = false)
     {
         if (!GameResultCache.PendingBudgetWarning) return;
         GameResultCache.PendingBudgetWarning = false;
@@ -2155,7 +2155,7 @@ using System.Threading.Tasks;
         if (_manager.budget_red_warnings >= threshold)
             ShowBudgetFiredModal();
         else
-            ShowBudgetWarningModal(_manager.budget_red_warnings);
+            ShowBudgetWarningModal(_manager.budget_red_warnings, fastSim);
     }
 
     void ProcessMaturedOffers()
@@ -2775,7 +2775,7 @@ using System.Threading.Tasks;
         }
     }
 
-    void ShowBudgetWarningModal(int num)
+    void ShowBudgetWarningModal(int num, bool fastSim = false)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
@@ -2798,13 +2798,24 @@ using System.Threading.Tasks;
         box.Add(text);
 
         var btn = new Button();
-        btn.text = "CONTINUAR";
+        btn.text = fastSim ? "IR A FINANZAS" : "CERRAR";
         btn.AddToClassList("fired-modal-btn");
         btn.AddToClassList("fired-modal-btn--warning");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            _firedOverlay.style.display = DisplayStyle.None;
+            if (fastSim)
+            {
+                // Detener la simulación rápida y llevar al jugador a Finanzas.
+                _fastSimStopRequested = true;
+                HideLoading();
+                _firedOverlay.style.display = DisplayStyle.None;
+                ScreenManager.Instance.GoTo(GameScreen.Finances);
+            }
+            else
+            {
+                _firedOverlay.style.display = DisplayStyle.None;
+            }
         });
         box.Add(btn);
     }
