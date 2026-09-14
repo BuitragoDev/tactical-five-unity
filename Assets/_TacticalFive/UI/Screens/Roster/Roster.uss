@@ -20,46 +20,24 @@
     min-height: 0;
 }
 
-/* ── SUMMARY BAR ── */
-.summary-bar {
-    flex-direction: row;
-    flex-shrink: 0;
-    margin: 16px 20px 12px;
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    background-color: rgb(22, 26, 36);
-}
-.summary-item {
-    flex-grow: 1;
+/* ── SCREEN HEADER ── */
+.roster-screen-header {
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 8px;
-    border-right-width: 1px;
-    border-right-color: rgb(42, 51, 71);
-    border-top-width: 0;
-    border-bottom-width: 0;
-    border-left-width: 0;
+    flex-shrink: 0;
+    padding: 16px 20px 12px;
 }
-.summary-item-last {
-    border-right-width: 0;
-}
-.summary-value {
+.roster-screen-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 28px;
-    color: rgb(255, 255, 255);
-    -unity-text-align: middle-center;
-}
-.summary-value--gold {
+    font-size: 32px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     color: rgb(212, 160, 23);
 }
-.summary-label {
+.roster-screen-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: rgb(85, 102, 119);
-    -unity-text-align: middle-center;
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: rgb(122, 138, 170);
     margin-top: 2px;
 }
 
@@ -69,6 +47,50 @@
     flex-grow: 1;
     min-height: 0;
     margin: 0 20px 16px;
+}
+
+/* ── RIGHT COLUMN: stats + detail ── */
+.roster-right-col {
+    width: 460px;
+    flex-shrink: 0;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* ── STATS PANEL (2×2 grid) ── */
+.roster-stats-panel {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+}
+.roster-stats-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px;
+}
+.roster-stat-item {
+    width: 50%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 8px;
+}
+.roster-stat-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+.roster-stat-value--gold {
+    color: rgb(212, 160, 23);
+}
+.roster-stat-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgb(85, 102, 119);
+    -unity-text-align: middle-center;
+    margin-top: 2px;
 }
 
 /* ── LEFT: lista de jugadores ── */
@@ -323,8 +345,7 @@
 
 /* ── RIGHT: detalle jugador ── */
 .player-detail {
-    width: 460px;
-    flex-shrink: 0;
+    flex-grow: 1;
     flex-direction: column;
     background-color: rgb(17, 24, 34);
     border-width: 1px;

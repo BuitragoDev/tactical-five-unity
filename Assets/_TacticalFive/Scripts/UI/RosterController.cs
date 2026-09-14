@@ -20,6 +20,7 @@ using System.Linq;
     private Label _summaryPlayers;
     private Label _summaryOverall;
     private Label _summaryBudget;
+    private Label _rosterTeamName;
 
     // Roster list
     private VisualElement _rosterBody;
@@ -157,6 +158,7 @@ using System.Linq;
         _summaryPlayers = _root.Q<Label>("SummaryPlayers");
         _summaryOverall = _root.Q<Label>("SummaryOverall");
         _summaryBudget = _root.Q<Label>("SummaryBudget");
+        _rosterTeamName = _root.Q<Label>("RosterTeamName");
 
         // Roster
         _rosterBody = _root.Q<VisualElement>("RosterBody");
@@ -355,6 +357,8 @@ using System.Linq;
             logo.style.backgroundImage = new StyleBackground(sprite);
 
         teamName.text = _myTeam.name.ToUpper();
+        if (_rosterTeamName != null)
+            _rosterTeamName.text = _myTeam.name.ToUpper();
         managerName.text = $"Manager: {_manager.name}";
         budget.text = $"${_myTeam.budget / 1_000_000}M";
         budget.style.color = _myTeam.budget < 0

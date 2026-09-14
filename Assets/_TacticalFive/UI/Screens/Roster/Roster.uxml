@@ -14,24 +14,10 @@
         <ui:VisualElement class="roster-main">
 
             <!-- TOP HEADER (reutilizamos clases del dashboard) -->
-            <!-- SUMMARY BAR -->
-            <ui:VisualElement class="summary-bar">
-                <ui:VisualElement class="summary-item">
-                    <ui:Label name="SummaryPlayers" class="summary-value" text="0" />
-                    <ui:Label class="summary-label" text="JUGADORES" />
-                </ui:VisualElement>
-                <ui:VisualElement class="summary-item">
-                    <ui:Label name="SummaryOverall" class="summary-value summary-value--gold" text="0" />
-                    <ui:Label class="summary-label" text="MEDIA" />
-                </ui:VisualElement>
-                <ui:VisualElement class="summary-item summary-item-last">
-                    <ui:Label name="SummaryBudget" class="summary-value summary-value--gold" text="" />
-                    <ui:Label class="summary-label" text="MASA SALARIAL" />
-                </ui:VisualElement>
-                <ui:VisualElement class="summary-item">
-                    <ui:Label name="SummaryTwoWay" class="summary-value" text="Two-way: 0/2" />
-                    <ui:Label class="summary-label" text="CONTRATOS TWO-WAY" />
-                </ui:VisualElement>
+            <!-- SCREEN HEADER -->
+            <ui:VisualElement class="roster-screen-header">
+                <ui:Label text="PLANTILLA" class="roster-screen-title" />
+                <ui:Label name="RosterSubtitle" text="" class="roster-screen-subtitle" />
             </ui:VisualElement>
 
             <!-- CONTENT -->
@@ -46,108 +32,138 @@
                     </ui:ScrollView>
                 </ui:VisualElement>
 
-                <!-- RIGHT: detalle -->
-                <ui:VisualElement name="PlayerDetail" class="player-detail">
+                <!-- RIGHT: stats panel + detail -->
+                <ui:VisualElement class="roster-right-col">
 
-                    <!-- Placeholder -->
-                    <ui:VisualElement name="DetailEmpty" class="detail-empty">
-                        <ui:Label class="detail-empty-text"
-                                  text="SELECCIONA UN JUGADOR" />
+                    <!-- Panel de estadísticas del equipo (2×2) -->
+                    <ui:VisualElement class="roster-stats-panel panel--gold">
+                        <ui:VisualElement class="panel-header">
+                            <ui:Label name="RosterTeamName" class="panel-title" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="roster-stats-grid">
+                            <ui:VisualElement class="roster-stat-item">
+                                <ui:Label name="SummaryPlayers" class="roster-stat-value" text="0" />
+                                <ui:Label class="roster-stat-label" text="JUGADORES" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="roster-stat-item">
+                                <ui:Label name="SummaryOverall" class="roster-stat-value roster-stat-value--gold" text="0" />
+                                <ui:Label class="roster-stat-label" text="MEDIA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="roster-stat-item">
+                                <ui:Label name="SummaryBudget" class="roster-stat-value roster-stat-value--gold" text="" />
+                                <ui:Label class="roster-stat-label" text="MASA SALARIAL" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="roster-stat-item">
+                                <ui:Label name="SummaryTwoWay" class="roster-stat-value" text="Two-way: 0/2" />
+                                <ui:Label class="roster-stat-label" text="CONTRATOS TWO-WAY" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
-                    <!-- Panel detalle (oculto hasta selección) -->
-                    <ui:ScrollView name="DetailScroll" class="detail-scroll"
-                                   horizontal-scrolling-enabled="false"
-                                   mode="Vertical">
-                        <ui:VisualElement name="DetailContent">
+                    <!-- Panel detalle jugador -->
+                    <ui:VisualElement name="PlayerDetail" class="player-detail">
 
-                            <!-- Cabecera -->
-                            <ui:VisualElement class="detail-top">
-                                <ui:VisualElement name="DetailPhoto" class="detail-photo" />
-                                <ui:VisualElement class="detail-name-block">
-                                    <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
-                                    <ui:Label name="DetailPlayerPos"  class="detail-player-pos"  text="" />
-                                    <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="detail-ovr-block">
-                                    <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />
-                                    <ui:Label class="detail-ovr-label" text="MED" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
+                        <!-- Placeholder -->
+                        <ui:VisualElement name="DetailEmpty" class="detail-empty">
+                            <ui:Label class="detail-empty-text"
+                                      text="SELECCIONA UN JUGADOR" />
+                        </ui:VisualElement>
 
-                            <!-- Botones link -->
-                            <ui:VisualElement class="detail-links-row">
-                                <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="VER TRAYECTORIA" />
-                                <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="VER PERFIL DEL JUGADOR" />
-                            </ui:VisualElement>
+                        <!-- Panel detalle (oculto hasta selección) -->
+                        <ui:ScrollView name="DetailScroll" class="detail-scroll"
+                                       horizontal-scrolling-enabled="false"
+                                       mode="Vertical">
+                            <ui:VisualElement name="DetailContent">
 
-                            <!-- Salud -->
-                            <ui:VisualElement class="detail-health">
-                                <ui:Label name="DetailHealth" class="detail-health-ok" text="✓ DISPONIBLE" />
-                            </ui:VisualElement>
-
-                            <!-- Atributos -->
-                            <ui:VisualElement name="DetailAttrs" class="detail-attrs" />
-
-                            <!-- Stats temporada -->
-                            <ui:VisualElement name="DetailSeasonStats" class="detail-season-stats">
-                                <ui:VisualElement class="season-stat-card">
-                                    <ui:Label name="StatPts"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="PTS" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="season-stat-card">
-                                    <ui:Label name="StatReb"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="REB" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="season-stat-card">
-                                    <ui:Label name="StatAst"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="AST" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="season-stat-card">
-                                    <ui:Label name="StatStl"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="ROB" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="season-stat-card">
-                                    <ui:Label name="StatBlk"   class="season-stat-val"   text="0.0" />
-                                    <ui:Label class="season-stat-label" text="TAP" />
-                                </ui:VisualElement>
-                            </ui:VisualElement>
-
-                            <!-- Stats G-League (solo si el jugador tiene minutos en la liga de desarrollo) -->
-                            <ui:VisualElement name="GLeagueStats" class="detail-gleague" style="display: none;">
-                                <ui:Label class="detail-gleague-label" text="G-LEAGUE" />
-                                <ui:Label name="GLeagueStatsText" class="detail-gleague-text" text="" />
-                            </ui:VisualElement>
-
-                            <!-- Footer contrato / rol / potencial -->
-                            <ui:VisualElement class="detail-footer">
-                                <ui:VisualElement class="flex-col">
-                                    <ui:Label class="detail-contract-label" text="CONTRATO" />
-                                    <ui:Label name="DetailContract" class="detail-contract-value" text="" />
-                                </ui:VisualElement>
-                                <ui:VisualElement class="flex-col" style="align-items: center;">
-                                    <ui:Label class="detail-role-label" text="ROL" />
-                                    <ui:VisualElement style="flex-direction: row; align-items: center;">
-                                        <ui:VisualElement name="DetailRoleIcon" class="detail-role-icon" />
-                                        <ui:Label name="DetailRoleName" class="detail-role-name" text="" />
+                                <!-- Cabecera -->
+                                <ui:VisualElement class="detail-top">
+                                    <ui:VisualElement name="DetailPhoto" class="detail-photo" />
+                                    <ui:VisualElement class="detail-name-block">
+                                        <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
+                                        <ui:Label name="DetailPlayerPos"  class="detail-player-pos"  text="" />
+                                        <ui:Label name="DetailPlayerMeta" class="detail-player-meta" text="" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="detail-ovr-block">
+                                        <ui:Label name="DetailOvr"      class="detail-ovr-val"   text="" />
+                                        <ui:Label class="detail-ovr-label" text="MED" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement class="flex-col" style="align-items: flex-end;">
-                                    <ui:Label class="detail-potential-label" text="POTENCIAL" />
-                                    <ui:Label name="DetailPotential" class="detail-potential-value" text="" />
+
+                                <!-- Botones link -->
+                                <ui:VisualElement class="detail-links-row">
+                                    <ui:Button name="DetailLinkTrajectory" class="detail-link-btn" text="VER TRAYECTORIA" />
+                                    <ui:Button name="DetailLinkProfile" class="detail-link-btn" text="VER PERFIL DEL JUGADOR" />
                                 </ui:VisualElement>
-                            </ui:VisualElement>
 
-                            <!-- Botones de acción en 2 columnas -->
-                            <ui:VisualElement class="detail-button-row">
-                                <ui:Button name="BtnBuyout" class="btn-buyout"
-                                           text="RESCINDIR CONTRATO" />
-                                <ui:Button name="BtnRenew" class="btn-renew"
-                                           text="RENOVAR CONTRATO" />
-                            </ui:VisualElement>
+                                <!-- Salud -->
+                                <ui:VisualElement class="detail-health">
+                                    <ui:Label name="DetailHealth" class="detail-health-ok" text="✓ DISPONIBLE" />
+                                </ui:VisualElement>
 
-                        </ui:VisualElement>
-                    </ui:ScrollView>
+                                <!-- Atributos -->
+                                <ui:VisualElement name="DetailAttrs" class="detail-attrs" />
+
+                                <!-- Stats temporada -->
+                                <ui:VisualElement name="DetailSeasonStats" class="detail-season-stats">
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatPts"   class="season-stat-val"   text="0.0" />
+                                        <ui:Label class="season-stat-label" text="PTS" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatReb"   class="season-stat-val"   text="0.0" />
+                                        <ui:Label class="season-stat-label" text="REB" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatAst"   class="season-stat-val"   text="0.0" />
+                                        <ui:Label class="season-stat-label" text="AST" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatStl"   class="season-stat-val"   text="0.0" />
+                                        <ui:Label class="season-stat-label" text="ROB" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="season-stat-card">
+                                        <ui:Label name="StatBlk"   class="season-stat-val"   text="0.0" />
+                                        <ui:Label class="season-stat-label" text="TAP" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Stats G-League -->
+                                <ui:VisualElement name="GLeagueStats" class="detail-gleague" style="display: none;">
+                                    <ui:Label class="detail-gleague-label" text="G-LEAGUE" />
+                                    <ui:Label name="GLeagueStatsText" class="detail-gleague-text" text="" />
+                                </ui:VisualElement>
+
+                                <!-- Footer contrato / rol / potencial -->
+                                <ui:VisualElement class="detail-footer">
+                                    <ui:VisualElement class="flex-col">
+                                        <ui:Label class="detail-contract-label" text="CONTRATO" />
+                                        <ui:Label name="DetailContract" class="detail-contract-value" text="" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="flex-col" style="align-items: center;">
+                                        <ui:Label class="detail-role-label" text="ROL" />
+                                        <ui:VisualElement style="flex-direction: row; align-items: center;">
+                                            <ui:VisualElement name="DetailRoleIcon" class="detail-role-icon" />
+                                            <ui:Label name="DetailRoleName" class="detail-role-name" text="" />
+                                        </ui:VisualElement>
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="flex-col" style="align-items: flex-end;">
+                                        <ui:Label class="detail-potential-label" text="POTENCIAL" />
+                                        <ui:Label name="DetailPotential" class="detail-potential-value" text="" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+
+                                <!-- Botones de acción -->
+                                <ui:VisualElement class="detail-button-row">
+                                    <ui:Button name="BtnBuyout" class="btn-buyout"
+                                               text="RESCINDIR CONTRATO" />
+                                    <ui:Button name="BtnRenew" class="btn-renew"
+                                               text="RENOVAR CONTRATO" />
+                                </ui:VisualElement>
+
+                            </ui:VisualElement>
+                        </ui:ScrollView>
+
+                    </ui:VisualElement>
 
                 </ui:VisualElement>
 
