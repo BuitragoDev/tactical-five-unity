@@ -45,6 +45,14 @@ public class DorsalesController : UIScreenController
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("ScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/dorsales_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = iconTex;
+        }
+
         var tshirtTex = Resources.Load<Texture2D>("Icons/tshirt");
         if (tshirtTex != null) _tshirtBg = new StyleBackground(tshirtTex);
 
