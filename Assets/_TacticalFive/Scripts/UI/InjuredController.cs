@@ -28,7 +28,8 @@ public class InjuredController : UIScreenController
 
     // League injured modal
     private VisualElement _leagueInjuredOverlay;
-    private ScrollView _leagueInjuredScroll;
+    private VisualElement _leagueInjuredList;
+    private VisualElement _leagueInjuredPaginator;
     private Button _btnLeagueInjured;
     private Button _btnLeagueInjuredClose;
 
@@ -54,6 +55,9 @@ public class InjuredController : UIScreenController
     // Pagination
     private int _currentPage;
     private const int ITEMS_PER_PAGE = 6;
+    private int _leagueInjuredPage;
+    private const int LEAGUE_INJURED_PER_PAGE = 10;
+    private List<(TeamData team, PlayerData player)> _leagueInjuredPlayers = new();
 
     protected override void CacheReferences()
     {
@@ -73,7 +77,8 @@ public class InjuredController : UIScreenController
         _injuredPaginator = _root.Q<VisualElement>("InjuredPaginator");
 
         _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
-        _leagueInjuredScroll = _root.Q<ScrollView>("LeagueInjuredScroll");
+        _leagueInjuredList = _root.Q<VisualElement>("LeagueInjuredList");
+        _leagueInjuredPaginator = _root.Q<VisualElement>("LeagueInjuredPaginator");
         _btnLeagueInjured = _root.Q<Button>("BtnLeagueInjured");
         _btnLeagueInjuredClose = _root.Q<Button>("BtnLeagueInjuredClose");
 
@@ -805,6 +810,7 @@ public class InjuredController : UIScreenController
 
     void OpenLeagueInjuredModal()
     {
+        _leagueInjuredPage = 0;
         BuildLeagueInjuredList();
         var scrollWrapper = _root.Q<VisualElement>("LeagueInjuredScrollWrapper");
         if (scrollWrapper != null)
@@ -812,7 +818,6 @@ public class InjuredController : UIScreenController
             scrollWrapper.style.height = new StyleLength(new Length(380, LengthUnit.Pixel));
             scrollWrapper.style.maxHeight = new StyleLength(new Length(380, LengthUnit.Pixel));
         }
-        _leagueInjuredScroll.style.height = new StyleLength(new Length(100, LengthUnit.Percent));
         _leagueInjuredOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _leagueInjuredOverlay.AddToClassList("modal-overlay--visible");
         _leagueInjuredOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
@@ -826,11 +831,13 @@ public class InjuredController : UIScreenController
 
     void BuildLeagueInjuredList()
     {
-        _leagueInjuredScroll.Clear();
+        _leagueInjuredList.Clear();
+        _leagueInjuredPaginator.Clear();
+        _leagueInjuredPaginator.style.display = DisplayStyle.None;
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var myTeamId = _myTeam.id;
-        var injuredList = new List<(TeamData team, PlayerData player)>();
+        _leagueInjuredPlayers.Clear();
 
         foreach (var team in allTeams)
         {
@@ -839,21 +846,29 @@ public class InjuredController : UIScreenController
             foreach (var p in players)
             {
                 if (p.injury_days > 0)
-                    injuredList.Add((team, p));
+                    _leagueInjuredPlayers.Add((team, p));
             }
         }
 
-        if (injuredList.Count == 0)
+        if (_leagueInjuredPlayers.Count == 0)
         {
             var emptyLbl = new Label();
             emptyLbl.AddToClassList("league-injured-empty");
             emptyLbl.text = "No hay jugadores lesionados en la liga.";
-            _leagueInjuredScroll.Add(emptyLbl);
+            _leagueInjuredList.Add(emptyLbl);
             return;
         }
 
-        foreach (var (team, player) in injuredList)
+        int totalPages = Mathf.CeilToInt((float)_leagueInjuredPlayers.Count / LEAGUE_INJURED_PER_PAGE);
+        if (_leagueInjuredPage >= totalPages) _leagueInjuredPage = totalPages - 1;
+        if (_leagueInjuredPage < 0) _leagueInjuredPage = 0;
+
+        int start = _leagueInjuredPage * LEAGUE_INJURED_PER_PAGE;
+        int end = Mathf.Min(start + LEAGUE_INJURED_PER_PAGE, _leagueInjuredPlayers.Count);
+
+        for (int i = start; i < end; i++)
         {
+            var (team, player) = _leagueInjuredPlayers[i];
             var row = new VisualElement();
             row.AddToClassList("league-injured-row");
             row.style.height = new StyleLength(new Length(38, LengthUnit.Pixel));
@@ -885,7 +900,48 @@ public class InjuredController : UIScreenController
             daysLbl.text = player.injury_days.ToString();
             row.Add(daysLbl);
 
-            _leagueInjuredScroll.Add(row);
+            _leagueInjuredList.Add(row);
+        }
+
+        if (totalPages > 1)
+        {
+            _leagueInjuredPaginator.style.display = DisplayStyle.Flex;
+
+            var btnPrev = new Button();
+            btnPrev.AddToClassList("injured-paginator-btn");
+            btnPrev.text = "\u25C0";
+            btnPrev.SetEnabled(_leagueInjuredPage > 0);
+            if (_leagueInjuredPage == 0)
+                btnPrev.AddToClassList("injured-paginator-btn--disabled");
+            int previousPage = _leagueInjuredPage - 1;
+            btnPrev.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                _leagueInjuredPage = previousPage;
+                BuildLeagueInjuredList();
+            });
+            CursorManager.Instance?.RegisterHandCursor(btnPrev);
+            _leagueInjuredPaginator.Add(btnPrev);
+
+            var pageLabel = new Label($"{_leagueInjuredPage + 1} / {totalPages}");
+            pageLabel.AddToClassList("injured-paginator-label");
+            _leagueInjuredPaginator.Add(pageLabel);
+
+            var btnNext = new Button();
+            btnNext.AddToClassList("injured-paginator-btn");
+            btnNext.text = "\u25B6";
+            btnNext.SetEnabled(_leagueInjuredPage < totalPages - 1);
+            if (_leagueInjuredPage >= totalPages - 1)
+                btnNext.AddToClassList("injured-paginator-btn--disabled");
+            int nextPage = _leagueInjuredPage + 1;
+            btnNext.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                _leagueInjuredPage = nextPage;
+                BuildLeagueInjuredList();
+            });
+            CursorManager.Instance?.RegisterHandCursor(btnNext);
+            _leagueInjuredPaginator.Add(btnNext);
         }
     }
 }
