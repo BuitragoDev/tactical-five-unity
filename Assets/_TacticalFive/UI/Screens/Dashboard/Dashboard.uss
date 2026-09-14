@@ -411,6 +411,22 @@
     margin-right: 0;
 }
 
+/* ── Panel brown/gold header variant ── */
+.panel--gold {
+    border-color: rgb(120, 95, 30);
+    background-color: rgb(18, 21, 28);
+}
+.panel--gold .panel-header {
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-color: rgb(120, 95, 30);
+}
+.panel--gold .panel-title {
+    color: rgb(212, 160, 23);
+}
+.panel--gold .panel-date {
+    color: rgb(180, 140, 40);
+}
+
 /* Row 1: Game panels wider, team stats narrower */
 .panel-game--third {
     flex: 1 1 0%;

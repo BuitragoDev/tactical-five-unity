@@ -43,7 +43,7 @@
                 <ui:VisualElement class="panels-grid">
                     <!-- ROW 1: ÚLTIMO PARTIDO + PRÓXIMO PARTIDO + ESTADÍSTICAS DEL EQUIPO -->
                     <ui:VisualElement class="panels-row">
-                        <ui:VisualElement name="PanelLastGame" class="panel panel-game panel-game--third">
+                        <ui:VisualElement name="PanelLastGame" class="panel panel-game panel-game--third panel--gold">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
                                     <ui:Label text="ÚLTIMO PARTIDO" class="panel-title"/>
@@ -81,7 +81,7 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement name="PanelNextGame" class="panel panel-game panel-game--third">
+                        <ui:VisualElement name="PanelNextGame" class="panel panel-game panel-game--third panel--gold">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
                                     <ui:Label text="PRÓXIMO PARTIDO" class="panel-title"/>
@@ -159,7 +159,7 @@
                     <!-- ROW 2: CLASIFICACIÓN | [ESTADÍSTICAS JUGADORES + RELACIONES] | NOTICIAS -->
                     <ui:VisualElement class="panels-row panels-row--grow">
                         <!-- IZQUIERDA: CLASIFICACIÓN -->
-                        <ui:VisualElement name="PanelStandings" class="panel panel-standings panel-standings--col">
+                        <ui:VisualElement name="PanelStandings" class="panel panel-standings panel-standings--col panel--gold">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
                                     <ui:Label text="CLASIFICACIÓN" class="panel-title"/>
@@ -188,7 +188,7 @@
 
                         <!-- CENTRO: ESTADÍSTICAS JUGADORES + RELACIONES (vertical) -->
                         <ui:VisualElement class="center-column">
-                            <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats panel-player-stats--center">
+                            <ui:VisualElement name="PanelPlayerStats" class="panel panel-player-stats panel-player-stats--center panel--gold">
                                 <ui:VisualElement class="panel-header">
                                     <ui:VisualElement class="panel-header-left">
                                         <ui:Label text="ESTADÍSTICAS DE JUGADORES" class="panel-title"/>
@@ -283,7 +283,7 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:VisualElement name="PanelBoard" class="panel panel-board panel-board--center">
+                            <ui:VisualElement name="PanelBoard" class="panel panel-board panel-board--center panel--gold">
                                 <ui:VisualElement class="panel-header">
                                     <ui:Label text="RELACIONES" class="panel-title"/>
                                 </ui:VisualElement>
@@ -315,7 +315,7 @@
                         </ui:VisualElement>
 
                         <!-- DERECHA: NOTICIAS -->
-                        <ui:VisualElement name="PanelMessages" class="panel panel-messages panel-messages--col">
+                        <ui:VisualElement name="PanelMessages" class="panel panel-messages panel-messages--col panel--gold">
                             <ui:VisualElement class="panel-header">
                                 <ui:VisualElement class="panel-header-left">
                                     <ui:Label text="NOTICIAS" class="panel-title"/>
