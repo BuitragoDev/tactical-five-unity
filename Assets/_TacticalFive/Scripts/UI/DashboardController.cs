@@ -1931,6 +1931,7 @@ using System.Threading.Tasks;
             }
 
             // Refrescar cabecera (fecha) y paneles del Dashboard tras cada día
+            _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
             _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
             _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
             Refresh();
@@ -2130,6 +2131,18 @@ using System.Threading.Tasks;
             _manager.budget_red_warnings = 0;
         }
         DatabaseManager.Instance.SaveManager(_manager);
+    }
+
+    /// <summary>
+    /// Sincroniza el presupuesto en memoria de _myTeam con el de la copia de DB.
+    /// Necesario porque muchos puntos mutan TeamData leído de la DB (no _myTeam):
+    /// sin esto la cabecera y CheckBudgetAfterGame trabajan con datos obsoletos
+    /// durante una sesión de Dashboard (sobre todo en FastSim, donde no hay OnEnable).
+    /// </summary>
+    void SyncMyTeamBudget(TeamData team)
+    {
+        if (team != null && _myTeam != null && team.id == _myTeam.id)
+            _myTeam.budget = team.budget;
     }
 
     void CheckBudgetWarning()
@@ -5988,6 +6001,7 @@ List<int> offeredPickIds = new List<int>();
         }
 
         DatabaseManager.Instance.UpdateTeamBudget(team.id, team.budget);
+        SyncMyTeamBudget(team);
 
         // Update team with renovation reset
         var dbTeam = DatabaseManager.Instance.GetTeamById(team.id);
@@ -6299,6 +6313,7 @@ List<int> offeredPickIds = new List<int>();
         {
             homeTeam.budget += ticketRevenue;
             DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
+            SyncMyTeamBudget(homeTeam);
 
             DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
             {
@@ -6321,6 +6336,7 @@ List<int> offeredPickIds = new List<int>();
             {
                 homeTeam.budget += sponsor.home_game_income;
                 DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
+                SyncMyTeamBudget(homeTeam);
                 DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
                 {
                     team_id = homeTeam.id,
@@ -6340,6 +6356,7 @@ List<int> offeredPickIds = new List<int>();
             {
                 homeTeam.budget += tv.home_game_income;
                 DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
+                SyncMyTeamBudget(homeTeam);
                 DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
                 {
                     team_id = homeTeam.id,
@@ -6590,6 +6607,7 @@ List<int> offeredPickIds = new List<int>();
 
         team.budget -= monthlyPayroll;
         DatabaseManager.Instance.UpdateTeamBudget(team.id, team.budget);
+        SyncMyTeamBudget(team);
 
         DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
         {
@@ -6673,6 +6691,7 @@ List<int> offeredPickIds = new List<int>();
             long monthlyTax = annualTax / 12;
             team.budget -= monthlyTax;
             DatabaseManager.Instance.UpdateTeamBudget(team.id, team.budget);
+            SyncMyTeamBudget(team);
 
             DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
             {
