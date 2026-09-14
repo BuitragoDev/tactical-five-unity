@@ -571,14 +571,17 @@
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     padding: 12px 0;
-    width: 100%;
     -unity-text-align: middle-center;
-    margin: 20px 24px 24px;
     flex-shrink: 0;
     border-radius: 8px;
 }
 .modal-close:hover {
     background-color: rgba(42, 95, 201, 0.25);
     color: rgb(140, 190, 255);
+}
+
+.modal-footer {
+    padding: 12px 28px 24px;
+    flex-shrink: 0;
 }
 

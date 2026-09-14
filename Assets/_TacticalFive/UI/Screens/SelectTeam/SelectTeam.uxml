@@ -127,7 +127,9 @@
                     <ui:VisualElement name="SquadColumnRight" class="modal-column"/>
                 </ui:VisualElement>
             </ui:ScrollView>
-            <ui:Button name="BtnCloseSquad" text="CERRAR" class="modal-close"/>
+            <ui:VisualElement class="modal-footer">
+                <ui:Button name="BtnCloseSquad" text="CERRAR" class="modal-close"/>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>
