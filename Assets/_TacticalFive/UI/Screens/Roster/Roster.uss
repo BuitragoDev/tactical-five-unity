@@ -24,21 +24,22 @@
 .roster-screen-header.panel--gold {
     flex-shrink: 0;
     padding: 0;
-    margin: 0px 20px 12px 20px;
+    margin: 16px 20px 12px 20px;
     border-color: rgb(212, 160, 23);
     border-width: 1px;
-    background-color: rgb(18, 21, 28);
+    background-color: rgba(120, 95, 30, 0.15);
     border-radius: 4px;
+    overflow: hidden;
 }
 .roster-screen-header-row {
     flex-direction: row;
     align-items: center;
-    padding: 10px 14px;
+    padding: 5px 14px;
     background-color: rgba(120, 95, 30, 0.15);
 }
 .roster-screen-icon {
-    width: 64px;
-    height: 64px;
+    width: 40px;
+    height: 40px;
     margin-right: 10px;
     flex-shrink: 0;
     background-size: contain;
@@ -46,7 +47,7 @@
     background-position: center;
 }
 .roster-screen-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 32px;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -57,7 +58,8 @@
     font-size: 16px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
-    padding: 4px 14px 6px;
+    padding: 0 14px;
+    background-color: rgba(120, 95, 30, 0.15);
 }
 
 /* ── CONTENT AREA ── */

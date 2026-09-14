@@ -18,7 +18,7 @@
             <ui:VisualElement class="roster-screen-header panel--gold">
                 <ui:VisualElement class="roster-screen-header-row">
                     <ui:VisualElement name="RosterScreenIcon" class="roster-screen-icon" />
-                    <ui:Label text="PLANTILLA" class="roster-screen-title" />
+                    <ui:Label text="JUGADORES" class="roster-screen-title" />
                 </ui:VisualElement>
                 <ui:Label name="RosterSubtitle" text="" class="roster-screen-subtitle" />
             </ui:VisualElement>
