@@ -27,17 +27,20 @@
 .btn-back {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 200px;
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 160, 230);
     font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 10px 26px;
     -unity-text-align: middle-center;
+    border-radius: 8px;
 }
 .btn-back:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(140, 190, 255);
 }
 .header-title {
     flex-direction: row;
@@ -62,21 +65,25 @@
 .btn-continue {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 200px;
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 10px 26px;
     -unity-text-align: middle-center;
+    border-radius: 8px;
 }
 .btn-continue:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(140, 220, 170);
 }
 .btn-continue:disabled {
-    background-color: rgb(42, 51, 71);
-    color: rgb(85, 102, 119);
+    background-color: rgba(100, 110, 130, 0.08);
+    border-color: rgb(100, 110, 130);
+    color: rgb(100, 110, 130);
 }
 
 /* ── INFO BAR ── */
@@ -270,25 +277,22 @@
 /* Botón quitar en slot */
 .btn-remove-slot {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: transparent;
-    border-width: 1px;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
     border-color: rgb(192, 57, 43);
-    border-radius: 4px;
-    color: rgb(192, 57, 43);
+    border-radius: 8px;
+    color: rgb(230, 120, 100);
     font-size: 16px;
     letter-spacing: 1px;
     padding: 8px 12px;
     flex-shrink: 0;
     margin-top: 44px;
-    min-width:120px;
+    min-width: 120px;
     -unity-text-align: middle-center;
 }
 .btn-remove-slot:hover {
-    background-color: rgba(192, 57, 43, 0.1);
-}
-.btn-remove-slot:hover {
-    background-color: rgb(231, 76, 60);
-    color: rgb(226, 217, 216);
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 /* ── BOTTOM AREA ── */
