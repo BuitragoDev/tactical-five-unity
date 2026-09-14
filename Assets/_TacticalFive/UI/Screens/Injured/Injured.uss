@@ -828,7 +828,8 @@
     overflow: hidden;
 }
 #LeagueInjuredBox .modal-title {
-    padding: 20px 24px 16px;
+    padding: 10px 24px;
+    background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
 }

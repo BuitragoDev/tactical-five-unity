@@ -850,6 +850,8 @@ public class InjuredController : UIScreenController
             }
         }
 
+        _leagueInjuredPlayers = _leagueInjuredPlayers.OrderBy(x => x.player.injury_days).ToList();
+
         if (_leagueInjuredPlayers.Count == 0)
         {
             var emptyLbl = new Label();
