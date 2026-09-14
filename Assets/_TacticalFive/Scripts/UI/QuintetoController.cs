@@ -528,32 +528,22 @@ using System.Linq;
 
         foreach (var (label, val) in attrs)
         {
-            var row = new VisualElement();
-            row.AddToClassList("attr-row");
+            var badge = new VisualElement();
+            badge.AddToClassList("attr-badge");
+            if (val < 40) badge.AddToClassList("attr-badge--low");
+            else if (val < 70) badge.AddToClassList("attr-badge--mid");
 
             var lbl = new Label();
-            lbl.AddToClassList("attr-label");
+            lbl.AddToClassList("attr-badge-label");
             lbl.text = label;
 
-            var barBg = new VisualElement();
-            barBg.AddToClassList("attr-bar-bg");
-
-            var barFill = new VisualElement();
-            barFill.AddToClassList("attr-bar-fill");
-            if (val < 50) barFill.AddToClassList("attr-bar-fill--low");
-            else if (val < 70) barFill.AddToClassList("attr-bar-fill--mid");
-
-            barFill.style.width = new StyleLength(new Length(val, LengthUnit.Percent));
-            barBg.Add(barFill);
-
             var valLbl = new Label();
-            valLbl.AddToClassList("attr-val");
+            valLbl.AddToClassList("attr-badge-val");
             valLbl.text = val.ToString();
 
-            row.Add(lbl);
-            row.Add(barBg);
-            row.Add(valLbl);
-            _detailAttrs.Add(row);
+            badge.Add(lbl);
+            badge.Add(valLbl);
+            _detailAttrs.Add(badge);
         }
     }
 

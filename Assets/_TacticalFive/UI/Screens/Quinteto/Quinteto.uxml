@@ -61,7 +61,7 @@
 
                     </ui:VisualElement>
 
-                    <!-- Column 2: Bench + Inactive -->
+                    <!-- Column 2: Bench only -->
                     <ui:VisualElement class="lineup-col lineup-col--mid">
 
                         <!-- ══ BANQUILLO ══ -->
@@ -73,6 +73,11 @@
                             <ui:VisualElement name="BenchList" class="lineup-section-body lineup-section-body--drop" />
                         </ui:VisualElement>
 
+                    </ui:VisualElement>
+
+                    <!-- Right panel: NO CONVOCADOS + load mgmt + detail -->
+                    <ui:VisualElement class="lineup-col lineup-col--right-panel">
+
                         <!-- ══ NO CONVOCADOS ══ -->
                         <ui:VisualElement class="lineup-section">
                             <ui:VisualElement class="lineup-section-header">
@@ -81,11 +86,6 @@
                             </ui:VisualElement>
                             <ui:VisualElement name="InactiveList" class="lineup-section-body lineup-section-body--drop" />
                         </ui:VisualElement>
-
-                    </ui:VisualElement>
-
-                    <!-- Right panel: player detail on hover -->
-                    <ui:VisualElement class="lineup-col lineup-col--right-panel">
 
                         <!-- ══ LOAD MANAGEMENT ══ -->
                         <ui:VisualElement class="load-mgmt-row">
