@@ -1184,11 +1184,10 @@
 
 .fired-modal-box {
     width: 720px;
-    background-color: rgb(15, 17, 23);
+    background-color: rgb(13, 14, 18);
     border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 3px;
-    border-top-color: rgb(192, 57, 43);
+    border-color: rgb(192, 57, 43);
+    border-radius: 12px;
     padding: 32px;
     flex-direction: column;
     align-items: center;
@@ -1203,10 +1202,10 @@
 }
 
 .fired-modal-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 36px;
-    letter-spacing: 4px;
-    color: rgb(192, 57, 43);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
     margin-bottom: 16px;
     -unity-text-align: middle-center;
 }
@@ -1253,18 +1252,24 @@
 
 .fired-modal-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgb(192, 57, 43);
-    color: white;
-    border-width: 0;
-    border-radius: 4px;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+    border-radius: 8px;
     padding: 12px 32px;
     cursor: pointer;
 }
 
+.fired-modal-btn:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
+}
+
 .fired-modal-box--warning {
-    border-top-color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
 }
 
 .fired-modal-title--warning {
@@ -1272,17 +1277,37 @@
 }
 
 .fired-modal-box--positive {
-    border-top-color: rgb(39, 174, 96);
+    border-color: rgb(39, 174, 96);
 }
 .fired-modal-title--positive {
     color: rgb(39, 174, 96);
 }
 .fired-modal-btn--positive {
-    background-color: rgb(39, 174, 96);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+}
+.fired-modal-btn--positive:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
 }
 .fired-modal-btn--warning {
-    background-color: rgb(212, 160, 23);
-    color: rgb(0, 0, 0);
+    background-color: rgba(212, 160, 23, 0.10);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+.fired-modal-btn--warning:hover {
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(230, 190, 60);
+}
+.fired-modal-btn--danger {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+.fired-modal-btn--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 /* ══ OFFER RESULT MODAL (modern) ══ */

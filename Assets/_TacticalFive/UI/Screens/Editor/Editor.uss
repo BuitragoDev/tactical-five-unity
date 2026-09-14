@@ -468,7 +468,7 @@
     top: 38px;
 }
 
-/* ══ SAVE MODAL ══ */
+/* ══ SAVE MODAL (estilo moderno) ══ */
 
 .editor-modal-overlay {
     position: absolute;
@@ -481,18 +481,17 @@
 
 .editor-modal-box {
     width: 520px;
-    background-color: rgb(15, 17, 23);
+    background-color: rgb(13, 14, 18);
     border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 3px;
-    border-top-color: rgb(39, 174, 96);
+    border-color: rgb(39, 174, 96);
+    border-radius: 12px;
     padding: 32px;
     flex-direction: column;
     align-items: center;
 }
 
 .editor-modal-box--error {
-    border-top-color: rgb(192, 57, 43);
+    border-color: rgb(192, 57, 43);
 }
 
 .editor-modal-icon {
@@ -504,7 +503,7 @@
 
 .editor-modal-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 34px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
     margin-bottom: 16px;
@@ -521,23 +520,28 @@
 
 .editor-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(208, 216, 232);
+    font-size: 20px;
+    color: rgb(179, 190, 214);
     margin-bottom: 24px;
     -unity-text-align: middle-center;
+    white-space: normal;
 }
 
 .editor-modal-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgb(42, 95, 201);
-    color: rgb(255, 255, 255);
-    border-width: 0;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+    border-radius: 8px;
     padding: 10px 32px;
+    cursor: pointer;
 }
 
 .editor-modal-btn:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 

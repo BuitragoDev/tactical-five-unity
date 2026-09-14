@@ -315,6 +315,66 @@
     background-color: rgba(0, 0, 0, 0.6);
 }
 
+/* ══ MODAL BORRAR PARTIDA (estilo moderno) ══ */
+
+#DeleteModalBox {
+    width: 720px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(192, 57, 43);
+    border-radius: 12px;
+    padding: 32px;
+    flex-direction: column;
+}
+
+#DeleteModalBox .modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    border-bottom-width: 0;
+    margin-bottom: 16px;
+    padding-bottom: 0;
+}
+
+#DeleteModalBox .modal-paragraph {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    margin-bottom: 12px;
+}
+
+#DeleteModalBox .modal-actions {
+    margin-top: 24px;
+}
+
+#DeleteModalBox .modal-btn--secondary {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+    border-radius: 8px;
+}
+
+#DeleteModalBox .modal-btn--secondary:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
+}
+
+#DeleteModalBox .modal-btn--danger {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    border-radius: 8px;
+}
+
+#DeleteModalBox .modal-btn--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
+}
+
 .btn-back-empty:hover {
     background-color: rgb(28, 33, 48);
     color: rgb(208, 216, 232);

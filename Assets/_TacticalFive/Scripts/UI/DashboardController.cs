@@ -2811,8 +2811,9 @@ using System.Threading.Tasks;
         box.Add(text);
 
         var btn = new Button();
-        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.text = "IR AL MENU PRINCIPAL";
         btn.AddToClassList("fired-modal-btn");
+        btn.AddToClassList("fired-modal-btn--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();

@@ -160,16 +160,16 @@
 }
 
 #BtnBugReportCerrar {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgba(42, 95, 201, 0.10);
     border-width: 2px;
-    border-color: rgb(192, 57, 43);
-    color: rgb(230, 120, 100);
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
     border-radius: 8px;
 }
 
 #BtnBugReportCerrar:hover {
-    background-color: rgba(192, 57, 43, 0.25);
-    color: rgb(240, 145, 125);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 
 /* ── MODAL SALIR DEL JUEGO (formato moderno) ── */
