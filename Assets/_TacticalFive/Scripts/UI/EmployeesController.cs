@@ -203,6 +203,14 @@ public class EmployeesController : UIScreenController
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("ScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/empleado");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = iconTex;
+        }
+
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
