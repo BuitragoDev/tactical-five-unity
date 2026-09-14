@@ -122,7 +122,6 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
                     <ui:Button name="BtnExitNo" text="NO" class="modal-btn modal-btn--secondary"/>
-                    <ui:VisualElement class="modal-spacer"/>
                     <ui:Button name="BtnExitYes" text="SÍ, SALIR" class="modal-btn modal-btn--danger"/>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -201,7 +200,6 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
                     <ui:Button name="BtnProCancel" text="CERRAR" class="modal-btn modal-btn--secondary"/>
-                    <ui:VisualElement class="modal-spacer"/>
                     <ui:Button name="BtnProConfirm" text="CONTINUAR" class="modal-btn modal-btn--primary"/>
                 </ui:VisualElement>
             </ui:VisualElement>
@@ -215,7 +213,6 @@
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
                     <ui:Button name="BtnBugReportCerrar" text="CERRAR" class="modal-btn modal-btn--secondary"/>
-                    <ui:VisualElement class="modal-spacer"/>
                     <ui:Button name="BtnBugReportSend" text="ENVIAR" class="modal-btn modal-btn--primary"/>
                 </ui:VisualElement>
             </ui:VisualElement>

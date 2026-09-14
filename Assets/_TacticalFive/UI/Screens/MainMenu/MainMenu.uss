@@ -172,32 +172,220 @@
     color: rgb(150, 190, 255);
 }
 
-/* ── MODAL SALIR DEL JUEGO (formato moderno) ── */
-
+/* ══ MODAL SALIR DEL JUEGO ══ */
+#ExitModalBox {
+    width: 520px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(192, 57, 43);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+#ExitModalBox .modal-title {
+    padding: 10px 24px;
+    background-color: rgba(192, 57, 43, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(192, 57, 43);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+#ExitModalBox .modal-body {
+    padding: 20px 24px;
+}
+#ExitModalBox .modal-paragraph {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 20px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+#ExitModalBox .modal-actions {
+    width: auto;
+    align-self: stretch;
+    margin: 8px 20px 16px;
+    justify-content: space-between;
+}
 #BtnExitNo {
+    flex-grow: 1;
+    min-width: 0;
     background-color: rgba(100, 110, 130, 0.10);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
     border-radius: 8px;
 }
-
 #BtnExitNo:hover {
     background-color: rgba(100, 110, 130, 0.25);
     color: rgb(190, 200, 220);
 }
-
 #BtnExitYes {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 16px;
     background-color: rgba(192, 57, 43, 0.10);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
     border-radius: 8px;
 }
-
 #BtnExitYes:hover {
     background-color: rgba(192, 57, 43, 0.25);
     color: rgb(240, 145, 125);
+}
+
+/* ══ MODAL PROMANAGER ══ */
+#ProModalBox {
+    width: 640px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+#ProModalBox .modal-title {
+    padding: 10px 24px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+#ProModalBox .modal-body {
+    padding: 20px 24px;
+}
+#ProModalBox .modal-paragraph {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 19px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    -unity-text-align: middle-left;
+    margin-bottom: 10px;
+}
+#ProModalBox .modal-paragraph--highlight {
+    color: rgb(232, 196, 96);
+}
+#ProModalBox .modal-actions {
+    width: auto;
+    align-self: stretch;
+    margin: 8px 20px 16px;
+    justify-content: space-between;
+}
+#BtnProCancel {
+    flex-grow: 1;
+    min-width: 0;
+    background-color: rgba(100, 110, 130, 0.10);
+    border-width: 2px;
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
+    border-radius: 8px;
+}
+#BtnProCancel:hover {
+    background-color: rgba(100, 110, 130, 0.25);
+    color: rgb(190, 200, 220);
+}
+#BtnProConfirm {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 16px;
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    border-radius: 8px;
+}
+#BtnProConfirm:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
+}
+
+/* ══ MODAL AVISO LEGAL ══ */
+#ModalBox {
+    width: 820px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+#ModalBox .modal-title {
+    padding: 10px 24px;
+    margin: 0;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+#ModalBox .modal-body {
+    padding: 20px 28px;
+}
+#ModalBox .modal-paragraph {
+    font-size: 18px;
+    color: rgb(179, 190, 214);
+}
+#ModalBox .modal-copyright {
+    color: rgb(122, 138, 170);
+}
+#ModalBox .modal-close {
+    align-self: center;
+    margin: 8px 0 20px;
+}
+
+/* ══ MODAL INFORME DE ERRORES ══ */
+#BugReportBox {
+    width: 820px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+#BugReportBox .modal-title {
+    padding: 10px 24px;
+    margin: 0;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+#BugReportBox .modal-body {
+    padding: 20px 28px;
+}
+#BugReportBox .modal-paragraph {
+    font-size: 19px;
+    color: rgb(179, 190, 214);
+}
+#BugReportBox .modal-actions {
+    width: auto;
+    align-self: stretch;
+    margin: 8px 20px 16px;
+    justify-content: space-between;
+}
+#BtnBugReportCerrar {
+    flex-grow: 1;
+    min-width: 0;
+}
+#BtnBugReportSend {
+    flex-grow: 1;
+    min-width: 0;
+    margin-left: 16px;
 }
 
 /* ── HERO ── */
@@ -479,7 +667,35 @@
     -unity-text-align: middle-center;
 }
 
-/* ══ Config modal settings styles (inlined from Settings.uss) ══ */
+/* ══ Config modal (MainMenu) ══ */
+#ConfigModalBox {
+    width: 720px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+#ConfigModalBox .modal-title {
+    padding: 10px 24px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+#ConfigModalBox .modal-body {
+    padding: 20px 24px;
+}
+#ConfigModalBox .modal-close {
+    margin: 12px 16px;
+}
+
+/* ── Config sections ── */
 .settings-section {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
@@ -499,11 +715,11 @@
     font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
-    color: rgb(150, 160, 180);
+    color: rgb(212, 160, 23);
     margin-bottom: 16px;
     padding-bottom: 8px;
     border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
+    border-bottom-color: rgb(120, 95, 30);
 }
 .settings-row {
     flex-direction: row;
@@ -561,6 +777,8 @@
     color: rgb(248, 196, 64);
     -unity-text-align: middle-right;
 }
+
+/* ── Quality / Sim buttons (dark outline) ── */
 .settings-quality-row {
     flex-direction: row;
     align-items: center;
@@ -575,32 +793,36 @@
     width: 70px;
     height: 36px;
     margin-left: 6px;
-    background-color: rgb(15, 17, 23);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 4px;
-    color: rgb(208, 216, 232);
+    background-color: rgba(30, 33, 42, 0.6);
+    border-width: 2px;
+    border-color: rgb(60, 65, 75);
+    border-radius: 8px;
+    color: rgb(160, 170, 190);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 15px;
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
     -unity-text-transform: upper;
 }
 .settings-quality-btn:hover {
-    background-color: rgb(28, 33, 48);
-    border-color: rgb(58, 74, 99);
+    background-color: rgba(50, 55, 68, 0.7);
+    border-color: rgb(90, 95, 110);
+    color: rgb(200, 210, 230);
 }
 .settings-quality-btn--active {
-    background-color: rgb(248, 196, 64);
-    border-color: rgb(248, 196, 64);
-    color: rgb(15, 17, 23);
+    background-color: rgba(60, 65, 78, 0.9);
+    border-color: rgb(120, 125, 140);
+    color: rgb(255, 255, 255);
 }
 .settings-quality-btn--active:hover {
-    background-color: rgb(255, 215, 90);
-    border-color: rgb(255, 215, 90);
+    background-color: rgba(70, 75, 88, 1);
+    border-color: rgb(140, 145, 160);
 }
 .settings-quality-btn--wide {
     width: 130px;
 }
+
+/* ── Settings columns ── */
 .settings-columns {
     flex-direction: row;
     align-items: flex-start;

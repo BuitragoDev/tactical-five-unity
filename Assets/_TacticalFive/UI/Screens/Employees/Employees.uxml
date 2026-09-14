@@ -14,7 +14,7 @@
             <ui:VisualElement class="screen-header panel--gold">
                 <ui:VisualElement class="screen-header-row">
                     <ui:VisualElement name="ScreenIcon" class="screen-icon" />
-                    <ui:Label class="screen-title" text="EMPLEADOS" />
+                    <ui:Label class="screen-title" text="GESTIÓN DE EMPLEADOS" />
                 </ui:VisualElement>
                 <ui:Label name="ScreenSubtitle" class="screen-subtitle" text="" />
             </ui:VisualElement>
