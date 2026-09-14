@@ -2786,6 +2786,7 @@ using System.Threading.Tasks;
 
         var btn = new Button();
         btn.text = "CONTINUAR";
+        btn.AddToClassList("fired-modal-btn");
         btn.AddToClassList("fired-modal-btn--warning");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
