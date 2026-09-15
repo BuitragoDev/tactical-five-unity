@@ -1706,30 +1706,32 @@
     width: 70px;
     height: 36px;
     margin-left: 6px;
-    background-color: rgb(15, 17, 23);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 4px;
-    color: rgb(208, 216, 232);
+    background-color: rgba(30, 33, 42, 0.6);
+    border-width: 2px;
+    border-color: rgb(60, 65, 75);
+    border-radius: 8px;
+    color: rgb(160, 170, 190);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 15px;
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
     -unity-text-transform: upper;
     transition-property: background-color, border-color, color;
     transition-duration: 0.15s;
 }
 .settings-quality-btn:hover {
-    background-color: rgb(28, 33, 48);
-    border-color: rgb(58, 74, 99);
+    background-color: rgba(50, 55, 68, 0.7);
+    border-color: rgb(90, 95, 110);
+    color: rgb(200, 210, 230);
 }
 .settings-quality-btn--active {
-    background-color: rgb(248, 196, 64);
-    border-color: rgb(248, 196, 64);
-    color: rgb(15, 17, 23);
+    background-color: rgba(60, 65, 78, 0.9);
+    border-color: rgb(120, 125, 140);
+    color: rgb(255, 255, 255);
 }
 .settings-quality-btn--active:hover {
-    background-color: rgb(255, 215, 90);
-    border-color: rgb(255, 215, 90);
+    background-color: rgba(70, 75, 88, 1);
+    border-color: rgb(140, 145, 160);
 }
 .settings-quality-btn--wide {
     width: 130px;
@@ -1758,7 +1760,8 @@
     cursor: pointer;
     height: 48px;
     width: 100%;
-    border-width: 0;
+    border-width: 2px;
+    border-radius: 8px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 1px;
@@ -1766,22 +1769,26 @@
     -unity-text-transform: upper;
     margin-top: 8px;
     align-self: center;
-    transition-property: background-color;
+    transition-property: background-color, border-color, color;
     transition-duration: 0.15s;
 }
 .settings-btn--secondary {
-    background-color: rgb(42, 51, 71);
-    color: rgb(208, 216, 232);
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
 }
 .settings-btn--secondary:hover {
-    background-color: rgb(58, 74, 99);
+    background-color: rgba(100, 110, 130, 0.25);
+    color: rgb(200, 210, 230);
 }
 .settings-btn--danger {
-    background-color: rgb(192, 57, 43);
-    color: rgb(255, 255, 255);
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
 }
 .settings-btn--danger:hover {
-    background-color: rgb(231, 76, 60);
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 /* ══ TRADE OFFER MODAL (moderno) ══ */
