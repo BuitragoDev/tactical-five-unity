@@ -122,7 +122,7 @@
 
 .stat-card-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 20px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(208, 216, 232);
