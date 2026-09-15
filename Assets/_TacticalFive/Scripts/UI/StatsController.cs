@@ -73,7 +73,7 @@ using System.Linq;
     private string _pagedStat = "";
     private bool _pagedAverages;
     private List<PlayerData> _pagedAllPlayers = new();
-    private const int PAGE_SIZE = 10;
+    private const int PAGE_SIZE = 9;
     protected override void OnEnable()
     {
         base.OnEnable();
