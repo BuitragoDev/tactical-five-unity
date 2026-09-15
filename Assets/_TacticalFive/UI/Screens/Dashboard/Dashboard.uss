@@ -334,34 +334,39 @@
 .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 250px;
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
     font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 10px 18px;
     -unity-text-align: middle-center;
     flex-shrink: 0;
+    border-radius: 8px;
 }
 .btn-action:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 .btn-action--match {
-    background-color: rgb(212, 160, 23);
-    color: rgb(0, 0, 0);
+    background-color: rgba(212, 160, 23, 0.10);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
 }
 .btn-action--match:hover {
-    background-color: rgb(240, 192, 64);
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(240, 192, 64);
 }
 .btn-action--simulate {
-    background-color: rgb(30, 37, 53);
-    border-width: 1px;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
     border-color: rgb(42, 95, 201);
-    color: rgb(74, 128, 240);
+    color: rgb(120, 160, 230);
 }
 .btn-action--simulate:hover {
-    background-color: rgb(20, 28, 48);
+    background-color: rgba(42, 95, 201, 0.25);
 }
 
 /* ── CONTENT AREA ── */
