@@ -667,34 +667,6 @@
     -unity-text-align: middle-center;
 }
 
-/* ══ Config modal (MainMenu) ══ */
-#ConfigModalBox {
-    width: 720px;
-    background-color: rgb(13, 14, 18);
-    border-width: 1px;
-    border-color: rgb(212, 160, 23);
-    border-radius: 12px;
-    padding: 0;
-    flex-direction: column;
-    overflow: hidden;
-}
-#ConfigModalBox .modal-title {
-    padding: 10px 24px;
-    background-color: rgba(120, 95, 30, 0.15);
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(212, 160, 23);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 34px;
-    letter-spacing: 2px;
-    color: rgb(255, 255, 255);
-}
-#ConfigModalBox .modal-body {
-    padding: 20px 24px;
-}
-#ConfigModalBox .modal-close {
-    margin: 12px 16px;
-}
-
 /* ── Config sections ── */
 .settings-section {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");

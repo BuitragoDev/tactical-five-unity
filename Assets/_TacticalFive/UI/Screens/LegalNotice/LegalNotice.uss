@@ -21,13 +21,12 @@
 .modal-box {
     position: absolute;
     width: 820px;
-    background-color: rgb(30, 37, 53);
+    background-color: rgb(13, 14, 18);
     border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 3px;
-    border-top-color: rgb(212, 160, 23);
-    padding: 44px 52px;
-    align-items: flex-start;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
     display: none;
 }
 
@@ -38,25 +37,24 @@
 
 /* ── TÍTULO ── */
 .modal-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 26px;
-    -unity-font-style: bold;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
     -unity-text-transform: upper;
-    letter-spacing: 3px;
     color: rgb(255, 255, 255);
-    margin-bottom: 24px;
-    padding-bottom: 16px;
+    padding: 10px 24px;
+    background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
+    border-bottom-color: rgb(212, 160, 23);
     border-top-width: 0;
     border-left-width: 0;
     border-right-width: 0;
-    width: 100%;
 }
 
 /* ── CUERPO ── */
 .modal-body {
     width: 100%;
+    padding: 20px 24px;
     flex-direction: column;
 }
 
@@ -92,7 +90,6 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 3px;
-    width: 200px;
     -unity-text-transform: upper;
     color: rgb(120, 160, 230);
     background-color: rgba(42, 95, 201, 0.10);
@@ -100,7 +97,7 @@
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
     padding: 12px 32px;
-    margin-top: 28px;
+    margin: 12px 16px;
     -unity-text-align: middle-center;
 }
 
@@ -114,7 +111,7 @@
     flex-direction: row;
     justify-content: flex-end;
     width: 100%;
-    margin-top: 28px;
+    margin: 8px 20px 16px;
 }
 
 .modal-spacer {
@@ -128,33 +125,42 @@
     font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(255, 255, 255);
-    border-width: 0;
+    border-width: 2px;
+    border-radius: 8px;
     padding: 12px 32px;
     -unity-text-align: middle-center;
     min-width: 170px;
 }
 
 .modal-btn--secondary {
-    background-color: rgb(58, 74, 99);
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
 }
 
 .modal-btn--secondary:hover {
-    background-color: rgb(74, 94, 119);
+    background-color: rgba(100, 110, 130, 0.25);
+    color: rgb(200, 210, 230);
 }
 
 .modal-btn--danger {
-    background-color: rgb(192, 57, 43);
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
 }
 
 .modal-btn--danger:hover {
-    background-color: rgb(210, 70, 55);
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 .modal-btn--primary {
-    background-color: rgb(42, 95, 201);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
 }
 
 .modal-btn--primary:hover {
-    background-color: rgb(74, 128, 240);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
