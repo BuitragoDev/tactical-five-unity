@@ -37,7 +37,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 - `GetCalculatedAverage()` currently returns integer `sum / 11`, so it truncates rather than rounds. Training, progression and migrations recalculate/cap `overall`; mentoring currently changes attributes without that recalculation. “Always recomputed” is an intended invariant, not a guaranteed current fact [F].
 
 ### managers (`ManagerData`)
-`id` (AI), `name`, `team_id`, `game_mode`, `created_at`, `lastPlayedRealDate`, `currentGameDay`, `currentDate`, `fan_confidence` (migrated, default 50), `budget_red_warnings` (migrated, default 0), `career_reg_wins/losses`, `career_po_wins/losses`, `championships`, `seasons_completed` (migrated).
+`id` (AI), `name`, `team_id`, `game_mode`, `created_at`, `lastPlayedRealDate`, `currentGameDay`, `currentDate`, `trust`, `morale`, `fan_confidence` (migrated, default 50), `budget_red_warnings` (migrated, default 0), `is_fired` (migrated, default 0; 1 = despedido, bloquea cargar la partida), `career_reg_wins/losses`, `career_po_wins/losses`, `championships`, `seasons_completed` (migrated).
 
 ### seasons (`SeasonData`)
 `id`, `year_start`, `year_end`, `is_active` (0/1), `current_game_day`, `game_mode`, `phase` (`preseason`|`regular`|`playin`|`playoff`|`finished`), `manager_id`, `generated` (0/1), `current_date` ("yyyy-MM-dd"), `last_ai_trade_day` (migrated, default -999).

@@ -152,12 +152,12 @@ public class LoadGameController : UIScreenController
             if (!File.Exists(dbPath)) return;
 
             using var conn = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadOnly);
-            var manager = conn.Table<ManagerData>()
-                .OrderByDescending(m => m.id)
+            var manager = conn.Query<ManagerStatusRow>(
+                "SELECT id, team_id, trust, game_mode, budget_red_warnings FROM managers ORDER BY id DESC LIMIT 1")
                 .FirstOrDefault();
 
             if (manager != null)
-                slot.managerStatus = manager.trust < 10 ? "fired" : "active";
+                slot.managerStatus = IsRowFired(conn, manager) ? "fired" : "active";
 
             if (manager == null) return;
             var team = conn.Table<TeamData>().FirstOrDefault(t => t.id == manager.team_id);
@@ -177,6 +177,24 @@ public class LoadGameController : UIScreenController
         catch (System.Exception ex)
         {
             Debug.LogWarning($"[LoadGame] No se pudo leer el estado del slot {slot.slotNumber}: {ex.Message}");
+        }
+    }
+
+    static bool IsRowFired(SQLiteConnection conn, ManagerStatusRow manager)
+    {
+        if (manager == null) return false;
+        if (manager.trust < 10) return true;
+
+        int threshold = manager.game_mode == "promanager" ? 2 : 3;
+        if (manager.budget_red_warnings >= threshold) return true;
+
+        try
+        {
+            return conn.ExecuteScalar<int>("SELECT is_fired FROM managers ORDER BY id DESC LIMIT 1") == 1;
+        }
+        catch (System.Exception)
+        {
+            return false;
         }
     }
 
@@ -391,23 +409,30 @@ public class LoadGameController : UIScreenController
 
     void OnLoadSlot(int slotNumber)
     {
-        try
-        {
-            string dbPath = GameSaveManager.GetSaveDbPath(slotNumber);
-            if (File.Exists(dbPath))
-            {
-                using var conn = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadOnly);
-                var mgr = conn.Table<ManagerData>()
-                    .OrderByDescending(m => m.id)
-                    .FirstOrDefault();
-                if (mgr != null && mgr.trust < 10) return;
-            }
-        }
-        catch (System.Exception) { }
+        if (IsSlotFired(slotNumber)) return;
 
         DatabaseManager.Instance.InitSaveSlot(slotNumber);
         GameSaveManager.UpdateSlotFromDatabase(slotNumber);
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+    }
+
+    static bool IsSlotFired(int slotNumber)
+    {
+        try
+        {
+            string dbPath = GameSaveManager.GetSaveDbPath(slotNumber);
+            if (!File.Exists(dbPath)) return false;
+
+            using var conn = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadOnly);
+            var manager = conn.Query<ManagerStatusRow>(
+                "SELECT id, team_id, trust, game_mode, budget_red_warnings FROM managers ORDER BY id DESC LIMIT 1")
+                .FirstOrDefault();
+            return IsRowFired(conn, manager);
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
     }
 
     void OnDeleteSlot(int slotNumber)
@@ -437,4 +462,13 @@ public class LoadGameController : UIScreenController
         CloseDeleteModal();
         RefreshSlots();
     }
+}
+
+public class ManagerStatusRow
+{
+    public int    id                  { get; set; }
+    public int    team_id             { get; set; }
+    public int    trust               { get; set; }
+    public string game_mode           { get; set; }
+    public int    budget_red_warnings { get; set; }
 }

@@ -2822,6 +2822,8 @@ using System.Threading.Tasks;
 
     void ShowBudgetFiredModal()
     {
+        MarkManagerFired();
+
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
@@ -4044,8 +4046,33 @@ using System.Threading.Tasks;
         return available.OrderByDescending(c => c.overall).FirstOrDefault();
     }
 
+    void MarkManagerFired()
+    {
+        if (_manager == null) return;
+
+        try
+        {
+            _manager.is_fired = 1;
+            DatabaseManager.Instance.SaveManager(_manager);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[Dashboard] No se pudo marcar is_fired: {ex.Message}");
+        }
+
+        int slot = DatabaseManager.Instance.ActiveSaveSlot;
+        var info = GameSaveManager.GetSlot(slot);
+        if (info != null)
+        {
+            info.managerStatus = "fired";
+            GameSaveManager.SaveSlotInfo(info);
+        }
+    }
+
     void ShowFiredModal()
     {
+        MarkManagerFired();
+
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
@@ -4077,6 +4104,8 @@ using System.Threading.Tasks;
 
     void ShowObjectiveFiredModal()
     {
+        MarkManagerFired();
+
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
