@@ -318,7 +318,7 @@
 .btn-fastsim {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     cursor: pointer;
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     color: rgb(120, 160, 230);
@@ -341,4 +341,50 @@
     border-color: rgb(60, 60, 70);
     color: rgb(80, 85, 95);
     cursor: default;
+}
+
+/* ── MODAL FAST SIM ── */
+#FastSimConfirmBox {
+    border-color: rgb(42, 95, 201);
+}
+
+#FastSimConfirmBox .modal-title {
+    background-color: rgba(42, 95, 201, 0.15);
+    border-bottom-color: rgb(42, 95, 201);
+}
+
+#FastSimConfirmBox .modal-actions {
+    width: auto;
+    align-self: stretch;
+    margin: 8px 20px 16px;
+}
+
+#FastSimConfirmBox .modal-btn {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    background-color: transparent;
+    border-width: 2px;
+    border-radius: 8px;
+    font-size: 16px;
+    letter-spacing: 1px;
+    -unity-text-transform: upper;
+}
+
+#FastSimConfirmBox .modal-btn--secondary {
+    border-color: rgb(100, 110, 130);
+    color: rgb(140, 150, 170);
+}
+#FastSimConfirmBox .modal-btn--secondary:hover {
+    background-color: rgba(100, 110, 130, 0.25);
+}
+
+#FastSimConfirmBox .modal-btn--primary {
+    margin-left: 16px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+}
+#FastSimConfirmBox .modal-btn--primary:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
