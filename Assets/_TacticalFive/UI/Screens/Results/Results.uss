@@ -276,7 +276,7 @@
 
 .results-card-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 15px;
+    font-size: 20px;
     letter-spacing: 1px;
     color: rgb(230, 235, 245);
     -unity-text-transform: upper;
@@ -289,7 +289,7 @@
 
 .results-card-record {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 20px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
     -unity-text-align: middle-center;
