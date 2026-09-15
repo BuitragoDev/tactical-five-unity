@@ -54,7 +54,7 @@ public class LoadGameController : UIScreenController
     {
         base.LoadData();
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
+        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         var arenas = Resources.LoadAll<Sprite>("Arenas/");
