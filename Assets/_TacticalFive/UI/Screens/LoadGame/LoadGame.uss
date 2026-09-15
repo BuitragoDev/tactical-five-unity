@@ -143,7 +143,7 @@
 
 .slot-card {
     flex-direction: column;
-    width: 310px;
+    width: 330px;
     background-color: rgb(22, 26, 36);
     border-width: 2px;
     border-color: rgb(42, 51, 71);
@@ -307,7 +307,7 @@
 
 .slot-status-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
 }
@@ -351,7 +351,7 @@
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     padding: 10px 0;
@@ -380,7 +380,7 @@
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
     padding: 10px 0;
