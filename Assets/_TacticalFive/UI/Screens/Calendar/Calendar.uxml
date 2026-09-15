@@ -14,6 +14,14 @@
         <ui:VisualElement class="calendar-main">
 
             <!-- TOP HEADER -->
+            <!-- SCREEN HEADER -->
+            <ui:VisualElement class="calendar-screen-header panel--gold">
+                <ui:VisualElement class="calendar-screen-header-row">
+                    <ui:VisualElement name="CalendarScreenIcon" class="calendar-screen-icon" />
+                    <ui:Label text="CALENDARIO" class="calendar-screen-title" />
+                </ui:VisualElement>
+                <ui:Label name="CalendarSubtitle" text="" class="calendar-screen-subtitle" />
+            </ui:VisualElement>
 
             <!-- CALENDAR CONTENT -->
             <ui:VisualElement class="calendar-content">

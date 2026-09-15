@@ -74,6 +74,15 @@ using System.Linq;
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
+        // ── Screen header icon ──
+        var screenIcon = _root.Q<VisualElement>("CalendarScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/calendario_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         foreach (var s in Resources.LoadAll<Sprite>("Teams/GLeague/32x32"))
             _glLogoSprites32[s.name] = s;
 
