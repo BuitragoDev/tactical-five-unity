@@ -333,10 +333,10 @@
 .btn-load {
     flex-grow: 1;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgba(42, 95, 201, 0.10);
     border-width: 2px;
-    border-color: rgb(39, 174, 96);
-    color: rgb(100, 200, 140);
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
     font-size: 16px;
     letter-spacing: 1px;
     -unity-text-transform: upper;
@@ -348,8 +348,8 @@
 }
 
 .btn-load:hover {
-    background-color: rgba(39, 174, 96, 0.25);
-    color: rgb(150, 220, 180);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 
 .btn-load--disabled {
