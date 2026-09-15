@@ -159,15 +159,17 @@ public class LoadGameController : UIScreenController
             if (manager != null)
                 slot.managerStatus = manager.trust < 10 ? "fired" : "active";
 
-            var team = conn.Table<TeamData>().FirstOrDefault(t => t.id == manager?.team_id);
+            if (manager == null) return;
+            var team = conn.Table<TeamData>().FirstOrDefault(t => t.id == manager.team_id);
             if (team != null)
             {
                 slot.teamLogo = team.logo;
                 slot.teamName = team.name;
                 slot.teamBudget = team.budget;
 
+                int teamId = manager.team_id;
                 slot.teamPayroll = conn.Table<PlayerData>()
-                    .Where(p => p.team_id == team.id && p.is_free_agent == 0)
+                    .Where(p => p.team_id == teamId)
                     .Sum(p => (long?)p.salary) ?? 0;
                 slot.teamChemistry = team.team_chemistry;
             }
