@@ -13,7 +13,14 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="infoleague-main">
 
-            <!-- TOP HEADER -->
+            <!-- SCREEN HEADER -->
+            <ui:VisualElement class="infoleague-screen-header panel--gold">
+                <ui:VisualElement class="infoleague-screen-header-row">
+                    <ui:VisualElement name="InfoLeagueScreenIcon" class="infoleague-screen-icon" />
+                    <ui:Label text="INFORMACIÓN DE LA LIGA" class="infoleague-screen-title" />
+                </ui:VisualElement>
+                <ui:Label name="InfoLeagueSubtitle" text="" class="infoleague-screen-subtitle" />
+            </ui:VisualElement>
 
             <!-- CONTENT -->
             <ui:VisualElement name="InfoLeagueContent" class="infoleague-content">

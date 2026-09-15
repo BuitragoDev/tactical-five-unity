@@ -31,6 +31,20 @@ public class InfoLeagueController : UIScreenController
         _teamsWest = _root.Q<VisualElement>("TeamsWest");
     }
 
+    protected override void LoadData()
+    {
+        base.LoadData();
+
+        // ── Screen header icon ──
+        var screenIcon = _root.Q<VisualElement>("InfoLeagueScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/info_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+    }
+
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
