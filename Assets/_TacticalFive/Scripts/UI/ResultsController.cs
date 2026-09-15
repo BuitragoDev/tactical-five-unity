@@ -619,8 +619,6 @@ public class ResultsController : UIScreenController
         }
         top.Add(statusLbl);
 
-        main.Add(top);
-
         // Body
         var body = new VisualElement();
         body.AddToClassList("results-card-body");
@@ -635,7 +633,11 @@ public class ResultsController : UIScreenController
         body.Add(BuildTeamSide(game.away_team_id, isPlayed, awayOverride, allStarLogo));
 
         main.Add(body);
-        inner.Add(main);
+        inner.Add(top);
+
+        var content = new VisualElement();
+        content.AddToClassList("results-card-content");
+        content.Add(main);
 
         // Chevron + clic (solo partidos jugados)
         if (isPlayed)
@@ -645,13 +647,14 @@ public class ResultsController : UIScreenController
                 var chevron = new VisualElement();
                 chevron.AddToClassList("results-card-chevron");
                 chevron.style.backgroundImage = new StyleBackground(_chevronTex);
-                inner.Add(chevron);
+                content.Add(chevron);
             }
 
             card.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenMatchDetails(game); });
             RegisterHand(card);
         }
 
+        inner.Add(content);
         card.Add(inner);
         return card;
     }
