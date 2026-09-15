@@ -25,11 +25,11 @@
             <!-- DATE NAVIGATOR -->
             <ui:VisualElement class="results-date-nav">
                 <ui:Button name="BtnPrevDate" class="results-nav-btn" text="◀" />
-                <ui:Button name="BtnHoy" class="results-today-btn" text="HOY" />
                 <ui:VisualElement class="results-date-center">
                     <ui:VisualElement name="ResultsDateIcon" class="results-date-icon" />
                     <ui:Label name="CurrentDateLabel" class="results-date-display" text="" />
                 </ui:VisualElement>
+                <ui:Button name="BtnHoy" class="results-today-btn" text="HOY" />
                 <ui:Button name="BtnNextDate" class="results-nav-btn" text="▶" />
             </ui:VisualElement>
 

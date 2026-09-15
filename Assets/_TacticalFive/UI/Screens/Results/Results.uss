@@ -73,6 +73,8 @@
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
     padding: 6px 16px;
+    margin-left: 16px;
+    margin-right: 16px;
     cursor: pointer;
     -unity-text-align: middle-center;
     flex-shrink: 0;
