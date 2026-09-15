@@ -419,11 +419,6 @@ public class UIScreenController : MonoBehaviour
             PlayClick();
             CloseMainMenuConfirmModal();
         });
-        _configMainMenuConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _configMainMenuConfirmOverlay)
-                { PlayClick(); CloseMainMenuConfirmModal(); }
-        });
 
         _configBtnExitYes?.RegisterCallback<ClickEvent>(_ =>
         {
@@ -434,11 +429,6 @@ public class UIScreenController : MonoBehaviour
         {
             PlayClick();
             CloseExitConfirmModal();
-        });
-        _configExitConfirmOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _configExitConfirmOverlay)
-                { PlayClick(); CloseExitConfirmModal(); }
         });
 
         if (CursorManager.Instance != null)

@@ -393,7 +393,7 @@
                     </ui:VisualElement>
                     <ui:VisualElement class="settings-section">
                         <ui:Label text="JUEGO" class="settings-section-title"/>
-                        <ui:Button name="ConfigBtnMainMenu" text="VOLVER AL MENÚ PRINCIPAL" class="settings-btn settings-btn--secondary"/>
+                        <ui:Button name="ConfigBtnMainMenu" text="VOLVER AL MENU PRINCIPAL" class="settings-btn settings-btn--secondary"/>
                         <ui:Button name="ConfigBtnExit" text="SALIR DEL JUEGO" class="settings-btn settings-btn--danger"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
@@ -402,7 +402,7 @@
         </ui:VisualElement>
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
-                <ui:Label text="VOLVER AL MENÚ PRINCIPAL" class="modal-title"/>
+                <ui:Label text="VOLVER AL MENU PRINCIPAL" class="modal-title"/>
                 <ui:VisualElement class="modal-body">
                     <ui:Label text="¿Estás seguro de que quieres volver al menú principal?" class="modal-paragraph modal-paragraph--highlight"/>
                     <ui:Label text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." class="modal-paragraph"/>
