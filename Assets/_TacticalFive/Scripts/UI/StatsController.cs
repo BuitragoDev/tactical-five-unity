@@ -126,15 +126,18 @@ using System.Linq;
     protected override void LoadData()
     {
         base.LoadData();
-
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        
-        
+        // ── Screen header icon ──
+        var screenIcon = _root.Q<VisualElement>("StatsScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/eliminatorias_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
 
-        
-        
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
     protected override void RegisterCallbacks()
