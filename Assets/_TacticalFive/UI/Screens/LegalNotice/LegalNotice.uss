@@ -110,7 +110,8 @@
 .modal-actions {
     flex-direction: row;
     justify-content: flex-end;
-    width: 100%;
+    width: auto;
+    align-self: stretch;
     margin: 8px 20px 16px;
 }
 
