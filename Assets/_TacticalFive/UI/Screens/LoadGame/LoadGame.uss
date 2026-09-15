@@ -228,7 +228,7 @@
 
 .slot-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 22px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
     -unity-text-transform: upper;
@@ -236,7 +236,7 @@
 
 .slot-team-season {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
     margin-top: 2px;
 }
