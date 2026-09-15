@@ -107,6 +107,7 @@ using System.Linq;
                 foreach (var child in panel.Children())
                 {
                     if (child == header) continue;
+                    if (child == _noPlayInText && _playInGames.Count > 0) continue;
                     if (child.style.display == DisplayStyle.None)
                     {
                         isOpen = false;
