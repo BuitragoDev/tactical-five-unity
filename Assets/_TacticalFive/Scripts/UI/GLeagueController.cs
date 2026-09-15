@@ -14,8 +14,6 @@ public class GLeagueController : UIScreenController
     private string _standingsConf = "East";
 
     // ── Página Plantilla (existente) ──
-    private Label _summaryAssigned;
-    private Label _summaryTwoWay;
     private Label _assignedTitle;
     private VisualElement _assignedHeader;
     private VisualElement _assignedBody;
@@ -57,8 +55,6 @@ public class GLeagueController : UIScreenController
         _pageEstadisticas = _root.Q<VisualElement>("PageEstadisticas");
 
         // Plantilla
-        _summaryAssigned = _root.Q<Label>("SummaryAssigned");
-        _summaryTwoWay = _root.Q<Label>("SummaryTwoWay");
         _assignedTitle = _root.Q<Label>("AssignedTitle");
         _assignedHeader = _root.Q<VisualElement>("AssignedHeader");
         _assignedBody = _root.Q<VisualElement>("AssignedBody");
@@ -206,10 +202,6 @@ public class GLeagueController : UIScreenController
 
     void RefreshSummary()
     {
-        if (_summaryAssigned != null)
-            _summaryAssigned.text = _players.Count(p => p.g_league_assigned == 1).ToString();
-        if (_summaryTwoWay != null && _myTeam != null)
-            _summaryTwoWay.text = $"{DatabaseManager.Instance.GetTwoWayCount(_myTeam.id)}/{TradeHelper.MAX_TWO_WAY}";
     }
 
     void BuildAssigned()

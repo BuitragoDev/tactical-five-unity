@@ -38,14 +38,6 @@
 
                     <!-- RESUMEN -->
                     <ui:VisualElement class="gleague-summary">
-                        <ui:VisualElement class="gleague-summary-card">
-                            <ui:Label name="SummaryAssigned" class="gleague-summary-value" text="0" />
-                            <ui:Label class="gleague-summary-label" text="ASIGNADOS A G-LEAGUE" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="gleague-summary-card">
-                            <ui:Label name="SummaryTwoWay" class="gleague-summary-value" text="0" />
-                            <ui:Label class="gleague-summary-label" text="CONTRATOS TWO-WAY" />
-                        </ui:VisualElement>
                         <ui:VisualElement class="gleague-summary-note">
                             <ui:Label class="gleague-summary-note-text" text="Los jugadores asignados a la G-League no juegan en la NBA y mejoran +1 atributo cada 7 días (hasta su potencial)." />
                         </ui:VisualElement>
