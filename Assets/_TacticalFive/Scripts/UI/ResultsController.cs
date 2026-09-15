@@ -750,12 +750,13 @@ public class ResultsController : UIScreenController
         switch (gameType)
         {
             case "preseason": return "PRETEMPORADA";
+            case "regular": return "LIGA REGULAR";
             case "playin": return "PLAY-IN";
             case "playoff": return "PLAYOFFS";
             case "allstar": return "ALL-STAR";
             case "gleague": return "G-LEAGUE";
             case "gleague_playoff": return "G-LEAGUE";
-            default: return "NBA";
+            default: return "LIGA REGULAR";
         }
     }
 

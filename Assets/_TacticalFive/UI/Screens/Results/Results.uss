@@ -65,16 +65,17 @@
 
 .results-today-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
+    width: 100px;
     letter-spacing: 1px;
     color: rgb(100, 150, 230);
     background-color: rgba(42, 95, 201, 0.10);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
-    padding: 8px 16px;
+    padding: 10px 16px;
     margin-left: 10px;
-    margin-right: 10px;
+    margin-right: 17px;
     cursor: pointer;
     -unity-text-align: middle-center;
     flex-shrink: 0;
@@ -214,7 +215,7 @@
 
 .results-card-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(100, 150, 230);
     background-color: rgba(42, 95, 201, 0.18);
@@ -226,7 +227,7 @@
 
 .results-card-date {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     margin-left: 12px;
@@ -235,7 +236,7 @@
 
 .results-card-status {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     margin-left: 14px;
