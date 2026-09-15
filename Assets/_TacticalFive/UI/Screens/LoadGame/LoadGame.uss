@@ -251,7 +251,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    height: 30px;
+    height: 36px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(30, 34, 44);
 }
@@ -262,8 +262,8 @@
 }
 
 .slot-stat-icon {
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     margin-right: 8px;
     background-size: contain;
     background-repeat: no-repeat;
@@ -273,7 +273,7 @@
 
 .slot-stat-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 1px;
     color: rgb(85, 102, 119);
     -unity-text-transform: upper;
@@ -281,7 +281,7 @@
 
 .slot-stat-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
 }
 
