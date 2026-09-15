@@ -406,12 +406,6 @@ public class UIScreenController : MonoBehaviour
         _configBtnQualityUltra?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(3); });
 
         _btnConfigCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseConfigModal(); });
-        _configModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _configModalOverlay)
-                { PlayClick(); CloseConfigModal(); }
-        });
-
         _configBtnMainMenu?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenMainMenuConfirmModal(); });
         _configBtnExit?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenExitConfirmModal(); });
 
