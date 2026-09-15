@@ -413,7 +413,7 @@ public partial class DatabaseManager
         Add(293, "MIN", "Trey",     "Kaufman-Renn",     "PF", 22, "USA", 206, 109, 69, 80, 75, 72, 75, 75, 70, 72, 68, 68, 65, 60, 65,  2000000, 2, true);
         Add(294, "MIN", "Isaiah",   "Evans",            "SG", 19, "USA", 198,  91, 70, 78, 88, 70, 74, 62, 72, 75, 65, 76, 78, 68, 45,  2000000, 2, true);
 
-        // ── NOP ── 18 jugadores
+        // ── NOP ── 17 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(295, "NOP", "Zion",     "Williamson",       "PF", 26, "USA", 201, 129, 85, 90, 69, 91, 79, 89, 84, 94, 84, 94, 74, 74, 72, 60000000, 4, false);
         Add(296, "NOP", "Dejounte", "Murray",           "PG", 30, "USA", 193,  83, 79, 89, 74, 89, 84, 89, 74, 74, 84, 84, 84, 76, 65, 28000000, 3, false);
@@ -431,7 +431,6 @@ public partial class DatabaseManager
         Add(309, "NOP", "Derik",    "Queen",            "PF", 20, "USA", 208, 110, 68, 89, 84, 84, 79, 74, 69, 89, 84, 69, 64, 65, 82,  4000000, 4, false);
         Add(366, "NOP", "Trendon",  "Watford",          "PF", 25, "USA", 203, 104, 77, 83, 82, 71, 80, 78, 80, 76, 72, 78, 80, 81, 69,  2900000, 1, false);
         Add(246, "NOP", "AJ",       "Johnson",          "PG", 21, "USA", 196,  72, 71, 84, 74, 64, 74, 74, 64, 64, 84, 64, 66, 69, 58,  3000000, 4, false);
-        Add(533, "NOP", "Taj",      "Gibson",           "PF", 39, "USA", 206, 108, 74, 72, 60, 70, 40, 66, 70, 80, 82, 80, 78, 82, 6,   2000000, 1, false);
         Add(310, "NOP", "Jaron",    "Pierre Jr.",       "PG", 22, "USA", 191,  86, 63, 79, 74, 59, 69, 74, 64, 54, 64, 69, 51, 59, 60,  2000000, 2, true);
 
         // ── NYK ── 15 jugadores
