@@ -52,7 +52,7 @@ public class ResultsController : UIScreenController
 
     protected override void CacheReferences()
     {
-        _resultsHeaderIcon = _root.Q<VisualElement>("ResultsHeaderIcon");
+        _resultsHeaderIcon = _root.Q<VisualElement>("ResultsScreenIcon");
         _resultsDateIcon = _root.Q<VisualElement>("ResultsDateIcon");
         _btnHoy = _root.Q<Button>("BtnHoy");
 

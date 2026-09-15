@@ -13,21 +13,19 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="results-main">
 
-            <!-- PAGE HEADER -->
-            <ui:VisualElement class="results-header">
-                <ui:VisualElement class="results-header-left">
-                    <ui:VisualElement name="ResultsHeaderIcon" class="results-header-icon" />
-                    <ui:VisualElement class="results-header-text">
-                        <ui:Label class="results-title" text="RESULTADOS" />
-                        <ui:Label class="results-subtitle" text="TODOS LOS PARTIDOS DE LA TEMPORADA" />
-                    </ui:VisualElement>
+            <!-- SCREEN HEADER -->
+            <ui:VisualElement class="results-screen-header panel--gold">
+                <ui:VisualElement class="results-screen-header-row">
+                    <ui:VisualElement name="ResultsScreenIcon" class="results-screen-icon" />
+                    <ui:Label text="RESULTADOS" class="results-screen-title" />
                 </ui:VisualElement>
-                <ui:Button name="BtnHoy" class="results-today-btn" text="Hoy" />
+                <ui:Label name="ResultsSubtitle" text="" class="results-screen-subtitle" />
             </ui:VisualElement>
 
             <!-- DATE NAVIGATOR -->
             <ui:VisualElement class="results-date-nav">
                 <ui:Button name="BtnPrevDate" class="results-nav-btn" text="◀" />
+                <ui:Button name="BtnHoy" class="results-today-btn" text="HOY" />
                 <ui:VisualElement class="results-date-center">
                     <ui:VisualElement name="ResultsDateIcon" class="results-date-icon" />
                     <ui:Label name="CurrentDateLabel" class="results-date-display" text="" />

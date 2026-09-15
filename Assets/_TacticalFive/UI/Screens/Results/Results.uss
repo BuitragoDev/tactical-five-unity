@@ -18,58 +18,61 @@
     min-height: 0;
 }
 
-/* ── PAGE HEADER ── */
+/* ── SCREEN HEADER ── */
 
-.results-header {
+.results-screen-header.panel--gold {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 16px 20px 12px 20px;
+    border-color: rgb(212, 160, 23);
+    border-width: 1px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.results-screen-header-row {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    padding: 18px 28px 4px;
+    padding: 5px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+}
+.results-screen-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
     flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
-
-.results-header-left {
-    flex-direction: row;
-    align-items: center;
-}
-
-.results-header-icon {
-    width: 48px;
-    height: 48px;
-    margin-right: 16px;
-    flex-shrink: 0;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.results-header-text {
-    flex-direction: column;
-}
-
-.results-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 34px;
-    letter-spacing: 2px;
+.results-screen-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
     color: rgb(255, 255, 255);
+    flex-grow: 1;
+    white-space: normal;
 }
-
-.results-subtitle {
+.results-screen-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 1px;
-    color: rgb(122, 138, 170);
-    margin-top: -4px;
+    color: rgb(212, 160, 23);
+    padding: 0 14px;
+    background-color: rgba(120, 95, 30, 0.15);
 }
 
 .results-today-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(100, 150, 230);
     background-color: rgba(42, 95, 201, 0.10);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
-    padding: 8px 28px;
+    padding: 6px 16px;
     cursor: pointer;
     -unity-text-align: middle-center;
     flex-shrink: 0;
