@@ -36,13 +36,6 @@
                 <!-- ══ PÁGINA 1 · PLANTILLA ══ -->
                 <ui:VisualElement name="PagePlantilla" class="gleague-page">
 
-                    <!-- RESUMEN -->
-                    <ui:VisualElement class="gleague-summary">
-                        <ui:VisualElement class="gleague-summary-note">
-                            <ui:Label class="gleague-summary-note-text" text="Los jugadores asignados a la G-League no juegan en la NBA y mejoran +1 atributo cada 7 días (hasta su potencial)." />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-
                     <ui:VisualElement class="gleague-tables-row">
                     <!-- ASIGNADOS -->
                     <ui:VisualElement name="AssignedPanel" class="stats-panel">

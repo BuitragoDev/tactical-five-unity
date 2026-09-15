@@ -70,59 +70,6 @@
     padding: 16px 24px;
 }
 
-/* ══ RESUMEN ══ */
-
-.gleague-summary {
-    flex-direction: row;
-    align-items: center;
-    flex-shrink: 0;
-    margin-bottom: 12px;
-    padding: 8px 4px;
-    border-bottom-width: 1px;
-    border-bottom-color: rgb(28, 33, 48);
-}
-
-.gleague-summary-card {
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 24px;
-    margin-right: 16px;
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 4px;
-    flex-shrink: 0;
-}
-
-.gleague-summary-value {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 28px;
-    color: rgb(212, 160, 23);
-    -unity-text-align: middle-center;
-}
-
-.gleague-summary-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
-    letter-spacing: 1px;
-    color: rgb(85, 102, 119);
-    -unity-text-align: middle-center;
-}
-
-.gleague-summary-note {
-    flex-direction: row;
-    align-items: center;
-    flex-grow: 1;
-    margin-left: 8px;
-}
-
-.gleague-summary-note-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
-    color: rgb(122, 138, 170);
-    white-space: normal;
-}
-
 /* ══ PANELES (2 columnas lado a lado) ══ */
 
 .gleague-tables-row {
