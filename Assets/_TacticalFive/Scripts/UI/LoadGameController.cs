@@ -111,6 +111,7 @@ public class LoadGameController : UIScreenController
         var allSlots = GameSaveManager.GetAllSlots();
         var existingSlots = allSlots
             .Where(s => s.exists && !string.IsNullOrEmpty(s.managerName) && !string.IsNullOrEmpty(s.teamName))
+            .OrderByDescending(s => ParseSlotDate(s.lastPlayedRealDate))
             .ToList();
 
         if (existingSlots.Count == 0)
@@ -202,31 +203,6 @@ public class LoadGameController : UIScreenController
     {
         var card = new VisualElement();
         card.AddToClassList("slot-card");
-
-        // ── Header: date + season ──
-        var header = new VisualElement();
-        header.AddToClassList("slot-card-header");
-
-        var dateGroup = new VisualElement();
-        dateGroup.AddToClassList("slot-date-group");
-
-        if (_calendarTex != null)
-        {
-            var calIcon = new VisualElement();
-            calIcon.AddToClassList("slot-date-icon");
-            calIcon.style.backgroundImage = new StyleBackground(_calendarTex);
-            dateGroup.Add(calIcon);
-        }
-
-        var dateLbl = new Label { text = FormatDate(slot.currentDate) };
-        dateLbl.AddToClassList("slot-date-text");
-        dateGroup.Add(dateLbl);
-        header.Add(dateGroup);
-
-        var seasonLbl = new Label { text = $"TEMP. {slot.seasonYear}" };
-        seasonLbl.AddToClassList("slot-season-text");
-        header.Add(seasonLbl);
-        card.Add(header);
 
         // ── Arena photo ──
         var arenaPhoto = new VisualElement();
@@ -324,6 +300,26 @@ public class LoadGameController : UIScreenController
         actions.Add(deleteBtn);
         card.Add(actions);
 
+        // ── Last saved date ──
+        if (!string.IsNullOrEmpty(slot.lastPlayedRealDate))
+        {
+            var savedDateRow = new VisualElement();
+            savedDateRow.AddToClassList("slot-saved-date-row");
+
+            if (_calendarTex != null)
+            {
+                var calIcon = new VisualElement();
+                calIcon.AddToClassList("slot-saved-date-icon");
+                calIcon.style.backgroundImage = new StyleBackground(_calendarTex);
+                savedDateRow.Add(calIcon);
+            }
+
+            var savedDateLbl = new Label { text = FormatSavedDate(slot.lastPlayedRealDate) };
+            savedDateLbl.AddToClassList("slot-saved-date-text");
+            savedDateRow.Add(savedDateLbl);
+            card.Add(savedDateRow);
+        }
+
         return card;
     }
 
@@ -392,19 +388,31 @@ public class LoadGameController : UIScreenController
         _slotsPaginator.Add(btnNext);
     }
 
-    string FormatDate(string date)
-    {
-        if (string.IsNullOrEmpty(date)) return "---";
-        if (System.DateTime.TryParse(date, out var dt))
-            return dt.ToString("dd MMM yyyy").ToUpper();
-        return date;
-    }
-
     string FormatMoney(long amount)
     {
         if (amount >= 1_000_000)
             return $"${amount / 1_000_000}M";
         return $"${amount:N0}";
+    }
+
+    string FormatSavedDate(string date)
+    {
+        if (string.IsNullOrEmpty(date)) return "";
+        if (System.DateTime.TryParseExact(date, "dd/MM/yyyy HH:mm",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var dt))
+            return dt.ToString("dd/MM/yyyy  HH:mm");
+        return date;
+    }
+
+    static System.DateTime ParseSlotDate(string date)
+    {
+        if (string.IsNullOrEmpty(date)) return System.DateTime.MinValue;
+        if (System.DateTime.TryParseExact(date, "dd/MM/yyyy HH:mm",
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None, out var dt))
+            return dt;
+        return System.DateTime.MinValue;
     }
 
     void OnLoadSlot(int slotNumber)

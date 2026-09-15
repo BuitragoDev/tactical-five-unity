@@ -157,43 +157,29 @@
     border-color: rgb(85, 102, 119);
 }
 
-/* Card header: date + season */
-.slot-card-header {
+/* Saved date footer */
+.slot-saved-date-row {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
+    justify-content: center;
+    padding: 8px 16px 10px;
 }
 
-.slot-date-group {
-    flex-direction: row;
-    align-items: center;
-}
-
-.slot-date-icon {
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
+.slot-saved-date-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 6px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
-.slot-date-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 1px;
-    color: rgb(208, 216, 232);
-    -unity-text-transform: upper;
-}
-
-.slot-season-text {
+.slot-saved-date-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 13px;
     letter-spacing: 1px;
-    color: rgb(85, 102, 119);
-    -unity-text-transform: upper;
+    color: rgb(65, 75, 95);
 }
 
 /* Arena photo */
