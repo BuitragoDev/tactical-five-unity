@@ -13,6 +13,15 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="gleague-main">
 
+            <!-- SCREEN HEADER -->
+            <ui:VisualElement class="gleague-screen-header panel--gold">
+                <ui:VisualElement class="gleague-screen-header-row">
+                    <ui:VisualElement name="GLeagueScreenIcon" class="gleague-screen-icon" />
+                    <ui:Label text="LIGA DE DESARROLLO G-LEAGUE" class="gleague-screen-title" />
+                </ui:VisualElement>
+                <ui:Label name="GLeagueSubtitle" text="" class="gleague-screen-subtitle" />
+            </ui:VisualElement>
+
             <!-- CONTENT -->
             <ui:VisualElement name="GLeagueContent" class="gleague-content">
 

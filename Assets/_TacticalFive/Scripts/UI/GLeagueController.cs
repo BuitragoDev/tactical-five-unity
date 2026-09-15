@@ -95,6 +95,15 @@ public class GLeagueController : UIScreenController
             ? DatabaseManager.Instance.GetAllGLeagueSeasonStats(_season.id)
             : new List<GLeagueSeasonStat>();
 
+        // ── Screen header icon ──
+        var screenIcon = _root.Q<VisualElement>("GLeagueScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/desarrollo_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         foreach (var s in Resources.LoadAll<Sprite>("Teams/GLeague/32x32"))
             _glLogos[s.name] = s;
 
