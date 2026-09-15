@@ -13,4 +13,11 @@ public class SaveSlotInfo
     public string lastPlayedRealDate;
     public int currentGameDay;
     public string gameMode;
+
+    // LoadGame card data
+    public int teamId;
+    public long teamBudget;
+    public long teamPayroll;
+    public int teamChemistry;
+    public string managerStatus;
 }

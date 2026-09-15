@@ -189,6 +189,23 @@ public static class GameSaveManager
             slot.currentDate = "";
         }
 
+        // ── LoadGame card data ──
+        slot.teamId = team?.id ?? 0;
+        slot.teamBudget = team?.budget ?? 0;
+        slot.teamChemistry = team?.team_chemistry ?? 50;
+        slot.managerStatus = (manager?.trust ?? 100) < 10 ? "fired" : "active";
+
+        // Payroll: sum of all player salaries on the team
+        if (slot.teamId > 0)
+        {
+            var players = DatabaseManager.Instance.GetPlayersByTeam(slot.teamId);
+            slot.teamPayroll = 0;
+            foreach (var p in players)
+                slot.teamPayroll += p.salary;
+        }
+        else
+            slot.teamPayroll = 0;
+
         SaveSlotInfo(slot);
     }
 

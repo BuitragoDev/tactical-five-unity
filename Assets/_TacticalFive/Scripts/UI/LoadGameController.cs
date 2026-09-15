@@ -5,9 +5,10 @@ using System.Linq;
 
 public class LoadGameController : UIScreenController
 {
-    private VisualElement _slotsContainer;
-    private VisualElement _emptyState;
+    private VisualElement _slotsGrid;
     private VisualElement _slotsArea;
+    private VisualElement _slotsPaginator;
+    private VisualElement _emptyState;
     private Button _btnBack;
 
     private VisualElement _deleteModalOverlay;
@@ -16,8 +17,16 @@ public class LoadGameController : UIScreenController
     private Button _btnDeleteNo;
 
     private int _pendingDeleteSlot = -1;
+    private int _currentPage;
+    private const int CARDS_PER_PAGE = 4;
 
     private Dictionary<string, Sprite> _logoSprites = new();
+    private Dictionary<string, Sprite> _arenaSprites = new();
+    private Sprite _defaultArenaSprite;
+    private Texture2D _calendarTex;
+    private Texture2D _budgetTex;
+    private Texture2D _payrollTex;
+    private Texture2D _chemistryTex;
 
     protected override void OnEnable()
     {
@@ -27,9 +36,10 @@ public class LoadGameController : UIScreenController
 
     protected override void CacheReferences()
     {
-        _slotsContainer = _root.Q<VisualElement>("SlotsContainer");
+        _slotsGrid = _root.Q<VisualElement>("SlotsGrid");
+        _slotsArea = _root.Q<VisualElement>("SlotsArea");
+        _slotsPaginator = _root.Q<VisualElement>("SlotsPaginator");
         _emptyState = _root.Q<VisualElement>("EmptyState");
-        _slotsArea = _root.Q<VisualElement>("SlotsScrollView").parent;
         _btnBack = _root.Q<Button>("BtnBack");
 
         _deleteModalOverlay = _root.Q<VisualElement>("DeleteModalOverlay");
@@ -45,6 +55,15 @@ public class LoadGameController : UIScreenController
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
         foreach (var s in logos) _logoSprites[s.name] = s;
 
+        var arenas = Resources.LoadAll<Sprite>("Arenas/");
+        foreach (var s in arenas) _arenaSprites[s.name] = s;
+        _defaultArenaSprite = Resources.Load<Sprite>("Arenas/default");
+
+        _calendarTex = Resources.Load<Texture2D>("Icons/calendario");
+        _budgetTex = Resources.Load<Texture2D>("Icons/finanzas");
+        _payrollTex = Resources.Load<Texture2D>("Icons/contrato");
+        _chemistryTex = Resources.Load<Texture2D>("Icons/quimica");
+
         GameSaveManager.CleanupAllOrphanDbs();
     }
 
@@ -52,7 +71,6 @@ public class LoadGameController : UIScreenController
     {
         _btnBack?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
 
-        // Modal borrar partida
         _btnDeleteYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmDelete(); });
         _btnDeleteNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseDeleteModal(); });
         _deleteModalOverlay?.RegisterCallback<ClickEvent>(e =>
@@ -61,7 +79,6 @@ public class LoadGameController : UIScreenController
                 { PlayClick(); CloseDeleteModal(); }
         });
 
-        // Escape para cerrar modal
         _root.focusable = true;
         _root.Focus();
         _root.RegisterCallback<KeyDownEvent>(e =>
@@ -70,7 +87,6 @@ public class LoadGameController : UIScreenController
                 CloseDeleteModal();
         });
 
-        // Cursores
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(_btnBack);
@@ -81,15 +97,16 @@ public class LoadGameController : UIScreenController
 
     protected override void Refresh()
     {
+        _currentPage = 0;
         RefreshSlots();
     }
 
     void RefreshSlots()
     {
-        _slotsContainer.Clear();
+        _slotsGrid.Clear();
+        _slotsPaginator.Clear();
 
         var allSlots = GameSaveManager.GetAllSlots();
-        // Solo slots verdaderamente válidos: exists + managerName + teamName
         var existingSlots = allSlots
             .Where(s => s.exists && !string.IsNullOrEmpty(s.managerName) && !string.IsNullOrEmpty(s.teamName))
             .ToList();
@@ -97,6 +114,7 @@ public class LoadGameController : UIScreenController
         if (existingSlots.Count == 0)
         {
             _slotsArea.style.display = DisplayStyle.None;
+            _slotsPaginator.style.display = DisplayStyle.None;
             _emptyState.style.display = DisplayStyle.Flex;
             return;
         }
@@ -104,11 +122,21 @@ public class LoadGameController : UIScreenController
         _slotsArea.style.display = DisplayStyle.Flex;
         _emptyState.style.display = DisplayStyle.None;
 
-        foreach (var slot in existingSlots)
+        int totalPages = Mathf.CeilToInt((float)existingSlots.Count / CARDS_PER_PAGE);
+        if (_currentPage >= totalPages) _currentPage = totalPages - 1;
+        if (_currentPage < 0) _currentPage = 0;
+
+        int start = _currentPage * CARDS_PER_PAGE;
+        int end = Mathf.Min(start + CARDS_PER_PAGE, existingSlots.Count);
+
+        for (int i = start; i < end; i++)
         {
-            var card = CreateSlotCard(slot);
-            _slotsContainer.Add(card);
+            var card = CreateSlotCard(existingSlots[i]);
+            _slotsGrid.Add(card);
         }
+
+        if (totalPages > 1)
+            BuildPaginator(totalPages);
     }
 
     VisualElement CreateSlotCard(SaveSlotInfo slot)
@@ -116,57 +144,101 @@ public class LoadGameController : UIScreenController
         var card = new VisualElement();
         card.AddToClassList("slot-card");
 
-        // Team Logo
+        // ── Header: date + season ──
+        var header = new VisualElement();
+        header.AddToClassList("slot-card-header");
+
+        var dateGroup = new VisualElement();
+        dateGroup.AddToClassList("slot-date-group");
+
+        if (_calendarTex != null)
+        {
+            var calIcon = new VisualElement();
+            calIcon.AddToClassList("slot-date-icon");
+            calIcon.style.backgroundImage = new StyleBackground(_calendarTex);
+            dateGroup.Add(calIcon);
+        }
+
+        var dateLbl = new Label { text = FormatDate(slot.currentDate) };
+        dateLbl.AddToClassList("slot-date-text");
+        dateGroup.Add(dateLbl);
+        header.Add(dateGroup);
+
+        var seasonLbl = new Label { text = $"TEMP. {slot.seasonYear}" };
+        seasonLbl.AddToClassList("slot-season-text");
+        header.Add(seasonLbl);
+        card.Add(header);
+
+        // ── Arena photo ──
+        var arenaPhoto = new VisualElement();
+        arenaPhoto.AddToClassList("slot-arena-photo");
+        if (!string.IsNullOrEmpty(slot.teamLogo))
+        {
+            Sprite arenaSpr = null;
+            string key = slot.teamLogo;
+            if (key == "sixers") key = "76ers";
+            _arenaSprites.TryGetValue(key, out arenaSpr);
+            if (arenaSpr == null) arenaSpr = _defaultArenaSprite;
+            if (arenaSpr != null)
+                arenaPhoto.style.backgroundImage = new StyleBackground(arenaSpr);
+        }
+        card.Add(arenaPhoto);
+
+        // ── Team section: logo + name ──
+        var teamSection = new VisualElement();
+        teamSection.AddToClassList("slot-team-section");
+
         var logoElem = new VisualElement();
         logoElem.AddToClassList("slot-team-logo");
-        if (!string.IsNullOrEmpty(slot.teamLogo) && _logoSprites.TryGetValue(slot.teamLogo, out var sprite))
-        {
-            logoElem.style.backgroundImage = new StyleBackground(sprite);
-        }
-        card.Add(logoElem);
+        if (!string.IsNullOrEmpty(slot.teamLogo) && _logoSprites.TryGetValue(slot.teamLogo, out var logoSpr))
+            logoElem.style.backgroundImage = new StyleBackground(logoSpr);
+        teamSection.Add(logoElem);
 
-        // Info Block
-        var info = new VisualElement();
-        info.AddToClassList("slot-info");
+        var teamInfo = new VisualElement();
+        teamInfo.AddToClassList("slot-team-info");
 
-        var managerLbl = new Label { text = slot.managerName ?? "Manager" };
-        managerLbl.AddToClassList("slot-manager");
-        info.Add(managerLbl);
+        var teamNameLbl = new Label { text = slot.teamName ?? "Sin equipo" };
+        teamNameLbl.AddToClassList("slot-team-name");
+        teamInfo.Add(teamNameLbl);
 
-        var teamLbl = new Label { text = slot.teamName ?? "Sin equipo" };
-        teamLbl.AddToClassList("slot-team-name");
-        info.Add(teamLbl);
+        var teamSeasonLbl = new Label { text = $"Temporada {slot.seasonYear}" };
+        teamSeasonLbl.AddToClassList("slot-team-season");
+        teamInfo.Add(teamSeasonLbl);
+        teamSection.Add(teamInfo);
+        card.Add(teamSection);
 
-        string metaText = $"Temporada {slot.seasonYear}";
-        if (slot.currentGameDay > 0)
-            metaText += $"  ·  Día {slot.currentGameDay}";
-        var metaLbl = new Label { text = metaText };
-        metaLbl.AddToClassList("slot-meta");
-        info.Add(metaLbl);
+        // ── Stats ──
+        var stats = new VisualElement();
+        stats.AddToClassList("slot-stats");
 
-        if (!string.IsNullOrEmpty(slot.currentDate))
-        {
-            var dateLbl = new Label { text = $"Fecha: {slot.currentDate}" };
-            dateLbl.AddToClassList("slot-date");
-            info.Add(dateLbl);
-        }
+        stats.Add(BuildStatRow(_budgetTex, "PRESUPUESTO", FormatMoney(slot.teamBudget)));
+        stats.Add(BuildStatRow(_payrollTex, "MASA SALARIAL", FormatMoney(slot.teamPayroll)));
+        stats.Add(BuildStatRow(_chemistryTex, "QUÍMICA DE EQUIPO", $"{slot.teamChemistry}%"));
+        card.Add(stats);
 
-        if (!string.IsNullOrEmpty(slot.lastPlayedRealDate))
-        {
-            var realDateLbl = new Label { text = $"Última sesión: {slot.lastPlayedRealDate}" };
-            realDateLbl.AddToClassList("slot-date");
-            info.Add(realDateLbl);
-        }
+        // ── Status badge ──
+        bool isFired = slot.managerStatus == "fired";
+        var badge = new VisualElement();
+        badge.AddToClassList("slot-status-badge");
+        badge.AddToClassList(isFired ? "slot-status-badge--fired" : "slot-status-badge--active");
 
-        card.Add(info);
+        var dot = new VisualElement();
+        dot.AddToClassList("slot-status-dot");
+        badge.Add(dot);
 
-        // Actions
+        var statusLbl = new Label { text = isFired ? "DESPEDIDO" : "ACTIVO" };
+        statusLbl.AddToClassList("slot-status-label");
+        badge.Add(statusLbl);
+        card.Add(badge);
+
+        // ── Actions ──
         var actions = new VisualElement();
         actions.AddToClassList("slot-actions");
 
         var loadBtn = new Button { text = "CARGAR" };
         loadBtn.AddToClassList("btn-load");
-        loadBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadSlot(slot.slotNumber); });
+        int slotNum = slot.slotNumber;
+        loadBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadSlot(slotNum); });
         if (CursorManager.Instance != null)
         {
             loadBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
@@ -176,24 +248,102 @@ public class LoadGameController : UIScreenController
 
         var deleteBtn = new Button { text = "BORRAR" };
         deleteBtn.AddToClassList("btn-delete");
-        deleteBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnDeleteSlot(slot.slotNumber); });
+        deleteBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnDeleteSlot(slotNum); });
         if (CursorManager.Instance != null)
         {
             deleteBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
             deleteBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
         }
         actions.Add(deleteBtn);
-
         card.Add(actions);
+
         return card;
+    }
+
+    VisualElement BuildStatRow(Texture2D icon, string label, string value)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("slot-stat-row");
+
+        var left = new VisualElement();
+        left.AddToClassList("slot-stat-left");
+
+        if (icon != null)
+        {
+            var iconElem = new VisualElement();
+            iconElem.AddToClassList("slot-stat-icon");
+            iconElem.style.backgroundImage = new StyleBackground(icon);
+            left.Add(iconElem);
+        }
+
+        var lbl = new Label { text = label };
+        lbl.AddToClassList("slot-stat-label");
+        left.Add(lbl);
+        row.Add(left);
+
+        var valLbl = new Label { text = value };
+        valLbl.AddToClassList("slot-stat-value");
+        row.Add(valLbl);
+
+        return row;
+    }
+
+    void BuildPaginator(int totalPages)
+    {
+        _slotsPaginator.style.display = DisplayStyle.Flex;
+
+        var btnPrev = new Button { text = "\u25C0" };
+        btnPrev.AddToClassList("loadgame-paginator-btn");
+        btnPrev.SetEnabled(_currentPage > 0);
+        if (_currentPage == 0) btnPrev.AddToClassList("loadgame-paginator-btn--disabled");
+        int prevPage = _currentPage - 1;
+        btnPrev.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _currentPage = prevPage;
+            RefreshSlots();
+        });
+        CursorManager.Instance?.RegisterHandCursor(btnPrev);
+        _slotsPaginator.Add(btnPrev);
+
+        var pageLabel = new Label($"{_currentPage + 1} / {totalPages}");
+        pageLabel.AddToClassList("loadgame-paginator-label");
+        _slotsPaginator.Add(pageLabel);
+
+        var btnNext = new Button { text = "\u25B6" };
+        btnNext.AddToClassList("loadgame-paginator-btn");
+        btnNext.SetEnabled(_currentPage < totalPages - 1);
+        if (_currentPage >= totalPages - 1) btnNext.AddToClassList("loadgame-paginator-btn--disabled");
+        int nextPage = _currentPage + 1;
+        btnNext.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _currentPage = nextPage;
+            RefreshSlots();
+        });
+        CursorManager.Instance?.RegisterHandCursor(btnNext);
+        _slotsPaginator.Add(btnNext);
+    }
+
+    string FormatDate(string date)
+    {
+        if (string.IsNullOrEmpty(date)) return "---";
+        if (System.DateTime.TryParse(date, out var dt))
+            return dt.ToString("dd MMM yyyy").ToUpper();
+        return date;
+    }
+
+    string FormatMoney(long amount)
+    {
+        if (amount >= 1_000_000)
+            return $"${amount / 1_000_000}M";
+        return $"${amount:N0}";
     }
 
     void OnLoadSlot(int slotNumber)
     {
         DatabaseManager.Instance.InitSaveSlot(slotNumber);
         GameSaveManager.UpdateSlotFromDatabase(slotNumber);
-
-        // Ir al dashboard (continuar la partida donde se quedó)
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }
 
