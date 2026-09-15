@@ -132,6 +132,9 @@ using System.Linq;
                         if (child == header) continue;
                         child.style.display = DisplayStyle.Flex;
                     }
+                    // Re-hide "no disponible" text if Play-In games exist
+                    if (panel == _playInPanel && _playInGames.Count > 0)
+                        _noPlayInText.style.display = DisplayStyle.None;
                     if (_scrollView != null) _scrollView.scrollOffset = Vector2.zero;
                 }
 
