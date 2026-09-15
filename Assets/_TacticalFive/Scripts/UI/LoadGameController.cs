@@ -203,22 +203,9 @@ public class LoadGameController : UIScreenController
         var card = new VisualElement();
         card.AddToClassList("slot-card");
 
-        // ── Arena photo + date/season overlay ──
-        var arenaPhoto = new VisualElement();
-        arenaPhoto.AddToClassList("slot-arena-photo");
-        if (!string.IsNullOrEmpty(slot.teamLogo))
-        {
-            Sprite arenaSpr = null;
-            string key = slot.teamLogo;
-            if (key == "sixers") key = "76ers";
-            _arenaSprites.TryGetValue(key, out arenaSpr);
-            if (arenaSpr == null) arenaSpr = _defaultArenaSprite;
-            if (arenaSpr != null)
-                arenaPhoto.style.backgroundImage = new StyleBackground(arenaSpr);
-        }
-
-        var overlay = new VisualElement();
-        overlay.AddToClassList("slot-arena-overlay");
+        // ── Header: date + season ──
+        var header = new VisualElement();
+        header.AddToClassList("slot-card-header");
 
         var dateGroup = new VisualElement();
         dateGroup.AddToClassList("slot-date-group");
@@ -234,13 +221,26 @@ public class LoadGameController : UIScreenController
         var dateLbl = new Label { text = FormatDate(slot.currentDate) };
         dateLbl.AddToClassList("slot-date-text");
         dateGroup.Add(dateLbl);
-        overlay.Add(dateGroup);
+        header.Add(dateGroup);
 
         var seasonLbl = new Label { text = $"TEMP. {slot.seasonYear}" };
         seasonLbl.AddToClassList("slot-season-text");
-        overlay.Add(seasonLbl);
+        header.Add(seasonLbl);
+        card.Add(header);
 
-        arenaPhoto.Add(overlay);
+        // ── Arena photo ──
+        var arenaPhoto = new VisualElement();
+        arenaPhoto.AddToClassList("slot-arena-photo");
+        if (!string.IsNullOrEmpty(slot.teamLogo))
+        {
+            Sprite arenaSpr = null;
+            string key = slot.teamLogo;
+            if (key == "sixers") key = "76ers";
+            _arenaSprites.TryGetValue(key, out arenaSpr);
+            if (arenaSpr == null) arenaSpr = _defaultArenaSprite;
+            if (arenaSpr != null)
+                arenaPhoto.style.backgroundImage = new StyleBackground(arenaSpr);
+        }
         card.Add(arenaPhoto);
 
         // ── Team section: logo + name ──
