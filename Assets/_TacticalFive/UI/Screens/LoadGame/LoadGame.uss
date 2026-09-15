@@ -96,7 +96,7 @@
 
 .loadgame-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 36px;
+    font-size: 48px;
     letter-spacing: 4px;
     -unity-text-transform: upper;
     color: rgb(208, 216, 232);
@@ -177,7 +177,7 @@
 
 .slot-saved-date-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 18px;
     letter-spacing: 1px;
     color: rgb(65, 75, 95);
 }
