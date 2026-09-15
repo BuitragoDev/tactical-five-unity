@@ -345,7 +345,7 @@
 
 /* ── MODAL FAST SIM ── */
 #FastSimConfirmBox {
-    width: 520px;
+    width: 620px;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
