@@ -4,6 +4,14 @@
     <Style src="../LegalNotice/LegalNotice.uss" />
     <ui:VisualElement name="PlayoffsRoot" class="playoffs-root">
         <ui:VisualElement class="playoffs-main">
+            <!-- SCREEN HEADER -->
+            <ui:VisualElement class="playoffs-screen-header panel--gold">
+                <ui:VisualElement class="playoffs-screen-header-row">
+                    <ui:VisualElement name="PlayoffsScreenIcon" class="playoffs-screen-icon" />
+                    <ui:Label text="ELIMINATORIAS DE PLAY-IN Y PLAYOFF" class="playoffs-screen-title" />
+                </ui:VisualElement>
+                <ui:Label name="PlayoffsSubtitle" text="" class="playoffs-screen-subtitle" />
+            </ui:VisualElement>
             <ui:VisualElement class="playoffs-body">
                 <ui:ScrollView name="PlayoffsScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="playoffs-scroll">
                     <ui:VisualElement name="RegularSeasonEmpty" class="bracket-empty" style="display: none;">
