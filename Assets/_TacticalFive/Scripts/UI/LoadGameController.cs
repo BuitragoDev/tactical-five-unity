@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using SQLite;
 
 public class LoadGameController : UIScreenController
 {
@@ -122,6 +124,9 @@ public class LoadGameController : UIScreenController
         _slotsArea.style.display = DisplayStyle.Flex;
         _emptyState.style.display = DisplayStyle.None;
 
+        foreach (var slot in existingSlots)
+            RefreshSlotStatus(slot);
+
         int totalPages = Mathf.CeilToInt((float)existingSlots.Count / CARDS_PER_PAGE);
         if (_currentPage >= totalPages) _currentPage = totalPages - 1;
         if (_currentPage < 0) _currentPage = 0;
@@ -137,6 +142,40 @@ public class LoadGameController : UIScreenController
 
         if (totalPages > 1)
             BuildPaginator(totalPages);
+    }
+
+    void RefreshSlotStatus(SaveSlotInfo slot)
+    {
+        try
+        {
+            string dbPath = GameSaveManager.GetSaveDbPath(slot.slotNumber);
+            if (!File.Exists(dbPath)) return;
+
+            using var conn = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadOnly);
+            var manager = conn.Table<ManagerData>()
+                .OrderByDescending(m => m.id)
+                .FirstOrDefault();
+
+            if (manager != null)
+                slot.managerStatus = manager.trust < 10 ? "fired" : "active";
+
+            var team = conn.Table<TeamData>().FirstOrDefault(t => t.id == manager?.team_id);
+            if (team != null)
+            {
+                slot.teamLogo = team.logo;
+                slot.teamName = team.name;
+                slot.teamBudget = team.budget;
+
+                slot.teamPayroll = conn.Table<PlayerData>()
+                    .Where(p => p.team_id == team.id && p.is_free_agent == 0)
+                    .Sum(p => (long?)p.salary) ?? 0;
+                slot.teamChemistry = team.team_chemistry;
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[LoadGame] No se pudo leer el estado del slot {slot.slotNumber}: {ex.Message}");
+        }
     }
 
     VisualElement CreateSlotCard(SaveSlotInfo slot)
@@ -238,7 +277,15 @@ public class LoadGameController : UIScreenController
         var loadBtn = new Button { text = "CARGAR" };
         loadBtn.AddToClassList("btn-load");
         int slotNum = slot.slotNumber;
-        loadBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadSlot(slotNum); });
+        if (isFired)
+        {
+            loadBtn.SetEnabled(false);
+            loadBtn.AddToClassList("btn-load--disabled");
+        }
+        else
+        {
+            loadBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnLoadSlot(slotNum); });
+        }
         if (CursorManager.Instance != null)
         {
             loadBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
@@ -342,6 +389,20 @@ public class LoadGameController : UIScreenController
 
     void OnLoadSlot(int slotNumber)
     {
+        try
+        {
+            string dbPath = GameSaveManager.GetSaveDbPath(slotNumber);
+            if (File.Exists(dbPath))
+            {
+                using var conn = new SQLiteConnection(dbPath, SQLiteOpenFlags.ReadOnly);
+                var mgr = conn.Table<ManagerData>()
+                    .OrderByDescending(m => m.id)
+                    .FirstOrDefault();
+                if (mgr != null && mgr.trust < 10) return;
+            }
+        }
+        catch (System.Exception) { }
+
         DatabaseManager.Instance.InitSaveSlot(slotNumber);
         GameSaveManager.UpdateSlotFromDatabase(slotNumber);
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
