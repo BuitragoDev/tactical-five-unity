@@ -1791,6 +1791,50 @@
     color: rgb(240, 145, 125);
 }
 
+/* ══ EXIT CONFIRM MODAL (rojo) ══ */
+#ConfigExitConfirmBox {
+    width: 520px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(192, 57, 43);
+    border-radius: 12px;
+    padding: 0;
+    overflow: hidden;
+}
+#ConfigExitConfirmBox .modal-title {
+    padding: 10px 24px;
+    background-color: rgba(192, 57, 43, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(192, 57, 43);
+}
+#ConfigExitConfirmBox .modal-actions {
+    width: auto;
+    align-self: stretch;
+    justify-content: space-between;
+}
+#ConfigBtnExitYes {
+    flex-grow: 1;
+    min-width: 0;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+#ConfigBtnExitYes:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
+}
+#ConfigBtnExitNo {
+    flex-grow: 1;
+    min-width: 0;
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
+}
+#ConfigBtnExitNo:hover {
+    background-color: rgba(100, 110, 130, 0.25);
+    color: rgb(200, 210, 230);
+}
+
 /* ══ TRADE OFFER MODAL (moderno) ══ */
 
 .trade-modal-box {
