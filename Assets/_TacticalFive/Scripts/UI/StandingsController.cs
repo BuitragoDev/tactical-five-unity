@@ -59,12 +59,15 @@ using System.Linq;
 
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
+        // ── Screen header icon ──
+        var screenIcon = _root.Q<VisualElement>("StandingsScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/clasificacion_icon");
+            if (iconTex != null)
+                screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
 
-        
-        
-
-        
-        
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
 
