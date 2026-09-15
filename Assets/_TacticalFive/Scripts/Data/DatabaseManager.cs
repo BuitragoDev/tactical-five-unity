@@ -466,8 +466,8 @@ public partial class DatabaseManager : MonoBehaviour
         }
 
         // Add is_fired to managers if missing
-        var managerCols = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");
-        if (managerCols.Count > 0 && !managerCols.Any(c => c.name == "is_fired"))
+        var managerColsFired = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");
+        if (managerColsFired.Count > 0 && !managerColsFired.Any(c => c.name == "is_fired"))
         {
             _db.Execute("ALTER TABLE managers ADD COLUMN is_fired INTEGER DEFAULT 0");
             Debug.Log("[DB] Migration: added is_fired to managers");
