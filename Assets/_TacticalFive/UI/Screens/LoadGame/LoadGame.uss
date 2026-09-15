@@ -122,9 +122,8 @@
 .slots-area {
     flex-grow: 1;
     width: 100%;
-    max-width: 1400px;
-    align-self: center;
-    padding: 0 40px;
+    align-self: stretch;
+    padding: 0 20px;
     overflow: hidden;
 }
 
