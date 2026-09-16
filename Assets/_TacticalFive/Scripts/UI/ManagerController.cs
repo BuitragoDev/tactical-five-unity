@@ -36,7 +36,7 @@ using System.Globalization;
     // Ranking
     private VisualElement _rankingBody;
     private VisualElement _rankingPaginator;
-    private List<CoachRankingEntry> _allCoaches;
+    private List<CoachRankingData> _allCoaches;
     private int _rankingPage = 0;
     private const int RANKING_PAGE_SIZE = 15;
     protected override void CacheReferences()
