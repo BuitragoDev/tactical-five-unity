@@ -54,8 +54,9 @@
     cursor: pointer;
 }
 .city-bubble:hover {
-    background-color: rgb(42, 36, 18);
-    color: rgb(255, 220, 120);
+    background-color: rgb(212, 160, 23);
+    border-color: rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
 }
 
 .city-bubble-tail {
