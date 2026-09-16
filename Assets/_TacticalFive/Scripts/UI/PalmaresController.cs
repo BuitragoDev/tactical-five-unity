@@ -18,6 +18,7 @@ using System.Linq;
 
     // ── Pagination state ──
     const int PAGE_SIZE = 10;
+    const int PAGE_SIZE_LEFT = 16;
 
     // Titles ranking
     private VisualElement _titlesRankingBody;
@@ -298,20 +299,20 @@ using System.Linq;
 
     // ══ PAGINATION HELPERS ════════════════════════════════
 
-    void UpdatePaginator(Button prev, Button next, Label pageInfo, int currentPage, int totalCount)
+    void UpdatePaginator(Button prev, Button next, Label pageInfo, int currentPage, int totalCount, int pageSize = PAGE_SIZE)
     {
-        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)totalCount / PAGE_SIZE));
+        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)totalCount / pageSize));
         int displayPage = Mathf.Clamp(currentPage + 1, 1, totalPages);
         pageInfo.text = $"{displayPage} / {totalPages}";
         prev.SetEnabled(currentPage > 0);
         next.SetEnabled(currentPage < totalPages - 1);
     }
 
-    List<T> GetPage<T>(List<T> data, int page)
+    List<T> GetPage<T>(List<T> data, int page, int pageSize = PAGE_SIZE)
     {
-        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)data.Count / PAGE_SIZE));
+        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)data.Count / pageSize));
         int p = Mathf.Clamp(page, 0, totalPages - 1);
-        return data.Skip(p * PAGE_SIZE).Take(PAGE_SIZE).ToList();
+        return data.Skip(p * pageSize).Take(pageSize).ToList();
     }
 
     void SetPaginatorVisibility(VisualElement paginator, bool hasData)
@@ -371,8 +372,8 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(sorted, _titlesRankingPage);
-        int startIdx = _titlesRankingPage * PAGE_SIZE;
+        var page = GetPage(sorted, _titlesRankingPage, PAGE_SIZE_LEFT);
+        int startIdx = _titlesRankingPage * PAGE_SIZE_LEFT;
         for (int i = 0; i < page.Count; i++)
         {
             var kv = page[i];
@@ -399,7 +400,7 @@ using System.Linq;
 
             _titlesRankingBody.Add(row);
         }
-        UpdatePaginator(_titlesRankingPrev, _titlesRankingNext, _titlesRankingPageInfo, _titlesRankingPage, sorted.Count);
+        UpdatePaginator(_titlesRankingPrev, _titlesRankingNext, _titlesRankingPageInfo, _titlesRankingPage, sorted.Count, PAGE_SIZE_LEFT);
     }
 
     void RenderFinalsHistory()
@@ -478,8 +479,8 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(sorted, _mvpRankingPage);
-        int startIdx = _mvpRankingPage * PAGE_SIZE;
+        var page = GetPage(sorted, _mvpRankingPage, PAGE_SIZE_LEFT);
+        int startIdx = _mvpRankingPage * PAGE_SIZE_LEFT;
         for (int i = 0; i < page.Count; i++)
         {
             var kv = page[i];
@@ -507,7 +508,7 @@ using System.Linq;
 
             _mvpRankingBody.Add(row);
         }
-        UpdatePaginator(_mvpRankingPrev, _mvpRankingNext, _mvpRankingPageInfo, _mvpRankingPage, sorted.Count);
+        UpdatePaginator(_mvpRankingPrev, _mvpRankingNext, _mvpRankingPageInfo, _mvpRankingPage, sorted.Count, PAGE_SIZE_LEFT);
     }
 
     void RenderAwardsHistory()
@@ -593,8 +594,8 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(sorted, _quintetAppearancesPage);
-        int startIdx = _quintetAppearancesPage * PAGE_SIZE;
+        var page = GetPage(sorted, _quintetAppearancesPage, PAGE_SIZE_LEFT);
+        int startIdx = _quintetAppearancesPage * PAGE_SIZE_LEFT;
         for (int i = 0; i < page.Count; i++)
         {
             var kv = page[i];
@@ -622,7 +623,7 @@ using System.Linq;
 
             _quintetAppearancesBody.Add(row);
         }
-        UpdatePaginator(_quintetAppearancesPrev, _quintetAppearancesNext, _quintetAppearancesPageInfo, _quintetAppearancesPage, sorted.Count);
+        UpdatePaginator(_quintetAppearancesPrev, _quintetAppearancesNext, _quintetAppearancesPageInfo, _quintetAppearancesPage, sorted.Count, PAGE_SIZE_LEFT);
     }
 
     void RenderQuintetHistory()
@@ -686,8 +687,8 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(_allStarAppearancesData, _allStarAppearancesPage);
-        int startIdx = _allStarAppearancesPage * PAGE_SIZE;
+        var page = GetPage(_allStarAppearancesData, _allStarAppearancesPage, PAGE_SIZE_LEFT);
+        int startIdx = _allStarAppearancesPage * PAGE_SIZE_LEFT;
         for (int i = 0; i < page.Count; i++)
         {
             var a = page[i];
@@ -715,7 +716,7 @@ using System.Linq;
 
             _allStarAppearancesBody.Add(row);
         }
-        UpdatePaginator(_allStarAppearancesPrev, _allStarAppearancesNext, _allStarAppearancesPageInfo, _allStarAppearancesPage, _allStarAppearancesData.Count);
+        UpdatePaginator(_allStarAppearancesPrev, _allStarAppearancesNext, _allStarAppearancesPageInfo, _allStarAppearancesPage, _allStarAppearancesData.Count, PAGE_SIZE_LEFT);
     }
 
     void RenderAllStarHistory()
