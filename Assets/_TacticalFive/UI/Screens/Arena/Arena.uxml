@@ -13,7 +13,13 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="arena-main">
 
-            <!-- TOP HEADER -->
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="ArenaScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="GESTIÓN DEL PABELLÓN" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- ARENA CONTENT -->
             <ui:VisualElement class="arena-content">
