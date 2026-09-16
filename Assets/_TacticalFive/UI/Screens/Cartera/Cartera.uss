@@ -738,11 +738,11 @@
 .cartera-info-row {
     flex-direction: row;
     align-items: center;
-    height: 42px;
-    min-height: 42px;
-    max-height: 42px;
+    height: 52px;
+    min-height: 52px;
+    max-height: 52px;
     flex-shrink: 0;
-    padding: 0 12px;
+    padding: 6px 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgba(42, 51, 71, 0.4);
 }
