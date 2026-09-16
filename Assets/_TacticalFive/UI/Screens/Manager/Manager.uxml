@@ -9,8 +9,13 @@
     <ui:VisualElement name="ManagerRoot" class="manager-root">
 
         <ui:VisualElement class="manager-main">
-            <ui:VisualElement class="manager-title-row">
-                <ui:Label name="ManagerTitle" class="manager-title" text="MANAGER" />
+
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="ManagerScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="INFORMACIÓN DEL MÁNAGER" />
+                </ui:VisualElement>
             </ui:VisualElement>
 
             <ui:VisualElement class="manager-body">

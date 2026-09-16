@@ -103,6 +103,13 @@ using System.Globalization;
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("ManagerScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/empleado");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         
         
 
