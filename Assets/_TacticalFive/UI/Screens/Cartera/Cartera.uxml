@@ -52,9 +52,12 @@
                     <ui:VisualElement class="cartera-table-wrapper">
                         <ui:VisualElement name="InformesTableHeader" class="cartera-table-header" />
                         <ui:VisualElement class="cartera-table-body-viewport">
-                            <ui:ScrollView name="InformesTableScroll" class="cartera-table-scroll">
-                                <ui:VisualElement name="InformesTableBody" class="cartera-table-body" />
-                            </ui:ScrollView>
+                            <ui:VisualElement name="InformesTableBody" class="cartera-table-body" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="InformesPaginator" class="cartera-paginator">
+                            <ui:Button name="InformesPrev" class="cartera-paginator-btn" text="◀" />
+                            <ui:Label name="InformesPageInfo" class="cartera-paginator-info" text="1 / 1" />
+                            <ui:Button name="InformesNext" class="cartera-paginator-btn" text="▶" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

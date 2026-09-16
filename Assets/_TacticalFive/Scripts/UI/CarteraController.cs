@@ -21,6 +21,13 @@ public class CarteraController : UIScreenController
     private VisualElement _informesTableHeader;
     private VisualElement _informesTableBody;
 
+    // ── Informes pagination ──
+    const int INFORMES_PAGE_SIZE = 12;
+    private int _informesPage;
+    private List<(PlayerData player, int scoutedDay)> _informesData = new();
+    private Button _informesPrev, _informesNext;
+    private Label _informesPageInfo;
+
     private List<TeamData> _allTeams;
     private List<ScoutData> _scouts;
     private TeamData _selectedTeam;
@@ -50,6 +57,9 @@ public class CarteraController : UIScreenController
         _tabInformes = _root.Q<Button>("TabInformes");
         _informesTableHeader = _root.Q<VisualElement>("InformesTableHeader");
         _informesTableBody = _root.Q<VisualElement>("InformesTableBody");
+        _informesPrev = _root.Q<Button>("InformesPrev");
+        _informesNext = _root.Q<Button>("InformesNext");
+        _informesPageInfo = _root.Q<Label>("InformesPageInfo");
     }
 
     protected override void LoadData()
@@ -84,6 +94,8 @@ public class CarteraController : UIScreenController
         _tabOjear?.RegisterCallback<ClickEvent>(_ => ShowTab("ojear"));
         _tabCartera?.RegisterCallback<ClickEvent>(_ => ShowTab("cartera"));
         _tabInformes?.RegisterCallback<ClickEvent>(_ => ShowTab("informes"));
+        _informesPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _informesPage--; RenderInformesPage(); });
+        _informesNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _informesPage++; RenderInformesPage(); });
     }
 
     void ShowTab(string tab)
@@ -666,21 +678,49 @@ public class CarteraController : UIScreenController
         BuildInformesHeader();
 
         var scouted = DatabaseManager.Instance.GetScoutedPlayers(_myTeam.id);
-        if (scouted.Count == 0)
+        _informesData.Clear();
+        foreach (var s in scouted)
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(s.player_id);
+            if (player != null)
+                _informesData.Add((player, s.scouted_day));
+        }
+
+        _informesPage = 0;
+        RenderInformesPage();
+    }
+
+    void RenderInformesPage()
+    {
+        _informesTableBody.Clear();
+
+        if (_informesData.Count == 0)
         {
             var empty = new Label();
             empty.AddToClassList("cartera-empty");
             empty.text = "Todavía no has ojeado a ningún jugador.";
             _informesTableBody.Add(empty);
+
+            if (_informesPageInfo != null) _informesPageInfo.text = "0 / 0";
+            if (_informesPrev != null) _informesPrev.SetEnabled(false);
+            if (_informesNext != null) _informesNext.SetEnabled(false);
             return;
         }
 
-        foreach (var s in scouted)
+        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)_informesData.Count / INFORMES_PAGE_SIZE));
+        _informesPage = Mathf.Clamp(_informesPage, 0, totalPages - 1);
+
+        int start = _informesPage * INFORMES_PAGE_SIZE;
+        int end = Mathf.Min(start + INFORMES_PAGE_SIZE, _informesData.Count);
+        for (int i = start; i < end; i++)
         {
-            var player = DatabaseManager.Instance.GetPlayerById(s.player_id);
-            if (player == null) continue;
-            _informesTableBody.Add(BuildInformeRow(player, s.scouted_day));
+            var entry = _informesData[i];
+            _informesTableBody.Add(BuildInformeRow(entry.player, entry.scoutedDay));
         }
+
+        if (_informesPageInfo != null) _informesPageInfo.text = $"{_informesPage + 1} / {totalPages}";
+        if (_informesPrev != null) _informesPrev.SetEnabled(_informesPage > 0);
+        if (_informesNext != null) _informesNext.SetEnabled(_informesPage < totalPages - 1);
     }
 
     void BuildInformesHeader()
