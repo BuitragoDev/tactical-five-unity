@@ -14,39 +14,88 @@ using System.Linq;
     private VisualElement _tabContentJugadores;
     private VisualElement _tabContentQuintetos;
     private VisualElement _tabContentAllStar;
-    private VisualElement _titlesRankingBody;
-    private VisualElement _finalsHistoryBody;
-    private VisualElement _mvpRankingBody;
-    private VisualElement _awardsHistoryBody;
-    private VisualElement _quintetAppearancesBody;
-    private VisualElement _quintetHistoryBody;
-    private VisualElement _allStarAppearancesBody;
-    private VisualElement _allStarHistoryBody;
     private VisualElement _tabContentSalonFama;
+
+    // ── Pagination state ──
+    const int PAGE_SIZE = 10;
+
+    // Titles ranking
+    private VisualElement _titlesRankingBody;
+    private List<FinalsRecord> _titlesRankingData;
+    private int _titlesRankingPage;
+
+    // Finals history
+    private VisualElement _finalsHistoryBody;
+    private List<FinalsRecord> _finalsHistoryData;
+    private int _finalsHistoryPage;
+
+    // MVP ranking
+    private VisualElement _mvpRankingBody;
+    private List<AwardsRecord> _mvpRankingData;
+    private int _mvpRankingPage;
+
+    // Awards history
+    private VisualElement _awardsHistoryBody;
+    private List<AwardsRecord> _awardsHistoryData;
+    private int _awardsHistoryPage;
+
+    // Quintet appearances
+    private VisualElement _quintetAppearancesBody;
+    private List<QuintetRecord> _quintetAppearancesData;
+    private int _quintetAppearancesPage;
+
+    // Quintet history
+    private VisualElement _quintetHistoryBody;
+    private List<QuintetRecord> _quintetHistoryData;
+    private int _quintetHistoryPage;
+
+    // All-Star appearances
+    private VisualElement _allStarAppearancesBody;
+    private List<AllStarAppearancesData> _allStarAppearancesData;
+    private int _allStarAppearancesPage;
+
+    // All-Star history
+    private VisualElement _allStarHistoryBody;
+    private List<AllStarRecord> _allStarHistoryData;
+    private int _allStarHistoryPage;
+
+    // Hall of Fame
     private VisualElement _hoFBody;
+    private List<HallOfFameData> _hoFData;
+    private int _hoFPage;
+
+    // Paginator elements
+    private Button _titlesRankingPrev, _titlesRankingNext;
+    private Label _titlesRankingPageInfo;
+    private Button _finalsHistoryPrev, _finalsHistoryNext;
+    private Label _finalsHistoryPageInfo;
+    private Button _mvpRankingPrev, _mvpRankingNext;
+    private Label _mvpRankingPageInfo;
+    private Button _awardsHistoryPrev, _awardsHistoryNext;
+    private Label _awardsHistoryPageInfo;
+    private Button _quintetAppearancesPrev, _quintetAppearancesNext;
+    private Label _quintetAppearancesPageInfo;
+    private Button _quintetHistoryPrev, _quintetHistoryNext;
+    private Label _quintetHistoryPageInfo;
+    private Button _allStarAppearancesPrev, _allStarAppearancesNext;
+    private Label _allStarAppearancesPageInfo;
+    private Button _allStarHistoryPrev, _allStarHistoryNext;
+    private Label _allStarHistoryPageInfo;
+    private Button _hoFPrev, _hoFNext;
+    private Label _hoFPageInfo;
+
     private List<TeamData> _allTeams;
     private List<SeasonRecord> _seasonRecords;
     private Dictionary<string, Sprite> _logoSprites32 = new();
     private Dictionary<string, Sprite> _logoSprites64 = new();
+
     protected override void OnEnable()
     {
         base.OnEnable();
-        SetupScrollViews();
     }
 
-    void SetupScrollViews()
-    {
-        var scrolls = new[] { "TitlesRankingScroll", "FinalsHistoryScroll", "MVPRankingScroll", "AwardsHistoryScroll", "QuintetAppearancesScroll", "QuintetHistoryScroll", "AllStarAppearancesScroll", "AllStarHistoryScroll", "HallOfFameScroll" };
-        foreach (var name in scrolls)
-        {
-            var sv = _root.Q<ScrollView>(name);
-            if (sv != null)
-                sv.contentContainer.style.flexGrow = 0;
-        }
-    }
     protected override void CacheReferences()
     {
-
         _tabEquipos = _root.Q<Button>("TabEquipos");
         _tabJugadores = _root.Q<Button>("TabJugadores");
         _tabQuintetos = _root.Q<Button>("TabQuintetos");
@@ -57,6 +106,7 @@ using System.Linq;
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
         _tabContentQuintetos = _root.Q<VisualElement>("TabContentQuintetos");
         _tabContentAllStar = _root.Q<VisualElement>("TabContentAllStar");
+        _tabContentSalonFama = _root.Q<VisualElement>("TabContentSalonFama");
 
         _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
         _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
@@ -66,9 +116,37 @@ using System.Linq;
         _quintetHistoryBody = _root.Q<VisualElement>("QuintetHistoryBody");
         _allStarAppearancesBody = _root.Q<VisualElement>("AllStarAppearancesBody");
         _allStarHistoryBody = _root.Q<VisualElement>("AllStarHistoryBody");
-        _tabContentSalonFama = _root.Q<VisualElement>("TabContentSalonFama");
         _hoFBody = _root.Q<VisualElement>("HallOfFameBody");
+
+        _titlesRankingPrev = _root.Q<Button>("TitlesRankingPrev");
+        _titlesRankingNext = _root.Q<Button>("TitlesRankingNext");
+        _titlesRankingPageInfo = _root.Q<Label>("TitlesRankingPageInfo");
+        _finalsHistoryPrev = _root.Q<Button>("FinalsHistoryPrev");
+        _finalsHistoryNext = _root.Q<Button>("FinalsHistoryNext");
+        _finalsHistoryPageInfo = _root.Q<Label>("FinalsHistoryPageInfo");
+        _mvpRankingPrev = _root.Q<Button>("MVPRankingPrev");
+        _mvpRankingNext = _root.Q<Button>("MVPRankingNext");
+        _mvpRankingPageInfo = _root.Q<Label>("MVPRankingPageInfo");
+        _awardsHistoryPrev = _root.Q<Button>("AwardsHistoryPrev");
+        _awardsHistoryNext = _root.Q<Button>("AwardsHistoryNext");
+        _awardsHistoryPageInfo = _root.Q<Label>("AwardsHistoryPageInfo");
+        _quintetAppearancesPrev = _root.Q<Button>("QuintetAppearancesPrev");
+        _quintetAppearancesNext = _root.Q<Button>("QuintetAppearancesNext");
+        _quintetAppearancesPageInfo = _root.Q<Label>("QuintetAppearancesPageInfo");
+        _quintetHistoryPrev = _root.Q<Button>("QuintetHistoryPrev");
+        _quintetHistoryNext = _root.Q<Button>("QuintetHistoryNext");
+        _quintetHistoryPageInfo = _root.Q<Label>("QuintetHistoryPageInfo");
+        _allStarAppearancesPrev = _root.Q<Button>("AllStarAppearancesPrev");
+        _allStarAppearancesNext = _root.Q<Button>("AllStarAppearancesNext");
+        _allStarAppearancesPageInfo = _root.Q<Label>("AllStarAppearancesPageInfo");
+        _allStarHistoryPrev = _root.Q<Button>("AllStarHistoryPrev");
+        _allStarHistoryNext = _root.Q<Button>("AllStarHistoryNext");
+        _allStarHistoryPageInfo = _root.Q<Label>("AllStarHistoryPageInfo");
+        _hoFPrev = _root.Q<Button>("HallOfFamePrev");
+        _hoFNext = _root.Q<Button>("HallOfFameNext");
+        _hoFPageInfo = _root.Q<Label>("HallOfFamePageInfo");
     }
+
     protected override void LoadData()
     {
         base.LoadData();
@@ -86,14 +164,10 @@ using System.Linq;
         var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
-        
         _allTeams = DatabaseManager.Instance.GetAllTeams();
-        
-
-        
-        
         _seasonRecords = DatabaseManager.Instance.GetAllSeasonRecords(_season?.id ?? 0);
     }
+
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
@@ -102,7 +176,27 @@ using System.Linq;
         _tabQuintetos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("quintetos"); });
         _tabAllStar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("allstar"); });
         _tabSalonFama?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("salonfama"); });
+
+        _titlesRankingPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _titlesRankingPage--; RenderTitlesRanking(); });
+        _titlesRankingNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _titlesRankingPage++; RenderTitlesRanking(); });
+        _finalsHistoryPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _finalsHistoryPage--; RenderFinalsHistory(); });
+        _finalsHistoryNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _finalsHistoryPage++; RenderFinalsHistory(); });
+        _mvpRankingPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _mvpRankingPage--; RenderMVPRanking(); });
+        _mvpRankingNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _mvpRankingPage++; RenderMVPRanking(); });
+        _awardsHistoryPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _awardsHistoryPage--; RenderAwardsHistory(); });
+        _awardsHistoryNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _awardsHistoryPage++; RenderAwardsHistory(); });
+        _quintetAppearancesPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _quintetAppearancesPage--; RenderQuintetAppearances(); });
+        _quintetAppearancesNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _quintetAppearancesPage++; RenderQuintetAppearances(); });
+        _quintetHistoryPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _quintetHistoryPage--; RenderQuintetHistory(); });
+        _quintetHistoryNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _quintetHistoryPage++; RenderQuintetHistory(); });
+        _allStarAppearancesPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _allStarAppearancesPage--; RenderAllStarAppearances(); });
+        _allStarAppearancesNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _allStarAppearancesPage++; RenderAllStarAppearances(); });
+        _allStarHistoryPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _allStarHistoryPage--; RenderAllStarHistory(); });
+        _allStarHistoryNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _allStarHistoryPage++; RenderAllStarHistory(); });
+        _hoFPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _hoFPage--; RenderHoF(); });
+        _hoFNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _hoFPage++; RenderHoF(); });
     }
+
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Palmares] RefreshHeader error: {ex.Message}"); }
@@ -152,6 +246,7 @@ using System.Linq;
                 break;
         }
     }
+
     protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;
@@ -201,6 +296,30 @@ using System.Linq;
         _btnAction.text = "MENÚ PRINCIPAL";
     }
 
+    // ══ PAGINATION HELPERS ════════════════════════════════
+
+    void UpdatePaginator(Button prev, Button next, Label pageInfo, int currentPage, int totalCount)
+    {
+        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)totalCount / PAGE_SIZE));
+        int displayPage = Mathf.Clamp(currentPage + 1, 1, totalPages);
+        pageInfo.text = $"{displayPage} / {totalPages}";
+        prev.SetEnabled(currentPage > 0);
+        next.SetEnabled(currentPage < totalPages - 1);
+    }
+
+    List<T> GetPage<T>(List<T> data, int page)
+    {
+        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)data.Count / PAGE_SIZE));
+        int p = Mathf.Clamp(page, 0, totalPages - 1);
+        return data.Skip(p * PAGE_SIZE).Take(PAGE_SIZE).ToList();
+    }
+
+    void SetPaginatorVisibility(VisualElement paginator, bool hasData)
+    {
+        if (paginator != null)
+            paginator.style.display = hasData ? DisplayStyle.Flex : DisplayStyle.None;
+    }
+
     // ══ DATA ══════════════════════════════════════════════
 
     TeamData FindTeam(string keyword)
@@ -217,17 +336,19 @@ using System.Linq;
     {
         var finalsData = DatabaseManager.Instance.GetFinalsRecords();
         finalsData.Reverse();
-        BuildTitlesRanking(finalsData);
-        BuildFinalsHistory(finalsData);
+        _titlesRankingData = finalsData;
+        _titlesRankingPage = 0;
+        _finalsHistoryData = finalsData;
+        _finalsHistoryPage = 0;
+        RenderTitlesRanking();
+        RenderFinalsHistory();
     }
 
-    void BuildTitlesRanking(List<FinalsRecord> finalsData)
+    void RenderTitlesRanking()
     {
-        _titlesRankingBody.Clear();
-
+        var sorted = new List<KeyValuePair<string, (int count, TeamData team)>>();
         var champCounts = new Dictionary<string, (int count, TeamData team)>();
-
-        foreach (var f in finalsData)
+        foreach (var f in _titlesRankingData)
         {
             var team = FindTeam(f.champ_keyword);
             string key = team?.name ?? f.champ_name;
@@ -236,24 +357,29 @@ using System.Linq;
             var cur = champCounts[key];
             champCounts[key] = (cur.count + 1, cur.team);
         }
+        sorted = champCounts.OrderByDescending(kv => kv.Value.count).ToList();
 
-        var sorted = champCounts.OrderByDescending(kv => kv.Value.count).ToList();
+        _titlesRankingBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("TitlesRankingPaginator"), sorted.Count > 0);
 
         if (sorted.Count == 0)
         {
             var emptyLbl = new Label { text = "Aún no hay campeonatos registrados" };
             emptyLbl.AddToClassList("no-data-cell");
             _titlesRankingBody.Add(emptyLbl);
+            UpdatePaginator(_titlesRankingPrev, _titlesRankingNext, _titlesRankingPageInfo, 0, 0);
             return;
         }
 
-        for (int i = 0; i < sorted.Count; i++)
+        var page = GetPage(sorted, _titlesRankingPage);
+        int startIdx = _titlesRankingPage * PAGE_SIZE;
+        for (int i = 0; i < page.Count; i++)
         {
-            var kv = sorted[i];
+            var kv = page[i];
             var row = new VisualElement();
             row.AddToClassList("champ-row");
 
-            var rankLbl = new Label { text = (i + 1).ToString() };
+            var rankLbl = new Label { text = (startIdx + i + 1).ToString() };
             rankLbl.AddToClassList("champ-rank");
             row.Add(rankLbl);
 
@@ -273,13 +399,23 @@ using System.Linq;
 
             _titlesRankingBody.Add(row);
         }
+        UpdatePaginator(_titlesRankingPrev, _titlesRankingNext, _titlesRankingPageInfo, _titlesRankingPage, sorted.Count);
     }
 
-    void BuildFinalsHistory(List<FinalsRecord> finalsData)
+    void RenderFinalsHistory()
     {
         _finalsHistoryBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("FinalsHistoryPaginator"), _finalsHistoryData.Count > 0);
 
-        foreach (var f in finalsData)
+        if (_finalsHistoryData.Count == 0)
+        {
+            UpdatePaginator(_finalsHistoryPrev, _finalsHistoryNext, _finalsHistoryPageInfo, 0, 0);
+            return;
+        }
+
+        var page = GetPage(_finalsHistoryData, _finalsHistoryPage);
+        int startIdx = _finalsHistoryPage * PAGE_SIZE;
+        foreach (var f in page)
         {
             var row = new VisualElement();
             row.AddToClassList("palmares-data-row");
@@ -301,6 +437,7 @@ using System.Linq;
 
             _finalsHistoryBody.Add(row);
         }
+        UpdatePaginator(_finalsHistoryPrev, _finalsHistoryNext, _finalsHistoryPageInfo, _finalsHistoryPage, _finalsHistoryData.Count);
     }
 
     // ══ JUGADORES TAB ════════════════════════════════════
@@ -309,41 +446,47 @@ using System.Linq;
     {
         var awardsData = DatabaseManager.Instance.GetAwardsRecords();
         awardsData.Reverse();
-        BuildMVPRanking(awardsData);
-        BuildAwardsHistory(awardsData);
+        _mvpRankingData = awardsData;
+        _mvpRankingPage = 0;
+        _awardsHistoryData = awardsData;
+        _awardsHistoryPage = 0;
+        RenderMVPRanking();
+        RenderAwardsHistory();
     }
 
-    void BuildMVPRanking(List<AwardsRecord> awardsData)
+    void RenderMVPRanking()
     {
-        _mvpRankingBody.Clear();
-
         var mvpCounts = new Dictionary<string, (int count, string teamKeyword)>();
-
-        foreach (var a in awardsData)
+        foreach (var a in _mvpRankingData)
         {
             if (!mvpCounts.ContainsKey(a.mvp))
                 mvpCounts[a.mvp] = (0, a.mvp_team_keyword);
             var cur = mvpCounts[a.mvp];
             mvpCounts[a.mvp] = (cur.count + 1, cur.teamKeyword);
         }
-
         var sorted = mvpCounts.OrderByDescending(kv => kv.Value.count).ToList();
+
+        _mvpRankingBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("MVPRankingPaginator"), sorted.Count > 0);
 
         if (sorted.Count == 0)
         {
             var emptyLbl = new Label { text = "Aún no hay MVPs registrados" };
             emptyLbl.AddToClassList("no-data-cell");
             _mvpRankingBody.Add(emptyLbl);
+            UpdatePaginator(_mvpRankingPrev, _mvpRankingNext, _mvpRankingPageInfo, 0, 0);
             return;
         }
 
-        for (int i = 0; i < sorted.Count; i++)
+        var page = GetPage(sorted, _mvpRankingPage);
+        int startIdx = _mvpRankingPage * PAGE_SIZE;
+        for (int i = 0; i < page.Count; i++)
         {
-            var kv = sorted[i];
+            var kv = page[i];
             var row = new VisualElement();
             row.AddToClassList("champ-row");
 
-            var rankLbl = new Label { text = (i + 1).ToString() };
+            var rankLbl = new Label { text = (startIdx + i + 1).ToString() };
             rankLbl.AddToClassList("champ-rank");
             row.Add(rankLbl);
 
@@ -364,13 +507,22 @@ using System.Linq;
 
             _mvpRankingBody.Add(row);
         }
+        UpdatePaginator(_mvpRankingPrev, _mvpRankingNext, _mvpRankingPageInfo, _mvpRankingPage, sorted.Count);
     }
 
-    void BuildAwardsHistory(List<AwardsRecord> awardsData)
+    void RenderAwardsHistory()
     {
         _awardsHistoryBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("AwardsHistoryPaginator"), _awardsHistoryData.Count > 0);
 
-        foreach (var a in awardsData)
+        if (_awardsHistoryData.Count == 0)
+        {
+            UpdatePaginator(_awardsHistoryPrev, _awardsHistoryNext, _awardsHistoryPageInfo, 0, 0);
+            return;
+        }
+
+        var page = GetPage(_awardsHistoryData, _awardsHistoryPage);
+        foreach (var a in page)
         {
             var row = new VisualElement();
             row.AddToClassList("palmares-data-row");
@@ -393,6 +545,7 @@ using System.Linq;
 
             _awardsHistoryBody.Add(row);
         }
+        UpdatePaginator(_awardsHistoryPrev, _awardsHistoryNext, _awardsHistoryPageInfo, _awardsHistoryPage, _awardsHistoryData.Count);
     }
 
     // ══ QUINTETOS TAB ════════════════════════════════════
@@ -401,17 +554,18 @@ using System.Linq;
     {
         var quintetData = DatabaseManager.Instance.GetQuintetRecords();
         quintetData.Reverse();
-        BuildQuintetAppearances(quintetData);
-        BuildQuintetHistory(quintetData);
+        _quintetAppearancesData = quintetData;
+        _quintetAppearancesPage = 0;
+        _quintetHistoryData = quintetData;
+        _quintetHistoryPage = 0;
+        RenderQuintetAppearances();
+        RenderQuintetHistory();
     }
 
-    void BuildQuintetAppearances(List<QuintetRecord> quintetData)
+    void RenderQuintetAppearances()
     {
-        _quintetAppearancesBody.Clear();
-
         var appearanceCounts = new Dictionary<string, (int count, string teamKeyword)>();
-
-        foreach (var q in quintetData)
+        foreach (var q in _quintetAppearancesData)
         {
             var players = new[] {
                 (q.pg, q.pg_team), (q.sg, q.sg_team),
@@ -425,24 +579,29 @@ using System.Linq;
                 appearanceCounts[name] = (cur.count + 1, cur.teamKeyword);
             }
         }
-
         var sorted = appearanceCounts.OrderByDescending(kv => kv.Value.count).ThenBy(kv => kv.Key).ToList();
+
+        _quintetAppearancesBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("QuintetAppearancesPaginator"), sorted.Count > 0);
 
         if (sorted.Count == 0)
         {
             var emptyLbl = new Label { text = "Aún no hay quintetos registrados" };
             emptyLbl.AddToClassList("no-data-cell");
             _quintetAppearancesBody.Add(emptyLbl);
+            UpdatePaginator(_quintetAppearancesPrev, _quintetAppearancesNext, _quintetAppearancesPageInfo, 0, 0);
             return;
         }
 
-        for (int i = 0; i < sorted.Count; i++)
+        var page = GetPage(sorted, _quintetAppearancesPage);
+        int startIdx = _quintetAppearancesPage * PAGE_SIZE;
+        for (int i = 0; i < page.Count; i++)
         {
-            var kv = sorted[i];
+            var kv = page[i];
             var row = new VisualElement();
             row.AddToClassList("champ-row");
 
-            var rankLbl = new Label { text = (i + 1).ToString() };
+            var rankLbl = new Label { text = (startIdx + i + 1).ToString() };
             rankLbl.AddToClassList("champ-rank");
             row.Add(rankLbl);
 
@@ -463,13 +622,22 @@ using System.Linq;
 
             _quintetAppearancesBody.Add(row);
         }
+        UpdatePaginator(_quintetAppearancesPrev, _quintetAppearancesNext, _quintetAppearancesPageInfo, _quintetAppearancesPage, sorted.Count);
     }
 
-    void BuildQuintetHistory(List<QuintetRecord> quintetData)
+    void RenderQuintetHistory()
     {
         _quintetHistoryBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("QuintetHistoryPaginator"), _quintetHistoryData.Count > 0);
 
-        foreach (var q in quintetData)
+        if (_quintetHistoryData.Count == 0)
+        {
+            UpdatePaginator(_quintetHistoryPrev, _quintetHistoryNext, _quintetHistoryPageInfo, 0, 0);
+            return;
+        }
+
+        var page = GetPage(_quintetHistoryData, _quintetHistoryPage);
+        foreach (var q in page)
         {
             var row = new VisualElement();
             row.AddToClassList("palmares-data-row");
@@ -486,6 +654,7 @@ using System.Linq;
 
             _quintetHistoryBody.Add(row);
         }
+        UpdatePaginator(_quintetHistoryPrev, _quintetHistoryNext, _quintetHistoryPageInfo, _quintetHistoryPage, _quintetHistoryData.Count);
     }
 
     // ══ ALL-STAR TAB ══════════════════════════════════════
@@ -494,31 +663,38 @@ using System.Linq;
     {
         var allStarData = DatabaseManager.Instance.GetAllStarRecords(_manager.id);
         allStarData.Sort((a, b) => b.season.CompareTo(a.season));
-        BuildAllStarAppearances();
-        BuildAllStarHistory(allStarData);
+        _allStarHistoryData = allStarData;
+        _allStarHistoryPage = 0;
+        _allStarAppearancesData = null;
+        _allStarAppearancesPage = 0;
+        RenderAllStarAppearances();
+        RenderAllStarHistory();
     }
 
-    void BuildAllStarAppearances()
+    void RenderAllStarAppearances()
     {
+        _allStarAppearancesData = DatabaseManager.Instance.GetAllStarAppearances(_manager.id);
         _allStarAppearancesBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("AllStarAppearancesPaginator"), _allStarAppearancesData.Count > 0);
 
-        var appearances = DatabaseManager.Instance.GetAllStarAppearances(_manager.id);
-
-        if (appearances.Count == 0)
+        if (_allStarAppearancesData.Count == 0)
         {
             var emptyLbl = new Label { text = "Aún no hay All-Stars registrados" };
             emptyLbl.AddToClassList("no-data-cell");
             _allStarAppearancesBody.Add(emptyLbl);
+            UpdatePaginator(_allStarAppearancesPrev, _allStarAppearancesNext, _allStarAppearancesPageInfo, 0, 0);
             return;
         }
 
-        for (int i = 0; i < appearances.Count; i++)
+        var page = GetPage(_allStarAppearancesData, _allStarAppearancesPage);
+        int startIdx = _allStarAppearancesPage * PAGE_SIZE;
+        for (int i = 0; i < page.Count; i++)
         {
-            var a = appearances[i];
+            var a = page[i];
             var row = new VisualElement();
             row.AddToClassList("champ-row");
 
-            var rankLbl = new Label { text = (i + 1).ToString() };
+            var rankLbl = new Label { text = (startIdx + i + 1).ToString() };
             rankLbl.AddToClassList("champ-rank");
             row.Add(rankLbl);
 
@@ -539,15 +715,24 @@ using System.Linq;
 
             _allStarAppearancesBody.Add(row);
         }
+        UpdatePaginator(_allStarAppearancesPrev, _allStarAppearancesNext, _allStarAppearancesPageInfo, _allStarAppearancesPage, _allStarAppearancesData.Count);
     }
 
-    void BuildAllStarHistory(List<AllStarRecord> allStarData)
+    void RenderAllStarHistory()
     {
         _allStarHistoryBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("AllStarHistoryPaginator"), _allStarHistoryData.Count > 0);
+
+        if (_allStarHistoryData.Count == 0)
+        {
+            UpdatePaginator(_allStarHistoryPrev, _allStarHistoryNext, _allStarHistoryPageInfo, 0, 0);
+            return;
+        }
 
         _logoSprites32.TryGetValue("all-star-game", out var allStarSprite);
 
-        foreach (var a in allStarData)
+        var page = GetPage(_allStarHistoryData, _allStarHistoryPage);
+        foreach (var a in page)
         {
             var row = new VisualElement();
             row.AddToClassList("palmares-data-row");
@@ -571,6 +756,7 @@ using System.Linq;
 
             _allStarHistoryBody.Add(row);
         }
+        UpdatePaginator(_allStarHistoryPrev, _allStarHistoryNext, _allStarHistoryPageInfo, _allStarHistoryPage, _allStarHistoryData.Count);
     }
 
     VisualElement CreateAllStarCell(string text, string cellClass, Sprite logo)
@@ -596,9 +782,6 @@ using System.Linq;
 
     void BuildSalonFamaTab()
     {
-        if (_hoFBody == null) return;
-        _hoFBody.Clear();
-
         var members = DatabaseManager.Instance.GetHoFMembers();
         members.Sort((a, b) =>
         {
@@ -609,22 +792,34 @@ using System.Linq;
             int byPts = b.career_points.CompareTo(a.career_points);
             return byPts != 0 ? byPts : string.Compare(a.FullName, b.FullName, System.StringComparison.Ordinal);
         });
+        _hoFData = members;
+        _hoFPage = 0;
+        RenderHoF();
+    }
 
-        if (members.Count == 0)
+    void RenderHoF()
+    {
+        _hoFBody.Clear();
+        SetPaginatorVisibility(_root.Q<VisualElement>("HallOfFamePaginator"), _hoFData.Count > 0);
+
+        if (_hoFData.Count == 0)
         {
             var emptyLbl = new Label { text = "Todavía no hay miembros en el Salón de la Fama" };
             emptyLbl.AddToClassList("no-data-cell");
             _hoFBody.Add(emptyLbl);
+            UpdatePaginator(_hoFPrev, _hoFNext, _hoFPageInfo, 0, 0);
             return;
         }
 
-        for (int i = 0; i < members.Count; i++)
+        var page = GetPage(_hoFData, _hoFPage);
+        int startIdx = _hoFPage * PAGE_SIZE;
+        for (int i = 0; i < page.Count; i++)
         {
-            var m = members[i];
+            var m = page[i];
             var row = new VisualElement();
             row.AddToClassList("palmares-data-row");
 
-            row.Add(MakeHoFCell((i + 1).ToString(), "td-hof-rank", true));
+            row.Add(MakeHoFCell((startIdx + i + 1).ToString(), "td-hof-rank", true));
             row.Add(MakeHoFCell(m.FullName, "td-hof-name", false));
             row.Add(MakeHoFCell(PositionCodes.GetName(m.position), "td-hof-pos", false));
             row.Add(MakeHoFCell(GetHoFTeamName(m), "td-hof-team", false));
@@ -637,6 +832,7 @@ using System.Linq;
 
             _hoFBody.Add(row);
         }
+        UpdatePaginator(_hoFPrev, _hoFNext, _hoFPageInfo, _hoFPage, _hoFData.Count);
     }
 
     static readonly System.Globalization.CultureInfo _hoFCulture = new("es-ES");

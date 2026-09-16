@@ -139,23 +139,6 @@
     overflow: hidden;
 }
 
-.palmares-left-scroll {
-    flex-grow: 1;
-    height: 100%;
-}
-
-.palmares-scroll-wrapper {
-    flex-grow: 1;
-    min-height: 0;
-    overflow: hidden;
-    flex-direction: column;
-}
-
-.palmares-right-scroll {
-    flex-grow: 1;
-    height: 100%;
-}
-
 .palmares-section-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
@@ -462,12 +445,6 @@
     flex-grow: 1;
 }
 
-/* Hide scrollbar */
-.palmares-left-scroll .unity-scroll-view__vertical-scroller,
-.palmares-right-scroll .unity-scroll-view__vertical-scroller {
-    display: none;
-}
-
 /* ══ TAB: SALÓN DE LA FAMA ══ */
 
 .palmares-full {
@@ -557,6 +534,49 @@
 .td-hof-season {
     color: rgb(85, 102, 119) !important;
     white-space: nowrap !important;
+}
+
+/* ══ PAGINATOR ══ */
+
+.palmares-paginator {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 8px;
+    padding: 6px 0;
+}
+
+.palmares-paginator-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin: 0 4px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.palmares-paginator-btn:hover {
+    background-color: rgba(212, 160, 23, 0.25);
+}
+.palmares-paginator-btn:disabled {
+    color: rgb(58, 74, 99);
+    border-color: rgb(42, 51, 71);
+    background-color: transparent;
+    cursor: default;
+}
+
+.palmares-paginator-info {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(122, 138, 170);
+    margin: 0 8px;
+    -unity-text-align: middle-center;
+    min-width: 50px;
 }
 
 /* Sidebar / header from Dashboard.uss are inherited */
