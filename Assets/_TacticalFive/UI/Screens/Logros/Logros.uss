@@ -147,7 +147,7 @@
 
 .logros-card-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: white;
     margin-bottom: 4px;
 }
