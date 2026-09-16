@@ -119,6 +119,13 @@ using System.Linq;
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("FinancesScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/finanzas_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         
         
 
