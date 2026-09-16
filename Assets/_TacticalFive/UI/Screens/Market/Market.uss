@@ -969,11 +969,12 @@
     width: 96px;
     height: 104px;
     margin: 5px;
-    padding: 8px 5px 6px 5px;
+    padding: 8px 5px;
     background-color: rgb(13, 20, 33);
     border-color: rgb(42, 51, 71);
     border-radius: 8px;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
 }
 .market-team-chip:hover {
     border-color: rgb(100, 150, 230);
