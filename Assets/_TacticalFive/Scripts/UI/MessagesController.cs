@@ -69,6 +69,13 @@ public class MessagesController : UIScreenController
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("MessagesScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/noticias_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
         foreach (var s in logos) _logoSprites[s.name] = s;
 

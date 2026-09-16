@@ -13,7 +13,13 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="messages-main">
 
-            <!-- TOP HEADER -->
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="MessagesScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="TABLÓN DE NOTICIAS" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- MESSAGES CONTENT -->
             <ui:VisualElement class="messages-content">
