@@ -41,6 +41,13 @@ using System.Linq;
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("HistorialScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/traspasos_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         
         
 
