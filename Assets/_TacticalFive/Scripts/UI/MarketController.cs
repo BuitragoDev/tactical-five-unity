@@ -87,6 +87,7 @@ using System.Linq;
     private Dictionary<string, Sprite> _headerLogos = new();
     private Dictionary<string, Sprite> _teamGridLogos = new();
     private Dictionary<string, Sprite> _tradePanelLogos = new();
+    private Dictionary<string, Sprite> _tradePanelLogos64 = new();
     private HashSet<int> _selectedMyPlayers = new();
     private HashSet<int> _selectedOtherPlayers = new();
     private HashSet<int> _selectedMyPicks = new();
@@ -433,6 +434,17 @@ using System.Linq;
         var tradePanelLogos = Resources.LoadAll<Sprite>("Teams/Logos/32x32/");
         foreach (var s in tradePanelLogos) _tradePanelLogos[s.name] = s;
 
+        var tradePanelLogos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
+        foreach (var s in tradePanelLogos64) _tradePanelLogos64[s.name] = s;
+
+        var tradeModalIcon = _root.Q<VisualElement>("TradeModalIcon");
+        if (tradeModalIcon != null)
+        {
+            var tradeIconTex = Resources.Load<Texture2D>("Icons/traspasos_icon");
+            if (tradeIconTex != null)
+                tradeModalIcon.style.backgroundImage = tradeIconTex;
+        }
+
         
         
 
@@ -730,11 +742,11 @@ using System.Linq;
         }
 
         // Set team logos and names
-        if (_tradePanelLogos.TryGetValue(_myTeam.logo, out var mySprite))
+        if (_tradePanelLogos64.TryGetValue(_myTeam.logo, out var mySprite))
             _root.Q<VisualElement>("MyTeamLogo").style.backgroundImage = new StyleBackground(mySprite);
         _root.Q<Label>("MyTeamName").text = _myTeam.name.ToUpper();
 
-        if (_tradePanelLogos.TryGetValue(_selectedTeam.logo, out var otherSprite))
+        if (_tradePanelLogos64.TryGetValue(_selectedTeam.logo, out var otherSprite))
             _root.Q<VisualElement>("OtherTeamLogo").style.backgroundImage = new StyleBackground(otherSprite);
         _root.Q<Label>("OtherTeamName").text = _selectedTeam.name.ToUpper();
 

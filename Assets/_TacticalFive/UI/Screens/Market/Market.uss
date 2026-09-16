@@ -989,9 +989,9 @@
     height: 96%;
     min-height: 0;
     flex-direction: column;
-    background-color: rgb(8, 18, 35);
+    background-color: rgb(18, 21, 28);
     border-width: 1px;
-    border-color: rgb(42, 95, 201);
+    border-color: rgb(120, 95, 30);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -1002,9 +1002,9 @@
     justify-content: space-between;
     flex-shrink: 0;
     padding: 14px 20px;
-    background-color: rgba(42, 95, 201, 0.12);
+    background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 95, 201, 0.40);
+    border-bottom-color: rgb(120, 95, 30);
 }
 .market-trade-modal-heading,
 .market-fa-modal-heading {
@@ -1012,11 +1012,13 @@
     align-items: center;
 }
 .market-trade-modal-icon {
-    width: 48px;
+    width: 40px;
+    height: 40px;
     margin-right: 14px;
-    color: rgb(100, 160, 230);
-    font-size: 38px;
-    -unity-text-align: middle-center;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 .market-trade-modal-title,
 .market-fa-modal-title {
@@ -1029,8 +1031,13 @@
 .market-fa-modal-subtitle {
     margin-top: 2px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
     color: rgb(140, 170, 210);
+}
+.market-trade-modal-subtitle {
+    font-size: 16px;
+}
+.market-fa-modal-subtitle {
+    font-size: 15px;
 }
 .market-trade-modal-close,
 .market-modal-close {
@@ -1086,7 +1093,7 @@
     background-color: rgba(212, 80, 80, 0.12);
 }
 .market-trade-panel-logo {
-    width: 48px; height: 48px;
+    width: 64px; height: 64px;
     margin-right: 12px;
     background-size: contain;
     background-repeat: no-repeat;
@@ -1095,16 +1102,20 @@
 }
 .market-trade-panel-header-text {
     flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
 }
 .market-trade-panel-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 20px;
     letter-spacing: 1px;
     color: rgb(255, 255, 255);
+    white-space: nowrap;
+    flex-grow: 1;
 }
 .market-trade-panel-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(140, 170, 210);
     margin-top: 1px;
 }

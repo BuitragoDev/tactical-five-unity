@@ -83,7 +83,7 @@
                 <!-- HEADER -->
                 <ui:VisualElement class="market-trade-modal-header">
                     <ui:VisualElement class="market-trade-modal-heading">
-                        <ui:Label class="market-trade-modal-icon" text="⇄" />
+                        <ui:VisualElement name="TradeModalIcon" class="market-trade-modal-icon" />
                         <ui:VisualElement>
                             <ui:Label class="market-trade-modal-title" text="PROPONER TRASPASO" />
                             <ui:Label class="market-trade-modal-subtitle" text="Selecciona los jugadores y activos que quieres incluir en la oferta." />
