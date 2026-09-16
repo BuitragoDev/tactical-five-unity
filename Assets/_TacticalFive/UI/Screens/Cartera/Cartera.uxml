@@ -9,6 +9,14 @@
         <!-- MAIN -->
         <ui:VisualElement class="cartera-main">
 
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="CarteraScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="GESTIÓN DE LA CARTERA DE JUGADORES" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+
             <!-- CONTENT -->
             <ui:VisualElement class="cartera-content">
 
