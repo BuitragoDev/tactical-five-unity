@@ -69,7 +69,7 @@ public class CarteraController : UIScreenController
         var screenIcon = _root.Q<VisualElement>("CarteraScreenIcon");
         if (screenIcon != null)
         {
-            var iconTex = Resources.Load<Texture2D>("Icons/buscador_icon");
+            var iconTex = Resources.Load<Texture2D>("Icons/lupa_icon");
             if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
         }
 
