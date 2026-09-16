@@ -35,6 +35,10 @@ using System.Globalization;
 
     // Ranking
     private VisualElement _rankingBody;
+    private VisualElement _rankingPaginator;
+    private List<CoachRankingEntry> _allCoaches;
+    private int _rankingPage = 0;
+    private const int RANKING_PAGE_SIZE = 15;
     protected override void CacheReferences()
     {
 
@@ -74,6 +78,7 @@ using System.Globalization;
         });
 
         _rankingBody = _root.Q<VisualElement>("RankingBody");
+        _rankingPaginator = _root.Q<VisualElement>("RankingPaginator");
 
         // Apply explicit inline styles to all manager panels as a safety net
         var panelBg = new Color(0.078f, 0.094f, 0.133f, 1f); // rgb(20, 24, 34)
@@ -393,24 +398,36 @@ using System.Globalization;
     {
         _rankingBody?.Clear();
 
-        var ranking = DatabaseManager.Instance.GetCoachRanking();
-        if (ranking == null || ranking.Count == 0) return;
-
-        int rank = 0;
-        var evenBg = new Color(0.059f, 0.071f, 0.102f, 1f); // rgb(15, 18, 26)
-        var oddBg = new Color(0f, 0f, 0f, 0f); // transparent
-        foreach (var coach in ranking)
+        _allCoaches = DatabaseManager.Instance.GetCoachRanking();
+        if (_allCoaches == null || _allCoaches.Count == 0)
         {
-            rank++;
+            _rankingPaginator?.Clear();
+            return;
+        }
+
+        int totalPages = Mathf.CeilToInt((float)_allCoaches.Count / RANKING_PAGE_SIZE);
+        if (_rankingPage >= totalPages) _rankingPage = totalPages - 1;
+        if (_rankingPage < 0) _rankingPage = 0;
+
+        int start = _rankingPage * RANKING_PAGE_SIZE;
+        int end = Mathf.Min(start + RANKING_PAGE_SIZE, _allCoaches.Count);
+
+        var evenBg = new Color(0.059f, 0.071f, 0.102f, 1f);
+        var oddBg = new Color(0f, 0f, 0f, 0f);
+        for (int i = start; i < end; i++)
+        {
+            var coach = _allCoaches[i];
+            int globalRank = i + 1;
+
             var row = new VisualElement();
             row.AddToClassList("ranking-row");
 
             if (coach.status == "player")
                 row.AddToClassList("ranking-row--player");
-            else if (rank % 2 == 0)
+            else if (globalRank % 2 == 0)
                 row.style.backgroundColor = new StyleColor(evenBg);
 
-            var rankLabel = new Label(rank.ToString());
+            var rankLabel = new Label(globalRank.ToString());
             rankLabel.AddToClassList("ranking-col-rank");
             row.Add(rankLabel);
 
@@ -467,6 +484,34 @@ using System.Globalization;
             row.Add(badgeContainer);
             _rankingBody.Add(row);
         }
+
+        BuildRankingPaginator(totalPages);
+    }
+
+    void BuildRankingPaginator(int totalPages)
+    {
+        _rankingPaginator?.Clear();
+        if (totalPages <= 1) return;
+
+        var prevBtn = new Button { text = "◀" };
+        prevBtn.AddToClassList("ranking-paginator-btn");
+        if (_rankingPage == 0)
+            prevBtn.AddToClassList("ranking-paginator-btn--disabled");
+        else
+            prevBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); _rankingPage--; RefreshRanking(); });
+        _rankingPaginator.Add(prevBtn);
+
+        var pageLabel = new Label($"{_rankingPage + 1} / {totalPages}");
+        pageLabel.AddToClassList("ranking-paginator-label");
+        _rankingPaginator.Add(pageLabel);
+
+        var nextBtn = new Button { text = "▶" };
+        nextBtn.AddToClassList("ranking-paginator-btn");
+        if (_rankingPage >= totalPages - 1)
+            nextBtn.AddToClassList("ranking-paginator-btn--disabled");
+        else
+            nextBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); _rankingPage++; RefreshRanking(); });
+        _rankingPaginator.Add(nextBtn);
     }
 
     // ── CONFIG MODAL ─────────────────────────────────────────────
