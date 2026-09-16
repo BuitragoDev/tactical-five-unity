@@ -123,7 +123,6 @@ using System.Globalization;
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Manager] Header error: {ex.Message}"); }
-        RefreshTitle();
         RefreshStats();
         RefreshRelationships();
         RefreshObjective();
@@ -173,13 +172,6 @@ using System.Globalization;
                 try { headerDate.text = System.DateTime.Parse(_season.current_date).ToString("dd/MM/yyyy"); } catch { }
             }
         }
-    }
-
-    void RefreshTitle()
-    {
-        if (_manager == null) return;
-        var title = _root.Q<Label>("ManagerTitle");
-        if (title != null) title.text = _manager.name.ToUpper();
     }
 
     // ── STATS ────────────────────────────────────────────────────
