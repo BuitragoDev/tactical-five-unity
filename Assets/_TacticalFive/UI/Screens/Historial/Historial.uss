@@ -98,7 +98,7 @@
 .historial-table-header {
     flex-direction: row;
     align-items: center;
-    padding: 10px 0;
+    padding: 4px 0;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
     background-color: rgba(18, 103, 195, 0.04);
@@ -127,40 +127,40 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: auto;
-    padding: 8px 0 4px 0;
-    border-top-width: 1px;
-    border-top-color: rgb(42, 51, 71);
+    padding: 8px 0;
+    margin-top: 4px;
 }
 .historial-paginator-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
-    color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.10);
-    border-width: 1px;
-    border-color: rgb(212, 160, 23);
-    border-radius: 4px;
-    padding: 4px 10px;
-    margin: 0 4px;
-    -unity-text-align: middle-center;
     cursor: pointer;
+    width: 32px;
+    height: 32px;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+    border-radius: 8px;
+    font-size: 14px;
+    -unity-text-align: middle-center;
+    padding: 0;
+    min-width: 0;
 }
 .historial-paginator-btn:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgba(42, 95, 201, 0.25);
 }
 .historial-paginator-btn:disabled {
-    color: rgb(58, 74, 99);
-    border-color: rgb(42, 51, 71);
-    background-color: transparent;
+    background-color: rgba(60, 60, 70, 0.25);
+    border-color: rgb(60, 60, 70);
+    color: rgb(80, 85, 95);
     cursor: default;
 }
 .historial-paginator-info {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
-    color: rgb(122, 138, 170);
-    margin: 0 8px;
+    margin: 0 12px;
+    font-size: 16px;
+    color: rgb(150, 160, 180);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
+    letter-spacing: 1px;
     -unity-text-align: middle-center;
-    min-width: 50px;
+    min-width: 0;
 }
 
 .historial-row {
