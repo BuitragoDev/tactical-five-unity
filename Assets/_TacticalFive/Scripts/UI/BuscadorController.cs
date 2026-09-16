@@ -35,7 +35,7 @@ public class BuscadorController : UIScreenController
     private string _sortColumn = "media";
     private bool _sortDescending = true;
 
-    private const int PAGE_SIZE = 11;
+    private const int PAGE_SIZE = 10;
     private int _currentPage;
 
     protected override void CacheReferences()
@@ -92,6 +92,14 @@ public class BuscadorController : UIScreenController
     protected override void LoadData()
     {
         base.LoadData();
+
+        var screenIcon = _root.Q<VisualElement>("BuscadorScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/lupa_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         _allTeams = DatabaseManager.Instance?.GetAllTeams() ?? new List<TeamData>();
         _allPlayers = DatabaseManager.Instance?.GetAllPlayers() ?? new List<PlayerData>();
 

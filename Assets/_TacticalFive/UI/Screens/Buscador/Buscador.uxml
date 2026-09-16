@@ -12,7 +12,13 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="buscador-main">
 
-            <!-- TOP HEADER -->
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="BuscadorScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="BUSCADOR" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- CONTENT -->
             <ui:VisualElement name="BuscadorContent" class="buscador-content">
