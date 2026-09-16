@@ -70,7 +70,7 @@ using System.Linq;
     private List<PlayerData> _freeAgents = new();
     private List<PlayerData> _currentFARows = new();
     private int _faCurrentPage;
-    private const int FA_PAGE_SIZE = 10;
+    private const int FA_PAGE_SIZE = 7;
     private Button _faPreviousPageBtn;
     private Button _faNextPageBtn;
     private Button _faFirstPageBtn;

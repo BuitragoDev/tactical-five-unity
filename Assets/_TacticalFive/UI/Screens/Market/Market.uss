@@ -1003,9 +1003,9 @@
     color: rgb(255, 255, 255);
 }
 .market-fa-row {
-    height: 58px;
-    min-height: 58px;
-    max-height: 58px;
+    height: 56px;
+    min-height: 56px;
+    max-height: 56px;
     padding: 7px 20px;
     background-color: rgba(13, 20, 33, 0.55);
 }
