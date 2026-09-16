@@ -24,6 +24,18 @@ public class PremiosController : UIScreenController
         _tabRookie = _root.Q<Button>("TabRookie");
     }
 
+    protected override void LoadData()
+    {
+        base.LoadData();
+
+        var screenIcon = _root.Q<VisualElement>("PremiosScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/premios_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+    }
+
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
