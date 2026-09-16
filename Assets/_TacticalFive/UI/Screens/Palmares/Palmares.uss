@@ -157,6 +157,9 @@
 .champs-list {
     flex-direction: column;
     gap: 4px;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .champ-row {
@@ -241,6 +244,9 @@
 
 .palmares-table-body {
     flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .palmares-table-body > .palmares-data-row {
@@ -543,8 +549,10 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    margin-top: 8px;
-    padding: 6px 0;
+    margin-top: auto;
+    padding: 8px 0 4px 0;
+    border-top-width: 1px;
+    border-top-color: rgb(42, 51, 71);
 }
 
 .palmares-paginator-btn {
