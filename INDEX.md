@@ -29,6 +29,7 @@
 | Doc | Contents |
 |---|---|
 | [Docs/UI_TOOLKIT.md](Docs/UI_TOOLKIT.md) | PanelSettings/theme, UXML/USS, `UIScreenController` base, 41 screens, navigation tree |
+| [Docs/CUSTOM_SCROLLBAR.md](Docs/CUSTOM_SCROLLBAR.md) | Custom scrollbar pattern (viewport + content + track/thumb); why Unity's `ScrollView` is unreliable here |
 | [Docs/SCENES.md](Docs/SCENES.md) | The single scene, its 44 GameObjects, lifecycle |
 | [Docs/PREFABS.md](Docs/PREFABS.md) | Why there are zero prefabs; runtime instantiation patterns |
 | [Docs/SCRIPTABLE_OBJECTS.md](Docs/SCRIPTABLE_OBJECTS.md) | No game SOs; the PanelSettings + fonts that exist |

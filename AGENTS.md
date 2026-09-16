@@ -29,6 +29,7 @@
 | `Docs/GAMEPLAY.md` | **Todas las mecánicas con fórmulas exactas** | Tocas simulación, economía, contratos, moral, draft |
 | `Docs/SYSTEMS.md` | 18 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
 | `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, **41 pantallas**, árbol de navegación | Trabajas en UI |
+| `Docs/CUSTOM_SCROLLBAR.md` | **Barra de scroll propia** (viewport + content + track/thumb) — el `ScrollView` de Unity no es fiable con el tema actual | Necesitas una lista larga con scroll arrastrable |
 | `Docs/SCENES.md` | La escena única, sus 44 GameObjects | Tocas la escena / añades pantalla |
 | `Docs/EVENTS.md` | Todos los canales de comunicación (static, DB messages, PlayerPrefs, callbacks) | Añades un evento/mensaje nuevo |
 | `Docs/DATA_MODEL.md` | **Las 42 tablas SQLite campo a campo**, seeds, migraciones | Cambias esquema, añades tabla/columna |

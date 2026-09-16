@@ -40,6 +40,11 @@ TacticalFivePanelSettings.asset (PanelSettings)
 ### CustomSlider (`Scripts/UI/CustomSlider.cs`)
 - Custom slider control (not a native `Slider`) used in the config modals (master/music/SFX). Binds drag to value changes via `OnValueChanged` callback → `AudioManager` volume setters.
 
+### Barra de scroll propia (viewport + content + track/thumb)
+- **[F]** El tema del proyecto (`TacticalFiveTheme.tss`) **no incluye los estilos base de Unity** para `ScrollView`, así que la barra interna no se dimensiona ni se sincroniza de forma fiable.
+- Para listas largas con barra arrastrable se usa un patrón propio: viewport (`overflow: hidden`) + content desplazado con `style.top = -scrollY` + track/thumb propios. Implementación de referencia: modal de traspasos de `Market` (`MarketController.cs:278-422`).
+- **Guía completa y reutilizable: [`Docs/CUSTOM_SCROLLBAR.md`](CUSTOM_SCROLLBAR.md).**
+
 ## 4. Controller pattern — `UIScreenController` base
 
 **[F] All 41 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:

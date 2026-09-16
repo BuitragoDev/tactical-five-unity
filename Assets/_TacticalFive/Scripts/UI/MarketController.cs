@@ -65,6 +65,8 @@ using System.Linq;
     private List<TeamData> _allTeams = new();
     private List<PlayerData> _myPlayers;
     private List<PlayerData> _otherPlayers;
+    private List<PlayerData> _filteredMyPlayers;
+    private List<PlayerData> _filteredOtherPlayers;
     private List<DraftPickData> _myPicks;
     private List<DraftPickData> _otherPicks;
     private List<PlayerData> _freeAgents = new();
@@ -94,6 +96,47 @@ using System.Linq;
     private List<PlayerData> _ownSATFAs = new();
     private HashSet<int> _selectedOwnSATFAs = new();
     private Dictionary<int, long> _ownSATSignSalaries = new();
+    private string _myFilterPos = "ALL";
+    private string _otherFilterPos = "ALL";
+    private Button _btnCancelTrade;
+    private Button _btnConfirmTrade;
+    private Label _myTeamSalary;
+    private Label _myTeamCapSpace;
+    private Label _myTeamExits;
+    private Label _otherTeamSalary;
+    private Label _otherTeamCapSpace;
+    private Label _otherTeamExits;
+    private Label _myPicksCount;
+    private Label _otherPicksCount;
+    private Label _summaryMyReceiveLabel;
+    private Label _summaryOtherReceiveLabel;
+    private VisualElement _summaryMyReceivedPlayers;
+    private VisualElement _summaryOtherReceivedPlayers;
+    private Label _summaryMySalaryLabel;
+    private Label _summaryMySalaryTotal;
+    private Label _summaryOtherSalaryLabel;
+    private Label _summaryOtherSalaryTotal;
+    private Label _summaryMyTeamBadge;
+    private Label _summaryOtherTeamBadge;
+    private VisualElement _summaryMyTeamLogoSmall;
+    private VisualElement _summaryOtherTeamLogoSmall;
+    private VisualElement _summaryMyTeamLogoMd;
+    private VisualElement _summaryOtherTeamLogoMd;
+    private Label _summaryNotes;
+    private TradeScrollbar _myBar;
+    private TradeScrollbar _otherBar;
+
+    class TradeScrollbar
+    {
+        public VisualElement Viewport;
+        public VisualElement Content;
+        public VisualElement Track;
+        public VisualElement Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY;
+        public float StartScrollY;
+    }
 
     // NBA salary thresholds (use TradeHelper constants as source of truth)
 
@@ -179,6 +222,41 @@ using System.Linq;
         _tradeSuccessText1 = _root.Q<Label>("TradeSuccessText1");
         _tradeSuccessText2 = _root.Q<Label>("TradeSuccessText2");
 
+        // Trade modal new elements
+        _btnCancelTrade = _root.Q<Button>("BtnCancelTrade");
+        _btnConfirmTrade = _root.Q<Button>("BtnConfirmTrade");
+        _myTeamSalary = _root.Q<Label>("MyTeamSalary");
+        _myTeamCapSpace = _root.Q<Label>("MyTeamCapSpace");
+        _myTeamExits = _root.Q<Label>("MyTeamExits");
+        _otherTeamSalary = _root.Q<Label>("OtherTeamSalary");
+        _otherTeamCapSpace = _root.Q<Label>("OtherTeamCapSpace");
+        _otherTeamExits = _root.Q<Label>("OtherTeamExits");
+        _myPicksCount = _root.Q<Label>("MyPicksCount");
+        _otherPicksCount = _root.Q<Label>("OtherPicksCount");
+        _summaryMyReceiveLabel = _root.Q<Label>("SummaryMyReceiveLabel");
+        _summaryOtherReceiveLabel = _root.Q<Label>("SummaryOtherReceiveLabel");
+        _summaryMyReceivedPlayers = _root.Q<VisualElement>("SummaryMyReceivedPlayers");
+        _summaryOtherReceivedPlayers = _root.Q<VisualElement>("SummaryOtherReceivedPlayers");
+        _summaryMySalaryLabel = _root.Q<Label>("SummaryMySalaryLabel");
+        _summaryMySalaryTotal = _root.Q<Label>("SummaryMySalaryTotal");
+        _summaryOtherSalaryLabel = _root.Q<Label>("SummaryOtherSalaryLabel");
+        _summaryOtherSalaryTotal = _root.Q<Label>("SummaryOtherSalaryTotal");
+        _summaryMyTeamBadge = _root.Q<Label>("SummaryMyTeamBadge");
+        _summaryOtherTeamBadge = _root.Q<Label>("SummaryOtherTeamBadge");
+        _summaryMyTeamLogoSmall = _root.Q<VisualElement>("SummaryMyTeamLogoSmall");
+        _summaryOtherTeamLogoSmall = _root.Q<VisualElement>("SummaryOtherTeamLogoSmall");
+        _summaryMyTeamLogoMd = _root.Q<VisualElement>("SummaryMyTeamLogoMd");
+        _summaryOtherTeamLogoMd = _root.Q<VisualElement>("SummaryOtherTeamLogoMd");
+        _summaryNotes = _root.Q<Label>("SummaryNotes");
+        var myViewport = _root.Q<VisualElement>("MyPlayerViewport");
+        var otherViewport = _root.Q<VisualElement>("OtherPlayerViewport");
+        ConfigurePlayerScroll(myViewport);
+        ConfigurePlayerScroll(otherViewport);
+        _myBar = BindTradeScrollbar(myViewport, _myTeamBody,
+            _root.Q<VisualElement>("MyPlayerScrollTrack"), _root.Q<VisualElement>("MyPlayerScrollThumb"));
+        _otherBar = BindTradeScrollbar(otherViewport, _otherTeamBody,
+            _root.Q<VisualElement>("OtherPlayerScrollTrack"), _root.Q<VisualElement>("OtherPlayerScrollThumb"));
+
         _faPreviousPageBtn = _root.Q<Button>("BtnFAPreviousPage");
         _faNextPageBtn = _root.Q<Button>("BtnFANextPage");
         _faFirstPageBtn = _root.Q<Button>("BtnFAFirstPage");
@@ -195,6 +273,152 @@ using System.Linq;
         SetFAPageIcon(_root.Q<Image>("FALastPageIcon2"), faNextSprite);
 
         if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
+    }
+
+    void ConfigurePlayerScroll(VisualElement viewport)
+    {
+        if (viewport == null) return;
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+    }
+
+    TradeScrollbar BindTradeScrollbar(VisualElement viewport, VisualElement content,
+                                      VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        var bar = new TradeScrollbar
+        {
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
+
+        // Rueda del ratón sobre la lista
+        viewport.RegisterCallback<WheelEvent>(evt =>
+        {
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        // Arrastre del thumb
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
+        {
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (bar.Dragging)
+            {
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
+
+        // Clic en la pista: salto de página
+        track.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+        return bar;
+    }
+
+    static float GetScrollMax(TradeScrollbar bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(TradeScrollbar bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(TradeScrollbar bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float thumbHeight = max <= 0f ? trackHeight : Mathf.Max(36f, trackHeight * viewportHeight / contentHeight);
+        thumbHeight = Mathf.Min(thumbHeight, trackHeight);
+
+        float travel = trackHeight - thumbHeight;
+        float t = max <= 0f ? 0f : Mathf.Clamp01(bar.ScrollY / max);
+
+        bar.Thumb.style.height = thumbHeight;
+        bar.Thumb.style.top = travel * t;
+    }
+
+    void ResetTradeScrollbars()
+    {
+        if (_myBar != null) { _myBar.ScrollY = 0f; ApplyScroll(_myBar); }
+        if (_otherBar != null) { _otherBar.ScrollY = 0f; ApplyScroll(_otherBar); }
+    }
+
+    void SyncAllTradeScrollbars()
+    {
+        if (_tradePanels == null || _tradePanels.resolvedStyle.display == DisplayStyle.None) return;
+        ClampAndApply(_myBar);
+        ClampAndApply(_otherBar);
+    }
+
+    void Update()
+    {
+        SyncAllTradeScrollbars();
     }
     protected override void LoadData()
     {
@@ -250,6 +474,24 @@ using System.Linq;
         _faNextPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(1); });
         _faFirstPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(-10); });
         _faLastPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(10); });
+
+        // Trade modal buttons
+        _btnCancelTrade?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseTradeModal(); });
+        _btnConfirmTrade?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnConfirmTrade(); });
+
+        // Filter tabs
+        SetupFilterTab("MyFilterAll", "ALL", true);
+        SetupFilterTab("MyFilterPG", "B", true);
+        SetupFilterTab("MyFilterSG", "E", true);
+        SetupFilterTab("MyFilterSF", "A", true);
+        SetupFilterTab("MyFilterPF", "AP", true);
+        SetupFilterTab("MyFilterC", "P", true);
+        SetupFilterTab("OtherFilterAll", "ALL", false);
+        SetupFilterTab("OtherFilterPG", "B", false);
+        SetupFilterTab("OtherFilterSG", "E", false);
+        SetupFilterTab("OtherFilterSF", "A", false);
+        SetupFilterTab("OtherFilterPF", "AP", false);
+        SetupFilterTab("OtherFilterC", "P", false);
     }
     protected override void Refresh()
     {
@@ -433,7 +675,18 @@ using System.Linq;
         _selectedOtherPlayers.Clear();
         _selectedMyPicks.Clear();
         _selectedOtherPicks.Clear();
+        _signAndTradeActive = false;
+        _signAndTradeCandidates.Clear();
+        _ownSATFAs.Clear();
+        _selectedOwnSATFAs.Clear();
+        _ownSATSignSalaries.Clear();
+        if (_btnConfirmTrade != null)
+        {
+            _btnConfirmTrade.SetEnabled(false);
+            _btnConfirmTrade.text = "ENVIAR OFERTA";
+        }
         LoadTradeData();
+        ResetTradeScrollbars();
     }
 
     void CloseTradeModal()
@@ -485,6 +738,63 @@ using System.Linq;
             _root.Q<VisualElement>("OtherTeamLogo").style.backgroundImage = new StyleBackground(otherSprite);
         _root.Q<Label>("OtherTeamName").text = _selectedTeam.name.ToUpper();
 
+        // Team stats
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
+        long myPayroll = _myPlayers.Sum(p => p.salary);
+        long otherPayroll = _otherPlayers.Sum(p => p.salary);
+        long myCapSpace = salaryCap - myPayroll;
+        long otherCapSpace = salaryCap - otherPayroll;
+        int myExits = _myPlayers.Count(p => p.contract_years <= 1);
+        int otherExits = _otherPlayers.Count(p => p.contract_years <= 1);
+
+        if (_myTeamSalary != null) _myTeamSalary.text = $"${myPayroll / 1_000_000}M";
+        if (_myTeamCapSpace != null)
+        {
+            _myTeamCapSpace.text = $"${myCapSpace / 1_000_000}M";
+            _myTeamCapSpace.style.color = new StyleColor(myCapSpace >= 0
+                ? new Color32(39, 174, 96, 255) : new Color32(192, 57, 43, 255));
+        }
+        if (_myTeamExits != null) _myTeamExits.text = myExits.ToString();
+        if (_otherTeamSalary != null) _otherTeamSalary.text = $"${otherPayroll / 1_000_000}M";
+        if (_otherTeamCapSpace != null)
+        {
+            _otherTeamCapSpace.text = $"${otherCapSpace / 1_000_000}M";
+            _otherTeamCapSpace.style.color = new StyleColor(otherCapSpace >= 0
+                ? new Color32(39, 174, 96, 255) : new Color32(192, 57, 43, 255));
+        }
+        if (_otherTeamExits != null) _otherTeamExits.text = otherExits.ToString();
+
+        // Picks counts
+        int myPickCount = _myPicks?.Count ?? 0;
+        int otherPickCount = _otherPicks?.Count ?? 0;
+        if (_myPicksCount != null) _myPicksCount.text = $"Hasta {myPickCount} pick{(myPickCount != 1 ? "s" : "")} disponible{(myPickCount != 1 ? "s" : "")}";
+        if (_otherPicksCount != null) _otherPicksCount.text = $"Hasta {otherPickCount} pick{(otherPickCount != 1 ? "s" : "")} disponible{(otherPickCount != 1 ? "s" : "")}";
+
+        // Set summary team logos and badges
+        if (_summaryMyTeamBadge != null) _summaryMyTeamBadge.text = _myTeam.abbreviation ?? "TF";
+        if (_summaryOtherTeamBadge != null) _summaryOtherTeamBadge.text = _selectedTeam.abbreviation ?? "TF";
+        if (_summaryMyReceiveLabel != null) _summaryMyReceiveLabel.text = $"{_myTeam.name.ToUpper()} RECIBE";
+        if (_summaryOtherReceiveLabel != null) _summaryOtherReceiveLabel.text = $"{_selectedTeam.name.ToUpper()} RECIBE";
+        if (_summaryMyTeamLogoSmall != null && _tradePanelLogos.TryGetValue(_myTeam.logo, out var mySm))
+            _summaryMyTeamLogoSmall.style.backgroundImage = new StyleBackground(mySm);
+        if (_summaryOtherTeamLogoSmall != null && _tradePanelLogos.TryGetValue(_selectedTeam.logo, out var otherSm))
+            _summaryOtherTeamLogoSmall.style.backgroundImage = new StyleBackground(otherSm);
+        if (_summaryMyTeamLogoMd != null && _tradePanelLogos.TryGetValue(_myTeam.logo, out var myMd))
+            _summaryMyTeamLogoMd.style.backgroundImage = new StyleBackground(myMd);
+        if (_summaryOtherTeamLogoMd != null && _tradePanelLogos.TryGetValue(_selectedTeam.logo, out var otherMd))
+            _summaryOtherTeamLogoMd.style.backgroundImage = new StyleBackground(otherMd);
+
+        // Notes
+        if (_summaryNotes != null)
+            _summaryNotes.text = "- Los equipos no pueden recibir más de 3 jugadores.\n- El salario enviado no puede superar el 125% del salario recibido.\n- El traspaso debe ser aprobado por ambas franquicias.";
+
+        // Reset filters
+        _myFilterPos = "ALL";
+        _otherFilterPos = "ALL";
+        UpdateFilterTabStyles(true);
+        UpdateFilterTabStyles(false);
+
         InitTableHeaders();
         BuildTradeTable();
         BuildPicksPanel();
@@ -495,16 +805,41 @@ using System.Linq;
     {
         if (_myTableHeader != null && _myTableHeader.childCount == 0)
         {
-            PopulateTableHeader(_myTableHeader);
+            PopulateTradeTableHeader(_myTableHeader);
         }
         if (_otherTableHeader != null && _otherTableHeader.childCount == 0)
         {
-            PopulateTableHeader(_otherTableHeader);
+            PopulateTradeTableHeader(_otherTableHeader);
         }
         if (_freeAgentsTableHeader != null && _freeAgentsTableHeader.childCount == 0)
         {
             PopulateTableHeader(_freeAgentsTableHeader);
         }
+    }
+
+    void PopulateTradeTableHeader(VisualElement header)
+    {
+        header.Clear();
+        var name = new Label("JUGADOR");
+        name.AddToClassList("market-table-header-label");
+        name.AddToClassList("market-table-header-name");
+        header.Add(name);
+        var pos = new Label("POS");
+        pos.AddToClassList("market-table-header-label");
+        pos.AddToClassList("market-table-header-pos");
+        header.Add(pos);
+        var ovr = new Label("MED");
+        ovr.AddToClassList("market-table-header-label");
+        ovr.AddToClassList("market-table-header-ovr");
+        header.Add(ovr);
+        var salary = new Label("SALARIO");
+        salary.AddToClassList("market-table-header-label");
+        salary.AddToClassList("market-table-header-salary");
+        header.Add(salary);
+        var restantes = new Label("AÑOS");
+        restantes.AddToClassList("market-table-header-label");
+        restantes.AddToClassList("market-table-header-restantes");
+        header.Add(restantes);
     }
 
     void PopulateTableHeader(VisualElement header)
@@ -556,10 +891,70 @@ using System.Linq;
         }
     }
 
+    void SetupFilterTab(string elementName, string position, bool isMyTeam)
+    {
+        var btn = _root.Q<Button>(elementName);
+        if (btn == null) return;
+        btn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            if (isMyTeam) _myFilterPos = position;
+            else _otherFilterPos = position;
+            UpdateFilterTabStyles(isMyTeam);
+            ApplyPlayerFilter(isMyTeam);
+        });
+        if (CursorManager.Instance != null)
+            CursorManager.Instance.RegisterHandCursor(btn);
+    }
+
+    void UpdateFilterTabStyles(bool isMyTeam)
+    {
+        string prefix = isMyTeam ? "My" : "Other";
+        string[] positions = { "All", "PG", "SG", "SF", "PF", "C" };
+        string[] filterValues = { "ALL", "B", "E", "A", "AP", "P" };
+        string activeFilter = isMyTeam ? _myFilterPos : _otherFilterPos;
+        for (int i = 0; i < positions.Length; i++)
+        {
+            var btn = _root.Q<Button>($"{prefix}Filter{positions[i]}");
+            if (btn == null) continue;
+            bool isActive = filterValues[i] == activeFilter;
+            btn.EnableInClassList("market-trade-filter-btn--active", isActive);
+        }
+    }
+
+    void ApplyPlayerFilter(bool isMyTeam)
+    {
+        string filter = isMyTeam ? _myFilterPos : _otherFilterPos;
+        var source = isMyTeam ? _myPlayers : _otherPlayers;
+        var body = isMyTeam ? _myTeamBody : _otherTeamBody;
+        if (source == null || body == null) return;
+
+        var filtered = filter == "ALL"
+            ? source
+            : source.Where(p => PositionCodes.GetShort(p.position) == filter).ToList();
+
+        if (isMyTeam) _filteredMyPlayers = filtered;
+        else _filteredOtherPlayers = filtered;
+
+        body.Clear();
+        foreach (var p in filtered)
+        {
+            var row = CreateTradeRow(p, isMyTeam);
+            body.Add(row);
+        }
+        if (isMyTeam && _ownSATFAs.Count > 0)
+            BuildOwnSASection();
+
+        if (isMyTeam && _myBar != null) { _myBar.ScrollY = 0f; ApplyScroll(_myBar); }
+        if (!isMyTeam && _otherBar != null) { _otherBar.ScrollY = 0f; ApplyScroll(_otherBar); }
+    }
+
     void BuildTradeTable()
     {
         _myTeamBody.Clear();
         _otherTeamBody.Clear();
+        _filteredMyPlayers = _myPlayers;
+        _filteredOtherPlayers = _otherPlayers;
 
         foreach (var p in _myPlayers)
         {
@@ -1077,36 +1472,82 @@ using System.Linq;
 
     void UpdateSummary()
     {
-        var mySalaryOut = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).Sum(p => p.salary);
-        long ownSASalary = _ownSATSignSalaries.Where(kv => _selectedOwnSATFAs.Contains(kv.Key)).Sum(kv => kv.Value);
-        mySalaryOut += ownSASalary;
-        var otherSalaryOut = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).Sum(p => p.salary);
+        var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
+        var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
+        var ownSA = _ownSATFAs.Where(p => _selectedOwnSATFAs.Contains(p.id)).ToList();
 
-        var myCount = _myTotalRosterCount - _selectedMyPlayers.Count + _selectedOtherPlayers.Count;
-        var otherCount = _otherTotalRosterCount - _selectedOtherPlayers.Count + _selectedMyPlayers.Count + _selectedOwnSATFAs.Count;
+        // Received players lists
+        BuildReceivedPlayersList(_summaryMyReceivedPlayers, otherSelected, false);
+        BuildReceivedPlayersList(_summaryOtherReceivedPlayers, mySelected.Concat(ownSA).ToList(), true);
 
-        var myBaseMargin = GetSalaryMargin(_myTeam);
-        var otherBaseMargin = GetSalaryMargin(_selectedTeam);
-        var myNewMargin = myBaseMargin + mySalaryOut - otherSalaryOut;
-        var otherNewMargin = otherBaseMargin + otherSalaryOut - mySalaryOut;
+        // Salary totals
+        long mySalaryOut = mySelected.Sum(p => p.salary) + ownSA.Sum(p => p.salary);
+        long otherSalaryOut = otherSelected.Sum(p => p.salary);
 
-        _root.Q<Label>("SummaryMyTeamName").text = _myTeam.name.ToUpper();
-        _root.Q<Label>("SummaryMyPlayerCount").text = myCount.ToString();
-        _root.Q<Label>("SummaryMySalaryMargin").text = $"${myNewMargin:N0}";
-        _root.Q<Label>("SummaryMySalaryMargin").RemoveFromClassList("market-summary-positive");
-        _root.Q<Label>("SummaryMySalaryMargin").RemoveFromClassList("market-summary-negative");
-        _root.Q<Label>("SummaryMySalaryMargin").AddToClassList(myNewMargin >= 0 ? "market-summary-positive" : "market-summary-negative");
-        _root.Q<Label>("SummaryMySalaryOut").text = $"${mySalaryOut:N0}";
-        _root.Q<Label>("SummaryMySalaryIn").text = $"${otherSalaryOut:N0}";
+        if (_summaryMySalaryLabel != null)
+            _summaryMySalaryLabel.text = $"SALARIO DE LA OFERTA ({_myTeam.abbreviation ?? "TU"})";
+        if (_summaryMySalaryTotal != null)
+        {
+            _summaryMySalaryTotal.text = $"${mySalaryOut:N0}";
+            _summaryMySalaryTotal.style.color = new StyleColor(new Color32(255, 255, 255, 255));
+        }
+        if (_summaryOtherSalaryLabel != null)
+            _summaryOtherSalaryLabel.text = $"SALARIO DE LA OFERTA ({_selectedTeam.abbreviation ?? "OT"})";
+        if (_summaryOtherSalaryTotal != null)
+        {
+            _summaryOtherSalaryTotal.text = $"${otherSalaryOut:N0}";
+            _summaryOtherSalaryTotal.style.color = new StyleColor(new Color32(220, 80, 70, 255));
+        }
+    }
 
-        _root.Q<Label>("SummaryOtherTeamName").text = _selectedTeam.name.ToUpper();
-        _root.Q<Label>("SummaryOtherPlayerCount").text = otherCount.ToString();
-        _root.Q<Label>("SummaryOtherSalaryMargin").text = $"${otherNewMargin:N0}";
-        _root.Q<Label>("SummaryOtherSalaryMargin").RemoveFromClassList("market-summary-positive");
-        _root.Q<Label>("SummaryOtherSalaryMargin").RemoveFromClassList("market-summary-negative");
-        _root.Q<Label>("SummaryOtherSalaryMargin").AddToClassList(otherNewMargin >= 0 ? "market-summary-positive" : "market-summary-negative");
-        _root.Q<Label>("SummaryOtherSalaryOut").text = $"${otherSalaryOut:N0}";
-        _root.Q<Label>("SummaryOtherSalaryIn").text = $"${mySalaryOut:N0}";
+    void BuildReceivedPlayersList(VisualElement container, List<PlayerData> players, bool isMyTeam)
+    {
+        if (container == null) return;
+        container.Clear();
+
+        if (players.Count == 0)
+        {
+            var empty = new Label("Ningún jugador seleccionado");
+            empty.style.fontSize = 12;
+            empty.style.color = new StyleColor(new Color32(120, 140, 170, 255));
+            empty.style.unityFontStyleAndWeight = FontStyle.Italic;
+            empty.style.paddingTop = 4;
+            empty.style.paddingBottom = 4;
+            container.Add(empty);
+            return;
+        }
+
+        foreach (var p in players)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("market-summary-player-row");
+
+            var photo = new VisualElement();
+            photo.AddToClassList("market-summary-player-photo");
+            var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+            if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
+            row.Add(photo);
+
+            var info = new VisualElement();
+            info.AddToClassList("market-summary-player-info");
+            var nameLabel = new Label($"{p.first_name} {p.last_name}");
+            nameLabel.AddToClassList("market-summary-player-name");
+            info.Add(nameLabel);
+            var posOvr = new Label($"{PositionCodes.GetShort(p.position)} | {p.GetCalculatedAverage()} GRL");
+            posOvr.AddToClassList("market-summary-player-pos-ovr");
+            info.Add(posOvr);
+            row.Add(info);
+
+            var salary = new Label($"${p.salary:N0}");
+            salary.AddToClassList("market-summary-player-salary");
+            row.Add(salary);
+
+            var years = new Label($"{p.contract_years} años");
+            years.AddToClassList("market-summary-player-years");
+            row.Add(years);
+
+            container.Add(row);
+        }
     }
 
     long GetSalaryMargin(TeamData team)
@@ -1136,7 +1577,15 @@ using System.Linq;
         mySelectedForTrade.AddRange(ownSA);
 
         if (mySelected.Count == 0 && otherSelected.Count == 0 && ownSA.Count == 0
-            && myPicksSel.Count == 0 && otherPicksSel.Count == 0) return;
+            && myPicksSel.Count == 0 && otherPicksSel.Count == 0)
+        {
+            if (_btnConfirmTrade != null)
+            {
+                _btnConfirmTrade.SetEnabled(false);
+                _btnConfirmTrade.text = "ENVIAR OFERTA";
+            }
+            return;
+        }
 
         var myPayroll = _myPlayers.Sum(p => p.salary);
         var otherPayroll = _otherPlayers.Sum(p => p.salary);
@@ -1198,6 +1647,12 @@ using System.Linq;
         box.Add(content);
 
         _tradeStatus.Add(box);
+
+        if (_btnConfirmTrade != null)
+        {
+            _btnConfirmTrade.SetEnabled(false);
+            _btnConfirmTrade.text = "SIN APROBACIÓN";
+        }
     }
 
     void ShowTradeResult(TradeResult result)
@@ -1218,7 +1673,7 @@ using System.Linq;
             box.Add(icon);
 
             var content = new VisualElement();
-            var title = new Label("EL EQUIPO ACEPTARÁ ESTA OFERTA");
+            var title = new Label("DENTRO DE LAS REGLAS DE LA NBA");
             title.AddToClassList("market-trade-status-title");
             content.Add(title);
 
@@ -1244,6 +1699,7 @@ using System.Linq;
                 var satRow = new VisualElement();
                 satRow.style.flexDirection = FlexDirection.Row;
                 satRow.style.alignItems = Align.Center;
+                satRow.style.marginTop = 6;
 
                 var satToggle = new Label("☐ Sign & Trade");
                 satToggle.AddToClassList("market-btn-sat-toggle");
@@ -1255,26 +1711,7 @@ using System.Linq;
                 satInfo.style.marginLeft = 6;
                 satRow.Add(satInfo);
 
-                var confirmBtn = new Button();
-                confirmBtn.AddToClassList("market-btn-confirm-trade");
-                confirmBtn.text = "CONFIRMAR TRASPASO";
-                confirmBtn.style.flexGrow = 1;
-                confirmBtn.style.width = StyleKeyword.None;
-                confirmBtn.style.marginTop = 0;
-                confirmBtn.style.marginLeft = 8;
-                confirmBtn.style.paddingLeft = 21;
-                confirmBtn.style.paddingRight = 21;
-                confirmBtn.clicked += () => { PlayClick(); OnConfirmTrade(); };
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.RegisterHandCursor(confirmBtn);
-
-                var bottomRow = new VisualElement();
-                bottomRow.style.flexDirection = FlexDirection.Row;
-                bottomRow.style.alignItems = Align.Center;
-                bottomRow.style.marginTop = 8;
-                bottomRow.Add(satRow);
-                bottomRow.Add(confirmBtn);
-                content.Add(bottomRow);
+                content.Add(satRow);
 
                 satToggle.RegisterCallback<ClickEvent>(_ =>
                 {
@@ -1282,18 +1719,15 @@ using System.Linq;
                     satToggle.text = _signAndTradeActive ? "☑ Sign & Trade" : "☐ Sign & Trade";
                 });
             }
-            else
-            {
-                var confirmBtn = new Button();
-                confirmBtn.AddToClassList("market-btn-confirm-trade");
-                confirmBtn.text = "CONFIRMAR TRASPASO";
-                confirmBtn.clicked += () => { PlayClick(); OnConfirmTrade(); };
-                if (CursorManager.Instance != null)
-                    CursorManager.Instance.RegisterHandCursor(confirmBtn);
-                content.Add(confirmBtn);
-            }
 
             box.Add(content);
+
+            // Enable confirm button
+            if (_btnConfirmTrade != null)
+            {
+                _btnConfirmTrade.SetEnabled(true);
+                _btnConfirmTrade.text = "ENVIAR OFERTA";
+            }
         }
         else
         {
@@ -1313,6 +1747,13 @@ using System.Linq;
             content.Add(score);
 
             box.Add(content);
+
+            // Disable confirm button
+            if (_btnConfirmTrade != null)
+            {
+                _btnConfirmTrade.SetEnabled(false);
+                _btnConfirmTrade.text = "SIN APROBACIÓN";
+            }
         }
 
         _tradeStatus.Add(box);
