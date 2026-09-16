@@ -68,6 +68,13 @@ public class RecordsController : UIScreenController
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("RecordsScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/records_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos) _logoSprites[s.name] = s;
 

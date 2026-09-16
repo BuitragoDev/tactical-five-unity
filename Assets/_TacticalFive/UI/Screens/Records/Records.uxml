@@ -13,19 +13,16 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="records-main">
 
-            <!-- TOP HEADER -->
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="RecordsScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="RECORDS HISTÓRICOS" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- RECORDS CONTENT -->
             <ui:VisualElement class="records-content">
-
-                <!-- PAGE HEADER -->
-                <ui:VisualElement class="records-header">
-                    <ui:VisualElement name="RecordsHeaderIcon" class="records-header-icon" />
-                    <ui:VisualElement class="records-header-text">
-                        <ui:Label class="records-title" text="RECORDS" />
-                        <ui:Label name="RecordsSubtitle" class="records-subtitle" text="MÁXIMOS HISTÓRICOS DEL EQUIPO" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
 
                 <!-- Filter tabs -->
                 <ui:VisualElement class="records-tabs">
