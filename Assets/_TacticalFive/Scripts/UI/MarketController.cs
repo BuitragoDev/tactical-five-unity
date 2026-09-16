@@ -409,20 +409,6 @@ using System.Linq;
 
             _teamGrid.Add(chip);
         }
-
-        // FA button
-        var faChip = new VisualElement();
-        faChip.AddToClassList("market-team-chip");
-        if (_isFA) faChip.AddToClassList("active");
-
-        var faLabel = new Label("FA");
-        faLabel.AddToClassList("market-team-chip-fa");
-        faChip.Add(faLabel);
-
-        faChip.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectFA(); });
-        if (CursorManager.Instance != null)
-            CursorManager.Instance.RegisterHandCursor(faChip);
-        _teamGrid.Add(faChip);
     }
 
     void ShowNegotiateButton()
@@ -439,17 +425,6 @@ using System.Linq;
         _isFA = false;
         ShowNegotiateButton();
         BuildTeamGrid();
-    }
-
-    void SelectFA()
-    {
-        _selectedTeam = null;
-        _isFA = true;
-        _btnNegotiate.style.display = DisplayStyle.None;
-        _tradePanels.style.display = DisplayStyle.None;
-        _freeAgentsPanel.style.display = DisplayStyle.Flex;
-        BuildTeamGrid();
-        BuildFreeAgents();
     }
 
     // ═══════════════════════════════════════════
