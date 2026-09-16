@@ -11,6 +11,41 @@
     top: 0; left: 0; right: 0; bottom: 0;
 }
 
+/* ══ SCREEN HEADER ══ */
+.screen-header.panel--gold {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 16px 20px 12px 20px;
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(120, 95, 30, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.screen-header-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+}
+.screen-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.screen-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: rgb(255, 255, 255);
+    flex-grow: 1;
+    white-space: normal;
+}
+
 .loans-main {
     flex-direction: column;
     flex-grow: 1;

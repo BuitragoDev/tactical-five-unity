@@ -13,7 +13,13 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="loans-main">
 
-            <!-- TOP HEADER -->
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="LoansScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="GESTIÓN DE PRÉSTAMOS BANCARIOS" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- CONTENT -->
             <ui:VisualElement class="loans-content">
