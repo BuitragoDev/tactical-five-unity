@@ -812,8 +812,8 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(_hoFData, _hoFPage);
-        int startIdx = _hoFPage * PAGE_SIZE;
+        var page = GetPage(_hoFData, _hoFPage, 13);
+        int startIdx = _hoFPage * 13;
         for (int i = 0; i < page.Count; i++)
         {
             var m = page[i];
@@ -833,7 +833,7 @@ using System.Linq;
 
             _hoFBody.Add(row);
         }
-        UpdatePaginator(_hoFPrev, _hoFNext, _hoFPageInfo, _hoFPage, _hoFData.Count);
+        UpdatePaginator(_hoFPrev, _hoFNext, _hoFPageInfo, _hoFPage, _hoFData.Count, 13);
     }
 
     static readonly System.Globalization.CultureInfo _hoFCulture = new("es-ES");
