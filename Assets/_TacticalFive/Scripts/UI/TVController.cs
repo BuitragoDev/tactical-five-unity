@@ -23,6 +23,14 @@ using System.Linq;
     protected override void LoadData()
     {
         base.LoadData();
+
+        var screenIcon = _root.Q<VisualElement>("TVScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/tv_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         if (_manager == null) return;
 
         _currentTV = DatabaseManager.Instance.GetActiveTVChannel(_myTeam.id);
