@@ -414,8 +414,8 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(_finalsHistoryData, _finalsHistoryPage);
-        int startIdx = _finalsHistoryPage * PAGE_SIZE;
+        var page = GetPage(_finalsHistoryData, _finalsHistoryPage, 13);
+        int startIdx = _finalsHistoryPage * 13;
         foreach (var f in page)
         {
             var row = new VisualElement();
@@ -438,7 +438,7 @@ using System.Linq;
 
             _finalsHistoryBody.Add(row);
         }
-        UpdatePaginator(_finalsHistoryPrev, _finalsHistoryNext, _finalsHistoryPageInfo, _finalsHistoryPage, _finalsHistoryData.Count);
+        UpdatePaginator(_finalsHistoryPrev, _finalsHistoryNext, _finalsHistoryPageInfo, _finalsHistoryPage, _finalsHistoryData.Count, 13);
     }
 
     // ══ JUGADORES TAB ════════════════════════════════════
@@ -522,7 +522,7 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(_awardsHistoryData, _awardsHistoryPage);
+        var page = GetPage(_awardsHistoryData, _awardsHistoryPage, 13);
         foreach (var a in page)
         {
             var row = new VisualElement();
@@ -546,7 +546,7 @@ using System.Linq;
 
             _awardsHistoryBody.Add(row);
         }
-        UpdatePaginator(_awardsHistoryPrev, _awardsHistoryNext, _awardsHistoryPageInfo, _awardsHistoryPage, _awardsHistoryData.Count);
+        UpdatePaginator(_awardsHistoryPrev, _awardsHistoryNext, _awardsHistoryPageInfo, _awardsHistoryPage, _awardsHistoryData.Count, 13);
     }
 
     // ══ QUINTETOS TAB ════════════════════════════════════
@@ -637,7 +637,7 @@ using System.Linq;
             return;
         }
 
-        var page = GetPage(_quintetHistoryData, _quintetHistoryPage);
+        var page = GetPage(_quintetHistoryData, _quintetHistoryPage, 13);
         foreach (var q in page)
         {
             var row = new VisualElement();
@@ -655,7 +655,7 @@ using System.Linq;
 
             _quintetHistoryBody.Add(row);
         }
-        UpdatePaginator(_quintetHistoryPrev, _quintetHistoryNext, _quintetHistoryPageInfo, _quintetHistoryPage, _quintetHistoryData.Count);
+        UpdatePaginator(_quintetHistoryPrev, _quintetHistoryNext, _quintetHistoryPageInfo, _quintetHistoryPage, _quintetHistoryData.Count, 13);
     }
 
     // ══ ALL-STAR TAB ══════════════════════════════════════
@@ -732,7 +732,7 @@ using System.Linq;
 
         _logoSprites32.TryGetValue("all-star-game", out var allStarSprite);
 
-        var page = GetPage(_allStarHistoryData, _allStarHistoryPage);
+        var page = GetPage(_allStarHistoryData, _allStarHistoryPage, 13);
         foreach (var a in page)
         {
             var row = new VisualElement();
@@ -757,7 +757,7 @@ using System.Linq;
 
             _allStarHistoryBody.Add(row);
         }
-        UpdatePaginator(_allStarHistoryPrev, _allStarHistoryNext, _allStarHistoryPageInfo, _allStarHistoryPage, _allStarHistoryData.Count);
+        UpdatePaginator(_allStarHistoryPrev, _allStarHistoryNext, _allStarHistoryPageInfo, _allStarHistoryPage, _allStarHistoryData.Count, 13);
     }
 
     VisualElement CreateAllStarCell(string text, string cellClass, Sprite logo)
