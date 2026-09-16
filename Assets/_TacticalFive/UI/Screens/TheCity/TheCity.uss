@@ -51,6 +51,11 @@
     font-size: 18px;
     letter-spacing: 1px;
     -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.city-bubble:hover {
+    background-color: rgba(212, 160, 23, 0.15);
+    color: rgb(255, 220, 120);
 }
 
 .city-bubble-tail {
