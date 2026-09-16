@@ -7,6 +7,7 @@ using System.Linq;
     protected override GameScreen ScreenId => GameScreen.Market;
     private Button _btnNegotiate;
     private VisualElement _tradePanels;
+    private Button _btnCloseTradeModal;
     private VisualElement _freeAgentsPanel;
     private VisualElement _teamGrid;
     private VisualElement _myTeamBody;
@@ -25,6 +26,7 @@ using System.Linq;
     private VisualElement _faConfirmModal;
     private Button _btnCloseFARosterFull;
     private Button _btnCancelFA;
+    private Button _btnCloseFA;
     private Button _btnConfirmFA;
     private Label _faPlayerName;
     private Label _faText1;
@@ -127,6 +129,7 @@ using System.Linq;
     {
         _btnNegotiate = _root.Q<Button>("BtnNegotiate");
         _tradePanels = _root.Q<VisualElement>("TradePanels");
+        _btnCloseTradeModal = _root.Q<Button>("BtnCloseTradeModal");
         _freeAgentsPanel = _root.Q<VisualElement>("FreeAgentsPanel");
         _teamGrid = _root.Q<VisualElement>("TeamGrid");
         _myTeamBody = _root.Q<VisualElement>("MyTeamBody");
@@ -145,6 +148,7 @@ using System.Linq;
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
         _btnCloseFARosterFull = _root.Q<Button>("BtnCloseFARosterFull");
         _btnCancelFA = _root.Q<Button>("BtnCancelFA");
+        _btnCloseFA = _root.Q<Button>("BtnCloseFA");
         _btnConfirmFA = _root.Q<Button>("BtnConfirmFA");
         _faPlayerName = _root.Q<Label>("FATitle");
         _faText1 = _root.Q<Label>("FAText1");
@@ -224,9 +228,13 @@ using System.Linq;
         base.RegisterCallbacks();
         _btnNegotiate?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); OnNegotiate(); });
+        _btnCloseTradeModal?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); CloseTradeModal(); });
         _btnCloseFARosterFull?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faRosterFullModal.style.display = DisplayStyle.None; });
         _btnCancelFA?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); _faLongPressSchedule?.Pause(); _faLongPressSchedule = null; _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
+        _btnCloseFA?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faLongPressSchedule?.Pause(); _faLongPressSchedule = null; _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
         _btnConfirmFA?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); SendFAOffer(); });
@@ -245,7 +253,7 @@ using System.Linq;
     }
     protected override void Refresh()
     {
-        _isFA = false;
+        _isFA = true;
         _selectedTeam = null;
         _selectedMyPlayers.Clear();
         _selectedOtherPlayers.Clear();
@@ -390,6 +398,10 @@ using System.Linq;
                 logo.style.backgroundImage = new StyleBackground(sprite);
             chip.Add(logo);
 
+            var teamName = new Label(team.name.ToUpper());
+            teamName.AddToClassList("market-team-chip-name");
+            chip.Add(teamName);
+
             int teamId = team.id;
             chip.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectTeam(teamId); });
             if (CursorManager.Instance != null)
@@ -418,7 +430,6 @@ using System.Linq;
         if (_btnNegotiate == null || _selectedTeam == null) return;
         _btnNegotiate.style.display = DisplayStyle.Flex;
         _tradePanels.style.display = DisplayStyle.None;
-        _freeAgentsPanel.style.display = DisplayStyle.None;
         _root.Q<Label>("NegotiateBtnText").text = $"NEGOCIAR CON {_selectedTeam.name.ToUpper()}";
     }
 
@@ -454,6 +465,14 @@ using System.Linq;
         _selectedMyPicks.Clear();
         _selectedOtherPicks.Clear();
         LoadTradeData();
+    }
+
+    void CloseTradeModal()
+    {
+        CloseAllDropdowns();
+        _tradePanels.style.display = DisplayStyle.None;
+        if (_selectedTeam != null && !_isFA)
+            _btnNegotiate.style.display = DisplayStyle.Flex;
     }
 
     void LoadTradeData()

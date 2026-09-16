@@ -952,6 +952,449 @@
     padding-right: 20px;
 }
 
+/* ══════════════════════════════════════════
+   MARKET REDESIGN — main market + trade modal
+   ══════════════════════════════════════════ */
+.market-content {
+    padding: 16px 20px 20px 20px;
+}
+
+.market-section {
+    background-color: rgb(18, 25, 39);
+    border-color: rgb(42, 95, 201);
+    border-radius: 10px;
+}
+.market-section-title {
+    padding: 10px 18px;
+    background-color: rgba(42, 95, 201, 0.16);
+    border-bottom-color: rgba(42, 95, 201, 0.55);
+}
+.market-section-title-text {
+    font-size: 20px;
+    letter-spacing: 2px;
+}
+.market-team-grid {
+    padding: 12px 14px 14px 14px;
+    align-items: flex-start;
+}
+.market-team-chip {
+    width: 96px;
+    height: 104px;
+    margin: 5px;
+    padding: 8px 5px 6px 5px;
+    background-color: rgb(13, 20, 33);
+    border-color: rgb(42, 51, 71);
+    border-radius: 8px;
+    justify-content: flex-start;
+}
+.market-team-chip:hover {
+    border-color: rgb(100, 150, 230);
+    background-color: rgba(42, 95, 201, 0.18);
+}
+.market-team-chip.active {
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.12);
+}
+.market-team-chip-logo {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 4px;
+}
+.market-team-chip-name {
+    width: 100%;
+    min-height: 22px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: rgb(208, 216, 232);
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+.market-team-chip-fa {
+    width: 62px;
+    height: 62px;
+    margin-bottom: 4px;
+}
+
+.market-btn-negotiate {
+    width: 100%;
+    margin-top: 0;
+    padding: 12px 20px;
+    background-color: rgba(39, 174, 96, 0.10);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+}
+.market-btn-negotiate:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+    border-color: rgb(70, 210, 125);
+    color: rgb(160, 235, 185);
+}
+.market-btn-negotiate-text,
+.market-btn-negotiate:hover .market-btn-negotiate-text {
+    color: inherit;
+}
+
+.market-fa-panel {
+    width: 100%;
+    margin-top: 0;
+    flex-grow: 1;
+}
+.market-fa-panel-inner {
+    background-color: rgb(18, 25, 39);
+    border-color: rgb(42, 95, 201);
+    border-radius: 10px;
+}
+.market-fa-panel-header {
+    padding: 12px 18px;
+    background-color: rgba(42, 95, 201, 0.12);
+    border-bottom-color: rgba(42, 95, 201, 0.45);
+}
+.market-fa-panel-name {
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+.market-fa-row {
+    height: 58px;
+    min-height: 58px;
+    max-height: 58px;
+    padding: 7px 20px;
+    background-color: rgba(13, 20, 33, 0.55);
+}
+.market-fa-row:hover {
+    background-color: rgba(42, 95, 201, 0.16);
+}
+.market-fa-col-photo {
+    width: 44px;
+    height: 44px;
+    margin-right: 14px;
+    border-radius: 6px;
+}
+.market-fa-col-name {
+    font-size: 18px;
+}
+.market-fa-col-pos,
+.market-fa-col-ovr,
+.market-fa-col-salary {
+    font-size: 17px;
+}
+.market-fa-col-action {
+    width: 290px;
+}
+
+/* ── trade modal ── */
+.market-trade-modal {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 900;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(3, 8, 16, 0.90);
+    padding: 20px;
+}
+.market-trade-modal-box {
+    width: 96%;
+    height: 94%;
+    min-height: 0;
+    flex-direction: column;
+    background-color: rgb(8, 20, 38);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 10px;
+    overflow: hidden;
+}
+.market-trade-modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 12px 18px;
+    background-color: rgba(42, 95, 201, 0.13);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 95, 201);
+}
+.market-trade-modal-heading,
+.market-fa-modal-heading {
+    flex-direction: row;
+    align-items: center;
+}
+.market-trade-modal-icon {
+    width: 48px;
+    margin-right: 12px;
+    color: rgb(120, 160, 230);
+    font-size: 42px;
+    -unity-text-align: middle-center;
+}
+.market-trade-modal-title,
+.market-fa-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+.market-trade-modal-subtitle,
+.market-fa-modal-subtitle {
+    margin-top: 2px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(150, 180, 220);
+}
+.market-trade-modal-close,
+.market-modal-close {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    border-radius: 8px;
+    color: rgb(230, 120, 100);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 25px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.market-trade-modal-close:hover,
+.market-modal-close:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(255, 170, 150);
+}
+.market-trade-modal-content {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+    padding: 12px;
+}
+.market-trade-panels-grid {
+    width: 68%;
+    min-width: 0;
+    height: 100%;
+}
+.market-trade-panel {
+    height: 100%;
+    background-color: rgb(11, 28, 51);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 8px;
+    margin-right: 8px;
+}
+.market-trade-panel-header {
+    padding: 10px 14px;
+    background-color: rgba(42, 95, 201, 0.18);
+}
+.market-trade-panel-name {
+    font-size: 20px;
+}
+.market-trade-summary {
+    width: 32%;
+    height: 100%;
+    min-width: 0;
+    margin-left: 4px;
+    padding: 14px;
+    background-color: rgb(9, 24, 44);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.market-summary-title-text {
+    font-size: 20px;
+}
+.market-summary-grid {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+.market-summary-grid .market-summary-col {
+    width: 100%;
+    flex-grow: 0;
+    margin-right: 0;
+    margin-bottom: 8px;
+    padding: 10px 12px;
+}
+.market-summary-col--result {
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+.market-summary-team {
+    font-size: 17px;
+}
+.market-summary-label,
+.market-summary-value {
+    font-size: 15px;
+}
+.market-trade-status {
+    overflow: hidden;
+}
+.market-trade-status-box {
+    padding: 10px;
+}
+.market-btn-confirm-trade {
+    padding: 11px 14px;
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 8px;
+    background-color: rgba(39, 174, 96, 0.14);
+    color: rgb(100, 210, 145);
+}
+.market-btn-confirm-trade:hover {
+    background-color: rgba(39, 174, 96, 0.30);
+}
+
+/* ── modern free-agent offer modal ── */
+.market-modal-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(3, 8, 16, 0.90);
+    display: none;
+}
+.market-fa-modal-box {
+    width: 720px;
+    max-height: 88%;
+    background-color: rgb(13, 24, 42);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 10px;
+    overflow: hidden;
+    flex-direction: column;
+}
+.market-fa-modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background-color: rgba(42, 95, 201, 0.16);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 95, 201);
+}
+.market-fa-modal-icon {
+    width: 54px;
+    height: 54px;
+    margin-right: 12px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    flex-shrink: 0;
+}
+.market-fa-modal-body {
+    padding: 20px 24px 22px 24px;
+    flex-direction: column;
+    overflow: hidden;
+}
+.market-fa-modal-body .renew-form-row {
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    background-color: rgba(7, 16, 30, 0.65);
+    border-width: 1px;
+    border-color: rgba(42, 95, 201, 0.35);
+    border-radius: 6px;
+}
+.market-fa-modal-body .renew-form-label {
+    width: 150px;
+    color: rgb(170, 190, 220);
+}
+.market-fa-modal-body .renew-spin-label {
+    font-size: 21px;
+    color: rgb(255, 255, 255);
+}
+.market-fa-modal-body .btn-spin {
+    width: 34px;
+    height: 34px;
+    background-color: rgba(42, 95, 201, 0.16);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 6px;
+    color: rgb(120, 170, 235);
+}
+.market-fa-modal-body .btn-spin:hover {
+    background-color: rgba(42, 95, 201, 0.35);
+}
+.market-fa-modal-body .renew-options-toggles {
+    flex-direction: row;
+    flex-grow: 1;
+}
+.market-fa-modal-body .renew-toggle-btn {
+    flex-grow: 1;
+    margin-left: 6px;
+    padding: 9px 10px;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 7px;
+    color: rgb(130, 170, 230);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+}
+.market-fa-modal-body .renew-toggle-btn:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+}
+.market-fa-modal-body .renew-modal-text {
+    width: 100%;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    padding: 9px 12px;
+    background-color: rgba(7, 16, 30, 0.50);
+    border-radius: 6px;
+    font-size: 16px;
+}
+.market-fa-modal-body .renew-modal-text--warning {
+    color: rgb(230, 185, 70);
+    border-left-width: 3px;
+    border-left-color: rgb(212, 160, 23);
+}
+.market-fa-modal-body .renew-modal-text--info {
+    color: rgb(140, 180, 235);
+    border-left-width: 3px;
+    border-left-color: rgb(42, 95, 201);
+}
+.market-fa-modal-body .renew-modal-text--pending {
+    color: rgb(100, 210, 145);
+    border-left-width: 3px;
+    border-left-color: rgb(39, 174, 96);
+}
+.market-fa-modal-actions {
+    flex-direction: row;
+    align-self: stretch;
+    margin-top: 18px;
+}
+.market-fa-modal-actions .btn-modal-cancel,
+.market-fa-modal-actions .btn-modal-confirm {
+    flex-grow: 1;
+    margin-left: 6px;
+    border-width: 2px;
+    border-radius: 8px;
+    padding: 11px 16px;
+    cursor: pointer;
+}
+.market-fa-modal-actions .btn-modal-cancel {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+.market-fa-modal-actions .btn-modal-cancel:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+}
+.market-fa-modal-actions .btn-modal-confirm {
+    background-color: rgba(39, 174, 96, 0.12);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 210, 145);
+}
+.market-fa-modal-actions .btn-modal-confirm:hover {
+    background-color: rgba(39, 174, 96, 0.28);
+}
+
 /* ── TRADE SUCCESS MODAL (copied from Roster renew modal) ── */
 .renew-modal-overlay {
     position: absolute;

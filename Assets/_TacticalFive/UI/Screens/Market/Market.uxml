@@ -37,8 +37,20 @@
                         <ui:Label name="NegotiateBtnText" class="market-btn-negotiate-text" text="NEGOCIAR" />
                     </ui:Button>
 
-                    <!-- ══ TRADE PANELS ══ -->
-                    <ui:VisualElement name="TradePanels" class="market-trade-panels" style="display: none;">
+                    <!-- ══ TRADE MODAL ══ -->
+                    <ui:VisualElement name="TradePanels" class="market-trade-modal" style="display: none;">
+                        <ui:VisualElement class="market-trade-modal-box">
+                            <ui:VisualElement class="market-trade-modal-header">
+                                <ui:VisualElement class="market-trade-modal-heading">
+                                    <ui:Label class="market-trade-modal-icon" text="↔" />
+                                    <ui:VisualElement>
+                                        <ui:Label class="market-trade-modal-title" text="PROPONER TRASPASO" />
+                                        <ui:Label class="market-trade-modal-subtitle" text="Selecciona los jugadores y activos que quieres incluir en la oferta." />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                                <ui:Button name="BtnCloseTradeModal" class="market-trade-modal-close" text="×" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="market-trade-modal-content">
                         <ui:VisualElement class="market-trade-panels-grid">
                             <!-- My Team Panel -->
                             <ui:VisualElement class="market-trade-panel">
@@ -146,6 +158,8 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- ══ FREE AGENTS PANEL ══ -->
@@ -205,11 +219,19 @@
 
         <!-- FA Confirm Modal -->
         <!-- ══ MODAL OFERTA AGENTE LIBRE ══ -->
-        <ui:VisualElement name="FAConfirmModal" class="renew-modal-overlay">
-            <ui:VisualElement name="FABox" class="renew-modal-box">
-                <ui:VisualElement name="FAIcon" class="renew-modal-icon"/>
-                <ui:Label name="FATitle" class="renew-modal-title" text="OFERTA DE CONTRATO" />
-                <ui:Label name="FAText1" class="renew-modal-text" text="" />
+         <ui:VisualElement name="FAConfirmModal" class="market-modal-overlay">
+            <ui:VisualElement name="FABox" class="market-fa-modal-box">
+                <ui:VisualElement class="market-fa-modal-header">
+                    <ui:VisualElement class="market-fa-modal-heading">
+                        <ui:VisualElement name="FAIcon" class="market-fa-modal-icon"/>
+                        <ui:VisualElement>
+                            <ui:Label name="FATitle" class="market-fa-modal-title" text="OFERTA DE CONTRATO" />
+                            <ui:Label name="FAText1" class="market-fa-modal-subtitle" text="" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Button name="BtnCloseFA" class="market-modal-close" text="×" />
+                </ui:VisualElement>
+                <ui:VisualElement class="market-fa-modal-body">
                 <ui:VisualElement name="FAFormRowSalary" class="renew-form-row">
                     <ui:Label class="renew-form-label" text="SALARIO ($)" />
                     <ui:VisualElement class="renew-spinner-row">
@@ -243,12 +265,13 @@
                 <ui:Label name="FAWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
                 <ui:Label name="FAMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
                 <ui:Label name="FAPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
-                <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnCancelFA" class="btn-modal-cancel" text="CERRAR" />
-                    <ui:Button name="BtnConfirmFA" class="btn-modal-confirm" text="ENVIAR OFERTA" />
+                 <ui:VisualElement class="market-fa-modal-actions">
+                     <ui:Button name="BtnCancelFA" class="btn-modal-cancel" text="CERRAR" />
+                     <ui:Button name="BtnConfirmFA" class="btn-modal-confirm" text="ENVIAR OFERTA" />
+                 </ui:VisualElement>
                 </ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
+             </ui:VisualElement>
+         </ui:VisualElement>
 
         <!-- Trade Success Modal -->
         <ui:VisualElement name="TradeSuccessOverlay" class="renew-modal-overlay">
