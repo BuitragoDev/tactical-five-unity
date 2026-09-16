@@ -21,6 +21,18 @@ public class LogrosController : UIScreenController
         _progress = _root.Q<Label>("LogrosProgress");
     }
 
+    protected override void LoadData()
+    {
+        base.LoadData();
+
+        var screenIcon = _root.Q<VisualElement>("LogrosScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/logros_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+    }
+
     protected override void Refresh()
     {
         base.Refresh();
