@@ -51,7 +51,7 @@ using System.Linq;
 
     // All-Star appearances
     private VisualElement _allStarAppearancesBody;
-    private List<AllStarAppearanceEntry> _allStarAppearancesData;
+    private List<DatabaseManager.AllStarAppearanceEntry> _allStarAppearancesData;
     private int _allStarAppearancesPage;
 
     // All-Star history
