@@ -139,6 +139,7 @@
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
     border-radius: 8px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
     -unity-text-align: middle-center;
     padding: 0;
