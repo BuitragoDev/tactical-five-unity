@@ -97,18 +97,6 @@
     -unity-background-scale-mode: scale-to-fit;
 }
 
-.market-team-chip-fa {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    background-color: rgb(212, 160, 23);
-    color: rgb(0, 0, 0);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
-    font-weight: 700;
-    -unity-text-align: middle-center;
-}
-
 /* ── NEGOTIATE BUTTON ── */
 .market-btn-negotiate {
     flex-direction: row;
@@ -999,22 +987,6 @@
 .market-team-chip-logo {
     width: 62px;
     height: 62px;
-    margin-bottom: 4px;
-}
-.market-team-chip-name {
-    width: 100%;
-    min-height: 22px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 11px;
-    letter-spacing: 0.5px;
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
-    white-space: normal;
-}
-.market-team-chip-fa {
-    width: 62px;
-    height: 62px;
-    margin-bottom: 4px;
 }
 
 .market-btn-negotiate {

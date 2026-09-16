@@ -398,10 +398,6 @@ using System.Linq;
                 logo.style.backgroundImage = new StyleBackground(sprite);
             chip.Add(logo);
 
-            var teamName = new Label(team.name.ToUpper());
-            teamName.AddToClassList("market-team-chip-name");
-            chip.Add(teamName);
-
             int teamId = team.id;
             chip.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectTeam(teamId); });
             if (CursorManager.Instance != null)
