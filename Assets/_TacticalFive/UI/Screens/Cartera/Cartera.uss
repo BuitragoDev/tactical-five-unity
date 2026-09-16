@@ -244,19 +244,22 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
     letter-spacing: 1px;
-    color: rgb(255, 255, 255);
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    border-radius: 3px;
+    color: rgb(120, 160, 230);
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 8px;
     padding: 6px 10px;
     width: 96px;
     margin-left: 12px;
     flex-shrink: 0;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .player-row-view:hover {
-    background-color: rgb(52, 115, 231);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 185, 245);
 }
 
 .player-row-pos {
@@ -272,38 +275,42 @@
 
 .btn-scout {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(8, 63, 31);
-    border-width: 0;
-    color: rgb(255, 255, 255);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     font-size: 24px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     padding: 12px 14px;
-    border-radius: 4px;
+    border-radius: 8px;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .btn-scout:hover {
-    background-color: rgb(10, 69, 35);
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(130, 220, 165);
 }
 
 .btn-scout--row {
     font-size: 14px;
     letter-spacing: 1px;
     padding: 6px 10px;
-    border-radius: 3px;
+    border-radius: 8px;
     width: 96px;
     margin-left: 12px;
     flex-shrink: 0;
 }
 
 .btn-scout--disabled {
-    background-color: rgb(60, 63, 68);
-    color: rgb(220, 220, 220);
+    background-color: rgba(60, 63, 68, 0.25);
+    border-color: rgb(60, 63, 68);
+    color: rgb(100, 105, 115);
 }
 
 .btn-scout--disabled:hover {
-    background-color: rgb(60, 63, 68);
+    background-color: rgba(60, 63, 68, 0.25);
 }
 
 /* ── RIGHT COLUMN ── */
@@ -607,12 +614,13 @@
 .btn-hire {
     width: 100%;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
-    letter-spacing: 2px;
-    background-color: rgb(42, 95, 201);
-    color: white;
-    border-width: 0;
-    border-radius: 4px;
+    font-size: 16px;
+    letter-spacing: 1px;
+    background-color: rgba(42, 95, 201, 0.10);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
+    color: rgb(120, 160, 230);
+    border-radius: 8px;
     padding: 10px;
     cursor: pointer;
     -unity-text-align: middle-center;
@@ -620,7 +628,8 @@
 }
 
 .btn-hire:hover {
-    background-color: rgb(52, 115, 231);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 185, 245);
 }
 
 /* ── INFORMES TABLE ── */
