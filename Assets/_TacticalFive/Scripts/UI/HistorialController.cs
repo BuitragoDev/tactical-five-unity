@@ -14,16 +14,23 @@ using System.Linq;
     private Label _headerMargin;
     private Label _headerChemistry;
     private List<TradeData> _trades = new();
+    private List<TradeData> _sortedTrades = new();
     private Dictionary<int, TeamData> _teamCache = new();
     private Dictionary<int, PlayerData> _playerCache = new();
     private Dictionary<int, DraftPickData> _pickCache = new();
+
+    const int PAGE_SIZE = 15;
+    private int _currentPage;
+    private Button _prevBtn, _nextBtn;
+    private Label _pageInfo;
+
     protected override void CacheReferences()
     {
         _historialBody = _root.Q<VisualElement>("HistorialBody");
+        _prevBtn = _root.Q<Button>("HistorialPrev");
+        _nextBtn = _root.Q<Button>("HistorialNext");
+        _pageInfo = _root.Q<Label>("HistorialPageInfo");
 
-        var scrollView = _root.Q<ScrollView>();
-        if (scrollView != null)
-            scrollView.contentContainer.style.flexGrow = 0;
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
         _headerManagerName = _root.Q<Label>("HeaderManagerName");
@@ -37,6 +44,7 @@ using System.Linq;
         var headerDate = _root.Q<Label>("HeaderDate");
         if (headerDate != null) headerDate.text = "";
     }
+
     protected override void LoadData()
     {
         base.LoadData();
@@ -48,11 +56,6 @@ using System.Linq;
             if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
         }
 
-        
-        
-
-        
-        
         if (_season == null) return;
 
         _trades = DatabaseManager.Instance.GetTradesBySeason(_season.id);
@@ -78,6 +81,14 @@ using System.Linq;
             }
         }
     }
+
+    protected override void RegisterCallbacks()
+    {
+        base.RegisterCallbacks();
+        _prevBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _currentPage--; RenderPage(); });
+        _nextBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _currentPage++; RenderPage(); });
+    }
+
     protected override void Refresh()
     {
         if (CursorManager.Instance != null)
@@ -143,14 +154,16 @@ using System.Linq;
             if (headerDate != null) headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        BuildHistorial();
+        _sortedTrades = _trades.OrderByDescending(t => t.game_day).ToList();
+        _currentPage = 0;
+        RenderPage();
     }
 
-    void BuildHistorial()
+    void RenderPage()
     {
         _historialBody.Clear();
 
-        if (_trades == null || _trades.Count == 0)
+        if (_sortedTrades == null || _sortedTrades.Count == 0)
         {
             var empty = new VisualElement();
             empty.AddToClassList("historial-empty");
@@ -158,16 +171,26 @@ using System.Linq;
             lbl.AddToClassList("historial-empty-text");
             empty.Add(lbl);
             _historialBody.Add(empty);
+
+            if (_pageInfo != null) _pageInfo.text = "0 / 0";
+            if (_prevBtn != null) _prevBtn.SetEnabled(false);
+            if (_nextBtn != null) _nextBtn.SetEnabled(false);
             return;
         }
 
-        var sorted = _trades.OrderByDescending(t => t.game_day).ToList();
+        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)_sortedTrades.Count / PAGE_SIZE));
+        _currentPage = Mathf.Clamp(_currentPage, 0, totalPages - 1);
 
-        foreach (var trade in sorted)
+        int start = _currentPage * PAGE_SIZE;
+        int end = Mathf.Min(start + PAGE_SIZE, _sortedTrades.Count);
+        for (int i = start; i < end; i++)
         {
-            var row = BuildTradeRow(trade);
-            _historialBody.Add(row);
+            _historialBody.Add(BuildTradeRow(_sortedTrades[i]));
         }
+
+        if (_pageInfo != null) _pageInfo.text = $"{_currentPage + 1} / {totalPages}";
+        if (_prevBtn != null) _prevBtn.SetEnabled(_currentPage > 0);
+        if (_nextBtn != null) _nextBtn.SetEnabled(_currentPage < totalPages - 1);
     }
 
     VisualElement BuildTradeRow(TradeData trade)
@@ -177,7 +200,6 @@ using System.Linq;
 
         _playerCache.TryGetValue(trade.player_id, out var player);
 
-        // Col 1: Date
         var dateLabel = new Label();
         dateLabel.AddToClassList("historial-col");
         dateLabel.AddToClassList("historial-col-first");
@@ -191,7 +213,6 @@ using System.Linq;
         }
         row.Add(dateLabel);
 
-        // Col 2: Player name OR Pick label
         var itemLabel = new Label();
         itemLabel.AddToClassList("historial-col");
         itemLabel.AddToClassList("historial-col-player");
@@ -212,7 +233,6 @@ using System.Linq;
         }
         row.Add(itemLabel);
 
-        // Col 3: Seller logo
         var sellerLogo = new VisualElement();
         sellerLogo.AddToClassList("historial-col");
         sellerLogo.AddToClassList("historial-col-logo");
@@ -233,7 +253,6 @@ using System.Linq;
         }
         row.Add(sellerLogo);
 
-        // Col 4: Seller name
         var sellerName = new Label();
         sellerName.AddToClassList("historial-col");
         if (trade.trade_type != "free_agent" && fromTeam != null)
@@ -242,7 +261,6 @@ using System.Linq;
             sellerName.text = "";
         row.Add(sellerName);
 
-        // Col 5: Buyer logo
         var buyerLogo = new VisualElement();
         buyerLogo.AddToClassList("historial-col");
         buyerLogo.AddToClassList("historial-col-logo");
@@ -260,13 +278,11 @@ using System.Linq;
         }
         row.Add(buyerLogo);
 
-        // Col 6: Buyer name
         var buyerName = new Label();
         buyerName.AddToClassList("historial-col");
         buyerName.text = toTeam != null ? toTeam.name : $"ID {trade.team_id_to}";
         row.Add(buyerName);
 
-        // Col 7: Position
         var posLabel = new Label();
         posLabel.AddToClassList("historial-col");
         posLabel.AddToClassList("historial-col-center");
@@ -274,7 +290,6 @@ using System.Linq;
         posLabel.text = PositionCodes.GetShort(player?.position);
         row.Add(posLabel);
 
-        // Col 8: Overall
         var ovrLabel = new Label();
         ovrLabel.AddToClassList("historial-col");
         ovrLabel.AddToClassList("historial-col-center");
