@@ -77,7 +77,7 @@ public class CarteraController : UIScreenController
         foreach (var s in logos)
             _logoSprites[s.name] = s;
 
-        var tex = Resources.Load<Texture2D>("Icons/empleado");
+        var tex = Resources.Load<Texture2D>("Icons/avatar");
         if (tex != null)
             _empleadoBg = new StyleBackground(tex);
 
