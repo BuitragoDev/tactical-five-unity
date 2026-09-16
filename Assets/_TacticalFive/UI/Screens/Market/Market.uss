@@ -991,12 +991,19 @@
 }
 
 .market-btn-negotiate {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    margin-top: 0;
-    padding: 12px 20px;
+    margin-top: 12px;
+    padding: 14px 20px;
     background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
     border-color: rgb(39, 174, 96);
+    border-radius: 8px;
     color: rgb(100, 200, 140);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 .market-btn-negotiate:hover {
     background-color: rgba(39, 174, 96, 0.25);
@@ -1005,6 +1012,9 @@
 }
 .market-btn-negotiate-text,
 .market-btn-negotiate:hover .market-btn-negotiate-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    letter-spacing: 2px;
     color: inherit;
 }
 

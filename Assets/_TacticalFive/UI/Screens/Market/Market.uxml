@@ -32,9 +32,8 @@
                 </ui:VisualElement>
 
                     <!-- ══ NEGOTIATE BUTTON ══ -->
-                    <ui:Button name="BtnNegotiate" class="market-btn-negotiate" style="display: none;">
-                        <ui:Label class="market-btn-negotiate-icon" text="" />
-                        <ui:Label name="NegotiateBtnText" class="market-btn-negotiate-text" text="NEGOCIAR" />
+                    <ui:Button name="BtnNegotiate" class="market-btn-negotiate">
+                        <ui:Label name="NegotiateBtnText" class="market-btn-negotiate-text" text="SELECCIONA UN EQUIPO PARA NEGOCIAR" />
                     </ui:Button>
 
                     <!-- ══ TRADE MODAL ══ -->

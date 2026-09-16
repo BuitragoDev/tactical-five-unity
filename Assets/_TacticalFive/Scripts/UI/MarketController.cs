@@ -280,7 +280,6 @@ using System.Linq;
 
         bool windowOpen = IsTransferWindowOpen();
         _teamGrid.style.display = windowOpen ? DisplayStyle.Flex : DisplayStyle.None;
-        _btnNegotiate.style.display = DisplayStyle.None;
         _tradePanels.style.display = DisplayStyle.None;
         _freeAgentsPanel.style.display = DisplayStyle.None;
         _marketClosedOverlay.style.display = windowOpen ? DisplayStyle.None : DisplayStyle.Flex;
@@ -410,8 +409,6 @@ using System.Linq;
     void ShowNegotiateButton()
     {
         if (_btnNegotiate == null || _selectedTeam == null) return;
-        _btnNegotiate.style.display = DisplayStyle.Flex;
-        _tradePanels.style.display = DisplayStyle.None;
         _root.Q<Label>("NegotiateBtnText").text = $"NEGOCIAR CON {_selectedTeam.name.ToUpper()}";
     }
 
@@ -429,6 +426,7 @@ using System.Linq;
 
     void OnNegotiate()
     {
+        if (_selectedTeam == null) return;
         _btnNegotiate.style.display = DisplayStyle.None;
         _tradePanels.style.display = DisplayStyle.Flex;
         _selectedMyPlayers.Clear();
@@ -2176,7 +2174,6 @@ using System.Linq;
     {
         _freeAgentsPanel.style.display = DisplayStyle.Flex;
         _tradePanels.style.display = DisplayStyle.None;
-        _btnNegotiate.style.display = DisplayStyle.None;
         BuildFreeAgents();
     }
 
