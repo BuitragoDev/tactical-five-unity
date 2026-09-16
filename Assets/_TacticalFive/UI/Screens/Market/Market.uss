@@ -106,14 +106,8 @@
     background-color: rgba(42, 95, 201, 0.10);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
-    color: rgb(100, 150, 230);
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    -unity-text-transform: upper;
-    padding: 14px 20px;
     border-radius: 8px;
+    padding: 14px 20px;
     cursor: pointer;
     flex-shrink: 0;
     margin-top: 12px;
@@ -122,7 +116,6 @@
 .market-btn-negotiate:hover {
     background-color: rgba(42, 95, 201, 0.25);
     border-color: rgb(74, 128, 240);
-    color: rgb(150, 190, 255);
 }
 
 .market-btn-negotiate-icon {
@@ -131,15 +124,14 @@
 
 .market-btn-negotiate-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
-    font-weight: 600;
+    font-size: 20px;
     letter-spacing: 2px;
-    -unity-text-transform: upper;
-    color: rgb(100, 150, 230);
+    color: rgb(100, 160, 230);
+    -unity-text-align: middle-center;
 }
 
 .market-btn-negotiate:hover .market-btn-negotiate-text {
-    color: rgb(150, 190, 255);
+    color: rgb(140, 190, 255);
 }
 
 /* ── TRADE PANELS ── */
@@ -988,34 +980,6 @@
 .market-team-chip-logo {
     width: 62px;
     height: 62px;
-}
-
-.market-btn-negotiate {
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    margin-top: 12px;
-    padding: 14px 20px;
-    background-color: rgba(39, 174, 96, 0.10);
-    border-width: 2px;
-    border-color: rgb(39, 174, 96);
-    border-radius: 8px;
-    color: rgb(100, 200, 140);
-    cursor: pointer;
-    flex-shrink: 0;
-}
-.market-btn-negotiate:hover {
-    background-color: rgba(39, 174, 96, 0.25);
-    border-color: rgb(70, 210, 125);
-    color: rgb(160, 235, 185);
-}
-.market-btn-negotiate-text,
-.market-btn-negotiate:hover .market-btn-negotiate-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: inherit;
 }
 
 .market-fa-panel {
