@@ -3,7 +3,7 @@
    ══════════════════════════════════════════ */
 
 .palmares-root {
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     height: 100%;
     background-color: rgb(15, 17, 23);
@@ -11,11 +11,54 @@
     top: 0; left: 0; right: 0; bottom: 0;
 }
 
+/* ══ SCREEN HEADER ══ */
+.screen-header.panel--gold {
+    flex-shrink: 0;
+    padding: 0;
+    margin: 16px 20px 12px 20px;
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(120, 95, 30, 0.15);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.screen-header-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+}
+.screen-icon {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.screen-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: rgb(255, 255, 255);
+    flex-grow: 1;
+    white-space: normal;
+}
+.screen-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    padding: 0 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+}
+
 .palmares-main {
     flex-direction: column;
     flex-grow: 1;
-    min-width: 0;
     min-height: 0;
+    min-width: 0;
 }
 
 .palmares-content {

@@ -3,6 +3,15 @@
     <Style src="project://database/Assets/_TacticalFive/UI/Screens/Dashboard/Dashboard.uss?fileID=7433441132597879392&amp;guid=4ea72934f300e2fc78940e1d76d7e1a8&amp;type=3#Dashboard"/>
     <Style src="../LegalNotice/LegalNotice.uss" />
 <ui:VisualElement name="PalmaresRoot" class="palmares-root">
+
+        <!-- ══ HEADER ══ -->
+        <ui:VisualElement class="screen-header panel--gold">
+            <ui:VisualElement class="screen-header-row">
+                <ui:VisualElement name="PalmaresScreenIcon" class="screen-icon" />
+                <ui:Label class="screen-title" text="PALMARES" />
+            </ui:VisualElement>
+            <ui:Label class="screen-subtitle" text="PALMARES DE JUGADORES Y EQUIPOS" />
+        </ui:VisualElement>
         
         <ui:VisualElement class="palmares-main">
 

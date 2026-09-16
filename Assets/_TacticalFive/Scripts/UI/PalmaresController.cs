@@ -73,6 +73,13 @@ using System.Linq;
     {
         base.LoadData();
 
+        var screenIcon = _root.Q<VisualElement>("PalmaresScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/palmares_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
         foreach (var s in logos32) _logoSprites32[s.name] = s;
 
