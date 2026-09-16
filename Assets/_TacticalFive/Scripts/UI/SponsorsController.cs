@@ -23,6 +23,14 @@ using System.Linq;
     protected override void LoadData()
     {
         base.LoadData();
+
+        var screenIcon = _root.Q<VisualElement>("SponsorsScreenIcon");
+        if (screenIcon != null)
+        {
+            var iconTex = Resources.Load<Texture2D>("Icons/patrocinador_icon");
+            if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
+        }
+
         if (_manager == null) return;
 
         _currentSponsor = DatabaseManager.Instance.GetActiveSponsor(_myTeam.id);

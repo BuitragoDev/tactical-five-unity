@@ -13,7 +13,13 @@
         <!-- ══ MAIN ══ -->
         <ui:VisualElement class="sponsors-main">
 
-            <!-- TOP HEADER -->
+            <!-- ══ HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="SponsorsScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="GESTIÓN DE PATROCINADORES" />
+                </ui:VisualElement>
+            </ui:VisualElement>
 
             <!-- SPONSORS CONTENT -->
             <ui:VisualElement class="sponsors-content">
