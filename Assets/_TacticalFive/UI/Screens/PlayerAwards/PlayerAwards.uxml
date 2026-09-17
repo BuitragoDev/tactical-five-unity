@@ -77,15 +77,11 @@
                     <ui:VisualElement class="pa-stats-row">
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="DpoyPts" text="--" class="pa-stat-val"/>
-                            <ui:Label text="PTS" class="pa-stat-lbl"/>
+                            <ui:Label text="ROB" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                         <ui:VisualElement class="pa-stat-box">
                             <ui:Label name="DpoyReb" text="--" class="pa-stat-val"/>
-                            <ui:Label text="REB" class="pa-stat-lbl"/>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="pa-stat-box">
-                            <ui:Label name="DpoyBlk" text="--" class="pa-stat-val"/>
-                            <ui:Label text="BLK" class="pa-stat-lbl"/>
+                            <ui:Label text="TAP" class="pa-stat-lbl"/>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

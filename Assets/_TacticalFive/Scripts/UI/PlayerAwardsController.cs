@@ -34,7 +34,6 @@ public class PlayerAwardsController : UIScreenController
     private Label _dpoyTeam;
     private Label _dpoyPts;
     private Label _dpoyReb;
-    private Label _dpoyBlk;
 
     // ── Rookie ──
     private VisualElement _rookieBadgeIcon;
@@ -125,7 +124,6 @@ public class PlayerAwardsController : UIScreenController
         _dpoyTeam = _root.Q<Label>("DpoyTeam");
         _dpoyPts = _root.Q<Label>("DpoyPts");
         _dpoyReb = _root.Q<Label>("DpoyReb");
-        _dpoyBlk = _root.Q<Label>("DpoyBlk");
 
         // Rookie
         _rookieBadgeIcon = _root.Q<VisualElement>("RookieBadgeIcon");
@@ -277,7 +275,6 @@ public class PlayerAwardsController : UIScreenController
             _dpoyTeam.text = dpoy.TeamName.ToUpper();
             _dpoyPts.text = dpoy.AvgPts.ToString("F1");
             _dpoyReb.text = dpoy.AvgReb.ToString("F1");
-            _dpoyBlk.text = "--";
             SetPlayerPhoto(_dpoyPhoto, dpoy.PlayerId, dpoy.Photo);
             SetTeamLogoOverlay(_dpoyTeamLogo, dpoy.TeamKeyword);
         }
