@@ -1224,7 +1224,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(179, 190, 214);
-    padding: 16px 24px 0;
+    padding: 16px 24px 10px;
     -unity-text-align: middle-center;
 }
 .modal-actions {
