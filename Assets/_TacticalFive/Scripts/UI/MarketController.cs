@@ -481,7 +481,7 @@ using System.Linq;
         var headerLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
         foreach (var s in headerLogos) _headerLogos[s.name] = s;
 
-        var teamGridLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
+        var teamGridLogos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
         foreach (var s in teamGridLogos) _teamGridLogos[s.name] = s;
 
         var tradePanelLogos = Resources.LoadAll<Sprite>("Teams/Logos/32x32/");

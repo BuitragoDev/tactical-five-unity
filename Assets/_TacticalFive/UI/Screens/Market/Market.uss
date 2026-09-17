@@ -68,8 +68,8 @@
 }
 
 .market-team-chip {
-    width: 80px;
-    height: 80px;
+    width: 90px;
+    height: 90px;
     margin: 6px;
     background-color: rgb(22, 26, 36);
     border-width: 1px;
@@ -92,8 +92,8 @@
 }
 
 .market-team-chip-logo {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     -unity-background-scale-mode: scale-to-fit;
 }
 
@@ -140,7 +140,14 @@
     cursor: default;
     pointer-events: none;
 }
+.market-btn-negotiate--disabled:hover {
+    background-color: rgba(100, 110, 130, 0.08);
+    border-color: rgba(100, 110, 130, 0.30);
+}
 .market-btn-negotiate--disabled .market-btn-negotiate-text {
+    color: rgba(100, 110, 130, 0.50);
+}
+.market-btn-negotiate--disabled:hover .market-btn-negotiate-text {
     color: rgba(100, 110, 130, 0.50);
 }
 
@@ -912,8 +919,8 @@
     align-items: flex-start;
 }
 .market-team-chip {
-    width: 96px;
-    height: 104px;
+    width: 90px;
+    height: 90px;
     margin: 5px;
     padding: 8px 5px;
     background-color: rgb(13, 20, 33);
@@ -932,8 +939,8 @@
     background-color: rgba(212, 160, 23, 0.12);
 }
 .market-team-chip-logo {
-    width: 62px;
-    height: 62px;
+    width: 80px;
+    height: 80px;
 }
 
 .market-fa-panel {
