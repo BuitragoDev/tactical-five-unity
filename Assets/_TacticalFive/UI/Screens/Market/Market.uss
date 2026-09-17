@@ -1278,7 +1278,7 @@
     flex-shrink: 0;
     height: 152px;
     min-height: 152px;
-    padding: 6px 12px;
+    padding: 6px 0px 6px 12px;
     overflow: hidden;
     background-color: rgba(4, 13, 28, 0.55);
 }
@@ -1325,8 +1325,8 @@
     flex-shrink: 0;
 }
 .market-trade-picks-scrollbar {
-    width: 10px;
-    min-width: 10px;
+    width: 12px;
+    min-width: 12px;
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;

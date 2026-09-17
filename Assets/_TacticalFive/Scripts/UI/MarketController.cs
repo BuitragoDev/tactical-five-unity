@@ -1109,7 +1109,7 @@ using System.Linq;
             lbl.style.unityTextAlign = TextAnchor.MiddleLeft;
             lbl.style.flexGrow = 1;
             lbl.style.minWidth = 70;
-            lbl.style.unityFontStyleAndWeight = FontStyle.Bold;
+            lbl.style.unityFontStyleAndWeight = FontStyle.Normal;
             row.Add(lbl);
 
             void RefreshSuffix(DraftPickData target)
