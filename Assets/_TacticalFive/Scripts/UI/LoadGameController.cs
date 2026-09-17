@@ -15,6 +15,7 @@ public class LoadGameController : UIScreenController
 
     private VisualElement _deleteModalOverlay;
     private VisualElement _deleteModalBox;
+    private VisualElement _contentOverlay;
     private Button _btnDeleteYes;
     private Button _btnDeleteNo;
 
@@ -46,6 +47,7 @@ public class LoadGameController : UIScreenController
 
         _deleteModalOverlay = _root.Q<VisualElement>("DeleteModalOverlay");
         _deleteModalBox = _root.Q<VisualElement>("DeleteModalBox");
+        _contentOverlay = _root.Q<VisualElement>("ContentOverlay");
         _btnDeleteYes = _root.Q<Button>("BtnDeleteYes");
         _btnDeleteNo = _root.Q<Button>("BtnDeleteNo");
     }
@@ -452,12 +454,14 @@ public class LoadGameController : UIScreenController
     void OpenDeleteModal()
     {
         CursorManager.Instance?.SetDefaultCursor();
+        if (_contentOverlay != null) _contentOverlay.style.display = DisplayStyle.Flex;
         _deleteModalOverlay.style.display = DisplayStyle.Flex;
         _deleteModalBox.style.display = DisplayStyle.Flex;
     }
 
     void CloseDeleteModal()
     {
+        if (_contentOverlay != null) _contentOverlay.style.display = DisplayStyle.None;
         _deleteModalOverlay.style.display = DisplayStyle.None;
         _deleteModalBox.style.display = DisplayStyle.None;
         _pendingDeleteSlot = -1;

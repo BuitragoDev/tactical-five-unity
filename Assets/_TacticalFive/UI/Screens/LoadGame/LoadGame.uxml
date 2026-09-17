@@ -38,6 +38,9 @@
             <ui:Label class="empty-hint" text="Empieza una nueva partida desde el menu principal" />
         </ui:VisualElement>
 
+        <!-- ══ CONTENT OVERLAY (difuminado detrás del modal) ══ -->
+        <ui:VisualElement name="ContentOverlay" class="content-overlay" style="display: none;" />
+
         <!-- ══ MODAL BORRAR PARTIDA ══ -->
         <ui:VisualElement name="DeleteModalOverlay" class="modal-overlay">
             <ui:VisualElement name="DeleteModalBox" class="modal-box">
