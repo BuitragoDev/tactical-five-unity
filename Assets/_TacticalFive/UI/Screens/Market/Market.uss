@@ -30,10 +30,10 @@
 
 /* ── SECTIONS ── */
 .market-section {
-    background-color: rgb(28, 33, 48);
+    background-color: rgb(18, 21, 28);
     border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 8px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 4px;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -41,11 +41,10 @@
 .market-section-title {
     flex-direction: row;
     align-items: center;
-    gap: 10px;
-    padding: 6px 20px;
+    padding: 10px 14px;
     border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
-    background-color: rgb(42, 95, 201);
+    border-bottom-color: rgb(120, 95, 30);
+    background-color: rgba(120, 95, 30, 0.15);
 }
 
 .market-section-icon {
@@ -56,8 +55,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 1.5px;
-    -unity-text-transform: upper;
-    color: rgb(255, 255, 255);
+    color: rgb(212, 160, 23);
 }
 
 /* ── TEAM GRID ── */
@@ -179,10 +177,10 @@
     flex-grow: 1;
     min-height: 0;
     flex-direction: column;
-    background-color: rgb(28, 33, 48);
+    background-color: rgb(18, 21, 28);
     border-width: 1px;
-    border-color: rgb(42, 51, 71);
-    border-radius: 8px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 4px;
     overflow: hidden;
     position: relative;
 }
@@ -190,18 +188,18 @@
 .market-fa-panel-header {
     flex-direction: row;
     align-items: center;
-    padding: 14px 20px;
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
     border-bottom-width: 1px;
-    border-bottom-color: rgb(42, 51, 71);
+    border-bottom-color: rgb(120, 95, 30);
     flex-shrink: 0;
 }
 
 .market-fa-panel-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     font-weight: 700;
-    letter-spacing: 1.5px;
-    -unity-text-transform: upper;
+    letter-spacing: 2px;
     color: rgb(212, 160, 23);
 }
 
@@ -901,18 +899,26 @@
 }
 
 .market-section {
-    background-color: rgb(18, 25, 39);
-    border-color: rgb(42, 95, 201);
-    border-radius: 10px;
+    background-color: rgb(18, 21, 28);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 .market-section-title {
-    padding: 10px 18px;
-    background-color: rgba(42, 95, 201, 0.16);
-    border-bottom-color: rgba(42, 95, 201, 0.55);
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(120, 95, 30);
 }
 .market-section-title-text {
-    font-size: 20px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
     letter-spacing: 2px;
+    color: rgb(212, 160, 23);
 }
 .market-team-grid {
     padding: 12px 14px 14px 14px;
@@ -949,19 +955,24 @@
     flex-grow: 1;
 }
 .market-fa-panel-inner {
-    background-color: rgb(18, 25, 39);
-    border-color: rgb(42, 95, 201);
-    border-radius: 10px;
+    background-color: rgb(18, 21, 28);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 4px;
 }
 .market-fa-panel-header {
-    padding: 12px 18px;
-    background-color: rgba(42, 95, 201, 0.12);
-    border-bottom-color: rgba(42, 95, 201, 0.45);
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(120, 95, 30);
 }
 .market-fa-panel-name {
-    font-size: 20px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
     letter-spacing: 2px;
-    color: rgb(255, 255, 255);
+    color: rgb(212, 160, 23);
 }
 .market-fa-row {
     height: 56px;
