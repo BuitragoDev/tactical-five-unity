@@ -1879,7 +1879,7 @@
 }
 .trade-success-team-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 32px;
     color: rgb(255, 255, 255);
     letter-spacing: 1px;
 }
@@ -1889,21 +1889,21 @@
 }
 .trade-success-receives-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 24px;
     color: rgb(212, 160, 23);
     letter-spacing: 2px;
     margin-bottom: 4px;
 }
 .trade-success-players {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 17px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
     white-space: normal;
     margin-bottom: 4px;
 }
 .trade-success-picks {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     white-space: normal;
 }
