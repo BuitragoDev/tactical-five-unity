@@ -55,6 +55,8 @@ using System.Threading.Tasks;
     private Label _nextAwayRecord;
     private Label _nextGameDate;
     private Label _nextGameArena;
+    private VisualElement _lastGameFooter;
+    private VisualElement _nextGameFooter;
 
     // Clasificación
     private Button _tabEast;
@@ -365,6 +367,8 @@ using System.Threading.Tasks;
         _nextAwayRecord = _root.Q<Label>("NextAwayRecord");
         _nextGameDate = _root.Q<Label>("NextGameDate");
         _nextGameArena = _root.Q<Label>("NextGameArena");
+        _lastGameFooter = _root.Q("PanelLastGame")?.Q(className: "game-meta-footer");
+        _nextGameFooter = _root.Q("PanelNextGame")?.Q(className: "game-meta-footer");
 
         // Clasificación
         _tabEast = _root.Q<Button>("TabEast");
@@ -6808,11 +6812,13 @@ List<int> offeredPickIds = new List<int>();
             _noLastGame.style.display = DisplayStyle.Flex;
             _lastGameResult.style.display = DisplayStyle.None;
             _lastGameDate.text = "";
+            if (_lastGameFooter != null) _lastGameFooter.style.display = DisplayStyle.None;
             return;
         }
 
         _noLastGame.style.display = DisplayStyle.None;
         _lastGameResult.style.display = DisplayStyle.Flex;
+        if (_lastGameFooter != null) _lastGameFooter.style.display = DisplayStyle.Flex;
 
         var home = _allTeams.Find(t => t.id == last.home_team_id);
         var away = _allTeams.Find(t => t.id == last.away_team_id);
@@ -6887,11 +6893,13 @@ List<int> offeredPickIds = new List<int>();
             _noNextGame.style.display = DisplayStyle.Flex;
             _nextGameResult.style.display = DisplayStyle.None;
             _nextGameDate.text = "";
+            if (_nextGameFooter != null) _nextGameFooter.style.display = DisplayStyle.None;
             return;
         }
 
         _noNextGame.style.display = DisplayStyle.None;
         _nextGameResult.style.display = DisplayStyle.Flex;
+        if (_nextGameFooter != null) _nextGameFooter.style.display = DisplayStyle.Flex;
 
         var home = _allTeams.Find(t => t.id == next.home_team_id);
         var away = _allTeams.Find(t => t.id == next.away_team_id);
