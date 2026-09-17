@@ -333,12 +333,16 @@
          </ui:VisualElement>
 
         <!-- Trade Success Modal -->
-        <ui:VisualElement name="TradeSuccessOverlay" class="renew-modal-overlay">
-            <ui:VisualElement name="TradeSuccessBox" class="renew-modal-box renew-modal-box--positive">
-                <ui:VisualElement name="TradeSuccessIcon" class="renew-modal-icon" />
-                <ui:Label name="TradeSuccessTitle" class="renew-modal-title renew-modal-title--positive" text="¡TRASPASO REALIZADO!" />
-                <ui:Label name="TradeSuccessText1" class="renew-modal-text" text="" />
-                <ui:Label name="TradeSuccessText2" class="renew-modal-text" text="" />
+        <ui:VisualElement name="TradeSuccessOverlay" class="modal-overlay">
+            <ui:VisualElement name="TradeSuccessBox" class="modal-box">
+                <ui:Label name="TradeSuccessTitle" class="modal-title" text="¡TRASPASO REALIZADO!" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label name="TradeSuccessText1" class="modal-paragraph" text="" />
+                    <ui:Label name="TradeSuccessText2" class="modal-paragraph" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnTradeSuccessClose" text="VER PLANTILLA" class="modal-btn modal-btn--primary" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

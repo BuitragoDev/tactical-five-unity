@@ -59,10 +59,11 @@ using System.Linq;
     private Label _faFormRowSalaryLabel;
     private VisualElement _tradeSuccessOverlay;
     private VisualElement _tradeSuccessBox;
-    private VisualElement _tradeSuccessIcon;
     private Label _tradeSuccessTitle;
     private Label _tradeSuccessText1;
     private Label _tradeSuccessText2;
+    private Button _btnTradeSuccessClose;
+    private bool _tradeSuccessGoToRoster;
     private List<TeamData> _allTeams = new();
     private List<PlayerData> _myPlayers;
     private List<PlayerData> _otherPlayers;
@@ -216,10 +217,17 @@ using System.Linq;
         _faFormRowSalaryLabel = _root.Q<Label>("FAFormRowSalary")?.Q<Label>(className: "renew-form-label");
         _tradeSuccessOverlay = _root.Q<VisualElement>("TradeSuccessOverlay");
         _tradeSuccessBox = _root.Q<VisualElement>("TradeSuccessBox");
-        _tradeSuccessIcon = _root.Q<VisualElement>("TradeSuccessIcon");
         _tradeSuccessTitle = _root.Q<Label>("TradeSuccessTitle");
         _tradeSuccessText1 = _root.Q<Label>("TradeSuccessText1");
         _tradeSuccessText2 = _root.Q<Label>("TradeSuccessText2");
+        _btnTradeSuccessClose = _root.Q<Button>("BtnTradeSuccessClose");
+        _btnTradeSuccessClose?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseTradeSuccessModal();
+            if (_tradeSuccessGoToRoster)
+                ScreenManager.Instance.GoTo(GameScreen.Roster);
+        });
 
         // Trade modal new elements
         _btnConfirmTrade = _root.Q<Button>("BtnConfirmTrade");
@@ -274,7 +282,8 @@ using System.Linq;
         SetFAPageIcon(_root.Q<Image>("FALastPageIcon1"), faNextSprite);
         SetFAPageIcon(_root.Q<Image>("FALastPageIcon2"), faNextSprite);
 
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
+        if (_tradeSuccessOverlay != null) { _tradeSuccessOverlay.RemoveFromClassList("modal-overlay--visible"); }
+        if (_tradeSuccessBox != null) { _tradeSuccessBox.RemoveFromClassList("modal-box--visible"); }
     }
 
     void ConfigurePlayerScroll(VisualElement viewport)
@@ -1965,13 +1974,30 @@ using System.Linq;
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
         var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
+        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
         var myPicksSelForMsg = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var otherPicksSelForMsg = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var myPicksText = myPicksSelForMsg.Count > 0
-            ? " y " + string.Join(", ", myPicksSelForMsg.Select(p => $"R{p.round} {(pickTeamLookup.TryGetValue(p.original_team_id, out var a) ? a : "???")}"))
+            ? " y " + string.Join(", ", myPicksSelForMsg.Select(p =>
+            {
+                string abbr = pickTeamLookup.TryGetValue(p.original_team_id, out var a) ? a : "???";
+                int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
+                string label = $"R{p.round} {year} {abbr}";
+                if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
+                else if (p.is_swap == 1) label += " (SWAP)";
+                return label;
+            }))
             : "";
         var otherPicksText = otherPicksSelForMsg.Count > 0
-            ? " y " + string.Join(", ", otherPicksSelForMsg.Select(p => $"R{p.round} {(pickTeamLookup.TryGetValue(p.original_team_id, out var b) ? b : "???")}"))
+            ? " y " + string.Join(", ", otherPicksSelForMsg.Select(p =>
+            {
+                string abbr = pickTeamLookup.TryGetValue(p.original_team_id, out var b) ? b : "???";
+                int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
+                string label = $"R{p.round} {year} {abbr}";
+                if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
+                else if (p.is_swap == 1) label += " (SWAP)";
+                return label;
+            }))
             : "";
         string satNote = satApplied ? " (Sign & Trade: contratos extendidos, hard cap activado)" : "";
 
@@ -2026,31 +2052,17 @@ using System.Linq;
             _tradeSuccessText2.text = $"Has recibido a {otherNames}{otherPicksText}."
                 + (satApplied ? $" {(string.IsNullOrEmpty(satExtraNote) ? "(contratos extendidos vía Sign & Trade)" : satExtraNote)}" : "");
 
-        if (_tradeSuccessIcon != null)
-        {
-            var iconSprite = Resources.Load<Sprite>("Icons/contrato");
-            if (iconSprite != null)
-            {
-                _tradeSuccessIcon.style.backgroundImage = new StyleBackground(iconSprite);
-            }
-            else
-            {
-                _tradeSuccessIcon.style.backgroundImage = new StyleBackground((Sprite)null);
-            }
-        }
+        if (_btnTradeSuccessClose != null) _btnTradeSuccessClose.text = "VER PLANTILLA";
+        _tradeSuccessGoToRoster = true;
 
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.Flex;
-        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.Flex;
-
-        StartCoroutine(AutoCloseTradeSuccess());
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.AddToClassList("modal-overlay--visible");
+        if (_tradeSuccessBox != null) _tradeSuccessBox.AddToClassList("modal-box--visible");
     }
 
-    System.Collections.IEnumerator AutoCloseTradeSuccess()
+    void CloseTradeSuccessModal()
     {
-        yield return new WaitForSeconds(5f);
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
-        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.None;
-        ScreenManager.Instance.GoTo(GameScreen.Roster);
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.RemoveFromClassList("modal-overlay--visible");
+        if (_tradeSuccessBox != null) _tradeSuccessBox.RemoveFromClassList("modal-box--visible");
     }
 
     // ═══════════════════════════════════════════
@@ -2631,9 +2643,6 @@ using System.Linq;
         if (_tradeSuccessTitle != null)
         {
             _tradeSuccessTitle.text = success ? "¡FICHAJE REALIZADO!" : "¡FICHAJE RECHAZADO!";
-            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--positive");
-            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--negative");
-            _tradeSuccessTitle.AddToClassList(success ? "renew-modal-title--positive" : "renew-modal-title--negative");
         }
         if (_tradeSuccessText1 != null)
             _tradeSuccessText1.text = success
@@ -2646,41 +2655,25 @@ using System.Linq;
 
         if (_tradeSuccessBox != null)
         {
-            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--positive");
-            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--negative");
-            _tradeSuccessBox.AddToClassList(success ? "renew-modal-box--positive" : "renew-modal-box--negative");
+            _tradeSuccessBox.style.borderTopColor = success
+                ? new StyleColor(new Color32(39, 174, 96, 255))
+                : new StyleColor(new Color32(192, 57, 43, 255));
+            _tradeSuccessBox.style.borderBottomColor = _tradeSuccessBox.style.borderTopColor;
+            _tradeSuccessBox.style.borderLeftColor = _tradeSuccessBox.style.borderTopColor;
+            _tradeSuccessBox.style.borderRightColor = _tradeSuccessBox.style.borderTopColor;
         }
-
-        if (_tradeSuccessIcon != null)
-        {
-            var iconName = success ? "contrato" : "rechazar";
-            var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
-            _tradeSuccessIcon.style.backgroundImage = tex != null ? new StyleBackground(tex) : null;
-        }
-
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.Flex;
-        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.Flex;
-
-        StartCoroutine(AutoCloseFAResult());
-    }
-
-    System.Collections.IEnumerator AutoCloseFAResult()
-    {
-        yield return new WaitForSeconds(4f);
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
-        if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.None;
         if (_tradeSuccessTitle != null)
         {
-            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--positive");
-            _tradeSuccessTitle.RemoveFromClassList("renew-modal-title--negative");
+            _tradeSuccessTitle.style.color = success
+                ? new StyleColor(new Color32(39, 174, 96, 255))
+                : new StyleColor(new Color32(192, 57, 43, 255));
         }
-        if (_tradeSuccessBox != null)
-        {
-            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--positive");
-            _tradeSuccessBox.RemoveFromClassList("renew-modal-box--negative");
-        }
-        if (_tradeSuccessIcon != null)
-            _tradeSuccessIcon.style.backgroundImage = null;
+
+        if (_btnTradeSuccessClose != null) _btnTradeSuccessClose.text = "CONTINUAR";
+        _tradeSuccessGoToRoster = false;
+
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.AddToClassList("modal-overlay--visible");
+        if (_tradeSuccessBox != null) _tradeSuccessBox.AddToClassList("modal-box--visible");
     }
 
     void ShowFreeAgents()

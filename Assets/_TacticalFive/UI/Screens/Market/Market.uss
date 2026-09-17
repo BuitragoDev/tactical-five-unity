@@ -1833,6 +1833,48 @@
     margin-top: 24px;
     gap: 12px;
 }
+
+/* ══ MODAL TRASPASO REALIZADO (estilo moderno) ══ */
+#TradeSuccessBox {
+    width: 520px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+#TradeSuccessBox .modal-title {
+    padding: 10px 24px;
+    background-color: rgba(39, 174, 96, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(39, 174, 96);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 34px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+}
+#TradeSuccessBox .modal-body {
+    padding: 20px 24px;
+}
+#TradeSuccessBox .modal-paragraph {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+#TradeSuccessBox .modal-actions {
+    width: auto;
+    align-self: stretch;
+    margin: 8px 20px 16px;
+    justify-content: flex-end;
+}
+#TradeSuccessBox .modal-btn {
+    flex-grow: 0;
+    min-width: 170px;
+}
 .renew-form-row {
     flex-direction: row;
     align-items: center;
