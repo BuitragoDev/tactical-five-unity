@@ -62,13 +62,14 @@ using System.Linq;
     private Label _tradeSuccessTitle;
     private VisualElement _tradeSuccessMyTeamLogo;
     private Label _tradeSuccessMyTeamName;
-    private Label _tradeSuccessMyPlayers;
-    private Label _tradeSuccessMyPicks;
+    private VisualElement _tradeSuccessMyPlayersBody;
     private VisualElement _tradeSuccessOtherTeamLogo;
     private Label _tradeSuccessOtherTeamName;
-    private Label _tradeSuccessOtherPlayers;
-    private Label _tradeSuccessOtherPicks;
+    private VisualElement _tradeSuccessOtherPlayersBody;
+    private Label _tradeSuccessDate;
+    private Label _tradeSuccessType;
     private Button _btnTradeSuccessClose;
+    private Button _btnTradeSuccessCloseX;
     private bool _tradeSuccessGoToRoster;
     private VisualElement _faResultOverlay;
     private VisualElement _faResultBox;
@@ -232,19 +233,25 @@ using System.Linq;
         _tradeSuccessTitle = _root.Q<Label>("TradeSuccessTitle");
         _tradeSuccessMyTeamLogo = _root.Q<VisualElement>("TradeSuccessMyTeamLogo");
         _tradeSuccessMyTeamName = _root.Q<Label>("TradeSuccessMyTeamName");
-        _tradeSuccessMyPlayers = _root.Q<Label>("TradeSuccessMyPlayers");
-        _tradeSuccessMyPicks = _root.Q<Label>("TradeSuccessMyPicks");
+        _tradeSuccessMyPlayersBody = _root.Q<VisualElement>("TradeSuccessMyPlayersBody");
         _tradeSuccessOtherTeamLogo = _root.Q<VisualElement>("TradeSuccessOtherTeamLogo");
         _tradeSuccessOtherTeamName = _root.Q<Label>("TradeSuccessOtherTeamName");
-        _tradeSuccessOtherPlayers = _root.Q<Label>("TradeSuccessOtherPlayers");
-        _tradeSuccessOtherPicks = _root.Q<Label>("TradeSuccessOtherPicks");
+        _tradeSuccessOtherPlayersBody = _root.Q<VisualElement>("TradeSuccessOtherPlayersBody");
+        _tradeSuccessDate = _root.Q<Label>("TradeSuccessDate");
+        _tradeSuccessType = _root.Q<Label>("TradeSuccessType");
         _btnTradeSuccessClose = _root.Q<Button>("BtnTradeSuccessClose");
+        _btnTradeSuccessCloseX = _root.Q<Button>("BtnTradeSuccessCloseX");
         _btnTradeSuccessClose?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             CloseTradeSuccessModal();
             if (_tradeSuccessGoToRoster)
                 ScreenManager.Instance.GoTo(GameScreen.Roster);
+        });
+        _btnTradeSuccessCloseX?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseTradeSuccessModal();
         });
         _faResultOverlay = _root.Q<VisualElement>("FAResultOverlay");
         _faResultBox = _root.Q<VisualElement>("FAResultBox");
@@ -311,7 +318,7 @@ using System.Linq;
         SetFAPageIcon(_root.Q<Image>("FALastPageIcon1"), faNextSprite);
         SetFAPageIcon(_root.Q<Image>("FALastPageIcon2"), faNextSprite);
 
-        if (_tradeSuccessOverlay != null) { _tradeSuccessOverlay.RemoveFromClassList("modal-overlay--visible"); }
+        if (_tradeSuccessOverlay != null) { _tradeSuccessOverlay.style.display = DisplayStyle.None; }
         if (_tradeSuccessBox != null) { _tradeSuccessBox.style.display = DisplayStyle.None; }
         if (_faResultOverlay != null) { _faResultOverlay.RemoveFromClassList("modal-overlay--visible"); }
         if (_faResultBox != null) { _faResultBox.style.display = DisplayStyle.None; }
@@ -2079,74 +2086,146 @@ using System.Linq;
         if (_tradeSuccessTitle != null)
             _tradeSuccessTitle.text = satApplied ? "¡TRASPASO + SIGN & TRADE REALIZADO!" : "¡TRASPASO REALIZADO!";
 
+        var teamsLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t);
         var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.name);
         var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
 
-        string FormatPick(DraftPickData p)
-        {
-            string teamName = pickTeamLookup.TryGetValue(p.original_team_id, out var tn) ? tn : "???";
-            int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
-            string label = $"Ronda {p.round} {year} {teamName}";
-            if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
-            else if (p.is_swap == 1) label += " (SWAP)";
-            return label;
-        }
-
-        // My team card: what MY team RECEIVES
+        // ── Team logos and names ──
         if (_tradeSuccessMyTeamLogo != null && _tradePanelLogos64.TryGetValue(_myTeam.logo, out var myLogo))
             _tradeSuccessMyTeamLogo.style.backgroundImage = new StyleBackground(myLogo);
         if (_tradeSuccessMyTeamName != null) _tradeSuccessMyTeamName.text = _myTeam.name;
-        if (_tradeSuccessMyPlayers != null)
-        {
-            string players = otherPlayersReceived.Count > 0
-                ? string.Join(", ", otherPlayersReceived.Select(p => $"{p.first_name} {p.last_name}"))
-                : "Ninguno";
-            _tradeSuccessMyPlayers.text = players;
-        }
-        if (_tradeSuccessMyPicks != null)
-        {
-            if (otherPicksReceived.Count > 0)
-            {
-                _tradeSuccessMyPicks.text = string.Join(", ", otherPicksReceived.Select(FormatPick));
-                _tradeSuccessMyPicks.style.display = DisplayStyle.Flex;
-            }
-            else
-                _tradeSuccessMyPicks.style.display = DisplayStyle.None;
-        }
 
-        // Other team card: what THE OTHER team RECEIVES
         if (_tradeSuccessOtherTeamLogo != null && _tradePanelLogos64.TryGetValue(_selectedTeam.logo, out var otherLogo))
             _tradeSuccessOtherTeamLogo.style.backgroundImage = new StyleBackground(otherLogo);
         if (_tradeSuccessOtherTeamName != null) _tradeSuccessOtherTeamName.text = _selectedTeam.name;
-        if (_tradeSuccessOtherPlayers != null)
+
+        // ── Build my team rows (what MY team sends) ──
+        if (_tradeSuccessMyPlayersBody != null)
         {
-            string players = myPlayersSent.Count > 0
-                ? string.Join(", ", myPlayersSent.Select(p => $"{p.first_name} {p.last_name}"))
-                : "Ninguno";
-            _tradeSuccessOtherPlayers.text = players;
-        }
-        if (_tradeSuccessOtherPicks != null)
-        {
-            if (myPicksSent.Count > 0)
+            _tradeSuccessMyPlayersBody.Clear();
+            foreach (var p in myPlayersSent)
             {
-                _tradeSuccessOtherPicks.text = string.Join(", ", myPicksSent.Select(FormatPick));
-                _tradeSuccessOtherPicks.style.display = DisplayStyle.Flex;
+                _tradeSuccessMyPlayersBody.Add(BuildTradeSuccessPlayerRow(p, teamsLookup));
             }
-            else
-                _tradeSuccessOtherPicks.style.display = DisplayStyle.None;
+            foreach (var pick in myPicksSent)
+            {
+                _tradeSuccessMyPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup, seasonsLookup));
+            }
         }
 
-        if (_btnTradeSuccessClose != null) _btnTradeSuccessClose.text = "VER PLANTILLA";
+        // ── Build other team rows (what OTHER team sends = what I receive) ──
+        if (_tradeSuccessOtherPlayersBody != null)
+        {
+            _tradeSuccessOtherPlayersBody.Clear();
+            foreach (var p in otherPlayersReceived)
+            {
+                _tradeSuccessOtherPlayersBody.Add(BuildTradeSuccessPlayerRow(p, teamsLookup));
+            }
+            foreach (var pick in otherPicksReceived)
+            {
+                _tradeSuccessOtherPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup, seasonsLookup));
+            }
+        }
+
+        // ── Date ──
+        if (_tradeSuccessDate != null)
+        {
+            string dateStr = "";
+            if (!string.IsNullOrEmpty(_season?.current_date) &&
+                System.DateTime.TryParse(_season.current_date, out var dt))
+            {
+                string[] months = { "ENE", "FEB", "MAR", "ABR", "MAY", "JUN", "JUL", "AGO", "SEP", "OCT", "NOV", "DIC" };
+                dateStr = $"{dt.Day:00} {months[dt.Month - 1]} {dt.Year}";
+            }
+            _tradeSuccessDate.text = dateStr;
+        }
+
+        // ── Type ──
+        if (_tradeSuccessType != null)
+            _tradeSuccessType.text = satApplied ? "SIGN & TRADE" : "TRASPASO";
+
+        // ── Button ──
+        if (_btnTradeSuccessClose != null) _btnTradeSuccessClose.text = "IR A PLANTILLA";
         _tradeSuccessGoToRoster = true;
 
         _tradePanels.style.display = DisplayStyle.None;
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.AddToClassList("modal-overlay--visible");
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.Flex;
         if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.Flex;
+    }
+
+    VisualElement BuildTradeSuccessPlayerRow(PlayerData p, Dictionary<int, TeamData> teamsLookup)
+    {
+        var row = new VisualElement { name = "TradePlayerRow" };
+        row.AddToClassList("trade-player-row");
+
+        // Photo
+        var photo = new VisualElement { name = "TradePlayerPhoto" };
+        photo.AddToClassList("trade-player-photo");
+        var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
+        row.Add(photo);
+
+        // Name column
+        var nameCol = new VisualElement { name = "TradePlayerNameCol" };
+        nameCol.AddToClassList("trade-player-name-col");
+        var nameLbl = new Label($"{p.first_name} {p.last_name}");
+        nameLbl.AddToClassList("trade-player-name");
+        nameCol.Add(nameLbl);
+        string teamName = p.team_id > 0 && teamsLookup.TryGetValue(p.team_id, out var t) ? t.name : "Agente Libre";
+        var teamLbl = new Label(teamName);
+        teamLbl.AddToClassList("trade-player-team");
+        nameCol.Add(teamLbl);
+        row.Add(nameCol);
+
+        // Position
+        var posLbl = new Label(PositionCodes.GetShort(p.position));
+        posLbl.AddToClassList("trade-player-pos");
+        row.Add(posLbl);
+
+        // Type
+        var typeLbl = new Label("Jugador");
+        typeLbl.AddToClassList("trade-player-type");
+        row.Add(typeLbl);
+
+        return row;
+    }
+
+    VisualElement BuildTradeSuccessPickRow(DraftPickData pick, Dictionary<int, string> pickTeamLookup, Dictionary<int, int> seasonsLookup)
+    {
+        var row = new VisualElement { name = "TradePickRow" };
+        row.AddToClassList("trade-pick-row");
+
+        // Basketball icon
+        var icon = new VisualElement { name = "TradePickIcon" };
+        icon.AddToClassList("trade-pick-icon");
+        row.Add(icon);
+
+        // Pick label
+        string teamName = pickTeamLookup.TryGetValue(pick.original_team_id, out var tn) ? tn : "???";
+        int year = seasonsLookup.TryGetValue(pick.season_id, out var ys) ? ys : 0;
+        string label = $"Ronda {pick.round} {year} {teamName}";
+        if (pick.protected_from > 0) label += $" (PROT top-{pick.protected_from})";
+        else if (pick.is_swap == 1) label += " (SWAP)";
+        var pickLbl = new Label(label);
+        pickLbl.AddToClassList("trade-pick-label");
+        row.Add(pickLbl);
+
+        // Position (dash for picks)
+        var posLbl = new Label("-");
+        posLbl.AddToClassList("trade-pick-pos");
+        row.Add(posLbl);
+
+        // Type
+        var typeLbl = new Label("Pick");
+        typeLbl.AddToClassList("trade-pick-type");
+        row.Add(typeLbl);
+
+        return row;
     }
 
     void CloseTradeSuccessModal()
     {
-        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.RemoveFromClassList("modal-overlay--visible");
+        if (_tradeSuccessOverlay != null) _tradeSuccessOverlay.style.display = DisplayStyle.None;
         if (_tradeSuccessBox != null) _tradeSuccessBox.style.display = DisplayStyle.None;
     }
 

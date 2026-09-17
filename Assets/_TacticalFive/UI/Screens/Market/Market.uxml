@@ -332,35 +332,91 @@
              </ui:VisualElement>
          </ui:VisualElement>
 
-        <!-- Trade Success Modal -->
-        <ui:VisualElement name="TradeSuccessOverlay" class="modal-overlay">
-            <ui:VisualElement name="TradeSuccessBox" class="trade-success-box">
-                <ui:Label name="TradeSuccessTitle" class="trade-success-title" text="¡TRASPASO REALIZADO!" />
-                <ui:VisualElement class="trade-success-team-card">
-                    <ui:VisualElement class="trade-success-team-header">
-                        <ui:VisualElement name="TradeSuccessMyTeamLogo" class="trade-success-logo" />
-                        <ui:Label name="TradeSuccessMyTeamName" class="trade-success-team-name" text="" />
+        <!-- Trade Success Modal (professional) -->
+        <ui:VisualElement name="TradeSuccessOverlay" class="trade-overlay">
+            <ui:VisualElement name="TradeSuccessBox" class="trade-box">
+                <!-- Header -->
+                <ui:VisualElement class="trade-header">
+                    <ui:VisualElement class="trade-check-icon" />
+                    <ui:VisualElement class="trade-header-text">
+                        <ui:Label name="TradeSuccessTitle" class="trade-title" text="¡TRASPASO REALIZADO!" />
+                        <ui:Label class="trade-subtitle" text="El siguiente traspaso ha sido completado exitosamente." />
                     </ui:VisualElement>
-                    <ui:VisualElement class="trade-success-team-body">
-                        <ui:Label class="trade-success-receives-label" text=" RECIBE:" />
-                        <ui:Label name="TradeSuccessMyPlayers" class="trade-success-players" text="" />
-                        <ui:Label name="TradeSuccessMyPicks" class="trade-success-picks" text="" />
+                    <ui:Button name="BtnTradeSuccessCloseX" class="trade-close-x" text="✕" />
+                </ui:VisualElement>
+                <ui:VisualElement class="trade-green-line" />
+                <!-- Two team panels -->
+                <ui:VisualElement class="trade-panels-row">
+                    <!-- Left: Equipo que envía -->
+                    <ui:VisualElement class="trade-team-panel">
+                        <ui:VisualElement class="trade-team-header-row">
+                            <ui:VisualElement name="TradeSuccessMyTeamLogo" class="trade-team-logo-lg" />
+                            <ui:VisualElement class="trade-team-info-col">
+                                <ui:Label name="TradeSuccessMyTeamName" class="trade-team-name-lg" text="" />
+                                <ui:Label class="trade-team-role" text="Equipo que envía" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="trade-table">
+                            <ui:VisualElement class="trade-table-header">
+                                <ui:Label class="trade-th trade-th-player" text="JUGADOR / ACTIVO" />
+                                <ui:Label class="trade-th trade-th-pos" text="POS" />
+                                <ui:Label class="trade-th trade-th-tipo" text="TIPO" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="TradeSuccessMyPlayersBody" class="trade-table-body" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <!-- Swap icon -->
+                    <ui:VisualElement class="trade-swap-icon">
+                        <ui:Label text="⇄" />
+                    </ui:VisualElement>
+                    <!-- Right: Equipo que recibe -->
+                    <ui:VisualElement class="trade-team-panel">
+                        <ui:VisualElement class="trade-team-header-row">
+                            <ui:VisualElement name="TradeSuccessOtherTeamLogo" class="trade-team-logo-lg" />
+                            <ui:VisualElement class="trade-team-info-col">
+                                <ui:Label name="TradeSuccessOtherTeamName" class="trade-team-name-lg" text="" />
+                                <ui:Label class="trade-team-role" text="Equipo que recibe" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="trade-table">
+                            <ui:VisualElement class="trade-table-header">
+                                <ui:Label class="trade-th trade-th-player" text="JUGADOR / ACTIVO" />
+                                <ui:Label class="trade-th trade-th-pos" text="POS" />
+                                <ui:Label class="trade-th trade-th-tipo" text="TIPO" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="TradeSuccessOtherPlayersBody" class="trade-table-body" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="trade-success-divider" />
-                <ui:VisualElement class="trade-success-team-card">
-                    <ui:VisualElement class="trade-success-team-header">
-                        <ui:VisualElement name="TradeSuccessOtherTeamLogo" class="trade-success-logo" />
-                        <ui:Label name="TradeSuccessOtherTeamName" class="trade-success-team-name" text="" />
+                <!-- Bottom info bar -->
+                <ui:VisualElement class="trade-info-bar">
+                    <ui:VisualElement class="trade-info-item">
+                        <ui:Label class="trade-info-icon" text="📅" />
+                        <ui:VisualElement class="trade-info-text">
+                            <ui:Label class="trade-info-label" text="FECHA DEL TRASPASO" />
+                            <ui:Label name="TradeSuccessDate" class="trade-info-value" text="" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="trade-success-team-body">
-                        <ui:Label class="trade-success-receives-label" text=" RECIBE:" />
-                        <ui:Label name="TradeSuccessOtherPlayers" class="trade-success-players" text="" />
-                        <ui:Label name="TradeSuccessOtherPicks" class="trade-success-picks" text="" />
+                    <ui:VisualElement class="trade-info-divider" />
+                    <ui:VisualElement class="trade-info-item">
+                        <ui:Label class="trade-info-icon" text="📋" />
+                        <ui:VisualElement class="trade-info-text">
+                            <ui:Label class="trade-info-label" text="TIPO DE TRASPASO" />
+                            <ui:Label name="TradeSuccessType" class="trade-info-value" text="" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trade-info-divider" />
+                    <ui:VisualElement class="trade-info-item">
+                        <ui:Label class="trade-info-icon" text="🤝" />
+                        <ui:VisualElement class="trade-info-text">
+                            <ui:Label class="trade-info-label" text="ESTADO" />
+                            <ui:Label class="trade-info-status" text="✓ COMPLETADO" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="trade-success-actions">
-                    <ui:Button name="BtnTradeSuccessClose" text="VER PLANTILLA" class="trade-success-btn" />
+                <!-- Button -->
+                <ui:VisualElement class="trade-actions">
+                    <ui:Button name="BtnTradeSuccessClose" text="IR A PLANTILLA" class="trade-btn" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
