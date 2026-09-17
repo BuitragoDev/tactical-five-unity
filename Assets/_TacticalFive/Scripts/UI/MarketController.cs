@@ -184,6 +184,7 @@ using System.Linq;
     protected override void CacheReferences()
     {
         _btnNegotiate = _root.Q<Button>("BtnNegotiate");
+        SetNegotiateButton(false);
         _tradePanels = _root.Q<VisualElement>("TradePanels");
         _btnCloseTradeModal = _root.Q<Button>("BtnCloseTradeModal");
         _freeAgentsPanel = _root.Q<VisualElement>("FreeAgentsPanel");
@@ -589,6 +590,9 @@ using System.Linq;
         _freeAgentsPanel.style.display = DisplayStyle.None;
         _marketClosedOverlay.style.display = windowOpen ? DisplayStyle.None : DisplayStyle.Flex;
 
+        SetNegotiateButton(false);
+        _root.Q<Label>("NegotiateBtnText").text = "SELECCIONA UN EQUIPO PARA NEGOCIAR";
+
         if (!windowOpen) return;
 
         BuildTeamGrid();
@@ -715,6 +719,17 @@ using System.Linq;
     {
         if (_btnNegotiate == null || _selectedTeam == null) return;
         _root.Q<Label>("NegotiateBtnText").text = $"NEGOCIAR CON {_selectedTeam.name.ToUpper()}";
+        SetNegotiateButton(true);
+    }
+
+    void SetNegotiateButton(bool enabled)
+    {
+        if (_btnNegotiate == null) return;
+        _btnNegotiate.SetEnabled(enabled);
+        if (enabled)
+            _btnNegotiate.RemoveFromClassList("market-btn-negotiate--disabled");
+        else
+            _btnNegotiate.AddToClassList("market-btn-negotiate--disabled");
     }
 
     void SelectTeam(int teamId)
@@ -767,7 +782,11 @@ using System.Linq;
         CloseAllDropdowns();
         _tradePanels.style.display = DisplayStyle.None;
         if (_selectedTeam != null && !_isFA)
+        {
             _btnNegotiate.style.display = DisplayStyle.Flex;
+            _root.Q<Label>("NegotiateBtnText").text = $"NEGOCIAR CON {_selectedTeam.name.ToUpper()}";
+            SetNegotiateButton(true);
+        }
     }
 
     void LoadTradeData()
@@ -2099,29 +2118,29 @@ using System.Linq;
             _tradeSuccessOtherTeamLogo.style.backgroundImage = new StyleBackground(otherLogo);
         if (_tradeSuccessOtherTeamName != null) _tradeSuccessOtherTeamName.text = _selectedTeam.name;
 
-        // ── Build my team rows (what MY team sends) ──
+        // ── Build my team rows (what MY team RECEIVES) ──
         if (_tradeSuccessMyPlayersBody != null)
         {
             _tradeSuccessMyPlayersBody.Clear();
-            foreach (var p in myPlayersSent)
+            foreach (var p in otherPlayersReceived)
             {
                 _tradeSuccessMyPlayersBody.Add(BuildTradeSuccessPlayerRow(p, teamsLookup));
             }
-            foreach (var pick in myPicksSent)
+            foreach (var pick in otherPicksReceived)
             {
                 _tradeSuccessMyPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup, seasonsLookup));
             }
         }
 
-        // ── Build other team rows (what OTHER team sends = what I receive) ──
+        // ── Build other team rows (what OTHER team RECEIVES) ──
         if (_tradeSuccessOtherPlayersBody != null)
         {
             _tradeSuccessOtherPlayersBody.Clear();
-            foreach (var p in otherPlayersReceived)
+            foreach (var p in myPlayersSent)
             {
                 _tradeSuccessOtherPlayersBody.Add(BuildTradeSuccessPlayerRow(p, teamsLookup));
             }
-            foreach (var pick in otherPicksReceived)
+            foreach (var pick in myPicksSent)
             {
                 _tradeSuccessOtherPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup, seasonsLookup));
             }

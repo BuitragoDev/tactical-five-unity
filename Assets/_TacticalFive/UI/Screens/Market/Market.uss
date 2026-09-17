@@ -134,6 +134,16 @@
     color: rgb(140, 190, 255);
 }
 
+.market-btn-negotiate--disabled {
+    background-color: rgba(100, 110, 130, 0.08);
+    border-color: rgba(100, 110, 130, 0.30);
+    cursor: default;
+    pointer-events: none;
+}
+.market-btn-negotiate--disabled .market-btn-negotiate-text {
+    color: rgba(100, 110, 130, 0.50);
+}
+
 /* ── TRADE PANELS ── */
 .market-trade-panels {
     flex-direction: column;
@@ -1846,7 +1856,7 @@
     justify-content: center;
 }
 .trade-box {
-    width: 1070px;
+    width: 1270px;
     background-color: rgb(8, 12, 30);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
@@ -2050,14 +2060,12 @@
     border-bottom-color: rgba(0, 140, 210, 0.08);
 }
 .trade-pick-icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     margin-right: 10px;
     flex-shrink: 0;
-    border-radius: 16px;
-    background-color: rgba(0, 140, 210, 0.12);
-    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/basket_icon.png");
-    background-size: 60% 60%;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Icons/d_icon.png");
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
 }
