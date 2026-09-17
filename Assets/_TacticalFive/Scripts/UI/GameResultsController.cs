@@ -8,7 +8,7 @@ public class GameResultsController : UIScreenController
 {
     private VisualElement _gamesBody;
     private VisualElement _mvpPanel;
-    private Label _mvpName, _mvpTeam, _mvpPos, _mvpPts, _mvpReb, _mvpAst, _mvpVal;
+    private Label _mvpName, _mvpTeam, _mvpPts, _mvpReb, _mvpAst, _mvpVal;
     private VisualElement _mvpLogo;
     private VisualElement _lbScorersBody, _lbReboundersBody, _lbAssistersBody;
     private Button _btnDashboard;
@@ -33,7 +33,6 @@ public class GameResultsController : UIScreenController
         _mvpPanel = _root.Q<VisualElement>("MvpPanel");
         _mvpName = _root.Q<Label>("MvpName");
         _mvpTeam = _root.Q<Label>("MvpTeam");
-        _mvpPos = _root.Q<Label>("MvpPos");
         _mvpPts = _root.Q<Label>("MvpPts");
         _mvpReb = _root.Q<Label>("MvpReb");
         _mvpAst = _root.Q<Label>("MvpAst");
@@ -319,7 +318,6 @@ public class GameResultsController : UIScreenController
                 ?? _allTeams.Find(t => t.id == mvpPlayer.team_id);
             _mvpName.text = $"{mvpPlayer.first_name.ToUpper()}\n{mvpPlayer.last_name.ToUpper()}";
             _mvpTeam.text = mvpTeamData?.name ?? "Equipo desconocido";
-            _mvpPos.text = PositionCodes.GetShort(mvpPlayer.position);
             _mvpPts.text = mvp.points.ToString();
             _mvpReb.text = mvp.rebounds.ToString();
             _mvpAst.text = mvp.assists.ToString();
@@ -360,7 +358,7 @@ public class GameResultsController : UIScreenController
             var nameLbl = new Label { text = $"{player.first_name} {player.last_name}" };
             nameLbl.AddToClassList("lb-name");
             info.Add(nameLbl);
-            var teamLbl = new Label { text = $"{team?.abbreviation ?? "FA"} · {PositionCodes.GetShort(player.position)}" };
+            var teamLbl = new Label { text = team?.name ?? "Equipo desconocido" };
             teamLbl.AddToClassList("lb-team");
             info.Add(teamLbl);
 
