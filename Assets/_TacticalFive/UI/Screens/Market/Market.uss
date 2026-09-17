@@ -1046,7 +1046,7 @@
 }
 .market-trade-modal-header-actions .market-trade-btn {
     flex-grow: 0;
-    width: 180px;
+    width: 220px;
     padding: 14px 18px;
     margin-left: 6px;
     font-size: 22px;
