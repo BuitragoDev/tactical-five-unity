@@ -545,7 +545,7 @@
 }
 
 .lb-value {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     color: #d4a017;
     flex-shrink: 0;
