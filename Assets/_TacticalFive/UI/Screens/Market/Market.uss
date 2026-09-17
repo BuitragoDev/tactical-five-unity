@@ -1834,9 +1834,12 @@
     gap: 12px;
 }
 
-/* ══ MODAL TRASPASO REALIZADO (estilo moderno) ══ */
-#TradeSuccessBox {
-    width: 520px;
+/* ══ TRADE SUCCESS MODAL ══ */
+#TradeSuccessOverlay.modal-overlay--visible {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+.trade-success-box {
+    width: 580px;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(39, 174, 96);
@@ -1845,35 +1848,154 @@
     flex-direction: column;
     overflow: hidden;
 }
-#TradeSuccessBox .modal-title {
+.trade-success-title {
+    padding: 12px 24px;
+    background-color: rgba(39, 174, 96, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(39, 174, 96);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
+}
+.trade-success-team-card {
+    flex-direction: column;
+    padding: 16px 24px;
+}
+.trade-success-team-header {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.trade-success-logo {
+    width: 48px;
+    height: 48px;
+    margin-right: 14px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.trade-success-team-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 22px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+}
+.trade-success-team-body {
+    flex-direction: column;
+    padding-left: 62px;
+}
+.trade-success-receives-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+.trade-success-players {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 17px;
+    color: rgb(208, 216, 232);
+    white-space: normal;
+    margin-bottom: 4px;
+}
+.trade-success-picks {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(122, 138, 170);
+    white-space: normal;
+}
+.trade-success-divider {
+    height: 1px;
+    background-color: rgba(39, 174, 96, 0.25);
+    margin: 0 24px;
+}
+.trade-success-actions {
+    flex-direction: row;
+    justify-content: center;
+    padding: 16px 24px 20px;
+}
+.trade-success-btn {
+    background-color: rgba(39, 174, 96, 0.15);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 12px 32px;
+    border-radius: 8px;
+    min-width: 200px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.trade-success-btn:hover {
+    background-color: rgba(39, 174, 96, 0.30);
+    color: rgb(130, 220, 170);
+}
+
+/* ══ FA RESULT MODAL ══ */
+#FAResultOverlay.modal-overlay--visible {
+    background-color: rgba(0, 0, 0, 0.75);
+}
+.fa-result-box {
+    width: 480px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+.fa-result-title {
     padding: 10px 24px;
     background-color: rgba(39, 174, 96, 0.15);
     border-bottom-width: 1px;
     border-bottom-color: rgb(39, 174, 96);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 34px;
+    font-size: 28px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
+    -unity-text-align: middle-center;
 }
-#TradeSuccessBox .modal-body {
-    padding: 20px 24px;
+.fa-result-body {
+    padding: 24px;
+    flex-direction: column;
+    align-items: center;
 }
-#TradeSuccessBox .modal-paragraph {
+.fa-result-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(179, 190, 214);
     white-space: normal;
     -unity-text-align: middle-center;
+    margin-bottom: 8px;
 }
-#TradeSuccessBox .modal-actions {
-    width: auto;
-    align-self: stretch;
-    margin: 8px 20px 16px;
-    justify-content: flex-end;
+.fa-result-actions {
+    flex-direction: row;
+    justify-content: center;
+    padding: 8px 24px 20px;
 }
-#TradeSuccessBox .modal-btn {
-    flex-grow: 0;
-    min-width: 170px;
+.fa-result-btn {
+    background-color: rgba(39, 174, 96, 0.15);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 12px 32px;
+    border-radius: 8px;
+    min-width: 200px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.fa-result-btn:hover {
+    background-color: rgba(39, 174, 96, 0.30);
+    color: rgb(130, 220, 170);
 }
 .renew-form-row {
     flex-direction: row;

@@ -334,14 +334,47 @@
 
         <!-- Trade Success Modal -->
         <ui:VisualElement name="TradeSuccessOverlay" class="modal-overlay">
-            <ui:VisualElement name="TradeSuccessBox" class="modal-box">
-                <ui:Label name="TradeSuccessTitle" class="modal-title" text="¡TRASPASO REALIZADO!" />
-                <ui:VisualElement class="modal-body">
-                    <ui:Label name="TradeSuccessText1" class="modal-paragraph" text="" />
-                    <ui:Label name="TradeSuccessText2" class="modal-paragraph" text="" />
+            <ui:VisualElement name="TradeSuccessBox" class="trade-success-box">
+                <ui:Label name="TradeSuccessTitle" class="trade-success-title" text="¡TRASPASO REALIZADO!" />
+                <ui:VisualElement class="trade-success-team-card">
+                    <ui:VisualElement class="trade-success-team-header">
+                        <ui:VisualElement name="TradeSuccessMyTeamLogo" class="trade-success-logo" />
+                        <ui:Label name="TradeSuccessMyTeamName" class="trade-success-team-name" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trade-success-team-body">
+                        <ui:Label class="trade-success-receives-label" text=" RECIBE:" />
+                        <ui:Label name="TradeSuccessMyPlayers" class="trade-success-players" text="" />
+                        <ui:Label name="TradeSuccessMyPicks" class="trade-success-picks" text="" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnTradeSuccessClose" text="VER PLANTILLA" class="modal-btn modal-btn--primary" />
+                <ui:VisualElement class="trade-success-divider" />
+                <ui:VisualElement class="trade-success-team-card">
+                    <ui:VisualElement class="trade-success-team-header">
+                        <ui:VisualElement name="TradeSuccessOtherTeamLogo" class="trade-success-logo" />
+                        <ui:Label name="TradeSuccessOtherTeamName" class="trade-success-team-name" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trade-success-team-body">
+                        <ui:Label class="trade-success-receives-label" text=" RECIBE:" />
+                        <ui:Label name="TradeSuccessOtherPlayers" class="trade-success-players" text="" />
+                        <ui:Label name="TradeSuccessOtherPicks" class="trade-success-picks" text="" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="trade-success-actions">
+                    <ui:Button name="BtnTradeSuccessClose" text="VER PLANTILLA" class="trade-success-btn" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- FA Result Modal -->
+        <ui:VisualElement name="FAResultOverlay" class="modal-overlay">
+            <ui:VisualElement name="FAResultBox" class="fa-result-box">
+                <ui:Label name="FAResultTitle" class="fa-result-title" text="¡FICHAJE REALIZADO!" />
+                <ui:VisualElement class="fa-result-body">
+                    <ui:Label name="FAResultText1" class="fa-result-text" text="" />
+                    <ui:Label name="FAResultText2" class="fa-result-text" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="fa-result-actions">
+                    <ui:Button name="BtnFAResultClose" text="CONTINUAR" class="fa-result-btn" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
