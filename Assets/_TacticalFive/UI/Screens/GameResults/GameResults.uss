@@ -547,7 +547,7 @@
 .lb-value {
     font-size: 22px;
     font-weight: 700;
-    color: #ffffff;
+    color: #d4a017;
     flex-shrink: 0;
     min-width: 30px;
     text-align: right;
