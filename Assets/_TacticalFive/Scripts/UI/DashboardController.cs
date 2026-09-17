@@ -1335,22 +1335,27 @@ using System.Threading.Tasks;
 
                 if (hasPlayedPlayIn && !hasRemainingPlayIn && !teamWonAnyPlayIn)
                 {
-                    DatabaseManager.Instance.AddMessage(new MessageData
+                    bool playInAlreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
+                        .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ELIMINACION_PLAYIN);
+                    if (!playInAlreadySent)
                     {
-                        manager_id = _manager.id,
-                        sender_type = 1,
-                        sender_id = 0,
-                        title = "Eliminación en Play-In",
-                        body = NewsTexts.EliminacionPlayin(_myTeam.name, 0),
-                        game_day = gameDay,
-                        game_date = _season?.current_date ?? "",
-                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0,
-                        category = NewsCategory.LIGA,
-                        news_type = NewsType.ELIMINACION_PLAYIN
-                    });
-                    Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Play-In.");
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 1,
+                            sender_id = 0,
+                            title = "Eliminación en Play-In",
+                            body = NewsTexts.EliminacionPlayin(_myTeam.name, 0),
+                            game_day = gameDay,
+                            game_date = _season?.current_date ?? "",
+                            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            is_read = 0,
+                            category = NewsCategory.LIGA,
+                            news_type = NewsType.ELIMINACION_PLAYIN
+                        });
+                        Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Play-In.");
+                    }
                 }
             }
         }
@@ -1403,22 +1408,27 @@ using System.Threading.Tasks;
 
                 if (hasPlayedPlayoffs && !hasRemainingPlayoffs && !teamWonLastSeries)
                 {
-                    DatabaseManager.Instance.AddMessage(new MessageData
+                    bool playoffAlreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
+                        .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ELIMINACION_PLAYOFFS);
+                    if (!playoffAlreadySent)
                     {
-                        manager_id = _manager.id,
-                        sender_type = 1,
-                        sender_id = 0,
-                        title = "Eliminación en Playoffs",
-                        body = NewsTexts.EliminacionPlayoffs(_myTeam.name, "", 0, 0),
-                        game_day = gameDay,
-                        game_date = _season?.current_date ?? "",
-                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        is_read = 0,
-                        category = NewsCategory.LIGA,
-                        news_type = NewsType.ELIMINACION_PLAYOFFS
-                    });
-                    Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Playoffs.");
+                        DatabaseManager.Instance.AddMessage(new MessageData
+                        {
+                            manager_id = _manager.id,
+                            sender_type = 1,
+                            sender_id = 0,
+                            title = "Eliminación en Playoffs",
+                            body = NewsTexts.EliminacionPlayoffs(_myTeam.name, "", 0, 0),
+                            game_day = gameDay,
+                            game_date = _season?.current_date ?? "",
+                            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                            is_read = 0,
+                            category = NewsCategory.LIGA,
+                            news_type = NewsType.ELIMINACION_PLAYOFFS
+                        });
+                        Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Playoffs.");
+                    }
                 }
             }
         }
