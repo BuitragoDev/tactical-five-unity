@@ -2079,64 +2079,57 @@ using System.Linq;
         if (_tradeSuccessTitle != null)
             _tradeSuccessTitle.text = satApplied ? "¡TRASPASO + SIGN & TRADE REALIZADO!" : "¡TRASPASO REALIZADO!";
 
-        // My team card
+        var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.name);
+        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
+
+        string FormatPick(DraftPickData p)
+        {
+            string teamName = pickTeamLookup.TryGetValue(p.original_team_id, out var tn) ? tn : "???";
+            int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
+            string label = $"Ronda {p.round} {year} {teamName}";
+            if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
+            else if (p.is_swap == 1) label += " (SWAP)";
+            return label;
+        }
+
+        // My team card: what MY team RECEIVES
         if (_tradeSuccessMyTeamLogo != null && _tradePanelLogos64.TryGetValue(_myTeam.logo, out var myLogo))
             _tradeSuccessMyTeamLogo.style.backgroundImage = new StyleBackground(myLogo);
         if (_tradeSuccessMyTeamName != null) _tradeSuccessMyTeamName.text = _myTeam.name;
         if (_tradeSuccessMyPlayers != null)
         {
-            string players = myPlayersSent.Count > 0
-                ? string.Join(", ", myPlayersSent.Select(p => $"{p.first_name} {p.last_name}"))
+            string players = otherPlayersReceived.Count > 0
+                ? string.Join(", ", otherPlayersReceived.Select(p => $"{p.first_name} {p.last_name}"))
                 : "Ninguno";
             _tradeSuccessMyPlayers.text = players;
         }
         if (_tradeSuccessMyPicks != null)
         {
-            if (myPicksSent.Count > 0)
+            if (otherPicksReceived.Count > 0)
             {
-                var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
-                var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
-                _tradeSuccessMyPicks.text = string.Join(", ", myPicksSent.Select(p =>
-                {
-                    string abbr = pickTeamLookup.TryGetValue(p.original_team_id, out var a) ? a : "???";
-                    int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
-                    string label = $"R{p.round} {year} {abbr}";
-                    if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
-                    else if (p.is_swap == 1) label += " (SWAP)";
-                    return label;
-                }));
+                _tradeSuccessMyPicks.text = string.Join(", ", otherPicksReceived.Select(FormatPick));
                 _tradeSuccessMyPicks.style.display = DisplayStyle.Flex;
             }
             else
                 _tradeSuccessMyPicks.style.display = DisplayStyle.None;
         }
 
-        // Other team card
+        // Other team card: what THE OTHER team RECEIVES
         if (_tradeSuccessOtherTeamLogo != null && _tradePanelLogos64.TryGetValue(_selectedTeam.logo, out var otherLogo))
             _tradeSuccessOtherTeamLogo.style.backgroundImage = new StyleBackground(otherLogo);
         if (_tradeSuccessOtherTeamName != null) _tradeSuccessOtherTeamName.text = _selectedTeam.name;
         if (_tradeSuccessOtherPlayers != null)
         {
-            string players = otherPlayersReceived.Count > 0
-                ? string.Join(", ", otherPlayersReceived.Select(p => $"{p.first_name} {p.last_name}"))
+            string players = myPlayersSent.Count > 0
+                ? string.Join(", ", myPlayersSent.Select(p => $"{p.first_name} {p.last_name}"))
                 : "Ninguno";
             _tradeSuccessOtherPlayers.text = players;
         }
         if (_tradeSuccessOtherPicks != null)
         {
-            if (otherPicksReceived.Count > 0)
+            if (myPicksSent.Count > 0)
             {
-                var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
-                var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
-                _tradeSuccessOtherPicks.text = string.Join(", ", otherPicksReceived.Select(p =>
-                {
-                    string abbr = pickTeamLookup.TryGetValue(p.original_team_id, out var b) ? b : "???";
-                    int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
-                    string label = $"R{p.round} {year} {abbr}";
-                    if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
-                    else if (p.is_swap == 1) label += " (SWAP)";
-                    return label;
-                }));
+                _tradeSuccessOtherPicks.text = string.Join(", ", myPicksSent.Select(FormatPick));
                 _tradeSuccessOtherPicks.style.display = DisplayStyle.Flex;
             }
             else
