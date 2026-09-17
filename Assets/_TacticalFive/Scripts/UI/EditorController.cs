@@ -1090,29 +1090,35 @@ public class EditorController : UIScreenController
         if (isError) box.AddToClassList("editor-modal-box--error");
         _toast.Add(box);
 
-        var icon = new VisualElement();
-        icon.AddToClassList("editor-modal-icon");
-        var iconName = isError ? "Icons/boton-x" : "Icons/boton-v-64px";
-        var tex = Resources.Load<Texture2D>(iconName);
-        if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
-        box.Add(icon);
+        var header = new VisualElement();
+        header.AddToClassList("editor-modal-header");
+        if (isError) header.AddToClassList("editor-modal-header--error");
+        box.Add(header);
 
         var titleText = isError ? "ERROR" : "GUARDADO";
         var title = new Label(titleText);
         title.AddToClassList("editor-modal-title");
-        title.AddToClassList(isError ? "editor-modal-title--error" : "editor-modal-title--success");
-        box.Add(title);
+        if (isError) title.AddToClassList("editor-modal-title--error");
+        header.Add(title);
+
+        var body = new VisualElement();
+        body.AddToClassList("editor-modal-body");
+        box.Add(body);
 
         var text = new Label(message);
         text.AddToClassList("editor-modal-text");
-        box.Add(text);
+        body.Add(text);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("editor-modal-actions");
+        box.Add(actions);
 
         var closeBtn = new Button();
         closeBtn.clicked += () => { PlayClick(); CloseToast(); };
         closeBtn.AddToClassList("editor-modal-btn");
         closeBtn.text = "CERRAR";
         CursorManager.Instance?.RegisterHandCursor(closeBtn);
-        box.Add(closeBtn);
+        actions.Add(closeBtn);
     }
 
     void CloseToast()

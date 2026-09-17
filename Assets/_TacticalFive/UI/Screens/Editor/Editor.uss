@@ -480,25 +480,33 @@
 }
 
 .editor-modal-box {
-    width: 520px;
+    width: 560px;
     background-color: rgb(13, 14, 18);
-    border-width: 1px;
+    border-width: 2px;
     border-color: rgb(39, 174, 96);
     border-radius: 12px;
-    padding: 32px;
+    padding: 0;
     flex-direction: column;
-    align-items: center;
+    overflow: hidden;
 }
 
 .editor-modal-box--error {
     border-color: rgb(192, 57, 43);
 }
 
-.editor-modal-icon {
-    width: 64px;
-    height: 64px;
-    margin-bottom: 8px;
-    -unity-background-scale-mode: scale-to-fit;
+.editor-modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 24px;
+    background-color: rgba(39, 174, 96, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(39, 174, 96);
+}
+
+.editor-modal-header--error {
+    background-color: rgba(192, 57, 43, 0.15);
+    border-bottom-color: rgb(192, 57, 43);
 }
 
 .editor-modal-title {
@@ -506,42 +514,45 @@
     font-size: 34px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
-    margin-bottom: 16px;
     -unity-text-align: middle-center;
 }
 
-.editor-modal-title--success {
-    color: rgb(39, 174, 96);
-}
-
-.editor-modal-title--error {
-    color: rgb(192, 57, 43);
+.editor-modal-body {
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
 }
 
 .editor-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 20px;
     color: rgb(179, 190, 214);
-    margin-bottom: 24px;
     -unity-text-align: middle-center;
     white-space: normal;
+}
+
+.editor-modal-actions {
+    flex-direction: row;
+    justify-content: center;
+    padding: 0 24px 24px;
 }
 
 .editor-modal-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgba(39, 174, 96, 0.10);
     border-width: 2px;
-    border-color: rgb(42, 95, 201);
-    color: rgb(120, 160, 230);
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
     border-radius: 8px;
-    padding: 10px 32px;
+    padding: 12px 48px;
+    min-width: 200px;
     cursor: pointer;
 }
 
 .editor-modal-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
-    color: rgb(150, 190, 255);
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
 }
 
