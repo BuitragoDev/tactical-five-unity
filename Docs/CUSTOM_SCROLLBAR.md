@@ -380,5 +380,6 @@ void Update() => SyncAllTradeScrollbars();
 - Extraer la lógica a un control reutilizable (p. ej. `ScrollbarBinder` o una clase
   `CustomVerticalScroll`) en `Scripts/UI/` para no duplicarla en cada pantalla.
 - Evaluar migrar otros listados largos (`Cartera`, `Messages`, `Trajectory`) a este patrón.
-- El `ScrollView` de picks del Market conserva los parches de `.unity-scroll-view__*`
-  (`Market.uss:1272-1282`); si crece, migrarlo a este patrón.
+- Los picks del Market usan también este patrón manual: viewport + content + track/thumb
+  (`Market.uxml` y `MarketController.cs`). Así no se salen del panel cuando hay más picks
+  de los que caben en la zona fija de `ACTIVOS ADICIONALES`.

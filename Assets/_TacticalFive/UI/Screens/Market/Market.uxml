@@ -110,32 +110,8 @@
                                 <ui:Label name="MyTeamSalary" class="market-trade-stat-value" text="$0M" />
                             </ui:VisualElement>
                             <ui:VisualElement class="market-trade-stat">
-                                <ui:Label class="market-trade-stat-label" text="CAP SPACE" />
+                                <ui:Label class="market-trade-stat-label" text="MARGEN SALARIAL" />
                                 <ui:Label name="MyTeamCapSpace" class="market-trade-stat-value market-trade-stat-value--green" text="$0M" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="market-trade-stat">
-                                <ui:Label class="market-trade-stat-label" text="TICKETS DE SALIDA" />
-                                <ui:Label name="MyTeamExits" class="market-trade-stat-value" text="0" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="market-trade-panel-section-title">
-                            <ui:Label class="market-trade-panel-section-text" text="JUGADORES DISPONIBLES" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="MyFilterTabs" class="market-trade-filter-tabs">
-                            <ui:Button name="MyFilterAll" class="market-trade-filter-btn market-trade-filter-btn--active" text="Todos" />
-                            <ui:Button name="MyFilterPG" class="market-trade-filter-btn" text="Base" />
-                            <ui:Button name="MyFilterSG" class="market-trade-filter-btn" text="Escolta" />
-                            <ui:Button name="MyFilterSF" class="market-trade-filter-btn" text="Alero" />
-                            <ui:Button name="MyFilterPF" class="market-trade-filter-btn" text="Ala-pívot" />
-                            <ui:Button name="MyFilterC" class="market-trade-filter-btn" text="Pívot" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="MyTableHeader" class="market-trade-table-header" />
-                        <ui:VisualElement class="market-trade-player-list-row">
-                            <ui:VisualElement name="MyPlayerViewport" class="market-trade-panel-body">
-                                <ui:VisualElement name="MyTeamBody" class="market-trade-panel-content" />
-                            </ui:VisualElement>
-                            <ui:VisualElement name="MyPlayerScrollTrack" class="market-trade-scrollbar">
-                                <ui:VisualElement name="MyPlayerScrollThumb" class="market-trade-scrollbar-thumb" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="market-trade-panel-section-title market-trade-picks-title-bar">
@@ -146,15 +122,37 @@
                                 <ui:Label class="market-trade-picks-icon" text="🏀" />
                                 <ui:VisualElement class="market-trade-picks-info">
                                     <ui:Label class="market-trade-picks-label" text="Rondas de draft" />
-                                    <ui:Label name="MyPicksCount" class="market-trade-picks-sub" text="Hasta 0 picks disponibles" />
+                                    <ui:Label name="MyPicksCount" class="market-trade-picks-sub" text="0 picks disponibles" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:ScrollView class="market-trade-picks-scroll"
-                                           horizontal-scrolling-enabled="false"
-                                           mode="Vertical"
-                                           style="max-height: 120px;">
-                                <ui:VisualElement name="MyPicksBody" class="market-trade-picks-content" />
-                            </ui:ScrollView>
+                            <ui:VisualElement class="market-trade-picks-list-row">
+                                <ui:VisualElement name="MyPicksViewport" class="market-trade-picks-scroll">
+                                    <ui:VisualElement name="MyPicksBody" class="market-trade-picks-content" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="MyPicksScrollTrack" class="market-trade-picks-scrollbar">
+                                    <ui:VisualElement name="MyPicksScrollThumb" class="market-trade-picks-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="market-trade-panel-section-title">
+                            <ui:Label class="market-trade-panel-section-text" text="JUGADORES DISPONIBLES" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="MyFilterTabs" class="market-trade-filter-tabs">
+                            <ui:Button name="MyFilterAll" class="market-trade-filter-btn market-trade-filter-btn--active" text="TODOS" />
+                            <ui:Button name="MyFilterPG" class="market-trade-filter-btn" text="BASE" />
+                            <ui:Button name="MyFilterSG" class="market-trade-filter-btn" text="ESCOLTA" />
+                            <ui:Button name="MyFilterSF" class="market-trade-filter-btn" text="ALERO" />
+                            <ui:Button name="MyFilterPF" class="market-trade-filter-btn" text="ALA-PÍVOT" />
+                            <ui:Button name="MyFilterC" class="market-trade-filter-btn" text="PÍVOT" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="MyTableHeader" class="market-trade-table-header" />
+                        <ui:VisualElement class="market-trade-player-list-row">
+                            <ui:VisualElement name="MyPlayerViewport" class="market-trade-panel-body">
+                                <ui:VisualElement name="MyTeamBody" class="market-trade-panel-content" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="MyPlayerScrollTrack" class="market-trade-scrollbar">
+                                <ui:VisualElement name="MyPlayerScrollThumb" class="market-trade-scrollbar-thumb" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -173,32 +171,8 @@
                                 <ui:Label name="OtherTeamSalary" class="market-trade-stat-value" text="$0M" />
                             </ui:VisualElement>
                             <ui:VisualElement class="market-trade-stat">
-                                <ui:Label class="market-trade-stat-label" text="CAP SPACE" />
+                                <ui:Label class="market-trade-stat-label" text="MARGEN SALARIAL" />
                                 <ui:Label name="OtherTeamCapSpace" class="market-trade-stat-value market-trade-stat-value--green" text="$0M" />
-                            </ui:VisualElement>
-                            <ui:VisualElement class="market-trade-stat">
-                                <ui:Label class="market-trade-stat-label" text="TICKETS DE SALIDA" />
-                                <ui:Label name="OtherTeamExits" class="market-trade-stat-value" text="0" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-                        <ui:VisualElement class="market-trade-panel-section-title">
-                            <ui:Label class="market-trade-panel-section-text" text="JUGADORES EN SU PLANTILLA" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="OtherFilterTabs" class="market-trade-filter-tabs">
-                            <ui:Button name="OtherFilterAll" class="market-trade-filter-btn market-trade-filter-btn--active" text="Todos" />
-                            <ui:Button name="OtherFilterPG" class="market-trade-filter-btn" text="Base" />
-                            <ui:Button name="OtherFilterSG" class="market-trade-filter-btn" text="Escolta" />
-                            <ui:Button name="OtherFilterSF" class="market-trade-filter-btn" text="Alero" />
-                            <ui:Button name="OtherFilterPF" class="market-trade-filter-btn" text="Ala-pívot" />
-                            <ui:Button name="OtherFilterC" class="market-trade-filter-btn" text="Pívot" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="OtherTableHeader" class="market-trade-table-header" />
-                        <ui:VisualElement class="market-trade-player-list-row">
-                            <ui:VisualElement name="OtherPlayerViewport" class="market-trade-panel-body">
-                                <ui:VisualElement name="OtherTeamBody" class="market-trade-panel-content" />
-                            </ui:VisualElement>
-                            <ui:VisualElement name="OtherPlayerScrollTrack" class="market-trade-scrollbar">
-                                <ui:VisualElement name="OtherPlayerScrollThumb" class="market-trade-scrollbar-thumb" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="market-trade-panel-section-title market-trade-picks-title-bar">
@@ -209,15 +183,37 @@
                                 <ui:Label class="market-trade-picks-icon" text="🏀" />
                                 <ui:VisualElement class="market-trade-picks-info">
                                     <ui:Label class="market-trade-picks-label" text="Rondas de draft" />
-                                    <ui:Label name="OtherPicksCount" class="market-trade-picks-sub" text="Hasta 0 picks disponibles" />
+                                    <ui:Label name="OtherPicksCount" class="market-trade-picks-sub" text="0 picks disponibles" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
-                            <ui:ScrollView class="market-trade-picks-scroll"
-                                           horizontal-scrolling-enabled="false"
-                                           mode="Vertical"
-                                           style="max-height: 120px;">
-                                <ui:VisualElement name="OtherPicksBody" class="market-trade-picks-content" />
-                            </ui:ScrollView>
+                            <ui:VisualElement class="market-trade-picks-list-row">
+                                <ui:VisualElement name="OtherPicksViewport" class="market-trade-picks-scroll">
+                                    <ui:VisualElement name="OtherPicksBody" class="market-trade-picks-content" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="OtherPicksScrollTrack" class="market-trade-picks-scrollbar">
+                                    <ui:VisualElement name="OtherPicksScrollThumb" class="market-trade-picks-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                        <ui:VisualElement class="market-trade-panel-section-title">
+                            <ui:Label class="market-trade-panel-section-text" text="JUGADORES EN SU PLANTILLA" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="OtherFilterTabs" class="market-trade-filter-tabs">
+                            <ui:Button name="OtherFilterAll" class="market-trade-filter-btn market-trade-filter-btn--active" text="TODOS" />
+                            <ui:Button name="OtherFilterPG" class="market-trade-filter-btn" text="BASE" />
+                            <ui:Button name="OtherFilterSG" class="market-trade-filter-btn" text="ESCOLTA" />
+                            <ui:Button name="OtherFilterSF" class="market-trade-filter-btn" text="ALERO" />
+                            <ui:Button name="OtherFilterPF" class="market-trade-filter-btn" text="ALA-PÍVOT" />
+                            <ui:Button name="OtherFilterC" class="market-trade-filter-btn" text="PÍVOT" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="OtherTableHeader" class="market-trade-table-header" />
+                        <ui:VisualElement class="market-trade-player-list-row">
+                            <ui:VisualElement name="OtherPlayerViewport" class="market-trade-panel-body">
+                                <ui:VisualElement name="OtherTeamBody" class="market-trade-panel-content" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="OtherPlayerScrollTrack" class="market-trade-scrollbar">
+                                <ui:VisualElement name="OtherPlayerScrollThumb" class="market-trade-scrollbar-thumb" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
@@ -283,11 +279,6 @@
                         </ui:VisualElement>
                     </ui:VisualElement>
 
-                </ui:VisualElement>
-
-                <!-- Bottom info bar -->
-                <ui:VisualElement class="market-trade-modal-footer">
-                    <ui:Label class="market-trade-footer-info" text="ℹ Puedes incluir hasta 3 jugadores, 5 picks y/o intercambiar contratos." />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

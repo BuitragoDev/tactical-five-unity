@@ -103,10 +103,8 @@ using System.Linq;
     private Button _btnConfirmTrade;
     private Label _myTeamSalary;
     private Label _myTeamCapSpace;
-    private Label _myTeamExits;
     private Label _otherTeamSalary;
     private Label _otherTeamCapSpace;
-    private Label _otherTeamExits;
     private Label _myPicksCount;
     private Label _otherPicksCount;
     private Label _summaryMyReceiveLabel;
@@ -126,6 +124,8 @@ using System.Linq;
     private Label _summaryNotes;
     private TradeScrollbar _myBar;
     private TradeScrollbar _otherBar;
+    private TradeScrollbar _myPicksBar;
+    private TradeScrollbar _otherPicksBar;
 
     class TradeScrollbar
     {
@@ -228,10 +228,8 @@ using System.Linq;
         _btnConfirmTrade = _root.Q<Button>("BtnConfirmTrade");
         _myTeamSalary = _root.Q<Label>("MyTeamSalary");
         _myTeamCapSpace = _root.Q<Label>("MyTeamCapSpace");
-        _myTeamExits = _root.Q<Label>("MyTeamExits");
         _otherTeamSalary = _root.Q<Label>("OtherTeamSalary");
         _otherTeamCapSpace = _root.Q<Label>("OtherTeamCapSpace");
-        _otherTeamExits = _root.Q<Label>("OtherTeamExits");
         _myPicksCount = _root.Q<Label>("MyPicksCount");
         _otherPicksCount = _root.Q<Label>("OtherPicksCount");
         _summaryMyReceiveLabel = _root.Q<Label>("SummaryMyReceiveLabel");
@@ -257,6 +255,14 @@ using System.Linq;
             _root.Q<VisualElement>("MyPlayerScrollTrack"), _root.Q<VisualElement>("MyPlayerScrollThumb"));
         _otherBar = BindTradeScrollbar(otherViewport, _otherTeamBody,
             _root.Q<VisualElement>("OtherPlayerScrollTrack"), _root.Q<VisualElement>("OtherPlayerScrollThumb"));
+        var myPicksViewport = _root.Q<VisualElement>("MyPicksViewport");
+        var otherPicksViewport = _root.Q<VisualElement>("OtherPicksViewport");
+        ConfigurePlayerScroll(myPicksViewport);
+        ConfigurePlayerScroll(otherPicksViewport);
+        _myPicksBar = BindTradeScrollbar(myPicksViewport, _myPicksBody,
+            _root.Q<VisualElement>("MyPicksScrollTrack"), _root.Q<VisualElement>("MyPicksScrollThumb"));
+        _otherPicksBar = BindTradeScrollbar(otherPicksViewport, _otherPicksBody,
+            _root.Q<VisualElement>("OtherPicksScrollTrack"), _root.Q<VisualElement>("OtherPicksScrollThumb"));
 
         _faPreviousPageBtn = _root.Q<Button>("BtnFAPreviousPage");
         _faNextPageBtn = _root.Q<Button>("BtnFANextPage");
@@ -408,6 +414,8 @@ using System.Linq;
     {
         if (_myBar != null) { _myBar.ScrollY = 0f; ApplyScroll(_myBar); }
         if (_otherBar != null) { _otherBar.ScrollY = 0f; ApplyScroll(_otherBar); }
+        if (_myPicksBar != null) { _myPicksBar.ScrollY = 0f; ApplyScroll(_myPicksBar); }
+        if (_otherPicksBar != null) { _otherPicksBar.ScrollY = 0f; ApplyScroll(_otherPicksBar); }
     }
 
     void SyncAllTradeScrollbars()
@@ -415,6 +423,8 @@ using System.Linq;
         if (_tradePanels == null || _tradePanels.resolvedStyle.display == DisplayStyle.None) return;
         ClampAndApply(_myBar);
         ClampAndApply(_otherBar);
+        ClampAndApply(_myPicksBar);
+        ClampAndApply(_otherPicksBar);
     }
 
     void Update()
@@ -757,8 +767,6 @@ using System.Linq;
         long otherPayroll = _otherPlayers.Sum(p => p.salary);
         long myCapSpace = salaryCap - myPayroll;
         long otherCapSpace = salaryCap - otherPayroll;
-        int myExits = _myPlayers.Count(p => p.contract_years <= 1);
-        int otherExits = _otherPlayers.Count(p => p.contract_years <= 1);
 
         if (_myTeamSalary != null) _myTeamSalary.text = $"${myPayroll / 1_000_000}M";
         if (_myTeamCapSpace != null)
@@ -767,7 +775,6 @@ using System.Linq;
             _myTeamCapSpace.style.color = new StyleColor(myCapSpace >= 0
                 ? new Color32(39, 174, 96, 255) : new Color32(192, 57, 43, 255));
         }
-        if (_myTeamExits != null) _myTeamExits.text = myExits.ToString();
         if (_otherTeamSalary != null) _otherTeamSalary.text = $"${otherPayroll / 1_000_000}M";
         if (_otherTeamCapSpace != null)
         {
@@ -775,13 +782,12 @@ using System.Linq;
             _otherTeamCapSpace.style.color = new StyleColor(otherCapSpace >= 0
                 ? new Color32(39, 174, 96, 255) : new Color32(192, 57, 43, 255));
         }
-        if (_otherTeamExits != null) _otherTeamExits.text = otherExits.ToString();
 
         // Picks counts
         int myPickCount = _myPicks?.Count ?? 0;
         int otherPickCount = _otherPicks?.Count ?? 0;
-        if (_myPicksCount != null) _myPicksCount.text = $"Hasta {myPickCount} pick{(myPickCount != 1 ? "s" : "")} disponible{(myPickCount != 1 ? "s" : "")}";
-        if (_otherPicksCount != null) _otherPicksCount.text = $"Hasta {otherPickCount} pick{(otherPickCount != 1 ? "s" : "")} disponible{(otherPickCount != 1 ? "s" : "")}";
+        if (_myPicksCount != null) _myPicksCount.text = $"{myPickCount} pick{(myPickCount != 1 ? "s" : "")} disponible{(myPickCount != 1 ? "s" : "")}";
+        if (_otherPicksCount != null) _otherPicksCount.text = $"{otherPickCount} pick{(otherPickCount != 1 ? "s" : "")} disponible{(otherPickCount != 1 ? "s" : "")}";
 
         // Set summary team logos and badges
         if (_summaryMyTeamBadge != null) _summaryMyTeamBadge.text = _myTeam.abbreviation ?? "TF";
@@ -799,7 +805,7 @@ using System.Linq;
 
         // Notes
         if (_summaryNotes != null)
-            _summaryNotes.text = "- Los equipos no pueden recibir más de 3 jugadores.\n- El salario enviado no puede superar el 125% del salario recibido.\n- El traspaso debe ser aprobado por ambas franquicias.";
+            _summaryNotes.text = "- El salario enviado no puede superar el 125% del salario recibido.\n- El traspaso debe ser aprobado por ambas franquicias.";
 
         // Reset filters
         _myFilterPos = "ALL";
@@ -1097,7 +1103,6 @@ using System.Linq;
             var lbl = new Label(baseLabel + suffix);
             lbl.AddToClassList("market-pick-label");
             lbl.style.color = new StyleColor(new Color32(236, 240, 241, 255));
-            lbl.style.fontSize = 16;
             lbl.style.unityTextAlign = TextAnchor.MiddleLeft;
             lbl.style.flexGrow = 1;
             lbl.style.minWidth = 70;
