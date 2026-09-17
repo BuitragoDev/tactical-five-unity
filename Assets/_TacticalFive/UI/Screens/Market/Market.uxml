@@ -89,7 +89,10 @@
                             <ui:Label class="market-trade-modal-subtitle" text="Selecciona los jugadores y activos que quieres incluir en la oferta." />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:Button name="BtnCloseTradeModal" class="market-trade-modal-close" text="×" />
+                    <ui:VisualElement class="market-trade-modal-header-actions">
+                        <ui:Button name="BtnConfirmTrade" class="market-trade-btn market-trade-btn--confirm" text="ENVIAR OFERTA" />
+                        <ui:Button name="BtnCloseTradeModal" class="market-trade-btn market-trade-btn--danger" text="CERRAR" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- 3-COLUMN CONTENT -->
@@ -226,7 +229,6 @@
                             <ui:VisualElement class="market-summary-receive-header">
                                 <ui:Label name="SummaryMyTeamBadge" class="market-summary-badge" text="TF" />
                                 <ui:Label name="SummaryMyReceiveLabel" class="market-summary-receive-title" text="EQUIPO RECIBE" />
-                                <ui:VisualElement name="SummaryMyTeamLogoSmall" class="market-summary-team-logo-sm" />
                             </ui:VisualElement>
                             <ui:VisualElement name="SummaryMyReceivedPlayers" class="market-summary-received-players" />
                         </ui:VisualElement>
@@ -236,7 +238,6 @@
                             <ui:VisualElement class="market-summary-receive-header market-summary-receive-header--other">
                                 <ui:Label name="SummaryOtherTeamBadge" class="market-summary-badge market-summary-badge--other" text="TF" />
                                 <ui:Label name="SummaryOtherReceiveLabel" class="market-summary-receive-title" text="EQUIPO RECIBE" />
-                                <ui:VisualElement name="SummaryOtherTeamLogoSmall" class="market-summary-team-logo-sm" />
                             </ui:VisualElement>
                             <ui:VisualElement name="SummaryOtherReceivedPlayers" class="market-summary-received-players" />
                         </ui:VisualElement>
@@ -255,28 +256,6 @@
 
                         <!-- Validation -->
                         <ui:VisualElement name="TradeStatus" class="market-trade-status" />
-
-                        <!-- Team logos -->
-                        <ui:VisualElement class="market-summary-teams-row">
-                            <ui:VisualElement name="SummaryMyTeamLogoMd" class="market-summary-team-logo-md" />
-                            <ui:Label class="market-summary-teams-arrow" text="⇄" />
-                            <ui:VisualElement name="SummaryOtherTeamLogoMd" class="market-summary-team-logo-md" />
-                        </ui:VisualElement>
-
-                        <!-- Notes -->
-                        <ui:VisualElement class="market-summary-notes">
-                            <ui:Label class="market-summary-notes-icon" text="ℹ" />
-                            <ui:VisualElement class="market-summary-notes-text">
-                                <ui:Label class="market-summary-notes-title" text="PUNTOS A TENER EN CUENTA" />
-                                <ui:Label name="SummaryNotes" class="market-summary-notes-body" text="" />
-                            </ui:VisualElement>
-                        </ui:VisualElement>
-
-                        <!-- Action buttons -->
-                        <ui:VisualElement class="market-trade-actions">
-                            <ui:Button name="BtnCancelTrade" class="market-trade-btn market-trade-btn--cancel" text="CANCELAR" />
-                            <ui:Button name="BtnConfirmTrade" class="market-trade-btn market-trade-btn--confirm" text="ENVIAR OFERTA" />
-                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>
