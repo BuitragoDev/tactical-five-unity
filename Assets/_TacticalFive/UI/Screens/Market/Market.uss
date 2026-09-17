@@ -1846,10 +1846,10 @@
     justify-content: center;
 }
 .trade-box {
-    width: 920px;
+    width: 1070px;
     background-color: rgb(8, 12, 30);
-    border-width: 1px;
-    border-color: rgba(0, 140, 210, 0.40);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
     border-radius: 12px;
     flex-direction: column;
     overflow: hidden;
@@ -1859,9 +1859,9 @@
     flex-direction: row;
     align-items: center;
     padding: 20px 28px;
-    background-color: rgba(10, 18, 45, 0.80);
+    background-color: rgba(39, 174, 96, 0.12);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(0, 140, 210, 0.25);
+    border-bottom-color: rgba(39, 174, 96, 0.30);
 }
 .trade-check-icon {
     width: 56px;
@@ -1893,7 +1893,7 @@
 .trade-subtitle {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
-    color: rgb(122, 160, 210);
+    color: rgb(255, 255, 255);
     margin-top: 4px;
 }
 .trade-close-x {
@@ -1941,8 +1941,8 @@
     border-bottom-color: rgba(0, 140, 210, 0.20);
 }
 .trade-team-logo-lg {
-    width: 48px;
-    height: 48px;
+    width: 64px;
+    height: 64px;
     margin-right: 14px;
     flex-shrink: 0;
     background-size: contain;
@@ -1954,13 +1954,13 @@
 }
 .trade-team-name-lg {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 24px;
+    font-size: 32px;
     color: rgb(255, 255, 255);
     letter-spacing: 1px;
 }
 .trade-team-role {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(100, 150, 210);
     margin-top: 2px;
 }
@@ -2007,11 +2007,11 @@
     border-bottom-width: 0;
 }
 .trade-player-photo {
-    width: 32px;
-    height: 32px;
+    width: 50px;
+    height: 50px;
     margin-right: 10px;
     flex-shrink: 0;
-    border-radius: 16px;
+    border-radius: 25px;
     background-color: rgba(0, 140, 210, 0.15);
     background-size: cover;
     background-repeat: no-repeat;
@@ -2024,26 +2024,20 @@
 }
 .trade-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(230, 238, 255);
-}
-.trade-player-team {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 12px;
-    color: rgb(80, 130, 190);
-    margin-top: 1px;
 }
 .trade-player-pos {
     width: 50px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 160, 210);
     -unity-text-align: middle-center;
 }
 .trade-player-type {
     width: 80px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(100, 150, 210);
     -unity-text-align: middle-center;
 }
@@ -2070,20 +2064,20 @@
 .trade-pick-label {
     flex-grow: 1;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(160, 190, 230);
 }
 .trade-pick-pos {
     width: 50px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(80, 110, 150);
     -unity-text-align: middle-center;
 }
 .trade-pick-type {
     width: 80px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(0, 160, 220);
     -unity-text-align: middle-center;
 }
@@ -2124,19 +2118,19 @@
 }
 .trade-info-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 16px;
     color: rgb(80, 130, 190);
     letter-spacing: 1px;
 }
 .trade-info-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(220, 230, 255);
     margin-top: 2px;
 }
 .trade-info-status {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 15px;
+    font-size: 18px;
     color: rgb(39, 174, 96);
     margin-top: 2px;
 }

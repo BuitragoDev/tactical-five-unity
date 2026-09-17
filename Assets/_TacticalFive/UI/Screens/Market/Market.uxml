@@ -353,7 +353,7 @@
                             <ui:VisualElement name="TradeSuccessMyTeamLogo" class="trade-team-logo-lg" />
                             <ui:VisualElement class="trade-team-info-col">
                                 <ui:Label name="TradeSuccessMyTeamName" class="trade-team-name-lg" text="" />
-                                <ui:Label class="trade-team-role" text="Equipo que envía" />
+                                <ui:Label class="trade-team-role" text="RECIBE" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="trade-table">
@@ -375,7 +375,7 @@
                             <ui:VisualElement name="TradeSuccessOtherTeamLogo" class="trade-team-logo-lg" />
                             <ui:VisualElement class="trade-team-info-col">
                                 <ui:Label name="TradeSuccessOtherTeamName" class="trade-team-name-lg" text="" />
-                                <ui:Label class="trade-team-role" text="Equipo que recibe" />
+                                <ui:Label class="trade-team-role" text="RECIBE" />
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="trade-table">

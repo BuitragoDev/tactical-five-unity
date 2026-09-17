@@ -2171,10 +2171,6 @@ using System.Linq;
         var nameLbl = new Label($"{p.first_name} {p.last_name}");
         nameLbl.AddToClassList("trade-player-name");
         nameCol.Add(nameLbl);
-        string teamName = p.team_id > 0 && teamsLookup.TryGetValue(p.team_id, out var t) ? t.name : "Agente Libre";
-        var teamLbl = new Label(teamName);
-        teamLbl.AddToClassList("trade-player-team");
-        nameCol.Add(teamLbl);
         row.Add(nameCol);
 
         // Position
