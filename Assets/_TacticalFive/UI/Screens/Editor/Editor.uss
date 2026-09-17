@@ -548,11 +548,23 @@
     border-radius: 8px;
     padding: 12px 48px;
     min-width: 200px;
+    -unity-text-align: middle-center;
     cursor: pointer;
 }
 
 .editor-modal-btn:hover {
     background-color: rgba(39, 174, 96, 0.25);
     color: rgb(150, 220, 180);
+}
+
+.editor-modal-btn--danger {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+
+.editor-modal-btn--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 

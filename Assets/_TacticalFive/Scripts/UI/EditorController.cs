@@ -1116,6 +1116,7 @@ public class EditorController : UIScreenController
         var closeBtn = new Button();
         closeBtn.clicked += () => { PlayClick(); CloseToast(); };
         closeBtn.AddToClassList("editor-modal-btn");
+        if (isError) closeBtn.AddToClassList("editor-modal-btn--danger");
         closeBtn.text = "CERRAR";
         CursorManager.Instance?.RegisterHandCursor(closeBtn);
         actions.Add(closeBtn);
