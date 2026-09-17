@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
     public class MarketController : UIScreenController
 {
+    private const int MAX_TRADE_ELEMENTS = 5;
     protected override GameScreen ScreenId => GameScreen.Market;
     private Button _btnNegotiate;
     private VisualElement _tradePanels;
@@ -1122,7 +1123,12 @@ using System.Linq;
                 if (selectedSet.Contains(pickId))
                     selectedSet.Remove(pickId);
                 else
+                {
+                    var mySet = isMyTeam ? _selectedMyPlayers : _selectedOtherPlayers;
+                    var myPicks = isMyTeam ? _selectedMyPicks : _selectedOtherPicks;
+                    if (mySet.Count + myPicks.Count >= MAX_TRADE_ELEMENTS) return;
                     selectedSet.Add(pickId);
+                }
                 row.EnableInClassList("selected", selectedSet.Contains(pickId));
                 if (dd != null)
                 {
@@ -1214,6 +1220,10 @@ using System.Linq;
             }
             else
             {
+                bool myPk = selectedSet == _selectedMyPicks;
+                var mySet = myPk ? _selectedMyPlayers : _selectedOtherPlayers;
+                var myPicks = myPk ? _selectedMyPicks : _selectedOtherPicks;
+                if (mySet.Count + myPicks.Count >= MAX_TRADE_ELEMENTS) return;
                 selectedSet.Add(pk.id);
                 row.EnableInClassList("selected", true);
                 OpenDropdown(dd);
@@ -1439,7 +1449,12 @@ using System.Linq;
             if (selectedSet.Contains(playerId))
                 selectedSet.Remove(playerId);
             else
+            {
+                var mySet = myTeam ? _selectedMyPlayers : _selectedOtherPlayers;
+                var myPicks = myTeam ? _selectedMyPicks : _selectedOtherPicks;
+                if (mySet.Count + myPicks.Count >= MAX_TRADE_ELEMENTS) return;
                 selectedSet.Add(playerId);
+            }
             row.EnableInClassList("selected", selectedSet.Contains(playerId));
             UpdateSummary();
             CheckTradeStatus();
