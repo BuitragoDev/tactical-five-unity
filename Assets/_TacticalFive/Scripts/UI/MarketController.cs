@@ -1085,11 +1085,13 @@ using System.Linq;
             return;
         }
 
-        var teamsLookup = DatabaseManager.Instance.GetAllTeams()
-            .ToDictionary(t => t.id, t => t.abbreviation);
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var teamsNameLookup = allTeams.ToDictionary(t => t.id, t => t.name);
+        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons()
+            .ToDictionary(s => s.id, s => s.year_start);
 
         foreach (var pk in picks.OrderBy(p => p.round)
-                                 .ThenBy(p => teamsLookup.TryGetValue(p.original_team_id, out var abbr) ? abbr : "ZZZ"))
+                                 .ThenBy(p => teamsNameLookup.TryGetValue(p.original_team_id, out var tn) ? tn : "ZZZ"))
         {
             var row = new VisualElement();
             row.AddToClassList("market-pick-row");
@@ -1097,8 +1099,9 @@ using System.Linq;
             row.userData = pk;
 
             int pickId = pk.id;
-            string abbr = teamsLookup.TryGetValue(pk.original_team_id, out var a) ? a : "???";
-            string baseLabel = $"R{pk.round} {abbr}";
+            string teamName = teamsNameLookup.TryGetValue(pk.original_team_id, out var tn2) ? tn2 : "???";
+            int year = seasonsLookup.TryGetValue(pk.season_id, out var ys) ? ys : 0;
+            string baseLabel = $"RONDA {pk.round}  {year}  {teamName}";
             string suffix = pk.protected_from > 0 ? $" (PROT top-{pk.protected_from})" : (pk.is_swap == 1 ? " (SWAP)" : "");
             var lbl = new Label(baseLabel + suffix);
             lbl.AddToClassList("market-pick-label");

@@ -1146,6 +1146,12 @@ public partial class DatabaseManager : MonoBehaviour
         Debug.Log($"[DB] Dorsales de veteranos activos sembrados en franquicias históricas.");
     }
 
+    public List<SeasonData> GetAllSeasons()
+    {
+        if (!EnsureDb()) return new List<SeasonData>();
+        return _db.Table<SeasonData>().ToList();
+    }
+
     public List<HallOfFameData> GetHoFMembers()
     {
         if (!EnsureDb()) return new List<HallOfFameData>();
