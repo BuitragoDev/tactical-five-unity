@@ -1185,12 +1185,16 @@ public class EndSeasonController : UIScreenController
         box.AddToClassList("lottery-box");
         _lotteryOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("modal-header");
+        box.Add(header);
+
         var title = new Label("LOTERIA DEL DRAFT");
-        title.AddToClassList("lottery-title");
-        box.Add(title);
+        title.AddToClassList("modal-title");
+        header.Add(title);
 
         var subtitle = new Label($"Probabilidades para el Draft {_season.year_end}");
-        subtitle.AddToClassList("lottery-subtitle");
+        subtitle.AddToClassList("modal-subtitle");
         box.Add(subtitle);
 
         var teams = BuildLotteryOrder();
@@ -1212,15 +1216,19 @@ public class EndSeasonController : UIScreenController
             target.Add(BuildLotteryRow(teams[i].pickNumber, teams[i].team, teams[i].pct, teams[i].pctNum));
         }
 
+        var actions = new VisualElement();
+        actions.AddToClassList("modal-actions");
+        box.Add(actions);
+
         var closeBtn = new Button();
         closeBtn.text = "CERRAR";
-        closeBtn.AddToClassList("lottery-close-btn");
+        closeBtn.AddToClassList("modal-close-btn");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _lotteryOverlay.style.display = DisplayStyle.None;
         });
-        box.Add(closeBtn);
+        actions.Add(closeBtn);
         CursorManager.Instance?.RegisterHandCursor(closeBtn);
     }
 
