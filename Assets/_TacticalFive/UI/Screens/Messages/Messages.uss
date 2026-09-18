@@ -70,7 +70,7 @@
 
 .messages-list-col {
     flex-direction: column;
-    flex-shrink: 0;
+    flex-grow: 1;
     width: 875px;
     min-height: 0;
 }
@@ -341,12 +341,6 @@
 }
 
 /* ── SCROLLBAR (blue) ── */
-
-.messages-list-col {
-    flex-direction: column;
-    flex-grow: 1;
-    min-height: 0;
-}
 
 .messages-scroll-row {
     flex-direction: row;
