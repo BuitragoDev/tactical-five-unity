@@ -2522,22 +2522,22 @@
     border-color: rgb(85, 102, 119);
 }
 
-.renew-toggle-btn--team-active,
-.renew-toggle-btn--team-active:hover {
+.market-fa-modal-body .renew-toggle-btn--team-active,
+.market-fa-modal-body .renew-toggle-btn--team-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     background-color: rgba(39, 174, 96, 0.15);
 }
 
-.renew-toggle-btn--player-active,
-.renew-toggle-btn--player-active:hover {
+.market-fa-modal-body .renew-toggle-btn--player-active,
+.market-fa-modal-body .renew-toggle-btn--player-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     background-color: rgba(39, 174, 96, 0.15);
 }
 
-.renew-toggle-btn--tw-active,
-.renew-toggle-btn--tw-active:hover {
+.market-fa-modal-body .renew-toggle-btn--tw-active,
+.market-fa-modal-body .renew-toggle-btn--tw-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
     background-color: rgba(39, 174, 96, 0.15);
