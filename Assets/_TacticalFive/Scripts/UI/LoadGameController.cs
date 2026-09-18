@@ -77,19 +77,9 @@ public class LoadGameController : UIScreenController
 
         _btnDeleteYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmDelete(); });
         _btnDeleteNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseDeleteModal(); });
-        _deleteModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _deleteModalOverlay)
-                { PlayClick(); CloseDeleteModal(); }
-        });
 
         _root.focusable = true;
         _root.Focus();
-        _root.RegisterCallback<KeyDownEvent>(e =>
-        {
-            if (e.keyCode == KeyCode.Escape && _deleteModalOverlay?.style.display == DisplayStyle.Flex)
-                CloseDeleteModal();
-        });
 
         if (CursorManager.Instance != null)
         {
