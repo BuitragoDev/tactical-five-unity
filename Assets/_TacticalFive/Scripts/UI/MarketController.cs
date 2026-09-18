@@ -86,13 +86,10 @@ using System.Linq;
     private List<DraftPickData> _otherPicks;
     private List<PlayerData> _freeAgents = new();
     private List<PlayerData> _currentFARows = new();
-    private int _faCurrentPage;
-    private const int FA_PAGE_SIZE = 7;
-    private Button _faPreviousPageBtn;
-    private Button _faNextPageBtn;
-    private Button _faFirstPageBtn;
-    private Button _faLastPageBtn;
-    private Label _faPageLabel;
+
+    // ── FA Scrollbar ──
+    private VisualElement _faViewport, _faScrollTrack, _faScrollThumb;
+    private TradeScrollbar _faScrollBar;
     private int _myTotalRosterCount;
     private int _otherTotalRosterCount;
     private TeamData _selectedTeam;
@@ -304,20 +301,10 @@ using System.Linq;
         _otherPicksBar = BindTradeScrollbar(otherPicksViewport, _otherPicksBody,
             _root.Q<VisualElement>("OtherPicksScrollTrack"), _root.Q<VisualElement>("OtherPicksScrollThumb"));
 
-        _faPreviousPageBtn = _root.Q<Button>("BtnFAPreviousPage");
-        _faNextPageBtn = _root.Q<Button>("BtnFANextPage");
-        _faFirstPageBtn = _root.Q<Button>("BtnFAFirstPage");
-        _faLastPageBtn = _root.Q<Button>("BtnFALastPage");
-        _faPageLabel = _root.Q<Label>("FAPageLabel");
-
-        var faPrevSprite = Resources.Load<Sprite>("Icons/left_arrow");
-        var faNextSprite = Resources.Load<Sprite>("Icons/right_arrow");
-        SetFAPageIcon(_root.Q<Image>("FAPreviousPageIcon"), faPrevSprite);
-        SetFAPageIcon(_root.Q<Image>("FANextPageIcon"), faNextSprite);
-        SetFAPageIcon(_root.Q<Image>("FAFirstPageIcon1"), faPrevSprite);
-        SetFAPageIcon(_root.Q<Image>("FAFirstPageIcon2"), faPrevSprite);
-        SetFAPageIcon(_root.Q<Image>("FALastPageIcon1"), faNextSprite);
-        SetFAPageIcon(_root.Q<Image>("FALastPageIcon2"), faNextSprite);
+        _faViewport = _root.Q<VisualElement>("FAViewport");
+        _faScrollTrack = _root.Q<VisualElement>("FAScrollTrack");
+        _faScrollThumb = _root.Q<VisualElement>("FAScrollThumb");
+        if (_faViewport != null) _faViewport.style.overflow = Overflow.Hidden;
 
         if (_tradeSuccessOverlay != null) { _tradeSuccessOverlay.style.display = DisplayStyle.None; }
         if (_tradeSuccessBox != null) { _tradeSuccessBox.style.display = DisplayStyle.None; }
@@ -534,11 +521,6 @@ using System.Linq;
         _faTeamOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("team"); });
         _faPlayerOption?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFAOption("player"); });
         _faTwoWayToggle?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ToggleFATwoWay(); });
-
-        _faPreviousPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(-1); });
-        _faNextPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(1); });
-        _faFirstPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(-10); });
-        _faLastPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangeFAPage(10); });
 
         // Trade modal buttons
         _btnConfirmTrade?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnConfirmTrade(); });
@@ -2248,12 +2230,6 @@ using System.Linq;
     //  FREE AGENTS
     // ═══════════════════════════════════════════
 
-    void SetFAPageIcon(Image image, Sprite sprite)
-    {
-        if (image != null && sprite != null)
-            image.style.backgroundImage = new StyleBackground(sprite);
-    }
-
     void BuildFreeAgents()
     {
         _currentFARows = _freeAgents?.Where(p =>
@@ -2262,14 +2238,6 @@ using System.Linq;
             return cd <= 0 || _season == null || _season.current_game_day >= cd;
         }).ToList() ?? new List<PlayerData>();
 
-        _faCurrentPage = 0;
-        RenderFAPage();
-    }
-
-    void ChangeFAPage(int direction)
-    {
-        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentFARows.Count / (float)FA_PAGE_SIZE));
-        _faCurrentPage = Mathf.Clamp(_faCurrentPage + direction, 0, pageCount - 1);
         RenderFAPage();
     }
 
@@ -2277,15 +2245,7 @@ using System.Linq;
     {
         _freeAgentsBody.Clear();
 
-        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentFARows.Count / (float)FA_PAGE_SIZE));
-        _faCurrentPage = Mathf.Clamp(_faCurrentPage, 0, pageCount - 1);
-
-        var pageRows = _currentFARows
-            .Skip(_faCurrentPage * FA_PAGE_SIZE)
-            .Take(FA_PAGE_SIZE)
-            .ToList();
-
-        if (pageRows.Count == 0)
+        if (_currentFARows.Count == 0)
         {
             var empty = new Label("No hay agentes libres disponibles");
             empty.AddToClassList("market-empty-fa");
@@ -2294,16 +2254,18 @@ using System.Linq;
         else
         {
             var pendingSet = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
-            foreach (var player in pageRows)
+            foreach (var player in _currentFARows)
                 BuildFARow(player, pendingSet);
         }
 
-        if (_faPageLabel != null)
-            _faPageLabel.text = $"{_faCurrentPage + 1} de {pageCount}";
-        _faPreviousPageBtn?.SetEnabled(_faCurrentPage > 0);
-        _faNextPageBtn?.SetEnabled(_faCurrentPage < pageCount - 1);
-        _faFirstPageBtn?.SetEnabled(_faCurrentPage > 0);
-        _faLastPageBtn?.SetEnabled(_faCurrentPage < pageCount - 1);
+        if (_faScrollBar != null) { _faScrollBar.ScrollY = 0f; ApplyScroll(_faScrollBar); }
+        BindFAScrollbar();
+    }
+
+    void BindFAScrollbar()
+    {
+        if (_faViewport == null || _faScrollTrack == null || _faScrollThumb == null) return;
+        _faScrollBar = BindTradeScrollbar(_faViewport, _freeAgentsBody, _faScrollTrack, _faScrollThumb);
     }
 
     void BuildFARow(PlayerData player, HashSet<int> pendingSet)

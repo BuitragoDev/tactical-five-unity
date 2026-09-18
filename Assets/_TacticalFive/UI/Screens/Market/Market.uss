@@ -2553,65 +2553,47 @@
     -unity-text-align: middle-center;
 }
 
-/* ══ PAGINACIÓN FA (10 resultados por página) ══ */
-.market-pagination {
+/* ══ FA SCROLLBAR (gold) ══ */
+
+.market-fa-scroll-row {
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    min-height: 48px;
-    padding: 6px 24px;
-    background-color: rgb(17, 24, 34);
-    border-top-width: 1px;
-    border-top-color: rgb(42, 51, 71);
+    flex-grow: 1;
+    min-height: 0;
 }
 
-.market-page-btn {
-    width: 38px;
-    height: 32px;
-    padding: 6px;
-    margin: 0 12px;
-    align-items: center;
-    justify-content: center;
-    color: rgb(122, 138, 170);
-    background-color: rgb(22, 26, 36);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
+.market-fa-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.market-fa-content {
+    flex-shrink: 0;
+}
+
+.market-fa-scrollbar {
+    width: 12px;
+    min-width: 12px;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-left: 4px;
+    background-color: rgba(25, 18, 8, 0.92);
+    border-left-width: 1px;
+    border-left-color: rgba(120, 95, 30, 0.35);
+    position: relative;
+}
+
+.market-fa-scrollbar-thumb {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 0;
+    height: 40px;
+    background-color: rgb(160, 128, 30);
     border-radius: 3px;
-    -unity-text-align: middle-center;
 }
-
-.market-page-btn:hover {
-    color: rgb(212, 160, 23);
-    border-color: rgb(212, 160, 23);
-}
-
-.market-page-jump-btn {
-    width: 64px;
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
-
-.market-page-icon {
-    width: 18px;
-    height: 18px;
-    margin: 0;
-    flex-shrink: 0;
-    -unity-background-scale-mode: scale-to-fit;
-}
-
-.market-page-btn:disabled {
-    color: rgb(55, 65, 84);
-    background-color: rgb(17, 24, 34);
-    border-color: rgb(28, 33, 48);
-}
-
-.market-page-label {
-    min-width: 80px;
-    height: 24px;
-    flex-shrink: 0;
-    font-size: 16px;
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    color: rgb(208, 216, 232);
-    -unity-text-align: middle-center;
+.market-fa-scrollbar:hover .market-fa-scrollbar-thumb {
+    background-color: rgb(212, 160, 23);
 }
