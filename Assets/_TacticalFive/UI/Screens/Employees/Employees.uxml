@@ -122,13 +122,17 @@
         <!-- ══ MODAL CONTRATAR ══ -->
         <ui:VisualElement name="HireOverlay" class="hire-modal-overlay">
             <ui:VisualElement name="HireBox" class="hire-modal-box">
-                <ui:Label name="HireTitle" class="hire-modal-title" text="CONTRATAR EMPLEADO" />
-                <ui:Label name="HireText1" class="hire-modal-text" text="" />
-                <ui:Label name="HireText2" class="hire-modal-text" text="" />
-                <ui:Label name="HireText3" class="hire-modal-text" text="" />
-                <ui:VisualElement class="hire-modal-buttons">
-                    <ui:Button name="BtnHireCancel"  class="btn-modal-cancel" text="CANCELAR" />
-                    <ui:Button name="BtnHireConfirm" class="btn-modal-confirm" text="CONTRATAR" />
+                <ui:VisualElement class="hire-modal-header">
+                    <ui:Label name="HireTitle" class="hire-modal-title" text="CONTRATAR EMPLEADO" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hire-modal-body">
+                    <ui:Label name="HireText1" class="hire-modal-text" text="" />
+                    <ui:Label name="HireText2" class="hire-modal-text" text="" />
+                    <ui:Label name="HireText3" class="hire-modal-text" text="" />
+                    <ui:VisualElement class="hire-modal-buttons">
+                        <ui:Button name="BtnHireCancel"  class="btn-modal-cancel" text="CANCELAR" />
+                        <ui:Button name="BtnHireConfirm" class="btn-modal-confirm" text="CONTRATAR" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -136,10 +140,14 @@
         <!-- ══ MODAL RESULTADO ══ -->
         <ui:VisualElement name="HireResultOverlay" class="hire-modal-overlay">
             <ui:VisualElement name="HireResultBox" class="hire-modal-box">
-                <ui:Label name="HireResultTitle" class="hire-modal-title" text="" />
-                <ui:Label name="HireResultText"  class="hire-modal-text"  text="" />
-                <ui:VisualElement class="hire-modal-buttons">
-                    <ui:Button name="BtnHireResultOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                <ui:VisualElement class="hire-modal-header">
+                    <ui:Label name="HireResultTitle" class="hire-modal-title" text="" />
+                </ui:VisualElement>
+                <ui:VisualElement class="hire-modal-body">
+                    <ui:Label name="HireResultText"  class="hire-modal-text"  text="" />
+                    <ui:VisualElement class="hire-modal-buttons">
+                        <ui:Button name="BtnHireResultOk" class="btn-modal-cancel" text="ENTENDIDO" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
