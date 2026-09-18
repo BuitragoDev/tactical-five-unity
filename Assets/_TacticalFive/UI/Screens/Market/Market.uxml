@@ -288,7 +288,6 @@
                             <ui:Label name="FAText1" class="market-fa-modal-subtitle" text="" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:Button name="BtnCloseFA" class="market-modal-close" text="×" />
                 </ui:VisualElement>
                 <ui:VisualElement class="market-fa-modal-body">
                 <ui:VisualElement name="FAFormRowSalary" class="renew-form-row">
