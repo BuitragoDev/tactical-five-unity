@@ -79,10 +79,14 @@
                     <ui:Label class="league-injured-col-injury" text="LESIÓN" />
                     <ui:Label class="league-injured-col-days" text="DÍAS" />
                 </ui:VisualElement>
-                <ui:VisualElement name="LeagueInjuredScrollWrapper" class="league-injured-scroll-wrapper">
-                    <ui:VisualElement name="LeagueInjuredList" class="league-injured-list" />
+                <ui:VisualElement class="league-injured-list-row">
+                    <ui:VisualElement name="LeagueInjuredScrollWrapper" class="league-injured-scroll-wrapper">
+                        <ui:VisualElement name="LeagueInjuredList" class="league-injured-list" />
+                    </ui:VisualElement>
+                    <ui:VisualElement name="LeagueInjuredScrollTrack" class="league-injured-scrollbar">
+                        <ui:VisualElement name="LeagueInjuredScrollThumb" class="league-injured-scrollbar-thumb" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement name="LeagueInjuredPaginator" class="injured-paginator league-injured-paginator" />
                 <ui:Button name="BtnLeagueInjuredClose" class="modal-close" text="CERRAR" />
             </ui:VisualElement>
         </ui:VisualElement>
