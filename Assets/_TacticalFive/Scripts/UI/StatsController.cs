@@ -63,17 +63,14 @@ using System.Linq;
     private List<Button> _statTabs = new();
     private List<Button> _filterBtns = new();
     private List<Button> _modeBtns = new();
-    private Button _previousPageBtn;
-    private Button _nextPageBtn;
-    private Button _firstPageBtn;
-    private Button _lastPageBtn;
-    private Label _pageLabel;
     private List<StatRow> _currentRows = new();
-    private int _currentPage;
     private string _pagedStat = "";
     private bool _pagedAverages;
     private List<PlayerData> _pagedAllPlayers = new();
-    private const int PAGE_SIZE = 9;
+
+    // ── Scrollbar ──
+    private VisualElement _statsViewport, _statsScrollTrack, _statsScrollThumb;
+    private ScrollBar _statsBar;
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -100,28 +97,9 @@ using System.Linq;
             if (btn != null) _statTabs.Add(btn);
         }
 
-        _previousPageBtn = _root.Q<Button>("BtnPreviousPage");
-        _nextPageBtn = _root.Q<Button>("BtnNextPage");
-        _firstPageBtn = _root.Q<Button>("BtnFirstPage");
-        _lastPageBtn = _root.Q<Button>("BtnLastPage");
-        _pageLabel = _root.Q<Label>("PageLabel");
-
-        var previousIcon = _root.Q<Image>("PreviousPageIcon");
-        var nextIcon = _root.Q<Image>("NextPageIcon");
-        var previousSprite = Resources.Load<Sprite>("Icons/left_arrow");
-        var nextSprite = Resources.Load<Sprite>("Icons/right_arrow");
-        SetPageIcon(previousIcon, previousSprite);
-        SetPageIcon(nextIcon, nextSprite);
-        SetPageIcon(_root.Q<Image>("FirstPageIcon1"), previousSprite);
-        SetPageIcon(_root.Q<Image>("FirstPageIcon2"), previousSprite);
-        SetPageIcon(_root.Q<Image>("LastPageIcon1"), nextSprite);
-        SetPageIcon(_root.Q<Image>("LastPageIcon2"), nextSprite);
-    }
-
-    void SetPageIcon(Image image, Sprite sprite)
-    {
-        if (image != null && sprite != null)
-            image.style.backgroundImage = new StyleBackground(sprite);
+        _statsViewport = _root.Q<VisualElement>("StatsViewport");
+        _statsScrollTrack = _root.Q<VisualElement>("StatsScrollTrack");
+        _statsScrollThumb = _root.Q<VisualElement>("StatsScrollThumb");
     }
     protected override void LoadData()
     {
@@ -169,10 +147,6 @@ using System.Linq;
         _modeBtns.Add(btnAverages);
         btnTotals?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetDisplay("totals"); });
         btnAverages?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetDisplay("averages"); });
-        _previousPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(-1); });
-        _nextPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(1); });
-        _firstPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(-10); });
-        _lastPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(10); });
     }
     protected override void Refresh()
     {
@@ -432,19 +406,11 @@ using System.Linq;
         _pagedStat = stat;
         _pagedAverages = useAverages;
         _pagedAllPlayers = allPlayers;
-        _currentPage = 0;
 
         // Build dynamic header
         BuildDynamicHeader(stat, useAverages);
 
-        // Render current page
-        RenderCurrentPage();
-    }
-
-    void ChangePage(int direction)
-    {
-        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentRows.Count / (float)PAGE_SIZE));
-        _currentPage = Mathf.Clamp(_currentPage + direction, 0, pageCount - 1);
+        // Render all items
         RenderCurrentPage();
     }
 
@@ -452,22 +418,10 @@ using System.Linq;
     {
         if (_statsBody == null) return;
 
-        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_currentRows.Count / (float)PAGE_SIZE));
-        _currentPage = Mathf.Clamp(_currentPage, 0, pageCount - 1);
-        var pageRows = _currentRows
-            .Skip(_currentPage * PAGE_SIZE)
-            .Take(PAGE_SIZE)
-            .ToList();
-
         _statsBody.Clear();
-        RenderDynamicRows(pageRows, _pagedStat, _pagedAverages, _pagedAllPlayers, _currentPage * PAGE_SIZE);
+        RenderDynamicRows(_currentRows, _pagedStat, _pagedAverages, _pagedAllPlayers, 0);
 
-        if (_pageLabel != null)
-            _pageLabel.text = $"{_currentPage + 1} de {pageCount}";
-        _previousPageBtn?.SetEnabled(_currentPage > 0);
-        _nextPageBtn?.SetEnabled(_currentPage < pageCount - 1);
-        _firstPageBtn?.SetEnabled(_currentPage > 0);
-        _lastPageBtn?.SetEnabled(_currentPage < pageCount - 1);
+        BindStatsScrollBar();
     }
 
     // ═══════════════════════════════════════════════════════
@@ -1035,6 +989,119 @@ using System.Linq;
             emptyLbl.text = "No hay datos estadísticos disponibles todavía.\nJuega partidos para ver estadísticas.";
             empty.Add(emptyLbl);
             _statsBody.Add(empty);
+        }
+    }
+
+    // ── ScrollBar ──
+    private ScrollBar _scrollBar;
+
+    void BindStatsScrollBar()
+    {
+        if (_statsViewport == null || _statsScrollTrack == null || _statsScrollThumb == null) return;
+        _scrollBar?.Dispose();
+        _scrollBar = new ScrollBar(_statsViewport, _statsScrollTrack, _statsScrollThumb);
+    }
+
+    private class ScrollBar : IDisposable
+    {
+        readonly VisualElement viewport, track, thumb;
+        float scrollRange, thumbMax;
+        bool dragging;
+
+        public ScrollBar(VisualElement vp, VisualElement tr, VisualElement th)
+        {
+            viewport = vp; track = tr; thumb = th;
+            Recalc();
+            UpdateThumb();
+            track.RegisterCallback<MouseDownEvent>(OnTrackClick);
+            thumb.RegisterCallback<MouseDownEvent>(OnThumbDown);
+            viewport.RegisterCallback<WheelEvent>(OnWheel);
+            thumb.RegisterCallback<GeometryChangedEvent>(OnGeo);
+        }
+
+        void OnGeo(GeometryChangedEvent _) { Recalc(); UpdateThumb(); }
+
+        void Recalc()
+        {
+            var content = viewport.contentContainer;
+            float ch = content.worldBound.height;
+            float vh = viewport.worldBound.height;
+            scrollRange = Mathf.Max(0f, ch - vh);
+            float th = scrollRange > 0f ? Mathf.Max(36f, vh * (vh / ch)) : track.worldBound.height;
+            thumbMax = Mathf.Max(1f, track.worldBound.height - th);
+            thumb.style.height = th;
+        }
+
+        void UpdateThumb()
+        {
+            if (scrollRange <= 0f) { thumb.style.top = 0; return; }
+            float t = -viewport.contentContainer.transform.position.y / scrollRange;
+            thumb.style.top = t * thumbMax;
+        }
+
+        void OnWheel(WheelEvent e)
+        {
+            float delta = e.delta.y * 40f;
+            Move(delta);
+            e.StopPropagation();
+        }
+
+        void OnTrackClick(MouseDownEvent e)
+        {
+            if (e.button != 0) return;
+            float clickY = track.WorldToLocal(e.mousePosition).y;
+            float th = thumb.resolvedStyle.height;
+            float target = clickY - th / 2f;
+            float current = thumb.style.top.value.value;
+            Move(target - current);
+            e.StopPropagation();
+        }
+
+        void OnThumbDown(MouseDownEvent e)
+        {
+            if (e.button != 0) return;
+            dragging = true;
+            float startY = track.WorldToLocal(e.mousePosition).y;
+            float startTop = thumb.style.top.value.value;
+            thumb.CapturePointer(e.pointerId);
+
+            EventCallback<MouseMoveEvent> onMove = me =>
+            {
+                if (!dragging) return;
+                float current = track.WorldToLocal(me.mousePosition).y;
+                float newTop = Mathf.Clamp(startTop + current - startY, 0f, thumbMax);
+                float t = newTop / thumbMax;
+                viewport.contentContainer.transform.position = new Vector3(0, -t * scrollRange, 0);
+                thumb.style.top = newTop;
+                me.StopPropagation();
+            };
+            EventCallback<MouseUpEvent> onUp = ue =>
+            {
+                dragging = false;
+                thumb.ReleasePointer(ue.pointerId);
+                thumb.UnregisterCallback<MouseMoveEvent>(onMove);
+                thumb.UnregisterCallback<MouseUpEvent>(onUp);
+                ue.StopPropagation();
+            };
+            thumb.RegisterCallback<MouseMoveEvent>(onMove);
+            thumb.RegisterCallback<MouseUpEvent>(onUp);
+            e.StopPropagation();
+        }
+
+        void Move(float delta)
+        {
+            float current = -viewport.contentContainer.transform.position.y;
+            float next = Mathf.Clamp(current + delta, 0f, scrollRange);
+            viewport.contentContainer.transform.position = new Vector3(0, -next, 0);
+            UpdateThumb();
+        }
+
+        public void Dispose()
+        {
+            track?.UnregisterCallback<MouseDownEvent>(OnTrackClick);
+            thumb?.UnregisterCallback<MouseDownEvent>(OnThumbDown);
+            viewport?.UnregisterCallback<WheelEvent>(OnWheel);
+            viewport?.UnregisterCallback<GeometryChangedEvent>(OnGeo);
         }
     }
 }
