@@ -362,6 +362,8 @@ public class EndSeasonController : UIScreenController
 
     void StartDraft()
     {
+        DatabaseManager.Instance.ClearAllRookies();
+
         _btnDraft.SetEnabled(false);
         _btnDraft.text = "GENERANDO...";
 

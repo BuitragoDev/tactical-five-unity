@@ -2634,6 +2634,12 @@ public partial class DatabaseManager
                   .Count() > 0;
     }
 
+    public void ClearAllRookies()
+    {
+        if (!EnsureDb()) return;
+        _db.Execute("UPDATE players SET is_rookie = 0");
+    }
+
     public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId, int prevTeamId = 0)
     {
         _db.BeginTransaction();
