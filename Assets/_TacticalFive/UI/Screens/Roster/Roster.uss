@@ -1331,19 +1331,19 @@
     flex-basis: 0;
     margin-left: 6px;
     margin-right: 0;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgba(100, 110, 130, 0.10);
     border-width: 2px;
-    border-color: rgb(192, 57, 43);
-    color: rgb(230, 120, 100);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
     font-size: 18px;
     letter-spacing: 1px;
     padding: 11px 16px;
     border-radius: 8px;
 }
 .renew-modal-box .btn-modal-cancel:hover {
-    background-color: rgba(192, 57, 43, 0.25);
-    border-color: rgb(192, 57, 43);
-    color: rgb(230, 120, 100);
+    background-color: rgba(100, 110, 130, 0.25);
+    border-color: rgb(140, 150, 170);
+    color: rgb(200, 210, 230);
 }
 .renew-modal-box .btn-modal-confirm {
     flex-grow: 1;
