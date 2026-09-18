@@ -192,13 +192,15 @@
     border-radius: 8px;
     border-width: 2px;
     -unity-text-align: middle-center;
-    background-color: rgba(42, 95, 201, 0.10);
-    border-color: rgb(42, 95, 201);
-    color: rgb(120, 160, 230);
+    background-color: rgba(212, 160, 23, 0.10);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+    cursor: pointer;
 }
 
 .lineup-auto-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(240, 200, 80);
 }
 
 /* ══ STARTER SLOTS ══ */
