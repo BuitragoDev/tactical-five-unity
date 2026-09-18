@@ -1729,19 +1729,19 @@
     padding: 9px 12px;
     background-color: rgba(7, 16, 30, 0.50);
     border-radius: 6px;
-    font-size: 16px;
+    font-size: 18px;
 }
 .market-fa-modal-body .renew-modal-text--warning {
     color: rgb(230, 185, 70);
     border-left-width: 3px;
     border-left-color: rgb(212, 160, 23);
-    font-size: 16px;
+    font-size: 18px;
 }
 .market-fa-modal-body .renew-modal-text--info {
     color: rgb(140, 180, 235);
     border-left-width: 3px;
     border-left-color: rgb(42, 95, 201);
-    font-size: 16px;
+    font-size: 18px;
 }
 .market-fa-modal-body .renew-modal-text--pending {
     color: rgb(100, 210, 145);
