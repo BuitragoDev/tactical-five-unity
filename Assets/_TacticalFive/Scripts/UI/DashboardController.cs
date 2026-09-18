@@ -7315,17 +7315,12 @@ List<int> offeredPickIds = new List<int>();
 
         var latest = all.OrderByDescending(m => m.id)
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
-.Take(3).ToList();
+                        .Take(5).ToList();
 
         foreach (var msg in latest)
         {
             var item = new VisualElement();
             item.AddToClassList("message-item");
-
-            var icon = new VisualElement();
-            icon.AddToClassList("message-item-icon");
-            SetNewsImage(icon, msg);
-            item.Add(icon);
 
             var textBlock = new VisualElement();
             textBlock.AddToClassList("message-item-text");
