@@ -453,10 +453,13 @@
 
 .match-modal-header {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
     justify-content: space-between;
-    padding: 24px 32px 0;
+    padding: 10px 24px;
     flex-shrink: 0;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
 }
 
 .match-modal-header-text {
@@ -467,7 +470,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     letter-spacing: 3px;
-    color: rgb(122, 138, 170);
+    color: rgb(212, 160, 23);
     -unity-text-transform: upper;
 }
 
@@ -476,7 +479,6 @@
     font-size: 34px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
-    margin-top: 2px;
 }
 
 /* ── ARENA ── */
