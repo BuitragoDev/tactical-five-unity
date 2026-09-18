@@ -29,7 +29,6 @@ public class InjuredController : UIScreenController
     // League injured modal
     private VisualElement _leagueInjuredOverlay;
     private VisualElement _leagueInjuredList;
-    private VisualElement _leagueInjuredPaginator;
     private Button _btnLeagueInjured;
     private Button _btnLeagueInjuredClose;
 
@@ -55,9 +54,10 @@ public class InjuredController : UIScreenController
     // Pagination
     private int _currentPage;
     private const int ITEMS_PER_PAGE = 6;
-    private int _leagueInjuredPage;
-    private const int LEAGUE_INJURED_PER_PAGE = 10;
     private List<(TeamData team, PlayerData player)> _leagueInjuredPlayers = new();
+
+    // League injured scrollbar
+    private ScrollBar _leagueBar;
 
     protected override void CacheReferences()
     {
@@ -78,7 +78,6 @@ public class InjuredController : UIScreenController
 
         _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
         _leagueInjuredList = _root.Q<VisualElement>("LeagueInjuredList");
-        _leagueInjuredPaginator = _root.Q<VisualElement>("LeagueInjuredPaginator");
         _btnLeagueInjured = _root.Q<Button>("BtnLeagueInjured");
         _btnLeagueInjuredClose = _root.Q<Button>("BtnLeagueInjuredClose");
 
@@ -810,14 +809,12 @@ public class InjuredController : UIScreenController
 
     void OpenLeagueInjuredModal()
     {
-        _leagueInjuredPage = 0;
         BuildLeagueInjuredList();
-        var scrollWrapper = _root.Q<VisualElement>("LeagueInjuredScrollWrapper");
-        if (scrollWrapper != null)
-        {
-            scrollWrapper.style.height = new StyleLength(new Length(380, LengthUnit.Pixel));
-            scrollWrapper.style.maxHeight = new StyleLength(new Length(380, LengthUnit.Pixel));
-        }
+        var viewport = _root.Q<VisualElement>("LeagueInjuredScrollWrapper");
+        var list = _root.Q<VisualElement>("LeagueInjuredList");
+        var track = _root.Q<VisualElement>("LeagueInjuredScrollTrack");
+        var thumb = _root.Q<VisualElement>("LeagueInjuredScrollThumb");
+        _leagueBar = BindScrollBar(viewport, list, track, thumb);
         _leagueInjuredOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _leagueInjuredOverlay.AddToClassList("modal-overlay--visible");
         _leagueInjuredOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
@@ -832,8 +829,6 @@ public class InjuredController : UIScreenController
     void BuildLeagueInjuredList()
     {
         _leagueInjuredList.Clear();
-        _leagueInjuredPaginator.Clear();
-        _leagueInjuredPaginator.style.display = DisplayStyle.None;
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var myTeamId = _myTeam.id;
@@ -861,14 +856,7 @@ public class InjuredController : UIScreenController
             return;
         }
 
-        int totalPages = Mathf.CeilToInt((float)_leagueInjuredPlayers.Count / LEAGUE_INJURED_PER_PAGE);
-        if (_leagueInjuredPage >= totalPages) _leagueInjuredPage = totalPages - 1;
-        if (_leagueInjuredPage < 0) _leagueInjuredPage = 0;
-
-        int start = _leagueInjuredPage * LEAGUE_INJURED_PER_PAGE;
-        int end = Mathf.Min(start + LEAGUE_INJURED_PER_PAGE, _leagueInjuredPlayers.Count);
-
-        for (int i = start; i < end; i++)
+        for (int i = 0; i < _leagueInjuredPlayers.Count; i++)
         {
             var (team, player) = _leagueInjuredPlayers[i];
             var row = new VisualElement();
@@ -904,46 +892,140 @@ public class InjuredController : UIScreenController
 
             _leagueInjuredList.Add(row);
         }
+    }
 
-        if (totalPages > 1)
+    // ── Scrollbar helpers ──
+
+    class ScrollBar
+    {
+        public VisualElement Viewport;
+        public VisualElement Content;
+        public VisualElement Track;
+        public VisualElement Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY;
+        public float StartScrollY;
+    }
+
+    ScrollBar BindScrollBar(VisualElement viewport, VisualElement content,
+                            VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+
+        var bar = new ScrollBar
         {
-            _leagueInjuredPaginator.style.display = DisplayStyle.Flex;
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
 
-            var btnPrev = new Button();
-            btnPrev.AddToClassList("injured-paginator-btn");
-            btnPrev.text = "\u25C0";
-            btnPrev.SetEnabled(_leagueInjuredPage > 0);
-            if (_leagueInjuredPage == 0)
-                btnPrev.AddToClassList("injured-paginator-btn--disabled");
-            int previousPage = _leagueInjuredPage - 1;
-            btnPrev.RegisterCallback<ClickEvent>(_ =>
+        viewport.RegisterCallback<WheelEvent>(evt =>
+        {
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
+        {
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (bar.Dragging)
             {
-                PlayClick();
-                _leagueInjuredPage = previousPage;
-                BuildLeagueInjuredList();
-            });
-            CursorManager.Instance?.RegisterHandCursor(btnPrev);
-            _leagueInjuredPaginator.Add(btnPrev);
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
 
-            var pageLabel = new Label($"{_leagueInjuredPage + 1} / {totalPages}");
-            pageLabel.AddToClassList("injured-paginator-label");
-            _leagueInjuredPaginator.Add(pageLabel);
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
 
-            var btnNext = new Button();
-            btnNext.AddToClassList("injured-paginator-btn");
-            btnNext.text = "\u25B6";
-            btnNext.SetEnabled(_leagueInjuredPage < totalPages - 1);
-            if (_leagueInjuredPage >= totalPages - 1)
-                btnNext.AddToClassList("injured-paginator-btn--disabled");
-            int nextPage = _leagueInjuredPage + 1;
-            btnNext.RegisterCallback<ClickEvent>(_ =>
-            {
-                PlayClick();
-                _leagueInjuredPage = nextPage;
-                BuildLeagueInjuredList();
-            });
-            CursorManager.Instance?.RegisterHandCursor(btnNext);
-            _leagueInjuredPaginator.Add(btnNext);
-        }
+        track.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+        return bar;
+    }
+
+    static float GetScrollMax(ScrollBar bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(ScrollBar bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(ScrollBar bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float thumbHeight = max <= 0f ? trackHeight : Mathf.Max(36f, trackHeight * viewportHeight / contentHeight);
+        thumbHeight = Mathf.Min(thumbHeight, trackHeight);
+
+        float travel = trackHeight - thumbHeight;
+        float t = max <= 0f ? 0f : Mathf.Clamp01(bar.ScrollY / max);
+
+        bar.Thumb.style.height = thumbHeight;
+        bar.Thumb.style.top = travel * t;
     }
 }
