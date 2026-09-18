@@ -488,6 +488,7 @@
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
     margin-bottom: 0;
+    white-space: nowrap;
     -unity-text-align: middle-left;
 }
 
