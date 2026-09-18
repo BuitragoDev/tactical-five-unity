@@ -1301,15 +1301,20 @@
     flex-grow: 1;
     flex-basis: 0;
     margin-left: 6px;
+    margin-right: 0;
     background-color: rgba(192, 57, 43, 0.10);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
-    border-radius: 8px;
+    font-size: 16px;
+    letter-spacing: 1px;
     padding: 11px 16px;
+    border-radius: 8px;
 }
 .btn-modal-cancel:hover {
     background-color: rgba(192, 57, 43, 0.25);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
 }
 .btn-modal-confirm {
     flex-grow: 1;
