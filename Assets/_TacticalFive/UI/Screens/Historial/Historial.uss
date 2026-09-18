@@ -103,6 +103,7 @@
     border-bottom-color: rgb(42, 51, 71);
     background-color: rgba(18, 103, 195, 0.04);
     flex-shrink: 0;
+    margin-right: 16px;
 }
 
 .historial-table-header-label {
