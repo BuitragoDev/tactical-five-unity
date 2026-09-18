@@ -3484,12 +3484,13 @@ using System.Threading.Tasks;
         btnGroup.Add(goBtn);
 
         var closeBtn = new Button();
-        closeBtn.text = "CERRAR";
+        closeBtn.text = "REHACER CONVOCATORIA";
         closeBtn.AddToClassList("trade-modal-btn");
         closeBtn.AddToClassList("trade-modal-btn--reject");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
+            AutoFixInjuredLineup();
             _firedOverlay.style.display = DisplayStyle.None;
             if (_fastSimRunning)
             {
