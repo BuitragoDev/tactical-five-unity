@@ -390,33 +390,43 @@
     font-size: 18px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(255, 255, 255);
-    background-color: rgb(5, 115, 51);
-    border-width: 0;
-    border-radius: 4px;
+    color: rgb(100, 200, 140);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 8px;
     padding: 12px 0;
     width: 100%;
     -unity-text-align: middle-center;
+    cursor: pointer;
 }
 
 .upgrade-card-btn:hover {
-    background-color: rgb(8, 141, 64);
+    background-color: rgba(39, 174, 96, 0.25);
 }
 
 .upgrade-card-btn:active {
-    background-color: rgb(13, 152, 71);
+    background-color: rgba(39, 174, 96, 0.35);
 }
 
 .upgrade-card-btn--disabled {
-    background-color: rgb(50, 55, 70);
-    color: rgb(100, 110, 130);
+    background-color: rgba(120, 95, 30, 0.10);
+    border-color: rgb(120, 95, 30);
+    color: rgb(160, 140, 80);
+    cursor: default;
 }
 
 .upgrade-card-btn--disabled:hover {
-    background-color: rgb(50, 55, 70);
+    background-color: rgba(120, 95, 30, 0.10);
 }
 
 .upgrade-card-btn--no-funds {
-    background-color: rgb(120, 40, 40);
-    color: rgb(200, 150, 150);
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    cursor: default;
+}
+
+.upgrade-card-btn--no-funds:hover {
+    background-color: rgba(192, 57, 43, 0.10);
 }
