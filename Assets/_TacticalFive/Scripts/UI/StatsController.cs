@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using System;
 using System.Collections.Generic;
 using System.Linq;
     public class StatRow
@@ -994,115 +993,140 @@ using System.Linq;
     }
 
     // ── ScrollBar ──
-    private ScrollBar _scrollBar;
+    private ScrollBarData _scrollBar;
 
     void BindStatsScrollBar()
     {
         if (_statsViewport == null || _statsScrollTrack == null || _statsScrollThumb == null) return;
-        _scrollBar?.Dispose();
-        _scrollBar = new ScrollBar(_statsViewport, _statsScrollTrack, _statsScrollThumb);
+        _scrollBar = BindScrollBar(_statsViewport, _statsBody, _statsScrollTrack, _statsScrollThumb);
     }
 
-    private class ScrollBar : IDisposable
+    class ScrollBarData
     {
-        readonly VisualElement viewport, track, thumb;
-        float scrollRange, thumbMax;
-        bool dragging;
+        public VisualElement Viewport;
+        public VisualElement Content;
+        public VisualElement Track;
+        public VisualElement Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY;
+        public float StartScrollY;
+    }
 
-        public ScrollBar(VisualElement vp, VisualElement tr, VisualElement th)
+    ScrollBarData BindScrollBar(VisualElement viewport, VisualElement content,
+                                VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+
+        var bar = new ScrollBarData
         {
-            viewport = vp; track = tr; thumb = th;
-            Recalc();
-            UpdateThumb();
-            track.RegisterCallback<MouseDownEvent>(OnTrackClick);
-            thumb.RegisterCallback<MouseDownEvent>(OnThumbDown);
-            viewport.RegisterCallback<WheelEvent>(OnWheel);
-            thumb.RegisterCallback<GeometryChangedEvent>(OnGeo);
-        }
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
 
-        void OnGeo(GeometryChangedEvent _) { Recalc(); UpdateThumb(); }
-
-        void Recalc()
+        viewport.RegisterCallback<WheelEvent>(evt =>
         {
-            var content = viewport.contentContainer;
-            float ch = content.worldBound.height;
-            float vh = viewport.worldBound.height;
-            scrollRange = Mathf.Max(0f, ch - vh);
-            float th = scrollRange > 0f ? Mathf.Max(36f, vh * (vh / ch)) : track.worldBound.height;
-            thumbMax = Mathf.Max(1f, track.worldBound.height - th);
-            thumb.style.height = th;
-        }
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
 
-        void UpdateThumb()
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
         {
-            if (scrollRange <= 0f) { thumb.style.top = 0; return; }
-            float t = -viewport.contentContainer.transform.position.y / scrollRange;
-            thumb.style.top = t * thumbMax;
-        }
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
 
-        void OnWheel(WheelEvent e)
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
         {
-            float delta = e.delta.y * 40f;
-            Move(delta);
-            e.StopPropagation();
-        }
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
 
-        void OnTrackClick(MouseDownEvent e)
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
         {
-            if (e.button != 0) return;
-            float clickY = track.WorldToLocal(e.mousePosition).y;
-            float th = thumb.resolvedStyle.height;
-            float target = clickY - th / 2f;
-            float current = thumb.style.top.value.value;
-            Move(target - current);
-            e.StopPropagation();
-        }
-
-        void OnThumbDown(MouseDownEvent e)
-        {
-            if (e.button != 0) return;
-            dragging = true;
-            float startY = track.WorldToLocal(e.mousePosition).y;
-            float startTop = thumb.style.top.value.value;
-            thumb.CapturePointer(e.pointerId);
-
-            EventCallback<MouseMoveEvent> onMove = me =>
+            if (bar.Dragging)
             {
-                if (!dragging) return;
-                float current = track.WorldToLocal(me.mousePosition).y;
-                float newTop = Mathf.Clamp(startTop + current - startY, 0f, thumbMax);
-                float t = newTop / thumbMax;
-                viewport.contentContainer.transform.position = new Vector3(0, -t * scrollRange, 0);
-                thumb.style.top = newTop;
-                me.StopPropagation();
-            };
-            EventCallback<MouseUpEvent> onUp = ue =>
-            {
-                dragging = false;
-                thumb.ReleasePointer(ue.pointerId);
-                thumb.UnregisterCallback<MouseMoveEvent>(onMove);
-                thumb.UnregisterCallback<MouseUpEvent>(onUp);
-                ue.StopPropagation();
-            };
-            thumb.RegisterCallback<MouseMoveEvent>(onMove);
-            thumb.RegisterCallback<MouseUpEvent>(onUp);
-            e.StopPropagation();
-        }
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
 
-        void Move(float delta)
-        {
-            float current = -viewport.contentContainer.transform.position.y;
-            float next = Mathf.Clamp(current + delta, 0f, scrollRange);
-            viewport.contentContainer.transform.position = new Vector3(0, -next, 0);
-            UpdateThumb();
-        }
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
 
-        public void Dispose()
+        track.RegisterCallback<PointerDownEvent>(evt =>
         {
-            track?.UnregisterCallback<MouseDownEvent>(OnTrackClick);
-            thumb?.UnregisterCallback<MouseDownEvent>(OnThumbDown);
-            viewport?.UnregisterCallback<WheelEvent>(OnWheel);
-            viewport?.UnregisterCallback<GeometryChangedEvent>(OnGeo);
-        }
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+
+        return bar;
+    }
+
+    static float GetScrollMax(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(ScrollBarData bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float ratio = max > 0f ? bar.ScrollY / max : 0f;
+        float thumbMax = trackHeight - bar.Thumb.layout.height;
+        bar.Thumb.style.top = ratio * thumbMax;
     }
 }
