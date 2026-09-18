@@ -731,10 +731,10 @@
 
 .btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(30, 37, 53);
-    border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    color: rgb(122, 138, 170);
+    background-color: rgba(42, 51, 71, 0.15);
+    border-width: 2px;
+    border-color: rgb(85, 102, 119);
+    color: rgb(160, 175, 200);
     font-size: 18px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -743,8 +743,9 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-cancel:hover {
-    border-color: rgb(122, 138, 170);
-    color: rgb(208, 216, 232);
+    background-color: rgba(42, 51, 71, 0.30);
+    border-color: rgb(120, 138, 160);
+    color: rgb(200, 210, 225);
 }
 .btn-modal-confirm {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
