@@ -177,45 +177,53 @@
         <!-- ══ MODAL RENOVAR CONTRATO ══ -->
         <ui:VisualElement name="RenewOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewBox" class="renew-modal-box">
-                <ui:VisualElement name="RenewIcon" class="renew-modal-icon"/>
-                <ui:Label name="RenewTitle" class="renew-modal-title" text="RENOVAR CONTRATO" />
-                <ui:Label name="RenewText1" class="renew-modal-text" text="" />
-                <ui:VisualElement name="RenewFormRowSalary" class="renew-form-row">
-                    <ui:Label class="renew-form-label" text="SALARIO ($)" />
-                    <ui:VisualElement class="renew-spinner-row">
-                        <ui:Label name="RenewSalaryDec" class="btn-spin" text="◀" />
-                        <ui:Label name="RenewSalaryValue" class="renew-spin-label" text="" />
-                        <ui:Label name="RenewSalaryInc" class="btn-spin" text="▶" />
+                <ui:VisualElement class="renew-modal-header">
+                    <ui:VisualElement class="renew-modal-heading">
+                        <ui:VisualElement name="RenewIcon" class="renew-modal-icon"/>
+                        <ui:VisualElement>
+                            <ui:Label name="RenewTitle" class="renew-modal-title" text="RENOVAR CONTRATO" />
+                            <ui:Label name="RenewText1" class="renew-modal-subtitle" text="" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement name="RenewFormRowYears" class="renew-form-row">
-                    <ui:Label class="renew-form-label" text="DURACIÓN (años)" />
-                    <ui:VisualElement class="renew-spinner-row">
-                        <ui:Label name="RenewYearsDec" class="btn-spin" text="◀" />
-                        <ui:Label name="RenewYearsValue" class="renew-spin-label" text="" />
-                        <ui:Label name="RenewYearsInc" class="btn-spin" text="▶" />
+                <ui:VisualElement class="renew-modal-body">
+                    <ui:VisualElement name="RenewFormRowSalary" class="renew-form-row">
+                        <ui:Label class="renew-form-label" text="SALARIO ($)" />
+                        <ui:VisualElement class="renew-spinner-row">
+                            <ui:Label name="RenewSalaryDec" class="btn-spin" text="&#9664;" />
+                            <ui:Label name="RenewSalaryValue" class="renew-spin-label" text="" />
+                            <ui:Label name="RenewSalaryInc" class="btn-spin" text="&#9654;" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement name="RenewFormRowOptions" class="renew-form-row renew-options-row">
-                    <ui:Label class="renew-form-label" text="OPCIONES" />
-                    <ui:VisualElement class="renew-options-toggles">
-                        <ui:Button name="RenewTeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
-                        <ui:Button name="RenewPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
+                    <ui:VisualElement name="RenewFormRowYears" class="renew-form-row">
+                        <ui:Label class="renew-form-label" text="DURACIÓN (años)" />
+                        <ui:VisualElement class="renew-spinner-row">
+                            <ui:Label name="RenewYearsDec" class="btn-spin" text="&#9664;" />
+                            <ui:Label name="RenewYearsValue" class="renew-spin-label" text="" />
+                            <ui:Label name="RenewYearsInc" class="btn-spin" text="&#9654;" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:VisualElement name="RenewFormRowTwoWay" class="renew-form-row renew-options-row" style="display: none;">
-                    <ui:Label class="renew-form-label" text="CONTRATO" />
-                    <ui:VisualElement class="renew-options-toggles">
-                        <ui:Button name="RenewTwoWayToggle" class="renew-toggle-btn" text="TWO-WAY" />
+                    <ui:VisualElement name="RenewFormRowOptions" class="renew-form-row renew-options-row">
+                        <ui:Label class="renew-form-label" text="OPCIONES" />
+                        <ui:VisualElement class="renew-options-toggles">
+                            <ui:Button name="RenewTeamOption" class="renew-toggle-btn" text="TO (Team Option)" />
+                            <ui:Button name="RenewPlayerOption" class="renew-toggle-btn" text="PO (Player Option)" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                </ui:VisualElement>
-                <ui:Label name="RenewText2" class="renew-modal-text" text="" />
-                <ui:Label name="RenewWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
-                <ui:Label name="RenewMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
-                <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
-                <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewCancel"  class="btn-modal-confirm btn-modal-confirm--danger" text="CERRAR" />
-                    <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="ENVIAR OFERTA" />
+                    <ui:VisualElement name="RenewFormRowTwoWay" class="renew-form-row renew-options-row" style="display: none;">
+                        <ui:Label class="renew-form-label" text="CONTRATO" />
+                        <ui:VisualElement class="renew-options-toggles">
+                            <ui:Button name="RenewTwoWayToggle" class="renew-toggle-btn" text="TWO-WAY" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                    <ui:Label name="RenewText2" class="renew-modal-text" text="" />
+                    <ui:Label name="RenewWarningText" class="renew-modal-text renew-modal-text--warning" style="display: none;" text="" />
+                    <ui:Label name="RenewMaxInfo" class="renew-modal-text renew-modal-text--info" style="display: none;" text="" />
+                    <ui:Label name="RenewPendingText" class="renew-modal-text renew-modal-text--pending" style="display: none;" text="OFERTA ENVIADA. Recibirás la respuesta en tu Dashboard en 7 días." />
+                    <ui:VisualElement class="renew-modal-actions">
+                        <ui:Button name="BtnRenewCancel" class="btn-modal-cancel" text="CERRAR" />
+                        <ui:Button name="BtnRenewConfirm" class="btn-modal-confirm" text="ENVIAR OFERTA" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

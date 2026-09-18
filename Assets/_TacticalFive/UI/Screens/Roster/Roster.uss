@@ -1135,11 +1135,13 @@
 /* ══ Scoped overrides: renewal modal (FA-modal style) ══ */
 .renew-modal-box {
     background-color: rgb(13, 24, 42);
+    border-width: 1px;
     border-color: rgb(42, 95, 201);
     border-radius: 10px;
     padding: 0;
     max-height: 88%;
-    align-items: stretch;
+    flex-direction: column;
+    overflow: hidden;
 }
 .renew-modal-box--positive {
     border-color: rgb(39, 174, 96);
@@ -1147,18 +1149,46 @@
 .renew-modal-box--negative {
     border-color: rgb(192, 57, 43);
 }
+.renew-modal-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background-color: rgba(42, 95, 201, 0.16);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(42, 95, 201);
+}
+.renew-modal-heading {
+    flex-direction: row;
+    align-items: center;
+}
 .renew-modal-icon {
     width: 48px;
     height: 48px;
-    margin-bottom: 0;
-    margin-right: 10px;
+    margin-right: 12px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
     flex-shrink: 0;
 }
 .renew-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
     font-size: 28px;
     letter-spacing: 2px;
+    color: rgb(255, 255, 255);
     margin-bottom: 0;
     -unity-text-align: middle-left;
+}
+.renew-modal-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 18px;
+    color: rgb(140, 170, 210);
+    margin-top: 2px;
+}
+.renew-modal-body {
+    padding: 20px 24px 22px 24px;
+    flex-direction: column;
+    overflow: hidden;
 }
 .renew-modal-text {
     width: 100%;
@@ -1187,6 +1217,11 @@
     border-left-width: 3px;
     border-left-color: rgb(39, 174, 96);
     font-size: 18px;
+}
+.renew-modal-actions {
+    flex-direction: row;
+    align-self: stretch;
+    margin-top: 18px;
 }
 .renew-modal-buttons {
     flex-direction: row;
