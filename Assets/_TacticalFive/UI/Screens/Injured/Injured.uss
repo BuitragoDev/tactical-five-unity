@@ -673,7 +673,6 @@
     flex-shrink: 0;
     width: auto;
     align-self: stretch;
-    margin: 0 12px;
     height: 32px;
     align-items: center;
 }
@@ -721,7 +720,7 @@
     height: 380px;
     flex-shrink: 0;
     overflow: hidden;
-    padding: 0 12px;
+    padding: 0;
 }
 .league-injured-list {
     flex-direction: column;
@@ -735,7 +734,7 @@
     flex-shrink: 0;
 }
 .league-injured-paginator {
-    margin: 10px 24px 0;
+    margin: 10px 14px 0;
 }
 .league-injured-row {
     flex-direction: row;
