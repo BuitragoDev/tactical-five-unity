@@ -798,7 +798,6 @@ public class EmployeesController : UIScreenController
         }
 
         _btnHireConfirm.text = existing != null ? "REEMPLAZAR" : "CONTRATAR";
-        var hireBox = _hireOverlay.Q<VisualElement>("HireBox");
         hireBox.RemoveFromClassList("hire-modal-box--negative");
         hireBox.RemoveFromClassList("hire-modal-box--gold");
         if (existing != null)
