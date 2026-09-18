@@ -70,7 +70,7 @@ using System.Linq;
 
     // ── Scrollbar ──
     private VisualElement _statsViewport, _statsScrollTrack, _statsScrollThumb;
-    private ScrollBar _statsBar;
+    private ScrollBarData _statsBar;
     protected override void OnEnable()
     {
         base.OnEnable();
