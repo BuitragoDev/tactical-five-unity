@@ -989,7 +989,7 @@
 }
 .message-item-subject {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     margin-bottom: 2px;
