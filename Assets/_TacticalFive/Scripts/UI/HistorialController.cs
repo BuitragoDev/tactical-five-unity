@@ -19,17 +19,17 @@ using System.Linq;
     private Dictionary<int, PlayerData> _playerCache = new();
     private Dictionary<int, DraftPickData> _pickCache = new();
 
-    const int PAGE_SIZE = 15;
-    private int _currentPage;
-    private Button _prevBtn, _nextBtn;
-    private Label _pageInfo;
+    // ── Scrollbar ──
+    private VisualElement _historialViewport, _historialScrollTrack, _historialScrollThumb;
+    private ScrollBarData _historialBar;
 
     protected override void CacheReferences()
     {
         _historialBody = _root.Q<VisualElement>("HistorialBody");
-        _prevBtn = _root.Q<Button>("HistorialPrev");
-        _nextBtn = _root.Q<Button>("HistorialNext");
-        _pageInfo = _root.Q<Label>("HistorialPageInfo");
+        _historialViewport = _root.Q<VisualElement>("HistorialViewport");
+        _historialScrollTrack = _root.Q<VisualElement>("HistorialScrollTrack");
+        _historialScrollThumb = _root.Q<VisualElement>("HistorialScrollThumb");
+        if (_historialViewport != null) _historialViewport.style.overflow = Overflow.Hidden;
 
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -85,8 +85,6 @@ using System.Linq;
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
-        _prevBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _currentPage--; RenderPage(); });
-        _nextBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _currentPage++; RenderPage(); });
     }
 
     protected override void Refresh()
@@ -155,7 +153,6 @@ using System.Linq;
         }
 
         _sortedTrades = _trades.OrderByDescending(t => t.game_day).ToList();
-        _currentPage = 0;
         RenderPage();
     }
 
@@ -171,26 +168,15 @@ using System.Linq;
             lbl.AddToClassList("historial-empty-text");
             empty.Add(lbl);
             _historialBody.Add(empty);
-
-            if (_pageInfo != null) _pageInfo.text = "0 / 0";
-            if (_prevBtn != null) _prevBtn.SetEnabled(false);
-            if (_nextBtn != null) _nextBtn.SetEnabled(false);
-            return;
         }
-
-        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)_sortedTrades.Count / PAGE_SIZE));
-        _currentPage = Mathf.Clamp(_currentPage, 0, totalPages - 1);
-
-        int start = _currentPage * PAGE_SIZE;
-        int end = Mathf.Min(start + PAGE_SIZE, _sortedTrades.Count);
-        for (int i = start; i < end; i++)
+        else
         {
-            _historialBody.Add(BuildTradeRow(_sortedTrades[i]));
+            foreach (var trade in _sortedTrades)
+                _historialBody.Add(BuildTradeRow(trade));
         }
 
-        if (_pageInfo != null) _pageInfo.text = $"{_currentPage + 1} / {totalPages}";
-        if (_prevBtn != null) _prevBtn.SetEnabled(_currentPage > 0);
-        if (_nextBtn != null) _nextBtn.SetEnabled(_currentPage < totalPages - 1);
+        if (_historialBar != null) { _historialBar.ScrollY = 0f; ApplyScroll(_historialBar); }
+        _historialBar = BindScrollBar(_historialViewport, _historialBody, _historialScrollTrack, _historialScrollThumb);
     }
 
     VisualElement BuildTradeRow(TradeData trade)
@@ -299,5 +285,135 @@ using System.Linq;
         row.Add(ovrLabel);
 
         return row;
+    }
+
+    // ── ScrollBar ──
+    class ScrollBarData
+    {
+        public VisualElement Viewport;
+        public VisualElement Content;
+        public VisualElement Track;
+        public VisualElement Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY;
+        public float StartScrollY;
+    }
+
+    ScrollBarData BindScrollBar(VisualElement viewport, VisualElement content,
+                                VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+
+        var bar = new ScrollBarData
+        {
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
+
+        viewport.RegisterCallback<WheelEvent>(evt =>
+        {
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
+        {
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (bar.Dragging)
+            {
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
+
+        track.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+
+        return bar;
+    }
+
+    static float GetScrollMax(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(ScrollBarData bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float ratio = max > 0f ? bar.ScrollY / max : 0f;
+        float thumbMax = trackHeight - bar.Thumb.layout.height;
+        bar.Thumb.style.top = ratio * thumbMax;
     }
 }

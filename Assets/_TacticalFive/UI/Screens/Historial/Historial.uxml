@@ -34,11 +34,13 @@
                         <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="POS" />
                         <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="MED" />
                     </ui:VisualElement>
-                    <ui:VisualElement name="HistorialBody" class="historial-table-body" />
-                    <ui:VisualElement name="HistorialPaginator" class="historial-paginator">
-                        <ui:Button name="HistorialPrev" class="historial-paginator-btn" text="◀" />
-                        <ui:Label name="HistorialPageInfo" class="historial-paginator-info" text="1 / 1" />
-                        <ui:Button name="HistorialNext" class="historial-paginator-btn" text="▶" />
+                    <ui:VisualElement class="historial-scroll-row">
+                        <ui:VisualElement name="HistorialViewport" class="historial-viewport">
+                            <ui:VisualElement name="HistorialBody" class="historial-table-body" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="HistorialScrollTrack" class="historial-scrollbar">
+                            <ui:VisualElement name="HistorialScrollThumb" class="historial-scrollbar-thumb" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
