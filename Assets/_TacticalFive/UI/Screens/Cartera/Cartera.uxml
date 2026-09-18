@@ -59,13 +59,13 @@
                     <ui:Label class="section-subtitle" text="Historial de jugadores que has ojeado. El conocimiento se mantiene aunque los retires de la cartera." />
                     <ui:VisualElement class="cartera-table-wrapper">
                         <ui:VisualElement name="InformesTableHeader" class="cartera-table-header" />
-                        <ui:VisualElement class="cartera-table-body-viewport">
-                            <ui:VisualElement name="InformesTableBody" class="cartera-table-body" />
-                        </ui:VisualElement>
-                        <ui:VisualElement name="InformesPaginator" class="cartera-paginator">
-                            <ui:Button name="InformesPrev" class="cartera-paginator-btn" text="◀" />
-                            <ui:Label name="InformesPageInfo" class="cartera-paginator-info" text="1 / 1" />
-                            <ui:Button name="InformesNext" class="cartera-paginator-btn" text="▶" />
+                        <ui:VisualElement class="cartera-informes-scroll-row">
+                            <ui:VisualElement name="InformesViewport" class="cartera-informes-viewport">
+                                <ui:VisualElement name="InformesTableBody" class="cartera-informes-table-body" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="InformesScrollTrack" class="cartera-informes-scrollbar">
+                                <ui:VisualElement name="InformesScrollThumb" class="cartera-informes-scrollbar-thumb" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

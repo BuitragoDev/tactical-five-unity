@@ -21,12 +21,10 @@ public class CarteraController : UIScreenController
     private VisualElement _informesTableHeader;
     private VisualElement _informesTableBody;
 
-    // ── Informes pagination ──
-    const int INFORMES_PAGE_SIZE = 12;
-    private int _informesPage;
+    // ── Informes scrollbar ──
     private List<(PlayerData player, int scoutedDay)> _informesData = new();
-    private Button _informesPrev, _informesNext;
-    private Label _informesPageInfo;
+    private VisualElement _informesViewport, _informesScrollTrack, _informesScrollThumb;
+    private ScrollBarData _informesBar;
 
     private List<TeamData> _allTeams;
     private List<ScoutData> _scouts;
@@ -57,9 +55,10 @@ public class CarteraController : UIScreenController
         _tabInformes = _root.Q<Button>("TabInformes");
         _informesTableHeader = _root.Q<VisualElement>("InformesTableHeader");
         _informesTableBody = _root.Q<VisualElement>("InformesTableBody");
-        _informesPrev = _root.Q<Button>("InformesPrev");
-        _informesNext = _root.Q<Button>("InformesNext");
-        _informesPageInfo = _root.Q<Label>("InformesPageInfo");
+        _informesViewport = _root.Q<VisualElement>("InformesViewport");
+        _informesScrollTrack = _root.Q<VisualElement>("InformesScrollTrack");
+        _informesScrollThumb = _root.Q<VisualElement>("InformesScrollThumb");
+        if (_informesViewport != null) _informesViewport.style.overflow = Overflow.Hidden;
     }
 
     protected override void LoadData()
@@ -101,8 +100,6 @@ public class CarteraController : UIScreenController
         _tabOjear?.RegisterCallback<ClickEvent>(_ => ShowTab("ojear"));
         _tabCartera?.RegisterCallback<ClickEvent>(_ => ShowTab("cartera"));
         _tabInformes?.RegisterCallback<ClickEvent>(_ => ShowTab("informes"));
-        _informesPrev?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _informesPage--; RenderInformesPage(); });
-        _informesNext?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _informesPage++; RenderInformesPage(); });
     }
 
     void ShowTab(string tab)
@@ -693,11 +690,10 @@ public class CarteraController : UIScreenController
                 _informesData.Add((player, s.scouted_day));
         }
 
-        _informesPage = 0;
-        RenderInformesPage();
+        RenderInformes();
     }
 
-    void RenderInformesPage()
+    void RenderInformes()
     {
         _informesTableBody.Clear();
 
@@ -707,27 +703,15 @@ public class CarteraController : UIScreenController
             empty.AddToClassList("cartera-empty");
             empty.text = "Todavía no has ojeado a ningún jugador.";
             _informesTableBody.Add(empty);
-
-            if (_informesPageInfo != null) _informesPageInfo.text = "0 / 0";
-            if (_informesPrev != null) _informesPrev.SetEnabled(false);
-            if (_informesNext != null) _informesNext.SetEnabled(false);
-            return;
         }
-
-        int totalPages = Mathf.Max(1, Mathf.CeilToInt((float)_informesData.Count / INFORMES_PAGE_SIZE));
-        _informesPage = Mathf.Clamp(_informesPage, 0, totalPages - 1);
-
-        int start = _informesPage * INFORMES_PAGE_SIZE;
-        int end = Mathf.Min(start + INFORMES_PAGE_SIZE, _informesData.Count);
-        for (int i = start; i < end; i++)
+        else
         {
-            var entry = _informesData[i];
-            _informesTableBody.Add(BuildInformeRow(entry.player, entry.scoutedDay));
+            foreach (var entry in _informesData)
+                _informesTableBody.Add(BuildInformeRow(entry.player, entry.scoutedDay));
         }
 
-        if (_informesPageInfo != null) _informesPageInfo.text = $"{_informesPage + 1} / {totalPages}";
-        if (_informesPrev != null) _informesPrev.SetEnabled(_informesPage > 0);
-        if (_informesNext != null) _informesNext.SetEnabled(_informesPage < totalPages - 1);
+        if (_informesBar != null) { _informesBar.ScrollY = 0f; ApplyScroll(_informesBar); }
+        _informesBar = BindScrollBar(_informesViewport, _informesTableBody, _informesScrollTrack, _informesScrollThumb);
     }
 
     void BuildInformesHeader()
@@ -875,5 +859,135 @@ public class CarteraController : UIScreenController
             _root.Remove(_scoutFullOverlay);
             _scoutFullOverlay = null;
         }
+    }
+
+    // ── ScrollBar ──
+    class ScrollBarData
+    {
+        public VisualElement Viewport;
+        public VisualElement Content;
+        public VisualElement Track;
+        public VisualElement Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY;
+        public float StartScrollY;
+    }
+
+    ScrollBarData BindScrollBar(VisualElement viewport, VisualElement content,
+                                VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+
+        var bar = new ScrollBarData
+        {
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
+
+        viewport.RegisterCallback<WheelEvent>(evt =>
+        {
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
+        {
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (bar.Dragging)
+            {
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
+
+        track.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+
+        return bar;
+    }
+
+    static float GetScrollMax(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(ScrollBarData bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float ratio = max > 0f ? bar.ScrollY / max : 0f;
+        float thumbMax = trackHeight - bar.Thumb.layout.height;
+        bar.Thumb.style.top = ratio * thumbMax;
     }
 }
