@@ -740,9 +740,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(4, 12, 25, 0.92);
+    background-color: rgba(25, 18, 8, 0.92);
     border-left-width: 1px;
-    border-left-color: rgba(65, 105, 165, 0.35);
+    border-left-color: rgba(120, 95, 30, 0.35);
     position: relative;
 }
 .league-injured-scrollbar-thumb {
@@ -751,11 +751,24 @@
     right: 2px;
     top: 0;
     height: 40px;
-    background-color: rgb(42, 95, 201);
+    background-color: rgb(160, 128, 30);
     border-radius: 3px;
 }
 .league-injured-scrollbar:hover .league-injured-scrollbar-thumb {
-    background-color: rgb(75, 135, 235);
+    background-color: rgb(212, 160, 23);
+}
+.league-injured-list-row + .modal-close,
+.league-injured-list-row ~ .modal-close {
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+    border-radius: 8px;
+}
+.league-injured-list-row + .modal-close:hover,
+.league-injured-list-row ~ .modal-close:hover {
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(240, 200, 80);
 }
 .league-injured-row {
     flex-direction: row;
