@@ -977,7 +977,7 @@
 }
 .dismiss-modal-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
-    font-size: 28px;
+    font-size: 32px;
     letter-spacing: 2px;
     color: rgb(255, 255, 255);
     margin-bottom: 0;
