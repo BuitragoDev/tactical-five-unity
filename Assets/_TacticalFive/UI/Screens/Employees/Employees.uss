@@ -529,6 +529,17 @@
     border-bottom-color: rgb(192, 57, 43);
 }
 
+/* ── Hire variant (gold) ── */
+
+.hire-modal-box--gold {
+    border-color: rgb(212, 160, 23);
+}
+
+.hire-modal-box--gold .hire-modal-header {
+    background-color: rgba(212, 160, 23, 0.16);
+    border-bottom-color: rgb(212, 160, 23);
+}
+
 /* ── Hire modal button styles ── */
 
 .hire-modal-box .btn-modal-cancel {
@@ -574,6 +585,52 @@
 
 .hire-modal-box .btn-modal-confirm:hover {
     background-color: rgba(39, 174, 96, 0.25);
+}
+
+.hire-modal-box .btn-modal-confirm--gold {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 6px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    color: rgb(232, 190, 80);
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    -unity-text-align: middle-center;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: normal;
+}
+
+.hire-modal-box .btn-modal-confirm--gold:hover {
+    background-color: rgba(212, 160, 23, 0.25);
+}
+
+.hire-modal-box .btn-modal-confirm--danger {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 6px;
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    -unity-text-align: middle-center;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: normal;
+}
+
+.hire-modal-box .btn-modal-confirm--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
 }
 
 /* ── EMPLOYEE DETAIL ROW ── */

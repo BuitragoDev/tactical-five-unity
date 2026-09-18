@@ -60,6 +60,7 @@ public class EmployeesController : UIScreenController
     private EmployeeData _selectedFireEmployee;
     private EmployeeData _selectedStaffEmployee;
     private bool _isFiring;
+    private bool _isReplacing;
     private string _activeTab = "empleados";
     private string _activeMarketTab = "ASISTENTE";
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -797,6 +798,22 @@ public class EmployeesController : UIScreenController
         }
 
         _btnHireConfirm.text = existing != null ? "REEMPLAZAR" : "CONTRATAR";
+        var hireBox = _hireOverlay.Q<VisualElement>("HireBox");
+        hireBox.RemoveFromClassList("hire-modal-box--negative");
+        hireBox.RemoveFromClassList("hire-modal-box--gold");
+        if (existing != null)
+        {
+            hireBox.AddToClassList("hire-modal-box--gold");
+            _btnHireConfirm.RemoveFromClassList("btn-modal-confirm");
+            _btnHireConfirm.AddToClassList("btn-modal-confirm--gold");
+            _isReplacing = true;
+        }
+        else
+        {
+            _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--gold");
+            _btnHireConfirm.AddToClassList("btn-modal-confirm");
+            _isReplacing = false;
+        }
         _hireOverlay.style.display = DisplayStyle.Flex;
     }
 
@@ -822,6 +839,12 @@ public class EmployeesController : UIScreenController
             modalStars.RemoveFromHierarchy();
 
         _btnHireConfirm.text = "DESPEDIR";
+        _btnHireConfirm.RemoveFromClassList("btn-modal-confirm");
+        _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--gold");
+        _btnHireConfirm.AddToClassList("btn-modal-confirm--danger");
+        var hireBox = _hireOverlay.Q<VisualElement>("HireBox");
+        hireBox.RemoveFromClassList("hire-modal-box--gold");
+        hireBox.AddToClassList("hire-modal-box--negative");
         _hireOverlay.style.display = DisplayStyle.Flex;
     }
 
@@ -834,7 +857,17 @@ public class EmployeesController : UIScreenController
         _selectedCandidate = null;
         _selectedFireEmployee = null;
         _isFiring = false;
+        _isReplacing = false;
         _btnHireConfirm.text = "CONTRATAR";
+        _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--danger");
+        _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--gold");
+        _btnHireConfirm.AddToClassList("btn-modal-confirm");
+        var hireBox = _hireOverlay.Q<VisualElement>("HireBox");
+        if (hireBox != null)
+        {
+            hireBox.RemoveFromClassList("hire-modal-box--negative");
+            hireBox.RemoveFromClassList("hire-modal-box--gold");
+        }
     }
 
     void ConfirmHire()
