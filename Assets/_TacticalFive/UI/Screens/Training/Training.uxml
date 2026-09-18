@@ -74,9 +74,13 @@
         <!-- ══ NO ASISTENTE MODAL ══ -->
         <ui:VisualElement name="NoAsistenteOverlay" class="training-modal-overlay">
             <ui:VisualElement class="training-modal-box">
-                <ui:Label class="training-modal-title" text="SIN ASISTENTE" />
-                <ui:Label class="training-modal-text" text="No tienes un Asistente contratado. Contrata uno en la sección de Empleados para poder entrenar a tus jugadores." />
-                <ui:Button name="BtnNoAsistenteOk" class="training-modal-btn" text="ENTENDIDO" />
+                <ui:VisualElement class="training-modal-header">
+                    <ui:Label class="training-modal-title" text="SIN ASISTENTE" />
+                </ui:VisualElement>
+                <ui:VisualElement class="training-modal-body">
+                    <ui:Label class="training-modal-text" text="No tienes un Asistente contratado. Contrata uno en la sección de Empleados para poder entrenar a tus jugadores." />
+                    <ui:Button name="BtnNoAsistenteOk" class="training-modal-btn" text="ENTENDIDO" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

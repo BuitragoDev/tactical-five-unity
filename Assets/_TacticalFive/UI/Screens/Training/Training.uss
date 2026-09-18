@@ -615,7 +615,7 @@
 .training-modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgba(3, 8, 16, 0.90);
     align-items: center;
     justify-content: center;
     display: none;
@@ -626,47 +626,64 @@
 }
 
 .training-modal-box {
-    width: 480px;
-    background-color: rgb(15, 17, 23);
+    width: 520px;
+    background-color: rgb(13, 24, 42);
     border-width: 1px;
-    border-color: rgb(58, 74, 99);
-    border-top-width: 3px;
-    border-top-color: rgb(212, 160, 23);
-    padding: 32px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 10px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.training-modal-header {
+    flex-direction: row;
+    align-items: center;
+    align-self: stretch;
+    padding: 14px 18px;
+    background-color: rgba(212, 160, 23, 0.16);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(212, 160, 23);
+}
+
+.training-modal-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 32px;
+    letter-spacing: 2px;
+    color: rgb(255, 255, 255);
+    margin-bottom: 0;
+    -unity-text-align: middle-left;
+}
+
+.training-modal-body {
+    padding: 20px 24px 22px 24px;
     flex-direction: column;
     align-items: center;
 }
 
-.training-modal-title {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 32px;
-    letter-spacing: 4px;
-    color: rgb(212, 160, 23);
-    margin-bottom: 16px;
-    -unity-text-align: middle-center;
-}
-
 .training-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 20px;
+    font-size: 18px;
     color: rgb(179, 190, 214);
     -unity-text-align: middle-center;
-    margin-bottom: 24px;
+    margin-bottom: 18px;
     white-space: normal;
 }
 
 .training-modal-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 22px;
+    font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgb(212, 160, 23);
-    color: white;
-    border-width: 0;
-    border-radius: 4px;
-    padding: 12px 32px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+    border-radius: 8px;
+    padding: 11px 32px;
     cursor: pointer;
 }
 
 .training-modal-btn:hover {
-    background-color: rgb(232, 180, 43);
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(240, 200, 80);
 }
