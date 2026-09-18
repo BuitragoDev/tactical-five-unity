@@ -2571,6 +2571,16 @@ public partial class DatabaseManager
             .Select(o => o.player_id));
     }
 
+    public bool HasPendingRenewalOffer(int managerId, int playerId)
+    {
+        if (!EnsureDb()) return false;
+        return _db.Table<OfferData>().Any(o =>
+            o.manager_id == managerId &&
+            o.player_id == playerId &&
+            o.offer_type == 0 &&
+            o.processed == 0);
+    }
+
     public void MarkOfferProcessed(int offerId)
     {
         if (!EnsureDb()) return;

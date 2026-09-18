@@ -802,9 +802,15 @@ using System.Linq;
         if (roleNameLbl != null)
             roleNameLbl.text = GetRoleName(p.role);
 
-        // Botón renovar siempre visible
+        // Botón renovar: desactivar si hay oferta pendiente
         if (_btnRenew != null)
+        {
             _btnRenew.style.display = DisplayStyle.Flex;
+            bool pending = DatabaseManager.Instance.HasPendingRenewalOffer(_manager.id, p.id);
+            _btnRenew.text = pending ? "ESPERANDO RESPUESTA" : "RENOVAR CONTRATO";
+            _btnRenew.SetEnabled(!pending);
+            _btnRenew.EnableInClassList("btn-renew--pending", pending);
+        }
     }
 
     void BuildAttrBars(PlayerData p)

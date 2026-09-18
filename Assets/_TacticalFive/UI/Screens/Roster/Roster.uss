@@ -779,6 +779,13 @@
 .btn-renew:hover {
     background-color: rgba(39, 174, 96, 0.25);
 }
+.btn-renew--pending,
+.btn-renew--pending:hover {
+    background-color: rgba(120, 95, 30, 0.10);
+    border-color: rgb(120, 95, 30);
+    color: rgb(160, 140, 80);
+    cursor: default;
+}
 
 /* Formulario de renovación */
 .renew-form {
