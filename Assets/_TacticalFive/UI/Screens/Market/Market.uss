@@ -1065,7 +1065,7 @@
     font-size: 16px;
 }
 .market-fa-modal-subtitle {
-    font-size: 15px;
+    font-size: 18px;
 }
 .market-trade-modal-header-actions {
     flex-direction: row;
