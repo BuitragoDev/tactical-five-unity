@@ -28,11 +28,13 @@
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
                             <ui:Label class="palmares-section-title" text="CLASIFICACIÓN POR TÍTULOS" />
-                            <ui:VisualElement name="TitlesRankingBody" class="champs-list" />
-                            <ui:VisualElement name="TitlesRankingPaginator" class="palmares-paginator">
-                                <ui:Button name="TitlesRankingPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="TitlesRankingPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="TitlesRankingNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="TitlesRankingViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="TitlesRankingBody" class="champs-list" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="TitlesRankingTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="TitlesRankingThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
@@ -44,11 +46,13 @@
                                 <ui:Label class="th-result" text="RESULTADO" />
                                 <ui:Label class="th-mvp" text="MVP FINALES" />
                             </ui:VisualElement>
-                            <ui:VisualElement name="FinalsHistoryBody" class="palmares-table-body" />
-                            <ui:VisualElement name="FinalsHistoryPaginator" class="palmares-paginator">
-                                <ui:Button name="FinalsHistoryPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="FinalsHistoryPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="FinalsHistoryNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="FinalsHistoryViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="FinalsHistoryBody" class="palmares-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="FinalsHistoryTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="FinalsHistoryThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -59,11 +63,13 @@
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
                             <ui:Label class="palmares-section-title" text="CLASIFICACIÓN MVP" />
-                            <ui:VisualElement name="MVPRankingBody" class="champs-list" />
-                            <ui:VisualElement name="MVPRankingPaginator" class="palmares-paginator">
-                                <ui:Button name="MVPRankingPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="MVPRankingPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="MVPRankingNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="MVPRankingViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="MVPRankingBody" class="champs-list" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="MVPRankingTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="MVPRankingThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
@@ -75,11 +81,13 @@
                                 <ui:Label class="th-rookie" text="ROOKIE DEL AÑO" />
                                 <ui:Label class="th-rating" text="VAL. MEDIA" />
                             </ui:VisualElement>
-                            <ui:VisualElement name="AwardsHistoryBody" class="palmares-table-body" />
-                            <ui:VisualElement name="AwardsHistoryPaginator" class="palmares-paginator">
-                                <ui:Button name="AwardsHistoryPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="AwardsHistoryPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="AwardsHistoryNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="AwardsHistoryViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="AwardsHistoryBody" class="palmares-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="AwardsHistoryTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="AwardsHistoryThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -90,11 +98,13 @@
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
                             <ui:Label class="palmares-section-title" text="APARICIONES EN QUINTETO" />
-                            <ui:VisualElement name="QuintetAppearancesBody" class="champs-list" />
-                            <ui:VisualElement name="QuintetAppearancesPaginator" class="palmares-paginator">
-                                <ui:Button name="QuintetAppearancesPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="QuintetAppearancesPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="QuintetAppearancesNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="QuintetAppearancesViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="QuintetAppearancesBody" class="champs-list" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="QuintetAppearancesTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="QuintetAppearancesThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
@@ -107,11 +117,13 @@
                                 <ui:Label class="th-quintet-pos" text="ALA-PIVOT" />
                                 <ui:Label class="th-quintet-pos" text="PIVOT" />
                             </ui:VisualElement>
-                            <ui:VisualElement name="QuintetHistoryBody" class="palmares-table-body" />
-                            <ui:VisualElement name="QuintetHistoryPaginator" class="palmares-paginator">
-                                <ui:Button name="QuintetHistoryPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="QuintetHistoryPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="QuintetHistoryNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="QuintetHistoryViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="QuintetHistoryBody" class="palmares-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="QuintetHistoryTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="QuintetHistoryThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -122,11 +134,13 @@
                     <ui:VisualElement class="palmares-split">
                         <ui:VisualElement class="palmares-left">
                             <ui:Label class="palmares-section-title" text="APARICIONES EN ALL-STAR" />
-                            <ui:VisualElement name="AllStarAppearancesBody" class="champs-list" />
-                            <ui:VisualElement name="AllStarAppearancesPaginator" class="palmares-paginator">
-                                <ui:Button name="AllStarAppearancesPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="AllStarAppearancesPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="AllStarAppearancesNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="AllStarAppearancesViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="AllStarAppearancesBody" class="champs-list" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="AllStarAppearancesTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="AllStarAppearancesThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
@@ -138,11 +152,13 @@
                                 <ui:Label class="th-result" text="RESULTADO" />
                                 <ui:Label class="th-mvp" text="MVP" />
                             </ui:VisualElement>
-                            <ui:VisualElement name="AllStarHistoryBody" class="palmares-table-body" />
-                            <ui:VisualElement name="AllStarHistoryPaginator" class="palmares-paginator">
-                                <ui:Button name="AllStarHistoryPrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="AllStarHistoryPageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="AllStarHistoryNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="AllStarHistoryViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="AllStarHistoryBody" class="palmares-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="AllStarHistoryTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="AllStarHistoryThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -165,11 +181,13 @@
                                 <ui:Label class="th-hof-assists" text="AST." />
                                 <ui:Label class="th-hof-season" text="INDUCCIÓN" />
                             </ui:VisualElement>
-                            <ui:VisualElement name="HallOfFameBody" class="palmares-table-body" />
-                            <ui:VisualElement name="HallOfFamePaginator" class="palmares-paginator">
-                                <ui:Button name="HallOfFamePrev" class="palmares-paginator-btn" text="◀" />
-                                <ui:Label name="HallOfFamePageInfo" class="palmares-paginator-info" text="1 / 1" />
-                                <ui:Button name="HallOfFameNext" class="palmares-paginator-btn" text="▶" />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="HallOfFameViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="HallOfFameBody" class="palmares-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="HallOfFameTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="HallOfFameThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>

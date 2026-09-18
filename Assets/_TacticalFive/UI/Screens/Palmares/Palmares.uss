@@ -159,7 +159,7 @@
     gap: 4px;
     flex-grow: 1;
     min-height: 0;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .champ-row {
@@ -246,7 +246,7 @@
     flex-direction: column;
     flex-grow: 1;
     min-height: 0;
-    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .palmares-table-body > .palmares-data-row {
@@ -542,49 +542,45 @@
     white-space: nowrap !important;
 }
 
-/* ══ PAGINATOR ══ */
+/* ══ SCROLLBAR (reemplaza paginadores) ══ */
 
-.palmares-paginator {
+.palmares-scroll-row {
     flex-direction: row;
-    align-items: center;
-    justify-content: center;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.palmares-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.palmares-scrollbar {
+    width: 12px;
+    min-width: 12px;
     flex-shrink: 0;
-    margin-top: auto;
-    padding: 8px 0 4px 0;
-    border-top-width: 1px;
-    border-top-color: rgb(42, 51, 71);
+    align-self: stretch;
+    margin-left: 4px;
+    background-color: rgba(25, 18, 8, 0.92);
+    border-left-width: 1px;
+    border-left-color: rgba(120, 95, 30, 0.35);
+    position: relative;
 }
 
-.palmares-paginator-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
-    color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.10);
-    border-width: 1px;
-    border-color: rgb(212, 160, 23);
-    border-radius: 4px;
-    padding: 4px 10px;
-    margin: 0 4px;
-    -unity-text-align: middle-center;
-    cursor: pointer;
+.palmares-scrollbar-thumb {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 0;
+    height: 40px;
+    background-color: rgb(160, 128, 30);
+    border-radius: 3px;
 }
-.palmares-paginator-btn:hover {
-    background-color: rgba(212, 160, 23, 0.25);
-}
-.palmares-paginator-btn:disabled {
-    color: rgb(58, 74, 99);
-    border-color: rgb(42, 51, 71);
-    background-color: transparent;
-    cursor: default;
-}
-
-.palmares-paginator-info {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
-    color: rgb(122, 138, 170);
-    margin: 0 8px;
-    -unity-text-align: middle-center;
-    min-width: 50px;
+.palmares-scrollbar:hover .palmares-scrollbar-thumb {
+    background-color: rgb(212, 160, 23);
 }
 
 /* Sidebar / header from Dashboard.uss are inherited */
