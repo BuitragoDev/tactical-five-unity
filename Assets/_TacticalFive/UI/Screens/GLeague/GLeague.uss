@@ -258,14 +258,15 @@
 
 /* ── Custom scrollbar (gold) ── */
 .gl-results-scrollbar {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
     width: 12px;
+    min-width: 12px;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-left: 4px;
     background-color: rgba(25, 18, 8, 0.92);
     border-left-width: 1px;
     border-left-color: rgba(120, 95, 30, 0.35);
+    position: relative;
 }
 
 .gl-results-scrollbar-thumb {
@@ -283,6 +284,7 @@
 
 .gl-table-body {
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .gl-table-header {
