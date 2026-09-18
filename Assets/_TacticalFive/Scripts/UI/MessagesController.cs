@@ -8,14 +8,12 @@ public class MessagesController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Messages;
 
-    private const int ITEMS_PER_PAGE = 4;
-
     private VisualElement _messagesBody;
-    private VisualElement _paginator;
     private TextField _searchField;
-    private Button _btnPrev;
-    private Button _btnNext;
-    private Label _pageLabel;
+
+    // ── Scrollbar (blue) ──
+    private VisualElement _messagesViewport, _messagesScrollTrack, _messagesScrollThumb;
+    private ScrollBar _messagesBar;
 
     private VisualElement _newsDetailPanel;
     private VisualElement _newsDetailContent;
@@ -31,7 +29,6 @@ public class MessagesController : UIScreenController
     private List<MessageData> _filteredMessages;
     private string _activeCategory = "TODAS";
     private string _searchQuery = "";
-    private int _currentPage = 0;
     private int _selectedMessageId = 0;
 
     private readonly Dictionary<string, Sprite> _logoSprites = new();
@@ -44,7 +41,9 @@ public class MessagesController : UIScreenController
     protected override void CacheReferences()
     {
         _messagesBody = _root.Q<VisualElement>("MessagesBody");
-        _paginator = _root.Q<VisualElement>("Paginator");
+        _messagesViewport = _root.Q<VisualElement>("MessagesViewport");
+        _messagesScrollTrack = _root.Q<VisualElement>("MessagesScrollTrack");
+        _messagesScrollThumb = _root.Q<VisualElement>("MessagesScrollThumb");
         _searchField = _root.Q<TextField>("SearchField");
 
         _filterTabs[0] = _root.Q<Button>("FilterTodas");
@@ -110,7 +109,6 @@ public class MessagesController : UIScreenController
         _searchField?.RegisterValueChangedCallback(evt =>
         {
             _searchQuery = evt.newValue ?? "";
-            _currentPage = 0;
             ApplyFilters();
         });
 
@@ -149,7 +147,6 @@ public class MessagesController : UIScreenController
     void SetActiveFilter(string category)
     {
         _activeCategory = category;
-        _currentPage = 0;
 
         var filterNames = new[] { "TODAS", "CLUB", "LIGA", "TRASPASOS", "LESIONES", "PRENSA" };
         for (int i = 0; i < _filterTabs.Length; i++)
@@ -207,24 +204,14 @@ public class MessagesController : UIScreenController
             lbl.AddToClassList("messages-empty-text");
             empty.Add(lbl);
             _messagesBody.Add(empty);
-            _paginator.style.display = DisplayStyle.None;
             ShowNewsDetail(null);
             return;
         }
 
-        // Keep the current selection if it is still present; otherwise select the first one
         if (_filteredMessages.All(m => m.id != _selectedMessageId))
             _selectedMessageId = _filteredMessages[0].id;
 
-        int totalPages = Mathf.CeilToInt((float)_filteredMessages.Count / ITEMS_PER_PAGE);
-        if (_currentPage >= totalPages) _currentPage = totalPages - 1;
-        if (_currentPage < 0) _currentPage = 0;
-
-        int start = _currentPage * ITEMS_PER_PAGE;
-        int end = Mathf.Min(start + ITEMS_PER_PAGE, _filteredMessages.Count);
-        var pageMessages = _filteredMessages.GetRange(start, end - start);
-
-        foreach (var msg in pageMessages)
+        foreach (var msg in _filteredMessages)
         {
             var card = CreateNewsCard(msg);
             _messagesBody.Add(card);
@@ -233,7 +220,7 @@ public class MessagesController : UIScreenController
                 DatabaseManager.Instance.MarkMessageRead(msg.id);
         }
 
-        BuildPaginator(totalPages);
+        _messagesBar = BindScrollBar(_messagesViewport, _messagesBody, _messagesScrollTrack, _messagesScrollThumb);
 
         var selected = _filteredMessages.FirstOrDefault(m => m.id == _selectedMessageId);
         ShowNewsDetail(selected);
@@ -291,58 +278,6 @@ public class MessagesController : UIScreenController
             CursorManager.Instance.RegisterHandCursor(card);
 
         return card;
-    }
-
-    void BuildPaginator(int totalPages)
-    {
-        _paginator.Clear();
-
-        if (totalPages <= 1)
-        {
-            _paginator.style.display = DisplayStyle.None;
-            return;
-        }
-
-        _paginator.style.display = DisplayStyle.Flex;
-
-        var btnPrev = new Button();
-        btnPrev.AddToClassList("messages-paginator-btn");
-        btnPrev.text = "\u25C0";
-        btnPrev.SetEnabled(_currentPage > 0);
-        if (_currentPage <= 0) btnPrev.AddToClassList("messages-paginator-btn--disabled");
-        int prevPage = _currentPage - 1;
-        btnPrev.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(prevPage); });
-        if (CursorManager.Instance != null)
-        {
-            btnPrev.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
-            btnPrev.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
-        }
-        _paginator.Add(btnPrev);
-
-        var pageLbl = new Label();
-        pageLbl.AddToClassList("messages-paginator-label");
-        pageLbl.text = $"{_currentPage + 1} / {totalPages}";
-        _paginator.Add(pageLbl);
-
-        var btnNext = new Button();
-        btnNext.AddToClassList("messages-paginator-btn");
-        btnNext.text = "\u25B6";
-        btnNext.SetEnabled(_currentPage < totalPages - 1);
-        if (_currentPage >= totalPages - 1) btnNext.AddToClassList("messages-paginator-btn--disabled");
-        int nextPage = _currentPage + 1;
-        btnNext.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(nextPage); });
-        if (CursorManager.Instance != null)
-        {
-            btnNext.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
-            btnNext.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
-        }
-        _paginator.Add(btnNext);
-    }
-
-    void GoToPage(int page)
-    {
-        _currentPage = page;
-        BuildNewsCards();
     }
 
     // ── NEWS DETAIL ──
@@ -858,5 +793,136 @@ public class MessagesController : UIScreenController
         if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays} día{((int)diff.TotalDays != 1 ? "s" : "")}";
         if (diff.TotalDays < 30) return $"Hace {(int)(diff.TotalDays / 7)} semana{((int)(diff.TotalDays / 7) != 1 ? "s" : "")}";
         return $"Hace {(int)(diff.TotalDays / 30)} mes{((int)(diff.TotalDays / 30) != 1 ? "es" : "")}";
+    }
+
+    // ── ScrollBar (blue) ──
+
+    class ScrollBar
+    {
+        public VisualElement Viewport, Content, Track, Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY, StartScrollY;
+    }
+
+    ScrollBar BindScrollBar(VisualElement viewport, VisualElement content,
+                            VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+
+        var bar = new ScrollBar
+        {
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
+
+        viewport.RegisterCallback<WheelEvent>(evt =>
+        {
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
+        {
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (bar.Dragging)
+            {
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
+
+        track.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+        return bar;
+    }
+
+    static float GetScrollMax(ScrollBar bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(ScrollBar bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(ScrollBar bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float thumbHeight = max <= 0f ? trackHeight : Mathf.Max(36f, trackHeight * viewportHeight / contentHeight);
+        thumbHeight = Mathf.Min(thumbHeight, trackHeight);
+
+        float travel = trackHeight - thumbHeight;
+        float t = max <= 0f ? 0f : Mathf.Clamp01(bar.ScrollY / max);
+
+        bar.Thumb.style.height = thumbHeight;
+        bar.Thumb.style.top = travel * t;
     }
 }
