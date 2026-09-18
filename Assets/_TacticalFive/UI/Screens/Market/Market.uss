@@ -1720,7 +1720,7 @@
     border-radius: 7px;
     color: rgb(130, 170, 230);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
 }
 .market-fa-modal-body .renew-modal-text {
     width: 100%;
