@@ -90,23 +90,14 @@
                     <ui:VisualElement class="stats-table-wrapper">
                         <!-- Fixed header -->
                         <ui:VisualElement name="BuscadorTableHeader" class="stats-header-row" />
-                        <ui:VisualElement name="BuscadorTableBody" class="stats-table" />
-                        <ui:VisualElement class="buscador-pagination">
-                            <ui:Button name="BtnFirstPage" class="buscador-page-btn buscador-page-jump-btn">
-                                <ui:Image name="FirstPageIcon1" class="buscador-page-icon" />
-                                <ui:Image name="FirstPageIcon2" class="buscador-page-icon" />
-                            </ui:Button>
-                            <ui:Button name="BtnPreviousPage" class="buscador-page-btn">
-                                <ui:Image name="PreviousPageIcon" class="buscador-page-icon" />
-                            </ui:Button>
-                            <ui:Label name="PageLabel" class="buscador-page-label" text="1 de 1" />
-                            <ui:Button name="BtnNextPage" class="buscador-page-btn">
-                                <ui:Image name="NextPageIcon" class="buscador-page-icon" />
-                            </ui:Button>
-                            <ui:Button name="BtnLastPage" class="buscador-page-btn buscador-page-jump-btn">
-                                <ui:Image name="LastPageIcon1" class="buscador-page-icon" />
-                                <ui:Image name="LastPageIcon2" class="buscador-page-icon" />
-                            </ui:Button>
+                        <!-- Body with custom scrollbar -->
+                        <ui:VisualElement class="stats-scroll-row">
+                            <ui:VisualElement name="BuscadorViewport" class="stats-viewport">
+                                <ui:VisualElement name="BuscadorTableBody" class="stats-table" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="BuscadorScrollTrack" class="stats-scrollbar">
+                                <ui:VisualElement name="BuscadorScrollThumb" class="stats-scrollbar-thumb" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

@@ -12,11 +12,6 @@ public class BuscadorController : UIScreenController
     private Label _panelTitle;
     private VisualElement _teamGrid;
     private readonly Dictionary<Button, int> _teamBtnMap = new();
-    private Button _previousPageBtn;
-    private Button _nextPageBtn;
-    private Button _firstPageBtn;
-    private Button _lastPageBtn;
-    private Label _pageLabel;
 
     private readonly List<Button> _posBtns = new();
     private readonly List<Button> _ageBtns = new();
@@ -35,8 +30,9 @@ public class BuscadorController : UIScreenController
     private string _sortColumn = "media";
     private bool _sortDescending = true;
 
-    private const int PAGE_SIZE = 9;
-    private int _currentPage;
+    // ── Scrollbar ──
+    private VisualElement _buscadorViewport, _buscadorScrollTrack, _buscadorScrollThumb;
+    private ScrollBarData _buscadorBar;
 
     protected override void CacheReferences()
     {
@@ -44,22 +40,10 @@ public class BuscadorController : UIScreenController
         _tableBody = _root.Q<VisualElement>("BuscadorTableBody");
         _panelTitle = _root.Q<Label>("PanelTitle");
         _teamGrid = _root.Q<VisualElement>("BuscadorTeamGrid");
-        _previousPageBtn = _root.Q<Button>("BtnPreviousPage");
-        _nextPageBtn = _root.Q<Button>("BtnNextPage");
-        _firstPageBtn = _root.Q<Button>("BtnFirstPage");
-        _lastPageBtn = _root.Q<Button>("BtnLastPage");
-        _pageLabel = _root.Q<Label>("PageLabel");
-
-        var previousIcon = _root.Q<Image>("PreviousPageIcon");
-        var nextIcon = _root.Q<Image>("NextPageIcon");
-        var previousSprite = Resources.Load<Sprite>("Icons/left_arrow");
-        var nextSprite = Resources.Load<Sprite>("Icons/right_arrow");
-        SetPageIcon(previousIcon, previousSprite);
-        SetPageIcon(nextIcon, nextSprite);
-        SetPageIcon(_root.Q<Image>("FirstPageIcon1"), previousSprite);
-        SetPageIcon(_root.Q<Image>("FirstPageIcon2"), previousSprite);
-        SetPageIcon(_root.Q<Image>("LastPageIcon1"), nextSprite);
-        SetPageIcon(_root.Q<Image>("LastPageIcon2"), nextSprite);
+        _buscadorViewport = _root.Q<VisualElement>("BuscadorViewport");
+        _buscadorScrollTrack = _root.Q<VisualElement>("BuscadorScrollTrack");
+        _buscadorScrollThumb = _root.Q<VisualElement>("BuscadorScrollThumb");
+        if (_buscadorViewport != null) _buscadorViewport.style.overflow = Overflow.Hidden;
 
         _posBtns.Clear();
         foreach (var name in new[] { "PosTodos", "PosPG", "PosSG", "PosSF", "PosPF", "PosC" })
@@ -81,12 +65,6 @@ public class BuscadorController : UIScreenController
             var btn = _root.Q<Button>(name);
             if (btn != null) _ovrBtns.Add(btn);
         }
-    }
-
-    void SetPageIcon(Image image, Sprite sprite)
-    {
-        if (image != null && sprite != null)
-            image.style.backgroundImage = new StyleBackground(sprite);
     }
 
     protected override void LoadData()
@@ -134,10 +112,6 @@ public class BuscadorController : UIScreenController
 
         _root.Q<Button>("ToggleOnlyFA")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _onlyFA = !_onlyFA; ApplyFilters(); });
         _root.Q<Button>("BtnClearFilters")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ClearFilters(); });
-        _previousPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(-1); });
-        _nextPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(1); });
-        _firstPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(-10); });
-        _lastPageBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ChangePage(10); });
     }
 
     protected override void Refresh()
@@ -229,7 +203,6 @@ public class BuscadorController : UIScreenController
             _panelTitle.text = $"BUSCADOR — {total} {word}";
         }
 
-        _currentPage = 0;
         RenderCurrentPage();
     }
 
@@ -270,32 +243,16 @@ public class BuscadorController : UIScreenController
         ApplyFilters();
     }
 
-    void ChangePage(int direction)
-    {
-        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_filteredPlayers.Count / (float)PAGE_SIZE));
-        _currentPage = Mathf.Clamp(_currentPage + direction, 0, pageCount - 1);
-        RenderCurrentPage();
-    }
-
     void RenderCurrentPage()
     {
         if (_tableBody == null) return;
 
-        int pageCount = Mathf.Max(1, Mathf.CeilToInt(_filteredPlayers.Count / (float)PAGE_SIZE));
-        _currentPage = Mathf.Clamp(_currentPage, 0, pageCount - 1);
-        var pagePlayers = _filteredPlayers
-            .Skip(_currentPage * PAGE_SIZE)
-            .Take(PAGE_SIZE)
-            .ToList();
-
         _tableBody.Clear();
         BuildDynamicHeader();
-        RenderRows(pagePlayers, _filteredPlayers.Count);
+        RenderRows(_filteredPlayers, _filteredPlayers.Count);
 
-        if (_pageLabel != null)
-            _pageLabel.text = $"{_currentPage + 1} de {pageCount}";
-        _previousPageBtn?.SetEnabled(_currentPage > 0);
-        _nextPageBtn?.SetEnabled(_currentPage < pageCount - 1);
+        if (_buscadorBar != null) { _buscadorBar.ScrollY = 0f; ApplyScroll(_buscadorBar); }
+        _buscadorBar = BindScrollBar(_buscadorViewport, _tableBody, _buscadorScrollTrack, _buscadorScrollThumb);
     }
 
     /* ═══════════════════════════════════════════
@@ -444,5 +401,135 @@ public class BuscadorController : UIScreenController
         CursorManager.Instance?.RegisterHandCursor(item);
         row.Add(item);
         _teamBtnMap[item] = teamId;
+    }
+
+    // ── ScrollBar ──
+    class ScrollBarData
+    {
+        public VisualElement Viewport;
+        public VisualElement Content;
+        public VisualElement Track;
+        public VisualElement Thumb;
+        public float ScrollY;
+        public bool Dragging;
+        public float StartPointerY;
+        public float StartScrollY;
+    }
+
+    ScrollBarData BindScrollBar(VisualElement viewport, VisualElement content,
+                                VisualElement track, VisualElement thumb)
+    {
+        if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        viewport.style.overflow = Overflow.Hidden;
+        viewport.style.flexDirection = FlexDirection.Column;
+
+        var bar = new ScrollBarData
+        {
+            Viewport = viewport,
+            Content = content,
+            Track = track,
+            Thumb = thumb
+        };
+
+        viewport.RegisterCallback<WheelEvent>(evt =>
+        {
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            bar.Dragging = true;
+            bar.StartPointerY = evt.position.y;
+            bar.StartScrollY = bar.ScrollY;
+            thumb.CapturePointer(evt.pointerId);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerMoveEvent>(evt =>
+        {
+            if (!bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            float travel = track.layout.height - thumb.layout.height;
+            if (max <= 0f || travel <= 0f) return;
+            float delta = evt.position.y - bar.StartPointerY;
+            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerUpEvent>(evt =>
+        {
+            if (bar.Dragging)
+            {
+                bar.Dragging = false;
+                thumb.ReleasePointer(evt.pointerId);
+            }
+            evt.StopPropagation();
+        });
+
+        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
+
+        track.RegisterCallback<PointerDownEvent>(evt =>
+        {
+            if (bar.Dragging) return;
+            float max = GetScrollMax(bar);
+            if (max <= 0f) return;
+            float page = viewport.layout.height;
+            float y = evt.localPosition.y;
+            float thumbTop = thumb.layout.y;
+            float thumbBottom = thumbTop + thumb.layout.height;
+            float target = y < thumbTop ? bar.ScrollY - page
+                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
+            bar.ScrollY = Mathf.Clamp(target, 0f, max);
+            ApplyScroll(bar);
+            evt.StopPropagation();
+        });
+
+        CursorManager.Instance?.RegisterHandCursor(thumb);
+        CursorManager.Instance?.RegisterHandCursor(track);
+
+        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
+
+        ApplyScroll(bar);
+
+        return bar;
+    }
+
+    static float GetScrollMax(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        return Mathf.Max(0f, contentHeight - viewportHeight);
+    }
+
+    void ClampAndApply(ScrollBarData bar)
+    {
+        if (bar == null) return;
+        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
+        ApplyScroll(bar);
+    }
+
+    void ApplyScroll(ScrollBarData bar)
+    {
+        if (bar == null || bar.Content == null) return;
+
+        bar.Content.style.top = -bar.ScrollY;
+
+        float trackHeight = bar.Track.layout.height;
+        float contentHeight = bar.Content.layout.height;
+        float viewportHeight = bar.Viewport.layout.height;
+        if (trackHeight <= 0f || contentHeight <= 0f) return;
+
+        float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float ratio = max > 0f ? bar.ScrollY / max : 0f;
+        float thumbMax = trackHeight - bar.Thumb.layout.height;
+        bar.Thumb.style.top = ratio * thumbMax;
     }
 }
