@@ -1306,7 +1306,7 @@
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     padding: 11px 16px;
     border-radius: 8px;
@@ -1324,6 +1324,7 @@
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 210, 145);
+    font-size: 18px;
     border-radius: 8px;
     padding: 11px 16px;
 }
