@@ -5556,13 +5556,12 @@ List<int> offeredPickIds = new List<int>();
         box.Add(analysisSection);
 
         // ── Buttons ──
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("trade-modal-buttons");
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
 
         var rejectBtn = new Button();
         rejectBtn.text = "RECHAZAR OFERTA";
-        rejectBtn.AddToClassList("trade-modal-btn");
-        rejectBtn.AddToClassList("trade-modal-btn--reject");
+        rejectBtn.AddToClassList("btn-modal-cancel");
         rejectBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -5576,12 +5575,12 @@ List<int> offeredPickIds = new List<int>();
             else
                 ShowNextPendingTradeOffer();
         });
-        btnGroup.Add(rejectBtn);
+        actions.Add(rejectBtn);
 
         var acceptBtn = new Button();
         acceptBtn.text = "ACEPTAR INTERCAMBIO";
-        acceptBtn.AddToClassList("trade-modal-btn");
-        acceptBtn.AddToClassList("trade-modal-btn--accept");
+        acceptBtn.AddToClassList("btn-modal-confirm");
+        acceptBtn.AddToClassList("btn-modal-confirm--gold");
         acceptBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -5744,8 +5743,8 @@ List<int> offeredPickIds = new List<int>();
             else
                 ShowNextPendingTradeOffer();
         });
-        btnGroup.Add(acceptBtn);
-        box.Add(btnGroup);
+        actions.Add(acceptBtn);
+        box.Add(actions);
 
         if (CursorManager.Instance != null)
         {

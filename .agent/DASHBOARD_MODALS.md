@@ -51,7 +51,7 @@ Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno n
 | 7 | Load Management | Red | Jugadores cansados | `ShowLoadManagementModal` | ✅ Hecho |
 | 8 | Empty Lineup | Red | Slots vacíos | `ShowEmptyLineupModal` | ✅ Hecho |
 | 9 | Offer Result | Green/Gold/Red | Ofertas maduradas | `ShowOfferResultModal` | ✅ Hecho |
-| 10 | Trade Offer | Dark Gold | Traspaso IA | `ShowTradeOfferModal` | ⬜ Pendiente |
+| 10 | Trade Offer | Dark Gold | Traspaso IA | `ShowTradeOfferModal` | ✅ Hecho |
 | 11 | Trade Deadline Week | Gold | 1 de febrero | `ShowTradeDeadlineModal` | ✅ Hecho |
 | 12 | Deadline Day | Gold | 7 de febrero | `ShowDeadlineDayModal` | ✅ Hecho |
 | 13 | Recovered Player(s) | Green | Recuperación lesión | `ShowRecoveredModal` | ✅ Hecho |
