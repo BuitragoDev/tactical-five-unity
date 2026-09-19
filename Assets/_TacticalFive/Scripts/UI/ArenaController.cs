@@ -16,6 +16,18 @@ using System.Linq;
     private Texture2D _starTex;
     private StyleBackground _starBg;
 
+    // Confirmation modal
+    private VisualElement _confirmRenovationOverlay;
+    private Label _confirmRenovationIcon;
+    private Label _confirmRenovationName;
+    private Label _confirmRenovationDesc;
+    private Label _confirmRenovationCost;
+    private Label _confirmRenovationDuration;
+    private Label _confirmRenovationCapacity;
+    private Button _confirmRenovationYes;
+    private Button _confirmRenovationNo;
+    private string _pendingRenovationType;
+
     // Renovation config (same as Django)
     private const int MAX_CAPACITY = 50000;
 
@@ -35,6 +47,20 @@ using System.Linq;
         _renovationWarning = _root.Q<VisualElement>("RenovationWarning");
         _renovationWarningText = _root.Q<Label>("RenovationWarningText");
         _upgradeCardsContainer = _root.Q<VisualElement>("UpgradeCardsContainer");
+
+        _confirmRenovationOverlay = _root.Q<VisualElement>("ConfirmRenovationOverlay");
+        _confirmRenovationIcon = _root.Q<Label>("ConfirmRenovationIcon");
+        _confirmRenovationName = _root.Q<Label>("ConfirmRenovationName");
+        _confirmRenovationDesc = _root.Q<Label>("ConfirmRenovationDesc");
+        _confirmRenovationCost = _root.Q<Label>("ConfirmRenovationCost");
+        _confirmRenovationDuration = _root.Q<Label>("ConfirmRenovationDuration");
+        _confirmRenovationCapacity = _root.Q<Label>("ConfirmRenovationCapacity");
+        _confirmRenovationYes = _root.Q<Button>("ConfirmRenovationYes");
+        _confirmRenovationNo = _root.Q<Button>("ConfirmRenovationNo");
+
+        _confirmRenovationYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); var t = _pendingRenovationType; CloseConfirmModal(); StartRenovation(t); });
+        _confirmRenovationNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseConfirmModal(); });
+        _confirmRenovationOverlay?.RegisterCallback<ClickEvent>(e => { if (e.target == _confirmRenovationOverlay) { PlayClick(); CloseConfirmModal(); } });
 
         _starTex = Resources.Load<Texture2D>("Icons/estrella64px");
         if (_starTex != null)
@@ -342,7 +368,7 @@ using System.Linq;
         else
         {
             btn.text = "INICIAR";
-            btn.clicked += () => { PlayClick(); StartRenovation(type); };
+            btn.clicked += () => { PlayClick(); ShowConfirmModal(type, info, discountedCost); };
         }
         card.Add(btn);
 
@@ -350,6 +376,36 @@ using System.Linq;
             CursorManager.Instance.RegisterHandCursor(btn);
 
         return card;
+    }
+
+    /* ═══════════════════════════════════════════
+       CONFIRM RENOVATION MODAL
+       ═══════════════════════════════════════════ */
+
+    void ShowConfirmModal(string type, (string name, string desc, string icon, int capacityBonus, long cost, int durationWeeks) info, long discountedCost)
+    {
+        if (_confirmRenovationOverlay == null) return;
+
+        _pendingRenovationType = type;
+        _confirmRenovationIcon.text = info.icon;
+        _confirmRenovationName.text = info.name;
+        _confirmRenovationDesc.text = info.desc;
+        _confirmRenovationCost.text = FormatCost(discountedCost);
+        _confirmRenovationDuration.text = $"{info.durationWeeks} semanas";
+        _confirmRenovationCapacity.text = $"+{info.capacityBonus:N0} asientos";
+
+        _confirmRenovationOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _confirmRenovationOverlay.AddToClassList("modal-overlay--visible");
+        var box = _confirmRenovationOverlay.Q<VisualElement>("ConfirmRenovationBox");
+        box?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseConfirmModal()
+    {
+        _confirmRenovationOverlay?.RemoveFromClassList("modal-overlay--visible");
+        var box = _confirmRenovationOverlay?.Q<VisualElement>("ConfirmRenovationBox");
+        box?.RemoveFromClassList("modal-box--visible");
+        _pendingRenovationType = null;
     }
 
     /* ═══════════════════════════════════════════
