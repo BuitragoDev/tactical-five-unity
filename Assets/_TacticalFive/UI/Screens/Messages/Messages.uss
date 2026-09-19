@@ -400,7 +400,7 @@
 
 .messages-empty-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
     -unity-text-align: middle-left;
 }
@@ -478,7 +478,7 @@
 
 .news-detail-empty {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(85, 102, 119);
     -unity-text-align: middle-center;
     align-self: stretch;
