@@ -1384,6 +1384,7 @@
     background-color: rgba(212, 160, 23, 0.10);
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
+    font-size: 18px;
 }
 .btn-modal-confirm--gold:hover {
     background-color: rgba(212, 160, 23, 0.25);
