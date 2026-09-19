@@ -1480,7 +1480,7 @@ using System.Threading.Tasks;
                     category = NewsCategory.TRASPASOS,
                     news_type = NewsType.DEADLINE_SEMANA
                 });
-                _showDeadlineWeekModal = !fastSim;
+                _showDeadlineWeekModal = true;
             }
 
             // Monthly awards evaluation (1st of Dec through Apr)
@@ -1785,6 +1785,15 @@ using System.Threading.Tasks;
 
             if (FindNextGameDay() == 0)
                 break;
+
+            if (IsFeb7OfYearEnd() && !_deadlineDayModalShown)
+            {
+                _deadlineDayModalShown = true;
+                _deadlineDayActive = true;
+                ShowDeadlineDayModal();
+                yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
+                _deadlineDayActive = false;
+            }
 
             yield return ProcessGameDayRoutine(fastSim: true);
 
