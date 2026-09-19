@@ -23,6 +23,7 @@
 
 - Botón cancelar: `btn-modal-cancel` (gris outline)
 - Botón confirmar: `btn-modal-confirm` (verde outline) / `btn-modal-confirm--gold` (dorado) / `btn-modal-confirm--danger` (rojo)
+- Ancho modal básico: **650px** (`fired-modal-box--modern`)
 
 ---
 

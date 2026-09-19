@@ -1393,7 +1393,7 @@
 }
 
 .fired-modal-box--modern {
-    width: 520px;
+    width: 650px;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-radius: 12px;
