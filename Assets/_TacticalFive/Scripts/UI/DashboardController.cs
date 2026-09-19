@@ -1312,7 +1312,7 @@ using System.Threading.Tasks;
                            && g.is_played == 0
                            && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
 
-                bool teamWonAnyPlayIn = false;
+                bool teamLostLastPlayIn = false;
                 if (hasPlayedPlayIn && !hasRemainingPlayIn)
                 {
                     var myPlayInGames = DatabaseManager.Instance.Db.Table<GameData>()
@@ -1320,21 +1320,19 @@ using System.Threading.Tasks;
                                && g.game_type == "playin"
                                && g.is_played == 1
                                && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
+                        .OrderByDescending(g => g.game_day)
                         .ToList();
 
-                    foreach (var g in myPlayInGames)
+                    if (myPlayInGames.Count > 0)
                     {
-                        bool iWon = (g.home_team_id == _myTeam.id && g.home_score > g.away_score)
-                                  || (g.away_team_id == _myTeam.id && g.away_score > g.home_score);
-                        if (iWon)
-                        {
-                            teamWonAnyPlayIn = true;
-                            break;
-                        }
+                        var lastGame = myPlayInGames[0];
+                        bool iWonLast = (lastGame.home_team_id == _myTeam.id && lastGame.home_score > lastGame.away_score)
+                                      || (lastGame.away_team_id == _myTeam.id && lastGame.away_score > lastGame.home_score);
+                        teamLostLastPlayIn = !iWonLast;
                     }
                 }
 
-                if (hasPlayedPlayIn && !hasRemainingPlayIn && !teamWonAnyPlayIn)
+                if (hasPlayedPlayIn && !hasRemainingPlayIn && teamLostLastPlayIn)
                 {
                     bool playInAlreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
                         .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ELIMINACION_PLAYIN);
@@ -1389,9 +1387,10 @@ using System.Threading.Tasks;
                            && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
 
                 bool teamWonLastSeries = false;
+                string lastSeriesLabel = "";
                 if (hasPlayedPlayoffs && !hasRemainingPlayoffs)
                 {
-                    string lastSeriesLabel = DatabaseManager.Instance.Db.Table<GameData>()
+                    lastSeriesLabel = DatabaseManager.Instance.Db.Table<GameData>()
                         .Where(g => g.manager_id == _manager.id
                                && g.game_type == "playoff"
                                && g.is_played == 1
@@ -1413,13 +1412,46 @@ using System.Threading.Tasks;
                         .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ELIMINACION_PLAYOFFS);
                     if (!playoffAlreadySent)
                     {
+                        string rivalName = "";
+                        int round = 0;
+                        int losses = 0;
+
+                        if (!string.IsNullOrEmpty(lastSeriesLabel))
+                        {
+                            var seriesGames = DatabaseManager.Instance.Db.Table<GameData>()
+                                .Where(g => g.manager_id == _manager.id
+                                       && g.series_label == lastSeriesLabel
+                                       && g.is_played == 1)
+                                .ToList();
+
+                            if (seriesGames.Count > 0)
+                            {
+                                int rivalId = seriesGames[0].home_team_id == _myTeam.id
+                                    ? seriesGames[0].away_team_id
+                                    : seriesGames[0].home_team_id;
+                                rivalName = _allTeams?.Find(t => t.id == rivalId)?.name ?? "";
+
+                                foreach (var sg in seriesGames)
+                                {
+                                    bool iLost = (sg.home_team_id == _myTeam.id && sg.home_score < sg.away_score)
+                                              || (sg.away_team_id == _myTeam.id && sg.away_score < sg.home_score);
+                                    if (iLost) losses++;
+                                }
+                            }
+
+                            if (lastSeriesLabel.Contains("-r1-")) round = 1;
+                            else if (lastSeriesLabel.Contains("-r2-")) round = 2;
+                            else if (lastSeriesLabel.Contains("-r3-")) round = 3;
+                            else round = 4;
+                        }
+
                         DatabaseManager.Instance.AddMessage(new MessageData
                         {
                             manager_id = _manager.id,
                             sender_type = 1,
                             sender_id = 0,
                             title = "Eliminación en Playoffs",
-                            body = NewsTexts.EliminacionPlayoffs(_myTeam.name, "", 0, 0),
+                            body = NewsTexts.EliminacionPlayoffs(_myTeam.name, rivalName, round, losses),
                             game_day = gameDay,
                             game_date = _season?.current_date ?? "",
                             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -1428,7 +1460,7 @@ using System.Threading.Tasks;
                             category = NewsCategory.LIGA,
                             news_type = NewsType.ELIMINACION_PLAYOFFS
                         });
-                        Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Playoffs.");
+                        Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Playoffs por {rivalName} en ronda {round}.");
                     }
                 }
             }
