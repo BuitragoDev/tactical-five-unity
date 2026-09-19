@@ -3720,6 +3720,8 @@ using System.Threading.Tasks;
         body.AddToClassList("fired-modal-body");
         var text = new Label("El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.");
         text.AddToClassList("fired-modal-text");
+        text.style.marginTop = 15;
+        text.style.marginBottom = 15;
         body.Add(text);
         box.Add(body);
 
@@ -3729,6 +3731,7 @@ using System.Threading.Tasks;
         var marketBtn = new Button();
         marketBtn.text = "IR AL MERCADO";
         marketBtn.AddToClassList("btn-modal-confirm");
+        marketBtn.AddToClassList("btn-modal-confirm--gold");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
