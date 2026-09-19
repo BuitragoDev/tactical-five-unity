@@ -3290,6 +3290,7 @@ using System.Threading.Tasks;
         {
             var infoLabel = new Label("Ningún jugador está por debajo del umbral de cansancio, pero el descanso proactivo puede prevenir lesiones.");
             infoLabel.AddToClassList("fired-modal-text");
+            infoLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             body.Add(infoLabel);
         }
 
@@ -3297,6 +3298,7 @@ using System.Threading.Tasks;
         {
             var text = new Label("Los siguientes jugadores están cansados y tienen mayor riesgo de lesión:");
             text.AddToClassList("fired-modal-text");
+            text.style.unityTextAlign = TextAnchor.MiddleLeft;
             body.Add(text);
 
             var list = new VisualElement();
