@@ -3916,6 +3916,7 @@ using System.Threading.Tasks;
         var marketBtn = new Button();
         marketBtn.text = "IR AL MERCADO";
         marketBtn.AddToClassList("btn-modal-confirm");
+        marketBtn.AddToClassList("btn-modal-confirm--gold");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();

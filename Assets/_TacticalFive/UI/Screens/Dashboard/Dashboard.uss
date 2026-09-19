@@ -1264,10 +1264,10 @@
 
 .fired-modal-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 20px;
+    font-size: 18px;
     color: rgb(179, 190, 214);
     -unity-text-align: middle-center;
-    margin-bottom: 24px;
+    margin-bottom: 0;
     white-space: normal;
 }
 
@@ -1337,7 +1337,7 @@
 
 .btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     letter-spacing: 1px;
     padding: 12px 20px;
     background-color: rgba(100, 110, 130, 0.10);
@@ -1659,7 +1659,7 @@
     font-size: 18px;
     color: rgb(140, 150, 175);
     -unity-text-align: middle-center;
-    padding: 24px 0;
+    padding: 16px 0;
 }
 
 .deadline-modal-hint {
@@ -1667,7 +1667,7 @@
     font-size: 15px;
     color: rgb(140, 150, 175);
     -unity-text-align: middle-center;
-    padding: 12px 0 0 0;
+    padding: 16px 0 0 0;
     white-space: normal;
 }
 
