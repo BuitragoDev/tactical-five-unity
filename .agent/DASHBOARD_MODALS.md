@@ -44,8 +44,8 @@ Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno n
 
 | # | Modal | Borde | Trigger | Método | Estado |
 |---|---|---|---|---|---|
-| 4 | Budget Warning | Gold | Presupuesto rojo | `ShowBudgetWarningModal` | ⬜ Pendiente |
-| 5 | Budget Fired | Red | Avisos >= umbral | `ShowBudgetFiredModal` | ⬜ Pendiente |
+| 4 | Budget Warning | Gold | Presupuesto rojo | `ShowBudgetWarningModal` | ✅ Hecho |
+| 5 | Budget Fired | Red | Avisos >= umbral | `ShowBudgetFiredModal` | ✅ Hecho |
 | 6 | Injured Lineup | Red | Lesionados en quinteto | `ShowInjuredLineupModal` | ⬜ Pendiente |
 | 7 | Load Management | Red | Jugadores cansados | `ShowLoadManagementModal` | ⬜ Pendiente |
 | 8 | Empty Lineup | Red | Slots vacíos | `ShowEmptyLineupModal` | ⬜ Pendiente |
@@ -55,8 +55,8 @@ Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno n
 | 12 | Deadline Day | Gold | 7 de febrero | `ShowDeadlineDayModal` | ⬜ Pendiente |
 | 13 | Recovered Player(s) | Green | Recuperación lesión | `ShowRecoveredModal` | ⬜ Pendiente |
 | 14 | IR Release | Green | Roster > MAX | `ShowPendingIRReleaseModal` | ⬜ Pendiente |
-| 15 | Fired (Trust) | Red | Confianza < 10 | `ShowFiredModal` | ⬜ Pendiente |
-| 16 | Fired (Objective) | Red | ProManager objetivo | `ShowObjectiveFiredModal` | ⬜ Pendiente |
+| 15 | Fired (Trust) | Red | Confianza < 10 | `ShowFiredModal` | ✅ Hecho |
+| 16 | Fired (Objective) | Red | ProManager objetivo | `ShowObjectiveFiredModal` | ✅ Hecho |
 | 17 | Fast Sim Summary | Blue | Sim rápida OK | `ShowFastSimSummary` | ⬜ Pendiente |
 
 ---

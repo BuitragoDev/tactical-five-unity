@@ -1331,6 +1331,123 @@
     color: rgb(240, 145, 125);
 }
 
+/* ══ FIRED MODALS (modern header+body) ══ */
+
+/* ── Shared button styles (matching Market/Roster pattern) ── */
+
+.btn-modal-cancel {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    background-color: rgba(100, 110, 130, 0.10);
+    border-width: 2px;
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
+    border-radius: 8px;
+    cursor: pointer;
+    -unity-text-align: middle-center;
+}
+.btn-modal-cancel:hover {
+    background-color: rgba(100, 110, 130, 0.25);
+    color: rgb(200, 210, 230);
+}
+
+.btn-modal-confirm {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    padding: 12px 20px;
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    color: rgb(100, 200, 140);
+    border-radius: 8px;
+    cursor: pointer;
+    -unity-text-align: middle-center;
+}
+.btn-modal-confirm:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+}
+
+.btn-modal-confirm--danger {
+    background-color: rgba(192, 57, 43, 0.10);
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+}
+.btn-modal-confirm--danger:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
+}
+
+.btn-modal-confirm--gold {
+    background-color: rgba(212, 160, 23, 0.10);
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+.btn-modal-confirm--gold:hover {
+    background-color: rgba(212, 160, 23, 0.25);
+    color: rgb(230, 190, 60);
+}
+
+.fired-modal-box--modern {
+    width: 520px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.fired-modal-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 24px;
+    background-color: rgba(192, 57, 43, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(192, 57, 43);
+}
+
+.fired-modal-header--warning {
+    background-color: rgba(212, 160, 23, 0.15);
+    border-bottom-color: rgb(212, 160, 23);
+}
+
+.fired-modal-header--green {
+    background-color: rgba(39, 174, 96, 0.15);
+    border-bottom-color: rgb(39, 174, 96);
+}
+
+.fired-modal-header--blue {
+    background-color: rgba(42, 95, 201, 0.15);
+    border-bottom-color: rgb(42, 95, 201);
+}
+
+.fired-modal-header .fired-modal-title {
+    margin-bottom: 0;
+    -unity-text-align: middle-left;
+    font-size: 28px;
+}
+
+.fired-modal-body {
+    padding: 20px 24px;
+}
+
+.fired-modal-actions {
+    flex-direction: row;
+    padding: 0 24px 24px 24px;
+}
+
+.fired-modal-actions .btn-modal-cancel,
+.fired-modal-actions .btn-modal-confirm {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-left: 6px;
+    margin-right: 6px;
+    min-width: 0;
+}
+
 /* ══ OFFER RESULT MODAL (modern) ══ */
 
 .offer-result-modal-box {

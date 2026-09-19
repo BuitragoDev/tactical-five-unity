@@ -2795,32 +2795,42 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fired-modal-box--warning");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(212, 160, 23, 255));
         _firedOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
         var title = new Label("AVISO FINANCIERO");
         title.AddToClassList("fired-modal-title");
-        title.AddToClassList("fired-modal-title--warning");
-        box.Add(title);
+        title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        header.Add(title);
+        box.Add(header);
 
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
         var text = new Label(
             $"El presupuesto del club está en números rojos.\n\n" +
             $"Aviso {num} de 3."
         );
         text.AddToClassList("fired-modal-text");
-        box.Add(text);
+        body.Add(text);
+        box.Add(body);
 
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = fastSim ? "IR A FINANZAS" : "CERRAR";
-        btn.AddToClassList("fired-modal-btn");
-        btn.AddToClassList("fired-modal-btn--warning");
+        btn.AddToClassList(fastSim ? "btn-modal-confirm--gold" : "btn-modal-cancel");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             if (fastSim)
             {
-                // Detener la simulación rápida y llevar al jugador a Finanzas.
                 _fastSimStopRequested = true;
                 HideLoading();
                 _firedOverlay.style.display = DisplayStyle.None;
@@ -2831,7 +2841,8 @@ using System.Threading.Tasks;
                 _firedOverlay.style.display = DisplayStyle.None;
             }
         });
-        box.Add(btn);
+        actions.Add(btn);
+        box.Add(actions);
     }
 
     void ShowBudgetFiredModal()
@@ -2842,30 +2853,38 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
         _firedOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
         var title = new Label("DESPIDO");
         title.AddToClassList("fired-modal-title");
-        box.Add(title);
+        header.Add(title);
+        box.Add(header);
 
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
         var text = new Label(
             "La directiva ha decidido prescindir de tus servicios\n" +
             "debido a la mala gestión financiera del club."
         );
         text.AddToClassList("fired-modal-text");
-        box.Add(text);
+        body.Add(text);
+        box.Add(body);
 
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENU PRINCIPAL";
-        btn.AddToClassList("fired-modal-btn");
-        btn.AddToClassList("fired-modal-btn--danger");
+        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             ScreenManager.Instance.GoTo(GameScreen.MainMenu);
         });
-        box.Add(btn);
+        actions.Add(btn);
+        box.Add(actions);
     }
 
     List<int> GetEmptyStarterSlots()
@@ -4092,29 +4111,38 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
         _firedOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
         var title = new Label("DESPIDO");
         title.AddToClassList("fired-modal-title");
-        box.Add(title);
+        header.Add(title);
+        box.Add(header);
 
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
         var text = new Label(
             "La directiva ha decidido prescindir de tus servicios.\n\n" +
             "Los resultados de la temporada no han cumplido las expectativas mínimas."
         );
         text.AddToClassList("fired-modal-text");
-        box.Add(text);
+        body.Add(text);
+        box.Add(body);
 
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "IR AL MENÚ PRINCIPAL";
-        btn.AddToClassList("fired-modal-btn");
+        btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             ScreenManager.Instance.GoTo(GameScreen.MainMenu);
         });
-        box.Add(btn);
+        actions.Add(btn);
+        box.Add(actions);
     }
 
     void ShowObjectiveFiredModal()
@@ -4125,13 +4153,18 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
         _firedOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
         var title = new Label("DESPIDO");
         title.AddToClassList("fired-modal-title");
-        box.Add(title);
+        header.Add(title);
+        box.Add(header);
 
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
         string obj = _myTeam?.objective ?? "el objetivo de temporada";
         var text = new Label(
             "La directiva ha decidido prescindir de tus servicios.\n\n" +
@@ -4139,17 +4172,21 @@ using System.Threading.Tasks;
             "En el modo ProManager, el objetivo es innegociable."
         );
         text.AddToClassList("fired-modal-text");
-        box.Add(text);
+        body.Add(text);
+        box.Add(body);
 
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "IR AL MENÚ PRINCIPAL";
-        btn.AddToClassList("fired-modal-btn");
+        btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             ScreenManager.Instance.GoTo(GameScreen.MainMenu);
         });
-        box.Add(btn);
+        actions.Add(btn);
+        box.Add(actions);
     }
 
     int DateToGameDay(System.DateTime date)
