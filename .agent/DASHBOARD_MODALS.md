@@ -50,12 +50,12 @@ Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno n
 | 6 | Injured Lineup | Red | Lesionados en quinteto | `ShowInjuredLineupModal` | ⬜ Pendiente |
 | 7 | Load Management | Red | Jugadores cansados | `ShowLoadManagementModal` | ⬜ Pendiente |
 | 8 | Empty Lineup | Red | Slots vacíos | `ShowEmptyLineupModal` | ⬜ Pendiente |
-| 9 | Offer Result | Green/Gold/Red | Ofertas maduradas | `ShowOfferResultModal` | ⬜ Pendiente |
+| 9 | Offer Result | Green/Gold/Red | Ofertas maduradas | `ShowOfferResultModal` | ✅ Hecho |
 | 10 | Trade Offer | Dark Gold | Traspaso IA | `ShowTradeOfferModal` | ⬜ Pendiente |
 | 11 | Trade Deadline Week | Gold | 1 de febrero | `ShowTradeDeadlineModal` | ✅ Hecho |
 | 12 | Deadline Day | Gold | 7 de febrero | `ShowDeadlineDayModal` | ✅ Hecho |
-| 13 | Recovered Player(s) | Green | Recuperación lesión | `ShowRecoveredModal` | ⬜ Pendiente |
-| 14 | IR Release | Green | Roster > MAX | `ShowPendingIRReleaseModal` | ⬜ Pendiente |
+| 13 | Recovered Player(s) | Green | Recuperación lesión | `ShowRecoveredModal` | ✅ Hecho |
+| 14 | IR Release | Green | Roster > MAX | `ShowPendingIRReleaseModal` | ✅ Hecho |
 | 15 | Fired (Trust) | Red | Confianza < 10 | `ShowFiredModal` | ✅ Hecho |
 | 16 | Fired (Objective) | Red | ProManager objetivo | `ShowObjectiveFiredModal` | ✅ Hecho |
 | 17 | Fast Sim Summary | Blue | Sim rápida OK | `ShowFastSimSummary` | ✅ Hecho |
