@@ -804,12 +804,14 @@ public class EmployeesController : UIScreenController
         {
             hireBox.AddToClassList("hire-modal-box--gold");
             _btnHireConfirm.RemoveFromClassList("btn-modal-confirm");
+            _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--danger");
             _btnHireConfirm.AddToClassList("btn-modal-confirm--gold");
             _isReplacing = true;
         }
         else
         {
             _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--gold");
+            _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--danger");
             _btnHireConfirm.AddToClassList("btn-modal-confirm");
             _isReplacing = false;
         }
@@ -1009,7 +1011,8 @@ public class EmployeesController : UIScreenController
         _hireResultBox.RemoveFromClassList("hire-modal-box--negative");
         _hireResultBox.AddToClassList("hire-modal-box--negative");
         _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
-        _btnHireResultOk.AddToClassList("btn-modal-cancel");
+        _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
+        _btnHireResultOk.AddToClassList("btn-modal-confirm--danger");
         _btnHireResultOk.text = "CERRAR";
         _hireResultOverlay.style.display = DisplayStyle.Flex;
     }
@@ -1103,6 +1106,7 @@ public class EmployeesController : UIScreenController
             _hireResultTitle.text = "CONTRATACIÓN COMPLETADA";
             _hireResultText.text = $"{name} se ha unido a tu equipo como {positionLabel}.";
             _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
+            _btnHireResultOk.RemoveFromClassList("btn-modal-confirm--danger");
             _btnHireResultOk.AddToClassList("btn-modal-confirm");
         }
         else
@@ -1110,6 +1114,7 @@ public class EmployeesController : UIScreenController
             _hireResultTitle.text = "CONTRATACIÓN FALLIDA";
             _hireResultText.text = "No se ha podido completar la contratación.";
             _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
+            _btnHireResultOk.RemoveFromClassList("btn-modal-confirm--danger");
             _btnHireResultOk.AddToClassList("btn-modal-cancel");
         }
         _btnHireResultOk.text = "CERRAR";

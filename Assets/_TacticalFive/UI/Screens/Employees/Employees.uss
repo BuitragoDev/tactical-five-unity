@@ -462,7 +462,7 @@
 }
 
 .hire-modal-box {
-    width: 520px;
+    width: 650px;
     background-color: rgb(13, 24, 42);
     border-width: 1px;
     border-color: rgb(39, 174, 96);
