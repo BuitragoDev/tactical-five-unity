@@ -175,6 +175,7 @@
 /* ══ MODAL SALIR DEL JUEGO ══ */
 #ExitModalBox {
     width: 650px;
+    position: relative;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
@@ -240,6 +241,7 @@
 /* ══ MODAL PROMANAGER ══ */
 #ProModalBox {
     width: 650px;
+    position: relative;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
@@ -309,6 +311,7 @@
 /* ══ MODAL AVISO LEGAL ══ */
 #ModalBox {
     width: 650px;
+    position: relative;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
@@ -346,6 +349,7 @@
 /* ══ MODAL INFORME DE ERRORES ══ */
 #BugReportBox {
     width: 650px;
+    position: relative;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
