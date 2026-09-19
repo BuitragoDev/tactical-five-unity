@@ -175,14 +175,13 @@
 /* ══ MODAL SALIR DEL JUEGO ══ */
 #ExitModalBox {
     width: 650px;
-    position: relative;
-    overflow: visible;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
     border-radius: 12px;
     padding: 0;
     flex-direction: column;
+    overflow: hidden;
 }
 #ExitModalBox .modal-title {
     padding: 10px 24px;
@@ -241,14 +240,13 @@
 /* ══ MODAL PROMANAGER ══ */
 #ProModalBox {
     width: 650px;
-    position: relative;
-    overflow: visible;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
     border-radius: 12px;
     padding: 0;
     flex-direction: column;
+    overflow: hidden;
 }
 #ProModalBox .modal-title {
     padding: 10px 24px;
@@ -311,14 +309,13 @@
 /* ══ MODAL AVISO LEGAL ══ */
 #ModalBox {
     width: 650px;
-    position: relative;
-    overflow: visible;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
     border-radius: 12px;
     padding: 0;
     flex-direction: column;
+    overflow: hidden;
 }
 #ModalBox .modal-title {
     padding: 10px 24px;
@@ -349,14 +346,13 @@
 /* ══ MODAL INFORME DE ERRORES ══ */
 #BugReportBox {
     width: 650px;
-    position: relative;
-    overflow: visible;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
     border-radius: 12px;
     padding: 0;
     flex-direction: column;
+    overflow: hidden;
 }
 #BugReportBox .modal-title {
     padding: 10px 24px;
