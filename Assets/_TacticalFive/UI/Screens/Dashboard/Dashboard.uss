@@ -1929,8 +1929,9 @@
 #ConfigModalBox {
     width: 800px;
 }
-#ConfigModalBox .btn-modal-cancel {
+#ConfigBtnCerrar {
     margin: 16px 20px;
+    align-self: stretch;
 }
 
 /* ══ MAIN MENU CONFIRM MODAL ══ */
