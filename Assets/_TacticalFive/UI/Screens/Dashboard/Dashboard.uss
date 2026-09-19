@@ -1925,9 +1925,19 @@
     color: rgb(240, 145, 125);
 }
 
+/* ══ CONFIG MODAL (audio/gráficos/sim) ══ */
+#ConfigModalBox {
+    width: 800px;
+}
+
+/* ══ MAIN MENU CONFIRM MODAL ══ */
+#ConfigMainMenuConfirmBox {
+    width: 650px;
+}
+
 /* ══ EXIT CONFIRM MODAL (rojo) ══ */
 #ConfigExitConfirmBox {
-    width: 520px;
+    width: 650px;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
