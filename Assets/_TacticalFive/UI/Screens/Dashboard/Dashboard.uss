@@ -1925,15 +1925,6 @@
     color: rgb(240, 145, 125);
 }
 
-/* ══ CONFIG MODAL (audio/gráficos/sim) ══ */
-#ConfigModalBox {
-    width: 800px;
-}
-#ConfigBtnCerrar {
-    margin: 16px 20px;
-    align-self: stretch;
-}
-
 /* ══ MAIN MENU CONFIRM MODAL ══ */
 #ConfigMainMenuConfirmBox {
     width: 650px;

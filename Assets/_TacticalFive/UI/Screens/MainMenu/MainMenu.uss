@@ -172,20 +172,6 @@
     color: rgb(150, 190, 255);
 }
 
-/* ══ MODAL CONFIGURACIÓN ══ */
-#ConfigModalBox {
-    width: 800px;
-}
-#ConfigBtnCerrar {
-    color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.10);
-    border-color: rgb(212, 160, 23);
-    margin: 16px 20px;
-}
-#ConfigBtnCerrar:hover {
-    background-color: rgba(212, 160, 23, 0.25);
-}
-
 /* ══ MODAL SALIR DEL JUEGO ══ */
 #ExitModalBox {
     width: 650px;

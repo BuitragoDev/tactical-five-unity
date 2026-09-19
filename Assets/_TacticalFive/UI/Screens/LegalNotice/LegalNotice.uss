@@ -165,3 +165,17 @@
     background-color: rgba(42, 95, 201, 0.25);
     color: rgb(150, 190, 255);
 }
+
+/* ══ CONFIG MODAL (global, heredado por UIScreenController) ══ */
+#ConfigModalBox {
+    width: 800px;
+}
+#ConfigBtnCerrar {
+    color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.10);
+    border-color: rgb(212, 160, 23);
+    margin: 16px 20px;
+}
+#ConfigBtnCerrar:hover {
+    background-color: rgba(212, 160, 23, 0.25);
+}
