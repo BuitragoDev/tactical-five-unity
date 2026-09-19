@@ -88,38 +88,18 @@ public class MainMenuController : UIScreenController
 
         // Callbacks modal legal
         _btnCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseModal(); });
-        _modalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _modalOverlay)
-                { PlayClick(); CloseModal(); }
-        });
 
         // Callbacks modal bug report
         _btnBugReportSend?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OnBugReportSendClicked(); });
         _btnBugReportCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseBugReportModal(); });
-        _bugReportOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _bugReportOverlay)
-                { PlayClick(); CloseBugReportModal(); }
-        });
 
         // Callbacks modal salir
         _btnExitYes?.RegisterCallback<ClickEvent>(_ => { PlayClick(); QuitGame(); });
         _btnExitNo?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseExitModal(); });
-        _exitModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _exitModalOverlay)
-                { PlayClick(); CloseExitModal(); }
-        });
 
         // Callbacks modal ProManager
         _btnProConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmProManager(); });
         _btnProCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseProModal(); });
-        _proModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _proModalOverlay)
-                { PlayClick(); CloseProModal(); }
-        });
 
         // Hover CTA tarjetas
         RegisterCardHover("BtnManager",    "CtaManager");
@@ -225,11 +205,6 @@ public class MainMenuController : UIScreenController
         _configBtnQualityUltra?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SelectConfigQuality(3); });
 
         _btnConfigCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseConfigModal(); });
-        _configModalOverlay?.RegisterCallback<ClickEvent>(e =>
-        {
-            if (e.target == _configModalOverlay)
-                { PlayClick(); CloseConfigModal(); }
-        });
 
         if (CursorManager.Instance != null)
         {
