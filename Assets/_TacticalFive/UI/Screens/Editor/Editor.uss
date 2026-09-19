@@ -480,7 +480,7 @@
 }
 
 .editor-modal-box {
-    width: 560px;
+    width: 650px;
     background-color: rgb(13, 14, 18);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
