@@ -2634,6 +2634,7 @@ using System.Threading.Tasks;
         // ── Box ──
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box--modern");
+        box.style.width = 800;
         Color32 borderColor = resultType == 1 ? new Color32(39, 174, 96, 255)
             : resultType == 0 ? new Color32(212, 160, 23, 255)
             : new Color32(192, 57, 43, 255);
@@ -2646,9 +2647,9 @@ using System.Threading.Tasks;
         // ── Header ──
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        string headerMod = resultType == 1 ? "fired-modal-header--positive"
+        string headerMod = resultType == 1 ? "fired-modal-header--green"
             : resultType == 0 ? "fired-modal-header--warning"
-            : "fired-modal-header--danger";
+            : "";
         header.AddToClassList(headerMod);
 
         string subtitleText = resultType == 1 ? "COMPLETADO" : resultType == 0 ? "AVISO" : "ERROR";
@@ -2731,6 +2732,7 @@ using System.Threading.Tasks;
             var goToQuintetoBtn = new Button();
             goToQuintetoBtn.text = "IR A QUINTETO";
             goToQuintetoBtn.AddToClassList("btn-modal-confirm");
+            goToQuintetoBtn.AddToClassList("btn-modal-confirm--gold");
             goToQuintetoBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -3396,7 +3398,7 @@ using System.Threading.Tasks;
         // ── Header ──
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        header.AddToClassList("fired-modal-header--positive");
+        header.AddToClassList("fired-modal-header--green");
 
         var title = new Label("JUGADOR(ES) RECUPERADO(S)");
         title.AddToClassList("fired-modal-title");
@@ -3554,7 +3556,7 @@ using System.Threading.Tasks;
 
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
-        header.AddToClassList("fired-modal-header--positive");
+        header.AddToClassList("fired-modal-header--green");
         var title = new Label("PLANTILLA COMPLETA TRAS RECUPERACI\u00d3N");
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(39, 174, 96, 255));
