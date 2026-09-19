@@ -397,7 +397,7 @@
                         <ui:Button name="ConfigBtnExit" text="SALIR DEL JUEGO" class="settings-btn settings-btn--danger"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:Button name="ConfigBtnCerrar" text="CERRAR" class="modal-close"/>
+                <ui:Button name="ConfigBtnCerrar" text="CERRAR" class="btn-modal-cancel"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
@@ -407,10 +407,9 @@
                     <ui:Label text="¿Estás seguro de que quieres volver al menú principal?" class="modal-paragraph modal-paragraph--highlight"/>
                     <ui:Label text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." class="modal-paragraph"/>
                 </ui:VisualElement>
-                <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnMainMenuNo" text="NO, QUEDARME" class="modal-btn modal-btn--secondary"/>
-                    <ui:VisualElement class="modal-spacer"/>
-                    <ui:Button name="ConfigBtnMainMenuYes" text="SÍ, VOLVER" class="modal-btn modal-btn--danger"/>
+                <ui:VisualElement class="fired-modal-actions">
+                    <ui:Button name="ConfigBtnMainMenuNo" text="NO, QUEDARME" class="btn-modal-cancel"/>
+                    <ui:Button name="ConfigBtnMainMenuYes" text="SÍ, VOLVER" class="btn-modal-confirm btn-modal-confirm--danger"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -421,10 +420,9 @@
                     <ui:Label text="¿Estás seguro de que quieres salir del juego?" class="modal-paragraph modal-paragraph--highlight"/>
                     <ui:Label text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." class="modal-paragraph"/>
                 </ui:VisualElement>
-                <ui:VisualElement class="modal-actions">
-                    <ui:Button name="ConfigBtnExitNo" text="NO" class="modal-btn modal-btn--secondary"/>
-                    <ui:VisualElement class="modal-spacer"/>
-                    <ui:Button name="ConfigBtnExitYes" text="SÍ, SALIR" class="modal-btn modal-btn--danger"/>
+                <ui:VisualElement class="fired-modal-actions">
+                    <ui:Button name="ConfigBtnExitNo" text="NO" class="btn-modal-cancel"/>
+                    <ui:Button name="ConfigBtnExitYes" text="SÍ, SALIR" class="btn-modal-confirm btn-modal-confirm--danger"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

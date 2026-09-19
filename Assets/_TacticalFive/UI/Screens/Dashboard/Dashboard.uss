@@ -1941,7 +1941,7 @@
     border-bottom-width: 1px;
     border-bottom-color: rgb(192, 57, 43);
 }
-#ConfigExitConfirmBox .modal-actions {
+#ConfigExitConfirmBox .fired-modal-actions {
     width: auto;
     align-self: stretch;
     justify-content: space-between;
