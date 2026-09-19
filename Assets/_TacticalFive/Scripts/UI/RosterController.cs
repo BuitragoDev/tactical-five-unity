@@ -1311,6 +1311,11 @@ using System.Linq;
         if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewResultBox, _renewResultTitle);
         ClearRenewResultIcon(_renewResultIcon);
+
+        _selectedPlayer = null;
+        _detailEmpty.style.display = DisplayStyle.Flex;
+        _detailScroll.style.display = DisplayStyle.None;
+        BuildRosterList();
     }
 
     void OpenRenewCooldownModal(int daysLeft)

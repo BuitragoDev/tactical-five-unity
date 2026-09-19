@@ -230,31 +230,47 @@
 
         <!-- ══ MODAL COOLDOWN RENOVACIÓN ══ -->
         <ui:VisualElement name="RenewCooldownOverlay" class="renew-modal-overlay">
-            <ui:VisualElement name="RenewCooldownBox" class="renew-modal-box">
-                <ui:VisualElement name="RenewCooldownIcon" class="renew-modal-icon"/>
-                <ui:Label name="RenewCooldownTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
-                <ui:Label name="RenewCooldownText" class="renew-modal-text" text="" />
-                <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewCooldownOk" class="btn-modal-confirm btn-modal-confirm--danger" text="CERRAR" />
+            <ui:VisualElement name="RenewCooldownBox" class="renew-modal-box renew-modal-box--negative" style="width: 650px;">
+                <ui:VisualElement class="renew-modal-header" style="background-color: rgba(192, 57, 43, 0.20); border-bottom-color: rgb(192, 57, 43);">
+                    <ui:VisualElement class="renew-modal-heading">
+                        <ui:VisualElement name="RenewCooldownIcon" class="renew-modal-icon"/>
+                        <ui:VisualElement>
+                            <ui:Label name="RenewCooldownTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="renew-modal-body">
+                    <ui:Label name="RenewCooldownText" class="renew-modal-text" text="" />
+                    <ui:VisualElement class="renew-modal-actions">
+                        <ui:Button name="BtnRenewCooldownOk" class="btn-modal-cancel" text="CERRAR" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL NO SE PUEDE RENOVAR ══ -->
         <ui:VisualElement name="RenewBlockOverlay" class="renew-modal-overlay">
-            <ui:VisualElement name="RenewBlockBox" class="renew-modal-box">
-                <ui:VisualElement name="RenewBlockIcon" class="renew-modal-icon"/>
-                <ui:Label name="RenewBlockTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
-                <ui:Label name="RenewBlockText" class="renew-modal-text" text="" />
-                <ui:VisualElement class="renew-modal-buttons">
-                    <ui:Button name="BtnRenewBlockOk" class="btn-modal-confirm btn-modal-confirm--danger" text="CERRAR" />
+            <ui:VisualElement name="RenewBlockBox" class="renew-modal-box renew-modal-box--negative" style="width: 650px;">
+                <ui:VisualElement class="renew-modal-header" style="background-color: rgba(192, 57, 43, 0.20); border-bottom-color: rgb(192, 57, 43);">
+                    <ui:VisualElement class="renew-modal-heading">
+                        <ui:VisualElement name="RenewBlockIcon" class="renew-modal-icon"/>
+                        <ui:VisualElement>
+                            <ui:Label name="RenewBlockTitle" class="renew-modal-title" text="RENOVACIÓN NO DISPONIBLE" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="renew-modal-body">
+                    <ui:Label name="RenewBlockText" class="renew-modal-text" text="" />
+                    <ui:VisualElement class="renew-modal-actions">
+                        <ui:Button name="BtnRenewBlockOk" class="btn-modal-cancel" text="CERRAR" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
         <!-- ══ MODAL RESULTADO RENOVACIÓN ══ -->
         <ui:VisualElement name="RenewResultOverlay" class="renew-modal-overlay">
-            <ui:VisualElement name="RenewResultBox" class="renew-modal-box">
+            <ui:VisualElement name="RenewResultBox" class="renew-modal-box" style="width: 650px;">
                 <ui:VisualElement name="RenewResultIcon" class="renew-modal-icon"/>
                 <ui:Label name="RenewResultTitle" class="renew-modal-title" text="" />
                 <ui:Label name="RenewResultText1" class="renew-modal-text" text="" />

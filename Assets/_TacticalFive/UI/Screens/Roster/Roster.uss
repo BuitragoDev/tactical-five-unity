@@ -848,7 +848,7 @@
     display: flex;
 }
 .renew-modal-box {
-    width: 720px;
+    width: 800px;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(39, 174, 96);
@@ -954,7 +954,7 @@
     display: flex;
 }
 .dismiss-modal-box {
-    width: 720px;
+    width: 650px;
     background-color: rgb(13, 24, 42);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
