@@ -2825,7 +2825,8 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = fastSim ? "IR A FINANZAS" : "CERRAR";
-        btn.AddToClassList(fastSim ? "btn-modal-confirm--gold" : "btn-modal-cancel");
+        btn.AddToClassList(fastSim ? "btn-modal-confirm" : "btn-modal-cancel");
+        if (fastSim) btn.AddToClassList("btn-modal-confirm--gold");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -2877,6 +2878,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4179,6 +4181,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
