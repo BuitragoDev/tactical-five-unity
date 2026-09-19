@@ -390,9 +390,9 @@ using System.Linq;
         _confirmRenovationIcon.text = info.icon;
         _confirmRenovationName.text = info.name;
         _confirmRenovationDesc.text = info.desc;
-        _confirmRenovationCost.text = FormatCost(discountedCost);
-        _confirmRenovationDuration.text = $"{info.durationWeeks} semanas";
-        _confirmRenovationCapacity.text = $"+{info.capacityBonus:N0} asientos";
+        _confirmRenovationCost.text = $" {FormatCost(discountedCost)}";
+        _confirmRenovationDuration.text = $" {info.durationWeeks} semanas";
+        _confirmRenovationCapacity.text = $" +{info.capacityBonus:N0} asientos";
 
         _confirmRenovationOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
         _confirmRenovationOverlay.AddToClassList("modal-overlay--visible");

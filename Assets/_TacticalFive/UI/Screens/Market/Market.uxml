@@ -410,20 +410,6 @@
             </ui:VisualElement>
         </ui:VisualElement>
 
-        <!-- FA Result Modal -->
-        <ui:VisualElement name="FAResultOverlay" class="modal-overlay">
-            <ui:VisualElement name="FAResultBox" class="fa-result-box">
-                <ui:Label name="FAResultTitle" class="fa-result-title" text="¡FICHAJE REALIZADO!" />
-                <ui:VisualElement class="fa-result-body">
-                    <ui:Label name="FAResultText1" class="fa-result-text" text="" />
-                    <ui:Label name="FAResultText2" class="fa-result-text" text="" />
-                </ui:VisualElement>
-                <ui:VisualElement class="fa-result-actions">
-                    <ui:Button name="BtnFAResultClose" text="CONTINUAR" class="fa-result-btn" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-        </ui:VisualElement>
-
     </ui:VisualElement>
 
         <!-- ══ MODAL CONFIGURACIÓN ══ -->

@@ -27,7 +27,6 @@ using System.Linq;
     private VisualElement _faConfirmModal;
     private Button _btnCloseFARosterFull;
     private Button _btnCancelFA;
-    private Button _btnCloseFA;
     private Button _btnConfirmFA;
     private Label _faPlayerName;
     private Label _faText1;
@@ -71,12 +70,6 @@ using System.Linq;
     private Button _btnTradeSuccessClose;
     private Button _btnTradeSuccessCloseX;
     private bool _tradeSuccessGoToRoster;
-    private VisualElement _faResultOverlay;
-    private VisualElement _faResultBox;
-    private Label _faResultTitle;
-    private Label _faResultText1;
-    private Label _faResultText2;
-    private Button _btnFAResultClose;
     private List<TeamData> _allTeams = new();
     private List<PlayerData> _myPlayers;
     private List<PlayerData> _otherPlayers;
@@ -202,7 +195,6 @@ using System.Linq;
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
         _btnCloseFARosterFull = _root.Q<Button>("BtnCloseFARosterFull");
         _btnCancelFA = _root.Q<Button>("BtnCancelFA");
-        _btnCloseFA = _root.Q<Button>("BtnCloseFA");
         _btnConfirmFA = _root.Q<Button>("BtnConfirmFA");
         _faPlayerName = _root.Q<Label>("FATitle");
         _faText1 = _root.Q<Label>("FAText1");
@@ -251,17 +243,6 @@ using System.Linq;
             PlayClick();
             CloseTradeSuccessModal();
         });
-        _faResultOverlay = _root.Q<VisualElement>("FAResultOverlay");
-        _faResultBox = _root.Q<VisualElement>("FAResultBox");
-        _faResultTitle = _root.Q<Label>("FAResultTitle");
-        _faResultText1 = _root.Q<Label>("FAResultText1");
-        _faResultText2 = _root.Q<Label>("FAResultText2");
-        _btnFAResultClose = _root.Q<Button>("BtnFAResultClose");
-        _btnFAResultClose?.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            CloseFAResultModal();
-        });
 
         // Trade modal new elements
         _btnConfirmTrade = _root.Q<Button>("BtnConfirmTrade");
@@ -308,8 +289,6 @@ using System.Linq;
 
         if (_tradeSuccessOverlay != null) { _tradeSuccessOverlay.style.display = DisplayStyle.None; }
         if (_tradeSuccessBox != null) { _tradeSuccessBox.style.display = DisplayStyle.None; }
-        if (_faResultOverlay != null) { _faResultOverlay.RemoveFromClassList("modal-overlay--visible"); }
-        if (_faResultBox != null) { _faResultBox.style.display = DisplayStyle.None; }
     }
 
     void ConfigurePlayerScroll(VisualElement viewport)
@@ -509,8 +488,6 @@ using System.Linq;
         _btnCloseFARosterFull?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faRosterFullModal.style.display = DisplayStyle.None; });
         _btnCancelFA?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); _faLongPressSchedule?.Pause(); _faLongPressSchedule = null; _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
-        _btnCloseFA?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faLongPressSchedule?.Pause(); _faLongPressSchedule = null; _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
         _btnConfirmFA?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); SendFAOffer(); });
@@ -2777,50 +2754,6 @@ using System.Linq;
                 _faLongPressSchedule = null;
             }
         });
-    }
-
-    void ShowFAResultModal(bool success, string playerName)
-    {
-        if (_faResultTitle != null)
-            _faResultTitle.text = success ? "¡FICHAJE REALIZADO!" : "¡FICHAJE RECHAZADO!";
-        if (_faResultText1 != null)
-            _faResultText1.text = success
-                ? $"{playerName} ha aceptado tu oferta."
-                : $"{playerName} ha rechazado tu oferta.";
-        if (_faResultText2 != null)
-            _faResultText2.text = success
-                ? "Revisa tu plantilla para ver los detalles."
-                : "No podrás volver a intentarlo hasta dentro de 14 días.";
-
-        if (_faResultBox != null)
-        {
-            var color = success ? new Color32(39, 174, 96, 255) : new Color32(192, 57, 43, 255);
-            _faResultBox.style.borderTopColor = new StyleColor(color);
-            _faResultBox.style.borderBottomColor = new StyleColor(color);
-            _faResultBox.style.borderLeftColor = new StyleColor(color);
-            _faResultBox.style.borderRightColor = new StyleColor(color);
-        }
-        if (_faResultTitle != null)
-        {
-            _faResultTitle.style.color = success
-                ? new StyleColor(new Color32(39, 174, 96, 255))
-                : new StyleColor(new Color32(192, 57, 43, 255));
-        }
-        if (_faResultTitle != null)
-        {
-            _faResultTitle.style.backgroundColor = success
-                ? new StyleColor(new Color32(39, 174, 96, 38))
-                : new StyleColor(new Color32(192, 57, 43, 38));
-        }
-
-        if (_faResultOverlay != null) _faResultOverlay.AddToClassList("modal-overlay--visible");
-        if (_faResultBox != null) _faResultBox.style.display = DisplayStyle.Flex;
-    }
-
-    void CloseFAResultModal()
-    {
-        if (_faResultOverlay != null) _faResultOverlay.RemoveFromClassList("modal-overlay--visible");
-        if (_faResultBox != null) _faResultBox.style.display = DisplayStyle.None;
     }
 
     void ShowFreeAgents()
