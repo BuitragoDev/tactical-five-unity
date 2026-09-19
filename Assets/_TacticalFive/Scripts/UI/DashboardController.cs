@@ -1515,7 +1515,7 @@ using System.Threading.Tasks;
         if (_showDeadlineWeekModal)
         {
             _showDeadlineWeekModal = false;
-            ShowTradeDeadlineModal();
+            ShowTradeDeadlineModal(fastSim);
             yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
         }
 
@@ -1790,7 +1790,7 @@ using System.Threading.Tasks;
             {
                 _deadlineDayModalShown = true;
                 _deadlineDayActive = true;
-                ShowDeadlineDayModal();
+                ShowDeadlineDayModal(true);
                 yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
                 _deadlineDayActive = false;
             }
@@ -3703,7 +3703,7 @@ using System.Threading.Tasks;
         }
     }
 
-    void ShowTradeDeadlineModal()
+    void ShowTradeDeadlineModal(bool fastSim = false)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
@@ -3750,7 +3750,7 @@ using System.Threading.Tasks;
         actions.Add(marketBtn);
 
         var closeBtn = new Button();
-        closeBtn.text = "CERRAR";
+        closeBtn.text = fastSim ? "SEGUIR SIMULANDO" : "CERRAR";
         closeBtn.AddToClassList("btn-modal-cancel");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -3768,7 +3768,7 @@ using System.Threading.Tasks;
         }
     }
 
-    void ShowDeadlineDayModal()
+    void ShowDeadlineDayModal(bool fastSim = false)
     {
         _deadlineDayActive = true;
         _firedOverlay.Clear();
@@ -3952,7 +3952,7 @@ using System.Threading.Tasks;
         actions.Add(marketBtn);
 
         var closeBtn = new Button();
-        closeBtn.text = "CERRAR";
+        closeBtn.text = fastSim ? "SEGUIR SIMULANDO" : "CERRAR";
         closeBtn.AddToClassList("btn-modal-cancel");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
