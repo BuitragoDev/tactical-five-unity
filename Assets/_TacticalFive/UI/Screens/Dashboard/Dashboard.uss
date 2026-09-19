@@ -1392,6 +1392,17 @@
     color: rgb(230, 190, 60);
 }
 
+.btn-modal-confirm--blue {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(42, 95, 201);
+    color: rgb(100, 150, 230);
+    font-size: 18px;
+}
+.btn-modal-confirm--blue:hover {
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(130, 180, 255);
+}
+
 .fired-modal-box--modern {
     width: 650px;
     background-color: rgb(13, 14, 18);

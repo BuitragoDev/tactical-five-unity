@@ -2077,7 +2077,8 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "CERRAR";
-        btn.AddToClassList("btn-modal-cancel");
+        btn.AddToClassList("btn-modal-confirm");
+        btn.AddToClassList("btn-modal-confirm--blue");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
