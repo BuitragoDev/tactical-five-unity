@@ -3282,6 +3282,7 @@ using System.Threading.Tasks;
         {
             var b2bLabel = new Label("Back‑to‑back: tu equipo jugó ayer. Considera descansar algún jugador.");
             b2bLabel.AddToClassList("fired-modal-text");
+            b2bLabel.style.unityTextAlign = TextAnchor.MiddleLeft;
             body.Add(b2bLabel);
         }
 
