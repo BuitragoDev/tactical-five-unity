@@ -5473,59 +5473,29 @@ List<int> offeredPickIds = new List<int>();
         var teamAbbrs = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
 
         var box = new VisualElement();
-        box.AddToClassList("trade-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.width = 800;
+        box.style.borderTopColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(212, 160, 23, 255));
         _firedOverlay.Add(box);
 
         // ── Header ──
         var header = new VisualElement();
-        header.AddToClassList("trade-modal-header");
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
 
-        var headerLeft = new VisualElement();
-        headerLeft.AddToClassList("trade-modal-header-left");
-
-        var subtitle = new Label("OFERTA DE TRASPASO");
-        subtitle.AddToClassList("trade-modal-subtitle");
-        headerLeft.Add(subtitle);
-
-        var titleText = IsDeadlineWeek() ? "[DEADLINE] PROPUESTA DE INTERCAMBIO" : "PROPUESTA DE INTERCAMBIO";
-        var title = new Label(titleText);
-        title.AddToClassList("trade-modal-title");
-        headerLeft.Add(title);
-        header.Add(headerLeft);
-
-        var headerRight = new VisualElement();
-        headerRight.AddToClassList("trade-modal-header-right");
-
-        string phaseLabel = _season?.phase == "regular" ? "TEMPORADA REGULAR"
-            : _season?.phase == "preseason" ? "PRETEMPORADA"
-            : _season?.phase == "playin" ? "PLAY-IN"
-            : _season?.phase == "playoff" ? "PLAYOFFS"
-            : "TEMPORADA REGULAR";
-        var phaseBadge = new Label(phaseLabel);
-        phaseBadge.AddToClassList("trade-modal-phase-badge");
-        headerRight.Add(phaseBadge);
-
-        var closeBtn = new Button();
-        closeBtn.text = "✕";
-        closeBtn.AddToClassList("trade-modal-close-btn");
-        closeBtn.RegisterCallback<ClickEvent>(_ =>
-        {
-            PlayClick();
-            DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
-            _firedOverlay.style.display = DisplayStyle.None;
-            if (_fastSimOfferPauseActive)
-            {
-                _tradeOfferModalResolved = true;
-                _tradeOfferAccepted = false;
-            }
-            else
-                ShowNextPendingTradeOffer();
-        });
-        headerRight.Add(closeBtn);
-        header.Add(headerRight);
+        var title = new Label("PROPUESTA DE INTERCAMBIO");
+        title.AddToClassList("fired-modal-title");
+        title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        header.Add(title);
         box.Add(header);
 
         // ── Teams row ──
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+
         var teamsRow = new VisualElement();
         teamsRow.AddToClassList("trade-modal-teams");
 
@@ -5549,11 +5519,12 @@ List<int> offeredPickIds = new List<int>();
         var rightPanel = BuildTradeTeamPanel(aiTeam, theirPlayers, theirPicks, teamAbbrs, isSending: false, otherSideSalary: ourSalaryTotal);
         teamsRow.Add(rightPanel);
 
-        box.Add(teamsRow);
+        body.Add(teamsRow);
 
         // ── Analysis section ──
         var analysisSection = BuildTradeAnalysis(ourPlayers, theirPlayers, aiTeam);
-        box.Add(analysisSection);
+        body.Add(analysisSection);
+        box.Add(body);
 
         // ── Buttons ──
         var actions = new VisualElement();
@@ -5561,7 +5532,8 @@ List<int> offeredPickIds = new List<int>();
 
         var rejectBtn = new Button();
         rejectBtn.text = "RECHAZAR OFERTA";
-        rejectBtn.AddToClassList("btn-modal-cancel");
+        rejectBtn.AddToClassList("btn-modal-confirm");
+        rejectBtn.AddToClassList("btn-modal-confirm--danger");
         rejectBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -5580,7 +5552,6 @@ List<int> offeredPickIds = new List<int>();
         var acceptBtn = new Button();
         acceptBtn.text = "ACEPTAR INTERCAMBIO";
         acceptBtn.AddToClassList("btn-modal-confirm");
-        acceptBtn.AddToClassList("btn-modal-confirm--gold");
         acceptBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -5750,7 +5721,6 @@ List<int> offeredPickIds = new List<int>();
         {
             CursorManager.Instance.RegisterHandCursor(rejectBtn);
             CursorManager.Instance.RegisterHandCursor(acceptBtn);
-            CursorManager.Instance.RegisterHandCursor(closeBtn);
         }
     }
 
