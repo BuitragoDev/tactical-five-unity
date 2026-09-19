@@ -111,7 +111,7 @@
                     <ui:Label text="Este proyecto es de uso privado y no tiene carácter comercial. Todos los datos utilizados son de dominio público o uso educativo bajo el principio de fair use." class="modal-paragraph"/>
                     <ui:Label text="© 2026 Tactical Five  ·  Todos los derechos reservados" class="modal-copyright"/>
                 </ui:VisualElement>
-                <ui:Button name="BtnCerrar" text="CERRAR" class="modal-close"/>
+                <ui:Button name="BtnCerrar" text="CERRAR" class="btn-modal-cancel"/>
             </ui:VisualElement>
         </ui:VisualElement>
         <ui:VisualElement name="ExitModalOverlay" class="modal-overlay">
@@ -121,8 +121,8 @@
                     <ui:Label text="¿Estás seguro de que quieres salir del juego?" class="modal-paragraph"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnExitNo" text="NO" class="modal-btn modal-btn--secondary"/>
-                    <ui:Button name="BtnExitYes" text="SÍ, SALIR" class="modal-btn modal-btn--danger"/>
+                    <ui:Button name="BtnExitNo" text="NO" class="btn-modal-cancel"/>
+                    <ui:Button name="BtnExitYes" text="SÍ, SALIR" class="btn-modal-confirm btn-modal-confirm--danger"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -199,8 +199,8 @@
                     <ui:Label text="Cambio de equipo: cada temporada podrás cambiar de franquicia entre los peores equipos de la liga." class="modal-paragraph"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnProCancel" text="CERRAR" class="modal-btn modal-btn--secondary"/>
-                    <ui:Button name="BtnProConfirm" text="CONTINUAR" class="modal-btn modal-btn--primary"/>
+                    <ui:Button name="BtnProCancel" text="CERRAR" class="btn-modal-cancel"/>
+                    <ui:Button name="BtnProConfirm" text="CONTINUAR" class="btn-modal-confirm"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
@@ -212,8 +212,8 @@
                     <ui:VisualElement name="BugReportInputContainer" class="bug-report-input"/>
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnBugReportCerrar" text="CERRAR" class="modal-btn modal-btn--secondary"/>
-                    <ui:Button name="BtnBugReportSend" text="ENVIAR" class="modal-btn modal-btn--primary"/>
+                    <ui:Button name="BtnBugReportCerrar" text="CERRAR" class="btn-modal-cancel"/>
+                    <ui:Button name="BtnBugReportSend" text="ENVIAR" class="btn-modal-confirm btn-modal-confirm--blue"/>
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
