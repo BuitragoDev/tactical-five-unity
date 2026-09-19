@@ -33,9 +33,9 @@ Gestionados por `UIScreenController` base. Estos ya siguen el patrón estándar 
 
 | # | Modal | Elementos | Estado |
 |---|---|---|---|
-| 1 | ConfigModalOverlay | Sliders audio, calidad gráficos, sim mode, volver/salir | ⬜ Pendiente (evaluar si necesita cambios) |
-| 2 | ConfigMainMenuConfirmOverlay | Confirmación volver menú | ⬜ Pendiente |
-| 3 | ConfigExitConfirmOverlay | Confirmación salir juego | ⬜ Pendiente |
+| 1 | ConfigModalOverlay | Sliders audio, calidad gráficos, sim mode, volver/salir | ✅ Hecho (btn-modal-cancel CERRAR) |
+| 2 | ConfigMainMenuConfirmOverlay | Confirmación volver menú | ✅ Hecho (btn-modal-cancel + btn-modal-confirm--danger) |
+| 3 | ConfigExitConfirmOverlay | Confirmación salir juego | ✅ Hecho (btn-modal-cancel + btn-modal-confirm--danger) |
 
 ---
 
