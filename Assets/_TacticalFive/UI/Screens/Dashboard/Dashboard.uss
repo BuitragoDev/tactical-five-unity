@@ -1374,6 +1374,7 @@
     background-color: rgba(192, 57, 43, 0.10);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
+    font-size: 18px;
 }
 .btn-modal-confirm--danger:hover {
     background-color: rgba(192, 57, 43, 0.25);

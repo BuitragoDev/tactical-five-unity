@@ -2855,6 +2855,10 @@ using System.Threading.Tasks;
 
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(192, 57, 43, 255));
         _firedOverlay.Add(box);
 
         var header = new VisualElement();
@@ -2877,7 +2881,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.text = "IR AL MENU PRINCIPAL";
         btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
@@ -4114,6 +4118,10 @@ using System.Threading.Tasks;
 
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(192, 57, 43, 255));
         _firedOverlay.Add(box);
 
         var header = new VisualElement();
@@ -4136,7 +4144,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.text = "IR AL MENU PRINCIPAL";
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4156,6 +4164,10 @@ using System.Threading.Tasks;
 
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(192, 57, 43, 255));
         _firedOverlay.Add(box);
 
         var header = new VisualElement();
@@ -4180,7 +4192,7 @@ using System.Threading.Tasks;
         var actions = new VisualElement();
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
-        btn.text = "IR AL MENÚ PRINCIPAL";
+        btn.text = "IR AL MENU PRINCIPAL";
         btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
