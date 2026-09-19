@@ -1307,15 +1307,20 @@ using System.Linq;
 
     void CloseRenewResultModal()
     {
+        bool wasVisible = _renewResultOverlay != null && _renewResultOverlay.style.display == DisplayStyle.Flex;
+
         if (_renewResultOverlay != null) _renewResultOverlay.style.display = DisplayStyle.None;
         if (_renewResultBox != null) _renewResultBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewResultBox, _renewResultTitle);
         ClearRenewResultIcon(_renewResultIcon);
 
-        _selectedPlayer = null;
-        _detailEmpty.style.display = DisplayStyle.Flex;
-        _detailScroll.style.display = DisplayStyle.None;
-        BuildRosterList();
+        if (wasVisible && _selectedPlayer != null)
+        {
+            _selectedPlayer = null;
+            _detailEmpty.style.display = DisplayStyle.Flex;
+            _detailScroll.style.display = DisplayStyle.None;
+            BuildRosterList();
+        }
     }
 
     void OpenRenewCooldownModal(int daysLeft)
@@ -1421,6 +1426,8 @@ using System.Linq;
 
     void CloseRenewModal()
     {
+        bool wasVisible = _renewOverlay != null && _renewOverlay.style.display == DisplayStyle.Flex;
+
         if (_renewOverlay != null) _renewOverlay.style.display = DisplayStyle.None;
         if (_renewBox != null) _renewBox.style.display = DisplayStyle.None;
         if (_renewPendingText != null) _renewPendingText.style.display = DisplayStyle.None;
@@ -1428,6 +1435,14 @@ using System.Linq;
         ClearRenewModalColor(_renewBox, _renewTitle);
         _offerSent = false;
         _renewMaxSalary = 0;
+
+        if (wasVisible && _selectedPlayer != null)
+        {
+            _selectedPlayer = null;
+            _detailEmpty.style.display = DisplayStyle.Flex;
+            _detailScroll.style.display = DisplayStyle.None;
+            BuildRosterList();
+        }
     }
 
     void UpdateAcceptScoreDisplay()
