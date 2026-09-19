@@ -143,6 +143,7 @@ using System.Threading.Tasks;
     private bool _deadlineDayActive;
     private bool _deadlineDayModalShown;
     private int _deadlineModalSeasonId;
+    private bool _showDeadlineWeekModal;
 
     // Toast de logros del GM
     private VisualElement _achievementToast;
@@ -1479,8 +1480,7 @@ using System.Threading.Tasks;
                     category = NewsCategory.TRASPASOS,
                     news_type = NewsType.DEADLINE_SEMANA
                 });
-                if (!fastSim)
-                    ShowTradeDeadlineModal();
+                _showDeadlineWeekModal = !fastSim;
             }
 
             // Monthly awards evaluation (1st of Dec through Apr)
@@ -1497,6 +1497,7 @@ using System.Threading.Tasks;
         catch (System.Exception ex)
         {
             db.Rollback();
+            _showDeadlineWeekModal = false;
             GameResultCache.Clear();
             Debug.LogError($"[GameDay] Error simulando el día, revertido: {ex.Message}\n{ex.StackTrace}");
             if (fastSim)
@@ -1510,6 +1511,13 @@ using System.Threading.Tasks;
         }
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+
+        if (_showDeadlineWeekModal)
+        {
+            _showDeadlineWeekModal = false;
+            ShowTradeDeadlineModal();
+            yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
+        }
 
         if (fastSim)
         {
