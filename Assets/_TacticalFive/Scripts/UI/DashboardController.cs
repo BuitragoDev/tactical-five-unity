@@ -1990,30 +1990,28 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("trade-modal-box");
-        box.AddToClassList("fastsim-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(42, 95, 201, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(42, 95, 201, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(42, 95, 201, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(42, 95, 201, 255));
         _firedOverlay.Add(box);
 
         // ── Header ──
         var header = new VisualElement();
-        header.AddToClassList("trade-modal-header");
-
-        var headerLeft = new VisualElement();
-        headerLeft.AddToClassList("trade-modal-header-left");
-
-        var subtitle = new Label("RESUMEN DE PERÍODO");
-        subtitle.AddToClassList("trade-modal-subtitle");
-        subtitle.AddToClassList("fastsim-modal-subtitle");
-        headerLeft.Add(subtitle);
-
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--blue");
         var title = new Label("SIMULACIÓN COMPLETADA");
-        title.AddToClassList("trade-modal-title");
-        title.AddToClassList("fastsim-modal-title");
-        headerLeft.Add(title);
-        header.Add(headerLeft);
+        title.AddToClassList("fired-modal-title");
+        title.style.color = new StyleColor(new Color32(42, 95, 201, 255));
+        header.Add(title);
         box.Add(header);
 
-        // ── Fechas ──
+        // ── Body ──
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+
+        // Fechas
         var datesRow = new VisualElement();
         datesRow.AddToClassList("fastsim-modal-dates");
 
@@ -2029,71 +2027,64 @@ using System.Threading.Tasks;
         var dateText = new Label($"{fmtStart}  →  {fmtEnd}");
         dateText.AddToClassList("fastsim-modal-dates-text");
         datesRow.Add(dateText);
-        box.Add(datesRow);
+        body.Add(datesRow);
 
-        // ── Stats: W / L ──
+        // Stats: W / L
         var statsRow = new VisualElement();
         statsRow.AddToClassList("fastsim-modal-stats");
 
-        // Wins
         var winCol = new VisualElement();
         winCol.AddToClassList("fastsim-modal-stat-col");
-
         var winNum = new Label(wins.ToString());
         winNum.AddToClassList("fastsim-modal-stat-num");
         winNum.AddToClassList("fastsim-modal-stat-num--win");
         winCol.Add(winNum);
-
         var winLabel = new Label("GANADOS");
         winLabel.AddToClassList("fastsim-modal-stat-label");
         winCol.Add(winLabel);
         statsRow.Add(winCol);
 
-        // Separator
         var sep = new Label("-");
         sep.AddToClassList("fastsim-modal-stat-sep");
         statsRow.Add(sep);
 
-        // Losses
         var lossCol = new VisualElement();
         lossCol.AddToClassList("fastsim-modal-stat-col");
-
         var lossNum = new Label(losses.ToString());
         lossNum.AddToClassList("fastsim-modal-stat-num");
         lossNum.AddToClassList("fastsim-modal-stat-num--loss");
         lossCol.Add(lossNum);
-
         var lossLabel = new Label("PERDIDOS");
         lossLabel.AddToClassList("fastsim-modal-stat-label");
         lossCol.Add(lossLabel);
         statsRow.Add(lossCol);
 
-        box.Add(statsRow);
+        body.Add(statsRow);
 
-        // ── Detail text ──
+        // Detail text
         int total = wins + losses;
         string detail = total > 0
             ? $"{total} partidos simulados · {wins} ganados · {losses} perdidos"
             : "Sin partidos jugados en este período";
         var detailLbl = new Label(detail);
         detailLbl.AddToClassList("fastsim-modal-detail");
-        box.Add(detailLbl);
+        body.Add(detailLbl);
+
+        box.Add(body);
 
         // ── Button ──
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("trade-modal-buttons");
-
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "CERRAR";
-        btn.AddToClassList("trade-modal-btn");
-        btn.AddToClassList("trade-modal-btn--manual");
+        btn.AddToClassList("btn-modal-cancel");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(btn);
-        box.Add(btnGroup);
+        actions.Add(btn);
+        box.Add(actions);
 
         if (CursorManager.Instance != null)
             CursorManager.Instance.RegisterHandCursor(btn);
@@ -3700,50 +3691,54 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
-        box.AddToClassList("fired-modal-box--warning");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(212, 160, 23, 255));
         _firedOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
         var title = new Label("CIERRE DE MERCADO");
         title.AddToClassList("fired-modal-title");
-        title.AddToClassList("fired-modal-title--warning");
-        box.Add(title);
+        title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        header.Add(title);
+        box.Add(header);
 
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
         var text = new Label("El período de traspasos finaliza el 8 de febrero. Aún estás a tiempo de realizar operaciones.");
         text.AddToClassList("fired-modal-text");
-        box.Add(text);
+        body.Add(text);
+        box.Add(body);
 
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
 
         var marketBtn = new Button();
         marketBtn.text = "IR AL MERCADO";
-        marketBtn.AddToClassList("injured-modal-btn");
-        marketBtn.style.backgroundColor = new StyleColor(new Color32(42, 95, 201, 255));
-        marketBtn.style.borderTopColor = new StyleColor(new Color32(42, 95, 201, 255));
-        marketBtn.style.borderBottomColor = new StyleColor(new Color32(42, 95, 201, 255));
-        marketBtn.style.borderLeftColor = new StyleColor(new Color32(42, 95, 201, 255));
-        marketBtn.style.borderRightColor = new StyleColor(new Color32(42, 95, 201, 255));
+        marketBtn.AddToClassList("btn-modal-confirm");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
             ScreenManager.Instance.GoTo(GameScreen.Market);
         });
-        btnGroup.Add(marketBtn);
+        actions.Add(marketBtn);
 
         var closeBtn = new Button();
         closeBtn.text = "CERRAR";
-        closeBtn.AddToClassList("injured-modal-btn");
-        closeBtn.style.marginLeft = 8;
+        closeBtn.AddToClassList("btn-modal-cancel");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(closeBtn);
+        actions.Add(closeBtn);
 
-        box.Add(btnGroup);
+        box.Add(actions);
 
         if (CursorManager.Instance != null)
         {

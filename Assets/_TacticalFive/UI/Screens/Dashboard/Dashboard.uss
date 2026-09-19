@@ -2594,7 +2594,6 @@
 .fastsim-modal-box {
     border-color: rgb(42, 95, 201);
     border-top-color: rgb(42, 95, 201);
-    width: 520px;
 }
 
 .fastsim-modal-title {
@@ -2602,8 +2601,8 @@
     font-size: 28px;
     letter-spacing: 3px;
     color: rgb(255, 255, 255);
-    margin-bottom: 4px;
-    -unity-text-align: middle-center;
+    margin-bottom: 0;
+    -unity-text-align: middle-left;
 }
 
 .fastsim-modal-subtitle {
@@ -2624,7 +2623,7 @@
     border-color: rgba(42, 95, 201, 0.25);
     border-radius: 6px;
     padding: 12px 20px;
-    margin: 0 32px 20px 32px;
+    margin-bottom: 20px;
     align-self: stretch;
 }
 
