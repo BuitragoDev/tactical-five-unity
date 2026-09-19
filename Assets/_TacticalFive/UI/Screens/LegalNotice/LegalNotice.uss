@@ -168,7 +168,7 @@
 
 /* ══ CONFIG MODAL (global, heredado por UIScreenController) ══ */
 #ConfigModalBox {
-    width: 800px;
+    width: 650px;
 }
 #ConfigBtnCerrar {
     color: rgb(212, 160, 23);
