@@ -1602,7 +1602,6 @@
 }
 
 .deadline-modal-op-list {
-    padding: 0 32px;
     max-height: 420px;
     overflow: scroll;
     overflow-clip: initial;
@@ -1668,7 +1667,7 @@
     font-size: 15px;
     color: rgb(140, 150, 175);
     -unity-text-align: middle-center;
-    padding: 0 32px 8px 32px;
+    padding: 12px 0 0 0;
     white-space: normal;
 }
 

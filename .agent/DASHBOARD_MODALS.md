@@ -53,7 +53,7 @@ Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno n
 | 9 | Offer Result | Green/Gold/Red | Ofertas maduradas | `ShowOfferResultModal` | ⬜ Pendiente |
 | 10 | Trade Offer | Dark Gold | Traspaso IA | `ShowTradeOfferModal` | ⬜ Pendiente |
 | 11 | Trade Deadline Week | Gold | 1 de febrero | `ShowTradeDeadlineModal` | ✅ Hecho |
-| 12 | Deadline Day | Gold | 7 de febrero | `ShowDeadlineDayModal` | ⬜ Pendiente |
+| 12 | Deadline Day | Gold | 7 de febrero | `ShowDeadlineDayModal` | ✅ Hecho |
 | 13 | Recovered Player(s) | Green | Recuperación lesión | `ShowRecoveredModal` | ⬜ Pendiente |
 | 14 | IR Release | Green | Roster > MAX | `ShowPendingIRReleaseModal` | ⬜ Pendiente |
 | 15 | Fired (Trust) | Red | Confianza < 10 | `ShowFiredModal` | ✅ Hecho |

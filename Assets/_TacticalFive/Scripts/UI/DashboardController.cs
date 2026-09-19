@@ -3755,29 +3755,28 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("trade-modal-box");
-        box.AddToClassList("deadline-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(212, 160, 23, 255));
         _firedOverlay.Add(box);
 
         // ── Header ──
         var header = new VisualElement();
-        header.AddToClassList("trade-modal-header");
-
-        var headerLeft = new VisualElement();
-        headerLeft.AddToClassList("trade-modal-header-left");
-
-        var subtitle = new Label("AVISO");
-        subtitle.AddToClassList("trade-modal-subtitle");
-        subtitle.AddToClassList("deadline-modal-subtitle");
-        headerLeft.Add(subtitle);
-
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
         var title = new Label("DEADLINE DAY");
-        title.AddToClassList("trade-modal-title");
-        headerLeft.Add(title);
-        header.Add(headerLeft);
+        title.AddToClassList("fired-modal-title");
+        title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        header.Add(title);
         box.Add(header);
 
-        // ── Operations list ──
+        // ── Body ──
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+
+        // Operations list
         var pendingTrades = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id) ?? new List<TradeOfferData>();
         var pendingSATIds = GetPendingSATIds();
         var maturedOffers = DatabaseManager.Instance.GetMaturedUnprocessedOffers(_manager.id, _season.current_game_day) ?? new List<OfferData>();
@@ -3901,21 +3900,22 @@ using System.Threading.Tasks;
                 opList.Add(card);
             }
         }
-        box.Add(opList);
+        body.Add(opList);
 
-        // ── Subtitle ──
+        // Hint
         var hint = new Label("Última oportunidad para realizar traspasos antes del cierre.");
         hint.AddToClassList("deadline-modal-hint");
-        box.Add(hint);
+        body.Add(hint);
+
+        box.Add(body);
 
         // ── Buttons ──
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("trade-modal-buttons");
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
 
         var marketBtn = new Button();
         marketBtn.text = "IR AL MERCADO";
-        marketBtn.AddToClassList("trade-modal-btn");
-        marketBtn.AddToClassList("trade-modal-btn--manual");
+        marketBtn.AddToClassList("btn-modal-confirm");
         marketBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3923,12 +3923,11 @@ using System.Threading.Tasks;
             _firedOverlay.style.display = DisplayStyle.None;
             ScreenManager.Instance.GoTo(GameScreen.Market);
         });
-        btnGroup.Add(marketBtn);
+        actions.Add(marketBtn);
 
         var closeBtn = new Button();
         closeBtn.text = "CERRAR";
-        closeBtn.AddToClassList("trade-modal-btn");
-        closeBtn.AddToClassList("trade-modal-btn--reject");
+        closeBtn.AddToClassList("btn-modal-cancel");
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3936,8 +3935,8 @@ using System.Threading.Tasks;
             _firedOverlay.style.display = DisplayStyle.None;
             RefreshActionButton();
         });
-        btnGroup.Add(closeBtn);
-        box.Add(btnGroup);
+        actions.Add(closeBtn);
+        box.Add(actions);
 
         if (CursorManager.Instance != null)
         {
