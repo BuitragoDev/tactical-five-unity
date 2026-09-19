@@ -406,6 +406,7 @@
                 <!-- Button -->
                 <ui:VisualElement class="trade-actions">
                     <ui:Button name="BtnTradeSuccessClose" text="IR A PLANTILLA" class="trade-btn" />
+                    <ui:Button name="BtnTradeSuccessCloseOnly" text="CERRAR" class="trade-btn" style="margin-left: 12px; background-color: rgba(100, 110, 130, 0.10); border-color: rgb(100, 110, 130); color: rgb(160, 170, 190);" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>

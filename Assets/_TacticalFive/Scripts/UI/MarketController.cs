@@ -69,6 +69,7 @@ using System.Linq;
     private Label _tradeSuccessType;
     private Button _btnTradeSuccessClose;
     private Button _btnTradeSuccessCloseX;
+    private Button _btnTradeSuccessCloseOnly;
     private bool _tradeSuccessGoToRoster;
     private List<TeamData> _allTeams = new();
     private List<PlayerData> _myPlayers;
@@ -231,6 +232,7 @@ using System.Linq;
         _tradeSuccessType = _root.Q<Label>("TradeSuccessType");
         _btnTradeSuccessClose = _root.Q<Button>("BtnTradeSuccessClose");
         _btnTradeSuccessCloseX = _root.Q<Button>("BtnTradeSuccessCloseX");
+        _btnTradeSuccessCloseOnly = _root.Q<Button>("BtnTradeSuccessCloseOnly");
         _btnTradeSuccessClose?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -239,6 +241,11 @@ using System.Linq;
                 ScreenManager.Instance.GoTo(GameScreen.Roster);
         });
         _btnTradeSuccessCloseX?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseTradeSuccessModal();
+        });
+        _btnTradeSuccessCloseOnly?.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             CloseTradeSuccessModal();
