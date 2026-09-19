@@ -3777,7 +3777,7 @@ using System.Threading.Tasks;
         var header = new VisualElement();
         header.AddToClassList("fired-modal-header");
         header.AddToClassList("fired-modal-header--warning");
-        var title = new Label("DEADLINE DAY");
+        var title = new Label("CIERRE DE MERCADO");
         title.AddToClassList("fired-modal-title");
         title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
         header.Add(title);
@@ -3797,9 +3797,12 @@ using System.Threading.Tasks;
 
         if (pendingTrades.Count == 0 && pendingSATIds.Count == 0 && maturedOffers.Count == 0)
         {
-            var emptyLbl = new Label("No tienes operaciones pendientes.");
-            emptyLbl.AddToClassList("deadline-modal-empty");
-            opList.Add(emptyLbl);
+            var emptyLbl = new Label("No tienes operaciones pendientes.\nÚltima oportunidad para realizar traspasos antes del cierre.");
+            emptyLbl.AddToClassList("fired-modal-text");
+            emptyLbl.style.marginTop = 15;
+            emptyLbl.style.marginBottom = 15;
+            body.Add(emptyLbl);
+            opList = null;
         }
         else
         {
@@ -3911,12 +3914,14 @@ using System.Threading.Tasks;
                 opList.Add(card);
             }
         }
-        body.Add(opList);
+        if (opList != null)
+        {
+            body.Add(opList);
 
-        // Hint
-        var hint = new Label("Última oportunidad para realizar traspasos antes del cierre.");
-        hint.AddToClassList("deadline-modal-hint");
-        body.Add(hint);
+            var hint = new Label("Última oportunidad para realizar traspasos antes del cierre.");
+            hint.AddToClassList("deadline-modal-hint");
+            body.Add(hint);
+        }
 
         box.Add(body);
 
