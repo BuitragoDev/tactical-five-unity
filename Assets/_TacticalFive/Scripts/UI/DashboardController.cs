@@ -2956,28 +2956,25 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("trade-modal-box");
-        box.AddToClassList("empty-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(192, 57, 43, 255));
         _firedOverlay.Add(box);
 
         // ── Header ──
         var header = new VisualElement();
-        header.AddToClassList("trade-modal-header");
-
-        var headerLeft = new VisualElement();
-        headerLeft.AddToClassList("trade-modal-header-left");
-
-        var subtitle = new Label("AVISO");
-        subtitle.AddToClassList("trade-modal-subtitle");
-        subtitle.AddToClassList("empty-modal-subtitle");
-        headerLeft.Add(subtitle);
+        header.AddToClassList("fired-modal-header");
 
         var title = new Label("QUINTETO INCOMPLETO");
-        title.AddToClassList("trade-modal-title");
-        title.AddToClassList("empty-modal-title");
-        headerLeft.Add(title);
-        header.Add(headerLeft);
+        title.AddToClassList("fired-modal-title");
+        header.Add(title);
         box.Add(header);
+
+        // ── Body ──
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
 
         // ── Empty position cards ──
         var playerList = new VisualElement();
@@ -3029,16 +3026,17 @@ using System.Threading.Tasks;
 
             playerList.Add(card);
         }
-        box.Add(playerList);
+        body.Add(playerList);
+        box.Add(body);
 
         // ── Buttons ──
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("trade-modal-buttons");
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
 
         var manualBtn = new Button();
         manualBtn.text = "REVISAR MANUALMENTE";
-        manualBtn.AddToClassList("trade-modal-btn");
-        manualBtn.AddToClassList("trade-modal-btn--manual");
+        manualBtn.AddToClassList("btn-modal-confirm");
+        manualBtn.AddToClassList("btn-modal-confirm--gold");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3046,12 +3044,11 @@ using System.Threading.Tasks;
             _emptyLineupModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(manualBtn);
+        actions.Add(manualBtn);
 
         var autoBtn = new Button();
         autoBtn.text = "AUTO-RELLENAR";
-        autoBtn.AddToClassList("trade-modal-btn");
-        autoBtn.AddToClassList("trade-modal-btn--reject");
+        autoBtn.AddToClassList("btn-modal-cancel");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3063,9 +3060,9 @@ using System.Threading.Tasks;
             _emptyLineupModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(autoBtn);
+        actions.Add(autoBtn);
 
-        box.Add(btnGroup);
+        box.Add(actions);
 
         if (CursorManager.Instance != null)
         {
@@ -3080,28 +3077,25 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("trade-modal-box");
-        box.AddToClassList("injury-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(192, 57, 43, 255));
         _firedOverlay.Add(box);
 
         // ── Header ──
         var header = new VisualElement();
-        header.AddToClassList("trade-modal-header");
-
-        var headerLeft = new VisualElement();
-        headerLeft.AddToClassList("trade-modal-header-left");
-
-        var subtitle = new Label("AVISO");
-        subtitle.AddToClassList("trade-modal-subtitle");
-        subtitle.AddToClassList("injury-modal-text-lg");
-        subtitle.style.color = new StyleColor(new Color32(231, 76, 60, 255));
-        headerLeft.Add(subtitle);
+        header.AddToClassList("fired-modal-header");
 
         var title = new Label("JUGADORES LESIONADOS");
-        title.AddToClassList("trade-modal-title");
-        headerLeft.Add(title);
-        header.Add(headerLeft);
+        title.AddToClassList("fired-modal-title");
+        header.Add(title);
         box.Add(header);
+
+        // ── Body ──
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
 
         // ── Injured players ──
         var playerList = new VisualElement();
@@ -3219,17 +3213,17 @@ using System.Threading.Tasks;
 
             playerList.Add(card);
         }
-
-        box.Add(playerList);
+        body.Add(playerList);
+        box.Add(body);
 
         // ── Buttons ──
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("trade-modal-buttons");
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
 
         var manualBtn = new Button();
         manualBtn.text = "CAMBIAR MANUALMENTE";
-        manualBtn.AddToClassList("trade-modal-btn");
-        manualBtn.AddToClassList("trade-modal-btn--manual");
+        manualBtn.AddToClassList("btn-modal-confirm");
+        manualBtn.AddToClassList("btn-modal-confirm--gold");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3237,12 +3231,11 @@ using System.Threading.Tasks;
             _injuredModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(manualBtn);
+        actions.Add(manualBtn);
 
         var autoBtn = new Button();
         autoBtn.text = "REEMPLAZAR AUTOMÁTICAMENTE";
-        autoBtn.AddToClassList("trade-modal-btn");
-        autoBtn.AddToClassList("trade-modal-btn--reject");
+        autoBtn.AddToClassList("btn-modal-cancel");
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3250,8 +3243,8 @@ using System.Threading.Tasks;
             _injuredModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(autoBtn);
-        box.Add(btnGroup);
+        actions.Add(autoBtn);
+        box.Add(actions);
 
         if (CursorManager.Instance != null)
         {
@@ -3266,32 +3259,42 @@ using System.Threading.Tasks;
         _firedOverlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
-        box.AddToClassList("fired-modal-box");
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(192, 57, 43, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(192, 57, 43, 255));
         _firedOverlay.Add(box);
 
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
         var title = new Label("GESTIÓN DE DESCANSO");
         title.AddToClassList("fired-modal-title");
-        box.Add(title);
+        header.Add(title);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
 
         if (isB2B)
         {
             var b2bLabel = new Label("Back‑to‑back: tu equipo jugó ayer. Considera descansar algún jugador.");
             b2bLabel.AddToClassList("fired-modal-text");
-            box.Add(b2bLabel);
+            body.Add(b2bLabel);
         }
 
         if (tiredPlayers.Count == 0 && isB2B)
         {
             var infoLabel = new Label("Ningún jugador está por debajo del umbral de cansancio, pero el descanso proactivo puede prevenir lesiones.");
             infoLabel.AddToClassList("fired-modal-text");
-            box.Add(infoLabel);
+            body.Add(infoLabel);
         }
 
         if (tiredPlayers.Count > 0)
         {
             var text = new Label("Los siguientes jugadores están cansados y tienen mayor riesgo de lesión:");
             text.AddToClassList("fired-modal-text");
-            box.Add(text);
+            body.Add(text);
 
             var list = new VisualElement();
             list.AddToClassList("injured-modal-list");
@@ -3306,18 +3309,19 @@ using System.Threading.Tasks;
                 row.style.color = new StyleColor(fisicoColor);
                 list.Add(row);
             }
-            box.Add(list);
+            body.Add(list);
         }
 
-        var btnGroup = new VisualElement();
-        btnGroup.AddToClassList("injured-modal-btn-group");
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
 
         if (tiredPlayers.Count > 0)
         {
             var restBtn = new Button();
             restBtn.text = "DESCANSAR CANSADOS";
-            restBtn.AddToClassList("injured-modal-btn");
-            restBtn.AddToClassList("load-mgmt-modal-btn--blue");
+            restBtn.AddToClassList("btn-modal-confirm");
             restBtn.RegisterCallback<ClickEvent>(_ =>
             {
                 PlayClick();
@@ -3331,13 +3335,13 @@ using System.Threading.Tasks;
                 _loadMgmtModalResolved = true;
                 _firedOverlay.style.display = DisplayStyle.None;
             });
-            btnGroup.Add(restBtn);
+            actions.Add(restBtn);
         }
 
         var manualBtn = new Button();
         manualBtn.text = "IR AL QUINTETO";
-        manualBtn.AddToClassList("injured-modal-btn");
-        manualBtn.AddToClassList("load-mgmt-modal-btn--blue");
+        manualBtn.AddToClassList("btn-modal-confirm");
+        manualBtn.AddToClassList("btn-modal-confirm--gold");
         manualBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -3345,21 +3349,20 @@ using System.Threading.Tasks;
             _loadMgmtModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(manualBtn);
+        actions.Add(manualBtn);
 
         var continueBtn = new Button();
         continueBtn.text = "CONTINUAR SIN CAMBIOS";
-        continueBtn.AddToClassList("injured-modal-btn");
-        continueBtn.AddToClassList("load-mgmt-modal-btn--green");
+        continueBtn.AddToClassList("btn-modal-cancel");
         continueBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
             _loadMgmtModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
-        btnGroup.Add(continueBtn);
+        actions.Add(continueBtn);
 
-        box.Add(btnGroup);
+        box.Add(actions);
     }
 
     void ShowPendingRecoveryModal()

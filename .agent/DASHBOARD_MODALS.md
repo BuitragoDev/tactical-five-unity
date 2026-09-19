@@ -47,9 +47,9 @@ Todos construidos en `DashboardController.cs` usando `_firedOverlay`. Cada uno n
 |---|---|---|---|---|---|
 | 4 | Budget Warning | Gold | Presupuesto rojo | `ShowBudgetWarningModal` | ✅ Hecho |
 | 5 | Budget Fired | Red | Avisos >= umbral | `ShowBudgetFiredModal` | ✅ Hecho |
-| 6 | Injured Lineup | Red | Lesionados en quinteto | `ShowInjuredLineupModal` | ⬜ Pendiente |
-| 7 | Load Management | Red | Jugadores cansados | `ShowLoadManagementModal` | ⬜ Pendiente |
-| 8 | Empty Lineup | Red | Slots vacíos | `ShowEmptyLineupModal` | ⬜ Pendiente |
+| 6 | Injured Lineup | Red | Lesionados en quinteto | `ShowInjuredLineupModal` | ✅ Hecho |
+| 7 | Load Management | Red | Jugadores cansados | `ShowLoadManagementModal` | ✅ Hecho |
+| 8 | Empty Lineup | Red | Slots vacíos | `ShowEmptyLineupModal` | ✅ Hecho |
 | 9 | Offer Result | Green/Gold/Red | Ofertas maduradas | `ShowOfferResultModal` | ✅ Hecho |
 | 10 | Trade Offer | Dark Gold | Traspaso IA | `ShowTradeOfferModal` | ⬜ Pendiente |
 | 11 | Trade Deadline Week | Gold | 1 de febrero | `ShowTradeDeadlineModal` | ✅ Hecho |
