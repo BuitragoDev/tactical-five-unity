@@ -5474,7 +5474,7 @@ List<int> offeredPickIds = new List<int>();
 
         var box = new VisualElement();
         box.AddToClassList("fired-modal-box--modern");
-        box.style.width = 800;
+        box.style.width = 1050;
         box.style.borderTopColor = new StyleColor(new Color32(212, 160, 23, 255));
         box.style.borderBottomColor = new StyleColor(new Color32(212, 160, 23, 255));
         box.style.borderLeftColor = new StyleColor(new Color32(212, 160, 23, 255));
