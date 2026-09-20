@@ -268,7 +268,7 @@ public static class NewsTexts
             $"El equipo ahora se enfrenta a una offseason crucial. Las decisiones que se tomen en los próximos meses definirán el rumbo del proyecto deportivo para las próximas temporadas. La afición espera un refuerzo que devuelva las esperanzas.";
     }
 
-    public static string EliminacionPlayoffs(string teamName, string rivalName, int round, int losses)
+    public static string EliminacionPlayoffs(string teamName, string rivalName, int round, int rivalWins, int teamWins)
     {
         string roundName = round switch
         {
@@ -278,7 +278,7 @@ public static class NewsTexts
             _ => "finales"
         };
         return $"El {teamName} ha sido eliminado de los Playoffs en {roundName} por {rivalName}.\n\n" +
-            $"Con un marcador de {losses}–0 a favor del rival, el equipo no pudo reponerse al dominio mostrado por {rivalName} en la serie. Una eliminación dolorosa que deja la sensación de que el equipo no estuvo a la altura en los momentos decisivos.\n\n" +
+            $"Con un marcador de {rivalWins}–{teamWins} a favor del rival, el equipo no pudo reponerse al dominio mostrado por {rivalName} en la serie. Una eliminación dolorosa que deja la sensación de que el equipo no estuvo a la altura en los momentos decisivos.\n\n" +
             $"La temporada ha terminado antes de lo esperado. El equipo deberá analizar qué falló y qué se puede mejorar para estar en mejor posición la próxima vez que llegue a esta fase.";
     }
 

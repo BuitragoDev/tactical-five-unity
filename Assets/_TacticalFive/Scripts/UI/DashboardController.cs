@@ -1414,7 +1414,8 @@ using System.Threading.Tasks;
                     {
                         string rivalName = "";
                         int round = 0;
-                        int losses = 0;
+                        int rivalWins = 0;
+                        int teamWins = 0;
 
                         if (!string.IsNullOrEmpty(lastSeriesLabel))
                         {
@@ -1435,7 +1436,8 @@ using System.Threading.Tasks;
                                 {
                                     bool iLost = (sg.home_team_id == _myTeam.id && sg.home_score < sg.away_score)
                                               || (sg.away_team_id == _myTeam.id && sg.away_score < sg.home_score);
-                                    if (iLost) losses++;
+                                    if (iLost) rivalWins++;
+                                    else teamWins++;
                                 }
                             }
 
@@ -1451,7 +1453,7 @@ using System.Threading.Tasks;
                             sender_type = 1,
                             sender_id = 0,
                             title = "Eliminación en Playoffs",
-                            body = NewsTexts.EliminacionPlayoffs(_myTeam.name, rivalName, round, losses),
+                            body = NewsTexts.EliminacionPlayoffs(_myTeam.name, rivalName, round, rivalWins, teamWins),
                             game_day = gameDay,
                             game_date = _season?.current_date ?? "",
                             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
