@@ -179,6 +179,13 @@ public static class QuickNewsGenerator
         if (season.phase == "finished" || season.phase == "preseason") return;
 
         var allStandingsGames = DatabaseManager.Instance.GetStandingsGames(manager.id);
+        var allPlayedGames = DatabaseManager.Instance.Db.Table<GameData>()
+            .Where(g => g.manager_id == manager.id
+                   && g.is_played == 1
+                   && (g.game_type == "regular" || g.game_type == "playin" || g.game_type == "playoff"))
+            .OrderBy(g => g.game_day)
+            .ThenBy(g => g.id)
+            .ToList();
         var allTeams = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);
         var teamRealAvg = allTeams.Values.ToDictionary(
             t => t.id,
@@ -212,8 +219,8 @@ public static class QuickNewsGenerator
             if (!allTeams.TryGetValue(game.home_team_id, out var homeTeam)) continue;
             if (!allTeams.TryGetValue(game.away_team_id, out var awayTeam)) continue;
 
-            int homeStreak = ComputeStreak(allStandingsGames, game.home_team_id);
-            int awayStreak = ComputeStreak(allStandingsGames, game.away_team_id);
+            int homeStreak = ComputeStreak(allPlayedGames, game.home_team_id);
+            int awayStreak = ComputeStreak(allPlayedGames, game.away_team_id);
 
             if (newsCount < 2 && homeStreak >= 5)
             {
