@@ -1281,6 +1281,64 @@ using System.Threading.Tasks;
                 }
             }
 
+            // Check user's play-in elimination BEFORE allPlayInPlayed transition
+            if (_myTeam != null)
+            {
+                bool hasPlayedPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id
+                           && g.game_type == "playin"
+                           && g.is_played == 1
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+                bool hasRemainingPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id
+                           && g.game_type == "playin"
+                           && g.is_played == 0
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+
+                if (hasPlayedPlayIn && !hasRemainingPlayIn)
+                {
+                    var myPlayInGames = DatabaseManager.Instance.Db.Table<GameData>()
+                        .Where(g => g.manager_id == _manager.id
+                               && g.game_type == "playin"
+                               && g.is_played == 1
+                               && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
+                        .OrderByDescending(g => g.game_day)
+                        .ToList();
+
+                    if (myPlayInGames.Count > 0)
+                    {
+                        var lastGame = myPlayInGames[0];
+                        bool iWonLast = (lastGame.home_team_id == _myTeam.id && lastGame.home_score > lastGame.away_score)
+                                      || (lastGame.away_team_id == _myTeam.id && lastGame.away_score > lastGame.home_score);
+
+                        if (!iWonLast)
+                        {
+                            bool playInAlreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
+                                .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ELIMINACION_PLAYIN);
+                            if (!playInAlreadySent)
+                            {
+                                DatabaseManager.Instance.AddMessage(new MessageData
+                                {
+                                    manager_id = _manager.id,
+                                    sender_type = 1,
+                                    sender_id = 0,
+                                    title = "Eliminación en Play-In",
+                                    body = NewsTexts.EliminacionPlayin(_myTeam.name, 0),
+                                    game_day = gameDay,
+                                    game_date = _season?.current_date ?? "",
+                                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                                    is_read = 0,
+                                    category = NewsCategory.LIGA,
+                                    news_type = NewsType.ELIMINACION_PLAYIN
+                                });
+                                Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Play-In.");
+                            }
+                        }
+                    }
+                }
+            }
+
             bool allPlayInPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
                 .Any(g => g.manager_id == _manager.id
                        && g.game_type == "playin"
@@ -1297,64 +1355,6 @@ using System.Threading.Tasks;
                 else
                 {
                     Debug.LogError("[Dashboard] allPlayInPlayed but GeneratePlayoffs returned 0 games!");
-                }
-            }
-            else if (_myTeam != null)
-            {
-                bool hasPlayedPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
-                    .Any(g => g.manager_id == _manager.id
-                           && g.game_type == "playin"
-                           && g.is_played == 1
-                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
-                bool hasRemainingPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
-                    .Any(g => g.manager_id == _manager.id
-                           && g.game_type == "playin"
-                           && g.is_played == 0
-                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
-
-                bool teamLostLastPlayIn = false;
-                if (hasPlayedPlayIn && !hasRemainingPlayIn)
-                {
-                    var myPlayInGames = DatabaseManager.Instance.Db.Table<GameData>()
-                        .Where(g => g.manager_id == _manager.id
-                               && g.game_type == "playin"
-                               && g.is_played == 1
-                               && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id))
-                        .OrderByDescending(g => g.game_day)
-                        .ToList();
-
-                    if (myPlayInGames.Count > 0)
-                    {
-                        var lastGame = myPlayInGames[0];
-                        bool iWonLast = (lastGame.home_team_id == _myTeam.id && lastGame.home_score > lastGame.away_score)
-                                      || (lastGame.away_team_id == _myTeam.id && lastGame.away_score > lastGame.home_score);
-                        teamLostLastPlayIn = !iWonLast;
-                    }
-                }
-
-                if (hasPlayedPlayIn && !hasRemainingPlayIn && teamLostLastPlayIn)
-                {
-                    bool playInAlreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
-                        .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ELIMINACION_PLAYIN);
-                    if (!playInAlreadySent)
-                    {
-                        DatabaseManager.Instance.AddMessage(new MessageData
-                        {
-                            manager_id = _manager.id,
-                            sender_type = 1,
-                            sender_id = 0,
-                            title = "Eliminación en Play-In",
-                            body = NewsTexts.EliminacionPlayin(_myTeam.name, 0),
-                            game_day = gameDay,
-                            game_date = _season?.current_date ?? "",
-                            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                            is_read = 0,
-                            category = NewsCategory.LIGA,
-                            news_type = NewsType.ELIMINACION_PLAYIN
-                        });
-                        Debug.Log($"[Dashboard] {_myTeam.name} eliminado de Play-In.");
-                    }
                 }
             }
         }
