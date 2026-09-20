@@ -3088,7 +3088,7 @@ using System.Threading.Tasks;
             PlayClick();
             var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
             var injuredIds = new HashSet<int>(allPlayers
-                .Where(p => p.injury_days > 0)
+                .Where(p => p.injury_days > 0 || p.g_league_assigned == 1)
                 .Select(p => p.id));
             DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers, injuredIds);
             _emptyLineupModalResolved = true;
@@ -3274,7 +3274,11 @@ using System.Threading.Tasks;
         autoBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            AutoFixInjuredLineup();
+            var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            var inactiveIds = new HashSet<int>(allPlayers
+                .Where(p => p.injury_days > 0 || p.g_league_assigned == 1)
+                .Select(p => p.id));
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers, inactiveIds);
             _injuredModalResolved = true;
             _firedOverlay.style.display = DisplayStyle.None;
         });
@@ -3551,7 +3555,11 @@ using System.Threading.Tasks;
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            AutoFixInjuredLineup();
+            var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            var inactiveIds = new HashSet<int>(allPlayers
+                .Where(p => p.injury_days > 0 || p.g_league_assigned == 1)
+                .Select(p => p.id));
+            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, allPlayers, inactiveIds);
             _firedOverlay.style.display = DisplayStyle.None;
             if (_fastSimRunning)
             {
@@ -4015,134 +4023,6 @@ using System.Threading.Tasks;
         return date.Month == 2 && date.Day == 7 && date.Year == _season.year_end;
     }
 
-    void AutoFixInjuredLineup()
-    {
-        var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        var playerMap = allPlayers.ToDictionary(p => p.id);
-        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
-        if (lineup.Count == 0) return;
-
-        // Find injured players in active slots
-        var injuredActive = lineup.Where(l => l.slot <= 1 && playerMap.TryGetValue(l.player_id, out var p) && p.injury_days > 0).ToList();
-        if (injuredActive.Count == 0) return;
-
-        var lineupIds = new HashSet<int>(lineup.Select(l => l.player_id));
-
-        // Separate lineup by slot
-        var benchLineup = lineup.Where(l => l.slot == 1).ToList();
-        var inactiveLineup = lineup.Where(l => l.slot == 2).ToList();
-
-        // Non-injured bench players (available for promotion)
-        var benchPool = benchLineup
-            .Where(l => playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0 && p.g_league_assigned == 0)
-            .Select(l => playerMap[l.player_id])
-            .ToList();
-
-        // Non-injured inactive players (available for bench backfill)
-        var inactivePool = inactiveLineup
-            .Where(l => playerMap.TryGetValue(l.player_id, out var p) && p.injury_days == 0 && p.g_league_assigned == 0)
-            .Select(l => playerMap[l.player_id])
-            .ToList();
-
-        // Unassigned non-injured players
-        var unassignedPool = allPlayers
-            .Where(p => p.injury_days == 0 && p.g_league_assigned == 0 && !lineupIds.Contains(p.id))
-            .OrderByDescending(p => p.overall)
-            .ToList();
-
-        var usedInFix = new HashSet<int>();
-        var benchVacated = new List<int>(); // bench slot_indices that need backfill
-
-        // ── 1. Fix injured starters ──
-        var injuredStarters = injuredActive.Where(l => l.slot == 0).OrderBy(l => l.slot_index).ToList();
-        int nextInactiveIdx = inactiveLineup.DefaultIfEmpty().Max(l => l?.slot_index ?? -1) + 1;
-        foreach (var li in injuredStarters)
-        {
-            var injuredPlayer = playerMap[li.player_id];
-            DatabaseManager.Instance.SetPlayerSlot(li.player_id, _myTeam.id, 2, nextInactiveIdx++);
-            lineupIds.Remove(li.player_id);
-            usedInFix.Add(li.player_id);
-
-            // Try to promote from bench first, then inactive, then unassigned
-            var replacement = PickBestReplacement(injuredPlayer.position, benchPool, usedInFix, true)
-                          ?? PickBestReplacement(injuredPlayer.position, inactivePool, usedInFix, true)
-                          ?? PickBestReplacement(injuredPlayer.position, unassignedPool, usedInFix, true);
-
-            if (replacement != null)
-            {
-                usedInFix.Add(replacement.id);
-                // Check if replacement came from bench
-                var oldBenchLi = benchLineup.FirstOrDefault(l => l.player_id == replacement.id);
-                if (oldBenchLi != null)
-                    benchVacated.Add(oldBenchLi.slot_index);
-                DatabaseManager.Instance.SetPlayerSlot(replacement.id, _myTeam.id, 0, li.slot_index);
-                lineupIds.Add(replacement.id);
-            }
-        }
-
-        // ── 2. Fix injured bench players ──
-        if (inactiveLineup.Count > 0)
-            nextInactiveIdx = inactiveLineup.Max(l => l.slot_index) + 1;
-
-        var injuredBench = injuredActive.Where(l => l.slot == 1).OrderBy(l => l.slot_index).ToList();
-        foreach (var li in injuredBench)
-        {
-            var injuredPlayer = playerMap[li.player_id];
-            DatabaseManager.Instance.SetPlayerSlot(li.player_id, _myTeam.id, 2, nextInactiveIdx++);
-            lineupIds.Remove(li.player_id);
-            usedInFix.Add(li.player_id);
-
-            // Fill bench from inactive first, then unassigned
-            var replacement = inactivePool.FirstOrDefault(c => !usedInFix.Contains(c.id))
-                          ?? unassignedPool.FirstOrDefault(c => !usedInFix.Contains(c.id));
-
-            if (replacement != null)
-            {
-                usedInFix.Add(replacement.id);
-                DatabaseManager.Instance.SetPlayerSlot(replacement.id, _myTeam.id, 1, li.slot_index);
-                lineupIds.Add(replacement.id);
-            }
-        }
-
-        // ── 3. Backfill bench slots vacated by promotions ──
-        foreach (var vacatedIdx in benchVacated)
-        {
-            var replacement = inactivePool.FirstOrDefault(c => !usedInFix.Contains(c.id))
-                          ?? unassignedPool.FirstOrDefault(c => !usedInFix.Contains(c.id));
-
-            if (replacement != null)
-            {
-                usedInFix.Add(replacement.id);
-                DatabaseManager.Instance.SetPlayerSlot(replacement.id, _myTeam.id, 1, vacatedIdx);
-                lineupIds.Add(replacement.id);
-            }
-        }
-    }
-
-    PlayerData PickBestReplacement(string injuredPos, List<PlayerData> pool, HashSet<int> used, bool preferExact)
-    {
-        var posOrder = PositionCodes.Order;
-        int injuredIdx = System.Array.IndexOf(posOrder, injuredPos);
-        var nearby = new List<string>();
-        if (injuredIdx > 0) nearby.Add(posOrder[injuredIdx - 1]);
-        if (injuredIdx < posOrder.Length - 1) nearby.Add(posOrder[injuredIdx + 1]);
-
-        var available = pool.Where(c => !used.Contains(c.id)).ToList();
-
-        if (preferExact)
-        {
-            var exact = available.Where(c => c.position == injuredPos).OrderByDescending(c => c.overall).FirstOrDefault();
-            if (exact != null) return exact;
-        }
-
-        foreach (var nearPos in nearby)
-        {
-            var match = available.Where(c => c.position == nearPos).OrderByDescending(c => c.overall).FirstOrDefault();
-            if (match != null) return match;
-        }
-
-        return available.OrderByDescending(c => c.overall).FirstOrDefault();
-    }
 
     void MarkManagerFired()
     {
