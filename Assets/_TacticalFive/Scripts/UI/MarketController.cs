@@ -22,8 +22,8 @@ using System.Linq;
     private VisualElement _tradeStatus;
     private VisualElement _marketClosedOverlay;
     private VisualElement _faRosterFullModal;
+    private VisualElement _faRosterFullBox;
     private Label _faRosterFullText;
-    private VisualElement _faRosterFullIcon;
     private VisualElement _faConfirmModal;
     private Button _btnCloseFARosterFull;
     private Button _btnCancelFA;
@@ -191,8 +191,8 @@ using System.Linq;
         _tradeStatus = _root.Q<VisualElement>("TradeStatus");
         _marketClosedOverlay = _root.Q<VisualElement>("MarketClosedOverlay");
         _faRosterFullModal = _root.Q<VisualElement>("FARosterFullModal");
+        _faRosterFullBox = _root.Q<VisualElement>("FARosterFullBox");
         _faRosterFullText = _root.Q<Label>("FARosterFullText");
-        _faRosterFullIcon = _root.Q<VisualElement>("FARosterFullIcon");
         _faConfirmModal = _root.Q<VisualElement>("FAConfirmModal");
         _btnCloseFARosterFull = _root.Q<Button>("BtnCloseFARosterFull");
         _btnCancelFA = _root.Q<Button>("BtnCancelFA");
@@ -493,7 +493,7 @@ using System.Linq;
         _btnCloseTradeModal?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); CloseTradeModal(); });
         _btnCloseFARosterFull?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); _faRosterFullModal.style.display = DisplayStyle.None; });
+            { PlayClick(); _faRosterFullModal.RemoveFromClassList("modal-overlay--visible"); _faRosterFullBox?.RemoveFromClassList("modal-box--visible"); });
         _btnCancelFA?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); _faLongPressSchedule?.Pause(); _faLongPressSchedule = null; _faConfirmModal.style.display = DisplayStyle.None; BuildFreeAgents(); });
         _btnConfirmFA?.RegisterCallback<ClickEvent>(_ =>
@@ -2341,13 +2341,8 @@ using System.Linq;
         {
             if (_faRosterFullText != null)
                 _faRosterFullText.text = $"No puedes fichar más jugadores. Tu plantilla ({rosterCount}) + ofertas pendientes ({pendingCount}) alcanzaría el máximo de {TradeHelper.MAX_ROSTER}.";
-            if (_faRosterFullIcon != null)
-            {
-                var xTex = Resources.Load<Texture2D>("Icons/boton-x-64px");
-                if (xTex != null)
-                    _faRosterFullIcon.style.backgroundImage = new StyleBackground(xTex);
-            }
-            _faRosterFullModal.style.display = DisplayStyle.Flex;
+            _faRosterFullModal.AddToClassList("modal-overlay--visible");
+            _faRosterFullBox?.AddToClassList("modal-box--visible");
             return;
         }
 
