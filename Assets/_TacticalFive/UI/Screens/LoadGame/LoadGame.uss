@@ -316,6 +316,24 @@
     color: rgb(230, 120, 100);
 }
 
+/* Game mode badge */
+.slot-mode-badge {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 6px 16px 0;
+    padding: 6px;
+    background-color: rgba(212, 160, 23, 0.08);
+}
+
+.slot-mode-badge .slot-mode-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 2px;
+    -unity-text-transform: upper;
+    color: rgb(212, 160, 23);
+}
+
 /* Card actions */
 .slot-actions {
     flex-direction: column;

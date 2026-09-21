@@ -258,6 +258,15 @@ public class LoadGameController : UIScreenController
         badge.Add(statusLbl);
         card.Add(badge);
 
+        // ── Mode badge ──
+        string modeText = slot.gameMode == "promanager" ? "PROMANAGER" : "MANAGER";
+        var modeBadge = new VisualElement();
+        modeBadge.AddToClassList("slot-mode-badge");
+        var modeLbl = new Label(modeText);
+        modeLbl.AddToClassList("slot-mode-label");
+        modeBadge.Add(modeLbl);
+        card.Add(modeBadge);
+
         // ── Actions ──
         var actions = new VisualElement();
         actions.AddToClassList("slot-actions");
