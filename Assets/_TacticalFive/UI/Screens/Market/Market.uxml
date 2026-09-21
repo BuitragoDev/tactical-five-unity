@@ -254,7 +254,7 @@
 
         <!-- ══ MODALS ══ -->
         <!-- FA Roster Full Modal -->
-        <ui:VisualElement name="FARosterFullModal" class="modal-overlay">
+        <ui:VisualElement name="FARosterFullModal" class="modal-overlay" style="background-color: rgba(0, 0, 0, 0.7);">
             <ui:VisualElement name="FARosterFullBox" class="modal-box" style="border-color: rgb(192, 57, 43);">
                 <ui:Label class="modal-title" style="background-color: rgba(192, 57, 43, 0.15); border-bottom-color: rgb(192, 57, 43);" text="PLANTILLA COMPLETA" />
                 <ui:VisualElement class="modal-body">
@@ -262,7 +262,7 @@
                     <ui:Label class="modal-paragraph" text="Debes liberar plazas antes de poder fichar." />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
-                    <ui:Button name="BtnCloseFARosterFull" class="modal-btn modal-btn--danger" text="ENTENDIDO" />
+                    <ui:Button name="BtnCloseFARosterFull" class="modal-btn modal-btn--danger" text="CERRAR" />
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
