@@ -608,8 +608,17 @@ public class MessagesController : UIScreenController
 
         if (nt == NewsType.ELIMINACION_PLAYIN || nt == NewsType.ELIMINACION_PLAYOFFS)
         {
-            var tex = _noticiasSprites.GetValueOrDefault("eliminacion");
-            if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+            string teamName = ExtractFirstTeamFromBody(msg.body);
+            if (teamName != null)
+            {
+                var team = _allTeams?.FirstOrDefault(t => t.name == teamName);
+                if (team != null && _logoSprites.TryGetValue(team.logo, out var sprite))
+                {
+                    icon.style.backgroundImage = new StyleBackground(sprite);
+                    return true;
+                }
+            }
+            return true;
         }
 
         if (nt == NewsType.PREMIOS_MES)
