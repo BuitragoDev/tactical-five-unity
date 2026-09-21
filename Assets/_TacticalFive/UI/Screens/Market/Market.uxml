@@ -256,11 +256,15 @@
         <!-- FA Roster Full Modal -->
         <ui:VisualElement name="FARosterFullModal" class="renew-modal-overlay" style="display: none;">
             <ui:VisualElement class="renew-modal-box renew-modal-box--negative">
-                <ui:VisualElement name="FARosterFullIcon" class="renew-modal-icon"/>
-                <ui:Label class="renew-modal-title renew-modal-title--negative" text="PLANTILLA COMPLETA" />
-                <ui:Label name="FARosterFullText" class="renew-modal-text" text="" />
-                <ui:Label class="renew-modal-text" text="Debes liberar plazas antes de poder fichar." />
-                <ui:VisualElement class="renew-modal-buttons">
+                <ui:VisualElement style="flex-direction: row; align-items: center; padding: 10px 14px; background-color: rgba(192, 57, 43, 0.15); border-bottom-width: 1px; border-bottom-color: rgb(192, 57, 43); margin: -32px -32px 0 -32px; width: calc(100% + 64px);">
+                    <ui:VisualElement name="FARosterFullIcon" class="renew-modal-icon" style="width: 32px; height: 32px; margin-bottom: 0; margin-right: 10px;"/>
+                    <ui:Label class="renew-modal-title renew-modal-title--negative" style="margin-bottom: 0; -unity-text-align: middle-left; font-size: 22px;" text="PLANTILLA COMPLETA" />
+                </ui:VisualElement>
+                <ui:VisualElement style="padding: 20px 24px;">
+                    <ui:Label name="FARosterFullText" class="renew-modal-text" style="-unity-text-align: middle-left; margin-top: 0;" text="" />
+                    <ui:Label class="renew-modal-text" style="-unity-text-align: middle-left; margin-top: 4px; color: rgb(122, 138, 170);" text="Debes liberar plazas antes de poder fichar." />
+                </ui:VisualElement>
+                <ui:VisualElement class="renew-modal-buttons" style="margin: 0; padding: 0 24px 20px 24px;">
                     <ui:Button name="BtnCloseFARosterFull" class="btn-modal-danger" text="ENTENDIDO" />
                 </ui:VisualElement>
             </ui:VisualElement>
