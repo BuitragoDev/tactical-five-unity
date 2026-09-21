@@ -7512,7 +7512,7 @@ List<int> offeredPickIds = new List<int>();
 
         var latest = all.OrderByDescending(m => m.id)
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
-.Take(4).ToList();
+.Take(5).ToList();
 
         foreach (var msg in latest)
         {
