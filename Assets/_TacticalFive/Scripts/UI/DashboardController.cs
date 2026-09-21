@@ -156,6 +156,7 @@ using System.Threading.Tasks;
     private Dictionary<int, int> _teamTradeCooldown = new();
     // RNG seguro para el camino AI (se ejecuta en hilo de fondo; UnityEngine.Random no es thread-safe)
     private readonly System.Random _aiRng = new System.Random();
+    private bool _airRenewalsProcessed;
 
     protected override void OnEnable()
     {
@@ -196,6 +197,7 @@ using System.Threading.Tasks;
                 _deadlineDayModalShown = false;
                 _deadlineModalSeasonId = _season.id;
                 _teamTradeCooldown.Clear();
+                _airRenewalsProcessed = false;
             }
             CheckBudgetWarning();
             ProcessMaturedOffers();
@@ -1515,6 +1517,25 @@ using System.Threading.Tasks;
                     news_type = NewsType.DEADLINE_SEMANA
                 });
                 _showDeadlineWeekModal = true;
+            }
+
+            if (newDate.Month == 2 && newDate.Day == 12 && newDate.Year == _season.year_end)
+            {
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 0,
+                    sender_id = 0,
+                    title = "Fecha límite de renovaciones",
+                    body = "Hoy cierra el plazo para renovar contratos. A partir de mañana no podrás ofrecer renovaciones a tus jugadores hasta la próxima temporada.",
+                    game_day = _season.current_game_day,
+                    game_date = _season.current_date,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    is_read = 0,
+                    category = NewsCategory.CLUB,
+                    news_type = NewsType.RENOVACION
+                });
             }
 
             // Monthly awards evaluation (1st of Dec through Apr)
@@ -4025,6 +4046,20 @@ using System.Threading.Tasks;
         return date.Month == 2 && date.Day == 7 && date.Year == _season.year_end;
     }
 
+    bool IsFeb12OfYearEnd()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date.Month == 2 && date.Day == 12 && date.Year == _season.year_end;
+    }
+
+    bool IsRenewalDeadlinePassed()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date > new DateTime(_season.year_end, 2, 12);
+    }
+
 
     void MarkManagerFired()
     {
@@ -4388,6 +4423,7 @@ using System.Threading.Tasks;
         {
             ProcessAITransfers(gameDay);
             ProcessStarFreeAgentSignings(gameDay);
+            ProcessAIRenewals();
             ProcessPsychologistMorale();
             db.Commit();
         }
@@ -4674,6 +4710,206 @@ using System.Threading.Tasks;
             if (p.morale >= 50) continue;
             int newMorale = Mathf.Min(50, p.morale + recovery);
             DatabaseManager.Instance.UpdatePlayerMorale(p.id, newMorale);
+        }
+    }
+
+    // ── AI RENEWALS ────────────────────────────────────────────────
+
+    void ProcessAIRenewals()
+    {
+        if (_airRenewalsProcessed) return;
+        if (!IsFeb12OfYearEnd() && !IsRenewalDeadlinePassed()) return;
+        _airRenewalsProcessed = true;
+
+        Debug.Log("[AIRenewals] Processing AI contract renewals...");
+
+        var db = DatabaseManager.Instance.Db;
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long cap = leagueSettings.salary_cap;
+        int renewedCount = 0, lostCount = 0;
+
+        foreach (var team in allTeams)
+        {
+            if (team.id == _myTeam.id) continue;
+
+            var expiringPlayers = db.Query<PlayerData>(
+                "SELECT * FROM players WHERE team_id = ? AND contract_years = 1 AND is_two_way = 0 AND is_on_ir = 0",
+                team.id);
+
+            foreach (var player in expiringPlayers)
+            {
+                float teamScore = CalculateTeamRenewalScore(player, team, cap);
+                if (teamScore < 50f) continue;
+
+                var offer = CalculateAIRenewalOffer(player, team, cap);
+
+                int gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(player.id, _season.id);
+                int teamChem = DatabaseManager.Instance.GetTeamChemistry(team.id);
+                float acceptScore = RosterController.CalculateAcceptScore(
+                    player, offer.salary, offer.years, gamesPlayed, teamChem);
+
+                bool accepted = _aiRng.Next(1, 101) <= acceptScore;
+
+                if (accepted)
+                {
+                    player.salary = offer.salary;
+                    player.contract_years = offer.years;
+                    player.guaranteed_years = offer.teamOption ? offer.years - 1 : offer.years;
+                    player.has_team_option = offer.teamOption ? 1 : 0;
+                    player.has_player_option = 0;
+                    player.renewal_cooldown_day = _season.current_game_day + 365;
+                    db.Update(player);
+                    renewedCount++;
+
+                    if (player.overall >= 90)
+                        AddAIRenewalNotification(player, team, true, offer);
+                }
+                else
+                {
+                    player.renewal_cooldown_day = _season.current_game_day + 15;
+                    db.Update(player);
+                    lostCount++;
+
+                    if (player.overall >= 90)
+                        AddAIRenewalNotification(player, team, false, offer);
+                }
+            }
+        }
+
+        Debug.Log($"[AIRenewals] Done. Renewed: {renewedCount}, Lost: {lostCount}");
+    }
+
+    float CalculateTeamRenewalScore(PlayerData player, TeamData team, long cap)
+    {
+        float score = 0f;
+
+        // OVR (40%)
+        if (player.overall >= 85) score += 40f;
+        else if (player.overall >= 80) score += 32f;
+        else if (player.overall >= 75) score += 24f;
+        else if (player.overall >= 70) score += 16f;
+        else score += 8f;
+
+        // Rol (20%)
+        if (player.role == 0) score += 20f;
+        else if (player.role == 1) score += 15f;
+        else if (player.role == 2) score += 5f;
+
+        // Edad (15%) — equipos prefieren jóvenes
+        if (player.age <= 25) score += 15f;
+        else if (player.age <= 30) score += 10f;
+        else if (player.age <= 34) score += 5f;
+
+        // Salario vs valor estimado (15%)
+        long estimatedValue = EstimateMarketValue(player, cap);
+        if (player.salary < estimatedValue) score += 15f;
+        else if (player.salary <= estimatedValue * 1.2f) score += 8f;
+
+        // Estrategia del equipo (10%)
+        var strategy = GetTeamStrategy(team.id);
+        if (strategy == TeamStrategy.Contend && player.overall >= 75) score += 10f;
+        else if (strategy == TeamStrategy.Rebuild && player.overall < 75 && player.age <= 28) score += 10f;
+        else score += 5f;
+
+        return Mathf.Clamp(score, 0f, 100f);
+    }
+
+    long EstimateMarketValue(PlayerData player, long cap)
+    {
+        if (player.overall >= 85) return (long)(cap * 0.35);
+        if (player.overall >= 80) return (long)(cap * 0.30);
+        if (player.overall >= 75) return (long)(cap * 0.25);
+        if (player.overall >= 70) return Mathf.Max(player.salary * 110 / 100, TradeHelper.MIN_SALARY);
+        return Mathf.Max(player.salary * 105 / 100, TradeHelper.MIN_SALARY);
+    }
+
+    (long salary, int years, bool teamOption) CalculateAIRenewalOffer(
+        PlayerData player, TeamData team, long cap)
+    {
+        long maxByExp;
+        int experience = player.age - 22;
+        if (experience <= 6) maxByExp = cap / 4;
+        else if (experience <= 9) maxByExp = (long)(cap * 0.30);
+        else maxByExp = (long)(cap * 0.35);
+
+        long marketValue = EstimateMarketValue(player, cap);
+        long salary = Mathf.Min(maxByExp, marketValue);
+
+        if (player.seasons_with_team >= 3)
+        {
+            salary = Mathf.Min(salary, maxByExp);
+        }
+        else if (player.seasons_with_team == 2)
+        {
+            long earlyBirdMax = Mathf.Max(player.salary * 175 / 100, (long)(cap * 1.05));
+            salary = Mathf.Min(salary, earlyBirdMax);
+        }
+        else
+        {
+            long noBirdMax = player.salary * 120 / 100;
+            salary = Mathf.Min(salary, noBirdMax);
+        }
+
+        salary = (long)(Mathf.Round(salary / 100_000f) * 100_000);
+        if (salary < TradeHelper.MIN_SALARY) salary = TradeHelper.MIN_SALARY;
+
+        int years;
+        if (player.age <= 25) years = 5;
+        else if (player.age <= 28) years = 4;
+        else if (player.age <= 32) years = 3;
+        else if (player.age <= 35) years = 2;
+        else years = 1;
+
+        bool teamOption = player.age >= 30;
+
+        return (salary, years, teamOption);
+    }
+
+    void AddAIRenewalNotification(PlayerData player, TeamData team, bool accepted,
+        (long salary, int years, bool teamOption) offer)
+    {
+        string playerName = $"{player.first_name} {player.last_name}";
+        string teamName = team.name;
+        string salaryStr = $"${offer.salary:N0}";
+        string yearsText = offer.years == 1 ? "1 temporada" : $"{offer.years} temporadas";
+        string optionText = offer.teamOption ? " (con opción de equipo)" : "";
+
+        if (accepted)
+        {
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 2,
+                sender_id = 0,
+                title = $"Renovación estrella: {playerName}",
+                body = $"{teamName} ha renovado a {playerName} (OVR {player.overall}) por {yearsText} a {salaryStr}/año{optionText}.",
+                game_day = _season.current_game_day,
+                game_date = _season.current_date,
+                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                is_read = 0,
+                category = NewsCategory.TRASPASOS,
+                news_type = NewsType.RENOVACION
+            });
+        }
+        else
+        {
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 2,
+                sender_id = 0,
+                title = $"Estrella sin renovar: {playerName}",
+                body = $"{playerName} (OVR {player.overall}) no ha aceptado la renovación de {teamName}. El jugador saldrá a mercado libre al final de temporada.",
+                game_day = _season.current_game_day,
+                game_date = _season.current_date,
+                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                is_read = 0,
+                category = NewsCategory.TRASPASOS,
+                news_type = NewsType.OFERTA_RECHAZADA
+            });
         }
     }
 

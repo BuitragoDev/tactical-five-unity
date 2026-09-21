@@ -802,14 +802,24 @@ using System.Linq;
         if (roleNameLbl != null)
             roleNameLbl.text = GetRoleName(p.role);
 
-        // Botón renovar: desactivar si hay oferta pendiente
+        // Botón renovar: desactivar si hay oferta pendiente o plazo cerrado
         if (_btnRenew != null)
         {
             _btnRenew.style.display = DisplayStyle.Flex;
-            bool pending = DatabaseManager.Instance.HasPendingRenewalOffer(_manager.id, p.id);
-            _btnRenew.text = pending ? "ESPERANDO RESPUESTA" : "RENOVAR CONTRATO";
-            _btnRenew.SetEnabled(!pending);
-            _btnRenew.EnableInClassList("btn-renew--pending", pending);
+            bool deadlinePassed = IsRenewalDeadlinePassed();
+            bool pending = !deadlinePassed && DatabaseManager.Instance.HasPendingRenewalOffer(_manager.id, p.id);
+            if (deadlinePassed)
+            {
+                _btnRenew.text = "PLAZO CERRADO";
+                _btnRenew.SetEnabled(false);
+                _btnRenew.EnableInClassList("btn-renew--pending", false);
+            }
+            else
+            {
+                _btnRenew.text = pending ? "ESPERANDO RESPUESTA" : "RENOVAR CONTRATO";
+                _btnRenew.SetEnabled(!pending);
+                _btnRenew.EnableInClassList("btn-renew--pending", pending);
+            }
         }
     }
 
@@ -922,6 +932,13 @@ using System.Linq;
     void OnRenewClicked()
     {
         if (_selectedPlayer == null) return;
+
+        // Fecha límite de renovaciones
+        if (IsRenewalDeadlinePassed())
+        {
+            OpenRenewDeadlineModal();
+            return;
+        }
 
         // Verificar cooldown de renovación
         int currentDay = _season?.current_game_day ?? 0;
@@ -1476,6 +1493,23 @@ using System.Linq;
         _renewBlockBox.style.display = DisplayStyle.None;
         ClearRenewModalColor(_renewBlockBox, _renewBlockTitle);
         ClearRenewResultIcon(_renewBlockIcon);
+    }
+
+    void OpenRenewDeadlineModal()
+    {
+        _renewBlockText.text = "La fecha límite de renovaciones ha pasado (12 de febrero). No podrás ofrecer contratos a tus jugadores hasta la próxima temporada.";
+
+        _renewBlockOverlay.style.display = DisplayStyle.Flex;
+        _renewBlockBox.style.display = DisplayStyle.Flex;
+        SetRenewModalColor(_renewBlockBox, _renewBlockTitle, false);
+        SetRenewResultIcon(_renewBlockIcon, false);
+    }
+
+    bool IsRenewalDeadlinePassed()
+    {
+        if (_season == null || string.IsNullOrEmpty(_season.current_date)) return false;
+        if (!System.DateTime.TryParse(_season.current_date, out var date)) return false;
+        return date > new System.DateTime(_season.year_end, 2, 12);
     }
 
     void SetRenewModalColor(VisualElement box, Label title, bool positive)
