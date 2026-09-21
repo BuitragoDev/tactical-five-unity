@@ -245,11 +245,14 @@ public class PreGameController : UIScreenController
         starterRow.Clear();
         benchList.Clear();
 
-        foreach (var p in starters) starterRow.Add(BuildStarterCard(p));
+        for (int i = 0; i < starters.Count && i < 5; i++)
+            starterRow.Add(BuildStarterCard(starters[i], i));
         foreach (var p in bench) benchList.Add(BuildBenchRow(p));
     }
 
-    VisualElement BuildStarterCard(PlayerData p)
+    static readonly string[] _slotPositions = { "BASE", "ESCOLTA", "ALERO", "ALA-PIVOT", "PIVOT" };
+
+    VisualElement BuildStarterCard(PlayerData p, int slotIndex)
     {
         var card = new VisualElement();
         card.AddToClassList("mpv-starter-card");
@@ -260,7 +263,10 @@ public class PreGameController : UIScreenController
         if (tex != null) photo.style.backgroundImage = new StyleBackground(tex);
         card.Add(photo);
 
-        var posLbl = new Label(PositionCodes.GetName(p.position));
+        string posName = (slotIndex >= 0 && slotIndex < _slotPositions.Length)
+            ? _slotPositions[slotIndex]
+            : PositionCodes.GetName(p.position);
+        var posLbl = new Label(posName);
         posLbl.AddToClassList("mpv-starter-pos");
         card.Add(posLbl);
 
