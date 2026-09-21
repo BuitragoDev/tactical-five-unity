@@ -30,6 +30,7 @@ public class LoadGameController : UIScreenController
     private Texture2D _budgetTex;
     private Texture2D _payrollTex;
     private Texture2D _chemistryTex;
+    private Texture2D _empleadoTex;
 
     protected override void OnEnable()
     {
@@ -67,6 +68,7 @@ public class LoadGameController : UIScreenController
         _budgetTex = Resources.Load<Texture2D>("Icons/finanzas");
         _payrollTex = Resources.Load<Texture2D>("Icons/contrato");
         _chemistryTex = Resources.Load<Texture2D>("Icons/quimica");
+        _empleadoTex = Resources.Load<Texture2D>("Icons/empleado");
 
         GameSaveManager.CleanupAllOrphanDbs();
     }
@@ -210,6 +212,23 @@ public class LoadGameController : UIScreenController
                 arenaPhoto.style.backgroundImage = new StyleBackground(arenaSpr);
         }
         card.Add(arenaPhoto);
+
+        // ── Manager name ──
+        var managerRow = new VisualElement();
+        managerRow.AddToClassList("slot-manager-row");
+
+        if (_empleadoTex != null)
+        {
+            var managerIcon = new VisualElement();
+            managerIcon.AddToClassList("slot-manager-icon");
+            managerIcon.style.backgroundImage = new StyleBackground(_empleadoTex);
+            managerRow.Add(managerIcon);
+        }
+
+        var managerLbl = new Label(slot.managerName ?? "Manager");
+        managerLbl.AddToClassList("slot-manager-name");
+        managerRow.Add(managerLbl);
+        card.Add(managerRow);
 
         // ── Team section: logo + name ──
         var teamSection = new VisualElement();

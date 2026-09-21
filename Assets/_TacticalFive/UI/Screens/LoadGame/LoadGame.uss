@@ -198,6 +198,31 @@
     padding: 16px;
 }
 
+/* Manager name row */
+.slot-manager-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 16px 0;
+}
+
+.slot-manager-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.7;
+}
+
+.slot-manager-name {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+}
+
 .slot-team-logo {
     width: 64px;
     height: 64px;
