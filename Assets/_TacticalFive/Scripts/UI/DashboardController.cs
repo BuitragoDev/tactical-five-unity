@@ -4792,9 +4792,9 @@ using System.Threading.Tasks;
         else score += 8f;
 
         // Rol (20%)
-        if (player.role == 0) score += 20f;
-        else if (player.role == 1) score += 15f;
-        else if (player.role == 2) score += 5f;
+        if (player.role == PlayerRole.Estrella) score += 20f;
+        else if (player.role == PlayerRole.Titular) score += 15f;
+        else if (player.role == PlayerRole.Banquillo) score += 5f;
 
         // Edad (15%) — equipos prefieren jóvenes
         if (player.age <= 25) score += 15f;
@@ -4820,8 +4820,8 @@ using System.Threading.Tasks;
         if (player.overall >= 85) return (long)(cap * 0.35);
         if (player.overall >= 80) return (long)(cap * 0.30);
         if (player.overall >= 75) return (long)(cap * 0.25);
-        if (player.overall >= 70) return Mathf.Max(player.salary * 110 / 100, TradeHelper.MIN_SALARY);
-        return Mathf.Max(player.salary * 105 / 100, TradeHelper.MIN_SALARY);
+        if (player.overall >= 70) return (long)Mathf.Max(player.salary * 110 / 100, TradeHelper.MIN_SALARY);
+        return (long)Mathf.Max(player.salary * 105 / 100, TradeHelper.MIN_SALARY);
     }
 
     (long salary, int years, bool teamOption) CalculateAIRenewalOffer(
@@ -4834,21 +4834,21 @@ using System.Threading.Tasks;
         else maxByExp = (long)(cap * 0.35);
 
         long marketValue = EstimateMarketValue(player, cap);
-        long salary = Mathf.Min(maxByExp, marketValue);
+        long salary = (long)Mathf.Min(maxByExp, marketValue);
 
         if (player.seasons_with_team >= 3)
         {
-            salary = Mathf.Min(salary, maxByExp);
+            salary = (long)Mathf.Min(salary, maxByExp);
         }
         else if (player.seasons_with_team == 2)
         {
-            long earlyBirdMax = Mathf.Max(player.salary * 175 / 100, (long)(cap * 1.05));
-            salary = Mathf.Min(salary, earlyBirdMax);
+            long earlyBirdMax = (long)Mathf.Max(player.salary * 175 / 100, (long)(cap * 1.05));
+            salary = (long)Mathf.Min(salary, earlyBirdMax);
         }
         else
         {
             long noBirdMax = player.salary * 120 / 100;
-            salary = Mathf.Min(salary, noBirdMax);
+            salary = (long)Mathf.Min(salary, noBirdMax);
         }
 
         salary = (long)(Mathf.Round(salary / 100_000f) * 100_000);
