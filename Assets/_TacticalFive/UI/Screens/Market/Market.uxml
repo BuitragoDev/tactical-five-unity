@@ -258,8 +258,8 @@
             <ui:VisualElement name="FARosterFullBox" class="modal-box" style="border-color: rgb(192, 57, 43);">
                 <ui:Label class="modal-title" style="background-color: rgba(192, 57, 43, 0.15); border-bottom-color: rgb(192, 57, 43);" text="PLANTILLA COMPLETA" />
                 <ui:VisualElement class="modal-body">
-                    <ui:Label name="FARosterFullText" class="modal-paragraph" text="" />
-                    <ui:Label class="modal-paragraph" text="Debes liberar plazas antes de poder fichar." />
+                    <ui:Label name="FARosterFullText" class="modal-paragraph" style="font-size: 18px;" text="" />
+                    <ui:Label class="modal-paragraph" style="font-size: 18px;" text="Debes liberar plazas antes de poder fichar." />
                 </ui:VisualElement>
                 <ui:VisualElement class="modal-actions">
                     <ui:Button name="BtnCloseFARosterFull" class="modal-btn modal-btn--danger" text="CERRAR" />
