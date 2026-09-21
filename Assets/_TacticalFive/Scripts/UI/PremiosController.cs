@@ -60,6 +60,11 @@ public class PremiosController : UIScreenController
 
     protected override void Refresh()
     {
+        _activeTab = "manager";
+        _tabManager?.EnableInClassList("standings-tab--active", true);
+        _tabPlayer?.EnableInClassList("standings-tab--active", false);
+        _tabRookie?.EnableInClassList("standings-tab--active", false);
+
         if (_season == null || _tableBody == null) return;
 
         var title = _root.Q<Label>("PremiosTitle");
