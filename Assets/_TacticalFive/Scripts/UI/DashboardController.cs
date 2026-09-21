@@ -2686,7 +2686,9 @@ using System.Threading.Tasks;
             : "";
         header.AddToClassList(headerMod);
 
-        string subtitleText = resultType == 1 ? "COMPLETADO" : resultType == 0 ? "AVISO" : "ERROR";
+        string subtitleText = resultType == 1 ? "OFERTAS ACEPTADAS"
+            : resultType == 0 ? "HAY OFERTAS RECHAZADAS"
+            : "OFERTAS RECHAZADAS";
         var subtitle = new Label(subtitleText);
         subtitle.AddToClassList("fired-modal-title");
         subtitle.style.color = new StyleColor(borderColor);
