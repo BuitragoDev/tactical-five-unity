@@ -735,21 +735,27 @@ using System.Threading.Tasks;
             return;
         }
 
+        // ── Despido anticipado: equipo eliminado fuera de finished ──
+        if (_season.phase == "playin" && _myTeam != null)
+        {
+            bool teamHasPlayIn = DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => g.manager_id == _manager.id && g.game_type == "playin"
+                       && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+            if (!teamHasPlayIn && ShowFiredModalIfNeeded()) return;
+        }
+
+        if (_season.phase == "playoff" && _myTeam != null)
+        {
+            bool teamHasPlayoffs = DatabaseManager.Instance.Db.Table<GameData>()
+                .Any(g => g.manager_id == _manager.id && g.game_type == "playoff"
+                       && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+            if (!teamHasPlayoffs && ShowFiredModalIfNeeded()) return;
+        }
+
         if (_season.phase == "finished")
         {
-            bool isPro = _manager.game_mode == "promanager";
-            if (isPro && !IsObjectiveMetThisSeason())
-            {
-                ShowObjectiveFiredModal();
-            }
-            else if (_manager.trust < 10)
-            {
-                ShowFiredModal();
-            }
-            else
-            {
-                ScreenManager.Instance.GoTo(GameScreen.SeasonSummary);
-            }
+            if (ShowFiredModalIfNeeded()) return;
+            ScreenManager.Instance.GoTo(GameScreen.SeasonSummary);
             return;
         }
 
@@ -2037,6 +2043,22 @@ using System.Threading.Tasks;
                 _fastSimRunning = true;
                 SetSidebarNavigationEnabled(false);
                 SetActionBtn("DETENER SIMULACIÓN", "");
+            }
+
+            // ── Despido anticipado durante FastSim ──
+            if (_myTeam != null && (_season.phase == "playin" || _season.phase == "playoff"))
+            {
+                string phaseType = _season.phase == "playin" ? "playin" : "playoff";
+                bool teamHasPhaseGames = DatabaseManager.Instance.Db.Table<GameData>()
+                    .Any(g => g.manager_id == _manager.id && g.game_type == phaseType
+                           && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
+                if (!teamHasPhaseGames && ShowFiredModalIfNeeded())
+                {
+                    _fastSimRunning = false;
+                    SetSidebarNavigationEnabled(true);
+                    yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
+                    yield break;
+                }
             }
 
             // Refrescar cabecera (fecha) y paneles del Dashboard tras cada día
@@ -4159,6 +4181,37 @@ using System.Threading.Tasks;
         return date > new DateTime(_season.year_end, 2, 12);
     }
 
+    // ── Despido anticipado ──
+
+    bool ShouldFireManager()
+    {
+        if (_manager == null) return false;
+        bool isPro = _manager.game_mode == "promanager";
+        if (isPro && !IsObjectiveMetThisSeason()) return true;
+        if (_manager.trust < 10) return true;
+        return false;
+    }
+
+    bool IsTeamChampion()
+    {
+        if (_season == null || _myTeam == null) return false;
+        string label = $"{_season.year_start}-{_season.year_end.ToString().Substring(2)}";
+        var fr = DatabaseManager.Instance.Db.Table<FinalsRecord>()
+            .FirstOrDefault(f => f.season == label);
+        return fr != null && fr.champ_name == _myTeam.name;
+    }
+
+    bool ShowFiredModalIfNeeded()
+    {
+        if (IsTeamChampion()) return false;
+        if (!ShouldFireManager()) return false;
+        bool isPro = _manager.game_mode == "promanager";
+        if (isPro && !IsObjectiveMetThisSeason())
+            ShowObjectiveFiredModal();
+        else
+            ShowFiredModal();
+        return true;
+    }
 
     void MarkManagerFired()
     {
