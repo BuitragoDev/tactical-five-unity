@@ -416,7 +416,7 @@ using System.Linq;
             string displayName = pos;
 
             if (slot != null && slot.childCount > 1 && slot[1].userData is (PlayerData pd, int))
-                displayName = $"{pd.first_name} {pd.last_name}";
+                displayName = $"{pd.first_name} {pd.last_name}{(pd.is_rookie == 1 ? " (R)" : "")}";
 
             var courtCard = new VisualElement();
             courtCard.AddToClassList("court-card");
@@ -463,7 +463,7 @@ using System.Linq;
         _detailPosBadge.text = string.IsNullOrEmpty(p.secondary_position)
             ? PositionCodes.GetName(p.position)
             : $"{PositionCodes.GetName(p.position)} / {PositionCodes.GetName(p.secondary_position)}";
-        _detailPlayerName.text = $"{p.first_name} {p.last_name}".ToUpper();
+        _detailPlayerName.text = $"{p.first_name} {p.last_name}{(p.is_rookie == 1 ? " (R)" : "")}".ToUpper();
         _detailPlayerMeta.text = $"{PlayerAge(p)} años · {CountryCodes.GetName(p.nationality)}";
 
         var photoTex = PlayerPhotoHelper.Load(p.id, p.photo);
@@ -574,7 +574,7 @@ using System.Linq;
 
         var nameLbl = new Label();
         nameLbl.AddToClassList("player-card-name");
-        nameLbl.text = $"{player.first_name} {player.last_name}";
+        nameLbl.text = $"{player.first_name} {player.last_name}{(player.is_rookie == 1 ? " (R)" : "")}";
         info.Add(nameLbl);
 
         var meta = new VisualElement();
