@@ -1110,7 +1110,7 @@ public partial class DatabaseManager
               JOIN seasons s ON g.season_id = s.id
               LEFT JOIN teams t ON ps.team_id = t.id
               WHERE ps.player_id = ? AND g.manager_id = ? AND g.is_played = 1
-              GROUP BY g.season_id
+              GROUP BY g.season_id, ps.team_id
 
               ORDER BY season_id",
             playerId, playerId, managerId).ToList();
@@ -2676,7 +2676,7 @@ public partial class DatabaseManager
             JOIN seasons s ON g.season_id = s.id
             LEFT JOIN teams t ON ps.team_id = t.id
             WHERE g.season_id = ? AND g.is_played = 1
-            GROUP BY ps.player_id", oldSeasonId, oldSeasonId);
+            GROUP BY ps.player_id, ps.team_id", oldSeasonId, oldSeasonId);
 
         var allPlayers = _db.Table<PlayerData>().ToList();
 

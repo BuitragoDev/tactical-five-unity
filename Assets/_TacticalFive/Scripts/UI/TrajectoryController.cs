@@ -196,7 +196,34 @@ using System.Linq;
 
         var fmt = System.Globalization.CultureInfo.InvariantCulture;
 
-        foreach (var season in _careerHistory)
+        // Merge rows with same season_id (mid-season trades produce multiple rows)
+        var merged = _careerHistory
+            .GroupBy(s => s.season_id)
+            .Select(g =>
+            {
+                var rows = g.ToList();
+                if (rows.Count == 1) return rows[0];
+                return new PlayerCareerSeasonRow
+                {
+                    season_id = rows[0].season_id,
+                    year_start = rows[0].year_start,
+                    year_end = rows[0].year_end,
+                    team_id = rows[0].team_id,
+                    team_abbreviation = string.Join(" / ", rows.Select(r => r.team_abbreviation ?? "—")),
+                    team_name = string.Join(" / ", rows.Select(r => r.team_name ?? "—")),
+                    games = rows.Sum(r => r.games),
+                    total_minutes = rows.Sum(r => r.total_minutes),
+                    total_points = rows.Sum(r => r.total_points),
+                    total_rebounds = rows.Sum(r => r.total_rebounds),
+                    total_assists = rows.Sum(r => r.total_assists),
+                    total_steals = rows.Sum(r => r.total_steals),
+                    total_blocks = rows.Sum(r => r.total_blocks),
+                    total_rating = rows.Sum(r => r.total_rating)
+                };
+            })
+            .ToList();
+
+        foreach (var season in merged)
         {
             var row = new VisualElement();
             row.AddToClassList("trajectory-table-row");
@@ -222,15 +249,15 @@ using System.Linq;
             _trajectoryTableBody.Add(row);
         }
 
-        // Fila de totales carrera (calculados desde careerHistory)
-        int totalGames = _careerHistory.Sum(s => s.games);
-        double totalMinutes = _careerHistory.Sum(s => s.total_minutes);
-        int totalPts = _careerHistory.Sum(s => s.total_points);
-        int totalReb = _careerHistory.Sum(s => s.total_rebounds);
-        int totalAst = _careerHistory.Sum(s => s.total_assists);
-        int totalStl = _careerHistory.Sum(s => s.total_steals);
-        int totalBlk = _careerHistory.Sum(s => s.total_blocks);
-        int totalRat = _careerHistory.Sum(s => s.total_rating);
+        // Fila de totales carrera (calculados desde merged)
+        int totalGames = merged.Sum(s => s.games);
+        double totalMinutes = merged.Sum(s => s.total_minutes);
+        int totalPts = merged.Sum(s => s.total_points);
+        int totalReb = merged.Sum(s => s.total_rebounds);
+        int totalAst = merged.Sum(s => s.total_assists);
+        int totalStl = merged.Sum(s => s.total_steals);
+        int totalBlk = merged.Sum(s => s.total_blocks);
+        int totalRat = merged.Sum(s => s.total_rating);
 
         var totalRow = new VisualElement();
         totalRow.AddToClassList("trajectory-table-row");
