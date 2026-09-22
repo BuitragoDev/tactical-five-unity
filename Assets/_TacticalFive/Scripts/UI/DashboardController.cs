@@ -6032,7 +6032,7 @@ List<int> offeredPickIds = new List<int>();
         info.Add(nameLbl);
 
         string stars = p.overall >= 85 ? " ★★★" : p.overall >= 75 ? " ★★" : p.overall >= 65 ? " ★" : "";
-        var metaLbl = new Label($"{PositionCodes.GetShort(p.position)} | {p.age} años{stars}");
+        var metaLbl = new Label($"{PositionCodes.GetShort(p.position)} | {p.age} años");
         metaLbl.AddToClassList("trade-modal-player-meta");
         info.Add(metaLbl);
 

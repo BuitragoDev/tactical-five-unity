@@ -2076,7 +2076,7 @@
 
 .trade-modal-team-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(46, 204, 113);
     margin-top: 2px;
 }
@@ -2136,14 +2136,14 @@
 
 .trade-modal-player-meta {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(140, 150, 175);
     margin-top: 1px;
 }
 
 .trade-modal-player-contract {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(140, 150, 175);
     margin-top: 1px;
 }
@@ -2169,7 +2169,7 @@
 
 .trade-modal-player-ovr-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
-    font-size: 10px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(140, 150, 175);
 }
