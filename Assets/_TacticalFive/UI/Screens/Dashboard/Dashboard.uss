@@ -2237,7 +2237,7 @@
 
 .trade-modal-analysis-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 3px;
     color: rgb(140, 150, 175);
     -unity-text-align: middle-center;
@@ -2272,7 +2272,7 @@
 
 .trade-modal-analysis-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 2px;
     color: rgb(140, 150, 175);
     margin-bottom: 8px;
@@ -2297,7 +2297,7 @@
 
 .trade-modal-analysis-desc {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 13px;
+    font-size: 16px;
     color: rgb(140, 150, 175);
     margin-top: 6px;
     -unity-text-align: middle-center;
