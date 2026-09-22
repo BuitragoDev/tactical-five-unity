@@ -7346,6 +7346,14 @@ List<int> offeredPickIds = new List<int>();
     {
         if (_season == null || _myTeam == null) return;
 
+        // Always load stat card icons
+        SetStatIcon("StatScorerIcon", "puntos");
+        SetStatIcon("StatRebounderIcon", "rebote");
+        SetStatIcon("StatAssisterIcon", "pase");
+        SetStatIcon("StatStealerIcon", "robo");
+        SetStatIcon("StatBlockerIcon", "tapones");
+        SetStatIcon("StatRatedIcon", "estrella64px");
+
         var teamStats = DatabaseManager.Instance.GetTeamPlayerSeasonStats(_season.id, _myTeam.id, _manager.id);
         if (teamStats.Count == 0) return;
 
@@ -7432,6 +7440,17 @@ List<int> offeredPickIds = new List<int>();
                 if (iconTex != null)
                     iconEl.style.backgroundImage = new StyleBackground(iconTex);
             }
+        }
+    }
+
+    void SetStatIcon(string iconElementName, string iconName)
+    {
+        var iconEl = _root.Q<VisualElement>(iconElementName);
+        if (iconEl != null)
+        {
+            var iconTex = Resources.Load<Texture2D>($"Icons/{iconName}");
+            if (iconTex != null)
+                iconEl.style.backgroundImage = new StyleBackground(iconTex);
         }
     }
 
