@@ -345,7 +345,7 @@
 }
 
 .th-season { width: 130px; -unity-text-align: middle-left; padding-left: 8px; }
-.th-team   { width: 240px; -unity-text-align: middle-left; }
+.th-team   { width: 480px; -unity-text-align: middle-left; }
 .th-gp     { width: 80px;  -unity-text-align: middle-center; }
 .th-mp     { width: 70px;  -unity-text-align: middle-center; }
 .th-pts    { width: 70px;  -unity-text-align: middle-center; }
