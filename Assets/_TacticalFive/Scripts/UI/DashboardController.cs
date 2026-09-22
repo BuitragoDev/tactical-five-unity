@@ -2030,6 +2030,8 @@ using System.Threading.Tasks;
 
         _fastSimRunning = false;
         SetSidebarNavigationEnabled(true);
+        _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
         Refresh();
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
