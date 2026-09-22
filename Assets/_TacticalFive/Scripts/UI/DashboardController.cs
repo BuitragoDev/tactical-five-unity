@@ -4641,7 +4641,8 @@ using System.Threading.Tasks;
     bool TrySellVeteran(TeamData seller, List<PlayerData> sellerRoster, int seasonId, int gameDay, HashSet<int> tradedThisSeason)
     {
         var vets = sellerRoster
-            .Where(p => p.injury_days == 0 && p.age >= 30 && p.salary >= TradeHelper.MIN_SALARY
+            .Where(p => p.injury_days == 0 && p.age >= 30 && p.overall < 87
+                        && p.salary >= TradeHelper.MIN_SALARY
                         && !tradedThisSeason.Contains(p.id) && p.is_rookie == 0)
             .OrderByDescending(p => p.salary)
             .ToList();
@@ -5412,7 +5413,10 @@ using System.Threading.Tasks;
                 if (faTarget != null)
                 {
                     targetedIds.Add(faTarget.id);
-                    var aiHealthyForSA = aiRoster.Where(p => p.injury_days == 0).ToList();
+                    var aiHealthyForSA = aiRoster
+                        .Where(p => p.injury_days == 0 && p.overall < 87
+                                    && !tradedThisSeason.Contains(p.id) && p.is_rookie == 0)
+                        .ToList();
                     if (aiHealthyForSA.Count > 0)
                     {
                         long estimatedSalary = faTarget.salary;
