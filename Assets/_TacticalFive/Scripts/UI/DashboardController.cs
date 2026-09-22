@@ -158,6 +158,8 @@ using System.Threading.Tasks;
     // RNG seguro para el camino AI (se ejecuta en hilo de fondo; UnityEngine.Random no es thread-safe)
     private readonly System.Random _aiRng = new System.Random();
     private bool _airRenewalsProcessed;
+    private bool _renewalDeadlineModalShown;
+    private bool _renewalDeadlineResolved;
 
     protected override void OnEnable()
     {
@@ -199,6 +201,7 @@ using System.Threading.Tasks;
                 _deadlineModalSeasonId = _season.id;
                 _teamTradeCooldown.Clear();
                 _airRenewalsProcessed = false;
+                _renewalDeadlineModalShown = false;
             }
             CheckBudgetWarning();
             ProcessMaturedOffers();
@@ -548,6 +551,9 @@ using System.Threading.Tasks;
         RefreshBoard();
         RefreshPlayerStats();
         RefreshMessages();
+
+        if (IsFeb12OfYearEnd() && !_renewalDeadlineModalShown)
+            ShowRenewalDeadlineModal(false);
     }
 
     // ── HEADER ───────────────────────────────────────────
@@ -1849,6 +1855,13 @@ using System.Threading.Tasks;
                 ShowDeadlineDayModal(true);
                 yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
                 _deadlineDayActive = false;
+            }
+
+            if (IsFeb12OfYearEnd() && !_renewalDeadlineModalShown)
+            {
+                _renewalDeadlineResolved = false;
+                ShowRenewalDeadlineModal(true);
+                yield return new WaitUntil(() => _renewalDeadlineResolved);
             }
 
             yield return ProcessGameDayRoutine(fastSim: true);
@@ -4038,6 +4051,79 @@ using System.Threading.Tasks;
         if (CursorManager.Instance != null)
         {
             CursorManager.Instance.RegisterHandCursor(marketBtn);
+            CursorManager.Instance.RegisterHandCursor(closeBtn);
+        }
+    }
+
+    void ShowRenewalDeadlineModal(bool fastSim = false)
+    {
+        _renewalDeadlineModalShown = true;
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.borderTopColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderBottomColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderLeftColor = new StyleColor(new Color32(212, 160, 23, 255));
+        box.style.borderRightColor = new StyleColor(new Color32(212, 160, 23, 255));
+        _firedOverlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
+        var title = new Label("FECHA LÍMITE DE RENOVACIONES");
+        title.AddToClassList("fired-modal-title");
+        title.style.color = new StyleColor(new Color32(212, 160, 23, 255));
+        header.Add(title);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+
+        var text = new Label("Hoy 12 de febrero es el último día para renovar contratos de tus jugadores. Las ofertas enviadas hoy tendrán respuesta en 7 días.");
+        text.AddToClassList("fired-modal-text");
+        body.Add(text);
+
+        var hint = new Label("Si no renuevas a tiempo, tus jugadores pasarán a ser agentes libres al finalizar la temporada.");
+        hint.AddToClassList("fired-modal-text");
+        hint.style.marginTop = 10;
+        body.Add(hint);
+
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
+
+        var rosterBtn = new Button();
+        rosterBtn.text = "IR A JUGADORES";
+        rosterBtn.AddToClassList("btn-modal-confirm");
+        rosterBtn.AddToClassList("btn-modal-confirm--gold");
+        rosterBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            _renewalDeadlineResolved = true;
+            ScreenManager.Instance.GoTo(GameScreen.Roster);
+        });
+        actions.Add(rosterBtn);
+
+        var closeBtn = new Button();
+        closeBtn.text = fastSim ? "SEGUIR SIMULANDO" : "CERRAR";
+        closeBtn.AddToClassList("btn-modal-cancel");
+        closeBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            _renewalDeadlineResolved = true;
+        });
+        actions.Add(closeBtn);
+
+        box.Add(actions);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(rosterBtn);
             CursorManager.Instance.RegisterHandCursor(closeBtn);
         }
     }
