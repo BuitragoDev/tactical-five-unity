@@ -875,7 +875,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background-color: rgb(40, 48, 60);
+    background-color: rgb(100, 111, 127);
     align-self: stretch;
 }
 
@@ -932,6 +932,9 @@
     color: rgb(230, 236, 248);
     line-height: 1;
     margin-top: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .stat-card-games {
