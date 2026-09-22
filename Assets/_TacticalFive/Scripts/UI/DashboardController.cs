@@ -181,6 +181,7 @@ using System.Threading.Tasks;
         GameResultCache.FastSimTargetDate = null;
         if (pendingTarget.HasValue)
         {
+            _renewalDeadlineModalShown = false;
             _fastSimTarget = pendingTarget.Value;
             _root.schedule.Execute(() =>
             {
@@ -1864,14 +1865,15 @@ using System.Threading.Tasks;
                 _deadlineDayActive = false;
             }
 
+            yield return ProcessGameDayRoutine(fastSim: true);
+
             if (IsFeb12OfYearEnd() && !_renewalDeadlineModalShown)
             {
+                _renewalDeadlineModalShown = true;
                 _renewalDeadlineResolved = false;
                 ShowRenewalDeadlineModal(true);
                 yield return new WaitUntil(() => _renewalDeadlineResolved);
             }
-
-            yield return ProcessGameDayRoutine(fastSim: true);
 
             if (_pendingIRReleaseCount > 0)
             {
