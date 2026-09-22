@@ -136,6 +136,7 @@ using System.Threading.Tasks;
     private bool _offerModalGoToQuinteto;
     private bool _tradeOfferModalResolved;
     private bool _tradeOfferAccepted;
+    private int _pendingTradeChem;
     private bool _fastSimAbortRecovered;
     private bool _recoveryModalResolved;
     private bool _recoveryModalGoToQuinteto;
@@ -5790,6 +5791,21 @@ List<int> offeredPickIds = new List<int>();
                 DatabaseManager.Instance.UpdatePlayer(p);
             }
 
+            // Apply projected chemistry from the analysis modal
+            DatabaseManager.Instance.UpdateTeamChemistry(_myTeam.id, _pendingTradeChem);
+            _myTeam.team_chemistry = _pendingTradeChem;
+            var headerChem = _root.Q<Label>("HeaderChemistry");
+            if (headerChem != null)
+            {
+                headerChem.text = $"{_pendingTradeChem}%";
+                headerChem.RemoveFromClassList("header-stat-value--gold");
+                headerChem.RemoveFromClassList("header-stat-value--negative");
+                if (_pendingTradeChem < 40)
+                    headerChem.AddToClassList("header-stat-value--negative");
+                else if (_pendingTradeChem < 70)
+                    headerChem.AddToClassList("header-stat-value--gold");
+            }
+
             // Transfer picks
             if (ourPicks != null && ourPicks.Count > 0)
             {
@@ -6126,12 +6142,11 @@ List<int> offeredPickIds = new List<int>();
         chemCard.Add(chemLabel);
 
         int currentChem = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
-        // Simulate chemistry impact: players leaving/arriving shift chemistry
-        // Players arriving with high morale boost it, low morale hurts
         float avgMoraleIn = theirPlayers.Count > 0 ? (float)theirPlayers.Average(p => p.morale) : 50;
         float avgMoraleOut = ourPlayers.Count > 0 ? (float)ourPlayers.Average(p => p.morale) : 50;
         int chemShift = Mathf.RoundToInt((avgMoraleIn - avgMoraleOut) * 0.15f);
         int projectedChem = Mathf.Clamp(currentChem + chemShift, 0, 100);
+        _pendingTradeChem = projectedChem;
 
         var chemCircle = new VisualElement();
         chemCircle.AddToClassList("trade-modal-chem-circle");
@@ -6167,12 +6182,12 @@ List<int> offeredPickIds = new List<int>();
         long salaryIn = theirPlayers.Sum(p => p.salary);
         long salaryOut = ourPlayers.Sum(p => p.salary);
         long newPayroll = currentPayroll - salaryOut + salaryIn;
+        long currentCapRoom = salaryCap - currentPayroll;
         long newCapRoom = salaryCap - newPayroll;
 
-        // Count expiring contracts (flexibility indicator)
-        int expiringOut = ourPlayers.Count(p => p.contract_years <= 1);
-        int expiringIn = theirPlayers.Count(p => p.contract_years <= 1);
-        int flexScore = (expiringIn - expiringOut) + (newCapRoom > 0 ? 1 : -1);
+        int flexScore = 0;
+        if (newCapRoom > currentCapRoom) flexScore = 1;
+        else if (newCapRoom < currentCapRoom) flexScore = -1;
 
         string flexText = (flexScore >= 0 ? "+" : "") + flexScore.ToString();
         var flexValue = new Label(flexText);
@@ -6184,9 +6199,12 @@ List<int> offeredPickIds = new List<int>();
                 : "trade-modal-analysis-value--neutral");
         flexCard.Add(flexValue);
 
-        string flexDesc = newCapRoom > 0
-            ? "Ganas espacio salarial a futuro"
-            : "Menos espacio salarial a futuro";
+        long capDiff = newCapRoom - currentCapRoom;
+        string flexDesc = capDiff > 0
+            ? $"Ganas {FormatMoneyShort(capDiff)} de espacio salarial"
+            : capDiff < 0
+                ? $"Pierdes {FormatMoneyShort(-capDiff)} de espacio salarial"
+                : "Sin cambio en espacio salarial";
 
         var flexDescLbl = new Label(flexDesc);
         flexDescLbl.AddToClassList("trade-modal-analysis-desc");
