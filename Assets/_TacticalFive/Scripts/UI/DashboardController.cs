@@ -727,6 +727,13 @@ using System.Threading.Tasks;
             return;
         }
 
+        if (IsFeb12OfYearEnd() && !_renewalDeadlineModalShown)
+        {
+            _renewalDeadlineModalShown = true;
+            ShowRenewalDeadlineModal();
+            return;
+        }
+
         if (_season.phase == "finished")
         {
             bool isPro = _manager.game_mode == "promanager";
@@ -4057,7 +4064,6 @@ using System.Threading.Tasks;
 
     void ShowRenewalDeadlineModal(bool fastSim = false)
     {
-        _renewalDeadlineModalShown = true;
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
 
@@ -4102,6 +4108,7 @@ using System.Threading.Tasks;
         rosterBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
+            _renewalDeadlineModalShown = true;
             _firedOverlay.style.display = DisplayStyle.None;
             _renewalDeadlineResolved = true;
             ScreenManager.Instance.GoTo(GameScreen.Roster);
@@ -4114,6 +4121,7 @@ using System.Threading.Tasks;
         closeBtn.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
+            _renewalDeadlineModalShown = true;
             _firedOverlay.style.display = DisplayStyle.None;
             _renewalDeadlineResolved = true;
         });
