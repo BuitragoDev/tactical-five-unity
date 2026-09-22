@@ -6224,7 +6224,7 @@ List<int> offeredPickIds = new List<int>();
 
     string SalaryStr(long salary)
     {
-        return "$" + salary.ToString("N0").Replace(',', '.');
+        return salary.ToString("N0").Replace(',', '.') + " $";
     }
 
     void ApplyRenovation(TeamData team)
