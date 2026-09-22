@@ -5806,6 +5806,23 @@ List<int> offeredPickIds = new List<int>();
                     headerChem.AddToClassList("header-stat-value--gold");
             }
 
+            // Update header payroll & margin
+            var leagueSet = DatabaseManager.Instance.GetLeagueSettings();
+            long cap = leagueSet?.salary_cap ?? TradeHelper.SALARY_CAP;
+            long prevPayroll = _players.Sum(x => x.salary);
+            long salIn = theirPlayers.Sum(p => p.salary);
+            long salOut = ourPlayers.Sum(p => p.salary);
+            long newTotalPayroll = prevPayroll - salOut + salIn;
+            long newMargin = cap - newTotalPayroll;
+            _headerPayroll.text = $"${newTotalPayroll / 1_000_000}M";
+            string newMarginText = newMargin >= 0
+                ? $"+${newMargin / 1_000_000}M"
+                : $"-${Mathf.Abs((int)(newMargin / 1_000_000))}M";
+            _headerMargin.text = newMarginText;
+            _headerMargin.RemoveFromClassList("header-stat-value--negative");
+            if (newMargin < 0)
+                _headerMargin.AddToClassList("header-stat-value--negative");
+
             // Transfer picks
             if (ourPicks != null && ourPicks.Count > 0)
             {
