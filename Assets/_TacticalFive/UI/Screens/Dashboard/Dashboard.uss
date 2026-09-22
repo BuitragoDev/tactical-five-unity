@@ -897,6 +897,8 @@
     background-position: center;
     margin: 0 10px;
     flex-shrink: 0;
+    align-self: flex-start;
+    margin-top: 4px;
 }
 
 .stat-card-right {
