@@ -913,7 +913,7 @@
     font-size: 14px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
-    color: rgb(212, 160, 23);
+    color: rgb(80, 130, 220);
 }
 
 .stat-card-val {
@@ -935,7 +935,7 @@
 .stat-card-games {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 13px;
-    color: rgb(85, 102, 119);
+    color: rgb(80, 130, 220);
     letter-spacing: 1px;
     -unity-text-transform: upper;
     margin-top: 1px;
