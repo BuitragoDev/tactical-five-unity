@@ -406,7 +406,7 @@
 }
 
 .td-season { width: 130px; -unity-text-align: middle-left; padding-left: 8px; }
-.td-team   { width: 240px; -unity-text-align: middle-left; }
+.td-team   { width: 480px; -unity-text-align: middle-left; }
 .td-gp     { width: 80px;  -unity-text-align: middle-center; }
 .td-mp     { width: 70px;  -unity-text-align: middle-center; }
 .td-pts    { width: 70px;  -unity-text-align: middle-center; }
