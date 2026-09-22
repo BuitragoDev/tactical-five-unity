@@ -875,7 +875,7 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    background-color: rgb(100, 111, 127);
+    background-color: rgb(40, 48, 60);
     align-self: stretch;
 }
 
@@ -1008,7 +1008,7 @@
 }
 .message-item-body {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     white-space: normal;
     overflow: hidden;
