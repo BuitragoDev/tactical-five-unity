@@ -2644,6 +2644,15 @@ public partial class DatabaseManager
                   .Count() > 0;
     }
 
+    public HashSet<int> GetPlayersTradedThisSeason(int seasonId)
+    {
+        if (!EnsureDb()) return new HashSet<int>();
+        return new HashSet<int>(
+            _db.Table<TradeData>()
+               .Where(t => t.season_id == seasonId && t.trade_type == "trade")
+               .Select(t => t.player_id));
+    }
+
     public void ClearAllRookies()
     {
         if (!EnsureDb()) return;

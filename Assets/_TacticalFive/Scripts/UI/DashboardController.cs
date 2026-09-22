@@ -4561,6 +4561,7 @@ using System.Threading.Tasks;
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var seasonId = _season.id;
         var freeAgentsAll = DatabaseManager.Instance.GetFreeAgents();
+        var tradedThisSeason = DatabaseManager.Instance.GetPlayersTradedThisSeason(seasonId);
 
         int teamsAttempted = 0, teamsTraded = 0, teamsFAd = 0;
         const int maxTrades = 3;
@@ -4602,7 +4603,7 @@ using System.Threading.Tasks;
             teamsAttempted++;
 
             // Rebuild: primero intenta vender veteranos (fire sale) para obtener jóvenes/picks
-            if (strategy == TeamStrategy.Rebuild && TrySellVeteran(team, roster, seasonId, gameDay))
+            if (strategy == TeamStrategy.Rebuild && TrySellVeteran(team, roster, seasonId, gameDay, tradedThisSeason))
             {
                 teamsTraded++;
                 continue;
@@ -4617,7 +4618,7 @@ using System.Threading.Tasks;
                 continue;
             }
 
-            bool traded = TryFindAITrade(team, roster, weakestPos, seasonId, gameDay);
+            bool traded = TryFindAITrade(team, roster, weakestPos, seasonId, gameDay, tradedThisSeason);
 
             if (traded)
             {
@@ -4632,15 +4633,16 @@ using System.Threading.Tasks;
         }
 
         Debug.Log($"[AITrades] Cycle complete: {teamsAttempted} teams attempted, {teamsTraded} trades, {teamsFAd} FA signings");
-        GenerateAITradeOffersForPlayer(gameDay, seasonId);
+        GenerateAITradeOffersForPlayer(gameDay, seasonId, tradedThisSeason);
     }
 
     // Fire sale de un equipo en reconstrucción: ofrece veteranos (edad >= 30, salario alto)
     // a cambio de jugadores jóvenes o picks de equipos contender/balanced.
-    bool TrySellVeteran(TeamData seller, List<PlayerData> sellerRoster, int seasonId, int gameDay)
+    bool TrySellVeteran(TeamData seller, List<PlayerData> sellerRoster, int seasonId, int gameDay, HashSet<int> tradedThisSeason)
     {
         var vets = sellerRoster
-            .Where(p => p.injury_days == 0 && p.age >= 30 && p.salary >= TradeHelper.MIN_SALARY)
+            .Where(p => p.injury_days == 0 && p.age >= 30 && p.salary >= TradeHelper.MIN_SALARY
+                        && !tradedThisSeason.Contains(p.id) && p.is_rookie == 0)
             .OrderByDescending(p => p.salary)
             .ToList();
         if (vets.Count == 0) return false;
@@ -5050,7 +5052,7 @@ using System.Threading.Tasks;
     }
 
     bool TryFindAITrade(TeamData teamA, List<PlayerData> rosterA, string targetPos,
-                        int seasonId, int gameDay)
+                        int seasonId, int gameDay, HashSet<int> tradedThisSeason)
     {
         var allTeams = DatabaseManager.Instance.GetAllTeams()
             .Where(t => t.id != _myTeam.id && t.id != teamA.id)
@@ -5073,6 +5075,7 @@ using System.Threading.Tasks;
 
             var candidates = rosterA
                 .Where(p => p.injury_days == 0 && p.id != target.id
+                            && !tradedThisSeason.Contains(p.id) && p.is_rookie == 0
                             && rosterA.Count(r => r.position == p.position) >= (
                                 p.position == targetPos ? 1 : 2))
                 .OrderBy(p => p.overall)
@@ -5363,7 +5366,7 @@ using System.Threading.Tasks;
         return result;
     }
 
-    void GenerateAITradeOffersForPlayer(int gameDay, int seasonId)
+    void GenerateAITradeOffersForPlayer(int gameDay, int seasonId, HashSet<int> tradedThisSeason)
     {
         var existingPending = DatabaseManager.Instance.GetPendingTradeOffers(_manager.id);
         if (existingPending.Count > 0) return;
@@ -5440,7 +5443,7 @@ using System.Threading.Tasks;
                 .ToList();
             if (aiHealthy.Count == 0) continue;
 
-            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam, aiStrategy);
+            var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam, aiStrategy, tradedThisSeason);
             if (offerPack == null) continue;
 
 List<int> offeredPickIds = new List<int>();
@@ -5586,7 +5589,7 @@ List<int> offeredPickIds = new List<int>();
 
     List<PlayerData> BuildOfferPackage(List<PlayerData> aiAvailable, int aiRosterCount,
                                         PlayerData target, List<PlayerData> userRoster, TeamData aiTeam,
-                                        TeamStrategy aiStrategy = TeamStrategy.Balanced)
+                                        TeamStrategy aiStrategy, HashSet<int> tradedThisSeason)
     {
         long userPayroll = userRoster.Sum(p => p.salary);
         var fullAiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
@@ -5597,11 +5600,11 @@ List<int> offeredPickIds = new List<int>();
 
         // Los contender nunca ofrecen a sus jóvenes de valor; los rebuild no se
         // deshacen de promesas jóvenes, solo de salarios caros.
-        var tradeable = aiAvailable;
+        var tradeable = aiAvailable.Where(p => !tradedThisSeason.Contains(p.id) && p.is_rookie == 0).ToList();
         if (aiStrategy == TeamStrategy.Contend)
-            tradeable = aiAvailable.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
+            tradeable = tradeable.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
         if (aiStrategy == TeamStrategy.Rebuild)
-            tradeable = aiAvailable.Where(p => p.age >= 25).ToList();
+            tradeable = tradeable.Where(p => p.age >= 25).ToList();
         if (tradeable.Count == 0) return null;
 
         // Try 1-for-1: closest salary match first
