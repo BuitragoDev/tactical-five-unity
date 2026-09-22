@@ -7318,49 +7318,50 @@ List<int> offeredPickIds = new List<int>();
 
         var scorer = teamStats.OrderByDescending(s => (float)s.total_points / s.games).First();
         SetStatCard("StatScorer", "StatScorerName", "StatScorerGames",
-            (scorer.total_points / (float)scorer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " pts",
+            (scorer.total_points / (float)scorer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{scorer.first_name} {scorer.last_name}",
-            $"{scorer.games} {(scorer.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
-            scorer.player_id);
+            $"{scorer.games} {(scorer.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
+            scorer.player_id, "puntos");
 
         var rebounder = teamStats.OrderByDescending(s => (float)s.total_rebounds / s.games).First();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
-            (rebounder.total_rebounds / (float)rebounder.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " reb",
+            (rebounder.total_rebounds / (float)rebounder.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{rebounder.first_name} {rebounder.last_name}",
-            $"{rebounder.games} {(rebounder.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
-            rebounder.player_id);
+            $"{rebounder.games} {(rebounder.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
+            rebounder.player_id, "rebote");
 
         var assister = teamStats.OrderByDescending(s => (float)s.total_assists / s.games).First();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
-            (assister.total_assists / (float)assister.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " ast",
+            (assister.total_assists / (float)assister.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{assister.first_name} {assister.last_name}",
-            $"{assister.games} {(assister.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
-            assister.player_id);
+            $"{assister.games} {(assister.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
+            assister.player_id, "pase");
 
         var stealer = teamStats.OrderByDescending(s => (float)s.total_steals / s.games).First();
         SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
-            (stealer.total_steals / (float)stealer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " rob",
+            (stealer.total_steals / (float)stealer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{stealer.first_name} {stealer.last_name}",
-            $"{stealer.games} {(stealer.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
-            stealer.player_id);
+            $"{stealer.games} {(stealer.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
+            stealer.player_id, "robo");
 
         var blocker = teamStats.OrderByDescending(s => (float)s.total_blocks / s.games).First();
         SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
-            (blocker.total_blocks / (float)blocker.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " tap",
+            (blocker.total_blocks / (float)blocker.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{blocker.first_name} {blocker.last_name}",
-            $"{blocker.games} {(blocker.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
-            blocker.player_id);
+            $"{blocker.games} {(blocker.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
+            blocker.player_id, "tapones");
 
         var rated = teamStats.OrderByDescending(s => (float)s.total_rating / s.games).First();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
-            (rated.total_rating / (float)rated.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + " val",
+            (rated.total_rating / (float)rated.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{rated.first_name} {rated.last_name}",
-            $"{rated.games} {(rated.games == 1 ? "Partido Jugado" : "Partidos Jugados")}",
-            rated.player_id);
+            $"{rated.games} {(rated.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
+            rated.player_id, "estrella64px");
     }
 
     void SetStatCard(string valName, string playerName, string gamesName,
-                     string val, string player, string games, int playerId = 0)
+                     string val, string player, string games, int playerId = 0,
+                     string iconName = null)
     {
         var valLbl = _root.Q<Label>(valName);
         var playerLbl = _root.Q<Label>(playerName);
@@ -7382,6 +7383,17 @@ List<int> offeredPickIds = new List<int>();
                 Texture2D tex = PlayerPhotoHelper.Load(p.id, p.photo);
                 if (tex != null)
                     photo.style.backgroundImage = new StyleBackground(tex);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(iconName))
+        {
+            var iconEl = _root.Q<VisualElement>(valName + "Icon");
+            if (iconEl != null)
+            {
+                var iconTex = Resources.Load<Texture2D>($"Icons/{iconName}");
+                if (iconTex != null)
+                    iconEl.style.backgroundImage = new StyleBackground(iconTex);
             }
         }
     }
