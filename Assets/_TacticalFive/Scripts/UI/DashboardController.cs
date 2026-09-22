@@ -4663,7 +4663,8 @@ using System.Threading.Tasks;
 
                 // El comprador paga con jóvenes (edad < 25) baratos o con picks
                 var young = buyerRoster
-                    .Where(p => p.injury_days == 0 && p.age < 25 && p.salary <= vet.salary * 0.8f)
+                    .Where(p => p.injury_days == 0 && p.age < 25 && p.salary <= vet.salary * 0.8f
+                                && !tradedThisSeason.Contains(p.id) && p.is_rookie == 0)
                     .OrderBy(p => p.salary)
                     .ToList();
                 if (young.Count == 0) continue;
@@ -4689,6 +4690,8 @@ using System.Threading.Tasks;
                         aSelectedPicks: null,
                         bSelectedPicks: picks))
                 {
+                    tradedThisSeason.Add(vet.id);
+                    foreach (var yp in youngPack) tradedThisSeason.Add(yp.id);
                     Debug.Log($"[AITrades] {seller.name} vende a {vet.first_name} {vet.last_name} ({vet.age} años) a {buyer.name} por jóvenes/picks (rebuild fire sale)");
                     return true;
                 }
@@ -5068,7 +5071,7 @@ using System.Threading.Tasks;
             int targetCap = teamAStrategy == TeamStrategy.Contend ? 90 : 86;
 
             var target = rosterB
-                .Where(p => p.position == targetPos && p.injury_days == 0)
+                .Where(p => p.position == targetPos && p.injury_days == 0 && p.is_rookie == 0)
                 .OrderByDescending(p => p.overall)
                 .FirstOrDefault(p => p.overall <= targetCap);
             if (target == null) continue;
@@ -5108,7 +5111,11 @@ using System.Threading.Tasks;
                         new List<PlayerData> { target },
                         seasonId, gameDay,
                         aSelectedPicks: teamAPicks))
+                {
+                    tradedThisSeason.Add(c.id);
+                    tradedThisSeason.Add(target.id);
                     return true;
+                }
             }
 
             // Try 2-for-1
@@ -5121,7 +5128,12 @@ using System.Threading.Tasks;
                             new List<PlayerData> { target },
                             seasonId, gameDay,
                             aSelectedPicks: teamAPicks))
+                    {
+                        tradedThisSeason.Add(tradeableCandidates[i].id);
+                        tradedThisSeason.Add(tradeableCandidates[j].id);
+                        tradedThisSeason.Add(target.id);
                         return true;
+                    }
                 }
             }
         }
@@ -5505,11 +5517,17 @@ List<int> offeredPickIds = new List<int>();
     {
         var roll = (float)_aiRng.NextDouble();
 
+        // Excluir rookies y jugadores ya excluidos
+        var tradeable = userHealthy
+            .Where(p => !excludedIds.Contains(p.id) && p.is_rookie == 0)
+            .ToList();
+        if (tradeable.Count == 0) return null;
+
         // Trade block: si el usuario ha puesto jugadores en el mercado, la IA
         // los prioriza con un 60 % de probabilidad (siempre que encajen en la
         // estrategia del equipo AI).
-        var onBlock = userHealthy
-            .Where(p => p.on_trade_block == 1 && !excludedIds.Contains(p.id))
+        var onBlock = tradeable
+            .Where(p => p.on_trade_block == 1)
             .ToList();
         if (onBlock.Count > 0 && _aiRng.NextDouble() < 0.60f)
         {
@@ -5525,8 +5543,8 @@ List<int> offeredPickIds = new List<int>();
         // Los contenders persiguen a tus mejores jugadores (estrellas)
         if (aiStrategy == TeamStrategy.Contend && roll < 0.75f)
         {
-            var starCandidates = userHealthy
-                .Where(p => !excludedIds.Contains(p.id) && p.overall >= 83)
+            var starCandidates = tradeable
+                .Where(p => p.overall >= 83)
                 .OrderByDescending(p => p.overall)
                 .ToList();
             if (starCandidates.Count > 0)
@@ -5536,8 +5554,8 @@ List<int> offeredPickIds = new List<int>();
         // Los rebuild buscan activos jóvenes (los explotan o los roban baratos)
         if (aiStrategy == TeamStrategy.Rebuild && roll < 0.30f)
         {
-            var youngCandidates = userHealthy
-                .Where(p => !excludedIds.Contains(p.id) && p.age <= 26)
+            var youngCandidates = tradeable
+                .Where(p => p.age <= 26)
                 .OrderByDescending(p => p.overall)
                 .ToList();
             if (youngCandidates.Count > 0)
@@ -5549,8 +5567,8 @@ List<int> offeredPickIds = new List<int>();
             var aiWeakPos = GetWeakestPosition(aiRoster);
             if (aiWeakPos != null)
             {
-                var candidates = userHealthy
-                    .Where(p => p.position == aiWeakPos && !excludedIds.Contains(p.id))
+                var candidates = tradeable
+                    .Where(p => p.position == aiWeakPos)
                     .OrderByDescending(p => p.overall)
                     .ToList();
                 if (candidates.Count > 0)
@@ -5560,8 +5578,7 @@ List<int> offeredPickIds = new List<int>();
 
         if (roll < 0.60f)
         {
-            var candidates = userHealthy
-                .Where(p => !excludedIds.Contains(p.id))
+            var candidates = tradeable
                 .OrderByDescending(p => p.overall)
                 .ToList();
             if (candidates.Count > 0)
@@ -5570,21 +5587,14 @@ List<int> offeredPickIds = new List<int>();
 
         if (roll < 0.80f)
         {
-            var candidates = userHealthy
-                .Where(p => !excludedIds.Contains(p.id))
+            var candidates = tradeable
                 .OrderByDescending(p => p.salary)
                 .ToList();
             if (candidates.Count > 0)
                 return candidates[_aiRng.Next(0, Mathf.Min(3, candidates.Count))];
         }
 
-        var randomCandidates = userHealthy
-            .Where(p => !excludedIds.Contains(p.id))
-            .ToList();
-        if (randomCandidates.Count > 0)
-            return randomCandidates[_aiRng.Next(0, randomCandidates.Count)];
-
-        return null;
+        return tradeable[_aiRng.Next(0, tradeable.Count)];
     }
 
     List<PlayerData> BuildOfferPackage(List<PlayerData> aiAvailable, int aiRosterCount,
