@@ -871,13 +871,14 @@
 
 .stat-card-photo-wrapper {
     width: 80px;
-    height: 80px;
     border-radius: 6px 0 0 6px;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
     background-color: rgb(40, 48, 60);
-    margin: -8px 0 -8px 0;
+    align-self: stretch;
+    margin: 0;
+    padding: 8px 0;
 }
 
 .stat-card-photo {
