@@ -918,7 +918,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 36px;
     color: rgb(212, 160, 23);
-    margin-bottom: 2px;
+    margin: 0;
 }
 
 .stat-card-player {
