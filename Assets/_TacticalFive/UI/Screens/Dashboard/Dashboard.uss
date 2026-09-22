@@ -918,7 +918,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 36px;
     color: rgb(212, 160, 23);
-    margin: -4px 0 -2px 0;
+    margin: -8px 0 -8px 0;
     line-height: 1;
 }
 
