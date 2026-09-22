@@ -5085,12 +5085,12 @@ using System.Threading.Tasks;
                 .ToList();
             if (candidates.Count == 0) continue;
 
-            // Los contender protegen a sus jóvenes con valor (edad < 26 y OVR >= 82)
-            List<PlayerData> tradeableCandidates;
+            // Protección universal: estrellas (OVR >= 87) nunca se ofrecen.
+            // Contender además protege jóvenes prometedores (edad < 26 y OVR >= 82).
+            List<PlayerData> tradeableCandidates = candidates
+                .Where(p => p.overall < 87).ToList();
             if (teamAStrategy == TeamStrategy.Contend)
-                tradeableCandidates = candidates.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
-            else
-                tradeableCandidates = candidates;
+                tradeableCandidates = tradeableCandidates.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
 
             if (tradeableCandidates.Count == 0) continue;
 
@@ -5608,9 +5608,11 @@ List<int> offeredPickIds = new List<int>();
         bool aiHardCapped = aiTeam.first_apron_hard_capped == 1;
         bool userHardCapped = _myTeam.first_apron_hard_capped == 1;
 
-        // Los contender nunca ofrecen a sus jóvenes de valor; los rebuild no se
-        // deshacen de promesas jóvenes, solo de salarios caros.
-        var tradeable = aiAvailable.Where(p => !tradedThisSeason.Contains(p.id) && p.is_rookie == 0).ToList();
+        // Protección universal: estrellas (OVR >= 87) nunca se ofrecen.
+        // Contender además protege jóvenes prometedores (edad < 26 y OVR >= 82).
+        // Rebuild solo ofrece veteranos (age >= 25).
+        var tradeable = aiAvailable.Where(p => !tradedThisSeason.Contains(p.id)
+                                              && p.is_rookie == 0 && p.overall < 87).ToList();
         if (aiStrategy == TeamStrategy.Contend)
             tradeable = tradeable.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
         if (aiStrategy == TeamStrategy.Rebuild)
