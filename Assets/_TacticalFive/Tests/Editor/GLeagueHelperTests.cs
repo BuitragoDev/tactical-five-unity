@@ -437,9 +437,9 @@ public class GLeaguePostSeasonTests
     {
         var serie = new List<GameData>
         {
-            Played("gleague_playoff", 4, 5, 90, 110, "gl-cf-east"),
-            Played("gleague_playoff", 4, 5, 100, 95, "gl-cf-east"),
-            Played("gleague_playoff", 4, 5, 80, 99, "gl-cf-east"),
+            Played("gleague_playoff", 4, 5, 110, 90, "gl-cf-east"),
+            Played("gleague_playoff", 4, 5, 95, 100, "gl-cf-east"),
+            Played("gleague_playoff", 4, 5, 99, 80, "gl-cf-east"),
         };
         // local(4) ganó G1 y G3; visitante(5) ganó G2 → 2-1 (local-visitante)
         Assert.That(GLeaguePostSeason.SeriesResult(serie), Is.EqualTo("2-1"));

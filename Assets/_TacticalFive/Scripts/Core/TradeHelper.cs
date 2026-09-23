@@ -14,7 +14,7 @@ public static class TradeHelper
     public const int MAX_ROSTER = 17;
     public const long TWO_WAY_SALARY = 578_000;
     public const int MAX_TWO_WAY = 2;
-    public const int IR_MIN_DAYS = 60;
+    public const int IR_MIN_DAYS = 90;
 
     public static bool IsEligibleForTwoWay(PlayerData p)
     {
