@@ -107,42 +107,12 @@ public class EmployeesController : UIScreenController
     private static readonly int REFRESH_INTERVAL = 30;
     private static readonly int CANDIDATES_PER_POSITION = 5;
 
-    private static readonly (string code, string name)[] Nationalities = {
-        ("USA", "Estados Unidos"), ("ESP", "España"), ("FRA", "Francia"),
-        ("ITA", "Italia"), ("DEU", "Alemania"), ("GBR", "Reino Unido"),
-        ("GRC", "Grecia"), ("SRB", "Serbia"), ("HRV", "Croacia"),
-        ("AUS", "Australia"), ("BRA", "Brasil"), ("ARG", "Argentina"),
-        ("CAN", "Canadá"), ("NGA", "Nigeria"), ("SEN", "Senegal"),
-        ("CMR", "Camerún"), ("LTU", "Lituania"), ("LVA", "Letonia"),
-        ("TUR", "Turquía"), ("NOR", "Noruega")
-    };
-
-    private static readonly string[] FirstNames = {
-        "James", "John", "William", "George", "Thomas", "Charles", "Henry", "Edward", "Harry", "Arthur",
-        "Jack", "Oliver", "Noah", "Jacob", "Leo", "Oscar", "Alfie", "Freddie", "Theo", "Archie",
-        "Charlie", "Finley", "Harrison", "Ethan", "Joseph", "Samuel", "Daniel", "Matthew", "Luke", "Adam",
-        "Benjamin", "Michael", "Nathan", "Ryan", "Connor", "Louis", "Alexander", "David", "Robert", "Richard",
-        "Peter", "Andrew", "Jonathan", "Simon", "Paul", "Mark", "Stephen", "Alan", "Martin", "Graham",
-        "Scott", "Dean", "Craig", "Bradley", "Lewis", "Callum", "Jamie", "Kyle", "Reece", "Sean",
-        "Dylan", "Logan", "Mason", "Aiden", "Tyler", "Cameron", "Jordan", "Zachary", "Aaron", "Elliot",
-        "Blake", "Cole", "Dominic", "Evan", "Isaac", "Max", "Patrick", "Philip", "Ross", "Spencer",
-        "Tristan", "Wesley", "Xavier", "Owen", "Caleb", "Nathaniel", "Vincent", "Harvey", "Riley", "Toby",
-        "Luca", "Matteo", "Giovanni", "Carlos", "Miguel",
-        "Alejandro", "Pierre", "Jean", "Hans", "Erik"
-    };
-
-    private static readonly string[] LastNames = {
-        "Smith", "Jones", "Taylor", "Brown", "Williams", "Wilson", "Johnson", "Davies", "Robinson", "Wright",
-        "Thompson", "Evans", "Walker", "White", "Roberts", "Green", "Hall", "Wood", "Jackson", "Clarke",
-        "Turner", "Harris", "Edwards", "Martin", "Cooper", "Hill", "Ward", "Morris", "Moore", "Clark",
-        "Lee", "King", "Baker", "Harrison", "Morgan", "Allen", "Scott", "Phillips", "Watson", "Parker",
-        "Price", "Bennett", "Young", "Griffiths", "Mitchell", "Carter", "Cook", "Bailey", "Richardson", "Cox",
-        "Howard", "Wardle", "Brooks", "Bell", "Murphy", "Miller", "Collins", "Gray", "Hughes", "Marshall",
-        "Shaw", "Webb", "Foster", "Butler", "Chapman", "Pearson", "Armstrong", "Reynolds", "Stephens", "Payne",
-        "Gardner", "Spencer", "Hunter", "Fox", "Gibson", "Harvey", "Palmer", "Warren", "Knight", "Mason",
-        "Ellis", "Bishop", "Porter", "George", "West", "Grant", "Black", "Fisher", "Holmes", "Stone",
-        "Garcia", "Martinez", "Rossi", "Bianchi", "Dubois",
-        "Moreau", "Muller", "Schmidt", "Andersen", "Johansson"
+    // Nacionalidades de los candidatos a empleado (códigos válidos de CountryCodes;
+    // el nombre para mostrar se resuelve con CountryCodes.GetName).
+    private static readonly string[] NationalityCodes = {
+        "USA", "ESP", "FRA", "ITA", "DEU", "GBR", "GRC", "SRB", "HRV",
+        "AUS", "BRA", "ARG", "CAN", "NGA", "SEN", "CMR", "LTU", "LVA",
+        "TUR", "NOR"
     };
 
     protected override void CacheReferences()
@@ -255,17 +225,19 @@ public class EmployeesController : UIScreenController
                 for (int i = 0; i < CANDIDATES_PER_POSITION; i++)
                 {
                     int rep = Random.Range(1, 6);
+                    string nat = NationalityCodes[Random.Range(0, NationalityCodes.Length)];
+                    var (firstName, lastName) = NamePools.Generate(nat);
                     var emp = new EmployeeData
                     {
                         team_id = 0,
                         position = pos,
-                        first_name = GenerateFirstName(),
-                        last_name = GenerateLastName(),
+                        first_name = firstName,
+                        last_name = lastName,
                         reputation = rep,
                         salary = GenerateSalary(pos, rep),
                         contract_years = Random.Range(1, 4),
                         candidate_day = currentDay,
-                        nationality = Nationalities[Random.Range(0, Nationalities.Length)].code
+                        nationality = nat
                     };
                     DatabaseManager.Instance.InsertEmployee(emp);
                     _candidates.Add(emp);
@@ -282,9 +254,6 @@ public class EmployeesController : UIScreenController
             }
         }
     }
-
-    string GenerateFirstName() => FirstNames[Random.Range(0, FirstNames.Length)];
-    string GenerateLastName() => LastNames[Random.Range(0, LastNames.Length)];
 
     long GenerateSalary(string position, int reputation)
     {
@@ -518,12 +487,7 @@ public class EmployeesController : UIScreenController
                 natCell.Add(flag);
 
                 var natName = new Label();
-                string countryName = "";
-                foreach (var n in Nationalities)
-                {
-                    if (n.code == emp.nationality) { countryName = n.name; break; }
-                }
-                natName.text = countryName;
+                natName.text = CountryCodes.GetName(emp.nationality);
                 natName.AddToClassList("emp-col");
                 natCell.Add(natName);
 
@@ -667,12 +631,7 @@ public class EmployeesController : UIScreenController
             natCell.Add(flag);
 
             var natName = new Label();
-            string countryName = "";
-            foreach (var n in Nationalities)
-            {
-                if (n.code == candidate.nationality) { countryName = n.name; break; }
-            }
-            natName.text = countryName;
+            natName.text = CountryCodes.GetName(candidate.nationality);
             natName.AddToClassList("emp-col");
             natCell.Add(natName);
 
@@ -1023,17 +982,19 @@ public class EmployeesController : UIScreenController
         for (int i = 0; i < toAdd; i++)
         {
             int rep = Random.Range(1, 6);
+            string nat = NationalityCodes[Random.Range(0, NationalityCodes.Length)];
+            var (firstName, lastName) = NamePools.Generate(nat);
             var emp = new EmployeeData
             {
                 team_id = 0,
                 position = position,
-                first_name = GenerateFirstName(),
-                last_name = GenerateLastName(),
+                first_name = firstName,
+                last_name = lastName,
                 reputation = rep,
                 salary = GenerateSalary(position, rep),
                 contract_years = Random.Range(1, 4),
                 candidate_day = currentDay,
-                nationality = Nationalities[Random.Range(0, Nationalities.Length)].code
+                nationality = nat
             };
             DatabaseManager.Instance.InsertEmployee(emp);
             _candidates.Add(emp);

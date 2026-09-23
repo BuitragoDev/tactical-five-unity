@@ -95,11 +95,13 @@ public static class GLeagueSeeder
                 + attrs["passing"] + attrs["dribbling"] + attrs["defense"] + attrs["rebounding"]
                 + attrs["athleticism"] + attrs["iq"] + attrs["steals"] + attrs["blocks"]) / 11;
 
+            var (firstName, lastName) = NamePools.GeneratePlayerNames(Rng);
+
             result.Add(new GLeaguePlayerData
             {
                 gleague_team_id = gleagueTeamId,
-                first_name = DraftGenerator.FirstNames[Rng.Next(0, DraftGenerator.FirstNames.Length)],
-                last_name = DraftGenerator.LastNames[Rng.Next(0, DraftGenerator.LastNames.Length)],
+                first_name = firstName,
+                last_name = lastName,
                 position = position,
                 age = age,
                 overall = overall,
