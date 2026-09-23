@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 
 /// <summary>
 /// Lógica pura de los objetivos de temporada de los equipos y del ranking de
@@ -42,37 +41,6 @@ public static class ObjectiveHelper
         List<TeamData> teams,
         List<GameData> games)
     {
-        if (teams == null || games == null) return 0;
-
-        var confTeams = teams.Where(t => t.conference == conference).ToList();
-        if (confTeams.Count == 0) return 0;
-
-var standings = new List<(TeamData team, int wins, int losses)>();
-        foreach (var team in confTeams)
-        {
-            var tg = games
-                .Where(g => g.is_played == 1
-                            && g.game_type == "regular"
-                            && (g.home_team_id == team.id || g.away_team_id == team.id))
-                .ToList();
-            int w = tg.Count(g =>
-                (g.home_team_id == team.id && g.home_score > g.away_score) ||
-                (g.away_team_id == team.id && g.away_score > g.home_score));
-            standings.Add((team, w, tg.Count - w));
-        }
-
-        standings.Sort((a, b) =>
-        {
-            float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0f;
-            float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0f;
-            if (pctB != pctA) return pctB.CompareTo(pctA);
-            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
-            return b.wins.CompareTo(a.wins);
-        });
-
-        for (int i = 0; i < standings.Count; i++)
-            if (standings[i].team.id == teamId) return i + 1;
-
-        return 0;
+        return StandingsHelper.GetRank(teamId, conference, teams, games);
     }
 }

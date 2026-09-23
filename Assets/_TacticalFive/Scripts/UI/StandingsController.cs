@@ -289,55 +289,7 @@ using System.Linq;
 
     List<StandingRow> BuildStandings(List<TeamData> teams)
     {
-        var data = teams.ToDictionary(t => t.id, t => new StandingRow
-        {
-            teamId = t.id,
-            wins = 0,
-            losses = 0,
-            pf = 0,
-            pa = 0,
-            games = new List<bool>()
-        });
-
-        foreach (var g in _allGames)
-        {
-            if (data.ContainsKey(g.home_team_id))
-            {
-                bool homeWon = g.home_score > g.away_score;
-                data[g.home_team_id].wins += homeWon ? 1 : 0;
-                data[g.home_team_id].losses += homeWon ? 0 : 1;
-                data[g.home_team_id].pf += g.home_score;
-                data[g.home_team_id].pa += g.away_score;
-                data[g.home_team_id].games.Add(homeWon);
-            }
-            if (data.ContainsKey(g.away_team_id))
-            {
-                bool awayWon = g.away_score > g.home_score;
-                data[g.away_team_id].wins += awayWon ? 1 : 0;
-                data[g.away_team_id].losses += awayWon ? 0 : 1;
-                data[g.away_team_id].pf += g.away_score;
-                data[g.away_team_id].pa += g.home_score;
-                data[g.away_team_id].games.Add(awayWon);
-            }
-        }
-
-        var rows = data.Values.ToList();
-        rows.Sort((a, b) =>
-        {
-            float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
-            float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
-            if (pctB != pctA) return pctB.CompareTo(pctA);
-            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
-            if (b.wins != a.wins) return b.wins.CompareTo(a.wins);
-            int diffA = a.pf - a.pa;
-            int diffB = b.pf - b.pa;
-            return diffB.CompareTo(diffA);
-        });
-
-        for (int i = 0; i < rows.Count; i++)
-            rows[i].rank = i + 1;
-
-        return rows;
+        return StandingsHelper.Build(teams, _allGames);
     }
 
     VisualElement CreateStandingsRow(StandingRow row, TeamData team)
@@ -448,14 +400,5 @@ using System.Linq;
             elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
-    class StandingRow
-    {
-        public int teamId;
-    public int rank;
-    public int wins;
-    public int losses;
-    public int pf;
-    public int pa;
-    public List<bool> games;
-    }
+    // StandingRow vive en Scripts/Core/StandingsHelper.cs (compartida).
 }

@@ -482,45 +482,12 @@ public static class PlayoffsGenerator
         return games;
     }
 
-    static List<(int teamId, int wins, int losses)> GetStandingsForConference(SeasonData season, int managerId, string conf)
+    static List<StandingRow> GetStandingsForConference(SeasonData season, int managerId, string conf)
     {
+        // Fuente única de clasificación (mismo orden que Dashboard/Standings).
         var teams = DatabaseManager.Instance.GetTeamsByConference(conf);
-        var teamData = teams.ToDictionary(t => t.id, t => (teamId: t.id, wins: 0, losses: 0));
-
-        var playedGames = DatabaseManager.Instance.Db.Table<GameData>()
-            .Where(g => g.manager_id == managerId && g.game_type == "regular" && g.is_played == 1)
-            .OrderBy(g => g.game_day)
-            .ToList();
-
-        foreach (var g in playedGames)
-        {
-            if (teamData.ContainsKey(g.home_team_id))
-            {
-                var homeEntry = teamData[g.home_team_id];
-                if (g.home_score > g.away_score) homeEntry.wins++;
-                else homeEntry.losses++;
-                teamData[g.home_team_id] = homeEntry;
-            }
-            if (teamData.ContainsKey(g.away_team_id))
-            {
-                var awayEntry = teamData[g.away_team_id];
-                if (g.away_score > g.home_score) awayEntry.wins++;
-                else awayEntry.losses++;
-                teamData[g.away_team_id] = awayEntry;
-            }
-        }
-
-        var rows = teamData.Values.ToList();
-        rows.Sort((a, b) =>
-        {
-            float pctA = a.wins + a.losses > 0 ? (float)a.wins / (a.wins + a.losses) : 0;
-            float pctB = b.wins + b.losses > 0 ? (float)b.wins / (b.wins + b.losses) : 0;
-            if (pctB != pctA) return pctB.CompareTo(pctA);
-            if (a.losses != b.losses) return a.losses.CompareTo(b.losses);
-            return b.wins.CompareTo(a.wins);
-        });
-
-        return rows;
+        var games = DatabaseManager.Instance.GetStandingsGames(managerId);
+        return StandingsHelper.Build(teams, games);
     }
 
     static Dictionary<string, List<int>> GetPlayoffSeeds(SeasonData season, int managerId)
