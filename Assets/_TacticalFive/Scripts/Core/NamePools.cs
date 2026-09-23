@@ -5,6 +5,9 @@ using System.Collections.Generic;
 /// por regiones culturales y cada país se mapea a una región, de modo que un
 /// jugador lituano recibe nombres bálticos y uno español, nombres hispanos.
 /// Fuente única para rookies, prospectos G-League y empleados.
+///
+/// Tamaños de pool: anglo = 100 nombres / 200 apellidos (por la alta proporción
+/// de USA); el resto de regiones = 50 nombres / 50 apellidos.
 /// </summary>
 public static class NamePools
 {
@@ -31,6 +34,12 @@ public static class NamePools
                 "Jalen", "DeAndre", "Isaiah", "Xavier", "Terrance", "Devin", "Malik", "Andre",
                 "Corey", "Trevor", "Cody", "Blake", "Chase", "Cole", "Jared", "Kyle", "Sean",
                 "Brian", "Eric", "Kevin", "Jason", "Scott", "Dylan", "Austin", "Jeremy",
+                "Charles", "Thomas", "Steven", "Paul", "Kenneth", "George", "Timothy", "Edward",
+                "Jeffrey", "Gary", "Nicholas", "Jonathan", "Stephen", "Larry", "Raymond",
+                "Gregory", "Frank", "Patrick", "Jack", "Dennis", "Jerry", "Walter", "Keith",
+                "Roger", "Terry", "Gerald", "Carl", "Harold", "Arthur", "Lawrence", "Jesse",
+                "Bryan", "Billy", "Bruce", "Gabriel", "Albert", "Willie", "Alan", "Wayne",
+                "Elijah", "Randy", "Vincent", "Owen", "Lucas",
             },
             Last = new[]
             {
@@ -45,6 +54,22 @@ public static class NamePools
                 "Powell", "Jenkins", "Perry", "Russell", "Sullivan", "Bell", "Coleman",
                 "Butler", "Henderson", "Barnes", "Fisher", "Simmons", "Patterson", "Hamilton",
                 "Graham", "Reynolds", "Griffin", "Wallace", "Harrison", "Marshall", "Webb",
+                "Robertson", "Ellis", "Carter", "Phillips", "Parker", "Evans", "Turner",
+                "Walsh", "Cunningham", "Snyder", "Armstrong", "Ferguson", "Hawkins", "Barrett",
+                "Chapman", "Lambert", "Weaver", "Garrett", "Parks", "Watkins", "Payne",
+                "Lawson", "McCarthy", "Dixon", "Boyd", "Bishop", "Fox", "Woods", "Newman",
+                "Lynch", "Rice", "Potter", "Holland", "Kelley", "Chambers", "Grant", "Waters",
+                "Cannon", "Barnett", "Hardy", "Sparks", "Riley", "Nichols", "Fowler", "Dean",
+                "Gregory", "Norris", "Curtis", "Knight", "Lane", "Gilbert", "Franklin",
+                "Pierce", "Robbins", "Wilkins", "Bartlett", "Ramsey", "Massey", "Buckley",
+                "Pratt", "McDaniel", "Watts", "Hodges", "Blackwell", "Dorsey", "Cummings",
+                "Whitaker", "Huff", "Cantrell", "Chaney", "Sherman", "Crosby", "Cameron",
+                "Dodson", "Nash", "Pollard", "Whitfield", "McLeod", "Hobbs", "Hendrix",
+                "Combs", "Kirby", "Bolton", "Holloway", "Barron", "Wilkinson", "McNeil",
+                "Allison", "Faulkner", "Coffey", "Melton", "Strickland", "Kramer", "Wooten",
+                "Burgess", "McKinney", "Dickson", "Rollins", "Swanson", "Grimes", "Roach",
+                "Sweeney", "Duke", "Hines", "Rowe", "Dillon", "Chase", "Bonner", "Rush",
+                "O'Donnell", "McCormick", "Preston", "Best", "Vaughan", "Gill", "Noble",
             },
         },
 
@@ -57,6 +82,8 @@ public static class NamePools
                 "Andrés", "Rubén", "Iván", "Manuel", "Pedro", "Rafael", "Víctor", "Hugo",
                 "Mario", "Marco", "Nicolás", "Gabriel", "Santiago", "Mateo", "Sebastián",
                 "Emilio", "Joaquín", "Tomás", "Gonzalo", "Rodrigo", "Esteban", "Cristian",
+                "Eduardo", "Ricardo", "Roberto", "Francisco", "Antonio", "Daniel", "David",
+                "Jorge", "Óscar", "Julio", "Ramón", "Salvador", "Vicente",
             },
             Last = new[]
             {
@@ -66,6 +93,7 @@ public static class NamePools
                 "Ruiz", "Álvarez", "Castillo", "Jiménez", "Vásquez", "Romero", "Moreno",
                 "Herrera", "Medina", "Aguilar", "Vargas", "Rojas", "Silva", "Núñez", "Molina",
                 "Delgado", "Castro", "Ortega", "Salazar", "Fuentes", "Cabrera", "Vega",
+                "Peña", "Ríos", "Contreras", "Guerrero", "Campos", "Solís",
             },
         },
 
@@ -77,6 +105,9 @@ public static class NamePools
                 "Felipe", "Gustavo", "Leonardo", "Vinícius", "Daniel", "Marcos", "Paulo",
                 "Ricardo", "Eduardo", "André", "Tiago", "Diogo", "Rui", "Miguel", "Duarte",
                 "Gonçalo", "Henrique", "Caio", "Douglas", "Fábio", "Renan", "Vítor",
+                "Alexandre", "Antônio", "Arthur", "Bernardo", "Cauã", "Davi", "Enzo",
+                "Fernando", "Guilherme", "Heitor", "Hugo", "Igor", "Joaquim", "Lorenzo",
+                "Lucca", "Murilo", "Nicolas", "Otávio", "Samuel", "Vicente",
             },
             Last = new[]
             {
@@ -84,6 +115,9 @@ public static class NamePools
                 "Rodrigues", "Almeida", "Nascimento", "Carvalho", "Araújo", "Ribeiro", "Gomes",
                 "Martins", "Barbosa", "Rocha", "Dias", "Monteiro", "Cardoso", "Teixeira",
                 "Moreira", "Correia", "Fernandes", "Pinto", "Neves", "Mendes", "Machado",
+                "Nunes", "Gonçalves", "Amaral", "Batista", "Cavalcanti", "Duarte", "Freitas",
+                "Lopes", "Marques", "Melo", "Miranda", "Moraes", "Nogueira", "Peixoto",
+                "Pires", "Ramos", "Reis", "Sampaio", "Tavares", "Vieira", "Cunha",
             },
         },
 
@@ -95,13 +129,19 @@ public static class NamePools
                 "Mathieu", "Clément", "Théo", "Lucas", "Hugo", "Mamadou", "Ousmane",
                 "Ibrahima", "Cheikh", "Moussa", "Abdoulaye", "Amadou", "Sékou", "Youssouf",
                 "Emmanuel", "Cédric", "Franck", "Bakary", "Lamine", "Alioune", "Boubacar",
+                "Adama", "Alphonse", "Arnaud", "Baba", "Charles", "David", "Étienne",
+                "Fabrice", "Gaël", "Guillaume", "Idrissa", "Jacques", "Karim", "Lassana",
+                "Malick", "Modou", "Olivier", "Pascal", "Régis", "Serge", "Vincent",
             },
             Last = new[]
             {
                 "Diallo", "Traoré", "Camara", "Coulibaly", "Koné", "Diarra", "Cissé", "Touré",
                 "Bah", "Barry", "Sow", "Ndiaye", "Diop", "Gueye", "Faye", "Sarr", "Dubois",
                 "Moreau", "Lefebvre", "Laurent", "Simon", "Michel", "Leroy", "Roux", "Fournier",
-                "Girard", "Bonnet", "Dupont", "Kouassi", "Bamba",
+                "Girard", "Bonnet", "Dupont", "Kouassi", "Bamba", "Keita", "Sylla", "Sangaré",
+                "Doumbia", "Kanté", "Dembélé", "Sissoko", "Maïga", "Ouattara", "Thiam",
+                "Petit", "Rousseau", "Blanc", "Henry", "Robin", "Marchand", "Noël", "Giraud",
+                "Perrin", "Chevalier",
             },
         },
 
@@ -112,12 +152,20 @@ public static class NamePools
                 "Kwame", "Kofi", "Chidi", "Emeka", "Obinna", "Tunde", "Femi", "Ade", "Kunle",
                 "Chinedu", "Nnamdi", "Kwesi", "Yaw", "Thabo", "Sipho", "Bongani", "Juma",
                 "Baraka", "Amani", "Zola", "Tendai", "Sekou", "Musa", "Ike", "Chike",
+                "Abiodun", "Ayo", "Bamidele", "Chima", "Efe", "Ekene", "Gbenga", "Ifeanyi",
+                "Kalu", "Kayode", "Lwazi", "Mandla", "Ngozi", "Nkosinathi", "Olu",
+                "Oluwaseun", "Segun", "Sizwe", "Tafadzwa", "Themba", "Uche", "Wale", "Yemi",
+                "Zanele", "Sefu",
             },
             Last = new[]
             {
                 "Okonkwo", "Mensah", "Okafor", "Adeyemi", "Osei", "Boateng", "Nwosu", "Eze",
                 "Obi", "Achebe", "Mbeki", "Nkosi", "Dlamini", "Ndlovu", "Mokoena", "Kamau",
                 "Otieno", "Wanjiru", "Abebe", "Bekele", "Owusu", "Adebayo", "Chukwu", "Mwangi",
+                "Acheampong", "Adewale", "Amoah", "Asante", "Balogun", "Chirwa", "Danquah",
+                "Frimpong", "Gyasi", "Kariuki", "Mabaso", "Mahlangu", "Mutombo", "Nkemelu",
+                "Nkrumah", "Nwankwo", "Odhiambo", "Ofori", "Ogundele", "Okoro", "Olawale",
+                "Onyeka", "Quaye", "Sibanda", "Tshabalala", "Zulu",
             },
         },
 
@@ -127,13 +175,21 @@ public static class NamePools
             {
                 "Mohamed", "Ahmed", "Ali", "Omar", "Youssef", "Karim", "Samir", "Rachid",
                 "Khalid", "Bilal", "Amir", "Hassan", "Hussein", "Tarek", "Nabil", "Yassine",
-                "Mehdi", "Anas", "Ilyas", "Rayan", "Zakaria", "Hamza",
+                "Mehdi", "Anas", "Ilyas", "Rayan", "Zakaria", "Hamza", "Abdul", "Adam",
+                "Adil", "Amin", "Ayman", "Bassem", "Elias", "Faisal", "Farid", "Fouad",
+                "Hicham", "Ibrahim", "Idris", "Ismael", "Jamal", "Kais", "Malek", "Marwan",
+                "Mourad", "Mustafa", "Nizar", "Osman", "Rami", "Reda", "Said", "Salim",
+                "Walid", "Yahya",
             },
             Last = new[]
             {
                 "El Amrani", "Benali", "Haddad", "Khalil", "Nasser", "Mansour", "Rahmani",
                 "Bouazizi", "Trabelsi", "Chaouki", "Zidane", "Ben Youssef", "Alaoui", "Cherif",
                 "Farsi", "Karimi", "Rahimi", "Saleh", "Farah", "Aziz", "Ben Salah", "El Fassi",
+                "Abbassi", "Amari", "Bakri", "Belkacem", "Ben Amor", "Bensalem", "Bouzid",
+                "Cherkaoui", "Dridi", "El Idrissi", "El Masri", "Gharbi", "Hamdi", "Jaziri",
+                "Kaddour", "Khoury", "Mahfoud", "Meziane", "Nasri", "Ouali", "Riad", "Saidi",
+                "Slimani", "Toumi", "Youssef", "Zaidi", "Ziani", "Belaid",
             },
         },
 
@@ -145,6 +201,9 @@ public static class NamePools
                 "Aleksandar", "Vladimir", "Dmitri", "Sergei", "Andrei", "Mikhail", "Pavel",
                 "Bogdan", "Vlad", "Igor", "Tomáš", "Jakub", "Krzysztof", "Wojciech", "Mateusz",
                 "Piotr", "Yuri", "Oleksandr", "Andriy", "Dušan", "Filip", "Lazar",
+                "Anton", "Bojan", "Branko", "Danilo", "Goran", "Jarosław", "Josip",
+                "Konstantin", "Miroslav", "Nenad", "Ognjen", "Radoslav", "Sasa", "Stanislav",
+                "Szymon", "Tomasz", "Uroš", "Vasilije", "Viktor", "Zoran",
             },
             Last = new[]
             {
@@ -152,6 +211,10 @@ public static class NamePools
                 "Kovač", "Horvat", "Novak", "Petrov", "Volkov", "Sokolov", "Ivanov", "Popov",
                 "Kowalski", "Nowak", "Wójcik", "Kamiński", "Novák", "Svoboda", "Dvořák",
                 "Shevchenko", "Kovalenko", "Bondarenko", "Đorđević", "Pavlović", "Milić",
+                "Babić", "Blagojević", "Božić", "Cvetković", "Dujmović", "Filipović",
+                "Kuznetsov", "Lukić", "Matić", "Morozov", "Nenadić", "Orlov", "Pavlenko",
+                "Radovanović", "Savić", "Sokolović", "Todorović", "Vasiliev", "Vuković",
+                "Zorić", "Zieliński", "Woźniak",
             },
         },
 
@@ -162,12 +225,22 @@ public static class NamePools
                 "Kristaps", "Dāvis", "Rihards", "Jānis", "Artūrs", "Rūdolfs", "Domantas",
                 "Jonas", "Mantas", "Rokas", "Tadas", "Vytautas", "Marius", "Siim", "Karl",
                 "Martin", "Rasmus", "Henri", "Kristjan", "Andris",
+                "Aivar", "Arnas", "Augustas", "Dainius", "Edgars", "Eerik", "Giedrius",
+                "Gustas", "Henrijs", "Indrek", "Jurgis", "Kārlis", "Kaspars", "Kęstutis",
+                "Kristofer", "Laurynas", "Madis", "Mārtiņš", "Matas", "Mindaugas", "Paulius",
+                "Priit", "Raivis", "Reinis", "Rimantas", "Saulius", "Tanel", "Tomas", "Urmas",
+                "Vaidas",
             },
             Last = new[]
             {
                 "Bērziņš", "Ozols", "Kalniņš", "Jankauskas", "Petrauskas", "Kazlauskas",
                 "Vaitkus", "Žukauskas", "Sabonis", "Mažeika", "Tamm", "Saar", "Sepp", "Kask",
-                "Mägi", "Liepiņš", "Balodis", "Stankevičius",
+                "Mägi", "Liepiņš", "Balodis", "Stankevičius", "Adomaitis", "Balčiūnas",
+                "Butkus", "Eglītis", "Grigas", "Ivanauskas", "Jankovskis", "Jokubaitis",
+                "Kairys", "Kallas", "Kuusk", "Lapinskas", "Laurinavičius", "Lill", "Mets",
+                "Männik", "Norkus", "Ozoliņš", "Pärn", "Puidet", "Raudsepp", "Reinhold",
+                "Sarapuu", "Sild", "Strazdiņš", "Šimonis", "Teder", "Toom", "Urbonas", "Valk",
+                "Vareikis", "Zvirgzdiņš",
             },
         },
 
@@ -178,13 +251,21 @@ public static class NamePools
                 "Erik", "Lars", "Anders", "Johan", "Magnus", "Nils", "Björn", "Sven", "Oskar",
                 "Elias", "Emil", "Axel", "Gustav", "Viktor", "Henrik", "Mikael", "Juha",
                 "Mikko", "Antti", "Ville", "Jussi", "Lauri", "Eero", "Sigurd", "Kasper",
+                "Aleksander", "Andreas", "Arvid", "Birger", "Bo", "Dag", "Einar", "Filip",
+                "Fredrik", "Håkon", "Harald", "Ivar", "Jens", "Joakim", "Knut", "Leif",
+                "Mattias", "Morten", "Olav", "Olli", "Pekka", "Rasmus", "Sami", "Timo",
+                "Øyvind",
             },
             Last = new[]
             {
                 "Andersson", "Johansson", "Karlsson", "Nilsson", "Eriksson", "Larsson",
                 "Olsson", "Persson", "Svensson", "Gustafsson", "Virtanen", "Korhonen",
                 "Mäkinen", "Nieminen", "Järvinen", "Hansen", "Johansen", "Larsen", "Nilsen",
-                "Berg", "Lindqvist", "Holm",
+                "Berg", "Lindqvist", "Holm", "Aalto", "Ahlberg", "Bengtsson", "Dahl",
+                "Eriksen", "Fredriksson", "Haugen", "Heikkilä", "Håkansson", "Jakobsen",
+                "Jokinen", "Koskinen", "Lahtinen", "Lindberg", "Lund", "Lundqvist", "Madsen",
+                "Møller", "Nyström", "Rasmussen", "Salo", "Sandberg", "Solberg", "Sten",
+                "Ström", "Tuominen", "Vik", "Ødegård",
             },
         },
 
@@ -195,14 +276,20 @@ public static class NamePools
                 "Hans", "Peter", "Klaus", "Stefan", "Thomas", "Michael", "Andreas", "Markus",
                 "Lukas", "Felix", "Maximilian", "Jonas", "Leon", "Niklas", "Jan", "Lars",
                 "Sven", "Tim", "Tom", "Daan", "Sem", "Bram", "Thijs", "Jeroen", "Pieter",
-                "Willem", "Matthias", "Florian", "Sebastian",
+                "Willem", "Matthias", "Florian", "Sebastian", "Alexander", "Benedikt",
+                "Christoph", "Daniel", "Fabian", "Hendrik", "Jannik", "Johannes", "Julian",
+                "Kai", "Kilian", "Lennart", "Marco", "Nico", "Oliver", "Paul", "Ruben",
+                "Simon", "Tobias", "Vincent", "Yannick",
             },
             Last = new[]
             {
                 "Müller", "Schmidt", "Schneider", "Fischer", "Weber", "Meyer", "Wagner",
                 "Becker", "Schulz", "Hoffmann", "Bauer", "Koch", "Richter", "Klein", "Wolf",
                 "De Jong", "Van Dijk", "Visser", "Bakker", "Smit", "De Vries", "Van den Berg",
-                "Jansen", "Vermeer",
+                "Jansen", "Vermeer", "Braun", "De Boer", "Van Leeuwen", "Van der Meer",
+                "Krüger", "Lehmann", "Köhler", "Herrmann", "Walter", "König", "Mayer", "Huber",
+                "Kaiser", "Fuchs", "Peters", "Lang", "Scholz", "Möller", "Weiß", "Jung",
+                "Hahn", "Vogel", "Friedrich", "Keller", "Günther", "Frank",
             },
         },
 
@@ -213,14 +300,21 @@ public static class NamePools
                 "Marco", "Luca", "Matteo", "Alessandro", "Andrea", "Francesco", "Giovanni",
                 "Lorenzo", "Giuseppe", "Antonio", "Giannis", "Kostas", "Nikos", "Dimitris",
                 "Georgios", "Christos", "Emre", "Mehmet", "Burak", "Can", "Yusuf", "David",
-                "Moshe", "Yossi", "Avi", "Paolo", "Salvatore",
+                "Moshe", "Yossi", "Avi", "Paolo", "Salvatore", "Alessio", "Angelo",
+                "Athanasios", "Carlo", "Dario", "Emanuele", "Enrico", "Fabio", "Gabriel",
+                "Giorgio", "Hakan", "Ibrahim", "Konstantinos", "Leandro", "Leonidas", "Murat",
+                "Panagiotis", "Roberto", "Selim", "Simone", "Stefano", "Theodoros", "Vassilis",
             },
             Last = new[]
             {
                 "Rossi", "Russo", "Ferrari", "Esposito", "Bianchi", "Romano", "Colombo",
                 "Ricci", "Greco", "Conti", "Papadopoulos", "Nikolaidis", "Georgiou",
                 "Dimitriou", "Yılmaz", "Kaya", "Demir", "Çelik", "Şahin", "Cohen", "Levi",
-                "Mizrahi", "Peretz", "Marino", "Gallo",
+                "Mizrahi", "Peretz", "Marino", "Gallo", "Barone", "Battaglia", "Bruno",
+                "Carbone", "De Luca", "Fontana", "Karaca", "Katsaros", "Lombardi", "Longo",
+                "Mancini", "Moretti", "Özdemir", "Pagano", "Papadakis", "Pellegrini", "Rizzo",
+                "Santoro", "Serra", "Sorrentino", "Theodorou", "Vitale", "Yıldız", "Aslan",
+                "Arslan",
             },
         },
 
@@ -230,13 +324,19 @@ public static class NamePools
             {
                 "Yuki", "Haruto", "Sota", "Ren", "Kaito", "Riku", "Takumi", "Daiki", "Hiroto",
                 "Kenji", "Wei", "Jun", "Hao", "Ming", "Lei", "Chen", "Ji-ho", "Min-jun",
-                "Seo-jun", "Do-yun", "Ji-hoon", "Sho", "Yuto",
+                "Seo-jun", "Do-yun", "Ji-hoon", "Sho", "Yuto", "Aoi", "Dae-hyun", "Eun-woo",
+                "Haruki", "Hyun-woo", "Itsuki", "Jin", "Kai", "Kazuki", "Keisuke", "Min-ho",
+                "Ryo", "Ryusei", "Satoshi", "Seung-min", "Shin", "Taiga", "Tatsuya",
+                "Tae-yang", "Xinyu", "Yamato", "Yejun", "Yi", "Yong", "Yuchen", "Zhen", "Zhi",
             },
             Last = new[]
             {
                 "Tanaka", "Suzuki", "Takahashi", "Watanabe", "Ito", "Yamamoto", "Nakamura",
                 "Kobayashi", "Kato", "Yoshida", "Kim", "Lee", "Park", "Choi", "Jung", "Kang",
-                "Wang", "Li", "Zhang", "Liu", "Chen", "Yang", "Huang",
+                "Wang", "Li", "Zhang", "Liu", "Chen", "Yang", "Huang", "Ahn", "Bae", "Chang",
+                "Cho", "Han", "Hayashi", "Ho", "Hong", "Im", "Ishikawa", "Jang", "Jeon",
+                "Jiang", "Kwon", "Lim", "Lin", "Maeda", "Matsumoto", "Moon", "Mori", "Oh",
+                "Okada", "Shin", "Shimizu", "Song", "Sun", "Wu",
             },
         },
 
@@ -247,13 +347,21 @@ public static class NamePools
             {
                 "Alex", "Sam", "Max", "Leo", "Adam", "Omar", "Karim", "Nikola", "Marco",
                 "Diego", "Ivan", "Yuki", "Kwame", "Rafael", "Daniel", "David", "Kevin",
-                "Bryan", "Joel", "Andrés", "Victor", "Hugo",
+                "Bryan", "Joel", "Andrés", "Victor", "Hugo", "Aaron", "Amir", "Andre",
+                "Carlos", "Elias", "Felix", "Gabriel", "Hassan", "Isaac", "Javier", "Jonas",
+                "Lucas", "Malik", "Mateo", "Miguel", "Noah", "Oscar", "Pablo", "Rayan",
+                "Samuel", "Santiago", "Tariq", "Theo", "Tomas", "Youssef", "Yusuf", "Zach",
+                "Adrian",
             },
             Last = new[]
             {
                 "Silva", "Rossi", "Kim", "Novak", "Garcia", "Müller", "Dubois", "Popov",
                 "Haddad", "Tanaka", "Okafor", "Andersen", "Costa", "López", "Petrov",
                 "Johnson", "Okonkwo", "Nasser", "Yamada", "Bauer", "Mensah", "Vargas",
+                "Ahmed", "Ali", "Brown", "Chen", "Davis", "Diallo", "Fernandez", "Gonzalez",
+                "Ivanov", "Jones", "Khan", "Lee", "Martinez", "Nakamura", "Nguyen", "Oliveira",
+                "Park", "Pereira", "Rodriguez", "Sanchez", "Schmidt", "Singh", "Smith",
+                "Suzuki", "Taylor", "Wang", "Yamaguchi", "Zhang",
             },
         },
     };
