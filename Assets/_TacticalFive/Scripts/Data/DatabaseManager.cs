@@ -751,6 +751,24 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for player_season_stats: {ex.Message}");
         }
 
+        // Cleanup: el All-Star se guardaba en player_game_stats con ids de equipo
+        // centinela (-1/-2), generando filas fantasma (team_name NULL) en el
+        // histórico de carrera. Se eliminan de los saves ya archivados.
+        if (!IsMigrationApplied("player_season_stats_exclude_allstar"))
+        {
+            try
+            {
+                int removed = _db.Execute(
+                    "DELETE FROM player_season_stats WHERE team_id <= 0 OR team_name IS NULL");
+                MarkMigrationApplied("player_season_stats_exclude_allstar");
+                Debug.Log($"[DB] Migration: removed {removed} phantom player_season_stats rows (All-Star)");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Migration error cleaning player_season_stats: {ex.Message}");
+            }
+        }
+
         // Create monthly_awards table if missing (for monthly awards)
         try
         {
