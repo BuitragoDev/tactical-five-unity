@@ -506,11 +506,25 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for trade_offers: {ex.Message}");
         }
 
+        // Add draft_year to draft_picks (multi-year future picks)
+        try
+        {
+            var dpCols = _db.Query<ColumnInfo>("PRAGMA table_info(draft_picks)");
+            if (dpCols.Count > 0 && !dpCols.Any(c => c.name == "draft_year"))
+            {
+                _db.Execute("ALTER TABLE draft_picks ADD COLUMN draft_year INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added draft_year to draft_picks");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for draft_picks.draft_year: {ex.Message}");
+        }
+
         // Reset draft_picks: clear any legacy picks (seeded by overall at
         // season start) and re-seed picks for the current manager's active
         // season based on the previous season's standings (or overall+rep
         // fallback if there is no previous season).
-        string picksKey = $"DraftPicksReset_{_activeSaveSlot}";
         if (!IsMigrationApplied("draft_picks_reset"))
         {
             try
@@ -531,7 +545,7 @@ public partial class DatabaseManager : MonoBehaviour
                             .OrderByDescending(s => s.year_start)
                             .Select(s => (int?)s.id)
                             .FirstOrDefault();
-                        SeedDraftPicks(activeSeason.id, mgr.id, prevSeasonId);
+                        SeedDraftPicksMultiYear(activeSeason, prevSeasonId);
                     }
                 }
 
@@ -541,6 +555,41 @@ public partial class DatabaseManager : MonoBehaviour
             catch (System.Exception ex)
             {
                 Debug.LogError($"[DB] Migration error resetting draft_picks: {ex.Message}");
+            }
+        }
+
+        // Multi-year picks: re-seed the active season with current + future years.
+        // (Los saves antiguos con un solo año se migran aquí.)
+        if (!IsMigrationApplied("draft_picks_multiyear"))
+        {
+            try
+            {
+                _db.Execute("DELETE FROM draft_picks");
+
+                var mgr = GetActiveManager();
+                if (mgr != null)
+                {
+                    var activeSeason = _db.Table<SeasonData>()
+                        .Where(s => s.manager_id == mgr.id && s.is_active == 1)
+                        .OrderByDescending(s => s.year_start)
+                        .FirstOrDefault();
+                    if (activeSeason != null)
+                    {
+                        int? prevSeasonId = _db.Table<SeasonData>()
+                            .Where(s => s.manager_id == mgr.id && s.id != activeSeason.id)
+                            .OrderByDescending(s => s.year_start)
+                            .Select(s => (int?)s.id)
+                            .FirstOrDefault();
+                        SeedDraftPicksMultiYear(activeSeason, prevSeasonId);
+                    }
+                }
+
+                MarkMigrationApplied("draft_picks_multiyear");
+                Debug.LogWarning("[DB] Migration: re-seeded draft_picks for 4 years.");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Migration error for draft_picks_multiyear: {ex.Message}");
             }
         }
 

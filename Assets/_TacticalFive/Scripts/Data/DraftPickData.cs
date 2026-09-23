@@ -5,7 +5,8 @@ public class DraftPickData
 {
     [PrimaryKey, AutoIncrement]
     public int id { get; set; }
-    public int season_id { get; set; }
+    public int season_id { get; set; }      // legado (temporada de origen)
+    public int draft_year { get; set; }     // año del draft (clave temporal)
     public int round { get; set; }
     public int pick_number { get; set; }
     public int original_team_id { get; set; }

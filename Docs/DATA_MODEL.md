@@ -87,7 +87,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bird rights, `team_id_from=0`) + `sign_and_trade` (traspaso inmediato). Sin migración de esquema: `MarketController.ProcessSATrade` y `DashboardController.ShowNextPendingTradeOffer` ejecutan el flujo.
 
 ### draft_picks (`DraftPickData`)
-`id`, `season_id`, `round`, `pick_number`, `original_team_id`, `current_team_id`, **`protected_from`** (0 = sin protección; n = protegido de los primeros n puestos, revierte al original dentro del rango), **`is_swap`** (0/1), **`swap_original_team_id`** (equipo con el que se compara; el tenedor del swap recibe la mejor posición). Seeded 2×30 per season ordered by reverse standings (or overall for year 1).
+`id`, `season_id` (legado), **`draft_year`** (año del draft, clave temporal), `round`, `pick_number`, `original_team_id`, `current_team_id`, **`protected_from`** (0 = sin protección; n = protegido de los primeros n puestos, revierte al original dentro del rango), **`is_swap`** (0/1), **`swap_original_team_id`** (equipo con el que se compara; el tenedor del swap recibe la mejor posición). **Multi-año:** cada equipo posee los drafts de `year_end..year_end+3` (el actual + 3 futuros); al inicio son 8 picks (4 R1 + 4 R2). `pick_number` solo se asigna al draft actual (proyección por standings inversos); en años futuros vale 0 (la posición real se decide al draftear por el `original_team_id`). `SeedDraftPicksMultiYear` siembra el año actual + futuros; `RolloverDraftPicks` (en `StartNewSeason`) borra el año drafteado, proyecta el nuevo actual y añade el año más lejano, conservando los intermedios (traspasos incluidos).
 
 ### training (`TrainingData`)
 `id`, `team_id`, `player_id`, `attribute`, `duration_days`, `days_remaining`, `completed`.
@@ -173,7 +173,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 | Coaches | `SeedCoachRankings` | ~100 | historical + active |
 | Hall of Fame | `HallOfFameSeeder` | ~100 leyendas | precargadas con `player_id=0` |
 | Dorsales retirados | `RetiredNumberSeeder`/`VeteranRetiredNumberSeeder` | 53 + 17 | leyendas con `player_id=0` |
-| Draft picks | `SeedDraftPicks` | 60/season | reverse standings order + protección/swap |
+| Draft picks | `SeedDraftPicksMultiYear` | 60/año × 4 años (actual + 3) | año actual con posiciones (standings inversos) + futuros sin posición; `RolloverDraftPicks` los rota |
 | Personalities/relationships | `SeedTeamPersonalities`/`SeedTeamRelationships`/`EnsureTeamRelationshipsSeeded` | per team | non-deterministic `System.Random` |
 
 ## 5. Migrations (`RunMigrations`, DatabaseManager.cs:286)
@@ -214,6 +214,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 **Data migrations (registradas en `schema_migrations`, viven con el slot):**
 - `overall_recalc`: recompute `overall` for all players as mean of 11 attrs (cap potential).
 - `draft_picks_reset`: wipe `draft_picks` and reseed for the active season (using previous season's standings if available).
+- `draft_picks_multiyear`: wipe `draft_picks` and reseed 4 years (current + 3) for the active season (`draft_year` column added via `ALTER TABLE`).
 
 **Raw SQL migrations:** create `player_season_stats`, `monthly_awards` if missing (redundante con `CreateTable`); set `secondary_position` for existing players; `UPDATE` loops.
 

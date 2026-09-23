@@ -92,7 +92,7 @@ public static class DraftGenerator
         var owners = new Dictionary<int, TeamData>();
 
         var picks = DatabaseManager.Instance.Db.Table<DraftPickData>()
-            .Where(p => p.season_id == season.id && p.round == round)
+            .Where(p => p.draft_year == season.year_end && p.round == round)
             .ToList();
 
         var teamsById = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id);

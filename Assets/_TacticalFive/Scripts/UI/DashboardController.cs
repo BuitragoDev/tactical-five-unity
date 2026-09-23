@@ -5224,15 +5224,14 @@ using System.Threading.Tasks;
 
     List<DraftPickData> GetFuturePicksForTeam(int teamId, bool includeRound2)
     {
-        var all = DatabaseManager.Instance.GetDraftPicksForTeam(teamId)
-            .OrderByDescending(p => p.season_id)
-            .ToList();
+        var all = DatabaseManager.Instance.GetDraftPicksForTeam(teamId);
         if (all.Count == 0) return all;
 
-        // Se toma la temporada futura más lejana que posea el equipo (mismo criterio
-        // que antes), para no descapitalizar el próximo draft.
-        var farSeason = all[0].season_id;
-        var rounded = all.Where(p => p.season_id == farSeason).ToList();
+        // La IA ofrece un año aleatorio de entre los que posee el equipo.
+        var years = all.Select(p => p.draft_year).Distinct().ToList();
+        int chosenYear = years[_aiRng.Next(years.Count)];
+        var rounded = all.Where(p => p.draft_year == chosenYear).ToList();
+
         var r1 = rounded.Where(p => p.round == 1).Take(1).ToList();
         if (!includeRound2)
             return r1;
@@ -6155,12 +6154,11 @@ List<int> offeredPickIds = new List<int>();
             var picksSection = new VisualElement();
             picksSection.AddToClassList("trade-modal-picks-section");
             var allTeams = DatabaseManager.Instance.GetAllTeams();
-            int draftYear = _season?.year_end ?? System.DateTime.Now.Year;
-            foreach (var pk in picks.OrderBy(p => p.round).ThenBy(p => p.pick_number))
+            foreach (var pk in picks.OrderBy(p => p.draft_year).ThenBy(p => p.round))
             {
                 var origTeam = allTeams.FirstOrDefault(t => t.id == pk.original_team_id);
                 string teamName = origTeam != null ? origTeam.name : "???";
-                var pickLbl = new Label($"Ronda {pk.round} {draftYear} - {teamName}");
+                var pickLbl = new Label($"Ronda {pk.round} {pk.draft_year} - {teamName}");
                 pickLbl.AddToClassList("trade-modal-picks-label");
                 picksSection.Add(pickLbl);
             }

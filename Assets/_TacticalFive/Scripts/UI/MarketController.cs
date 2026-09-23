@@ -773,19 +773,8 @@ using System.Linq;
             .OrderByDescending(p => p.GetCalculatedAverage())
             .ToList();
 
-        var activeSeason = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        if (activeSeason != null)
-        {
-            int activeSeasonId = activeSeason.id;
-            var allPicksForSeason = DatabaseManager.Instance.GetDraftPicksForSeason(activeSeasonId);
-            _myPicks = allPicksForSeason.Where(p => p.current_team_id == _myTeam.id).ToList();
-            _otherPicks = allPicksForSeason.Where(p => p.current_team_id == _selectedTeam.id).ToList();
-        }
-        else
-        {
-            _myPicks = new List<DraftPickData>();
-            _otherPicks = new List<DraftPickData>();
-        }
+        _myPicks = DatabaseManager.Instance.GetDraftPicksForTeam(_myTeam.id);
+        _otherPicks = DatabaseManager.Instance.GetDraftPicksForTeam(_selectedTeam.id);
 
         // Set team logos and names
         if (_tradePanelLogos64.TryGetValue(_myTeam.logo, out var mySprite))
@@ -1113,10 +1102,9 @@ using System.Linq;
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var teamsNameLookup = allTeams.ToDictionary(t => t.id, t => t.name);
-        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons()
-            .ToDictionary(s => s.id, s => s.year_start);
 
-        foreach (var pk in picks.OrderBy(p => p.round)
+        foreach (var pk in picks.OrderBy(p => p.draft_year)
+                                 .ThenBy(p => p.round)
                                  .ThenBy(p => teamsNameLookup.TryGetValue(p.original_team_id, out var tn) ? tn : "ZZZ"))
         {
             var row = new VisualElement();
@@ -1126,8 +1114,7 @@ using System.Linq;
 
             int pickId = pk.id;
             string teamName = teamsNameLookup.TryGetValue(pk.original_team_id, out var tn2) ? tn2 : "???";
-            int year = seasonsLookup.TryGetValue(pk.season_id, out var ys) ? ys : 0;
-            string baseLabel = $"RONDA {pk.round}  {year}  {teamName}";
+            string baseLabel = $"RONDA {pk.round}  {pk.draft_year}  {teamName}";
             string suffix = pk.protected_from > 0 ? $" (PROT top-{pk.protected_from})" : (pk.is_swap == 1 ? " (SWAP)" : "");
             var lbl = new Label(baseLabel + suffix);
             lbl.AddToClassList("market-pick-label");
@@ -1620,8 +1607,6 @@ using System.Linq;
 
         var allTeams = DatabaseManager.Instance.GetAllTeams();
         var teamsAbbrLookup = allTeams.ToDictionary(t => t.id, t => t.abbreviation);
-        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons()
-            .ToDictionary(s => s.id, s => s.year_start);
 
         foreach (var pk in picks)
         {
@@ -1645,8 +1630,7 @@ using System.Linq;
             row.Add(icon);
 
             string abbr = teamsAbbrLookup.TryGetValue(pk.original_team_id, out var a) ? a : "???";
-            int year = seasonsLookup.TryGetValue(pk.season_id, out var ys) ? ys : 0;
-            string pickLabel = $"R{pk.round} {year} {abbr}";
+            string pickLabel = $"R{pk.round} {pk.draft_year} {abbr}";
             if (pk.protected_from > 0) pickLabel += $" (PROT top-{pk.protected_from})";
             else if (pk.is_swap == 1) pickLabel += " (SWAP)";
 
@@ -1723,7 +1707,8 @@ using System.Linq;
             _selectedTeam.name, _otherTotalRosterCount, otherPayroll,
             myPicksSel, otherPicksSel,
             firstApron, secondApron, luxuryTax,
-            _ownSATSignSalaries.Count > 0 ? _ownSATSignSalaries : null);
+            _ownSATSignSalaries.Count > 0 ? _ownSATSignSalaries : null,
+            currentDraftYear: _season?.year_end ?? 0);
 
         ShowTradeResult(result);
     }
@@ -1997,15 +1982,13 @@ using System.Linq;
         var myNames = string.Join(", ", mySelected.Select(p => $"{p.first_name} {p.last_name}"));
         var otherNames = string.Join(", ", otherSelected.Select(p => $"{p.first_name} {p.last_name}"));
         var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.abbreviation);
-        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
         var myPicksSelForMsg = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var otherPicksSelForMsg = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
         var myPicksText = myPicksSelForMsg.Count > 0
             ? " y " + string.Join(", ", myPicksSelForMsg.Select(p =>
             {
                 string abbr = pickTeamLookup.TryGetValue(p.original_team_id, out var a) ? a : "???";
-                int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
-                string label = $"R{p.round} {year} {abbr}";
+                string label = $"R{p.round} {p.draft_year} {abbr}";
                 if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
                 else if (p.is_swap == 1) label += " (SWAP)";
                 return label;
@@ -2015,8 +1998,7 @@ using System.Linq;
             ? " y " + string.Join(", ", otherPicksSelForMsg.Select(p =>
             {
                 string abbr = pickTeamLookup.TryGetValue(p.original_team_id, out var b) ? b : "???";
-                int year = seasonsLookup.TryGetValue(p.season_id, out var ys) ? ys : 0;
-                string label = $"R{p.round} {year} {abbr}";
+                string label = $"R{p.round} {p.draft_year} {abbr}";
                 if (p.protected_from > 0) label += $" (PROT top-{p.protected_from})";
                 else if (p.is_swap == 1) label += " (SWAP)";
                 return label;
@@ -2025,13 +2007,8 @@ using System.Linq;
         string satNote = satApplied ? " (Sign & Trade: contratos extendidos, hard cap activado)" : "";
 
         // Refresh local pick caches after transfer
-        var activeSeason = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        if (activeSeason != null)
-        {
-            var allPicksForSeason = DatabaseManager.Instance.GetDraftPicksForSeason(activeSeason.id);
-            _myPicks = allPicksForSeason.Where(p => p.current_team_id == _myTeam.id).ToList();
-            _otherPicks = allPicksForSeason.Where(p => p.current_team_id == _selectedTeam.id).ToList();
-        }
+        _myPicks = DatabaseManager.Instance.GetDraftPicksForTeam(_myTeam.id);
+        _otherPicks = DatabaseManager.Instance.GetDraftPicksForTeam(_selectedTeam.id);
         _selectedMyPicks.Clear();
         _selectedOtherPicks.Clear();
 
@@ -2073,7 +2050,6 @@ using System.Linq;
 
         var teamsLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t);
         var pickTeamLookup = DatabaseManager.Instance.GetAllTeams().ToDictionary(t => t.id, t => t.name);
-        var seasonsLookup = DatabaseManager.Instance.GetAllSeasons().ToDictionary(s => s.id, s => s.year_start);
 
         // ── Team logos and names ──
         if (_tradeSuccessMyTeamLogo != null && _tradePanelLogos64.TryGetValue(_myTeam.logo, out var myLogo))
@@ -2094,7 +2070,7 @@ using System.Linq;
             }
             foreach (var pick in otherPicksReceived)
             {
-                _tradeSuccessMyPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup, seasonsLookup));
+                _tradeSuccessMyPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup));
             }
         }
 
@@ -2108,7 +2084,7 @@ using System.Linq;
             }
             foreach (var pick in myPicksSent)
             {
-                _tradeSuccessOtherPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup, seasonsLookup));
+                _tradeSuccessOtherPlayersBody.Add(BuildTradeSuccessPickRow(pick, pickTeamLookup));
             }
         }
 
@@ -2171,7 +2147,7 @@ using System.Linq;
         return row;
     }
 
-    VisualElement BuildTradeSuccessPickRow(DraftPickData pick, Dictionary<int, string> pickTeamLookup, Dictionary<int, int> seasonsLookup)
+    VisualElement BuildTradeSuccessPickRow(DraftPickData pick, Dictionary<int, string> pickTeamLookup)
     {
         var row = new VisualElement { name = "TradePickRow" };
         row.AddToClassList("trade-pick-row");
@@ -2183,8 +2159,7 @@ using System.Linq;
 
         // Pick label
         string teamName = pickTeamLookup.TryGetValue(pick.original_team_id, out var tn) ? tn : "???";
-        int year = seasonsLookup.TryGetValue(pick.season_id, out var ys) ? ys : 0;
-        string label = $"Ronda {pick.round} {year} {teamName}";
+        string label = $"Ronda {pick.round} {pick.draft_year} {teamName}";
         if (pick.protected_from > 0) label += $" (PROT top-{pick.protected_from})";
         else if (pick.is_swap == 1) label += " (SWAP)";
         var pickLbl = new Label(label);
@@ -2965,13 +2940,8 @@ using System.Linq;
         _selectedOtherPicks.Clear();
 
         // Refresh local pick caches after transfer
-        var activeSeason = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        if (activeSeason != null)
-        {
-            var allPicksForSeason = DatabaseManager.Instance.GetDraftPicksForSeason(activeSeason.id);
-            _myPicks = allPicksForSeason.Where(p => p.current_team_id == _myTeam.id).ToList();
-            _otherPicks = allPicksForSeason.Where(p => p.current_team_id == _selectedTeam.id).ToList();
-        }
+        _myPicks = DatabaseManager.Instance.GetDraftPicksForTeam(_myTeam.id);
+        _otherPicks = DatabaseManager.Instance.GetDraftPicksForTeam(_selectedTeam.id);
 
         // Logros del GM
         AchievementService.EvaluateSignAndTrade(_manager.id, _myTeam.id, _season?.id ?? 0);

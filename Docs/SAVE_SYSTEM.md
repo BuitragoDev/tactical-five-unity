@@ -67,7 +67,7 @@ All under `Application.persistentDataPath`:
 
 - **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2` (`DatabaseManager.cs:41,290-291`). The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state). The current code assigns `PRAGMA user_version = 2` unconditionally rather than branching on prior versions; functional migration state is therefore carried mainly by named migrations and column checks.
 - **Additive column migrations stay idempotent:** `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
-- **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `draft_picks_reset` (see `EVENTS.md §4`).
+- **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `draft_picks_reset`, `draft_picks_multiyear` (see `EVENTS.md §4`).
 - **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN` (e.g. `players.last_team_id = team_id` for players on a roster).
 - **Implication:** older saves open fine on newer code; newer saves with extra columns read fine by older code only if older code ignores extra columns (it does — sqlite-net maps known fields only).
 

@@ -3045,6 +3045,9 @@ public partial class DatabaseManager
             Debug.LogError($"[DB] Error archiving attendance summary: {ex.Message}");
         }
 
+        // Draft order projection captured before clearing games (for pick positions).
+        var projectedDraftOrder = BuildDraftOrder(oldSeason != null ? (int?)oldSeason.id : null);
+
         // 5. Clear tables
         _db.Execute("DELETE FROM player_game_stats");
         _db.Execute("DELETE FROM finals_player_stats");
@@ -3211,10 +3214,9 @@ public partial class DatabaseManager
         };
         _db.Insert(newSeason);
 
-        // Seed draft picks for the new season. Use oldSeason standings if it
-        // exists; otherwise fall back to overall+reputation ordering.
-        int? prevSeasonId = oldSeason != null ? (int?)oldSeason.id : null;
-        SeedDraftPicks(newSeason.id, managerId, prevSeasonId);
+        // Rollover de picks: borra el año drafteado, proyecta el nuevo draft
+        // actual y añade el año más lejano (los intermedios se conservan).
+        RolloverDraftPicks(newSeason, oldSeason, projectedDraftOrder);
         _db.Commit();
         }
         catch (System.Exception ex)

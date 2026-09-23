@@ -31,10 +31,9 @@ public partial class DatabaseManager
         };
         _db.Insert(season);
 
-        // Seed draft picks for this new season. First-ever season of the manager
-        // has no previousSeasonId (falls back to overall+reputation ordering).
+        // Seed draft picks: current draft year (positions) + future years (no position).
         int? prevSeasonId = lastSeason != null ? (int?)lastSeason.id : null;
-        SeedDraftPicks(season.id, managerId, prevSeasonId);
+        SeedDraftPicksMultiYear(season, prevSeasonId);
 
         return season;
     }

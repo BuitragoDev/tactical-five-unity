@@ -76,17 +76,16 @@ public partial class DatabaseManager
             });
         }
 
-        // ── ATL ── 15 jugadores
+        // ── ATL ── 14 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         Add(1,   "ATL", "Jalen",    "Johnson",          "SF", 24, "USA", 203,  78, 82, 94, 82, 92, 78, 98, 80, 78, 96, 82, 92, 80, 78, 30000000, 4, false);
         Add(2,   "ATL", "Nickeil",  "Alexander-Walker", "SG", 27, "CAN", 196,  78, 80, 88, 90, 82, 88, 78, 80, 74, 70, 78, 90, 78, 78, 15500000, 3, false);
         Add(3,   "ATL", "Dyson",    "Daniels",          "SG", 22, "AUS", 196,  78, 80, 89, 92, 76, 76, 78, 80, 98, 74, 78, 80, 99, 82, 25000000, 4, false);
         Add(331, "ATL", "Luguentz", "Dort",             "SG", 27, "CAN", 193,  78, 78, 88, 96, 78, 76, 72, 98, 99, 68, 80, 76, 92, 80, 16000000, 3, false, 1, 1);
         Add(4,   "ATL", "Onyeka",   "Okongwu",          "C",  25, "USA", 206,  78, 80, 88, 80, 88, 78, 74, 78, 78, 90, 82, 80, 78, 90, 16000000, 2, false);
-        Add(112, "ATL", "Ryan",     "Nembhard",         "PG", 23, "CAN", 180,  78, 72, 87, 76, 76, 76, 80, 74, 64, 50, 72, 76, 80, 74,   400000, 4, false);
         Add(6,   "ATL", "CJ",       "McCollum",         "SG", 34, "USA", 191,  78, 80, 87, 74, 92, 94, 92, 80, 74, 70, 88, 92, 82, 62, 21000000, 1, false);
         Add(7,   "ATL", "Aaron",    "Wiggins",          "SF", 27, "USA", 198,  78, 76, 80, 80, 78, 76, 74, 76, 74, 68, 76, 72, 76, 74,  9000000, 3, false);
-        Add(8,   "ATL", "Buddy",    "Hield",            "SG", 33, "BHS", 196,  78, 74, 78, 70, 74, 90, 88, 66, 66, 64, 72, 68, 76, 66,  9000000, 2, false);
+        Add(59,  "ATL", "Dorian",   "Finney-Smith",     "SF", 33, "USA", 201, 100, 78, 83, 69, 89, 79, 74, 91, 84, 74, 91, 84, 49, 55, 14000000, 2, false);
         Add(9,   "ATL", "Corey",    "Kispert",          "SF", 27, "USA", 201,  78, 74, 79, 68, 74, 72, 88, 64, 70, 68, 70, 70, 74, 60, 13000000, 3, false);
         Add(10,  "ATL", "Asa",      "Newell",           "PF", 20, "USA", 208,  78, 72, 79, 80, 76, 66, 80, 68, 64, 62, 72, 74, 70, 58,  3600000, 3, false);
         Add(11,  "ATL", "Jock",     "Landale",          "C",  29, "AUS", 211,  78, 76, 78, 62, 70, 78, 70, 70, 66, 72, 72, 74, 76, 70, 13200000, 1, false);
@@ -130,24 +129,25 @@ public partial class DatabaseManager
         Add(51, "BKN", "Joshua",    "Jefferson",        "SF", 21, "USA", 203, 97,  66, 83, 74, 54, 59, 64, 74, 69, 74, 64, 64, 66, 52,  3500000, 4, true);
         Add(52, "BKN", "Mikel",     "Brown Jr.",        "PG", 19, "USA", 193, 84,  67, 84, 74, 74, 59, 74, 84, 54, 74, 64, 59, 57, 68,  7400000, 4, true);
 
-        // ── CHA ── 16 jugadores
+        // ── CHA ── 17 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
-        Add(54, "CHA", "Brandon",   "Miller",           "SF", 23, "USA", 206, 91,  88, 90, 89, 91, 84, 87, 91, 84, 91, 87, 84, 91, 62, 16000000, 2, false);
-        Add(55, "CHA", "Coby",      "White",            "SG", 26, "USA", 196, 88,  85, 90, 84, 89, 87, 87, 79, 80, 84, 87, 81, 88, 42, 12000000, 2, false);
-        Add(56, "CHA", "Naz",       "Reid",             "C",  27, "USA", 206, 113, 87, 84, 89, 94, 84, 85, 84, 91, 84, 89, 84, 99, 68, 16000000, 4, false);
-        Add(57, "CHA", "Grayson",   "Allen",            "SG", 30, "USA", 193, 90,  83, 84, 84, 99, 84, 84, 89, 74, 79, 89, 74, 73, 42, 15000000, 2, false);
-        Add(58, "CHA", "Royce",     "O'Neale",          "SF", 32, "USA", 198, 104, 80, 79, 74, 89, 84, 74, 94, 84, 74, 91, 84, 58, 52, 11000000, 2, false);
-        Add(59, "CHA", "Dorian",    "Finney-Smith",     "SF", 33, "USA", 201, 100, 78, 83, 69, 89, 79, 74, 91, 84, 74, 91, 84, 49, 55, 14000000, 2, false);
-        Add(92, "CHA", "Dennis",    "Schroder",         "PG", 33, "DEU", 188,  78, 79, 83, 83, 78, 76, 84, 82, 80, 58, 81, 84, 79, 65,  7000000, 1, false);
-        Add(61, "CHA", "Kon",       "Knueppel",         "SG", 20, "USA", 198, 99,  81, 88, 84, 99, 84, 84, 74, 74, 79, 86, 74, 69, 42,  7000000, 4, false);
-        Add(63, "CHA", "Tidjane",   "Salaun",           "PF", 20, "FRA", 206, 98,  75, 88, 84, 69, 74, 69, 84, 84, 84, 74, 79, 45, 55,  6500000, 3, false);
-        Add(64, "CHA", "Ryan",      "Kalkbrenner",      "C",  23, "USA", 216, 117, 74, 84, 79, 54, 74, 64, 89, 89, 79, 79, 64, 79, 82,  3200000, 4, false);
-        Add(66, "CHA", "Grant",     "Williams",         "PF", 27, "USA", 198, 107, 79, 87, 79, 89, 79, 74, 89, 74, 79, 89, 79, 59, 55, 13000000, 2, false);
-        Add(67, "CHA", "Xavier",    "Tillman",          "C",  27, "USA", 203, 111, 75, 81, 84, 59, 84, 69, 89, 89, 84, 84, 55, 59, 62,  7000000, 2, false);
-        Add(68, "CHA", "Moussa",    "Diabate",          "C",  23, "FRA", 211, 95,  73, 84, 79, 54, 69, 64, 84, 84, 84, 74, 69, 68, 78,  2500000, 3, false);
-        Add(69, "CHA", "Pat",       "Connaughton",      "SG", 33, "USA", 196, 94,  74, 78, 74, 84, 74, 74, 79, 69, 64, 84, 74, 74, 48,  9400000, 1, false, 1, 1);
-        Add(70, "CHA", "Christian", "Anderson Jr.",     "PG", 19, "USA", 185, 84,  69, 84, 84, 79, 84, 74, 64, 59, 74, 74, 72, 61, 52,  4300000, 4, true);
-        Add(71, "CHA", "Hannes",    "Steinbach",        "PF", 20, "DEU", 208, 107, 71, 86, 74, 74, 69, 74, 74, 74, 74, 69, 73, 72, 62,  4700000, 4, true);
+        Add(54,  "CHA", "Brandon",   "Miller",           "SF", 23, "USA", 206, 91,  88, 90, 89, 91, 84, 87, 91, 84, 91, 87, 84, 91, 62, 16000000, 2, false);
+        Add(55,  "CHA", "Coby",      "White",            "SG", 26, "USA", 196, 88,  85, 90, 84, 89, 87, 87, 79, 80, 84, 87, 81, 88, 42, 12000000, 2, false);
+        Add(56,  "CHA", "Naz",       "Reid",             "C",  27, "USA", 206, 113, 87, 84, 89, 94, 84, 85, 84, 91, 84, 89, 84, 99, 68, 16000000, 4, false);
+        Add(57,  "CHA", "Grayson",   "Allen",            "SG", 30, "USA", 193, 90,  83, 84, 84, 99, 84, 84, 89, 74, 79, 89, 74, 73, 42, 15000000, 2, false);
+        Add(58,  "CHA", "Royce",     "O'Neale",          "SF", 32, "USA", 198, 104, 80, 79, 74, 89, 84, 74, 94, 84, 74, 91, 84, 58, 52, 11000000, 2, false);     
+        Add(92,  "CHA", "Dennis",    "Schroder",         "PG", 33, "DEU", 188,  78, 79, 83, 83, 78, 76, 84, 82, 80, 58, 81, 84, 79, 65,  7000000, 1, false);
+        Add(61,  "CHA", "Kon",       "Knueppel",         "SG", 20, "USA", 198, 99,  81, 88, 84, 99, 84, 84, 74, 74, 79, 86, 74, 69, 42,  7000000, 4, false);
+        Add(63,  "CHA", "Tidjane",   "Salaun",           "PF", 20, "FRA", 206, 98,  75, 88, 84, 69, 74, 69, 84, 84, 84, 74, 79, 45, 55,  6500000, 3, false);
+        Add(64,  "CHA", "Ryan",      "Kalkbrenner",      "C",  23, "USA", 216, 117, 74, 84, 79, 54, 74, 64, 89, 89, 79, 79, 64, 79, 82,  3200000, 4, false);
+        Add(66,  "CHA", "Grant",     "Williams",         "PF", 27, "USA", 198, 107, 79, 87, 79, 89, 79, 74, 89, 74, 79, 89, 79, 59, 55, 13000000, 2, false);
+        Add(68,  "CHA", "Moussa",    "Diabate",          "C",  23, "FRA", 211, 95,  73, 84, 79, 54, 69, 64, 84, 84, 84, 74, 69, 68, 78,  2500000, 3, false);
+        Add(69,  "CHA", "Pat",       "Connaughton",      "SG", 33, "USA", 196, 94,  74, 78, 74, 84, 74, 74, 79, 69, 64, 84, 74, 74, 48,  9400000, 1, false, 1, 1);
+        Add(112, "CHA", "Ryan",      "Nembhard",         "PG", 23, "CAN", 180,  78, 72, 87, 76, 76, 76, 80, 74, 64, 50, 72, 76, 80, 74,  2400000, 3, false);
+        Add(62,  "CHA", "Liam",      "McNeeley",         "SF", 20, "USA", 201, 98,  77, 89, 83, 89, 93, 81, 87, 75, 71, 81, 89, 67, 31,  4500000, 4, false);
+        Add(8,   "CHA", "Buddy",     "Hield",            "SG", 33, "BHS", 196,  78, 74, 78, 70, 74, 90, 88, 66, 66, 64, 72, 68, 76, 66,  9000000, 2, false);
+        Add(70,  "CHA", "Christian", "Anderson Jr.",     "PG", 19, "USA", 185, 84,  69, 84, 84, 79, 84, 74, 64, 59, 74, 74, 72, 61, 52,  4300000, 4, true);
+        Add(71,  "CHA", "Hannes",    "Steinbach",        "PF", 20, "DEU", 208, 107, 71, 86, 74, 74, 69, 74, 74, 74, 74, 69, 73, 72, 62,  4700000, 4, true);
 
         // ── CHI ── 14 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
@@ -914,6 +914,8 @@ public partial class DatabaseManager
         // ── Free Agents ── 140 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA
         AddFA(165, "Lajae",         "Jones",            "SF", 22, "USA", 201, 97,  77, 75, 77, 70, 78, 70, 70, 72, 66, 72, 68, 68, 57,  2000000, 1);
+        AddFA(488, "Sion",          "James",            "SG", 23, "USA", 196, 92,  76, 84, 82, 76, 74, 74, 76, 74, 52, 76, 74, 74, 10,  2000000, 1);
+        AddFA(67,  "Xavier",        "Tillman",          "C",  27, "USA", 203, 111, 75, 81, 84, 59, 84, 69, 89, 89, 84, 84, 55, 59, 62,  2000000, 2);
         AddFA(288, "Kyle",          "Anderson",         "SF", 32, "USA", 206, 104, 79, 84, 65, 80, 74, 86, 80, 84, 72, 63, 96, 78, 94,  3900000, 1);
         AddFA(292, "Joe",           "Ingles",           "SF", 38, "AUS", 203, 102, 75, 76, 64, 74, 86, 88, 80, 69, 59, 59, 88, 65, 83,  3000000, 1);
         AddFA(350, "Jett",          "Howard",           "SG", 23, "USA", 198,  92, 72, 77, 79, 84, 69, 69, 69, 69, 74, 74, 69, 77, 39,  6000000, 4);
@@ -929,7 +931,6 @@ public partial class DatabaseManager
         AddFA(485, "Christian",     "Koloko",           "C",  25, "CMR", 213, 104, 60, 74, 73, 72, 54, 52, 66, 63, 73, 73, 61, 54, 79,  2000000, 2);
         AddFA(486, "Tyson",         "Etienne",          "SG", 26, "USA", 188, 86,  76, 82, 84, 78, 74, 76, 72, 60, 44, 74, 76, 70, 10,  2000000, 2);
         AddFA(487, "Tosan",         "Evbuomwan",        "SF", 24, "GBR", 201, 95,  76, 82, 80, 76, 72, 74, 76, 78, 58, 78, 76, 76, 10,  2000000, 2);
-        AddFA(488, "Sion",          "James",            "SG", 23, "USA", 196, 92,  76, 84, 82, 76, 74, 74, 76, 74, 52, 76, 74, 74, 10,  2000000, 2);
         AddFA(489, "Antonio",       "Reeves",           "SG", 24, "USA", 193, 90,  78, 86, 80, 82, 84, 70, 74, 60, 44, 74, 78, 68, 12,  2500000, 3);
         AddFA(490, "PJ",            "Hall",             "PF", 24, "USA", 206, 110, 78, 84, 76, 78, 70, 72, 74, 82, 70, 80, 78, 78, 14,  3000000, 3);
         AddFA(491, "Mouhamadou",    "Gueye",            "PF", 26, "USA", 208, 102, 74, 82, 78, 72, 64, 70, 72, 82, 74, 82, 76, 80, 10,  2000000, 2);
@@ -1033,7 +1034,6 @@ public partial class DatabaseManager
         AddFA(41, "Nolan",          "Traore",           "PG", 19, "FRA", 191, 84,  77, 91, 98, 80, 70, 95, 92, 70, 60, 90, 86, 74, 32,  3810000, 4);
         AddFA(49, "Josh",           "Minott",           "SF", 23, "USA", 203, 98,  75, 82, 90, 73, 63, 69, 73, 86, 72, 92, 76, 80, 51,  2500000, 2);
         AddFA(50, "E.J.",           "Liddell",          "PF", 25, "USA", 201, 109, 73, 75, 77, 78, 70, 68, 68, 81, 78, 81, 78, 68, 56,  2200000, 1);
-        AddFA(62, "Liam",           "McNeeley",         "SF", 20, "USA", 201, 98,  77, 89, 83, 89, 93, 81, 87, 75, 71, 81, 89, 67, 31,  4500000, 4);
         AddFA(117, "Vsevolod",      "Ishchenko",        "SG", 21, "RUS", 193, 84,  57, 68, 78, 74, 72, 76, 74, 70, 50, 76, 76, 66, 36,  2000000, 2);
         AddFA(111, "Tyler",         "Smith",            "PF", 21, "USA", 206, 101, 75, 88, 82, 79, 77, 69, 73, 79, 79, 88, 79, 67, 53,  1900000, 3);
         AddFA(132, "David",         "Roddy",            "SF", 25, "USA", 193, 116, 72, 74, 80, 77, 75, 69, 73, 78, 73, 84, 77, 67, 39,  2200000, 1);
@@ -1233,17 +1233,21 @@ public partial class DatabaseManager
         }
     }
 
-    public void SeedDraftPicks(int newSeasonId, int managerId, int? previousSeasonId = null)
+    // ── DRAFT PICKS MULTI-AÑO ─────────────────────────────────────────
+    // Cada ronda tiene un draft_year (año del draft). Un equipo posee hasta
+    // DRAFT_YEARS_AHEAD+1 años (el actual + 3 futuros). pick_number solo tiene
+    // sentido para el draft actual; en años futuros vale 0 (la posición real
+    // se decide al draftear según el equipo original del slot).
+
+    public const int DRAFT_YEARS_AHEAD = 3;
+
+    /// <summary>
+    /// Orden de equipos para proyectar posiciones de un draft (peor primero).
+    /// previousSeasonId: standings de esa temporada; null -> overall+reputation.
+    /// </summary>
+    public List<int> BuildDraftOrder(int? previousSeasonId)
     {
-        // Picks are not cumulative across seasons. Clear any picks from other seasons first.
-        _db.Execute("DELETE FROM draft_picks WHERE season_id != ?", newSeasonId);
-
-        if (_db.Table<DraftPickData>().Where(p => p.season_id == newSeasonId).Count() > 0)
-            return;
-
         var teams = GetAllTeams();
-        var orderedTeamIds = new List<int>();
-
         if (previousSeasonId.HasValue)
         {
             var teamStats = teams.ToDictionary(t => t.id, t => (wins: 0, losses: 0));
@@ -1269,7 +1273,7 @@ public partial class DatabaseManager
                 }
             }
 
-            orderedTeamIds = teams
+            return teams
                 .Select(t => new
                 {
                     Team = t,
@@ -1281,23 +1285,26 @@ public partial class DatabaseManager
                 .Select(s => s.Team.id)
                 .ToList();
         }
-        else
-        {
-            orderedTeamIds = teams
-                .OrderBy(t => t.overall)
-                .ThenBy(t => t.reputation)
-                .Select(t => t.id)
-                .ToList();
-        }
 
+        return teams
+            .OrderBy(t => t.overall)
+            .ThenBy(t => t.reputation)
+            .Select(t => t.id)
+            .ToList();
+    }
+
+    /// <summary>Siembra 60 picks (30 R1 + 30 R2) para un draft_year.</summary>
+    public void SeedDraftPicksForYear(int draftYear, int seasonId, List<int> orderedTeamIds, bool assignPositions)
+    {
         int pickNum = 1;
         foreach (var teamId in orderedTeamIds)
         {
             _db.Insert(new DraftPickData
             {
-                season_id = newSeasonId,
+                season_id = seasonId,
+                draft_year = draftYear,
                 round = 1,
-                pick_number = pickNum++,
+                pick_number = assignPositions ? pickNum++ : 0,
                 original_team_id = teamId,
                 current_team_id = teamId,
                 protected_from = 0,
@@ -1305,13 +1312,16 @@ public partial class DatabaseManager
                 swap_original_team_id = 0
             });
         }
+
+        pickNum = 31;
         foreach (var teamId in orderedTeamIds)
         {
             _db.Insert(new DraftPickData
             {
-                season_id = newSeasonId,
+                season_id = seasonId,
+                draft_year = draftYear,
                 round = 2,
-                pick_number = pickNum++,
+                pick_number = assignPositions ? pickNum++ : 0,
                 original_team_id = teamId,
                 current_team_id = teamId,
                 protected_from = 0,
@@ -1319,7 +1329,70 @@ public partial class DatabaseManager
                 swap_original_team_id = 0
             });
         }
-        Debug.Log($"[DB] {orderedTeamIds.Count * 2} draft picks seeded for season {newSeasonId} (previous={previousSeasonId?.ToString() ?? "none"}).");
+    }
+
+    /// <summary>
+    /// Siembra los drafts del año actual (year_end, con posiciones proyectadas)
+    /// y los DRAFT_YEARS_AHEAD futuros (sin posición). Idempotente por año.
+    /// </summary>
+    public void SeedDraftPicksMultiYear(SeasonData season, int? previousSeasonId)
+    {
+        var ordered = BuildDraftOrder(previousSeasonId);
+        for (int i = 0; i <= DRAFT_YEARS_AHEAD; i++)
+        {
+            int year = season.year_end + i;
+            if (_db.Table<DraftPickData>().Where(p => p.draft_year == year).Count() > 0)
+                continue;
+            SeedDraftPicksForYear(year, season.id, ordered, assignPositions: i == 0);
+        }
+        Debug.Log($"[DB] Draft picks seeded for {season.year_end}-{season.year_end + DRAFT_YEARS_AHEAD}.");
+    }
+
+    /// <summary>
+    /// Asigna posiciones proyectadas (peor primero) a los picks de un draft_year
+    /// que pasa a ser el draft actual. R1 = 1..30, R2 = 31..60.
+    /// </summary>
+    public void AssignProjectedPositions(int draftYear, List<int> orderedTeamIds)
+    {
+        var picks = _db.Table<DraftPickData>().Where(p => p.draft_year == draftYear).ToList();
+        if (picks.Count == 0) return;
+
+        int slot = 1;
+        foreach (var teamId in orderedTeamIds)
+        {
+            var pk = picks.FirstOrDefault(p => p.round == 1 && p.original_team_id == teamId);
+            if (pk != null && pk.pick_number != slot) { pk.pick_number = slot; _db.Update(pk); }
+            slot++;
+        }
+
+        slot = 31;
+        foreach (var teamId in orderedTeamIds)
+        {
+            var pk = picks.FirstOrDefault(p => p.round == 2 && p.original_team_id == teamId);
+            if (pk != null && pk.pick_number != slot) { pk.pick_number = slot; _db.Update(pk); }
+            slot++;
+        }
+    }
+
+    /// <summary>
+    /// Rollover de picks al empezar temporada: borra el año drafteado y anteriores,
+    /// proyecta posiciones del nuevo draft actual y añade el año más lejano. Los
+    /// años intermedios se conservan intactos (traspasos incluidos).
+    /// </summary>
+    public void RolloverDraftPicks(SeasonData newSeason, SeasonData oldSeason, List<int> projectedOrder)
+    {
+        int draftedYear = oldSeason != null ? oldSeason.year_end : newSeason.year_end - 1;
+        _db.Execute("DELETE FROM draft_picks WHERE draft_year <= ?", draftedYear);
+
+        int currentDraftYear = newSeason.year_end;
+        if (_db.Table<DraftPickData>().Where(p => p.draft_year == currentDraftYear).Count() == 0)
+            SeedDraftPicksForYear(currentDraftYear, newSeason.id, projectedOrder, assignPositions: true);
+        else
+            AssignProjectedPositions(currentDraftYear, projectedOrder);
+
+        int farthest = currentDraftYear + DRAFT_YEARS_AHEAD;
+        if (_db.Table<DraftPickData>().Where(p => p.draft_year == farthest).Count() == 0)
+            SeedDraftPicksForYear(farthest, newSeason.id, projectedOrder, assignPositions: false);
     }
 
     public List<DraftPickData> GetDraftPicksForTeam(int teamId)
@@ -1327,8 +1400,18 @@ public partial class DatabaseManager
         if (!EnsureDb()) return new List<DraftPickData>();
         return _db.Table<DraftPickData>()
             .Where(p => p.current_team_id == teamId)
-            .OrderBy(p => p.season_id)
+            .OrderBy(p => p.draft_year)
             .ThenBy(p => p.round)
+            .ThenBy(p => p.pick_number)
+            .ToList();
+    }
+
+    public List<DraftPickData> GetDraftPicksForDraftYear(int draftYear)
+    {
+        if (!EnsureDb()) return new List<DraftPickData>();
+        return _db.Table<DraftPickData>()
+            .Where(p => p.draft_year == draftYear)
+            .OrderBy(p => p.round)
             .ThenBy(p => p.pick_number)
             .ToList();
     }

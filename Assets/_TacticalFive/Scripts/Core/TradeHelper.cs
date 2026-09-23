@@ -59,23 +59,30 @@ public static class TradeHelper
         }
     }
 
-    public static int PickBonus(DraftPickData pk)
+    public static int PickBonus(DraftPickData pk, int currentDraftYear = 0)
     {
         if (pk == null) return 0;
+
+        // Descuento por año: una ronda de un draft futuro vale menos.
+        int yearOffset = (currentDraftYear > 0 && pk.draft_year > 0)
+            ? Mathf.Max(0, pk.draft_year - currentDraftYear)
+            : 0;
+
         int bonus;
         if (pk.round == 1)
         {
-            int slot = Mathf.Clamp(pk.pick_number, 1, 30);
-            bonus = 10 + (30 - slot) / 3;
+            // Años futuros sin posición (pick_number = 0): valor plano de R1.
+            int slot = pk.pick_number > 0 ? Mathf.Clamp(pk.pick_number, 1, 30) : 16;
+            bonus = Mathf.Max(1, 10 + (30 - slot) / 3 - yearOffset * 2);
         }
         else if (pk.round == 2)
         {
-            int slot = Mathf.Clamp(pk.pick_number - 30, 1, 30);
-            bonus = 5 + (30 - slot) / 5;
+            int slot = pk.pick_number > 0 ? Mathf.Clamp(pk.pick_number - 30, 1, 30) : 16;
+            bonus = Mathf.Max(1, 5 + (30 - slot) / 5 - yearOffset);
         }
         else
         {
-            bonus = 3;
+            bonus = Mathf.Max(1, 3 - yearOffset);
         }
 
         // Un pick protegido top-N pierde cuota de valor según la profundidad
@@ -185,7 +192,8 @@ public static class TradeHelper
         long secondApron = SECOND_APRON,
         long luxuryTax = LUXURY_TAX,
         Dictionary<int, long> teamASignSalaries = null,
-        Dictionary<int, long> teamBSignSalaries = null)
+        Dictionary<int, long> teamBSignSalaries = null,
+        int currentDraftYear = 0)
     {
         var aSalaryOut = teamASelected.Sum(p => SalaryOf(p, teamASignSalaries));
         var bSalaryOut = teamBSelected.Sum(p => SalaryOf(p, teamBSignSalaries));
@@ -204,12 +212,12 @@ public static class TradeHelper
         if (teamASelectedPicks != null)
         {
             foreach (var pk in teamASelectedPicks)
-                acceptScore += PickBonus(pk);
+                acceptScore += PickBonus(pk, currentDraftYear);
         }
         if (teamBSelectedPicks != null)
         {
             foreach (var pk in teamBSelectedPicks)
-                acceptScore -= PickBonus(pk);
+                acceptScore -= PickBonus(pk, currentDraftYear);
         }
 
         // Player quality comparison

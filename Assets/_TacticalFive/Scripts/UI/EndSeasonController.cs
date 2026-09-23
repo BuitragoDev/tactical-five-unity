@@ -1295,7 +1295,7 @@ public class EndSeasonController : UIScreenController
         var lotterySlots = standings.Take(14).ToList();
 
         var r1Picks = DatabaseManager.Instance.Db.Table<DraftPickData>()
-            .Where(p => p.season_id == _season.id && p.round == 1)
+            .Where(p => p.draft_year == _season.year_end && p.round == 1)
             .ToList();
         var teamsById = allTeams.ToDictionary(t => t.id);
 

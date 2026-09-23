@@ -73,6 +73,24 @@ public class TradeHelperTests
     }
 
     [Test]
+    public void PickBonus_FutureYear_IsDiscounted()
+    {
+        // R1 slot 1 vale 19 en el año actual y pierde 2 por cada año futuro.
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 1, draft_year = 2027 }, 2027), Is.EqualTo(19));
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 1, draft_year = 2028 }, 2027), Is.EqualTo(17));
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 1, draft_year = 2030 }, 2027), Is.EqualTo(13));
+    }
+
+    [Test]
+    public void PickBonus_FutureYearNoPosition_UsesFlatBase()
+    {
+        // Años futuros sin posición (pick_number = 0): base plana R1 = 14, R2 = 7,
+        // menos el descuento por año.
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 1, pick_number = 0, draft_year = 2028 }, 2027), Is.EqualTo(12));
+        Assert.That(TradeHelper.PickBonus(new DraftPickData { round = 2, pick_number = 0, draft_year = 2028 }, 2027), Is.EqualTo(6));
+    }
+
+    [Test]
     public void ValidateTrade_FairTrade_HasNoErrors()
     {
         var a = new List<PlayerData> { Player(10_000_000) };
