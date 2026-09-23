@@ -1701,6 +1701,32 @@ using System.Threading.Tasks;
                 mvp_player_id = mvpStats.player_id
             };
             DatabaseManager.Instance.SaveAllStarRecord(record);
+
+            bool alreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
+                .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ALLSTAR
+                       && m.game_day == game.game_day);
+            if (!alreadySent)
+            {
+                bool eastWon = game.home_score > game.away_score;
+                int maxScore = Mathf.Max(game.home_score, game.away_score);
+                int minScore = Mathf.Min(game.home_score, game.away_score);
+                DatabaseManager.Instance.AddMessage(new MessageData
+                {
+                    manager_id = _manager.id,
+                    sender_type = 2,
+                    sender_id = 0,
+                    title = $"All-Star: {(eastWon ? "Este" : "Oeste")} {maxScore}-{minScore}",
+                    body = NewsTexts.AllStar(_season.year_end, eastWon, game.home_score,
+                        game.away_score, mvpStats.name, mvpStats.points),
+                    game_day = game.game_day,
+                    game_date = game.game_date,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    is_read = 0,
+                    category = NewsCategory.LIGA,
+                    news_type = NewsType.ALLSTAR
+                });
+            }
         }
 
         if (game.game_type != "allstar")
@@ -7804,6 +7830,16 @@ List<int> offeredPickIds = new List<int>();
             {
                 var tex = _noticiasSprites.GetValueOrDefault("rechazado");
                 if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
+            }
+            return false;
+        }
+
+        if (nt == NewsType.ALLSTAR)
+        {
+            if (_logoSprites.TryGetValue("all-star-game", out var allStarSprite))
+            {
+                icon.style.backgroundImage = new StyleBackground(allStarSprite);
+                return true;
             }
             return false;
         }

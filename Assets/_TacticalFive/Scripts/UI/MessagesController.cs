@@ -483,6 +483,16 @@ public class MessagesController : UIScreenController
             return false;
         }
 
+        if (nt == NewsType.ALLSTAR)
+        {
+            if (_logoSprites.TryGetValue("all-star-game", out var allStarSprite))
+            {
+                icon.style.backgroundImage = new StyleBackground(allStarSprite);
+                return true;
+            }
+            return false;
+        }
+
         if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
             || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP)
         {

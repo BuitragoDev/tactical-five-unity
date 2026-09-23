@@ -28,6 +28,18 @@ public static class NewsTexts
             $"Un plantilla que apostó por el desarrollo de sus prospectos y jugadores asignados cosechó los frutos más dulces de la temporada. Este campeón refuerza la inversión en la cantera y envía un mensaje claro a la franquicia sobre el futuro del proyecto.";
     }
 
+    public static string AllStar(int yearEnd, bool eastWon, int eastScore, int westScore,
+        string mvpName, int mvpPoints)
+    {
+        string ganador = eastWon ? "Conferencia Este" : "Conferencia Oeste";
+        string perdedor = eastWon ? "Conferencia Oeste" : "Conferencia Este";
+        int maxPts = System.Math.Max(eastScore, westScore);
+        int minPts = System.Math.Min(eastScore, westScore);
+        return $"El All-Star Game de {yearEnd} se decidió del lado de la {ganador}, que se impuso a la {perdedor} por {maxPts}–{minPts} en una noche cargada de espectáculo y talento.\n\n" +
+            $"{mvpName} se llevó el MVP del partido tras firmar {mvpPoints} puntos, liderando a los suyos y firmando las jugadas más destacadas del encuentro.\n\n" +
+            $"El fin de semana de las estrellas deja grandes momentos para el recuerdo y sirve de punto de inflexión antes de encarar el tramo decisivo de la temporada.";
+    }
+
     // ── LESIONES ──
 
     public static string Recuperacion(string playerName, string injuryType, int daysOut)
