@@ -1710,12 +1710,14 @@ using System.Threading.Tasks;
                 bool eastWon = game.home_score > game.away_score;
                 int maxScore = Mathf.Max(game.home_score, game.away_score);
                 int minScore = Mathf.Min(game.home_score, game.away_score);
+                string winnerConf = eastWon ? "Conferencia Este" : "Conferencia Oeste";
+                string loserConf = eastWon ? "Conferencia Oeste" : "Conferencia Este";
                 DatabaseManager.Instance.AddMessage(new MessageData
                 {
                     manager_id = _manager.id,
                     sender_type = 2,
                     sender_id = 0,
-                    title = $"All-Star: {(eastWon ? "Este" : "Oeste")} {maxScore}-{minScore}",
+                    title = $"All-Star: {winnerConf} {maxScore}-{minScore} {loserConf}",
                     body = NewsTexts.AllStar(_season.year_end, eastWon, game.home_score,
                         game.away_score, mvpStats.name, mvpStats.points),
                     game_day = game.game_day,
