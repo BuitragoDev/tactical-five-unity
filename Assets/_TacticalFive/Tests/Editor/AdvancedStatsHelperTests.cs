@@ -52,7 +52,8 @@ public class AdvancedStatsHelperTests
         var eff = AdvancedStatsHelper.CalcEff(
             pts: 25, reb: 10, ast: 5, stl: 2, blk: 1,
             fgm: 10, fga: 20, ftm: 4, fta: 5, tov: 3);
-        Assert.That(eff, Is.EqualTo(23));
+        // Eficiencia estándar: 25+10+5+2+1 - (20-10) - (5-4) - 3 = 29
+        Assert.That(eff, Is.EqualTo(29));
     }
 
     [Test]

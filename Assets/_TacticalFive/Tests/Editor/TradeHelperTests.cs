@@ -170,15 +170,15 @@ public class TradeHelperTests
     [Test]
     public void ValidateTrade_SignAndTrade_UsingNewSignedSalary()
     {
-        // FA propio firmado a 25M (teamA envia solo el FA via S&T) contra 15M de B.
-        // Sin la firma el salario entrante seria el de su contiene externa; con el
-        // nuevo salario de 25M el matching se valida sobre ese valor.
+        // FA propio firmado a 25M (teamA envia solo el FA via S&T) contra 25M de B.
+        // Sin la firma el salario entrante seria el de su contrato externa; con el
+        // nuevo salario de 25M el matching se valida sobre ese valor (25M, no 8M).
         var a = new List<PlayerData> { Player(8_000_000, 85, 26) };
-        var b = new List<PlayerData> { Player(15_000_000, 78, 27) };
+        var b = new List<PlayerData> { Player(25_000_000, 78, 27) };
         var sign = new Dictionary<int, long> { [a[0].id] = 25_000_000L };
         var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", 100_000_000L, "Lakers", 100_000_000L,
             false, false, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
-        // A envia 25M por 15M -> salario saliente > entrante, ok. No deben saltar errores de matching.
+        // A envia 25M (firmado) por 25M -> matching correcto en ambos lados.
         Assert.That(errors, Is.Empty);
     }
 

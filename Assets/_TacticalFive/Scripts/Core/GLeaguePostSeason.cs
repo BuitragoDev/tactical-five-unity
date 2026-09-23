@@ -460,8 +460,13 @@ public static class GLeaguePostSeason
         {
             var confTeams = glTeams.Where(t => t.conference == conf).ToList();
             var table = GLeagueStandings.Compute(confTeams, regularGames);
-            for (int i = 0; i < table.Count; i++)
-                result[table[i].teamId] = (i + 1, table[i].WinPct);
+            int seed = 0;
+            foreach (var row in table)
+            {
+                // Solo reciben seed los equipos que han jugado algún partido.
+                if (row.wins + row.losses == 0) continue;
+                result[row.teamId] = (++seed, row.WinPct);
+            }
         }
         return result;
     }
