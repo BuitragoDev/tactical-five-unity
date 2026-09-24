@@ -1651,6 +1651,24 @@ using System.Linq;
         return cap - payroll;
     }
 
+    // Día de juego correspondiente a la fecha actual. Los traspasos manuales se
+    // registran en la fecha mostrada (current_date), no en el último día simulado
+    // (current_game_day, que va un día por detrás), para que el Historial los
+    // ordene correctamente.
+    int TradeGameDay()
+    {
+        if (_season == null) return 0;
+        if (!string.IsNullOrEmpty(_season.current_date)
+            && System.DateTime.TryParse(_season.current_date, out var d))
+        {
+            var seasonStart = new System.DateTime(_season.year_start, 10, 22);
+            return d >= seasonStart
+                ? (int)(d - seasonStart).TotalDays + 1
+                : -(int)(seasonStart - d).TotalDays;
+        }
+        return _season.current_game_day;
+    }
+
     // ═══════════════════════════════════════════
     //  TRADE VALIDATION
     // ═══════════════════════════════════════════
@@ -1922,7 +1940,7 @@ using System.Linq;
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
-                    game_day = _season?.current_game_day ?? 0,
+                    game_day = TradeGameDay(),
                     game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                     team_id_from = _myTeam.id,
                     team_id_to = _selectedTeam.id,
@@ -1940,7 +1958,7 @@ using System.Linq;
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
-                    game_day = _season?.current_game_day ?? 0,
+                    game_day = TradeGameDay(),
                     game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                     team_id_from = _selectedTeam.id,
                     team_id_to = _myTeam.id,
@@ -1957,7 +1975,7 @@ using System.Linq;
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
                 season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
+                game_day = TradeGameDay(),
                 game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                 team_id_from = _myTeam.id,
                 team_id_to = _selectedTeam.id,
@@ -1970,7 +1988,7 @@ using System.Linq;
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
                 season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
+                game_day = TradeGameDay(),
                 game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                 team_id_from = _selectedTeam.id,
                 team_id_to = _myTeam.id,
@@ -2021,7 +2039,7 @@ using System.Linq;
             body = satApplied
                 ? NewsTexts.SignAndTrade(myNames, _myTeam.name, _selectedTeam.name, 0)
                 : NewsTexts.Traspaso(_myTeam.name, myNames, _selectedTeam.name, otherNames, otherPicksText),
-            game_day = _season?.current_game_day ?? 0,
+            game_day = TradeGameDay(),
             game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -2763,7 +2781,7 @@ using System.Linq;
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
                 season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
+                game_day = TradeGameDay(),
                 game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                 team_id_from = 0,
                 team_id_to = _myTeam.id,
@@ -2787,7 +2805,7 @@ using System.Linq;
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
                 season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
+                game_day = TradeGameDay(),
                 game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                 team_id_from = _myTeam.id,
                 team_id_to = _selectedTeam.id,
@@ -2851,7 +2869,7 @@ using System.Linq;
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
-                    game_day = _season?.current_game_day ?? 0,
+                    game_day = TradeGameDay(),
                     game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                     team_id_from = _myTeam.id,
                     team_id_to = _selectedTeam.id,
@@ -2869,7 +2887,7 @@ using System.Linq;
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
-                    game_day = _season?.current_game_day ?? 0,
+                    game_day = TradeGameDay(),
                     game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                     team_id_from = _selectedTeam.id,
                     team_id_to = _myTeam.id,
@@ -2885,7 +2903,7 @@ using System.Linq;
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
                 season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
+                game_day = TradeGameDay(),
                 game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                 team_id_from = _myTeam.id,
                 team_id_to = _selectedTeam.id,
@@ -2898,7 +2916,7 @@ using System.Linq;
             DatabaseManager.Instance.InsertTrade(new TradeData
             {
                 season_id = _season?.id ?? 0,
-                game_day = _season?.current_game_day ?? 0,
+                game_day = TradeGameDay(),
                 game_date = _season?.current_date ?? System.DateTime.Now.ToString("yyyy-MM-dd"),
                 team_id_from = _selectedTeam.id,
                 team_id_to = _myTeam.id,
@@ -2925,7 +2943,7 @@ using System.Linq;
             body = NewsTexts.SignAndTrade(saNames, _myTeam.name, _selectedTeam.name, 0) +
                    (myNames.Length > 0 ? $" Además envías: {myNames}." : "") +
                    $" Recibes: {otherNames}{otherPicksText}.",
-            game_day = _season?.current_game_day ?? 0,
+            game_day = TradeGameDay(),
             game_date = System.DateTime.Now.ToString("yyyy-MM-dd"),
             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),

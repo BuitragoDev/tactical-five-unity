@@ -152,7 +152,10 @@ using System.Linq;
             if (headerDate != null) headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _sortedTrades = _trades.OrderByDescending(t => t.game_day).ToList();
+        _sortedTrades = _trades
+            .OrderByDescending(t => t.game_date)   // "yyyy-MM-dd" -> orden lexicográfico = cronológico
+            .ThenByDescending(t => t.id)           // a igual fecha, el más reciente insertado arriba
+            .ToList();
         RenderPage();
     }
 

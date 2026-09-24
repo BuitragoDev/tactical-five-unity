@@ -2633,7 +2633,8 @@ public partial class DatabaseManager
         if (!EnsureDb()) return new List<TradeData>();
         return _db.Table<TradeData>()
                   .Where(t => t.season_id == seasonId)
-                  .OrderByDescending(t => t.game_day)
+                  .OrderByDescending(t => t.game_date)
+                  .ThenByDescending(t => t.id)
                   .ToList();
     }
 
