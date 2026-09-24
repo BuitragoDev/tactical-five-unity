@@ -210,8 +210,8 @@ using System.Linq;
             && _teamCache.TryGetValue(pick.original_team_id, out var origTeam))
         {
             itemLabel.text = pick.draft_year > 0
-                ? $"Ronda {pick.round} {pick.draft_year} {origTeam.abbreviation}"
-                : $"Ronda {pick.round} {origTeam.abbreviation}";
+                ? $"Ronda {pick.round} · {pick.draft_year} · {origTeam.abbreviation}"
+                : $"Ronda {pick.round} · {origTeam.abbreviation}";
             itemLabel.AddToClassList("historial-pick-label");
         }
         else if (player != null)
