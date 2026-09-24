@@ -5579,6 +5579,11 @@ List<int> offeredPickIds = new List<int>();
                     offeredPickIds.Add(dlPicks[0].id);
             }
 
+            // Evitar picks repetidos: GetFuturePicksForTeam elige año aleatorio y puede
+            // devolver el mismo pick en varias llamadas (payPicks + dlPicks).
+            offeredPickIds = offeredPickIds.Distinct().ToList();
+            wantedPickIds = wantedPickIds.Distinct().ToList();
+
             var wantIds = new List<int> { target.id };
             var offeredIds = offerPack.Select(p => p.id).ToList();
             DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
@@ -6158,7 +6163,15 @@ List<int> offeredPickIds = new List<int>();
             {
                 var origTeam = allTeams.FirstOrDefault(t => t.id == pk.original_team_id);
                 string teamName = origTeam != null ? origTeam.name : "???";
-                var pickLbl = new Label($"Ronda {pk.round} {pk.draft_year} - {teamName}");
+                string pickText = $"Ronda {pk.round} {pk.draft_year} - {teamName}";
+                // Si el pick cambió de dueño, indicar también el equipo actual (la
+                // posición la marca el equipo original).
+                if (pk.current_team_id != pk.original_team_id)
+                {
+                    var curTeam = allTeams.FirstOrDefault(t => t.id == pk.current_team_id);
+                    if (curTeam != null) pickText += $" ({curTeam.name})";
+                }
+                var pickLbl = new Label(pickText);
                 pickLbl.AddToClassList("trade-modal-picks-label");
                 picksSection.Add(pickLbl);
             }
