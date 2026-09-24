@@ -57,12 +57,12 @@ public class LoadGameController : UIScreenController
     {
         base.LoadData();
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
+        var logos = TeamImages.Logos(64);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        var arenas = Resources.LoadAll<Sprite>("Arenas/");
+        var arenas = TeamImages.Arenas();
         foreach (var s in arenas) _arenaSprites[s.name] = s;
-        _defaultArenaSprite = Resources.Load<Sprite>("Arenas/default");
+        _defaultArenaSprite = TeamImages.Arena("default");
 
         _calendarTex = Resources.Load<Texture2D>("Icons/calendario");
         _budgetTex = Resources.Load<Texture2D>("Icons/finanzas");

@@ -128,10 +128,10 @@ public class SeasonSummaryController : UIScreenController
         if (_season == null) return;
         _allTeams = DatabaseManager.Instance.GetAllTeams();
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
-        var logos100 = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
+        var logos100 = TeamImages.Logos(100);
         foreach (var s in logos100) _logoSprites100[s.name] = s;
 
         var glLogos64 = Resources.LoadAll<Sprite>("Teams/GLeague/64x64");

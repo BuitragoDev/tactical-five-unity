@@ -182,10 +182,10 @@ public class EmployeesController : UIScreenController
                 screenIcon.style.backgroundImage = iconTex;
         }
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos = TeamImages.Logos(64);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        var logos200 = Resources.LoadAll<Sprite>("Teams/Logos/120x120");
+        var logos200 = TeamImages.Logos(120);
         _logos = new Dictionary<string, Sprite>();
         foreach (var s in logos200) _logos[s.name] = s;
 

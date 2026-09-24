@@ -438,7 +438,7 @@ using System.Threading.Tasks;
     {
         base.LoadData();
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = TeamImages.Logos(200);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         if (_noticiasSprites.Count == 0)
@@ -7432,7 +7432,7 @@ List<int> offeredPickIds = new List<int>();
         logoElem.AddToClassList("col-team-logo");
         if (team != null)
         {
-            var logo32 = Resources.Load<Sprite>($"Teams/Logos/32x32/{team.logo}");
+            var logo32 = TeamImages.Logo(32, team.logo);
             if (logo32 != null)
                 logoElem.style.backgroundImage = new StyleBackground(logo32);
             else
@@ -7617,7 +7617,7 @@ List<int> offeredPickIds = new List<int>();
         // Logo del equipo (32x32 desde carpeta específica)
         if (_teamStatsLogo != null)
         {
-            var logo32 = Resources.Load<Sprite>($"Teams/Logos/32x32/{_myTeam.logo}");
+            var logo32 = TeamImages.Logo(32, _myTeam.logo);
             if (logo32 != null)
                 _teamStatsLogo.style.backgroundImage = new StyleBackground(logo32);
             else
@@ -8110,7 +8110,7 @@ List<int> offeredPickIds = new List<int>();
 
         if (!string.IsNullOrEmpty(sizeFolder))
         {
-            var sprite = Resources.Load<Sprite>($"Teams/Logos/{sizeFolder}/{logoName}");
+            var sprite = TeamImages.Logo(sizeFolder, logoName);
             if (sprite != null)
             {
                 elem.style.backgroundImage = new StyleBackground(sprite);

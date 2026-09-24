@@ -72,7 +72,7 @@ public class CarteraController : UIScreenController
             if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
         }
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos = TeamImages.Logos(64);
         foreach (var s in logos)
             _logoSprites[s.name] = s;
 

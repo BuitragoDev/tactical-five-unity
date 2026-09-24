@@ -248,12 +248,12 @@ using System.Linq;
 
     void BuildArenaImage()
     {
-        var arenaSprite = Resources.Load<Sprite>($"Arenas/{_myTeam.logo}");
+        var arenaSprite = TeamImages.Arena(_myTeam.logo);
         if (arenaSprite != null)
             _arenaImage.style.backgroundImage = new StyleBackground(arenaSprite);
         else
         {
-            var defaultSprite = Resources.Load<Sprite>("Arenas/default");
+            var defaultSprite = TeamImages.Arena("default");
             if (defaultSprite != null)
                 _arenaImage.style.backgroundImage = new StyleBackground(defaultSprite);
         }

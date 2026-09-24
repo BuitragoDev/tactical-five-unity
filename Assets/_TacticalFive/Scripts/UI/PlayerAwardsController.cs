@@ -200,11 +200,11 @@ public class PlayerAwardsController : UIScreenController
     void LoadLogoCaches()
     {
         _logos64 = new Dictionary<string, Sprite>();
-        foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/64x64"))
+        foreach (var s in TeamImages.Logos(64))
             _logos64[s.name] = s;
 
         _logos100 = new Dictionary<string, Sprite>();
-        foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/100x100"))
+        foreach (var s in TeamImages.Logos(100))
             _logos100[s.name] = s;
     }
 

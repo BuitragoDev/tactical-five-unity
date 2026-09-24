@@ -78,10 +78,10 @@ public class ResultsController : UIScreenController
     {
         base.LoadData();
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
-        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
+        var logos80 = TeamImages.Logos(80);
         foreach (var s in logos80) _logoSprites80[s.name] = s;
 
         _chevronTex = Resources.Load<Texture2D>("Icons/right_arrow");
@@ -562,13 +562,13 @@ public class ResultsController : UIScreenController
         if (key == "sixers") key = "76ers"; // desajuste de nombre de archivo de arena
         if (!string.IsNullOrEmpty(key))
         {
-            var sprite = Resources.Load<Sprite>($"Arenas/{key}");
+            var sprite = TeamImages.Arena(key);
             if (sprite != null) return sprite;
         }
 
         if (!_defaultArenaLoaded)
         {
-            _defaultArenaSprite = Resources.Load<Sprite>("Arenas/default");
+            _defaultArenaSprite = TeamImages.Arena("default");
             _defaultArenaLoaded = true;
         }
         return _defaultArenaSprite;

@@ -451,16 +451,16 @@ using System.Linq;
     {
         base.LoadData();
 
-        var headerLogos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
+        var headerLogos = TeamImages.Logos(64);
         foreach (var s in headerLogos) _headerLogos[s.name] = s;
 
-        var teamGridLogos = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
+        var teamGridLogos = TeamImages.Logos(80);
         foreach (var s in teamGridLogos) _teamGridLogos[s.name] = s;
 
-        var tradePanelLogos = Resources.LoadAll<Sprite>("Teams/Logos/32x32/");
+        var tradePanelLogos = TeamImages.Logos(32);
         foreach (var s in tradePanelLogos) _tradePanelLogos[s.name] = s;
 
-        var tradePanelLogos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
+        var tradePanelLogos64 = TeamImages.Logos(64);
         foreach (var s in tradePanelLogos64) _tradePanelLogos64[s.name] = s;
 
         var tradeModalIcon = _root.Q<VisualElement>("TradeModalIcon");

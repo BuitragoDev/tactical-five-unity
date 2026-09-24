@@ -143,7 +143,7 @@ public class InfoLeagueController : UIScreenController
 
             var logo = new VisualElement();
             logo.AddToClassList("infoleague-team-logo");
-            var tex = Resources.Load<Sprite>($"Teams/Logos/32x32/{team.logo}");
+            var tex = TeamImages.Logo(32, team.logo);
             if (tex != null)
                 logo.style.backgroundImage = new StyleBackground(tex);
 

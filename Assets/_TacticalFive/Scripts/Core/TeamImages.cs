@@ -1,0 +1,254 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+/// <summary>
+/// Servicio central de imágenes de equipos (logos y pabellones) con sistema de
+/// "overlay": las imágenes originales viven empaquetadas en Resources (solo
+/// lectura) y las personalizadas se guardan en una carpeta escribible del disco
+/// (persistentDataPath) que tiene prioridad. Así la edición funciona también en
+/// una build y RESETEAR BASE DE DATOS solo tiene que borrar la carpeta custom
+/// para volver a las originales (que nunca se modifican).
+/// </summary>
+public static class TeamImages
+{
+    // Tamaños de logo soportados (200 es el original en la raíz de Teams/Logos).
+    public static readonly int[] LogoSizes = { 200, 120, 100, 80, 64, 32 };
+    public const int LogoSourceSize = 200;
+    public const int ArenaWidth = 1380;
+    public const int ArenaHeight = 752;
+
+    public static string CustomRoot => Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom");
+    public static string CustomLogoDir(int size) => Path.Combine(CustomRoot, "Logos", SizeFolder(size));
+    public static string CustomArenaDir => Path.Combine(CustomRoot, "Arenas");
+
+    static string SizeFolder(int size) => size >= LogoSourceSize ? "" : $"{size}x{size}";
+
+    static int ParseSize(string sizeFolder)
+    {
+        if (string.IsNullOrEmpty(sizeFolder)) return LogoSourceSize;
+        int x = sizeFolder.IndexOf('x');
+        if (x > 0 && int.TryParse(sizeFolder.Substring(0, x), out int s)) return s;
+        return LogoSourceSize;
+    }
+
+    static string ArenaFileName(string logo) => logo == "sixers" ? "76ers" : logo;
+
+    // ── Cache ─────────────────────────────────────────────────────────
+    static readonly Dictionary<int, Sprite[]> _logoArrays = new();
+    static readonly Dictionary<string, Sprite> _logoSprites = new();
+    static Sprite[] _arenaArray;
+    static readonly Dictionary<string, Sprite> _arenaSprites = new();
+
+    public static void Invalidate()
+    {
+        _logoArrays.Clear();
+        _logoSprites.Clear();
+        _arenaArray = null;
+        _arenaSprites.Clear();
+    }
+
+    // ── LOGOS ─────────────────────────────────────────────────────────
+    public static Sprite[] Logos(int size)
+    {
+        if (_logoArrays.TryGetValue(size, out var cached)) return cached;
+
+        var dict = new Dictionary<string, Sprite>();
+        foreach (var s in Resources.LoadAll<Sprite>($"Teams/Logos/{SizeFolder(size)}"))
+            dict[s.name] = s;
+
+        string dir = CustomLogoDir(size);
+        if (Directory.Exists(dir))
+        {
+            foreach (var f in Directory.GetFiles(dir, "*.png"))
+            {
+                var sp = LoadSpriteFromFile(f);
+                if (sp != null) dict[Path.GetFileNameWithoutExtension(f)] = sp;
+            }
+        }
+
+        var arr = new Sprite[dict.Count];
+        dict.Values.CopyTo(arr, 0);
+        _logoArrays[size] = arr;
+        return arr;
+    }
+
+    public static Sprite Logo(int size, string logo)
+    {
+        if (string.IsNullOrEmpty(logo)) return null;
+        string key = size + ":" + logo;
+        if (_logoSprites.TryGetValue(key, out var cached)) return cached;
+
+        string customFile = Path.Combine(CustomLogoDir(size), logo + ".png");
+        Sprite sp = File.Exists(customFile)
+            ? LoadSpriteFromFile(customFile)
+            : Resources.Load<Sprite>($"Teams/Logos/{SizeFolder(size)}/{logo}");
+
+        if (sp != null) _logoSprites[key] = sp;
+        return sp;
+    }
+
+    public static Sprite Logo(string sizeFolder, string logo) => Logo(ParseSize(sizeFolder), logo);
+
+    // ── ARENAS ────────────────────────────────────────────────────────
+    public static Sprite[] Arenas()
+    {
+        if (_arenaArray != null) return _arenaArray;
+
+        var dict = new Dictionary<string, Sprite>();
+        foreach (var s in Resources.LoadAll<Sprite>("Arenas/"))
+            dict[s.name] = s;
+
+        if (Directory.Exists(CustomArenaDir))
+        {
+            foreach (var f in Directory.GetFiles(CustomArenaDir, "*.png"))
+            {
+                var sp = LoadSpriteFromFile(f);
+                if (sp != null) dict[Path.GetFileNameWithoutExtension(f)] = sp;
+            }
+        }
+
+        var arr = new Sprite[dict.Count];
+        dict.Values.CopyTo(arr, 0);
+        _arenaArray = arr;
+        return arr;
+    }
+
+    public static Sprite Arena(string logo)
+    {
+        string file = string.IsNullOrEmpty(logo) ? "default" : ArenaFileName(logo);
+        if (_arenaSprites.TryGetValue(file, out var cached)) return cached;
+
+        string customFile = Path.Combine(CustomArenaDir, file + ".png");
+        Sprite sp = File.Exists(customFile)
+            ? LoadSpriteFromFile(customFile)
+            : Resources.Load<Sprite>($"Arenas/{file}");
+
+        if (sp == null && file != "default")
+            sp = Resources.Load<Sprite>("Arenas/default");
+
+        if (sp != null) _arenaSprites[file] = sp;
+        return sp;
+    }
+
+    // ── VALIDACIÓN ────────────────────────────────────────────────────
+    public static bool ValidateLogoFile(string path, out string error)
+        => ValidatePng(path, LogoSourceSize, LogoSourceSize, "El logo", out error);
+
+    public static bool ValidateArenaFile(string path, out string error)
+        => ValidatePng(path, ArenaWidth, ArenaHeight, "La imagen del pabellón", out error);
+
+    static bool ValidatePng(string path, int w, int h, string label, out string error)
+    {
+        error = null;
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+            error = "No se encontró el archivo.";
+            return false;
+        }
+        if (!path.ToLowerInvariant().EndsWith(".png") || !HasPngSignature(path))
+        {
+            error = $"{label} debe estar en formato PNG.";
+            return false;
+        }
+        var tex = LoadTexture(path);
+        if (tex == null)
+        {
+            error = "No se pudo leer la imagen.";
+            return false;
+        }
+        if (tex.width != w || tex.height != h)
+        {
+            error = $"{label} debe medir {w}×{h} px (actual: {tex.width}×{tex.height}).";
+            Object.Destroy(tex);
+            return false;
+        }
+        Object.Destroy(tex);
+        return true;
+    }
+
+    static bool HasPngSignature(string path)
+    {
+        try
+        {
+            using var fs = File.OpenRead(path);
+            var sig = new byte[8];
+            if (fs.Read(sig, 0, 8) < 8) return false;
+            return sig[0] == 0x89 && sig[1] == 0x50 && sig[2] == 0x4E && sig[3] == 0x47
+                && sig[4] == 0x0D && sig[5] == 0x0A && sig[6] == 0x1A && sig[7] == 0x0A;
+        }
+        catch { return false; }
+    }
+
+    static Texture2D LoadTexture(string path)
+    {
+        try
+        {
+            var bytes = File.ReadAllBytes(path);
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            if (!tex.LoadImage(bytes)) { Object.Destroy(tex); return null; }
+            return tex;
+        }
+        catch { return null; }
+    }
+
+    // ── GUARDAR ───────────────────────────────────────────────────────
+    /// <summary>Guarda un logo custom (200×200) y genera las 5 copias de tamaño.</summary>
+    public static bool SetLogo(string logo, string sourcePath, out string error)
+    {
+        if (!ValidateLogoFile(sourcePath, out error)) return false;
+
+        var src = LoadTexture(sourcePath);
+        if (src == null) { error = "No se pudo leer la imagen."; return false; }
+
+        foreach (var size in LogoSizes)
+        {
+            var dir = CustomLogoDir(size);
+            Directory.CreateDirectory(dir);
+            Texture2D outTex = size == LogoSourceSize ? src : TextureScaler.Resize(src, size, size);
+            File.WriteAllBytes(Path.Combine(dir, logo + ".png"), outTex.EncodeToPNG());
+            if (outTex != src) Object.Destroy(outTex);
+        }
+        Object.Destroy(src);
+        Invalidate();
+        return true;
+    }
+
+    /// <summary>Guarda la imagen custom del pabellón (1380×752).</summary>
+    public static bool SetArena(string logo, string sourcePath, out string error)
+    {
+        if (!ValidateArenaFile(sourcePath, out error)) return false;
+
+        var src = LoadTexture(sourcePath);
+        if (src == null) { error = "No se pudo leer la imagen."; return false; }
+
+        Directory.CreateDirectory(CustomArenaDir);
+        File.WriteAllBytes(Path.Combine(CustomArenaDir, ArenaFileName(logo) + ".png"), src.EncodeToPNG());
+        Object.Destroy(src);
+        Invalidate();
+        return true;
+    }
+
+    /// <summary>Elimina todas las imágenes custom (reset). Las originales quedan intactas.</summary>
+    public static void ClearCustom()
+    {
+        try
+        {
+            if (Directory.Exists(CustomRoot)) Directory.Delete(CustomRoot, true);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[TeamImages] Error borrando imágenes custom: {ex.Message}");
+        }
+        Invalidate();
+    }
+
+    static Sprite LoadSpriteFromFile(string path)
+    {
+        var tex = LoadTexture(path);
+        if (tex == null) return null;
+        tex.wrapMode = TextureWrapMode.Clamp;
+        tex.filterMode = FilterMode.Bilinear;
+        return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+    }
+}

@@ -75,10 +75,10 @@ public class RecordsController : UIScreenController
             if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
         }
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        var logos = TeamImages.Logos(32);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         _statIcons["points"] = Resources.Load<Texture2D>("Icons/puntos");

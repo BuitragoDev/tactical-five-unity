@@ -126,10 +126,10 @@ public class PalmaresController : UIScreenController
             if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
         }
 
-        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        var logos32 = TeamImages.Logos(32);
         foreach (var s in logos32) _logoSprites32[s.name] = s;
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();

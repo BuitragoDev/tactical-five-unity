@@ -139,7 +139,7 @@ public class PremiosController : UIScreenController
         {
             if (_activeTab == "manager" && winner.team_id.HasValue)
             {
-                var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+                var logos = TeamImages.Logos(64);
                 var team = DatabaseManager.Instance.GetTeamById(winner.team_id.Value);
                 if (team != null)
                 {

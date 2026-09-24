@@ -170,7 +170,7 @@ public static class HeaderController
 
         var logo = header.Q<VisualElement>("HeaderTeamLogo");
         if (logo == null) return;
-        var tex = Resources.Load<Sprite>($"Teams/Logos/64x64/{myTeam.logo}");
+        var tex = TeamImages.Logo(64, myTeam.logo);
         if (tex != null)
             logo.style.backgroundImage = new StyleBackground(tex);
     }

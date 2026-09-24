@@ -140,7 +140,7 @@ using System.Globalization;
     {
         if (_myTeam == null || _manager == null) return;
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos = TeamImages.Logos(64);
         var logoDict = new Dictionary<string, Sprite>();
         foreach (var s in logos) logoDict[s.name] = s;
 

@@ -104,7 +104,7 @@ using System.Linq;
     protected override void LoadData()
     {
         base.LoadData();
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos = TeamImages.Logos(64);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         // ── Screen header icon ──

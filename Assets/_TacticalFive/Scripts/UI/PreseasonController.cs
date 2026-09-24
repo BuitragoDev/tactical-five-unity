@@ -64,11 +64,11 @@ public class PreseasonController : UIScreenController
         base.LoadData();
         if (_myTeam == null) return;
 
-        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80/");
+        var logos80 = TeamImages.Logos(80);
         foreach (var s in logos80)
             _logoSprites[s.name] = s;
 
-        var logos120 = Resources.LoadAll<Sprite>("Teams/Logos/120x120/");
+        var logos120 = TeamImages.Logos(120);
         foreach (var s in logos120)
             _logoSprites120[s.name] = s;
 

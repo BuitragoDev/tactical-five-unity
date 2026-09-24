@@ -64,7 +64,7 @@ public class PreGameController : UIScreenController
     protected override void LoadData()
     {
         base.LoadData();
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = TeamImages.Logos(200);
         foreach (var s in logos) _logoSprites[s.name] = s;
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }

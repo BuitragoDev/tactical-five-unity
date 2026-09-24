@@ -241,15 +241,15 @@ public class EndSeasonController : UIScreenController
         base.LoadData();
         if (_season == null) return;
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        var logos = TeamImages.Logos(32);
         _logo32 = new Dictionary<string, Sprite>();
         foreach (var s in logos) _logo32[s.name] = s;
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         _logo64 = new Dictionary<string, Sprite>();
         foreach (var s in logos64) _logo64[s.name] = s;
 
-        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
+        var logos80 = TeamImages.Logos(80);
         _logo80 = new Dictionary<string, Sprite>();
         foreach (var s in logos80) _logo80[s.name] = s;
 
@@ -314,7 +314,7 @@ public class EndSeasonController : UIScreenController
     {
         if (_myTeam == null || _manager == null) return;
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         var logoDict = new Dictionary<string, Sprite>();
         foreach (var s in logos64) logoDict[s.name] = s;
         if (logoDict.TryGetValue(_myTeam.logo, out var sprite))

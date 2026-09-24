@@ -52,7 +52,7 @@ public class GameResultsController : UIScreenController
     {
         base.LoadData();
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = TeamImages.Logos(200);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();
@@ -379,7 +379,7 @@ public class GameResultsController : UIScreenController
 
         if (!string.IsNullOrEmpty(sizeFolder))
         {
-            var sprite = Resources.Load<Sprite>($"Teams/Logos/{sizeFolder}/{logoName}");
+            var sprite = TeamImages.Logo(sizeFolder, logoName);
             if (sprite != null)
             {
                 elem.style.backgroundImage = new StyleBackground(sprite);

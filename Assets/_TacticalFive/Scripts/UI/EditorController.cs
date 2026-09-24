@@ -229,7 +229,7 @@ public class EditorController : UIScreenController
 
     void LoadImages()
     {
-        foreach (var s in Resources.LoadAll<Sprite>("Teams/Logos/64x64"))
+        foreach (var s in TeamImages.Logos(64))
             _logoSprites[s.name] = s;
     }
 

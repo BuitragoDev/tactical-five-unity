@@ -102,7 +102,7 @@ using System.Linq;
                 _headerManagerName.text = $"Manager: {_manager?.name ?? ""}";
             if (_headerTeamLogo != null)
             {
-                var logos = Resources.LoadAll<Sprite>("Teams/Logos/64x64/");
+                var logos = TeamImages.Logos(64);
                 foreach (var s in logos)
                 {
                     if (s.name == _myTeam.logo)
@@ -233,7 +233,7 @@ using System.Linq;
             _teamCache.TryGetValue(trade.team_id_from, out fromTeam);
         if (fromTeam != null)
         {
-            var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32/");
+            var logos = TeamImages.Logos(32);
             foreach (var s in logos)
             {
                 if (s.name == fromTeam.logo)
@@ -259,7 +259,7 @@ using System.Linq;
         buyerLogo.AddToClassList("historial-col-logo");
         if (_teamCache.TryGetValue(trade.team_id_to, out var toTeam))
         {
-            var logos = Resources.LoadAll<Sprite>("Teams/Logos/32x32/");
+            var logos = TeamImages.Logos(32);
             foreach (var s in logos)
             {
                 if (s.name == toTeam.logo)

@@ -75,7 +75,7 @@ public class MessagesController : UIScreenController
             if (iconTex != null) screenIcon.style.backgroundImage = new StyleBackground(iconTex);
         }
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/100x100");
+        var logos = TeamImages.Logos(100);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
         if (_noticiasSprites.Count == 0)

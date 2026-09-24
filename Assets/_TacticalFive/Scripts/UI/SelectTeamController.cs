@@ -182,7 +182,7 @@ public class SelectTeamController : UIScreenController
 
     void LoadSprites()
     {
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos/120x120/");
+        var logos = TeamImages.Logos(120);
         Debug.Log($"[SelectTeam] Logos cargados: {logos.Length}");
         foreach (var s in logos)
             _logoSprites[s.name] = s;

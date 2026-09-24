@@ -62,16 +62,16 @@ using System.Linq;
     {
         base.LoadData();
 
-        var logos = Resources.LoadAll<Sprite>("Teams/Logos");
+        var logos = TeamImages.Logos(200);
         foreach (var s in logos) _logoSprites[s.name] = s;
 
-        var logos80 = Resources.LoadAll<Sprite>("Teams/Logos/80x80");
+        var logos80 = TeamImages.Logos(80);
         foreach (var s in logos80) _logoSprites80[s.name] = s;
 
-        var logos32 = Resources.LoadAll<Sprite>("Teams/Logos/32x32");
+        var logos32 = TeamImages.Logos(32);
         foreach (var s in logos32) _logoSprites32[s.name] = s;
 
-        var logos64 = Resources.LoadAll<Sprite>("Teams/Logos/64x64");
+        var logos64 = TeamImages.Logos(64);
         foreach (var s in logos64) _logoSprites64[s.name] = s;
 
         // ── Screen header icon ──
