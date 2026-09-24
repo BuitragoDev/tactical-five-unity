@@ -41,6 +41,10 @@ public class EditorController : UIScreenController
     private CustomDropdown _teamConferenceDropdown, _teamDivisionDropdown;
     private CustomDropdown _teamReputationDropdown, _teamFacilitiesDropdown, _teamObjectiveDropdown;
 
+    // Imágenes elegidas pero aún sin guardar (se aplican al pulsar GUARDAR EQUIPO).
+    private string _pendingLogoPath;
+    private string _pendingArenaPath;
+
     // Player list
     private CustomDropdown _playerTeamFilter, _playerPosFilter;
     private TextField _playerSearch;
@@ -463,6 +467,10 @@ public class EditorController : UIScreenController
 
     void SelectTeam(TeamData team, VisualElement listItem)
     {
+        // Al cambiar de equipo se descarta cualquier imagen en borrador.
+        _pendingLogoPath = null;
+        _pendingArenaPath = null;
+
         _selectedTeam = team;
         foreach (var child in _teamList.Children())
             child.RemoveFromClassList("editor-list-item--selected");
@@ -479,7 +487,9 @@ public class EditorController : UIScreenController
         var t = _selectedTeam;
         RecalcTeamRatingsFromPlayers(t);
 
-        var arenaSprite = TeamImages.Arena(t.logo);
+        var arenaSprite = _pendingArenaPath != null
+            ? TeamImages.PreviewSprite(_pendingArenaPath)
+            : TeamImages.Arena(t.logo);
 
         // ── BANNER ──
         var banner = new VisualElement();
@@ -495,7 +505,9 @@ public class EditorController : UIScreenController
 
         var bannerLogo = new VisualElement();
         bannerLogo.AddToClassList("editor-team-banner-logo");
-        var logoSprite = TeamImages.Logo(120, t.logo);
+        var logoSprite = _pendingLogoPath != null
+            ? TeamImages.PreviewSprite(_pendingLogoPath)
+            : TeamImages.Logo(120, t.logo);
         if (logoSprite != null) bannerLogo.style.backgroundImage = new StyleBackground(logoSprite);
         bannerContent.Add(bannerLogo);
 
@@ -653,17 +665,14 @@ public class EditorController : UIScreenController
     {
         PickImage("SELECCIONA UN LOGO PNG (200 × 200)", path =>
         {
-            if (TeamImages.SetLogo(t.logo, path, out var error))
-            {
-                _logoSprites.Clear();
-                LoadImages();
-                BuildTeamDetail();
-                ShowToast("Logo actualizado correctamente.");
-            }
-            else
+            if (!TeamImages.ValidateLogoFile(path, out var error))
             {
                 ShowToast(error, isError: true);
+                return;
             }
+            // Borrador: se aplica al pulsar GUARDAR EQUIPO.
+            _pendingLogoPath = path;
+            BuildTeamDetail();
         });
     }
 
@@ -671,15 +680,14 @@ public class EditorController : UIScreenController
     {
         PickImage("SELECCIONA UNA IMAGEN PNG (1380 × 752)", path =>
         {
-            if (TeamImages.SetArena(t.logo, path, out var error))
-            {
-                BuildTeamDetail();
-                ShowToast("Imagen del pabellón actualizada correctamente.");
-            }
-            else
+            if (!TeamImages.ValidateArenaFile(path, out var error))
             {
                 ShowToast(error, isError: true);
+                return;
             }
+            // Borrador: se aplica al pulsar GUARDAR EQUIPO.
+            _pendingArenaPath = path;
+            BuildTeamDetail();
         });
     }
 
@@ -723,7 +731,29 @@ public class EditorController : UIScreenController
         int.TryParse(_teamFacilitiesDropdown.Value, out int fac); t.facilities = fac;
         t.objective = _teamObjectiveDropdown.Value;
 
+        // Aplicar las imágenes en borrador (si las hay) junto con los campos.
+        if (_pendingLogoPath != null)
+        {
+            if (!TeamImages.SetLogo(t.logo, _pendingLogoPath, out var logoError))
+            {
+                ShowToast(logoError, isError: true);
+                return;
+            }
+            _pendingLogoPath = null;
+        }
+        if (_pendingArenaPath != null)
+        {
+            if (!TeamImages.SetArena(t.logo, _pendingArenaPath, out var arenaError))
+            {
+                ShowToast(arenaError, isError: true);
+                return;
+            }
+            _pendingArenaPath = null;
+        }
+
         DatabaseManager.Instance.UpdateTeam(t);
+        _logoSprites.Clear();
+        LoadImages();
         // Refrescar el detalle para que los stats (aforo, instalaciones, etc.)
         // reflejen los valores recién guardados.
         BuildTeamDetail();

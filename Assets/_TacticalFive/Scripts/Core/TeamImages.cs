@@ -39,6 +39,18 @@ public static class TeamImages
     static readonly Dictionary<string, Sprite> _logoSprites = new();
     static Sprite[] _arenaArray;
     static readonly Dictionary<string, Sprite> _arenaSprites = new();
+    static readonly Dictionary<string, Sprite> _previewCache = new();
+
+    /// <summary>Sprite de previsualización desde un fichero (sin guardarlo). Para
+    /// el borrador del Editor antes de pulsar GUARDAR.</summary>
+    public static Sprite PreviewSprite(string path)
+    {
+        if (string.IsNullOrEmpty(path) || !File.Exists(path)) return null;
+        if (_previewCache.TryGetValue(path, out var cached)) return cached;
+        var sp = LoadSpriteFromFile(path);
+        if (sp != null) _previewCache[path] = sp;
+        return sp;
+    }
 
     public static void Invalidate()
     {
