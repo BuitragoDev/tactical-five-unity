@@ -30,6 +30,7 @@ public class EditorController : UIScreenController
     private TextField _teamFilter;
     private VisualElement _teamList;
     private TeamData _selectedTeam;
+    private int _selectedTeamId = -1;
     private List<TeamData> _allTeams;
     private readonly Dictionary<int, VisualElement> _teamListLogoElems = new();
 
@@ -242,13 +243,14 @@ public class EditorController : UIScreenController
     {
         try
         {
-            if (DatabaseManager.Instance.Db == null)
-            {
-                DatabaseManager.Instance.EnsureTemplateDb();
-                DatabaseManager.Instance.InitTemplateSession();
-            }
+            // El Editor trabaja SIEMPRE sobre el template (y su ámbito de imágenes),
+            // tanto para los datos como para los logos/pabellones. Si había una
+            // partida abierta, se cierra su conexión (todo está ya commiteado; para
+            // volver a jugar hay que cargar la partida, que reabre su save_{n}).
+            DatabaseManager.Instance.EnsureTemplateDb();
+            DatabaseManager.Instance.InitTemplateSession();
 
-            // Cargar las imágenes después de fijar la sesión/ámbito (template o save_{n}).
+            // Cargar las imágenes con la sesión/ámbito del template ya fijado.
             LoadImages();
 
             _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();
@@ -433,6 +435,7 @@ public class EditorController : UIScreenController
                 t.city.ToLower().Contains(filter) ||
                 (t.abbreviation ?? "").ToLower().Contains(filter)).ToList();
 
+        var items = new List<VisualElement>();
         for (int i = 0; i < filtered.Count; i++)
         {
             var team = filtered[i];
@@ -458,10 +461,14 @@ public class EditorController : UIScreenController
             item.RegisterCallback<ClickEvent>(_ => SelectTeam(captured, capturedItem));
             CursorManager.Instance?.RegisterHandCursor(item);
             _teamList.Add(item);
-
-            if (i == 0)
-                SelectTeam(captured, capturedItem);
+            items.Add(item);
         }
+
+        // Mantener el equipo seleccionado entre visitas al Editor; si ya no está
+        // visible (filtro) se selecciona el primero.
+        int sel = filtered.FindIndex(t => t.id == _selectedTeamId);
+        if (sel < 0 && filtered.Count > 0) sel = 0;
+        if (sel >= 0) SelectTeam(filtered[sel], items[sel]);
     }
 
     void FilterTeamList()
@@ -476,6 +483,7 @@ public class EditorController : UIScreenController
         _pendingArenaPath = null;
 
         _selectedTeam = team;
+        _selectedTeamId = team.id;
         foreach (var child in _teamList.Children())
             child.RemoveFromClassList("editor-list-item--selected");
         if (listItem != null)

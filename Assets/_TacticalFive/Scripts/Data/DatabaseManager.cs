@@ -61,6 +61,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
 
         _activeSaveSlot = slotNumber;
+        _isTemplateSession = false;
         // Las imágenes personalizadas se guardan por ámbito (save_{n}).
         TeamImages.SetScope($"save_{slotNumber}");
 
