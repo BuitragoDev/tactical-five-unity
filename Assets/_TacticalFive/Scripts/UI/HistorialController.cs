@@ -205,6 +205,7 @@ using System.Linq;
         var itemLabel = new Label();
         itemLabel.AddToClassList("historial-col");
         itemLabel.AddToClassList("historial-col-player");
+        itemLabel.AddToClassList("historial-col-wide");
         if (trade.trade_type == "pick_trade" && trade.pick_id > 0
             && _pickCache.TryGetValue(trade.pick_id, out var pick)
             && _teamCache.TryGetValue(pick.original_team_id, out var origTeam))
@@ -246,6 +247,7 @@ using System.Linq;
 
         var sellerName = new Label();
         sellerName.AddToClassList("historial-col");
+        sellerName.AddToClassList("historial-col-wide");
         if (trade.trade_type != "free_agent" && fromTeam != null)
             sellerName.text = fromTeam.name;
         else
@@ -271,6 +273,7 @@ using System.Linq;
 
         var buyerName = new Label();
         buyerName.AddToClassList("historial-col");
+        buyerName.AddToClassList("historial-col-wide");
         buyerName.text = toTeam != null ? toTeam.name : $"ID {trade.team_id_to}";
         row.Add(buyerName);
 
@@ -278,6 +281,7 @@ using System.Linq;
         posLabel.AddToClassList("historial-col");
         posLabel.AddToClassList("historial-col-center");
         posLabel.AddToClassList("historial-col-bold");
+        posLabel.AddToClassList("historial-col-narrow");
         posLabel.text = PositionCodes.GetShort(player?.position);
         row.Add(posLabel);
 
@@ -286,6 +290,7 @@ using System.Linq;
         ovrLabel.AddToClassList("historial-col-center");
         ovrLabel.AddToClassList("historial-col-bold");
         ovrLabel.AddToClassList("historial-col-ovr");
+        ovrLabel.AddToClassList("historial-col-narrow");
         ovrLabel.text = player?.overall.ToString() ?? "";
         row.Add(ovrLabel);
 
@@ -293,7 +298,7 @@ using System.Linq;
         salLabel.AddToClassList("historial-col");
         salLabel.AddToClassList("historial-col-center");
         salLabel.AddToClassList("historial-col-bold");
-        salLabel.AddToClassList("historial-col-sal");
+        salLabel.AddToClassList("historial-col-narrow");
         salLabel.text = player != null ? SalaryStr(player.salary) : "";
         row.Add(salLabel);
 

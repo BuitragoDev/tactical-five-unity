@@ -210,9 +210,13 @@
     color: rgb(212, 160, 23);
 }
 
-.historial-col-sal {
-    flex-grow: 1.5;
-    min-width: 110px;
+.historial-col-wide {
+    flex-grow: 2.2;
+}
+
+.historial-col-narrow {
+    flex-grow: 0.5;
+    min-width: 0;
 }
 
 .historial-col-first {

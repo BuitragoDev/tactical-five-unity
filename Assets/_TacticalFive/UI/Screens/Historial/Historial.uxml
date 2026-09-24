@@ -26,14 +26,14 @@
                 <ui:VisualElement class="historial-table">
                     <ui:VisualElement class="historial-table-header">
                         <ui:Label class="historial-table-header-label historial-col historial-col-first" text="FECHA" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-player" text="JUGADOR" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-player historial-col-wide" text="JUGADOR" />
                         <ui:Label class="historial-table-header-label historial-col-logo" text="" />
-                        <ui:Label class="historial-table-header-label historial-col" text="ORIGEN" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-wide" text="ORIGEN" />
                         <ui:Label class="historial-table-header-label historial-col-logo" text="" />
-                        <ui:Label class="historial-table-header-label historial-col" text="DESTINO" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="POS" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="MED" />
-                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-sal" text="SAL" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-wide" text="DESTINO" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="POS" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="MED" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-narrow" text="SAL" />
                     </ui:VisualElement>
                     <ui:VisualElement class="historial-scroll-row">
                         <ui:VisualElement name="HistorialViewport" class="historial-viewport">
