@@ -31,6 +31,7 @@ public class EditorController : UIScreenController
     private VisualElement _teamList;
     private TeamData _selectedTeam;
     private List<TeamData> _allTeams;
+    private readonly Dictionary<int, VisualElement> _teamListLogoElems = new();
 
     // Team detail fields
     private VisualElement _teamDetail;
@@ -420,6 +421,7 @@ public class EditorController : UIScreenController
     void BuildTeamList()
     {
         _teamList.Clear();
+        _teamListLogoElems.Clear();
         _selectedTeam = null;
 
         string filter = _teamFilter?.value?.ToLower() ?? "";
@@ -441,6 +443,7 @@ public class EditorController : UIScreenController
             if (_logoSprites.TryGetValue(team.logo ?? "", out var sprite))
                 logo.style.backgroundImage = new StyleBackground(sprite);
             item.Add(logo);
+            _teamListLogoElems[team.id] = logo;
 
             var nameLbl = new Label(team.name.ToUpper());
             nameLbl.AddToClassList("editor-list-item-name");
@@ -754,6 +757,10 @@ public class EditorController : UIScreenController
         DatabaseManager.Instance.UpdateTeam(t);
         _logoSprites.Clear();
         LoadImages();
+        // Actualizar el escudo del equipo en la lista de la izquierda.
+        if (_teamListLogoElems.TryGetValue(t.id, out var listLogo)
+            && _logoSprites.TryGetValue(t.logo ?? "", out var listSprite))
+            listLogo.style.backgroundImage = new StyleBackground(listSprite);
         // Refrescar el detalle para que los stats (aforo, instalaciones, etc.)
         // reflejen los valores recién guardados.
         BuildTeamDetail();
