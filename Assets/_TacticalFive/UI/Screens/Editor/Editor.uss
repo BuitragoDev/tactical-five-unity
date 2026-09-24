@@ -894,7 +894,10 @@
     border-color: rgb(42, 51, 71);
     border-radius: 8px;
     padding: 10px 6px;
-    margin-right: 8px;
+}
+
+.editor-stadium-stat--gap {
+    margin-left: 8px;
 }
 
 .editor-stadium-stat-value {

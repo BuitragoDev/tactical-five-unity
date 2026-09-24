@@ -598,7 +598,9 @@ public class EditorController : UIScreenController
         var statsRow = new VisualElement();
         statsRow.AddToClassList("editor-stadium-stats");
         statsRow.Add(BuildStadiumStat("CAPACIDAD", t.capacity.ToString("N0")));
-        statsRow.Add(BuildStadiumStat("INSTALACIONES", t.facilities.ToString()));
+        var instStat = BuildStadiumStat("INSTALACIONES", t.facilities.ToString());
+        instStat.AddToClassList("editor-stadium-stat--gap");
+        statsRow.Add(instStat);
         stadiumPanel.Add(statsRow);
 
         var btnChangeArena = new Button();
