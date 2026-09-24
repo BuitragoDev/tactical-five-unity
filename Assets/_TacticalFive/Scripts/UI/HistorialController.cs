@@ -298,7 +298,7 @@ using System.Linq;
         salLabel.AddToClassList("historial-col");
         salLabel.AddToClassList("historial-col-center");
         salLabel.AddToClassList("historial-col-bold");
-        salLabel.AddToClassList("historial-col-narrow");
+        salLabel.AddToClassList("historial-col-sal");
         salLabel.text = player != null ? SalaryStr(player.salary) : "";
         row.Add(salLabel);
 
