@@ -249,6 +249,10 @@ public static class TeamImages
         if (tex == null) return null;
         tex.wrapMode = TextureWrapMode.Clamp;
         tex.filterMode = FilterMode.Bilinear;
-        return Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+        var sp = Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100f);
+        // El nombre es clave: las pantallas re-indexan los arrays de Logos()/Arenas()
+        // por s.name, así que el sprite custom debe llevar el nombre del fichero.
+        sp.name = Path.GetFileNameWithoutExtension(path);
+        return sp;
     }
 }
