@@ -814,7 +814,7 @@
     align-items: flex-start;
 }
 
-.editor-team-panel {
+.editor-section-panel {
     flex-direction: column;
     background-color: rgb(20, 24, 32);
     border-width: 1px;
@@ -825,12 +825,12 @@
     margin-bottom: 16px;
 }
 
-.editor-team-panel--info {
+.editor-section-panel--info {
     flex-grow: 3;
     margin-right: 16px;
 }
 
-.editor-team-panel--stadium {
+.editor-section-panel--stadium {
     flex-grow: 2;
 }
 

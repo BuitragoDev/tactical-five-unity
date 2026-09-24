@@ -544,8 +544,8 @@ public class EditorController : UIScreenController
 
         // INFORMACIÓN GENERAL
         var infoPanel = new VisualElement();
-        infoPanel.AddToClassList("editor-team-panel");
-        infoPanel.AddToClassList("editor-team-panel--info");
+        infoPanel.AddToClassList("editor-section-panel");
+        infoPanel.AddToClassList("editor-section-panel--info");
         AddPanelHeader(infoPanel, "INFORMACIÓN GENERAL");
 
         var infoFields = new VisualElement();
@@ -582,8 +582,8 @@ public class EditorController : UIScreenController
 
         // ESTADIO
         var stadiumPanel = new VisualElement();
-        stadiumPanel.AddToClassList("editor-team-panel");
-        stadiumPanel.AddToClassList("editor-team-panel--stadium");
+        stadiumPanel.AddToClassList("editor-section-panel");
+        stadiumPanel.AddToClassList("editor-section-panel--stadium");
         AddPanelHeader(stadiumPanel, "ESTADIO");
 
         var arenaImg = new VisualElement();
