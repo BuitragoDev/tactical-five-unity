@@ -136,6 +136,9 @@ public static class GameSaveManager
             try { Directory.Delete(photoDir, true); } catch { }
         }
 
+        // Borrar también las imágenes de equipos personalizadas de esta partida.
+        TeamImages.DeleteScope($"save_{slotNumber}");
+
         var slot = GetSlot(slotNumber);
         if (slot != null)
         {

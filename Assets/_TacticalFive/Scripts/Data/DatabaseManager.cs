@@ -61,6 +61,8 @@ public partial class DatabaseManager : MonoBehaviour
         }
 
         _activeSaveSlot = slotNumber;
+        // Las imágenes personalizadas se guardan por ámbito (save_{n}).
+        TeamImages.SetScope($"save_{slotNumber}");
 
         // Crear directorio de guardados si no existe
         string dir = Path.GetDirectoryName(DbPath);
@@ -73,13 +75,14 @@ public partial class DatabaseManager : MonoBehaviour
         RunMigrations();
 
         bool hasExistingData = _db.Table<TeamData>().Count() > 0;
+        bool isNewGame = !hasExistingData;
 
-        if (File.Exists(TemplateDbPath) && !hasExistingData)
+        if (File.Exists(TemplateDbPath) && isNewGame)
         {
             CloneFromTemplate();
             SeedStaticDataIfNeeded();
         }
-        else if (!File.Exists(TemplateDbPath) && !hasExistingData)
+        else if (!File.Exists(TemplateDbPath) && isNewGame)
         {
             SeedStaticDataIfNeeded();
         }
@@ -87,6 +90,20 @@ public partial class DatabaseManager : MonoBehaviour
         // Las partidas existentes (creadas antes de la G-League) también
         // necesitan sus filiales y prospectos.
         EnsureGLeagueSeeded();
+
+        // Imágenes personalizadas por partida: una partida nueva hace snapshot de
+        // las imágenes del template (conserva las que había al empezar). Una partida
+        // existente anterior a este sistema recibe su snapshot una sola vez.
+        string scope = $"save_{slotNumber}";
+        if (isNewGame)
+        {
+            TeamImages.DeleteScope(scope);
+            TeamImages.CopyCustom("template", scope);
+        }
+        else if (!TeamImages.HasCustom(scope))
+        {
+            TeamImages.CopyCustom("template", scope);
+        }
 
         Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
     }
@@ -184,6 +201,9 @@ public partial class DatabaseManager : MonoBehaviour
     public void InitTemplateSession()
     {
         EnsureTemplateDirectory(TemplateDbPath);
+        // El Editor trabaja sobre el template: sus imágenes custom viven en el
+        // ámbito "template" (las partidas nuevas hacen snapshot al empezar).
+        TeamImages.SetScope("template");
         if (_db != null)
         {
             try { _db.Close(); } catch { }

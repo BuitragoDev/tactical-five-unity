@@ -242,13 +242,14 @@ public class EditorController : UIScreenController
     {
         try
         {
-            LoadImages();
-
             if (DatabaseManager.Instance.Db == null)
             {
                 DatabaseManager.Instance.EnsureTemplateDb();
                 DatabaseManager.Instance.InitTemplateSession();
             }
+
+            // Cargar las imágenes después de fijar la sesión/ámbito (template o save_{n}).
+            LoadImages();
 
             _allTeams = DatabaseManager.Instance.GetAllTeams() ?? new List<TeamData>();
             _allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>().ToList() ?? new List<PlayerData>();

@@ -18,9 +18,98 @@ public static class TeamImages
     public const int ArenaWidth = 1380;
     public const int ArenaHeight = 752;
 
-    public static string CustomRoot => Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom");
+    // Ámbito de las imágenes personalizadas: "template" (Editor) o "save_{n}".
+    static string _scope = "template";
+    static bool _legacyMigrated;
+
+    public static string CustomRoot => ScopeRoot(_scope);
     public static string CustomLogoDir(int size) => Path.Combine(CustomRoot, "Logos", SizeFolder(size));
     public static string CustomArenaDir => Path.Combine(CustomRoot, "Arenas");
+
+    static string ScopeRoot(string scope) =>
+        Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom", scope);
+
+    /// <summary>Fija el ámbito de las imágenes personalizadas (template o save_{n}).</summary>
+    public static void SetScope(string scope)
+    {
+        if (string.IsNullOrEmpty(scope)) scope = "template";
+        bool migrated = MigrateLegacyGlobal();
+        if (_scope == scope && !migrated) return;
+        _scope = scope;
+        Invalidate();
+    }
+
+    public static bool HasCustom(string scope) => Directory.Exists(ScopeRoot(scope));
+
+    /// <summary>Copia las imágenes custom de un ámbito a otro (p. ej. template → save_{n}).
+    /// Siempre crea la carpeta destino, para dejar constancia de que el snapshot ya
+    /// se hizo aunque no haya imágenes personalizadas.</summary>
+    public static void CopyCustom(string fromScope, string toScope)
+    {
+        try
+        {
+            string dst = ScopeRoot(toScope);
+            Directory.CreateDirectory(dst);
+            string src = ScopeRoot(fromScope);
+            if (!Directory.Exists(src)) return;
+            CopyDir(src, dst);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[TeamImages] Error copiando imágenes custom: {ex.Message}");
+        }
+    }
+
+    public static void DeleteScope(string scope)
+    {
+        try
+        {
+            string dir = ScopeRoot(scope);
+            if (Directory.Exists(dir)) Directory.Delete(dir, true);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[TeamImages] Error borrando imágenes custom ({scope}): {ex.Message}");
+        }
+    }
+
+    static void CopyDir(string src, string dst)
+    {
+        Directory.CreateDirectory(dst);
+        foreach (var file in Directory.GetFiles(src))
+            File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
+        foreach (var dir in Directory.GetDirectories(src))
+            CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
+    }
+
+    // Migración: la versión anterior guardaba las imágenes en Custom/{Logos,Arenas}
+    // (global, compartido por todas las partidas). Se mueven una vez a Custom/template/.
+    static bool MigrateLegacyGlobal()
+    {
+        if (_legacyMigrated) return false;
+        _legacyMigrated = true;
+        try
+        {
+            string root = Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom");
+            string legacyLogos = Path.Combine(root, "Logos");
+            string legacyArenas = Path.Combine(root, "Arenas");
+            if (!Directory.Exists(legacyLogos) && !Directory.Exists(legacyArenas)) return false;
+
+            string templateDir = Path.Combine(root, "template");
+            Directory.CreateDirectory(templateDir);
+            if (Directory.Exists(legacyLogos) && !Directory.Exists(Path.Combine(templateDir, "Logos")))
+                Directory.Move(legacyLogos, Path.Combine(templateDir, "Logos"));
+            if (Directory.Exists(legacyArenas) && !Directory.Exists(Path.Combine(templateDir, "Arenas")))
+                Directory.Move(legacyArenas, Path.Combine(templateDir, "Arenas"));
+            Debug.Log("[TeamImages] Migradas imágenes custom globales a 'template'.");
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[TeamImages] Error migrando imágenes custom: {ex.Message}");
+            return false;
+        }
+    }
 
     static string SizeFolder(int size) => size >= LogoSourceSize ? "" : $"{size}x{size}";
 
