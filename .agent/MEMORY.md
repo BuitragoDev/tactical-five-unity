@@ -60,6 +60,7 @@
 | **`schema_migrations` + `PRAGMA user_version`** for data migrations; column-presence `ALTER TABLE` for schema | Migrations live with the slot (delete slot = clean state); additive schema keeps old saves openable |
 | Background work via `Task.Run` + WAL + `AsyncLocal` ambient connection (`RunInBackground`/`RunInBackgroundAsync`) | Heavy batches (injuries/physical, `StartNewSeason`, AI trades) off the main thread; match sim stays main-thread (fast, stable) |
 | Cap constants duplicated in `TradeHelper` and `league_settings` (seeded) | `TradeHelper` is source for UI; DB copy exists for potential runtime changes (+5%/season applied to DB row) |
+| **Imágenes de equipos por overlay (`TeamImages`)** | Los logos/pabellones originales viven en `Resources` (solo lectura, empaquetados); las versiones personalizadas se guardan en `persistentDataPath/TacticalFive/Custom/{Logos/{size},Arenas}` y tienen prioridad al cargar. Funciona en build y RESETEAR solo borra la carpeta custom (las originales nunca se tocan). Todas las cargas de `Teams/Logos`/`Arenas` pasan por `TeamImages` (`Logos`/`Logo`/`Arenas`/`Arena`). |
 
 ## 6. Confirmed assumptions
 
