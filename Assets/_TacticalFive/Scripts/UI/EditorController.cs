@@ -37,7 +37,7 @@ public class EditorController : UIScreenController
     private VisualElement _teamDetailPanel;
     private TextField _teamNameInput, _teamAbbrInput, _teamCityInput;
     private TextField _teamArenaInput, _teamCapacityInput, _teamOwnerInput;
-    private TextField _teamBudgetInput, _teamAttackInput, _teamDefenseInput, _teamOverallDisplay;
+    private TextField _teamBudgetInput;
     private CustomDropdown _teamConferenceDropdown, _teamDivisionDropdown;
     private CustomDropdown _teamReputationDropdown, _teamFacilitiesDropdown, _teamObjectiveDropdown;
 
@@ -305,6 +305,10 @@ public class EditorController : UIScreenController
         ShowLoading();
         yield return null;
 
+        // Restaurar imágenes originales: borrar el overlay custom (los logos y
+        // pabellones empaquetados en Resources nunca se modifican).
+        TeamImages.ClearCustom();
+
         DatabaseManager.Instance.CloseTemplateSession();
 
         if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
@@ -473,65 +477,201 @@ public class EditorController : UIScreenController
         _teamDetail.Clear();
 
         var t = _selectedTeam;
-        AddDetailTitle(_teamDetail, $"EDITANDO: {t.name.ToUpper()}");
-
         RecalcTeamRatingsFromPlayers(t);
 
-        var columnsRow = new VisualElement();
-        columnsRow.AddToClassList("editor-columns-row");
+        var arenaSprite = TeamImages.Arena(t.logo);
 
-        // ── LEFT COLUMN ──
-        var leftCol = new VisualElement();
-        leftCol.AddToClassList("editor-column");
+        // ── BANNER ──
+        var banner = new VisualElement();
+        banner.AddToClassList("editor-team-banner");
 
-        AddSectionTitle(leftCol, "INFORMACIÓN BÁSICA");
-        _teamNameInput = AddInput(leftCol, "Nombre", t.name);
+        var bannerBg = new VisualElement();
+        bannerBg.AddToClassList("editor-team-banner-bg");
+        if (arenaSprite != null) bannerBg.style.backgroundImage = new StyleBackground(arenaSprite);
+        banner.Add(bannerBg);
+
+        var bannerContent = new VisualElement();
+        bannerContent.AddToClassList("editor-team-banner-content");
+
+        var bannerLogo = new VisualElement();
+        bannerLogo.AddToClassList("editor-team-banner-logo");
+        var logoSprite = TeamImages.Logo(120, t.logo);
+        if (logoSprite != null) bannerLogo.style.backgroundImage = new StyleBackground(logoSprite);
+        bannerContent.Add(bannerLogo);
+
+        var bannerInfo = new VisualElement();
+        bannerInfo.AddToClassList("editor-team-banner-info");
+
+        var nameRow = new VisualElement();
+        nameRow.AddToClassList("editor-team-banner-name-row");
+        var nameLbl = new Label(t.name.ToUpper());
+        nameLbl.AddToClassList("editor-team-banner-name");
+        nameRow.Add(nameLbl);
+        var abbrBadge = new Label(t.abbreviation);
+        abbrBadge.AddToClassList("editor-team-banner-abbr");
+        nameRow.Add(abbrBadge);
+        bannerInfo.Add(nameRow);
+
+        var cityLbl = new Label(t.city);
+        cityLbl.AddToClassList("editor-team-banner-city");
+        bannerInfo.Add(cityLbl);
+
+        var metaRow = new VisualElement();
+        metaRow.AddToClassList("editor-team-banner-meta");
+        var confLbl = new Label($"CONFERENCIA  {(_confToDisplay.TryGetValue(t.conference, out var cd) ? cd : t.conference)}");
+        confLbl.AddToClassList("editor-team-banner-meta-item");
+        metaRow.Add(confLbl);
+        var divLbl = new Label($"DIVISIÓN  {(_divToDisplay.TryGetValue(t.division, out var dd) ? dd : t.division)}");
+        divLbl.AddToClassList("editor-team-banner-meta-item");
+        metaRow.Add(divLbl);
+        bannerInfo.Add(metaRow);
+
+        bannerContent.Add(bannerInfo);
+
+        var btnChangeLogo = new Button();
+        btnChangeLogo.text = "CAMBIAR LOGO";
+        btnChangeLogo.AddToClassList("editor-banner-btn");
+        btnChangeLogo.clicked += () => { PlayClick(); ChangeLogo(t); };
+        CursorManager.Instance?.RegisterHandCursor(btnChangeLogo);
+        bannerContent.Add(btnChangeLogo);
+
+        banner.Add(bannerContent);
+        _teamDetail.Add(banner);
+
+        // ── PANELS ──
+        var panelsRow = new VisualElement();
+        panelsRow.AddToClassList("editor-team-panels-row");
+
+        // INFORMACIÓN GENERAL
+        var infoPanel = new VisualElement();
+        infoPanel.AddToClassList("editor-team-panel");
+        infoPanel.AddToClassList("editor-team-panel--info");
+        AddPanelHeader(infoPanel, "INFORMACIÓN GENERAL");
+
+        var infoFields = new VisualElement();
+        infoFields.AddToClassList("editor-panel-fields");
+        var infoLeft = new VisualElement();
+        infoLeft.AddToClassList("editor-panel-col");
+        _teamNameInput = AddInput(infoLeft, "Nombre del equipo", t.name);
         SetLettersOnly(_teamNameInput);
-        _teamAbbrInput = AddInput(leftCol, "Abreviatura", t.abbreviation);
-        SetAbbreviationInput(_teamAbbrInput);
-        _teamCityInput = AddInput(leftCol, "Ciudad", t.city);
+        _teamCityInput = AddInput(infoLeft, "Ciudad", t.city);
         SetLettersOnly(_teamCityInput);
-        _teamConferenceDropdown = AddDropdown(leftCol, "Conferencia", new[] { "Este", "Oeste" }, _confToDisplay.TryGetValue(t.conference, out var confD) ? confD : t.conference);
-        _teamDivisionDropdown = AddDropdown(leftCol, "División", new[] { "Atlántico", "Central", "Sudeste", "Noroeste", "Pacífico", "Suroeste" }, _divToDisplay.TryGetValue(t.division, out var divD) ? divD : t.division);
-        AddDivider(leftCol);
+        _teamAbbrInput = AddInput(infoLeft, "Abreviatura", t.abbreviation);
+        SetAbbreviationInput(_teamAbbrInput);
+        _teamConferenceDropdown = AddDropdown(infoLeft, "Conferencia", new[] { "Este", "Oeste" }, _confToDisplay.TryGetValue(t.conference, out var confD) ? confD : t.conference);
+        _teamDivisionDropdown = AddDropdown(infoLeft, "División", new[] { "Atlántico", "Central", "Sudeste", "Noroeste", "Pacífico", "Suroeste" }, _divToDisplay.TryGetValue(t.division, out var divD) ? divD : t.division);
 
-        AddSectionTitle(leftCol, "PABELLÓN");
-        _teamArenaInput = AddInput(leftCol, "Nombre", t.arena);
-        SetLettersOnly(_teamArenaInput);
-        _teamCapacityInput = AddInput(leftCol, "Capacidad", t.capacity.ToString());
-        SetDigitsOnly(_teamCapacityInput);
-        _teamOwnerInput = AddInput(leftCol, "Propietario", t.owner);
+        var infoRight = new VisualElement();
+        infoRight.AddToClassList("editor-panel-col");
+        var coachInput = AddInput(infoRight, "Entrenador", DatabaseManager.Instance.GetManagerNameByTeamId(t.id) ?? "—");
+        coachInput.isReadOnly = true;
+        _teamOwnerInput = AddInput(infoRight, "Propietario", t.owner);
         SetLettersOnly(_teamOwnerInput);
-        AddDivider(leftCol);
-
-        // ── RIGHT COLUMN ──
-        var rightCol = new VisualElement();
-        rightCol.AddToClassList("editor-column");
-
-        AddSectionTitle(rightCol, "VALORACIONES");
-        _teamAttackInput = AddInput(rightCol, "Ataque", t.attack.ToString());
-        _teamAttackInput.isReadOnly = true;
-        _teamDefenseInput = AddInput(rightCol, "Defensa", t.defense.ToString());
-        _teamDefenseInput.isReadOnly = true;
-        _teamOverallDisplay = AddInput(rightCol, "Media", t.overall.ToString());
-        _teamOverallDisplay.isReadOnly = true;
-        _teamReputationDropdown = AddDropdown(rightCol, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
-        _teamFacilitiesDropdown = AddDropdown(rightCol, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
-        AddDivider(rightCol);
-
-        AddSectionTitle(rightCol, "FINANZAS");
-        _teamBudgetInput = AddInput(rightCol, "Presupuesto", t.budget.ToString());
+        _teamBudgetInput = AddInput(infoRight, "Presupuesto salarial", t.budget.ToString());
         SetDigitsOnly(_teamBudgetInput);
-        _teamObjectiveDropdown = AddDropdown(rightCol, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
+        _teamCapacityInput = AddInput(infoRight, "Aforo del estadio", t.capacity.ToString());
+        SetDigitsOnly(_teamCapacityInput);
+        _teamReputationDropdown = AddDropdown(infoRight, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
+        _teamFacilitiesDropdown = AddDropdown(infoRight, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
+        _teamObjectiveDropdown = AddDropdown(infoRight, "Objetivo", new[] { "Campeonato", "Playoffs", "Play-In", "Zona tranquila" }, t.objective);
 
-        columnsRow.Add(leftCol);
-        columnsRow.Add(rightCol);
-        _teamDetail.Add(columnsRow);
+        infoFields.Add(infoLeft);
+        infoFields.Add(infoRight);
+        infoPanel.Add(infoFields);
+        panelsRow.Add(infoPanel);
+
+        // ESTADIO
+        var stadiumPanel = new VisualElement();
+        stadiumPanel.AddToClassList("editor-team-panel");
+        stadiumPanel.AddToClassList("editor-team-panel--stadium");
+        AddPanelHeader(stadiumPanel, "ESTADIO");
+
+        var arenaImg = new VisualElement();
+        arenaImg.AddToClassList("editor-stadium-image");
+        if (arenaSprite != null) arenaImg.style.backgroundImage = new StyleBackground(arenaSprite);
+        stadiumPanel.Add(arenaImg);
+
+        _teamArenaInput = AddInput(stadiumPanel, "Nombre del pabellón", t.arena);
+        SetLettersOnly(_teamArenaInput);
+
+        var statsRow = new VisualElement();
+        statsRow.AddToClassList("editor-stadium-stats");
+        statsRow.Add(BuildStadiumStat("CAPACIDAD", t.capacity.ToString("N0")));
+        statsRow.Add(BuildStadiumStat("INSTALACIONES", t.facilities.ToString()));
+        statsRow.Add(BuildStadiumStat("REPUTACIÓN", t.reputation.ToString()));
+        stadiumPanel.Add(statsRow);
+
+        var btnChangeArena = new Button();
+        btnChangeArena.text = "CAMBIAR IMAGEN";
+        btnChangeArena.AddToClassList("editor-stadium-btn");
+        btnChangeArena.clicked += () => { PlayClick(); ChangeArena(t); };
+        CursorManager.Instance?.RegisterHandCursor(btnChangeArena);
+        stadiumPanel.Add(btnChangeArena);
+
+        panelsRow.Add(stadiumPanel);
+        _teamDetail.Add(panelsRow);
 
         // Save button outside scroll view, fixed at bottom of panel
         var oldBtn = _teamDetailPanel.Q<Button>("SaveBtn");
         oldBtn?.RemoveFromHierarchy();
         AddSaveBtn(_teamDetailPanel, "GUARDAR EQUIPO", SaveTeam, "SaveBtn");
+    }
+
+    void AddPanelHeader(VisualElement parent, string text)
+    {
+        var header = new VisualElement();
+        header.AddToClassList("editor-panel-header");
+        var lbl = new Label(text);
+        lbl.AddToClassList("editor-panel-header-title");
+        header.Add(lbl);
+        parent.Add(header);
+    }
+
+    VisualElement BuildStadiumStat(string label, string value)
+    {
+        var item = new VisualElement();
+        item.AddToClassList("editor-stadium-stat");
+        var v = new Label(value);
+        v.AddToClassList("editor-stadium-stat-value");
+        item.Add(v);
+        var l = new Label(label);
+        l.AddToClassList("editor-stadium-stat-label");
+        item.Add(l);
+        return item;
+    }
+
+    void ChangeLogo(TeamData t)
+    {
+        OpenFileBrowser("SELECCIONA UN LOGO PNG (200 × 200)", path =>
+        {
+            if (TeamImages.SetLogo(t.logo, path, out var error))
+            {
+                _logoSprites.Clear();
+                LoadImages();
+                BuildTeamDetail();
+                ShowToast("Logo actualizado correctamente.");
+            }
+            else
+            {
+                ShowToast(error, isError: true);
+            }
+        });
+    }
+
+    void ChangeArena(TeamData t)
+    {
+        OpenFileBrowser("SELECCIONA UNA IMAGEN PNG (1380 × 752)", path =>
+        {
+            if (TeamImages.SetArena(t.logo, path, out var error))
+            {
+                BuildTeamDetail();
+                ShowToast("Imagen del pabellón actualizada correctamente.");
+            }
+            else
+            {
+                ShowToast(error, isError: true);
+            }
+        });
     }
 
     void RecalcTeamRatingsFromPlayers(TeamData team)
@@ -1126,5 +1266,128 @@ public class EditorController : UIScreenController
     {
         _toast.style.display = DisplayStyle.None;
         _toast.Clear();
+    }
+
+    // ── EXPLORADOR DE ARCHIVOS (in-game, sin plugins) ─────────────────
+    VisualElement _browserOverlay;
+
+    void OpenFileBrowser(string title, System.Action<string> onSelected)
+    {
+        CloseFileBrowser();
+
+        _browserOverlay = new VisualElement();
+        _browserOverlay.AddToClassList("editor-browser-overlay");
+
+        var box = new VisualElement();
+        box.AddToClassList("editor-browser-box");
+        _browserOverlay.Add(box);
+
+        var titleLbl = new Label(title);
+        titleLbl.AddToClassList("editor-browser-title");
+        box.Add(titleLbl);
+
+        var pathBar = new Label();
+        pathBar.AddToClassList("editor-browser-path");
+        box.Add(pathBar);
+
+        var quick = new VisualElement();
+        quick.AddToClassList("editor-browser-quick");
+        box.Add(quick);
+
+        var scroll = new ScrollView();
+        scroll.AddToClassList("editor-browser-scroll");
+        var list = new VisualElement();
+        list.AddToClassList("editor-browser-list");
+        scroll.Add(list);
+        box.Add(scroll);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("editor-browser-actions");
+        var cancel = new Button();
+        cancel.text = "CANCELAR";
+        cancel.AddToClassList("editor-browser-btn");
+        cancel.AddToClassList("editor-browser-btn--cancel");
+        cancel.clicked += () => { PlayClick(); CloseFileBrowser(); };
+        CursorManager.Instance?.RegisterHandCursor(cancel);
+        actions.Add(cancel);
+        box.Add(actions);
+
+        void Navigate(string dir)
+        {
+            try
+            {
+                if (!System.IO.Directory.Exists(dir)) return;
+                pathBar.text = dir;
+                list.Clear();
+
+                var parent = System.IO.Directory.GetParent(dir);
+                if (parent != null)
+                    list.Add(BrowserEntry("..", true, () => Navigate(parent.FullName)));
+
+                foreach (var d in System.IO.Directory.GetDirectories(dir).OrderBy(x => x))
+                    list.Add(BrowserEntry(System.IO.Path.GetFileName(d), true, () => Navigate(d)));
+
+                foreach (var f in System.IO.Directory.GetFiles(dir, "*.png").OrderBy(x => x))
+                    list.Add(BrowserEntry(System.IO.Path.GetFileName(f), false, () =>
+                    {
+                        CloseFileBrowser();
+                        onSelected?.Invoke(f);
+                    }));
+            }
+            catch (System.Exception ex)
+            {
+                pathBar.text = "No se puede abrir la carpeta: " + ex.Message;
+            }
+        }
+
+        AddQuickButton(quick, "INICIO", System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile), Navigate);
+        AddQuickButton(quick, "ESCRITORIO", System.Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory), Navigate);
+        AddQuickButton(quick, "IMÁGENES", System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyPictures), Navigate);
+        try
+        {
+            foreach (var drv in System.IO.DriveInfo.GetDrives())
+                AddQuickButton(quick, drv.Name.TrimEnd('\\', '/'), drv.RootDirectory.FullName, Navigate);
+        }
+        catch { }
+
+        Navigate(System.Environment.GetFolderPath(System.Environment.SpecialFolder.UserProfile));
+
+        _root.Add(_browserOverlay);
+        _browserOverlay.BringToFront();
+    }
+
+    void AddQuickButton(VisualElement parent, string label, string dir, System.Action<string> navigate)
+    {
+        if (string.IsNullOrEmpty(dir) || !System.IO.Directory.Exists(dir)) return;
+        var b = new Button();
+        b.text = label;
+        b.AddToClassList("editor-browser-quick-btn");
+        b.clicked += () => { PlayClick(); navigate(dir); };
+        CursorManager.Instance?.RegisterHandCursor(b);
+        parent.Add(b);
+    }
+
+    VisualElement BrowserEntry(string name, bool isFolder, System.Action onClick)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("editor-browser-entry");
+        if (isFolder) row.AddToClassList("editor-browser-entry--folder");
+
+        var lbl = new Label(isFolder ? "▸ " + name : name);
+        lbl.AddToClassList("editor-browser-entry-name");
+        row.Add(lbl);
+
+        row.RegisterCallback<ClickEvent>(_ => { PlayClick(); onClick(); });
+        CursorManager.Instance?.RegisterHandCursor(row);
+        return row;
+    }
+
+    void CloseFileBrowser()
+    {
+        if (_browserOverlay != null)
+        {
+            _browserOverlay.RemoveFromHierarchy();
+            _browserOverlay = null;
+        }
     }
 }
