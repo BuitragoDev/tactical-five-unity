@@ -289,7 +289,20 @@ using System.Linq;
         ovrLabel.text = player?.overall.ToString() ?? "";
         row.Add(ovrLabel);
 
+        var salLabel = new Label();
+        salLabel.AddToClassList("historial-col");
+        salLabel.AddToClassList("historial-col-center");
+        salLabel.AddToClassList("historial-col-bold");
+        salLabel.AddToClassList("historial-col-sal");
+        salLabel.text = player != null ? SalaryStr(player.salary) : "";
+        row.Add(salLabel);
+
         return row;
+    }
+
+    static string SalaryStr(long salary)
+    {
+        return salary.ToString("N0").Replace(',', '.') + " $";
     }
 
     // ── ScrollBar ──

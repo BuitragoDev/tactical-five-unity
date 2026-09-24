@@ -33,6 +33,7 @@
                         <ui:Label class="historial-table-header-label historial-col" text="DESTINO" />
                         <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="POS" />
                         <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold" text="MED" />
+                        <ui:Label class="historial-table-header-label historial-col historial-col-center historial-col-bold historial-col-sal" text="SAL" />
                     </ui:VisualElement>
                     <ui:VisualElement class="historial-scroll-row">
                         <ui:VisualElement name="HistorialViewport" class="historial-viewport">

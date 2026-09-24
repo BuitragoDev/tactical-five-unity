@@ -210,6 +210,11 @@
     color: rgb(212, 160, 23);
 }
 
+.historial-col-sal {
+    flex-grow: 1.5;
+    min-width: 110px;
+}
+
 .historial-col-first {
     padding-left: 20px;
 }
