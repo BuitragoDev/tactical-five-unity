@@ -593,6 +593,7 @@ public class EditorController : UIScreenController
 
         _teamArenaInput = AddInput(stadiumPanel, "Nombre del pabellón", t.arena);
         SetLettersOnly(_teamArenaInput);
+        _teamArenaInput.parent.AddToClassList("editor-stadium-field");
 
         var statsRow = new VisualElement();
         statsRow.AddToClassList("editor-stadium-stats");

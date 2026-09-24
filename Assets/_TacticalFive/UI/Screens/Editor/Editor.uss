@@ -823,6 +823,7 @@
     overflow: hidden;
     padding-bottom: 14px;
     margin-bottom: 16px;
+    min-width: 0;
 }
 
 .editor-section-panel--info {
@@ -924,4 +925,8 @@
 .editor-stadium-btn:hover {
     background-color: rgba(39, 174, 96, 0.25);
     color: rgb(150, 220, 180);
+}
+
+.editor-stadium-field {
+    padding: 0 14px;
 }
