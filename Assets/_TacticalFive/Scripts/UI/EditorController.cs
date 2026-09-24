@@ -553,9 +553,9 @@ public class EditorController : UIScreenController
         var infoLeft = new VisualElement();
         infoLeft.AddToClassList("editor-panel-col");
         _teamNameInput = AddInput(infoLeft, "Nombre del equipo", t.name);
-        SetLettersOnly(_teamNameInput);
+        SetLettersOnly(_teamNameInput, 30);
         _teamCityInput = AddInput(infoLeft, "Ciudad", t.city);
-        SetLettersOnly(_teamCityInput);
+        SetLettersOnly(_teamCityInput, 30);
         _teamAbbrInput = AddInput(infoLeft, "Abreviatura", t.abbreviation);
         SetAbbreviationInput(_teamAbbrInput);
         _teamConferenceDropdown = AddDropdown(infoLeft, "Conferencia", new[] { "Este", "Oeste" }, _confToDisplay.TryGetValue(t.conference, out var confD) ? confD : t.conference);
@@ -592,7 +592,7 @@ public class EditorController : UIScreenController
         stadiumPanel.Add(arenaImg);
 
         _teamArenaInput = AddInput(stadiumPanel, "Nombre del pabellón", t.arena);
-        SetLettersOnly(_teamArenaInput);
+        SetLettersOnly(_teamArenaInput, 30);
         _teamArenaInput.parent.AddToClassList("editor-stadium-field");
 
         var statsRow = new VisualElement();
@@ -972,7 +972,7 @@ public class EditorController : UIScreenController
         return field;
     }
 
-    void SetLettersOnly(TextField field)
+    void SetLettersOnly(TextField field, int maxLength = 0)
     {
         field.RegisterCallback<KeyDownEvent>(evt =>
         {
@@ -985,8 +985,14 @@ public class EditorController : UIScreenController
         field.RegisterValueChangedCallback(evt =>
         {
             var filtered = new string(evt.newValue.Where(c => char.IsLetter(c) || c == ' ').ToArray());
+            if (maxLength > 0 && filtered.Length > maxLength)
+                filtered = filtered.Substring(0, maxLength);
             if (filtered != evt.newValue)
+            {
+                int cursor = field.cursorIndex;
                 field.value = filtered.Length > 0 ? filtered : evt.previousValue;
+                field.cursorIndex = cursor < field.text.Length ? cursor : field.text.Length;
+            }
         });
     }
 
