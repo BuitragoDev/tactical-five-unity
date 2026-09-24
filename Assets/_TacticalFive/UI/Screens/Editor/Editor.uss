@@ -261,8 +261,10 @@
     border-color: rgb(42, 51, 71);
     padding: 12px 10px;
     flex-grow: 1;
+    flex-basis: 0;
     min-width: 0;
     max-width: none;
+    overflow: hidden;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border-bottom-left-radius: 2px;
@@ -828,11 +830,13 @@
 
 .editor-section-panel--info {
     flex-grow: 4;
+    flex-basis: 0;
     margin-right: 16px;
 }
 
 .editor-section-panel--stadium {
     flex-grow: 2;
+    flex-basis: 0;
 }
 
 .editor-panel-header {
