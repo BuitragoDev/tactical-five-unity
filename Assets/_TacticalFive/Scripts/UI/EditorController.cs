@@ -599,7 +599,6 @@ public class EditorController : UIScreenController
         statsRow.AddToClassList("editor-stadium-stats");
         statsRow.Add(BuildStadiumStat("CAPACIDAD", t.capacity.ToString("N0")));
         statsRow.Add(BuildStadiumStat("INSTALACIONES", t.facilities.ToString()));
-        statsRow.Add(BuildStadiumStat("REPUTACIÓN", t.reputation.ToString()));
         stadiumPanel.Add(statsRow);
 
         var btnChangeArena = new Button();
