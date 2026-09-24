@@ -717,6 +717,9 @@ public class EditorController : UIScreenController
         t.objective = _teamObjectiveDropdown.Value;
 
         DatabaseManager.Instance.UpdateTeam(t);
+        // Refrescar el detalle para que los stats (aforo, instalaciones, etc.)
+        // reflejen los valores recién guardados.
+        BuildTeamDetail();
         ShowToast("Equipo guardado correctamente");
     }
 
