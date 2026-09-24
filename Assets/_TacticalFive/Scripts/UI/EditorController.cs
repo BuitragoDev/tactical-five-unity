@@ -642,9 +642,16 @@ public class EditorController : UIScreenController
         return item;
     }
 
+    // Abre el diálogo nativo del SO; si no está disponible, cae al navegador in-game.
+    void PickImage(string title, System.Action<string> onSelected)
+    {
+        if (FileDialogHelper.TryOpenImage(title, onSelected)) return;
+        OpenFileBrowser(title, onSelected);
+    }
+
     void ChangeLogo(TeamData t)
     {
-        OpenFileBrowser("SELECCIONA UN LOGO PNG (200 × 200)", path =>
+        PickImage("SELECCIONA UN LOGO PNG (200 × 200)", path =>
         {
             if (TeamImages.SetLogo(t.logo, path, out var error))
             {
@@ -662,7 +669,7 @@ public class EditorController : UIScreenController
 
     void ChangeArena(TeamData t)
     {
-        OpenFileBrowser("SELECCIONA UNA IMAGEN PNG (1380 × 752)", path =>
+        PickImage("SELECCIONA UNA IMAGEN PNG (1380 × 752)", path =>
         {
             if (TeamImages.SetArena(t.logo, path, out var error))
             {
