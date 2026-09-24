@@ -123,10 +123,10 @@ public static class TeamImages
 
     static string ArenaFileName(string logo) => logo == "sixers" ? "76ers" : logo;
 
-    // ── Cache ─────────────────────────────────────────────────────────
-    static readonly Dictionary<int, Sprite[]> _logoArrays = new();
+    // ── Cache (clave = ámbito + tamaño/nombre) ────────────────────────
+    static readonly Dictionary<string, Sprite[]> _logoArrays = new();
     static readonly Dictionary<string, Sprite> _logoSprites = new();
-    static Sprite[] _arenaArray;
+    static readonly Dictionary<string, Sprite[]> _arenaArrays = new();
     static readonly Dictionary<string, Sprite> _arenaSprites = new();
     static readonly Dictionary<string, Sprite> _previewCache = new();
 
@@ -145,20 +145,27 @@ public static class TeamImages
     {
         _logoArrays.Clear();
         _logoSprites.Clear();
-        _arenaArray = null;
+        _arenaArrays.Clear();
         _arenaSprites.Clear();
     }
 
     // ── LOGOS ─────────────────────────────────────────────────────────
-    public static Sprite[] Logos(int size)
+    public static Sprite[] Logos(int size) => LogosFor(_scope, size);
+    public static Sprite Logo(int size, string logo) => LogoFor(_scope, size, logo);
+    public static Sprite Logo(string sizeFolder, string logo) => LogoFor(_scope, ParseSize(sizeFolder), logo);
+
+    /// <summary>Logos de un ámbito concreto (para la pantalla de Cargar Partida,
+    /// que muestra varias partidas a la vez).</summary>
+    public static Sprite[] LogosFor(string scope, int size)
     {
-        if (_logoArrays.TryGetValue(size, out var cached)) return cached;
+        string key = scope + "|" + size;
+        if (_logoArrays.TryGetValue(key, out var cached)) return cached;
 
         var dict = new Dictionary<string, Sprite>();
         foreach (var s in Resources.LoadAll<Sprite>($"Teams/Logos/{SizeFolder(size)}"))
             dict[s.name] = s;
 
-        string dir = CustomLogoDir(size);
+        string dir = Path.Combine(ScopeRoot(scope), "Logos", SizeFolder(size));
         if (Directory.Exists(dir))
         {
             foreach (var f in Directory.GetFiles(dir, "*.png"))
@@ -170,17 +177,17 @@ public static class TeamImages
 
         var arr = new Sprite[dict.Count];
         dict.Values.CopyTo(arr, 0);
-        _logoArrays[size] = arr;
+        _logoArrays[key] = arr;
         return arr;
     }
 
-    public static Sprite Logo(int size, string logo)
+    public static Sprite LogoFor(string scope, int size, string logo)
     {
         if (string.IsNullOrEmpty(logo)) return null;
-        string key = size + ":" + logo;
+        string key = scope + "|" + size + ":" + logo;
         if (_logoSprites.TryGetValue(key, out var cached)) return cached;
 
-        string customFile = Path.Combine(CustomLogoDir(size), logo + ".png");
+        string customFile = Path.Combine(ScopeRoot(scope), "Logos", SizeFolder(size), logo + ".png");
         Sprite sp = File.Exists(customFile)
             ? LoadSpriteFromFile(customFile)
             : Resources.Load<Sprite>($"Teams/Logos/{SizeFolder(size)}/{logo}");
@@ -189,20 +196,22 @@ public static class TeamImages
         return sp;
     }
 
-    public static Sprite Logo(string sizeFolder, string logo) => Logo(ParseSize(sizeFolder), logo);
-
     // ── ARENAS ────────────────────────────────────────────────────────
-    public static Sprite[] Arenas()
+    public static Sprite[] Arenas() => ArenasFor(_scope);
+    public static Sprite Arena(string logo) => ArenaFor(_scope, logo);
+
+    public static Sprite[] ArenasFor(string scope)
     {
-        if (_arenaArray != null) return _arenaArray;
+        if (_arenaArrays.TryGetValue(scope, out var cached)) return cached;
 
         var dict = new Dictionary<string, Sprite>();
         foreach (var s in Resources.LoadAll<Sprite>("Arenas/"))
             dict[s.name] = s;
 
-        if (Directory.Exists(CustomArenaDir))
+        string dir = Path.Combine(ScopeRoot(scope), "Arenas");
+        if (Directory.Exists(dir))
         {
-            foreach (var f in Directory.GetFiles(CustomArenaDir, "*.png"))
+            foreach (var f in Directory.GetFiles(dir, "*.png"))
             {
                 var sp = LoadSpriteFromFile(f);
                 if (sp != null) dict[Path.GetFileNameWithoutExtension(f)] = sp;
@@ -211,16 +220,17 @@ public static class TeamImages
 
         var arr = new Sprite[dict.Count];
         dict.Values.CopyTo(arr, 0);
-        _arenaArray = arr;
+        _arenaArrays[scope] = arr;
         return arr;
     }
 
-    public static Sprite Arena(string logo)
+    public static Sprite ArenaFor(string scope, string logo)
     {
         string file = string.IsNullOrEmpty(logo) ? "default" : ArenaFileName(logo);
-        if (_arenaSprites.TryGetValue(file, out var cached)) return cached;
+        string key = scope + "|" + file;
+        if (_arenaSprites.TryGetValue(key, out var cached)) return cached;
 
-        string customFile = Path.Combine(CustomArenaDir, file + ".png");
+        string customFile = Path.Combine(ScopeRoot(scope), "Arenas", file + ".png");
         Sprite sp = File.Exists(customFile)
             ? LoadSpriteFromFile(customFile)
             : Resources.Load<Sprite>($"Arenas/{file}");
@@ -228,7 +238,7 @@ public static class TeamImages
         if (sp == null && file != "default")
             sp = Resources.Load<Sprite>("Arenas/default");
 
-        if (sp != null) _arenaSprites[file] = sp;
+        if (sp != null) _arenaSprites[key] = sp;
         return sp;
     }
 

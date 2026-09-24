@@ -23,9 +23,6 @@ public class LoadGameController : UIScreenController
     private int _currentPage;
     private const int CARDS_PER_PAGE = 4;
 
-    private Dictionary<string, Sprite> _logoSprites = new();
-    private Dictionary<string, Sprite> _arenaSprites = new();
-    private Sprite _defaultArenaSprite;
     private Texture2D _calendarTex;
     private Texture2D _budgetTex;
     private Texture2D _payrollTex;
@@ -56,13 +53,6 @@ public class LoadGameController : UIScreenController
     protected override void LoadData()
     {
         base.LoadData();
-
-        var logos = TeamImages.Logos(64);
-        foreach (var s in logos) _logoSprites[s.name] = s;
-
-        var arenas = TeamImages.Arenas();
-        foreach (var s in arenas) _arenaSprites[s.name] = s;
-        _defaultArenaSprite = TeamImages.Arena("default");
 
         _calendarTex = Resources.Load<Texture2D>("Icons/calendario");
         _budgetTex = Resources.Load<Texture2D>("Icons/finanzas");
@@ -175,6 +165,14 @@ public class LoadGameController : UIScreenController
         }
     }
 
+    // Ámbito de imágenes de una partida: su propia carpeta save_{n} si ya la tiene,
+    // o el template (lo que heredaría al cargarse por primera vez).
+    static string SlotScope(int slotNumber)
+    {
+        string scope = $"save_{slotNumber}";
+        return TeamImages.HasCustom(scope) ? scope : "template";
+    }
+
     static bool IsRowFired(SQLiteConnection conn, ManagerStatusRow manager)
     {
         if (manager == null) return false;
@@ -198,16 +196,17 @@ public class LoadGameController : UIScreenController
         var card = new VisualElement();
         card.AddToClassList("slot-card");
 
+        // Cada partida muestra las imágenes de SU ámbito (save_{n}); si aún no tiene
+        // carpeta propia (partida antigua) se usa el template, que es lo que heredará
+        // al cargarse por primera vez.
+        string scope = SlotScope(slot.slotNumber);
+
         // ── Arena photo ──
         var arenaPhoto = new VisualElement();
         arenaPhoto.AddToClassList("slot-arena-photo");
         if (!string.IsNullOrEmpty(slot.teamLogo))
         {
-            Sprite arenaSpr = null;
-            string key = slot.teamLogo;
-            if (key == "sixers") key = "76ers";
-            _arenaSprites.TryGetValue(key, out arenaSpr);
-            if (arenaSpr == null) arenaSpr = _defaultArenaSprite;
+            var arenaSpr = TeamImages.ArenaFor(scope, slot.teamLogo);
             if (arenaSpr != null)
                 arenaPhoto.style.backgroundImage = new StyleBackground(arenaSpr);
         }
@@ -236,8 +235,12 @@ public class LoadGameController : UIScreenController
 
         var logoElem = new VisualElement();
         logoElem.AddToClassList("slot-team-logo");
-        if (!string.IsNullOrEmpty(slot.teamLogo) && _logoSprites.TryGetValue(slot.teamLogo, out var logoSpr))
-            logoElem.style.backgroundImage = new StyleBackground(logoSpr);
+        if (!string.IsNullOrEmpty(slot.teamLogo))
+        {
+            var logoSpr = TeamImages.LogoFor(scope, 64, slot.teamLogo);
+            if (logoSpr != null)
+                logoElem.style.backgroundImage = new StyleBackground(logoSpr);
+        }
         teamSection.Add(logoElem);
 
         var teamInfo = new VisualElement();
