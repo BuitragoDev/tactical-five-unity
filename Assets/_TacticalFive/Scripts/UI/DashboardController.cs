@@ -7503,14 +7503,6 @@ List<int> offeredPickIds = new List<int>();
     {
         if (_season == null || _myTeam == null) return;
 
-        // Always load stat card icons
-        SetStatIcon("StatScorerIcon", "puntos");
-        SetStatIcon("StatRebounderIcon", "rebote");
-        SetStatIcon("StatAssisterIcon", "pase");
-        SetStatIcon("StatStealerIcon", "robo");
-        SetStatIcon("StatBlockerIcon", "tapones");
-        SetStatIcon("StatRatedIcon", "estrella64px");
-
         var teamStats = DatabaseManager.Instance.GetTeamPlayerSeasonStats(_season.id, _myTeam.id, _manager.id);
         if (teamStats.Count == 0) return;
 
@@ -7523,47 +7515,46 @@ List<int> offeredPickIds = new List<int>();
             (scorer.total_points / (float)scorer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{scorer.first_name} {scorer.last_name}",
             $"{scorer.games} {(scorer.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
-            scorer.player_id, "puntos");
+            scorer.player_id);
 
         var rebounder = teamStats.OrderByDescending(s => (float)s.total_rebounds / s.games).First();
         SetStatCard("StatRebounder", "StatRebounderName", "StatRebounderGames",
             (rebounder.total_rebounds / (float)rebounder.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{rebounder.first_name} {rebounder.last_name}",
             $"{rebounder.games} {(rebounder.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
-            rebounder.player_id, "rebote");
+            rebounder.player_id);
 
         var assister = teamStats.OrderByDescending(s => (float)s.total_assists / s.games).First();
         SetStatCard("StatAssister", "StatAssisterName", "StatAssisterGames",
             (assister.total_assists / (float)assister.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{assister.first_name} {assister.last_name}",
             $"{assister.games} {(assister.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
-            assister.player_id, "pase");
+            assister.player_id);
 
         var stealer = teamStats.OrderByDescending(s => (float)s.total_steals / s.games).First();
         SetStatCard("StatStealer", "StatStealerName", "StatStealerGames",
             (stealer.total_steals / (float)stealer.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{stealer.first_name} {stealer.last_name}",
             $"{stealer.games} {(stealer.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
-            stealer.player_id, "robo");
+            stealer.player_id);
 
         var blocker = teamStats.OrderByDescending(s => (float)s.total_blocks / s.games).First();
         SetStatCard("StatBlocker", "StatBlockerName", "StatBlockerGames",
             (blocker.total_blocks / (float)blocker.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{blocker.first_name} {blocker.last_name}",
             $"{blocker.games} {(blocker.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
-            blocker.player_id, "tapones");
+            blocker.player_id);
 
         var rated = teamStats.OrderByDescending(s => (float)s.total_rating / s.games).First();
         SetStatCard("StatRated", "StatRatedName", "StatRatedGames",
             (rated.total_rating / (float)rated.games).ToString("F1", System.Globalization.CultureInfo.InvariantCulture),
             $"{rated.first_name} {rated.last_name}",
             $"{rated.games} {(rated.games == 1 ? "PARTIDO JUGADO" : "PARTIDOS JUGADOS")}",
-            rated.player_id, "estrella64px");
+            rated.player_id);
     }
 
     void SetStatCard(string valName, string playerName, string gamesName,
-                     string val, string player, string games, int playerId = 0,
-                     string iconName = null)
+                     string val, string player, string games, int playerId = 0)
     {
         var valLbl = _root.Q<Label>(valName);
         var playerLbl = _root.Q<Label>(playerName);
@@ -7586,28 +7577,6 @@ List<int> offeredPickIds = new List<int>();
                 if (tex != null)
                     photo.style.backgroundImage = new StyleBackground(tex);
             }
-        }
-
-        if (!string.IsNullOrEmpty(iconName))
-        {
-            var iconEl = _root.Q<VisualElement>(valName + "Icon");
-            if (iconEl != null)
-            {
-                var iconTex = Resources.Load<Texture2D>($"Icons/{iconName}");
-                if (iconTex != null)
-                    iconEl.style.backgroundImage = new StyleBackground(iconTex);
-            }
-        }
-    }
-
-    void SetStatIcon(string iconElementName, string iconName)
-    {
-        var iconEl = _root.Q<VisualElement>(iconElementName);
-        if (iconEl != null)
-        {
-            var iconTex = Resources.Load<Texture2D>($"Icons/{iconName}");
-            if (iconTex != null)
-                iconEl.style.backgroundImage = new StyleBackground(iconTex);
         }
     }
 

@@ -200,7 +200,7 @@
                                             <ui:VisualElement class="stat-card-photo-wrapper">
                                                 <ui:VisualElement name="StatScorerPhoto" class="stat-card-photo"/>
                                             </ui:VisualElement>
-                                            <ui:VisualElement name="StatScorerIcon" class="stat-card-icon"/>
+                                            <ui:Label name="StatScorerIcon" text="PT" class="stat-card-icon"/>
                                             <ui:VisualElement class="stat-card-right">
                                                 <ui:Label text="PUNTOS" class="stat-card-label"/>
                                                 <ui:Label name="StatScorer" text="--" class="stat-card-val"/>
@@ -212,7 +212,7 @@
                                             <ui:VisualElement class="stat-card-photo-wrapper">
                                                 <ui:VisualElement name="StatRebounderPhoto" class="stat-card-photo"/>
                                             </ui:VisualElement>
-                                            <ui:VisualElement name="StatRebounderIcon" class="stat-card-icon"/>
+                                            <ui:Label name="StatRebounderIcon" text="RE" class="stat-card-icon"/>
                                             <ui:VisualElement class="stat-card-right">
                                                 <ui:Label text="REBOTES" class="stat-card-label"/>
                                                 <ui:Label name="StatRebounder" text="--" class="stat-card-val"/>
@@ -224,7 +224,7 @@
                                             <ui:VisualElement class="stat-card-photo-wrapper">
                                                 <ui:VisualElement name="StatAssisterPhoto" class="stat-card-photo"/>
                                             </ui:VisualElement>
-                                            <ui:VisualElement name="StatAssisterIcon" class="stat-card-icon"/>
+                                            <ui:Label name="StatAssisterIcon" text="AS" class="stat-card-icon"/>
                                             <ui:VisualElement class="stat-card-right">
                                                 <ui:Label text="ASISTENCIAS" class="stat-card-label"/>
                                                 <ui:Label name="StatAssister" text="--" class="stat-card-val"/>
@@ -236,7 +236,7 @@
                                             <ui:VisualElement class="stat-card-photo-wrapper">
                                                 <ui:VisualElement name="StatStealerPhoto" class="stat-card-photo"/>
                                             </ui:VisualElement>
-                                            <ui:VisualElement name="StatStealerIcon" class="stat-card-icon"/>
+                                            <ui:Label name="StatStealerIcon" text="RO" class="stat-card-icon"/>
                                             <ui:VisualElement class="stat-card-right">
                                                 <ui:Label text="ROBOS" class="stat-card-label"/>
                                                 <ui:Label name="StatStealer" text="--" class="stat-card-val"/>
@@ -248,7 +248,7 @@
                                             <ui:VisualElement class="stat-card-photo-wrapper">
                                                 <ui:VisualElement name="StatBlockerPhoto" class="stat-card-photo"/>
                                             </ui:VisualElement>
-                                            <ui:VisualElement name="StatBlockerIcon" class="stat-card-icon"/>
+                                            <ui:Label name="StatBlockerIcon" text="TA" class="stat-card-icon"/>
                                             <ui:VisualElement class="stat-card-right">
                                                 <ui:Label text="TAPONES" class="stat-card-label"/>
                                                 <ui:Label name="StatBlocker" text="--" class="stat-card-val"/>
@@ -260,7 +260,7 @@
                                             <ui:VisualElement class="stat-card-photo-wrapper">
                                                 <ui:VisualElement name="StatRatedPhoto" class="stat-card-photo"/>
                                             </ui:VisualElement>
-                                            <ui:VisualElement name="StatRatedIcon" class="stat-card-icon"/>
+                                            <ui:Label name="StatRatedIcon" text="VA" class="stat-card-icon"/>
                                             <ui:VisualElement class="stat-card-right">
                                                 <ui:Label text="VALORACIÓN" class="stat-card-label"/>
                                                 <ui:Label name="StatRated" text="--" class="stat-card-val"/>

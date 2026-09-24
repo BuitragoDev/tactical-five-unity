@@ -894,12 +894,14 @@
     border-radius: 18px;
     border-width: 2px;
     border-color: rgb(212, 160, 23);
-    background-size: 55%;
-    background-repeat: no-repeat;
-    background-position: center;
     margin: 10px 10px 10px 10px;
     flex-shrink: 0;
     align-self: flex-start;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    -unity-text-align: middle-center;
 }
 
 .stat-card-right {
