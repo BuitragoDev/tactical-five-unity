@@ -261,8 +261,8 @@
     border-color: rgb(42, 51, 71);
     padding: 12px 10px;
     flex-grow: 1;
-    min-width: 300px;
-    max-width: 300px;
+    min-width: 0;
+    max-width: none;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border-bottom-left-radius: 2px;
@@ -826,7 +826,7 @@
 }
 
 .editor-section-panel--info {
-    flex-grow: 3;
+    flex-grow: 4;
     margin-right: 16px;
 }
 
