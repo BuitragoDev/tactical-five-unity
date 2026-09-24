@@ -221,6 +221,9 @@
     font-size: 16px;
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .slot-team-logo {
