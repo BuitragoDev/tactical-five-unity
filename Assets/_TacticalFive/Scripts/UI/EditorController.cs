@@ -645,8 +645,43 @@ public class EditorController : UIScreenController
     // Abre el diálogo nativo del SO; si no está disponible, cae al navegador in-game.
     void PickImage(string title, System.Action<string> onSelected)
     {
-        if (FileDialogHelper.TryOpenImage(title, onSelected)) return;
-        OpenFileBrowser(title, onSelected);
+        StartCoroutine(PickImageRoutine(title, onSelected));
+    }
+
+    // Sale temporalmente de fullscreen para que la ventana nativa del SO aparezca
+    // por encima del juego (el diálogo del plugin no tiene ventana padre y en
+    // fullscreen el gestor de ventanas mantiene delante la de Unity).
+    IEnumerator PickImageRoutine(string title, System.Action<string> onSelected)
+    {
+#if UNITY_EDITOR
+        // En el editor no hay fullscreen exclusivo que apartar; abrimos directo.
+        if (!FileDialogHelper.TryOpenImage(title, onSelected))
+            OpenFileBrowser(title, onSelected);
+        yield break;
+#else
+        var prevMode = Screen.fullScreenMode;
+
+        Screen.fullScreenMode = FullScreenMode.Windowed;
+        yield return null; // dejar que el gestor de ventanas aplique el cambio
+
+#if UNITY_STANDALONE_OSX
+        bool available = FileDialogHelper.TryOpenImage(title, path =>
+        {
+            Screen.fullScreenMode = prevMode;
+            onSelected(path);
+        });
+        if (!available)
+        {
+            Screen.fullScreenMode = prevMode;
+            OpenFileBrowser(title, onSelected);
+        }
+#else
+        bool available = FileDialogHelper.TryOpenImage(title, onSelected);
+        // El diálogo (síncrono) ya se cerró: restauramos siempre.
+        Screen.fullScreenMode = prevMode;
+        if (!available) OpenFileBrowser(title, onSelected);
+#endif
+#endif
     }
 
     void ChangeLogo(TeamData t)
