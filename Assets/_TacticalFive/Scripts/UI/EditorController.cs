@@ -566,7 +566,7 @@ public class EditorController : UIScreenController
         var coachInput = AddInput(infoRight, "Entrenador", DatabaseManager.Instance.GetManagerNameByTeamId(t.id) ?? "—");
         coachInput.isReadOnly = true;
         _teamOwnerInput = AddInput(infoRight, "Propietario", t.owner);
-        SetLettersOnly(_teamOwnerInput);
+        SetLettersOnly(_teamOwnerInput, 30);
         _teamBudgetInput = AddInput(infoRight, "Presupuesto salarial", t.budget.ToString());
         SetDigitsOnly(_teamBudgetInput);
         _teamCapacityInput = AddInput(infoRight, "Aforo del estadio", t.capacity.ToString());
