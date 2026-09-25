@@ -940,6 +940,11 @@
 
 /* ══ PLAYER DETAIL: BANNER + PANELES + CONTRATO ══ */
 
+/* Lista de jugadores más ancha (la de equipos mantiene 280px). */
+#EditorPlayerPanel .editor-list-panel {
+    width: 430px;
+}
+
 .editor-player-row {
     flex-direction: row;
     align-items: flex-start;
@@ -947,7 +952,7 @@
 
 .editor-player-col-left {
     flex-direction: column;
-    flex-grow: 1.1;
+    flex-grow: 1.37;
     flex-basis: 0;
     min-width: 0;
     padding-right: 12px;
