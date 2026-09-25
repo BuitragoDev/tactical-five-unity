@@ -1153,6 +1153,10 @@
     font-size: 15px;
 }
 
+.editor-contract-fields {
+    padding: 0 14px;
+}
+
 .editor-check-row {
     flex-direction: column;
     padding: 4px 14px 0 14px;

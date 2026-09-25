@@ -1134,12 +1134,16 @@ public class EditorController : UIScreenController
         panel.AddToClassList("editor-player-panel--side");
         AddPanelHeader(panel, "CONTRATO");
 
-        _playerSalary = AddInput(panel, "Salario", p.salary.ToString());
+        var fields = new VisualElement();
+        fields.AddToClassList("editor-contract-fields");
+
+        _playerSalary = AddInput(fields, "Salario", p.salary.ToString());
         SetDigitsOnly(_playerSalary);
-        _playerContract = AddInput(panel, "Años", p.contract_years.ToString());
+        _playerContract = AddInput(fields, "Años", p.contract_years.ToString());
         SetDigitsOnly(_playerContract, 1);
-        _playerGuaranteed = AddInput(panel, "Años garantizados", p.guaranteed_years.ToString());
+        _playerGuaranteed = AddInput(fields, "Años garantizados", p.guaranteed_years.ToString());
         SetDigitsOnly(_playerGuaranteed, 1);
+        panel.Add(fields);
 
         _playerTeamOptionOn = p.has_team_option == 1;
         _playerPlayerOptionOn = p.has_player_option == 1;
@@ -1314,14 +1318,14 @@ public class EditorController : UIScreenController
         field.RegisterCallback<KeyDownEvent>(evt =>
         {
             if (evt.character == '\0' || char.IsControl(evt.character)) return;
-            if (!char.IsLetter(evt.character) && evt.character != ' ')
+            if (!char.IsLetter(evt.character) && evt.character != ' ' && evt.character != '-')
             {
                 evt.StopPropagation();
             }
         }, TrickleDown.TrickleDown);
         field.RegisterValueChangedCallback(evt =>
         {
-            var filtered = new string(evt.newValue.Where(c => char.IsLetter(c) || c == ' ').ToArray());
+            var filtered = new string(evt.newValue.Where(c => char.IsLetter(c) || c == ' ' || c == '-').ToArray());
             if (maxLength > 0 && filtered.Length > maxLength)
                 filtered = filtered.Substring(0, maxLength);
             if (filtered != evt.newValue)
