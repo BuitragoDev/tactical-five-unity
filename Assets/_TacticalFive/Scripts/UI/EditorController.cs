@@ -947,7 +947,6 @@ public class EditorController : UIScreenController
         leftCol.Add(histPanel);
 
         // ── COLUMNA DERECHA ──
-        rightCol.Add(BuildPlayerPhotoPanel(p));
         rightCol.Add(BuildPlayerAttributesPanel(p));
         rightCol.Add(BuildPlayerContractPanel(p));
 
@@ -975,10 +974,22 @@ public class EditorController : UIScreenController
         var content = new VisualElement();
         content.AddToClassList("editor-player-banner-content");
 
+        var photoCol = new VisualElement();
+        photoCol.AddToClassList("editor-player-banner-photo-col");
+
         var photo = new VisualElement();
         photo.AddToClassList("editor-player-banner-photo");
         SetPlayerPhoto(photo, p);
-        content.Add(photo);
+        photoCol.Add(photo);
+
+        var btnPhoto = new Button();
+        btnPhoto.text = "CAMBIAR IMAGEN";
+        btnPhoto.AddToClassList("editor-player-banner-photo-btn");
+        btnPhoto.clicked += () => { PlayClick(); ChangePlayerPhoto(p); };
+        CursorManager.Instance?.RegisterHandCursor(btnPhoto);
+        photoCol.Add(btnPhoto);
+
+        content.Add(photoCol);
 
         var info = new VisualElement();
         info.AddToClassList("editor-player-banner-info");
@@ -1112,32 +1123,6 @@ public class EditorController : UIScreenController
         grid.Add(col1);
         grid.Add(col2);
         panel.Add(grid);
-        return panel;
-    }
-
-    VisualElement BuildPlayerPhotoPanel(PlayerData p)
-    {
-        var panel = new VisualElement();
-        panel.AddToClassList("editor-section-panel");
-        panel.AddToClassList("editor-player-panel");
-        panel.AddToClassList("editor-player-panel--side");
-        AddPanelHeader(panel, "IMAGEN DEL JUGADOR");
-
-        var img = new VisualElement();
-        img.AddToClassList("editor-player-photo-image");
-        SetPlayerPhoto(img, p);
-        panel.Add(img);
-
-        var btn = new Button();
-        btn.text = "CAMBIAR IMAGEN";
-        btn.AddToClassList("editor-stadium-btn");
-        btn.clicked += () => { PlayClick(); ChangePlayerPhoto(p); };
-        CursorManager.Instance?.RegisterHandCursor(btn);
-        panel.Add(btn);
-
-        var caption = new Label("Puedes cambiar la imagen del jugador");
-        caption.AddToClassList("editor-player-photo-caption");
-        panel.Add(caption);
         return panel;
     }
 
