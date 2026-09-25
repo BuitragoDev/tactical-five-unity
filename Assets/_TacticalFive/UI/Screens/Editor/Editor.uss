@@ -503,6 +503,12 @@
     top: 38px;
 }
 
+.custom-filter-dropdown .custom-dropdown__value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* ══ SAVE MODAL (estilo moderno) ══ */
 
 .editor-modal-overlay {

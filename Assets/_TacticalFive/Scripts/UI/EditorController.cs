@@ -13,7 +13,9 @@ public class EditorController : UIScreenController
         public Button Trigger;
         public VisualElement List;
         public Label ValueLabel;
-        public string Value => ValueLabel?.text ?? "";
+        public string Title;    // nombre del filtro (p. ej. "EQUIPO"); si es null no se prefija
+        public string RawValue; // valor real seleccionado (el display puede llevar prefijo)
+        public string Value => string.IsNullOrEmpty(RawValue) ? (ValueLabel?.text ?? "") : RawValue;
     }
     private Button _btnReset;
     private VisualElement _loadingSpinner;
@@ -176,8 +178,8 @@ public class EditorController : UIScreenController
         _teamDetail = _root.Q<VisualElement>("TeamDetail");
         _teamDetailPanel = _teamPanel.Q<VisualElement>(className: "editor-detail-panel");
 
-        _playerTeamFilter = WrapFilterDropdown("PlayerTeamFilter");
-        _playerPosFilter = WrapFilterDropdown("PlayerPosFilter");
+        _playerTeamFilter = WrapFilterDropdown("PlayerTeamFilter", "EQUIPO");
+        _playerPosFilter = WrapFilterDropdown("PlayerPosFilter", "POSICIÓN");
         _playerSearch = _root.Q<TextField>("PlayerSearch");
         _playerList = _root.Q<VisualElement>("PlayerList");
         _playerDetail = _root.Q<VisualElement>("PlayerDetail");
@@ -192,7 +194,7 @@ public class EditorController : UIScreenController
             _root.Q<VisualElement>("PlayerScrollTrack"), _root.Q<VisualElement>("PlayerScrollThumb"));
     }
 
-    CustomDropdown WrapFilterDropdown(string name)
+    CustomDropdown WrapFilterDropdown(string name, string title)
     {
         var root = _root.Q<VisualElement>(name);
         var trigger = root.Q<Button>(className: "custom-dropdown__trigger");
@@ -204,7 +206,8 @@ public class EditorController : UIScreenController
             Root = root,
             Trigger = trigger,
             List = list,
-            ValueLabel = value
+            ValueLabel = value,
+            Title = title
         };
 
         trigger.clicked += () =>
@@ -216,6 +219,14 @@ public class EditorController : UIScreenController
         };
 
         return dd;
+    }
+
+    // Fija el valor real del desplegable y su texto visible. Si el desplegable tiene
+    // Title (los filtros), el texto se prefija: "EQUIPO (TODOS)", "POSICIÓN (B)"...
+    void SetDropdownValue(CustomDropdown dd, string value)
+    {
+        dd.RawValue = value;
+        dd.ValueLabel.text = string.IsNullOrEmpty(dd.Title) ? value : $"{dd.Title} ({value})";
     }
 
     void SetFilterDropdownItems(CustomDropdown dd, string[] items, int selectedIndex)
@@ -230,13 +241,13 @@ public class EditorController : UIScreenController
             if (i == selectedIndex)
             {
                 item.AddToClassList("custom-dropdown__item--selected");
-                dd.ValueLabel.text = text;
+                SetDropdownValue(dd, text);
             }
 
             var captured = i;
             item.clicked += () =>
             {
-                dd.ValueLabel.text = text;
+                SetDropdownValue(dd, text);
                 CloseAllDropdowns();
                 foreach (var b in dd.List.Query<Button>(className: "custom-dropdown__item").ToList())
                     b.RemoveFromClassList("custom-dropdown__item--selected");
@@ -1440,7 +1451,8 @@ public class EditorController : UIScreenController
             Root = root,
             Trigger = trigger,
             List = list,
-            ValueLabel = valueLabel
+            ValueLabel = valueLabel,
+            RawValue = choices[idx]
         };
 
         foreach (var c in choices)
@@ -1467,12 +1479,12 @@ public class EditorController : UIScreenController
         var item = new Button();
         item.AddToClassList("custom-dropdown__item");
         item.text = text;
-        if (text == dd.ValueLabel.text)
+        if (text == dd.RawValue)
             item.AddToClassList("custom-dropdown__item--selected");
 
         item.clicked += () =>
         {
-            dd.ValueLabel.text = text;
+            SetDropdownValue(dd, text);
             CloseAllDropdowns();
             foreach (var b in dd.List.Query<Button>(className: "custom-dropdown__item").ToList())
                 b.RemoveFromClassList("custom-dropdown__item--selected");
