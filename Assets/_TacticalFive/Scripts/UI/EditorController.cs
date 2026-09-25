@@ -266,7 +266,7 @@ public class EditorController : UIScreenController
             teamChoices.AddRange(_allTeams.Select(t => $"{t.abbreviation} - {t.name}"));
             SetFilterDropdownItems(_playerTeamFilter, teamChoices.ToArray(), 0);
 
-            SetFilterDropdownItems(_playerPosFilter, new[] { "TODOS", "PG", "SG", "SF", "PF", "C" }, 0);
+            SetFilterDropdownItems(_playerPosFilter, new[] { "TODOS", "B", "E", "A", "AP", "P" }, 0);
             _loadError = null;
         }
         catch (System.Exception ex)
@@ -805,7 +805,7 @@ public class EditorController : UIScreenController
 
         var query = _allPlayers.AsEnumerable();
         if (teamId.HasValue) query = query.Where(p => p.team_id == teamId.Value);
-        if (posFilter != "TODOS") query = query.Where(p => p.position == posFilter);
+        if (posFilter != "TODOS") query = query.Where(p => PositionCodes.GetShort(p.position) == posFilter);
         if (!string.IsNullOrEmpty(search))
             query = query.Where(p => $"{p.first_name} {p.last_name}".ToLower().Contains(search));
 
