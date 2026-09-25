@@ -1304,8 +1304,7 @@ public class EditorController : UIScreenController
         actions.AddToClassList("editor-browser-actions");
         var cancel = new Button();
         cancel.text = "CANCELAR";
-        cancel.AddToClassList("editor-browser-btn");
-        cancel.AddToClassList("editor-browser-btn--cancel");
+        cancel.AddToClassList("editor-country-cancel");
         cancel.clicked += () => { PlayClick(); CloseCountryModal(); };
         CursorManager.Instance?.RegisterHandCursor(cancel);
         actions.Add(cancel);

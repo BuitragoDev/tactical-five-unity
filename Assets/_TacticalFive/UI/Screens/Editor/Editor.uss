@@ -1263,14 +1263,14 @@
 
 .editor-field-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 15px;
     letter-spacing: 1px;
-    color: rgb(100, 200, 140);
-    background-color: rgba(39, 174, 96, 0.10);
+    color: rgb(120, 160, 230);
+    background-color: rgba(42, 95, 201, 0.10);
     border-width: 2px;
-    border-color: rgb(39, 174, 96);
-    border-radius: 8px;
-    padding: 8px 16px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 6px;
+    padding: 2px 14px;
     margin-left: 8px;
     flex-shrink: 0;
     -unity-text-align: middle-center;
@@ -1278,8 +1278,8 @@
 }
 
 .editor-field-btn:hover {
-    background-color: rgba(39, 174, 96, 0.25);
-    color: rgb(150, 220, 180);
+    background-color: rgba(42, 95, 201, 0.25);
+    color: rgb(150, 190, 255);
 }
 
 /* ══ MODAL DE PAÍS ══ */
@@ -1299,8 +1299,8 @@
 .editor-country-scroll-row {
     flex-direction: row;
     flex-grow: 1;
-    min-height: 0;
-    max-height: 350px;
+    min-height: 355px;
+    max-height: 355px;
 }
 
 .editor-country-viewport {
@@ -1349,5 +1349,24 @@
 .editor-country-btn--empty {
     background-color: rgba(0, 0, 0, 0);
     border-width: 0;
+}
+
+.editor-country-cancel {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    background-color: rgba(120, 95, 30, 0.15);
+    border-width: 2px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 8px;
+    padding: 2px 28px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+
+.editor-country-cancel:hover {
+    background-color: rgba(120, 95, 30, 0.35);
+    color: rgb(255, 220, 130);
 }
 
