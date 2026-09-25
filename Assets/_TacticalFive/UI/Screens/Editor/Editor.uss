@@ -1184,7 +1184,7 @@
 
 .editor-attr-col .editor-field-label {
     width: 92px;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .editor-attr-col .editor-field-input {
@@ -1199,6 +1199,10 @@
 
 .editor-contract-fields {
     padding: 0 14px;
+}
+
+.editor-contract-fields .editor-field-label {
+    font-size: 18px;
 }
 
 .editor-check-row {
@@ -1236,7 +1240,7 @@
 
 .editor-check-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(208, 216, 232);
 }
 
