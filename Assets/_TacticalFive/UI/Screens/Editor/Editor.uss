@@ -278,7 +278,7 @@
 
 .editor-field-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     width: 140px;
     flex-shrink: 0;
