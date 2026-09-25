@@ -40,7 +40,7 @@ using System.Linq;
     private Label _statBlk;
 
     const int BENCH_SLOTS = 7;
-    const int INACTIVE_SLOTS = 5;
+    const int INACTIVE_SLOTS = DatabaseManager.INACTIVE_SLOTS;
     static readonly string[] PosOrder = { "PG", "SG", "SF", "PF", "C" };
     private Button _loadMgmtBtnOn;
     private Button _loadMgmtBtnOff;
@@ -143,36 +143,8 @@ using System.Linq;
 
     void EnsureLineupSeeded()
     {
-        var existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
-        if (existing.Count == 0)
-        {
-            var excluded = new HashSet<int>(_players.Where(p => p.g_league_assigned == 1).Select(p => p.id));
-            DatabaseManager.Instance.AutoSeedLineup(_myTeam.id, _players, excluded);
-        }
-        else
-        {
-            var currentIds = new HashSet<int>(_players.Select(p => p.id));
-            foreach (var e in existing)
-            {
-                if (!currentIds.Contains(e.player_id))
-                    DatabaseManager.Instance.DeleteLineupEntry(e.id);
-            }
-            existing = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
-            var assigned = new HashSet<int>(existing.Select(l => l.player_id));
-            int nextInactIdx = existing.Where(l => l.slot == 2).Select(l => l.slot_index).DefaultIfEmpty(-1).Max() + 1;
-            foreach (var p in _players)
-            {
-                if (!assigned.Contains(p.id))
-                {
-                    if (nextInactIdx < INACTIVE_SLOTS)
-                    {
-                        DatabaseManager.Instance.SetPlayerSlot(p.id, _myTeam.id, 2, nextInactIdx);
-                        nextInactIdx++;
-                    }
-                }
-            }
-        }
-        _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        // La lógica vive en DatabaseManager.EnsureLineupSeeded (compartida con ROTACIÓN).
+        _lineup = DatabaseManager.Instance.EnsureLineupSeeded(_myTeam.id, _players);
     }
     protected override void RefreshHeader()
     {

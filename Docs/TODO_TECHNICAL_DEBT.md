@@ -79,7 +79,7 @@ _(none open — see resolved B1 below)_
 - **Note:** the 12 controllers that override `RegisterCallbacks()` without `base` (Editor, EndSeason, GameResults, LoadGame, MainMenu, MatchDay, NewSeason, PlayerAwards, Preseason, Quintos, SeasonSummary, SelectTeam) don't get the config modal via the base — verify each still exposes settings (most are boot/menu/slot screens).
 
 ### B5. No UI base controller — **DONE**
-- **Detail [F]:** `UIScreenController` base exists (`Scripts/Core/UIScreenController.cs`, 575 ln); **all 41 controllers inherit it** (`UI_TOOLKIT.md §4`). Provides full-screen, chrome injection (Header/Sidebar), nav wiring, cursors, config modal, `RefreshHeader`.
+- **Detail [F]:** `UIScreenController` base exists (`Scripts/Core/UIScreenController.cs`, 575 ln); **all 47 controllers inherit it** (`UI_TOOLKIT.md §4`). Provides full-screen, chrome injection (Header/Sidebar), nav wiring, cursors, config modal, `RefreshHeader`.
 - **Remaining quirk:** **12 controllers override `RegisterCallbacks()` without `base`** (see B4 note). `GameResultsController` re-implements nav/submenu/cursor wiring in its override referencing 3 non-existent sidebar elements (`NavRecords`/`NavSponsors`/`NavTV`) — null-safe but confusing.
 
 ### B7. `GameScreen.Settings` dead — **DONE**

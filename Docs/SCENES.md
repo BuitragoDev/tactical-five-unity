@@ -7,9 +7,9 @@
 ## 1. `MainMenu.unity`
 
 ### Objective
-Host the entire game: boot/loading, menus, and all 41 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
+Host the entire game: boot/loading, menus, and all 47 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
 
-### Root GameObjects (44)
+### Root GameObjects (49; 50 con `RotationDocument`)
 
 | GameObject | Components | Active at boot |
 |---|---|---|
@@ -17,11 +17,11 @@ Host the entire game: boot/loading, menus, and all 41 management screens as iner
 | ScreenManager | ScreenManager + DatabaseManager | yes |
 | CursorManager | CursorManager (own GO, single instance) | yes |
 | LoadingDocument | UIDocument + FullScreenUI + LoadingController | yes |
-| 40 × `*Document` | UIDocument + FullScreenUI + controller | no |
+| 46 × pantalla (45 `*Document` + `TheCity`) | UIDocument + FullScreenUI + controller | no |
 
-**[F] 39 documents carry `FullScreenUI`; `SelectTeamDocument` and `PreseasonDocument` do not** (they render full-screen via UXML/controller logic only).
+**[F] 44 documents carry `FullScreenUI`; `SelectTeamDocument` and `PreseasonDocument` do not** (they render full-screen via UXML/controller logic only).
 
-### Screen documents (41)
+### Screen documents (47 en `GameScreen`; 46 creados en la escena)
 
 | Document GO | Controller |
 |---|---|
@@ -36,6 +36,7 @@ Host the entire game: boot/loading, menus, and all 41 management screens as iner
 | TrayectoryDocument | TrajectoryController |
 | PlayerProfileDocument | PlayerProfileController |
 | QuintetoDocument | QuintetoController |
+| **RotationDocument** (pendiente) | RotationController |
 | TrainingDocument | TrainingController |
 | EmployeesDocument | EmployeesController |
 | InjuredDocument | InjuredController |
@@ -60,6 +61,10 @@ Host the entire game: boot/loading, menus, and all 41 management screens as iner
 | ManagerDocument | ManagerController |
 | MessagesDocument | MessagesController |
 | MatchDayDocument | MatchDayController |
+| PreGameDocument | PreGameController |
+| InfoLeagueDocument | InfoLeagueController |
+| TheCity | TheCityController |
+| BuscadorDocument | BuscadorController |
 | GameResultsDocument | GameResultsController |
 | SeasonSummaryDocument | SeasonSummaryController |
 | PlayerAwardsDocument | PlayerAwardsController |
@@ -69,7 +74,8 @@ Host the entire game: boot/loading, menus, and all 41 management screens as iner
 | GLeagueDocument | GLeagueController |
 
 ### Serialization notes
-- `ScreenManager` has **41 serialized `UIDocument` fields** (1:1 with the 41 `GameScreen` enum values; all have cases in `GoTo` — no dead enum values).
+- `ScreenManager` has **one serialized `UIDocument` field per `GameScreen` value** (all have cases in `GoTo` — no dead enum values).
+- **`rotationDocument` (ROTACIÓN) está cableado con fallback por nombre**: si el campo serializado está vacío, `ScreenManager.Awake` busca un `UIDocument` cuyo GameObject contenga `"rotation"` (mismo patrón que `gleague`/`loading`). **El GameObject `RotationDocument` todavía hay que crearlo en Unity** (UIDocument + PanelSettings `TacticalFivePanelSettings` + sourceAsset `Rotation.uxml` + `FullScreenUI` + `RotationController`, inactivo). Mientras no exista, `ShowOnly` avisa por consola y no cambia de pantalla (no deja la app en negro).
 - **No `legalNoticeDocument` / `settingsDocument` fields** [F] — the Legal Notice is an inline modal in `MainMenu.uxml` (`BtnLegal`), and `GameScreen.Settings` no longer exists (removed).
 - Every document shares `TacticalFivePanelSettings.asset` (guid `84f0403e…`) and has its own `sourceAsset` (the screen UXML).
 

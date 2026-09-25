@@ -54,6 +54,13 @@ public class PlayerData
     public string photo { get; set; }
     public int number { get; set; } // dorsal
 
+    // Minutos configurados en la pantalla ROTACIÓN. Transitorio: no se persiste en
+    // la tabla `players` (vive en `team_lineup.rotation_minutes`); se rellena al
+    // construir la convocatoria para que el simulador los use como objetivo.
+    // -1 = automático (heurística del simulador).
+    [Ignore]
+    public int rotation_minutes { get; set; } = -1;
+
     public int GetCalculatedAverage()
     {
         return (speed + shooting + three_point + passing + dribbling + defense + rebounding + athleticism + iq + steals + blocks) / 11;

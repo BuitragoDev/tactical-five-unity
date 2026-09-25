@@ -17,6 +17,9 @@
                 <ui:Button name="SubmenuQuinteto" class="nav-submenu-item">
                     <ui:Label text="QUINTETO" class="nav-submenu-label"/>
                 </ui:Button>
+                <ui:Button name="SubmenuRotacion" class="nav-submenu-item">
+                    <ui:Label text="ROTACIÓN" class="nav-submenu-label"/>
+                </ui:Button>
                 <ui:Button name="SubmenuEntrenamiento" class="nav-submenu-item">
                     <ui:Label text="ENTRENAMIENTO" class="nav-submenu-label"/>
                 </ui:Button>

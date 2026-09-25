@@ -14,6 +14,9 @@ public static class GameSimulator
         public PlayerRole role;
         public bool starter;
         public int target_minutes;
+        // Minutos fijados por el jugador en la pantalla ROTACIÓN (no heurística):
+        // solo la plantilla del usuario los trae, y el reparto los respeta de verdad.
+        public bool fixed_minutes;
         public int overall, shooting, three_point, passing, rebounding, defense, steals_attr, blocks_attr;
         public float minutes;
         public int fgm, fga, fg3m, fg3a, ftm, fta;
@@ -74,6 +77,12 @@ public static class GameSimulator
         PrepareRotationMetadata(homePS, glLeague);
         PrepareRotationMetadata(awayPS, glLeague);
 
+        // Rotación vinculante: solo si el equipo trae minutos configurados en ROTACIÓN
+        // con algún reparto real (> 0). Los rellena GetActivePlayers únicamente para la
+        // plantilla del usuario; la IA, la G-League y el All-Star siguen con la heurística.
+        bool strictHome = homePS.Any(p => p.fixed_minutes && p.target_minutes > 0);
+        bool strictAway = awayPS.Any(p => p.fixed_minutes && p.target_minutes > 0);
+
         if (homePS.Count < 2 || awayPS.Count < 2)
         {
             int homeScore = UnityEngine.Random.Range(105, 126);
@@ -125,7 +134,7 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague);
+            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway);
             homeTotal += hPts; awayTotal += aPts;
             quarters.Add((hPts, aPts));
         }
@@ -303,16 +312,34 @@ public static class GameSimulator
             steals_attr = p.steals,
             blocks_attr = p.blocks,
             minutes = 0,
+            target_minutes = p.rotation_minutes,
+            fixed_minutes = p.rotation_minutes >= 0,
             fisico = p.fisico
         };
     }
 
-    static void PrepareRotationMetadata(List<PlayerStatSnapshot> players, bool glLeague = false)
+    // Suelo de minutos para una rotación configurada: un plan entre 1 y 7 se sube a 8
+    // (0 se respeta: el jugador no entra salvo necesidad).
+    public const int MIN_FIXED_MINUTES = 8;
+
+    public static void PrepareRotationMetadata(List<PlayerStatSnapshot> players, bool glLeague = false)
     {
         for (int i = 0; i < players.Count; i++)
         {
             players[i].starter = i < 5;
-            players[i].target_minutes = GetTargetMinutes(players[i], glLeague);
+
+            if (players[i].fixed_minutes)
+            {
+                // Minutos configurados en ROTACIÓN: vinculantes. No los toca la fatiga
+                // (para eso está la gestión de carga), solo el suelo mínimo.
+                if (players[i].target_minutes > 0 && players[i].target_minutes < MIN_FIXED_MINUTES)
+                    players[i].target_minutes = MIN_FIXED_MINUTES;
+                continue;
+            }
+
+            // Sin configurar (-1 = automático): heurística por rol/OVR.
+            if (players[i].target_minutes < 0)
+                players[i].target_minutes = GetTargetMinutes(players[i], glLeague);
             if (players[i].fisico < 30)
                 players[i].target_minutes = Mathf.Max(8, players[i].target_minutes - 6);
         }
@@ -328,6 +355,18 @@ public static class GameSimulator
         if (player.role == PlayerRole.Titular || player.overall >= 75) return 21;
         if (player.role == PlayerRole.Banquillo) return 15;
         return 8;
+    }
+
+    /// <summary>Minutos que sugeriría el simulador a un jugador (columna SUGERIDO de la
+    /// pantalla ROTACIÓN): heurística por rol/OVR sin tener en cuenta la fatiga.</summary>
+    public static int GetSuggestedMinutes(PlayerData p, bool starter)
+    {
+        return GetTargetMinutes(new PlayerStatSnapshot
+        {
+            role = p.role,
+            overall = p.overall,
+            starter = starter
+        });
     }
 
     static PlayerGameStats PS2DB(PlayerStatSnapshot ps, int gameId, int teamId)
@@ -360,7 +399,7 @@ public static class GameSimulator
         };
     }
 
-    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false)
+    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false)
     {
         int homePts = 0, awayPts = 0;
         int teamPoss = Mathf.Clamp(Mathf.RoundToInt(pace / 4 * UnityEngine.Random.Range(0.96f, 1.04f)), 22, 28);
@@ -370,18 +409,26 @@ public static class GameSimulator
         var awayMins = new float[awayPS.Count];
         var homeOn = new HashSet<int>(Enumerable.Range(0, Mathf.Min(5, homePS.Count)));
         var awayOn = new HashSet<int>(Enumerable.Range(0, Mathf.Min(5, awayPS.Count)));
-        var subSchedule = SubSchedule(qNum);
-        int subIdx = 0;
+        // Calendario de cambios independiente por equipo: las ventanas densas son solo
+        // para el equipo con rotación vinculante; la IA mantiene las de siempre.
+        var homeSchedule = SubSchedule(qNum, strictHome);
+        var awaySchedule = SubSchedule(qNum, strictAway);
+        int homeSubIdx = 0;
+        int awaySubIdx = 0;
         float minsPerPoss = 12f / totalPoss;
 
         for (int pIdx = 0; pIdx < totalPoss; pIdx++)
         {
             float elapsed = pIdx * minsPerPoss;
-            if (subIdx < subSchedule.Length && elapsed >= subSchedule[subIdx])
+            if (homeSubIdx < homeSchedule.Length && elapsed >= homeSchedule[homeSubIdx])
             {
-                homeOn = DoSub(homeOn, homePS, homeMins);
-                awayOn = DoSub(awayOn, awayPS, awayMins);
-                subIdx++;
+                homeOn = DoSub(homeOn, homePS, homeMins, strictHome);
+                homeSubIdx++;
+            }
+            if (awaySubIdx < awaySchedule.Length && elapsed >= awaySchedule[awaySubIdx])
+            {
+                awayOn = DoSub(awayOn, awayPS, awayMins, strictAway);
+                awaySubIdx++;
             }
             foreach (int i in homeOn) homeMins[i] += minsPerPoss;
             foreach (int i in awayOn) awayMins[i] += minsPerPoss;
@@ -893,38 +940,85 @@ public static class GameSimulator
         return fouler.name;
     }
 
-    static HashSet<int> DoSub(HashSet<int> on, List<PlayerStatSnapshot> players, float[] quarterMinutes)
+    static HashSet<int> DoSub(HashSet<int> on, List<PlayerStatSnapshot> players, float[] quarterMinutes, bool strict = false)
     {
-        int maxPlayers = players.Count;
         int n = Mathf.Min(UnityEngine.Random.value < 0.65f ? 1 : 2, on.Count);
         if (n == 0) return on;
 
         var newSet = new HashSet<int>(on);
         for (int change = 0; change < n; change++)
         {
-            var outgoing = newSet
-                .Where(i => CanRemoveFromRotation(newSet, players, i))
+            var pick = PickSubstitution(newSet, players, quarterMinutes, strict);
+            if (pick.outgoing < 0 || pick.incoming < 0) break;
+
+            newSet.Remove(pick.outgoing);
+            newSet.Add(pick.incoming);
+        }
+
+        return newSet;
+    }
+
+    /// <summary>Decide un cambio (sale / entra) en una ventana de substitución. Es puro
+    /// y determinista para poder testearlo. Con <paramref name="strict"/> = true se
+    /// respetan los minutos configurados en ROTACIÓN (rotación vinculante).</summary>
+    public static (int outgoing, int incoming) PickSubstitution(
+        ICollection<int> on, List<PlayerStatSnapshot> players, float[] quarterMinutes, bool strict)
+    {
+        int maxPlayers = players.Count;
+        if (on.Count == 0) return (-1, -1);
+
+        int outgoing;
+        if (strict)
+        {
+            // Sale quien más se pasa de su objetivo; si nadie se pasa, quien más
+            // proporción de su plan lleva (para liberar minutos a quien espera).
+            outgoing = on
+                .Where(i => CanRemoveFromRotation(on, players, i, quarterMinutes, strict))
+                .OrderByDescending(i => Overage(players[i], quarterMinutes[i]))
+                .ThenByDescending(i => MinutesRatio(players[i], quarterMinutes[i]))
+                .ThenBy(i => players[i].target_minutes)
+                .ThenBy(i => players[i].overall)
+                .DefaultIfEmpty(-1)
+                .First();
+        }
+        else
+        {
+            outgoing = on
+                .Where(i => CanRemoveFromRotation(on, players, i, quarterMinutes, strict))
                 .OrderByDescending(i => MinutesRatio(players[i], quarterMinutes[i]))
                 .ThenBy(i => players[i].target_minutes)
                 .ThenBy(i => players[i].overall)
                 .DefaultIfEmpty(-1)
                 .First();
-            if (outgoing < 0) break;
+        }
+        if (outgoing < 0) return (-1, -1);
 
-            var incoming = Enumerable.Range(0, maxPlayers)
-                .Where(i => !newSet.Contains(i))
+        int incoming;
+        if (strict)
+        {
+            // Entra quien tiene minutos pendientes, ponderando el encaje posicional.
+            incoming = Enumerable.Range(0, maxPlayers)
+                .Where(i => !on.Contains(i))
+                .Where(i => Remaining(players[i], quarterMinutes[i]) > 0.01f)
+                .OrderByDescending(i => Remaining(players[i], quarterMinutes[i]) * FitFactor(players[i], players[outgoing]))
+                .ThenByDescending(i => Remaining(players[i], quarterMinutes[i]))
+                .ThenByDescending(i => players[i].overall)
+                .DefaultIfEmpty(-1)
+                .First();
+        }
+        else
+        {
+            incoming = Enumerable.Range(0, maxPlayers)
+                .Where(i => !on.Contains(i))
                 .OrderByDescending(i => PositionFit(players[i], players[outgoing]))
                 .ThenByDescending(i => MinutesNeed(players[i], quarterMinutes[i]))
                 .ThenByDescending(i => players[i].overall)
                 .DefaultIfEmpty(-1)
                 .First();
-            if (incoming < 0) break;
-
-            newSet.Remove(outgoing);
-            newSet.Add(incoming);
         }
+        if (incoming < 0) return (-1, -1);
 
-        return newSet;
+        return (outgoing, incoming);
     }
 
     static float MinutesRatio(PlayerStatSnapshot player, float currentQuarterMinutes)
@@ -938,11 +1032,41 @@ public static class GameSimulator
         return Mathf.Max(0, player.target_minutes - player.minutes - currentQuarterMinutes);
     }
 
-    static bool CanRemoveFromRotation(HashSet<int> on, List<PlayerStatSnapshot> players, int index)
+    // Minutos pendientes según el plan configurado (puede ser negativo si se pasó).
+    static float Remaining(PlayerStatSnapshot player, float currentQuarterMinutes)
+    {
+        return player.target_minutes - player.minutes - currentQuarterMinutes;
+    }
+
+    // Minutos jugados por encima del plan (negativo si aún le quedan).
+    static float Overage(PlayerStatSnapshot player, float currentQuarterMinutes)
+    {
+        return player.minutes + currentQuarterMinutes - player.target_minutes;
+    }
+
+    // Encaje posicional del que entra respecto al que sale, como factor del plan:
+    // posición exacta 1.0, mismo tipo interior/exterior 0.85, ninguno 0.6.
+    static float FitFactor(PlayerStatSnapshot incoming, PlayerStatSnapshot outgoing)
+    {
+        return PositionFit(incoming, outgoing) switch
+        {
+            3 => 1.00f,
+            2 => 0.85f,
+            _ => 0.60f
+        };
+    }
+
+    static bool CanRemoveFromRotation(ICollection<int> on, List<PlayerStatSnapshot> players, int index, float[] quarterMinutes, bool strict)
     {
         var player = players[index];
+        // Con rotación vinculante se usan los minutos efectivos (player.minutes solo se
+        // actualiza al cerrar el cuarto); la IA mantiene la regla de siempre.
+        float played = player.minutes;
+        if (strict && quarterMinutes != null && index < quarterMinutes.Length)
+            played += quarterMinutes[index];
+
         bool isStar = player.role == PlayerRole.Estrella || player.overall >= 85;
-        if (isStar && player.starter && player.minutes < player.target_minutes * 0.55f)
+        if (isStar && player.starter && played < player.target_minutes * 0.55f)
             return false;
 
         if (player.position is "C" or "PF")
@@ -970,13 +1094,23 @@ public static class GameSimulator
         return player.position == position || player.secondary_position == position;
     }
 
-    static float[] SubSchedule(int qNum) => qNum switch
+    static float[] SubSchedule(int qNum, bool dense = false)
     {
-        1 => new[] { 4f, 8f },
-        2 => new[] { 2f, 5f, 8f, 10.5f },
-        3 => new[] { 4f, 8f },
-        _ => new[] { 2f, 5f, 8f, 10.5f }
-    };
+        if (dense)
+        {
+            // Ventanas cada 1,5 min: suficientes cambios para cumplir los planes
+            // configurados (con las de siempre el quinteto inicial se quedaba +4 min).
+            return new[] { 1.5f, 3f, 4.5f, 6f, 7.5f, 9f, 10.5f };
+        }
+
+        return qNum switch
+        {
+            1 => new[] { 4f, 8f },
+            2 => new[] { 2f, 5f, 8f, 10.5f },
+            3 => new[] { 4f, 8f },
+            _ => new[] { 2f, 5f, 8f, 10.5f }
+        };
+    }
 
     static TeamStats CalcTeamStats(List<PlayerStatSnapshot> ps)
     {

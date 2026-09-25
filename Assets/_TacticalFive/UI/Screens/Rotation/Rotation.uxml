@@ -1,0 +1,195 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements"
+         xmlns:uie="UnityEditor.UIElements"
+         editor-extension-mode="False">
+
+    <Style src="Rotation.uss" />
+    <Style src="../Dashboard/Dashboard.uss" />
+    <Style src="../LegalNotice/LegalNotice.uss" />
+
+    <ui:VisualElement name="RotationRoot" class="rotation-root">
+
+        <!-- ══ MAIN CONTENT ══ -->
+        <ui:VisualElement name="RotationMain" class="rotation-main">
+
+            <!-- ══ SCREEN HEADER ══ -->
+            <ui:VisualElement class="screen-header panel--gold">
+                <ui:VisualElement class="screen-header-row">
+                    <ui:VisualElement name="ScreenIcon" class="screen-icon" />
+                    <ui:Label class="screen-title" text="ROTACIÓN DE MINUTOS" />
+                </ui:VisualElement>
+                <ui:Label name="ScreenSubtitle" class="screen-subtitle" text="" />
+            </ui:VisualElement>
+
+            <ui:VisualElement name="RotationContent" class="rotation-content">
+
+                <!-- ══ LEFT: LISTA DE MINUTOS ══ -->
+                <ui:VisualElement class="rotation-col rotation-col--left">
+
+                    <ui:VisualElement class="rotation-section">
+                        <ui:VisualElement class="rotation-section-header">
+                            <ui:Label class="rotation-section-title" text="TITULARES" />
+                            <ui:Label class="rotation-section-subtitle" text="5 JUGADORES" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="rotation-list-header">
+                            <ui:Label class="rot-col rot-col--name rot-col--head" text="JUGADOR" />
+                            <ui:Label class="rot-col rot-col--pos rot-col--head" text="POS" />
+                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="OVR" />
+                            <ui:Label class="rot-col rot-col--min rot-col--head" text="MINUTOS" />
+                            <ui:Label class="rot-col rot-col--val rot-col--head" text="MIN" />
+                            <ui:Label class="rot-col rot-col--sug rot-col--head" text="SUG." />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="StartersList" class="rotation-list" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="rotation-section">
+                        <ui:VisualElement class="rotation-section-header">
+                            <ui:Label class="rotation-section-title" text="BANQUILLO" />
+                            <ui:Label class="rotation-section-subtitle" text="7 JUGADORES" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="rotation-list-header">
+                            <ui:Label class="rot-col rot-col--name rot-col--head" text="JUGADOR" />
+                            <ui:Label class="rot-col rot-col--pos rot-col--head" text="POS" />
+                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="OVR" />
+                            <ui:Label class="rot-col rot-col--min rot-col--head" text="MINUTOS" />
+                            <ui:Label class="rot-col rot-col--val rot-col--head" text="MIN" />
+                            <ui:Label class="rot-col rot-col--sug rot-col--head" text="SUG." />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="BenchList" class="rotation-list" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- ══ RIGHT: RESUMEN + ACCIONES ══ -->
+                <ui:VisualElement class="rotation-col rotation-col--right">
+
+                    <!-- ══ MINUTOS POR POSICIÓN (solo lectura) ══ -->
+                    <ui:VisualElement class="rotation-section">
+                        <ui:VisualElement class="rotation-section-header">
+                            <ui:Label class="rotation-section-title" text="MINUTOS POR POSICIÓN" />
+                            <ui:Label class="rotation-section-subtitle" text="PRINCIPAL / SECUNDARIA" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="PosSummary" class="pos-summary" />
+                    </ui:VisualElement>
+
+                    <!-- ══ MINUTOS RESTANTES ══ -->
+                    <ui:VisualElement name="RemainingBox" class="remaining-box">
+                        <ui:Label name="RemainingCaption" class="remaining-caption" text="MINUTOS DEL PARTIDO" />
+                        <ui:Label name="RemainingValue" class="remaining-value" text="240" />
+                        <ui:Label name="RemainingHint" class="remaining-hint" text="" />
+                    </ui:VisualElement>
+
+                    <!-- ══ ACCIONES ══ -->
+                    <ui:VisualElement class="rotation-actions">
+                        <ui:Button name="AutoMinutesBtn" class="rot-btn rot-btn--primary rot-btn--lead" text="AUTO (240 MIN)" />
+                        <ui:Button name="ResetMinutesBtn" class="rot-btn rot-btn--danger" text="RESET (0 MIN)" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="rotation-help">
+                        <ui:Label class="rotation-help-text"
+                                  text="Arrastra la barra de cada jugador para fijar sus minutos objetivo. El simulador usa esos minutos para decidir quién descansa y quién entra. Si no configuras nada (convocatoria nueva), mantiene lo sugerido (SUG.)." />
+                        <ui:Label class="rotation-help-text"
+                                  text="AUTO reparte los 240 minutos del partido proporcionalmente a lo sugerido. RESET pone todos los minutos a 0 para que los repartas tú desde cero." />
+                        <ui:Label class="rotation-help-text"
+                                  text="Los lesionados y los asignados a la G-League no juegan: no cuentan en el reparto." />
+                        <ui:Label class="rotation-help-text rotation-help-text--last"
+                                  text="Estos minutos son vinculantes en tus partidos (mínimo 8 por jugador; 0 = no juega). Si la suma no llega a 240, juegan más los que estén en pista." />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+            </ui:VisualElement>
+
+        </ui:VisualElement>
+
+    </ui:VisualElement>
+
+    <!-- ══ MODAL CONFIGURACIÓN ══ -->
+    <ui:VisualElement name="ConfigModalOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigModalBox" class="modal-box">
+            <ui:Label class="modal-title" text="CONFIGURACIÓN" />
+            <ui:VisualElement class="modal-body">
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="AUDIO" />
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Volumen General" />
+                        <ui:VisualElement name="ConfigSliderMaster" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMaster" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMaster" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMaster" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Música" />
+                        <ui:VisualElement name="ConfigSliderMusic" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillMusic" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerMusic" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelMusic" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="settings-row">
+                        <ui:Label class="settings-label" text="Efectos" />
+                        <ui:VisualElement name="ConfigSliderSFX" class="custom-slider">
+                            <ui:VisualElement class="custom-slider-track" />
+                            <ui:VisualElement name="ConfigFillSFX" class="custom-slider-fill" />
+                            <ui:VisualElement name="ConfigDraggerSFX" class="custom-slider-dragger" />
+                        </ui:VisualElement>
+                        <ui:Label name="ConfigLabelSFX" class="settings-value" text="100%" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="GRÁFICOS" />
+                    <ui:VisualElement class="settings-quality-row">
+                        <ui:Label class="settings-label" text="Calidad" />
+                        <ui:VisualElement class="settings-quality-options">
+                            <ui:Button name="ConfigBtnQualityLow" class="settings-quality-btn" text="Baja" />
+                            <ui:Button name="ConfigBtnQualityMedium" class="settings-quality-btn" text="Media" />
+                            <ui:Button name="ConfigBtnQualityHigh" class="settings-quality-btn" text="Alta" />
+                            <ui:Button name="ConfigBtnQualityUltra" class="settings-quality-btn" text="Ultra" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="settings-section">
+                    <ui:Label class="settings-section-title" text="JUEGO" />
+                    <ui:Button name="ConfigBtnMainMenu" class="settings-btn settings-btn--secondary" text="VOLVER AL MENÚ PRINCIPAL" />
+                    <ui:Button name="ConfigBtnExit" class="settings-btn settings-btn--danger" text="SALIR DEL JUEGO" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:Button name="ConfigBtnCerrar" class="modal-close" text="CERRAR" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ══ MODAL CONFIRMAR VOLVER AL MENÚ PRINCIPAL ══ -->
+    <ui:VisualElement name="ConfigMainMenuConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigMainMenuConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="VOLVER AL MENÚ PRINCIPAL" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres volver al menú principal?" />
+                <ui:Label class="modal-paragraph" text="Se perderá el progreso no guardado de la partida actual. Asegúrate de haber guardado antes de continuar." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnMainMenuNo" class="modal-btn modal-btn--secondary" text="NO, QUEDARME" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnMainMenuYes" class="modal-btn modal-btn--danger" text="SÍ, VOLVER" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+    <!-- ══ MODAL CONFIRMAR SALIR DEL JUEGO ══ -->
+    <ui:VisualElement name="ConfigExitConfirmOverlay" class="modal-overlay">
+        <ui:VisualElement name="ConfigExitConfirmBox" class="modal-box">
+            <ui:Label class="modal-title" text="SALIR DEL JUEGO" />
+            <ui:VisualElement class="modal-body">
+                <ui:Label class="modal-paragraph modal-paragraph--highlight" text="¿Estás seguro de que quieres salir del juego?" />
+                <ui:Label class="modal-paragraph" text="Tu progreso se guarda automáticamente durante la partida. Al volver a cargarla continuarás desde el último estado guardado." />
+            </ui:VisualElement>
+            <ui:VisualElement class="modal-actions">
+                <ui:Button name="ConfigBtnExitNo" class="modal-btn modal-btn--secondary" text="NO" />
+                <ui:VisualElement class="modal-spacer" />
+                <ui:Button name="ConfigBtnExitYes" class="modal-btn modal-btn--danger" text="SÍ, SALIR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+
+</ui:UXML>
