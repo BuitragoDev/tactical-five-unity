@@ -93,6 +93,9 @@ public static class PlayerPhotoHelper
     }
 
     // ── FOTO CUSTOM (Editor) ──────────────────────────────────────────
+    public const int PhotoWidth = 256;
+    public const int PhotoHeight = 256;
+
     public static bool ValidatePhotoFile(string path, out string error)
     {
         error = null;
@@ -101,7 +104,7 @@ public static class PlayerPhotoHelper
             error = "No se encontró el archivo.";
             return false;
         }
-        if (!path.ToLowerInvariant().EndsWith(".png"))
+        if (!path.ToLowerInvariant().EndsWith(".png") || !HasPngSignature(path))
         {
             error = "La imagen del jugador debe estar en formato PNG.";
             return false;
@@ -114,12 +117,25 @@ public static class PlayerPhotoHelper
         }
         int w = tex.width, h = tex.height;
         Object.Destroy(tex);
-        if (w < 64 || h < 64 || w > 2000 || h > 2000)
+        if (w != PhotoWidth || h != PhotoHeight)
         {
-            error = $"La imagen debe medir entre 64 y 2000 px (actual: {w}×{h}).";
+            error = $"La imagen del jugador debe medir {PhotoWidth}×{PhotoHeight} px (actual: {w}×{h}).";
             return false;
         }
         return true;
+    }
+
+    static bool HasPngSignature(string path)
+    {
+        try
+        {
+            using var fs = File.OpenRead(path);
+            var sig = new byte[8];
+            if (fs.Read(sig, 0, 8) < 8) return false;
+            return sig[0] == 0x89 && sig[1] == 0x50 && sig[2] == 0x4E && sig[3] == 0x47
+                && sig[4] == 0x0D && sig[5] == 0x0A && sig[6] == 0x1A && sig[7] == 0x0A;
+        }
+        catch { return false; }
     }
 
     /// <summary>Guarda la foto custom del jugador en el ámbito activo (template o

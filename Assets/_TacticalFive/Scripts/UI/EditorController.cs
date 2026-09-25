@@ -1229,7 +1229,7 @@ public class EditorController : UIScreenController
 
     void ChangePlayerPhoto(PlayerData p)
     {
-        PickImage("SELECCIONA UNA FOTO PNG (mín. 64 px)", path =>
+        PickImage("SELECCIONA UNA FOTO PNG (256 × 256)", path =>
         {
             if (!PlayerPhotoHelper.ValidatePhotoFile(path, out var error))
             {
