@@ -78,6 +78,9 @@ public class EditorController : UIScreenController
     // Foto elegida pero aún sin guardar (se aplica al pulsar GUARDAR JUGADOR).
     private string _pendingPhotoPath;
 
+    // Modal de selección de país.
+    private VisualElement _countryOverlay;
+
     // Image cache (team list logos only)
     private Dictionary<string, Sprite> _logoSprites = new();
     private VisualElement _dropdownOverlay;
@@ -131,6 +134,7 @@ public class EditorController : UIScreenController
 
     void OnDisable()
     {
+        CloseCountryModal();
         DatabaseManager.Instance?.CloseTemplateSession();
     }
 
@@ -925,8 +929,28 @@ public class EditorController : UIScreenController
         SetLettersOnly(_playerFName, 20);
         _playerLName = AddInput(infoLeft, "Apellidos", p.last_name);
         SetLettersOnly(_playerLName, 25);
-        _playerNat = AddInput(infoLeft, "País", p.nationality);
-        SetAbbreviationInput(_playerNat);
+
+        // País: caja de solo lectura + botón CAMBIAR (modal con la lista de países).
+        var natRow = new VisualElement();
+        natRow.AddToClassList("editor-field-row");
+        var natLbl = new Label("País");
+        natLbl.AddToClassList("editor-field-label");
+        natRow.Add(natLbl);
+
+        _playerNat = new TextField { value = p.nationality };
+        _playerNat.AddToClassList("editor-field-input");
+        _playerNat.AddToClassList("editor-field-input--narrow");
+        _playerNat.isReadOnly = true;
+        natRow.Add(_playerNat);
+
+        var natBtn = new Button();
+        natBtn.text = "CAMBIAR";
+        natBtn.AddToClassList("editor-field-btn");
+        natBtn.clicked += () => { PlayClick(); OpenCountryModal(); };
+        CursorManager.Instance?.RegisterHandCursor(natBtn);
+        natRow.Add(natBtn);
+
+        infoLeft.Add(natRow);
 
         var infoRight = new VisualElement();
         infoRight.AddToClassList("editor-panel-col");
@@ -1239,6 +1263,104 @@ public class EditorController : UIScreenController
             _pendingPhotoPath = path;
             BuildPlayerDetail();
         });
+    }
+
+    // ── MODAL DE PAÍS ─────────────────────────────────────────────────
+    void OpenCountryModal()
+    {
+        CloseCountryModal();
+
+        _countryOverlay = new VisualElement();
+        _countryOverlay.AddToClassList("editor-browser-overlay");
+
+        var box = new VisualElement();
+        box.AddToClassList("editor-country-box");
+        _countryOverlay.Add(box);
+
+        var title = new Label("SELECCIONA UN PAÍS");
+        title.AddToClassList("editor-browser-title");
+        box.Add(title);
+
+        var scrollRow = new VisualElement();
+        scrollRow.AddToClassList("editor-country-scroll-row");
+
+        var viewport = new VisualElement();
+        viewport.AddToClassList("editor-country-viewport");
+        var content = new VisualElement();
+        content.AddToClassList("editor-country-content");
+        viewport.Add(content);
+        scrollRow.Add(viewport);
+
+        var track = new VisualElement();
+        track.AddToClassList("editor-list-scrollbar");
+        var thumb = new VisualElement();
+        thumb.AddToClassList("editor-list-scrollbar-thumb");
+        track.Add(thumb);
+        scrollRow.Add(track);
+
+        box.Add(scrollRow);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("editor-browser-actions");
+        var cancel = new Button();
+        cancel.text = "CANCELAR";
+        cancel.AddToClassList("editor-browser-btn");
+        cancel.AddToClassList("editor-browser-btn--cancel");
+        cancel.clicked += () => { PlayClick(); CloseCountryModal(); };
+        CursorManager.Instance?.RegisterHandCursor(cancel);
+        actions.Add(cancel);
+        box.Add(actions);
+
+        // Lista en varias columnas, ordenada por nombre.
+        var countries = CountryCodes.Names.OrderBy(kv => kv.Value).ToList();
+        const int columns = 4;
+        for (int i = 0; i < countries.Count; i += columns)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("editor-country-row");
+            for (int c = 0; c < columns; c++)
+            {
+                int idx = i + c;
+                if (idx < countries.Count)
+                {
+                    var kv = countries[idx];
+                    string code = kv.Key;
+                    var btn = new Button();
+                    btn.text = $"{kv.Key}  {kv.Value}";
+                    btn.AddToClassList("editor-country-btn");
+                    btn.clicked += () =>
+                    {
+                        PlayClick();
+                        _playerNat.value = code;
+                        CloseCountryModal();
+                    };
+                    CursorManager.Instance?.RegisterHandCursor(btn);
+                    row.Add(btn);
+                }
+                else
+                {
+                    var filler = new VisualElement();
+                    filler.AddToClassList("editor-country-btn");
+                    filler.AddToClassList("editor-country-btn--empty");
+                    row.Add(filler);
+                }
+            }
+            content.Add(row);
+        }
+
+        _root.Add(_countryOverlay);
+        _countryOverlay.BringToFront();
+
+        CustomScrollbar.Bind(viewport, content, track, thumb);
+    }
+
+    void CloseCountryModal()
+    {
+        if (_countryOverlay != null)
+        {
+            _countryOverlay.RemoveFromHierarchy();
+            _countryOverlay = null;
+        }
     }
 
     void SavePlayer()

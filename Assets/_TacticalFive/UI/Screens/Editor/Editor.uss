@@ -1253,3 +1253,99 @@
     color: rgb(255, 255, 255);
 }
 
+/* ══ CAMPO PAÍS (solo lectura + botón) ══ */
+.editor-field-input--narrow {
+    flex-grow: 0;
+    flex-basis: auto;
+    width: 90px;
+    min-width: 0;
+}
+
+.editor-field-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(100, 200, 140);
+    background-color: rgba(39, 174, 96, 0.10);
+    border-width: 2px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 8px;
+    padding: 8px 16px;
+    margin-left: 8px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+
+.editor-field-btn:hover {
+    background-color: rgba(39, 174, 96, 0.25);
+    color: rgb(150, 220, 180);
+}
+
+/* ══ MODAL DE PAÍS ══ */
+.editor-country-box {
+    width: 900px;
+    height: 640px;
+    background-color: rgb(13, 14, 18);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 12px;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.editor-country-scroll-row {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.editor-country-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.editor-country-content {
+    flex-direction: column;
+    flex-shrink: 0;
+    padding: 6px 4px;
+}
+
+.editor-country-row {
+    flex-direction: row;
+}
+
+.editor-country-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(208, 216, 232);
+    background-color: rgb(22, 26, 36);
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin: 3px;
+    height: 34px;
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    -unity-text-align: middle-left;
+}
+
+.editor-country-btn:hover {
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+
+.editor-country-btn--empty {
+    background-color: rgba(0, 0, 0, 0);
+    border-width: 0;
+}
+
