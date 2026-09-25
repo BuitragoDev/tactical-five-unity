@@ -1285,7 +1285,8 @@
 /* ══ MODAL DE PAÍS ══ */
 .editor-country-box {
     width: 900px;
-    height: 640px;
+    max-width: 92%;
+    height: 80%;
     background-color: rgb(13, 14, 18);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
