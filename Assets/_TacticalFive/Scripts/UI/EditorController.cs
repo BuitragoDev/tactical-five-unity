@@ -33,6 +33,7 @@ public class EditorController : UIScreenController
     private int _selectedTeamId = -1;
     private List<TeamData> _allTeams;
     private readonly Dictionary<int, VisualElement> _teamListLogoElems = new();
+    private CustomScrollbar.Handle _teamScroll;
 
     // Team detail fields
     private VisualElement _teamDetail;
@@ -54,6 +55,7 @@ public class EditorController : UIScreenController
     private PlayerData _selectedPlayer;
     private int _selectedPlayerId = -1;
     private List<PlayerData> _allPlayers;
+    private CustomScrollbar.Handle _playerScroll;
 
     // Player detail fields
     private VisualElement _playerDetail;
@@ -180,6 +182,14 @@ public class EditorController : UIScreenController
         _playerList = _root.Q<VisualElement>("PlayerList");
         _playerDetail = _root.Q<VisualElement>("PlayerDetail");
         _playerDetailPanel = _playerPanel.Q<VisualElement>(className: "editor-detail-panel");
+
+        // Barra de scroll propia (se enlaza una sola vez; los elementos persisten).
+        _teamScroll ??= CustomScrollbar.Bind(
+            _root.Q<VisualElement>("TeamViewport"), _teamList,
+            _root.Q<VisualElement>("TeamScrollTrack"), _root.Q<VisualElement>("TeamScrollThumb"));
+        _playerScroll ??= CustomScrollbar.Bind(
+            _root.Q<VisualElement>("PlayerViewport"), _playerList,
+            _root.Q<VisualElement>("PlayerScrollTrack"), _root.Q<VisualElement>("PlayerScrollThumb"));
     }
 
     CustomDropdown WrapFilterDropdown(string name)
@@ -475,6 +485,7 @@ public class EditorController : UIScreenController
         int sel = filtered.FindIndex(t => t.id == _selectedTeamId);
         if (sel < 0 && filtered.Count > 0) sel = 0;
         if (sel >= 0) SelectTeam(filtered[sel], items[sel]);
+        CustomScrollbar.Reset(_teamScroll);
     }
 
     void FilterTeamList()
@@ -846,6 +857,7 @@ public class EditorController : UIScreenController
         int sel = results.FindIndex(p => p.id == _selectedPlayerId);
         if (sel < 0 && results.Count > 0) sel = 0;
         if (sel >= 0) SelectPlayer(results[sel], items[sel]);
+        CustomScrollbar.Reset(_playerScroll);
     }
 
     void FilterPlayerList()
