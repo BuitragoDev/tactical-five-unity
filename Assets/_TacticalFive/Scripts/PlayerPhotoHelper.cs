@@ -10,8 +10,19 @@ public static class PlayerPhotoHelper
         return Path.Combine(BaseDir, slot.ToString());
     }
 
+    // Foto personalizada del ámbito activo (template o save_{n}).
+    static string CustomPhotoPath(int playerId) =>
+        Path.Combine(CustomScopes.ActiveRoot, "PlayerPhotos", $"{playerId}.png");
+
     public static Texture2D Load(int playerId, string photoField)
     {
+        // 0. Foto personalizada del ámbito activo (tiene prioridad sobre Resources).
+        if (File.Exists(CustomPhotoPath(playerId)))
+        {
+            var custom = LoadTexture(CustomPhotoPath(playerId));
+            if (custom != null) return custom;
+        }
+
         // 1. Check Resources/PlayerPhotos/{id} (fotos manuales del seed)
         Texture2D res = Resources.Load<Texture2D>($"PlayerPhotos/{playerId}");
         if (res != null) return res;
@@ -28,24 +39,33 @@ public static class PlayerPhotoHelper
         string slotPath = Path.Combine(SlotDir(slot), $"{playerId}.png");
         if (File.Exists(slotPath))
         {
-            byte[] bytes = File.ReadAllBytes(slotPath);
-            Texture2D tex = new Texture2D(2, 2);
-            if (tex.LoadImage(bytes))
-                return tex;
+            var tex = LoadTexture(slotPath);
+            if (tex != null) return tex;
         }
 
         // 4. Check persistent data root (retrocompatibilidad partidas antiguas)
         string rootPath = Path.Combine(BaseDir, $"{playerId}.png");
         if (File.Exists(rootPath))
         {
-            byte[] bytes = File.ReadAllBytes(rootPath);
-            Texture2D tex = new Texture2D(2, 2);
-            if (tex.LoadImage(bytes))
-                return tex;
+            var tex = LoadTexture(rootPath);
+            if (tex != null) return tex;
         }
 
         // 5. Fallback
         return Resources.Load<Texture2D>("PlayerPhotos/default");
+    }
+
+    static Texture2D LoadTexture(string path)
+    {
+        try
+        {
+            byte[] bytes = File.ReadAllBytes(path);
+            Texture2D tex = new Texture2D(2, 2);
+            if (tex.LoadImage(bytes)) return tex;
+            Object.Destroy(tex);
+            return null;
+        }
+        catch { return null; }
     }
 
     public static void CreateRookiePhoto(int playerId)
@@ -70,5 +90,54 @@ public static class PlayerPhotoHelper
         Directory.CreateDirectory(slotDir);
         File.WriteAllBytes(Path.Combine(slotDir, $"{playerId}.png"), bytes);
         Object.DestroyImmediate(copy);
+    }
+
+    // ── FOTO CUSTOM (Editor) ──────────────────────────────────────────
+    public static bool ValidatePhotoFile(string path, out string error)
+    {
+        error = null;
+        if (string.IsNullOrEmpty(path) || !File.Exists(path))
+        {
+            error = "No se encontró el archivo.";
+            return false;
+        }
+        if (!path.ToLowerInvariant().EndsWith(".png"))
+        {
+            error = "La imagen del jugador debe estar en formato PNG.";
+            return false;
+        }
+        var tex = LoadTexture(path);
+        if (tex == null)
+        {
+            error = "No se pudo leer la imagen.";
+            return false;
+        }
+        int w = tex.width, h = tex.height;
+        Object.Destroy(tex);
+        if (w < 64 || h < 64 || w > 2000 || h > 2000)
+        {
+            error = $"La imagen debe medir entre 64 y 2000 px (actual: {w}×{h}).";
+            return false;
+        }
+        return true;
+    }
+
+    /// <summary>Guarda la foto custom del jugador en el ámbito activo (template o
+    /// save_{n}). Tiene prioridad sobre Resources al cargar.</summary>
+    public static bool SetPhoto(int playerId, string sourcePath, out string error)
+    {
+        if (!ValidatePhotoFile(sourcePath, out error)) return false;
+        try
+        {
+            string dir = Path.Combine(CustomScopes.ActiveRoot, "PlayerPhotos");
+            Directory.CreateDirectory(dir);
+            File.Copy(sourcePath, Path.Combine(dir, $"{playerId}.png"), true);
+            return true;
+        }
+        catch (System.Exception ex)
+        {
+            error = "No se pudo guardar la imagen: " + ex.Message;
+            return false;
+        }
     }
 }

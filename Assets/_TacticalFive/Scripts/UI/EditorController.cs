@@ -52,21 +52,27 @@ public class EditorController : UIScreenController
     private TextField _playerSearch;
     private VisualElement _playerList;
     private PlayerData _selectedPlayer;
+    private int _selectedPlayerId = -1;
     private List<PlayerData> _allPlayers;
 
     // Player detail fields
     private VisualElement _playerDetail;
     private VisualElement _playerDetailPanel;
     private TextField _playerFName, _playerLName;
-    private CustomDropdown _playerPosDropdown, _playerTeamDropdown, _playerRoleDropdown;
+    private CustomDropdown _playerPosDropdown, _playerTeamDropdown, _playerRoleDropdown, _playerRookieDropdown;
     private TextField _playerAge, _playerNat, _playerHt, _playerWt;
     private TextField _playerPot;
     private TextField _playerSpeed, _playerShooting, _player3pt, _playerPassing;
     private TextField _playerDribbling, _playerDefense, _playerRebounding;
     private TextField _playerAthleticism, _playerIq, _playerSteals, _playerBlocks;
     private TextField _playerMorale;
-    private TextField _playerSalary, _playerContract;
-    private Label _playerOverallDisplay;
+    private TextField _playerSalary, _playerContract, _playerGuaranteed;
+    private TextField _playerRings, _playerFinalsMvps, _playerFinalsPlayed, _playerSeasonMvps;
+    private bool _playerTeamOptionOn, _playerPlayerOptionOn, _playerTwoWayOn;
+    private VisualElement _playerTeamOptionBox, _playerPlayerOptionBox;
+
+    // Foto elegida pero aún sin guardar (se aplica al pulsar GUARDAR JUGADOR).
+    private string _pendingPhotoPath;
 
     // Image cache (team list logos only)
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -806,13 +812,21 @@ public class EditorController : UIScreenController
         var results = query.OrderBy(p => _allTeams.Find(t => t.id == p.team_id)?.abbreviation ?? "ZZZ")
                           .ThenBy(p => p.last_name).ToList();
 
+        var items = new List<VisualElement>();
         for (int i = 0; i < results.Count; i++)
         {
             var player = results[i];
             var item = new VisualElement();
             item.AddToClassList("editor-list-item");
 
-            var abbr = _allTeams.Find(t => t.id == player.team_id)?.abbreviation ?? "FA";
+            var team = _allTeams.Find(t => t.id == player.team_id);
+            var logo = new VisualElement();
+            logo.AddToClassList("editor-list-item-logo");
+            if (team != null && _logoSprites.TryGetValue(team.logo ?? "", out var sprite))
+                logo.style.backgroundImage = new StyleBackground(sprite);
+            item.Add(logo);
+
+            var abbr = team?.abbreviation ?? "FA";
             var nameLbl = new Label($"{player.first_name} {player.last_name}");
             nameLbl.AddToClassList("editor-list-item-name");
             var subLbl = new Label($"{abbr} | {PositionCodes.GetShort(player.position)} | {player.overall}");
@@ -825,10 +839,13 @@ public class EditorController : UIScreenController
             item.RegisterCallback<ClickEvent>(_ => SelectPlayer(captured, capturedItem));
             CursorManager.Instance?.RegisterHandCursor(item);
             _playerList.Add(item);
-
-            if (i == 0)
-                SelectPlayer(captured, capturedItem);
+            items.Add(item);
         }
+
+        // Mantener el jugador seleccionado entre visitas; si no está, el primero.
+        int sel = results.FindIndex(p => p.id == _selectedPlayerId);
+        if (sel < 0 && results.Count > 0) sel = 0;
+        if (sel >= 0) SelectPlayer(results[sel], items[sel]);
     }
 
     void FilterPlayerList()
@@ -838,7 +855,9 @@ public class EditorController : UIScreenController
 
     void SelectPlayer(PlayerData player, VisualElement listItem)
     {
+        _pendingPhotoPath = null;
         _selectedPlayer = player;
+        _selectedPlayerId = player.id;
         foreach (var child in _playerList.Children())
             child.RemoveFromClassList("editor-list-item--selected");
         if (listItem != null)
@@ -852,91 +871,361 @@ public class EditorController : UIScreenController
         _playerDetail.Clear();
 
         var p = _selectedPlayer;
-        AddDetailTitle(_playerDetail, $"EDITANDO: {p.first_name} {p.last_name}");
+        var team = _allTeams.Find(t => t.id == p.team_id);
 
-        var columnsRow = new VisualElement();
-        columnsRow.AddToClassList("editor-columns-row");
+        var row = new VisualElement();
+        row.AddToClassList("editor-player-row");
 
-        // ── LEFT COLUMN ──
         var leftCol = new VisualElement();
-        leftCol.AddToClassList("editor-column");
-
-        AddSectionTitle(leftCol, "INFORMACIÓN BÁSICA");
-        _playerFName = AddInput(leftCol, "Nombre", p.first_name);
-        SetLettersOnly(_playerFName);
-        _playerLName = AddInput(leftCol, "Apellido", p.last_name);
-        SetLettersOnly(_playerLName);
-        _playerPosDropdown = AddDropdown(leftCol, "Posición", new[] { "Base", "Escolta", "Alero", "Ala-Pívot", "Pívot" }, _posToDisplay.TryGetValue(p.position, out var posD) ? posD : p.position);
-        _playerAge = AddInput(leftCol, "Edad", p.age.ToString());
-        SetDigitsOnly(_playerAge, 2);
-        _playerNat = AddInput(leftCol, "Nacionalidad", p.nationality);
-        SetAbbreviationInput(_playerNat);
-        _playerHt = AddInput(leftCol, "Altura (cm)", p.height_cm.ToString());
-        SetDigitsOnly(_playerHt, 3);
-        _playerWt = AddInput(leftCol, "Peso (kg)", p.weight_kg.ToString());
-        SetDigitsOnly(_playerWt, 3);
-
-        var teamChoices = new List<string> { "0 - AGENTE LIBRE" };
-        teamChoices.AddRange(_allTeams.Select(t => $"{t.id} - {t.name}"));
-        var teamAbbr = _allTeams.Find(t => t.id == p.team_id);
-        var teamDefault = p.team_id == 0 ? "0 - AGENTE LIBRE" : $"{p.team_id} - {teamAbbr?.name ?? ""}";
-        _playerTeamDropdown = AddDropdown(leftCol, "Equipo", teamChoices.ToArray(), teamDefault);
-        AddDivider(leftCol);
-
-        AddSectionTitle(leftCol, "CONTRATO");
-        _playerSalary = AddInput(leftCol, "Salario", p.salary.ToString());
-        SetDigitsOnly(_playerSalary);
-        _playerContract = AddInput(leftCol, "Años", p.contract_years.ToString());
-        SetDigitsOnly(_playerContract, 1);
-
-        // ── RIGHT COLUMN ──
+        leftCol.AddToClassList("editor-player-col-left");
         var rightCol = new VisualElement();
-        rightCol.AddToClassList("editor-column");
+        rightCol.AddToClassList("editor-player-col-right");
 
-        AddSectionTitle(rightCol, "VALORACIONES");
-        _playerOverallDisplay = new Label($"Media: {p.overall}  /  Potencial: {p.potential}");
-        _playerOverallDisplay.AddToClassList("editor-field-display");
-        var ovrRow = new VisualElement();
-        ovrRow.AddToClassList("editor-field-row");
-        ovrRow.style.paddingLeft = 140;
-        ovrRow.Add(_playerOverallDisplay);
-        rightCol.Add(ovrRow);
+        // ── BANNER ──
+        leftCol.Add(BuildPlayerBanner(p, team));
 
-        _playerPot = AddInput(rightCol, "Potencial", p.potential.ToString());
-        SetDigitsOnly(_playerPot, 2);
-        _playerSpeed = AddInput(rightCol, "Velocidad", p.speed.ToString());
-        SetDigitsOnly(_playerSpeed, 2);
-        _playerShooting = AddInput(rightCol, "Tiro", p.shooting.ToString());
-        SetDigitsOnly(_playerShooting, 2);
-        _player3pt = AddInput(rightCol, "Triple", p.three_point.ToString());
-        SetDigitsOnly(_player3pt, 2);
-        _playerPassing = AddInput(rightCol, "Pase", p.passing.ToString());
-        SetDigitsOnly(_playerPassing, 2);
-        _playerDribbling = AddInput(rightCol, "Regate", p.dribbling.ToString());
-        SetDigitsOnly(_playerDribbling, 2);
-        _playerDefense = AddInput(rightCol, "Defensa", p.defense.ToString());
-        SetDigitsOnly(_playerDefense, 2);
-        _playerRebounding = AddInput(rightCol, "Rebote", p.rebounding.ToString());
-        SetDigitsOnly(_playerRebounding, 2);
-        _playerAthleticism = AddInput(rightCol, "Atletismo", p.athleticism.ToString());
-        SetDigitsOnly(_playerAthleticism, 2);
-        _playerIq = AddInput(rightCol, "IQ", p.iq.ToString());
-        SetDigitsOnly(_playerIq, 2);
-        _playerSteals = AddInput(rightCol, "Robos", p.steals.ToString());
-        SetDigitsOnly(_playerSteals, 2);
-        _playerBlocks = AddInput(rightCol, "Tapones", p.blocks.ToString());
-        SetDigitsOnly(_playerBlocks, 2);
-        _playerMorale = AddInput(rightCol, "Moral", p.morale.ToString());
-        SetDigitsOnly(_playerMorale, 2);
+        // ── FILA: POSICIÓN | EQUIPO | ROOKIE ──
+        leftCol.Add(BuildPlayerTopRow(p));
 
+        // ── INFORMACIÓN PERSONAL ──
+        var infoPanel = new VisualElement();
+        infoPanel.AddToClassList("editor-section-panel");
+        infoPanel.AddToClassList("editor-player-panel");
+        AddPanelHeader(infoPanel, "INFORMACIÓN PERSONAL");
+
+        var infoFields = new VisualElement();
+        infoFields.AddToClassList("editor-panel-fields");
+
+        var infoLeft = new VisualElement();
+        infoLeft.AddToClassList("editor-panel-col");
+        _playerFName = AddInput(infoLeft, "Nombre", p.first_name);
+        SetLettersOnly(_playerFName, 20);
+        _playerLName = AddInput(infoLeft, "Apellidos", p.last_name);
+        SetLettersOnly(_playerLName, 25);
+        _playerNat = AddInput(infoLeft, "País", p.nationality);
+        SetAbbreviationInput(_playerNat);
+
+        var infoRight = new VisualElement();
+        infoRight.AddToClassList("editor-panel-col");
+        _playerHt = AddInput(infoRight, "Altura (cm)", p.height_cm.ToString());
+        SetDigitsOnly(_playerHt, 3);
+        _playerWt = AddInput(infoRight, "Peso (kg)", p.weight_kg.ToString());
+        SetDigitsOnly(_playerWt, 3);
+        _playerAge = AddInput(infoRight, "Edad", p.age.ToString());
+        SetDigitsOnly(_playerAge, 2);
         string[] roleChoices = { "Estrella", "Titular", "Banquillo", "Último recurso" };
-        _playerRoleDropdown = AddDropdown(rightCol, "Rol", roleChoices, roleChoices[(int)p.role]);
+        _playerRoleDropdown = AddDropdown(infoRight, "Rol", roleChoices, roleChoices[(int)p.role]);
 
-        columnsRow.Add(leftCol);
-        columnsRow.Add(rightCol);
-        _playerDetail.Add(columnsRow);
+        infoFields.Add(infoLeft);
+        infoFields.Add(infoRight);
+        infoPanel.Add(infoFields);
+        leftCol.Add(infoPanel);
+
+        // ── HISTORIAL ──
+        var histPanel = new VisualElement();
+        histPanel.AddToClassList("editor-section-panel");
+        histPanel.AddToClassList("editor-player-panel");
+        AddPanelHeader(histPanel, "HISTORIAL");
+
+        var histFields = new VisualElement();
+        histFields.AddToClassList("editor-panel-fields");
+        var histLeft = new VisualElement();
+        histLeft.AddToClassList("editor-panel-col");
+        _playerRings = AddInput(histLeft, "Anillos", p.rings.ToString());
+        SetDigitsOnly(_playerRings, 2);
+        _playerFinalsMvps = AddInput(histLeft, "MVP de las Finales", p.finals_mvps.ToString());
+        SetDigitsOnly(_playerFinalsMvps, 2);
+        var histRight = new VisualElement();
+        histRight.AddToClassList("editor-panel-col");
+        _playerFinalsPlayed = AddInput(histRight, "Finales jugadas", p.finals_played.ToString());
+        SetDigitsOnly(_playerFinalsPlayed, 2);
+        _playerSeasonMvps = AddInput(histRight, "MVP de la Temporada", p.season_mvps.ToString());
+        SetDigitsOnly(_playerSeasonMvps, 2);
+        histFields.Add(histLeft);
+        histFields.Add(histRight);
+        histPanel.Add(histFields);
+        leftCol.Add(histPanel);
+
+        // ── COLUMNA DERECHA ──
+        rightCol.Add(BuildPlayerPhotoPanel(p));
+        rightCol.Add(BuildPlayerAttributesPanel(p));
+        rightCol.Add(BuildPlayerContractPanel(p));
+
+        row.Add(leftCol);
+        row.Add(rightCol);
+        _playerDetail.Add(row);
 
         AddSaveBtn(_playerDetailPanel, "GUARDAR JUGADOR", SavePlayer, "SaveBtn");
+    }
+
+    VisualElement BuildPlayerBanner(PlayerData p, TeamData team)
+    {
+        var banner = new VisualElement();
+        banner.AddToClassList("editor-player-banner");
+
+        var bg = new VisualElement();
+        bg.AddToClassList("editor-player-banner-bg");
+        if (team != null)
+        {
+            var arena = TeamImages.Arena(team.logo);
+            if (arena != null) bg.style.backgroundImage = new StyleBackground(arena);
+        }
+        banner.Add(bg);
+
+        var content = new VisualElement();
+        content.AddToClassList("editor-player-banner-content");
+
+        var photo = new VisualElement();
+        photo.AddToClassList("editor-player-banner-photo");
+        SetPlayerPhoto(photo, p);
+        content.Add(photo);
+
+        var info = new VisualElement();
+        info.AddToClassList("editor-player-banner-info");
+
+        var nameRow = new VisualElement();
+        nameRow.AddToClassList("editor-player-banner-name-row");
+        var name = new Label($"{p.first_name} {p.last_name}".ToUpper());
+        name.AddToClassList("editor-player-banner-name");
+        nameRow.Add(name);
+        var badge = new Label($"{PositionCodes.GetShort(p.position)} | {p.overall}");
+        badge.AddToClassList("editor-player-banner-badge");
+        nameRow.Add(badge);
+        info.Add(nameRow);
+
+        var teamRow = new VisualElement();
+        teamRow.AddToClassList("editor-player-banner-team");
+        var teamLogo = new VisualElement();
+        teamLogo.AddToClassList("editor-player-banner-team-logo");
+        if (team != null)
+        {
+            var logo = TeamImages.Logo(64, team.logo);
+            if (logo != null) teamLogo.style.backgroundImage = new StyleBackground(logo);
+        }
+        teamRow.Add(teamLogo);
+        var teamName = new Label(team != null ? team.name : "AGENTE LIBRE");
+        teamName.AddToClassList("editor-player-banner-team-name");
+        teamRow.Add(teamName);
+        info.Add(teamRow);
+
+        content.Add(info);
+        banner.Add(content);
+        return banner;
+    }
+
+    void SetPlayerPhoto(VisualElement elem, PlayerData p)
+    {
+        if (_pendingPhotoPath != null)
+        {
+            var sp = TeamImages.PreviewSprite(_pendingPhotoPath);
+            if (sp != null) { elem.style.backgroundImage = new StyleBackground(sp); return; }
+        }
+        var tex = PlayerPhotoHelper.Load(p.id, p.photo);
+        if (tex != null) elem.style.backgroundImage = new StyleBackground(tex);
+    }
+
+    VisualElement BuildPlayerTopRow(PlayerData p)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("editor-topinfo-row");
+
+        var posBox = MakeTopInfoBox("POSICIÓN");
+        _playerPosDropdown = AddDropdownBox(posBox, new[] { "Base", "Escolta", "Alero", "Ala-Pívot", "Pívot" }, _posToDisplay.TryGetValue(p.position, out var posD) ? posD : p.position);
+        row.Add(posBox);
+
+        var teamBox = MakeTopInfoBox("EQUIPO");
+        var teamChoices = new List<string> { "0 - AGENTE LIBRE" };
+        teamChoices.AddRange(_allTeams.Select(t => $"{t.id} - {t.name}"));
+        var selTeam = _allTeams.Find(t => t.id == p.team_id);
+        var teamDefault = p.team_id == 0 ? "0 - AGENTE LIBRE" : $"{p.team_id} - {selTeam?.name ?? ""}";
+        _playerTeamDropdown = AddDropdownBox(teamBox, teamChoices.ToArray(), teamDefault);
+        row.Add(teamBox);
+
+        var rookieBox = MakeTopInfoBox("ROOKIE");
+        _playerRookieDropdown = AddDropdownBox(rookieBox, new[] { "No", "Sí" }, p.is_rookie == 1 ? "Sí" : "No");
+        row.Add(rookieBox);
+
+        return row;
+    }
+
+    VisualElement MakeTopInfoBox(string title)
+    {
+        var box = new VisualElement();
+        box.AddToClassList("editor-topinfo-box");
+        var lbl = new Label(title);
+        lbl.AddToClassList("editor-topinfo-title");
+        box.Add(lbl);
+        return box;
+    }
+
+    CustomDropdown AddDropdownBox(VisualElement box, string[] choices, string selected)
+    {
+        var dd = BuildCustomDropdown(choices, selected);
+        dd.Root.AddToClassList("editor-topinfo-dropdown");
+        box.Add(dd.Root);
+        return dd;
+    }
+
+    VisualElement BuildPlayerAttributesPanel(PlayerData p)
+    {
+        var panel = new VisualElement();
+        panel.AddToClassList("editor-section-panel");
+        panel.AddToClassList("editor-player-panel");
+        panel.AddToClassList("editor-player-panel--side");
+        AddPanelHeader(panel, "ATRIBUTOS");
+
+        var grid = new VisualElement();
+        grid.AddToClassList("editor-attr-grid");
+
+        var col1 = new VisualElement();
+        col1.AddToClassList("editor-attr-col");
+        _playerPot = AddInput(col1, "Potencial", p.potential.ToString());
+        SetDigitsOnly(_playerPot, 2);
+        _playerSpeed = AddInput(col1, "Velocidad", p.speed.ToString());
+        SetDigitsOnly(_playerSpeed, 2);
+        _playerShooting = AddInput(col1, "Tiro", p.shooting.ToString());
+        SetDigitsOnly(_playerShooting, 2);
+        _player3pt = AddInput(col1, "Triple", p.three_point.ToString());
+        SetDigitsOnly(_player3pt, 2);
+        _playerPassing = AddInput(col1, "Pase", p.passing.ToString());
+        SetDigitsOnly(_playerPassing, 2);
+        _playerDribbling = AddInput(col1, "Regate", p.dribbling.ToString());
+        SetDigitsOnly(_playerDribbling, 2);
+        _playerDefense = AddInput(col1, "Defensa", p.defense.ToString());
+        SetDigitsOnly(_playerDefense, 2);
+
+        var col2 = new VisualElement();
+        col2.AddToClassList("editor-attr-col");
+        _playerRebounding = AddInput(col2, "Rebote", p.rebounding.ToString());
+        SetDigitsOnly(_playerRebounding, 2);
+        _playerAthleticism = AddInput(col2, "Atletismo", p.athleticism.ToString());
+        SetDigitsOnly(_playerAthleticism, 2);
+        _playerIq = AddInput(col2, "IQ", p.iq.ToString());
+        SetDigitsOnly(_playerIq, 2);
+        _playerSteals = AddInput(col2, "Robos", p.steals.ToString());
+        SetDigitsOnly(_playerSteals, 2);
+        _playerBlocks = AddInput(col2, "Tapones", p.blocks.ToString());
+        SetDigitsOnly(_playerBlocks, 2);
+        _playerMorale = AddInput(col2, "Moral", p.morale.ToString());
+        SetDigitsOnly(_playerMorale, 2);
+
+        grid.Add(col1);
+        grid.Add(col2);
+        panel.Add(grid);
+        return panel;
+    }
+
+    VisualElement BuildPlayerPhotoPanel(PlayerData p)
+    {
+        var panel = new VisualElement();
+        panel.AddToClassList("editor-section-panel");
+        panel.AddToClassList("editor-player-panel");
+        panel.AddToClassList("editor-player-panel--side");
+        AddPanelHeader(panel, "IMAGEN DEL JUGADOR");
+
+        var img = new VisualElement();
+        img.AddToClassList("editor-player-photo-image");
+        SetPlayerPhoto(img, p);
+        panel.Add(img);
+
+        var btn = new Button();
+        btn.text = "CAMBIAR IMAGEN";
+        btn.AddToClassList("editor-stadium-btn");
+        btn.clicked += () => { PlayClick(); ChangePlayerPhoto(p); };
+        CursorManager.Instance?.RegisterHandCursor(btn);
+        panel.Add(btn);
+
+        var caption = new Label("Puedes cambiar la imagen del jugador");
+        caption.AddToClassList("editor-player-photo-caption");
+        panel.Add(caption);
+        return panel;
+    }
+
+    VisualElement BuildPlayerContractPanel(PlayerData p)
+    {
+        var panel = new VisualElement();
+        panel.AddToClassList("editor-section-panel");
+        panel.AddToClassList("editor-player-panel");
+        panel.AddToClassList("editor-player-panel--side");
+        AddPanelHeader(panel, "CONTRATO");
+
+        _playerSalary = AddInput(panel, "Salario", p.salary.ToString());
+        SetDigitsOnly(_playerSalary);
+        _playerContract = AddInput(panel, "Años", p.contract_years.ToString());
+        SetDigitsOnly(_playerContract, 1);
+        _playerGuaranteed = AddInput(panel, "Años garantizados", p.guaranteed_years.ToString());
+        SetDigitsOnly(_playerGuaranteed, 1);
+
+        _playerTeamOptionOn = p.has_team_option == 1;
+        _playerPlayerOptionOn = p.has_player_option == 1;
+        _playerTwoWayOn = p.is_two_way == 1;
+
+        var options = new VisualElement();
+        options.AddToClassList("editor-check-row");
+
+        _playerTeamOptionBox = AddCheck(options, "Opción de equipo", _playerTeamOptionOn, on =>
+        {
+            _playerTeamOptionOn = on;
+            if (on && _playerPlayerOptionOn)
+            {
+                _playerPlayerOptionOn = false;
+                _playerPlayerOptionBox?.EnableInClassList("editor-check--on", false);
+            }
+        });
+        _playerPlayerOptionBox = AddCheck(options, "Opción de jugador", _playerPlayerOptionOn, on =>
+        {
+            _playerPlayerOptionOn = on;
+            if (on && _playerTeamOptionOn)
+            {
+                _playerTeamOptionOn = false;
+                _playerTeamOptionBox?.EnableInClassList("editor-check--on", false);
+            }
+        });
+        AddCheck(options, "Two-way", _playerTwoWayOn, on => _playerTwoWayOn = on);
+
+        panel.Add(options);
+        return panel;
+    }
+
+    VisualElement AddCheck(VisualElement parent, string label, bool initial, System.Action<bool> onToggle)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("editor-check");
+        if (initial) row.AddToClassList("editor-check--on");
+
+        var box = new Label("✓");
+        box.AddToClassList("editor-check-box");
+        row.Add(box);
+
+        var lbl = new Label(label);
+        lbl.AddToClassList("editor-check-label");
+        row.Add(lbl);
+
+        bool state = initial;
+        row.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            state = !state;
+            row.EnableInClassList("editor-check--on", state);
+            onToggle?.Invoke(state);
+        });
+        CursorManager.Instance?.RegisterHandCursor(row);
+        parent.Add(row);
+        return row;
+    }
+
+    void ChangePlayerPhoto(PlayerData p)
+    {
+        PickImage("SELECCIONA UNA FOTO PNG (mín. 64 px)", path =>
+        {
+            if (!PlayerPhotoHelper.ValidatePhotoFile(path, out var error))
+            {
+                ShowToast(error, isError: true);
+                return;
+            }
+            _pendingPhotoPath = path;
+            BuildPlayerDetail();
+        });
     }
 
     void SavePlayer()
@@ -954,6 +1243,13 @@ public class EditorController : UIScreenController
 
         int.TryParse(_playerTeamDropdown.Value.Split(" - ")[0], out int tid);
         p.team_id = tid;
+
+        p.is_rookie = _playerRookieDropdown.Value == "Sí" ? 1 : 0;
+
+        int.TryParse(_playerRings.value, out int rings); p.rings = rings;
+        int.TryParse(_playerFinalsMvps.value, out int fMvps); p.finals_mvps = fMvps;
+        int.TryParse(_playerFinalsPlayed.value, out int fPlayed); p.finals_played = fPlayed;
+        int.TryParse(_playerSeasonMvps.value, out int sMvps); p.season_mvps = sMvps;
 
         int.TryParse(_playerPot.value, out int pot); p.potential = pot;
 
@@ -979,8 +1275,27 @@ public class EditorController : UIScreenController
         p.overall = (int)System.Math.Round(sum / 11f);
         if (p.overall > p.potential) p.overall = p.potential;
 
+        // Contrato
         long.TryParse(_playerSalary.value, out long sal); p.salary = sal;
         int.TryParse(_playerContract.value, out int yrs); p.contract_years = yrs;
+        int.TryParse(_playerGuaranteed.value, out int gyr);
+        if (gyr < 0) gyr = 0;
+        if (gyr > yrs) gyr = yrs;
+        p.guaranteed_years = gyr;
+        p.has_team_option = _playerTeamOptionOn ? 1 : 0;
+        p.has_player_option = _playerPlayerOptionOn ? 1 : 0;
+        p.is_two_way = _playerTwoWayOn ? 1 : 0;
+
+        // Foto en borrador (se aplica junto con el resto).
+        if (_pendingPhotoPath != null)
+        {
+            if (!PlayerPhotoHelper.SetPhoto(p.id, _pendingPhotoPath, out var photoError))
+            {
+                ShowToast(photoError, isError: true);
+                return;
+            }
+            _pendingPhotoPath = null;
+        }
 
         DatabaseManager.Instance.UpdatePlayer(p);
         ShowToast("Jugador guardado correctamente");
@@ -990,27 +1305,6 @@ public class EditorController : UIScreenController
     // ══════════════════════════════════════
     // UI HELPERS
     // ══════════════════════════════════════
-
-    void AddDetailTitle(VisualElement parent, string text)
-    {
-        var lbl = new Label(text);
-        lbl.AddToClassList("editor-detail-title");
-        parent.Add(lbl);
-    }
-
-    void AddSectionTitle(VisualElement parent, string text)
-    {
-        var lbl = new Label(text);
-        lbl.AddToClassList("editor-section-title");
-        parent.Add(lbl);
-    }
-
-    void AddDivider(VisualElement parent)
-    {
-        var div = new VisualElement();
-        div.AddToClassList("editor-section-divider");
-        parent.Add(div);
-    }
 
     TextField AddInput(VisualElement parent, string labelText, string value)
     {

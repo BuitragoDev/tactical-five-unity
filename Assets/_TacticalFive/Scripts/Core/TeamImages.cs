@@ -18,98 +18,21 @@ public static class TeamImages
     public const int ArenaWidth = 1380;
     public const int ArenaHeight = 752;
 
-    // Ámbito de las imágenes personalizadas: "template" (Editor) o "save_{n}".
-    static string _scope = "template";
-    static bool _legacyMigrated;
-
-    public static string CustomRoot => ScopeRoot(_scope);
+    // Ámbito activo gestionado por CustomScopes ("template" o "save_{n}").
+    public static string CustomRoot => CustomScopes.ActiveRoot;
     public static string CustomLogoDir(int size) => Path.Combine(CustomRoot, "Logos", SizeFolder(size));
     public static string CustomArenaDir => Path.Combine(CustomRoot, "Arenas");
 
-    static string ScopeRoot(string scope) =>
-        Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom", scope);
-
-    /// <summary>Fija el ámbito de las imágenes personalizadas (template o save_{n}).</summary>
+    /// <summary>Fija el ámbito de las imágenes personalizadas (template o save_{n}).
+    /// Delega en CustomScopes e invalida las cachés si cambió.</summary>
     public static void SetScope(string scope)
     {
-        if (string.IsNullOrEmpty(scope)) scope = "template";
-        bool migrated = MigrateLegacyGlobal();
-        if (_scope == scope && !migrated) return;
-        _scope = scope;
-        Invalidate();
+        if (CustomScopes.SetScope(scope)) Invalidate();
     }
 
-    public static bool HasCustom(string scope) => Directory.Exists(ScopeRoot(scope));
-
-    /// <summary>Copia las imágenes custom de un ámbito a otro (p. ej. template → save_{n}).
-    /// Siempre crea la carpeta destino, para dejar constancia de que el snapshot ya
-    /// se hizo aunque no haya imágenes personalizadas.</summary>
-    public static void CopyCustom(string fromScope, string toScope)
-    {
-        try
-        {
-            string dst = ScopeRoot(toScope);
-            Directory.CreateDirectory(dst);
-            string src = ScopeRoot(fromScope);
-            if (!Directory.Exists(src)) return;
-            CopyDir(src, dst);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[TeamImages] Error copiando imágenes custom: {ex.Message}");
-        }
-    }
-
-    public static void DeleteScope(string scope)
-    {
-        try
-        {
-            string dir = ScopeRoot(scope);
-            if (Directory.Exists(dir)) Directory.Delete(dir, true);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[TeamImages] Error borrando imágenes custom ({scope}): {ex.Message}");
-        }
-    }
-
-    static void CopyDir(string src, string dst)
-    {
-        Directory.CreateDirectory(dst);
-        foreach (var file in Directory.GetFiles(src))
-            File.Copy(file, Path.Combine(dst, Path.GetFileName(file)), true);
-        foreach (var dir in Directory.GetDirectories(src))
-            CopyDir(dir, Path.Combine(dst, Path.GetFileName(dir)));
-    }
-
-    // Migración: la versión anterior guardaba las imágenes en Custom/{Logos,Arenas}
-    // (global, compartido por todas las partidas). Se mueven una vez a Custom/template/.
-    static bool MigrateLegacyGlobal()
-    {
-        if (_legacyMigrated) return false;
-        _legacyMigrated = true;
-        try
-        {
-            string root = Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom");
-            string legacyLogos = Path.Combine(root, "Logos");
-            string legacyArenas = Path.Combine(root, "Arenas");
-            if (!Directory.Exists(legacyLogos) && !Directory.Exists(legacyArenas)) return false;
-
-            string templateDir = Path.Combine(root, "template");
-            Directory.CreateDirectory(templateDir);
-            if (Directory.Exists(legacyLogos) && !Directory.Exists(Path.Combine(templateDir, "Logos")))
-                Directory.Move(legacyLogos, Path.Combine(templateDir, "Logos"));
-            if (Directory.Exists(legacyArenas) && !Directory.Exists(Path.Combine(templateDir, "Arenas")))
-                Directory.Move(legacyArenas, Path.Combine(templateDir, "Arenas"));
-            Debug.Log("[TeamImages] Migradas imágenes custom globales a 'template'.");
-            return true;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[TeamImages] Error migrando imágenes custom: {ex.Message}");
-            return false;
-        }
-    }
+    public static bool HasCustom(string scope) => CustomScopes.HasCustom(scope);
+    public static void CopyCustom(string fromScope, string toScope) => CustomScopes.CopyCustom(fromScope, toScope);
+    public static void DeleteScope(string scope) => CustomScopes.DeleteScope(scope);
 
     static string SizeFolder(int size) => size >= LogoSourceSize ? "" : $"{size}x{size}";
 
@@ -150,9 +73,9 @@ public static class TeamImages
     }
 
     // ── LOGOS ─────────────────────────────────────────────────────────
-    public static Sprite[] Logos(int size) => LogosFor(_scope, size);
-    public static Sprite Logo(int size, string logo) => LogoFor(_scope, size, logo);
-    public static Sprite Logo(string sizeFolder, string logo) => LogoFor(_scope, ParseSize(sizeFolder), logo);
+    public static Sprite[] Logos(int size) => LogosFor(CustomScopes.Active, size);
+    public static Sprite Logo(int size, string logo) => LogoFor(CustomScopes.Active, size, logo);
+    public static Sprite Logo(string sizeFolder, string logo) => LogoFor(CustomScopes.Active, ParseSize(sizeFolder), logo);
 
     /// <summary>Logos de un ámbito concreto (para la pantalla de Cargar Partida,
     /// que muestra varias partidas a la vez).</summary>
@@ -165,7 +88,7 @@ public static class TeamImages
         foreach (var s in Resources.LoadAll<Sprite>($"Teams/Logos/{SizeFolder(size)}"))
             dict[s.name] = s;
 
-        string dir = Path.Combine(ScopeRoot(scope), "Logos", SizeFolder(size));
+        string dir = Path.Combine(CustomScopes.ScopeRoot(scope), "Logos", SizeFolder(size));
         if (Directory.Exists(dir))
         {
             foreach (var f in Directory.GetFiles(dir, "*.png"))
@@ -187,7 +110,7 @@ public static class TeamImages
         string key = scope + "|" + size + ":" + logo;
         if (_logoSprites.TryGetValue(key, out var cached)) return cached;
 
-        string customFile = Path.Combine(ScopeRoot(scope), "Logos", SizeFolder(size), logo + ".png");
+        string customFile = Path.Combine(CustomScopes.ScopeRoot(scope), "Logos", SizeFolder(size), logo + ".png");
         Sprite sp = File.Exists(customFile)
             ? LoadSpriteFromFile(customFile)
             : Resources.Load<Sprite>($"Teams/Logos/{SizeFolder(size)}/{logo}");
@@ -197,8 +120,8 @@ public static class TeamImages
     }
 
     // ── ARENAS ────────────────────────────────────────────────────────
-    public static Sprite[] Arenas() => ArenasFor(_scope);
-    public static Sprite Arena(string logo) => ArenaFor(_scope, logo);
+    public static Sprite[] Arenas() => ArenasFor(CustomScopes.Active);
+    public static Sprite Arena(string logo) => ArenaFor(CustomScopes.Active, logo);
 
     public static Sprite[] ArenasFor(string scope)
     {
@@ -208,7 +131,7 @@ public static class TeamImages
         foreach (var s in Resources.LoadAll<Sprite>("Arenas/"))
             dict[s.name] = s;
 
-        string dir = Path.Combine(ScopeRoot(scope), "Arenas");
+        string dir = Path.Combine(CustomScopes.ScopeRoot(scope), "Arenas");
         if (Directory.Exists(dir))
         {
             foreach (var f in Directory.GetFiles(dir, "*.png"))
@@ -230,7 +153,7 @@ public static class TeamImages
         string key = scope + "|" + file;
         if (_arenaSprites.TryGetValue(key, out var cached)) return cached;
 
-        string customFile = Path.Combine(ScopeRoot(scope), "Arenas", file + ".png");
+        string customFile = Path.Combine(CustomScopes.ScopeRoot(scope), "Arenas", file + ".png");
         Sprite sp = File.Exists(customFile)
             ? LoadSpriteFromFile(customFile)
             : Resources.Load<Sprite>($"Arenas/{file}");
