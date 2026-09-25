@@ -825,7 +825,7 @@
 
 .editor-team-banner-meta-item {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 1px;
     color: rgb(160, 175, 205);
     margin-right: 22px;
@@ -947,7 +947,7 @@
 
 .editor-stadium-stat-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 11px;
+    font-size: 16px;
     letter-spacing: 1px;
     color: rgb(122, 138, 170);
     margin-top: 2px;

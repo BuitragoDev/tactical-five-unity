@@ -621,7 +621,7 @@ public class EditorController : UIScreenController
         SetLettersOnly(_teamOwnerInput, 30);
         _teamBudgetInput = AddInput(infoRight, "Presupuesto salarial", t.budget.ToString());
         SetDigitsOnly(_teamBudgetInput);
-        _teamCapacityInput = AddInput(infoRight, "Aforo del estadio", t.capacity.ToString());
+        _teamCapacityInput = AddInput(infoRight, "Aforo del pabellón", t.capacity.ToString());
         SetDigitsOnly(_teamCapacityInput);
         _teamReputationDropdown = AddDropdown(infoRight, "Reputación", new[] { "1", "2", "3", "4", "5" }, t.reputation.ToString());
         _teamFacilitiesDropdown = AddDropdown(infoRight, "Instalaciones", new[] { "1", "2", "3", "4", "5" }, t.facilities.ToString());
