@@ -997,6 +997,11 @@
     padding-right: 12px;
 }
 
+/* Labels de INFORMACIÓN PERSONAL e HISTORIAL a 18px. */
+.editor-player-col-left .editor-field-label {
+    font-size: 18px;
+}
+
 .editor-player-col-right {
     flex-direction: column;
     flex-grow: 1;
@@ -1149,7 +1154,7 @@
 
 .editor-topinfo-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 18px;
     letter-spacing: 1.5px;
     color: rgb(122, 138, 170);
     margin-bottom: 6px;
