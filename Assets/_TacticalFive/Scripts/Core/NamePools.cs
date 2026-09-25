@@ -93,7 +93,7 @@ public static class NamePools
                 "Ruiz", "Álvarez", "Castillo", "Jiménez", "Vásquez", "Romero", "Moreno",
                 "Herrera", "Medina", "Aguilar", "Vargas", "Rojas", "Silva", "Núñez", "Molina",
                 "Delgado", "Castro", "Ortega", "Salazar", "Fuentes", "Cabrera", "Vega",
-                "Peña", "Ríos", "Contreras", "Guerrero", "Campos", "Solís",
+                "Peña", "Ríos", "Contreras", "Guerrero", "Campos", "Solís", "Buitrago",
             },
         },
 
