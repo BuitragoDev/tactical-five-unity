@@ -1300,7 +1300,7 @@
     flex-direction: row;
     flex-grow: 1;
     min-height: 0;
-    max-height: 340px;
+    max-height: 350px;
 }
 
 .editor-country-viewport {
