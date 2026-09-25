@@ -50,6 +50,14 @@ Al no extender `UnityDefaultRuntimeTheme`, los elementos internos del `ScrollVie
 > `.unity-scroll-view__*`. Funcionan porque son listas cortas o con paginación.
 > **Para listas largas con barra arrastrable, usar el patrón de este documento.**
 
+> **Helper reutilizable `[F]`:** existe `CustomScrollbar` (`Scripts/Core/CustomScrollbar.cs`)
+> con `Bind(viewport, content, track, thumb)` (devuelve un `Handle`) y `Reset(handle)`,
+> que encapsula la rueda, el arrastre del thumb, el clic en la pista y el recálculo por
+> geometría (variante de `Stats`: thumb de 40px fijo). Lo usan `StatsController` y las dos
+> listas del Editor (`EditorController`), enlazándose **una sola vez** y llamando a
+> `CustomScrollbar.Reset(...)` al reconstruir/filtrar la lista. El modal de traspasos de
+> `Market` mantiene su variante propia con thumb de altura dinámica (mín. 36px).
+
 ---
 
 ## 2. Arquitectura de la solución
@@ -374,11 +382,16 @@ void Update() => SyncAllTradeScrollbars();
 | `Assets/_TacticalFive/UI/Screens/Market/Market.uss` | estilos viewport/content/track/thumb (`:1191-1234`) |
 | `Assets/_TacticalFive/Scripts/UI/MarketController.cs` | `ConfigurePlayerScroll` (`:278`), `BindTradeScrollbar` (`:285`), `GetScrollMax` (`:369`), `ClampAndApply` (`:377`), `ApplyScroll` (`:384`), `ResetTradeScrollbars` (`:406`), `SyncAllTradeScrollbars` (`:412`), `Update` (`:419`) |
 | `Assets/_TacticalFive/Scripts/Core/UIScreenController.cs` | ciclo de vida de pantalla (`OnEnable` → `CacheReferences` → `LoadData` → `RegisterCallbacks` → `Refresh`) |
+| `Assets/_TacticalFive/Scripts/Core/CustomScrollbar.cs` | helper reutilizable (`Bind`/`Reset`/`Handle`); variante de `Stats` |
+| `Assets/_TacticalFive/Scripts/UI/StatsController.cs` | usa `CustomScrollbar` (enlaza en `CacheReferences`, `Reset` en `RenderCurrentPage`) |
+| `Assets/_TacticalFive/Scripts/UI/EditorController.cs` | listas de EQUIPOS y JUGADORES con `CustomScrollbar` (`_teamScroll`, `_playerScroll`) |
+| `Assets/_TacticalFive/UI/Screens/Editor/Editor.uxml` / `.uss` | viewport + content + track/thumb (`editor-list-viewport` / `editor-list-scrollbar`) |
 
 ## 9. Pendiente / mejoras futuras
 
-- Extraer la lógica a un control reutilizable (p. ej. `ScrollbarBinder` o una clase
-  `CustomVerticalScroll`) en `Scripts/UI/` para no duplicarla en cada pantalla.
+- ~~Extraer la lógica a un control reutilizable~~ — **hecho**: `CustomScrollbar`
+  (`Scripts/Core/CustomScrollbar.cs`). Pendiente valorar si `Market` se migra también a él
+  (su thumb dinámico difiere).
 - Evaluar migrar otros listados largos (`Cartera`, `Messages`, `Trajectory`) a este patrón.
 - Los picks del Market usan también este patrón manual: viewport + content + track/thumb
   (`Market.uxml` y `MarketController.cs`). Así no se salen del panel cuando hay más picks
