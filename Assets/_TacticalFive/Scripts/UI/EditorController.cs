@@ -1201,13 +1201,14 @@ public class EditorController : UIScreenController
         lbl.AddToClassList("editor-check-label");
         row.Add(lbl);
 
-        bool state = initial;
         row.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
-            state = !state;
-            row.EnableInClassList("editor-check--on", state);
-            onToggle?.Invoke(state);
+            // Leer el estado real de la clase (puede haberlo cambiado otro checkbox,
+            // p. ej. la exclusividad TO/PO).
+            bool on = !row.ClassListContains("editor-check--on");
+            row.EnableInClassList("editor-check--on", on);
+            onToggle?.Invoke(on);
         });
         CursorManager.Instance?.RegisterHandCursor(row);
         parent.Add(row);
