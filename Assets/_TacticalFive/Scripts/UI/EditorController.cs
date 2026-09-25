@@ -962,7 +962,7 @@ public class EditorController : UIScreenController
         histRight.AddToClassList("editor-panel-col");
         _playerFinalsPlayed = AddInput(histRight, "Finales jugadas", p.finals_played.ToString());
         SetDigitsOnly(_playerFinalsPlayed, 2);
-        _playerSeasonMvps = AddInput(histRight, "MVP de la Temporada", p.season_mvps.ToString());
+        _playerSeasonMvps = AddInput(histRight, "MVP Temporada", p.season_mvps.ToString());
         SetDigitsOnly(_playerSeasonMvps, 2);
         histFields.Add(histLeft);
         histFields.Add(histRight);
