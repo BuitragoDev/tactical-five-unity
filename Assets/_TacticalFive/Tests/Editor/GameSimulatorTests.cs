@@ -286,8 +286,8 @@ public class GameSimulatorTests
         var on = GameSimulator.InitialOnCourt(ps, strict: true);
 
         Assert.That(on.Count, Is.EqualTo(5));
-        Assert.That(on, Does.Not.Contain(0), "Un titular con plan 0 no debe empezar");
-        Assert.That(on, Does.Contain(5), "Debe entrar el siguiente con minutos");
+        Assert.That(on.Contains(0), Is.False, "Un titular con plan 0 no debe empezar");
+        Assert.That(on.Contains(5), Is.True, "Debe entrar el siguiente con minutos");
     }
 
     [Test]
