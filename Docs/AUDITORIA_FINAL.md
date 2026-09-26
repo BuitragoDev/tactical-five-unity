@@ -43,13 +43,14 @@
 
 | Bloque | Hallazgos | Hechos |
 |---|---|---|
-| CRÍTICOS | 9 | 0 |
-| ALTOS | 20 | 0 |
+| CRÍTICOS | 9 | 7 (+2 parciales) |
+| ALTOS | 20 | 6 |
 | MEDIOS | ~30 | 0 |
 | BAJOS | ~10 | 0 |
 | Tests propuestos | 25 | 0 |
 
 > Actualiza esta tabla a mano al cerrar hallazgos.
+> **Fase 1 en curso (2026-09-26):** cerrados `SAV-01..07`, `SEA-01/02/03`, `CON-01`, `UI-01`, `UI-02`; parciales `ECO-01` (falta persistir el dead money multi-temporada), `ECO-02` (falta revalidar en la aceptación de ofertas IA del Dashboard) y `CON-02` (hay espera + lock de navegación, falta cancelación real). Pendientes de Fase 1: `SEA-04`, `SEA-05`, tests.
 
 ### Top 10 por daño/esfuerzo (orden recomendado de ataque)
 
@@ -136,7 +137,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-01` · Pérdida total de todas las partidas por `saves.json` corrupto
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Persistencia / pantalla Cargar partida
 - **Archivos:** `Assets/_TacticalFive/Scripts/Data/GameSaveManager.cs:47-66` (`CleanupAllOrphanDbs`), `:68-105` (`GetAllSlots`), `Assets/_TacticalFive/Scripts/UI/LoadGameController.cs:63`
@@ -154,7 +155,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-02` · `_dbField` repuntado desde el hilo de fondo (Editor) sin `finally`
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Editor / plantilla / conexión DB
 - **Archivos:** `Assets/_TacticalFive/Scripts/Data/DatabaseManager.cs:24-28` (setter), `:186-200` (`BuildTemplateDatabaseInBackground`), `:166-179` (`EnsureTemplateDb`), `:202-217` (`InitTemplateSession`); `Assets/_TacticalFive/Scripts/UI/EditorController.cs:359-374`
@@ -169,7 +170,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SEA-01` · Estadísticas históricas archivadas dos veces por temporada (totales ×2)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Historial / HOF / récords
 - **Archivos:** `Assets/_TacticalFive/Scripts/UI/DashboardController.cs:1518`; `Assets/_TacticalFive/Scripts/Data/DatabaseManager.Records.cs:2669-2672`; función acumulativa `Records.cs:1180-1290` (`hist.games += ss.games; hist.total_points += ...`)
@@ -184,7 +185,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-01` · Buyout gratis (no debita presupuesto) y la deuda de stretch se borra en el rollover
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[~]` parcial
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Economía / contratos
 - **Archivos:** `Assets/_TacticalFive/Scripts/UI/RosterController.cs:1589-1649`; mismo patrón en `Assets/_TacticalFive/Scripts/UI/DashboardController.cs:3782-3812`; borrado de `finance_records` en `DatabaseManager.Records.cs:3058`
@@ -201,7 +202,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-02` · Traspasos del usuario y aceptación de ofertas IA sin revalidar
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[~]` parcial
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Traspasos
 - **Archivos:** `Assets/_TacticalFive/Scripts/UI/MarketController.cs:1869-1998` (`OnConfirmTrade`), `:1707` (única llamada a `ValidateTrade`); `Assets/_TacticalFive/Scripts/UI/DashboardController.cs:5919-6112` (aceptar oferta IA), `:5954-5956`; `MarketController.cs:1884-1907` (S&T)
@@ -216,7 +217,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-01` · Soft-lock del Dashboard: `_isLoading` no se resetea al navegar durante la simulación
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** UX / navegación
 - **Archivos:** `Assets/_TacticalFive/Scripts/UI/DashboardController.cs:721` (`OnActionClicked` guard), `:223-233` (`OnDisable` → `StopAllCoroutines`), `:2255-2285` (`ShowLoading`/`HideLoading`). `_isLoading` solo se asigna en `:2260/2261/2281`.
@@ -231,7 +232,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `CON-01` · La transacción del día se mantiene abierta a través de `yield return null` (sin `finally`)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]** (patrón ya documentado en `TODO_TECHNICAL_DEBT.md`)
 - **Sistema:** Transacciones / async
 - **Archivos:** `Assets/_TacticalFive/Scripts/UI/DashboardController.cs:1196` (`BeginTransaction`), `:1226` y `:1246` (`if (fastSim) yield return null`), `:1580` (`Commit`), `:226` (`StopAllCoroutines`); `Assets/_TacticalFive/Scripts/Data/SQLite.cs:1752-1754` (throw si ya hay transacción)
@@ -261,7 +262,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-03` · El metadata del slot se escribe antes de que la partida exista
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Persistencia / nueva partida
 - **Archivos:** `Assets/_TacticalFive/Scripts/UI/PreseasonController.cs:426-494`
@@ -280,7 +281,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-04` · Migraciones no atómicas, `user_version` prematuro y bloques multi-columna no auto-sanables
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `Assets/_TacticalFive/Scripts/Data/DatabaseManager.cs:330-1055` (p. ej. `:477-486` players, `:505-513` offers), `:1070-1081` (`MarkMigrationApplied`)
 - **Problema:** `RunMigrations` no está en transacción; hace `PRAGMA user_version = 2` **antes** de migrar; varios bloques comprueban una sola columna antes de añadir 3 (`guaranteed_years` + `has_team_option` + `has_player_option`): si el 2.º `ALTER` falla, el bloque no se reintenta → `no such column` al leer la tabla. `MarkMigrationApplied` se traga errores → migraciones destructivas (`DELETE FROM draft_picks`) pueden re-ejecutarse.
@@ -293,7 +294,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-05` · `InitSaveSlot` sin manejo de errores (DB corrupta/bloqueada/solo lectura)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `Assets/_TacticalFive/Scripts/Data/DatabaseManager.cs:55-110`; llamadores `MainMenuController.cs:324-345`, `LoadGameController.cs:441-448`
 - **Problema:** sin `try/catch`; `_activeSaveSlot` ya está asignado y `_db` puede quedar no-null/cerrada.
@@ -304,7 +305,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-06` · `CloneFromTemplate` no atómico y el test de "partida nueva" impide recompletarlo
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `Assets/_TacticalFive/Scripts/Data/DatabaseManager.cs:238-265`, `:78-89`
 - **Problema:** ~16 `InsertAll` sin transacción externa; `isNewGame` se decide con `TeamData.Count() > 0`, así que un clon parcial **no** se vuelve a sembrar.
@@ -315,7 +316,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SAV-07` · Pares delete+insert sin transacción (lineup, pretemporada, G-League)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]** (AutoSeedLineup)
 - **Archivos:** `DatabaseManager.Records.cs:3515-3548` (`EnsureLineupSeeded`), `:3551-3559` (`AutoSeedLineup`); `DatabaseManager.Games.cs:84-98` (`SavePreseasonGames`); `DatabaseManager.GLeague.cs:12-58` (`EnsureGLeagueSeeded`)
 - **Problema:** borran y reinsertan sin transacción. `EnsureGLeagueSeeded` solo comprueba `Count()==0`, por lo que un seed parcial queda permanente.
@@ -326,7 +327,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SEA-02` · `first_apron_hard_capped` nunca se resetea entre temporadas
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** se escribe en `DashboardController.cs:2571`, `:5956`; `MarketController.cs:1901`, `:2820`. **No existe ningún reset** (grep global).
 - **Problema:** la regla real es anual; en el juego es permanente.
@@ -337,7 +338,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SEA-03` · Calendario sin guardar marcado como generado (soft-lock de temporada)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `DatabaseManager.Games.cs:109-125` (`SaveRegularSeasonGames` traga la excepción), `:131-158` (`GenerateSchedule`), `UI/PreseasonController.cs:474-494` (`season.generated = 1; phase = "regular"`)
 - **Problema:** si el guardado falla, hay 0-partidos parciales pero la temporada se marca generada y pasa a `regular`. `FindNextGameDay` devuelve 0 → el bloque de transición no corre.
@@ -480,7 +481,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `CON-02` · Tareas de fondo no cancelables (el rollover sigue escribiendo tras salir)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[~]` parcial
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]** (patrón)
 - **Archivos:** `Data/DatabaseManager.cs:112-164` (sin `CancellationToken`); `NewSeasonController.cs:416-440` (`while (!task.IsCompleted) yield return null`); `DashboardController.cs:226`
 - **Problema:** `Task.Run` no se cancela al morir la corrutina. `StartNewSeason` (minutos) sigue ejecutándose y commiteando aunque el usuario navegue o cargue otra partida.
@@ -502,7 +503,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-02` · Config → Menú principal alcanzable durante fast-sim (abandona la transacción)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `Core/UIScreenController.cs:413-417`; `DashboardController.cs:1226,1246,1878-1885`
 - **Problema:** `SetSidebarNavigationEnabled(false)` deshabilita items de sidebar, pero no el icono de configuración; su handler "Menú principal" navega sin guard.
@@ -794,24 +795,25 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 
 **Criterio de salida:** simular 3 temporadas seguidas y cerrar el juego a mitad de cada operación crítica sin corromper datos, sin soft-locks y sin excepciones.
 
-- [ ] `SAV-01` borrado masivo de partidas + `saves.json` atómico + `.bak` + `initialized`.
-- [ ] `SAV-02` no repuntar `_dbField` desde worker + `finally` + `CreateTables` en template.
-- [ ] `CON-01` sin `yield` entre `BeginTransaction`/`Commit` (+ `try/finally`).
-- [ ] `CON-02` single-flight + cancelación; bloquear navegación durante operaciones.
-- [ ] `UI-01` reset de `_isLoading` en `OnDisable` + bloqueo de navegación en simulación normal.
-- [ ] `UI-02` deshabilitar config/menú durante la simulación.
-- [ ] `SEA-01` eliminar el doble archivado histórico.
-- [ ] `SEA-02` reset anual de `first_apron_hard_capped`.
-- [ ] `SEA-03` propagar fallo de guardado del calendario y no marcar `generated`.
-- [ ] `SEA-05` escape de diagnóstico en play-in sin seeds.
-- [ ] `SAV-03` metadata del slot al final (o flag `initialized`).
-- [ ] `SAV-04` migraciones transaccionales + comprobación por columna.
-- [ ] `SAV-05` try/catch + integrity check en `InitSaveSlot`.
-- [ ] `SAV-06` clon atómico + marcador.
-- [ ] `SAV-07` transacción en delete+insert (lineup/preseason/G-League).
-- [ ] `ECO-01` buyout con coste + deuda persistente.
-- [ ] `ECO-02` revalidar trades en confirmación y aceptación.
-- [ ] Tests: `SaveSlot_CorruptSavesJson_*`, `StartNewSeason_Archives…Once`, `Trade_Confirm_Revalidates…`, `Dashboard_OnDisable…`, `SimulateGame_Overtime…`.
+- [x] `SAV-01` borrado masivo de partidas + `saves.json` atómico + `.bak` (commit `3a59f854`). *Nota:* el flag `initialized` no se añadió; se resolvió moviendo el metadata al final en `SAV-03`.
+- [x] `SAV-02` no repuntar `_dbField` desde worker + `finally` (conexión local + ambient) + `CreateTables` en template (commit `3a59f854`).
+- [x] `CON-01` transacción del día con `finally` que revierte si la corrutina se aborta (commit `2ba82b9c`). *Nota:* se mantiene el `yield` dentro de la transacción (bufferizar del todo queda para Fase 2), pero ya no puede quedar colgada.
+- [~] `CON-02` `WaitForBackgroundBatch()` (espera con tope antes de cambiar de conexión) + lock de navegación en el rollover (commits `3a59f854`, `2ba82b9c`). *Falta:* cancelación real con `CancellationToken`.
+- [x] `UI-01` reset de `_isLoading`/spinner/botón en `OnDisable` + navegación bloqueada también en simulación normal (commit `2ba82b9c`).
+- [x] `UI-02` `ScreenManager.NavigationLocked` + guard en config → Menú principal; sidebar deshabilitada en `ShowLoading` (commit `2ba82b9c`).
+- [x] `SEA-01` eliminado el doble archivado histórico (commit `3a59f854`).
+- [x] `SEA-02` reset anual de `first_apron_hard_capped` en `StartNewSeason` (commit `3a59f854`).
+- [x] `SEA-03` `SaveRegularSeasonGames` devuelve bool; `GenerateSchedule` devuelve -1 si falla; Preseason no marca `generated` y avisa (commit `3a59f854`).
+- [ ] `SEA-05` escape de diagnóstico en play-in sin seeds. **Pendiente.**
+- [x] `SAV-03` metadata del slot al final de `PreseasonController.OnContinue` (commit `3a59f854`).
+- [x] `SAV-04` `RunMigrations` en transacción + `user_version` al final + `AddColumnIfMissing` por columna en players/offers (commit `3a59f854`).
+- [x] `SAV-05` `InitSaveSlot` devuelve bool con try/catch; los llamadores (MainMenu/LoadGame) abortan si falla (commit `3a59f854`). *Nota:* sin `integrity_check` previo (CreateTables/migraciones ya detectan corrupción).
+- [x] `SAV-06` clon+seed en `RunInTransaction` + marcador `slot_initialized` (commit `3a59f854`).
+- [x] `SAV-07` transacciones en `AutoSeedLineup`, `EnsureLineupSeeded`, `SavePreseasonGames`, `EnsureGLeagueSeeded` (commit `3a59f854`).
+- [~] `ECO-01` buyout: se debita el tramo anual del presupuesto + guardas de división (commit `2ba82b9c`). *Falta:* persistir la deuda de stretch multi-temporada (tabla `dead_money`).
+- [~] `ECO-02` revalidación en `MarketController.OnConfirmTrade` (commit `2ba82b9c`). *Falta:* revalidar la aceptación de ofertas IA en `DashboardController.ShowTradeOfferModal`.
+- [ ] `SEA-04` mover opciones/decremento de contratos dentro de `StartNewSeason`. **Pendiente** (sí se movió el cambio de equipo del manager).
+- [ ] Tests: `SaveSlot_CorruptSavesJson_*`, `StartNewSeason_Archives…Once`, `Trade_Confirm_Revalidates…`, `Dashboard_OnDisable…`, `SimulateGame_Overtime…`. **Pendiente** (falta runner/refactor de rutas).
 
 ### Fase 2 — Arquitectura (~2-4 semanas)
 
@@ -860,6 +862,15 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | Fecha | Commit | Cerrados | Notas |
 |---|---|---|---|
 | 2026-09-26 | `d565623e` | — | Auditoría creada (documento inicial). Rama `auditoria-final`. |
+| 2026-09-26 | `3a59f854` | SAV-01..07, SEA-01/02/03 | Persistencia robusta: `saves.json` atómico + `.bak` sin borrado por metadatos ilegibles, plantilla sin race (`_dbField`), migraciones transaccionales, clon+seeds atómicos, metadata del slot al final, archivado histórico único, reset anual del hard cap, calendario no se marca generado si falla el guardado. |
+| 2026-09-26 | `2ba82b9c` | CON-01, UI-01, UI-02 (+ECO-01/02 y CON-02 parciales) | `finally` que revierte la transacción del día si se aborta la corrutina; reset de `_isLoading`/spinner/navegación en `OnDisable`; `ScreenManager.NavigationLocked` + guard en config; `WaitForBackgroundBatch()`; lock en el rollover; buyout con coste y guardas; revalidación de traspasos en `OnConfirmTrade`. |
+
+**Hallazgo nuevo detectado durante la implementación:**
+- `SEA-13` · **ALTO** · `DashboardController.ProcessGameDayRoutine:915-920`: si `FindNextGameDay() == 0` (no quedan partidos sin jugar) el método hace `yield break` **antes** del bloque de transición de fase. Si por lo que sea la temporada sigue en `regular` con todos los partidos jugados (calendario parcial, solo All-Star, datos corruptos), la fase no avanza nunca → soft-lock. **Fix propuesto:** evaluar la transición de fase antes del early-return cuando `_season.phase` no sea terminal. **Archivos:** `UI/DashboardController.cs`.
+
+**Pendiente inmediato (Fase 1):** `SEA-04` (mover opciones/decremento dentro de `StartNewSeason`), `SEA-05` (escape del play-in sin seeds), `SEA-13` (transición sin partidos), cancelación real de lotes (`CON-02`), persistencia del dead money (`ECO-01`), revalidación de la aceptación de ofertas IA (`ECO-02`) y los tests de la Fase 1.
+
+**Verificación pendiente en Unity:** compilar (el editor estaba abierto durante los cambios) y lanzar EditMode (85 tests). Probar en partida: cargar/borrar slots, cerrar a mitad de simulación, RESET del Editor, y un traspaso tras fichar.
 
 ---
 
