@@ -401,16 +401,17 @@ public class NewSeasonController : UIScreenController
         int newTeamId = _selectedTeamId;
         int oldTeamId = _manager.team_id; // Capture before possible update
 
-        // Update manager team if changed
-        if (_manager.team_id != newTeamId)
-        {
-            _manager.team_id = newTeamId;
-            DatabaseManager.Instance.SaveManager(_manager);
-        }
-
         int seasonId = _season.id;
         int managerId = _manager.id;
         string gameMode = _season.game_mode;
+
+        // Bloquear salidas duras (config → Menú principal) mientras corre el rollover:
+        // si la corrutina se aborta a media transacción, el lote de fondo seguiría
+        // escribiendo sin que el jugador lo sepa.
+        ScreenManager.NavigationLocked = true;
+
+        // El equipo del manager se fija DENTRO de la transacción de StartNewSeason
+        // (antes se cambiaba aquí, fuera: si el rollover fallaba quedaba cambiado).
 
         // Execute the full new season logic on a background thread (own SQLite connection)
         var task = DatabaseManager.Instance.RunInBackgroundAsync(() =>
@@ -433,11 +434,14 @@ public class NewSeasonController : UIScreenController
         }
         catch (System.Exception ex)
         {
+            ScreenManager.NavigationLocked = false;
             _btnStartSeason.SetEnabled(true);
             _btnStartSeason.text = "EMPEZAR TEMPORADA";
             Debug.LogError($"[NewSeason] Error al iniciar la nueva temporada: {ex.Message}\n{ex.StackTrace}");
             yield break;
         }
+
+        ScreenManager.NavigationLocked = false;
 
         // Navigate to Preseason to set up friendly games
         ScreenManager.Instance.GoTo(GameScreen.Preseason);

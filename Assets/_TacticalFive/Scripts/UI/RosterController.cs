@@ -1565,6 +1565,9 @@ using System.Linq;
     {
         if (_selectedPlayer == null) return;
 
+        // Un contrato de 0 años no se puede rescindir (evita división por cero).
+        if (_selectedPlayer.contract_years <= 0) return;
+
         long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
         int stretchYears = _selectedPlayer.contract_years * 2;
         long annualPayment = remainingSalary / stretchYears;
@@ -1590,12 +1593,17 @@ using System.Linq;
     {
         if (_selectedPlayer == null) return;
 
-        long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
-        int stretchYears = _selectedPlayer.contract_years * 2;
+        long remainingSalary = _selectedPlayer.salary * Mathf.Max(0, _selectedPlayer.contract_years);
+        int stretchYears = Mathf.Max(1, _selectedPlayer.contract_years * 2);
         long annualPayment = remainingSalary / stretchYears;
         int currentDay = _season?.current_game_day ?? 0;
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        // Coste real de la rescisión: el tramo de stretch de esta temporada sale del
+        // presupuesto (antes el buyout era gratis).
+        _myTeam.budget -= annualPayment;
+        DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
 
         _selectedPlayer.team_id = 0;
         _selectedPlayer.last_team_id = 0;

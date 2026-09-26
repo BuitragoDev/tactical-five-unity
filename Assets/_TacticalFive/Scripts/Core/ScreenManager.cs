@@ -5,6 +5,13 @@ public class ScreenManager : MonoBehaviour
 {
     public static ScreenManager Instance { get; private set; }
 
+    /// <summary>
+    /// Bloquea las salidas "duras" (config → Menú principal) mientras una operación
+    /// crítica corre (simulación de día, rollover de temporada...). La sidebar se
+    /// deshabilita aparte; esto cubre el icono de configuración del header.
+    /// </summary>
+    public static bool NavigationLocked { get; set; }
+
     [SerializeField] private UIDocument loadingDocument;
     [SerializeField] private UIDocument mainMenuDocument;
     [SerializeField] private UIDocument selectTeamDocument;

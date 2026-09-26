@@ -61,6 +61,9 @@ public partial class DatabaseManager : MonoBehaviour
     {
         try
         {
+            // No cambiar de conexión/partida mientras un lote de fondo sigue escribiendo.
+            WaitForBackgroundBatch();
+
             if (_dbField != null)
             {
                 try { _dbField.Close(); } catch { }
@@ -143,6 +146,7 @@ public partial class DatabaseManager : MonoBehaviour
     /// <summary>Cierra la conexión del slot activo (p. ej. antes de borrar la partida).</summary>
     public void CloseActiveSlot()
     {
+        WaitForBackgroundBatch();
         if (_dbField != null)
         {
             try { _dbField.Close(); } catch { }
@@ -152,24 +156,41 @@ public partial class DatabaseManager : MonoBehaviour
         _isTemplateSession = false;
     }
 
+    private static Task _runningBatch;
+
+    /// <summary>Espera (con tope) a que termine un lote de fondo en curso. Evita cambiar
+    /// de conexión/partida mientras una tarea sigue escribiendo.</summary>
+    public static void WaitForBackgroundBatch(int timeoutMs = 10000)
+    {
+        var t = _runningBatch;
+        if (t == null || t.IsCompleted) return;
+        Debug.LogWarning("[DB] Esperando a que termine un lote de fondo antes de continuar...");
+        try { t.Wait(timeoutMs); }
+        catch (Exception e) { Debug.LogError($"[DB] El lote de fondo terminó con error: {e.Message}"); }
+    }
+
     public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
     {
         string path = DbPath;
-        return Task.Run(() =>
+        var task = Task.Run(() =>
         {
             using var conn = new SQLiteConnection(path);
             return work(conn);
         });
+        _runningBatch = task;
+        return task;
     }
 
     public Task RunInBackground(Action<SQLiteConnection> work)
     {
         string path = DbPath;
-        return Task.Run(() =>
+        var task = Task.Run(() =>
         {
             using var conn = new SQLiteConnection(path);
             work(conn);
         });
+        _runningBatch = task;
+        return task;
     }
 
     /// <summary>
@@ -181,7 +202,7 @@ public partial class DatabaseManager : MonoBehaviour
     public Task RunInBackgroundAsync(Action work)
     {
         string path = DbPath;
-        return Task.Run(() =>
+        var task = Task.Run(() =>
         {
             using var conn = new SQLiteConnection(path);
             conn.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
@@ -190,12 +211,14 @@ public partial class DatabaseManager : MonoBehaviour
             try { work(); }
             finally { _ambientDb.Value = prev; }
         });
+        _runningBatch = task;
+        return task;
     }
 
     public Task<T> RunInBackgroundAsync<T>(Func<T> work)
     {
         string path = DbPath;
-        return Task.Run(() =>
+        var task = Task.Run(() =>
         {
             using var conn = new SQLiteConnection(path);
             conn.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
@@ -204,6 +227,8 @@ public partial class DatabaseManager : MonoBehaviour
             try { return work(); }
             finally { _ambientDb.Value = prev; }
         });
+        _runningBatch = task;
+        return task;
     }
 
     public void EnsureTemplateDb()

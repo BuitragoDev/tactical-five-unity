@@ -3168,6 +3168,15 @@ public partial class DatabaseManager
         // al empezar la temporada (antes quedaba activo de por vida).
         _db.Execute("UPDATE teams SET first_apron_hard_capped = 0 WHERE first_apron_hard_capped = 1");
 
+        // 7c. Fijar el equipo del manager para la nueva temporada DENTRO de la
+        // transacción: si el rollover falla, no queda cambiado a medias.
+        var managerRow = _db.Find<ManagerData>(managerId);
+        if (managerRow != null && managerRow.team_id != newTeamId)
+        {
+            managerRow.team_id = newTeamId;
+            _db.Update(managerRow);
+        }
+
         // 8. Deactivate old season
         if (oldSeason != null)
         {

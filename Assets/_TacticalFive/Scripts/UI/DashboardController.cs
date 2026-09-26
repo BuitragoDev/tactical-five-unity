@@ -230,6 +230,17 @@ using System.Threading.Tasks;
         _fastSimOfferPauseActive = false;
         _fastSimAbortOffers = false;
         GameResultCache.FastSimTargetDate = null;
+
+        // Liberar SIEMPRE el estado de carga: si no, _isLoading queda a true y el
+        // botón de avanzar deja de responder al volver (soft-lock). La transacción
+        // del día que pudiera quedar abierta la revierte el finally de ProcessGameDayRoutine.
+        _isLoading = false;
+        _spinScheduler?.Pause();
+        _spinScheduler = null;
+        if (_loadingSpinner != null) _loadingSpinner.style.display = DisplayStyle.None;
+        _btnAction?.SetEnabled(true);
+        SetSidebarNavigationEnabled(true);
+        ScreenManager.NavigationLocked = false;
     }
 
     void Update()
@@ -1594,6 +1605,18 @@ using System.Threading.Tasks;
             ShowOfferResultModal("ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.\n\n" + ex.Message, -1);
             yield break;
         }
+        finally
+        {
+            // Red de seguridad: si la corrutina se aborta a mitad (StopAllCoroutines al
+            // salir de la pantalla) Unity ejecuta este finally. Sin él, la transacción
+            // quedaría abierta y bloquearía todas las escrituras de la sesión.
+            if (db.IsInTransaction)
+            {
+                try { db.Rollback(); } catch { }
+                GameResultCache.Clear();
+                Debug.LogWarning("[GameDay] Día abortado a mitad de transacción: revertido.");
+            }
+        }
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
 
@@ -2262,6 +2285,10 @@ using System.Threading.Tasks;
         _btnAction.SetEnabled(false);
         _loadingSpinner.style.display = DisplayStyle.Flex;
 
+        // Bloquear navegación (sidebar + config → Menú principal) mientras corre.
+        SetSidebarNavigationEnabled(false);
+        ScreenManager.NavigationLocked = true;
+
         _spinScheduler = _root.schedule.Execute(() =>
         {
             if (_loadingSpinner == null) return;
@@ -2279,6 +2306,8 @@ using System.Threading.Tasks;
         _loadingSpinner.style.display = DisplayStyle.None;
         _btnAction.SetEnabled(true);
         _isLoading = false;
+        SetSidebarNavigationEnabled(true);
+        ScreenManager.NavigationLocked = false;
     }
 
     void CheckBudgetAfterGame()

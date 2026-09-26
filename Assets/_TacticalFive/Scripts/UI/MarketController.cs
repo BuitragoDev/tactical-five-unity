@@ -1873,6 +1873,43 @@ using System.Linq;
 
         // Sign & Trade de FA propio: firmar con Bird rights y traspasar de inmediato
         var ownSA = _ownSATFAs.Where(p => _selectedOwnSATFAs.Contains(p.id)).ToList();
+
+        // ── Revalidación obligatoria antes de mutar ──
+        // Entre la previsualización y el confirmado la plantilla/nómina pueden haber
+        // cambiado (fichajes IA, ofertas maduradas, IR...). Sin esto se pueden crear
+        // plantillas >17 o traspasos que incumplen el salary matching / apron.
+        {
+            var mySelectedForTrade = new List<PlayerData>(mySelected);
+            mySelectedForTrade.AddRange(ownSA);
+            var myPicksSelChk = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+            var otherPicksSelChk = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+
+            if (mySelectedForTrade.Count > 0 || otherSelected.Count > 0
+                || myPicksSelChk.Count > 0 || otherPicksSelChk.Count > 0)
+            {
+                var leagueChk = DatabaseManager.Instance.GetLeagueSettings();
+                long firstApronChk = leagueChk?.apron > 0 ? leagueChk.apron : TradeHelper.FIRST_APRON;
+                long secondApronChk = leagueChk?.repeater_apron > 0 ? leagueChk.repeater_apron : TradeHelper.SECOND_APRON;
+                long luxuryTaxChk = leagueChk?.luxury_tax > 0 ? leagueChk.luxury_tax : TradeHelper.LUXURY_TAX;
+
+                var errorsChk = TradeHelper.ValidateTrade(
+                    mySelectedForTrade, otherSelected,
+                    DatabaseManager.Instance.GetRosterCount(_myTeam.id),
+                    DatabaseManager.Instance.GetRosterCount(_selectedTeam.id),
+                    _selectedTeam.name, _otherPlayers.Sum(p => p.salary),
+                    _myTeam.name, _myPlayers.Sum(p => p.salary),
+                    _myTeam.first_apron_hard_capped == 1,
+                    _selectedTeam.first_apron_hard_capped == 1,
+                    firstApronChk, secondApronChk, luxuryTaxChk,
+                    _ownSATSignSalaries.Count > 0 ? _ownSATSignSalaries : null);
+
+                if (errorsChk.Count > 0)
+                {
+                    ShowTradeInvalid(errorsChk);
+                    return;
+                }
+            }
+        }
         if (ownSA.Count > 0)
         {
             ProcessSATrade(ownSA, mySelected, otherSelected);
