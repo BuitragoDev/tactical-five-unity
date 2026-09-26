@@ -2701,6 +2701,11 @@ public partial class DatabaseManager
                 teamWinPctCache[kv.Key] = kv.Value.total > 0 ? (float)kv.Value.wins / kv.Value.total : 0.5f;
         }
 
+        // Minutos por partido de la temporada anterior: modulan el desarrollo.
+        var mpgByPlayer = new Dictionary<int, int>();
+        foreach (var ss in _db.Table<PlayerSeasonStatRow>().Where(x => x.season_id == oldSeasonId))
+            mpgByPlayer[ss.player_id] = ss.games > 0 ? (int)System.Math.Round(ss.total_minutes / ss.games) : -1;
+
         foreach (var p in remaining)
         {
             if (p.is_rookie == 1)
@@ -2710,14 +2715,6 @@ public partial class DatabaseManager
             }
 
             p.age += 1;
-
-            // Base change by age group
-            int baseChange;
-            if (p.age <= 22) baseChange = 4;       // Crecimiento rápido
-            else if (p.age <= 27) baseChange = 1;  // Prime temprano
-            else if (p.age <= 30) baseChange = 0;  // Prime tardío
-            else if (p.age <= 34) baseChange = -3; // Declive suave
-            else baseChange = -5;                   // Declive fuerte
 
             // Position priority attributes (get +1 extra)
             var priorityAttrs = new HashSet<string>();
@@ -2773,10 +2770,14 @@ public partial class DatabaseManager
 
             int Apply(string name, int current)
             {
-                int change = baseChange;
-                if (priorityAttrs.Contains(name)) change += 1;
+                int change = PlayerProgression.AttributeDelta(
+                    p.age,
+                    p.potential,
+                    p.overall,
+                    mpgByPlayer.TryGetValue(p.id, out var mpg) ? mpg : -1,
+                    priorityAttrs.Contains(name),
+                    Rng.Next(-1, 2));
                 change += GetPositionDeclineModifier(p.position, name, p.age);
-                change += Rng.Next(-1, 2);
                 return Math.Max(0, Math.Min(99, current + change));
             }
 
