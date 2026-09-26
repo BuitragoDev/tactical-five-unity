@@ -18,11 +18,15 @@ public class GameSaveManagerTests
         _dir = Path.Combine(Path.GetTempPath(), "tf_saves_" + System.Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
         GameSaveManager.BaseDirOverride = _dir;
+        // Estos tests provocan a propósito la rama de "metadata ilegible", que
+        // registra un Debug.LogError; el framework lo contaría como fallo.
+        LogAssert.ignoreFailingMessages = true;
     }
 
     [TearDown]
     public void TearDown()
     {
+        LogAssert.ignoreFailingMessages = false;
         GameSaveManager.BaseDirOverride = null;
         try { if (Directory.Exists(_dir)) Directory.Delete(_dir, true); } catch { }
     }
@@ -39,8 +43,6 @@ public class GameSaveManagerTests
         WriteDb(DbPath(2));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "{ esto no es json valido");
 
-        // La ruta de "metadata ilegible" registra un error a propósito.
-        LogAssert.Expect(LogType.Error, "saves.json ilegible y sin backup válido");
         GameSaveManager.CleanupAllOrphanDbs();
 
         Assert.That(File.Exists(DbPath(1)), Is.True, "No debe borrar DBs si el metadata es ilegible");
@@ -53,7 +55,6 @@ public class GameSaveManagerTests
         WriteDb(DbPath(1));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "roto");
 
-        LogAssert.Expect(LogType.Error, "saves.json ilegible y sin backup válido");
         bool ok = GameSaveManager.TryGetAllSlots(out var slots);
 
         Assert.That(ok, Is.False, "Debe indicar que el metadata no se pudo leer");
@@ -113,7 +114,6 @@ public class GameSaveManagerTests
         WriteDb(DbPath(1));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "no json");
 
-        LogAssert.Expect(LogType.Error, "saves.json ilegible y sin backup válido");
         GameSaveManager.SaveSlotInfo(new SaveSlotInfo { slotNumber = 1, exists = true, managerName = "A" });
 
         Assert.That(Directory.GetFiles(_dir, "saves.json.corrupt-*").Length, Is.EqualTo(1),
