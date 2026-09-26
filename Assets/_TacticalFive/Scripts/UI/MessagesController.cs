@@ -338,12 +338,58 @@ public class MessagesController : UIScreenController
     void DeleteSelectedMessage()
     {
         if (_selectedMessageId <= 0) return;
+        ShowDeleteConfirmModal(_selectedMessageId);
+    }
 
-        DatabaseManager.Instance.DeleteMessage(_selectedMessageId);
-        _selectedMessageId = 0;
-        _allMessages = DatabaseManager.Instance.GetMessages(_manager.id);
-        ApplyFilters();
-        ShowNewsDetail(null);
+    /// <summary>UI-11: el borrado de una noticia es irreversible; se confirma antes.</summary>
+    void ShowDeleteConfirmModal(int messageId)
+    {
+        var overlay = new VisualElement();
+        overlay.AddToClassList("modal-overlay");
+
+        var box = new VisualElement();
+        box.AddToClassList("modal-box");
+        overlay.Add(box);
+
+        var title = new Label("¿ELIMINAR NOTICIA?");
+        title.AddToClassList("modal-title");
+        box.Add(title);
+
+        var body = new VisualElement();
+        body.AddToClassList("modal-body");
+        var text = new Label("Esta acción no se puede deshacer.");
+        text.AddToClassList("modal-paragraph");
+        body.Add(text);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.style.flexDirection = FlexDirection.Row;
+        actions.style.marginTop = 14;
+
+        var cancel = new Button { text = "CANCELAR" };
+        cancel.AddToClassList("btn-modal-cancel");
+        cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
+        actions.Add(cancel);
+
+        var confirm = new Button { text = "ELIMINAR" };
+        confirm.AddToClassList("btn-modal-confirm");
+        confirm.AddToClassList("btn-modal-confirm--danger");
+        confirm.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            overlay.RemoveFromHierarchy();
+            DatabaseManager.Instance.DeleteMessage(messageId);
+            _selectedMessageId = 0;
+            _allMessages = DatabaseManager.Instance.GetMessages(_manager.id);
+            ApplyFilters();
+            ShowNewsDetail(null);
+        });
+        actions.Add(confirm);
+
+        box.Add(actions);
+        CursorManager.Instance?.RegisterHandCursor(confirm);
+        CursorManager.Instance?.RegisterHandCursor(cancel);
+        _root.Add(overlay);
     }
 
     // ── CATEGORY ──
