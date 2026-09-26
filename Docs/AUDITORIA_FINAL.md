@@ -829,10 +829,10 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 
 ### Fase 3 — Profundidad (~1-3 meses)
 
-- [ ] Progresión por arquetipo/edad/minutos/entrenamiento (`SEA-08/09/10` resueltos de raíz).
-- [ ] IA con cap/aprons real (`ECO-06`) + economía estable a 20+ temporadas (`ECO-09/10`).
-- [ ] Draft persistente/resumible (`SEA-07`) + scouting con riesgo.
-- [ ] Plan de partido + staff con esquemas.
+- [x] Progresión por arquetipo/edad/minutos/entrenamiento (`PlayerProgression`: edad + potencial como techo + minutos; `SEA-08/09/10` resueltos de raíz).
+- [x] IA con cap/aprons real (`ECO-06`). *Pendiente:* economía estable a 20+ temporadas (`ECO-09` nómina 7/12 y `ECO-10` préstamos).
+- [x] Draft persistente/resumible (`SEA-07`). *Pendiente:* scouting con riesgo (busts).
+- [~] Plan de partido (ritmo/ataque/defensa: datos + simulador + IA + panel en QUINTETO). *Pendiente:* staff con esquemas.
 - [ ] Dashboard de cap/aprons + negociación de agente.
 
 ### Fase 4 — Pulido (~1 mes)
@@ -874,6 +874,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `49379e1c` | REN-01, UI-03/05, CON-07/08, QA-07/08 | Rendimiento y UI: `AchievementService` filtra por temporada y `GetStandingsGames(season)`; bandeja del dashboard con `LIMIT` (`GetRecentMessages`); scrollbar re-bindeada en cada visita (Stats/Editor); crash de Entrenamiento resuelto (se re-aplica la tarjeta seleccionada + `FirstOrDefault`); eliminados `GetLeagueTop*` muertos; `FullScreenUI` null-safe; docs corregidas sobre callbacks. |
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
+| 2026-09-26 | `63d5048e` + `16b4782b` | Fase 3 · plan de partido | Táctica persistente por equipo (`teams.plan_pace/plan_offense/plan_defense` + migración): el simulador ajusta posesiones (ritmo), sesgo de tiro de tres (interior/exterior) y pérdidas/faltas (defensa). La IA deriva el plan de su `TeamStrategy` (Contend rápido/agresivo/exterior; Rebuild lento/interior). Panel de 3 filas en QUINTETO + 6 tests. |
 | 2026-09-26 | `2ef769ad` | Fase 3 · progresión | `PlayerProgression` (helper puro): el offseason combina edad, **potencial** (techo real: un jugador en su techo no sube), **minutos de la temporada anterior** (jugar desarrolla; no jugar estanca) y prioridad posicional. +6 tests. |
 | 2026-09-26 | `830316da` | SEA-07 | Draft **persistente y resumible**: tabla `draft_state` (season_id, cursor, completed); si el draft ya terminó no se repite, y al recargar a mitad se reanuda desde el pick guardado sin duplicar la clase (no se limpian los flags de rookie de los ya elegidos). |
 | 2026-09-26 | `1550aab2` | ECO-06 | IA con modelo de cap/aprons: `TradeHelper.CanAISignExternal` (espacio de cap → MLE por apron → mínimo, tope del 2º apron) y `CanAIRenew` (Bird hasta el 2º apron); aplicados en `TrySignFreeAgent` y `ProcessAIRenewals`. +4 tests. |
