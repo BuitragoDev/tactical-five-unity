@@ -124,6 +124,7 @@ using System.Threading.Tasks;
     private System.DateTime? _fastSimTarget;
     private string _fastSimStartDate;
     private bool _fastSimAborted;
+    private string _fastSimErrorMessage;
     private List<int> _fastSimAbortEmptySlots = new();
     private List<(LineupData li, PlayerData p)> _fastSimAbortInjured = new();
     private bool _fastSimSkipPreBatch;
@@ -1869,6 +1870,9 @@ using System.Threading.Tasks;
         if (fastSim)
         {
             _fastSimAborted = true;
+            // Guardar el motivo: al terminar el bucle se muestra al jugador (antes
+            // el error solo quedaba en la consola y la simulación se detenía en silencio).
+            _fastSimErrorMessage = $"{step}: {ex.Message}";
             _fastSimAbortEmptySlots.Clear();
             _fastSimAbortInjured.Clear();
         }
@@ -1890,6 +1894,7 @@ using System.Threading.Tasks;
         }
 
         _fastSimAborted = false;
+        _fastSimErrorMessage = null;
         _fastSimSkipPreBatch = false;
         _fastSimAutoFixAttempts = 0;
         _fastSimAbortEmptySlots = new List<int>();
@@ -2144,7 +2149,13 @@ using System.Threading.Tasks;
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
         HideLoading();
 
-        if (!_fastSimAborted && !_fastSimStopRequested)
+        if (_fastSimErrorMessage != null)
+        {
+            // La simulación se detuvo por un error: avisar en vez de salir en silencio.
+            ShowOfferResultModal("ERROR EN LA SIMULACIÓN",
+                "La simulación se detuvo por un error y el último día no se aplicó.\n\n" + _fastSimErrorMessage, -1);
+        }
+        else if (!_fastSimAborted && !_fastSimStopRequested)
         {
             // Calcular W/L del período simulado
             string endDate = _season?.current_date ?? _fastSimTarget?.ToString("yyyy-MM-dd") ?? "";
