@@ -293,7 +293,8 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    padding: 14px 48px;
+    padding: 0 48px;
+    min-height: 0;
     border-radius: 8px;
     border-width: 2px;
     -unity-text-align: middle-center;
