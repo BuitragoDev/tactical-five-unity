@@ -976,7 +976,10 @@ using System.Threading.Tasks;
                         }
                         if (p.injury_days <= 0 && !teamsPlayToday.Contains(team.id))
                         {
-                            p.fisico = Mathf.Min(99, p.fisico + 8);
+                            // +10 en día de descanso: compensa el desgaste de la
+                            // temporada sin que los titulares acaben hundidos (antes
+                            // +8 dejaba un drenaje neto que hacía caer el acierto).
+                            p.fisico = Mathf.Min(99, p.fisico + 10);
                             conn.Update(p);
                         }
                     }

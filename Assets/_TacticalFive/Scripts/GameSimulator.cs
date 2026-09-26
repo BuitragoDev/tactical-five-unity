@@ -210,22 +210,28 @@ public static class GameSimulator
         game.q4_home = qsArr.Length > 3 ? qsArr[3].Item1 : 0;
         game.q4_away = qsArr.Length > 3 ? qsArr[3].Item2 : 0;
 
-        // Suelo garantizado para atributos elite (tras simulacion)
+        // Suelo garantizado para atributos elite (tras simulacion). Los rebotes del
+        // suelo no pueden superar los tiros fallados del partido (antes el total de
+        // rebotes podía pasar de los fallos disponibles).
+        int missPool = homePS.Concat(awayPS).Sum(x => (x.fga - x.fgm) + (x.fta - x.ftm));
+        int reboundsSoFar = homePS.Concat(awayPS).Sum(x => x.oreb + x.dreb);
+
         foreach (var ps in homePS.Concat(awayPS))
         {
             if (ps.minutes < 20) continue;
             if (ps.passing >= 95)
                 ps.assists = Mathf.Max(ps.assists, Mathf.RoundToInt(ps.minutes / 48f * 10));
-            if (ps.rebounding >= 95)
+            if (ps.rebounding >= 95 && reboundsSoFar < missPool)
             {
                 int curReb = ps.oreb + ps.dreb;
                 int floorReb = Mathf.RoundToInt(ps.minutes / 48f * 10f
                     * GetReboundPositionMultiplier(ps.position, false));
                 if (curReb < floorReb)
                 {
-                    int extra = floorReb - curReb;
+                    int extra = Mathf.Min(floorReb - curReb, missPool - reboundsSoFar);
                     ps.oreb += extra / 2;
                     ps.dreb += extra - extra / 2;
+                    reboundsSoFar += extra;
                 }
             }
             if (ps.steals_attr >= 90)
@@ -280,8 +286,9 @@ public static class GameSimulator
 
         // Fatiga post-partido (los partidos G-League no desgastan el físico:
         // los prospectos ni existen en players, y a los asignados no se les
-        // aplica doble desgaste por jugar en dos competiciones)
-        if (persistToDb)
+        // aplica doble desgaste por jugar en dos competiciones). El All-Star es
+        // una exhibición: tampoco desgasta.
+        if (persistToDb && game.game_type != "allstar")
         {
             bool homeBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
                 .Any(g => (g.home_team_id == game.home_team_id || g.away_team_id == game.home_team_id)
@@ -293,7 +300,7 @@ public static class GameSimulator
             {
                 var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                 if (player == null) continue;
-                int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
+                int loss = Mathf.RoundToInt(ps.minutes * 0.28f);
                 if (homeBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
                 player.fisico = Mathf.Max(0, player.fisico - loss);
                 DatabaseManager.Instance.UpdatePlayer(player);
@@ -302,15 +309,17 @@ public static class GameSimulator
             {
                 var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                 if (player == null) continue;
-                int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
+                int loss = Mathf.RoundToInt(ps.minutes * 0.28f);
                 if (awayBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
                 player.fisico = Mathf.Max(0, player.fisico - loss);
                 DatabaseManager.Instance.UpdatePlayer(player);
             }
         }
 
-        var homeInjuries = persistToDb ? CheckInjuries(homePS) : new List<(int player_id, string type, int days)>();
-        var awayInjuries = persistToDb ? CheckInjuries(awayPS) : new List<(int player_id, string type, int days)>();
+        // Sin lesiones en el All-Star (exhibición).
+        bool trackInjuries = persistToDb && game.game_type != "allstar";
+        var homeInjuries = trackInjuries ? CheckInjuries(homePS) : new List<(int player_id, string type, int days)>();
+        var awayInjuries = trackInjuries ? CheckInjuries(awayPS) : new List<(int player_id, string type, int days)>();
 
         var result = new GameResult
         {
@@ -861,7 +870,9 @@ public static class GameSimulator
         // En la G-League hay más canastas asistidas (reparto más coral del ataque):
         // sin el reparto extra, los líderes no llegan ni a 4 APP porque el star
         // acapara los tiros y quedan pocas canastas ajenas que asistir.
-        if (UnityEngine.Random.value >= (glLeague ? 0.60f : 0.35f)) return null;
+        // % de canastas asistidas: ~55% en la NBA real (antes 35%, las asistencias
+        // salían estructuralmente bajas). La G-League reparte aún más.
+        if (UnityEngine.Random.value >= (glLeague ? 0.62f : 0.55f)) return null;
         var others = court.Where(p => p != scorer).ToList();
         if (others.Count == 0) return null;
         var w = others.Select(p => Mathf.Pow(Mathf.Max(1, p.passing), 3f)).ToList();
