@@ -548,7 +548,7 @@ public static class GLeaguePostSeason
             var homePlayers = GLeagueHelper.BuildAffiliateLineup(homeTeam, allProspects, assignedByNba);
             var awayPlayers = GLeagueHelper.BuildAffiliateLineup(awayTeam, allProspects, assignedByNba);
 
-            var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, false,
+            var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50,
                 persistToDb: false, glLeague: true);
             db.UpdateGame(game);
         }

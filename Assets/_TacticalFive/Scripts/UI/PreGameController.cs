@@ -132,7 +132,7 @@ public class PreGameController : UIScreenController
         if (home == null || away == null) return;
 
         var preview = MatchupPreview.Compute(myGame.home_team_id, myGame.away_team_id,
-            myGame.home_team_id == _myTeam.id, _manager.id, _season.id, myGame.game_date);
+            _manager.id, _season.id, myGame.game_date);
 
         if (_mpvFavorite != null)
         {

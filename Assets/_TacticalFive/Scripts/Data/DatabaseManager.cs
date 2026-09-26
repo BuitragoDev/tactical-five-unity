@@ -867,6 +867,16 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for on_trade_block: {ex.Message}");
         }
 
+        // Limpieza one-time: las filas de player_game_stats con 0 minutos (DNPs)
+        // inflaban los partidos jugados y diluían las medias. Ya no se persisten
+        // (GameSimulator) y aquí se borran las existentes.
+        if (!IsMigrationApplied("no_dnp_game_stats"))
+        {
+            _db.Execute("DELETE FROM player_game_stats WHERE minutes = 0");
+            MarkMigrationApplied("no_dnp_game_stats");
+            Debug.Log("[DB] Migration: eliminadas las filas de player_game_stats con 0 minutos");
+        }
+
         // Add rings to players if missing (championships won by the player)
         try
         {

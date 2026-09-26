@@ -1307,7 +1307,7 @@ using System.Threading.Tasks;
                         var awayP = GetActivePlayers(elimGame.away_team_id);
                         int elimHomeChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.home_team_id);
                         int elimAwayChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.away_team_id);
-                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem, elimGame.home_team_id == _myTeam.id);
+                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem);
                         DatabaseManager.Instance.UpdateGame(elimGame);
                         ProcessGameFinances(elimGame, elimResult);
                         UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
@@ -1715,7 +1715,7 @@ using System.Threading.Tasks;
         var awayStarters = new HashSet<int>(awayPlayers.Take(5).Select(p => p.id));
         GameResultCache.GameStarters[game.id] = new HashSet<int>(homeStarters.Concat(awayStarters));
 
-        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem, isMyHomeGame);
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem);
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
 
@@ -1828,7 +1828,7 @@ using System.Threading.Tasks;
         var myAffiliate = _myTeam != null ? DatabaseManager.Instance.GetGLeagueTeamByNbaTeam(_myTeam.id) : null;
         bool isMyHomeGame = myAffiliate != null && homeTeam.id == myAffiliate.id;
 
-        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, isMyHomeGame, persistToDb:false, glLeague:true);
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, persistToDb:false, glLeague:true);
         DatabaseManager.Instance.UpdateGame(game);
 
         // Solo acumular stats de liga regular en gleague_season_stats;
@@ -6901,6 +6901,7 @@ List<int> offeredPickIds = new List<int>();
             activeIds.Add(player.id);
 
             var last5Stats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
+                .Where(s => s.minutes > 0)
                 .OrderByDescending(s => s.game_id).Take(5).ToList();
             float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
 

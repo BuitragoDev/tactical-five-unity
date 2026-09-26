@@ -618,7 +618,7 @@ public partial class DatabaseManager
                          .Select(g => g.id)
                          .ToList();
         return _db.Table<PlayerGameStats>()
-                  .Where(s => s.player_id == playerId && gameIds.Contains(s.game_id))
+                  .Where(s => s.player_id == playerId && s.minutes > 0 && gameIds.Contains(s.game_id))
                   .Count();
     }
 
