@@ -93,7 +93,7 @@ Un **Sign-and-Trade de FA propio** genera dos filas: `free_agent` (firma con Bir
 `id`, `team_id`, `player_id`, `attribute`, `duration_days`, `days_remaining`, `completed`.
 
 ### team_lineup (`LineupData`)
-`id`, `player_id`, `team_id`, `slot` (0=starter, 1=bench, 2=inactive), `slot_index` (migrated, default -1). Seeded by `AutoSeedLineup`.
+`id`, `player_id`, `team_id`, `slot` (0=starter, 1=bench, 2=inactive), `slot_index` (migrated, default -1). Seeded by `AutoSeedLineup`. **`rotation_minutes`** (migración aditiva, default -1 = automático): minutos asignados en la pantalla ROTACIÓN para el siguiente partido (`0..48`). Solo se lee del equipo del usuario; la IA se rige por la heurística `GameSimulator.GetTargetMinutes`. Se rellena en `DashboardController.GetActivePlayers` y se escribe con `DatabaseManager.SetLineupMinutes`.
 
 ### employees (`EmployeeData`)
 `id`, `team_id`, `position` (e.g. "PABELLON", coaches), `first_name`, `last_name`, `salary`, `reputation` (1–5, drives ticket/renovation modifiers), `contract_years`, `candidate_day`. Positions include psychologist (see `ProcessPsychologistMorale`).
@@ -189,6 +189,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 | `players` | `morale` | 50 |
 | `players` | `role` | 3 |
 | `team_lineup` | `slot_index` | -1 |
+| `team_lineup` | `rotation_minutes` | -1 |
 | `players` | `photo` | '' |
 | `players` | `secondary_position` | '' |
 | `trade_offers` | `player_ids_out`, `player_ids_in` | '' |

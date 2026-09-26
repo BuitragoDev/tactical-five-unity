@@ -3494,6 +3494,60 @@ public partial class DatabaseManager
         }
     }
 
+    /// <summary>Guarda los minutos asignados en la pantalla ROTACIÓN para un jugador
+    /// de la convocatoria. -1 = automático (heurística del simulador).</summary>
+    public void SetLineupMinutes(int playerId, int minutes)
+    {
+        if (!EnsureDb()) return;
+        var existing = GetPlayerLineupSlot(playerId);
+        if (existing == null) return;
+        existing.rotation_minutes = minutes;
+        _db.Update(existing);
+    }
+
+    /// <summary>Número máximo de NO CONVOCADOS (slot 2) en la convocatoria.</summary>
+    public const int INACTIVE_SLOTS = 5;
+
+    /// <summary>Garantiza que la convocatoria (team_lineup) existe y está al día con la
+    /// plantilla: crea la convocatoria automática si está vacía, elimina filas de
+    /// jugadores que ya no están en el equipo y mete a los nuevos en NO CONVOCADOS.
+    /// Devuelve la convocatoria resultante.</summary>
+    public List<LineupData> EnsureLineupSeeded(int teamId, List<PlayerData> players)
+    {
+        if (!EnsureDb()) return new List<LineupData>();
+
+        var existing = GetTeamLineup(teamId);
+        if (existing.Count == 0)
+        {
+            var excluded = new HashSet<int>(players.Where(p => p.g_league_assigned == 1).Select(p => p.id));
+            AutoSeedLineup(teamId, players, excluded);
+        }
+        else
+        {
+            var currentIds = new HashSet<int>(players.Select(p => p.id));
+            foreach (var e in existing)
+            {
+                if (!currentIds.Contains(e.player_id))
+                    DeleteLineupEntry(e.id);
+            }
+
+            existing = GetTeamLineup(teamId);
+            var assigned = new HashSet<int>(existing.Select(l => l.player_id));
+            int nextInactIdx = existing.Where(l => l.slot == 2)
+                                       .Select(l => l.slot_index)
+                                       .DefaultIfEmpty(-1).Max() + 1;
+            foreach (var p in players)
+            {
+                if (assigned.Contains(p.id)) continue;
+                if (nextInactIdx >= INACTIVE_SLOTS) break;
+                SetPlayerSlot(p.id, teamId, 2, nextInactIdx);
+                nextInactIdx++;
+            }
+        }
+
+        return GetTeamLineup(teamId);
+    }
+
     public void AutoSeedLineup(int teamId, List<PlayerData> players, HashSet<int> forceInactiveIds = null)
     {
         if (!EnsureDb()) return;

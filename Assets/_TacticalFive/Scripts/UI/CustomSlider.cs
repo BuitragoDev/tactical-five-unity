@@ -13,12 +13,22 @@ public class CustomSlider
     private float _value;
     public System.Action<float> OnValueChanged;
 
+    private float _maxValue = 1f;
+
+    /// <summary>Tope normalizado (0..1) que la barra no puede sobrepasar al arrastrar.
+    /// Se usa, p. ej., para no repartir más de los 240 minutos del partido.</summary>
+    public float MaxValue
+    {
+        get { return _maxValue; }
+        set { _maxValue = Mathf.Clamp01(value); }
+    }
+
     public float Value
     {
         get { return _value; }
         set
         {
-            _value = Mathf.Clamp01(value);
+            _value = Mathf.Clamp(value, 0f, _maxValue);
             UpdateVisuals();
         }
     }
@@ -39,7 +49,7 @@ public class CustomSlider
 
     public void SetValueWithoutNotify(float value)
     {
-        _value = Mathf.Clamp01(value);
+        _value = Mathf.Clamp(value, 0f, _maxValue);
         UpdateVisuals();
     }
 
@@ -85,7 +95,7 @@ public class CustomSlider
 
         float worldLeft = _container.worldBound.x;
         float localX = pointerPos.x - worldLeft;
-        float newValue = Mathf.Clamp01(localX / containerWidth);
+        float newValue = Mathf.Clamp(localX / containerWidth, 0f, _maxValue);
 
         if (!Mathf.Approximately(newValue, _value))
         {

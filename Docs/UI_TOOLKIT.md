@@ -9,8 +9,8 @@
   - Render mode: Screen Space Overlay.
   - `m_ScaleMode: ScaleWithScreenSize`, reference 1920×1080, match 0.5, reference DPI 96.
   - `themeUss` → `TacticalFiveTheme.tss` (the only `.tss`) which `@import`s `Styles/GlobalVariables.uss`, `Styles/Typography.uss`, `Styles/Utilities.uss`.
-- **Every screen** is a root GameObject with `UIDocument` (same PanelSettings) + `FullScreenUI` + its controller MonoBehaviour. **41 screen GameObjects** in `MainMenu.unity`; only 4 active at boot (MainCamera, ScreenManager, CursorManager, LoadingDocument).
-- **Per-screen files:** 42 UXML/USS pairs exist under `UI/Screens/`: 41 operational screens plus the uninstantiated `LegalNotice.uxml`; `LegalNotice.uss` is still imported by MainMenu and other screens. Shared USS references mix `project://database/...` and relative paths, not only GUID-style references.
+- **Every screen** is a root GameObject with `UIDocument` (same PanelSettings) + `FullScreenUI` + its controller MonoBehaviour. One screen GameObject per `GameScreen` value in `MainMenu.unity`; only 4 active at boot (MainCamera, ScreenManager, CursorManager, LoadingDocument).
+- **Per-screen files:** 48 UXML/USS pairs exist under `UI/Screens/`: 47 operational screens plus the uninstantiated `LegalNotice.uxml`; `LegalNotice.uss` is still imported by MainMenu and other screens. Shared USS references mix `project://database/...` and relative paths, not only GUID-style references.
 
 ## 2. Theme & styling architecture
 
@@ -47,7 +47,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
 
 ## 4. Controller pattern — `UIScreenController` base
 
-**[F] All 41 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:
+**[F] All 47 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:
 
 ```csharp
 protected virtual void OnEnable()
@@ -79,7 +79,7 @@ protected virtual void OnEnable()
 - **Callback lifecycle risk [F]:** screens are disabled with `SetActive(false)` but not destroyed. `OnEnable` calls `RegisterCallback` again and there is no general unregister/guard phase. Repeated navigation may accumulate handlers; confirm with a Unity runtime test before changing the pattern.
 - `BtnActionTarget` is never overridden; `OnBtnActionClicked` overridden by `CalendarController` and `DashboardController`.
 
-## 5. Screens inventory (41)
+## 5. Screens inventory (43 en esta tabla; 47 en el enum)
 
 | # | Screen | UXML folder | Controller | Notes |
 |---|---|---|---|---|
@@ -124,11 +124,18 @@ protected virtual void OnEnable()
 | 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Player season stats + career + attributes + fog-of-war gate + honors |
 | 40 | Quintos | `Screens/Quintos` | `QuintosController` | Season All-Star/Rookie quintets |
 | 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career |
-| 42 | GLeague | `Screens/GLeague` | `GLeagueController` | G-League con 4 pestañas: PLANTILLA (plantilla completa de la filial — prospectos + asignados NBA — con RECUPERAR en los asignados, y elegibles), RESULTADOS (la tabla de partidos del filial por fecha), CLASIFICACIÓN (Este/Oeste, corte playoff) y ESTADÍSTICAS (top-5 promedios); reutiliza clases de Stats.uss y Standings.uss |
+| 42 | PreGame | `Screens/PreGame` | `PreGameController` | Previas del partido: pronóstico/favorito, registros, ofensiva/defensiva + rango, bajas, alineaciones y claves; botones VOLVER/JUGAR |
+| 43 | InfoLeague | `Screens/InfoLeague` | `InfoLeagueController` | Información de la liga: pestañas FINANZAS (economía de la competición) y EQUIPOS (plantillas por conferencia Este/Oeste) |
+| 44 | TheCity | `Screens/TheCity` | `TheCityController` | Mapa/ciudad con burbujas de acceso directo (hospital, pabellón, entrenamiento, clasificación, empleados, finanzas, prensa, estadísticas, palmarés). **GameObject `TheCity` (sin sufijo `Document`)** |
+| 45 | Buscador | `Screens/Buscador` | `BuscadorController` | Buscador de jugadores: filtros posición/edad/equipo/OVR/solo FA, orden por columna y scrollbar propia |
+| 46 | GLeague | `Screens/GLeague` | `GLeagueController` | G-League con 4 pestañas: PLANTILLA (plantilla completa de la filial — prospectos + asignados NBA — con RECUPERAR en los asignados, y elegibles), RESULTADOS (la tabla de partidos del filial por fecha), CLASIFICACIÓN (Este/Oeste, corte playoff) y ESTADÍSTICAS (top-5 promedios); reutiliza clases de Stats.uss y Standings.uss |
+| 47 | Rotation | `Screens/Rotation` | `RotationController` | **ROTACIÓN** (submenu PLANTILLA, tras QUINTETO): reparto de los 240 minutos del partido entre los 12 convocados. Slider por jugador (0-48) + columnas POS / ROL / MED / MIN / SUG. (heurística `GameSimulator.GetSuggestedMinutes`), panel de solo lectura MINUTOS POR POSICIÓN (principal/secundaria), contador de minutos restantes y botones AUTO (240) / RESET (todo a 0). Los sliders nunca permiten pasar de 240 min en total (`CustomSlider.MaxValue`): con el reparto completo (o excedido) cada barra solo puede bajar hasta que alguien libere minutos. Se persiste en `team_lineup.rotation_minutes` (`-1` = automático) y el simulador lo usa como `target_minutes` en `PrepareRotationMetadata`, **vinculante** para tu equipo vía `PickSubstitution` (suelo 8 min; 0 = no juega) |
+
+> **Nota de conteo (verificado contra `GameEnums.cs`):** la tabla lista los **47 valores** de `GameScreen` (incluye `Rotation`, la última). Las referencias a "41 pantallas" en otros documentos son históricas y están actualizadas en este pase.
 
 **Sidebar navigation (verified, `SidebarController.cs:15-45`):**
 - **INICIO** → Dashboard
-- **PLANTILLA** (RosterSubmenu) → Jugadores (Roster), Quinteto, Entrenamiento, Empleados, Lesionados, Dorsales
+- **PLANTILLA** (RosterSubmenu) → Jugadores (Roster), Quinteto, **Rotación**, Entrenamiento, Empleados, Lesionados, Dorsales
 - **RESULTADOS** → Calendar, Results, Playoffs
 - **CLASIFICACIÓN** → Standings
 - **LOGROS** (the current `Sidebar.uxml` label for PalmaresSubmenu) → Palmares, Records, Premios
@@ -150,7 +157,7 @@ flowchart TD
     SelectTeam --> Preseason
     Preseason --> Dashboard
     Dashboard -->|sidebar| Roster
-    Dashboard --> Quinteto & Training & Employees & Injured & Dorsales
+    Dashboard --> Quinteto & Rotation & Training & Employees & Injured & Dorsales
     Dashboard --> Calendar & Results & Playoffs & Standings & Stats & GLeague
     Dashboard --> Palmares & Records & Premios & Logros
     Dashboard --> Market & Cartera & Historial
@@ -167,7 +174,7 @@ flowchart TD
     Dashboard -->|menú| MainMenu
 ```
 
-**Navigation mechanics:** `ScreenManager.GoTo(GameScreen, GameMode)` → `ShowOnly(doc)` toggles `SetActive`. Controllers rebuild in `OnEnable`. All 41 enum values have cases; no dead values.
+**Navigation mechanics:** `ScreenManager.GoTo(GameScreen, GameMode)` → `ShowOnly(doc)` toggles `SetActive`. Controllers rebuild in `OnEnable`. All `GameScreen` values have cases; no dead values.
 
 ## 7. How screens are created/shown/hidden
 

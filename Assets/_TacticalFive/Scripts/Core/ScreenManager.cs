@@ -13,6 +13,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument rosterDocument;
 
     [SerializeField] private UIDocument quintetoDocument;
+    [SerializeField] private UIDocument rotationDocument;
     [SerializeField] private UIDocument trainingDocument;
     [SerializeField] private UIDocument calendarDocument;
     [SerializeField] private UIDocument standingsDocument;
@@ -91,6 +92,20 @@ public class ScreenManager : MonoBehaviour
                 if (n.Contains("gleague"))
                 {
                     gleagueDocument = doc;
+                    break;
+                }
+            }
+        }
+
+        if (rotationDocument == null)
+        {
+            var allDocs = FindObjectsByType<UIDocument>(FindObjectsSortMode.None);
+            foreach (var doc in allDocs)
+            {
+                string n = doc.gameObject.name.ToLower();
+                if (n.Contains("rotation"))
+                {
+                    rotationDocument = doc;
                     break;
                 }
             }
@@ -215,6 +230,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Quinteto:
                 ShowOnly(quintetoDocument);
                 break;
+            case GameScreen.Rotation:
+                ShowOnly(rotationDocument);
+                break;
             case GameScreen.Dorsales:
                 ShowOnly(dorsalesDocument);
                 break;
@@ -250,6 +268,14 @@ public class ScreenManager : MonoBehaviour
 
     void ShowOnly(UIDocument target)
     {
+        // Pantalla sin document asignado (p. ej. GameObject aún no creado en la
+        // escena): mantenemos la pantalla actual y avisamos en vez de dejar todo en negro.
+        if (target == null)
+        {
+            Debug.LogWarning($"[ScreenManager] No hay UIDocument asignado para '{CurrentScreen}'.");
+            return;
+        }
+
         if (loadingDocument != null) loadingDocument.gameObject.SetActive(false);
         if (mainMenuDocument != null) mainMenuDocument.gameObject.SetActive(false);
         if (selectTeamDocument != null) selectTeamDocument.gameObject.SetActive(false);
@@ -287,6 +313,7 @@ public class ScreenManager : MonoBehaviour
         if (trainingDocument != null) trainingDocument.gameObject.SetActive(false);
 
         if (quintetoDocument != null) quintetoDocument.gameObject.SetActive(false);
+        if (rotationDocument != null) rotationDocument.gameObject.SetActive(false);
         if (dorsalesDocument != null) dorsalesDocument.gameObject.SetActive(false);
         if (managerDocument != null) managerDocument.gameObject.SetActive(false);
         if (trajectoryDocument != null) trajectoryDocument.gameObject.SetActive(false);

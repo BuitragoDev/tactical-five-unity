@@ -803,7 +803,16 @@ using System.Threading.Tasks;
 
                 var orderedStarters = startersWithIdx.OrderBy(s => s.sortIdx).Select(s => s.p).ToList();
                 var active = orderedStarters.Concat(bench).Take(12).ToList();
-                if (active.Count > 0) return active;
+                if (active.Count > 0)
+                {
+                    // Minutos configurados en la pantalla ROTACIÓN (-1 = automático).
+                    foreach (var p in active)
+                    {
+                        if (lineupByPlayer.TryGetValue(p.id, out var ls))
+                            p.rotation_minutes = ls.rotation_minutes;
+                    }
+                    return active;
+                }
             }
         }
 
@@ -6654,9 +6663,11 @@ List<int> offeredPickIds = new List<int>();
             _ => 3f
         };
 
-        void ProcessPlayer(PlayerData player, float minutes, float? avgRating)
+        void ProcessPlayer(PlayerData player, float minutes, float? avgRating, float expectedMinutes)
         {
-            float expectedMin = ExpectedMinForRole(player.role);
+            // Minutos esperados: los configurados en ROTACIÓN (target del snapshot) o,
+            // si no hay, la tabla fija por rol.
+            float expectedMin = expectedMinutes > 0f ? expectedMinutes : ExpectedMinForRole(player.role);
             float ratio = expectedMin > 0f ? minutes / expectedMin : 1f;
             int roleDelta = GetRoleDelta(player.role, ratio);
             if (teamWon) roleDelta = Mathf.Min(roleDelta + 1, 2);
@@ -6729,7 +6740,7 @@ List<int> offeredPickIds = new List<int>();
                 .OrderByDescending(s => s.game_id).Take(5).ToList();
             float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
 
-            ProcessPlayer(player, ps.minutes, avgRating);
+            ProcessPlayer(player, ps.minutes, avgRating, ps.target_minutes);
         }
 
         // ── Inactive healthy players (no convocados pero sanos) ──
@@ -6738,7 +6749,7 @@ List<int> offeredPickIds = new List<int>();
         {
             if (player.injury_days > 0) continue;
             if (activeIds.Contains(player.id)) continue;
-            ProcessPlayer(player, 0f, null);
+            ProcessPlayer(player, 0f, null, 0f);
         }
     }
 

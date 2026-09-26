@@ -8,8 +8,8 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  UI LAYER — UI Toolkit (41 UIDocument screens + 2 injected components) │
-│  MainMenu.unity (single scene, 41 screen GameObjects)                   │
+│  UI LAYER — UI Toolkit (47 UIDocument screens + 2 injected components) │
+│  MainMenu.unity (single scene, 47 screen GameObjects)                   │
 │  ScreenManager (navigates by toggling SetActive)                        │
 │  UIScreenController (base class: header/sidebar/nav/config injection)   │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -49,7 +49,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Legacy/history** | `HallOfFameData`/`HallOfFameSeeder`/`HallOfFameHelper`, `RetiredNumberData` + 2 seeders, `PalmaresSeeder`, `TeamRecordSeeder`, `HistoricalPlayerStatsSeeder`, `GmAchievementData` | HOF, retired numbers, palmarés, records, achievements |
 | **Media** | `MessageData.cs`, `QuickNewsGenerator.cs`, `TvChannelData.cs` | Inbox, news generation |
 | **Analytics/forecast** | `Stats/AdvancedStatsHelper.cs`, `Stats/FogOfWarHelper.cs`, `Stats/MatchupPreview.cs` | eFG%/TS%/PER, scout fog-of-war, pre-match forecast |
-| **UI controllers** | `Scripts/UI/*.cs` (41, all inheriting `UIScreenController` in Core) | One per screen; bind UXML, load data, handle clicks |
+| **UI controllers** | `Scripts/UI/*.cs` (47, all inheriting `UIScreenController` in Core) | One per screen; bind UXML, load data, handle clicks |
 | **Reusable UI** | `HeaderController.cs`, `SidebarController.cs` (static helpers), `CustomSlider.cs` | Injected header/sidebar; custom slider control |
 | **Assets** | `Art/Resources/*`, `UI/*` | Textures, audio, fonts, UXML/USS, panel settings |
 
@@ -60,7 +60,7 @@ Common pattern: `public static X Instance { get; private set; }` + guard in `Awa
 | Singleton | Auto-create | `DontDestroyOnLoad` | Notes |
 |---|---|---|---|
 | `AudioManager` | **Yes** — `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]` creates a GameObject `"AudioManager"` | Yes | Also loads volumes/quality from `PlayerPrefs` and plays menu music |
-| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Yes** (`ScreenManager.cs:64`) | Holds 41 serialized `UIDocument` refs |
+| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Yes** (`ScreenManager.cs:64`) | Holds 47 serialized `UIDocument` refs |
 | `CursorManager` | No (GameObject `CursorManager` in scene) | Yes | **Single instance** (the old duplicate was removed) |
 | `DatabaseManager` | No (co-located on the `ScreenManager` GameObject) | Yes | Opens no DB in `Awake`; slot init is driven by UI flow |
 
@@ -106,11 +106,11 @@ Detailed per-phase doc: see `SCENES.md` (single scene) and `SAVE_SYSTEM.md` (slo
 
 ## 5. Navigation model
 
-- `GameScreen` enum (**41 values**, `GameEnums.cs`) maps 1:1 to serialized `UIDocument` fields on `ScreenManager` (`ScreenManager.cs:8-49`). Verified: every enum value has a `case` in `GoTo` and every case maps to a distinct document. No dead enum values remain.
+- `GameScreen` enum (**47 values**, `GameEnums.cs`) maps 1:1 to serialized `UIDocument` fields on `ScreenManager` (`ScreenManager.cs:8-49`). Verified: every enum value has a `case` in `GoTo` and every case maps to a distinct document. No dead enum values remain.
 - `GoTo(screen, mode)`:
   1. Sets `CurrentMode` if `mode != None`.
   2. Sets `CurrentScreen`.
-  3. `switch` → `ShowOnly(document)` → iterates all 41 docs, `SetActive(false)`, then `SetActive(true)` on target.
+  3. `switch` → `ShowOnly(document)` → iterates all 47 docs, `SetActive(false)`, then `SetActive(true)` on target.
 - Screens are **never destroyed**; each controller re-binds everything in `OnEnable` (via the `UIScreenController` base pipeline).
 - `GameScreen` values: Loading, MainMenu, SelectTeam, Preseason, Dashboard, Roster, Calendar, Standings, Palmares, Results, Playoffs, Stats, Records, Market, Finances, Loans, Sponsors, TV, Arena, Messages, MatchDay, GameResults, LoadGame, Employees, Injured, Cartera, SeasonSummary, PlayerAwards, Quintos, EndSeason, NewSeason, Editor, Historial, Training, Quinteto, Dorsales, Manager, Trajectory, Premios, PlayerProfile, Logros.
 
@@ -139,7 +139,7 @@ flowchart LR
 flowchart TD
     DB[DatabaseManager] --> SQLITE[(SQLite sqlite-net)]
     GSS[GameSaveManager] --> DB
-    SC[ScreenManager] --> UI[UIDocument x41]
+    SC[ScreenManager] --> UI[UIDocument x47]
     UI_C[UI controllers x40] --> USC[UIScreenController base]
     USC --> DB
     USC --> SC

@@ -427,6 +427,13 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: added slot_index to team_lineup");
         }
 
+        // Add rotation_minutes to team_lineup if missing (pantalla ROTACIÓN)
+        if (!lineupCols.Any(c => c.name == "rotation_minutes"))
+        {
+            _db.Execute("ALTER TABLE team_lineup ADD COLUMN rotation_minutes INTEGER DEFAULT -1");
+            Debug.Log("[DB] Migration: added rotation_minutes to team_lineup");
+        }
+
         // Add photo to players if missing
         var playerCols3 = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
         bool hasPhoto = playerCols3.Any(c => c.name == "photo");
