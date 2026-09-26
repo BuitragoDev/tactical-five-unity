@@ -6,7 +6,15 @@ using System.Linq;
 
 public static class GameSaveManager
 {
-    private static string BaseDir => Path.Combine(Application.persistentDataPath, "TacticalFive", "saves");
+    /// <summary>
+    /// Directorio de guardado. En tests se sobrescribe con una carpeta temporal para
+    /// poder probar el flujo de slots sin tocar las partidas del jugador.
+    /// </summary>
+    public static string BaseDirOverride { get; set; }
+
+    private static string BaseDir => string.IsNullOrEmpty(BaseDirOverride)
+        ? Path.Combine(Application.persistentDataPath, "TacticalFive", "saves")
+        : BaseDirOverride;
     private static string MetaPath => Path.Combine(BaseDir, "saves.json");
 
     public static int FindNextAvailableSlot()
