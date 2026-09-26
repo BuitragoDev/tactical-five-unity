@@ -210,6 +210,9 @@ public partial class DatabaseManager : MonoBehaviour
 
     public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
     {
+        // Single-flight: si ya hay un lote en curso, esperar a que termine
+        // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
+        WaitForBackgroundBatch();
         string path = DbPath;
         var task = Task.Run(() =>
         {
@@ -221,6 +224,9 @@ public partial class DatabaseManager : MonoBehaviour
 
     public Task RunInBackground(Action<SQLiteConnection> work)
     {
+        // Single-flight: si ya hay un lote en curso, esperar a que termine
+        // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
+        WaitForBackgroundBatch();
         string path = DbPath;
         var task = Task.Run(() =>
         {
@@ -238,6 +244,9 @@ public partial class DatabaseManager : MonoBehaviour
     /// </summary>
     public Task RunInBackgroundAsync(Action work)
     {
+        // Single-flight: si ya hay un lote en curso, esperar a que termine
+        // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
+        WaitForBackgroundBatch();
         string path = DbPath;
         var task = Task.Run(() =>
         {
@@ -253,6 +262,9 @@ public partial class DatabaseManager : MonoBehaviour
 
     public Task<T> RunInBackgroundAsync<T>(Func<T> work)
     {
+        // Single-flight: si ya hay un lote en curso, esperar a que termine
+        // (evita que dos lotes compartan estado/RNG y compitan por el lock de escritura).
+        WaitForBackgroundBatch();
         string path = DbPath;
         var task = Task.Run(() =>
         {
