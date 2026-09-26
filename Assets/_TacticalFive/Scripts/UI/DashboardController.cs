@@ -2489,9 +2489,23 @@ using System.Threading.Tasks;
                     if (leagueSettings != null)
                     {
                         bool proManagerOnly = _manager.game_mode == "promanager";
+                        bool ownRecentFA = DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id);
                         if (offer.is_two_way == 1)
                         {
-                            offerLegal = true;
+                            // El límite de 2 two-way se valida en la maduración: la UI
+                            // solo lo comprueba al abrir la oferta y se podían colar.
+                            offerLegal = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY
+                                      && TradeHelper.IsEligibleForTwoWay(player);
+                            illegalReason = "ya tienes 2 contratos two-way (o el jugador no es elegible)";
+                        }
+                        else if (ownRecentFA)
+                        {
+                            // FA propio reciente: se mantienen los Bird Rights (la UI ya
+                            // ofertaba con este máximo y la maduración los rechazaba).
+                            var bd = RosterController.GetMaxOfferBreakdown(player, leagueSettings, totalPayroll, true, proManagerOnly);
+                            long birdMax = bd.birdMax > 0 ? bd.birdMax : bd.capSpaceMax;
+                            offerLegal = offer.offer_salary <= birdMax;
+                            illegalReason = $"supera el máximo con Bird Rights (${birdMax:N0})";
                         }
                         else if (totalPayroll <= leagueSettings.salary_cap)
                         {
@@ -6124,8 +6138,7 @@ List<int> offeredPickIds = new List<int>();
 
             foreach (var p in ourPlayers)
             {
-                p.team_id = offer.team_id_from;
-                DatabaseManager.Instance.UpdatePlayer(p);
+                DatabaseManager.Instance.MovePlayerToTeam(p, offer.team_id_from);
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
@@ -6140,8 +6153,7 @@ List<int> offeredPickIds = new List<int>();
 
             foreach (var p in theirPlayers)
             {
-                p.team_id = _myTeam.id;
-                DatabaseManager.Instance.UpdatePlayer(p);
+                DatabaseManager.Instance.MovePlayerToTeam(p, _myTeam.id);
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
@@ -7359,7 +7371,9 @@ List<int> offeredPickIds = new List<int>();
                 season_id = _season.id,
                 record_type = FinanceRecord.TYPE_TAX,
                 game_day = gameDay,
-                amount = -monthlyTax,
+                // Positivo como el resto de gastos: GetTotalExpenses suma los importes
+                // y con signo negativo el balance salía inflado.
+                amount = monthlyTax,
                 created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             });
         }

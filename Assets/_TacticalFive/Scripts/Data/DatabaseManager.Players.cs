@@ -26,6 +26,22 @@ public partial class DatabaseManager
         return next;
     }
 
+    /// <summary>
+    /// Mueve un jugador a otro equipo en un traspaso: actualiza team_id y last_team_id
+    /// (los Bird rights viajan con el jugador, pero solo el equipo nuevo cuenta como
+    /// "su último equipo") y limpia los flags de IR/two-way/G-League/trade block.
+    /// </summary>
+    public void MovePlayerToTeam(PlayerData p, int newTeamId)
+    {
+        p.team_id = newTeamId;
+        p.last_team_id = newTeamId;
+        p.is_on_ir = 0;
+        p.is_two_way = 0;
+        p.g_league_assigned = 0;
+        p.on_trade_block = 0;
+        UpdatePlayer(p);
+    }
+
     public List<PlayerData> GetFreeAgents()
     {
         if (!EnsureDb()) return new List<PlayerData>();

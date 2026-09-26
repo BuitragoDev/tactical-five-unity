@@ -1943,17 +1943,11 @@ using System.Linq;
             _signAndTradeActive = false;
         }
 
-        // Execute trade
+        // Execute trade (MovePlayerToTeam: actualiza equipo/tenure y limpia flags)
         foreach (var p in mySelected)
-        {
-            p.team_id = _selectedTeam.id;
-            DatabaseManager.Instance.UpdatePlayer(p);
-        }
+            DatabaseManager.Instance.MovePlayerToTeam(p, _selectedTeam.id);
         foreach (var p in otherSelected)
-        {
-            p.team_id = _myTeam.id;
-            DatabaseManager.Instance.UpdatePlayer(p);
-        }
+            DatabaseManager.Instance.MovePlayerToTeam(p, _myTeam.id);
         foreach (var p in mySelected)
         {
             DatabaseManager.Instance.AssignJerseyNumber(p, _selectedTeam.id);

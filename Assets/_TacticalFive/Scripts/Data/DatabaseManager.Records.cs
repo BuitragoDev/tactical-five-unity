@@ -3207,6 +3207,25 @@ public partial class DatabaseManager
             _db.Update(managerRow);
         }
 
+        // 7d. Ofertas pendientes: su day_sent es de la temporada anterior y con el
+        // contador a 0 madurarían casi un año tarde. Se normalizan (maduran en 7 días
+        // de la nueva temporada) y se descartan las ofertas de traspaso obsoletas.
+        try
+        {
+            _db.Execute("UPDATE offers SET day_sent = 0 WHERE processed = 0");
+            _db.Execute("DELETE FROM trade_offers WHERE processed = 0");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[DB] No se pudieron normalizar las ofertas del rollover: {ex.Message}");
+        }
+
+        // 7e. Reset del estado transitorio de temporada: lesiones, fatiga, trade block,
+        // química y confianza no deben viajar entre temporadas.
+        _db.Execute("UPDATE players SET injury_days = 0, injury_type = '', treated = 0, fisico = 99, on_trade_block = 0");
+        _db.Execute("UPDATE teams SET team_chemistry = 50");
+        _db.Execute("UPDATE managers SET fan_confidence = 50");
+
         // 8. Deactivate old season
         if (oldSeason != null)
         {
