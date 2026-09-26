@@ -14,12 +14,33 @@ public static class PlayerPhotoHelper
     static string CustomPhotoPath(int playerId) =>
         Path.Combine(CustomScopes.ActiveRoot, "PlayerPhotos", $"{playerId}.png");
 
+    // Texturas cargadas de fichero, cacheadas por ruta (la ruta incluye el ámbito,
+    // así que cambiar de partida no reutiliza texturas de otra). Evita crear una
+    // textura nueva en cada refresco de pantalla (fuga).
+    static readonly System.Collections.Generic.Dictionary<string, Texture2D> _texCache = new();
+
+    static Texture2D LoadCached(string path)
+    {
+        if (_texCache.TryGetValue(path, out var cached) && cached != null) return cached;
+        var tex = LoadTexture(path);
+        if (tex != null) _texCache[path] = tex;
+        return tex;
+    }
+
+    /// <summary>Libera las texturas de fichero cacheadas (tras sobrescribir una foto).</summary>
+    public static void Invalidate()
+    {
+        foreach (var kv in _texCache)
+            if (kv.Value != null) Object.Destroy(kv.Value);
+        _texCache.Clear();
+    }
+
     public static Texture2D Load(int playerId, string photoField)
     {
         // 0. Foto personalizada del ámbito activo (tiene prioridad sobre Resources).
         if (File.Exists(CustomPhotoPath(playerId)))
         {
-            var custom = LoadTexture(CustomPhotoPath(playerId));
+            var custom = LoadCached(CustomPhotoPath(playerId));
             if (custom != null) return custom;
         }
 
@@ -39,7 +60,7 @@ public static class PlayerPhotoHelper
         string slotPath = Path.Combine(SlotDir(slot), $"{playerId}.png");
         if (File.Exists(slotPath))
         {
-            var tex = LoadTexture(slotPath);
+            var tex = LoadCached(slotPath);
             if (tex != null) return tex;
         }
 
@@ -47,7 +68,7 @@ public static class PlayerPhotoHelper
         string rootPath = Path.Combine(BaseDir, $"{playerId}.png");
         if (File.Exists(rootPath))
         {
-            var tex = LoadTexture(rootPath);
+            var tex = LoadCached(rootPath);
             if (tex != null) return tex;
         }
 
@@ -90,6 +111,7 @@ public static class PlayerPhotoHelper
         Directory.CreateDirectory(slotDir);
         File.WriteAllBytes(Path.Combine(slotDir, $"{playerId}.png"), bytes);
         Object.DestroyImmediate(copy);
+        Invalidate(); // la ruta puede estar cacheada
     }
 
     // ── FOTO CUSTOM (Editor) ──────────────────────────────────────────
@@ -148,6 +170,7 @@ public static class PlayerPhotoHelper
             string dir = Path.Combine(CustomScopes.ActiveRoot, "PlayerPhotos");
             Directory.CreateDirectory(dir);
             File.Copy(sourcePath, Path.Combine(dir, $"{playerId}.png"), true);
+            Invalidate(); // la ruta puede estar cacheada
             return true;
         }
         catch (System.Exception ex)

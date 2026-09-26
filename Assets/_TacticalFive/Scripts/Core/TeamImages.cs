@@ -27,7 +27,12 @@ public static class TeamImages
     /// Delega en CustomScopes e invalida las cachés si cambió.</summary>
     public static void SetScope(string scope)
     {
-        if (CustomScopes.SetScope(scope)) Invalidate();
+        if (CustomScopes.SetScope(scope))
+        {
+            Invalidate();
+            // Las fotos de jugador también dependen del ámbito: liberar sus texturas.
+            PlayerPhotoHelper.Invalidate();
+        }
     }
 
     public static bool HasCustom(string scope) => CustomScopes.HasCustom(scope);
@@ -52,6 +57,10 @@ public static class TeamImages
     static readonly Dictionary<string, Sprite[]> _arenaArrays = new();
     static readonly Dictionary<string, Sprite> _arenaSprites = new();
     static readonly Dictionary<string, Sprite> _previewCache = new();
+    // Sprites creados en runtime a partir de ficheros (los de Resources son assets
+    // compartidos y NO deben destruirse). Se destruyen al invalidar para no filtrar
+    // memoria al cambiar de partida varias veces.
+    static readonly HashSet<Sprite> _runtimeSprites = new();
 
     /// <summary>Sprite de previsualización desde un fichero (sin guardarlo). Para
     /// el borrador del Editor antes de pulsar GUARDAR.</summary>
@@ -66,10 +75,20 @@ public static class TeamImages
 
     public static void Invalidate()
     {
+        foreach (var sp in _runtimeSprites)
+        {
+            if (sp == null) continue;
+            var tex = sp.texture;
+            Object.Destroy(sp);
+            if (tex != null) Object.Destroy(tex);
+        }
+        _runtimeSprites.Clear();
+
         _logoArrays.Clear();
         _logoSprites.Clear();
         _arenaArrays.Clear();
         _arenaSprites.Clear();
+        _previewCache.Clear();
     }
 
     // ── LOGOS ─────────────────────────────────────────────────────────
@@ -287,6 +306,7 @@ public static class TeamImages
         // El nombre es clave: las pantallas re-indexan los arrays de Logos()/Arenas()
         // por s.name, así que el sprite custom debe llevar el nombre del fichero.
         sp.name = Path.GetFileNameWithoutExtension(path);
+        _runtimeSprites.Add(sp);
         return sp;
     }
 }
