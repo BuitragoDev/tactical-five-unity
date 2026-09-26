@@ -3050,6 +3050,9 @@ public partial class DatabaseManager
         var projectedDraftOrder = BuildDraftOrder(oldSeason != null ? (int?)oldSeason.id : null);
 
         // 5. Clear tables
+        // Punto seguro: si se cambió de partida durante el rollover, abortar aquí
+        // (rollback completo) antes de borrar datos.
+        ThrowIfBatchCancelled();
         _db.Execute("DELETE FROM player_game_stats");
         _db.Execute("DELETE FROM finals_player_stats");
         _db.Execute("DELETE FROM games");
@@ -3227,6 +3230,34 @@ public partial class DatabaseManager
             generated = 0
         };
         _db.Insert(newSeason);
+
+        // 11b. Deuda muerta (buyouts con stretch): cobrar el tramo de la nueva
+        // temporada. dead_money es persistente (no la borra el rollover).
+        var deadRows = _db.Table<DeadMoneyData>().ToList();
+        foreach (var dm in deadRows)
+        {
+            var deadTeam = _db.Find<TeamData>(dm.team_id);
+            if (deadTeam != null)
+            {
+                deadTeam.budget -= dm.annual_amount;
+                _db.Update(deadTeam);
+                _db.Insert(new FinanceRecord
+                {
+                    team_id = dm.team_id,
+                    season_id = newSeason.id,
+                    record_type = FinanceRecord.TYPE_BUYOUT,
+                    game_day = 0,
+                    amount = dm.annual_amount,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                });
+            }
+
+            dm.years_remaining -= 1;
+            if (dm.years_remaining <= 0)
+                _db.Delete(dm);
+            else
+                _db.Update(dm);
+        }
 
         // Rollover de picks: borra el año drafteado, proyecta el nuevo draft
         // actual y añade el año más lejano (los intermedios se conservan).

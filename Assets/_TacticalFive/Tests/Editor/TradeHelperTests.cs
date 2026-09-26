@@ -120,6 +120,17 @@ public class TradeHelperTests
     }
 
     [Test]
+    public void ValidateTrade_AcceptingTwoForOne_AtMaxRoster_ReportsError()
+    {
+        // Revalidación al aceptar una oferta IA estando en el máximo de plantilla:
+        // un 2x1 dejaría al equipo que acepta con 18 jugadores.
+        var aiSent = new List<PlayerData> { Player(10_000_000), Player(8_000_000) };
+        var ourSent = new List<PlayerData> { Player(10_000_000) };
+        var errors = TradeHelper.ValidateTrade(aiSent, ourSent, 15, 17, "Nosotros", 100_000_000L, "IA", 100_000_000L);
+        Assert.That(errors, Has.Some.Contains("máximo 17"));
+    }
+
+    [Test]
     public void ValidateTrade_HardCappedSecondApron_RejectsMultiplePlayersAndSalaryGain()
     {
         var a = new List<PlayerData> { Player(10_000_000), Player(10_000_000) };

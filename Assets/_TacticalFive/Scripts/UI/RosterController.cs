@@ -1596,13 +1596,16 @@ using System.Linq;
         long remainingSalary = _selectedPlayer.salary * Mathf.Max(0, _selectedPlayer.contract_years);
         int stretchYears = Mathf.Max(1, _selectedPlayer.contract_years * 2);
         long annualPayment = remainingSalary / stretchYears;
+        // El remanente se absorbe en el tramo de ESTA temporada para que el total
+        // cobrado sea exactamente remainingSalary.
+        long currentSeasonPayment = remainingSalary - annualPayment * (stretchYears - 1);
         int currentDay = _season?.current_game_day ?? 0;
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
         // Coste real de la rescisión: el tramo de stretch de esta temporada sale del
         // presupuesto (antes el buyout era gratis).
-        _myTeam.budget -= annualPayment;
+        _myTeam.budget -= currentSeasonPayment;
         DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
 
         _selectedPlayer.team_id = 0;
@@ -1614,19 +1617,30 @@ using System.Linq;
         _selectedPlayer.on_trade_block = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
-        long remainder = remainingSalary;
-        for (int y = 0; y < stretchYears; y++)
+        // Registro de la temporada actual (solo este tramo: los futuros se cobran en
+        // StartNewSeason desde dead_money).
+        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
         {
-            long payment = (y == stretchYears - 1) ? remainder : annualPayment;
-            remainder -= payment;
-            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+            team_id = _myTeam.id,
+            season_id = _season?.id ?? 0,
+            record_type = FinanceRecord.TYPE_BUYOUT,
+            game_day = currentDay,
+            amount = currentSeasonPayment,
+            created_at = now
+        });
+
+        // Deuda muerta persistente: los tramos de las temporadas siguientes. Antes se
+        // insertaban todos como finance_records y se borraban en el rollover.
+        int futureYears = stretchYears - 1;
+        if (futureYears > 0)
+        {
+            DatabaseManager.Instance.Db.Insert(new DeadMoneyData
             {
                 team_id = _myTeam.id,
-                season_id = _season?.id ?? 0,
-                record_type = FinanceRecord.TYPE_BUYOUT,
-                game_day = currentDay,
-                amount = payment,
-                created_at = now
+                player_name = playerName,
+                origin_season_id = _season?.id ?? 0,
+                annual_amount = annualPayment,
+                years_remaining = futureYears
             });
         }
 

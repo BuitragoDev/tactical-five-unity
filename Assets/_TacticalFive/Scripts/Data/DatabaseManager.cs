@@ -61,7 +61,9 @@ public partial class DatabaseManager : MonoBehaviour
     {
         try
         {
-            // No cambiar de conexión/partida mientras un lote de fondo sigue escribiendo.
+            // No cambiar de conexión/partida mientras un lote de fondo sigue escribiendo:
+            // lo cancelamos y esperamos a que termine (rollback limpio si aborta).
+            CancelBackgroundBatches();
             WaitForBackgroundBatch();
 
             if (_dbField != null)
@@ -146,6 +148,7 @@ public partial class DatabaseManager : MonoBehaviour
     /// <summary>Cierra la conexión del slot activo (p. ej. antes de borrar la partida).</summary>
     public void CloseActiveSlot()
     {
+        CancelBackgroundBatches();
         WaitForBackgroundBatch();
         if (_dbField != null)
         {
@@ -157,6 +160,26 @@ public partial class DatabaseManager : MonoBehaviour
     }
 
     private static Task _runningBatch;
+    private static CancellationTokenSource _batchCts;
+
+    /// <summary>Token del lote de fondo en curso (None si no hay ninguno). Los métodos
+    /// largos pueden consultarlo para abortar de forma limpia.</summary>
+    public static CancellationToken BackgroundToken => _batchCts?.Token ?? CancellationToken.None;
+
+    /// <summary>Cancela el lote de fondo en curso (p. ej. al cambiar de partida).</summary>
+    public static void CancelBackgroundBatches()
+    {
+        try { _batchCts?.Cancel(); } catch { }
+    }
+
+    /// <summary>Lanza si el lote de fondo en curso fue cancelado. Úsalo en los puntos
+    /// seguros de una operación larga para abortar y hacer rollback.</summary>
+    public static void ThrowIfBatchCancelled()
+    {
+        var token = BackgroundToken;
+        if (token.CanBeCanceled && token.IsCancellationRequested)
+            throw new OperationCanceledException("Operación cancelada (se cambió de partida).");
+    }
 
     /// <summary>Espera (con tope) a que termine un lote de fondo en curso. Evita cambiar
     /// de conexión/partida mientras una tarea sigue escribiendo.</summary>
@@ -169,6 +192,14 @@ public partial class DatabaseManager : MonoBehaviour
         catch (Exception e) { Debug.LogError($"[DB] El lote de fondo terminó con error: {e.Message}"); }
     }
 
+    /// <summary>Registra el lote en curso para poder esperarlo/cancelarlo.</summary>
+    private static Task TrackBatch(Task task, CancellationTokenSource cts)
+    {
+        _runningBatch = task;
+        _batchCts = cts;
+        return task;
+    }
+
     public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
     {
         string path = DbPath;
@@ -177,8 +208,7 @@ public partial class DatabaseManager : MonoBehaviour
             using var conn = new SQLiteConnection(path);
             return work(conn);
         });
-        _runningBatch = task;
-        return task;
+        return TrackBatch(task, new CancellationTokenSource());
     }
 
     public Task RunInBackground(Action<SQLiteConnection> work)
@@ -189,8 +219,7 @@ public partial class DatabaseManager : MonoBehaviour
             using var conn = new SQLiteConnection(path);
             work(conn);
         });
-        _runningBatch = task;
-        return task;
+        return TrackBatch(task, new CancellationTokenSource());
     }
 
     /// <summary>
@@ -211,8 +240,7 @@ public partial class DatabaseManager : MonoBehaviour
             try { work(); }
             finally { _ambientDb.Value = prev; }
         });
-        _runningBatch = task;
-        return task;
+        return TrackBatch(task, new CancellationTokenSource());
     }
 
     public Task<T> RunInBackgroundAsync<T>(Func<T> work)
@@ -227,8 +255,7 @@ public partial class DatabaseManager : MonoBehaviour
             try { return work(); }
             finally { _ambientDb.Value = prev; }
         });
-        _runningBatch = task;
-        return task;
+        return TrackBatch(task, new CancellationTokenSource());
     }
 
     public void EnsureTemplateDb()
@@ -359,6 +386,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<ScoutData>();
         _db.CreateTable<PlayerGameStats>();
         _db.CreateTable<FinanceRecord>();
+        _db.CreateTable<DeadMoneyData>();
         _db.CreateTable<SeasonRecord>();
         _db.CreateTable<MessageData>();
         _db.CreateTable<SponsorData>();
@@ -1171,6 +1199,18 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] MarkMigrationApplied({name}) error: {ex.Message}");
         }
     }
+
+    /// <summary>
+    /// Pre-condiciones del rollover de temporada (opciones de jugador, decremento de
+    /// contratos del equipo del usuario): se aplican en la UI antes de la transacción
+    /// de StartNewSeason. Estos marcadores evitan aplicarlas dos veces si el rollover
+    /// falla y el jugador reintenta. `phase`: "opts" | "dec".
+    /// </summary>
+    public bool IsRolloverPreApplied(int seasonId, string phase) =>
+        IsMigrationApplied($"rollover_{phase}_{seasonId}");
+
+    public void MarkRolloverPreApplied(int seasonId, string phase) =>
+        MarkMigrationApplied($"rollover_{phase}_{seasonId}");
 
     class ColumnInfo
     {

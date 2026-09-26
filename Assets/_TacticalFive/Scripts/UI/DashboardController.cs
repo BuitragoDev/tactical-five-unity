@@ -915,6 +915,9 @@ using System.Threading.Tasks;
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
+            // Red de seguridad: si no quedan partidos pero la fase no es terminal,
+            // avanzar/cerrar la temporada en lugar de dejar la partida bloqueada.
+            TryEscapeStuckPhase();
             if (!fastSim) HideLoading();
             yield break;
         }
@@ -4406,6 +4409,91 @@ using System.Threading.Tasks;
             return -(int)(seasonStart - date).TotalDays;
     }
 
+    /// <summary>
+    /// Red de seguridad contra soft-locks de temporada. Se llama cuando no quedan
+    /// partidos pendientes pero la fase no es terminal (calendario parcial, datos
+    /// heredados de un guardado fallido, play-in sin seeds...): regenera el
+    /// calendario si falta o avanza/cierra la fase para que la partida no se quede
+    /// bloqueada para siempre.
+    /// </summary>
+    void TryEscapeStuckPhase()
+    {
+        if (_season == null || _manager == null) return;
+
+        int Count(string type) => DatabaseManager.Instance.Db.Table<GameData>()
+            .Count(g => g.manager_id == _manager.id && g.game_type == type);
+        bool NoPending(string type) => !DatabaseManager.Instance.Db.Table<GameData>()
+            .Any(g => g.manager_id == _manager.id && g.game_type == type && g.is_played == 0);
+
+        // 1. Temporada regular sin calendario (fallo de guardado heredado): regenerar.
+        if ((_season.phase == "preseason" || _season.phase == "regular") && Count("regular") == 0)
+        {
+            int count = ScheduleGenerator.GenerateSchedule(_season, DatabaseManager.Instance.GetAllTeams());
+            if (count > 0)
+            {
+                try
+                {
+                    var glTeams = DatabaseManager.Instance.GetGLeagueTeams();
+                    if (glTeams.Count > 0)
+                        GLeagueScheduleGenerator.GenerateSchedule(_season, glTeams);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Dashboard] Error regenerando calendario G-League: {ex.Message}");
+                }
+
+                _season.generated = 1;
+                _season.phase = "regular";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.LogWarning($"[Dashboard] Temporada sin calendario: regenerados {count} partidos de liga regular.");
+            }
+            else
+            {
+                Debug.LogError("[Dashboard] No se pudo regenerar el calendario de la temporada.");
+            }
+            return;
+        }
+
+        // 2. Regular completa pero sin transición hecha.
+        if ((_season.phase == "preseason" || _season.phase == "regular") && NoPending("regular"))
+        {
+            PlayoffsGenerator.GeneratePlayIn(_season, _manager.id);
+            _season.phase = "playin";
+            DatabaseManager.Instance.UpdateSeason(_season);
+            Debug.LogWarning("[Dashboard] Regular sin partidos pendientes: Play-In generado y fase avanzada.");
+            return;
+        }
+
+        // 3. Play-In completo: generar playoffs o cerrar la temporada si no hay seeds.
+        if (_season.phase == "playin" && NoPending("playin"))
+        {
+            int created = PlayoffsGenerator.GeneratePlayoffs(_season, _manager.id);
+            if (created > 0)
+            {
+                _season.phase = "playoff";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.LogWarning($"[Dashboard] Play-In sin partidos pendientes: playoffs generados ({created}).");
+            }
+            else
+            {
+                // Sin seeds suficientes no se puede construir el bracket: cerrar la
+                // temporada es preferible a dejarla bloqueada para siempre.
+                _season.phase = "finished";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.LogError("[Dashboard] Play-In sin partidos y sin seeds suficientes: temporada cerrada como 'finished'.");
+            }
+            return;
+        }
+
+        // 4. Playoffs completos.
+        if (_season.phase == "playoff" && NoPending("playoff"))
+        {
+            _season.phase = "finished";
+            DatabaseManager.Instance.UpdateSeason(_season);
+            Debug.LogWarning("[Dashboard] Playoffs sin partidos pendientes: temporada cerrada.");
+        }
+    }
+
     int FindNextGameDay()
     {
         bool anyUnplayed = DatabaseManager.Instance.Db.Table<GameData>()
@@ -5949,6 +6037,53 @@ List<int> offeredPickIds = new List<int>();
         {
             PlayClick();
             var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            // ── Revalidación obligatoria antes de mutar ──
+            // La oferta se generó cuando la plantilla/nómina eran otras; entre medias
+            // el jugador pudo fichar/cortar. Sin revalidar se pueden crear plantillas
+            // >17 o traspasos que incumplen el salary matching / apron.
+            {
+                // Salario estimado de los FA propios que se firmarían (S&T).
+                var signSalaries = new Dictionary<int, long>();
+                if (ourSATFAs != null && ourSATFAs.Count > 0)
+                {
+                    var lsSat = DatabaseManager.Instance.GetLeagueSettings();
+                    long myPaySat = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+                    foreach (var fa in ourSATFAs)
+                    {
+                        var bd = RosterController.GetMaxOfferBreakdown(fa, lsSat, myPaySat, true);
+                        long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(), lsSat != null ? lsSat.salary_cap : TradeHelper.SALARY_CAP);
+                        signSalaries[fa.id] = bd.birdMax > 0 ? bd.birdMax : market;
+                    }
+                }
+
+                var leagueChk = DatabaseManager.Instance.GetLeagueSettings();
+                long firstApronChk = leagueChk?.apron > 0 ? leagueChk.apron : TradeHelper.FIRST_APRON;
+                long secondApronChk = leagueChk?.repeater_apron > 0 ? leagueChk.repeater_apron : TradeHelper.SECOND_APRON;
+                long luxuryTaxChk = leagueChk?.luxury_tax > 0 ? leagueChk.luxury_tax : TradeHelper.LUXURY_TAX;
+
+                var errorsChk = TradeHelper.ValidateTrade(
+                    theirPlayers, ourPlayers,
+                    DatabaseManager.Instance.GetRosterCount(offer.team_id_from),
+                    DatabaseManager.Instance.GetRosterCount(_myTeam.id),
+                    _myTeam.name, DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary),
+                    aiTeam != null ? aiTeam.name : "IA",
+                    DatabaseManager.Instance.GetPlayersByTeam(offer.team_id_from).Sum(p => p.salary),
+                    aiTeam != null && aiTeam.first_apron_hard_capped == 1,
+                    _myTeam.first_apron_hard_capped == 1,
+                    firstApronChk, secondApronChk, luxuryTaxChk,
+                    null,
+                    signSalaries.Count > 0 ? signSalaries : null);
+
+                if (errorsChk.Count > 0)
+                {
+                    DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
+                    _firedOverlay.style.display = DisplayStyle.None;
+                    ShowOfferResultModal("TRASPASO NO VÁLIDO",
+                        "La oferta ya no es válida con tu plantilla actual:\n\n" + string.Join("\n", errorsChk), -1);
+                    return;
+                }
+            }
 
             // S&T: firmar los FA propios antes de traspazarlos a la IA
             if (ourSATFAs != null && ourSATFAs.Count > 0)
