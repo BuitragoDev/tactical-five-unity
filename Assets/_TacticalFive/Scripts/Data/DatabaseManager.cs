@@ -900,6 +900,18 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: eliminadas las filas de player_game_stats con 0 minutos");
         }
 
+        // Reclasificar los registros de préstamo antiguos (TYPE_LOAN): el dinero
+        // recibido pasa a ingreso y las devoluciones a gasto con importe positivo.
+        if (!IsMigrationApplied("loan_records_reclassified"))
+        {
+            int loanIn = _db.Execute("UPDATE finance_records SET record_type = ? WHERE record_type = ? AND amount > 0",
+                FinanceRecord.TYPE_LOAN_IN, FinanceRecord.TYPE_LOAN);
+            int loanRep = _db.Execute("UPDATE finance_records SET record_type = ?, amount = -amount WHERE record_type = ? AND amount < 0",
+                FinanceRecord.TYPE_LOAN_REPAY, FinanceRecord.TYPE_LOAN);
+            MarkMigrationApplied("loan_records_reclassified");
+            Debug.Log($"[DB] Migration: reclasificados {loanIn} préstamos y {loanRep} devoluciones");
+        }
+
         // Add rings to players if missing (championships won by the player)
         try
         {

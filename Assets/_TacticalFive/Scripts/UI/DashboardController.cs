@@ -7304,8 +7304,10 @@ List<int> offeredPickIds = new List<int>();
     {
         if (_myTeam == null || _season == null || _manager == null) return;
 
-        // Payroll on game days ~1, 31, 61, 91, 121, 151, 181 (1st of each month)
-        int[] payrollDays = { 1, 31, 61, 91, 121, 151, 181 };
+        // Nómina mensual: 12 plazos de `salario/12` repartidos cada 15 días de la
+        // temporada (~181 días). Antes eran 7 pagos al año, así que solo se cobraba
+        // ~58% de la nómina y los presupuestos divergían al alza.
+        int[] payrollDays = { 1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166 };
         if (!payrollDays.Contains(gameDay)) return;
 
         foreach (var team in DatabaseManager.Instance.GetAllTeams())

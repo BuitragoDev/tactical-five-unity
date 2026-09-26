@@ -545,7 +545,7 @@ using System.Linq;
         {
             team_id = _myTeam.id,
             season_id = _season?.id ?? 0,
-            record_type = FinanceRecord.TYPE_LOAN,
+            record_type = FinanceRecord.TYPE_LOAN_IN,
             game_day = _season?.current_game_day ?? 0,
             amount = amount,
         });
@@ -584,14 +584,14 @@ using System.Linq;
         _myTeam.budget -= remainingTotal;
         DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
 
-        // Finance record (negative amount = expense)
+        // Registro de la devolución (gasto, importe positivo como el resto)
         DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
         {
             team_id = _myTeam.id,
             season_id = _season?.id ?? 0,
-            record_type = FinanceRecord.TYPE_LOAN,
+            record_type = FinanceRecord.TYPE_LOAN_REPAY,
             game_day = _season?.current_game_day ?? 0,
-            amount = -remainingTotal,
+            amount = remainingTotal,
         });
 
         // Delete loan

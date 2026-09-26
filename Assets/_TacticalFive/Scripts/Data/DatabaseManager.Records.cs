@@ -947,7 +947,8 @@ public partial class DatabaseManager
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
                          .Where(r => r.team_id == teamId && r.season_id == seasonId
-                                  && r.record_type <= FinanceRecord.TYPE_TV)
+                                  && (r.record_type <= FinanceRecord.TYPE_TV
+                                      || r.record_type == FinanceRecord.TYPE_LOAN_IN))
                          .ToList();
         return records.Sum(r => r.amount);
     }
@@ -957,7 +958,8 @@ public partial class DatabaseManager
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
                          .Where(r => r.team_id == teamId && r.season_id == seasonId
-                                  && r.record_type >= FinanceRecord.TYPE_RENOVATION)
+                                  && r.record_type >= FinanceRecord.TYPE_RENOVATION
+                                  && r.record_type != FinanceRecord.TYPE_LOAN_IN)
                          .ToList();
         return records.Sum(r => r.amount);
     }

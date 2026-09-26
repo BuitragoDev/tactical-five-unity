@@ -356,12 +356,15 @@ using System.Linq;
         long subTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SUBSCRIPTION);
         long sponsorTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SPONSORSHIP);
         long tvTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TV);
-        long total = ticketTotal + subTotal + sponsorTotal + tvTotal;
+        long loanInTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_LOAN_IN);
+        long total = ticketTotal + subTotal + sponsorTotal + tvTotal + loanInTotal;
 
         AddTableRow(_incomeTable, "Taquilla", ticketTotal, true);
         AddTableRow(_incomeTable, "Abonos", subTotal, true);
         AddTableRow(_incomeTable, "Patrocinios", sponsorTotal, true);
         AddTableRow(_incomeTable, "Televisión", tvTotal, true);
+        if (loanInTotal != 0)
+            AddTableRow(_incomeTable, "Préstamos", loanInTotal, true);
 
         _totalIncomeValue.text = FormatMoney(total);
     }
@@ -382,7 +385,8 @@ using System.Linq;
         long dismissalTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_DISMISSAL);
         long taxTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TAX);
         long buyoutTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_BUYOUT);
-        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal + taxTotal + buyoutTotal;
+        long loanRepayTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_LOAN_REPAY);
+        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal + taxTotal + buyoutTotal + loanRepayTotal;
 
         AddTableRow(_expensesTable, "Sueldos de jugadores", salariesTotal, false);
         AddTableRow(_expensesTable, "Sueldos empleados", empSalaryTotal, false);
@@ -390,6 +394,8 @@ using System.Linq;
         AddTableRow(_expensesTable, "Despidos", dismissalTotal, false);
         AddTableRow(_expensesTable, "Luxury tax", System.Math.Abs(taxTotal), false);
         AddTableRow(_expensesTable, "Rescisiones (buyout)", buyoutTotal, false);
+        if (loanRepayTotal != 0)
+            AddTableRow(_expensesTable, "Devolución de préstamos", loanRepayTotal, false);
 
         _totalExpensesValue.text = FormatMoney(total);
     }
@@ -462,7 +468,7 @@ using System.Linq;
             int idx = GetMonthIndex(date, hasPreseason);
             if (idx < 0 || idx >= 10) continue;
 
-            if (r.record_type <= FinanceRecord.TYPE_TV)
+            if (r.record_type <= FinanceRecord.TYPE_TV || r.record_type == FinanceRecord.TYPE_LOAN_IN)
                 totals[idx].inc += r.amount;
             else
                 totals[idx].exp += r.amount;

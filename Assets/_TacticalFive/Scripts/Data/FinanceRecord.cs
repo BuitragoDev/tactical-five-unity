@@ -11,7 +11,9 @@ public class FinanceRecord
     public const int TYPE_DISMISSAL     = 6;   // Despido
     public const int TYPE_SALARIES      = 7;   // Sueldos de jugadores
     public const int TYPE_EMPLOYEE_SALARY = 8;   // Sueldos de empleados
-    public const int TYPE_LOAN = 9;               // Préstamo bancario
+    public const int TYPE_LOAN = 9;               // Préstamo bancario (obsoleto: usar LOAN_IN/LOAN_REPAY)
+    public const int TYPE_LOAN_IN = 12;           // Ingreso por préstamo (dinero recibido)
+    public const int TYPE_LOAN_REPAY = 13;        // Devolución de préstamo (gasto)
     public const int TYPE_TAX = 10;               // Luxury tax
     public const int TYPE_BUYOUT = 11;             // Buyout (stretch provision)
 
