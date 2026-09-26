@@ -344,10 +344,8 @@ public partial class DatabaseManager
                 }
             }
 
-            // Recalcular overall
-            int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling
-                    + p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-            p.overall = Mathf.Min(p.potential, sum / 11);
+            // Recalcular overall (fuente única)
+            p.RecalculateOverall();
             progressed++;
         }
         if (progressed > 0)

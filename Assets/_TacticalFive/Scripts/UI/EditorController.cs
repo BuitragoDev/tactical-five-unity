@@ -1405,10 +1405,7 @@ public class EditorController : UIScreenController
         int roleIdx = System.Array.IndexOf(roleChoices, _playerRoleDropdown.Value);
         p.role = (PlayerRole)(roleIdx >= 0 ? roleIdx : 3);
 
-        int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
-                  p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-        p.overall = (int)System.Math.Round(sum / 11f);
-        if (p.overall > p.potential) p.overall = p.potential;
+        p.RecalculateOverall();
 
         // Contrato
         long.TryParse(_playerSalary.value, out long sal); p.salary = sal;

@@ -2771,12 +2771,8 @@ public partial class DatabaseManager
             p.steals = Apply("steals", p.steals);
             p.blocks = Apply("blocks", p.blocks);
 
-            // Recalculate overall as average of all attributes, capped by potential
-            int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
-                      p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-            p.overall = (int)System.Math.Round(sum / 11f);
-            if (p.overall > p.potential)
-                p.overall = p.potential;
+            // Overall = media de atributos capada por potencial (fuente única).
+            p.RecalculateOverall();
 
             // Save old team for seasons_with_team tracking
             int oldTeamId = p.team_id;
@@ -3945,6 +3941,7 @@ public partial class DatabaseManager
                 int oldVal = GetAttr(young, targetAttr);
                 int newVal = Math.Min(99, oldVal + bonus);
                 SetAttr(young, targetAttr, newVal);
+                young.RecalculateOverall(); // el overall debe seguir a los atributos
                 _db.Update(young);
             }
         }
