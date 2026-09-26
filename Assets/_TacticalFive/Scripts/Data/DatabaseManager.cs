@@ -870,6 +870,12 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
         }
 
+        // Esquema táctico del asistente (empleados)
+        AddColumnIfMissing("employees", "scheme_pace", "scheme_pace INTEGER DEFAULT 0");
+        AddColumnIfMissing("employees", "scheme_offense", "scheme_offense INTEGER DEFAULT 0");
+        AddColumnIfMissing("employees", "scheme_defense", "scheme_defense INTEGER DEFAULT 1");
+        AddColumnIfMissing("employees", "scheme_set", "scheme_set INTEGER DEFAULT 0");
+
         // Plan de partido en teams (táctica persistente del equipo)
         AddColumnIfMissing("teams", "plan_pace", "plan_pace INTEGER DEFAULT 0");
         AddColumnIfMissing("teams", "plan_offense", "plan_offense INTEGER DEFAULT 0");
@@ -898,6 +904,17 @@ public partial class DatabaseManager : MonoBehaviour
             _db.Execute("DELETE FROM player_game_stats WHERE minutes = 0");
             MarkMigrationApplied("no_dnp_game_stats");
             Debug.Log("[DB] Migration: eliminadas las filas de player_game_stats con 0 minutos");
+        }
+
+        // Asignar un esquema a los asistentes creados antes de esta feature.
+        if (!IsMigrationApplied("coach_schemes_assigned"))
+        {
+            var coaches = _db.Table<EmployeeData>().Where(e => e.position == CoachScheme.POSITION && e.scheme_set == 0).ToList();
+            foreach (var c in coaches)
+                CoachScheme.AssignRandomScheme(c, Rng);
+            if (coaches.Count > 0) _db.UpdateAll(coaches);
+            MarkMigrationApplied("coach_schemes_assigned");
+            Debug.Log($"[DB] Migration: esquema asignado a {coaches.Count} asistentes");
         }
 
         // Reclasificar los registros de préstamo antiguos (TYPE_LOAN): el dinero

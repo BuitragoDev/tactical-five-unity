@@ -71,7 +71,8 @@ public static class GameSimulator
 
     public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
         int homeChemistry = 50, int awayChemistry = 50, bool persistToDb = true, bool glLeague = false,
-        GamePlan? homePlan = null, GamePlan? awayPlan = null)
+        GamePlan? homePlan = null, GamePlan? awayPlan = null,
+        int homeCoachBonus = 0, int awayCoachBonus = 0)
     {
         var hp = homePlan ?? GamePlan.Neutral;
         var ap = awayPlan ?? GamePlan.Neutral;
@@ -127,8 +128,9 @@ public static class GameSimulator
         float awayChemBonus = (awayChemistry - 50) * 0.15f;
         const float homeCourtBonus = 1.5f;
 
-        homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus), 0, 99);
-        awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus), 0, 99);
+        // Bonus del cuerpo técnico (calidad del asistente en el equipo del usuario).
+        homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus + homeCoachBonus), 0, 99);
+        awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus + awayCoachBonus), 0, 99);
         float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f)
                                  + GamePlan.PaceAdjustment(hp, ap), 92, 110);
 

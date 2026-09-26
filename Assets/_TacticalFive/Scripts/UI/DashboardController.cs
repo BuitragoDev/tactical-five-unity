@@ -1309,7 +1309,8 @@ using System.Threading.Tasks;
                         int elimHomeChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.home_team_id);
                         int elimAwayChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.away_team_id);
                         var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem,
-                            homePlan: PlanFor(elimGame.home_team_id), awayPlan: PlanFor(elimGame.away_team_id));
+                            homePlan: PlanFor(elimGame.home_team_id), awayPlan: PlanFor(elimGame.away_team_id),
+                            homeCoachBonus: CoachBonusFor(elimGame.home_team_id), awayCoachBonus: CoachBonusFor(elimGame.away_team_id));
                         DatabaseManager.Instance.UpdateGame(elimGame);
                         ProcessGameFinances(elimGame, elimResult);
                         UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
@@ -1718,7 +1719,8 @@ using System.Threading.Tasks;
         GameResultCache.GameStarters[game.id] = new HashSet<int>(homeStarters.Concat(awayStarters));
 
         var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem,
-            homePlan: PlanFor(game.home_team_id), awayPlan: PlanFor(game.away_team_id));
+            homePlan: PlanFor(game.home_team_id), awayPlan: PlanFor(game.away_team_id),
+            homeCoachBonus: CoachBonusFor(game.home_team_id), awayCoachBonus: CoachBonusFor(game.away_team_id));
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
 
@@ -4750,8 +4752,28 @@ using System.Threading.Tasks;
     GamePlan PlanFor(int teamId)
     {
         if (_myTeam != null && teamId == _myTeam.id)
-            return new GamePlan { pace = _myTeam.plan_pace, offense = _myTeam.plan_offense, defense = _myTeam.plan_defense };
+        {
+            var userPlan = new GamePlan { pace = _myTeam.plan_pace, offense = _myTeam.plan_offense, defense = _myTeam.plan_defense };
+            var assistant = GetMyAssistant();
+            return CoachScheme.Blend(userPlan, assistant);
+        }
         return GamePlan.FromStrategy(GetTeamStrategy(teamId));
+    }
+
+    /// <summary>Asistente del equipo del usuario (aporta esquema y bonus).</summary>
+    EmployeeData GetMyAssistant()
+    {
+        if (_myTeam == null) return null;
+        return DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
+            .FirstOrDefault(e => e.position == CoachScheme.POSITION && e.scheme_set == 1);
+    }
+
+    /// <summary>Bonus de rating del cuerpo técnico del equipo indicado.</summary>
+    int CoachBonusFor(int teamId)
+    {
+        if (_myTeam == null || teamId != _myTeam.id) return 0;
+        var assistant = GetMyAssistant();
+        return assistant != null ? CoachScheme.RatingBonus(assistant.reputation) : 0;
     }
 
     void ProcessAIMarket(int gameDay)

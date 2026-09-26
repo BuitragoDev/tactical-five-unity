@@ -158,6 +158,16 @@ using System.Linq;
             v => _myTeam.plan_offense = v);
         AddPlanRow("DEFENSA", new[] { "CONSERVADORA", "EQUILIBRADA", "AGRESIVA" }, new[] { 0, 1, 2 }, _myTeam.plan_defense,
             v => _myTeam.plan_defense = v);
+
+        // El asistente matiza el plan con su propio esquema y aporta (o resta) nivel.
+        var assistant = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
+            .FirstOrDefault(e => e.position == CoachScheme.POSITION && e.scheme_set == 1);
+        var caption = new Label();
+        caption.AddToClassList("plan-caption");
+        caption.text = assistant == null
+            ? "SIN ASISTENTE: ficha uno en EMPLEADOS para que aporte su esquema."
+            : $"ASISTENTE {assistant.first_name} {assistant.last_name} (MED {assistant.reputation}) · ESQUEMA {CoachScheme.SchemeLabel(assistant)}";
+        _gamePlanBody.Add(caption);
     }
 
     void AddPlanRow(string label, string[] texts, int[] values, int current, Action<int> apply)
