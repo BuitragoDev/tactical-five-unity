@@ -837,9 +837,10 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 
 ### Fase 4 — Pulido (~1 mes)
 
-- [ ] UX: confirmaciones, feedback de errores, tooltips, scrollbar única, filtros/orden, formato consistente (§6).
-- [ ] QoL: autosave/checkpoint, export/import de liga, resumen de temporada.
-- [ ] Balance: asistencias (`SIM-10`), fatiga (`SIM-09`), rebotes (`SIM-11`), química (`SIM-13`), All-Star (`SIM-14`).
+- [x] Balance: asistencias 35%→55% (`SIM-10`), desgaste por minuto 0.30→0.28 y recuperación 8→10 (`SIM-09`), suelo de rebotes acotado por los tiros fallados (`SIM-11`), química simétrica (`SIM-13`), All‑Star sin desgaste ni lesiones (`SIM-14`).
+- [x] UX (parcial): tooltips explicativos del CAP SHEET y formato de números consistente (`es-ES`) en el perfil; `UI-07` (aviso de error en simulación rápida) ya en Fase 3.
+- [ ] UX pendiente: confirmar el **traspaso propio** (`UI-10`), borrado de noticias (`UI-11`), unificar la **scrollbar** (`UI-04`) y `CON-05` (cache de standings por día).
+- [ ] QoL pendiente: export/import de liga (el resumen de temporada y el autosave por día ya existen).
 - [ ] Killer feature elegida (recomendado: **Modo histórico** o **Motor de narrativa**).
 
 ---
@@ -874,6 +875,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `49379e1c` | REN-01, UI-03/05, CON-07/08, QA-07/08 | Rendimiento y UI: `AchievementService` filtra por temporada y `GetStandingsGames(season)`; bandeja del dashboard con `LIMIT` (`GetRecentMessages`); scrollbar re-bindeada en cada visita (Stats/Editor); crash de Entrenamiento resuelto (se re-aplica la tarjeta seleccionada + `FirstOrDefault`); eliminados `GetLeagueTop*` muertos; `FullScreenUI` null-safe; docs corregidas sobre callbacks. |
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
+| 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-26 | `4fbba67e` | Fase 4 · UX | Tooltips del CAP SHEET (cap, espacio, aprons, excepciones, expiring) y formato de números consistente en el perfil (todo `es-ES`). |
 | 2026-09-26 | `4b1fac88` | Fase 3 · negociación | **Contraofertas del agente**: si una oferta (fichaje o renovación) se rechaza por dinero, el agente propone un salario mayor (escalón 11–38% según lo lejos que quedó la aceptación, redondeado a 100k y **topado al máximo legal** del equipo) en un modal ACEPTAR / RETIRARSE. Una contraoferta por tanda; el resto siguen al inbox. +4 tests. |
 | 2026-09-26 | `95b17fb8` | Fase 3 · cap sheet | El CAP SHEET de Finanzas ya mostraba nómina/cap/espacio/1er apron/proyección/excepciones; se añade el **estado del hard cap** (NT-MLE usada) y la lista de **FA propios con derechos Bird** re-firmables por encima del tope. |
 | 2026-09-26 | `3dffd1ca` | Fase 3 · scouting | **Scouting con riesgo (busts)**: los prospectos se muestran como **estimación** (`overall ±rango`); el margen lo fija la reputación de los ojeadores (`ScoutingHelper.MaxError`: rep 1 → ±5, rep 5 → ±1) con error triangular. Al elegir el pick se **revela el valor real** (`Reveal`) y se recalcula el overall → puede salir mejor (boom) o peor (bust). La IA usa la misma estimación. +6 tests. |
