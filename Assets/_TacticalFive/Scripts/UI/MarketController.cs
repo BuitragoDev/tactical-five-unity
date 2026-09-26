@@ -1866,7 +1866,96 @@ using System.Linq;
         _tradeStatus.Add(box);
     }
 
+    /// <summary>UI-10: antes de ejecutar un traspaso propio se pide confirmación con
+    /// un resumen de lo que se envía y se recibe (es irreversible).</summary>
     void OnConfirmTrade()
+    {
+        ShowTradeConfirmModal();
+    }
+
+    void ShowTradeConfirmModal()
+    {
+        var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
+        var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
+        var ownSA = _ownSATFAs.Where(p => _selectedOwnSATFAs.Contains(p.id)).ToList();
+        var myPicks = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        var otherPicks = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+
+        var overlay = new VisualElement();
+        overlay.AddToClassList("market-modal-overlay");
+
+        var box = new VisualElement();
+        box.AddToClassList("market-fa-modal-box");
+        overlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("market-fa-modal-header");
+        var heading = new VisualElement();
+        var title = new Label("CONFIRMAR TRASPASO");
+        title.AddToClassList("market-fa-modal-title");
+        var subtitle = new Label($"{_myTeam.name}  ⇄  {_selectedTeam.name}");
+        subtitle.AddToClassList("market-fa-modal-subtitle");
+        heading.Add(title);
+        heading.Add(subtitle);
+        header.Add(heading);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("market-fa-modal-body");
+        var summary = new Label(BuildTradeSummary(mySelected, otherSelected, ownSA, myPicks, otherPicks));
+        summary.style.whiteSpace = WhiteSpace.Normal;
+        body.Add(summary);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("market-fa-modal-actions");
+
+        var cancel = new Button { text = "CANCELAR" };
+        cancel.AddToClassList("btn-modal-cancel");
+        cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
+        actions.Add(cancel);
+
+        var confirm = new Button { text = "CONFIRMAR TRASPASO" };
+        confirm.AddToClassList("btn-modal-confirm");
+        confirm.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            overlay.RemoveFromHierarchy();
+            ExecuteTradeNow();
+        });
+        actions.Add(confirm);
+
+        box.Add(actions);
+        CursorManager.Instance?.RegisterHandCursor(confirm);
+        CursorManager.Instance?.RegisterHandCursor(cancel);
+
+        _root.Add(overlay);
+    }
+
+    string BuildTradeSummary(List<PlayerData> mySelected, List<PlayerData> otherSelected,
+                             List<PlayerData> ownSA, List<DraftPickData> myPicks, List<DraftPickData> otherPicks)
+    {
+        var sb = new System.Text.StringBuilder();
+        string Names(List<PlayerData> list) => list.Count > 0
+            ? string.Join(", ", list.Select(p => $"{p.first_name} {p.last_name} (${p.salary:N0})"))
+            : "—";
+        string Picks(List<DraftPickData> list) => list.Count > 0
+            ? string.Join(", ", list.Select(pk => $"R{pk.round} {pk.draft_year}"))
+            : "—";
+
+        sb.AppendLine($"ENVÍAS A {_selectedTeam.name.ToUpper()}");
+        sb.AppendLine($"  Jugadores: {Names(mySelected)}");
+        if (ownSA.Count > 0)
+            sb.AppendLine($"  Sign & Trade: {Names(ownSA)}");
+        sb.AppendLine($"  Picks: {Picks(myPicks)}");
+        sb.AppendLine();
+        sb.AppendLine($"RECIBES DE {_selectedTeam.name.ToUpper()}");
+        sb.AppendLine($"  Jugadores: {Names(otherSelected)}");
+        sb.AppendLine($"  Picks: {Picks(otherPicks)}");
+        return sb.ToString();
+    }
+
+    void ExecuteTradeNow()
     {
         var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
         var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
