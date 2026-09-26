@@ -52,61 +52,104 @@ public partial class DatabaseManager : MonoBehaviour
         // No inicializar automáticamente — el flujo de guardado decide cuándo y qué slot abrir
     }
 
-    public void InitSaveSlot(int slotNumber)
+    /// <summary>
+    /// Abre/crea el slot indicado. Devuelve false si la DB no se pudo inicializar
+    /// (corrupta, bloqueada, sólo lectura...): en ese caso la sesión queda limpia
+    /// y el llamador debe avisar y abortar.
+    /// </summary>
+    public bool InitSaveSlot(int slotNumber)
     {
-        if (_db != null)
+        try
         {
-            try { _db.Close(); } catch { }
-            _db = null;
-        }
+            if (_dbField != null)
+            {
+                try { _dbField.Close(); } catch { }
+                _dbField = null;
+            }
 
-        _activeSaveSlot = slotNumber;
+            _activeSaveSlot = slotNumber;
+            _isTemplateSession = false;
+            // Las imágenes personalizadas se guardan por ámbito (save_{n}).
+            TeamImages.SetScope($"save_{slotNumber}");
+
+            // Crear directorio de guardados si no existe
+            string dir = Path.GetDirectoryName(DbPath);
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            _dbField = new SQLiteConnection(DbPath);
+            _db.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
+            // CreateTables/RunMigrations ya fallan si el archivo está corrupto: es
+            // nuestra detección temprana de DB ilegible.
+            CreateTables();
+            RunMigrations();
+
+            bool hasExistingData = _db.Table<TeamData>().Count() > 0;
+            bool isNewGame = !hasExistingData;
+
+            if (isNewGame)
+            {
+                // Clon + seed en una sola transacción: un fallo no puede dejar la
+                // partida a medias (tablas sin jugadores, etc.).
+                _db.RunInTransaction(() =>
+                {
+                    if (File.Exists(TemplateDbPath))
+                        CloneFromTemplate();
+                    SeedStaticDataIfNeeded();
+                });
+                MarkMigrationApplied("slot_initialized");
+            }
+            else if (!IsMigrationApplied("slot_initialized"))
+            {
+                // Partida anterior al marcador: completar lo que falte y marcarla.
+                SeedStaticDataIfNeeded();
+                MarkMigrationApplied("slot_initialized");
+            }
+
+            // Las partidas existentes (creadas antes de la G-League) también
+            // necesitan sus filiales y prospectos.
+            EnsureGLeagueSeeded();
+
+            // Imágenes personalizadas por partida: una partida nueva hace snapshot de
+            // las imágenes del template (conserva las que había al empezar). Una partida
+            // existente anterior a este sistema recibe su snapshot una sola vez.
+            string scope = $"save_{slotNumber}";
+            if (isNewGame)
+            {
+                TeamImages.DeleteScope(scope);
+                TeamImages.CopyCustom("template", scope);
+            }
+            else if (!TeamImages.HasCustom(scope))
+            {
+                TeamImages.CopyCustom("template", scope);
+            }
+
+            Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[DB] Error inicializando el slot {slotNumber}: {e.Message}\n{e.StackTrace}");
+            if (_dbField != null)
+            {
+                try { _dbField.Close(); } catch { }
+                _dbField = null;
+            }
+            _activeSaveSlot = 0;
+            return false;
+        }
+    }
+
+    /// <summary>Cierra la conexión del slot activo (p. ej. antes de borrar la partida).</summary>
+    public void CloseActiveSlot()
+    {
+        if (_dbField != null)
+        {
+            try { _dbField.Close(); } catch { }
+            _dbField = null;
+        }
+        _activeSaveSlot = 0;
         _isTemplateSession = false;
-        // Las imágenes personalizadas se guardan por ámbito (save_{n}).
-        TeamImages.SetScope($"save_{slotNumber}");
-
-        // Crear directorio de guardados si no existe
-        string dir = Path.GetDirectoryName(DbPath);
-        if (!Directory.Exists(dir))
-            Directory.CreateDirectory(dir);
-
-        _db = new SQLiteConnection(DbPath);
-        _db.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
-        CreateTables();
-        RunMigrations();
-
-        bool hasExistingData = _db.Table<TeamData>().Count() > 0;
-        bool isNewGame = !hasExistingData;
-
-        if (File.Exists(TemplateDbPath) && isNewGame)
-        {
-            CloneFromTemplate();
-            SeedStaticDataIfNeeded();
-        }
-        else if (!File.Exists(TemplateDbPath) && isNewGame)
-        {
-            SeedStaticDataIfNeeded();
-        }
-
-        // Las partidas existentes (creadas antes de la G-League) también
-        // necesitan sus filiales y prospectos.
-        EnsureGLeagueSeeded();
-
-        // Imágenes personalizadas por partida: una partida nueva hace snapshot de
-        // las imágenes del template (conserva las que había al empezar). Una partida
-        // existente anterior a este sistema recibe su snapshot una sola vez.
-        string scope = $"save_{slotNumber}";
-        if (isNewGame)
-        {
-            TeamImages.DeleteScope(scope);
-            TeamImages.CopyCustom("template", scope);
-        }
-        else if (!TeamImages.HasCustom(scope))
-        {
-            TeamImages.CopyCustom("template", scope);
-        }
-
-        Debug.Log($"[DB] Save slot {slotNumber} inicializado: {DbPath}");
     }
 
     public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
@@ -168,13 +211,7 @@ public partial class DatabaseManager : MonoBehaviour
         if (File.Exists(TemplateDbPath)) return;
 
         EnsureTemplateDirectory(TemplateDbPath);
-        var oldDb = _db;
-        _db = new SQLiteConnection(TemplateDbPath);
-        CreateTables();
-        RunMigrations();
-        SeedStaticDataIfNeeded();
-        _db.Close();
-        _db = oldDb;
+        BuildTemplateFile(TemplateDbPath);
         Debug.Log($"[DB] Template database created: {TemplateDbPath}");
     }
 
@@ -188,14 +225,32 @@ public partial class DatabaseManager : MonoBehaviour
         lock (_templateLock)
         {
             EnsureTemplateDirectory(dbPath);
-            var oldDb = _db;
-            _db = new SQLiteConnection(dbPath);
+            BuildTemplateFile(dbPath);
+            Debug.Log($"[DB] Template database created (background): {dbPath}");
+        }
+    }
+
+    /// <summary>
+    /// Construye una DB de plantilla en `dbPath` con una conexión LOCAL.
+    /// Nunca toca `_dbField` (que puede estar en uso por el hilo principal): instala
+    /// la conexión local como "ambient" mientras corre, de modo que los helpers
+    /// (CreateTables/RunMigrations/Seed) escriban en ella. La conexión se cierra (y
+    /// el ambient se restaura) incluso si algo lanza.
+    /// </summary>
+    private void BuildTemplateFile(string dbPath)
+    {
+        using var conn = new SQLiteConnection(dbPath);
+        var prev = _ambientDb.Value;
+        _ambientDb.Value = conn;
+        try
+        {
             CreateTables();
             RunMigrations();
             SeedStaticDataIfNeeded();
-            _db.Close();
-            _db = oldDb;
-            Debug.Log($"[DB] Template database created (background): {dbPath}");
+        }
+        finally
+        {
+            _ambientDb.Value = prev;
         }
     }
 
@@ -205,12 +260,13 @@ public partial class DatabaseManager : MonoBehaviour
         // El Editor trabaja sobre el template: sus imágenes custom viven en el
         // ámbito "template" (las partidas nuevas hacen snapshot al empezar).
         TeamImages.SetScope("template");
-        if (_db != null)
+        if (_dbField != null)
         {
-            try { _db.Close(); } catch { }
-            _db = null;
+            try { _dbField.Close(); } catch { }
+            _dbField = null;
         }
-        _db = new SQLiteConnection(TemplateDbPath);
+        _dbField = new SQLiteConnection(TemplateDbPath);
+        CreateTables();
         RunMigrations();
         _isTemplateSession = true;
         Debug.Log("[DB] Template session started");
@@ -226,10 +282,10 @@ public partial class DatabaseManager : MonoBehaviour
     public void CloseTemplateSession()
     {
         if (!_isTemplateSession) return;
-        if (_db != null)
+        if (_dbField != null)
         {
-            try { _db.Close(); } catch { }
-            _db = null;
+            try { _dbField.Close(); } catch { }
+            _dbField = null;
         }
         _isTemplateSession = false;
         Debug.Log("[DB] Template session closed");
@@ -329,10 +385,27 @@ public partial class DatabaseManager : MonoBehaviour
 
     void RunMigrations()
     {
-        // Versionado de esquema + registro de migraciones one-time dentro del DB
-        // (los flags viven con el slot; borrar el slot reinicia el estado)
-        _db.Execute("CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)");
+        // Atómico: si una migración lanza, no queda un esquema a medias. La versión
+        // se marca solo tras aplicar todas correctamente.
+        _db.RunInTransaction(() => RunMigrationsCore());
         _db.Execute("PRAGMA user_version = " + SCHEMA_VERSION);
+    }
+
+    /// <summary>Añade una columna solo si no existe (idempotente y segura por columna).</summary>
+    private bool AddColumnIfMissing(string table, string column, string ddl)
+    {
+        var cols = _db.Query<ColumnInfo>($"PRAGMA table_info({table})");
+        if (cols.Any(c => c.name == column)) return false;
+        _db.Execute($"ALTER TABLE {table} ADD COLUMN {ddl}");
+        Debug.Log($"[DB] Migration: added {column} to {table}");
+        return true;
+    }
+
+    void RunMigrationsCore()
+    {
+        // Registro de migraciones one-time dentro del DB (los flags viven con el slot;
+        // borrar el slot reinicia el estado)
+        _db.Execute("CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)");
 
         // Add fan_confidence to managers if missing
         var managerCols = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");
@@ -474,16 +547,14 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogWarning($"[DB] Migration: secondary_position data migration failed: {ex.Message}");
         }
 
-        // Add guaranteed_years to players if missing
+        // Add guaranteed_years/has_team_option/has_player_option to players if missing
+        // (cada columna se comprueba por separado: un ALTER fallido no bloquea los demás)
         var playerColsOpt = _db.Query<ColumnInfo>("PRAGMA table_info(players)");
-        if (!playerColsOpt.Any(c => c.name == "guaranteed_years"))
-        {
-            _db.Execute("ALTER TABLE players ADD COLUMN guaranteed_years INTEGER DEFAULT 0");
-            _db.Execute("ALTER TABLE players ADD COLUMN has_team_option INTEGER DEFAULT 0");
-            _db.Execute("ALTER TABLE players ADD COLUMN has_player_option INTEGER DEFAULT 0");
+        bool addedGuaranteed = AddColumnIfMissing("players", "guaranteed_years", "guaranteed_years INTEGER DEFAULT 0");
+        AddColumnIfMissing("players", "has_team_option", "has_team_option INTEGER DEFAULT 0");
+        AddColumnIfMissing("players", "has_player_option", "has_player_option INTEGER DEFAULT 0");
+        if (addedGuaranteed)
             _db.Execute("UPDATE players SET guaranteed_years = contract_years WHERE contract_years > 0");
-            Debug.Log("[DB] Migration: added guaranteed_years/has_team_option/has_player_option to players");
-        }
 
         // Add last_team_id to players if missing
         if (!playerColsOpt.Any(c => c.name == "last_team_id"))
@@ -501,16 +572,12 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: added is_fired to managers");
         }
 
-        // Add guaranteed_years to offers if missing
-        var offersCols = _db.Query<ColumnInfo>("PRAGMA table_info(offers)");
-        if (!offersCols.Any(c => c.name == "guaranteed_years"))
-        {
-            _db.Execute("ALTER TABLE offers ADD COLUMN guaranteed_years INTEGER DEFAULT 0");
-            _db.Execute("ALTER TABLE offers ADD COLUMN has_team_option INTEGER DEFAULT 0");
-            _db.Execute("ALTER TABLE offers ADD COLUMN has_player_option INTEGER DEFAULT 0");
+        // Add guaranteed_years/has_team_option/has_player_option to offers if missing
+        bool addedOfferGuaranteed = AddColumnIfMissing("offers", "guaranteed_years", "guaranteed_years INTEGER DEFAULT 0");
+        AddColumnIfMissing("offers", "has_team_option", "has_team_option INTEGER DEFAULT 0");
+        AddColumnIfMissing("offers", "has_player_option", "has_player_option INTEGER DEFAULT 0");
+        if (addedOfferGuaranteed)
             _db.Execute("UPDATE offers SET guaranteed_years = offer_years WHERE guaranteed_years = 0");
-            Debug.Log("[DB] Migration: added guaranteed_years/has_team_option/has_player_option to offers");
-        }
 
         // Migrate trade_offers to multi-player schema
         try

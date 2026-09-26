@@ -2666,10 +2666,10 @@ public partial class DatabaseManager
         _db.BeginTransaction();
         try
         {
-        // 0. Archive historical stats BEFORE clearing tables
+        // 0. Cargar la temporada anterior. Su archivado histórico de carrera lo hace
+        // el Dashboard al llegar a la fase "finished"; aquí NO se repite (duplicaba
+        // los totales de carrera).
         var oldSeason = _db.Find<SeasonData>(oldSeasonId);
-        if (oldSeason != null)
-            UpdateHistoricalPlayerStatsFromSeason(oldSeasonId, managerId);
 
         // 0b. Archive per-season stats for career history
         _db.Execute("DELETE FROM player_season_stats WHERE season_id = ?", oldSeasonId);
@@ -3164,6 +3164,10 @@ public partial class DatabaseManager
             _db.Update(leagueSettings);
         }
 
+        // 7b. El hard cap por uso del NT-MLE es ANUAL: se libera para todos los equipos
+        // al empezar la temporada (antes quedaba activo de por vida).
+        _db.Execute("UPDATE teams SET first_apron_hard_capped = 0 WHERE first_apron_hard_capped = 1");
+
         // 8. Deactivate old season
         if (oldSeason != null)
         {
@@ -3516,6 +3520,14 @@ public partial class DatabaseManager
     {
         if (!EnsureDb()) return new List<LineupData>();
 
+        // Atómico: borrados + inserciones de la convocatoria no pueden quedar a medias.
+        List<LineupData> result = new List<LineupData>();
+        _db.RunInTransaction(() => { result = EnsureLineupSeededCore(teamId, players); });
+        return result;
+    }
+
+    List<LineupData> EnsureLineupSeededCore(int teamId, List<PlayerData> players)
+    {
         var existing = GetTeamLineup(teamId);
         if (existing.Count == 0)
         {
@@ -3553,6 +3565,12 @@ public partial class DatabaseManager
         if (!EnsureDb()) return;
         if (players.Count == 0) return;
 
+        // Atómico: borrar la convocatoria anterior e insertar la nueva no puede quedar a medias.
+        _db.RunInTransaction(() => AutoSeedLineupCore(teamId, players, forceInactiveIds));
+    }
+
+    void AutoSeedLineupCore(int teamId, List<PlayerData> players, HashSet<int> forceInactiveIds)
+    {
         // Remove any existing lineup for this team
         var existing = GetTeamLineup(teamId);
         foreach (var e in existing)

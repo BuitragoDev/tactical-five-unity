@@ -86,15 +86,20 @@ public partial class DatabaseManager
         // Borrar amistosos anteriores de este manager/temporada
         if (games.Count == 0) return;
         int managerId = games[0].manager_id;
-        var existing = _db.Table<GameData>()
-                        .Where(g => g.manager_id == managerId
-                                && g.game_type == "preseason")
-                        .ToList();
-        foreach (var g in existing)
-            _db.Delete(g);
 
-        foreach (var g in games)
-            _db.Insert(g);
+        // Atómico: borrado + inserción no puede quedar a medias.
+        _db.RunInTransaction(() =>
+        {
+            var existing = _db.Table<GameData>()
+                            .Where(g => g.manager_id == managerId
+                                    && g.game_type == "preseason")
+                            .ToList();
+            foreach (var g in existing)
+                _db.Delete(g);
+
+            foreach (var g in games)
+                _db.Insert(g);
+        });
     }
 
     public List<GameData> GetPreseasonGames(int managerId)
@@ -106,21 +111,24 @@ public partial class DatabaseManager
                 .ToList();
     }
 
-    public void SaveRegularSeasonGames(List<GameData> games)
+    /// <summary>Guarda los partidos de liga regular. Devuelve false si no se pudieron
+    /// persistir (el llamador NO debe marcar la temporada como generada).</summary>
+    public bool SaveRegularSeasonGames(List<GameData> games)
     {
-        // Insertar en lotes para mejor rendimiento
-        _db.BeginTransaction();
         try
         {
-            foreach (var g in games)
-                _db.Insert(g);
-            _db.Commit();
+            _db.RunInTransaction(() =>
+            {
+                foreach (var g in games)
+                    _db.Insert(g);
+            });
             Debug.Log($"[DB] {games.Count} partidos de liga regular guardados.");
+            return true;
         }
         catch (Exception e)
         {
-            _db.Rollback();
             Debug.LogError($"[DB] Error guardando partidos: {e.Message}");
+            return false;
         }
     }
 

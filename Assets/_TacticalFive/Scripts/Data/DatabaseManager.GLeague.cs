@@ -11,11 +11,15 @@ public partial class DatabaseManager
     /// (para partidas existentes creadas antes de esta feature).</summary>
     internal void EnsureGLeagueSeeded()
     {
-        if (_db.Table<GLeagueTeamData>().Count() == 0)
-            SeedGLeagueTeams();
+        // Atómico: un fallo a mitad no puede dejar un seed parcial permanente.
+        _db.RunInTransaction(() =>
+        {
+            if (_db.Table<GLeagueTeamData>().Count() == 0)
+                SeedGLeagueTeams();
 
-        if (_db.Table<GLeaguePlayerData>().Count() == 0)
-            SeedGLeagueProspects();
+            if (_db.Table<GLeaguePlayerData>().Count() == 0)
+                SeedGLeagueProspects();
+        });
     }
 
     void SeedGLeagueTeams()

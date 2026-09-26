@@ -128,7 +128,13 @@ public static class ScheduleGenerator
             });
         }
 
-        DatabaseManager.Instance.SaveRegularSeasonGames(games);
+        // Si el guardado falla, devolvemos -1 para que el llamador NO marque la
+        // temporada como generada (de lo contrario quedaría sin partidos).
+        if (!DatabaseManager.Instance.SaveRegularSeasonGames(games))
+        {
+            Debug.LogError("[Schedule] No se pudo guardar el calendario de temporada regular.");
+            return -1;
+        }
         Debug.Log($"[Schedule] {games.Count} partidos de temporada regular generados.");
 
         // All-Star Game (sábado de la segunda semana de febrero)

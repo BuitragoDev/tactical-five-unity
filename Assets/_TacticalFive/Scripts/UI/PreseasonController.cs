@@ -426,23 +426,11 @@ public class PreseasonController : UIScreenController
     void OnContinue()
     {
         // === COMMIT: la partida se crea oficialmente al pulsar Continuar en Preseason ===
+        // El metadata del slot se escribe AL FINAL (cuando la temporada y el calendario
+        // existen de verdad): así un cierre inesperado a mitad no deja una partida
+        // listada pero rota.
         int activeSlot = DatabaseManager.Instance.ActiveSaveSlot;
         var season = DatabaseManager.Instance.GetActiveSeason(_manager.id);
-        string seasonYear = season != null ? $"{season.year_start}-{season.year_end}" : "2026-2027";
-        GameSaveManager.SaveSlotInfo(new SaveSlotInfo
-        {
-            slotNumber = activeSlot,
-            exists = true,
-            managerName = _manager.name,
-            teamName = _myTeam.name,
-            teamLogo = _myTeam.logo,
-            seasonYear = seasonYear,
-            currentDate = "",
-            lastPlayedRealDate = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
-            currentGameDay = 0,
-            gameMode = _manager.game_mode
-        });
-        Debug.Log($"[Preseason] Partida creada en slot {activeSlot}: {_manager.name} → {_myTeam.name}");
 
         // 1. Crear temporada si no existe (primera partida)
         bool isNewGame = season == null;
@@ -475,6 +463,16 @@ public class PreseasonController : UIScreenController
         {
             var allTeams = DatabaseManager.Instance.GetAllTeams();
             int count = ScheduleGenerator.GenerateSchedule(season, allTeams);
+
+            // count < 0 => el calendario no se pudo persistir. NO marcar la temporada
+            // como generada: dejaría una carrera sin partidos imposible de avanzar.
+            if (count <= 0)
+            {
+                Debug.LogError("[Preseason] Fallo al generar/guardar el calendario. La temporada NO se marca como generada.");
+                if (_infoBarSeason != null)
+                    _infoBarSeason.text = "ERROR: no se pudo guardar el calendario. Vuelve a intentarlo.";
+                return;
+            }
 
             // Calendario G-League sobre los días con partidos NBA ya programados
             try
@@ -521,6 +519,23 @@ public class PreseasonController : UIScreenController
                 DatabaseManager.Instance.AddMessage(welcomeMsg);
             }
         }
+
+        // === Metadata del slot: la partida solo queda "válida" cuando la temporada y
+        // el calendario ya están persistidos. ===
+        GameSaveManager.SaveSlotInfo(new SaveSlotInfo
+        {
+            slotNumber = activeSlot,
+            exists = true,
+            managerName = _manager.name,
+            teamName = _myTeam.name,
+            teamLogo = _myTeam.logo,
+            seasonYear = $"{season.year_start}-{season.year_end}",
+            currentDate = "",
+            lastPlayedRealDate = System.DateTime.Now.ToString("dd/MM/yyyy HH:mm"),
+            currentGameDay = 0,
+            gameMode = _manager.game_mode
+        });
+        Debug.Log($"[Preseason] Partida creada en slot {activeSlot}: {_manager.name} → {_myTeam.name}");
 
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }

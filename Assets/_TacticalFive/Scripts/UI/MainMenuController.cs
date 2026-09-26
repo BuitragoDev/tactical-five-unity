@@ -326,7 +326,11 @@ public class MainMenuController : UIScreenController
         ClearTransientGameState();
         int slot = GameSaveManager.FindNextAvailableSlot();
         GameSaveManager.CleanupOrphanDb(slot);
-        DatabaseManager.Instance.InitSaveSlot(slot);
+        if (!DatabaseManager.Instance.InitSaveSlot(slot))
+        {
+            Debug.LogError("[MainMenu] No se pudo crear/abrir la partida. Se cancela el inicio.");
+            return;
+        }
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.Manager);
     }
 
@@ -340,7 +344,11 @@ public class MainMenuController : UIScreenController
         ClearTransientGameState();
         int slot = GameSaveManager.FindNextAvailableSlot();
         GameSaveManager.CleanupOrphanDb(slot);
-        DatabaseManager.Instance.InitSaveSlot(slot);
+        if (!DatabaseManager.Instance.InitSaveSlot(slot))
+        {
+            Debug.LogError("[MainMenu] No se pudo crear/abrir la partida ProManager. Se cancela el inicio.");
+            return;
+        }
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.ProManager);
     }
 

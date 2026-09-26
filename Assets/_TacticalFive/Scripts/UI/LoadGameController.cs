@@ -442,7 +442,11 @@ public class LoadGameController : UIScreenController
     {
         if (IsSlotFired(slotNumber)) return;
 
-        DatabaseManager.Instance.InitSaveSlot(slotNumber);
+        if (!DatabaseManager.Instance.InitSaveSlot(slotNumber))
+        {
+            Debug.LogError($"[LoadGame] No se pudo abrir la partida del slot {slotNumber} (DB corrupta o bloqueada).");
+            return;
+        }
         GameSaveManager.UpdateSlotFromDatabase(slotNumber);
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }
