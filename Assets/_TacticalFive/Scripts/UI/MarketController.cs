@@ -1919,6 +1919,10 @@ using System.Linq;
 
         var actions = new VisualElement();
         actions.AddToClassList("market-fa-modal-actions");
+        // La caja recorta (overflow hidden) y no tiene padding: el pie lo aporta aquí.
+        actions.style.paddingLeft = 24;
+        actions.style.paddingRight = 24;
+        actions.style.paddingBottom = 22;
 
         var cancel = new Button { text = "CANCELAR" };
         cancel.AddToClassList("btn-modal-cancel");

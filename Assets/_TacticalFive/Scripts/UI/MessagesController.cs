@@ -372,18 +372,25 @@ public class MessagesController : UIScreenController
         body.Add(text);
         box.Add(body);
 
+        // La caja no tiene padding propio: el pie lo aporta aquí (como .modal-body).
         var actions = new VisualElement();
         actions.style.flexDirection = FlexDirection.Row;
-        actions.style.marginTop = 14;
+        actions.style.justifyContent = Justify.Center;
+        actions.style.paddingLeft = 24;
+        actions.style.paddingRight = 24;
+        actions.style.paddingBottom = 20;
 
         var cancel = new Button { text = "CANCELAR" };
         cancel.AddToClassList("btn-modal-cancel");
+        cancel.style.minWidth = 170;
+        cancel.style.marginRight = 8;
         cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
         actions.Add(cancel);
 
         var confirm = new Button { text = "ELIMINAR" };
         confirm.AddToClassList("btn-modal-confirm");
         confirm.AddToClassList("btn-modal-confirm--danger");
+        confirm.style.minWidth = 170;
         confirm.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
