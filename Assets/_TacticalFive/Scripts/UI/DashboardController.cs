@@ -2399,6 +2399,7 @@ using System.Threading.Tasks;
         db.BeginTransaction();
         try
         {
+        bool agentCounterShown = false; // solo una contraoferta por tanda (el resto, al inbox)
         foreach (var offer in offers)
         {
             var player = DatabaseManager.Instance.GetPlayerById(offer.player_id);
@@ -2674,6 +2675,23 @@ using System.Threading.Tasks;
                         category = NewsCategory.CLUB,
                         news_type = NewsType.FICHAJE_RECHAZADO
                     });
+
+                    // Contraoferta del agente (si queda margen legal y no es two-way).
+                    if (offer.is_two_way != 1 && !agentCounterShown && leagueSettings != null)
+                    {
+                        bool proFA = _manager.game_mode == "promanager";
+                        long legalMax = totalPayroll <= leagueSettings.salary_cap ? Math.Max(0, leagueSettings.salary_cap - totalPayroll)
+                                      : (proFA && totalPayroll <= firstApron) ? tMle
+                                      : totalPayroll <= firstApron ? ntMle
+                                      : totalPayroll <= secondApron ? tMle
+                                      : minSalary;
+                        long counter = NegotiationHelper.CounterSalary(offer.offer_salary, acceptScore, legalMax);
+                        if (counter > offer.offer_salary)
+                        {
+                            agentCounterShown = true;
+                            ShowAgentCounterModal(player, counter, offer.offer_years, isRenewal: false);
+                        }
+                    }
                 }
             }
             else
@@ -2766,6 +2784,22 @@ using System.Threading.Tasks;
                         category = NewsCategory.CLUB,
                         news_type = NewsType.OFERTA_RECHAZADA
                     });
+
+                    // Contraoferta del agente (la re-firma propia puede pasar del cap,
+                    // así que el techo es el valor de mercado del jugador).
+                    if (offer.is_two_way != 1 && !agentCounterShown)
+                    {
+                        var lsNeg = DatabaseManager.Instance.GetLeagueSettings();
+                        long capNeg = lsNeg != null ? lsNeg.salary_cap : TradeHelper.SALARY_CAP;
+                        long market = DatabaseManager.Instance.EstimateMarketSalary(player.GetCalculatedAverage(), capNeg);
+                        long legalMax = Math.Max(offer.offer_salary, market);
+                        long counter = NegotiationHelper.CounterSalary(offer.offer_salary, acceptScore, legalMax);
+                        if (counter > offer.offer_salary)
+                        {
+                            agentCounterShown = true;
+                            ShowAgentCounterModal(player, counter, offer.offer_years, isRenewal: true);
+                        }
+                    }
                 }
             }
 
@@ -2824,6 +2858,145 @@ using System.Threading.Tasks;
             : resultSummary;
 
         ShowOfferResultModal(title, text, resultType);
+    }
+
+    // ── NEGOCIACIÓN CON EL AGENTE ───────────────────────────────────
+    /// <summary>Contraoferta del agente tras un rechazo por dinero: aceptarla ficha
+    /// (o renueva) con las nuevas condiciones; retirarse deja al jugador como estaba.</summary>
+    void ShowAgentCounterModal(PlayerData player, long counterSalary, int years, bool isRenewal)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.width = 760;
+        _firedOverlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
+        var title = new Label("EL AGENTE PIDE MÁS");
+        title.AddToClassList("fired-modal-title");
+        header.Add(title);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+        var text = new Label();
+        text.AddToClassList("modal-text");
+        text.text = $"{player.first_name} {player.last_name} rechazó tu oferta, pero su agente cerraría por " +
+                    $"${counterSalary:N0} durante {years} año{(years != 1 ? "s" : "")}.\n\n¿Aceptas las nuevas condiciones?";
+        body.Add(text);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.style.flexDirection = FlexDirection.Row;
+        actions.style.marginTop = 18;
+
+        var accept = new Button { text = "ACEPTAR" };
+        accept.AddToClassList("btn-modal-confirm");
+        accept.RegisterCallback<ClickEvent>(_ => { PlayClick(); AcceptAgentCounter(player, counterSalary, years, isRenewal); });
+        CursorManager.Instance?.RegisterHandCursor(accept);
+        actions.Add(accept);
+
+        var reject = new Button { text = "RETIRARSE" };
+        reject.AddToClassList("btn-modal-confirm");
+        reject.AddToClassList("btn-modal-confirm--danger");
+        reject.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            Refresh();
+        });
+        CursorManager.Instance?.RegisterHandCursor(reject);
+        actions.Add(reject);
+
+        box.Add(actions);
+    }
+
+    void AcceptAgentCounter(PlayerData player, long counterSalary, int years, bool isRenewal)
+    {
+        _firedOverlay.style.display = DisplayStyle.None;
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        string playerName = $"{player.first_name} {player.last_name}";
+
+        if (!isRenewal && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER)
+        {
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 0,
+                sender_id = 0,
+                title = "Plantilla completa",
+                body = $"No se pudo fichar a {playerName}: la plantilla está al máximo ({TradeHelper.MAX_ROSTER}).",
+                game_day = _season.current_game_day,
+                game_date = _season.current_date,
+                created_at = now,
+                date_sent = now,
+                is_read = 0,
+                category = NewsCategory.CLUB,
+                news_type = NewsType.FICHAJE_RECHAZADO
+            });
+            Refresh();
+            return;
+        }
+
+        player.salary = counterSalary;
+        player.contract_years = years;
+        player.guaranteed_years = years;
+        player.has_team_option = 0;
+        player.has_player_option = 0;
+
+        if (!isRenewal)
+        {
+            player.is_two_way = 0;
+            DatabaseManager.Instance.MovePlayerToTeam(player, _myTeam.id);
+            DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(player);
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season?.id ?? 0,
+                game_day = _season?.current_game_day ?? 0,
+                game_date = _season?.current_date ?? now,
+                team_id_from = 0,
+                team_id_to = _myTeam.id,
+                player_id = player.id,
+                trade_type = "free_agent"
+            });
+            AchievementService.EvaluateSignStarFA(_manager.id, _myTeam.id, _season?.id ?? 0, player);
+        }
+        else
+        {
+            // Re-firma de un FA propio reciente: devolverlo al equipo.
+            if (player.team_id == 0 && DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id))
+            {
+                DatabaseManager.Instance.MovePlayerToTeam(player, _myTeam.id);
+                DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
+            }
+            DatabaseManager.Instance.UpdatePlayer(player);
+        }
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
+            title = $"{(isRenewal ? "Contrato renovado" : "Fichaje")}: {playerName}",
+            body = isRenewal
+                ? NewsTexts.Renovacion(playerName, _myTeam.name, (int)counterSalary, years)
+                : NewsTexts.Fichaje(playerName, _myTeam.name, (int)counterSalary, years),
+            game_day = _season.current_game_day,
+            game_date = _season.current_date,
+            created_at = now,
+            date_sent = now,
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = isRenewal ? NewsType.RENOVACION : NewsType.FICHAJE
+        });
+
+        Debug.Log($"[Negotiation] Contraoferta aceptada: {playerName} ${counterSalary:N0} x {years}");
+        Refresh();
     }
 
     void ShowOfferResultModal(string title, string text, int resultType)
