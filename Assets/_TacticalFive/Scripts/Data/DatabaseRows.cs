@@ -239,6 +239,10 @@ public class DraftProspect
     public int weight_kg { get; set; }
     public int overall { get; set; }
     public int potential { get; set; }
+    // Scouting: `scout_error` es la desviación (real - estimación) aplicada a los
+    // valores mostrados; `scout_range` es el margen (±) para la UI.
+    public int scout_error { get; set; }
+    public int scout_range { get; set; }
     public int speed { get; set; }
     public int shooting { get; set; }
     public int three_point { get; set; }

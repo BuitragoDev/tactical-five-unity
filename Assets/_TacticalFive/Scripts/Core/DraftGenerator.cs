@@ -257,7 +257,7 @@ public static class DraftGenerator
         return (order, classLabel, classQuality);
     }
 
-    public static List<DraftProspect> GenerateProspectPool(string classLabel, float classQuality, int count = 75)
+    public static List<DraftProspect> GenerateProspectPool(string classLabel, float classQuality, int count = 75, int scoutReputation = 3)
     {
         var generationalPicks = new HashSet<int>();
         if (classLabel == "historic")
@@ -337,7 +337,14 @@ public static class DraftGenerator
                 attrs[attr] = (int)Mathf.Clamp(baseAvg + mod + roll + traitBonus, 30, 99);
             }
 
-            int overall = (int)System.Math.Round(attrs.Values.Average());
+            int trueOverall = (int)System.Math.Round(attrs.Values.Average());
+            // Evaluación con error de scouting: lo que se muestra (y usa la IA) es una
+            // estimación; el valor real se revela al elegir el pick.
+            int scoutRange = ScoutingHelper.MaxError(scoutReputation);
+            int scoutError = ScoutingHelper.ErrorFor(scoutReputation,
+                UnityEngine.Random.Range(-scoutRange, scoutRange + 1),
+                UnityEngine.Random.Range(-scoutRange, scoutRange + 1));
+            int overall = ScoutingHelper.Estimate(trueOverall, scoutError);
 
             int potential;
             if (isGenerational)
@@ -375,17 +382,19 @@ public static class DraftGenerator
                 weight_kg = weight,
                 overall = overall,
                 potential = potential,
-                speed = attrs["speed"],
-                shooting = attrs["shooting"],
-                three_point = attrs["three_point"],
-                passing = attrs["passing"],
-                dribbling = attrs["ball_handling"],
-                defense = attrs["defense"],
-                rebounding = attrs["rebounding"],
-                athleticism = attrs["athleticism"],
-                iq = attrs["iq"],
-                steals = attrs["steals"],
-                blocks = attrs["blocks"],
+                scout_error = scoutError,
+                scout_range = scoutRange,
+                speed = ScoutingHelper.Estimate(attrs["speed"], scoutError),
+                shooting = ScoutingHelper.Estimate(attrs["shooting"], scoutError),
+                three_point = ScoutingHelper.Estimate(attrs["three_point"], scoutError),
+                passing = ScoutingHelper.Estimate(attrs["passing"], scoutError),
+                dribbling = ScoutingHelper.Estimate(attrs["ball_handling"], scoutError),
+                defense = ScoutingHelper.Estimate(attrs["defense"], scoutError),
+                rebounding = ScoutingHelper.Estimate(attrs["rebounding"], scoutError),
+                athleticism = ScoutingHelper.Estimate(attrs["athleticism"], scoutError),
+                iq = ScoutingHelper.Estimate(attrs["iq"], scoutError),
+                steals = ScoutingHelper.Estimate(attrs["steals"], scoutError),
+                blocks = ScoutingHelper.Estimate(attrs["blocks"], scoutError),
                 trait = trait,
                 is_generational = isGenerational
             });
@@ -420,6 +429,9 @@ public static class DraftGenerator
 
         int nextId = DatabaseManager.Instance.AllocatePlayerId();
 
+        // Se revela el valor real: la estimación mostrada puede ser optimista (bust) o
+        // pesimista (boom).
+        int se = prospect.scout_error;
         var player = new PlayerData
         {
             id = nextId,
@@ -433,19 +445,19 @@ public static class DraftGenerator
             college = prospect.college,
             height_cm = prospect.height_cm,
             weight_kg = prospect.weight_kg,
-            overall = prospect.overall,
-            potential = prospect.potential,
-            speed = prospect.speed,
-            shooting = prospect.shooting,
-            three_point = prospect.three_point,
-            passing = prospect.passing,
-            dribbling = prospect.dribbling,
-            defense = prospect.defense,
-            rebounding = prospect.rebounding,
-            athleticism = prospect.athleticism,
-            iq = prospect.iq,
-            steals = prospect.steals,
-            blocks = prospect.blocks,
+            overall = ScoutingHelper.Reveal(prospect.overall, se),
+            potential = ScoutingHelper.Reveal(prospect.potential, se),
+            speed = ScoutingHelper.Reveal(prospect.speed, se),
+            shooting = ScoutingHelper.Reveal(prospect.shooting, se),
+            three_point = ScoutingHelper.Reveal(prospect.three_point, se),
+            passing = ScoutingHelper.Reveal(prospect.passing, se),
+            dribbling = ScoutingHelper.Reveal(prospect.dribbling, se),
+            defense = ScoutingHelper.Reveal(prospect.defense, se),
+            rebounding = ScoutingHelper.Reveal(prospect.rebounding, se),
+            athleticism = ScoutingHelper.Reveal(prospect.athleticism, se),
+            iq = ScoutingHelper.Reveal(prospect.iq, se),
+            steals = ScoutingHelper.Reveal(prospect.steals, se),
+            blocks = ScoutingHelper.Reveal(prospect.blocks, se),
             injury_days = 0,
             injury_type = "",
             treated = 0,
@@ -456,6 +468,8 @@ public static class DraftGenerator
             is_rookie = 1
         };
 
+        // El overall debe seguir siendo la media de los atributos (capada por potencial).
+        player.RecalculateOverall();
         DatabaseManager.Instance.AssignJerseyNumber(player, drafTeamId);
         DatabaseManager.Instance.Db.Insert(player);
         PlayerPhotoHelper.CreateRookiePhoto(player.id);

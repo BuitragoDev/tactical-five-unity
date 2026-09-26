@@ -398,7 +398,11 @@ public class EndSeasonController : UIScreenController
         _draftOrder = order;
         _classLabel = classLabel;
         _classQuality = classQuality;
-        _availableProspects = DraftGenerator.GenerateProspectPool(classLabel, classQuality, 75);
+        // La precisión del scouting depende de los ojeadores del equipo: a peores
+        // ojeadores, más riesgo de que un prospecto salga mejor/peor de lo mostrado.
+        int scoutRep = ScoutingHelper.ScoutReputation(DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id));
+        _availableProspects = DraftGenerator.GenerateProspectPool(classLabel, classQuality, 75, scoutRep);
+        Debug.Log($"[Draft] Clase {classLabel} generada con scouting reputación {scoutRep} (±{ScoutingHelper.MaxError(scoutRep)})");
 
         _draftState = DraftState.Idle;
         // Reanudar desde el pick guardado: la clase/orden se regeneran, pero los
@@ -539,7 +543,7 @@ public class EndSeasonController : UIScreenController
 
             var med = new Label();
             med.AddToClassList("draft-prospect-med");
-            med.text = p.overall.ToString();
+            med.text = p.scout_range > 0 ? $"{p.overall} ±{p.scout_range}" : p.overall.ToString();
             if (p.overall > 84) med.AddToClassList("draft-prospect-med--high");
             else if (p.overall >= 70) med.AddToClassList("draft-prospect-med--mid");
             else med.AddToClassList("draft-prospect-med--low");
@@ -612,7 +616,7 @@ public class EndSeasonController : UIScreenController
         _draftCardName.text = $"{p.first_name} {p.last_name}";
         _draftCardCollege.text = p.college;
         _draftCardBio.text = $"{p.height_cm}cm  ·  {p.weight_kg}kg  ·  {p.age} años  ·  {CountryCodes.GetName(p.nationality)}";
-        _draftCardOvr.text = p.overall.ToString();
+        _draftCardOvr.text = p.scout_range > 0 ? $"{p.overall} ±{p.scout_range}" : p.overall.ToString();
         _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--high");
         _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--mid");
         _draftCardOvrBadge.RemoveFromClassList("draft-card-ovr-badge--low");
