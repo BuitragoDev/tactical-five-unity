@@ -448,7 +448,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-06` · La IA renueva y ficha sin cap/aprons
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `DashboardController.cs:4949-4957` (`ProcessAIRenewals`), `:5388,5426` (`TrySignFreeAgent`), `:4856-4862` (star FA); `Records.cs:3122-3137` (relleno con `availableCap` negativo → `Math.Max(minSalary, availableCap)`)
 - **Problema:** la IA solo comprueba `team.budget` (caja), no el cap/aprons.
@@ -611,7 +611,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[x]` **`CON-08` · `GetLeagueTop*` N+1 y sin filtro de temporada (¿código muerto?)** — `Records.cs:625-716`; sin call sites encontrados. → Eliminar o reescribir en una query agregada con `season_id`. **Verificación:** [A]
 - `[x]` **`CON-09` · Fuga de texturas/sprites en `TeamImages`** — `TeamImages.cs:67-73` (`Invalidate` solo limpia diccionarios), `:280-291` (crea `Texture2D`/`Sprite`); `_previewCache` nunca se limpia. → Fuga al cambiar de slot repetidamente (escena única, nunca se descargan). → `Object.Destroy` al invalidar. **Verificación:** [A]
 - `[x]` **`CON-10` · `PlayerPhotoHelper.Load` sin caché** — `PlayerPhotoHelper.cs:17-69`; usado hasta 6× por `Refresh` en `DashboardController.cs:7587`. → Textura nueva por llamada con fotos custom. → Cachear por `(scope, playerId)` y `Destroy` en invalidación. **Verificación:** [A]
-- `[ ]` **`UI-07` · Errores de fast-sim solo a consola** — `DashboardController.cs:1843-1847, 2121`. → El jugador no sabe por qué se detuvo. → Modal/toast con motivo y opción de reintentar. **Verificación:** [A]
+- `[x]` **`UI-07` · Errores de fast-sim solo a consola** — `DashboardController.cs:1843-1847, 2121`. → El jugador no sabe por qué se detuvo. → Modal/toast con motivo y opción de reintentar. **Verificación:** [A]
 - `[ ]` **`UI-08` · `FullScreenUI.Awake` puede desreferenciar null** — `FullScreenUI.cs:9-11` (`rootVisualElement` no existe hasta `OnEnable`). → NRE por pantalla en build; ruido que enmascara errores reales. → Eliminar el componente (la base ya hace fullscreen) o mover a `OnEnable`. **Verificación:** [A]
 - `[ ]` **`UI-09` · RESETEAR del Editor sin confirmación** — `EditorController.cs:314, 336-354` (borra `template.db`). → Acción destructiva de un clic. → Modal de confirmación (patrón existente). **Verificación:** [A]
 - `[ ]` **`UI-10` · Traspaso propio sin confirmación ni undo** — `MarketController.cs:1869-1998`. → Un traspaso mal armado es irreversible. → Reutilizar el modal de confirmación de ofertas IA con resumen. **Verificación:** [A]
@@ -874,6 +874,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `49379e1c` | REN-01, UI-03/05, CON-07/08, QA-07/08 | Rendimiento y UI: `AchievementService` filtra por temporada y `GetStandingsGames(season)`; bandeja del dashboard con `LIMIT` (`GetRecentMessages`); scrollbar re-bindeada en cada visita (Stats/Editor); crash de Entrenamiento resuelto (se re-aplica la tarjeta seleccionada + `FirstOrDefault`); eliminados `GetLeagueTop*` muertos; `FullScreenUI` null-safe; docs corregidas sobre callbacks. |
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
+| 2026-09-26 | `1550aab2` | ECO-06 | IA con modelo de cap/aprons: `TradeHelper.CanAISignExternal` (espacio de cap → MLE por apron → mínimo, tope del 2º apron) y `CanAIRenew` (Bird hasta el 2º apron); aplicados en `TrySignFreeAgent` y `ProcessAIRenewals`. +4 tests. |
+| 2026-09-26 | `8e2a9185` | UI-07 | La simulación rápida avisa con un modal cuando se detiene por un error (antes solo iba a consola). |
 | 2026-09-26 | `8cf34612` | SEA-08, SEA-09 | `overall` con **fuente única**: `GetCalculatedAverage()` redondea y capa por potencial, `RecalculateOverall()` se llama tras mentoring, progresión/declive, training, desarrollo G-League y Editor. +4 tests (`PlayerDataTests`). |
 | 2026-09-26 | `1bea1c43` | CON-03, CON-04 | Concurrencia: `RunInBackground*` espera al lote anterior (single-flight), evitando solapes de estado/RNG y contención del lock; `BusyTimeout` de SQLite de 1 s a **5 s** para que la UI espere en vez de fallar con `SQLITE_BUSY`. |
 | 2026-09-26 | `2d1f880d` | Tests Fase 1 | Infra de tests de slots (`GameSaveManager.BaseDirOverride`) + 7 tests de persistencia (`GameSaveManagerTests`): metadata corrupto no borra DBs, backup, reclamo atómico y `-wal`/`-shm`. |
