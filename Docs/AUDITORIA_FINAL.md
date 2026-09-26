@@ -44,14 +44,13 @@
 | Bloque | Hallazgos | Hechos |
 |---|---|---|
 | CRÍTICOS | 9 | 9 |
-| ALTOS | 21 | 20 (queda `REN-01`, `UI-03..06` y `SIM-05`) |
-| MEDIOS | ~30 | 5 |
-| BAJOS | ~10 | 1 |
-| Tests propuestos | 25 | 6 |
+| ALTOS | 21 | 20 (queda `SIM-05` y `UI-04` parcial) |
+| MEDIOS | ~32 | 8 |
+| BAJOS | ~12 | 3 |
+| Tests propuestos | 25 | 13 (98 tests en total) |
 
-> **Fase 1 completada** (salvo el bloque de tests que necesita inyectar la ruta de la DB).
-> **Fase 2 en curso:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (`índices`, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11`, parcial), economía (`ECO-03/04/05/07/08`, `SEA-10`) y traspasos con flags. Pendiente: rendimiento (`REN-01`, `CON-05..10`), limpieza de código muerto, tests de DB y `SIM-05`.
-> **Fase 1 completada (2026-09-26) salvo tests:** cerrados `SAV-01..07`, `SEA-01/02/03/04/05/13`, `CON-01/02`, `UI-01/02`, `ECO-01/02`. Queda añadir el resto de tests de Fase 1 (requieren refactor para inyectar la ruta de la DB).
+> **Fase 1 completada.** **Fase 2 muy avanzada:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (índices, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11` parcial), economía (`ECO-03/04/05/07/08`, `SEA-10`), rendimiento (`REN-01`, `CON-07`, `CON-08`), UI (`UI-03/05/06`), limpieza de código muerto y corrección de docs (`QA-07/08`), y **tests de persistencia** (`GameSaveManagerTests`, 7) con `BaseDirOverride`.
+> Pendiente de Fase 2: `SIM-05` (<5 sanos), `UI-04` (scrollbar intra-visita), `CON-03/04` (mutex/solape de lotes), `CON-05/06` (standings/N+1), `CON-09/10` (fugas de texturas) y tests de `InitSaveSlot`/`StartNewSeason` (requieren una DB viva en EditMode).
 
 ### Top 10 por daño/esfuerzo (orden recomendado de ataque)
 
@@ -493,7 +492,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `REN-01` · `EvaluateGameDay` escanea todos los partidos de la carrera cada día
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO (rendimiento + semántica) · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `Core/AchievementService.cs:64-71, 91-117`; `DatabaseManager.Games.cs:226-235` (`GetStandingsGames` sin filtro de temporada); llamado en `DashboardController.cs:1256`
 - **Problema:** `MyTeamSeasonGames` recorre todos los partidos del manager y recalcula wins/racha con LINQ **cada día** (también en fast-sim). Si algún día se deja de purgar `games`, contaminará temporadas pasadas.
@@ -515,7 +514,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-03` · Scroll muerto tras la primera visita (handle cacheado con `??=`)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `UI/StatsController.cs:104`; `UI/EditorController.cs:192-198`
 - **Problema:** `_scrollBar ??= CustomScrollbar.Bind(...)`. En Unity 6, `UIDocument.OnDisable()` anula `rootVisualElement` y al reactivar se recrea el árbol → el handle cacheado apunta a elementos desechados y nunca se rebindea.
@@ -526,7 +525,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-04` · Scrollbar re-bindeada en cada rebuild dentro de la misma visita
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[~]` parcial
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `MessagesController.cs:223, 827` (cada tecla/filtro); `PalmaresController.cs` (varias, cada pestaña); `BuscadorController.cs:255`; `CarteraController.cs:714`; `GLeagueController.cs:411`; `HistorialController.cs:182`; `InjuredController.cs:817`
 - **Problema:** `BindScrollBar(...)` registra `WheelEvent`/pointer/`GeometryChangedEvent` sobre elementos persistidos durante la visita; se vuelve a llamar en cada rebuild → N handlers acumulados.
@@ -537,7 +536,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-05` · `TrainingController` lanza `InvalidOperationException` al pulsar ENTRENAR/AUTO
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `UI/TrainingController.cs:569-571`, `:661-668`
 - **Problema:** `BuildPlayerList()` limpia el grid y `OnPlayerSelected(player, _trainingBody.Query<VisualElement>(className: "training-card--selected").First())` → `.First()` sobre vacío lanza (la clase `--selected` no se re-aplica).
@@ -548,7 +547,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-06` · `DivideByZeroException` en buyout con `contract_years == 0`
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** RIESGO · **Verificación:** **[V]**
 - **Archivos:** `UI/RosterController.cs:1568-1570` (`OpenBuyoutModal`), `:1593-1595` (`ConfirmBuyout`); contraste `DashboardController.cs:3785` que sí usa `Mathf.Max(1, ...)`
 - **Problema:** `stretchYears = contract_years * 2` y `remainingSalary / stretchYears` sin guarda; el botón siempre está registrado/visible.
@@ -608,8 +607,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[ ]` **`SIM-14` · All-Star aplica fatiga/lesiones y escribe stats** — `GameSimulator.cs:231-279` (solo excluye récords), `DashboardController.cs:1701-1742`. → Participantes pierden físico, se lesionan y generan `player_game_stats` con `team_id` negativo; `.First()` puede lanzar si los rosters quedan vacíos. → Excluir fatiga/lesión/stats para `game_type == "allstar"`; guardar `Any()` antes de `First()`. **Verificación:** [A]
 - `[ ]` **`CON-05` · `Refresh()` re-escanea partidos varias veces/día** — `DashboardController.cs:468, 7330-7346, 7395-7420, 7596-7600`; `GetTeamRecordShort` llamado 4×. → CPU dominante del fast-sim. → Calcular standings/records una vez por día y cachear; filtrar por `season_id`. **Verificación:** [A]
 - `[ ]` **`CON-06` · N+1 `GetPlayerGamesPlayedInSeason` en renovaciones IA** — `Records.cs:616-622`; `DashboardController.cs:4942`. → Cientos de queries por ciclo (carga todos los `gameIds` de la temporada en cada llamada). → Un solo `JOIN ... GROUP BY player_id` o diccionario precomputado. **Verificación:** [A]
-- `[ ]` **`CON-07` · Bandeja completa cargada para mostrar 5** — `DashboardController.cs:7709`; `Records.cs:2519`. → `SELECT ORDER BY id DESC LIMIT 5` + índice `(manager_id, id)`. **Verificación:** [A]
-- `[ ]` **`CON-08` · `GetLeagueTop*` N+1 y sin filtro de temporada (¿código muerto?)** — `Records.cs:625-716`; sin call sites encontrados. → Eliminar o reescribir en una query agregada con `season_id`. **Verificación:** [A]
+- `[x]` **`CON-07` · Bandeja completa cargada para mostrar 5** — `DashboardController.cs:7709`; `Records.cs:2519`. → `SELECT ORDER BY id DESC LIMIT 5` + índice `(manager_id, id)`. **Verificación:** [A]
+- `[x]` **`CON-08` · `GetLeagueTop*` N+1 y sin filtro de temporada (¿código muerto?)** — `Records.cs:625-716`; sin call sites encontrados. → Eliminar o reescribir en una query agregada con `season_id`. **Verificación:** [A]
 - `[ ]` **`CON-09` · Fuga de texturas/sprites en `TeamImages`** — `TeamImages.cs:67-73` (`Invalidate` solo limpia diccionarios), `:280-291` (crea `Texture2D`/`Sprite`); `_previewCache` nunca se limpia. → Fuga al cambiar de slot repetidamente (escena única, nunca se descargan). → `Object.Destroy` al invalidar. **Verificación:** [A]
 - `[ ]` **`CON-10` · `PlayerPhotoHelper.Load` sin caché** — `PlayerPhotoHelper.cs:17-69`; usado hasta 6× por `Refresh` en `DashboardController.cs:7587`. → Textura nueva por llamada con fotos custom. → Cachear por `(scope, playerId)` y `Destroy` en invalidación. **Verificación:** [A]
 - `[ ]` **`UI-07` · Errores de fast-sim solo a consola** — `DashboardController.cs:1843-1847, 2121`. → El jugador no sabe por qué se detuvo. → Modal/toast con motivo y opción de reintentar. **Verificación:** [A]
@@ -872,6 +871,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `b02f2a96` | QA-01, SEA-12, §4 | Esquema: índices que faltaban (`players.team_id`, `games.season_id`, `messages(manager_id,id)`), `[Table]` de `player_season_stats`, una sola temporada activa (`GetActiveSeason` ordenado + `CreateSeason` desactiva) y `AllocatePlayerId()` monótono para el draft. |
 | 2026-09-26 | `1504f9db` | SEA-11 (parcial) | `season_records` completo: campeón, finalista, MVP de finales, MVP de temporada, ROY y primer quinteto (faltan All-Star/DPOY/Sexto Hombre/2º quinteto, que el juego no calcula). |
 | 2026-09-26 | `d4aae4f5` | ECO-03/04/05/07/08, SEA-10 | Economía: límite two-way y Bird rights en la maduración de ofertas, luxury tax positivo, ofertas normalizadas en el rollover (maduran en 7 días), reset del estado transitorio (lesiones/fatiga/trade block/química/confianza) y `MovePlayerToTeam` en traspasos (tenure + flags). |
+| 2026-09-26 | `49379e1c` | REN-01, UI-03/05, CON-07/08, QA-07/08 | Rendimiento y UI: `AchievementService` filtra por temporada y `GetStandingsGames(season)`; bandeja del dashboard con `LIMIT` (`GetRecentMessages`); scrollbar re-bindeada en cada visita (Stats/Editor); crash de Entrenamiento resuelto (se re-aplica la tarjeta seleccionada + `FirstOrDefault`); eliminados `GetLeagueTop*` muertos; `FullScreenUI` null-safe; docs corregidas sobre callbacks. |
+| 2026-09-26 | `2d1f880d` | Tests Fase 1 | Infra de tests de slots (`GameSaveManager.BaseDirOverride`) + 7 tests de persistencia (`GameSaveManagerTests`): metadata corrupto no borra DBs, backup, reclamo atómico y `-wal`/`-shm`. |
 
 **Hallazgo nuevo detectado durante la implementación (ya corregido):**
 - `SEA-13` · **ALTO** · `DashboardController.ProcessGameDayRoutine`: si `FindNextGameDay() == 0` (no quedan partidos sin jugar) el método hacía `yield break` **antes** del bloque de transición de fase; con la temporada en `regular` y todos los partidos jugados, la fase no avanzaba nunca → soft-lock. **Fix aplicado (`35e9a28f`):** `TryEscapeStuckPhase()` se llama en el early-return y regenera el calendario si falta o avanza/cierra la fase (cubre también `SEA-05`).
