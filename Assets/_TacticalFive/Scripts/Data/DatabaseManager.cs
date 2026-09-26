@@ -200,6 +200,14 @@ public partial class DatabaseManager : MonoBehaviour
         return task;
     }
 
+    /// <summary>Registra el lote en curso (sobrecarga para Task&lt;T&gt;).</summary>
+    private static Task<T> TrackBatch<T>(Task<T> task, CancellationTokenSource cts)
+    {
+        _runningBatch = task;
+        _batchCts = cts;
+        return task;
+    }
+
     public Task<T> RunInBackground<T>(Func<SQLiteConnection, T> work)
     {
         string path = DbPath;
