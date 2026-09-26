@@ -1533,6 +1533,13 @@ public partial class DatabaseManager
                     mvpPlayer.finals_mvps = mvpPlayer.finals_mvps + 1;
                     _db.Update(mvpPlayer);
                 }
+
+                // season_records: campeón, finalista y MVP de las Finales (antes solo
+                // se escribía most_improved_id y la trayectoria del jugador salía vacía).
+                seasonRecord.champion_id = champId;
+                seasonRecord.finalist_id = finalistId;
+                seasonRecord.finals_mvp_id = topPlayer.PlayerId;
+                seasonRecord.finals_mvp_rating = (float)topPlayer.AvgRating;
             }
 
             _db.Insert(new FinalsRecord
@@ -1616,6 +1623,10 @@ public partial class DatabaseManager
                 _db.Update(mvpPlayer);
             }
 
+            seasonRecord.season_mvp_id = topMvp.player_id;
+            seasonRecord.season_mvp_rating = (float)((double)topMvp.total_rating / Math.Max(1, topMvp.games));
+            seasonRecord.season_mvp_games = topMvp.games;
+
             // Rookie of the Year
             var rookieCandidates = seasonStats
                 .Where(s =>
@@ -1635,6 +1646,10 @@ public partial class DatabaseManager
                 rookieName = rookiePlayer != null ? $"{rookiePlayer.first_name} {rookiePlayer.last_name}" : "";
                 rookieTeamKeyword = rookieTeam?.logo ?? "";
                 rookieRatingStr = ((double)topRookie.total_rating / Math.Max(1, topRookie.games)).ToString("F1", CultureInfo.InvariantCulture);
+
+                seasonRecord.rookie_of_year_id = topRookie.player_id;
+                seasonRecord.rookie_rating = (float)((double)topRookie.total_rating / Math.Max(1, topRookie.games));
+                seasonRecord.rookie_games = topRookie.games;
             }
 
             _db.Insert(new AwardsRecord
@@ -1656,6 +1671,7 @@ public partial class DatabaseManager
                 { "PG", ("", "") }, { "SG", ("", "") }, { "SF", ("", "") },
                 { "PF", ("", "") }, { "C",  ("", "") }
             };
+            var posIds = new Dictionary<string, int>();
             var assigned = new HashSet<int>();
 
             foreach (string pos in positions)
@@ -1679,7 +1695,15 @@ public partial class DatabaseManager
                 string fullName = player != null ? $"{player.first_name} {player.last_name}" : "";
                 string teamKw = team?.logo ?? "";
                 posValues[pos] = (fullName, teamKw);
+                posIds[pos] = best.player_id;
             }
+
+            // Primer quinteto en season_records (para la trayectoria del jugador).
+            seasonRecord.first_team_pg = posIds.GetValueOrDefault("PG");
+            seasonRecord.first_team_sg = posIds.GetValueOrDefault("SG");
+            seasonRecord.first_team_sf = posIds.GetValueOrDefault("SF");
+            seasonRecord.first_team_pf = posIds.GetValueOrDefault("PF");
+            seasonRecord.first_team_c  = posIds.GetValueOrDefault("C");
 
             _db.Insert(new QuintetRecord
             {
@@ -1697,6 +1721,9 @@ public partial class DatabaseManager
             });
             Debug.Log($"[DB] QuintetRecord saved for {seasonLabel}");
         }
+
+        // Persistir el season_records enriquecido (campeón, MVP, ROY, quinteto...).
+        _db.Update(seasonRecord);
 
         Debug.Log($"[DB] Season-end records complete for {seasonLabel}");
     }
