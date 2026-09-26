@@ -870,6 +870,11 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
         }
 
+        // Plan de partido en teams (táctica persistente del equipo)
+        AddColumnIfMissing("teams", "plan_pace", "plan_pace INTEGER DEFAULT 0");
+        AddColumnIfMissing("teams", "plan_offense", "plan_offense INTEGER DEFAULT 0");
+        AddColumnIfMissing("teams", "plan_defense", "plan_defense INTEGER DEFAULT 1");
+
         // Add on_trade_block to players if missing
         try
         {

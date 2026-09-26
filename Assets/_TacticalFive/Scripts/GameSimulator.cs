@@ -70,8 +70,11 @@ public static class GameSimulator
     }
 
     public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
-        int homeChemistry = 50, int awayChemistry = 50, bool persistToDb = true, bool glLeague = false)
+        int homeChemistry = 50, int awayChemistry = 50, bool persistToDb = true, bool glLeague = false,
+        GamePlan? homePlan = null, GamePlan? awayPlan = null)
     {
+        var hp = homePlan ?? GamePlan.Neutral;
+        var ap = awayPlan ?? GamePlan.Neutral;
         var homePS = homePlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
         var awayPS = awayPlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
         PrepareRotationMetadata(homePS, glLeague);
@@ -126,7 +129,8 @@ public static class GameSimulator
 
         homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus), 0, 99);
         awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus), 0, 99);
-        float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f), 95, 107);
+        float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f)
+                                 + GamePlan.PaceAdjustment(hp, ap), 92, 110);
 
         var quarters = new List<(int, int)>();
         var playByPlay = new List<PlayByPlayEvent>();
@@ -142,7 +146,7 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway);
+            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway, hp, ap);
             homeTotal += hPts; awayTotal += aPts;
             quarters.Add((hPts, aPts));
         }
@@ -162,7 +166,7 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway);
+            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway, hp, ap);
             homeTotal += hOT; awayTotal += aOT;
             quarters.Add((hOT, aOT));
         }
@@ -461,7 +465,7 @@ public static class GameSimulator
         };
     }
 
-    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false)
+    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false, GamePlan homePlan = default, GamePlan awayPlan = default)
     {
         int homePts = 0, awayPts = 0;
         int teamPoss = Mathf.Clamp(Mathf.RoundToInt(pace / 4 * UnityEngine.Random.Range(0.96f, 1.04f)), 22, 28);
@@ -498,7 +502,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < 0.5f)
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague, homePlan, awayPlan);
                 homePts += outHome.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -509,7 +513,7 @@ public static class GameSimulator
             else
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague, awayPlan, homePlan);
                 awayPts += outAway.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -525,7 +529,7 @@ public static class GameSimulator
         return (homePts, awayPts);
     }
 
-    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false)
+    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false, GamePlan homePlan = default, GamePlan awayPlan = default)
     {
         int homePts = 0, awayPts = 0;
         int totalPoss = 24;
@@ -552,7 +556,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < 0.5f)
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague, homePlan, awayPlan);
                 homePts += outHome.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -563,7 +567,7 @@ public static class GameSimulator
             else
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague, awayPlan, homePlan);
                 awayPts += outAway.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -673,12 +677,13 @@ public static class GameSimulator
         if (amount != 0) deltas.Add(new StatDelta { player_id = player_id, stat = stat, amount = amount });
     }
 
-    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR, bool glLeague = false)
+    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR, bool glLeague = false, GamePlan offPlan = default, GamePlan defPlan = default)
     {
         var off = offIds.Select(i => offAll[i]).ToList();
         var def = defIds.Select(i => defAll[i]).ToList();
 
-        float toPct = 0.11f + (defR - offR) * 0.0003f;
+        // La defensa agresiva fuerza más pérdidas; la conservadora menos.
+        float toPct = 0.11f + (defR - offR) * 0.0003f + defPlan.ForcedTurnoverDelta();
         if (UnityEngine.Random.value < toPct)
         {
             string toName = DoTO(off, def);
@@ -693,7 +698,7 @@ public static class GameSimulator
         if (shooter == null)
             return new PossessionOutcome { pts = 0, desc = "Pérdida" };
 
-        string shot = ShotType(shooter);
+        string shot = ShotType(shooter, offPlan);
         var defender = def.OrderByDescending(p => p.defense).FirstOrDefault();
         float di = defender != null ? (defender.defense - 70) * 0.005f : 0;
 
@@ -784,7 +789,7 @@ public static class GameSimulator
             }
         }
 
-        float foulChance = isThree ? 0.18f : 0.14f;
+        float foulChance = (isThree ? 0.18f : 0.14f) + defPlan.FoulDelta();
         if (UnityEngine.Random.value < foulChance)
         {
             string foulName = DoFoul(def);
@@ -833,7 +838,7 @@ public static class GameSimulator
         return court[^1];
     }
 
-    static string ShotType(PlayerStatSnapshot p)
+    static string ShotType(PlayerStatSnapshot p, GamePlan plan = default)
     {
         float base3pt = p.position switch
         {
@@ -844,7 +849,7 @@ public static class GameSimulator
             "C" => 0.18f,
             _ => 0.30f
         };
-        float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f, 0.10f, 0.55f);
+        float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f + plan.ThreePointBias(), 0.10f, 0.55f);
         adj *= FisicoPenalty(p.fisico);
         return UnityEngine.Random.value < adj ? "3" : "2";
     }

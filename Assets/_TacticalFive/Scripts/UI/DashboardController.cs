@@ -1308,7 +1308,8 @@ using System.Threading.Tasks;
                         var awayP = GetActivePlayers(elimGame.away_team_id);
                         int elimHomeChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.home_team_id);
                         int elimAwayChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.away_team_id);
-                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem);
+                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem,
+                            homePlan: PlanFor(elimGame.home_team_id), awayPlan: PlanFor(elimGame.away_team_id));
                         DatabaseManager.Instance.UpdateGame(elimGame);
                         ProcessGameFinances(elimGame, elimResult);
                         UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
@@ -1716,7 +1717,8 @@ using System.Threading.Tasks;
         var awayStarters = new HashSet<int>(awayPlayers.Take(5).Select(p => p.id));
         GameResultCache.GameStarters[game.id] = new HashSet<int>(homeStarters.Concat(awayStarters));
 
-        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem);
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem,
+            homePlan: PlanFor(game.home_team_id), awayPlan: PlanFor(game.away_team_id));
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
 
@@ -4742,6 +4744,15 @@ using System.Threading.Tasks;
     TeamStrategy GetTeamStrategy(int teamId)
     {
         return _teamStrategyCache.TryGetValue(teamId, out var s) ? s : TeamStrategy.Balanced;
+    }
+
+    /// <summary>Plan de partido de un equipo: el del usuario es persistente; el de
+    /// la IA se deriva de su estrategia de GM.</summary>
+    GamePlan PlanFor(int teamId)
+    {
+        if (_myTeam != null && teamId == _myTeam.id)
+            return new GamePlan { pace = _myTeam.plan_pace, offense = _myTeam.plan_offense, defense = _myTeam.plan_defense };
+        return GamePlan.FromStrategy(GetTeamStrategy(teamId));
     }
 
     void ProcessAIMarket(int gameDay)
