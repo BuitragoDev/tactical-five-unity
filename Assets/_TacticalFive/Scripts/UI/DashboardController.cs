@@ -2677,19 +2677,34 @@ using System.Threading.Tasks;
                     });
 
                     // Contraoferta del agente (si queda margen legal y no es two-way).
-                    if (offer.is_two_way != 1 && !agentCounterShown && leagueSettings != null)
+                    // El máximo legal se recalcula aquí: las variables de cap del bloque
+                    // anterior viven en otro ámbito.
+                    if (offer.is_two_way != 1 && !agentCounterShown)
                     {
-                        bool proFA = _manager.game_mode == "promanager";
-                        long legalMax = totalPayroll <= leagueSettings.salary_cap ? Math.Max(0, leagueSettings.salary_cap - totalPayroll)
-                                      : (proFA && totalPayroll <= firstApron) ? tMle
-                                      : totalPayroll <= firstApron ? ntMle
-                                      : totalPayroll <= secondApron ? tMle
-                                      : minSalary;
-                        long counter = NegotiationHelper.CounterSalary(offer.offer_salary, acceptScore, legalMax);
-                        if (counter > offer.offer_salary)
+                        var lsNegFA = DatabaseManager.Instance.GetLeagueSettings();
+                        if (lsNegFA != null)
                         {
-                            agentCounterShown = true;
-                            ShowAgentCounterModal(player, counter, offer.offer_years, isRenewal: false);
+                            long payrollFA = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary);
+                            long capFA = lsNegFA.salary_cap;
+                            long apron1FA = lsNegFA.apron > 0 ? lsNegFA.apron : TradeHelper.FIRST_APRON;
+                            long apron2FA = lsNegFA.repeater_apron > 0 ? lsNegFA.repeater_apron : TradeHelper.SECOND_APRON;
+                            long ntMleFA = lsNegFA.mid_level > 0 ? lsNegFA.mid_level : TradeHelper.NT_MLE;
+                            long tMleFA = lsNegFA.taxpayer_mid_level > 0 ? lsNegFA.taxpayer_mid_level : TradeHelper.T_MLE;
+                            long minFA = lsNegFA.minimum_salary > 0 ? lsNegFA.minimum_salary : TradeHelper.MIN_SALARY;
+                            bool proFA = _manager.game_mode == "promanager";
+
+                            long legalMax = payrollFA <= capFA ? Math.Max(0, capFA - payrollFA)
+                                          : (proFA && payrollFA <= apron1FA) ? tMleFA
+                                          : payrollFA <= apron1FA ? ntMleFA
+                                          : payrollFA <= apron2FA ? tMleFA
+                                          : minFA;
+
+                            long counter = NegotiationHelper.CounterSalary(offer.offer_salary, (int)acceptScore, legalMax);
+                            if (counter > offer.offer_salary)
+                            {
+                                agentCounterShown = true;
+                                ShowAgentCounterModal(player, counter, offer.offer_years, isRenewal: false);
+                            }
                         }
                     }
                 }
@@ -2793,7 +2808,7 @@ using System.Threading.Tasks;
                         long capNeg = lsNeg != null ? lsNeg.salary_cap : TradeHelper.SALARY_CAP;
                         long market = DatabaseManager.Instance.EstimateMarketSalary(player.GetCalculatedAverage(), capNeg);
                         long legalMax = Math.Max(offer.offer_salary, market);
-                        long counter = NegotiationHelper.CounterSalary(offer.offer_salary, acceptScore, legalMax);
+                        long counter = NegotiationHelper.CounterSalary(offer.offer_salary, (int)acceptScore, legalMax);
                         if (counter > offer.offer_salary)
                         {
                             agentCounterShown = true;
