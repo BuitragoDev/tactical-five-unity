@@ -7108,7 +7108,7 @@ List<int> offeredPickIds = new List<int>();
         if (result.injuries == null) return;
         foreach (var inj in result.injuries)
         {
-            if (inj.player_id == _myTeam.id || true) // Notify for all injuries affecting my team
+            // Avisar solo de las lesiones de jugadores de mi equipo.
             {
                 var player = DatabaseManager.Instance.GetPlayerById(inj.player_id);
                 if (player != null && player.team_id == _myTeam.id)
@@ -7885,7 +7885,8 @@ List<int> offeredPickIds = new List<int>();
         if (_messagesBody == null || _manager == null) return;
         _messagesBody.Clear();
 
-        var all = DatabaseManager.Instance.GetMessages(_manager.id);
+        // Solo los últimos: antes se cargaba toda la bandeja en cada refresco.
+        var all = DatabaseManager.Instance.GetRecentMessages(_manager.id, 20);
         if (all == null || all.Count == 0)
         {
             var lbl = new Label("NO HAY NOTICIAS");
@@ -7896,7 +7897,7 @@ List<int> offeredPickIds = new List<int>();
 
         var latest = all.OrderByDescending(m => m.id)
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
-.Take(5).ToList();
+                        .Take(5).ToList();
 
         foreach (var msg in latest)
         {

@@ -138,6 +138,6 @@ Game-facing terms are Spanish. A mapping is in `.agent/GLOSSARY.md`.
 
 - `[F]` The Input System package and `InputSystem_Actions.inputactions` exist, but scripts use legacy `UnityEngine.Input`; no `InputAction`, `PlayerInput` or `InputSystemUIInputModule` use was found.
 - `[F]` Static analysis found no prefabs, gameplay ScriptableObjects, Addressables, Animator controllers, animation clips or Timeline usage. The active product is a database-backed UI application, not a 3D gameplay scene.
-- `[F]` `OnEnable` re-registers UI callbacks without a general unregister/guard phase. Because screens are hidden rather than destroyed, repeated visits can accumulate callbacks; runtime reproduction is still required to quantify this.
+- `[F]` `OnEnable` re-registers UI callbacks. **Corrección (auditoría 2026-09):** en Unity 6 `UIDocument.OnDisable()` anula `rootVisualElement` y `OnEnable` recrea el árbol, así que **no se acumulan handlers entre visitas**. El riesgo real es el contrario: re-bindear callbacks *dentro* de una misma visita al reconstruir listas (p. ej. el scrollbar), y los `??=` sobre elementos que ya no existen.
 - `[F]` `FastSimRoutine` yields while its transaction is open, and luxury-tax records are written negative while expense aggregation treats all expense types as positive. Both contradict the intended accounting/atomicity model.
 - `[D]` The highest-risk areas are data integrity during long simulations/template builds, stale derived player ratings, and UI callback lifecycle.

@@ -189,11 +189,12 @@ public class EditorController : UIScreenController
         _playerDetail = _root.Q<VisualElement>("PlayerDetail");
         _playerDetailPanel = _playerPanel.Q<VisualElement>(className: "editor-detail-panel");
 
-        // Barra de scroll propia (se enlaza una sola vez; los elementos persisten).
-        _teamScroll ??= CustomScrollbar.Bind(
+        // Barras de scroll propias: se re-enlazan en cada visita porque Unity recrea
+        // el árbol del UIDocument al reactivar la pantalla (con ??= quedaban muertas).
+        _teamScroll = CustomScrollbar.Bind(
             _root.Q<VisualElement>("TeamViewport"), _teamList,
             _root.Q<VisualElement>("TeamScrollTrack"), _root.Q<VisualElement>("TeamScrollThumb"));
-        _playerScroll ??= CustomScrollbar.Bind(
+        _playerScroll = CustomScrollbar.Bind(
             _root.Q<VisualElement>("PlayerViewport"), _playerList,
             _root.Q<VisualElement>("PlayerScrollTrack"), _root.Q<VisualElement>("PlayerScrollThumb"));
     }

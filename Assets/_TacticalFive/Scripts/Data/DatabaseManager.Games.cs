@@ -236,15 +236,26 @@ public partial class DatabaseManager
                   .ToList();
     }
 
-    public List<GameData> GetStandingsGames(int managerId)
+    public List<GameData> GetStandingsGames(int managerId, int seasonId = 0)
     {
-        return _db.Table<GameData>()
+        var q = _db.Table<GameData>()
                 .Where(g => g.manager_id == managerId
                         && g.game_type == "regular"
-                        && g.is_played == 1)
-                .OrderBy(g => g.game_day)
+                        && g.is_played == 1);
+        if (seasonId > 0)
+            q = q.Where(g => g.season_id == seasonId);
+        return q.OrderBy(g => g.game_day)
                 .ThenBy(g => g.id)
                 .ToList();
+    }
+
+    /// <summary>Últimos `limit` mensajes del manager (vista previa del dashboard).</summary>
+    public List<MessageData> GetRecentMessages(int managerId, int limit)
+    {
+        if (!EnsureDb() || limit <= 0) return new List<MessageData>();
+        return _db.Query<MessageData>(
+            "SELECT * FROM messages WHERE manager_id = ? ORDER BY id DESC LIMIT ?",
+            managerId, limit).ToList();
     }
 
     public void UpdateSeason(SeasonData season)

@@ -195,7 +195,7 @@ flowchart TD
 
 ## Preguntas abiertas
 
-- ¿La acumulación de callbacks se reproduce en todas las pantallas o algunos controles se reemplazan al hacer `CloneTree`?
+- **Resuelto (auditoría 2026-09):** en Unity 6 `UIDocument.OnDisable()` anula `rootVisualElement` y `OnEnable` lo recrea, por lo que los handlers **no se acumulan entre visitas**. El riesgo real está *dentro* de una misma visita: re-bindear callbacks al reconstruir listas (scrollbar) y usar `??=` para handles de elementos que ya no existen. Ya corregido en Stats/Editor (`Bind` en cada visita) y pendiente de unificar el resto de scrollbars.
 - ¿Debe eliminarse `LegalNotice.uxml` y conservarse solo el USS compartido, o se pretende convertir el aviso legal en pantalla real?
 - ¿La mezcla de rutas USS relativas y `project://database` funciona en todas las plataformas objetivo?
 - ¿La resolución mínima soportada es realmente 1920×1080, dado el uso extensivo de tamaños fijos?

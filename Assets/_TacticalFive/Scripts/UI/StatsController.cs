@@ -100,8 +100,9 @@ using System.Linq;
         _statsScrollTrack = _root.Q<VisualElement>("StatsScrollTrack");
         _statsScrollThumb = _root.Q<VisualElement>("StatsScrollThumb");
 
-        // Barra de scroll propia (se enlaza una sola vez; los elementos persisten).
-        _scrollBar ??= CustomScrollbar.Bind(_statsViewport, _statsBody, _statsScrollTrack, _statsScrollThumb);
+        // Barra de scroll propia: se re-enlaza en cada visita porque Unity recrea el
+        // árbol del UIDocument al reactivar la pantalla (con ??= quedaba muerta).
+        _scrollBar = CustomScrollbar.Bind(_statsViewport, _statsBody, _statsScrollTrack, _statsScrollThumb);
     }
     protected override void LoadData()
     {
