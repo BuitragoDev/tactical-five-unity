@@ -79,6 +79,15 @@
                             <ui:Button name="LoadMgmtBtnOff" class="load-mgmt-btn load-mgmt-btn--off" text="NO GESTIONAR DESCANSOS" />
                         </ui:VisualElement>
 
+                        <!-- ══ PLAN DE PARTIDO ══ -->
+                        <ui:VisualElement class="lineup-section">
+                            <ui:VisualElement class="lineup-section-header">
+                                <ui:Label class="lineup-section-title" text="PLAN DE PARTIDO" />
+                                <ui:Label class="lineup-section-subtitle" text="RITMO · ATAQUE · DEFENSA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="GamePlanBody" class="lineup-section-body" />
+                        </ui:VisualElement>
+
                     </ui:VisualElement>
 
                     <!-- Right panel: NO CONVOCADOS + detail -->

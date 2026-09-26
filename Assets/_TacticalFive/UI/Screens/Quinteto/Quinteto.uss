@@ -670,3 +670,41 @@
     color: rgb(85, 102, 119);
     -unity-text-align: middle-center;
 }
+
+/* ── PLAN DE PARTIDO ── */
+.plan-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.plan-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 96px;
+    flex-shrink: 0;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(150, 162, 186);
+}
+.plan-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex: 1;
+    margin-left: 6px;
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 8px 6px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgb(60, 70, 92);
+    background-color: rgba(42, 95, 201, 0.08);
+    color: rgb(150, 162, 186);
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.plan-btn:hover {
+    background-color: rgba(42, 95, 201, 0.20);
+}
+.plan-btn--active {
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.15);
+    color: rgb(248, 196, 64);
+}

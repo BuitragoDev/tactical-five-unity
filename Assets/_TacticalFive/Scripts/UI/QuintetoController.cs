@@ -44,6 +44,7 @@ using System.Linq;
     static readonly string[] PosOrder = { "PG", "SG", "SF", "PF", "C" };
     private Button _loadMgmtBtnOn;
     private Button _loadMgmtBtnOff;
+    private VisualElement _gamePlanBody;
 
     static readonly Dictionary<string, (float x, float y)> CourtPositions = new()
     {
@@ -87,6 +88,7 @@ using System.Linq;
 
         _loadMgmtBtnOn = _root.Q<Button>("LoadMgmtBtnOn");
         _loadMgmtBtnOff = _root.Q<Button>("LoadMgmtBtnOff");
+        _gamePlanBody = _root.Q<VisualElement>("GamePlanBody");
         _loadMgmtBtnOn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLoadMgmt(true); });
         _loadMgmtBtnOff?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLoadMgmt(false); });
         if (CursorManager.Instance != null)
@@ -139,6 +141,52 @@ using System.Linq;
         _selectedSlot = null;
         HidePlayerDetail();
         BuildLineup();
+        BuildGamePlanUI();
+    }
+
+    // ── PLAN DE PARTIDO ─────────────────────────────────────
+    /// <summary>Tres filas de opciones (ritmo/ataque/defensa) que se persisten en
+    /// `teams` y que el simulador aplica en cada partido del equipo del usuario.</summary>
+    void BuildGamePlanUI()
+    {
+        if (_gamePlanBody == null || _myTeam == null) return;
+        _gamePlanBody.Clear();
+
+        AddPlanRow("RITMO", new[] { "LENTO", "NORMAL", "RÁPIDO" }, new[] { -1, 0, 1 }, _myTeam.plan_pace,
+            v => _myTeam.plan_pace = v);
+        AddPlanRow("ATAQUE", new[] { "INTERIOR", "EQUILIBRADO", "EXTERIOR" }, new[] { 1, 0, 2 }, _myTeam.plan_offense,
+            v => _myTeam.plan_offense = v);
+        AddPlanRow("DEFENSA", new[] { "CONSERVADORA", "EQUILIBRADA", "AGRESIVA" }, new[] { 0, 1, 2 }, _myTeam.plan_defense,
+            v => _myTeam.plan_defense = v);
+    }
+
+    void AddPlanRow(string label, string[] texts, int[] values, int current, Action<int> apply)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("plan-row");
+
+        var lbl = new Label(label);
+        lbl.AddToClassList("plan-label");
+        row.Add(lbl);
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            int value = values[i];
+            var btn = new Button { text = texts[i] };
+            btn.AddToClassList("plan-btn");
+            if (value == current) btn.AddToClassList("plan-btn--active");
+            btn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                apply(value);
+                DatabaseManager.Instance.UpdateTeam(_myTeam);
+                BuildGamePlanUI();
+            });
+            CursorManager.Instance?.RegisterHandCursor(btn);
+            row.Add(btn);
+        }
+
+        _gamePlanBody.Add(row);
     }
 
     void EnsureLineupSeeded()
