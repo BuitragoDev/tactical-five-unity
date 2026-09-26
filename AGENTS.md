@@ -36,6 +36,7 @@
 | `Docs/SAVE_SYSTEM.md` | Slots, `template.db`, flujos save/load, versionado | Trabajas en persistencia |
 | `Docs/CODE_GUIDELINES.md` | Convenciones reales, patrones a seguir/evitar | **Antes de escribir cualquier código nuevo** |
 | `Docs/TODO_TECHNICAL_DEBT.md` | Deuda técnica priorizada P0–P3 + código muerto | Arreglas bugs o decides refactors |
+| `Docs/AUDITORIA_FINAL.md` | **Auditoría integral (2026-09)**: hallazgos con ID/severidad/repro/fix, DB, rendimiento, UX, edge cases, tests, nuevas features y roadmap por fases (checklist viva) | **Empiezas cualquier arreglo o retomas trabajo pendiente** |
 | `Docs/IMPROVEMENT_PROPOSALS.md` | Propuestas de mejora futuras (en español) | Ideación |
 | `NEXT_PROPOSALS.md` | Mejoras pendientes ordenadas (G-League/IR pendiente) | Sabes qué falta por hacer |
 | `.agent/SKILLS.md` | Onboarding exprés para agentes | Quieres el camino rápido |
