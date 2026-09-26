@@ -1926,6 +1926,7 @@ using System.Linq;
 
         var cancel = new Button { text = "CANCELAR" };
         cancel.AddToClassList("btn-modal-cancel");
+        cancel.AddToClassList("btn-modal-cancel--neutral"); // cancelar no es destructivo
         cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
         actions.Add(cancel);
 

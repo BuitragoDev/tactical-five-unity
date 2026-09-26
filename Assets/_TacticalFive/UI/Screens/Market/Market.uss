@@ -2538,3 +2538,15 @@
 .market-fa-scrollbar:hover .market-fa-scrollbar-thumb {
     background-color: rgb(212, 160, 23);
 }
+
+/* Cancelar neutro del pie del modal (el rojo de .btn-modal-cancel es de peligro):
+   en la confirmación de traspaso cancelar no es destructivo, así que va en gris. */
+.market-fa-modal-actions .btn-modal-cancel--neutral {
+    background-color: rgba(100, 110, 130, 0.10);
+    border-color: rgb(100, 110, 130);
+    color: rgb(160, 170, 190);
+}
+.market-fa-modal-actions .btn-modal-cancel--neutral:hover {
+    background-color: rgba(100, 110, 130, 0.25);
+    color: rgb(200, 210, 230);
+}

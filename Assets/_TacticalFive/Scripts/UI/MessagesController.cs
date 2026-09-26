@@ -353,6 +353,7 @@ public class MessagesController : UIScreenController
 
         var box = new VisualElement();
         box.AddToClassList("modal-box");
+        box.AddToClassList("modal-box--danger"); // borrar es destructivo: variante roja
         // `.modal-box` trae display:none y position:absolute en la USS (los modales de
         // UXML se activan con la clase --visible). Aquí se aplica en línea y se pasa a
         // posición relativa para que el overlay (align/justify center) lo centre.
