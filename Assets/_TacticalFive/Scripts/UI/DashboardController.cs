@@ -5055,6 +5055,9 @@ using System.Threading.Tasks;
         long cap = leagueSettings.salary_cap;
         int renewedCount = 0, lostCount = 0;
 
+        // Una sola query agregada en vez de una por jugador (N+1).
+        var gamesByPlayer = DatabaseManager.Instance.GetGamesPlayedByPlayerInSeason(_manager.id, _season.id);
+
         foreach (var team in allTeams)
         {
             if (team.id == _myTeam.id) continue;
@@ -5070,7 +5073,7 @@ using System.Threading.Tasks;
 
                 var offer = CalculateAIRenewalOffer(player, team, cap);
 
-                int gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(player.id, _season.id);
+                int gamesPlayed = gamesByPlayer.GetValueOrDefault(player.id, 0);
                 int teamChem = DatabaseManager.Instance.GetTeamChemistry(team.id);
                 float acceptScore = RosterController.CalculateAcceptScore(
                     player, offer.salary, offer.years, gamesPlayed, teamChem);

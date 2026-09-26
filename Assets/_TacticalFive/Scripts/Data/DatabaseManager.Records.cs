@@ -594,6 +594,26 @@ public partial class DatabaseManager
             managerId, seasonId);
     }
 
+    /// <summary>Partidos jugados por jugador en una temporada (una sola query agregada).</summary>
+    public Dictionary<int, int> GetGamesPlayedByPlayerInSeason(int managerId, int seasonId)
+    {
+        var dict = new Dictionary<int, int>();
+        if (!EnsureDb()) return dict;
+
+        var rows = _db.Query<PlayerGamesRow>(
+            @"SELECT ps.player_id AS player_id, COUNT(*) AS games
+              FROM player_game_stats ps
+              JOIN games g ON ps.game_id = g.id
+              WHERE g.manager_id = ? AND g.season_id = ? AND g.is_played = 1
+                    AND ps.minutes > 0
+              GROUP BY ps.player_id",
+            managerId, seasonId);
+
+        foreach (var r in rows)
+            dict[r.player_id] = r.games;
+        return dict;
+    }
+
     public List<PlayerGameStats> GetGamePlayerStats(int gameId)
     {
         return _db.Table<PlayerGameStats>()

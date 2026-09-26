@@ -83,8 +83,11 @@ public static class GameSimulator
         bool strictHome = homePS.Any(p => p.fixed_minutes && p.target_minutes > 0);
         bool strictAway = awayPS.Any(p => p.fixed_minutes && p.target_minutes > 0);
 
-        if (homePS.Count < 2 || awayPS.Count < 2)
+        // Un equipo con menos de 5 jugadores sanos no puede formar una alineación
+        // legal: se usa el resultado sintético en vez de simular con 2-4 en pista.
+        if (homePS.Count < 5 || awayPS.Count < 5)
         {
+            Debug.LogWarning($"[Sim] Alineación incompleta (local={homePS.Count}, visitante={awayPS.Count}): resultado sintético.");
             int homeScore = UnityEngine.Random.Range(105, 126);
             int awayScore = UnityEngine.Random.Range(100, 121);
             // Un partido nunca puede acabar en empate.

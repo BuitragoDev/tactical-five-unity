@@ -253,3 +253,9 @@ public class DraftProspect
     public string trait { get; set; }
     public bool is_generational { get; set; }
 }
+/// <summary>Fila agregada: partidos jugados por jugador (una sola query).</summary>
+public class PlayerGamesRow
+{
+    public int player_id { get; set; }
+    public int games { get; set; }
+}
