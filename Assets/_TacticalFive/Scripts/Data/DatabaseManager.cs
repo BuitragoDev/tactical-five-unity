@@ -442,6 +442,11 @@ public partial class DatabaseManager : MonoBehaviour
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_GameId ON player_game_stats(game_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_PlayerId ON player_game_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_TeamId ON player_game_stats(team_id)");
+        // Índices que faltaban: las consultas por equipo/temporada/bandeja eran
+        // full scans y se notan a lo largo de muchas temporadas.
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_Players_TeamId ON players(team_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_Games_SeasonId ON games(season_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_Messages_ManagerId ON messages(manager_id, id)");
     }
 
     void RunMigrations()

@@ -108,6 +108,7 @@ public class PlayerCareerSeasonRow
     public int total_rating { get; set; }
 }
 
+[Table("player_season_stats")]
 public class PlayerSeasonStatRow
 {
     [PrimaryKey, AutoIncrement]

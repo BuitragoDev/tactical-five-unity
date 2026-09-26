@@ -418,9 +418,7 @@ public static class DraftGenerator
             salary = (long)UnityEngine.Random.Range(1500000, 4000001);
         salary = (salary / 100000) * 100000;
 
-        int nextId = DatabaseManager.Instance.Db.Table<PlayerData>().Any()
-            ? DatabaseManager.Instance.Db.Table<PlayerData>().Max(p => p.id) + 1
-            : 1;
+        int nextId = DatabaseManager.Instance.AllocatePlayerId();
 
         var player = new PlayerData
         {

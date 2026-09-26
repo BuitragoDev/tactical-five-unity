@@ -11,6 +11,10 @@ public partial class DatabaseManager
     // ── SEASON ────────────────────────────────────────────
     public SeasonData CreateSeason(int managerId, string gameMode)
     {
+        // Solo puede haber una temporada activa por manager: desactivar las previas
+        // (evita que GetActiveSeason devuelva una fila arbitraria).
+        _db.Execute("UPDATE seasons SET is_active = 0 WHERE manager_id = ? AND is_active = 1", managerId);
+
         // Find the max year_start from existing seasons, default to 2025
         var lastSeason = _db.Table<SeasonData>()
             .OrderByDescending(s => s.year_start)
@@ -42,6 +46,7 @@ public partial class DatabaseManager
     {
         return _db.Table<SeasonData>()
                 .Where(s => s.manager_id == managerId && s.is_active == 1)
+                .OrderByDescending(s => s.id)
                 .FirstOrDefault();
     }
 

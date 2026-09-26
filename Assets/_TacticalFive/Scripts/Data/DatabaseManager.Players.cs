@@ -10,6 +10,22 @@ public partial class DatabaseManager
 {
     // ── PLAYERS ───────────────────────────────────────────
 
+    /// <summary>
+    /// Devuelve el siguiente id de jugador de forma monótona. No reutiliza ids aunque
+    /// se borre el jugador de id máximo (los premios/HOF/retirados guardan player_id).
+    /// </summary>
+    public int AllocatePlayerId()
+    {
+        if (!EnsureDb()) return 0;
+        _db.Execute("CREATE TABLE IF NOT EXISTS id_counters (name TEXT PRIMARY KEY, value INTEGER NOT NULL)");
+        int current = _db.ExecuteScalar<int>("SELECT COALESCE(MAX(value), 0) FROM id_counters WHERE name = 'player'");
+        int next = current > 0
+            ? current + 1
+            : _db.ExecuteScalar<int>("SELECT COALESCE(MAX(id), 0) + 1 FROM players");
+        _db.Execute("INSERT OR REPLACE INTO id_counters (name, value) VALUES ('player', ?)", next);
+        return next;
+    }
+
     public List<PlayerData> GetFreeAgents()
     {
         if (!EnsureDb()) return new List<PlayerData>();
