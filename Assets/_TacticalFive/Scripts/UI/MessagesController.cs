@@ -353,6 +353,10 @@ public class MessagesController : UIScreenController
 
         var box = new VisualElement();
         box.AddToClassList("modal-box");
+        // `.modal-box` también trae display:none en la USS; su variante --visible
+        // activa flex y columna. Se aplican aquí en lugar de depender de la clase.
+        box.style.display = DisplayStyle.Flex;
+        box.style.flexDirection = FlexDirection.Column;
         overlay.Add(box);
 
         var title = new Label("¿ELIMINAR NOTICIA?");
