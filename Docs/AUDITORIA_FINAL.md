@@ -44,8 +44,8 @@
 | Bloque | Hallazgos | Hechos |
 |---|---|---|
 | CRÍTICOS | 9 | 9 |
-| ALTOS | 21 | 20 (queda `SIM-05` y `UI-04` parcial) |
-| MEDIOS | ~32 | 8 |
+| ALTOS | 21 | 20 (quedan `UI-04` parcial y `CON-05`) |
+| MEDIOS | ~32 | 11 |
 | BAJOS | ~12 | 3 |
 | Tests propuestos | 25 | 13 (98 tests en total) |
 
@@ -558,7 +558,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `CON-03` · Busy timeout de 1 s y sin mutex global de escritura
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** RIESGO · **Verificación:** **[A]**
 - **Archivos:** `Data/SQLite.cs:600` (`BusyTimeout = 1s`); `DatabaseManager.cs:112-164`; `DashboardController.cs:921, 1067-1071` (la sidebar no se bloquea en el batch normal)
 - **Problema:** WAL permite un solo escritor; un batch de fondo tiene el lock y la UI puede intentar escribir en main thread → `SQLITE_BUSY` tras 1 s, que muchos sitios se tragan.
@@ -568,7 +568,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `CON-04` · Batches solapados comparten estado no thread-safe
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** RIESGO · **Verificación:** **[A]**
 - **Archivos:** `DashboardController.cs:158-159` (`_aiRng`), `:4582-4603` (`_teamStrategyCache`), `:4685` (`_teamTradeCooldown`)
 - **Problema:** si una tarea huérfana (`CON-02`) sigue viva y se lanza otro batch, dos hilos mutan `System.Random`/`Dictionary` no thread-safe.
@@ -595,7 +595,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[x]` **`SEA-10` · Estado transitorio no reseteado en el rollover** — `Records.cs:2664-3229`: `injury_days`, `fisico`, `morale`, `on_trade_block`, `team_chemistry`, `fan_confidence`. → Lesiones/fatiga/trade-block viajan de temporada; química/moral nunca se normalizan. → Resetear explícitamente (o documentar por qué persisten). **Verificación:** [A]
 - `[~]` **`SEA-11` · `season_records` solo escribe `most_improved_id`** — lecturas en `Records.cs:1143,1155,1165` comparan `season_mvp_id`, `champion_id`, `first_team_*`… que nunca se escriben (verificado: solo hay lecturas `==`). → La trayectoria del jugador nunca muestra MVP/All-Star/campeón/primer equipo. → Poblar `season_records` en `SaveSeasonEndRecords`. **Verificación:** [V]
 - `[x]` **`SEA-12` · `GetActiveSeason` sin `ORDER BY` y `CreateSeason` no desactiva** — `Games.cs:41-46`, `:12-39`; desactivación en `Records.cs:3168-3172`. → Dos temporadas `is_active=1` → se opera sobre la equivocada (awards/récords/rollover). → `OrderByDescending(id).FirstOrDefault()` + forzar desactivación al crear. **Verificación:** [V]
-- `[ ]` **`SIM-05` · Equipos con 2-4 sanos alinean <5 y <2 genera marcador sin box** — `GameSimulator.cs:86-109, 410` (solo guarda `<2`). → Baloncesto ilegal; fallback con marcador y boxscore vacío; la pre-check de quinteto vacío solo aplica al usuario. → Guardar `<5` (rellenar desde G-League/IR/FA) y generar stats coherentes con el marcador. **Verificación:** [A]
+- `[x]` **`SIM-05` · Equipos con 2-4 sanos alinean <5 y <2 genera marcador sin box** — `GameSimulator.cs:86-109, 410` (solo guarda `<2`). → Baloncesto ilegal; fallback con marcador y boxscore vacío; la pre-check de quinteto vacío solo aplica al usuario. → Guardar `<5` (rellenar desde G-League/IR/FA) y generar stats coherentes con el marcador. **Verificación:** [A]
 - `[ ]` **`SIM-06` · Lesiones también a jugadores con 0 minutos** — `GameSimulator.cs:278-279, 1161-1181` (prob. plana sobre `fisico` pre-partido). → Distribución de lesiones irreal. → Excluir `minutes <= 0` o ponderar por minutos. **Verificación:** [A]
 - `[ ]` **`SIM-07` · `GameResultCache` no se limpia al cargar partida y `Clear()` no resetea `LastGameDay`** — `GameResultCache.cs:23-28`; `LoadGameController.cs:445-447`; consumidores `GameResultsController.cs:206,229`, `MatchDayController.cs:332,514,616,658`. → Resultados de otra partida visibles. → Limpiar (y resetear `LastGameDay`) en el flujo de carga. **Verificación:** **[V]** (solo llamadas a `Clear` verificadas)
 - `[ ]` **`SIM-08` · No se limpia el cache en día sin partidos preexistentes que crea play-in** — `DashboardController.cs:1199-1203` vs `:1285-1303` (`gamesToday` se lee antes de crear eliminatorias). → Resultados del día anterior mezclados. → `Clear()` incondicional al inicio de la transacción del día. **Verificación:** [A]
@@ -606,7 +606,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[x]` **`SIM-13` · Bonus de química asimétrico (local 0.15 / visitante 0.10)** — `GameSimulator.cs:115-116`. → El local se beneficia el doble de la química, acumulado con `SIM-01`. → Unificar coeficiente o documentar. **Verificación:** **[V]**
 - `[ ]` **`SIM-14` · All-Star aplica fatiga/lesiones y escribe stats** — `GameSimulator.cs:231-279` (solo excluye récords), `DashboardController.cs:1701-1742`. → Participantes pierden físico, se lesionan y generan `player_game_stats` con `team_id` negativo; `.First()` puede lanzar si los rosters quedan vacíos. → Excluir fatiga/lesión/stats para `game_type == "allstar"`; guardar `Any()` antes de `First()`. **Verificación:** [A]
 - `[ ]` **`CON-05` · `Refresh()` re-escanea partidos varias veces/día** — `DashboardController.cs:468, 7330-7346, 7395-7420, 7596-7600`; `GetTeamRecordShort` llamado 4×. → CPU dominante del fast-sim. → Calcular standings/records una vez por día y cachear; filtrar por `season_id`. **Verificación:** [A]
-- `[ ]` **`CON-06` · N+1 `GetPlayerGamesPlayedInSeason` en renovaciones IA** — `Records.cs:616-622`; `DashboardController.cs:4942`. → Cientos de queries por ciclo (carga todos los `gameIds` de la temporada en cada llamada). → Un solo `JOIN ... GROUP BY player_id` o diccionario precomputado. **Verificación:** [A]
+- `[x]` **`CON-06` · N+1 `GetPlayerGamesPlayedInSeason` en renovaciones IA** — `Records.cs:616-622`; `DashboardController.cs:4942`. → Cientos de queries por ciclo (carga todos los `gameIds` de la temporada en cada llamada). → Un solo `JOIN ... GROUP BY player_id` o diccionario precomputado. **Verificación:** [A]
 - `[x]` **`CON-07` · Bandeja completa cargada para mostrar 5** — `DashboardController.cs:7709`; `Records.cs:2519`. → `SELECT ORDER BY id DESC LIMIT 5` + índice `(manager_id, id)`. **Verificación:** [A]
 - `[x]` **`CON-08` · `GetLeagueTop*` N+1 y sin filtro de temporada (¿código muerto?)** — `Records.cs:625-716`; sin call sites encontrados. → Eliminar o reescribir en una query agregada con `season_id`. **Verificación:** [A]
 - `[ ]` **`CON-09` · Fuga de texturas/sprites en `TeamImages`** — `TeamImages.cs:67-73` (`Invalidate` solo limpia diccionarios), `:280-291` (crea `Texture2D`/`Sprite`); `_previewCache` nunca se limpia. → Fuga al cambiar de slot repetidamente (escena única, nunca se descargan). → `Object.Destroy` al invalidar. **Verificación:** [A]
@@ -872,6 +872,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `1504f9db` | SEA-11 (parcial) | `season_records` completo: campeón, finalista, MVP de finales, MVP de temporada, ROY y primer quinteto (faltan All-Star/DPOY/Sexto Hombre/2º quinteto, que el juego no calcula). |
 | 2026-09-26 | `d4aae4f5` | ECO-03/04/05/07/08, SEA-10 | Economía: límite two-way y Bird rights en la maduración de ofertas, luxury tax positivo, ofertas normalizadas en el rollover (maduran en 7 días), reset del estado transitorio (lesiones/fatiga/trade block/química/confianza) y `MovePlayerToTeam` en traspasos (tenure + flags). |
 | 2026-09-26 | `49379e1c` | REN-01, UI-03/05, CON-07/08, QA-07/08 | Rendimiento y UI: `AchievementService` filtra por temporada y `GetStandingsGames(season)`; bandeja del dashboard con `LIMIT` (`GetRecentMessages`); scrollbar re-bindeada en cada visita (Stats/Editor); crash de Entrenamiento resuelto (se re-aplica la tarjeta seleccionada + `FirstOrDefault`); eliminados `GetLeagueTop*` muertos; `FullScreenUI` null-safe; docs corregidas sobre callbacks. |
+| 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
+| 2026-09-26 | `1bea1c43` | CON-03, CON-04 | Concurrencia: `RunInBackground*` espera al lote anterior (single-flight), evitando solapes de estado/RNG y contención del lock; `BusyTimeout` de SQLite de 1 s a **5 s** para que la UI espere en vez de fallar con `SQLITE_BUSY`. |
 | 2026-09-26 | `2d1f880d` | Tests Fase 1 | Infra de tests de slots (`GameSaveManager.BaseDirOverride`) + 7 tests de persistencia (`GameSaveManagerTests`): metadata corrupto no borra DBs, backup, reclamo atómico y `-wal`/`-shm`. |
 
 **Hallazgo nuevo detectado durante la implementación (ya corregido):**
