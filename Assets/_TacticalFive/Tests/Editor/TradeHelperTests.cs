@@ -219,4 +219,48 @@ public class TradeHelperTests
             null, null, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
         Assert.That(result.AcceptScore, Is.InRange(0, 100));
     }
+
+    // ── Fase 3: modelo de cap para la IA (ECO-06) ────────────────
+
+    static LeagueSettingsData Settings(long cap, long apron1, long apron2, long ntMle, long tMle, long min)
+        => new LeagueSettingsData
+        {
+            salary_cap = cap,
+            apron = apron1,
+            repeater_apron = apron2,
+            mid_level = ntMle,
+            taxpayer_mid_level = tMle,
+            minimum_salary = min
+        };
+
+    [Test]
+    public void CanAISignExternal_UnderCap_Allows()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(80_000_000, 15_000_000, s), Is.True);
+    }
+
+    [Test]
+    public void CanAISignExternal_OverCap_AllowsOnlyMLE()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(105_000_000, 9_000_000, s), Is.True, "cabe en el NT-MLE");
+        Assert.That(TradeHelper.CanAISignExternal(105_000_000, 11_000_000, s), Is.False, "supera el NT-MLE");
+    }
+
+    [Test]
+    public void CanAISignExternal_OverSecondApron_OnlyMinimum()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 2_000_000, s), Is.True, "el mínimo sí");
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 3_000_000, s), Is.False, "por encima del 2º apron solo el mínimo");
+    }
+
+    [Test]
+    public void CanAIRenew_RespectsSecondApron()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAIRenew(125_000_000, s), Is.True);
+        Assert.That(TradeHelper.CanAIRenew(131_000_000, s), Is.False);
+    }
 }

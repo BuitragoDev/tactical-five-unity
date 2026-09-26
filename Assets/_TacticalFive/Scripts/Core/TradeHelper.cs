@@ -164,6 +164,42 @@ public static class TradeHelper
         (long.MaxValue, 3.75),
     };
 
+    /// <summary>
+    /// ¿Puede un equipo IA fichar a un agente libre EXTERNO (sin Bird rights) por
+    /// `newSalary`, dado su payroll actual? Modelo simplificado de excepciones, el
+    /// mismo que sufre el jugador: espacio de cap → MLE (NT por debajo del 1er
+    /// apron, T por debajo del 2º) → salario mínimo. Nunca deja el payroll por
+    /// encima del 2º apron salvo con un contrato mínimo.
+    /// </summary>
+    public static bool CanAISignExternal(long payroll, long newSalary, LeagueSettingsData s)
+    {
+        if (s == null) return true;
+        long cap = s.salary_cap > 0 ? s.salary_cap : SALARY_CAP;
+        long firstApron = s.apron > 0 ? s.apron : FIRST_APRON;
+        long secondApron = s.repeater_apron > 0 ? s.repeater_apron : SECOND_APRON;
+        long ntMle = s.mid_level > 0 ? s.mid_level : NT_MLE;
+        long tMle = s.taxpayer_mid_level > 0 ? s.taxpayer_mid_level : T_MLE;
+        long min = s.minimum_salary > 0 ? s.minimum_salary : MIN_SALARY;
+
+        if (payroll + newSalary <= cap) return true;                          // espacio de cap
+        if (payroll + newSalary > secondApron && newSalary > min) return false; // tope duro del 2º apron
+        if (payroll <= firstApron) return newSalary <= ntMle;
+        if (payroll <= secondApron) return newSalary <= tMle;
+        return newSalary <= min;
+    }
+
+    /// <summary>
+    /// ¿Puede un equipo IA RENOVAR a un jugador propio (Bird rights) por `newSalary`?
+    /// La re-firma propia puede superar el cap, pero se limita al 2º apron para que
+    /// las nóminas IA no se disparen a lo largo de muchas temporadas.
+    /// </summary>
+    public static bool CanAIRenew(long projectedPayroll, LeagueSettingsData s)
+    {
+        if (s == null) return true;
+        long secondApron = s.repeater_apron > 0 ? s.repeater_apron : SECOND_APRON;
+        return projectedPayroll <= secondApron;
+    }
+
     public static long CalculateLuxuryTax(long payroll, long taxThreshold = LUXURY_TAX)
     {
         if (payroll <= taxThreshold) return 0;

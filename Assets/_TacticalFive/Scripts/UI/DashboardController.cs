@@ -5062,6 +5062,9 @@ using System.Threading.Tasks;
         {
             if (team.id == _myTeam.id) continue;
 
+            // Nómina en curso del equipo (se actualiza al renovar).
+            long teamPayroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(p => p.salary);
+
             var expiringPlayers = db.Query<PlayerData>(
                 "SELECT * FROM players WHERE team_id = ? AND contract_years = 1 AND is_two_way = 0 AND is_on_ir = 0",
                 team.id);
@@ -5072,6 +5075,19 @@ using System.Threading.Tasks;
                 if (teamScore < 50f) continue;
 
                 var offer = CalculateAIRenewalOffer(player, team, cap);
+
+                // No renovar si deja al equipo por encima del 2º apron (evita que las
+                // nóminas IA se disparen temporada a temporada).
+                long projected = teamPayroll - player.salary + offer.salary;
+                if (!TradeHelper.CanAIRenew(projected, leagueSettings))
+                {
+                    player.renewal_cooldown_day = _season.current_game_day + 15;
+                    db.Update(player);
+                    lostCount++;
+                    if (player.overall >= 90)
+                        AddAIRenewalNotification(player, team, false, offer);
+                    continue;
+                }
 
                 int gamesPlayed = gamesByPlayer.GetValueOrDefault(player.id, 0);
                 int teamChem = DatabaseManager.Instance.GetTeamChemistry(team.id);
@@ -5089,6 +5105,7 @@ using System.Threading.Tasks;
                     player.has_player_option = 0;
                     player.renewal_cooldown_day = _season.current_game_day + 365;
                     db.Update(player);
+                    teamPayroll = projected;
                     renewedCount++;
 
                     if (player.overall >= 90)
@@ -5515,6 +5532,9 @@ using System.Threading.Tasks;
         int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(team.id);
         if (rosterCount >= TradeHelper.MAX_ROSTER && twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
 
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long aiPayroll = roster.Sum(p => p.salary);
+
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
         var pendingSATIds = GetPendingSATIds();
 
@@ -5545,6 +5565,11 @@ using System.Threading.Tasks;
             int chance = (int)Mathf.Clamp(team.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
             if (_aiRng.Next(0, 100) >= chance) continue;
 
+            // Los two-way no computan contra el cap (igual que para el usuario).
+            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY : player.salary + 2_000_000;
+            if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings))
+                continue; // no cabe en el cap/excepciones: probar otro candidato
+
             player.team_id = team.id;
             player.last_team_id = team.id;
             if (signAsTwoWay)
@@ -5557,9 +5582,10 @@ using System.Threading.Tasks;
             else
             {
                 int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
-                player.salary += 2_000_000;
+                player.salary = newSalary;
                 player.contract_years = years;
                 player.guaranteed_years = years;
+                aiPayroll += newSalary;
             }
             DatabaseManager.Instance.AssignJerseyNumber(player, team.id);
             DatabaseManager.Instance.UpdatePlayer(player);
