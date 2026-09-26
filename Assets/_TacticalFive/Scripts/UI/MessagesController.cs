@@ -346,8 +346,10 @@ public class MessagesController : UIScreenController
     {
         var overlay = new VisualElement();
         overlay.AddToClassList("modal-overlay");
-        // La clase trae display:none en la USS: hay que activarlo explícitamente.
+        // La clase trae display:none y fondo transparente en la USS: se activa y se
+        // oscurece el fondo para que el modal destaque.
         overlay.style.display = DisplayStyle.Flex;
+        overlay.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0.6f));
 
         var box = new VisualElement();
         box.AddToClassList("modal-box");
