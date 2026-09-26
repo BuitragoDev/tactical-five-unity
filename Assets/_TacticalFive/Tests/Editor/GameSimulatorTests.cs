@@ -173,20 +173,26 @@ public class GameSimulatorTests
     {
         var players = new List<GameSimulator.PlayerStatSnapshot>
         {
-            Plan("PG", "SG", PlayerRole.Titular,   88,  5, true),   // 5 -> suelo 8
-            Plan("SF", "PF", PlayerRole.Banquillo, 77, 39, false),  // fijo, no lo toca la fatiga
-            Plan("C",  "PF", PlayerRole.Banquillo, 75,  0, false),  // 0 se respeta
-            Plan("SG", "SF", PlayerRole.Banquillo, 72, -1, false)   // automático -> heurística
+            Plan("PG", "SG", PlayerRole.Titular,   88,  5, true),   // 0: 5 -> suelo 8
+            Plan("SF", "PF", PlayerRole.Banquillo, 77, 39, false),  // 1: fijo, no lo toca la fatiga
+            Plan("C",  "PF", PlayerRole.Banquillo, 75,  0, false),  // 2: 0 se respeta
+            Plan("AP", "P",  PlayerRole.Banquillo, 74, 20, false),  // 3: fijo, sin cambios
+            Plan("B",  "E",  PlayerRole.Banquillo, 73, 20, false),  // 4: fijo, sin cambios
+            // 5+: banquillo. PrepareRotationMetadata fija starter = i < 5, así que el
+            // automático tiene que estar en índice ≥ 5 para usar la heurística de suplente.
+            Plan("SG", "SF", PlayerRole.Banquillo, 72, -1, false)   // 5: automático -> heurística
         };
         players[1].fisico = 10;
-        players[3].fisico = 50;
+        players[5].fisico = 50;
 
         GameSimulator.PrepareRotationMetadata(players);
 
         Assert.That(players[0].target_minutes, Is.EqualTo(GameSimulator.MIN_FIXED_MINUTES));
         Assert.That(players[1].target_minutes, Is.EqualTo(39), "La fatiga no baja un plan configurado");
         Assert.That(players[2].target_minutes, Is.EqualTo(0));
-        Assert.That(players[3].target_minutes, Is.EqualTo(15), "Sin configurar usa la heurística");
-        Assert.That(players[3].fixed_minutes, Is.False);
+        Assert.That(players[5].target_minutes, Is.EqualTo(15), "Sin configurar usa la heurística de suplente");
+        Assert.That(players[5].fixed_minutes, Is.False);
+        Assert.That(players[5].starter, Is.False);
+        Assert.That(players[0].starter, Is.True);
     }
 }

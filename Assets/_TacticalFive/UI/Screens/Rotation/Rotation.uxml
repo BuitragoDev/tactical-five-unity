@@ -33,7 +33,8 @@
                         <ui:VisualElement class="rotation-list-header">
                             <ui:Label class="rot-col rot-col--name rot-col--head" text="JUGADOR" />
                             <ui:Label class="rot-col rot-col--pos rot-col--head" text="POS" />
-                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="OVR" />
+                            <ui:Label class="rot-col rot-col--role rot-col--head" text="ROL" />
+                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="MED" />
                             <ui:Label class="rot-col rot-col--min rot-col--head" text="MINUTOS" />
                             <ui:Label class="rot-col rot-col--val rot-col--head" text="MIN" />
                             <ui:Label class="rot-col rot-col--sug rot-col--head" text="SUG." />
@@ -49,7 +50,8 @@
                         <ui:VisualElement class="rotation-list-header">
                             <ui:Label class="rot-col rot-col--name rot-col--head" text="JUGADOR" />
                             <ui:Label class="rot-col rot-col--pos rot-col--head" text="POS" />
-                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="OVR" />
+                            <ui:Label class="rot-col rot-col--role rot-col--head" text="ROL" />
+                            <ui:Label class="rot-col rot-col--ovr rot-col--head" text="MED" />
                             <ui:Label class="rot-col rot-col--min rot-col--head" text="MINUTOS" />
                             <ui:Label class="rot-col rot-col--val rot-col--head" text="MIN" />
                             <ui:Label class="rot-col rot-col--sug rot-col--head" text="SUG." />

@@ -23,6 +23,9 @@ public class RotationController : UIScreenController
     private List<LineupData> _lineup;
     private readonly Dictionary<int, int> _suggested = new();
 
+    // Sliders vivos de la lista, para recalcular el tope de minutos (240 en total).
+    private readonly List<(LineupData ls, PlayerData p, bool playable, CustomSlider slider)> _sliders = new();
+
     protected override void CacheReferences()
     {
         _startersList = _root.Q<VisualElement>("StartersList");
@@ -85,7 +88,7 @@ public class RotationController : UIScreenController
         BuildSuggested();
 
         if (_subtitle != null)
-            _subtitle.text = $"REPARTE LOS {TEAM_MINUTES} MINUTOS DEL PARTIDO ENTRE TUS 12 CONVOCADOS";
+            _subtitle.text = $"REPARTE LOS {TEAM_MINUTES} MINUTOS DEL PARTIDO ENTRE TUS CONVOCADOS";
 
         BuildRows();
         UpdateSummary();
@@ -96,6 +99,14 @@ public class RotationController : UIScreenController
     PlayerData FindPlayer(int id) => _players?.FirstOrDefault(p => p.id == id);
 
     bool IsPlayable(PlayerData p) => p.injury_days == 0 && p.g_league_assigned != 1;
+
+    static string RoleName(PlayerRole role) => role switch
+    {
+        PlayerRole.Estrella => "Estrella",
+        PlayerRole.Titular => "Titular",
+        PlayerRole.Banquillo => "Banquillo",
+        _ => "Último recurso"
+    };
 
     void BuildSuggested()
     {
@@ -143,6 +154,7 @@ public class RotationController : UIScreenController
 
         _startersList.Clear();
         _benchList.Clear();
+        _sliders.Clear();
 
         foreach (var ls in ActiveEntries())
         {
@@ -198,6 +210,15 @@ public class RotationController : UIScreenController
         posLbl.text = posStr;
         row.Add(posLbl);
 
+        // ── Rol ──
+        var roleLbl = new Label();
+        roleLbl.AddToClassList("rot-col");
+        roleLbl.AddToClassList("rot-col--role");
+        roleLbl.AddToClassList("rot-role");
+        roleLbl.text = RoleName(p.role);
+        roleLbl.tooltip = RoleName(p.role);
+        row.Add(roleLbl);
+
         // ── OVR ──
         int ovr = p.GetCalculatedAverage();
         var ovrLbl = new Label();
@@ -229,15 +250,22 @@ public class RotationController : UIScreenController
         valLbl.AddToClassList("rot-min-val");
         row.Add(valLbl);
 
-        var sugLbl = new Label();
-        sugLbl.AddToClassList("rot-col");
-        sugLbl.AddToClassList("rot-col--sug");
-        sugLbl.AddToClassList("rot-sug");
-        row.Add(sugLbl);
+        var sugCell = new VisualElement();
+        sugCell.AddToClassList("rot-col");
+        sugCell.AddToClassList("rot-col--sug");
+        sugCell.AddToClassList("rot-sug");
+        var sugBase = new Label();
+        sugBase.AddToClassList("rot-sug-base");
+        var sugDelta = new Label();
+        sugDelta.AddToClassList("rot-sug-delta");
+        sugCell.Add(sugBase);
+        sugCell.Add(sugDelta);
+        row.Add(sugCell);
 
-        ApplyRowValues(valLbl, sugLbl, effective, suggested);
+        ApplyRowValues(valLbl, sugBase, sugDelta, effective, suggested);
 
         var cs = new CustomSlider(slider, fill, dragger);
+        _sliders.Add((ls, p, playable, cs));
         cs.SetValueWithoutNotify(Mathf.Clamp01(effective / (float)MAX_MINUTES));
 
         int playerId = p.id;
@@ -249,23 +277,39 @@ public class RotationController : UIScreenController
             DatabaseManager.Instance.SetLineupMinutes(playerId, minutes);
 
             int sug = SuggestedFor(FindPlayer(playerId), entrySlot == 0);
-            ApplyRowValues(valLbl, sugLbl, minutes, sug);
+            ApplyRowValues(valLbl, sugBase, sugDelta, minutes, sug);
             UpdateSummary();
         };
 
         return row;
     }
 
-    void ApplyRowValues(Label valLbl, Label sugLbl, int minutes, int suggested)
+    void ApplyRowValues(Label valLbl, Label sugBase, Label sugDelta, int minutes, int suggested)
     {
         valLbl.text = minutes.ToString();
         valLbl.EnableInClassList("rot-min-val--custom", minutes != suggested);
 
+        sugBase.text = suggested.ToString();
+        sugBase.tooltip = $"Sugerido por el simulador: {suggested} min";
+
         int delta = minutes - suggested;
-        sugLbl.text = delta == 0
-            ? $"{suggested}"
-            : $"{suggested} {(minutes - suggested):+0;-0}";
-        sugLbl.tooltip = $"Sugerido por el simulador: {suggested} min";
+        if (delta == 0)
+        {
+            sugDelta.text = string.Empty;
+            sugDelta.style.display = DisplayStyle.None;
+            sugDelta.tooltip = null;
+            sugDelta.EnableInClassList("rot-sug-delta--pos", false);
+            sugDelta.EnableInClassList("rot-sug-delta--neg", false);
+            return;
+        }
+
+        sugDelta.text = delta.ToString("+0;-0");
+        sugDelta.style.display = DisplayStyle.Flex;
+        sugDelta.EnableInClassList("rot-sug-delta--pos", delta > 0);
+        sugDelta.EnableInClassList("rot-sug-delta--neg", delta < 0);
+        sugDelta.tooltip = delta > 0
+            ? $"Vas {delta} min por encima de la sugerencia ({suggested} min)"
+            : $"Vas {-delta} min por debajo de la sugerencia ({suggested} min)";
     }
 
     Label CreateBadge(string text, bool isGL)
@@ -311,6 +355,33 @@ public class RotationController : UIScreenController
         }
 
         BuildPosSummary(rows);
+        RefreshSliderLimits(total);
+    }
+
+    // Tope por slider: no se pueden repartir más de 240 minutos. Si el reparto ya
+    // está completo (remaining == 0) o hay exceso (remaining < 0), cada fila queda
+    // clavada en su valor actual y solo puede bajar; el margen de subida es el
+    // sobrante actual (remaining), repartible entre todos.
+    void RefreshSliderLimits(int total)
+    {
+        if (_sliders.Count == 0) return;
+
+        int remaining = TEAM_MINUTES - total;
+
+        foreach (var s in _sliders)
+        {
+            // Los no jugables no cuentan en el total (igual que el panel), así que no
+            // se les impone tope.
+            if (!s.playable)
+            {
+                s.slider.MaxValue = 1f;
+                continue;
+            }
+
+            int mine = Effective(s.ls, s.p);
+            int maxAllowed = Mathf.Clamp(mine + Mathf.Max(0, remaining), 0, MAX_MINUTES);
+            s.slider.MaxValue = maxAllowed / (float)MAX_MINUTES;
+        }
     }
 
     void BuildPosSummary(List<(PlayerData p, LineupData ls)> rows)
