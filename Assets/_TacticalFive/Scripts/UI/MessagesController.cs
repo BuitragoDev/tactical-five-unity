@@ -353,10 +353,12 @@ public class MessagesController : UIScreenController
 
         var box = new VisualElement();
         box.AddToClassList("modal-box");
-        // `.modal-box` también trae display:none en la USS; su variante --visible
-        // activa flex y columna. Se aplican aquí en lugar de depender de la clase.
+        // `.modal-box` trae display:none y position:absolute en la USS (los modales de
+        // UXML se activan con la clase --visible). Aquí se aplica en línea y se pasa a
+        // posición relativa para que el overlay (align/justify center) lo centre.
         box.style.display = DisplayStyle.Flex;
         box.style.flexDirection = FlexDirection.Column;
+        box.style.position = Position.Relative;
         overlay.Add(box);
 
         var title = new Label("¿ELIMINAR NOTICIA?");

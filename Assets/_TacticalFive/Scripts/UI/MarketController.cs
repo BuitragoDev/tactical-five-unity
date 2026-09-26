@@ -1905,9 +1905,16 @@ using System.Linq;
 
         var body = new VisualElement();
         body.AddToClassList("market-fa-modal-body");
-        var summary = new Label(BuildTradeSummary(mySelected, otherSelected, ownSA, myPicks, otherPicks));
-        summary.style.whiteSpace = WhiteSpace.Normal;
-        body.Add(summary);
+        // Una etiqueta por línea: un único Label con \n colapsa los saltos y queda
+        // como una sola línea recortada.
+        foreach (var line in BuildTradeSummary(mySelected, otherSelected, ownSA, myPicks, otherPicks))
+        {
+            var lbl = new Label(string.IsNullOrEmpty(line) ? " " : line);
+            lbl.style.color = new StyleColor(new Color(0.78f, 0.82f, 0.90f));
+            lbl.style.fontSize = 16;
+            lbl.style.marginBottom = 2;
+            body.Add(lbl);
+        }
         box.Add(body);
 
         var actions = new VisualElement();
@@ -1935,10 +1942,9 @@ using System.Linq;
         _root.Add(overlay);
     }
 
-    string BuildTradeSummary(List<PlayerData> mySelected, List<PlayerData> otherSelected,
-                             List<PlayerData> ownSA, List<DraftPickData> myPicks, List<DraftPickData> otherPicks)
+    List<string> BuildTradeSummary(List<PlayerData> mySelected, List<PlayerData> otherSelected,
+                                   List<PlayerData> ownSA, List<DraftPickData> myPicks, List<DraftPickData> otherPicks)
     {
-        var sb = new System.Text.StringBuilder();
         string Names(List<PlayerData> list) => list.Count > 0
             ? string.Join(", ", list.Select(p => $"{p.first_name} {p.last_name} (${p.salary:N0})"))
             : "—";
@@ -1946,16 +1952,19 @@ using System.Linq;
             ? string.Join(", ", list.Select(pk => $"R{pk.round} {pk.draft_year}"))
             : "—";
 
-        sb.AppendLine($"ENVÍAS A {_selectedTeam.name.ToUpper()}");
-        sb.AppendLine($"  Jugadores: {Names(mySelected)}");
+        var lines = new List<string>
+        {
+            $"ENVÍAS A {_selectedTeam.name.ToUpper()}",
+            $"   Jugadores: {Names(mySelected)}"
+        };
         if (ownSA.Count > 0)
-            sb.AppendLine($"  Sign & Trade: {Names(ownSA)}");
-        sb.AppendLine($"  Picks: {Picks(myPicks)}");
-        sb.AppendLine();
-        sb.AppendLine($"RECIBES DE {_selectedTeam.name.ToUpper()}");
-        sb.AppendLine($"  Jugadores: {Names(otherSelected)}");
-        sb.AppendLine($"  Picks: {Picks(otherPicks)}");
-        return sb.ToString();
+            lines.Add($"   Sign & Trade: {Names(ownSA)}");
+        lines.Add($"   Picks: {Picks(myPicks)}");
+        lines.Add("");
+        lines.Add($"RECIBES DE {_selectedTeam.name.ToUpper()}");
+        lines.Add($"   Jugadores: {Names(otherSelected)}");
+        lines.Add($"   Picks: {Picks(otherPicks)}");
+        return lines;
     }
 
     void ExecuteTradeNow()
