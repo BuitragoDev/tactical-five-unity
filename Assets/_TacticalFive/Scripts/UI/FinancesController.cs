@@ -653,11 +653,25 @@ using System.Linq;
             }));
         }
 
+        // FA propios recientes: re-firmables por encima del tope (Bird rights)
+        var ownBirdFAs = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id))
+            .OrderByDescending(p => p.salary)
+            .Take(8)
+            .ToList();
+        if (ownBirdFAs.Count > 0)
+        {
+            string names = string.Join(", ", ownBirdFAs.Select(p => $"{p.first_name} {p.last_name}"));
+            _capExpiringLabel.text += $"\nDERECHOS BIRD (re-firmables por encima del tope): {names}";
+        }
+
         // Exceptions
         long ntMle = settings != null ? settings.mid_level : TradeHelper.NT_MLE;
         long tMle = settings != null ? settings.taxpayer_mid_level : TradeHelper.T_MLE;
         long minSal = settings != null ? settings.minimum_salary : TradeHelper.MIN_SALARY;
-        _capExceptionNtMle.text = FormatMoney(ntMle);
+        _capExceptionNtMle.text = _myTeam.first_apron_hard_capped == 1
+            ? $"{FormatMoney(ntMle)} (USADA → HARD CAP 1er APRON)"
+            : FormatMoney(ntMle);
         _capExceptionTMle.text = FormatMoney(tMle);
         _capExceptionMin.text = FormatMoney(minSal);
         _capExceptionApron.text =
