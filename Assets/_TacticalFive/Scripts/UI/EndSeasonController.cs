@@ -339,6 +339,12 @@ public class EndSeasonController : UIScreenController
         LoadRetiringPlayers();
         LoadFamePlayers();
         _btnDraft.text = $"EMPEZAR DRAFT {_season.year_end}";
+        var draftStateRow = _season != null ? DatabaseManager.Instance.GetDraftState(_season.id) : null;
+        if (draftStateRow != null && draftStateRow.completed == 1)
+        {
+            _btnDraft.text = "DRAFT COMPLETADO";
+            _btnDraft.SetEnabled(false);
+        }
 
         var iconTalents = _root.Q<VisualElement>("DraftIconTalents");
         var iconOpps = _root.Q<VisualElement>("DraftIconOpps");
@@ -360,9 +366,30 @@ public class EndSeasonController : UIScreenController
     //  DRAFT FLOW
     // ════════════════════════════════════════════════════════════════
 
+    /// <summary>Persiste el progreso del draft para poder reanudarlo sin duplicar.</summary>
+    void PersistDraftProgress(bool completed = false)
+    {
+        DatabaseManager.Instance.SaveDraftState(_season.id, _manager.id, _currentPickIndex, completed);
+    }
+
     void StartDraft()
     {
-        DatabaseManager.Instance.ClearAllRookies();
+        // Si el draft de esta temporada ya terminó (p. ej. el jugador recargó la
+        // partida), no se repite: reiniciarlo duplicaba la clase entera.
+        var savedDraft = DatabaseManager.Instance.GetDraftState(_season.id);
+        if (savedDraft != null && savedDraft.completed == 1)
+        {
+            Debug.LogWarning("[Draft] El draft de esta temporada ya está completado; no se repite.");
+            _btnDraft.SetEnabled(false);
+            _btnDraft.text = "DRAFT COMPLETADO";
+            return;
+        }
+
+        int resumeFrom = savedDraft?.current_pick_index ?? 0;
+        // Solo limpiar flags de rookie en un draft nuevo: al reanudar, los ya
+        // elegidos deben seguir contando como rookies.
+        if (resumeFrom == 0)
+            DatabaseManager.Instance.ClearAllRookies();
 
         _btnDraft.SetEnabled(false);
         _btnDraft.text = "GENERANDO...";
@@ -374,7 +401,10 @@ public class EndSeasonController : UIScreenController
         _availableProspects = DraftGenerator.GenerateProspectPool(classLabel, classQuality, 75);
 
         _draftState = DraftState.Idle;
-        _currentPickIndex = 0;
+        // Reanudar desde el pick guardado: la clase/orden se regeneran, pero los
+        // jugadores ya elegidos se conservan (no se duplica ninguno).
+        _currentPickIndex = Mathf.Clamp(resumeFrom, 0, _draftOrder.Count);
+        PersistDraftProgress();
         _selectedProspect = null;
         _draftRunning = true;
         _prospectPage = 0;
@@ -430,10 +460,12 @@ public class EndSeasonController : UIScreenController
 
                 AddLogEntry(slot, prospect, player);
                 _currentPickIndex++;
+                PersistDraftProgress();
             }
         }
 
         _draftState = DraftState.Complete;
+        PersistDraftProgress(completed: true);
         _btnDraftPick.style.display = DisplayStyle.None;
         _btnAutoPick.style.display = DisplayStyle.None;
         _prospectCount.text = "0";
@@ -622,6 +654,7 @@ public class EndSeasonController : UIScreenController
         AddLogEntry(slot, prospect, player);
 
         _currentPickIndex++;
+        PersistDraftProgress();
         _draftState = DraftState.Idle;
         ClearPlayerCard();
     }
@@ -637,6 +670,7 @@ public class EndSeasonController : UIScreenController
         AddLogEntry(slot, prospect, player);
 
         _currentPickIndex++;
+        PersistDraftProgress();
         _draftState = DraftState.Idle;
         ClearPlayerCard();
     }

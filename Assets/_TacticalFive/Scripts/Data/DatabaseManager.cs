@@ -407,6 +407,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<PlayerGameStats>();
         _db.CreateTable<FinanceRecord>();
         _db.CreateTable<DeadMoneyData>();
+        _db.CreateTable<DraftStateData>();
         _db.CreateTable<SeasonRecord>();
         _db.CreateTable<MessageData>();
         _db.CreateTable<SponsorData>();

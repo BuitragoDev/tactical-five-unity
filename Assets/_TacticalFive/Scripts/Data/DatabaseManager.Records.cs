@@ -2615,6 +2615,27 @@ public partial class DatabaseManager
         _db.Execute("UPDATE players SET is_rookie = 0");
     }
 
+    /// <summary>Estado persistido del draft de una temporada (null si no hay).</summary>
+    public DraftStateData GetDraftState(int seasonId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<DraftStateData>().FirstOrDefault(d => d.season_id == seasonId);
+    }
+
+    /// <summary>Guarda el progreso del draft (upsert por temporada).</summary>
+    public void SaveDraftState(int seasonId, int managerId, int currentPickIndex, bool completed)
+    {
+        if (!EnsureDb()) return;
+        _db.InsertOrReplace(new DraftStateData
+        {
+            season_id = seasonId,
+            manager_id = managerId,
+            current_pick_index = currentPickIndex,
+            completed = completed ? 1 : 0,
+            updated_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        });
+    }
+
     public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId, int prevTeamId = 0)
     {
         _db.BeginTransaction();
