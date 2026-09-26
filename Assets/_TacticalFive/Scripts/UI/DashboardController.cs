@@ -4680,7 +4680,6 @@ using System.Threading.Tasks;
     //  AI TRANSFERS
     // ═══════════════════════════════════════════
 
-    enum TeamStrategy { Rebuild, Balanced, Contend }
 
     bool IsDeadlineWeek()
     {
