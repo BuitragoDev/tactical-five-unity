@@ -548,6 +548,18 @@ using System.Linq;
         _capSheetApron.RemoveFromClassList("cap-summary-value--danger");
         _capSheetApron.AddToClassList(currentPayroll > apron ? "cap-summary-value--danger" : "cap-summary-value--income");
 
+        // Tooltips de ayuda (cap/aprons/excepciones son áridos sin contexto)
+        _capSheetSalary.tooltip = "Masa salarial actual: suma de los salarios de tu plantilla.";
+        _capSheetCap.tooltip = "Tope salarial de la liga (crece un 5% cada temporada).";
+        _capSheetSpace.tooltip = "Espacio salarial: tope menos masa salarial. Bajo el tope puedes fichar con espacio; por encima, solo con excepciones.";
+        _capSheetApron.tooltip = "1er apron: por encima de él solo puedes usar la Taxpayer MLE y no puedes recibir más salario del que envías en un traspaso.";
+        _capExceptionNtMle.tooltip = "Non-Taxpayer MLE: excepción para fichar por encima del tope. Si la usas, quedas sujeto al hard cap del 1er apron.";
+        _capExceptionTMle.tooltip = "Taxpayer MLE: excepción reducida si ya estás por encima del 1er apron.";
+        _capExceptionMin.tooltip = "Salario mínimo: siempre puedes firmar contratos mínimos, incluso por encima del tope.";
+        _capExceptionApron.tooltip = "Luxury tax / 2º apron: por encima del 2º apron solo puedes firmar mínimos y no puedes agrupar salarios en traspasos.";
+        if (_capExpiringLabel != null)
+            _capExpiringLabel.tooltip = "Jugadores que acaban contrato este año. Con TO/PO, la opción se decide al llegar a él.";
+
         // Projection header
         var headerRow = new VisualElement();
         headerRow.AddToClassList("cap-proj-header-row");

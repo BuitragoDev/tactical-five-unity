@@ -32,7 +32,9 @@ using System.Linq;
 
     private PlayerData _player;
     private HashSet<int> _scoutedPlayerIds;
-    private static readonly System.Globalization.CultureInfo _fmt = System.Globalization.CultureInfo.InvariantCulture;
+    // Formato único del panel (es-ES): antes los porcentajes usaban InvariantCulture y
+    // salían con punto decimal mezclados con el resto con coma.
+    private static readonly System.Globalization.CultureInfo _fmt = new System.Globalization.CultureInfo("es-ES");
     private static readonly System.Globalization.CultureInfo _spanishCI = new("es-ES");
 
     protected override void CacheReferences()
