@@ -720,7 +720,7 @@ public static class GameSimulator
                         : $"{shooter.name} encesta un triple"
                 };
             }
-            return MissHandler(def, off, shooter, true, glLeague);
+            return MissHandler(def, off, shooter, true, glLeague, defPlan);
         }
 
         float fp2 = FisicoPenalty(shooter.fisico);
@@ -758,10 +758,10 @@ public static class GameSimulator
                     : $"{shooter.name} anota de dos"
             };
         }
-        return MissHandler(def, off, shooter, false, glLeague);
+        return MissHandler(def, off, shooter, false, glLeague, defPlan);
     }
 
-    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree, bool glLeague = false)
+    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree, bool glLeague = false, GamePlan defPlan = default)
     {
         // Un solo intento colectivo: el defensor se elige por atributo y posición,
         // evitando que el orden de la lista convierta a un base en taponador principal.
