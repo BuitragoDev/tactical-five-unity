@@ -1,5 +1,7 @@
 using System.IO;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 /// <summary>
 /// Tests del sistema de slots (Fase 1 de la auditoría). Usan una carpeta temporal
@@ -37,6 +39,8 @@ public class GameSaveManagerTests
         WriteDb(DbPath(2));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "{ esto no es json valido");
 
+        // La ruta de "metadata ilegible" registra un error a propósito.
+        LogAssert.Expect(LogType.Error, "saves.json ilegible y sin backup válido");
         GameSaveManager.CleanupAllOrphanDbs();
 
         Assert.That(File.Exists(DbPath(1)), Is.True, "No debe borrar DBs si el metadata es ilegible");
@@ -49,6 +53,7 @@ public class GameSaveManagerTests
         WriteDb(DbPath(1));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "roto");
 
+        LogAssert.Expect(LogType.Error, "saves.json ilegible y sin backup válido");
         bool ok = GameSaveManager.TryGetAllSlots(out var slots);
 
         Assert.That(ok, Is.False, "Debe indicar que el metadata no se pudo leer");
@@ -108,6 +113,7 @@ public class GameSaveManagerTests
         WriteDb(DbPath(1));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "no json");
 
+        LogAssert.Expect(LogType.Error, "saves.json ilegible y sin backup válido");
         GameSaveManager.SaveSlotInfo(new SaveSlotInfo { slotNumber = 1, exists = true, managerName = "A" });
 
         Assert.That(Directory.GetFiles(_dir, "saves.json.corrupt-*").Length, Is.EqualTo(1),
