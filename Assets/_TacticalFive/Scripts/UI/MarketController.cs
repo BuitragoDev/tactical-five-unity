@@ -1883,6 +1883,9 @@ using System.Linq;
 
         var overlay = new VisualElement();
         overlay.AddToClassList("market-modal-overlay");
+        // La clase trae display:none en la USS (los modales de UXML lo activan por
+        // código): sin esto el overlay procedural queda invisible.
+        overlay.style.display = DisplayStyle.Flex;
 
         var box = new VisualElement();
         box.AddToClassList("market-fa-modal-box");
