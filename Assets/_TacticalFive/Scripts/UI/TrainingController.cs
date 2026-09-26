@@ -572,7 +572,7 @@ using System.Linq;
 
         _activeTraining = DatabaseManager.Instance.GetTeamTraining(_myTeam.id);
         BuildPlayerList();
-        var selCard = _trainingBody.Query<VisualElement>(className: "training-card--selected").FirstOrDefault();
+        var selCard = _trainingBody.Query<VisualElement>(className: "training-card--selected").First();
         if (selCard != null)
             OnPlayerSelected(player, selCard);
     }
@@ -669,7 +669,7 @@ using System.Linq;
 
         if (_selectedPlayer != null)
         {
-            var card = _trainingBody.Query<VisualElement>(className: "training-card--selected").FirstOrDefault();
+            var card = _trainingBody.Query<VisualElement>(className: "training-card--selected").First();
             if (card != null)
                 OnPlayerSelected(_selectedPlayer, card);
         }

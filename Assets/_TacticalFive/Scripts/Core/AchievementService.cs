@@ -126,7 +126,7 @@ public static class AchievementService
         if (season == null || manager == null || team == null) return;
 
         string label = SeasonLabel(season);
-        var games = MyTeamSeasonGames(managerId, teamId);
+        var games = MyTeamSeasonGames(managerId, teamId, seasonId);
         int wins = games.Count(g => DidTeamWin(g, teamId));
 
         var finalsRecords = DatabaseManager.Instance.GetFinalsRecords();
