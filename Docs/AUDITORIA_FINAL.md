@@ -44,12 +44,13 @@
 | Bloque | Hallazgos | Hechos |
 |---|---|---|
 | CRÍTICOS | 9 | 9 |
-| ALTOS | 20 | 9 (+1 nuevo: SEA-13) |
-| MEDIOS | ~30 | 0 |
-| BAJOS | ~10 | 0 |
-| Tests propuestos | 25 | 1 |
+| ALTOS | 21 | 20 (queda `REN-01`, `UI-03..06` y `SIM-05`) |
+| MEDIOS | ~30 | 5 |
+| BAJOS | ~10 | 1 |
+| Tests propuestos | 25 | 6 |
 
-> Actualiza esta tabla a mano al cerrar hallazgos.
+> **Fase 1 completada** (salvo el bloque de tests que necesita inyectar la ruta de la DB).
+> **Fase 2 en curso:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (`índices`, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11`, parcial), economía (`ECO-03/04/05/07/08`, `SEA-10`) y traspasos con flags. Pendiente: rendimiento (`REN-01`, `CON-05..10`), limpieza de código muerto, tests de DB y `SIM-05`.
 > **Fase 1 completada (2026-09-26) salvo tests:** cerrados `SAV-01..07`, `SEA-01/02/03/04/05/13`, `CON-01/02`, `UI-01/02`, `ECO-01/02`. Queda añadir el resto de tests de Fase 1 (requieren refactor para inyectar la ruta de la DB).
 
 ### Top 10 por daño/esfuerzo (orden recomendado de ataque)
@@ -247,7 +248,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SIM-04` · Empate persistido tras 5 prórrogas (resultado imposible)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** CRÍTICO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Sistema:** Simulación
 - **Archivos:** `Assets/_TacticalFive/Scripts/GameSimulator.cs:142-158` (bucle OT), `:178-179` (asignación de marcador)
@@ -382,7 +383,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SIM-01` · Ventaja de casa solo cuando el equipo del usuario juega en casa
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `GameSimulator.cs:117` (`homeCourtBonus = isHome ? 1.5f : 0`); llamadas `DashboardController.cs:1296,1686,1692` (`isMyHomeGame = game.home_team_id == _myTeam.id`), `:1805` (G-League)
 - **Problema:** el parámetro `isHome` significa "el usuario es local", pero el bonus se suma al `homeR` real. Los partidos IA-IA son neutrales y, cuando el usuario juega fuera, el local IA no recibe ventaja.
@@ -393,7 +394,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SIM-02` · Se escriben stats para jugadores con 0 minutos y cuentan como partido jugado
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `GameSimulator.cs:231-238` (persiste para todos los `homePS`/`awayPS` sanos); `DatabaseManager.Records.cs:565-595` (`COUNT(*) AS gp` sin filtro de minutos), `:613-623` (`GetPlayerGamesPlayedInSeason`); consumidores `StatsController.cs:384-392`, `PlayerProfileController.cs:173-180`, `DashboardController.cs:6739-6741` (moral, `Take(5)` de ratings)
 - **Problema:** todos los convocados sanos generan fila de boxscore (aunque no jueguen) y la agregación las cuenta como GP.
@@ -404,7 +405,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SIM-03` · Rotación "todo a 0" (RESET) y titular con plan 0 ignorados
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `GameSimulator.cs:83-84` (`strictHome = Any(fixed && target > 0)`), `:331-338` (fixed mantiene `target` 0), `:410-411` (quinteto inicial por índices 0-4), `:997-1018`, `:1068-1070`; `RotationController.cs:531-540` (`ApplyReset` a 0)
 - **Problema:** con todos los planes a 0, `strict=false` pero los `target` quedan 0 → entran igualmente jugadores marcados como "no juega". Y un titular con plan 0 juega el arranque del partido hasta la primera ventana.
@@ -415,7 +416,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-03` · El límite two-way no se comprueba al madurar ofertas
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `DashboardController.cs:2460-2463` (`if (offer.is_two_way == 1) offerLegal = true;`)
 - **Problema:** no se re-comprueba `GetTwoWayCount < TradeHelper.MAX_TWO_WAY` ni `IsEligibleForTwoWay`; la UI solo lo valida al abrir la oferta (`MarketController.cs:2350-2351`).
@@ -426,7 +427,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-04` · Re-firma con Bird rights rechazada a los 7 días (la maduración no conoce `IsOwnRecentFA`)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `DashboardController.cs:2454-2489` (rama `offer_type == 1`, solo reglas de FA externo); UI con `birdMax` en `RosterController.cs:1081-1186`; `IsOwnRecentFA` solo se usa en renovaciones (`:2632`) y en el panel (`:5458,5498,5795`)
 - **Problema:** el panel de FA permite ofertar por FA propios calculando Bird completo, pero la maduración aplica cap/MLE de FA externo y rechaza.
@@ -437,7 +438,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-05` · Luxury tax con signo negativo descuadra gastos y balance
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `DashboardController.cs:7191-7199` (`amount = -monthlyTax`); `DatabaseManager.Records.cs:1028-1036` (`GetTotalExpenses` suma `amount` de `record_type >= TYPE_RENOVATION`); `FinancesController.cs:383-394` (muestra `Math.Abs(taxTotal)`); enum verificado: `TYPE_RENOVATION=5`, `TYPE_TAX=10`, `TYPE_BUYOUT=11`
 - **Problema:** el impuesto se guarda negativo pero el agregador lo suma como gasto (debería restar), y la UI lo pinta positivo.
@@ -459,7 +460,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-07` · Ofertas y trade-offers sobreviven al rollover; la re-firma madura ~1 año tarde
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `Records.cs:3052-3058` (no se borran `offers`/`trade_offers`), `:2558` (`currentDay >= day_sent + 7`), `:3209` (`current_game_day` = 0 en la nueva temporada); `NewSeasonController.cs:903-928` (`day_sent = _season?.current_game_day`)
 - **Problema:** las ofertas pendientes persisten con `day_sent` de la temporada anterior.
@@ -470,7 +471,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `ECO-08` · Los traspasos no actualizan tenure ni limpian flags (IR/two-way/G-League/trade block)
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `MarketController.cs:1910-1929`; `DashboardController.cs:5274-5325` (IA, sí limpia), `:5961-6003` (aceptar, no limpia)
 - **Problema:** `seasons_with_team`/`last_team_id` no se actualizan al cambiar de equipo (Bird rights heredados) y no se resetean `is_two_way`/`is_on_ir`/`g_league_assigned`/`on_trade_block`.
@@ -592,9 +593,9 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[ ]` **`SEA-07` · Draft no transaccional ni resumible** — `EndSeasonController.cs:363-395, 616-642`; `DraftGenerator.cs:397-465`; `ClearAllRookies` en `:365`. → Recargar a mitad de draft reinicia y puede duplicar la clase (jugadores fantasma, cap explotado). → Persistir estado del draft (cursor + picks usados) y flag de completado; `StartDraft` no-op si hay draft en curso/completado. **Verificación:** [A]
 - `[ ]` **`SEA-08` · `overall` almacenado ≠ `GetCalculatedAverage()`** — `Records.cs:2823` (`Round(sum/11f)`) vs `PlayerData.cs:64-67` (división entera). → Rankings/valoración IA y UI usan números distintos (±1). → Una sola fórmula (usar `GetCalculatedAverage`, aplicando cap de `potential`) en todo el proyecto. **Verificación:** [V]
 - `[ ]` **`SEA-09` · `ApplyMentoring` no recalcula `overall`** — `Records.cs:3881-3920`. → Deriva del overall cada offseason. → Recalcular/`cap` tras el loop. (Relacionado con `SEA-08`; puede resolverse en el mismo refactor.) **Verificación:** [A]
-- `[ ]` **`SEA-10` · Estado transitorio no reseteado en el rollover** — `Records.cs:2664-3229`: `injury_days`, `fisico`, `morale`, `on_trade_block`, `team_chemistry`, `fan_confidence`. → Lesiones/fatiga/trade-block viajan de temporada; química/moral nunca se normalizan. → Resetear explícitamente (o documentar por qué persisten). **Verificación:** [A]
-- `[ ]` **`SEA-11` · `season_records` solo escribe `most_improved_id`** — lecturas en `Records.cs:1143,1155,1165` comparan `season_mvp_id`, `champion_id`, `first_team_*`… que nunca se escriben (verificado: solo hay lecturas `==`). → La trayectoria del jugador nunca muestra MVP/All-Star/campeón/primer equipo. → Poblar `season_records` en `SaveSeasonEndRecords`. **Verificación:** [V]
-- `[ ]` **`SEA-12` · `GetActiveSeason` sin `ORDER BY` y `CreateSeason` no desactiva** — `Games.cs:41-46`, `:12-39`; desactivación en `Records.cs:3168-3172`. → Dos temporadas `is_active=1` → se opera sobre la equivocada (awards/récords/rollover). → `OrderByDescending(id).FirstOrDefault()` + forzar desactivación al crear. **Verificación:** [V]
+- `[x]` **`SEA-10` · Estado transitorio no reseteado en el rollover** — `Records.cs:2664-3229`: `injury_days`, `fisico`, `morale`, `on_trade_block`, `team_chemistry`, `fan_confidence`. → Lesiones/fatiga/trade-block viajan de temporada; química/moral nunca se normalizan. → Resetear explícitamente (o documentar por qué persisten). **Verificación:** [A]
+- `[~]` **`SEA-11` · `season_records` solo escribe `most_improved_id`** — lecturas en `Records.cs:1143,1155,1165` comparan `season_mvp_id`, `champion_id`, `first_team_*`… que nunca se escriben (verificado: solo hay lecturas `==`). → La trayectoria del jugador nunca muestra MVP/All-Star/campeón/primer equipo. → Poblar `season_records` en `SaveSeasonEndRecords`. **Verificación:** [V]
+- `[x]` **`SEA-12` · `GetActiveSeason` sin `ORDER BY` y `CreateSeason` no desactiva** — `Games.cs:41-46`, `:12-39`; desactivación en `Records.cs:3168-3172`. → Dos temporadas `is_active=1` → se opera sobre la equivocada (awards/récords/rollover). → `OrderByDescending(id).FirstOrDefault()` + forzar desactivación al crear. **Verificación:** [V]
 - `[ ]` **`SIM-05` · Equipos con 2-4 sanos alinean <5 y <2 genera marcador sin box** — `GameSimulator.cs:86-109, 410` (solo guarda `<2`). → Baloncesto ilegal; fallback con marcador y boxscore vacío; la pre-check de quinteto vacío solo aplica al usuario. → Guardar `<5` (rellenar desde G-League/IR/FA) y generar stats coherentes con el marcador. **Verificación:** [A]
 - `[ ]` **`SIM-06` · Lesiones también a jugadores con 0 minutos** — `GameSimulator.cs:278-279, 1161-1181` (prob. plana sobre `fisico` pre-partido). → Distribución de lesiones irreal. → Excluir `minutes <= 0` o ponderar por minutos. **Verificación:** [A]
 - `[ ]` **`SIM-07` · `GameResultCache` no se limpia al cargar partida y `Clear()` no resetea `LastGameDay`** — `GameResultCache.cs:23-28`; `LoadGameController.cs:445-447`; consumidores `GameResultsController.cs:206,229`, `MatchDayController.cs:332,514,616,658`. → Resultados de otra partida visibles. → Limpiar (y resetear `LastGameDay`) en el flujo de carga. **Verificación:** **[V]** (solo llamadas a `Clear` verificadas)
@@ -602,8 +603,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[ ]` **`SIM-09` · Fatiga con drenaje neto negativo y sin reset de temporada** — `DashboardController.cs:962-966` (+8 solo en día sin partido), `GameSimulator.cs:262` (`minutes*0.30`), helper muerto `DashboardController.cs:4444-4455`. → Stars caen por debajo de `fisico < 30` (−25% tiro) → el anotador de la liga decae con la temporada. → Rebalancear recuperación y resetear/recuperar en `StartNewSeason`. **Verificación:** [A]
 - `[ ]` **`SIM-10` · Solo 35% de canastas asistidas** — `GameSimulator.cs:795` (`Random.value >= 0.35`). → Asistencias ~40% bajas vs NBA real. → Subir a ~0.55-0.60 o añadir segunda fuente de asistencia. **Verificación:** [A]
 - `[ ]` **`SIM-11` · Suelo de rebotes añade rebotes sin tiro fallado** — `GameSimulator.cs:189-200`. → Rebotes de equipo > fallos disponibles; medias de élite infladas. → Acotar el suelo por la bolsa real de fallos o quitarlo. **Verificación:** [A]
-- `[ ]` **`SIM-12` · La prórroga ignora la rotación vinculante** — `GameSimulator.cs:481-486` (`DoSub(..., strict` por defecto `false`)); `SimQuarter` sí pasa `strictHome/Away`. → Los minutos configurados no se respetan en OT. → Pasar `strict` a `SimOvertime`. **Verificación:** [A]
-- `[ ]` **`SIM-13` · Bonus de química asimétrico (local 0.15 / visitante 0.10)** — `GameSimulator.cs:115-116`. → El local se beneficia el doble de la química, acumulado con `SIM-01`. → Unificar coeficiente o documentar. **Verificación:** **[V]**
+- `[x]` **`SIM-12` · La prórroga ignora la rotación vinculante** — `GameSimulator.cs:481-486` (`DoSub(..., strict` por defecto `false`)); `SimQuarter` sí pasa `strictHome/Away`. → Los minutos configurados no se respetan en OT. → Pasar `strict` a `SimOvertime`. **Verificación:** [A]
+- `[x]` **`SIM-13` · Bonus de química asimétrico (local 0.15 / visitante 0.10)** — `GameSimulator.cs:115-116`. → El local se beneficia el doble de la química, acumulado con `SIM-01`. → Unificar coeficiente o documentar. **Verificación:** **[V]**
 - `[ ]` **`SIM-14` · All-Star aplica fatiga/lesiones y escribe stats** — `GameSimulator.cs:231-279` (solo excluye récords), `DashboardController.cs:1701-1742`. → Participantes pierden físico, se lesionan y generan `player_game_stats` con `team_id` negativo; `.First()` puede lanzar si los rosters quedan vacíos. → Excluir fatiga/lesión/stats para `game_type == "allstar"`; guardar `Any()` antes de `First()`. **Verificación:** [A]
 - `[ ]` **`CON-05` · `Refresh()` re-escanea partidos varias veces/día** — `DashboardController.cs:468, 7330-7346, 7395-7420, 7596-7600`; `GetTeamRecordShort` llamado 4×. → CPU dominante del fast-sim. → Calcular standings/records una vez por día y cachear; filtrar por `season_id`. **Verificación:** [A]
 - `[ ]` **`CON-06` · N+1 `GetPlayerGamesPlayedInSeason` en renovaciones IA** — `Records.cs:616-622`; `DashboardController.cs:4942`. → Cientos de queries por ciclo (carga todos los `gameIds` de la temporada en cada llamada). → Un solo `JOIN ... GROUP BY player_id` o diccionario precomputado. **Verificación:** [A]
@@ -615,7 +616,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[ ]` **`UI-08` · `FullScreenUI.Awake` puede desreferenciar null** — `FullScreenUI.cs:9-11` (`rootVisualElement` no existe hasta `OnEnable`). → NRE por pantalla en build; ruido que enmascara errores reales. → Eliminar el componente (la base ya hace fullscreen) o mover a `OnEnable`. **Verificación:** [A]
 - `[ ]` **`UI-09` · RESETEAR del Editor sin confirmación** — `EditorController.cs:314, 336-354` (borra `template.db`). → Acción destructiva de un clic. → Modal de confirmación (patrón existente). **Verificación:** [A]
 - `[ ]` **`UI-10` · Traspaso propio sin confirmación ni undo** — `MarketController.cs:1869-1998`. → Un traspaso mal armado es irreversible. → Reutilizar el modal de confirmación de ofertas IA con resumen. **Verificación:** [A]
-- `[ ]` **`QA-01` · `PlayerSeasonStatRow` sin `[Table]`** — `Data/DatabaseRows.cs:111`; `CreateTable` en `DatabaseManager.cs:305` crea una tabla basura distinta de `player_season_stats` (creada por SQL crudo `:805`). → Cualquier uso futuro de `_db.Table<PlayerSeasonStatRow>()` lee vacío. → Añadir `[Table("player_season_stats")]` o eliminar la clase y dejar una sola vía de creación. **Verificación:** **[V]**
+- `[x]` **`QA-01` · `PlayerSeasonStatRow` sin `[Table]`** — `Data/DatabaseRows.cs:111`; `CreateTable` en `DatabaseManager.cs:305` crea una tabla basura distinta de `player_season_stats` (creada por SQL crudo `:805`). → Cualquier uso futuro de `_db.Table<PlayerSeasonStatRow>()` lee vacío. → Añadir `[Table("player_season_stats")]` o eliminar la clase y dejar una sola vía de creación. **Verificación:** **[V]**
 
 ---
 
@@ -865,11 +866,15 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `d565623e` | — | Auditoría creada (documento inicial). Rama `auditoria-final`. |
 | 2026-09-26 | `3a59f854` | SAV-01..07, SEA-01/02/03 | Persistencia robusta: `saves.json` atómico + `.bak` sin borrado por metadatos ilegibles, plantilla sin race (`_dbField`), migraciones transaccionales, clon+seeds atómicos, metadata del slot al final, archivado histórico único, reset anual del hard cap, calendario no se marca generado si falla el guardado. |
 | 2026-09-26 | `2ba82b9c` | CON-01, UI-01, UI-02 (+ECO-01/02 y CON-02 parciales) | `finally` que revierte la transacción del día si se aborta la corrutina; reset de `_isLoading`/spinner/navegación en `OnDisable`; `ScreenManager.NavigationLocked` + guard en config; `WaitForBackgroundBatch()`; lock en el rollover; buyout con coste y guardas; revalidación de traspasos en `OnConfirmTrade`. |
+| 2026-09-26 | `35e9a28f` | SEA-04, SEA-05, SEA-13, ECO-01, ECO-02, CON-02 | Escape de soft-locks (`TryEscapeStuckPhase()`: regenera el calendario si falta o cierra la fase); revalidación de la aceptación de ofertas IA del Dashboard; tabla `dead_money` persistente + cobro por temporada; rollover reintentable (`rollover_pre_{seasonId}`); cancelación de lotes de fondo (`CancellationTokenSource`); +1 test de `ValidateTrade`. |
+| 2026-09-26 | `1b8cdbf2` | — | Hotfix de compilación: sobrecarga genérica de `TrackBatch` (Task<T>). |
+| 2026-09-26 | `0cab1dd4` | SIM-01/02/03/04/12/13 | Integridad de simulación: ventaja de casa al local real (y química simétrica), desempate garantizado (OT y respaldo de <2 jugadores), sin filas de 0 minutos (+migración de limpieza) y rotación todo-0 → automática con quinteto inicial según planes. +5 tests. |
+| 2026-09-26 | `b02f2a96` | QA-01, SEA-12, §4 | Esquema: índices que faltaban (`players.team_id`, `games.season_id`, `messages(manager_id,id)`), `[Table]` de `player_season_stats`, una sola temporada activa (`GetActiveSeason` ordenado + `CreateSeason` desactiva) y `AllocatePlayerId()` monótono para el draft. |
+| 2026-09-26 | `1504f9db` | SEA-11 (parcial) | `season_records` completo: campeón, finalista, MVP de finales, MVP de temporada, ROY y primer quinteto (faltan All-Star/DPOY/Sexto Hombre/2º quinteto, que el juego no calcula). |
+| 2026-09-26 | `d4aae4f5` | ECO-03/04/05/07/08, SEA-10 | Economía: límite two-way y Bird rights en la maduración de ofertas, luxury tax positivo, ofertas normalizadas en el rollover (maduran en 7 días), reset del estado transitorio (lesiones/fatiga/trade block/química/confianza) y `MovePlayerToTeam` en traspasos (tenure + flags). |
 
 **Hallazgo nuevo detectado durante la implementación (ya corregido):**
 - `SEA-13` · **ALTO** · `DashboardController.ProcessGameDayRoutine`: si `FindNextGameDay() == 0` (no quedan partidos sin jugar) el método hacía `yield break` **antes** del bloque de transición de fase; con la temporada en `regular` y todos los partidos jugados, la fase no avanzaba nunca → soft-lock. **Fix aplicado (`35e9a28f`):** `TryEscapeStuckPhase()` se llama en el early-return y regenera el calendario si falta o avanza/cierra la fase (cubre también `SEA-05`).
-
-| 2026-09-26 | `35e9a28f` | SEA-04, SEA-05, SEA-13, ECO-01, ECO-02, CON-02 | Escape de soft-locks (`TryEscapeStuckPhase()`: regenera el calendario si falta o cierra la fase); revalidación de la aceptación de ofertas IA del Dashboard; tabla `dead_money` persistente + cobro por temporada; rollover reintentable (`rollover_pre_{seasonId}`); cancelación de lotes de fondo (`CancellationTokenSource`); +1 test de `ValidateTrade`. |
 
 **Fase 1 completada** salvo el bloque de tests que necesita refactor (inyección de la ruta de la DB para poder probar `GameSaveManager`/`InitSaveSlot`/`StartNewSeason` en EditMode).
 
