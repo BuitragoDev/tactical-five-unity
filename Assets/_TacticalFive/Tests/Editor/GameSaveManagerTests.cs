@@ -18,15 +18,11 @@ public class GameSaveManagerTests
         _dir = Path.Combine(Path.GetTempPath(), "tf_saves_" + System.Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
         GameSaveManager.BaseDirOverride = _dir;
-        // Estos tests provocan a propósito la rama de "metadata ilegible", que
-        // registra un Debug.LogError; el framework lo contaría como fallo.
-        LogAssert.ignoreFailingMessages = true;
     }
 
     [TearDown]
     public void TearDown()
     {
-        LogAssert.ignoreFailingMessages = false;
         GameSaveManager.BaseDirOverride = null;
         try { if (Directory.Exists(_dir)) Directory.Delete(_dir, true); } catch { }
     }
@@ -43,6 +39,10 @@ public class GameSaveManagerTests
         WriteDb(DbPath(2));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "{ esto no es json valido");
 
+        // Estos tests provocan a propósito la rama de "metadata ilegible", que
+        // registra un Debug.LogError; hay que ignorarlo en el scope del propio test.
+        LogAssert.ignoreFailingMessages = true;
+
         GameSaveManager.CleanupAllOrphanDbs();
 
         Assert.That(File.Exists(DbPath(1)), Is.True, "No debe borrar DBs si el metadata es ilegible");
@@ -54,6 +54,10 @@ public class GameSaveManagerTests
     {
         WriteDb(DbPath(1));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "roto");
+
+        // Estos tests provocan a propósito la rama de "metadata ilegible", que
+        // registra un Debug.LogError; hay que ignorarlo en el scope del propio test.
+        LogAssert.ignoreFailingMessages = true;
 
         bool ok = GameSaveManager.TryGetAllSlots(out var slots);
 
@@ -113,6 +117,10 @@ public class GameSaveManagerTests
     {
         WriteDb(DbPath(1));
         File.WriteAllText(Path.Combine(_dir, "saves.json"), "no json");
+
+        // Estos tests provocan a propósito la rama de "metadata ilegible", que
+        // registra un Debug.LogError; hay que ignorarlo en el scope del propio test.
+        LogAssert.ignoreFailingMessages = true;
 
         GameSaveManager.SaveSlotInfo(new SaveSlotInfo { slotNumber = 1, exists = true, managerName = "A" });
 
