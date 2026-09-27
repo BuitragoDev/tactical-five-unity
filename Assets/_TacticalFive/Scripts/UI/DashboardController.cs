@@ -86,7 +86,7 @@ using System.Threading.Tasks;
     private Label _teamArenaCapacity;
     private VisualElement _teamReputationStars;
     private VisualElement _messagesBody;
-    private VisualElement _storylineBadge;
+    private Label _storylineBadge; // Label (no VisualElement): se le escribe .text
 
     // Datos
     private List<TeamData> _allTeams;
