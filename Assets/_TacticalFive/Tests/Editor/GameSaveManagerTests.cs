@@ -142,4 +142,38 @@ public class GameSaveManagerTests
         Assert.That(ok, Is.True, "Con un backup válido debe poder leerse");
         Assert.That(slots.Exists(s => s.slotNumber == 7), Is.True);
     }
+
+    // ── Exportar / importar partida (QoL) ──
+
+    [Test]
+    public void ExportSlot_CreatesBackupAndListsIt()
+    {
+        WriteDb(DbPath(1));
+
+        string path = GameSaveManager.ExportSlot(1, "GM Test", "Boston Celtics");
+
+        Assert.That(path, Is.Not.Null);
+        Assert.That(File.Exists(path), Is.True, "Se crea el archivo de exportación");
+        Assert.That(GameSaveManager.ListExports(), Has.Count.EqualTo(1), "El export aparece en la lista");
+    }
+
+    [Test]
+    public void ImportSave_CopiesToNextFreeSlot()
+    {
+        WriteDb(DbPath(1));
+        string path = GameSaveManager.ExportSlot(1, "GM", "Equipo");
+        File.Delete(DbPath(1)); // se "pierde" la partida original
+
+        int slot = GameSaveManager.ImportSave(path);
+
+        Assert.That(slot, Is.EqualTo(1), "El primer slot libre es el 1");
+        Assert.That(File.Exists(DbPath(slot)), Is.True, "La partida importada existe en el slot");
+    }
+
+    [Test]
+    public void ImportSave_MissingFile_ReturnsMinusOne()
+    {
+        Assert.That(GameSaveManager.ImportSave(null), Is.EqualTo(-1));
+        Assert.That(GameSaveManager.ImportSave(Path.Combine(_dir, "no_existe.db")), Is.EqualTo(-1));
+    }
 }

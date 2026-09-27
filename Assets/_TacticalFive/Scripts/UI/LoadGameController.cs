@@ -48,6 +48,14 @@ public class LoadGameController : UIScreenController
         _contentOverlay = _root.Q<VisualElement>("ContentOverlay");
         _btnDeleteYes = _root.Q<Button>("BtnDeleteYes");
         _btnDeleteNo = _root.Q<Button>("BtnDeleteNo");
+
+        // Fila de QoL (exportar/importar partida) encima de la lista de slots.
+        if (_slotsArea != null && _slotsArea.parent != null)
+        {
+            var transferRow = BuildTransferRow();
+            int idx = _slotsArea.parent.IndexOf(_slotsArea);
+            _slotsArea.parent.Insert(idx < 0 ? 0 : idx, transferRow);
+        }
     }
 
     protected override void LoadData()
@@ -449,6 +457,149 @@ public class LoadGameController : UIScreenController
         }
         GameSaveManager.UpdateSlotFromDatabase(slotNumber);
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+    }
+
+    // ── EXPORTAR / IMPORTAR PARTIDA (QoL) ───────────────────
+
+    VisualElement BuildTransferRow()
+    {
+        var row = new VisualElement();
+        row.style.flexDirection = FlexDirection.Row;
+        row.style.justifyContent = Justify.Center;
+        row.style.marginBottom = 10;
+
+        var exportBtn = new Button { text = "EXPORTAR PARTIDA" };
+        exportBtn.AddToClassList("modal-btn");
+        exportBtn.AddToClassList("modal-btn--secondary");
+        exportBtn.style.marginRight = 8;
+        exportBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowExportModal(); });
+        row.Add(exportBtn);
+
+        var importBtn = new Button { text = "IMPORTAR PARTIDA" };
+        importBtn.AddToClassList("modal-btn");
+        importBtn.AddToClassList("modal-btn--secondary");
+        importBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowImportModal(); });
+        row.Add(importBtn);
+
+        CursorManager.Instance?.RegisterHandCursor(exportBtn);
+        CursorManager.Instance?.RegisterHandCursor(importBtn);
+        return row;
+    }
+
+    void ShowExportModal()
+    {
+        var slots = GameSaveManager.GetAllSlots().Where(x => x.exists).ToList();
+        var items = new List<(string label, System.Action action)>();
+        foreach (var slot in slots)
+            items.Add(($"{slot.teamName}  ·  {slot.managerName}  ·  {slot.seasonYear}", () => DoExport(slot.slotNumber)));
+        if (items.Count == 0) items.Add(("No hay partidas que exportar", null));
+        ShowListModal("EXPORTAR PARTIDA", items);
+    }
+
+    void DoExport(int slot)
+    {
+        var info = GameSaveManager.GetSlot(slot);
+        string path = GameSaveManager.ExportSlot(slot, info?.managerName ?? "manager", info?.teamName ?? "equipo");
+        if (path == null) { ShowMessageModal("EXPORTAR PARTIDA", "No se pudo exportar la partida."); return; }
+        ShowMessageModal("PARTIDA EXPORTADA",
+            "Se ha guardado una copia:\n\n" + path + "\n\nPuedes copiar ese archivo fuera del juego para conservarlo.");
+    }
+
+    void ShowImportModal()
+    {
+        var files = GameSaveManager.ListExports();
+        var items = new List<(string label, System.Action action)>();
+        foreach (var f in files)
+            items.Add(($"{Path.GetFileName(f)}  ·  {File.GetLastWriteTime(f):dd/MM/yyyy HH:mm}", () => DoImport(f)));
+        if (items.Count == 0) items.Add(("No hay partidas exportadas", null));
+        ShowListModal("IMPORTAR PARTIDA", items);
+    }
+
+    void DoImport(string file)
+    {
+        int slot = GameSaveManager.ImportSave(file);
+        if (slot < 0) { ShowMessageModal("IMPORTAR PARTIDA", "No se pudo importar el archivo."); return; }
+        if (DatabaseManager.Instance.InitSaveSlot(slot))
+            GameSaveManager.UpdateSlotFromDatabase(slot);
+        RefreshSlots();
+        ShowMessageModal("PARTIDA IMPORTADA", $"La partida se ha importado en el slot {slot}.");
+    }
+
+    /// <summary>Modal procedural con una lista de acciones (una fila por elemento).</summary>
+    void ShowListModal(string title, List<(string label, System.Action action)> items)
+    {
+        var overlay = CreateModalBase(title, out var box);
+        var body = new VisualElement();
+        body.AddToClassList("modal-body");
+        foreach (var (label, action) in items)
+        {
+            var row = new Button { text = label };
+            row.AddToClassList("modal-btn");
+            row.style.marginBottom = 6;
+            row.style.unityTextAlign = TextAnchor.MiddleLeft;
+            if (action == null)
+            {
+                row.SetEnabled(false);
+            }
+            else
+            {
+                var act = action;
+                row.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); act(); });
+                CursorManager.Instance?.RegisterHandCursor(row);
+            }
+            body.Add(row);
+        }
+        box.Add(body);
+        AddModalClose(overlay, box);
+        _root.Add(overlay);
+    }
+
+    void ShowMessageModal(string title, string text)
+    {
+        var overlay = CreateModalBase(title, out var box);
+        var body = new VisualElement();
+        body.AddToClassList("modal-body");
+        var label = new Label(text);
+        label.AddToClassList("modal-paragraph");
+        label.style.whiteSpace = WhiteSpace.Normal;
+        body.Add(label);
+        box.Add(body);
+        AddModalClose(overlay, box);
+        _root.Add(overlay);
+    }
+
+    VisualElement CreateModalBase(string title, out VisualElement box)
+    {
+        var overlay = new VisualElement();
+        overlay.AddToClassList("modal-overlay");
+        // Las clases traen display:none (los modales de UXML los activan por código).
+        overlay.style.display = DisplayStyle.Flex;
+        overlay.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0.6f));
+
+        box = new VisualElement();
+        box.AddToClassList("modal-box");
+        box.style.display = DisplayStyle.Flex;
+        box.style.flexDirection = FlexDirection.Column;
+        box.style.position = Position.Relative; // .modal-box es absolute: así lo centra el overlay
+        overlay.Add(box);
+
+        var t = new Label(title);
+        t.AddToClassList("modal-title");
+        box.Add(t);
+        return overlay;
+    }
+
+    void AddModalClose(VisualElement overlay, VisualElement box)
+    {
+        var actions = new VisualElement();
+        actions.AddToClassList("modal-actions");
+        var close = new Button { text = "CERRAR" };
+        close.AddToClassList("modal-btn");
+        close.AddToClassList("modal-btn--secondary");
+        close.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
+        CursorManager.Instance?.RegisterHandCursor(close);
+        actions.Add(close);
+        box.Add(actions);
     }
 
     static bool IsSlotFired(int slotNumber)

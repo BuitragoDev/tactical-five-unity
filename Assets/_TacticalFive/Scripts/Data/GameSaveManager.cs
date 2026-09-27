@@ -50,6 +50,95 @@ public static class GameSaveManager
         }
     }
 
+    /// <summary>Carpeta de partidas exportadas (backup portable en un .db).</summary>
+    public static string ExportsDir => Path.Combine(BaseDir, "exports");
+
+    /// <summary>Copia la partida del slot a la carpeta de exportaciones. Devuelve la
+    /// ruta del archivo o null si el slot no existe.</summary>
+    public static string ExportSlot(int slotNumber, string managerName, string teamName)
+    {
+        try
+        {
+            string db = GetSaveDbPath(slotNumber);
+            if (!File.Exists(db)) return null;
+
+            // Si es la partida abierta, volcar el WAL antes de copiar para que el
+            // respaldo sea autocontenido.
+            if (DatabaseManager.Instance != null && DatabaseManager.Instance.ActiveSaveSlot == slotNumber)
+            {
+                try { DatabaseManager.Instance.Db.ExecuteScalar<string>("PRAGMA wal_checkpoint(TRUNCATE)"); }
+                catch { }
+            }
+
+            Directory.CreateDirectory(ExportsDir);
+            string name = $"liga_{Sanitize(teamName)}_{Sanitize(managerName)}_{System.DateTime.Now:yyyyMMdd_HHmmss}.db";
+            string dest = Path.Combine(ExportsDir, name);
+            File.Copy(db, dest, true);
+
+            // Sidecars por si el WAL no se pudo truncar.
+            foreach (var side in new[] { "-wal", "-shm" })
+                if (File.Exists(db + side))
+                    File.Copy(db + side, dest + side, true);
+
+            Debug.Log($"[GameSaveManager] Partida exportada: {dest}");
+            return dest;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameSaveManager] Error exportando el slot {slotNumber}: {e.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>Lista de partidas exportadas, de la más reciente a la más antigua.</summary>
+    public static List<string> ListExports()
+    {
+        if (!Directory.Exists(ExportsDir)) return new List<string>();
+        return Directory.GetFiles(ExportsDir, "liga_*.db")
+            .OrderByDescending(File.GetLastWriteTime)
+            .ToList();
+    }
+
+    /// <summary>Importa un archivo exportado al siguiente slot libre. Devuelve el slot
+    /// (o -1 si no se pudo).</summary>
+    public static int ImportSave(string filePath)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return -1;
+
+            EnsureBaseDir();
+            int slot = FindNextAvailableSlot();
+            string db = GetSaveDbPath(slot);
+            File.Copy(filePath, db, true);
+
+            foreach (var side in new[] { "-wal", "-shm" })
+            {
+                if (File.Exists(db + side)) File.Delete(db + side);
+                if (File.Exists(filePath + side)) File.Copy(filePath + side, db + side, true);
+            }
+
+            Debug.Log($"[GameSaveManager] Partida importada al slot {slot}: {filePath}");
+            return slot;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameSaveManager] Error importando {filePath}: {e.Message}");
+            return -1;
+        }
+    }
+
+    /// <summary>Nombre de archivo seguro (sin rutas ni caracteres raros).</summary>
+    private static string Sanitize(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "partida";
+        var invalid = Path.GetInvalidFileNameChars();
+        var sb = new System.Text.StringBuilder(text.Length);
+        foreach (char c in text)
+            sb.Append(invalid.Contains(c) || c == ' ' ? '_' : c);
+        return sb.ToString();
+    }
+
     public static string GetSaveDbPath(int slotNumber)
     {
         return Path.Combine(BaseDir, $"save_{slotNumber}.db");
