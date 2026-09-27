@@ -38,7 +38,9 @@ public static class StorylineCatalog
     public const int HOT_GAMES = 3;          // partidos seguidos anotando
     public const int HOT_POINTS = 27;        // puntos para considerar "caliente"
     public const int COLD_GAMES = 3;         // partidos seguidos desaparecido
-    public const int COLD_POINTS = 10;       // puntos para considerar "seco"
+    public const int COLD_POINTS_MIN = 6;    // suelo del umbral de sequía (umbral relativo)
+    public const float COLD_PCT = 0.45f;     // sequía = ≤45% de su media anotadora de la temporada
+    public const float SLUMP_MIN_AVG_MINUTES = 12f; // minutos medios para que una sequía sea creíble
     public const int UNREST_MORALE = 35;     // moral por debajo de la cual hay descontento
     public const int UNREST_MINUTES_PCT = 50; // % de los minutos esperados por debajo del cual hay descontento
     public const int STAR_OVERALL = 85;       // overall a partir del cual una baja es "de estrella"
@@ -139,11 +141,24 @@ public static class StorylineCatalog
         return PlayerStreakTransitions(ctx, def, active, best, StorylineType.JugadorCaliente, up: true);
     }
 
-    /// <summary>Jugador en sequía (3+ partidos con 10 puntos o menos).</summary>
+    /// <summary>Jugador en sequía: 3+ partidos por debajo de SU umbral (relativo a su media).</summary>
     public static List<StorylineTransition> DetectSlump(StorylineContext ctx, StorylineDef def, StorylineData active)
     {
-        var best = FindPointsStreak(ctx, COLD_POINTS, atLeast: false, minGames: COLD_GAMES);
+        var best = FindPointsStreak(ctx, COLD_POINTS_MIN, atLeast: false, minGames: COLD_GAMES,
+                                    minAvgMinutes: SLUMP_MIN_AVG_MINUTES);
         return PlayerStreakTransitions(ctx, def, active, best, StorylineType.Sequia, up: false);
+    }
+
+    /// <summary>
+    /// Umbral de "partido seco" de un jugador. Relativo a su media anotadora de la
+    /// temporada (≤45%) con un suelo absoluto: un especialista defensivo de 5 puntos por
+    /// partido no está "en sequía" cada noche, y una estrella de 30 sí lo está al anotar 14.
+    /// </summary>
+    public static int ColdThreshold(StorylineContext ctx, PlayerData p)
+    {
+        float ppg = 0f;
+        if (ctx != null && ctx.SeasonPpg != null) ctx.SeasonPpg.TryGetValue(p.id, out ppg);
+        return Mathf.Max(COLD_POINTS_MIN, Mathf.RoundToInt(ppg * COLD_PCT));
     }
 
     /// <summary>Descontento: moral baja y minutos muy por debajo de lo que pide su rol.</summary>
@@ -505,18 +520,26 @@ public static class StorylineCatalog
 
     /// <summary>Jugador con más partidos seguidos cumpliendo el umbral de puntos.</summary>
     public static (PlayerData player, int games, float avg)? FindPointsStreak(StorylineContext ctx, int points,
-                                                                             bool atLeast, int minGames)
+                                                                             bool atLeast, int minGames,
+                                                                             float minAvgMinutes = 0f)
     {
         (PlayerData, int, float)? best = null;
         foreach (var p in ctx.Roster)
         {
+            // Una sequía debe ser creíble: no se narra la de quien apenas juega ni la de
+            // un último recurso (su poco protagonismo ya viene del rol, ver Descontento).
+            if (minAvgMinutes > 0f && p.role == PlayerRole.UltimoRecurso) continue;
             if (!ctx.RecentByPlayer.TryGetValue(p.id, out var games) || games.Count < minGames) continue;
+            if (minAvgMinutes > 0f && games.Average(g => g.minutes) < minAvgMinutes) continue;
+
+            // El umbral es relativo a su media cuando el detector lo pide (sequía).
+            int threshold = atLeast ? points : Mathf.Max(points, ColdThreshold(ctx, p));
 
             int streak = 0;
             float sum = 0f;
             foreach (var g in games)
             {
-                bool ok = atLeast ? g.points >= points : g.points <= points;
+                bool ok = atLeast ? g.points >= threshold : g.points <= threshold;
                 if (!ok) break;
                 streak++;
                 sum += g.points;
@@ -525,11 +548,19 @@ public static class StorylineCatalog
 
             float avg = sum / streak;
             if (best == null || streak > best.Value.Item2
-                || (streak == best.Value.Item2 && avg > best.Value.Item3))
+                || (streak == best.Value.Item2 && IsMoreRelevant(p, avg, best.Value)))
                 best = (p, streak, avg);
         }
         return best;
     }
+
+    /// <summary>
+    /// Desempate a igual racha: el jugador más relevante (mayor OVR) genera mejor noticia;
+    /// a igual OVR, la media más alta (menos malo en una sequía, más meritorio en una racha).
+    /// </summary>
+    static bool IsMoreRelevant(PlayerData candidate, float avg, (PlayerData player, int games, float avg) current)
+        => candidate.overall > current.player.overall
+           || (candidate.overall == current.player.overall && avg > current.avg);
 
     /// <summary>Jugador con moral baja que juega por debajo de la mitad de lo que pide su rol.</summary>
     public static (PlayerData player, int avgMinutes)? FindUnderusedPlayer(StorylineContext ctx)
@@ -561,6 +592,7 @@ public static class StorylineCatalog
         {
             if (best == null) return result;
             var (p, streak, avg) = best.Value;
+            int cold = ColdThreshold(ctx, p);
             result.Add(new StorylineTransition
             {
                 type = type,
@@ -570,10 +602,10 @@ public static class StorylineCatalog
                 title = up ? $"En racha: {p.first_name} {p.last_name}" : $"Sequía: {p.first_name} {p.last_name}",
                 summary = up
                     ? $"{streak} partidos seguidos por encima de {HOT_POINTS} puntos ({avg:N1} de media)"
-                    : $"{streak} partidos seguidos por debajo de {COLD_POINTS} puntos ({avg:N1} de media)",
+                    : $"{streak} partidos seguidos por debajo de {cold} puntos ({avg:N1} de media)",
                 body = up
                     ? $"{p.first_name} {p.last_name} está en un momento dulce: {streak} partidos consecutivos superando los {HOT_POINTS} puntos, con {avg:N1} de media.\n\nSu nombre empieza a sonar en las quinielas de los premios de la temporada."
-                    : $"{p.first_name} {p.last_name} no encuentra su sitio: {streak} partidos seguidos por debajo de los {COLD_POINTS} puntos.\n\nEl vestuario y la prensa se preguntan qué le está pasando.",
+                    : $"{p.first_name} {p.last_name} no encuentra su sitio: {streak} partidos seguidos por debajo de los {cold} puntos.\n\nEl vestuario y la prensa se preguntan qué le está pasando.",
                 newsType = NewsType.EXPLOSION,
                 morale = up ? 3 : -2
             });
@@ -616,7 +648,7 @@ public static class StorylineCatalog
                     : $"{best.Value.Item2} partidos seguidos sin aparecer",
                 body = up
                     ? $"{subject.first_name} {subject.last_name} encadena {best.Value.Item2} partidos por encima de los {HOT_POINTS} puntos. La liga entera habla de su momento de forma."
-                    : $"{subject.first_name} {subject.last_name} acumula {best.Value.Item2} partidos por debajo de los {COLD_POINTS} puntos. Empieza a ser un problema serio para el equipo.",
+                    : $"{subject.first_name} {subject.last_name} acumula {best.Value.Item2} partidos por debajo de los {ColdThreshold(ctx, subject)} puntos. Empieza a ser un problema serio para el equipo.",
                 newsType = up ? NewsType.EXPLOSION : NewsType.SEQUIA,
                 morale = up ? 2 : -2
             });

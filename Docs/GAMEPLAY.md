@@ -265,13 +265,21 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   |---|---|---|
   | `racha_positiva` / `bache` | racha del equipo | 5 victorias/derrotas (escala cada 5) |
   | `jugador_caliente` | puntos por partido | 3 partidos seguidos ≥27 (escala cada 2) |
-  | `sequia` | puntos por partido | 3 partidos seguidos ≤10 |
+  | `sequia` | puntos por partido | 3 partidos seguidos por debajo de **su** umbral: `max(6, 45 % de su media anotadora de la temporada)`; exige ≥12 min de media y no aplica a `UltimoRecurso` |
   | `descontento` | moral + minutos vs rol | moral <35 y <50% de los minutos esperados |
   | `rumor_traspaso` | trade block / contrato expirante | expirante con moral <40 o en el mercado |
   | `baja_estrella` | lesión | OVR ≥85 y ≥7 días de baja |
   | `presion_gm` | afición y confianza | afición <30 y trust <45 |
   | `caza_playoffs` | rank de conferencia | ≤25 partidos restantes y rank ≥7 |
   | `crisis_economica` | presupuesto | presupuesto <0 o ≥2 avisos |
+- **Elegibilidad de los hilos de jugador:** el umbral de sequía es **relativo** (un
+  especialista defensivo de 5 puntos no está "seco" cada noche; una estrella de 30 sí lo
+  está al anotar 14), se exige protagonismo (≥12 min de media en los últimos partidos) y
+  se excluye al `UltimoRecurso`. Los partidos sin minutos (DNP) no cuentan ni rompen la
+  racha: la racha se mide sobre partidos jugados; el que no juega es historia de
+  `descontento`, no de `sequia`.
+- **Desempate:** a igual racha, se narra la del jugador **más relevante** (mayor OVR; a
+  igual OVR, la media más alta).
 - **Visibilidad:** pestaña **HISTORIA** en Palmarés (activos + histórico con línea
   temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el

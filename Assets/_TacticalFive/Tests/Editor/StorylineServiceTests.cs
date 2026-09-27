@@ -159,6 +159,111 @@ public class StorylineServiceTests
         Assert.That(StorylineCatalog.FindPointsStreak(ctx, StorylineCatalog.HOT_POINTS, true, 3), Is.Null);
     }
 
+    // ── SEQUÍA: umbral relativo, minutos y relevancia ───────
+
+    [Test]
+    public void ColdThreshold_IsRelativeToSeasonAverage_WithFloor()
+    {
+        var p = new PlayerData { id = 1 };
+        var ctx = Ctx(p);
+        ctx.SeasonPpg[1] = 30f;   // 30 * 0.45 = 13.5 -> 14
+        Assert.That(StorylineCatalog.ColdThreshold(ctx, p), Is.EqualTo(14));
+
+        ctx.SeasonPpg[1] = 8f;    // 3.6 -> por debajo del suelo
+        Assert.That(StorylineCatalog.ColdThreshold(ctx, p), Is.EqualTo(StorylineCatalog.COLD_POINTS_MIN));
+
+        ctx.SeasonPpg.Clear();    // sin datos de temporada: suelo
+        Assert.That(StorylineCatalog.ColdThreshold(ctx, p), Is.EqualTo(StorylineCatalog.COLD_POINTS_MIN));
+    }
+
+    [Test]
+    public void DetectSlump_UsesRelativeThreshold()
+    {
+        // Tirador de 4 puntos por partido: 4 no es "sequía" (su umbral es 6).
+        var bajo = new PlayerData { id = 1, first_name = "Bajo", last_name = "Perfil",
+                                    role = PlayerRole.Banquillo, overall = 60 };
+        var ctx = Ctx(bajo);
+        ctx.SeasonPpg[1] = 12f;                     // umbral = max(6, 5) = 6
+        AddGame(ctx, 1, 4, 25f);
+        AddGame(ctx, 1, 5, 25f);
+        AddGame(ctx, 1, 6, 25f);
+
+        var def = StorylineCatalog.Find(StorylineType.Sequia);
+        Assert.That(StorylineCatalog.DetectSlump(ctx, def, null), Is.Empty,
+            "4-5-6 puntos no es sequía para un jugador que promedia 12");
+    }
+
+    [Test]
+    public void DetectSlump_IgnoresPlayersWhoBarelyPlay()
+    {
+        // 3 partidos fríos pero solo 8 minutos de media: es un problema de rol (Descontento).
+        var suplente = new PlayerData { id = 1, role = PlayerRole.Banquillo, overall = 70 };
+        var ctx = Ctx(suplente);
+        ctx.SeasonPpg[1] = 30f;                     // umbral 14
+        AddGame(ctx, 1, 2, 8f);
+        AddGame(ctx, 1, 3, 8f);
+        AddGame(ctx, 1, 4, 8f);
+
+        var def = StorylineCatalog.Find(StorylineType.Sequia);
+        Assert.That(StorylineCatalog.DetectSlump(ctx, def, null), Is.Empty);
+    }
+
+    [Test]
+    public void DetectSlump_IgnoresUltimoRecurso()
+    {
+        var ultimo = new PlayerData { id = 1, role = PlayerRole.UltimoRecurso, overall = 65 };
+        var ctx = Ctx(ultimo);
+        ctx.SeasonPpg[1] = 30f;
+        AddGame(ctx, 1, 2, 30f);
+        AddGame(ctx, 1, 3, 30f);
+        AddGame(ctx, 1, 4, 30f);
+
+        var def = StorylineCatalog.Find(StorylineType.Sequia);
+        Assert.That(StorylineCatalog.DetectSlump(ctx, def, null), Is.Empty);
+    }
+
+    [Test]
+    public void DetectSlump_OpensForUnderperformingStar()
+    {
+        var estrella = new PlayerData { id = 1, first_name = "Estrella", last_name = "Uno",
+                                        role = PlayerRole.Estrella, overall = 92 };
+        var ctx = Ctx(estrella);
+        ctx.SeasonPpg[1] = 30f;                     // umbral 14
+        AddGame(ctx, 1, 10, 36f);
+        AddGame(ctx, 1, 12, 35f);
+        AddGame(ctx, 1, 9, 34f);
+
+        var def = StorylineCatalog.Find(StorylineType.Sequia);
+        var t = StorylineCatalog.DetectSlump(ctx, def, null);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Start));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(1));
+        Assert.That(t[0].summary, Does.Contain("14"), "El texto usa el umbral del jugador");
+    }
+
+    [Test]
+    public void FindPointsStreak_TieBreakPrefersRelevantPlayer()
+    {
+        // Misma racha fría: se narra la del jugador más relevante (mayor OVR).
+        var suplente = new PlayerData { id = 1, overall = 68, role = PlayerRole.Banquillo };
+        var estrella = new PlayerData { id = 2, overall = 91, role = PlayerRole.Estrella };
+        var ctx = Ctx(suplente, estrella);
+        ctx.SeasonPpg[1] = 30f; ctx.SeasonPpg[2] = 30f;
+        foreach (int id in new[] { 1, 2 })
+        {
+            AddGame(ctx, id, 5, 30f);
+            AddGame(ctx, id, 6, 30f);
+            AddGame(ctx, id, 7, 30f);
+        }
+
+        var best = StorylineCatalog.FindPointsStreak(ctx, StorylineCatalog.COLD_POINTS_MIN,
+                                                     atLeast: false, minGames: 3,
+                                                     minAvgMinutes: StorylineCatalog.SLUMP_MIN_AVG_MINUTES);
+        Assert.That(best, Is.Not.Null);
+        Assert.That(best.Value.player.id, Is.EqualTo(2));
+    }
+
     [Test]
     public void FindUnderusedPlayer_DetectsLowMoraleAndMinutes()
     {
