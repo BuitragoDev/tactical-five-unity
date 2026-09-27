@@ -459,7 +459,16 @@ public class LoadGameController : UIScreenController
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }
 
-    // ── EXPORTAR / IMPORTAR PARTIDA (QoL) ───────────────────
+    // ── COPIAS DE SEGURIDAD (QoL) ───────────────────────────
+    /// <summary>Definición de una fila de las listas de los modales.</summary>
+    class ListRowDef
+    {
+        public string logo;
+        public string title;
+        public string sub;
+        public System.Action onClick;
+        public System.Action onDelete;
+    }
 
     VisualElement BuildTransferRow()
     {
@@ -468,100 +477,209 @@ public class LoadGameController : UIScreenController
         row.style.justifyContent = Justify.Center;
         row.style.marginBottom = 10;
 
-        var exportBtn = new Button { text = "EXPORTAR PARTIDA" };
-        exportBtn.AddToClassList("modal-btn");
-        exportBtn.AddToClassList("modal-btn--secondary");
-        exportBtn.style.marginRight = 8;
-        exportBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowExportModal(); });
-        row.Add(exportBtn);
+        var saveBtn = new Button { text = "GUARDAR COPIA" };
+        saveBtn.AddToClassList("modal-btn");
+        saveBtn.AddToClassList("modal-btn--primary");
+        saveBtn.style.marginRight = 8;
+        saveBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowExportModal(); });
+        row.Add(saveBtn);
 
-        var importBtn = new Button { text = "IMPORTAR PARTIDA" };
-        importBtn.AddToClassList("modal-btn");
-        importBtn.AddToClassList("modal-btn--secondary");
-        importBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowImportModal(); });
-        row.Add(importBtn);
+        var restoreBtn = new Button { text = "RESTAURAR COPIA" };
+        restoreBtn.AddToClassList("modal-btn");
+        restoreBtn.AddToClassList("modal-btn--secondary");
+        restoreBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowImportModal(); });
+        row.Add(restoreBtn);
 
-        CursorManager.Instance?.RegisterHandCursor(exportBtn);
-        CursorManager.Instance?.RegisterHandCursor(importBtn);
+        CursorManager.Instance?.RegisterHandCursor(saveBtn);
+        CursorManager.Instance?.RegisterHandCursor(restoreBtn);
         return row;
     }
 
     void ShowExportModal()
     {
-        var slots = GameSaveManager.GetAllSlots().Where(x => x.exists).ToList();
-        var items = new List<(string label, System.Action action)>();
-        foreach (var slot in slots)
-            items.Add(($"{slot.teamName}  ·  {slot.managerName}  ·  {slot.seasonYear}", () => DoExport(slot.slotNumber)));
-        if (items.Count == 0) items.Add(("No hay partidas que exportar", null));
-        ShowListModal("EXPORTAR PARTIDA", items);
+        var defs = new List<ListRowDef>();
+        foreach (var slot in GameSaveManager.GetAllSlots().Where(x => x.exists))
+        {
+            int slotNumber = slot.slotNumber;
+            defs.Add(new ListRowDef
+            {
+                logo = slot.teamLogo,
+                title = slot.teamName ?? "Equipo",
+                sub = $"{slot.managerName} · {slot.seasonYear} · Jugado {slot.lastPlayedRealDate}",
+                onClick = () => DoExport(slotNumber)
+            });
+        }
+        if (defs.Count == 0)
+            defs.Add(new ListRowDef { title = "No hay partidas que copiar", sub = "Crea una partida desde el menú principal" });
+
+        ShowScrollListModal("GUARDAR COPIA DE PARTIDA", defs,
+            "Elige la partida de la que quieres una copia de seguridad (no se modifica).",
+            new List<(string, System.Action)> { ("ABRIR CARPETA", OpenExportsFolder) });
     }
 
     void DoExport(int slot)
     {
         var info = GameSaveManager.GetSlot(slot);
         string path = GameSaveManager.ExportSlot(slot, info?.managerName ?? "manager", info?.teamName ?? "equipo");
-        if (path == null) { ShowMessageModal("EXPORTAR PARTIDA", "No se pudo exportar la partida."); return; }
-        ShowMessageModal("PARTIDA EXPORTADA",
-            "Se ha guardado una copia:\n\n" + path + "\n\nPuedes copiar ese archivo fuera del juego para conservarlo.");
+        if (path == null)
+        {
+            ShowMessageModal("GUARDAR COPIA", "No se pudo crear la copia de la partida.", null);
+            return;
+        }
+        ShowMessageModal("COPIA GUARDADA",
+            "Se ha creado una copia de seguridad congelada de esta partida.\n\n" +
+            $"Archivo: {Path.GetFileName(path)}\n\n" +
+            "El juego NO modifica esa copia: sirve para volver a este punto con RESTAURAR COPIA " +
+            "o para guardarla fuera del juego (USB, nube...).",
+            new List<(string, System.Action)> { ("ABRIR CARPETA", OpenExportsFolder) });
     }
 
     void ShowImportModal()
     {
-        var files = GameSaveManager.ListExports();
-        var items = new List<(string label, System.Action action)>();
-        foreach (var f in files)
-            items.Add(($"{Path.GetFileName(f)}  ·  {File.GetLastWriteTime(f):dd/MM/yyyy HH:mm}", () => DoImport(f)));
-        if (items.Count == 0) items.Add(("No hay partidas exportadas", null));
-        ShowListModal("IMPORTAR PARTIDA", items);
+        var defs = new List<ListRowDef>();
+        foreach (var exp in GameSaveManager.ListExportInfos())
+        {
+            var e = exp;
+            defs.Add(new ListRowDef
+            {
+                logo = e.teamLogo,
+                title = string.IsNullOrEmpty(e.teamName) ? e.fileName : $"{e.teamName} · {e.managerName}",
+                sub = $"{e.date:dd/MM/yyyy HH:mm} · {FormatSize(e.sizeBytes)} · Pulsa para restaurar",
+                onClick = () => DoImport(e.path),
+                onDelete = () => { GameSaveManager.DeleteExport(e.path); RefreshSlots(); ShowImportModal(); }
+            });
+        }
+        if (defs.Count == 0)
+            defs.Add(new ListRowDef { title = "No hay copias guardadas", sub = "Usa GUARDAR COPIA para crear una" });
+
+        ShowScrollListModal("RESTAURAR COPIA", defs,
+            "Se restaurará como partida NUEVA en el siguiente slot libre (no borra ninguna partida).",
+            new List<(string, System.Action)> { ("ABRIR CARPETA", OpenExportsFolder) });
     }
 
     void DoImport(string file)
     {
         int slot = GameSaveManager.ImportSave(file);
-        if (slot < 0) { ShowMessageModal("IMPORTAR PARTIDA", "No se pudo importar el archivo."); return; }
+        if (slot < 0)
+        {
+            ShowMessageModal("RESTAURAR COPIA", "No se pudo restaurar la copia (archivo no válido).", null);
+            return;
+        }
         if (DatabaseManager.Instance.InitSaveSlot(slot))
             GameSaveManager.UpdateSlotFromDatabase(slot);
         RefreshSlots();
-        ShowMessageModal("PARTIDA IMPORTADA", $"La partida se ha importado en el slot {slot}.");
+        ShowMessageModal("COPIA RESTAURADA",
+            $"La copia se ha restaurado como partida en el slot {slot}. Ya aparece en la lista para cargarla.",
+            null);
     }
 
-    /// <summary>Modal procedural con una lista de acciones (una fila por elemento).</summary>
-    void ShowListModal(string title, List<(string label, System.Action action)> items)
+    void OpenExportsFolder()
     {
-        var overlay = CreateModalBase(title, out var box);
-        var body = new VisualElement();
-        body.AddToClassList("modal-body");
-        foreach (var (label, action) in items)
+        try
         {
-            var row = new Button { text = label };
-            row.AddToClassList("modal-btn");
-            // La clase base no define color (quedaba texto oscuro ilegible): las filas
-            // seleccionables van en azul y la de aviso en gris.
-            row.AddToClassList(action == null ? "modal-btn--secondary" : "modal-btn--primary");
-            row.style.minWidth = 0;
-            row.style.alignSelf = Align.Stretch;
-            row.style.marginBottom = 6;
-            row.style.unityTextAlign = TextAnchor.MiddleLeft;
-            if (action == null)
-            {
-                row.SetEnabled(false);
-            }
-            else
-            {
-                var act = action;
-                row.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); act(); });
-                CursorManager.Instance?.RegisterHandCursor(row);
-            }
-            body.Add(row);
+            Directory.CreateDirectory(GameSaveManager.ExportsDir);
+            Application.OpenURL("file://" + GameSaveManager.ExportsDir);
         }
-        box.Add(body);
-        AddModalClose(overlay, box);
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[LoadGame] No se pudo abrir la carpeta de copias: {e.Message}");
+        }
+    }
+
+    static string FormatSize(long bytes)
+    {
+        if (bytes >= 1024 * 1024) return $"{bytes / 1024f / 1024f:N1} MB";
+        if (bytes >= 1024) return $"{bytes / 1024f:N0} KB";
+        return $"{bytes} B";
+    }
+
+    // ── MODALES PROCEDURALES ────────────────────────────────
+    /// <summary>Modal con lista scrollable de alto fijo (caben ~4-5 filas).</summary>
+    void ShowScrollListModal(string title, List<ListRowDef> defs, string subtitle,
+                             List<(string label, System.Action action)> footerExtra)
+    {
+        var overlay = CreateModalBase(title, subtitle, out var box);
+
+        var listWrap = new VisualElement();
+        listWrap.style.flexDirection = FlexDirection.Row;
+        listWrap.style.height = 320;
+        listWrap.style.marginLeft = 24;
+        listWrap.style.marginRight = 24;
+
+        var viewport = new VisualElement();
+        viewport.AddToClassList("lgx-viewport");
+        var content = new VisualElement();
+        content.AddToClassList("lgx-content");
+        viewport.Add(content);
+        listWrap.Add(viewport);
+
+        var track = new VisualElement();
+        track.AddToClassList("lgx-track");
+        var thumb = new VisualElement();
+        thumb.AddToClassList("lgx-thumb");
+        track.Add(thumb);
+        listWrap.Add(track);
+
+        foreach (var d in defs)
+        {
+            var def = d;
+            content.Add(BuildListRow(def.logo, def.title, def.sub,
+                def.onClick == null ? null : () => { overlay.RemoveFromHierarchy(); def.onClick(); },
+                def.onDelete == null ? null : () => { overlay.RemoveFromHierarchy(); def.onDelete(); }));
+        }
+
+        box.Add(listWrap);
+        CustomScrollbar.Bind(viewport, content, track, thumb);
+        AddModalFooter(overlay, box, footerExtra);
         _root.Add(overlay);
     }
 
-    void ShowMessageModal(string title, string text)
+    VisualElement BuildListRow(string logoName, string title, string sub, System.Action onClick, System.Action onDelete)
     {
-        var overlay = CreateModalBase(title, out var box);
+        var row = new VisualElement();
+        row.AddToClassList("lgx-row");
+
+        var logo = new VisualElement();
+        logo.AddToClassList("lgx-logo");
+        var sprite = string.IsNullOrEmpty(logoName) ? null : TeamImages.Logo(64, logoName);
+        if (sprite != null) logo.style.backgroundImage = new StyleBackground(sprite);
+        row.Add(logo);
+
+        var col = new VisualElement();
+        col.AddToClassList("lgx-col");
+        var titleLbl = new Label(title);
+        titleLbl.AddToClassList("lgx-title");
+        col.Add(titleLbl);
+        if (!string.IsNullOrEmpty(sub))
+        {
+            var subLbl = new Label(sub);
+            subLbl.AddToClassList("lgx-sub");
+            subLbl.style.whiteSpace = WhiteSpace.Normal;
+            col.Add(subLbl);
+        }
+        row.Add(col);
+
+        if (onClick != null)
+        {
+            row.RegisterCallback<ClickEvent>(_ => { PlayClick(); onClick(); });
+            CursorManager.Instance?.RegisterHandCursor(row);
+        }
+
+        if (onDelete != null)
+        {
+            var del = new Button { text = "✕" };
+            del.AddToClassList("lgx-del");
+            del.RegisterCallback<ClickEvent>(evt => { evt.StopPropagation(); PlayClick(); onDelete(); });
+            CursorManager.Instance?.RegisterHandCursor(del);
+            row.Add(del);
+        }
+
+        return row;
+    }
+
+    void ShowMessageModal(string title, string text, List<(string label, System.Action action)> footerExtra)
+    {
+        var overlay = CreateModalBase(title, null, out var box);
         var body = new VisualElement();
         body.AddToClassList("modal-body");
         var label = new Label(text);
@@ -569,11 +687,11 @@ public class LoadGameController : UIScreenController
         label.style.whiteSpace = WhiteSpace.Normal;
         body.Add(label);
         box.Add(body);
-        AddModalClose(overlay, box);
+        AddModalFooter(overlay, box, footerExtra);
         _root.Add(overlay);
     }
 
-    VisualElement CreateModalBase(string title, out VisualElement box)
+    VisualElement CreateModalBase(string title, string subtitle, out VisualElement box)
     {
         var overlay = new VisualElement();
         overlay.AddToClassList("modal-overlay");
@@ -586,18 +704,46 @@ public class LoadGameController : UIScreenController
         box.style.display = DisplayStyle.Flex;
         box.style.flexDirection = FlexDirection.Column;
         box.style.position = Position.Relative; // .modal-box es absolute: así lo centra el overlay
+        box.style.width = 820;
         overlay.Add(box);
 
         var t = new Label(title);
         t.AddToClassList("modal-title");
         box.Add(t);
+
+        if (!string.IsNullOrEmpty(subtitle))
+        {
+            var sub = new Label(subtitle);
+            sub.AddToClassList("modal-paragraph");
+            sub.style.marginTop = 10;
+            sub.style.marginLeft = 24;
+            sub.style.marginRight = 24;
+            sub.style.fontSize = 16;
+            box.Add(sub);
+        }
         return overlay;
     }
 
-    void AddModalClose(VisualElement overlay, VisualElement box)
+    void AddModalFooter(VisualElement overlay, VisualElement box, List<(string label, System.Action action)> extra)
     {
         var actions = new VisualElement();
         actions.AddToClassList("modal-actions");
+
+        if (extra != null)
+        {
+            foreach (var (label, action) in extra)
+            {
+                var b = new Button { text = label };
+                b.AddToClassList("modal-btn");
+                b.AddToClassList("modal-btn--primary");
+                b.style.marginRight = 8;
+                var act = action;
+                b.RegisterCallback<ClickEvent>(_ => { PlayClick(); act?.Invoke(); });
+                CursorManager.Instance?.RegisterHandCursor(b);
+                actions.Add(b);
+            }
+        }
+
         var close = new Button { text = "CERRAR" };
         close.AddToClassList("modal-btn");
         close.AddToClassList("modal-btn--secondary");

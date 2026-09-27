@@ -176,4 +176,17 @@ public class GameSaveManagerTests
         Assert.That(GameSaveManager.ImportSave(null), Is.EqualTo(-1));
         Assert.That(GameSaveManager.ImportSave(Path.Combine(_dir, "no_existe.db")), Is.EqualTo(-1));
     }
+
+    [Test]
+    public void DeleteExport_RemovesTheBackup()
+    {
+        WriteDb(DbPath(1));
+        string path = GameSaveManager.ExportSlot(1, "GM", "Equipo");
+        Assert.That(File.Exists(path), Is.True);
+
+        Assert.That(GameSaveManager.DeleteExport(path), Is.True);
+
+        Assert.That(File.Exists(path), Is.False);
+        Assert.That(GameSaveManager.ListExports(), Is.Empty);
+    }
 }

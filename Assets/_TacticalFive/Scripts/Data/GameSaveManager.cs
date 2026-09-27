@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using SQLite;
 
 public static class GameSaveManager
 {
@@ -87,6 +88,83 @@ public static class GameSaveManager
         {
             Debug.LogError($"[GameSaveManager] Error exportando el slot {slotNumber}: {e.Message}");
             return null;
+        }
+    }
+
+    /// <summary>Datos de una partida exportada, para pintarla con logo y fecha.</summary>
+    public class ExportInfo
+    {
+        public string path;
+        public string fileName;
+        public string teamName;
+        public string teamLogo;
+        public string managerName;
+        public System.DateTime date;
+        public long sizeBytes;
+    }
+
+    private class ExportDbRow
+    {
+        public int team_id { get; set; }
+        public string name { get; set; }          // nombre del equipo
+        public string logo { get; set; }          // clave del logo
+        public string manager_name { get; set; }
+    }
+
+    /// <summary>Partidas exportadas con sus datos; el equipo/manager se leen del
+    /// propio .db (con la ruta y el nombre de archivo como respaldo).</summary>
+    public static List<ExportInfo> ListExportInfos()
+    {
+        var list = new List<ExportInfo>();
+        foreach (var path in ListExports())
+        {
+            var info = new ExportInfo
+            {
+                path = path,
+                fileName = Path.GetFileName(path),
+                date = File.GetLastWriteTime(path),
+                sizeBytes = new FileInfo(path).Length
+            };
+
+            try
+            {
+                using var conn = new SQLiteConnection(path, SQLiteOpenFlags.ReadOnly);
+                var row = conn.Query<ExportDbRow>(
+                    @"SELECT m.team_id AS team_id, t.name AS name, t.logo AS logo, m.name AS manager_name
+                      FROM managers m LEFT JOIN teams t ON t.id = m.team_id
+                      ORDER BY m.id DESC LIMIT 1").FirstOrDefault();
+                if (row != null)
+                {
+                    info.teamName = row.name;
+                    info.teamLogo = row.logo;
+                    info.managerName = row.manager_name;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[GameSaveManager] No se pudo leer la cabecera de {info.fileName}: {e.Message}");
+            }
+
+            list.Add(info);
+        }
+        return list;
+    }
+
+    /// <summary>Borra una copia exportada (y sus sidecars).</summary>
+    public static bool DeleteExport(string path)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
+            File.Delete(path);
+            foreach (var side in new[] { "-wal", "-shm" })
+                if (File.Exists(path + side)) File.Delete(path + side);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameSaveManager] No se pudo borrar la copia {path}: {e.Message}");
+            return false;
         }
     }
 
