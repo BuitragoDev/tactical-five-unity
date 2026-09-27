@@ -599,6 +599,9 @@
 }
 .lgx-content {
     flex-direction: column;
+    /* Sin flex-shrink el contenido no se comprime: desborda el viewport y el scroll
+       tiene recorrido (antes las filas se encogían para caber y el scroll no hacía nada). */
+    flex-shrink: 0;
 }
 .lgx-track {
     width: 12px;
@@ -624,6 +627,8 @@
 .lgx-row {
     flex-direction: row;
     align-items: center;
+    flex-shrink: 0;
+    min-height: 62px;
     padding: 8px 10px;
     margin-bottom: 6px;
     background-color: rgba(42, 95, 201, 0.08);
