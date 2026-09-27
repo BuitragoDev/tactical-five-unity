@@ -70,7 +70,11 @@
 
 .messages-list-col {
     flex-direction: column;
-    flex-grow: 1;
+    /* Ancho fijo: con flex-grow el ancho dependía del contenido de cada noticia y
+       la columna se movía al ir seleccionando. */
+    flex-grow: 0;
+    flex-shrink: 0;
+    flex-basis: 875px;
     width: 875px;
     min-height: 0;
 }
@@ -407,7 +411,10 @@
 
 /* ── NEWS DETAIL PANEL ── */
 .news-detail-panel {
+    /* Ocupa el espacio restante: con flex-basis 0 su tamaño no depende del texto. */
     flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
     min-width: 0;
     margin-left: 16px;
     background-color: rgb(13, 14, 18);
