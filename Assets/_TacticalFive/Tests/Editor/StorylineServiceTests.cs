@@ -241,7 +241,7 @@ public class StorylineServiceTests
         ctx.SeasonPpg[1] = 30f;   // 30 * 0.45 = 13.5 -> 14
         Assert.That(StorylineCatalog.ColdThreshold(ctx, p), Is.EqualTo(14));
 
-        ctx.SeasonPpg[1] = 8f;    // 3.6 -> por debajo del suelo
+        ctx.SeasonPpg[1] = 5f;    // 2.25 -> por debajo del suelo
         Assert.That(StorylineCatalog.ColdThreshold(ctx, p), Is.EqualTo(StorylineCatalog.COLD_POINTS_MIN));
 
         ctx.SeasonPpg.Clear();    // sin datos de temporada: suelo
@@ -251,18 +251,27 @@ public class StorylineServiceTests
     [Test]
     public void DetectSlump_UsesRelativeThreshold()
     {
-        // Tirador de 4 puntos por partido: 4 no es "sequía" (su umbral es 6).
+        // Anotador de 5 puntos por partido: 4-5-6 es su nivel normal, no una sequía
+        // (su umbral es max(3, 45% de 5) = 3).
         var bajo = new PlayerData { id = 1, first_name = "Bajo", last_name = "Perfil",
                                     role = PlayerRole.Banquillo, overall = 60 };
         var ctx = Ctx(bajo);
-        ctx.SeasonPpg[1] = 12f;                     // umbral = max(6, 5) = 6
+        ctx.SeasonPpg[1] = 5f;
         AddGame(ctx, 1, 4, 25f);
         AddGame(ctx, 1, 5, 25f);
         AddGame(ctx, 1, 6, 25f);
 
         var def = StorylineCatalog.Find(StorylineType.Sequia);
         Assert.That(StorylineCatalog.DetectSlump(ctx, def, null), Is.Empty,
-            "4-5-6 puntos no es sequía para un jugador que promedia 12");
+            "4-5-6 puntos no es sequía para un jugador que promedia 5");
+
+        // El mismo perfil anotando la mitad de lo suyo (≤3) sí es sequía.
+        var ctx2 = Ctx(new PlayerData { id = 1, role = PlayerRole.Banquillo, overall = 60 });
+        ctx2.SeasonPpg[1] = 4f;                     // umbral = max(3, 2) = 3
+        AddGame(ctx2, 1, 1, 25f);
+        AddGame(ctx2, 1, 2, 25f);
+        AddGame(ctx2, 1, 3, 25f);
+        Assert.That(StorylineCatalog.DetectSlump(ctx2, def, null), Has.Count.EqualTo(1));
     }
 
     [Test]

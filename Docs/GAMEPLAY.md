@@ -270,7 +270,7 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   |---|---|---|
   | `racha_positiva` / `bache` | racha del equipo | 5 victorias/derrotas (escala cada 5) |
   | `jugador_caliente` | puntos por partido | 3 partidos seguidos ≥27 (escala cada 2) |
-  | `sequia` | puntos por partido | 3 partidos seguidos por debajo de **su** umbral: `max(6, 45 % de su media anotadora de la temporada)`; exige ≥12 min de media y no aplica a `UltimoRecurso` |
+  | `sequia` | puntos por partido | 3 partidos seguidos por debajo de **su** umbral: `max(3, 45 % de su media anotadora de la temporada)`; exige ≥12 min de media y no aplica a `UltimoRecurso` |
   | `descontento` | moral + minutos vs rol | moral <35 y <50% de los minutos esperados |
   | `rumor_traspaso` | trade block / contrato expirante | expirante con moral <40 o en el mercado |
   | `baja_estrella` | lesión | OVR ≥85 y ≥7 días de baja |

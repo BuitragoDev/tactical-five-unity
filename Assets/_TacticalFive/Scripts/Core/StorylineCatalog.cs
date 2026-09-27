@@ -54,7 +54,7 @@ public static class StorylineCatalog
     public const int HOT_GAMES = 3;          // partidos seguidos anotando
     public const int HOT_POINTS = 27;        // puntos para considerar "caliente"
     public const int COLD_GAMES = 3;         // partidos seguidos desaparecido
-    public const int COLD_POINTS_MIN = 6;    // suelo del umbral de sequía (umbral relativo)
+    public const int COLD_POINTS_MIN = 3;    // suelo del umbral de sequía (un 5 ppg necesita ≤3, no ≤6)
     public const float COLD_PCT = 0.45f;     // sequía = ≤45% de su media anotadora de la temporada
     public const float SLUMP_MIN_AVG_MINUTES = 12f; // minutos medios para que una sequía sea creíble
     public const int UNREST_MORALE = 35;     // moral por debajo de la cual hay descontento
