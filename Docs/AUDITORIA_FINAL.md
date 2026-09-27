@@ -44,10 +44,10 @@
 | Bloque | Hallazgos | Hechos |
 |---|---|---|
 | CRÍTICOS | 9 | 9 |
-| ALTOS | 21 | 20 (quedan `UI-04` parcial y `CON-05`) |
-| MEDIOS | ~32 | 11 |
-| BAJOS | ~12 | 3 |
-| Tests propuestos | 25 | 13 (98 tests en total) |
+| ALTOS | 21 | **20** (queda `SEA-06`: histórico indexado por nombre) |
+| MEDIOS | ~32 | ~28 |
+| BAJOS | ~12 | ~10 |
+| Tests | — | **155** (de los 25 propuestos: 9 cerrados, 16 requieren DB/UI) |
 
 > **Fase 1 completada.** **Fase 2 muy avanzada:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (índices, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11` parcial), economía (`ECO-03/04/05/07/08`, `SEA-10`), rendimiento (`REN-01`, `CON-07`, `CON-08`), UI (`UI-03/05/06`), limpieza de código muerto y corrección de docs (`QA-07/08`), y **tests de persistencia** (`GameSaveManagerTests`, 7) con `BaseDirOverride`.
 > **Fase 2 cerrada salvo dos menores diferidos a propósito:** `UI-04` (re-bind del scrollbar *dentro* de una visita en 7 pantallas; el `BindScrollBar` está duplicado y el riesgo de romper el scroll supera al beneficio: hacerlo al unificar la scrollbar compartida) y `CON-05` (cachear standings por día; el coste real es ~1.230 filas/día, impacto bajo). Los tests de `InitSaveSlot`/`StartNewSeason` necesitan una `DatabaseManager` viva en EditMode (se abordarán si se añade un arnés de tests con DB).
@@ -525,7 +525,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `UI-04` · Scrollbar re-bindeada en cada rebuild dentro de la misma visita
-- **Estado:** `[~]` parcial
+- **Estado:** `[x]` hecho (`ScrollBarBinder`: un enlace por viewport y visita)
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[A]**
 - **Archivos:** `MessagesController.cs:223, 827` (cada tecla/filtro); `PalmaresController.cs` (varias, cada pestaña); `BuscadorController.cs:255`; `CarteraController.cs:714`; `GLeagueController.cs:411`; `HistorialController.cs:182`; `InjuredController.cs:817`
 - **Problema:** `BindScrollBar(...)` registra `WheelEvent`/pointer/`GeometryChangedEvent` sobre elementos persistidos durante la visita; se vuelve a llamar en cada rebuild → N handlers acumulados.
@@ -697,13 +697,13 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 > Los tests viven en `Assets/_TacticalFive/Tests/Editor/` (sin asmdef, EditMode). Los que requieren DB necesitan refactor para inyectar ruta (ver nota en `AGENTS.md §9`). Hoy: 85 tests.
 
 **Simulación (`GameSimulatorTests`)**
-- [ ] `SimulateGame_Overtime_AlwaysProducesWinner` (`SIM-04`)
+- [x] `SimulateGame_Overtime_AlwaysProducesWinner` (`SIM-04`) → `SimulateGame_ShortRoster_NeverEndsInTie` + `SimulateGame_FullRosters_AlwaysProducesWinner`
 - [ ] `HomeCourt_AppliedToActualHomeTeam_RegardlessOfUser` (`SIM-01`)
 - [ ] `BoxScore_NoRowsForZeroMinutes` (`SIM-02`)
 - [ ] `SeasonAggregate_GamesPlayed_ExcludesDNP` (`SIM-02`)
 - [ ] `GameSimulator_NeverMoreThanFiveOnCourt` / `NoDuplicateOnCourt`
-- [ ] `Rotation_AllZero_FallsBackToAutomatic` (`SIM-03`)
-- [ ] `Rotation_ZeroMinuteStarter_DoesNotStart` (`SIM-03`)
+- [x] `Rotation_AllZero_FallsBackToAutomatic` (`SIM-03`) → `PrepareRotationMetadata_AllZeroPlans_FallsBackToAutomatic`
+- [x] `Rotation_ZeroMinuteStarter_DoesNotStart` (`SIM-03`) → `InitialOnCourt_Strict_SkipsZeroMinuteStarter`
 - [ ] `Overtime_RespectsFixedRotation` (`SIM-12`)
 
 **Temporada / draft**
@@ -719,7 +719,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - [ ] `HistoricalStats_SameNameRookie_DoesNotInheritLegendTotals` (`SEA-06`)
 
 **Economía / traspasos / FA**
-- [ ] `Trade_Confirm_Revalidates_RejectsOverRoster17` (`ECO-02`)
+- [x] `Trade_Confirm_Revalidates_RejectsOverRoster17` (`ECO-02`) → implementado como `ValidateTrade_AcceptingTwoForOne_AtMaxRoster_ReportsError`
 - [ ] `SignAndTrade_Extension_RespectsHardCap` (`ECO-02`)
 - [ ] `Offer_TwoWay_Rejected_WhenLimitReached` (`ECO-03`)
 - [ ] `Offer_OwnRecentFA_CanExceedMLE_WithBirdRights` (`ECO-04`)
@@ -730,10 +730,10 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - [ ] `Trade_MovesPlayer_ResetsFlagsAndTenure` (`ECO-08`)
 
 **Persistencia (requiere refactor de rutas)**
-- [ ] **`SaveSlot_CorruptSavesJson_DoesNotDeleteDatabases`** (`SAV-01`) ← el más valioso
+- [x] **`SaveSlot_CorruptSavesJson_DoesNotDeleteDatabases`** (`SAV-01`) ← el más valioso (`GameSaveManagerTests`)
 - [ ] `InitSaveSlot_InterruptedClone_IsDetectedAndRebuilt` (`SAV-06`)
 - [ ] `RunMigrations_IsIdempotent_AndRecoversFromPartialColumns` (`SAV-04`)
-- [ ] `DeleteSave_RemovesWalAndShm` (`QA-04`)
+- [x] `DeleteSave_RemovesWalAndShm` (`QA-04`) → `CleanupOrphanDb_RemovesWalAndShm`
 - [ ] `InitSaveSlot_CorruptDb_ShowsErrorAndRecovers` (`SAV-05`)
 
 **UI / estado**
@@ -741,6 +741,14 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - [ ] `GameResultCache_ClearedOnLoadAndOnZeroGameDay` (`SIM-07`/`SIM-08`)
 
 ---
+
+### Tests implementados adicionales (no listados arriba)
+
+Además de los de la lista, se añadieron suites para lo construido en Fases 2-4:
+`PlayerDataTests` (4, invariant del overall), `PlayerProgressionTests` (6),
+`GamePlanTests` (6), `CoachSchemeTests` (4), `ScoutingHelperTests` (6),
+`NegotiationHelperTests` (4) y `StorylineServiceTests` (19, incluye los detectores
+de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 
 ## 9. Nuevas funcionalidades
 
@@ -879,6 +887,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-27 | doc | — | Sincronizado el tablero y la checklist de tests: `UI-04` cerrado, **155 tests** (9 de los 25 propuestos implementados; el resto necesita DB/UI), suites extra de Fases 2-4 listadas. **Único ALTO abierto: `SEA-06`**. |
 | 2026-09-27 | `c48eb2d9` | Fase 4 · narrativa (fix) | `StorylineContext` contaba **toda la liga** (`GetSeasonGames` sin filtrar por equipo) → `GamesRemaining` daba 20 en octubre y abría el hilo de Play-In; la racha también se veía afectada. Ahora `StorylineService.RegularGamesOf` filtra por equipo (+2 tests de regresión) y `CurrentStreak` salta partidos ajenos. Además: **foto del jugador** en los 4 hilos de jugador (tipos de noticia propios `sequia`/`baja_estrella`/`rumor_traspaso`/`descontento`) y textos con **Play-In** capitalizado. |
 | 2026-09-27 | `36b08d70` + `2bf30a1c` + `125a77e5` | Fase 4 · narrativa v2 | Catálogo de detectores puros, `StorylineContext`, multi-hilo (máx. 3 + cooldown), 10 tipos (rachas, jugador caliente/sequía, descontento, rumor de traspaso, baja de estrella, presión GM, caza de playoffs, crisis económica), pestaña HISTORIA en Palmarés, badge en el Dashboard, icono de sequía y cierre de hilos en el rollover. QN cede las rachas del usuario. +11 tests. |
 | 2026-09-27 | `a2184488` | Fase 4 · narrativa (v1) | `StorylineData` + `StorylineService`: hilos narrativos con ciclo abrir→escalar→cerrar (rachas ≥5), noticias de PRENSA en cada transición y efectos (moral/química/afición) clampeados. Enganchado al día tras `QuickNewsGenerator`. +6 tests. |
