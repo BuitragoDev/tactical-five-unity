@@ -90,6 +90,9 @@ using System.Threading.Tasks;
     // Datos
     private List<TeamData> _allTeams;
     private List<GameData> _allGames;
+    // Récords por equipo calculados una vez por carga de _allGames (evita recorrer
+    // todos los partidos en cada llamada a GetTeamRecordShort).
+    private Dictionary<int, (int w, int l)> _teamRecordCache;
     private List<PlayerData> _players = new();
     private Dictionary<string, PlayerData> _playerByName = new();
 
@@ -478,6 +481,7 @@ using System.Threading.Tasks;
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
 
         // Clasificación: mostrar por defecto la conferencia de mi equipo
         if (_myTeam != null)
@@ -1628,6 +1632,7 @@ using System.Threading.Tasks;
         }
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
 
         if (_showDeadlineWeekModal)
         {
@@ -2140,6 +2145,7 @@ using System.Threading.Tasks;
             _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
             _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
             _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
             Refresh();
 
             // Renderizar un frame por día para que el spinner de la cabecera
@@ -2152,6 +2158,7 @@ using System.Threading.Tasks;
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
         Refresh();
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
         HideLoading();
@@ -7773,20 +7780,23 @@ List<int> offeredPickIds = new List<int>();
 
     string GetTeamRecordShort(int teamId)
     {
-        int w = 0, l = 0;
-        foreach (var g in _allGames)
+        if (_teamRecordCache == null)
         {
-            if (g.is_played != 1 || g.game_type != "regular") continue;
-            if (g.home_team_id == teamId)
+            _teamRecordCache = new Dictionary<int, (int w, int l)>();
+            void Add(int id, bool won)
             {
-                if (g.home_score > g.away_score) w++; else l++;
+                var cur = _teamRecordCache.TryGetValue(id, out var r) ? r : (0, 0);
+                _teamRecordCache[id] = won ? (cur.Item1 + 1, cur.Item2) : (cur.Item1, cur.Item2 + 1);
             }
-            else if (g.away_team_id == teamId)
+            foreach (var g in _allGames)
             {
-                if (g.away_score > g.home_score) w++; else l++;
+                if (g.is_played != 1 || g.game_type != "regular") continue;
+                Add(g.home_team_id, g.home_score > g.away_score);
+                Add(g.away_team_id, g.away_score > g.home_score);
             }
         }
-        return $"{w} - {l}";
+        var rec = _teamRecordCache.TryGetValue(teamId, out var r2) ? r2 : (0, 0);
+        return $"{rec.Item1} - {rec.Item2}";
     }
 
     // ── PRÓXIMO PARTIDO ──────────────────────────────────
