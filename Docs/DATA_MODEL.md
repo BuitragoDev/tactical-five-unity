@@ -72,6 +72,24 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 ### finance_records (`FinanceRecord`)
 `id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) Current `ProcessTeamLuxuryTax` writes type 10 as a negative amount, unlike the other expense writers; consumers do not normalize this sign [F].
 
+### storylines (`StorylineData`)
+
+Hilos narrativos persistentes (motor de narrativa, Fase 4). CRUD en el partial
+`DatabaseManager.Storylines.cs`.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | INTEGER PK AI | |
+| `manager_id` / `team_id` | INTEGER | |
+| `type` | TEXT | `StorylineType.*` (racha_positiva, bache, jugador_caliente, sequia, descontento, rumor_traspaso, baja_estrella, presion_gm, caza_playoffs, crisis_economica) |
+| `subject_player_id` | INTEGER | 0 = hilo de equipo |
+| `title` / `summary` | TEXT | para la noticia y la línea temporal |
+| `intensity` | INTEGER | escalón alcanzado |
+| `started_game_day` / `last_update_game_day` / `last_news_game_day` | INTEGER | ciclo y cooldown |
+| `resolved` | INTEGER | 0 abierto / 1 cerrado |
+| `resolution` | TEXT | "" / broken / completed / abandoned (rollover) |
+| `started_at` | TEXT | |
+
 ### messages (`MessageData`)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.
 

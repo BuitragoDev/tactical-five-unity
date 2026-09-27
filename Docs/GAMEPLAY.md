@@ -246,6 +246,37 @@ La G-League es una liga paralela real con calendario, partidos simulados, clasif
 
 ---
 
+## Narrative engine (storylines) — Fase 4
+
+Los **hilos narrativos** convierten los resultados reales en situaciones con continuidad
+(se abren, escalan y se cierran) y consecuencias. Viven en la tabla `storylines`
+(persistentes; el histórico sobrevive al rollover) y los gestiona `StorylineService`
+(estado) + `StorylineCatalog` (detectores **puros** y testables) a partir de un
+`StorylineContext` construido 1 vez por día y solo para el equipo del usuario.
+
+- **Ciclo:** `Start` → `Escalate` → `Resolve`. Cada transición escribe una noticia de
+  **PRENSA** (`MessageData`) y aplica consecuencias.
+- **Presupuestos:** máximo **3 hilos activos** por equipo; cada tipo tiene **cooldown**
+  (10-25 días) antes de poder reabrirse; los efectos se clampean por día
+  (moral ±3, química ±3, afición ±5) para no duplicar lo que ya mueven los partidos
+  (moral por forma/rol, afición por resultado).
+- **Tipos y umbrales** (`StorylineCatalog`):
+  | Tipo | Señal | Umbral |
+  |---|---|---|
+  | `racha_positiva` / `bache` | racha del equipo | 5 victorias/derrotas (escala cada 5) |
+  | `jugador_caliente` | puntos por partido | 3 partidos seguidos ≥27 (escala cada 2) |
+  | `sequia` | puntos por partido | 3 partidos seguidos ≤10 |
+  | `descontento` | moral + minutos vs rol | moral <35 y <50% de los minutos esperados |
+  | `rumor_traspaso` | trade block / contrato expirante | expirante con moral <40 o en el mercado |
+  | `baja_estrella` | lesión | OVR ≥85 y ≥7 días de baja |
+  | `presion_gm` | afición y confianza | afición <30 y trust <45 |
+  | `caza_playoffs` | rank de conferencia | ≤25 partidos restantes y rank ≥7 |
+  | `crisis_economica` | presupuesto | presupuesto <0 o ≥2 avisos |
+- **Visibilidad:** pestaña **HISTORIA** en Palmarés (activos + histórico con línea
+  temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
+- **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
+  motor (QN sigue con las del resto de la liga).
+
 ## Cross-mechanic interaction diagram
 
 ```mermaid
