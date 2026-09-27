@@ -1971,10 +1971,10 @@ using System.Linq;
         if (sprite != null) logo.style.backgroundImage = new StyleBackground(sprite);
         col.Add(logo);
 
-        var teamName = new Label(team.name.ToUpper());
+        var teamName = new Label($"{team.name.ToUpper()} RECIBE");
         teamName.AddToClassList("market-fa-modal-subtitle");
         teamName.style.color = new StyleColor(new Color(0.83f, 0.65f, 0.25f));
-        teamName.style.fontSize = 18;
+        teamName.style.fontSize = 24;
         teamName.style.marginBottom = 8;
         col.Add(teamName);
 
@@ -1991,7 +1991,7 @@ using System.Linq;
         foreach (var pk in picks)
         {
             string origTeam = DatabaseManager.Instance.GetTeamById(pk.original_team_id)?.name ?? "—";
-            col.Add(BuildTradeRow($"Ronda {pk.round} {pk.draft_year} {origTeam}", new Color(0.62f, 0.76f, 0.95f)));
+            col.Add(BuildTradeRow($"Ronda {pk.round} de {pk.draft_year} ({origTeam})", new Color(0.62f, 0.76f, 0.95f)));
         }
 
         return col;
