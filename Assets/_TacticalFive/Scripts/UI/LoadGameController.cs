@@ -686,6 +686,7 @@ public class LoadGameController : UIScreenController
         var label = new Label(text);
         label.AddToClassList("modal-paragraph");
         label.style.whiteSpace = WhiteSpace.Normal;
+        label.style.fontSize = 16; // descripción del modal, acorde con los subtítulos
         body.Add(label);
         box.Add(body);
         AddModalFooter(overlay, box, footerExtra);
