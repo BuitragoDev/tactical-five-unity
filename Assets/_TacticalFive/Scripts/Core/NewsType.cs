@@ -8,6 +8,9 @@ public static class NewsType
     public const string TRIPLE_DOBLE = "triple_doble";
     public const string EXPLOSION = "explosion";
     public const string SEQUIA = "sequia";
+    public const string BAJA_ESTRELLA = "baja_estrella";
+    public const string RUMOR_TRASPASO = "rumor_traspaso";
+    public const string DESCONTENTO = "descontento";
 
     // ── PARTIDOS / RESULTADOS ──
     public const string RESULTADO = "resultado";

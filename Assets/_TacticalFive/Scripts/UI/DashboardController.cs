@@ -8277,7 +8277,10 @@ List<int> offeredPickIds = new List<int>();
         }
 
         if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
-            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP)
+            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP
+            // Hilos narrativos de jugador: foto del protagonista
+            || nt == NewsType.SEQUIA || nt == NewsType.BAJA_ESTRELLA
+            || nt == NewsType.RUMOR_TRASPASO || nt == NewsType.DESCONTENTO)
         {
             string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
             if (playerName != null && _playerByName.TryGetValue(playerName, out var p))
@@ -8411,7 +8414,7 @@ List<int> offeredPickIds = new List<int>();
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
         }
 
-        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION || nt == NewsType.SEQUIA)
+        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION)
         {
             var tex = _noticiasSprites.GetValueOrDefault("quejas");
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }

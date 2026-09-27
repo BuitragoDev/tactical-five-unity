@@ -46,10 +46,9 @@ public class StorylineContext
             gameDate = gameDate
         };
 
-        ctx.MyPlayedGames = DatabaseManager.Instance.GetSeasonGames(manager.id, season.id)
-            .Where(g => g.is_played == 1 && g.game_type == "regular")
-            .OrderBy(g => g.game_day).ThenBy(g => g.id)
-            .ToList();
+        // Solo los partidos de MI equipo (GetSeasonGames devuelve los de toda la liga).
+        ctx.MyPlayedGames = StorylineService.RegularGamesOf(
+            DatabaseManager.Instance.GetSeasonGames(manager.id, season.id), myTeam.id);
         ctx.GamesPlayed = ctx.MyPlayedGames.Count;
         ctx.Streak = StorylineService.CurrentStreak(ctx.MyPlayedGames, myTeam.id);
 

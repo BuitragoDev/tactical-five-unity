@@ -165,7 +165,7 @@ public static class StorylineCatalog
                     summary = subj != null ? $"{subj.first_name} {subj.last_name} recuperó la calma" : "El jugador ya no está en el equipo",
                     title = "Vuelve la calma al vestuario",
                     body = $"{active.title} se desactiva: la situación en el vestuario del {ctx.myTeam.name} se ha normalizado.",
-                    newsType = NewsType.PREOCUPACION
+                    newsType = NewsType.DESCONTENTO
                 });
                 return result;
             }
@@ -182,7 +182,7 @@ public static class StorylineCatalog
                     title = $"Crisis abierta: {subj.first_name} {subj.last_name}",
                     summary = $"{subj.first_name} {subj.last_name} sigue sin minutos y explota",
                     body = $"La situación de {subj.first_name} {subj.last_name} en el {ctx.myTeam.name} es insostenible: su entorno deja entrever una petición de salida si no cambia su rol.",
-                    newsType = NewsType.QUEJA,
+                    newsType = NewsType.DESCONTENTO,
                     chemistry = -1, fan = -1
                 });
             }
@@ -203,7 +203,7 @@ public static class StorylineCatalog
             summary = $"{p.first_name} {p.last_name} juega muy por debajo de lo que pide su rol",
             body = $"{p.first_name} {p.last_name} no está conforme con los minutos que está jugando en el {ctx.myTeam.name}. " +
                    $"Su rol prometido era otro y el vestuario empieza a notar el malestar.\n\nLa dirección deportiva deberá decidir si le da más protagonismo o busca una salida.",
-            newsType = NewsType.PREOCUPACION,
+            newsType = NewsType.DESCONTENTO,
             chemistry = -1
         });
         return result;
@@ -232,7 +232,7 @@ public static class StorylineCatalog
                     summary = "El jugador salió del equipo",
                     title = "Se resolvió el culebrón",
                     body = $"{active.title} termina: el jugador ya no está en el {ctx.myTeam.name} y la operación se ha cerrado.",
-                    newsType = NewsType.TRASPASO
+                    newsType = NewsType.RUMOR_TRASPASO
                 });
             }
             else if (!stillRumor)
@@ -243,7 +243,7 @@ public static class StorylineCatalog
                     title = "Vuelve la calma",
                     summary = $"{subj.first_name} {subj.last_name} ya no está en el mercado",
                     body = $"{subj.first_name} {subj.last_name} deja de estar en el mercado y su situación en el {ctx.myTeam.name} se normaliza.",
-                    newsType = NewsType.TRASPASO
+                    newsType = NewsType.RUMOR_TRASPASO
                 });
             }
             else if (ctx.gameDay - active.last_update_game_day >= 7)
@@ -256,7 +256,7 @@ public static class StorylineCatalog
                     title = $"Culebrón: {subj.first_name} {subj.last_name}",
                     summary = "Los rumores se intensifican y la operación podría cerrarse en cualquier momento",
                     body = $"El futuro de {subj.first_name} {subj.last_name} sigue sin resolverse y los rumores se intensifican. Varias franquicias han preguntado por su situación y el {ctx.myTeam.name} estudia ofertas.",
-                    newsType = NewsType.TRASPASO, chemistry = -1
+                    newsType = NewsType.RUMOR_TRASPASO, chemistry = -1
                 });
             }
             return result;
@@ -274,7 +274,7 @@ public static class StorylineCatalog
                 : $"El contrato de {candidate.first_name} {candidate.last_name} expira y no hay acuerdo",
             body = $"{candidate.first_name} {candidate.last_name} vive un momento de incertidumbre en el {ctx.myTeam.name}: " +
                    "su nombre suena en los despachos y varias franquicias han preguntado por él.\n\nEl club deberá decidir si lo retiene o busca una operación.",
-            newsType = NewsType.TRASPASO, morale = -1, chemistry = -1
+            newsType = NewsType.RUMOR_TRASPASO, morale = -1, chemistry = -1
         });
         return result;
     }
@@ -298,7 +298,7 @@ public static class StorylineCatalog
                     summary = $"{subj.first_name} {subj.last_name} vuelve a las canchas",
                     title = $"Vuelve {subj.first_name} {subj.last_name}",
                     body = $"{subj.first_name} {subj.last_name} está de vuelta después de su lesión. La afición del {ctx.myTeam.name} recupera la ilusión.",
-                    newsType = NewsType.RECUPERACION, morale = 2, fan = 2
+                    newsType = NewsType.BAJA_ESTRELLA, morale = 2, fan = 2
                 });
             }
             else if (subj.injury_days >= 21 && active.intensity < 2)
@@ -310,7 +310,7 @@ public static class StorylineCatalog
                     title = $"Sin {subj.first_name} {subj.last_name}: la lesión se alarga",
                     summary = $"La baja se alarga y el equipo nota su ausencia",
                     body = $"La lesión de {subj.first_name} {subj.last_name} se alarga más de lo previsto y el {ctx.myTeam.name} tendrá que sobrevivir sin él durante más semanas.",
-                    newsType = NewsType.LESION, fan = -2, chemistry = -1
+                    newsType = NewsType.BAJA_ESTRELLA, fan = -2, chemistry = -1
                 });
             }
             return result;
@@ -330,7 +330,7 @@ public static class StorylineCatalog
             summary = $"{star.first_name} {star.last_name} estará fuera al menos {star.injury_days} días",
             body = $"El {ctx.myTeam.name} pierde temporalmente a {star.first_name} {star.last_name}, uno de sus jugadores más importantes. " +
                    $"La enfermería confirma que estará fuera al menos {star.injury_days} días.\n\nEl equipo tendrá que reordenar su rotación para tapar su ausencia.",
-            newsType = NewsType.LESION, fan = -2, chemistry = -1
+            newsType = NewsType.BAJA_ESTRELLA, fan = -2, chemistry = -1
         });
         return result;
     }
@@ -355,7 +355,7 @@ public static class StorylineCatalog
                     title = "La afición vuelve a creer",
                     summary = "La presión sobre la dirección se disipa",
                     body = $"La situación en el {ctx.myTeam.name} se relaja: los resultados y el apoyo de la grada devuelven la calma a la dirección deportiva.",
-                    newsType = NewsType.PREOCUPACION, fan = 2
+                    newsType = NewsType.HITO, fan = 2
                 });
                 return result;
             }
@@ -386,7 +386,7 @@ public static class StorylineCatalog
         return result;
     }
 
-    /// <summary>Pelea por el play-in o el playoff directo (o riesgo de lottery) al final de temporada.</summary>
+    /// <summary>Pelea por el Play-In o el playoff directo (o riesgo de lottery) al final de temporada.</summary>
     public static List<StorylineTransition> DetectPlayoffRace(StorylineContext ctx, StorylineDef def, StorylineData active)
     {
         var result = new List<StorylineTransition>();
@@ -418,7 +418,7 @@ public static class StorylineCatalog
                     type = def.type, action = StorylineService.Action.Escalate, intensity = bucket,
                     title = "Riesgo de lottery",
                     summary = "El equipo se cae de la pelea",
-                    body = $"Al {ctx.myTeam.name} se le complica incluso el play-in: el equipo cae en zona de lottery y la temporada amenaza con quedar en nada.",
+                    body = $"Al {ctx.myTeam.name} se le complica incluso el Play-In: el equipo cae en zona de lottery y la temporada amenaza con quedar en nada.",
                     newsType = NewsType.MALA_RACHA, fan = -2
                 });
             }
@@ -430,13 +430,13 @@ public static class StorylineCatalog
         result.Add(new StorylineTransition
         {
             type = def.type, action = StorylineService.Action.Start, intensity = bucket,
-            title = bucket >= 2 ? "Riesgo de lottery" : "Pelea por el play-in",
+            title = bucket >= 2 ? "Riesgo de lottery" : "Pelea por el Play-In",
             summary = bucket >= 2
                 ? $"{ctx.GamesRemaining} partidos y el equipo fuera de todo"
-                : $"Quedan {ctx.GamesRemaining} partidos y el play-in está en juego",
+                : $"Quedan {ctx.GamesRemaining} partidos y el Play-In está en juego",
             body = bucket >= 2
                 ? $"Al {ctx.myTeam.name} se le escapa la temporada: con {ctx.GamesRemaining} partidos por jugar, el equipo está en zona de lottery y necesita una reacción urgente."
-                : $"Recta final apretada: al {ctx.myTeam.name} le quedan {ctx.GamesRemaining} partidos para meterse en el play-in. Cada partido vale doble.",
+                : $"Recta final apretada: al {ctx.myTeam.name} le quedan {ctx.GamesRemaining} partidos para meterse en el Play-In. Cada partido vale doble.",
             newsType = NewsType.HITO, fan = bucket >= 2 ? -1 : 1
         });
         return result;

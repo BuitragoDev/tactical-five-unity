@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 /// <summary>
@@ -23,6 +24,17 @@ public static class StorylineService
 
     // ── LÓGICA PURA ─────────────────────────────────────────
 
+    /// <summary>
+    /// Partidos de liga regular jugados por UN equipo, en orden cronológico. Puro.
+    /// Ojo: GetSeasonGames devuelve los de toda la liga; contar el total falseaba
+    /// GamesRemaining y la racha (bug corregido).
+    /// </summary>
+    public static List<GameData> RegularGamesOf(List<GameData> seasonGames, int teamId)
+        => seasonGames.Where(g => g.is_played == 1 && g.game_type == "regular"
+                               && (g.home_team_id == teamId || g.away_team_id == teamId))
+                      .OrderBy(g => g.game_day).ThenBy(g => g.id)
+                      .ToList();
+
     /// <summary>Racha actual del equipo: positiva = victorias, negativa = derrotas.</summary>
     public static int CurrentStreak(List<GameData> playedGames, int teamId)
     {
@@ -31,6 +43,7 @@ public static class StorylineService
         {
             var g = playedGames[i];
             if (g.is_played != 1) continue;
+            if (g.home_team_id != teamId && g.away_team_id != teamId) continue;
             bool home = g.home_team_id == teamId;
             bool won = home ? g.home_score > g.away_score : g.away_score > g.home_score;
 

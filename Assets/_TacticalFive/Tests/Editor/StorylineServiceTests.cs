@@ -291,4 +291,40 @@ public class StorylineServiceTests
         Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
         Assert.That(closed[0].resolution, Is.EqualTo(StorylineResolution.Completed));
     }
+
+    // ── REGRESIÓN: solo cuentan los partidos de MI equipo ──
+
+    [Test]
+    public void RegularGamesOf_KeepsOnlyMyTeamGames_InOrder()
+    {
+        var games = new List<GameData>
+        {
+            Game(3, 2, 3, 100, 90),   // otro equipo
+            Game(1, 1, 2, 100, 90),   // mío
+            Game(2, 1, 3, 90, 100),   // mío
+            Game(4, 3, 4, 100, 90),   // otro equipo
+            Game(5, 4, 1, 80, 100)    // mío
+        };
+
+        var mine = StorylineService.RegularGamesOf(games, 1);
+
+        Assert.That(mine, Has.Count.EqualTo(3), "Solo los partidos de mi equipo (bug: contaba toda la liga)");
+        Assert.That(mine[0].game_day, Is.EqualTo(1));
+        Assert.That(mine[1].game_day, Is.EqualTo(2));
+        Assert.That(mine[2].game_day, Is.EqualTo(5));
+    }
+
+    [Test]
+    public void CurrentStreak_IgnoresGamesOfOtherTeams()
+    {
+        // Aunque la lista venga mezclada, la racha solo mira mis partidos.
+        var games = new List<GameData>
+        {
+            Game(1, 1, 2, 100, 90),   // gano
+            Game(2, 3, 4, 100, 90),   // partido ajeno (no debe romper nada)
+            Game(3, 1, 2, 110, 99),   // gano
+            Game(4, 4, 3, 100, 90)    // partido ajeno
+        };
+        Assert.That(StorylineService.CurrentStreak(games, 1), Is.EqualTo(2));
+    }
 }
