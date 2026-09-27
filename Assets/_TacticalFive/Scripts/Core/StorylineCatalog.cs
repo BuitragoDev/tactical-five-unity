@@ -19,6 +19,17 @@ public class StorylineTransition
     public int fan;
 }
 
+/// <summary>
+/// Hilos activos de un tipo, indexables por protagonista. Permite que un tipo "por
+/// jugador" (sequía, racha anotadora) tenga varios hilos a la vez, uno por jugador.
+/// </summary>
+public class StorylineSubjects
+{
+    public List<StorylineData> Actives = new();
+    /// <summary>Hilo abierto del protagonista indicado (o null; 0 = hilo de equipo).</summary>
+    public StorylineData For(int playerId) => Actives.FirstOrDefault(a => a.subject_player_id == playerId);
+}
+
 /// <summary>Definición de un tipo de hilo: con qué periodicidad puede volver a abrirse
 /// y la función que decide sus transiciones (pura, sin DB).</summary>
 public class StorylineDef
@@ -26,6 +37,11 @@ public class StorylineDef
     public string type;
     public int cooldownDays;
     public System.Func<StorylineContext, StorylineDef, StorylineData, List<StorylineTransition>> detect;
+    /// <summary>
+    /// Hilos POR JUGADOR: si está definido, el tipo admite varios hilos simultáneos (uno
+    /// por protagonista) y este detector los gobierna todos. El servicio lo prefiere sobre `detect`.
+    /// </summary>
+    public System.Func<StorylineContext, StorylineDef, StorylineSubjects, List<StorylineTransition>> detectPlayers;
 }
 
 /// <summary>
@@ -48,6 +64,7 @@ public static class StorylineCatalog
     public const int GM_FAN_LOW = 30;         // afición por debajo de la cual hay presión
     public const int GM_TRUST_LOW = 45;       // confianza del dueño por debajo de la cual hay presión
     public const int RACE_GAMES_LEFT = 25;    // partidos restantes para abrir la pelea por playoffs
+    public const int MAX_PLAYER_HILOS = 2;    // hilos simultáneos por tipo de jugador (uno por protagonista)
 
     public static readonly List<StorylineDef> All = new()
     {
@@ -58,8 +75,8 @@ public static class StorylineCatalog
         new StorylineDef { type = StorylineType.RumorTraspaso,   cooldownDays = 20, detect = DetectTradeRumor },
         new StorylineDef { type = StorylineType.PresionGM,       cooldownDays = 25, detect = DetectGmPressure },
         new StorylineDef { type = StorylineType.CazaPlayoffs,    cooldownDays = 20, detect = DetectPlayoffRace },
-        new StorylineDef { type = StorylineType.JugadorCaliente, cooldownDays = 15, detect = DetectHotHand },
-        new StorylineDef { type = StorylineType.Sequia,          cooldownDays = 15, detect = DetectSlump },
+        new StorylineDef { type = StorylineType.JugadorCaliente, cooldownDays = 15, detect = DetectHotHand, detectPlayers = DetectHotHandPlayers },
+        new StorylineDef { type = StorylineType.Sequia,          cooldownDays = 15, detect = DetectSlump,   detectPlayers = DetectSlumpPlayers },
         new StorylineDef { type = StorylineType.CrisisEconomica, cooldownDays = 25, detect = DetectEconomicCrisis },
     };
 
@@ -159,6 +176,64 @@ public static class StorylineCatalog
         float ppg = 0f;
         if (ctx != null && ctx.SeasonPpg != null) ctx.SeasonPpg.TryGetValue(p.id, out ppg);
         return Mathf.Max(COLD_POINTS_MIN, Mathf.RoundToInt(ppg * COLD_PCT));
+    }
+
+    /// <summary>Jugadores en racha anotadora: hasta `MAX_PLAYER_HILOS` a la vez, uno por jugador.</summary>
+    public static List<StorylineTransition> DetectHotHandPlayers(StorylineContext ctx, StorylineDef def, StorylineSubjects subjects)
+    {
+        var candidates = FindPointsStreakCandidates(ctx, HOT_POINTS, atLeast: true, minGames: HOT_GAMES);
+        return PlayerStreakTransitionsMulti(ctx, def, subjects, candidates, StorylineType.JugadorCaliente, up: true);
+    }
+
+    /// <summary>Jugadores en sequía: hasta `MAX_PLAYER_HILOS` a la vez, uno por jugador.</summary>
+    public static List<StorylineTransition> DetectSlumpPlayers(StorylineContext ctx, StorylineDef def, StorylineSubjects subjects)
+    {
+        var candidates = FindPointsStreakCandidates(ctx, COLD_POINTS_MIN, atLeast: false, minGames: COLD_GAMES,
+                                                    minAvgMinutes: SLUMP_MIN_AVG_MINUTES);
+        return PlayerStreakTransitionsMulti(ctx, def, subjects, candidates, StorylineType.Sequia, up: false);
+    }
+
+    /// <summary>
+    /// Transiciones de un tipo POR JUGADOR: abre/escala el hilo de cada candidato y cierra
+    /// el de los protagonistas que ya no cumplen. Varios jugadores pueden estar en sequía
+    /// (o en racha) a la vez, cada uno con su propio hilo.
+    /// </summary>
+    static List<StorylineTransition> PlayerStreakTransitionsMulti(StorylineContext ctx, StorylineDef def,
+        StorylineSubjects subjects, List<(PlayerData player, int streak, float avg)> candidates,
+        string type, bool up)
+    {
+        var result = new List<StorylineTransition>();
+
+        foreach (var cand in candidates)
+            result.AddRange(PlayerStreakTransitions(ctx, def, subjects.For(cand.player.id), cand, type, up));
+
+        // Protagonistas con hilo abierto que ya no cumplen la racha: se cierran.
+        foreach (var active in subjects.Actives)
+        {
+            if (active.subject_player_id <= 0) continue;
+            if (candidates.Any(c => c.player.id == active.subject_player_id)) continue;
+            result.Add(ResolvePlayerStreak(active, up));
+        }
+
+        return result;
+    }
+
+    /// <summary>Cierre de un hilo de jugador que ya no cumple la racha.</summary>
+    static StorylineTransition ResolvePlayerStreak(StorylineData active, bool up)
+    {
+        return new StorylineTransition
+        {
+            type = active.type,
+            action = StorylineService.Action.Resolve,
+            resolution = StorylineResolution.Broken,
+            subjectPlayerId = active.subject_player_id,
+            summary = up ? "El jugador se enfrió" : "El jugador rompió su mala racha",
+            title = up ? "Se acabó el momento dulce" : "Fin de la sequía",
+            body = up
+                ? $"{active.title} llega a su fin: el jugador ya no mantiene el nivel de las últimas semanas."
+                : $"{active.title} llega a su fin: el jugador ha firmado un partido que rompe la mala dinámica.",
+            newsType = up ? NewsType.EXPLOSION : NewsType.SEQUIA
+        };
     }
 
     /// <summary>Descontento: moral baja y minutos muy por debajo de lo que pide su rol.</summary>
@@ -523,7 +598,22 @@ public static class StorylineCatalog
                                                                              bool atLeast, int minGames,
                                                                              float minAvgMinutes = 0f)
     {
-        (PlayerData, int, float)? best = null;
+        var best = FindPointsStreakCandidates(ctx, points, atLeast, minGames, minAvgMinutes, maxCandidates: 1);
+        if (best.Count == 0) return null;
+        var c = best[0];
+        return (c.player, c.streak, c.avg);
+    }
+
+    /// <summary>
+    /// Todos los jugadores que cumplen la racha, ordenados por relevancia (racha más larga,
+    /// luego mayor OVR y luego mejor media) y capados a `maxCandidates`. Base de los hilos
+    /// por jugador: permiten narrar a la vez a los dos protagonistas más relevantes.
+    /// </summary>
+    public static List<(PlayerData player, int streak, float avg)> FindPointsStreakCandidates(
+        StorylineContext ctx, int points, bool atLeast, int minGames,
+        float minAvgMinutes = 0f, int maxCandidates = StorylineCatalog.MAX_PLAYER_HILOS)
+    {
+        var found = new List<(PlayerData, int, float)>();
         foreach (var p in ctx.Roster)
         {
             // Una sequía debe ser creíble: no se narra la de quien apenas juega ni la de
@@ -545,22 +635,16 @@ public static class StorylineCatalog
                 sum += g.points;
             }
             if (streak < minGames) continue;
-
-            float avg = sum / streak;
-            if (best == null || streak > best.Value.Item2
-                || (streak == best.Value.Item2 && IsMoreRelevant(p, avg, best.Value)))
-                best = (p, streak, avg);
+            found.Add((p, streak, sum / streak));
         }
-        return best;
-    }
 
-    /// <summary>
-    /// Desempate a igual racha: el jugador más relevante (mayor OVR) genera mejor noticia;
-    /// a igual OVR, la media más alta (menos malo en una sequía, más meritorio en una racha).
-    /// </summary>
-    static bool IsMoreRelevant(PlayerData candidate, float avg, (PlayerData player, int games, float avg) current)
-        => candidate.overall > current.player.overall
-           || (candidate.overall == current.player.overall && avg > current.avg);
+        return found
+            .OrderByDescending(c => c.Item2)                // racha más larga
+            .ThenByDescending(c => c.Item1.overall)         // jugador más relevante
+            .ThenByDescending(c => c.Item3)                 // y mejor media
+            .Take(maxCandidates)
+            .ToList();
+    }
 
     /// <summary>Jugador con moral baja que juega por debajo de la mitad de lo que pide su rol.</summary>
     public static (PlayerData player, int avgMinutes)? FindUnderusedPlayer(StorylineContext ctx)
@@ -618,18 +702,7 @@ public static class StorylineCatalog
                        best != null && best.Value.Item1.id == subject.id;
         if (!stillOn)
         {
-            result.Add(new StorylineTransition
-            {
-                type = type,
-                action = StorylineService.Action.Resolve,
-                resolution = StorylineResolution.Broken,
-                summary = up ? "El jugador se enfrió" : "El jugador rompió su mala racha",
-                title = up ? "Se acabó el momento dulce" : "Fin de la sequía",
-                body = up
-                    ? $"{active.title} llega a su fin: el jugador ya no mantiene el nivel de las últimas semanas."
-                    : $"{active.title} llega a su fin: el jugador ha firmado un partido que rompe la mala dinámica.",
-                newsType = up ? NewsType.EXPLOSION : NewsType.SEQUIA
-            });
+            result.Add(ResolvePlayerStreak(active, up));
             return result;
         }
 

@@ -17,8 +17,9 @@ public static class StorylineService
     public const int STREAK_START = 5;
     /// <summary>Cada cuántas victorias/derrotas sube un escalón.</summary>
     public const int STREAK_STEP = 5;
-    /// <summary>Máximo de hilos abiertos a la vez por equipo.</summary>
-    public const int MAX_ACTIVE = 3;
+    /// <summary>Máximo de hilos abiertos a la vez por equipo (los tipos de jugador pueden
+    /// coexistir: hasta 2 protagonistas por tipo).</summary>
+    public const int MAX_ACTIVE = 4;
 
     public enum Action { None, Start, Escalate, Resolve }
 
@@ -85,14 +86,25 @@ public static class StorylineService
         var ctx = StorylineContext.Build(manager, myTeam, season, gameDay, gameDate);
         if (ctx == null || ctx.GamesPlayed == 0) return;
 
+        var allActives = DatabaseManager.Instance.GetActiveStorylines(manager.id, myTeam.id);
+        int openedToday = 0;
+
         foreach (var def in StorylineCatalog.All)
         {
-            var active = DatabaseManager.Instance.GetActiveStoryline(manager.id, myTeam.id, def.type);
+            // Los hilos por jugador se gobiernan por protagonista (varios a la vez, uno por
+            // jugador); el resto son de equipo (sujeto 0, uno por tipo).
+            var subjects = new StorylineSubjects
+            {
+                Actives = allActives.Where(a => a.type == def.type).ToList()
+            };
 
             List<StorylineTransition> transitions;
             try
             {
-                transitions = def.detect(ctx, def, active) ?? new List<StorylineTransition>();
+                transitions = def.detectPlayers != null
+                    ? def.detectPlayers(ctx, def, subjects)
+                    : def.detect(ctx, def, subjects.For(0));
+                if (transitions == null) transitions = new List<StorylineTransition>();
             }
             catch (System.Exception e)
             {
@@ -102,19 +114,25 @@ public static class StorylineService
 
             foreach (var t in transitions)
             {
-                if (t.action == Action.Start && !CanOpen(manager.id, myTeam.id, def, gameDay)) continue;
-                Apply(ctx, active, t);
+                if (t.action == Action.Start &&
+                    !CanOpen(manager.id, myTeam.id, def, gameDay, t.subjectPlayerId, openedToday))
+                    continue;
+                Apply(ctx, subjects.For(t.subjectPlayerId), t);
+                if (t.action == Action.Start) openedToday++;
             }
         }
     }
 
-    /// <summary>Máximo de hilos activos y cooldown por tipo.</summary>
-    static bool CanOpen(int managerId, int teamId, StorylineDef def, int gameDay)
+    /// <summary>Máximo de hilos activos y cooldown (por tipo, y por protagonista en los de jugador).</summary>
+    static bool CanOpen(int managerId, int teamId, StorylineDef def, int gameDay,
+                        int subjectPlayerId, int extraOpened)
     {
-        if (DatabaseManager.Instance.GetActiveStorylines(managerId, teamId).Count >= MAX_ACTIVE)
+        if (DatabaseManager.Instance.GetActiveStorylines(managerId, teamId).Count + extraOpened >= MAX_ACTIVE)
             return false;
 
-        var last = DatabaseManager.Instance.GetLastStoryline(managerId, teamId, def.type);
+        var last = subjectPlayerId > 0
+            ? DatabaseManager.Instance.GetLastStoryline(managerId, teamId, def.type, subjectPlayerId)
+            : DatabaseManager.Instance.GetLastStoryline(managerId, teamId, def.type);
         if (last != null && gameDay - last.last_update_game_day < def.cooldownDays) return false;
         return true;
     }

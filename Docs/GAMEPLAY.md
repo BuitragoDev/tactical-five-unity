@@ -256,10 +256,15 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 
 - **Ciclo:** `Start` → `Escalate` → `Resolve`. Cada transición escribe una noticia de
   **PRENSA** (`MessageData`) y aplica consecuencias.
-- **Presupuestos:** máximo **3 hilos activos** por equipo; cada tipo tiene **cooldown**
-  (10-25 días) antes de poder reabrirse; los efectos se clampean por día
+- **Presupuestos:** máximo **4 hilos activos** por equipo; cada tipo tiene **cooldown**
+  (10-25 días) antes de poder reabrirse (**por protagonista** en los tipos de jugador);
+  los efectos se clampean por día
   (moral ±3, química ±3, afición ±5) para no duplicar lo que ya mueven los partidos
   (moral por forma/rol, afición por resultado).
+- **Hilos por jugador:** `jugador_caliente` y `sequia` admiten **varios hilos a la vez**
+  (hasta 2 protagonistas cada uno, `StorylineCatalog.MAX_PLAYER_HILOS`), porque cada
+  `storyline` lleva su `subject_player_id`: la sequía de un jugador no tapa la de otro.
+  El resto de tipos son de equipo (sujeto 0) y siguen siendo únicos.
 - **Tipos y umbrales** (`StorylineCatalog`):
   | Tipo | Señal | Umbral |
   |---|---|---|

@@ -26,12 +26,35 @@ public partial class DatabaseManager
                   .FirstOrDefault();
     }
 
+    /// <summary>Hilo abierto de un tipo para un protagonista concreto (hilos por jugador).</summary>
+    public StorylineData GetActiveStoryline(int managerId, int teamId, string type, int subjectPlayerId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<StorylineData>()
+                  .Where(s => s.manager_id == managerId && s.team_id == teamId
+                           && s.resolved == 0 && s.type == type
+                           && s.subject_player_id == subjectPlayerId)
+                  .OrderByDescending(s => s.id)
+                  .FirstOrDefault();
+    }
+
     /// <summary>Último hilo de un tipo (abierto o cerrado), para el cooldown de reapertura.</summary>
     public StorylineData GetLastStoryline(int managerId, int teamId, string type)
     {
         if (!EnsureDb()) return null;
         return _db.Table<StorylineData>()
                   .Where(s => s.manager_id == managerId && s.team_id == teamId && s.type == type)
+                  .OrderByDescending(s => s.id)
+                  .FirstOrDefault();
+    }
+
+    /// <summary>Último hilo de un tipo para un protagonista (cooldown por jugador).</summary>
+    public StorylineData GetLastStoryline(int managerId, int teamId, string type, int subjectPlayerId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<StorylineData>()
+                  .Where(s => s.manager_id == managerId && s.team_id == teamId && s.type == type
+                           && s.subject_player_id == subjectPlayerId)
                   .OrderByDescending(s => s.id)
                   .FirstOrDefault();
     }

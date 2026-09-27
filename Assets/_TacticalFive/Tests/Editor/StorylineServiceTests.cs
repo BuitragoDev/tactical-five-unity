@@ -159,6 +159,78 @@ public class StorylineServiceTests
         Assert.That(StorylineCatalog.FindPointsStreak(ctx, StorylineCatalog.HOT_POINTS, true, 3), Is.Null);
     }
 
+    // ── HILOS POR JUGADOR (varios protagonistas a la vez) ───
+
+    [Test]
+    public void DetectSlumpPlayers_OpensOneHiloPerPlayer()
+    {
+        var a = new PlayerData { id = 1, first_name = "Ana", last_name = "Uno", role = PlayerRole.Estrella, overall = 90 };
+        var b = new PlayerData { id = 2, first_name = "Bea", last_name = "Dos", role = PlayerRole.Titular, overall = 85 };
+        var ctx = Ctx(a, b);
+        ctx.SeasonPpg[1] = 30f; ctx.SeasonPpg[2] = 30f;   // umbral 14
+        foreach (int id in new[] { 1, 2 })
+        {
+            AddGame(ctx, id, 8, 30f);
+            AddGame(ctx, id, 9, 30f);
+            AddGame(ctx, id, 10, 30f);
+        }
+
+        var def = StorylineCatalog.Find(StorylineType.Sequia);
+        var t = StorylineCatalog.DetectSlumpPlayers(ctx, def, new StorylineSubjects());
+
+        Assert.That(t, Has.Count.EqualTo(2), "Cada protagonista tiene su propio hilo");
+        Assert.That(t.Select(x => x.subjectPlayerId).OrderBy(x => x), Is.EqualTo(new[] { 1, 2 }));
+        Assert.That(t.All(x => x.action == StorylineService.Action.Start), Is.True);
+    }
+
+    [Test]
+    public void DetectSlumpPlayers_ClosesSubjectThatNoLongerQualifies()
+    {
+        var a = new PlayerData { id = 1, first_name = "Ana", last_name = "Uno", role = PlayerRole.Estrella, overall = 90 };
+        var ctx = Ctx(a);
+        ctx.SeasonPpg[1] = 30f;
+        AddGame(ctx, 1, 8, 30f);
+        AddGame(ctx, 1, 9, 30f);
+        AddGame(ctx, 1, 10, 30f);
+
+        var subjects = new StorylineSubjects
+        {
+            Actives = new List<StorylineData>
+            {
+                new StorylineData { id = 5, type = StorylineType.Sequia, subject_player_id = 9,
+                                    title = "Sequía: Otro Jugador", resolved = 0 }
+            }
+        };
+
+        var def = StorylineCatalog.Find(StorylineType.Sequia);
+        var t = StorylineCatalog.DetectSlumpPlayers(ctx, def, subjects);
+
+        Assert.That(t.Any(x => x.action == StorylineService.Action.Start && x.subjectPlayerId == 1), Is.True);
+        Assert.That(t.Any(x => x.action == StorylineService.Action.Resolve && x.subjectPlayerId == 9), Is.True,
+            "El hilo del protagonista que ya no cumple se cierra (y con su sujeto, no de equipo)");
+    }
+
+    [Test]
+    public void FindPointsStreakCandidates_CapsAndOrdersByRelevance()
+    {
+        var bajo = new PlayerData { id = 1, role = PlayerRole.Banquillo, overall = 60 };
+        var estrella = new PlayerData { id = 2, role = PlayerRole.Estrella, overall = 95 };
+        var titular = new PlayerData { id = 3, role = PlayerRole.Titular, overall = 80 };
+        var ctx = Ctx(bajo, estrella, titular);
+        foreach (int id in new[] { 1, 2, 3 })
+        {
+            ctx.SeasonPpg[id] = 30f;
+            for (int i = 0; i < 3; i++) AddGame(ctx, id, 5, 30f);
+        }
+
+        var cands = StorylineCatalog.FindPointsStreakCandidates(ctx, StorylineCatalog.COLD_POINTS_MIN,
+            atLeast: false, minGames: 3, minAvgMinutes: StorylineCatalog.SLUMP_MIN_AVG_MINUTES, maxCandidates: 2);
+
+        Assert.That(cands, Has.Count.EqualTo(2), "Se capan a los más relevantes");
+        Assert.That(cands[0].player.id, Is.EqualTo(2));
+        Assert.That(cands[1].player.id, Is.EqualTo(3));
+    }
+
     // ── SEQUÍA: umbral relativo, minutos y relevancia ───────
 
     [Test]
