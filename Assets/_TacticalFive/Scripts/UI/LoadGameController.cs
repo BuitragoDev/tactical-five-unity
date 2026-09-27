@@ -535,6 +535,11 @@ public class LoadGameController : UIScreenController
         {
             var row = new Button { text = label };
             row.AddToClassList("modal-btn");
+            // La clase base no define color (quedaba texto oscuro ilegible): las filas
+            // seleccionables van en azul y la de aviso en gris.
+            row.AddToClassList(action == null ? "modal-btn--secondary" : "modal-btn--primary");
+            row.style.minWidth = 0;
+            row.style.alignSelf = Align.Stretch;
             row.style.marginBottom = 6;
             row.style.unityTextAlign = TextAnchor.MiddleLeft;
             if (action == null)
