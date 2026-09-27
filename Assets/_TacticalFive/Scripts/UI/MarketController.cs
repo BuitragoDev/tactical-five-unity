@@ -1907,11 +1907,18 @@ using System.Linq;
         body.AddToClassList("market-fa-modal-body");
         // Una etiqueta por línea: un único Label con \n colapsa los saltos y queda
         // como una sola línea recortada.
-        foreach (var line in BuildTradeSummary(mySelected, otherSelected, ownSA, myPicks, otherPicks))
+        var summaryLines = BuildTradeSummary(mySelected, otherSelected, ownSA, myPicks, otherPicks);
+        for (int li = 0; li < summaryLines.Count; li++)
         {
+            string line = summaryLines[li];
             var lbl = new Label(string.IsNullOrEmpty(line) ? " " : line);
-            lbl.style.color = new StyleColor(new Color(0.78f, 0.82f, 0.90f));
-            lbl.style.fontSize = 16;
+            // Los Label sin clase no resuelven la fuente del tema: se reutiliza la del
+            // subtítulo del modal (que sí se ve) y se ajusta color/tamaño en línea.
+            lbl.AddToClassList("market-fa-modal-subtitle");
+            bool isHeader = line.StartsWith("ENVÍAS") || line.StartsWith("RECIBES");
+            lbl.style.color = new StyleColor(isHeader ? new Color(0.83f, 0.65f, 0.25f) : new Color(0.78f, 0.82f, 0.90f));
+            lbl.style.fontSize = isHeader ? 18 : 16;
+            lbl.style.marginTop = isHeader && li > 0 ? 10 : 2;
             lbl.style.marginBottom = 2;
             body.Add(lbl);
         }
