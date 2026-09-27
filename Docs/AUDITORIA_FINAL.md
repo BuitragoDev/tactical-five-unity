@@ -843,7 +843,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - [x] Confirmar el borrado de noticias (`UI-11`).
 - [x] `CON-05`: récords por equipo cacheados por carga de partidos (antes 4 recorridos por refresco).
 - [x] `UI-04`: barra de scroll enlazada **una vez por visita** (`ScrollBarBinder` con `ConditionalWeakTable`); fin de los handlers duplicados en las 7 pantallas del patrón copiado.
-- [ ] QoL pendiente: export/import de liga (el resumen de temporada y el autosave por día ya existen).
+- [x] QoL: **exportar/importar partida** desde Cargar Partida (backup `.db` en `saves/exports` con checkpoint del WAL; importar al siguiente slot libre). El resumen de temporada y el autosave diario ya existían.
 - [ ] Killer feature elegida (recomendado: **Modo histórico** o **Motor de narrativa**).
 
 ---
@@ -879,6 +879,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-27 | `e26cdb66` | Fase 4 · QoL | Exportar/importar **partida** desde Cargar Partida: fila con EXPORTAR/IMPORTAR, modales procedurales (lista de partidas / lista de exports) y `GameSaveManager.ExportSlot/ListExports/ImportSave` con `wal_checkpoint(TRUNCATE)` antes de copiar. +3 tests. |
 | 2026-09-27 | `d916c2f4` | Fase 4 · UI-04 | `ScrollBarBinder` compartido (interfaz marcadora `IScrollBarHandle` + `ConditionalWeakTable`): cada viewport se enlaza una sola vez por visita, así reconstruir la lista (filtros/pestañas/búsqueda) ya no acumula handlers de rueda/arrastre. Aplicado a Messages, Palmares, GLeague, Injured, Buscador, Cartera e Historial. |
 | 2026-09-27 | `500e43f9` + `0cfb98b7` | Fase 4 · UI/rendimiento | Ancho fijo de la lista de noticias y detalle elástico (`flex-basis`), y caché de récords por equipo en el Dashboard (`CON-05`). También: modales de confirmación (traspaso con tabla de 2 columnas y logos, borrado de noticia), estilos y formatos del resumen. |
 | 2026-09-26 | `fe93c65a` | Fase 4 · UI-11 | Confirmación antes de borrar una noticia (modal CANCELAR/ELIMINAR). |
