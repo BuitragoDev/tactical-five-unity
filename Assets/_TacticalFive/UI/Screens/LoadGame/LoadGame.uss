@@ -628,7 +628,7 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    min-height: 62px;
+    min-height: 64px;
     padding: 8px 10px;
     margin-bottom: 6px;
     background-color: rgba(42, 95, 201, 0.08);
