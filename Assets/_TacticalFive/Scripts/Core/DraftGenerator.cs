@@ -160,22 +160,23 @@ public static class DraftGenerator
     /// <summary>
     /// Intercambia los dueños de los dos slots de un swap (ECO-15). Usar los dueños reales
     /// de los slots —no los `current_team_id` de los picks— garantiza que el intercambio
-    /// es una permutación y no sobreescribe a un tercero.
+    /// es una permutación y no sobreescribe a un tercero. Puro.
     /// </summary>
-    public static void ApplySwap(TeamData[] owners, int selfSlot, int partnerSlot)
+    public static void ApplySwap(IDictionary<int, TeamData> owners, int selfSlot, int partnerSlot)
     {
-        if (owners == null) return;
-        if (selfSlot < 0 || partnerSlot < 0 || selfSlot == partnerSlot) return;
-        if (selfSlot >= owners.Length || partnerSlot >= owners.Length) return;
-        (owners[selfSlot], owners[partnerSlot]) = (owners[partnerSlot], owners[selfSlot]);
+        if (owners == null || selfSlot == partnerSlot) return;
+        if (!owners.TryGetValue(selfSlot, out var a) || !owners.TryGetValue(partnerSlot, out var b)) return;
+        if (a == null || b == null) return;
+        owners[selfSlot] = b;
+        owners[partnerSlot] = a;
     }
 
     /// <summary>Número de equipos distintos que poseen un pick en la ronda (puro).</summary>
-    public static int CountDistinctOwners(TeamData[] owners)
+    public static int CountDistinctOwners(IDictionary<int, TeamData> owners)
     {
         if (owners == null) return 0;
         var seen = new System.Collections.Generic.HashSet<int>();
-        foreach (var t in owners)
+        foreach (var t in owners.Values)
             if (t != null) seen.Add(t.id);
         return seen.Count;
     }
