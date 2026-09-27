@@ -125,6 +125,7 @@ public static class DraftGenerator
         // Swap: el poseedor (current_team_id) del pick marcado como swap se queda con el
         // slot mejor (menor índice) entre su pick y el del equipo partner; el propietario
         // del pick partner se lleva el peor. Aplica solo si la posición del partner es mejor.
+        int ownersBefore = CountDistinctOwners(owners);
         foreach (var swapPick in picks.Where(p => p.is_swap == 1))
         {
             if (swapPick.protected_from > 0) continue;
@@ -143,24 +144,40 @@ public static class DraftGenerator
             }
             if (selfSlot == -1 || partnerSlot == -1 || selfSlot == partnerSlot) continue;
 
-            var swapHolder = teamsById.TryGetValue(swapPick.current_team_id, out var sh)
-                ? sh : slotById(swapPick.current_team_id);
-            var partnerHolder = teamsById.TryGetValue(partner.current_team_id, out var ph)
-                ? ph : slotById(partner.current_team_id);
-
             if (partnerSlot < selfSlot)
-            {
-                owners[partnerSlot] = swapHolder;
-                owners[selfSlot] = partnerHolder;
-            }
+                ApplySwap(owners, selfSlot, partnerSlot);
         }
+
+        // ECO-15: un swap debe ser una permutación de dos slots (nunca reduce el número de
+        // dueños distintos). Guarda de regresión.
+        int ownersAfter = CountDistinctOwners(owners);
+        if (ownersAfter < ownersBefore)
+            UnityEngine.Debug.LogWarning($"[Draft] Swap solapado: dueños distintos {ownersBefore} → {ownersAfter}");
 
         return owners;
     }
 
-    static TeamData slotById(int teamId)
+    /// <summary>
+    /// Intercambia los dueños de los dos slots de un swap (ECO-15). Usar los dueños reales
+    /// de los slots —no los `current_team_id` de los picks— garantiza que el intercambio
+    /// es una permutación y no sobreescribe a un tercero.
+    /// </summary>
+    public static void ApplySwap(TeamData[] owners, int selfSlot, int partnerSlot)
     {
-        return DatabaseManager.Instance.GetAllTeams().FirstOrDefault(t => t.id == teamId);
+        if (owners == null) return;
+        if (selfSlot < 0 || partnerSlot < 0 || selfSlot == partnerSlot) return;
+        if (selfSlot >= owners.Length || partnerSlot >= owners.Length) return;
+        (owners[selfSlot], owners[partnerSlot]) = (owners[partnerSlot], owners[selfSlot]);
+    }
+
+    /// <summary>Número de equipos distintos que poseen un pick en la ronda (puro).</summary>
+    public static int CountDistinctOwners(TeamData[] owners)
+    {
+        if (owners == null) return 0;
+        var seen = new System.Collections.Generic.HashSet<int>();
+        foreach (var t in owners)
+            if (t != null) seen.Add(t.id);
+        return seen.Count;
     }
 
     // ── INTERACTIVE DRAFT SUPPORT ────────────────────────────────────
@@ -413,7 +430,9 @@ public static class DraftGenerator
         {
             var twoWayCount = DatabaseManager.Instance.Db.Table<PlayerData>()
                 .Count(p => p.team_id == drafTeamId && p.is_two_way == 1);
-            asTwoWay = twoWayCount < TradeHelper.MAX_TWO_WAY;
+            // ECO-14: también exige edad ≤ 23 (antes solo la ronda y el cupo).
+            asTwoWay = twoWayCount < TradeHelper.MAX_TWO_WAY
+                    && TradeHelper.IsEligibleForTwoWayAge(prospect.age);
         }
 
         long salary;

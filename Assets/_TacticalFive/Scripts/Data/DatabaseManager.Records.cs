@@ -1660,6 +1660,11 @@ public partial class DatabaseManager
             seasonRecord.first_team_pf = posIds.GetValueOrDefault("PF");
             seasonRecord.first_team_c  = posIds.GetValueOrDefault("C");
 
+            // DPOY y Sexto Hombre también en season_records (SEA-11: la trayectoria del
+            // jugador no los mostraba). All-Star y 2º quinteto siguen sin persistir.
+            seasonRecord.best_defender_id = GetBestDefensivePlayer(seasonId, managerId)?.PlayerId ?? 0;
+            seasonRecord.sixth_man_id = GetSixthMan(seasonId, managerId)?.PlayerId ?? 0;
+
             _db.Insert(new QuintetRecord
             {
                 season = seasonLabel,

@@ -264,7 +264,8 @@ public static class GameSimulator
         // (la pantalla Stats filtra solo temporada regular).
         // Los partidos G-League no escriben en player_game_stats: sus stats
         // viven en gleague_season_stats y las gestiona el llamador.
-        if (persistToDb)
+        // El All-Star tampoco escribe: sus equipos no existen como team_id reales (SIM-14).
+        if (persistToDb && game.game_type != "allstar")
         {
             DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
             // Solo se persisten los jugadores que realmente jugaron: las filas con
@@ -1243,6 +1244,10 @@ public static class GameSimulator
         var injuries = new List<(int, string, int)>();
         foreach (var ps in players)
         {
+            // SIM-06: quien no juega (0 minutos) no se lesiona. Antes la probabilidad era
+            // plana y también caía sobre los que ni pisaron la pista.
+            if (ps.minutes <= 0) continue;
+
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
             if (player == null || player.injury_days > 0) continue;
             float injuryChance = 0.008f;

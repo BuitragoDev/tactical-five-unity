@@ -14,11 +14,29 @@ public static class TradeHelper
     public const int MAX_ROSTER = 17;
     public const long TWO_WAY_SALARY = 578_000;
     public const int MAX_TWO_WAY = 2;
+    public const int MAX_TWO_WAY_AGE = 23;
     public const int IR_MIN_DAYS = 90;
 
     public static bool IsEligibleForTwoWay(PlayerData p)
     {
-        return p != null && p.age <= 23;
+        return p != null && IsEligibleForTwoWayAge(p.age);
+    }
+
+    /// <summary>Edad máxima para un contrato two-way (misma fuente para FA y draft).</summary>
+    public static bool IsEligibleForTwoWayAge(int age) => age <= MAX_TWO_WAY_AGE;
+
+    /// <summary>
+    /// Ajusta una oferta al mínimo legal y al máximo permitido. Devuelve false si no hay
+    /// rango legal (el máximo está por debajo del mínimo). ECO-13: antes el suelo de 1M se
+    /// aplicaba con `else if`, así que una oferta podía quedar por encima del máximo.
+    /// </summary>
+    public static bool TryClampOffer(long offer, long floor, long max, out long clamped)
+    {
+        clamped = offer;
+        if (max < floor) return false;
+        if (clamped < floor) clamped = floor;
+        if (clamped > max) clamped = max;
+        return true;
     }
 
     public static bool IsEligibleForIR(PlayerData p)

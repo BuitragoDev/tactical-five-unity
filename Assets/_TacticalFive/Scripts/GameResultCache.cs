@@ -22,6 +22,9 @@ public static class GameResultCache
 
     public static void Clear()
     {
+        // SIM-07: LastGameDay también se resetea; si no, al cargar otra partida los
+        // consumidores (GameResults/MatchDay) creían que el día seguía siendo el mismo.
+        LastGameDay = 0;
         SimulatedGameIds.Clear();
         GameStarters.Clear();
         PlayByPlayLogs.Clear();

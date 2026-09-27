@@ -1230,11 +1230,12 @@ using System.Threading.Tasks;
         db.BeginTransaction();
         try
         {
+            // SIM-08: limpieza INCONDICIONAL. En un día sin partidos previos que crea
+            // clasificatorios, `gamesToday` se leyó vacío y quedaban resultados del día
+            // anterior mezclados en el cache.
+            GameResultCache.Clear();
             if (gamesToday.Count > 0)
-            {
-                GameResultCache.Clear();
                 GameResultCache.LastGameDay = gameDay;
-            }
         }
         catch (System.Exception ex)
         {

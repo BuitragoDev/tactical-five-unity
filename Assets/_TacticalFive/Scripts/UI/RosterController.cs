@@ -1129,7 +1129,11 @@ using System.Linq;
         }
 
         long capSpace = settings.salary_cap - totalPayroll;
-        result.capSpaceMax = player.salary + (capSpace > 0 ? capSpace : 0);
+        // Re-firma: su salario actual ya libera espacio al renovarlo. FA externo: no está
+        // en la nómina, así que solo cuenta el espacio real (ECO-11: la UI prometía más).
+        result.capSpaceMax = isFromSameTeam
+            ? player.salary + (capSpace > 0 ? capSpace : 0)
+            : (capSpace > 0 ? capSpace : 0);
 
         result.exceptionMax = 0;
         result.exceptionName = "";
@@ -1237,7 +1241,6 @@ using System.Linq;
         if (_selectedPlayer == null || _offerSent) return;
 
         // Asegurar que los valores están dentro de límites
-        if (_renewSalary < 1000000) _renewSalary = 1000000;
         if (_renewYears < 1) _renewYears = 1;
         else if (_renewYears > 5) _renewYears = 5;
 
@@ -1247,14 +1250,33 @@ using System.Linq;
             _renewSalary = TradeHelper.TWO_WAY_SALARY;
             _renewYears = 2;
         }
-        else if (_renewSalary > _renewMaxSalary)
+        else
         {
-            _renewSalary = _renewMaxSalary;
-            RefreshRenewSpinners();
-            if (_renewWarningText != null)
+            // Suelo de mínimo y tope legal juntos: antes el `else if` dejaba pasar una
+            // oferta por encima del máximo cuando el suelo subía el salario (ECO-13).
+            if (!TradeHelper.TryClampOffer(_renewSalary, 1000000, _renewMaxSalary, out long clamped))
             {
-                _renewWarningText.text = $"Oferta ajustada al máximo legal: {FormatMoney(_renewMaxSalary)}.";
-                _renewWarningText.style.display = DisplayStyle.Flex;
+                if (_renewWarningText != null)
+                {
+                    _renewWarningText.text = $"Tu máximo legal ({FormatMoney(_renewMaxSalary)}) está por debajo del mínimo " +
+                                             $"({FormatMoney(1000000)}): no puedes enviar esta oferta.";
+                    _renewWarningText.style.display = DisplayStyle.Flex;
+                }
+                return;
+            }
+
+            if (clamped != _renewSalary)
+            {
+                bool wasAbove = _renewSalary > clamped;
+                _renewSalary = clamped;
+                RefreshRenewSpinners();
+                if (_renewWarningText != null)
+                {
+                    _renewWarningText.text = wasAbove
+                        ? $"Oferta ajustada al máximo legal: {FormatMoney(clamped)}."
+                        : $"Oferta ajustada al mínimo: {FormatMoney(clamped)}.";
+                    _renewWarningText.style.display = DisplayStyle.Flex;
+                }
             }
         }
 

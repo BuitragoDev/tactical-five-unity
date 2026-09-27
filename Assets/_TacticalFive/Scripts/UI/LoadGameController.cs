@@ -455,6 +455,9 @@ public class LoadGameController : UIScreenController
             Debug.LogError($"[LoadGame] No se pudo abrir la partida del slot {slotNumber} (DB corrupta o bloqueada).");
             return;
         }
+        // SIM-07: limpia el traspaso de resultados en memoria (escena única, nunca se
+        // descarga): si no, se veían resultados de la partida anterior.
+        GameResultCache.Clear();
         GameSaveManager.UpdateSlotFromDatabase(slotNumber);
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
     }

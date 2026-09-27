@@ -263,4 +263,36 @@ public class TradeHelperTests
         Assert.That(TradeHelper.CanAIRenew(125_000_000, s), Is.True);
         Assert.That(TradeHelper.CanAIRenew(131_000_000, s), Is.False);
     }
+
+    // ── ECO-13: la oferta se ajusta al mínimo y al máximo legal ──
+
+    [Test]
+    public void TryClampOffer_AppliesFloorThenCap()
+    {
+        Assert.That(TradeHelper.TryClampOffer(500_000, 1_000_000, 5_000_000, out var low), Is.True);
+        Assert.That(low, Is.EqualTo(1_000_000), "Sube al mínimo");
+
+        Assert.That(TradeHelper.TryClampOffer(9_000_000, 1_000_000, 5_000_000, out var high), Is.True);
+        Assert.That(high, Is.EqualTo(5_000_000), "Baja al máximo legal (antes el `else if` lo dejaba pasar)");
+
+        Assert.That(TradeHelper.TryClampOffer(3_000_000, 1_000_000, 5_000_000, out var ok), Is.True);
+        Assert.That(ok, Is.EqualTo(3_000_000));
+    }
+
+    [Test]
+    public void TryClampOffer_RejectsWhenMaxBelowFloor()
+    {
+        Assert.That(TradeHelper.TryClampOffer(2_000_000, 1_000_000, 800_000, out _), Is.False,
+            "Sin rango legal no hay oferta posible");
+    }
+
+    // ── ECO-14: two-way solo para ≤ 23 años ──
+
+    [Test]
+    public void IsEligibleForTwoWayAge_OnlyUpTo23()
+    {
+        Assert.That(TradeHelper.IsEligibleForTwoWayAge(19), Is.True);
+        Assert.That(TradeHelper.IsEligibleForTwoWayAge(23), Is.True);
+        Assert.That(TradeHelper.IsEligibleForTwoWayAge(24), Is.False);
+    }
 }
