@@ -2,7 +2,7 @@
 
 > **Purpose of this document:** entry point to the whole project. Read this first, then follow the reading order at the bottom.
 
-**Version analyzed:** Unity `6000.3.15f1` (Unity 6), editor build with a single scene, in-app version shown as `v1.0.0 · Beta` (`MainMenu.uxml` footer). Code analyzed at HEAD `81d9e4f` (2026-08-16). Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
+**Version analyzed:** Unity `6000.3.15f1` (Unity 6), editor build with a single scene, in-app version shown as `v1.0.0 · Beta` (`MainMenu.uxml` footer). Code analyzed at HEAD `8460d21` (2026-09-27, rama `auditoria-final`). La **checklist viva** del estado está en `Docs/AUDITORIA_FINAL.md`. Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
 
 **Product:** *Tactical Five* — a single-player NBA-management simulation game, entirely in Spanish, played with mouse/keyboard on desktop (target resolution 1920×1080). It is a "GM mode" (no playable basketball): the player manages a franchise season by season, simulating games and making roster/financial decisions.
 
@@ -109,7 +109,8 @@ Docs/  .agent/            this knowledge base (keep in sync)
 - Very mature feature set (47 screens, full season cycle, records/awards/HOF/retired numbers, finances, personnel, morale, injuries, draft, playoffs, GM achievements, play-by-play).
 - Branding/labels: product "TacticalFive", company "BuitragoStudio", version `v1.0.0 Beta`.
 - Current audit commit: `81d9e4f` (merge de `crear-mejoras2`, 2026-08-16), containing the feature set below.
-- **Recent features landed since the previous doc snapshot (`50b1a86`):** play-by-play overlay, S&T of own FA (Bird rights), contract options TO/PO with re-sign, trade deadline event, AI GM strategy, GM achievements (28), PlayerProfile screen, advanced analytics (eFG%/TS%/PER), fog-of-war in ratings, async DB (background WAL threads), load management, trade block, Hall of Fame, retired numbers (Dorsales screen), season quintets (Quintos), matchup preview, protected picks + swaps, position-based athletic decline + mentoring, `UIScreenController` base, `DatabaseManager` partial split, `schema_migrations` versioning, atomic game-day transaction, IR (reserva de lesionados), two-way contracts, G-League (liga de desarrollo ligera).
+- **Features landed in the 2026-09 audit branch (`auditoria-final`):** rotation binding (`team_lineup.rotation_minutes`), G-League as a full league (30 affiliates + playoffs), play-by-play/pronóstico ya existentes, narrativa v2, plan de partido, staff con esquemas, progresión por edad/potencial, scouting con riesgo, negociación de agente, DPOY/6º hombre en `season_records`, export/import de partidas.
+- **Recent features landed before that (previous doc snapshot `50b1a86`):** play-by-play overlay, S&T of own FA (Bird rights), contract options TO/PO with re-sign, trade deadline event, AI GM strategy, GM achievements (28), PlayerProfile screen, advanced analytics (eFG%/TS%/PER), fog-of-war in ratings, async DB (background WAL threads), load management, trade block, Hall of Fame, retired numbers (Dorsales screen), season quintets (Quintos), matchup preview, protected picks + swaps, position-based athletic decline + mentoring, `UIScreenController` base, `DatabaseManager` partial split, `schema_migrations` versioning, atomic game-day transaction, IR (reserva de lesionados), two-way contracts, G-League (liga de desarrollo ligera).
 - **Resolved debt:** duplicate `CursorManager` fixed (single instance now), `SettingsController`/`SQLiteAsync.cs` deleted, dead `GameScreen.Settings` removed, `GetTopPlayersByStat` real SQL aggregation, B8 (sync DB) closed for heavy batches. See `TODO_TECHNICAL_DEBT.md`.
 
 ---
@@ -134,7 +135,7 @@ Game-facing terms are Spanish. A mapping is in `.agent/GLOSSARY.md`.
 - Whether `template.db` is meant to ship with the build or be regenerated at first run (Editor flow suggests dev-tool). [D]
 - Whether `GameMode.Editor` (dead) will be revived or removed.
 
-## Current audit delta (HEAD 81d9e4f)
+## Current audit delta (HEAD 8460d21, 2026-09-27)
 
 - `[F]` The Input System package and `InputSystem_Actions.inputactions` exist, but scripts use legacy `UnityEngine.Input`; no `InputAction`, `PlayerInput` or `InputSystemUIInputModule` use was found.
 - `[F]` Static analysis found no prefabs, gameplay ScriptableObjects, Addressables, Animator controllers, animation clips or Timeline usage. The active product is a database-backed UI application, not a 3D gameplay scene.

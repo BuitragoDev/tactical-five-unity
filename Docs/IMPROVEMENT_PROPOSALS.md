@@ -141,6 +141,12 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | **Opciones de contrato TO/PO** | **Hecho** — toggles en renovaciones/FA + `guaranteed_years` + `FormatContractYears` |
 | **Re-firma de FA propio (Bird rights)** | **Hecho** — `last_team_id`/`IsOwnRecentFA` + modal de re-firma en NewSeason |
 | **G-League / IR / contratos two-way** | **Hecho** — `NEXT_PROPOSALS.md` D (IR, two-way, G-League ligera) |
+| **G-League como liga completa (30 filiales, calendario y playoffs)** | **Hecho** — `GLeagueScheduleGenerator`/`GLeaguePostSeason`/`GLeagueStandings` + `GameScreen.GLeague` (4 pestañas) |
+| **Plan de partido + staff con esquemas** | **Hecho** — `GamePlan` (ritmo/ataque/defensa, panel en QUINTETO, planes IA) + `CoachScheme` (asistente) |
+| **Progresión por edad/potencial/minutos** | **Hecho** — `PlayerProgression` (`SEA-08/09/10`) |
+| **Scouting con riesgo + negociación de agente** | **Hecho** — `ScoutingHelper` (error de informe, bust/boom) + `NegotiationHelper` (contraofertas) |
+| **Motor de narrativa (storylines)** | **Hecho (v2)** — 10 tipos, detectores puros, pestaña HISTORIA, badge; pulido con hilos por jugador y umbrales relativos |
+| **Rivalidades / dinastías** | **En curso** — tabla `playoff_series` + prestige desde `season_records` + 2 hilos (revancha, dinastía) |
 
 ---
 

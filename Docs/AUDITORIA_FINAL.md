@@ -757,40 +757,40 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 ### A. Pequeñas (1-3 días)
 | Estado | Idea | Aporta | Sistemas que usa | Prioridad |
 |---|---|---|---|---|
-| `[ ]` | Confirmación de traspaso propio + resumen | Seguridad | Modal existente en `DashboardController` | Alta |
-| `[ ]` | Toast/modal de error de fast-sim con "reintentar" | Confianza | `HandleDayError`, `UIScreenController` | Alta |
-| `[ ]` | Aviso/indicador del tope de 240 en ROTACIÓN | Claridad | `RotationController.RefreshSliderLimits` | Media |
-| `[ ]` | Arreglar `season_records` (MVP/champion/first_team/All-Star) | Trayectoria del jugador | `SaveSeasonEndRecords` (`SEA-11`) | Alta |
-| `[ ]` | Tooltips en eFG%/TS%/PER, aprons y excepciones | Onboarding | UI Toolkit | Media |
-| `[ ]` | Flag `initialized` en `SaveSlotInfo` | Integridad | `GameSaveManager` | Alta |
+| `[x]` | Confirmación de traspaso propio + resumen (`UI-10`) | Seguridad | Modal existente en `DashboardController` | Alta |
+| `[x]` | Toast/modal de error de fast-sim con "reintentar" (`UI-07`) | Confianza | `HandleDayError`, `UIScreenController` | Alta |
+| `[x]` | Aviso/indicador del tope de 240 en ROTACIÓN ("REPARTO EXACTO (240)" + tope por slider) | Claridad | `RotationController.RefreshSliderLimits` | Media |
+| `[~]` | Arreglar `season_records` (`SEA-11`): MVP/campeón/1er quinteto/MIP/DPOY/6º hombre **hechos**; quedan **All-Star y 2º quinteto** | Trayectoria del jugador | `SaveSeasonEndRecords` (`SEA-11`) | Alta |
+| `[~]` | Tooltips en eFG%/TS%/PER, aprons y excepciones: CAP SHEET/aplazamientos hechos; faltan los de eFG/TS/PER | Onboarding | UI Toolkit | Media |
+| `[x]` | Flag `initialized` en `SaveSlotInfo`: resuelto por `SAV-03` (metadata al final + `exists` recalculado) | Integridad | `GameSaveManager` | Alta |
 | `[ ]` | Filtros/orden en Historial y Récords | Usabilidad | scrollbar única | Media |
-| `[ ]` | Indicador de cap space/aprón en la pantalla de ofertas | Claridad | `TradeHelper` + `league_settings` | Alta |
+| `[x]` | Indicador de cap space/aprón en la pantalla de ofertas (máximo legal + motivo: espacio/excepción/Bird, aviso MODO PRO) | Claridad | `TradeHelper` + `league_settings` | Alta |
 
 ### B. Medianas (1-3 semanas)
 | Estado | Idea | Cómo funciona | Sistemas nuevos/existentes | Prioridad |
 |---|---|---|---|---|
-| `[ ]` | Draft persistente y resumible + board con votos IA | Tabla `draft_state` (cursor, picks usados) + `DraftGenerator` por pasos | `DraftGenerator`, `EndSeasonController` | Alta |
-| `[ ]` | Negociación de agente (contraofertas, promesas de rol/minutos, bonuses) | Extender `OfferData` + `CalculateAcceptScore` con peso de rol/minutos | `OfferData`, `RosterController`, `DashboardController` | Alta |
-| `[ ]` | Dashboard de cap/aprons por equipo | Vista de excepciones y espacio salarial | `TradeHelper`, `league_settings` | Alta |
+| `[x]` | Draft persistente y resumible + board con votos IA (`SEA-07`) | Tabla `draft_state` (cursor, picks usados) + `DraftGenerator` por pasos | `DraftGenerator`, `EndSeasonController` | Alta |
+| `[x]` | Negociación de agente (contraofertas al rechazar por dinero) | Extender `OfferData` + `CalculateAcceptScore` con peso de rol/minutos | `OfferData`, `RosterController`, `DashboardController` | Alta |
+| `[x]` | Dashboard de cap/aprons (CAP SHEET + hard cap por NT-MLE + FA con derechos Bird) | Vista de excepciones y espacio salarial | `TradeHelper`, `league_settings` | Alta |
 | `[ ]` | Historial de temporadas navegable | Pantalla nueva desde `player_season_stats` + `season_records` | `player_season_stats`, `SeasonRecord` | Media |
 | `[ ]` | Parte médico y recuperación realista | Tipos de lesión con tiempos y recaídas | `injury_days`, `GameSimulator` | Media |
 | `[ ]` | Camp de pretemporada con decisiones | Foco por jugador, efectos y coste de fatiga | `TrainingData`, `Records` (rollover) | Media |
-| `[ ]` | IA con gestión real de cap | Helper de cap compartido con el usuario | `TradeHelper`, `DashboardController` (`ECO-06`) | Alta |
-| `[ ]` | Rivalidades/dinastías | Récords de series y prestige de franquicia | `season_records`, `standings` | Media |
+| `[x]` | IA con gestión real de cap (`ECO-06`) | Helper de cap compartido con el usuario | `TradeHelper`, `DashboardController` (`ECO-06`) | Alta |
+| `[~]` | Rivalidades/dinastías (en curso: tabla `playoff_series` + prestige desde `season_records` + 2 hilos) | Récords de series y prestige de franquicia | `season_records`, `standings` | Media |
 
 ### C. Grandes (1-3 meses)
 | Estado | Idea | Aporta | Sistemas a tocar | Prioridad |
 |---|---|---|---|---|
-| `[ ]` | Plan de partido / instrucciones (ritmo, dobles a la estrella, defensa, rotación corta) | El jugador *entrena*, no solo ficha | `GameSimulator` (pacing/usage/defense) + UI | Alta |
-| `[ ]` | Staff técnico con esquemas que modifican el simulador | Diferenciación real | `CoachRankingData`, `EmployeeData`, `GameSimulator` | Media-alta |
-| `[ ]` | Progresión por arquetipo/edad/minutos/entrenamiento | Carreras creíbles | `Records.cs` (rollover), `ApplyMentoring` (`SEA-08/09/10`) | Alta |
-| `[ ]` | Economía de mercado real (asistencia elástica, ingresos por ciudad, patrocinios por fama) | Gestión de franquicia de verdad | `DashboardController` economía, `TeamSettingsData` | Media |
-| `[ ]` | Scouting profundo de draft (incertidumbre, busts, informes) | Riesgo real en el draft | `FogOfWarHelper`, `ScoutData`, `DraftGenerator` | Media |
+| `[x]` | Plan de partido / instrucciones (ritmo, ataque, defensa + plan IA y panel en QUINTETO) | El jugador *entrena*, no solo ficha | `GameSimulator` (pacing/usage/defense) + UI | Alta |
+| `[x]` | Staff técnico con esquemas (`CoachScheme`: asistente matiza el plan y da bonus al rating) | Diferenciación real | `CoachRankingData`, `EmployeeData`, `GameSimulator` | Media-alta |
+| `[x]` | Progresión por edad/potencial/minutos (`PlayerProgression`) | Carreras creíbles | `Records.cs` (rollover), `ApplyMentoring` (`SEA-08/09/10`) | Alta |
+| `[~]` | Economía de mercado real: nómina en 12 plazos (`ECO-09`), préstamos (`ECO-10`) y IA con cap; falta asistencia elástica/ciudad/patrocinios por fama | Gestión de franquicia de verdad | `DashboardController` economía, `TeamSettingsData` | Media |
+| `[x]` | Scouting profundo de draft (`ScoutingHelper`: error de informe, bust/boom) | Riesgo real en el draft | `FogOfWarHelper`, `ScoutData`, `DraftGenerator` | Media |
 | `[ ]` | All-Star weekend jugable | Contenido | `GameSimulator`, `all_star_records` | Baja-media |
 
 ### D. Killer features
 1. **Modo histórico / eras** — empezar en cualquier temporada histórica con plantillas/palmarés reales (base ya existente: `HallOfFameSeeder`, `PalmaresSeeder`, `HistoricalPlayerStatsSeeder`, `RetiredNumberSeeder`) y reescribir la historia. *Coste:* alto (necesita datasets y lógica de bootstrap de liga). *Riesgo:* datos.
-2. **Motor de narrativa ("storylines")** — rumores, polémicas, rachas y relaciones de vestuario convertidos en noticias (ya hay `QuickNewsGenerator` + personalidades/relaciones sin explotar) que afectan moral, prensa y afición. *Coste:* medio. *Impacto:* convierte números en drama.
+2. **Motor de narrativa ("storylines") — HECHO** (v2): 10 tipos de hilo con detectores puros, `storylines` persistente, pestaña HISTORIA, badge y noticias de PRENSA con efectos; hilos por jugador y umbrales relativos en el pulido posterior. *Impacto:* convierte números en drama.
 3. **MyLeague / Editor total** — llevar `EditorController` a editor de liga completo (equipos, ciudades, reglas, draft classes, logos, pabellones — ya hay `CustomScopes`/`TeamImages`) con export/import. *Coste:* alto. *Impacto:* multiplica la vida útil.
 4. **Broadcast en vivo narrado** — posición a posición con comentario (ya se captura `PlayByPlayLogs`) + odds internas. *Coste:* bajo-medio. *Impacto:* espectáculo.
 5. **Hotseat/multi-manager local** — varios GMs en la misma liga (la IA ya juega con `TeamStrategy`). *Coste:* medio-alto. *Impacto:* modo social local.
@@ -826,33 +826,33 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 
 ### Fase 2 — Arquitectura (~2-4 semanas)
 
-- [ ] Capa de transacción: helper `ExecuteInTransaction`, mutex/cola de escritura, guardas `IsInTransaction`, `try/finally` en `RunInBackground*`.
-- [ ] Servicio de traspasos/contratos: mutación centralizada (`MovePlayerToTeam`) + `ValidateTrade` obligatorio.
-- [ ] Rollover único: opciones/decrementos dentro de `StartNewSeason`; reset de estado transitorio (`SEA-04`, `SEA-10`).
-- [ ] Esquema: índices (`players.team_id`, `messages.manager_id`, `games.season_id`…), `UNIQUE` (HOF, dorsales), ids monótonos (`QA-02`, §4).
-- [ ] Rendimiento: cachear standings/records del día, agregados SQL (N+1), `LIMIT` en bandeja, `Destroy` de texturas (`REN-01`, `CON-05..CON-10`).
-- [ ] Integridad de simulación: `SIM-01/02/03/04`.
-- [ ] Corregir `season_records` (`SEA-11`) y `GetActiveSeason` (`SEA-12`).
-- [ ] Limpiar código muerto (`CON-08`, `QA-01`, `QA-08`, `PreseasonGameData`, `FullScreenUI`, `LoadSidebarIcons`) y corregir docs (`QA-07`).
+- [~] Capa de transacción: transacción atómica del día + rollover y `try/finally` en `RunInBackground*`. **No** se añadió un helper genérico `ExecuteInTransaction` ni guardas `IsInTransaction`.
+- [x] Servicio de traspasos/contratos: `MovePlayerToTeam` (`ECO-08`) + `ValidateTrade` obligatorio (`ECO-02`).
+- [x] Rollover único: opciones/decrementos dentro de `StartNewSeason`; reset de transitorios (`SEA-04`, `SEA-10`).
+- [~] Esquema: índices (`players.team_id`, `messages.manager_id`, `games.season_id`) e ids monótonos (`AllocatePlayerId`) hechos. **No** se añadieron `UNIQUE` en HOF/dorsales.
+- [x] Rendimiento: records cacheados por día (`CON-05`), agregados SQL (`CON-06/07/08`), texturas con `Destroy` (`CON-09/10`), `REN-01`.
+- [x] Integridad de simulación: `SIM-01/02/03/04` (+`SIM-05/12/13`).
+- [~] `season_records` (`SEA-11`: falta All-Star/2º quinteto) y `GetActiveSeason` (`SEA-12`, hecho).
+- [~] Limpiar código muerto: `CON-08`, `QA-01`, `QA-08` hechos y docs corregidas (`QA-07`). Siguen `PreseasonGameData`, `FullScreenUI` y `LoadSidebarIcons` (inofensivos).
 
 ### Fase 3 — Profundidad (~1-3 meses)
 
 - [x] Progresión por arquetipo/edad/minutos/entrenamiento (`PlayerProgression`: edad + potencial como techo + minutos; `SEA-08/09/10` resueltos de raíz).
-- [x] IA con cap/aprons real (`ECO-06`). *Pendiente:* economía estable a 20+ temporadas (`ECO-09` nómina 7/12 y `ECO-10` préstamos).
+- [x] IA con cap/aprons real (`ECO-06`) + nómina en 12 plazos (`ECO-09`) + préstamos (`ECO-10`).
 - [x] Draft persistente/resumible (`SEA-07`) + scouting con riesgo (busts).
-- [~] Plan de partido (ritmo/ataque/defensa: datos + simulador + IA + panel en QUINTETO). *Pendiente:* staff con esquemas.
+- [x] Plan de partido (ritmo/ataque/defensa: datos + simulador + IA + panel en QUINTETO) + **staff con esquemas** (`CoachScheme`).
 - [x] Dashboard de cap/aprons (ya existía el **CAP SHEET** en Finanzas; se añaden el estado de **hard cap** por NT-MLE y la lista de **FA con derechos Bird**). + **negociación de agente** (contraofertas al rechazar por dinero).
 
 ### Fase 4 — Pulido (~1 mes)
 
 - [x] Balance: asistencias 35%→55% (`SIM-10`), desgaste por minuto 0.30→0.28 y recuperación 8→10 (`SIM-09`), suelo de rebotes acotado por los tiros fallados (`SIM-11`), química simétrica (`SIM-13`), All‑Star sin desgaste ni lesiones (`SIM-14`).
-- [x] UX (parcial): tooltips explicativos del CAP SHEET y formato de números consistente (`es-ES`) en el perfil; `UI-07` (aviso de error en simulación rápida) ya en Fase 3.
+- [~] UX (parcial): tooltips del CAP SHEET y formato `es-ES` en el perfil; `UI-07` en Fase 3. **Faltan** tooltips de eFG/TS/PER y quedan `InvariantCulture` sueltos (`QA-10`).
 - [x] Confirmar el **traspaso propio** (`UI-10`): modal con resumen de lo que se envía/recibe antes de ejecutar.
 - [x] Confirmar el borrado de noticias (`UI-11`).
 - [x] `CON-05`: récords por equipo cacheados por carga de partidos (antes 4 recorridos por refresco).
 - [x] `UI-04`: barra de scroll enlazada **una vez por visita** (`ScrollBarBinder` con `ConditionalWeakTable`); fin de los handlers duplicados en las 7 pantallas del patrón copiado.
 - [x] QoL: **copias de seguridad** desde Cargar Partida (`GUARDAR COPIA` / `RESTAURAR COPIA`): backup `.db` en `saves/exports` con `wal_checkpoint`, restauración al siguiente slot libre, modales con **logo del equipo**, alto fijo + scroll lateral, fecha/tamaño, borrado de copias y botón **ABRIR CARPETA**. El resumen de temporada y el autosave diario ya existían.
-- [x] Killer feature: **Motor de narrativa** completo (v2) — 10 tipos de hilo, catálogo de **detectores puros**, `StorylineContext` (1-2 queries/día), máx. 3 activos + cooldown, noticias de PRENSA y efectos clampeados; **pestaña HISTORIA** en Palmarés y **badge** en el Dashboard; hilos cerrados como `abandoned` en el rollover. +11 tests. *No incluidos:* rivalidades (no hay histórico de series: `games` se purga) y hitos de legado (requiere un agregado de carrera por jugador).
+- [x] Killer feature: **Motor de narrativa** completo (v2) — 10 tipos de hilo, catálogo de **detectores puros**, `StorylineContext` (1-2 queries/día), máx. 4 activos + cooldown por tipo/protagonista, noticias de PRENSA y efectos clampeados; **pestaña HISTORIA** en Palmarés y **badge** en el Dashboard; hilos cerrados como `abandoned` en el rollover. 19 tests. **Pulido posterior:** hilos de jugador con **varios protagonistas**, sequía con umbral **relativo** (`max(3, 45 %)`), mínimo de minutos y desempate por relevancia. **Pendiente:** rivalidades/dinastías (en curso, ver §9-B) e hitos de legado.
 
 ---
 
@@ -927,9 +927,9 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 
 ## Anexo · Métricas de la auditoría
 
-- Archivos `.cs`: **152** · Líneas: **62.385**
+- Archivos `.cs`: **172** · Líneas: **68.325** (a 2026-09-27, tras las Fases 1-4)
 - Pantallas `UIDocument`: **47** (todas con `case` en `GoTo` y campo asignado)
-- Tests EditMode: **85** (7 archivos) — `TradeHelperTests` 22 · `GLLeagueHelperTests` 22 · `AdvancedStatsHelperTests` 11 · `ObjectiveHelperTests` 10 · `HallOfFameHelperTests` 9 · `GameSimulatorTests` 9 · `EditModeSmokeTests` 2
+- Tests EditMode: **176** (17 archivos) — `TradeHelperTests` 30 · `StorylineServiceTests` 28 · `GLLeagueHelperTests` 22 · `GameSimulatorTests` 14 · `AdvancedStatsHelperTests` 11 · `GameSaveManagerTests` 11 · `ObjectiveHelperTests` 10 · `HallOfFameHelperTests` 9 · `GamePlanTests` 6 · `PlayerProgressionTests` 6 · `ScoutingHelperTests` 6 · `HistoricalStatsRulesTests` 5 · `CoachSchemeTests` 4 · `DraftGeneratorTests` 4 · `NegotiationHelperTests` 4 · `PlayerDataTests` 4 · `EditModeSmokeTests` 2
 - Archivos con `[Indexed]`: **4**
 - Superficie de red/procesos externos: **ninguna** (no hay `UnityWebRequest`, `HttpClient`, `Process.Start`): el "apartado de seguridad" se reduce a robustez frente a datos corruptos.
 
