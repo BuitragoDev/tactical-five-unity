@@ -159,7 +159,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 ### Records & history tables
 - `historical_records` (`HistoricalRecordData`): all-time single-game records (9 real: Wilt 100pts, 55 reb, Skiles 30 ast, …).
 - `team_records` (`TeamRecordData`): per-team records seeded from `TeamRecordSeeder`.
-- `historical_player_stats` (`HistoricalPlayerStatsData`): career totals for ~120 real legends (totals + computed `ppg, rpg, apg, spg, bpg, fg_pct, fg3_pct, ft_pct`). Re-seeded if all `total_turnovers == 0`.
+- `historical_player_stats` (`HistoricalPlayerStatsData`): career totals for ~120 real legends plus every in-game player (totals + computed `ppg, rpg, apg, spg, bpg, fg_pct, fg3_pct, ft_pct`). Re-seeded if all `total_turnovers == 0`. **Clave `player_id`** (SEA-06): `>0` real player (stable id), `-1` seeder legend (untouchable), `0` legacy ownerless row adopted by unique name during the migration (`HistoricalStatsRules`). Never aggregated by name.
 - `season_game_records` (`SeasonGameRecordData`): season-level single-game records (`team_id, season_id, stat_type, player_name, value, game_date`).
 - `player_season_stats` (`PlayerSeasonStatRow`): per-player per-season aggregates (created via `CreateTable` AND raw SQL in migrations). Archived in `StartNewSeason`.
 - `finals_records` (`FinalsRecord`): real finals 1970-71→today (champ/finalist/keyword/result/mvp).

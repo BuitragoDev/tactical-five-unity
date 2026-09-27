@@ -1077,7 +1077,7 @@ public partial class DatabaseManager
         foreach (var p in allPlayers)
         {
             if (p.is_rookie == 1) continue;
-            if (GetHistoricalPlayerStats(p.first_name, p.last_name) != null) continue;
+            if (GetHistoricalPlayerStats(p.id) != null) continue;
 
             ApplyInitialCareer(p);
             seeded++;
@@ -1138,6 +1138,7 @@ public partial class DatabaseManager
         var team = GetTeamById(p.team_id);
         SaveHistoricalPlayerStats(new HistoricalPlayerStatsData
         {
+            player_id = p.id,
             first_name = p.first_name,
             last_name = p.last_name,
             position = p.position,

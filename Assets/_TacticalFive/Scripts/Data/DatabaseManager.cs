@@ -913,6 +913,51 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.Log("[DB] Migration: eliminadas las filas de player_game_stats con 0 minutos");
         }
 
+        // SEA-06: el histórico de carrera se agregaba por NOMBRE COMPLETO. Como los pools
+        // de nombres incluyen nombres de leyendas, un rookie generado con el mismo nombre
+        // heredaba sus totales, inducciones al HOF y dorsales. Ahora la clave es player_id:
+        //   -1 = leyenda del seeder, 0 = fila antigua sin dueño, >0 = jugador real.
+        try
+        {
+            AddColumnIfMissing("historical_player_stats", "player_id",
+                "player_id INTEGER NOT NULL DEFAULT 0");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for historical_player_stats.player_id: {ex.Message}");
+        }
+
+        if (!IsMigrationApplied("historical_stats_keyed_by_player_id"))
+        {
+            // 1) Marcar las filas del seeder como leyendas (intocables).
+            int legends = 0;
+            foreach (var d in HistoricalPlayerStatsSeeder.Data)
+            {
+                legends += _db.Execute(
+                    "UPDATE historical_player_stats SET player_id = ? WHERE player_id = 0 AND first_name = ? AND last_name = ?",
+                    HistoricalStatsRules.LEGEND_ID, d.first, d.last);
+            }
+
+            // 2) Adoptar las filas huérfanas cuyo nombre sea de UN único jugador actual
+            //    (así las carreras de partidas antiguas no se pierden). Los homónimos se
+            //    quedan sin dueño: esa fila es una mezcla y no se puede repartir.
+            var orphans = _db.Table<HistoricalPlayerStatsData>().Where(r => r.player_id == 0).ToList();
+            var playersByName = _db.Table<PlayerData>().ToList()
+                .ToLookup(p => (p.first_name, p.last_name));
+            int adopted = 0;
+            foreach (var r in orphans)
+            {
+                var ids = playersByName[(r.first_name, r.last_name)].Select(p => p.id).ToList();
+                if (!HistoricalStatsRules.CanAdopt(r, ids)) continue;
+                r.player_id = ids[0];
+                _db.Update(r);
+                adopted++;
+            }
+
+            MarkMigrationApplied("historical_stats_keyed_by_player_id");
+            Debug.Log($"[DB] Migration: histórico clave player_id ({legends} leyendas marcadas, {adopted} carreras adoptadas)");
+        }
+
         // Asignar un esquema a los asistentes creados antes de esta feature.
         if (!IsMigrationApplied("coach_schemes_assigned"))
         {
@@ -1432,7 +1477,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
 
             var match = playerByName[(firstName, lastName)].FirstOrDefault();
-            var hist = match != null ? GetHistoricalPlayerStats(match.first_name, match.last_name) : null;
+            var hist = match != null ? GetHistoricalPlayerStats(match.id) : null;
 
             _db.Insert(new RetiredNumberData
             {

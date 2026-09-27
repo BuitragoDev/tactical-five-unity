@@ -482,16 +482,24 @@ using System.Linq;
         // 2. Get all historical stats
         var histData = DatabaseManager.Instance.GetAllHistoricalPlayerStats();
 
-        // 3. Build dict keyed by (first, last)
-        var histDict = new Dictionary<(string first, string last), HistoricalPlayerStatsData>();
+        // 3. Jugadores reales por player_id; leyendas y filas antiguas sin dueño por nombre
+        var histById = new Dictionary<int, HistoricalPlayerStatsData>();
+        var histByName = new Dictionary<(string first, string last), HistoricalPlayerStatsData>();
         foreach (var h in histData)
         {
-            var key = (h.first_name.ToLower(), h.last_name.ToLower());
-            histDict[key] = h;
+            if (h.player_id > 0)
+            {
+                histById[h.player_id] = h;
+                continue;
+            }
+            var legKey = (h.first_name.ToLower(), h.last_name.ToLower());
+            if (!histByName.TryGetValue(legKey, out var prev) || h.total_points > prev.total_points)
+                histByName[legKey] = h;
         }
 
         var result = new List<StatRow>();
         var mergedKeys = new HashSet<(string, string)>();
+        var mergedIds = new HashSet<int>();
 
         // 4. Merge: for active players, add historical to season
         foreach (var s in seasonStats)
@@ -507,65 +515,70 @@ using System.Linq;
             var team = _allTeams.Find(t => t.id == player.team_id);
             s.teamAbbrev = team?.abbreviation ?? "FA";
 
-            if (histDict.TryGetValue(key, out var h))
+            if (histById.TryGetValue(player.id, out var h))
             {
-                s.gp += h.games;
-                s.totalPts += h.total_points;
-                s.totalReb += h.total_rebounds;
-                s.totalAst += h.total_assists;
-                s.totalStl += h.total_steals;
-                s.totalBlk += h.total_blocks;
-                s.totalFgm += h.total_fgm;
-                s.totalFga += h.total_fga;
-                s.totalFg3m += h.total_fg3m;
-                s.totalFg3a += h.total_fg3a;
-                s.totalFtm += h.total_ftm;
-                s.totalFta += h.total_fta;
-                s.totalTov += h.total_turnovers;
-                s.totalMin += h.games * 36;  // Django estimates 36 min per historical game
-                s.totalVal += h.total_rating;
-                s.totalDd += h.total_double_doubles;
-                s.totalTd += h.total_triple_doubles;
+                AddHistoricalToRow(s, h);
+                mergedKeys.Add(key);
+                mergedIds.Add(player.id);
+            }
+            else if (histByName.TryGetValue(key, out var hLegacy))
+            {
+                AddHistoricalToRow(s, hLegacy);
                 mergedKeys.Add(key);
             }
             result.Add(s);
         }
 
-        // 5. Add historical-only players not in current season
-        foreach (var kvp in histDict)
+        // 5a. Carreras propias que no están en las stats de la temporada (retirados)
+        foreach (var kvp in histById)
+            if (!mergedIds.Contains(kvp.Key))
+                result.Add(RowFromHistory(kvp.Value));
+
+        // 5b. Leyendas sembradas y filas antiguas sin dueño actual
+        foreach (var kvp in histByName)
         {
             if (!mergedKeys.Contains(kvp.Key))
-            {
-                var h = kvp.Value;
-                result.Add(new StatRow
-                {
-                    playerId = 0,
-                    firstName = h.first_name,
-                    lastName = h.last_name,
-                    position = h.position,
-                    teamAbbrev = h.team_abbreviation ?? "FA",
-                    gp = h.games,
-                    totalPts = h.total_points,
-                    totalReb = h.total_rebounds,
-                    totalAst = h.total_assists,
-                    totalStl = h.total_steals,
-                    totalBlk = h.total_blocks,
-                    totalFgm = h.total_fgm,
-                    totalFga = h.total_fga,
-                    totalFg3m = h.total_fg3m,
-                    totalFg3a = h.total_fg3a,
-                    totalFtm = h.total_ftm,
-                    totalFta = h.total_fta,
-                    totalTov = h.total_turnovers,
-                    totalMin = h.games * 36,
-                    totalVal = h.total_rating,
-                    totalDd = h.total_double_doubles,
-                    totalTd = h.total_triple_doubles,
-                });
-            }
+                result.Add(RowFromHistory(kvp.Value));
         }
 
         return result;
+    }
+
+    /// <summary>Suma la carrera histórica a la fila de la temporada.</summary>
+    static void AddHistoricalToRow(StatRow s, HistoricalPlayerStatsData h)
+    {
+        s.gp += h.games;
+        s.totalPts += h.total_points;
+        s.totalReb += h.total_rebounds;
+        s.totalAst += h.total_assists;
+        s.totalStl += h.total_steals;
+        s.totalBlk += h.total_blocks;
+        s.totalFgm += h.total_fgm;
+        s.totalFga += h.total_fga;
+        s.totalFg3m += h.total_fg3m;
+        s.totalFg3a += h.total_fg3a;
+        s.totalFtm += h.total_ftm;
+        s.totalFta += h.total_fta;
+        s.totalTov += h.total_turnovers;
+        s.totalMin += h.games * 36;  // estimación: 36 min por partido histórico
+        s.totalVal += h.total_rating;
+        s.totalDd += h.total_double_doubles;
+        s.totalTd += h.total_triple_doubles;
+    }
+
+    /// <summary>Fila de un histórico sin equipo actual (leyenda, retirado o fila antigua).</summary>
+    static StatRow RowFromHistory(HistoricalPlayerStatsData h)
+    {
+        var row = new StatRow
+        {
+            playerId = 0,
+            firstName = h.first_name,
+            lastName = h.last_name,
+            position = h.position,
+            teamAbbrev = h.team_abbreviation ?? "FA"
+        };
+        AddHistoricalToRow(row, h);
+        return row;
     }
 
     // ═══════════════════════════════════════════════════════

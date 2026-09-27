@@ -61,6 +61,7 @@ public partial class DatabaseManager
         {
             stats.Add(new HistoricalPlayerStatsData
             {
+                player_id = HistoricalStatsRules.LEGEND_ID,
                 first_name = d.first,
                 last_name = d.last,
                 position = d.pos,
@@ -1001,10 +1002,24 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    /// <summary>Carrera acumulada de un jugador real, por su id estable (nunca por nombre).</summary>
+    public HistoricalPlayerStatsData GetHistoricalPlayerStats(int playerId)
+    {
+        if (playerId <= 0) return null;
+        return _db.Table<HistoricalPlayerStatsData>()
+                  .Where(p => p.player_id == playerId)
+                  .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Fila por nombre: SOLO filas sin dueño real (leyendas del seeder u huérfanas
+    /// antiguas). Los jugadores reales se buscan por id — ver <see cref="HistoricalStatsRules"/>.
+    /// </summary>
     public HistoricalPlayerStatsData GetHistoricalPlayerStats(string firstName, string lastName)
     {
         return _db.Table<HistoricalPlayerStatsData>()
-                  .Where(p => p.first_name == firstName && p.last_name == lastName)
+                  .Where(p => p.first_name == firstName && p.last_name == lastName
+                           && p.player_id <= 0)
                   .FirstOrDefault();
     }
 
@@ -1120,7 +1135,17 @@ public partial class DatabaseManager
 
     public void SaveHistoricalPlayerStats(HistoricalPlayerStatsData stats)
     {
-        var existing = GetHistoricalPlayerStats(stats.first_name, stats.last_name);
+        // La fila a actualizar se decide por id de fila, por player_id o (solo si la fila
+        // no tiene dueño real) por nombre. Nunca por nombre si hay player_id: era el bug
+        // que hacía que un homónimo heredara la carrera de una leyenda.
+        HistoricalPlayerStatsData existing = null;
+        if (stats.id > 0)
+            existing = _db.Find<HistoricalPlayerStatsData>(stats.id);
+        else if (stats.player_id > 0)
+            existing = GetHistoricalPlayerStats(stats.player_id);
+        else
+            existing = GetHistoricalPlayerStats(stats.first_name, stats.last_name);
+
         if (existing != null)
         {
             stats.id = existing.id;
@@ -1166,12 +1191,13 @@ public partial class DatabaseManager
             var player = GetPlayerById(ss.player_id);
             if (player == null) continue;
 
-            var hist = GetHistoricalPlayerStats(player.first_name, player.last_name);
+            var hist = GetHistoricalPlayerStats(player.id);
             if (hist == null)
             {
                 var team = GetTeamById(player.team_id);
                 hist = new HistoricalPlayerStatsData
                 {
+                    player_id = player.id,
                     first_name = player.first_name,
                     last_name = player.last_name,
                     position = player.position,
@@ -1222,7 +1248,7 @@ public partial class DatabaseManager
     {
         try
         {
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
@@ -1259,7 +1285,7 @@ public partial class DatabaseManager
             if (!WouldInduct(p))
                 return;
 
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
@@ -1304,7 +1330,7 @@ public partial class DatabaseManager
         if (p.seasons_with_team < 10) return false;
         try
         {
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
@@ -1325,7 +1351,7 @@ public partial class DatabaseManager
         {
             if (!ShouldRetireNumber(p) || p.team_id <= 0) return;
 
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             _db.Insert(new RetiredNumberData
             {
                 team_id = p.team_id,

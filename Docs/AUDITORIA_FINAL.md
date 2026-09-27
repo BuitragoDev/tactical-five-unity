@@ -44,7 +44,7 @@
 | Bloque | Hallazgos | Hechos |
 |---|---|---|
 | CRÍTICOS | 9 | 9 |
-| ALTOS | 21 | **20** (queda `SEA-06`: histórico indexado por nombre) |
+| ALTOS | 21 | **21** |
 | MEDIOS | ~32 | ~28 |
 | BAJOS | ~12 | ~10 |
 | Tests | — | **155** (de los 25 propuestos: 9 cerrados, 16 requieren DB/UI) |
@@ -371,7 +371,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 ---
 
 #### `SEA-06` · Histórico indexado por nombre → colisión con leyendas sembradas
-- **Estado:** `[ ]` pendiente
+- **Estado:** `[x]` hecho (`player_id`: `-1` leyenda del seeder, `0` fila antigua sin dueño adoptada por nombre único, `>0` jugador real)
 - **Severidad:** ALTO · **Tipo:** BUG · **Verificación:** **[V]**
 - **Archivos:** `DatabaseManager.Records.cs:1075-1083` (`GetHistoricalPlayerStats(first_name, last_name)`), `:1192-1204`, `:1256-1290` (`hist.games += ...`); `HistoricalPlayerStatsSeeder.cs:15`; `NamePools.cs:30`
 - **Problema:** el histórico se agrega por nombre completo. Los pools de nombres son finitos e incluyen nombres de leyendas (p. ej. "Michael"/"Jordan").
@@ -716,7 +716,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - [ ] `Playoffs_MissingSeeds_DoesNotSoftLock` (`SEA-05`)
 - [ ] `Draft_ProtectedPickReverts_WhenInsideRange` / `Draft_Swaps_KeepThirtyDistinctOwnersPerRound` (`ECO-15`)
 - [ ] `Draft_Interrupted_Midway_DoesNotDuplicateClass` (`SEA-07`)
-- [ ] `HistoricalStats_SameNameRookie_DoesNotInheritLegendTotals` (`SEA-06`)
+- [x] `HistoricalStats_SameNameRookie_DoesNotInheritLegendTotals` (`SEA-06`) → `HistoricalStatsRulesTests` (5): la fila se elige por `player_id`, nunca por nombre, y reglas de adopción de huérfanas
 
 **Economía / traspasos / FA**
 - [x] `Trade_Confirm_Revalidates_RejectsOverRoster17` (`ECO-02`) → implementado como `ValidateTrade_AcceptingTwoForOne_AtMaxRoster_ReportsError`
@@ -887,6 +887,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-27 | este commit | Fase 2 · `SEA-06` | Histórico de carrera con clave **`player_id`** (+`HistoricalStatsRules`, migración `historical_stats_keyed_by_player_id` que marca las leyendas del seeder como `-1` y adopta las filas huérfanas de nombre único): un rookie homónimo de una leyenda ya no hereda totales, HOF ni dorsal. `StatsController` fusiona por id (+leyendas por nombre) y `SaveHistoricalPlayerStats` nunca resuelve por nombre si hay id. +5 tests (160). |
 | 2026-09-27 | doc | — | Sincronizado el tablero y la checklist de tests: `UI-04` cerrado, **155 tests** (9 de los 25 propuestos implementados; el resto necesita DB/UI), suites extra de Fases 2-4 listadas. **Único ALTO abierto: `SEA-06`**. |
 | 2026-09-27 | `c48eb2d9` | Fase 4 · narrativa (fix) | `StorylineContext` contaba **toda la liga** (`GetSeasonGames` sin filtrar por equipo) → `GamesRemaining` daba 20 en octubre y abría el hilo de Play-In; la racha también se veía afectada. Ahora `StorylineService.RegularGamesOf` filtra por equipo (+2 tests de regresión) y `CurrentStreak` salta partidos ajenos. Además: **foto del jugador** en los 4 hilos de jugador (tipos de noticia propios `sequia`/`baja_estrella`/`rumor_traspaso`/`descontento`) y textos con **Play-In** capitalizado. |
 | 2026-09-27 | `36b08d70` + `2bf30a1c` + `125a77e5` | Fase 4 · narrativa v2 | Catálogo de detectores puros, `StorylineContext`, multi-hilo (máx. 3 + cooldown), 10 tipos (rachas, jugador caliente/sequía, descontento, rumor de traspaso, baja de estrella, presión GM, caza de playoffs, crisis económica), pestaña HISTORIA en Palmarés, badge en el Dashboard, icono de sequía y cierre de hilos en el rollover. QN cede las rachas del usuario. +11 tests. |
