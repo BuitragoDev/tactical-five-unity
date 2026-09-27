@@ -194,4 +194,101 @@ public class StorylineServiceTests
         Assert.That(StorylineCatalog.ExpectedMinutes(PlayerRole.Banquillo), Is.GreaterThan(
                     StorylineCatalog.ExpectedMinutes(PlayerRole.UltimoRecurso)));
     }
+
+    // ── DETECTORES FASE C/E ────────────────────────────────
+
+    [Test]
+    public void DetectTradeRumor_OpensForMarketPlayer_AndClosesWhenOut()
+    {
+        var p = new PlayerData { id = 5, first_name = "Rui", last_name = "Diaz", on_trade_block = 1, overall = 80 };
+        var ctx = Ctx(p);
+        var def = StorylineCatalog.Find(StorylineType.RumorTraspaso);
+
+        var open = StorylineCatalog.DetectTradeRumor(ctx, def, null);
+        Assert.That(open, Has.Count.EqualTo(1));
+        Assert.That(open[0].action, Is.EqualTo(StorylineService.Action.Start));
+        Assert.That(open[0].subjectPlayerId, Is.EqualTo(5));
+
+        // El jugador sale del equipo -> el hilo se resuelve
+        var active = new StorylineData { type = StorylineType.RumorTraspaso, subject_player_id = 5, intensity = 1 };
+        ctx.Roster.Clear();
+        var closed = StorylineCatalog.DetectTradeRumor(ctx, def, active);
+        Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(closed[0].resolution, Is.EqualTo(StorylineResolution.Completed));
+    }
+
+    [Test]
+    public void DetectStarInjury_OpensAndResolvesOnReturn()
+    {
+        var star = new PlayerData { id = 9, first_name = "Nikola", last_name = "P", overall = 92, injury_days = 12 };
+        var ctx = Ctx(star);
+        var def = StorylineCatalog.Find(StorylineType.BajaEstrella);
+
+        var open = StorylineCatalog.DetectStarInjury(ctx, def, null);
+        Assert.That(open, Has.Count.EqualTo(1));
+        Assert.That(open[0].action, Is.EqualTo(StorylineService.Action.Start));
+
+        star.injury_days = 0;
+        var active = new StorylineData { type = StorylineType.BajaEstrella, subject_player_id = 9, intensity = 1 };
+        var closed = StorylineCatalog.DetectStarInjury(ctx, def, active);
+        Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(closed[0].resolution, Is.EqualTo(StorylineResolution.Completed));
+    }
+
+    [Test]
+    public void DetectGmPressure_OpensWhenFanAndTrustAreLow()
+    {
+        var ctx = Ctx();
+        ctx.manager.fan_confidence = 25;
+        ctx.manager.trust = 40;
+        var def = StorylineCatalog.Find(StorylineType.PresionGM);
+
+        var open = StorylineCatalog.DetectGmPressure(ctx, def, null);
+        Assert.That(open, Has.Count.EqualTo(1));
+        Assert.That(open[0].action, Is.EqualTo(StorylineService.Action.Start));
+
+        ctx.manager.fan_confidence = 60;
+        ctx.manager.trust = 60;
+        var active = new StorylineData { type = StorylineType.PresionGM, intensity = 1 };
+        var closed = StorylineCatalog.DetectGmPressure(ctx, def, active);
+        Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+    }
+
+    [Test]
+    public void DetectPlayoffRace_OpensLateAndResolvesWithDirectPlayoff()
+    {
+        var ctx = Ctx();
+        ctx.GamesRemaining = 20;
+        ctx.ConferenceRank = 9;
+        var def = StorylineCatalog.Find(StorylineType.CazaPlayoffs);
+
+        var open = StorylineCatalog.DetectPlayoffRace(ctx, def, null);
+        Assert.That(open, Has.Count.EqualTo(1));
+        Assert.That(open[0].action, Is.EqualTo(StorylineService.Action.Start));
+
+        ctx.ConferenceRank = 4;
+        var active = new StorylineData { type = StorylineType.CazaPlayoffs, intensity = 1 };
+        var closed = StorylineCatalog.DetectPlayoffRace(ctx, def, active);
+        Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(closed[0].resolution, Is.EqualTo(StorylineResolution.Completed));
+    }
+
+    [Test]
+    public void DetectEconomicCrisis_OpensWithNegativeBudget_AndClosesWhenFixed()
+    {
+        var ctx = Ctx();
+        ctx.myTeam.budget = -5_000_000;
+        var def = StorylineCatalog.Find(StorylineType.CrisisEconomica);
+
+        var open = StorylineCatalog.DetectEconomicCrisis(ctx, def, null);
+        Assert.That(open, Has.Count.EqualTo(1));
+        Assert.That(open[0].action, Is.EqualTo(StorylineService.Action.Start));
+
+        ctx.myTeam.budget = 1_000_000;
+        ctx.manager.budget_red_warnings = 0;
+        var active = new StorylineData { type = StorylineType.CrisisEconomica, intensity = 1 };
+        var closed = StorylineCatalog.DetectEconomicCrisis(ctx, def, active);
+        Assert.That(closed[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(closed[0].resolution, Is.EqualTo(StorylineResolution.Completed));
+    }
 }

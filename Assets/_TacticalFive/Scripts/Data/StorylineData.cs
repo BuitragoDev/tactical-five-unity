@@ -11,6 +11,11 @@ public static class StorylineType
     public const string JugadorCaliente = "jugador_caliente"; // 3+ partidos anotando mucho
     public const string Sequia = "sequia";                    // 3+ partidos sin aparecer
     public const string Descontento = "descontento";          // minutos por debajo del rol
+    public const string RumorTraspaso = "rumor_traspaso";     // jugador en el mercado
+    public const string BajaEstrella = "baja_estrella";       // estrella lesionada
+    public const string PresionGM = "presion_gm";             // afición/confianza bajo mínimos
+    public const string CazaPlayoffs = "caza_playoffs";       // pelea por el play-in / riesgo lottery
+    public const string CrisisEconomica = "crisis_economica"; // presupuesto en rojo
 }
 
 /// <summary>Motivo del cierre del hilo.</summary>

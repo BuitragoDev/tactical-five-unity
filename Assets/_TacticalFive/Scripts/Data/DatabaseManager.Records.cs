@@ -3173,6 +3173,9 @@ public partial class DatabaseManager
         _db.Execute("UPDATE teams SET team_chemistry = 50");
         _db.Execute("UPDATE managers SET fan_confidence = 50");
 
+        // 7f. Hilos narrativos: se cierran al acabar la temporada (el histórico se conserva).
+        AbandonActiveStorylines(managerId);
+
         // 8. Deactivate old season
         if (oldSeason != null)
         {

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 /// <summary>
 /// Snapshot del día que consumen los detectores de hilos narrativos. Se construye con
@@ -25,6 +26,11 @@ public class StorylineContext
     /// <summary>Últimos partidos de cada jugador (más reciente primero, solo con minutos).</summary>
     public Dictionary<int, List<PlayerGameStats>> RecentByPlayer = new();
 
+    /// <summary>Posición en la conferencia (1 = primero; 0 = sin dato).</summary>
+    public int ConferenceRank;
+    /// <summary>Partidos de liga regular que quedan.</summary>
+    public int GamesRemaining;
+
     public const int RECENT_GAMES = 5;
 
     public static StorylineContext Build(ManagerData manager, TeamData myTeam, SeasonData season, int gameDay, string gameDate)
@@ -46,6 +52,12 @@ public class StorylineContext
             .ToList();
         ctx.GamesPlayed = ctx.MyPlayedGames.Count;
         ctx.Streak = StorylineService.CurrentStreak(ctx.MyPlayedGames, myTeam.id);
+
+        ctx.GamesRemaining = Mathf.Max(0, 82 - ctx.GamesPlayed);
+        ctx.ConferenceRank = ObjectiveHelper.GetConferenceRank(
+            myTeam.id, myTeam.conference,
+            DatabaseManager.Instance.GetAllTeams(),
+            DatabaseManager.Instance.GetStandingsGames(manager.id));
 
         ctx.Roster = DatabaseManager.Instance.GetPlayersByTeam(myTeam.id);
 

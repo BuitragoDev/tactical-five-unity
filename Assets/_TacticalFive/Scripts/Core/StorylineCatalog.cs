@@ -41,14 +41,24 @@ public static class StorylineCatalog
     public const int COLD_POINTS = 10;       // puntos para considerar "seco"
     public const int UNREST_MORALE = 35;     // moral por debajo de la cual hay descontento
     public const int UNREST_MINUTES_PCT = 50; // % de los minutos esperados por debajo del cual hay descontento
+    public const int STAR_OVERALL = 85;       // overall a partir del cual una baja es "de estrella"
+    public const int STAR_INJURY_DAYS = 7;    // días de baja para abrir el hilo
+    public const int GM_FAN_LOW = 30;         // afición por debajo de la cual hay presión
+    public const int GM_TRUST_LOW = 45;       // confianza del dueño por debajo de la cual hay presión
+    public const int RACE_GAMES_LEFT = 25;    // partidos restantes para abrir la pelea por playoffs
 
     public static readonly List<StorylineDef> All = new()
     {
-        new StorylineDef { type = StorylineType.RachaPositiva, cooldownDays = 10, detect = DetectStreak },
-        new StorylineDef { type = StorylineType.Bache,         cooldownDays = 10, detect = DetectStreak },
+        new StorylineDef { type = StorylineType.BajaEstrella,    cooldownDays = 10, detect = DetectStarInjury },
+        new StorylineDef { type = StorylineType.Bache,           cooldownDays = 10, detect = DetectStreak },
+        new StorylineDef { type = StorylineType.RachaPositiva,   cooldownDays = 10, detect = DetectStreak },
+        new StorylineDef { type = StorylineType.Descontento,     cooldownDays = 20, detect = DetectUnrest },
+        new StorylineDef { type = StorylineType.RumorTraspaso,   cooldownDays = 20, detect = DetectTradeRumor },
+        new StorylineDef { type = StorylineType.PresionGM,       cooldownDays = 25, detect = DetectGmPressure },
+        new StorylineDef { type = StorylineType.CazaPlayoffs,    cooldownDays = 20, detect = DetectPlayoffRace },
         new StorylineDef { type = StorylineType.JugadorCaliente, cooldownDays = 15, detect = DetectHotHand },
         new StorylineDef { type = StorylineType.Sequia,          cooldownDays = 15, detect = DetectSlump },
-        new StorylineDef { type = StorylineType.Descontento,     cooldownDays = 20, detect = DetectUnrest },
+        new StorylineDef { type = StorylineType.CrisisEconomica, cooldownDays = 25, detect = DetectEconomicCrisis },
     };
 
     public static StorylineDef Find(string type) => All.FirstOrDefault(d => d.type == type);
@@ -195,6 +205,289 @@ public static class StorylineCatalog
                    $"Su rol prometido era otro y el vestuario empieza a notar el malestar.\n\nLa dirección deportiva deberá decidir si le da más protagonismo o busca una salida.",
             newsType = NewsType.PREOCUPACION,
             chemistry = -1
+        });
+        return result;
+    }
+
+    /// <summary>Jugador en el mercado (trade block o expirante descontento).</summary>
+    public static List<StorylineTransition> DetectTradeRumor(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        var result = new List<StorylineTransition>();
+
+        PlayerData candidate = ctx.Roster
+            .Where(p => p.injury_days == 0)
+            .OrderByDescending(p => (p.on_trade_block == 1 ? 100 : 0) + p.overall)
+            .FirstOrDefault(p => p.on_trade_block == 1 || (p.contract_years <= 1 && p.morale < 40));
+
+        if (active != null)
+        {
+            var subj = ctx.FindPlayer(active.subject_player_id);
+            bool stillRumor = subj != null && (subj.on_trade_block == 1 || (subj.contract_years <= 1 && subj.morale < 40));
+            if (subj == null)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Resolve,
+                    resolution = StorylineResolution.Completed,
+                    summary = "El jugador salió del equipo",
+                    title = "Se resolvió el culebrón",
+                    body = $"{active.title} termina: el jugador ya no está en el {ctx.myTeam.name} y la operación se ha cerrado.",
+                    newsType = NewsType.TRASPASO
+                });
+            }
+            else if (!stillRumor)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Resolve,
+                    title = "Vuelve la calma",
+                    summary = $"{subj.first_name} {subj.last_name} ya no está en el mercado",
+                    body = $"{subj.first_name} {subj.last_name} deja de estar en el mercado y su situación en el {ctx.myTeam.name} se normaliza.",
+                    newsType = NewsType.TRASPASO
+                });
+            }
+            else if (ctx.gameDay - active.last_update_game_day >= 7)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Escalate,
+                    intensity = active.intensity + 1,
+                    subjectPlayerId = subj.id,
+                    title = $"Culebrón: {subj.first_name} {subj.last_name}",
+                    summary = "Los rumores se intensifican y la operación podría cerrarse en cualquier momento",
+                    body = $"El futuro de {subj.first_name} {subj.last_name} sigue sin resolverse y los rumores se intensifican. Varias franquicias han preguntado por su situación y el {ctx.myTeam.name} estudia ofertas.",
+                    newsType = NewsType.TRASPASO, chemistry = -1
+                });
+            }
+            return result;
+        }
+
+        if (candidate == null) return result;
+
+        result.Add(new StorylineTransition
+        {
+            type = def.type, action = StorylineService.Action.Start, intensity = 1,
+            subjectPlayerId = candidate.id,
+            title = $"Rumores: {candidate.first_name} {candidate.last_name}",
+            summary = candidate.on_trade_block == 1
+                ? $"{candidate.first_name} {candidate.last_name} está en el mercado"
+                : $"El contrato de {candidate.first_name} {candidate.last_name} expira y no hay acuerdo",
+            body = $"{candidate.first_name} {candidate.last_name} vive un momento de incertidumbre en el {ctx.myTeam.name}: " +
+                   "su nombre suena en los despachos y varias franquicias han preguntado por él.\n\nEl club deberá decidir si lo retiene o busca una operación.",
+            newsType = NewsType.TRASPASO, morale = -1, chemistry = -1
+        });
+        return result;
+    }
+
+    /// <summary>Baja de una estrella (lesión larga).</summary>
+    public static List<StorylineTransition> DetectStarInjury(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        var result = new List<StorylineTransition>();
+
+        if (active != null)
+        {
+            var subj = ctx.FindPlayer(active.subject_player_id);
+            if (subj == null) return result;
+
+            if (subj.injury_days <= 0)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Resolve,
+                    resolution = StorylineResolution.Completed,
+                    summary = $"{subj.first_name} {subj.last_name} vuelve a las canchas",
+                    title = $"Vuelve {subj.first_name} {subj.last_name}",
+                    body = $"{subj.first_name} {subj.last_name} está de vuelta después de su lesión. La afición del {ctx.myTeam.name} recupera la ilusión.",
+                    newsType = NewsType.RECUPERACION, morale = 2, fan = 2
+                });
+            }
+            else if (subj.injury_days >= 21 && active.intensity < 2)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Escalate, intensity = 2,
+                    subjectPlayerId = subj.id,
+                    title = $"Sin {subj.first_name} {subj.last_name}: la lesión se alarga",
+                    summary = $"La baja se alarga y el equipo nota su ausencia",
+                    body = $"La lesión de {subj.first_name} {subj.last_name} se alarga más de lo previsto y el {ctx.myTeam.name} tendrá que sobrevivir sin él durante más semanas.",
+                    newsType = NewsType.LESION, fan = -2, chemistry = -1
+                });
+            }
+            return result;
+        }
+
+        var star = ctx.Roster
+            .Where(p => p.overall >= STAR_OVERALL && p.injury_days >= STAR_INJURY_DAYS)
+            .OrderByDescending(p => p.overall)
+            .FirstOrDefault();
+        if (star == null) return result;
+
+        result.Add(new StorylineTransition
+        {
+            type = def.type, action = StorylineService.Action.Start, intensity = 1,
+            subjectPlayerId = star.id,
+            title = $"Baja sensible: {star.first_name} {star.last_name}",
+            summary = $"{star.first_name} {star.last_name} estará fuera al menos {star.injury_days} días",
+            body = $"El {ctx.myTeam.name} pierde temporalmente a {star.first_name} {star.last_name}, uno de sus jugadores más importantes. " +
+                   $"La enfermería confirma que estará fuera al menos {star.injury_days} días.\n\nEl equipo tendrá que reordenar su rotación para tapar su ausencia.",
+            newsType = NewsType.LESION, fan = -2, chemistry = -1
+        });
+        return result;
+    }
+
+    /// <summary>Presión sobre el GM: afición y confianza del dueño bajo mínimos.</summary>
+    public static List<StorylineTransition> DetectGmPressure(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        var result = new List<StorylineTransition>();
+        var m = ctx.manager;
+        int fan = m.fan_confidence;
+        int trust = m.trust;
+        bool pressure = fan < GM_FAN_LOW && trust < GM_TRUST_LOW;
+
+        if (active != null)
+        {
+            if (!pressure && fan >= GM_FAN_LOW + 15)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Resolve,
+                    resolution = StorylineResolution.Completed,
+                    title = "La afición vuelve a creer",
+                    summary = "La presión sobre la dirección se disipa",
+                    body = $"La situación en el {ctx.myTeam.name} se relaja: los resultados y el apoyo de la grada devuelven la calma a la dirección deportiva.",
+                    newsType = NewsType.PREOCUPACION, fan = 2
+                });
+                return result;
+            }
+            if (pressure && fan < GM_FAN_LOW - 10 && active.intensity < 2)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Escalate, intensity = 2,
+                    title = "Crisis institucional",
+                    summary = "La grada pide responsabilidades",
+                    body = $"La situación en el {ctx.myTeam.name} es crítica: la afición pide explicaciones y la continuidad de la dirección deportiva empieza a cuestionarse seriamente.",
+                    newsType = NewsType.QUEJA, fan = -1, chemistry = -1
+                });
+            }
+            return result;
+        }
+
+        if (!pressure) return result;
+
+        result.Add(new StorylineTransition
+        {
+            type = def.type, action = StorylineService.Action.Start, intensity = 1,
+            title = "Presión sobre la dirección deportiva",
+            summary = "La afición y el dueño empiezan a perder la paciencia",
+            body = $"El ambiente en el {ctx.myTeam.name} se ha enrarecido. La afición muestra su malestar con abucheos y desde el consejo llegan mensajes poco tranquilizadores sobre la gestión deportiva.",
+            newsType = NewsType.PREOCUPACION, fan = -1
+        });
+        return result;
+    }
+
+    /// <summary>Pelea por el play-in o el playoff directo (o riesgo de lottery) al final de temporada.</summary>
+    public static List<StorylineTransition> DetectPlayoffRace(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        var result = new List<StorylineTransition>();
+        int rank = ctx.ConferenceRank;
+        if (rank <= 0) return result;
+
+        bool inRace = ctx.GamesRemaining <= RACE_GAMES_LEFT && rank >= 7;
+        int bucket = rank >= 13 ? 2 : rank >= 7 ? 1 : 0;
+
+        if (active != null)
+        {
+            if (rank <= 6)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Resolve,
+                    resolution = StorylineResolution.Completed,
+                    title = "Objetivo cumplido: playoff directo",
+                    summary = $"El {ctx.myTeam.name} asalta el playoff directo",
+                    body = $"El {ctx.myTeam.name} cierra la temporada regular en posición de playoff directo. La apuesta de la dirección ha funcionado.",
+                    newsType = NewsType.HITO, fan = 3
+                });
+                return result;
+            }
+            if (bucket > active.intensity)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Escalate, intensity = bucket,
+                    title = "Riesgo de lottery",
+                    summary = "El equipo se cae de la pelea",
+                    body = $"Al {ctx.myTeam.name} se le complica incluso el play-in: el equipo cae en zona de lottery y la temporada amenaza con quedar en nada.",
+                    newsType = NewsType.MALA_RACHA, fan = -2
+                });
+            }
+            return result;
+        }
+
+        if (!inRace) return result;
+
+        result.Add(new StorylineTransition
+        {
+            type = def.type, action = StorylineService.Action.Start, intensity = bucket,
+            title = bucket >= 2 ? "Riesgo de lottery" : "Pelea por el play-in",
+            summary = bucket >= 2
+                ? $"{ctx.GamesRemaining} partidos y el equipo fuera de todo"
+                : $"Quedan {ctx.GamesRemaining} partidos y el play-in está en juego",
+            body = bucket >= 2
+                ? $"Al {ctx.myTeam.name} se le escapa la temporada: con {ctx.GamesRemaining} partidos por jugar, el equipo está en zona de lottery y necesita una reacción urgente."
+                : $"Recta final apretada: al {ctx.myTeam.name} le quedan {ctx.GamesRemaining} partidos para meterse en el play-in. Cada partido vale doble.",
+            newsType = NewsType.HITO, fan = bucket >= 2 ? -1 : 1
+        });
+        return result;
+    }
+
+    /// <summary>Crisis económica: presupuesto en rojo o demasiados avisos.</summary>
+    public static List<StorylineTransition> DetectEconomicCrisis(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        var result = new List<StorylineTransition>();
+        long budget = ctx.myTeam.budget;
+        int warnings = ctx.manager.budget_red_warnings;
+        bool crisis = budget < 0 || warnings >= 2;
+
+        if (active != null)
+        {
+            if (!crisis)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Resolve,
+                    resolution = StorylineResolution.Completed,
+                    title = "Las cuentas se equilibran",
+                    summary = "El club sale de números rojos",
+                    body = $"Las cuentas del {ctx.myTeam.name} vuelven a estar en orden y la preocupación por el presupuesto desaparece.",
+                    newsType = NewsType.NOMINA, fan = 1
+                });
+                return result;
+            }
+            if (budget < -10_000_000 && active.intensity < 2)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type, action = StorylineService.Action.Escalate, intensity = 2,
+                    title = "Alarma financiera",
+                    summary = "El déficit se dispara",
+                    body = $"El déficit del {ctx.myTeam.name} se agrava y en el club empiezan a plantearse recortes severos si no llegan ingresos.",
+                    newsType = NewsType.NOMINA, chemistry = -1
+                });
+            }
+            return result;
+        }
+
+        if (!crisis) return result;
+
+        result.Add(new StorylineTransition
+        {
+            type = def.type, action = StorylineService.Action.Start, intensity = 1,
+            title = "Preocupación en las cuentas",
+            summary = "El club entra en números rojos",
+            body = $"La situación económica del {ctx.myTeam.name} empieza a ser preocupante: el presupuesto está en rojo y desde el consejo llegan peticiones de ajuste.",
+            newsType = NewsType.NOMINA, fan = -1
         });
         return result;
     }
