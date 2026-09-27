@@ -602,7 +602,8 @@ public class LoadGameController : UIScreenController
 
         var listWrap = new VisualElement();
         listWrap.style.flexDirection = FlexDirection.Row;
-        listWrap.style.height = 320;
+        // Alto para 3 filas (80px de fila + 6px de margen = 86; 3x86 = 258) con holgura.
+        listWrap.style.height = 264;
         listWrap.style.marginLeft = 24;
         listWrap.style.marginRight = 24;
 

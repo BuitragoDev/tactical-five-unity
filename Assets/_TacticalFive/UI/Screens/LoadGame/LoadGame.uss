@@ -628,7 +628,7 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    min-height: 64px;
+    min-height: 80px; /* logo 64px + padding 8+8 */
     padding: 8px 10px;
     margin-bottom: 6px;
     background-color: rgba(42, 95, 201, 0.08);
@@ -641,8 +641,8 @@
     border-color: rgb(42, 95, 201);
 }
 .lgx-logo {
-    width: 44px;
-    height: 44px;
+    width: 64px;
+    height: 64px;
     margin-right: 12px;
     flex-shrink: 0;
     background-size: contain;
