@@ -787,7 +787,7 @@ public class GLeagueController : UIScreenController
 
     // ── Scrollbar helpers ──
 
-    class ScrollBar
+    class ScrollBar : IScrollBarHandle
     {
         public VisualElement Viewport;
         public VisualElement Content;
@@ -803,6 +803,11 @@ public class GLeagueController : UIScreenController
                             VisualElement track, VisualElement thumb)
     {
         if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        // Ya enlazada en esta visita (el viewport persiste): no registrar los
+        // handlers otra vez, que se acumulaban al reconstruir la lista.
+        if (ScrollBarBinder.TryGet<ScrollBar>(viewport, out var bound)) return bound;
+
 
         viewport.style.overflow = Overflow.Hidden;
         viewport.style.flexDirection = FlexDirection.Column;
@@ -880,6 +885,7 @@ public class GLeagueController : UIScreenController
         viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
 
         ApplyScroll(bar);
+        ScrollBarBinder.Remember(viewport, bar);
         return bar;
     }
 
