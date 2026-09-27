@@ -1917,7 +1917,7 @@ using System.Linq;
             lbl.AddToClassList("market-fa-modal-subtitle");
             bool isHeader = line.StartsWith("ENVÍAS") || line.StartsWith("RECIBES");
             lbl.style.color = new StyleColor(isHeader ? new Color(0.83f, 0.65f, 0.25f) : new Color(0.78f, 0.82f, 0.90f));
-            lbl.style.fontSize = isHeader ? 18 : 16;
+            lbl.style.fontSize = 18;
             lbl.style.marginTop = isHeader && li > 0 ? 10 : 2;
             lbl.style.marginBottom = 2;
             body.Add(lbl);
