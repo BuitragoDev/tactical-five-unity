@@ -1275,6 +1275,9 @@ using System.Threading.Tasks;
             {
                 QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, gameDay, _season?.current_date ?? "");
 
+                // Motor de narrativa: abre/escala/cierra hilos (rachas) con noticias y efectos.
+                StorylineService.ProcessDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
+
                 AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
             }
 
