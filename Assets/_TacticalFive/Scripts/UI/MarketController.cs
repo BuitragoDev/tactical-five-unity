@@ -1905,23 +1905,20 @@ using System.Linq;
 
         var body = new VisualElement();
         body.AddToClassList("market-fa-modal-body");
-        // Una etiqueta por línea: un único Label con \n colapsa los saltos y queda
-        // como una sola línea recortada.
-        var summaryLines = BuildTradeSummary(mySelected, otherSelected, ownSA, myPicks, otherPicks);
-        for (int li = 0; li < summaryLines.Count; li++)
-        {
-            string line = summaryLines[li];
-            var lbl = new Label(string.IsNullOrEmpty(line) ? " " : line);
-            // Los Label sin clase no resuelven la fuente del tema: se reutiliza la del
-            // subtítulo del modal (que sí se ve) y se ajusta color/tamaño en línea.
-            lbl.AddToClassList("market-fa-modal-subtitle");
-            bool isHeader = line.StartsWith("ENVÍAS") || line.StartsWith("RECIBES");
-            lbl.style.color = new StyleColor(isHeader ? new Color(0.83f, 0.65f, 0.25f) : new Color(0.78f, 0.82f, 0.90f));
-            lbl.style.fontSize = 18;
-            lbl.style.marginTop = isHeader && li > 0 ? 10 : 2;
-            lbl.style.marginBottom = 2;
-            body.Add(lbl);
-        }
+
+        // Tabla de 2 columnas: a la izquierda mi equipo (lo que recibo), a la derecha
+        // el otro equipo (lo que recibe). Cada jugador/pick en su propia fila.
+        var columns = new VisualElement();
+        columns.style.flexDirection = FlexDirection.Row;
+        columns.style.alignItems = Align.FlexStart;
+
+        columns.Add(BuildTradeSidePanel(_myTeam, otherSelected, otherPicks, isLeft: true));
+
+        var sentPlayers = new List<PlayerData>(mySelected);
+        sentPlayers.AddRange(ownSA);
+        columns.Add(BuildTradeSidePanel(_selectedTeam, sentPlayers, myPicks, isLeft: false));
+
+        body.Add(columns);
         box.Add(body);
 
         var actions = new VisualElement();
@@ -1954,29 +1951,62 @@ using System.Linq;
         _root.Add(overlay);
     }
 
-    List<string> BuildTradeSummary(List<PlayerData> mySelected, List<PlayerData> otherSelected,
-                                   List<PlayerData> ownSA, List<DraftPickData> myPicks, List<DraftPickData> otherPicks)
+    /// <summary>Columna del modal de confirmación: logo del equipo (64x64) y debajo
+    /// los jugadores y picks que recibe, uno por fila.</summary>
+    VisualElement BuildTradeSidePanel(TeamData team, List<PlayerData> players, List<DraftPickData> picks, bool isLeft)
     {
-        string Names(List<PlayerData> list) => list.Count > 0
-            ? string.Join(", ", list.Select(p => $"{p.first_name} {p.last_name} (${p.salary:N0})"))
-            : "—";
-        string Picks(List<DraftPickData> list) => list.Count > 0
-            ? string.Join(", ", list.Select(pk => $"R{pk.round} {pk.draft_year}"))
-            : "—";
+        var col = new VisualElement();
+        col.style.flexGrow = 1;
+        col.style.flexBasis = 0;
+        col.style.flexDirection = FlexDirection.Column;
+        col.style.marginLeft = isLeft ? 0 : 12;
+        col.style.marginRight = isLeft ? 12 : 0;
 
-        var lines = new List<string>
+        var logo = new VisualElement();
+        logo.style.width = 64;
+        logo.style.height = 64;
+        logo.style.alignSelf = Align.Center;
+        logo.style.marginBottom = 8;
+        var sprite = TeamImages.Logo(64, team.logo);
+        if (sprite != null) logo.style.backgroundImage = new StyleBackground(sprite);
+        col.Add(logo);
+
+        var teamName = new Label(team.name.ToUpper());
+        teamName.AddToClassList("market-fa-modal-subtitle");
+        teamName.style.color = new StyleColor(new Color(0.83f, 0.65f, 0.25f));
+        teamName.style.fontSize = 18;
+        teamName.style.marginBottom = 8;
+        col.Add(teamName);
+
+        if (players.Count == 0 && picks.Count == 0)
         {
-            $"ENVÍAS A {_selectedTeam.name.ToUpper()}",
-            $"   Jugadores: {Names(mySelected)}"
-        };
-        if (ownSA.Count > 0)
-            lines.Add($"   Sign & Trade: {Names(ownSA)}");
-        lines.Add($"   Picks: {Picks(myPicks)}");
-        lines.Add("");
-        lines.Add($"RECIBES DE {_selectedTeam.name.ToUpper()}");
-        lines.Add($"   Jugadores: {Names(otherSelected)}");
-        lines.Add($"   Picks: {Picks(otherPicks)}");
-        return lines;
+            col.Add(BuildTradeRow("—", new Color(0.55f, 0.60f, 0.70f)));
+            return col;
+        }
+
+        foreach (var p in players)
+            col.Add(BuildTradeRow($"{p.first_name} {p.last_name} ({PositionCodes.GetShort(p.position)})  ${p.salary:N0}",
+                                  new Color(0.78f, 0.82f, 0.90f)));
+
+        foreach (var pk in picks)
+        {
+            string origTeam = DatabaseManager.Instance.GetTeamById(pk.original_team_id)?.name ?? "—";
+            col.Add(BuildTradeRow($"Ronda {pk.round} {pk.draft_year} {origTeam}", new Color(0.62f, 0.76f, 0.95f)));
+        }
+
+        return col;
+    }
+
+    Label BuildTradeRow(string text, Color color)
+    {
+        var row = new Label(text);
+        // La clase del subtítulo es la que resuelve la fuente del tema.
+        row.AddToClassList("market-fa-modal-subtitle");
+        row.style.color = new StyleColor(color);
+        row.style.fontSize = 18;
+        row.style.whiteSpace = WhiteSpace.Normal;
+        row.style.marginBottom = 3;
+        return row;
     }
 
     void ExecuteTradeNow()
