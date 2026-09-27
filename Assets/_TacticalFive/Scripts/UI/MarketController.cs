@@ -6,6 +6,9 @@ using System.Linq;
 {
     private const int MAX_TRADE_ELEMENTS = 5;
     protected override GameScreen ScreenId => GameScreen.Market;
+
+    // Formato español para el dinero (miles con punto: 51.000.000 $).
+    private static readonly System.Globalization.CultureInfo _esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
     private Button _btnNegotiate;
     private VisualElement _tradePanels;
     private Button _btnCloseTradeModal;
@@ -1986,8 +1989,13 @@ using System.Linq;
         }
 
         foreach (var p in players)
-            col.Add(BuildTradeRow($"{p.first_name} {p.last_name} ({PositionCodes.GetShort(p.position)})  ${p.salary:N0}",
-                                  new Color(0.78f, 0.82f, 0.90f)));
+        {
+            string opt = p.has_team_option == 1 ? " + TO" : p.has_player_option == 1 ? " + PO" : "";
+            col.Add(BuildTradeRow(
+                $"{p.first_name} {p.last_name} ({PositionCodes.GetShort(p.position)})  " +
+                $"{p.salary.ToString("N0", _esCulture)} $ / {p.contract_years}{opt}",
+                new Color(0.78f, 0.82f, 0.90f)));
+        }
 
         foreach (var pk in picks)
         {
