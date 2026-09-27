@@ -21,6 +21,7 @@
                     <ui:Button name="TabQuintetos" text="QUINTETOS" class="palmares-tab"/>
                     <ui:Button name="TabAllStar" text="ALL-STAR" class="palmares-tab"/>
                     <ui:Button name="TabSalonFama" text="SALÓN DE LA FAMA" class="palmares-tab"/>
+                    <ui:Button name="TabHistoria" text="HISTORIA" class="palmares-tab"/>
                 </ui:VisualElement>
 
                 <!-- ══ TAB: EQUIPOS ══ -->
@@ -187,6 +188,24 @@
                                 </ui:VisualElement>
                                 <ui:VisualElement name="HallOfFameTrack" class="palmares-scrollbar">
                                     <ui:VisualElement name="HallOfFameThumb" class="palmares-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- ══ TAB: HISTORIA (hilos narrativos) ══ -->
+                <ui:VisualElement name="TabContentHistoria" class="palmares-tab-content" style="display: none;">
+                    <ui:VisualElement class="palmares-split">
+                        <ui:VisualElement class="palmares-full">
+                            <ui:Label class="palmares-section-title" text="HILOS DE LA TEMPORADA" />
+                            <ui:Label class="historia-hint" text="Situaciones que se abren, escalan y se cierran a lo largo de la temporada." />
+                            <ui:VisualElement class="palmares-scroll-row">
+                                <ui:VisualElement name="HistoriaViewport" class="palmares-viewport">
+                                    <ui:VisualElement name="HistoriaBody" class="historia-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="HistoriaTrack" class="palmares-scrollbar">
+                                    <ui:VisualElement name="HistoriaThumb" class="palmares-scrollbar-thumb" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>

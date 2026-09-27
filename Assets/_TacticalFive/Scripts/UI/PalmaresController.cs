@@ -11,6 +11,10 @@ public class PalmaresController : UIScreenController
     private Button _tabQuintetos;
     private Button _tabAllStar;
     private Button _tabSalonFama;
+    private Button _tabHistoria;
+    private VisualElement _tabContentHistoria;
+    private VisualElement _historiaBody;
+    private CustomScrollbar.Handle _historiaBar;
     private VisualElement _tabContentEquipos;
     private VisualElement _tabContentJugadores;
     private VisualElement _tabContentQuintetos;
@@ -68,12 +72,15 @@ public class PalmaresController : UIScreenController
         _tabQuintetos = _root.Q<Button>("TabQuintetos");
         _tabAllStar = _root.Q<Button>("TabAllStar");
         _tabSalonFama = _root.Q<Button>("TabSalonFama");
+        _tabHistoria = _root.Q<Button>("TabHistoria");
 
         _tabContentEquipos = _root.Q<VisualElement>("TabContentEquipos");
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
         _tabContentQuintetos = _root.Q<VisualElement>("TabContentQuintetos");
         _tabContentAllStar = _root.Q<VisualElement>("TabContentAllStar");
         _tabContentSalonFama = _root.Q<VisualElement>("TabContentSalonFama");
+        _tabContentHistoria = _root.Q<VisualElement>("TabContentHistoria");
+        _historiaBody = _root.Q<VisualElement>("HistoriaBody");
 
         _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
         _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
@@ -144,6 +151,7 @@ public class PalmaresController : UIScreenController
         _tabQuintetos?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("quintetos"); });
         _tabAllStar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("allstar"); });
         _tabSalonFama?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("salonfama"); });
+        _tabHistoria?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("historia"); });
     }
 
     protected override void Refresh()
@@ -159,12 +167,14 @@ public class PalmaresController : UIScreenController
         _tabQuintetos.RemoveFromClassList("palmares-tab--active");
         _tabAllStar.RemoveFromClassList("palmares-tab--active");
         _tabSalonFama.RemoveFromClassList("palmares-tab--active");
+        _tabHistoria?.RemoveFromClassList("palmares-tab--active");
 
         _tabContentEquipos.style.display = DisplayStyle.None;
         _tabContentJugadores.style.display = DisplayStyle.None;
         _tabContentQuintetos.style.display = DisplayStyle.None;
         _tabContentAllStar.style.display = DisplayStyle.None;
         _tabContentSalonFama.style.display = DisplayStyle.None;
+        if (_tabContentHistoria != null) _tabContentHistoria.style.display = DisplayStyle.None;
 
         switch (tab)
         {
@@ -193,8 +203,82 @@ public class PalmaresController : UIScreenController
                 _tabContentSalonFama.style.display = DisplayStyle.Flex;
                 BuildSalonFamaTab();
                 break;
+            case "historia":
+                _tabHistoria.AddToClassList("palmares-tab--active");
+                _tabContentHistoria.style.display = DisplayStyle.Flex;
+                BuildHistoriaTab();
+                break;
         }
     }
+
+    // ── PESTAÑA HISTORIA (hilos narrativos) ─────────────────
+
+    void BuildHistoriaTab()
+    {
+        if (_historiaBody == null || _manager == null || _myTeam == null) return;
+        _historiaBody.Clear();
+
+        var storylines = DatabaseManager.Instance.GetStorylineHistory(_manager.id, _myTeam.id);
+        if (storylines.Count == 0)
+        {
+            var empty = new Label("Todavía no hay hilos: las rachas, el descontento y los momentos de forma aparecerán aquí.");
+            empty.AddToClassList("historia-empty");
+            _historiaBody.Add(empty);
+            return;
+        }
+
+        foreach (var s in storylines)
+        {
+            bool active = s.resolved == 0;
+            var row = new VisualElement();
+            row.AddToClassList("historia-row");
+            row.AddToClassList(active ? "historia-row--active" : "historia-row--closed");
+
+            var badge = new Label(active ? "ABIERTO" : "CERRADO");
+            badge.AddToClassList("historia-badge");
+            badge.AddToClassList(active ? "historia-badge--active" : "historia-badge--closed");
+            row.Add(badge);
+
+            var col = new VisualElement();
+            col.AddToClassList("historia-col");
+
+            var title = new Label(s.title ?? s.type);
+            title.AddToClassList("historia-title");
+            col.Add(title);
+
+            if (!string.IsNullOrEmpty(s.summary))
+            {
+                var sum = new Label(s.summary);
+                sum.AddToClassList("historia-summary");
+                sum.style.whiteSpace = WhiteSpace.Normal;
+                col.Add(sum);
+            }
+
+            string meta = active
+                ? $"Jornada {s.started_game_day} · escalón {s.intensity}"
+                : $"Jornada {s.started_game_day} → {s.last_update_game_day}"
+                  + (string.IsNullOrEmpty(s.resolution) ? "" : $" · {ResolutionLabel(s.resolution)}");
+            var metaLbl = new Label(meta);
+            metaLbl.AddToClassList("historia-meta");
+            col.Add(metaLbl);
+
+            row.Add(col);
+            _historiaBody.Add(row);
+        }
+
+        // Barra de scroll propia (una vez por visita)
+        _historiaBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("HistoriaViewport"), _historiaBody,
+            _root.Q<VisualElement>("HistoriaTrack"), _root.Q<VisualElement>("HistoriaThumb"));
+    }
+
+    static string ResolutionLabel(string resolution) => resolution switch
+    {
+        StorylineResolution.Broken => "terminó",
+        StorylineResolution.Completed => "resuelto",
+        StorylineResolution.Abandoned => "cerrado al acabar la temporada",
+        _ => resolution
+    };
 
     protected override void RefreshHeader()
     {

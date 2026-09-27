@@ -86,6 +86,7 @@ using System.Threading.Tasks;
     private Label _teamArenaCapacity;
     private VisualElement _teamReputationStars;
     private VisualElement _messagesBody;
+    private VisualElement _storylineBadge;
 
     // Datos
     private List<TeamData> _allTeams;
@@ -422,6 +423,17 @@ using System.Threading.Tasks;
 
         // Mensajes
         _messagesBody = _root.Q<VisualElement>("MessagesBody");
+
+        // Badge de hilo narrativo activo, junto al título del panel de noticias.
+        _storylineBadge = null;
+        var messagesHeaderLeft = _messagesBody?.parent?.parent?.Q<VisualElement>(className: "panel-header-left");
+        if (messagesHeaderLeft != null)
+        {
+            _storylineBadge = new Label();
+            _storylineBadge.AddToClassList("storyline-badge");
+            _storylineBadge.style.display = DisplayStyle.None;
+            messagesHeaderLeft.Add(_storylineBadge);
+        }
 
         // Forzar anchos de columnas Row 2 (USS flex no es fiable en build)
         var standingsPanel = _root.Q<VisualElement>("PanelStandings");
@@ -8158,10 +8170,29 @@ List<int> offeredPickIds = new List<int>();
 
     // ── MENSAJES ────────────────────────────────────────
 
+    /// <summary>Badge con el hilo narrativo activo más relevante del equipo.</summary>
+    void RefreshStorylineBadge()
+    {
+        if (_storylineBadge == null) return;
+
+        var active = DatabaseManager.Instance.GetActiveStorylines(_manager.id, _myTeam.id);
+        if (active.Count == 0)
+        {
+            _storylineBadge.style.display = DisplayStyle.None;
+            return;
+        }
+
+        var top = active.OrderByDescending(s => s.intensity).First();
+        _storylineBadge.text = $"HILO: {top.title.ToUpper()}";
+        _storylineBadge.tooltip = string.Join("\n", active.Select(s => $"{s.title} (escalón {s.intensity})"));
+        _storylineBadge.style.display = DisplayStyle.Flex;
+    }
+
     void RefreshMessages()
     {
         if (_messagesBody == null || _manager == null) return;
         _messagesBody.Clear();
+        RefreshStorylineBadge();
 
         // Solo los últimos: antes se cargaba toda la bandeja en cada refresco.
         var all = DatabaseManager.Instance.GetRecentMessages(_manager.id, 20);
@@ -8380,7 +8411,7 @@ List<int> offeredPickIds = new List<int>();
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
         }
 
-        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION)
+        if (nt == NewsType.QUEJA || nt == NewsType.PREOCUPACION || nt == NewsType.SEQUIA)
         {
             var tex = _noticiasSprites.GetValueOrDefault("quejas");
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
