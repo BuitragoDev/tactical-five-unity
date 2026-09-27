@@ -1976,6 +1976,7 @@ using System.Linq;
         teamName.style.color = new StyleColor(new Color(0.83f, 0.65f, 0.25f));
         teamName.style.fontSize = 24;
         teamName.style.marginBottom = 8;
+        teamName.style.unityTextAlign = TextAnchor.MiddleCenter;
         col.Add(teamName);
 
         if (players.Count == 0 && picks.Count == 0)
@@ -2005,6 +2006,7 @@ using System.Linq;
         row.style.color = new StyleColor(color);
         row.style.fontSize = 18;
         row.style.whiteSpace = WhiteSpace.Normal;
+        row.style.unityTextAlign = TextAnchor.MiddleCenter;
         row.style.marginBottom = 3;
         return row;
     }
