@@ -337,7 +337,11 @@ public class EditorController : UIScreenController
     void ResetToDefaults()
     {
         if (_isLoading) return;
-        StartCoroutine(ResetToDefaultsCoroutine());
+        // UI-09: acción destructiva (borra el template) → confirmación explícita.
+        ShowConfirm("RESETEAR",
+            "Se borrarán el template (datos base de nuevas partidas) y todas las imágenes " +
+            "personalizadas del editor. Las partidas ya guardadas NO se tocan. ¿Continuar?",
+            () => StartCoroutine(ResetToDefaultsCoroutine()));
     }
 
     IEnumerator ResetToDefaultsCoroutine()
@@ -1757,6 +1761,54 @@ public class EditorController : UIScreenController
     {
         _toast.style.display = DisplayStyle.None;
         _toast.Clear();
+    }
+
+    /// <summary>Modal de confirmación para acciones destructivas (UI-09).</summary>
+    void ShowConfirm(string titleText, string message, System.Action onConfirm)
+    {
+        _toast.Clear();
+        _toast.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("editor-modal-box");
+        box.AddToClassList("editor-modal-box--error");
+        _toast.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("editor-modal-header");
+        header.AddToClassList("editor-modal-header--error");
+        box.Add(header);
+
+        var title = new Label(titleText);
+        title.AddToClassList("editor-modal-title");
+        title.AddToClassList("editor-modal-title--error");
+        header.Add(title);
+
+        var body = new VisualElement();
+        body.AddToClassList("editor-modal-body");
+        box.Add(body);
+
+        var text = new Label(message);
+        text.AddToClassList("editor-modal-text");
+        body.Add(text);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("editor-modal-actions");
+        box.Add(actions);
+
+        var cancelBtn = new Button { text = "CANCELAR" };
+        cancelBtn.clicked += () => { PlayClick(); CloseToast(); };
+        cancelBtn.AddToClassList("editor-modal-btn");
+        CursorManager.Instance?.RegisterHandCursor(cancelBtn);
+        actions.Add(cancelBtn);
+
+        var confirmBtn = new Button { text = "RESETEAR" };
+        confirmBtn.clicked += () => { PlayClick(); CloseToast(); onConfirm(); };
+        confirmBtn.AddToClassList("editor-modal-btn");
+        confirmBtn.AddToClassList("editor-modal-btn--danger");
+        confirmBtn.style.marginLeft = 12;
+        CursorManager.Instance?.RegisterHandCursor(confirmBtn);
+        actions.Add(confirmBtn);
     }
 
     // ── EXPLORADOR DE ARCHIVOS (in-game, sin plugins) ─────────────────

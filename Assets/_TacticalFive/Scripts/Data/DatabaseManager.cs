@@ -280,10 +280,27 @@ public partial class DatabaseManager : MonoBehaviour
 
     public void EnsureTemplateDb()
     {
-        if (File.Exists(TemplateDbPath)) return;
+        // QA-05: un template de 0 bytes o parcial (build interrumpido) se reconstruye.
+        if (File.Exists(TemplateDbPath) && new FileInfo(TemplateDbPath).Length > 1024) return;
 
         EnsureTemplateDirectory(TemplateDbPath);
-        BuildTemplateFile(TemplateDbPath);
+
+        // Se construye en un temporal y se publica con rename: si el proceso muere a
+        // mitad, nunca queda un template a medias en su ruta definitiva.
+        string tmp = TemplateDbPath + ".tmp";
+        try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
+        BuildTemplateFile(tmp);
+
+        try
+        {
+            if (File.Exists(TemplateDbPath)) File.Delete(TemplateDbPath);
+            File.Move(tmp, TemplateDbPath);
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] No se pudo publicar el template: {ex.Message}");
+            throw;
+        }
         Debug.Log($"[DB] Template database created: {TemplateDbPath}");
     }
 

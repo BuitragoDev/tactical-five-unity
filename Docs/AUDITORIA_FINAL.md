@@ -45,8 +45,8 @@
 |---|---|---|
 | CRÍTICOS | 9 | 9 |
 | ALTOS | 21 | **21** |
-| MEDIOS | ~32 | ~30 (queda `SEA-11` parcial y `UI-08`/`UI-09`) |
-| BAJOS | ~12 | ~10 |
+| MEDIOS | ~32 | ~31 (solo `SEA-11` parcial: All-Star / 2º quinteto) |
+| BAJOS | ~12 | ~9 (quedan `QA-10` parcial, `QA-11` scrollbar nativa y `QA-12` overrides sin `base`) |
 | Tests | — | **167** (de los 25 propuestos: 10 cerrados, 15 requieren DB/UI) |
 
 > **Fase 1 completada.** **Fase 2 muy avanzada:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (índices, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11` parcial), economía (`ECO-03/04/05/07/08`, `SEA-10`), rendimiento (`REN-01`, `CON-07`, `CON-08`), UI (`UI-03/05/06`), limpieza de código muerto y corrección de docs (`QA-07/08`), y **tests de persistencia** (`GameSaveManagerTests`, 7) con `BaseDirOverride`.
@@ -612,8 +612,8 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[x]` **`CON-09` · Fuga de texturas/sprites en `TeamImages`** — `TeamImages.cs:67-73` (`Invalidate` solo limpia diccionarios), `:280-291` (crea `Texture2D`/`Sprite`); `_previewCache` nunca se limpia. → Fuga al cambiar de slot repetidamente (escena única, nunca se descargan). → `Object.Destroy` al invalidar. **Verificación:** [A]
 - `[x]` **`CON-10` · `PlayerPhotoHelper.Load` sin caché** — `PlayerPhotoHelper.cs:17-69`; usado hasta 6× por `Refresh` en `DashboardController.cs:7587`. → Textura nueva por llamada con fotos custom. → Cachear por `(scope, playerId)` y `Destroy` en invalidación. **Verificación:** [A]
 - `[x]` **`UI-07` · Errores de fast-sim solo a consola** — `DashboardController.cs:1843-1847, 2121`. → El jugador no sabe por qué se detuvo. → Modal/toast con motivo y opción de reintentar. **Verificación:** [A]
-- `[ ]` **`UI-08` · `FullScreenUI.Awake` puede desreferenciar null** — `FullScreenUI.cs:9-11` (`rootVisualElement` no existe hasta `OnEnable`). → NRE por pantalla en build; ruido que enmascara errores reales. → Eliminar el componente (la base ya hace fullscreen) o mover a `OnEnable`. **Verificación:** [A]
-- `[ ]` **`UI-09` · RESETEAR del Editor sin confirmación** — `EditorController.cs:314, 336-354` (borra `template.db`). → Acción destructiva de un clic. → Modal de confirmación (patrón existente). **Verificación:** [A]
+- `[x]` **`UI-08` · `FullScreenUI.Awake` puede desreferenciar null** → acceso null-safe (el fullscreen real lo hace la base). — `FullScreenUI.cs:9-11` (`rootVisualElement` no existe hasta `OnEnable`). → NRE por pantalla en build; ruido que enmascara errores reales. → Eliminar el componente (la base ya hace fullscreen) o mover a `OnEnable`. **Verificación:** [A]
+- `[x]` **`UI-09` · RESETEAR del Editor sin confirmación** → modal `ShowConfirm` (CANCELAR / RESETEAR en rojo) reutilizando `.editor-modal-*`. — `EditorController.cs:314, 336-354` (borra `template.db`). → Acción destructiva de un clic. → Modal de confirmación (patrón existente). **Verificación:** [A]
 - `[x]` **`UI-10` · Traspaso propio sin confirmación ni undo** — `MarketController.ShowTradeConfirmModal` (tabla de 2 columnas con logos y salarios) antes de ejecutar (Fase 4). — `MarketController.cs:1869-1998`. → Un traspaso mal armado es irreversible. → Reutilizar el modal de confirmación de ofertas IA con resumen. **Verificación:** [A]
 - `[x]` **`QA-01` · `PlayerSeasonStatRow` sin `[Table]`** — `Data/DatabaseRows.cs:111`; `CreateTable` en `DatabaseManager.cs:305` crea una tabla basura distinta de `player_season_stats` (creada por SQL crudo `:805`). → Cualquier uso futuro de `_db.Table<PlayerSeasonStatRow>()` lee vacío. → Añadir `[Table("player_season_stats")]` o eliminar la clase y dejar una sola vía de creación. **Verificación:** **[V]**
 
@@ -621,15 +621,15 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 
 ### 3.4 BAJOS
 
-- `[ ]` `QA-02` · `contract_years`/`guaranteed_years` pueden quedar a −1 con datos raros (`NewSeasonController` opciones). → Clamp `>= 0`.
-- `[ ]` `QA-03` · `GetAllSlots` corrige `exists` en memoria pero no lo persiste (`GameSaveManager.cs:90-102`) + `managerName` vacío se trata como inválido (`:59`) → mejor usar `initialized` (enlaza `SAV-01`/`SAV-03`).
-- `[ ]` `QA-04` · `DeleteSave` no cierra la conexión activa ni borra `-wal`/`-shm` (`GameSaveManager.cs:125-156`); el borrado silencioso puede dejar huérfanas. → `wal_checkpoint(TRUNCATE)` + borrar sidecars + cerrar si es el slot activo.
-- `[ ]` `QA-05` · `EnsureTemplateDb` acepta un `template.db` de 0 bytes/parcial (`DatabaseManager.cs:166-179`). → Validar tamaño/integridad y reconstruir; escribir con rename atómico.
-- `[ ]` `QA-06` · `LoadingController._transitioning` no se resetea (`LoadingController.cs:21, 49-51`). → Reset en `OnEnable`.
-- `[ ]` `QA-07` · Los docs afirman acumulación de callbacks entre visitas (`AGENTS.md`, `Docs/UI_TOOLKIT.md:79`); en Unity 6 el árbol se recrea. → Corregir la doc y quedarse solo con el fix real (`UI-04`).
-- `[ ]` `QA-08` · `DashboardController.cs:6934` (`if (inj.player_id == _myTeam.id || true)`) → condición muerta. → Simplificar.
-- `[ ]` `QA-09` · `GLeaguePostSeason.cs:551` pasa `isHome=false` fijo (sin ventaja de casa en playoffs GL). → Pasar el flag real (tras arreglar `SIM-01`).
-- `[ ]` `QA-10` · Formato de números inconsistente (`es-ES` vs `InvariantCulture` en `PlayerProfileController.cs:193-206`) y solo hay tooltips en roles/badges G-League. → Centralizar formato y añadir tooltips (ver §9-A).
+- `[x]` `QA-02` · `contract_years`/`guaranteed_years` pueden quedar a −1 → `Math.Max(0, …)` en el decremento del rollover (`Records.cs`) y en `NewSeasonController`. con datos raros (`NewSeasonController` opciones). → Clamp `>= 0`.
+- `[x]` `QA-03` · `GetAllSlots` corrige `exists` en memoria pero no lo persiste → `CleanupOrphanDb` respeta metadatos ilegibles y `hasValidMeta` usa `slot.exists` (Fase 1). (`GameSaveManager.cs:90-102`) + `managerName` vacío se trata como inválido (`:59`) → mejor usar `initialized` (enlaza `SAV-01`/`SAV-03`).
+- `[x]` `QA-04` · `DeleteSave` no cierra la conexión activa ni borra `-wal`/`-shm` → `CloseActiveSlot()` + `DeleteDbFiles()` (+ test `CleanupOrphanDb_RemovesWalAndShm`). (`GameSaveManager.cs:125-156`); el borrado silencioso puede dejar huérfanas. → `wal_checkpoint(TRUNCATE)` + borrar sidecars + cerrar si es el slot activo.
+- `[x]` `QA-05` · `EnsureTemplateDb` acepta un `template.db` de 0 bytes/parcial → valida tamaño (>1 KB) y publica con **rename atómico** desde `.tmp`. (`DatabaseManager.cs:166-179`). → Validar tamaño/integridad y reconstruir; escribir con rename atómico.
+- `[x]` `QA-06` · `LoadingController._transitioning` no se resetea → reset en `OnEnable`. (`LoadingController.cs:21, 49-51`). → Reset en `OnEnable`.
+- `[x]` `QA-07` · Los docs afirman acumulación de callbacks entre visitas → corregido en `PROJECT_OVERVIEW.md` y `UI_TOOLKIT.md` (en Unity 6 el árbol se recrea). (`AGENTS.md`, `Docs/UI_TOOLKIT.md:79`); en Unity 6 el árbol se recrea. → Corregir la doc y quedarse solo con el fix real (`UI-04`).
+- `[x]` `QA-08` · `|| true` muerto → eliminado. → condición muerta. → Simplificar.
+- `[x]` `QA-09` · `GLeaguePostSeason` pasa `isHome=false` fijo → el parámetro ya no existe; la ventaja se deriva de `game.home_team_id` (SIM-01). (sin ventaja de casa en playoffs GL). → Pasar el flag real (tras arreglar `SIM-01`).
+- `[~]` `QA-10` · Formato de números inconsistente → formato `es-ES` aplicado y tooltips de roles/badges; quedan `InvariantCulture` sueltos en `PlayerProfileController` (`es-ES` vs `InvariantCulture` en `PlayerProfileController.cs:193-206`) y solo hay tooltips en roles/badges G-League. → Centralizar formato y añadir tooltips (ver §9-A).
 - `[ ]` `QA-11` · `GamesController`/4 pantallas siguen usando `ScrollView` nativo pese al aviso de `Docs/UI_TOOLKIT.md:44` (`PreseasonController.cs:291`, `PlayoffsController.cs:25`, `SelectTeamController.cs:76`, `QuintetoController.cs:74`). → Migrar a la scrollbar propia.
 - `[ ]` `QA-12` · 13 controllers hacen override de `RegisterCallbacks()` sin `base` (los 12 documentados + `PreGameController`). → No copiar el patrón; migrar gradualmente a la base (algunos son de arranque y no la necesitan).
 
@@ -887,6 +887,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-27 | este commit | Fase 2 · BAJOS | Cerrados `QA-02` (clamp de años de contrato), `QA-03/04` (slots/borrado), `QA-05` (template validado y rename atómico), `QA-06` (`_transitioning`), `QA-07` (docs de callbacks), `QA-08` (`|| true`), `QA-09` (ventaja de casa en playoffs GL), `UI-08` (NRE de `FullScreenUI`), `UI-09` (confirmación al RESETEAR del Editor). Quedan solo `QA-10` (formato), `QA-11` (scrollbar nativa en 4 pantallas), `QA-12` (overrides sin `base`) y `SEA-11` (All-Star/2º quinteto). |
 | 2026-09-27 | este commit | Fase 2 · MEDIOS | Cerrados `ECO-11` (máximo del FA externo), `ECO-13` (`TryClampOffer`), `ECO-14` (edad two-way), `ECO-15` (`ApplySwap`/`CountDistinctOwners`), `SIM-06` (lesiones solo a quien juega), `SIM-07/08` (`GameResultCache` al cargar y limpieza incondicional del día), `SEA-11` (DPOY y 6º hombre a `season_records`), y marcados por verificación `ECO-12`, `SIM-09/10/11/14`, `CON-05`, `UI-10`. +7 tests (167). Quedan `UI-08/09` y los BAJOS. |
 | 2026-09-27 | este commit | Fase 2 · `SEA-06` | Histórico de carrera con clave **`player_id`** (+`HistoricalStatsRules`, migración `historical_stats_keyed_by_player_id` que marca las leyendas del seeder como `-1` y adopta las filas huérfanas de nombre único): un rookie homónimo de una leyenda ya no hereda totales, HOF ni dorsal. `StatsController` fusiona por id (+leyendas por nombre) y `SaveHistoricalPlayerStats` nunca resuelve por nombre si hay id. +5 tests (160). |
 | 2026-09-27 | doc | — | Sincronizado el tablero y la checklist de tests: `UI-04` cerrado, **155 tests** (9 de los 25 propuestos implementados; el resto necesita DB/UI), suites extra de Fases 2-4 listadas. **Único ALTO abierto: `SEA-06`**. |

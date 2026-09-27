@@ -24,6 +24,9 @@ public class LoadingController : UIScreenController
     {
         base.OnEnable();
 
+        // QA-06: al volver a esta pantalla el flag debe estar limpio o se queda bloqueada.
+        _transitioning = false;
+
         _root.style.flexGrow = 1f;
 
         _tipLabel = _root.Q<Label>("LoadingTip");

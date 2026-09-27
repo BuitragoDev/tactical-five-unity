@@ -76,7 +76,7 @@ protected virtual void OnEnable()
 **Inheritance quirks (verified):**
 - 17 controllers call `base.RegisterCallbacks()`; **12 override `RegisterCallbacks()` WITHOUT base** (Editor, EndSeason, GameResults, LoadGame, MainMenu, MatchDay, NewSeason, PlayerAwards, Preseason, Quintos, SeasonSummary, SelectTeam) — those screens build their own chrome/nav or are standalone (boot/menu/slot screens). The remaining 12 don't override it (base behavior).
 - `GameResultsController` re-implements nav/submenu/cursor wiring in its override (references `NavRecords`/`NavSponsors`/`NavTV`, which do **not** exist in `Sidebar.uxml` — null-safe `?.`).
-- **Callback lifecycle risk [F]:** screens are disabled with `SetActive(false)` but not destroyed. `OnEnable` calls `RegisterCallback` again and there is no general unregister/guard phase. Repeated navigation may accumulate handlers; confirm with a Unity runtime test before changing the pattern.
+- **Callback lifecycle [F, corregido]:** las pantallas se desactivan con `SetActive(false)` pero no se destruyen. **En Unity 6 `UIDocument.OnDisable()` anula `rootVisualElement` y `OnEnable` vuelve a construir el árbol, así que los handlers NO se acumulan entre visitas.** El riesgo real es re-bindear *dentro* de una misma visita al reconstruir listas (resuelto con `ScrollBarBinder`, `UI-04`).
 - `BtnActionTarget` is never overridden; `OnBtnActionClicked` overridden by `CalendarController` and `DashboardController`.
 
 ## 5. Screens inventory (43 en esta tabla; 47 en el enum)
