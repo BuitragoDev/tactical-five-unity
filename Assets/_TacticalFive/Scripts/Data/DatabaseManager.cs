@@ -871,6 +871,12 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
         }
 
+        // Storylines: columnas nuevas (sujeto, resolución, resumen y cooldown)
+        AddColumnIfMissing("storylines", "subject_player_id", "subject_player_id INTEGER DEFAULT 0");
+        AddColumnIfMissing("storylines", "resolution", "resolution TEXT DEFAULT ''");
+        AddColumnIfMissing("storylines", "summary", "summary TEXT DEFAULT ''");
+        AddColumnIfMissing("storylines", "last_news_game_day", "last_news_game_day INTEGER DEFAULT 0");
+
         // Esquema táctico del asistente (empleados)
         AddColumnIfMissing("employees", "scheme_pace", "scheme_pace INTEGER DEFAULT 0");
         AddColumnIfMissing("employees", "scheme_offense", "scheme_offense INTEGER DEFAULT 0");

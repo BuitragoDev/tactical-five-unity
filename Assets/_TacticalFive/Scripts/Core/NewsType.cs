@@ -7,6 +7,7 @@ public static class NewsType
     public const string CAMPANADA = "campanada";
     public const string TRIPLE_DOBLE = "triple_doble";
     public const string EXPLOSION = "explosion";
+    public const string SEQUIA = "sequia";
 
     // ── PARTIDOS / RESULTADOS ──
     public const string RESULTADO = "resultado";

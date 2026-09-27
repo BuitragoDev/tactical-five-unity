@@ -10,30 +10,6 @@ public partial class DatabaseManager
 {
     // ── MANAGER ────────────────────────────────────────
 
-    // ── HILOS NARRATIVOS (storylines) ─────────────────────
-
-    /// <summary>Hilo narrativo abierto del equipo (el más reciente), o null.</summary>
-    public StorylineData GetActiveStoryline(int managerId, int teamId)
-    {
-        if (!EnsureDb()) return null;
-        return _db.Table<StorylineData>()
-                  .Where(s => s.manager_id == managerId && s.team_id == teamId && s.resolved == 0)
-                  .OrderByDescending(s => s.id)
-                  .FirstOrDefault();
-    }
-
-    public void InsertStoryline(StorylineData storyline)
-    {
-        if (!EnsureDb()) return;
-        _db.Insert(storyline);
-    }
-
-    public void UpdateStoryline(StorylineData storyline)
-    {
-        if (!EnsureDb()) return;
-        _db.Update(storyline);
-    }
-
     public void SaveManager(ManagerData manager)
     {
         if (manager.id == 0)

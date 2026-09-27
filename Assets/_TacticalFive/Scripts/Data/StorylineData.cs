@@ -3,14 +3,28 @@ using SQLite;
 /// <summary>Tipo de hilo narrativo (storyline).</summary>
 public static class StorylineType
 {
+    // Rachas del equipo
     public const string RachaPositiva = "racha_positiva"; // 5+ victorias seguidas
     public const string Bache = "bache";                  // 5+ derrotas seguidas
+
+    // Jugadores
+    public const string JugadorCaliente = "jugador_caliente"; // 3+ partidos anotando mucho
+    public const string Sequia = "sequia";                    // 3+ partidos sin aparecer
+    public const string Descontento = "descontento";          // minutos por debajo del rol
+}
+
+/// <summary>Motivo del cierre del hilo.</summary>
+public static class StorylineResolution
+{
+    public const string Broken = "broken";       // la situación terminó sola (racha rota...)
+    public const string Completed = "completed"; // se cumplió el objetivo del hilo
+    public const string Abandoned = "abandoned"; // se cerró al acabar la temporada
 }
 
 /// <summary>
 /// Hilo narrativo persistente: una situación que se ABRE, ESCALA y se CIERRA a lo
-/// largo de varias jornadas (a diferencia de una noticia suelta). Los gestiona
-/// StorylineService a partir de los resultados reales de la partida.
+/// largo de varias jornadas. Los gestiona StorylineService a partir de los resultados
+/// reales de la partida.
 /// </summary>
 [Table("storylines")]
 public class StorylineData
@@ -20,11 +34,19 @@ public class StorylineData
     public int manager_id { get; set; }
     public int team_id { get; set; }
     public string type { get; set; }
+    /// <summary>Jugador protagonista (0 = hilo de equipo).</summary>
+    public int subject_player_id { get; set; }
     public string title { get; set; }
-    /// <summary>Escalones superados (1 = recién abierto, 2 = 10 victorias/derrotas...).</summary>
+    /// <summary>Resumen corto para la línea temporal.</summary>
+    public string summary { get; set; }
+    /// <summary>Escalones superados (1 = recién abierto, 2 = siguiente hito...).</summary>
     public int intensity { get; set; }
     public int started_game_day { get; set; }
     public int last_update_game_day { get; set; }
+    /// <summary>Última jornada en la que se generó noticia (para el cooldown).</summary>
+    public int last_news_game_day { get; set; }
     public int resolved { get; set; }
+    /// <summary>"" mientras está abierto; si no, StorylineResolution.*</summary>
+    public string resolution { get; set; }
     public string started_at { get; set; }
 }
