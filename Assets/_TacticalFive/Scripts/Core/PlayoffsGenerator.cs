@@ -262,6 +262,7 @@ public static class PlayoffsGenerator
             }
 
             int winner = teamAWins >= 4 ? teamA : teamB;
+            RecordCompletedSeries(season, managerId, seriesLabel, teamA, teamB, teamAWins, teamBWins, winner, played);
             AdvanceWinner(season, managerId, seriesLabel, winner);
         }
 
@@ -272,6 +273,49 @@ public static class PlayoffsGenerator
     static void AdvanceWinner(SeasonData season, int managerId, string seriesLabel, int winner)
     {
         // Winners are tracked in CheckAndCreateNextRound
+    }
+
+    /// <summary>
+    /// Ronda y conferencia de un `series_label`. Puro.
+    /// `playoff-r1-east-1v8` → ("r1","East") · `playoff-r4-finals` → ("r4","").
+    /// </summary>
+    public static (string stage, string conference) ParseSeriesLabel(string label)
+    {
+        if (string.IsNullOrEmpty(label) || !label.StartsWith("playoff-")) return ("", "");
+        var parts = label.Split('-');
+        if (parts.Length < 3) return ("", "");
+        string conf = parts[2].ToLowerInvariant();
+        return (parts[1], conf == "east" ? "East" : conf == "west" ? "West" : "");
+    }
+
+    /// <summary>
+    /// Guarda una serie ya resuelta en `playoff_series` (rivalidades/dinastías). El play-in
+    /// no se registra: son partidos sueltos, no series. Idempotente por (temporada, label).
+    /// </summary>
+    static void RecordCompletedSeries(SeasonData season, int managerId, string label,
+                                      int teamA, int teamB, int aWins, int bWins,
+                                      int winner, List<GameData> played)
+    {
+        if (season == null || string.IsNullOrEmpty(label) || !label.StartsWith("playoff-")) return;
+
+        var (stage, conference) = ParseSeriesLabel(label);
+        int lastDay = played.Count > 0 ? played[played.Count - 1].game_day : 0;
+
+        DatabaseManager.Instance.RecordPlayoffSeries(new PlayoffSeriesData
+        {
+            manager_id = managerId,
+            season_id = season.id,
+            label = label,
+            stage = stage,
+            conference = conference,
+            high_team_id = teamA,
+            low_team_id = teamB,
+            high_wins = aWins,
+            low_wins = bWins,
+            winner_id = winner,
+            loser_id = winner == teamA ? teamB : teamA,
+            game_day = lastDay
+        });
     }
 
     static void CheckAndCreateNextRound(SeasonData season, int managerId)

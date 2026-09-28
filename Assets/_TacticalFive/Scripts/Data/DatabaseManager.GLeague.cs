@@ -11,11 +11,15 @@ public partial class DatabaseManager
     /// (para partidas existentes creadas antes de esta feature).</summary>
     internal void EnsureGLeagueSeeded()
     {
-        if (_db.Table<GLeagueTeamData>().Count() == 0)
-            SeedGLeagueTeams();
+        // Atómico: un fallo a mitad no puede dejar un seed parcial permanente.
+        _db.RunInTransaction(() =>
+        {
+            if (_db.Table<GLeagueTeamData>().Count() == 0)
+                SeedGLeagueTeams();
 
-        if (_db.Table<GLeaguePlayerData>().Count() == 0)
-            SeedGLeagueProspects();
+            if (_db.Table<GLeaguePlayerData>().Count() == 0)
+                SeedGLeagueProspects();
+        });
     }
 
     void SeedGLeagueTeams()
@@ -340,10 +344,8 @@ public partial class DatabaseManager
                 }
             }
 
-            // Recalcular overall
-            int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling
-                    + p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-            p.overall = Mathf.Min(p.potential, sum / 11);
+            // Recalcular overall (fuente única)
+            p.RecalculateOverall();
             progressed++;
         }
         if (progressed > 0)

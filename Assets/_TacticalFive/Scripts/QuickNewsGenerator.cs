@@ -222,7 +222,7 @@ public static class QuickNewsGenerator
             int homeStreak = ComputeStreak(allPlayedGames, game.home_team_id);
             int awayStreak = ComputeStreak(allPlayedGames, game.away_team_id);
 
-            if (newsCount < 2 && homeStreak >= 5)
+            if (newsCount < 2 && homeStreak >= 5 && homeTeam.id != myTeam.id)
             {
                 string score = $"{game.home_score}-{game.away_score}";
                 if (SaveNews(manager, gameDay, gameDate, $"Racha de {homeTeam.name}: {homeStreak} victorias",
@@ -230,7 +230,7 @@ public static class QuickNewsGenerator
                     NewsType.RACHA_VICTORIAS, NewsCategory.LIGA))
                     { newsCount++; continue; }
             }
-            if (newsCount < 2 && awayStreak >= 5)
+            if (newsCount < 2 && awayStreak >= 5 && awayTeam.id != myTeam.id)
             {
                 string score = $"{game.home_score}-{game.away_score}";
                 if (SaveNews(manager, gameDay, gameDate, $"Racha de {awayTeam.name}: {awayStreak} victorias",
@@ -239,14 +239,14 @@ public static class QuickNewsGenerator
                     { newsCount++; continue; }
             }
 
-            if (newsCount < 2 && homeStreak <= -5)
+            if (newsCount < 2 && homeStreak <= -5 && homeTeam.id != myTeam.id)
             {
                 if (SaveNews(manager, gameDay, gameDate, $"Mala racha de {homeTeam.name}: {-homeStreak} derrotas",
                     PickVariant(LoseStreakVariants, homeTeam.name, -homeStreak),
                     NewsType.MALA_RACHA, NewsCategory.LIGA))
                     { newsCount++; continue; }
             }
-            if (newsCount < 2 && awayStreak <= -5)
+            if (newsCount < 2 && awayStreak <= -5 && awayTeam.id != myTeam.id)
             {
                 if (SaveNews(manager, gameDay, gameDate, $"Mala racha de {awayTeam.name}: {-awayStreak} derrotas",
                     PickVariant(LoseStreakVariants, awayTeam.name, -awayStreak),

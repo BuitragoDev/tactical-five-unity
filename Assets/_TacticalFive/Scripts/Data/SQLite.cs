@@ -597,7 +597,9 @@ namespace SQLite
 			DateTimeStringFormat = connectionString.DateTimeStringFormat;
 			DateTimeStyle = connectionString.DateTimeStyle;
 
-			BusyTimeout = TimeSpan.FromSeconds (1.0);
+			// Tactical Five: subido de 1s a 5s. La UI puede escribir mientras un lote de
+			// fondo (WAL) tiene el lock; con 1s algunas escrituras fallaban con SQLITE_BUSY.
+			BusyTimeout = TimeSpan.FromSeconds (5.0);
 			Tracer = line => Debug.WriteLine (line);
 
 			connectionString.PreKeyAction?.Invoke (this);

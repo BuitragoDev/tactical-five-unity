@@ -338,12 +338,76 @@ public class MessagesController : UIScreenController
     void DeleteSelectedMessage()
     {
         if (_selectedMessageId <= 0) return;
+        ShowDeleteConfirmModal(_selectedMessageId);
+    }
 
-        DatabaseManager.Instance.DeleteMessage(_selectedMessageId);
-        _selectedMessageId = 0;
-        _allMessages = DatabaseManager.Instance.GetMessages(_manager.id);
-        ApplyFilters();
-        ShowNewsDetail(null);
+    /// <summary>UI-11: el borrado de una noticia es irreversible; se confirma antes.</summary>
+    void ShowDeleteConfirmModal(int messageId)
+    {
+        var overlay = new VisualElement();
+        overlay.AddToClassList("modal-overlay");
+        // La clase trae display:none y fondo transparente en la USS: se activa y se
+        // oscurece el fondo para que el modal destaque.
+        overlay.style.display = DisplayStyle.Flex;
+        overlay.style.backgroundColor = new StyleColor(new Color(0f, 0f, 0f, 0.6f));
+
+        var box = new VisualElement();
+        box.AddToClassList("modal-box");
+        box.AddToClassList("modal-box--danger"); // borrar es destructivo: variante roja
+        // `.modal-box` trae display:none y position:absolute en la USS (los modales de
+        // UXML se activan con la clase --visible). Aquí se aplica en línea y se pasa a
+        // posición relativa para que el overlay (align/justify center) lo centre.
+        box.style.display = DisplayStyle.Flex;
+        box.style.flexDirection = FlexDirection.Column;
+        box.style.position = Position.Relative;
+        overlay.Add(box);
+
+        var title = new Label("¿ELIMINAR NOTICIA?");
+        title.AddToClassList("modal-title");
+        box.Add(title);
+
+        var body = new VisualElement();
+        body.AddToClassList("modal-body");
+        var text = new Label("Esta acción no se puede deshacer.");
+        text.AddToClassList("modal-paragraph");
+        body.Add(text);
+        box.Add(body);
+
+        // La caja no tiene padding propio: el pie lo aporta aquí (como .modal-body).
+        var actions = new VisualElement();
+        actions.style.flexDirection = FlexDirection.Row;
+        actions.style.justifyContent = Justify.Center;
+        actions.style.paddingLeft = 24;
+        actions.style.paddingRight = 24;
+        actions.style.paddingBottom = 20;
+
+        var cancel = new Button { text = "CANCELAR" };
+        cancel.AddToClassList("btn-modal-cancel");
+        cancel.style.minWidth = 170;
+        cancel.style.marginRight = 8;
+        cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
+        actions.Add(cancel);
+
+        var confirm = new Button { text = "ELIMINAR" };
+        confirm.AddToClassList("btn-modal-confirm");
+        confirm.AddToClassList("btn-modal-confirm--danger");
+        confirm.style.minWidth = 170;
+        confirm.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            overlay.RemoveFromHierarchy();
+            DatabaseManager.Instance.DeleteMessage(messageId);
+            _selectedMessageId = 0;
+            _allMessages = DatabaseManager.Instance.GetMessages(_manager.id);
+            ApplyFilters();
+            ShowNewsDetail(null);
+        });
+        actions.Add(confirm);
+
+        box.Add(actions);
+        CursorManager.Instance?.RegisterHandCursor(confirm);
+        CursorManager.Instance?.RegisterHandCursor(cancel);
+        _root.Add(overlay);
     }
 
     // ── CATEGORY ──
@@ -463,7 +527,8 @@ public class MessagesController : UIScreenController
         string nt = msg.news_type;
 
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
-            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION)
+            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
+            || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)
         {
             string teamName = ExtractFirstTeamFromBody(msg.body);
             if (teamName != null)
@@ -494,7 +559,10 @@ public class MessagesController : UIScreenController
         }
 
         if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
-            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP)
+            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP
+            // Hilos narrativos de jugador: foto del protagonista
+            || nt == NewsType.SEQUIA || nt == NewsType.BAJA_ESTRELLA
+            || nt == NewsType.RUMOR_TRASPASO || nt == NewsType.DESCONTENTO)
         {
             string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
             if (playerName != null && _playerByName.TryGetValue(playerName, out var p))
@@ -816,7 +884,7 @@ public class MessagesController : UIScreenController
 
     // ── ScrollBar (blue) ──
 
-    class ScrollBar
+    class ScrollBar : IScrollBarHandle
     {
         public VisualElement Viewport, Content, Track, Thumb;
         public float ScrollY;
@@ -828,6 +896,11 @@ public class MessagesController : UIScreenController
                             VisualElement track, VisualElement thumb)
     {
         if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        // Ya enlazada en esta visita (el viewport persiste): no registrar los
+        // handlers otra vez, que se acumulaban al reconstruir la lista.
+        if (ScrollBarBinder.TryGet<ScrollBar>(viewport, out var bound)) return bound;
+
 
         viewport.style.overflow = Overflow.Hidden;
         viewport.style.flexDirection = FlexDirection.Column;
@@ -905,6 +978,7 @@ public class MessagesController : UIScreenController
         viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
 
         ApplyScroll(bar);
+        ScrollBarBinder.Remember(viewport, bar);
         return bar;
     }
 

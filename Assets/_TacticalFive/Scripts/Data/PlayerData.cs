@@ -61,8 +61,19 @@ public class PlayerData
     [Ignore]
     public int rotation_minutes { get; set; } = -1;
 
+    /// <summary>
+    /// Media de los 11 atributos (redondeada) capada por el potencial. ES LA FUENTE
+    /// ÚNICA del overall: no dupliques esta fórmula en otros sitios.
+    /// </summary>
     public int GetCalculatedAverage()
     {
-        return (speed + shooting + three_point + passing + dribbling + defense + rebounding + athleticism + iq + steals + blocks) / 11;
+        int sum = speed + shooting + three_point + passing + dribbling + defense
+                + rebounding + athleticism + iq + steals + blocks;
+        int avg = (int)System.Math.Round(sum / 11.0);
+        return potential > 0 ? System.Math.Min(avg, potential) : avg;
     }
+
+    /// <summary>Recalcula y fija `overall` desde los atributos. Llámalo SIEMPRE que
+    /// mutes un atributo (training, mentoring, progresión, desarrollo G-League...).</summary>
+    public void RecalculateOverall() => overall = GetCalculatedAverage();
 }

@@ -108,6 +108,7 @@ public class PlayerCareerSeasonRow
     public int total_rating { get; set; }
 }
 
+[Table("player_season_stats")]
 public class PlayerSeasonStatRow
 {
     [PrimaryKey, AutoIncrement]
@@ -238,6 +239,10 @@ public class DraftProspect
     public int weight_kg { get; set; }
     public int overall { get; set; }
     public int potential { get; set; }
+    // Scouting: `scout_error` es la desviación (real - estimación) aplicada a los
+    // valores mostrados; `scout_range` es el margen (±) para la UI.
+    public int scout_error { get; set; }
+    public int scout_range { get; set; }
     public int speed { get; set; }
     public int shooting { get; set; }
     public int three_point { get; set; }
@@ -251,4 +256,10 @@ public class DraftProspect
     public int blocks { get; set; }
     public string trait { get; set; }
     public bool is_generational { get; set; }
+}
+/// <summary>Fila agregada: partidos jugados por jugador (una sola query).</summary>
+public class PlayerGamesRow
+{
+    public int player_id { get; set; }
+    public int games { get; set; }
 }

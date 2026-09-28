@@ -32,8 +32,8 @@ using System.Linq;
 
     private PlayerData _player;
     private HashSet<int> _scoutedPlayerIds;
-    private static readonly System.Globalization.CultureInfo _fmt = System.Globalization.CultureInfo.InvariantCulture;
-    private static readonly System.Globalization.CultureInfo _spanishCI = new("es-ES");
+    // Formato único del panel (es-ES): antes los porcentajes usaban InvariantCulture y
+    // salían con punto decimal mezclados con el resto con coma.
 
     protected override void CacheReferences()
     {
@@ -190,26 +190,27 @@ using System.Linq;
                                               agg.total_turnovers);
         float per = AdvancedStatsHelper.CalcPER(eff, (float)agg.total_minutes);
 
-        AddStatCard("PTS", avgPts.ToString("N1", _spanishCI));
-        AddStatCard("REB", avgReb.ToString("N1", _spanishCI));
-        AddStatCard("AST", avgAst.ToString("N1", _spanishCI));
-        AddStatCard("ROB", avgStl.ToString("N2", _spanishCI));
-        AddStatCard("TAP", avgBlk.ToString("N2", _spanishCI));
-        AddStatCard("TO", avgTov.ToString("N1", _spanishCI));
-        AddStatCard("MIN", avgMin.ToString("N1", _spanishCI));
-        AddStatCard("TC%", fgPct.ToString("N1", _fmt));
-        AddStatCard("3P%", fg3Pct.ToString("N1", _fmt));
-        AddStatCard("TL%", ftPct.ToString("N1", _fmt));
-        AddStatCardAccent("EFG%", efgPct.ToString("N1", _fmt));
-        AddStatCardAccent("TS%", tsPct.ToString("N1", _fmt));
-        AddStatCardAccent("PER", per.ToString("N1", _spanishCI));
-        AddStatCard("VAL", ((float)agg.total_rating / g).ToString("N1", _spanishCI));
+        AddStatCard("PTS", StatFormat.One(avgPts));
+        AddStatCard("REB", StatFormat.One(avgReb));
+        AddStatCard("AST", StatFormat.One(avgAst));
+        AddStatCard("ROB", StatFormat.Two(avgStl));
+        AddStatCard("TAP", StatFormat.Two(avgBlk));
+        AddStatCard("TO", StatFormat.One(avgTov), StatFormat.TovTip);
+        AddStatCard("MIN", StatFormat.One(avgMin), StatFormat.MinTip);
+        AddStatCard("TC%", StatFormat.One(fgPct));
+        AddStatCard("3P%", StatFormat.One(fg3Pct));
+        AddStatCard("TL%", StatFormat.One(ftPct));
+        AddStatCardAccent("EFG%", StatFormat.One(efgPct), StatFormat.EfgTip);
+        AddStatCardAccent("TS%", StatFormat.One(tsPct), StatFormat.TsTip);
+        AddStatCardAccent("PER", StatFormat.One(per), StatFormat.PerTip);
+        AddStatCard("VAL", StatFormat.One((float)agg.total_rating / g), StatFormat.ValTip);
     }
 
-    void AddStatCard(string label, string value)
+    void AddStatCard(string label, string value, string tooltip = null)
     {
         var card = new VisualElement();
         card.AddToClassList("playerprofile-stat-card");
+        if (!string.IsNullOrEmpty(tooltip)) card.tooltip = tooltip;
 
         var valLbl = new Label();
         valLbl.AddToClassList("playerprofile-stat-card-value");
@@ -224,10 +225,11 @@ using System.Linq;
         _profileSeasonBody.Add(card);
     }
 
-    void AddStatCardAccent(string label, string value)
+    void AddStatCardAccent(string label, string value, string tooltip = null)
     {
         var card = new VisualElement();
         card.AddToClassList("playerprofile-stat-card");
+        if (!string.IsNullOrEmpty(tooltip)) card.tooltip = tooltip;
 
         var valLbl = new Label();
         valLbl.AddToClassList("playerprofile-stat-card-value--accent");

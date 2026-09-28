@@ -6,6 +6,9 @@ using System.Linq;
 {
     private const int MAX_TRADE_ELEMENTS = 5;
     protected override GameScreen ScreenId => GameScreen.Market;
+
+    // Formato español para el dinero (miles con punto: 51.000.000 $).
+    private static readonly System.Globalization.CultureInfo _esCulture = System.Globalization.CultureInfo.GetCultureInfo("es-ES");
     private Button _btnNegotiate;
     private VisualElement _tradePanels;
     private Button _btnCloseTradeModal;
@@ -1866,13 +1869,200 @@ using System.Linq;
         _tradeStatus.Add(box);
     }
 
+    /// <summary>UI-10: antes de ejecutar un traspaso propio se pide confirmación con
+    /// un resumen de lo que se envía y se recibe (es irreversible).</summary>
     void OnConfirmTrade()
+    {
+        ShowTradeConfirmModal();
+    }
+
+    void ShowTradeConfirmModal()
+    {
+        var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
+        var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
+        var ownSA = _ownSATFAs.Where(p => _selectedOwnSATFAs.Contains(p.id)).ToList();
+        var myPicks = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+        var otherPicks = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+
+        var overlay = new VisualElement();
+        overlay.AddToClassList("market-modal-overlay");
+        // La clase trae display:none en la USS (los modales de UXML lo activan por
+        // código): sin esto el overlay procedural queda invisible.
+        overlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("market-fa-modal-box");
+        overlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("market-fa-modal-header");
+        var heading = new VisualElement();
+        var title = new Label("CONFIRMAR TRASPASO");
+        title.AddToClassList("market-fa-modal-title");
+        var subtitle = new Label($"{_myTeam.name}  ⇄  {_selectedTeam.name}");
+        subtitle.AddToClassList("market-fa-modal-subtitle");
+        heading.Add(title);
+        heading.Add(subtitle);
+        header.Add(heading);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("market-fa-modal-body");
+
+        // Tabla de 2 columnas: a la izquierda mi equipo (lo que recibo), a la derecha
+        // el otro equipo (lo que recibe). Cada jugador/pick en su propia fila.
+        var columns = new VisualElement();
+        columns.style.flexDirection = FlexDirection.Row;
+        columns.style.alignItems = Align.FlexStart;
+
+        columns.Add(BuildTradeSidePanel(_myTeam, otherSelected, otherPicks, isLeft: true));
+
+        var sentPlayers = new List<PlayerData>(mySelected);
+        sentPlayers.AddRange(ownSA);
+        columns.Add(BuildTradeSidePanel(_selectedTeam, sentPlayers, myPicks, isLeft: false));
+
+        body.Add(columns);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("market-fa-modal-actions");
+        // La caja recorta (overflow hidden) y no tiene padding: el pie lo aporta aquí.
+        actions.style.paddingLeft = 24;
+        actions.style.paddingRight = 24;
+        actions.style.paddingBottom = 22;
+
+        var cancel = new Button { text = "CANCELAR" };
+        cancel.AddToClassList("btn-modal-cancel");
+        cancel.AddToClassList("btn-modal-cancel--neutral"); // cancelar no es destructivo
+        cancel.RegisterCallback<ClickEvent>(_ => { PlayClick(); overlay.RemoveFromHierarchy(); });
+        actions.Add(cancel);
+
+        var confirm = new Button { text = "CONFIRMAR TRASPASO" };
+        confirm.AddToClassList("btn-modal-confirm");
+        confirm.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            overlay.RemoveFromHierarchy();
+            ExecuteTradeNow();
+        });
+        actions.Add(confirm);
+
+        box.Add(actions);
+        CursorManager.Instance?.RegisterHandCursor(confirm);
+        CursorManager.Instance?.RegisterHandCursor(cancel);
+
+        _root.Add(overlay);
+    }
+
+    /// <summary>Columna del modal de confirmación: logo del equipo (64x64) y debajo
+    /// los jugadores y picks que recibe, uno por fila.</summary>
+    VisualElement BuildTradeSidePanel(TeamData team, List<PlayerData> players, List<DraftPickData> picks, bool isLeft)
+    {
+        var col = new VisualElement();
+        col.style.flexGrow = 1;
+        col.style.flexBasis = 0;
+        col.style.flexDirection = FlexDirection.Column;
+        col.style.marginLeft = isLeft ? 0 : 12;
+        col.style.marginRight = isLeft ? 12 : 0;
+
+        var logo = new VisualElement();
+        logo.style.width = 64;
+        logo.style.height = 64;
+        logo.style.alignSelf = Align.Center;
+        logo.style.marginBottom = 8;
+        var sprite = TeamImages.Logo(64, team.logo);
+        if (sprite != null) logo.style.backgroundImage = new StyleBackground(sprite);
+        col.Add(logo);
+
+        var teamName = new Label($"{team.name.ToUpper()} RECIBE");
+        teamName.AddToClassList("market-fa-modal-subtitle");
+        teamName.style.color = new StyleColor(new Color(0.83f, 0.65f, 0.25f));
+        teamName.style.fontSize = 24;
+        teamName.style.marginBottom = 8;
+        teamName.style.unityTextAlign = TextAnchor.MiddleCenter;
+        col.Add(teamName);
+
+        if (players.Count == 0 && picks.Count == 0)
+        {
+            col.Add(BuildTradeRow("—", new Color(0.55f, 0.60f, 0.70f)));
+            return col;
+        }
+
+        foreach (var p in players)
+        {
+            string opt = p.has_team_option == 1 ? " + TO" : p.has_player_option == 1 ? " + PO" : "";
+            col.Add(BuildTradeRow(
+                $"{p.first_name} {p.last_name} ({PositionCodes.GetShort(p.position)})  " +
+                $"{p.salary.ToString("N0", _esCulture)} $ / {p.contract_years}{opt}",
+                new Color(0.78f, 0.82f, 0.90f)));
+        }
+
+        foreach (var pk in picks)
+        {
+            string origTeam = DatabaseManager.Instance.GetTeamById(pk.original_team_id)?.name ?? "—";
+            col.Add(BuildTradeRow($"Ronda {pk.round} de {pk.draft_year} ({origTeam})", new Color(0.62f, 0.76f, 0.95f)));
+        }
+
+        return col;
+    }
+
+    Label BuildTradeRow(string text, Color color)
+    {
+        var row = new Label(text);
+        // La clase del subtítulo es la que resuelve la fuente del tema.
+        row.AddToClassList("market-fa-modal-subtitle");
+        row.style.color = new StyleColor(color);
+        row.style.fontSize = 18;
+        row.style.whiteSpace = WhiteSpace.Normal;
+        row.style.unityTextAlign = TextAnchor.MiddleCenter;
+        row.style.marginBottom = 3;
+        return row;
+    }
+
+    void ExecuteTradeNow()
     {
         var mySelected = _myPlayers.Where(p => _selectedMyPlayers.Contains(p.id)).ToList();
         var otherSelected = _otherPlayers.Where(p => _selectedOtherPlayers.Contains(p.id)).ToList();
 
         // Sign & Trade de FA propio: firmar con Bird rights y traspasar de inmediato
         var ownSA = _ownSATFAs.Where(p => _selectedOwnSATFAs.Contains(p.id)).ToList();
+
+        // ── Revalidación obligatoria antes de mutar ──
+        // Entre la previsualización y el confirmado la plantilla/nómina pueden haber
+        // cambiado (fichajes IA, ofertas maduradas, IR...). Sin esto se pueden crear
+        // plantillas >17 o traspasos que incumplen el salary matching / apron.
+        {
+            var mySelectedForTrade = new List<PlayerData>(mySelected);
+            mySelectedForTrade.AddRange(ownSA);
+            var myPicksSelChk = _myPicks != null ? _myPicks.Where(p => _selectedMyPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+            var otherPicksSelChk = _otherPicks != null ? _otherPicks.Where(p => _selectedOtherPicks.Contains(p.id)).ToList() : new List<DraftPickData>();
+
+            if (mySelectedForTrade.Count > 0 || otherSelected.Count > 0
+                || myPicksSelChk.Count > 0 || otherPicksSelChk.Count > 0)
+            {
+                var leagueChk = DatabaseManager.Instance.GetLeagueSettings();
+                long firstApronChk = leagueChk?.apron > 0 ? leagueChk.apron : TradeHelper.FIRST_APRON;
+                long secondApronChk = leagueChk?.repeater_apron > 0 ? leagueChk.repeater_apron : TradeHelper.SECOND_APRON;
+                long luxuryTaxChk = leagueChk?.luxury_tax > 0 ? leagueChk.luxury_tax : TradeHelper.LUXURY_TAX;
+
+                var errorsChk = TradeHelper.ValidateTrade(
+                    mySelectedForTrade, otherSelected,
+                    DatabaseManager.Instance.GetRosterCount(_myTeam.id),
+                    DatabaseManager.Instance.GetRosterCount(_selectedTeam.id),
+                    _selectedTeam.name, _otherPlayers.Sum(p => p.salary),
+                    _myTeam.name, _myPlayers.Sum(p => p.salary),
+                    _myTeam.first_apron_hard_capped == 1,
+                    _selectedTeam.first_apron_hard_capped == 1,
+                    firstApronChk, secondApronChk, luxuryTaxChk,
+                    _ownSATSignSalaries.Count > 0 ? _ownSATSignSalaries : null);
+
+                if (errorsChk.Count > 0)
+                {
+                    ShowTradeInvalid(errorsChk);
+                    return;
+                }
+            }
+        }
         if (ownSA.Count > 0)
         {
             ProcessSATrade(ownSA, mySelected, otherSelected);
@@ -1906,17 +2096,11 @@ using System.Linq;
             _signAndTradeActive = false;
         }
 
-        // Execute trade
+        // Execute trade (MovePlayerToTeam: actualiza equipo/tenure y limpia flags)
         foreach (var p in mySelected)
-        {
-            p.team_id = _selectedTeam.id;
-            DatabaseManager.Instance.UpdatePlayer(p);
-        }
+            DatabaseManager.Instance.MovePlayerToTeam(p, _selectedTeam.id);
         foreach (var p in otherSelected)
-        {
-            p.team_id = _myTeam.id;
-            DatabaseManager.Instance.UpdatePlayer(p);
-        }
+            DatabaseManager.Instance.MovePlayerToTeam(p, _myTeam.id);
         foreach (var p in mySelected)
         {
             DatabaseManager.Instance.AssignJerseyNumber(p, _selectedTeam.id);

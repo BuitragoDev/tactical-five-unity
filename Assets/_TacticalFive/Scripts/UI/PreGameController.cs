@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 using System.Collections.Generic;
+using System.Linq;
 
 public class PreGameController : UIScreenController
 {
-    private Label _mpvFavorite;
+    private Label _mpvFavorite, _mpvRivalry;
     private VisualElement _mpvHomeLogo, _mpvAwayLogo;
     private Label _mpvHomeName, _mpvHomeRecord, _mpvHomeConf;
     private Label _mpvAwayName, _mpvAwayRecord, _mpvAwayConf;
@@ -27,6 +28,7 @@ public class PreGameController : UIScreenController
     protected override void CacheReferences()
     {
         _mpvFavorite = _root.Q<Label>("MPVFavorite");
+        _mpvRivalry = _root.Q<Label>("MPVRivalry");
         _mpvHomeLogo = _root.Q<VisualElement>("MPVHomeLogo");
         _mpvAwayLogo = _root.Q<VisualElement>("MPVAwayLogo");
         _mpvHomeName = _root.Q<Label>("MPVHomeName");
@@ -132,13 +134,37 @@ public class PreGameController : UIScreenController
         if (home == null || away == null) return;
 
         var preview = MatchupPreview.Compute(myGame.home_team_id, myGame.away_team_id,
-            myGame.home_team_id == _myTeam.id, _manager.id, _season.id, myGame.game_date);
+            _manager.id, _season.id, myGame.game_date);
 
         if (_mpvFavorite != null)
         {
             _mpvFavorite.text = string.IsNullOrEmpty(preview.favoriteName)
                 ? ""
                 : $"FAVORITO {preview.favoriteName.ToUpper()}";
+        }
+
+        // Rivalidad: solo en playoffs/play-in y si ya se cruzaron antes (tabla playoff_series).
+        if (_mpvRivalry != null)
+        {
+            bool isPlayoffGame = myGame.game_type == "playoff" || myGame.game_type == "playin";
+            var history = isPlayoffGame
+                ? RivalryHelper.MeetingsWith(
+                      DatabaseManager.Instance.GetPlayoffSeriesOfTeam(_manager.id, _myTeam.id),
+                      myGame.home_team_id, myGame.away_team_id)
+                : new System.Collections.Generic.List<PlayoffSeriesData>();
+
+            if (history.Count > 0)
+            {
+                int wins = history.Count(h => h.winner_id == _myTeam.id);
+                int losses = history.Count - wins;
+                string stage = history[0].stage == "r4" ? "las Finales" : "los playoffs";
+                _mpvRivalry.text = $"RIVALIDAD: {wins}-{losses} EN SERIES · ÚLTIMO CRUCE EN {stage.ToUpper()}";
+                _mpvRivalry.style.display = DisplayStyle.Flex;
+            }
+            else
+            {
+                _mpvRivalry.style.display = DisplayStyle.None;
+            }
         }
 
         var h = preview.home;

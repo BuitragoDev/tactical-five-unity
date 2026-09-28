@@ -70,8 +70,12 @@ public static class GameSimulator
     }
 
     public static GameResult SimulateGame(GameData game, List<PlayerData> homePlayers, List<PlayerData> awayPlayers,
-        int homeChemistry = 50, int awayChemistry = 50, bool isHome = false, bool persistToDb = true, bool glLeague = false)
+        int homeChemistry = 50, int awayChemistry = 50, bool persistToDb = true, bool glLeague = false,
+        GamePlan? homePlan = null, GamePlan? awayPlan = null,
+        int homeCoachBonus = 0, int awayCoachBonus = 0)
     {
+        var hp = homePlan ?? GamePlan.Neutral;
+        var ap = awayPlan ?? GamePlan.Neutral;
         var homePS = homePlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
         var awayPS = awayPlayers.Where(p => p.injury_days == 0).Select(InitPS).ToList();
         PrepareRotationMetadata(homePS, glLeague);
@@ -83,10 +87,15 @@ public static class GameSimulator
         bool strictHome = homePS.Any(p => p.fixed_minutes && p.target_minutes > 0);
         bool strictAway = awayPS.Any(p => p.fixed_minutes && p.target_minutes > 0);
 
-        if (homePS.Count < 2 || awayPS.Count < 2)
+        // Un equipo con menos de 5 jugadores sanos no puede formar una alineación
+        // legal: se usa el resultado sintético en vez de simular con 2-4 en pista.
+        if (homePS.Count < 5 || awayPS.Count < 5)
         {
+            Debug.LogWarning($"[Sim] Alineación incompleta (local={homePS.Count}, visitante={awayPS.Count}): resultado sintético.");
             int homeScore = UnityEngine.Random.Range(105, 126);
             int awayScore = UnityEngine.Random.Range(100, 121);
+            // Un partido nunca puede acabar en empate.
+            if (homeScore == awayScore) awayScore -= 1;
             var qs = DistributeQuarters(homeScore, awayScore);
             game.home_score = homeScore;
             game.away_score = awayScore;
@@ -111,14 +120,19 @@ public static class GameSimulator
         int homeR = (int)homePlayers.Average(p => Mathf.Clamp(p.overall + (p.morale - 50) * 0.1f, 0, 99));
         int awayR = (int)awayPlayers.Average(p => Mathf.Clamp(p.overall + (p.morale - 50) * 0.1f, 0, 99));
 
-        // Apply chemistry bonus
+        // Ventaja de casa: SIEMPRE para el equipo local real. Antes solo se aplicaba
+        // cuando el equipo del usuario jugaba en casa, lo que sesgaba los resultados
+        // (los partidos IA-IA eran neutrales y el local IA no recibía nada).
+        // El bonus de química es simétrico para ambos equipos.
         float homeChemBonus = (homeChemistry - 50) * 0.15f;
-        float awayChemBonus = (awayChemistry - 50) * 0.10f;
-        float homeCourtBonus = isHome ? 1.5f : 0;
+        float awayChemBonus = (awayChemistry - 50) * 0.15f;
+        const float homeCourtBonus = 1.5f;
 
-        homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus), 0, 99);
-        awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus), 0, 99);
-        float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f), 95, 107);
+        // Bonus del cuerpo técnico (calidad del asistente en el equipo del usuario).
+        homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus + homeCoachBonus), 0, 99);
+        awayR = Mathf.Clamp(Mathf.RoundToInt(awayR + awayChemBonus + awayCoachBonus), 0, 99);
+        float pace = Mathf.Clamp(101 + (homeR + awayR - 140) * 0.06f + UnityEngine.Random.Range(-2f, 2f)
+                                 + GamePlan.PaceAdjustment(hp, ap), 92, 110);
 
         var quarters = new List<(int, int)>();
         var playByPlay = new List<PlayByPlayEvent>();
@@ -134,13 +148,16 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway);
+            var (hPts, aPts) = SimQuarter(q + 1, homeR, awayR, homePS, awayPS, pace, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway, hp, ap);
             homeTotal += hPts; awayTotal += aPts;
             quarters.Add((hPts, aPts));
         }
 
         int otCount = 0;
-        while (homeTotal == awayTotal && otCount < 5)
+        // Prórrogas hasta desempatar. El tope (10) es una red de seguridad: si se
+        // alcanza, se resuelve con un punto para el local. El resultado NUNCA puede
+        // quedar empatado (standings/brackets asumen un ganador).
+        while (homeTotal == awayTotal && otCount < 10)
         {
             otCount++;
             playByPlay.Add(new PlayByPlayEvent
@@ -151,9 +168,22 @@ public static class GameSimulator
                 awayScore = awayTotal,
                 timeElapsed = 0
             });
-            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal, glLeague);
+            var (hOT, aOT) = SimOvertime(4 + otCount, homeR, awayR, homePS, awayPS, playByPlay, homeTotal, awayTotal, glLeague, strictHome, strictAway, hp, ap);
             homeTotal += hOT; awayTotal += aOT;
             quarters.Add((hOT, aOT));
+        }
+
+        if (homeTotal == awayTotal)
+        {
+            homeTotal += 1;
+            playByPlay.Add(new PlayByPlayEvent
+            {
+                quarter = 4 + otCount,
+                text = "Canasta final del local (desempate).",
+                homeScore = homeTotal,
+                awayScore = awayTotal,
+                timeElapsed = 0
+            });
         }
 
         playByPlay.Add(new PlayByPlayEvent
@@ -180,22 +210,28 @@ public static class GameSimulator
         game.q4_home = qsArr.Length > 3 ? qsArr[3].Item1 : 0;
         game.q4_away = qsArr.Length > 3 ? qsArr[3].Item2 : 0;
 
-        // Suelo garantizado para atributos elite (tras simulacion)
+        // Suelo garantizado para atributos elite (tras simulacion). Los rebotes del
+        // suelo no pueden superar los tiros fallados del partido (antes el total de
+        // rebotes podía pasar de los fallos disponibles).
+        int missPool = homePS.Concat(awayPS).Sum(x => (x.fga - x.fgm) + (x.fta - x.ftm));
+        int reboundsSoFar = homePS.Concat(awayPS).Sum(x => x.oreb + x.dreb);
+
         foreach (var ps in homePS.Concat(awayPS))
         {
             if (ps.minutes < 20) continue;
             if (ps.passing >= 95)
                 ps.assists = Mathf.Max(ps.assists, Mathf.RoundToInt(ps.minutes / 48f * 10));
-            if (ps.rebounding >= 95)
+            if (ps.rebounding >= 95 && reboundsSoFar < missPool)
             {
                 int curReb = ps.oreb + ps.dreb;
                 int floorReb = Mathf.RoundToInt(ps.minutes / 48f * 10f
                     * GetReboundPositionMultiplier(ps.position, false));
                 if (curReb < floorReb)
                 {
-                    int extra = floorReb - curReb;
+                    int extra = Mathf.Min(floorReb - curReb, missPool - reboundsSoFar);
                     ps.oreb += extra / 2;
                     ps.dreb += extra - extra / 2;
+                    reboundsSoFar += extra;
                 }
             }
             if (ps.steals_attr >= 90)
@@ -228,13 +264,18 @@ public static class GameSimulator
         // (la pantalla Stats filtra solo temporada regular).
         // Los partidos G-League no escriben en player_game_stats: sus stats
         // viven en gleague_season_stats y las gestiona el llamador.
-        if (persistToDb)
+        // El All-Star tampoco escribe: sus equipos no existen como team_id reales (SIM-14).
+        if (persistToDb && game.game_type != "allstar")
         {
             DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
+            // Solo se persisten los jugadores que realmente jugaron: las filas con
+            // 0 minutos contaban como partido jugado e inflaban GP/medias.
             foreach (var ps in homePS)
-                DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.home_team_id));
+                if (ps.minutes > 0)
+                    DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.home_team_id));
             foreach (var ps in awayPS)
-                DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.away_team_id));
+                if (ps.minutes > 0)
+                    DatabaseManager.Instance.SavePlayerGameStats(PS2DB(ps, game.id, game.away_team_id));
         }
 
         // Check and update records (exclude All-Star — no records should count)
@@ -246,8 +287,9 @@ public static class GameSimulator
 
         // Fatiga post-partido (los partidos G-League no desgastan el físico:
         // los prospectos ni existen en players, y a los asignados no se les
-        // aplica doble desgaste por jugar en dos competiciones)
-        if (persistToDb)
+        // aplica doble desgaste por jugar en dos competiciones). El All-Star es
+        // una exhibición: tampoco desgasta.
+        if (persistToDb && game.game_type != "allstar")
         {
             bool homeBackToBack = DatabaseManager.Instance.Db.Table<GameData>()
                 .Any(g => (g.home_team_id == game.home_team_id || g.away_team_id == game.home_team_id)
@@ -259,7 +301,7 @@ public static class GameSimulator
             {
                 var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                 if (player == null) continue;
-                int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
+                int loss = Mathf.RoundToInt(ps.minutes * 0.28f);
                 if (homeBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
                 player.fisico = Mathf.Max(0, player.fisico - loss);
                 DatabaseManager.Instance.UpdatePlayer(player);
@@ -268,15 +310,17 @@ public static class GameSimulator
             {
                 var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
                 if (player == null) continue;
-                int loss = Mathf.RoundToInt(ps.minutes * 0.30f);
+                int loss = Mathf.RoundToInt(ps.minutes * 0.28f);
                 if (awayBackToBack) loss = Mathf.RoundToInt(loss * 1.5f);
                 player.fisico = Mathf.Max(0, player.fisico - loss);
                 DatabaseManager.Instance.UpdatePlayer(player);
             }
         }
 
-        var homeInjuries = persistToDb ? CheckInjuries(homePS) : new List<(int player_id, string type, int days)>();
-        var awayInjuries = persistToDb ? CheckInjuries(awayPS) : new List<(int player_id, string type, int days)>();
+        // Sin lesiones en el All-Star (exhibición).
+        bool trackInjuries = persistToDb && game.game_type != "allstar";
+        var homeInjuries = trackInjuries ? CheckInjuries(homePS) : new List<(int player_id, string type, int days)>();
+        var awayInjuries = trackInjuries ? CheckInjuries(awayPS) : new List<(int player_id, string type, int days)>();
 
         var result = new GameResult
         {
@@ -322,8 +366,42 @@ public static class GameSimulator
     // (0 se respeta: el jugador no entra salvo necesidad).
     public const int MIN_FIXED_MINUTES = 8;
 
+    /// <summary>
+    /// Índices del quinteto inicial. Con rotación vinculante (strict) un titular con
+    /// plan 0 no debe empezar el partido: se siembra con los que tienen minutos
+    /// pendientes manteniendo el orden de titulares y se completan los huecos con el
+    /// resto. Sin strict, los 5 primeros por orden (titulares de la convocatoria).
+    /// </summary>
+    public static List<int> InitialOnCourt(List<PlayerStatSnapshot> ps, bool strict)
+    {
+        var result = new List<int>();
+        int need = Mathf.Min(5, ps.Count);
+
+        if (strict)
+        {
+            for (int i = 0; i < ps.Count && result.Count < need; i++)
+                if (ps[i].target_minutes > 0)
+                    result.Add(i);
+        }
+        for (int i = 0; i < ps.Count && result.Count < need; i++)
+            if (!result.Contains(i))
+                result.Add(i);
+        return result;
+    }
+
     public static void PrepareRotationMetadata(List<PlayerStatSnapshot> players, bool glLeague = false)
     {
+        // Sin ningún plan positivo (p. ej. tras RESET a 0) la rotación vuelve a ser
+        // automática: se ignoran los 0 configurados y se usa la heurística.
+        if (!players.Any(p => p.fixed_minutes && p.target_minutes > 0))
+        {
+            for (int i = 0; i < players.Count; i++)
+            {
+                players[i].fixed_minutes = false;
+                players[i].target_minutes = -1;
+            }
+        }
+
         for (int i = 0; i < players.Count; i++)
         {
             players[i].starter = i < 5;
@@ -399,7 +477,7 @@ public static class GameSimulator
         };
     }
 
-    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false)
+    static (int, int) SimQuarter(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, float pace, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false, GamePlan homePlan = default, GamePlan awayPlan = default)
     {
         int homePts = 0, awayPts = 0;
         int teamPoss = Mathf.Clamp(Mathf.RoundToInt(pace / 4 * UnityEngine.Random.Range(0.96f, 1.04f)), 22, 28);
@@ -407,8 +485,8 @@ public static class GameSimulator
 
         var homeMins = new float[homePS.Count];
         var awayMins = new float[awayPS.Count];
-        var homeOn = new HashSet<int>(Enumerable.Range(0, Mathf.Min(5, homePS.Count)));
-        var awayOn = new HashSet<int>(Enumerable.Range(0, Mathf.Min(5, awayPS.Count)));
+        var homeOn = new HashSet<int>(InitialOnCourt(homePS, strictHome));
+        var awayOn = new HashSet<int>(InitialOnCourt(awayPS, strictAway));
         // Calendario de cambios independiente por equipo: las ventanas densas son solo
         // para el equipo con rotación vinculante; la IA mantiene las de siempre.
         var homeSchedule = SubSchedule(qNum, strictHome);
@@ -436,7 +514,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < 0.5f)
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague, homePlan, awayPlan);
                 homePts += outHome.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -447,7 +525,7 @@ public static class GameSimulator
             else
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague, awayPlan, homePlan);
                 awayPts += outAway.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -463,14 +541,14 @@ public static class GameSimulator
         return (homePts, awayPts);
     }
 
-    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false)
+    static (int, int) SimOvertime(int qNum, int homeR, int awayR, List<PlayerStatSnapshot> homePS, List<PlayerStatSnapshot> awayPS, List<PlayByPlayEvent> log, int baseHome = 0, int baseAway = 0, bool glLeague = false, bool strictHome = false, bool strictAway = false, GamePlan homePlan = default, GamePlan awayPlan = default)
     {
         int homePts = 0, awayPts = 0;
         int totalPoss = 24;
         var homeMins = new float[homePS.Count];
         var awayMins = new float[awayPS.Count];
-        var homeOn = new HashSet<int>(Enumerable.Range(0, Mathf.Min(5, homePS.Count)));
-        var awayOn = new HashSet<int>(Enumerable.Range(0, Mathf.Min(5, awayPS.Count)));
+        var homeOn = new HashSet<int>(InitialOnCourt(homePS, strictHome));
+        var awayOn = new HashSet<int>(InitialOnCourt(awayPS, strictAway));
         float minsPerPoss = 5f / totalPoss;
         float[] subSchedule = { 2.5f };
         int subIdx = 0;
@@ -480,8 +558,8 @@ public static class GameSimulator
             float elapsed = pIdx * minsPerPoss;
             if (subIdx < subSchedule.Length && elapsed >= subSchedule[subIdx])
             {
-                homeOn = DoSub(homeOn, homePS, homeMins);
-                awayOn = DoSub(awayOn, awayPS, awayMins);
+                homeOn = DoSub(homeOn, homePS, homeMins, strictHome);
+                awayOn = DoSub(awayOn, awayPS, awayMins, strictAway);
                 subIdx++;
             }
             foreach (int i in homeOn) homeMins[i] += minsPerPoss;
@@ -490,7 +568,7 @@ public static class GameSimulator
             if (UnityEngine.Random.value < 0.5f)
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague);
+                var outHome = RunPossession(homeOn, awayOn, homePS, awayPS, homeR, awayR, glLeague, homePlan, awayPlan);
                 homePts += outHome.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -501,7 +579,7 @@ public static class GameSimulator
             else
             {
                 var before = CaptureBox(homePS, awayPS);
-                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague);
+                var outAway = RunPossession(awayOn, homeOn, awayPS, homePS, awayR, homeR, glLeague, awayPlan, homePlan);
                 awayPts += outAway.pts;
                 var after = CaptureBox(homePS, awayPS);
                 var deltas = DiffBox(before, after);
@@ -611,12 +689,13 @@ public static class GameSimulator
         if (amount != 0) deltas.Add(new StatDelta { player_id = player_id, stat = stat, amount = amount });
     }
 
-    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR, bool glLeague = false)
+    static PossessionOutcome RunPossession(HashSet<int> offIds, HashSet<int> defIds, List<PlayerStatSnapshot> offAll, List<PlayerStatSnapshot> defAll, int offR, int defR, bool glLeague = false, GamePlan offPlan = default, GamePlan defPlan = default)
     {
         var off = offIds.Select(i => offAll[i]).ToList();
         var def = defIds.Select(i => defAll[i]).ToList();
 
-        float toPct = 0.11f + (defR - offR) * 0.0003f;
+        // La defensa agresiva fuerza más pérdidas; la conservadora menos.
+        float toPct = 0.11f + (defR - offR) * 0.0003f + defPlan.ForcedTurnoverDelta();
         if (UnityEngine.Random.value < toPct)
         {
             string toName = DoTO(off, def);
@@ -631,7 +710,7 @@ public static class GameSimulator
         if (shooter == null)
             return new PossessionOutcome { pts = 0, desc = "Pérdida" };
 
-        string shot = ShotType(shooter);
+        string shot = ShotType(shooter, offPlan);
         var defender = def.OrderByDescending(p => p.defense).FirstOrDefault();
         float di = defender != null ? (defender.defense - 70) * 0.005f : 0;
 
@@ -653,7 +732,7 @@ public static class GameSimulator
                         : $"{shooter.name} encesta un triple"
                 };
             }
-            return MissHandler(def, off, shooter, true, glLeague);
+            return MissHandler(def, off, shooter, true, glLeague, defPlan);
         }
 
         float fp2 = FisicoPenalty(shooter.fisico);
@@ -691,10 +770,10 @@ public static class GameSimulator
                     : $"{shooter.name} anota de dos"
             };
         }
-        return MissHandler(def, off, shooter, false, glLeague);
+        return MissHandler(def, off, shooter, false, glLeague, defPlan);
     }
 
-    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree, bool glLeague = false)
+    static PossessionOutcome MissHandler(List<PlayerStatSnapshot> def, List<PlayerStatSnapshot> off, PlayerStatSnapshot shooter, bool isThree, bool glLeague = false, GamePlan defPlan = default)
     {
         // Un solo intento colectivo: el defensor se elige por atributo y posición,
         // evitando que el orden de la lista convierta a un base en taponador principal.
@@ -722,7 +801,7 @@ public static class GameSimulator
             }
         }
 
-        float foulChance = isThree ? 0.18f : 0.14f;
+        float foulChance = (isThree ? 0.18f : 0.14f) + defPlan.FoulDelta();
         if (UnityEngine.Random.value < foulChance)
         {
             string foulName = DoFoul(def);
@@ -771,7 +850,7 @@ public static class GameSimulator
         return court[^1];
     }
 
-    static string ShotType(PlayerStatSnapshot p)
+    static string ShotType(PlayerStatSnapshot p, GamePlan plan = default)
     {
         float base3pt = p.position switch
         {
@@ -782,7 +861,7 @@ public static class GameSimulator
             "C" => 0.18f,
             _ => 0.30f
         };
-        float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f, 0.10f, 0.55f);
+        float adj = Mathf.Clamp(base3pt + (p.three_point - 75) * 0.002f + plan.ThreePointBias(), 0.10f, 0.55f);
         adj *= FisicoPenalty(p.fisico);
         return UnityEngine.Random.value < adj ? "3" : "2";
     }
@@ -792,7 +871,9 @@ public static class GameSimulator
         // En la G-League hay más canastas asistidas (reparto más coral del ataque):
         // sin el reparto extra, los líderes no llegan ni a 4 APP porque el star
         // acapara los tiros y quedan pocas canastas ajenas que asistir.
-        if (UnityEngine.Random.value >= (glLeague ? 0.60f : 0.35f)) return null;
+        // % de canastas asistidas: ~55% en la NBA real (antes 35%, las asistencias
+        // salían estructuralmente bajas). La G-League reparte aún más.
+        if (UnityEngine.Random.value >= (glLeague ? 0.62f : 0.55f)) return null;
         var others = court.Where(p => p != scorer).ToList();
         if (others.Count == 0) return null;
         var w = others.Select(p => Mathf.Pow(Mathf.Max(1, p.passing), 3f)).ToList();
@@ -1163,6 +1244,10 @@ public static class GameSimulator
         var injuries = new List<(int, string, int)>();
         foreach (var ps in players)
         {
+            // SIM-06: quien no juega (0 minutos) no se lesiona. Antes la probabilidad era
+            // plana y también caía sobre los que ni pisaron la pista.
+            if (ps.minutes <= 0) continue;
+
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
             if (player == null || player.injury_days > 0) continue;
             float injuryChance = 0.008f;

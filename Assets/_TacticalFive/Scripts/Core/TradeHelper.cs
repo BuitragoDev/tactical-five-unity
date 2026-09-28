@@ -14,11 +14,29 @@ public static class TradeHelper
     public const int MAX_ROSTER = 17;
     public const long TWO_WAY_SALARY = 578_000;
     public const int MAX_TWO_WAY = 2;
+    public const int MAX_TWO_WAY_AGE = 23;
     public const int IR_MIN_DAYS = 90;
 
     public static bool IsEligibleForTwoWay(PlayerData p)
     {
-        return p != null && p.age <= 23;
+        return p != null && IsEligibleForTwoWayAge(p.age);
+    }
+
+    /// <summary>Edad máxima para un contrato two-way (misma fuente para FA y draft).</summary>
+    public static bool IsEligibleForTwoWayAge(int age) => age <= MAX_TWO_WAY_AGE;
+
+    /// <summary>
+    /// Ajusta una oferta al mínimo legal y al máximo permitido. Devuelve false si no hay
+    /// rango legal (el máximo está por debajo del mínimo). ECO-13: antes el suelo de 1M se
+    /// aplicaba con `else if`, así que una oferta podía quedar por encima del máximo.
+    /// </summary>
+    public static bool TryClampOffer(long offer, long floor, long max, out long clamped)
+    {
+        clamped = offer;
+        if (max < floor) return false;
+        if (clamped < floor) clamped = floor;
+        if (clamped > max) clamped = max;
+        return true;
     }
 
     public static bool IsEligibleForIR(PlayerData p)
@@ -163,6 +181,42 @@ public static class TradeHelper
         (5_000_000, 3.25),
         (long.MaxValue, 3.75),
     };
+
+    /// <summary>
+    /// ¿Puede un equipo IA fichar a un agente libre EXTERNO (sin Bird rights) por
+    /// `newSalary`, dado su payroll actual? Modelo simplificado de excepciones, el
+    /// mismo que sufre el jugador: espacio de cap → MLE (NT por debajo del 1er
+    /// apron, T por debajo del 2º) → salario mínimo. Nunca deja el payroll por
+    /// encima del 2º apron salvo con un contrato mínimo.
+    /// </summary>
+    public static bool CanAISignExternal(long payroll, long newSalary, LeagueSettingsData s)
+    {
+        if (s == null) return true;
+        long cap = s.salary_cap > 0 ? s.salary_cap : SALARY_CAP;
+        long firstApron = s.apron > 0 ? s.apron : FIRST_APRON;
+        long secondApron = s.repeater_apron > 0 ? s.repeater_apron : SECOND_APRON;
+        long ntMle = s.mid_level > 0 ? s.mid_level : NT_MLE;
+        long tMle = s.taxpayer_mid_level > 0 ? s.taxpayer_mid_level : T_MLE;
+        long min = s.minimum_salary > 0 ? s.minimum_salary : MIN_SALARY;
+
+        if (payroll + newSalary <= cap) return true;                          // espacio de cap
+        if (payroll + newSalary > secondApron && newSalary > min) return false; // tope duro del 2º apron
+        if (payroll <= firstApron) return newSalary <= ntMle;
+        if (payroll <= secondApron) return newSalary <= tMle;
+        return newSalary <= min;
+    }
+
+    /// <summary>
+    /// ¿Puede un equipo IA RENOVAR a un jugador propio (Bird rights) por `newSalary`?
+    /// La re-firma propia puede superar el cap, pero se limita al 2º apron para que
+    /// las nóminas IA no se disparen a lo largo de muchas temporadas.
+    /// </summary>
+    public static bool CanAIRenew(long projectedPayroll, LeagueSettingsData s)
+    {
+        if (s == null) return true;
+        long secondApron = s.repeater_apron > 0 ? s.repeater_apron : SECOND_APRON;
+        return projectedPayroll <= secondApron;
+    }
 
     public static long CalculateLuxuryTax(long payroll, long taxThreshold = LUXURY_TAX)
     {

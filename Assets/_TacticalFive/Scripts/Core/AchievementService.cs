@@ -61,9 +61,9 @@ public static class AchievementService
         return false;
     }
 
-    static List<GameData> MyTeamSeasonGames(int managerId, int teamId)
+    static List<GameData> MyTeamSeasonGames(int managerId, int teamId, int seasonId)
     {
-        return DatabaseManager.Instance.GetStandingsGames(managerId)
+        return DatabaseManager.Instance.GetStandingsGames(managerId, seasonId)
             .Where(g => g.home_team_id == teamId || g.away_team_id == teamId)
             .OrderBy(g => g.game_day)
             .ThenBy(g => g.id)
@@ -94,7 +94,7 @@ public static class AchievementService
         var manager = DatabaseManager.Instance.GetActiveManager();
         if (season == null || manager == null) return;
 
-        var games = MyTeamSeasonGames(managerId, teamId);
+        var games = MyTeamSeasonGames(managerId, teamId, seasonId);
         if (games.Count == 0) return;
 
         int wins = games.Count(g => DidTeamWin(g, teamId));
@@ -126,7 +126,7 @@ public static class AchievementService
         if (season == null || manager == null || team == null) return;
 
         string label = SeasonLabel(season);
-        var games = MyTeamSeasonGames(managerId, teamId);
+        var games = MyTeamSeasonGames(managerId, teamId, seasonId);
         int wins = games.Count(g => DidTeamWin(g, teamId));
 
         var finalsRecords = DatabaseManager.Instance.GetFinalsRecords();

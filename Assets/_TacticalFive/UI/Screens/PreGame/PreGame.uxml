@@ -22,6 +22,8 @@
 
             <!-- FAVORITE BADGE -->
             <ui:Label name="MPVFavorite" class="mpv-favorite" text="" />
+            <!-- RIVALITY LINE (solo playoffs con historia previa) -->
+            <ui:Label name="MPVRivalry" class="mpv-rivalry" text="" />
 
             <!-- 3-COLUMN LAYOUT -->
             <ui:VisualElement class="mpv-3cols">

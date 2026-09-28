@@ -20,10 +20,11 @@ public class SelectTeamController : UIScreenController
 
     // Grid
     private VisualElement _teamsGrid;
-    private ScrollView _gridScroll;
+    private VisualElement _gridViewport, _gridContent, _detailScrollRow, _detailViewport, _detailContent;
+    private VisualElement _squadModalViewport, _squadModalContent;
+    private CustomScrollbar.Handle _gridBar, _detailBar, _squadModalBar;
 
     // Detail
-    private ScrollView _detailScroll;
     private VisualElement _detailPlaceholder;
     private VisualElement _detailPanel;
     private VisualElement _detailLogo;
@@ -73,9 +74,14 @@ public class SelectTeamController : UIScreenController
         _tabAll = _root.Q<Button>("TabAll");
         _tabEast = _root.Q<Button>("TabEast");
         _tabWest = _root.Q<Button>("TabWest");
-        _gridScroll = _root.Q<ScrollView>("GridScroll");
+        _gridViewport = _root.Q<VisualElement>("GridViewport");
+        _gridContent = _root.Q<VisualElement>("TeamsGrid");
         _teamsGrid = _root.Q<VisualElement>("TeamsGrid");
-        _detailScroll = _root.Q<ScrollView>("DetailScroll");
+        _detailScrollRow = _root.Q<VisualElement>("DetailScrollRow");
+        _detailViewport = _root.Q<VisualElement>("DetailViewport");
+        _detailContent = _root.Q<VisualElement>("DetailPanel");
+        _squadModalViewport = _root.Q<VisualElement>("SquadModalViewport");
+        _squadModalContent = _root.Q<VisualElement>("SquadModalViewport")?.Q<VisualElement>(className: "modal-columns");
         _detailPlaceholder = _root.Q<VisualElement>("DetailPlaceholder");
         _detailPanel = _root.Q<VisualElement>("DetailPanel");
         _detailLogo = _root.Q<VisualElement>("DetailLogo");
@@ -107,20 +113,18 @@ public class SelectTeamController : UIScreenController
 
     void SetupScrollViews()
     {
-        // Forzar el contenedor del grid a ser wrap
-        if (_gridScroll != null)
-        {
-            _gridScroll.contentContainer.style.flexDirection = FlexDirection.Row;
-            _gridScroll.contentContainer.style.flexWrap = Wrap.Wrap;
-            _gridScroll.contentContainer.style.alignContent = Align.FlexStart;
-        }
+        // Barra de scroll propia en los tres paneles (una vez por visita: el árbol se recrea).
+        if (_gridBar == null || _gridBar.Viewport != _gridViewport)
+            _gridBar = CustomScrollbar.Bind(_gridViewport, _gridContent,
+                _root.Q<VisualElement>("GridScrollTrack"), _root.Q<VisualElement>("GridScrollThumb"));
 
-        // Forzar el contenedor del detail a ser columna
-        if (_detailScroll != null)
-        {
-            _detailScroll.contentContainer.style.flexDirection = FlexDirection.Column;
-            _detailScroll.contentContainer.style.flexShrink = 0;
-        }
+        if (_detailBar == null || _detailBar.Viewport != _detailViewport)
+            _detailBar = CustomScrollbar.Bind(_detailViewport, _detailContent,
+                _root.Q<VisualElement>("DetailScrollTrack"), _root.Q<VisualElement>("DetailScrollThumb"));
+
+        if (_squadModalBar == null || _squadModalBar.Viewport != _squadModalViewport)
+            _squadModalBar = CustomScrollbar.Bind(_squadModalViewport, _squadModalContent,
+                _root.Q<VisualElement>("SquadModalScrollTrack"), _root.Q<VisualElement>("SquadModalScrollThumb"));
     }
 
     protected override void LoadData()
@@ -166,7 +170,7 @@ public class SelectTeamController : UIScreenController
         _headerMode.text = mode == GameMode.ProManager ? "PROMANAGER" : "MANAGER";
 
         // Estado inicial
-        _detailScroll.style.display = DisplayStyle.None;
+        _detailScrollRow.style.display = DisplayStyle.None;
         _detailPlaceholder.style.display = DisplayStyle.Flex;
         _btnContinue.SetEnabled(false);
 
@@ -281,7 +285,7 @@ public class SelectTeamController : UIScreenController
     void ShowTeamDetail(TeamData team)
     {
         _detailPlaceholder.style.display = DisplayStyle.None;
-        _detailScroll.style.display = DisplayStyle.Flex;
+        _detailScrollRow.style.display = DisplayStyle.Flex;
 
         // Logo
         if (_logoSprites.TryGetValue(team.logo, out var logoSprite))

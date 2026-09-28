@@ -3,6 +3,8 @@
 > Prioritized list of bugs, refactors, duplicates, technical debt, risks, and improvements, each with impact and reference. **[F]** confirmed, **[D]** deduction, **[H]** hypothesis.
 > Priorities: **P0** = can break the app / data loss; **P1** = significant maintenance or correctness burden; **P2** = moderate; **P3** = nice-to-have.
 > Status markers: **DONE** / **PARTIAL** (progress + what remains) / **OPEN**.
+>
+> **Revisión 2026-09 (auditoría integral):** `Docs/AUDITORIA_FINAL.md` es la **checklist viva** con el estado verificado por ID. Varios ítems de este archivo ya están resueltos y quedan marcados abajo con su commit/fix.
 
 ---
 
@@ -38,35 +40,35 @@ _(none open — see resolved B1 below)_
 - **Impact:** the connection remains in an open transaction across frames; exceptions, navigation or concurrent DB work can leave locks or partial state. This contradicts the intended atomic day pipeline.
 - **Fix:** keep simulation/bookkeeping transaction work synchronous within one frame, or split into precomputed data plus a short commit transaction with explicit cancellation/rollback tests.
 
-### B39. Template build replaces shared `_dbField` from a worker thread — **OPEN**
+### B39. Template build replaces shared `_dbField` from a worker thread — **DONE**
 - **Type:** race condition / persistence.
 - **Detail [F]:** `BuildTemplateDatabaseInBackground` temporarily assigns and closes the shared `_dbField` while `EditorController` invokes it from a background flow (`DatabaseManager.cs:163-175`, `EditorController.cs:298-313`). The lock does not protect normal UI queries.
 - **Impact:** a simultaneous query may use the temporary connection or one that is being closed; template and active-save operations are not isolated.
-- **Fix:** use a local connection exclusively for template generation and publish/swap it only on the main thread after completion; block template editing while a save slot is active.
+- **Fix:** ✅ `BuildTemplateFile` usa una conexión **local** (nada de reasignar `_dbField`) con `EnsureTemplateDb` publicando por **rename atómico** desde `.tmp` (`SAV-02`/`QA-05`).
 
-### B40. `overall` derived value is stale/inconsistent — **OPEN**
+### B40. `overall` derived value is stale/inconsistent — **DONE**
 - **Type:** gameplay correctness / data invariant.
 - **Detail [F]:** `PlayerData.GetCalculatedAverage()` uses integer division; `DatabaseManager.Records.ApplyMentoring()` changes attributes without recalculating `overall`.
 - **Impact:** sorting, AI evaluation and UI ratings can disagree with the attribute grid by one or more points after mentoring.
-- **Fix:** centralize `RecalculateOverall()` and call it after every attribute mutation; add EditMode tests for truncation/rounding and potential caps.
+- **Fix:** ✅ `PlayerData.GetCalculatedAverage()` redondea y capa por `potential`; `RecalculateOverall()` se llama tras cada mutación (mentoring/progresión/entrenamiento/G-League). Tests `PlayerDataTests` + `PlayerProgressionTests` (`SEA-08/09`).
 
-### B41. Rookies skipped by season progression — **OPEN**
+### B41. Rookies skipped by season progression — **OPEN (parcial)**
 - **Type:** gameplay correctness.
 - **Detail [F]:** `StartNewSeason` continues before aging/contract progression for `is_rookie == 1` (`DatabaseManager.Records.cs:2632-2638`).
-- **Impact:** rookie age, contract years and team tenure do not advance through the rollover path.
+- **Impact:** rookie age, contract years and team tenure do not advance through the rollover path. *(Re-verificado 2026-09: `DatabaseManager.Records.cs:2744` sigue haciendo `continue` con `is_rookie == 1`.)*
 - **Fix:** separate “newly drafted this season” handling from normal next-season progression and add a two-season regression test.
 
-### B42. Local advantage and injury rating use wrong population — **OPEN**
+### B42. Local advantage and injury rating use wrong population — **DONE**
 - **Type:** simulation correctness.
 - **Detail [F]:** `DashboardController` passes `isMyHomeGame`; `GameSimulator` applies the local bonus only for that flag. Team rating uses player lists that include injured players even though active rotations exclude them.
 - **Impact:** AI league games lack local advantage and injuries can affect rating in addition to removing rotation minutes.
-- **Fix:** pass `isHomeGame = game.home_team_id == homeTeamId`, and derive rating from available players or explicitly document the injury penalty.
+- **Fix:** ✅ la ventaja de casa se calcula del local real (`SIM-01`, ya no se pasa `isMyHomeGame`) y las lesiones solo afectan a quien juega (`SIM-06`: `CheckInjuries` salta `minutes <= 0`).
 
-### B43. Luxury-tax expense sign disagrees with aggregators — **OPEN**
+### B43. Luxury-tax expense sign disagrees with aggregators — **DONE**
 - **Type:** economy correctness.
 - **Detail [F]:** `ProcessTeamLuxuryTax` persists `-monthlyTax`, while `GetTotalExpenses` sums expense types as-is.
 - **Impact:** tax can reduce the calculated expense total and inflate displayed balance.
-- **Fix:** standardize expense records as positive and subtract at the balance boundary, or normalize all consumers consistently.
+- **Fix:** ✅ el luxury tax se registra en **positivo** como gasto (`ECO-05`, migración `loan_records_reclassified` normaliza importes antiguos).
 
 ### B3. `DatabaseManager` is a monolith — **PARTIAL (mostly done)**
 - **Type:** refactor.
@@ -117,10 +119,10 @@ _(none open — see resolved B1 below)_
 - **Impact:** slower with long careers.
 - **Fix:** move to SQL aggregates (`GetSeasonPlayerStatsAggregates` already does for one path).
 
-### B15. Reflection in `CompleteTrainingAndApply`
+### B15. Reflection in `CompleteTrainingAndApply` — **DONE**
 - **Detail [F]:** attribute +2 via `typeof(PlayerData).GetProperty`.
 - **Impact:** fragile (renames break silently); minor perf.
-- **Fix:** switch on attribute name or dictionary.
+- **Fix:** ✅ ya no hay reflexión en el entrenamiento (verificado: sin `GetProperty`/`GetMethod` en `DatabaseManager.Records.cs`).
 
 ### B16. `league_settings.apron/repeater_apron` vs `TradeHelper.FIRST/SECOND_APRON` duplication
 - **Detail [F]:** two sources of truth; UI mostly uses `TradeHelper`. (`taxpayer_mid_level` was added to `league_settings` but is unused by most UI too.)
@@ -166,7 +168,7 @@ _(none open — see resolved B1 below)_
 - **B31.** Comments only in Spanish — fine for current team; document if external contributors join.
 - **B32.** Fonts referenced via `project://database/Assets/...` (editor-absolute) in USS — works in editor builds; verify in built players.
 - **B33.** `_Recovery` scenes leftover in `Assets/_Recovery` (gitignored) — clean up.
-- **B34.** Tests unitarios: 78 `[Test]` en 7 archivos (`TradeHelperTests`=20, `GLLeagueHelperTests`=22, `AdvancedStatsHelperTests`=11, `ObjectiveHelperTests`=10, `HallOfFameHelperTests`=9, `GameSimulatorTests`=4, `EditModeSmokeTests`=2). Sin test runner CLI. `GameSimulatorTests` solo testeable para helpers estáticos (position multipliers, target minutes). Pendiente: tests para `DatabaseManager` migrations y `GameSimulator.SimulateGame` completo.
+- **B34.** Tests unitarios: **176** `[Test]` en 17 archivos (2026-09). Sin test runner CLI (se corre en el Test Runner del editor). `GameSimulatorTests` cubre los helpers públicos del simulador y partidos completos con `persistToDb:false`; `GameSaveManagerTests` cubre slots con `BaseDirOverride`. Pendiente: migraciones de `DatabaseManager` contra DB real y tests de UI/navegación.
 - **B35.** Emoji as icons in UXML (🏟👑💎🛒) — platform font-dependent; consider sprites.
 - **B36.** `PLAN.md` (repo root) documents an improvement plan; several parts are now implemented (draft picks/protections, hard cap, luxury tax, buyout, TO/PO, load management, HOF, achievements). **Sync the plan with the code or delete it.**
 - **B37.** No changelog or versioning policy for `v1.0.0 · Beta`.

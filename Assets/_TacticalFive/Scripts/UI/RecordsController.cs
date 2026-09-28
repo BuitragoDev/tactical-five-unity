@@ -54,11 +54,22 @@ public class RecordsController : UIScreenController
         "fgm", "fg3m", "ftm", "turnovers"
     };
 
+    // Selector de temporada (pestaña TEMPORADA)
+    private List<SeasonData> _seasons = new();
+    private int _seasonIdx;
+    private VisualElement _seasonSelector;
+    private Label _seasonLabel;
+    private Button _btnPrevSeason, _btnNextSeason;
+
     protected override void CacheReferences()
     {
         _tabTeam = _root.Q<Button>("TabTeam");
         _tabSeason = _root.Q<Button>("TabSeason");
         _tabHistorical = _root.Q<Button>("TabHistorical");
+        _seasonSelector = _root.Q<VisualElement>("SeasonSelector");
+        _seasonLabel = _root.Q<Label>("SeasonSelectorLabel");
+        _btnPrevSeason = _root.Q<Button>("BtnPrevSeason");
+        _btnNextSeason = _root.Q<Button>("BtnNextSeason");
         _recordsBody = _root.Q<VisualElement>("RecordsBody");
         _recordsHeaderIcon = _root.Q<VisualElement>("RecordsHeaderIcon");
         _recordsSubtitle = _root.Q<Label>("RecordsSubtitle");
@@ -99,6 +110,11 @@ public class RecordsController : UIScreenController
             _recordsHeaderIcon.style.backgroundImage = new StyleBackground(headerIcon);
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();
+
+        _seasons = DatabaseManager.Instance.GetAllSeasons()
+                        .OrderBy(s => s.year_start).ToList();
+        _seasonIdx = _seasons.FindIndex(s => s.id == _season?.id);
+        if (_seasonIdx < 0) _seasonIdx = Mathf.Max(0, _seasons.Count - 1);
     }
 
     protected override void RegisterCallbacks()
@@ -107,6 +123,17 @@ public class RecordsController : UIScreenController
         _tabTeam?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetFilter("team"); });
         _tabSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetFilter("season"); });
         _tabHistorical?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetFilter("historical"); });
+
+        _btnPrevSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); MoveSeason(-1); });
+        _btnNextSeason?.RegisterCallback<ClickEvent>(_ => { PlayClick(); MoveSeason(1); });
+    }
+
+    /// <summary>Cambia la temporada mostrada en la pestaña TEMPORADA (acotado al rango).</summary>
+    void MoveSeason(int delta)
+    {
+        if (_seasons.Count == 0) return;
+        _seasonIdx = Mathf.Clamp(_seasonIdx + delta, 0, _seasons.Count - 1);
+        Refresh();
     }
 
     void SetFilter(string filter)
@@ -119,6 +146,9 @@ public class RecordsController : UIScreenController
         if (filter == "team") _tabTeam.AddToClassList("records-tab--active");
         else if (filter == "season") _tabSeason.AddToClassList("records-tab--active");
         else if (filter == "historical") _tabHistorical.AddToClassList("records-tab--active");
+
+        if (_seasonSelector != null)
+            _seasonSelector.style.display = filter == "season" ? DisplayStyle.Flex : DisplayStyle.None;
 
         Refresh();
     }
@@ -222,7 +252,14 @@ public class RecordsController : UIScreenController
     void BuildSeasonRecords()
     {
         if (_season == null) return;
-        var records = DatabaseManager.Instance.GetCurrentSeasonRecords(_season.id);
+
+        var shown = (_seasons.Count > 0 && _seasonIdx >= 0 && _seasonIdx < _seasons.Count)
+            ? _seasons[_seasonIdx]
+            : _season;
+        if (_seasonLabel != null)
+            _seasonLabel.text = $"TEMPORADA {shown.year_start}-{shown.year_end % 100:D2}";
+
+        var records = DatabaseManager.Instance.GetCurrentSeasonRecords(shown.id);
         var byStat = records.ToDictionary(r => r.stat_type, r => r);
 
         int count = 0;

@@ -293,7 +293,8 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    padding: 14px 48px;
+    padding: 0 48px;
+    min-height: 0;
     border-radius: 8px;
     border-width: 2px;
     -unity-text-align: middle-center;
@@ -491,11 +492,46 @@
     -unity-text-align: middle-center;
 }
 
-.detail-scroll {
+.detail-scroll-row {
+    flex-direction: row;
     flex-grow: 1;
     min-height: 0;
     border-width: 1px;
     border-color: rgb(120, 95, 30);
+}
+.detail-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+.detail-content {
+    flex-direction: column;
+    flex-shrink: 0;
+}
+.detail-scrollbar {
+    width: 12px;
+    min-width: 12px;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-left: 2px;
+    background-color: rgba(18, 24, 34, 0.92);
+    border-left-width: 1px;
+    border-left-color: rgba(120, 95, 30, 0.45);
+    position: relative;
+}
+.detail-scrollbar-thumb {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 0;
+    height: 40px;
+    background-color: rgb(212, 160, 23);
+    border-radius: 3px;
+}
+.detail-scrollbar:hover .detail-scrollbar-thumb {
+    background-color: rgb(240, 196, 80);
 }
 
 .detail-top {
@@ -669,4 +705,50 @@
     text-transform: uppercase;
     color: rgb(85, 102, 119);
     -unity-text-align: middle-center;
+}
+
+/* ── PLAN DE PARTIDO ── */
+.plan-row {
+    flex-direction: row;
+    align-items: center;
+    margin-bottom: 6px;
+}
+.plan-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 96px;
+    flex-shrink: 0;
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(150, 162, 186);
+}
+.plan-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex: 1;
+    margin-left: 6px;
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 8px 6px;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgb(60, 70, 92);
+    background-color: rgba(42, 95, 201, 0.08);
+    color: rgb(150, 162, 186);
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.plan-btn:hover {
+    background-color: rgba(42, 95, 201, 0.20);
+}
+.plan-btn--active {
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.15);
+    color: rgb(248, 196, 64);
+}
+.plan-caption {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: rgb(150, 162, 186);
+    white-space: normal;
+    margin-top: 4px;
 }

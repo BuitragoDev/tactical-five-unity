@@ -303,3 +303,36 @@
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
 }
+
+/* ── SELECTOR DE TEMPORADA ── */
+.records-season-selector {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-bottom: 8px;
+}
+.records-season-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    width: 34px;
+    height: 30px;
+    margin: 0 10px;
+    font-size: 16px;
+    background-color: rgba(42, 95, 201, 0.12);
+    border-width: 1px;
+    border-color: rgb(60, 70, 92);
+    color: rgb(200, 212, 232);
+    border-radius: 6px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.records-season-btn:hover {
+    background-color: rgba(42, 95, 201, 0.28);
+    color: rgb(235, 242, 255);
+}
+.records-season-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: rgb(212, 160, 23);
+}

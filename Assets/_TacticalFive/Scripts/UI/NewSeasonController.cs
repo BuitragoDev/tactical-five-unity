@@ -267,6 +267,15 @@ public class NewSeasonController : UIScreenController
 
     void CheckTeamOptions()
     {
+        // Si las pre-condiciones del rollover ya se aplicaron (reintento tras un fallo
+        // de StartNewSeason), no volver a resolver opciones ni decrementar contratos:
+        // se duplicarían. Se salta directamente al control de plantilla.
+        if (_season != null && DatabaseManager.Instance.IsRolloverPreApplied(_season.id, "pre"))
+        {
+            CheckRosterAndStart();
+            return;
+        }
+
         var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
         var teamOptions = players
             .Where(p => p.has_team_option == 1 && p.guaranteed_years == 0 && p.contract_years > 0)
@@ -353,31 +362,40 @@ public class NewSeasonController : UIScreenController
         // Decrementar contratos de la plantilla seleccionada para que los jugadores
         // en último año de contrato no renovados pasen a agentes libres ANTES del
         // control de plantilla (>17). Misma semántica que StartNewSeason.
-        var players = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
-        foreach (var p in players)
+        // Si ya se aplicó (reintento tras fallo del rollover) se omite: la marca
+        // "pre" cubre opciones + decremento y evita descontar dos veces.
+        bool preApplied = _season != null && DatabaseManager.Instance.IsRolloverPreApplied(_season.id, "pre");
+        if (!preApplied)
         {
-            if (p.is_rookie == 1) continue; // igual que StartNewSeason: los rookies no decrementan
-            int oldTeamId = p.team_id;
-            p.contract_years -= 1;
-            p.guaranteed_years -= 1;
-            if (p.contract_years <= 0)
+            var prePlayers = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
+            foreach (var p in prePlayers)
             {
-                p.contract_years = 0;
-                p.guaranteed_years = 0;
-                p.has_team_option = 0;
-                p.has_player_option = 0;
-                p.is_two_way = 0;
-                p.is_on_ir = 0;
-                p.g_league_assigned = 0;
-                if (oldTeamId != 0 && p.last_team_id == 0)
-                    p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
-                p.team_id = 0; // agente libre
+                if (p.is_rookie == 1) continue; // igual que StartNewSeason: los rookies no decrementan
+                int oldTeamId = p.team_id;
+                p.contract_years = System.Math.Max(0, p.contract_years - 1);
+                p.guaranteed_years = System.Math.Max(0, p.guaranteed_years - 1);
+                if (p.contract_years <= 0)
+                {
+                    p.contract_years = 0;
+                    p.guaranteed_years = 0;
+                    p.has_team_option = 0;
+                    p.has_player_option = 0;
+                    p.is_two_way = 0;
+                    p.is_on_ir = 0;
+                    p.g_league_assigned = 0;
+                    if (oldTeamId != 0 && p.last_team_id == 0)
+                        p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
+                    p.team_id = 0; // agente libre
+                }
+                else
+                {
+                    p.seasons_with_team += 1; // sigue en el mismo equipo
+                }
+                DatabaseManager.Instance.UpdatePlayer(p);
             }
-            else
-            {
-                p.seasons_with_team += 1; // sigue en el mismo equipo
-            }
-            DatabaseManager.Instance.UpdatePlayer(p);
+
+            if (_season != null)
+                DatabaseManager.Instance.MarkRolloverPreApplied(_season.id, "pre");
         }
 
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
@@ -401,16 +419,17 @@ public class NewSeasonController : UIScreenController
         int newTeamId = _selectedTeamId;
         int oldTeamId = _manager.team_id; // Capture before possible update
 
-        // Update manager team if changed
-        if (_manager.team_id != newTeamId)
-        {
-            _manager.team_id = newTeamId;
-            DatabaseManager.Instance.SaveManager(_manager);
-        }
-
         int seasonId = _season.id;
         int managerId = _manager.id;
         string gameMode = _season.game_mode;
+
+        // Bloquear salidas duras (config → Menú principal) mientras corre el rollover:
+        // si la corrutina se aborta a media transacción, el lote de fondo seguiría
+        // escribiendo sin que el jugador lo sepa.
+        ScreenManager.NavigationLocked = true;
+
+        // El equipo del manager se fija DENTRO de la transacción de StartNewSeason
+        // (antes se cambiaba aquí, fuera: si el rollover fallaba quedaba cambiado).
 
         // Execute the full new season logic on a background thread (own SQLite connection)
         var task = DatabaseManager.Instance.RunInBackgroundAsync(() =>
@@ -433,11 +452,14 @@ public class NewSeasonController : UIScreenController
         }
         catch (System.Exception ex)
         {
+            ScreenManager.NavigationLocked = false;
             _btnStartSeason.SetEnabled(true);
             _btnStartSeason.text = "EMPEZAR TEMPORADA";
             Debug.LogError($"[NewSeason] Error al iniciar la nueva temporada: {ex.Message}\n{ex.StackTrace}");
             yield break;
         }
+
+        ScreenManager.NavigationLocked = false;
 
         // Navigate to Preseason to set up friendly games
         ScreenManager.Instance.GoTo(GameScreen.Preseason);

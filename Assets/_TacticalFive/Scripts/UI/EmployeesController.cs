@@ -106,6 +106,8 @@ public class EmployeesController : UIScreenController
     private static readonly string[] PositionOrder = { "ASISTENTE", "MEDICO", "FINANCIERO", "OJEADOR", "PSICOLOGO", "PABELLON" };
     private static readonly int REFRESH_INTERVAL = 30;
     private static readonly int CANDIDATES_PER_POSITION = 5;
+    // RNG del hilo principal para generar esquemas de asistente (no afecta a UnityEngine.Random).
+    private readonly System.Random _coachRng = new System.Random();
 
     // Nacionalidades de los candidatos a empleado (códigos válidos de CountryCodes;
     // el nombre para mostrar se resuelve con CountryCodes.GetName).
@@ -239,6 +241,9 @@ public class EmployeesController : UIScreenController
                         candidate_day = currentDay,
                         nationality = nat
                     };
+                    // El asistente trae un esquema táctico propio.
+                    if (pos == CoachScheme.POSITION)
+                        CoachScheme.AssignRandomScheme(emp, _coachRng);
                     DatabaseManager.Instance.InsertEmployee(emp);
                     _candidates.Add(emp);
                 }
@@ -764,6 +769,7 @@ public class EmployeesController : UIScreenController
             hireBox.AddToClassList("hire-modal-box--gold");
             _btnHireConfirm.RemoveFromClassList("btn-modal-confirm");
             _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--danger");
+            _btnHireConfirm.AddToClassList("btn-modal-confirm");
             _btnHireConfirm.AddToClassList("btn-modal-confirm--gold");
             _isReplacing = true;
         }
@@ -971,6 +977,7 @@ public class EmployeesController : UIScreenController
         _hireResultBox.AddToClassList("hire-modal-box--negative");
         _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
         _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
+        _btnHireResultOk.AddToClassList("btn-modal-confirm");
         _btnHireResultOk.AddToClassList("btn-modal-confirm--danger");
         _btnHireResultOk.text = "CERRAR";
         _hireResultOverlay.style.display = DisplayStyle.Flex;

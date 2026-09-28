@@ -356,12 +356,15 @@ using System.Linq;
         long subTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SUBSCRIPTION);
         long sponsorTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_SPONSORSHIP);
         long tvTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TV);
-        long total = ticketTotal + subTotal + sponsorTotal + tvTotal;
+        long loanInTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_LOAN_IN);
+        long total = ticketTotal + subTotal + sponsorTotal + tvTotal + loanInTotal;
 
         AddTableRow(_incomeTable, "Taquilla", ticketTotal, true);
         AddTableRow(_incomeTable, "Abonos", subTotal, true);
         AddTableRow(_incomeTable, "Patrocinios", sponsorTotal, true);
         AddTableRow(_incomeTable, "Televisión", tvTotal, true);
+        if (loanInTotal != 0)
+            AddTableRow(_incomeTable, "Préstamos", loanInTotal, true);
 
         _totalIncomeValue.text = FormatMoney(total);
     }
@@ -382,7 +385,8 @@ using System.Linq;
         long dismissalTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_DISMISSAL);
         long taxTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_TAX);
         long buyoutTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_BUYOUT);
-        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal + taxTotal + buyoutTotal;
+        long loanRepayTotal = DatabaseManager.Instance.GetFinanceTotalByType(_myTeam.id, _season.id, FinanceRecord.TYPE_LOAN_REPAY);
+        long total = salariesTotal + empSalaryTotal + renovationTotal + dismissalTotal + taxTotal + buyoutTotal + loanRepayTotal;
 
         AddTableRow(_expensesTable, "Sueldos de jugadores", salariesTotal, false);
         AddTableRow(_expensesTable, "Sueldos empleados", empSalaryTotal, false);
@@ -390,6 +394,8 @@ using System.Linq;
         AddTableRow(_expensesTable, "Despidos", dismissalTotal, false);
         AddTableRow(_expensesTable, "Luxury tax", System.Math.Abs(taxTotal), false);
         AddTableRow(_expensesTable, "Rescisiones (buyout)", buyoutTotal, false);
+        if (loanRepayTotal != 0)
+            AddTableRow(_expensesTable, "Devolución de préstamos", loanRepayTotal, false);
 
         _totalExpensesValue.text = FormatMoney(total);
     }
@@ -462,7 +468,7 @@ using System.Linq;
             int idx = GetMonthIndex(date, hasPreseason);
             if (idx < 0 || idx >= 10) continue;
 
-            if (r.record_type <= FinanceRecord.TYPE_TV)
+            if (r.record_type <= FinanceRecord.TYPE_TV || r.record_type == FinanceRecord.TYPE_LOAN_IN)
                 totals[idx].inc += r.amount;
             else
                 totals[idx].exp += r.amount;
@@ -541,6 +547,18 @@ using System.Linq;
         _capSheetApron.RemoveFromClassList("cap-summary-value--income");
         _capSheetApron.RemoveFromClassList("cap-summary-value--danger");
         _capSheetApron.AddToClassList(currentPayroll > apron ? "cap-summary-value--danger" : "cap-summary-value--income");
+
+        // Tooltips de ayuda (cap/aprons/excepciones son áridos sin contexto)
+        _capSheetSalary.tooltip = "Masa salarial actual: suma de los salarios de tu plantilla.";
+        _capSheetCap.tooltip = "Tope salarial de la liga (crece un 5% cada temporada).";
+        _capSheetSpace.tooltip = "Espacio salarial: tope menos masa salarial. Bajo el tope puedes fichar con espacio; por encima, solo con excepciones.";
+        _capSheetApron.tooltip = "1er apron: por encima de él solo puedes usar la Taxpayer MLE y no puedes recibir más salario del que envías en un traspaso.";
+        _capExceptionNtMle.tooltip = "Non-Taxpayer MLE: excepción para fichar por encima del tope. Si la usas, quedas sujeto al hard cap del 1er apron.";
+        _capExceptionTMle.tooltip = "Taxpayer MLE: excepción reducida si ya estás por encima del 1er apron.";
+        _capExceptionMin.tooltip = "Salario mínimo: siempre puedes firmar contratos mínimos, incluso por encima del tope.";
+        _capExceptionApron.tooltip = "Luxury tax / 2º apron: por encima del 2º apron solo puedes firmar mínimos y no puedes agrupar salarios en traspasos.";
+        if (_capExpiringLabel != null)
+            _capExpiringLabel.tooltip = "Jugadores que acaban contrato este año. Con TO/PO, la opción se decide al llegar a él.";
 
         // Projection header
         var headerRow = new VisualElement();
@@ -647,11 +665,25 @@ using System.Linq;
             }));
         }
 
+        // FA propios recientes: re-firmables por encima del tope (Bird rights)
+        var ownBirdFAs = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => DatabaseManager.Instance.IsOwnRecentFA(p, _myTeam.id))
+            .OrderByDescending(p => p.salary)
+            .Take(8)
+            .ToList();
+        if (ownBirdFAs.Count > 0)
+        {
+            string names = string.Join(", ", ownBirdFAs.Select(p => $"{p.first_name} {p.last_name}"));
+            _capExpiringLabel.text += $"\nDERECHOS BIRD (re-firmables por encima del tope): {names}";
+        }
+
         // Exceptions
         long ntMle = settings != null ? settings.mid_level : TradeHelper.NT_MLE;
         long tMle = settings != null ? settings.taxpayer_mid_level : TradeHelper.T_MLE;
         long minSal = settings != null ? settings.minimum_salary : TradeHelper.MIN_SALARY;
-        _capExceptionNtMle.text = FormatMoney(ntMle);
+        _capExceptionNtMle.text = _myTeam.first_apron_hard_capped == 1
+            ? $"{FormatMoney(ntMle)} (USADA → HARD CAP 1er APRON)"
+            : FormatMoney(ntMle);
         _capExceptionTMle.text = FormatMoney(tMle);
         _capExceptionMin.text = FormatMoney(minSal);
         _capExceptionApron.text =

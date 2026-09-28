@@ -240,3 +240,36 @@
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
 }
+
+/* ── FILTROS Y ORDEN ── */
+.historial-filter-bar {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    margin-bottom: 4px;
+}
+.historial-filter-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    margin-right: 6px;
+    background-color: rgba(42, 95, 201, 0.08);
+    border-width: 1px;
+    border-color: rgb(60, 70, 92);
+    color: rgb(179, 190, 214);
+    border-radius: 6px;
+    cursor: pointer;
+}
+.historial-filter-btn:hover {
+    background-color: rgba(42, 95, 201, 0.20);
+    color: rgb(220, 230, 245);
+}
+.historial-filter-btn--active {
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.12);
+    color: rgb(248, 196, 64);
+}
+.historial-filter-spacer {
+    flex-grow: 1;
+}

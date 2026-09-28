@@ -40,7 +40,7 @@ public static class MatchupPreview
         public string arenaCity;
     }
 
-    public static PreviewResult Compute(int homeTeamId, int awayTeamId, bool isHome,
+    public static PreviewResult Compute(int homeTeamId, int awayTeamId,
         int managerId, int seasonId, string gameDate)
     {
         var db = DatabaseManager.Instance;
@@ -57,9 +57,11 @@ public static class MatchupPreview
         int homeR = TeamRating(homePlayers);
         int awayR = TeamRating(awayPlayers);
 
+        // Mismos coeficientes que GameSimulator: química simétrica y ventaja de casa
+        // SIEMPRE para el local real.
         float homeChemBonus = (db.GetTeamChemistry(homeTeamId) - 50) * 0.15f;
-        float awayChemBonus = (db.GetTeamChemistry(awayTeamId) - 50) * 0.10f;
-        float homeCourtBonus = isHome ? 1.5f : 0f;
+        float awayChemBonus = (db.GetTeamChemistry(awayTeamId) - 50) * 0.15f;
+        float homeCourtBonus = 1.5f;
 
         homeR = Mathf.Clamp(Mathf.RoundToInt(homeR + homeChemBonus + homeCourtBonus
             + RecentFormBonus(db, homeTeamId, managerId, seasonId)), 0, 99);

@@ -197,13 +197,8 @@ public partial class DatabaseManager
         val = Mathf.Min(val + 2, 99);
         prop.SetValue(player, val);
 
-        // Recalculate overall as average of all attributes, capped by potential
-        int sum = player.shooting + player.three_point + player.passing + player.dribbling
-                + player.defense + player.rebounding + player.speed + player.athleticism
-                + player.iq + player.steals + player.blocks;
-        player.overall = (int)System.Math.Round(sum / 11f);
-        if (player.overall > player.potential)
-            player.overall = player.potential;
+        // Overall = media de atributos capada por potencial (fuente única).
+        player.RecalculateOverall();
 
         _db.Update(player);
     }

@@ -61,6 +61,7 @@ public partial class DatabaseManager
         {
             stats.Add(new HistoricalPlayerStatsData
             {
+                player_id = HistoricalStatsRules.LEGEND_ID,
                 first_name = d.first,
                 last_name = d.last,
                 position = d.pos,
@@ -470,6 +471,43 @@ public partial class DatabaseManager
         _db.Insert(record);
     }
 
+    /// <summary>
+    /// Guarda la convocatoria del All-Star de la temporada (una vez por temporada, idempotente:
+    /// borra la previa de esa temporada). Titulares = primeros 5 de cada conferencia.
+    /// </summary>
+    public void SaveAllStarRoster(int managerId, int seasonId, List<PlayerData> east, List<PlayerData> west)
+    {
+        if (!EnsureDb()) return;
+        _db.Execute("DELETE FROM all_star_roster WHERE manager_id = ? AND season_id = ?", managerId, seasonId);
+
+        var rows = new List<AllStarRosterData>();
+        void AddConference(List<PlayerData> players, string conference)
+        {
+            if (players == null) return;
+            for (int i = 0; i < players.Count; i++)
+                rows.Add(new AllStarRosterData
+                {
+                    manager_id = managerId,
+                    season_id = seasonId,
+                    conference = conference,
+                    player_id = players[i].id,
+                    is_starter = i < 5 ? 1 : 0
+                });
+        }
+        AddConference(east, "East");
+        AddConference(west, "West");
+        if (rows.Count > 0) _db.InsertAll(rows);
+    }
+
+    /// <summary>Temporadas en las que un jugador fue convocado al All-Star (para la trayectoria).</summary>
+    public List<int> GetAllStarSeasonIds(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return new List<int>();
+        return _db.Query<int>(
+            "SELECT DISTINCT season_id FROM all_star_roster WHERE player_id = ? ORDER BY season_id",
+            playerId);
+    }
+
     public class AllStarAppearanceEntry
     {
         public int player_id { get; set; }
@@ -484,13 +522,12 @@ public partial class DatabaseManager
 
         var fromGames = _db.Query<AllStarAppearanceEntry>(@"
             SELECT p.id as player_id, p.first_name || ' ' || p.last_name as player_name,
-                   t.logo as team_logo, COUNT(DISTINCT g.season_id) as appearances
-            FROM player_game_stats pgs
-            JOIN games g ON pgs.game_id = g.id
-            JOIN players p ON pgs.player_id = p.id
+                   t.logo as team_logo, COUNT(DISTINCT r.season_id) as appearances
+            FROM all_star_roster r
+            JOIN players p ON r.player_id = p.id
             JOIN teams t ON p.team_id = t.id
-            WHERE g.game_type = 'allstar' AND g.manager_id = ?
-            GROUP BY pgs.player_id", managerId);
+            WHERE r.manager_id = ?
+            GROUP BY r.player_id", managerId);
 
         var fromSeed = _db.Table<AllStarAppearanceSeed>().ToList();
 
@@ -594,6 +631,26 @@ public partial class DatabaseManager
             managerId, seasonId);
     }
 
+    /// <summary>Partidos jugados por jugador en una temporada (una sola query agregada).</summary>
+    public Dictionary<int, int> GetGamesPlayedByPlayerInSeason(int managerId, int seasonId)
+    {
+        var dict = new Dictionary<int, int>();
+        if (!EnsureDb()) return dict;
+
+        var rows = _db.Query<PlayerGamesRow>(
+            @"SELECT ps.player_id AS player_id, COUNT(*) AS games
+              FROM player_game_stats ps
+              JOIN games g ON ps.game_id = g.id
+              WHERE g.manager_id = ? AND g.season_id = ? AND g.is_played = 1
+                    AND ps.minutes > 0
+              GROUP BY ps.player_id",
+            managerId, seasonId);
+
+        foreach (var r in rows)
+            dict[r.player_id] = r.games;
+        return dict;
+    }
+
     public List<PlayerGameStats> GetGamePlayerStats(int gameId)
     {
         return _db.Table<PlayerGameStats>()
@@ -618,101 +675,8 @@ public partial class DatabaseManager
                          .Select(g => g.id)
                          .ToList();
         return _db.Table<PlayerGameStats>()
-                  .Where(s => s.player_id == playerId && gameIds.Contains(s.game_id))
+                  .Where(s => s.player_id == playerId && s.minutes > 0 && gameIds.Contains(s.game_id))
                   .Count();
-    }
-
-    public List<PlayerData> GetLeagueTopScorers(int managerId, int count = 10)
-    {
-        var season = GetActiveSeason(GetActiveManager()?.id ?? 0);
-        if (season == null) return new List<PlayerData>();
-
-        var allGames = _db.Table<GameData>()
-                          .Where(g => g.manager_id == season.manager_id
-                                   && g.is_played == 1
-                                   && g.game_type == "regular")
-                          .ToList();
-
-        var playerPoints = new Dictionary<int, int>();
-        foreach (var game in allGames)
-        {
-            var stats = GetGamePlayerStats(game.id);
-            foreach (var s in stats)
-            {
-                playerPoints[s.player_id] = playerPoints.GetValueOrDefault(s.player_id, 0) + s.points;
-            }
-        }
-
-        var sorted = playerPoints.OrderByDescending(p => p.Value).Take(count).ToList();
-        var result = new List<PlayerData>();
-        foreach (var kvp in sorted)
-        {
-            var player = _db.Table<PlayerData>().Where(p => p.id == kvp.Key).FirstOrDefault();
-            if (player != null) result.Add(player);
-        }
-        return result;
-    }
-
-    public List<PlayerData> GetLeagueTopRebounders(int managerId, int count = 10)
-    {
-        var season = GetActiveSeason(GetActiveManager()?.id ?? 0);
-        if (season == null) return new List<PlayerData>();
-
-        var allGames = _db.Table<GameData>()
-                          .Where(g => g.manager_id == season.manager_id
-                                   && g.is_played == 1
-                                   && g.game_type == "regular")
-                          .ToList();
-
-        var playerRebounds = new Dictionary<int, int>();
-        foreach (var game in allGames)
-        {
-            var stats = GetGamePlayerStats(game.id);
-            foreach (var s in stats)
-            {
-                playerRebounds[s.player_id] = playerRebounds.GetValueOrDefault(s.player_id, 0) + s.rebounds;
-            }
-        }
-
-        var sorted = playerRebounds.OrderByDescending(p => p.Value).Take(count).ToList();
-        var result = new List<PlayerData>();
-        foreach (var kvp in sorted)
-        {
-            var player = _db.Table<PlayerData>().Where(p => p.id == kvp.Key).FirstOrDefault();
-            if (player != null) result.Add(player);
-        }
-        return result;
-    }
-
-    public List<PlayerData> GetLeagueTopAssisters(int managerId, int count = 10)
-    {
-        var season = GetActiveSeason(GetActiveManager()?.id ?? 0);
-        if (season == null) return new List<PlayerData>();
-
-        var allGames = _db.Table<GameData>()
-                          .Where(g => g.manager_id == season.manager_id
-                                   && g.is_played == 1
-                                   && g.game_type == "regular")
-                          .ToList();
-
-        var playerAssists = new Dictionary<int, int>();
-        foreach (var game in allGames)
-        {
-            var stats = GetGamePlayerStats(game.id);
-            foreach (var s in stats)
-            {
-                playerAssists[s.player_id] = playerAssists.GetValueOrDefault(s.player_id, 0) + s.assists;
-            }
-        }
-
-        var sorted = playerAssists.OrderByDescending(p => p.Value).Take(count).ToList();
-        var result = new List<PlayerData>();
-        foreach (var kvp in sorted)
-        {
-            var player = _db.Table<PlayerData>().Where(p => p.id == kvp.Key).FirstOrDefault();
-            if (player != null) result.Add(player);
-        }
-        return result;
     }
 
     public (PlayerData player, float avgPts, float avgReb, float avgAst, float avgStl, float avgBlk, float avgVal, int games) GetPlayerSeasonStats(int playerId, int managerId)
@@ -1020,7 +984,8 @@ public partial class DatabaseManager
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
                          .Where(r => r.team_id == teamId && r.season_id == seasonId
-                                  && r.record_type <= FinanceRecord.TYPE_TV)
+                                  && (r.record_type <= FinanceRecord.TYPE_TV
+                                      || r.record_type == FinanceRecord.TYPE_LOAN_IN))
                          .ToList();
         return records.Sum(r => r.amount);
     }
@@ -1030,7 +995,8 @@ public partial class DatabaseManager
         if (!EnsureDb()) return 0;
         var records = _db.Table<FinanceRecord>()
                          .Where(r => r.team_id == teamId && r.season_id == seasonId
-                                  && r.record_type >= FinanceRecord.TYPE_RENOVATION)
+                                  && r.record_type >= FinanceRecord.TYPE_RENOVATION
+                                  && r.record_type != FinanceRecord.TYPE_LOAN_IN)
                          .ToList();
         return records.Sum(r => r.amount);
     }
@@ -1072,10 +1038,24 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    /// <summary>Carrera acumulada de un jugador real, por su id estable (nunca por nombre).</summary>
+    public HistoricalPlayerStatsData GetHistoricalPlayerStats(int playerId)
+    {
+        if (playerId <= 0) return null;
+        return _db.Table<HistoricalPlayerStatsData>()
+                  .Where(p => p.player_id == playerId)
+                  .FirstOrDefault();
+    }
+
+    /// <summary>
+    /// Fila por nombre: SOLO filas sin dueño real (leyendas del seeder u huérfanas
+    /// antiguas). Los jugadores reales se buscan por id — ver <see cref="HistoricalStatsRules"/>.
+    /// </summary>
     public HistoricalPlayerStatsData GetHistoricalPlayerStats(string firstName, string lastName)
     {
         return _db.Table<HistoricalPlayerStatsData>()
-                  .Where(p => p.first_name == firstName && p.last_name == lastName)
+                  .Where(p => p.first_name == firstName && p.last_name == lastName
+                           && p.player_id <= 0)
                   .FirstOrDefault();
     }
 
@@ -1155,12 +1135,6 @@ public partial class DatabaseManager
             if (r.champion_id == playerId)
                 awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "champion" });
 
-            // All-Star
-            if (r.all_star_pg_id == playerId || r.all_star_sg_id == playerId ||
-                r.all_star_sf_id == playerId || r.all_star_pf_id == playerId ||
-                r.all_star_c_id == playerId)
-                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "all_star" });
-
             // First Team
             if (r.first_team_pg == playerId || r.first_team_sg == playerId ||
                 r.first_team_sf == playerId || r.first_team_pf == playerId ||
@@ -1186,12 +1160,36 @@ public partial class DatabaseManager
                 awards.Add(new PlayerAwardEntry { season_id = m.season_id, year_start = season.year_start, year_end = season.year_end, award_type = m.award_type });
         }
 
+        // Convocatorias All-Star (tabla all_star_roster: ve a los 24, no solo al quinteto)
+        foreach (int allStarSeasonId in GetAllStarSeasonIds(playerId))
+        {
+            var season = _db.Find<SeasonData>(allStarSeasonId);
+            if (season != null)
+                awards.Add(new PlayerAwardEntry
+                {
+                    season_id = allStarSeasonId,
+                    year_start = season.year_start,
+                    year_end = season.year_end,
+                    award_type = "all_star"
+                });
+        }
+
         return awards;
     }
 
     public void SaveHistoricalPlayerStats(HistoricalPlayerStatsData stats)
     {
-        var existing = GetHistoricalPlayerStats(stats.first_name, stats.last_name);
+        // La fila a actualizar se decide por id de fila, por player_id o (solo si la fila
+        // no tiene dueño real) por nombre. Nunca por nombre si hay player_id: era el bug
+        // que hacía que un homónimo heredara la carrera de una leyenda.
+        HistoricalPlayerStatsData existing = null;
+        if (stats.id > 0)
+            existing = _db.Find<HistoricalPlayerStatsData>(stats.id);
+        else if (stats.player_id > 0)
+            existing = GetHistoricalPlayerStats(stats.player_id);
+        else
+            existing = GetHistoricalPlayerStats(stats.first_name, stats.last_name);
+
         if (existing != null)
         {
             stats.id = existing.id;
@@ -1237,12 +1235,13 @@ public partial class DatabaseManager
             var player = GetPlayerById(ss.player_id);
             if (player == null) continue;
 
-            var hist = GetHistoricalPlayerStats(player.first_name, player.last_name);
+            var hist = GetHistoricalPlayerStats(player.id);
             if (hist == null)
             {
                 var team = GetTeamById(player.team_id);
                 hist = new HistoricalPlayerStatsData
                 {
+                    player_id = player.id,
                     first_name = player.first_name,
                     last_name = player.last_name,
                     position = player.position,
@@ -1293,7 +1292,7 @@ public partial class DatabaseManager
     {
         try
         {
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
@@ -1330,7 +1329,7 @@ public partial class DatabaseManager
             if (!WouldInduct(p))
                 return;
 
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
@@ -1375,7 +1374,7 @@ public partial class DatabaseManager
         if (p.seasons_with_team < 10) return false;
         try
         {
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             int pts = hist?.total_points ?? 0;
             int reb = hist?.total_rebounds ?? 0;
             int ast = hist?.total_assists ?? 0;
@@ -1396,7 +1395,7 @@ public partial class DatabaseManager
         {
             if (!ShouldRetireNumber(p) || p.team_id <= 0) return;
 
-            var hist = GetHistoricalPlayerStats(p.first_name, p.last_name);
+            var hist = GetHistoricalPlayerStats(p.id);
             _db.Insert(new RetiredNumberData
             {
                 team_id = p.team_id,
@@ -1533,6 +1532,13 @@ public partial class DatabaseManager
                     mvpPlayer.finals_mvps = mvpPlayer.finals_mvps + 1;
                     _db.Update(mvpPlayer);
                 }
+
+                // season_records: campeón, finalista y MVP de las Finales (antes solo
+                // se escribía most_improved_id y la trayectoria del jugador salía vacía).
+                seasonRecord.champion_id = champId;
+                seasonRecord.finalist_id = finalistId;
+                seasonRecord.finals_mvp_id = topPlayer.PlayerId;
+                seasonRecord.finals_mvp_rating = (float)topPlayer.AvgRating;
             }
 
             _db.Insert(new FinalsRecord
@@ -1616,6 +1622,10 @@ public partial class DatabaseManager
                 _db.Update(mvpPlayer);
             }
 
+            seasonRecord.season_mvp_id = topMvp.player_id;
+            seasonRecord.season_mvp_rating = (float)((double)topMvp.total_rating / Math.Max(1, topMvp.games));
+            seasonRecord.season_mvp_games = topMvp.games;
+
             // Rookie of the Year
             var rookieCandidates = seasonStats
                 .Where(s =>
@@ -1635,6 +1645,10 @@ public partial class DatabaseManager
                 rookieName = rookiePlayer != null ? $"{rookiePlayer.first_name} {rookiePlayer.last_name}" : "";
                 rookieTeamKeyword = rookieTeam?.logo ?? "";
                 rookieRatingStr = ((double)topRookie.total_rating / Math.Max(1, topRookie.games)).ToString("F1", CultureInfo.InvariantCulture);
+
+                seasonRecord.rookie_of_year_id = topRookie.player_id;
+                seasonRecord.rookie_rating = (float)((double)topRookie.total_rating / Math.Max(1, topRookie.games));
+                seasonRecord.rookie_games = topRookie.games;
             }
 
             _db.Insert(new AwardsRecord
@@ -1656,6 +1670,7 @@ public partial class DatabaseManager
                 { "PG", ("", "") }, { "SG", ("", "") }, { "SF", ("", "") },
                 { "PF", ("", "") }, { "C",  ("", "") }
             };
+            var posIds = new Dictionary<string, int>();
             var assigned = new HashSet<int>();
 
             foreach (string pos in positions)
@@ -1679,7 +1694,20 @@ public partial class DatabaseManager
                 string fullName = player != null ? $"{player.first_name} {player.last_name}" : "";
                 string teamKw = team?.logo ?? "";
                 posValues[pos] = (fullName, teamKw);
+                posIds[pos] = best.player_id;
             }
+
+            // Primer quinteto en season_records (para la trayectoria del jugador).
+            seasonRecord.first_team_pg = posIds.GetValueOrDefault("PG");
+            seasonRecord.first_team_sg = posIds.GetValueOrDefault("SG");
+            seasonRecord.first_team_sf = posIds.GetValueOrDefault("SF");
+            seasonRecord.first_team_pf = posIds.GetValueOrDefault("PF");
+            seasonRecord.first_team_c  = posIds.GetValueOrDefault("C");
+
+            // DPOY y Sexto Hombre también en season_records (SEA-11: la trayectoria del
+            // jugador no los mostraba). All-Star y 2º quinteto siguen sin persistir.
+            seasonRecord.best_defender_id = GetBestDefensivePlayer(seasonId, managerId)?.PlayerId ?? 0;
+            seasonRecord.sixth_man_id = GetSixthMan(seasonId, managerId)?.PlayerId ?? 0;
 
             _db.Insert(new QuintetRecord
             {
@@ -1697,6 +1725,9 @@ public partial class DatabaseManager
             });
             Debug.Log($"[DB] QuintetRecord saved for {seasonLabel}");
         }
+
+        // Persistir el season_records enriquecido (campeón, MVP, ROY, quinteto...).
+        _db.Update(seasonRecord);
 
         Debug.Log($"[DB] Season-end records complete for {seasonLabel}");
     }
@@ -2152,6 +2183,15 @@ public partial class DatabaseManager
         if (!EnsureDb()) return new List<SeasonRecord>();
         return _db.Table<SeasonRecord>()
                   .Where(r => r.season_id == seasonId)
+                  .ToList();
+    }
+
+    /// <summary>Todos los season_records de la partida (para dinastías/prestigio histórico).</summary>
+    public List<SeasonRecord> GetAllSeasonRecords()
+    {
+        if (!EnsureDb()) return new List<SeasonRecord>();
+        return _db.Table<SeasonRecord>()
+                  .OrderBy(r => r.season_id)
                   .ToList();
     }
 
@@ -2661,15 +2701,36 @@ public partial class DatabaseManager
         _db.Execute("UPDATE players SET is_rookie = 0");
     }
 
+    /// <summary>Estado persistido del draft de una temporada (null si no hay).</summary>
+    public DraftStateData GetDraftState(int seasonId)
+    {
+        if (!EnsureDb()) return null;
+        return _db.Table<DraftStateData>().FirstOrDefault(d => d.season_id == seasonId);
+    }
+
+    /// <summary>Guarda el progreso del draft (upsert por temporada).</summary>
+    public void SaveDraftState(int seasonId, int managerId, int currentPickIndex, bool completed)
+    {
+        if (!EnsureDb()) return;
+        _db.InsertOrReplace(new DraftStateData
+        {
+            season_id = seasonId,
+            manager_id = managerId,
+            current_pick_index = currentPickIndex,
+            completed = completed ? 1 : 0,
+            updated_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+        });
+    }
+
     public void StartNewSeason(int oldSeasonId, int newTeamId, string gameMode, int managerId, int prevTeamId = 0)
     {
         _db.BeginTransaction();
         try
         {
-        // 0. Archive historical stats BEFORE clearing tables
+        // 0. Cargar la temporada anterior. Su archivado histórico de carrera lo hace
+        // el Dashboard al llegar a la fase "finished"; aquí NO se repite (duplicaba
+        // los totales de carrera).
         var oldSeason = _db.Find<SeasonData>(oldSeasonId);
-        if (oldSeason != null)
-            UpdateHistoricalPlayerStatsFromSeason(oldSeasonId, managerId);
 
         // 0b. Archive per-season stats for career history
         _db.Execute("DELETE FROM player_season_stats WHERE season_id = ?", oldSeasonId);
@@ -2726,6 +2787,11 @@ public partial class DatabaseManager
                 teamWinPctCache[kv.Key] = kv.Value.total > 0 ? (float)kv.Value.wins / kv.Value.total : 0.5f;
         }
 
+        // Minutos por partido de la temporada anterior: modulan el desarrollo.
+        var mpgByPlayer = new Dictionary<int, int>();
+        foreach (var ss in _db.Table<PlayerSeasonStatRow>().Where(x => x.season_id == oldSeasonId))
+            mpgByPlayer[ss.player_id] = ss.games > 0 ? (int)System.Math.Round(ss.total_minutes / ss.games) : -1;
+
         foreach (var p in remaining)
         {
             if (p.is_rookie == 1)
@@ -2735,14 +2801,6 @@ public partial class DatabaseManager
             }
 
             p.age += 1;
-
-            // Base change by age group
-            int baseChange;
-            if (p.age <= 22) baseChange = 4;       // Crecimiento rápido
-            else if (p.age <= 27) baseChange = 1;  // Prime temprano
-            else if (p.age <= 30) baseChange = 0;  // Prime tardío
-            else if (p.age <= 34) baseChange = -3; // Declive suave
-            else baseChange = -5;                   // Declive fuerte
 
             // Position priority attributes (get +1 extra)
             var priorityAttrs = new HashSet<string>();
@@ -2798,10 +2856,14 @@ public partial class DatabaseManager
 
             int Apply(string name, int current)
             {
-                int change = baseChange;
-                if (priorityAttrs.Contains(name)) change += 1;
+                int change = PlayerProgression.AttributeDelta(
+                    p.age,
+                    p.potential,
+                    p.overall,
+                    mpgByPlayer.TryGetValue(p.id, out var mpg) ? mpg : -1,
+                    priorityAttrs.Contains(name),
+                    Rng.Next(-1, 2));
                 change += GetPositionDeclineModifier(p.position, name, p.age);
-                change += Rng.Next(-1, 2);
                 return Math.Max(0, Math.Min(99, current + change));
             }
 
@@ -2817,12 +2879,8 @@ public partial class DatabaseManager
             p.steals = Apply("steals", p.steals);
             p.blocks = Apply("blocks", p.blocks);
 
-            // Recalculate overall as average of all attributes, capped by potential
-            int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
-                      p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-            p.overall = (int)System.Math.Round(sum / 11f);
-            if (p.overall > p.potential)
-                p.overall = p.potential;
+            // Overall = media de atributos capada por potencial (fuente única).
+            p.RecalculateOverall();
 
             // Save old team for seasons_with_team tracking
             int oldTeamId = p.team_id;
@@ -2860,8 +2918,8 @@ public partial class DatabaseManager
                 _db.Update(p);
                 continue;
             }
-            p.contract_years -= 1;
-            p.guaranteed_years -= 1;
+            p.contract_years = System.Math.Max(0, p.contract_years - 1);
+            p.guaranteed_years = System.Math.Max(0, p.guaranteed_years - 1);
             if (p.contract_years <= 0)
             {
                 p.contract_years = 0;
@@ -3050,6 +3108,9 @@ public partial class DatabaseManager
         var projectedDraftOrder = BuildDraftOrder(oldSeason != null ? (int?)oldSeason.id : null);
 
         // 5. Clear tables
+        // Punto seguro: si se cambió de partida durante el rollover, abortar aquí
+        // (rollback completo) antes de borrar datos.
+        ThrowIfBatchCancelled();
         _db.Execute("DELETE FROM player_game_stats");
         _db.Execute("DELETE FROM finals_player_stats");
         _db.Execute("DELETE FROM games");
@@ -3164,6 +3225,41 @@ public partial class DatabaseManager
             _db.Update(leagueSettings);
         }
 
+        // 7b. El hard cap por uso del NT-MLE es ANUAL: se libera para todos los equipos
+        // al empezar la temporada (antes quedaba activo de por vida).
+        _db.Execute("UPDATE teams SET first_apron_hard_capped = 0 WHERE first_apron_hard_capped = 1");
+
+        // 7c. Fijar el equipo del manager para la nueva temporada DENTRO de la
+        // transacción: si el rollover falla, no queda cambiado a medias.
+        var managerRow = _db.Find<ManagerData>(managerId);
+        if (managerRow != null && managerRow.team_id != newTeamId)
+        {
+            managerRow.team_id = newTeamId;
+            _db.Update(managerRow);
+        }
+
+        // 7d. Ofertas pendientes: su day_sent es de la temporada anterior y con el
+        // contador a 0 madurarían casi un año tarde. Se normalizan (maduran en 7 días
+        // de la nueva temporada) y se descartan las ofertas de traspaso obsoletas.
+        try
+        {
+            _db.Execute("UPDATE offers SET day_sent = 0 WHERE processed = 0");
+            _db.Execute("DELETE FROM trade_offers WHERE processed = 0");
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogWarning($"[DB] No se pudieron normalizar las ofertas del rollover: {ex.Message}");
+        }
+
+        // 7e. Reset del estado transitorio de temporada: lesiones, fatiga, trade block,
+        // química y confianza no deben viajar entre temporadas.
+        _db.Execute("UPDATE players SET injury_days = 0, injury_type = '', treated = 0, fisico = 99, on_trade_block = 0");
+        _db.Execute("UPDATE teams SET team_chemistry = 50");
+        _db.Execute("UPDATE managers SET fan_confidence = 50");
+
+        // 7f. Hilos narrativos: se cierran al acabar la temporada (el histórico se conserva).
+        AbandonActiveStorylines(managerId);
+
         // 8. Deactivate old season
         if (oldSeason != null)
         {
@@ -3214,6 +3310,34 @@ public partial class DatabaseManager
             generated = 0
         };
         _db.Insert(newSeason);
+
+        // 11b. Deuda muerta (buyouts con stretch): cobrar el tramo de la nueva
+        // temporada. dead_money es persistente (no la borra el rollover).
+        var deadRows = _db.Table<DeadMoneyData>().ToList();
+        foreach (var dm in deadRows)
+        {
+            var deadTeam = _db.Find<TeamData>(dm.team_id);
+            if (deadTeam != null)
+            {
+                deadTeam.budget -= dm.annual_amount;
+                _db.Update(deadTeam);
+                _db.Insert(new FinanceRecord
+                {
+                    team_id = dm.team_id,
+                    season_id = newSeason.id,
+                    record_type = FinanceRecord.TYPE_BUYOUT,
+                    game_day = 0,
+                    amount = dm.annual_amount,
+                    created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+                });
+            }
+
+            dm.years_remaining -= 1;
+            if (dm.years_remaining <= 0)
+                _db.Delete(dm);
+            else
+                _db.Update(dm);
+        }
 
         // Rollover de picks: borra el año drafteado, proyecta el nuevo draft
         // actual y añade el año más lejano (los intermedios se conservan).
@@ -3516,6 +3640,14 @@ public partial class DatabaseManager
     {
         if (!EnsureDb()) return new List<LineupData>();
 
+        // Atómico: borrados + inserciones de la convocatoria no pueden quedar a medias.
+        List<LineupData> result = new List<LineupData>();
+        _db.RunInTransaction(() => { result = EnsureLineupSeededCore(teamId, players); });
+        return result;
+    }
+
+    List<LineupData> EnsureLineupSeededCore(int teamId, List<PlayerData> players)
+    {
         var existing = GetTeamLineup(teamId);
         if (existing.Count == 0)
         {
@@ -3553,6 +3685,12 @@ public partial class DatabaseManager
         if (!EnsureDb()) return;
         if (players.Count == 0) return;
 
+        // Atómico: borrar la convocatoria anterior e insertar la nueva no puede quedar a medias.
+        _db.RunInTransaction(() => AutoSeedLineupCore(teamId, players, forceInactiveIds));
+    }
+
+    void AutoSeedLineupCore(int teamId, List<PlayerData> players, HashSet<int> forceInactiveIds)
+    {
         // Remove any existing lineup for this team
         var existing = GetTeamLineup(teamId);
         foreach (var e in existing)
@@ -3914,6 +4052,7 @@ public partial class DatabaseManager
                 int oldVal = GetAttr(young, targetAttr);
                 int newVal = Math.Min(99, oldVal + bonus);
                 SetAttr(young, targetAttr, newVal);
+                young.RecalculateOverall(); // el overall debe seguir a los atributos
                 _db.Update(young);
             }
         }

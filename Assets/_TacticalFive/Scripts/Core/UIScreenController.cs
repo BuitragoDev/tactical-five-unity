@@ -412,6 +412,8 @@ public class UIScreenController : MonoBehaviour
 
         _configBtnMainMenuYes?.RegisterCallback<ClickEvent>(_ =>
         {
+            // Bloqueado mientras corre una operación crítica (simulación/rollover).
+            if (ScreenManager.NavigationLocked) return;
             PlayClick();
             ScreenManager.Instance.GoTo(GameScreen.MainMenu);
         });

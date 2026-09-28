@@ -94,7 +94,7 @@ public static class GLeagueHelper
             case "blocks": p.blocks = v; break;
         }
         // Recalcular overall tras la mejora (mantiene la invariante media de 11 atributos)
-        p.overall = System.Math.Min(p.potential, p.GetCalculatedAverage());
+        p.RecalculateOverall();
     }
 
     // ── LIGA COMPLETA (filiales y prospectos) ────────────

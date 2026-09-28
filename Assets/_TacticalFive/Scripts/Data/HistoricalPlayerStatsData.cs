@@ -5,6 +5,8 @@ public class HistoricalPlayerStatsData
 {
     [PrimaryKey, AutoIncrement]
     public int    id                  { get; set; }
+    /// <summary>Jugador dueño de la carrera. &gt;0 jugador real, -1 leyenda sembrada, 0 fila legada sin dueño. Ver <see cref="HistoricalStatsRules"/>.</summary>
+    public int    player_id           { get; set; }
     public string first_name          { get; set; }
     public string last_name           { get; set; }
     public string position            { get; set; }

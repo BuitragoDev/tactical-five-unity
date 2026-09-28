@@ -404,7 +404,7 @@ public class BuscadorController : UIScreenController
     }
 
     // ── ScrollBar ──
-    class ScrollBarData
+    class ScrollBarData : IScrollBarHandle
     {
         public VisualElement Viewport;
         public VisualElement Content;
@@ -420,6 +420,11 @@ public class BuscadorController : UIScreenController
                                 VisualElement track, VisualElement thumb)
     {
         if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        // Ya enlazada en esta visita (el viewport persiste): no registrar los
+        // handlers otra vez, que se acumulaban al reconstruir la lista.
+        if (ScrollBarBinder.TryGet<ScrollBarData>(viewport, out var bound)) return bound;
+
 
         viewport.style.overflow = Overflow.Hidden;
         viewport.style.flexDirection = FlexDirection.Column;
@@ -498,6 +503,7 @@ public class BuscadorController : UIScreenController
 
         ApplyScroll(bar);
 
+        ScrollBarBinder.Remember(viewport, bar);
         return bar;
     }
 

@@ -24,6 +24,11 @@ public class TeamData
     public string jersey_away              { get; set; }
     public long   salary_margin            { get; set; }
     public int    first_apron_hard_capped  { get; set; }  // 0=no, 1=hard capped at FIRST_APRON
+
+    // ── Plan de partido (táctica persistente del equipo) ──
+    public int    plan_pace     { get; set; }              // -1 lento, 0 normal, 1 rápido
+    public int    plan_offense  { get; set; }              // 0 equilibrado, 1 interior, 2 exterior
+    public int    plan_defense  { get; set; } = 1;         // 0 conservadora, 1 equilibrada, 2 agresiva
     public string objective                { get; set; }
 
     // Arena renovation

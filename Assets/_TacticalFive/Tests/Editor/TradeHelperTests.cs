@@ -120,6 +120,17 @@ public class TradeHelperTests
     }
 
     [Test]
+    public void ValidateTrade_AcceptingTwoForOne_AtMaxRoster_ReportsError()
+    {
+        // Revalidación al aceptar una oferta IA estando en el máximo de plantilla:
+        // un 2x1 dejaría al equipo que acepta con 18 jugadores.
+        var aiSent = new List<PlayerData> { Player(10_000_000), Player(8_000_000) };
+        var ourSent = new List<PlayerData> { Player(10_000_000) };
+        var errors = TradeHelper.ValidateTrade(aiSent, ourSent, 15, 17, "Nosotros", 100_000_000L, "IA", 100_000_000L);
+        Assert.That(errors, Has.Some.Contains("máximo 17"));
+    }
+
+    [Test]
     public void ValidateTrade_HardCappedSecondApron_RejectsMultiplePlayersAndSalaryGain()
     {
         var a = new List<PlayerData> { Player(10_000_000), Player(10_000_000) };
@@ -207,5 +218,81 @@ public class TradeHelperTests
         var result = TradeHelper.EvaluateTrade(a, b, "Bulls", 12, 100_000_000L,
             null, null, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
         Assert.That(result.AcceptScore, Is.InRange(0, 100));
+    }
+
+    // ── Fase 3: modelo de cap para la IA (ECO-06) ────────────────
+
+    static LeagueSettingsData Settings(long cap, long apron1, long apron2, long ntMle, long tMle, long min)
+        => new LeagueSettingsData
+        {
+            salary_cap = cap,
+            apron = apron1,
+            repeater_apron = apron2,
+            mid_level = ntMle,
+            taxpayer_mid_level = tMle,
+            minimum_salary = min
+        };
+
+    [Test]
+    public void CanAISignExternal_UnderCap_Allows()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(80_000_000, 15_000_000, s), Is.True);
+    }
+
+    [Test]
+    public void CanAISignExternal_OverCap_AllowsOnlyMLE()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(105_000_000, 9_000_000, s), Is.True, "cabe en el NT-MLE");
+        Assert.That(TradeHelper.CanAISignExternal(105_000_000, 11_000_000, s), Is.False, "supera el NT-MLE");
+    }
+
+    [Test]
+    public void CanAISignExternal_OverSecondApron_OnlyMinimum()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 2_000_000, s), Is.True, "el mínimo sí");
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 3_000_000, s), Is.False, "por encima del 2º apron solo el mínimo");
+    }
+
+    [Test]
+    public void CanAIRenew_RespectsSecondApron()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAIRenew(125_000_000, s), Is.True);
+        Assert.That(TradeHelper.CanAIRenew(131_000_000, s), Is.False);
+    }
+
+    // ── ECO-13: la oferta se ajusta al mínimo y al máximo legal ──
+
+    [Test]
+    public void TryClampOffer_AppliesFloorThenCap()
+    {
+        Assert.That(TradeHelper.TryClampOffer(500_000, 1_000_000, 5_000_000, out var low), Is.True);
+        Assert.That(low, Is.EqualTo(1_000_000), "Sube al mínimo");
+
+        Assert.That(TradeHelper.TryClampOffer(9_000_000, 1_000_000, 5_000_000, out var high), Is.True);
+        Assert.That(high, Is.EqualTo(5_000_000), "Baja al máximo legal (antes el `else if` lo dejaba pasar)");
+
+        Assert.That(TradeHelper.TryClampOffer(3_000_000, 1_000_000, 5_000_000, out var ok), Is.True);
+        Assert.That(ok, Is.EqualTo(3_000_000));
+    }
+
+    [Test]
+    public void TryClampOffer_RejectsWhenMaxBelowFloor()
+    {
+        Assert.That(TradeHelper.TryClampOffer(2_000_000, 1_000_000, 800_000, out _), Is.False,
+            "Sin rango legal no hay oferta posible");
+    }
+
+    // ── ECO-14: two-way solo para ≤ 23 años ──
+
+    [Test]
+    public void IsEligibleForTwoWayAge_OnlyUpTo23()
+    {
+        Assert.That(TradeHelper.IsEligibleForTwoWayAge(19), Is.True);
+        Assert.That(TradeHelper.IsEligibleForTwoWayAge(23), Is.True);
+        Assert.That(TradeHelper.IsEligibleForTwoWayAge(24), Is.False);
     }
 }

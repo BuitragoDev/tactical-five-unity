@@ -36,6 +36,7 @@
 | `Docs/SAVE_SYSTEM.md` | Slots, `template.db`, flujos save/load, versionado | Trabajas en persistencia |
 | `Docs/CODE_GUIDELINES.md` | Convenciones reales, patrones a seguir/evitar | **Antes de escribir cualquier código nuevo** |
 | `Docs/TODO_TECHNICAL_DEBT.md` | Deuda técnica priorizada P0–P3 + código muerto | Arreglas bugs o decides refactors |
+| `Docs/AUDITORIA_FINAL.md` | **Auditoría integral (2026-09)**: hallazgos con ID/severidad/repro/fix, DB, rendimiento, UX, edge cases, tests, nuevas features y roadmap por fases (checklist viva) | **Empiezas cualquier arreglo o retomas trabajo pendiente** |
 | `Docs/IMPROVEMENT_PROPOSALS.md` | Propuestas de mejora futuras (en español) | Ideación |
 | `NEXT_PROPOSALS.md` | Mejoras pendientes ordenadas (G-League/IR pendiente) | Sabes qué falta por hacer |
 | `.agent/SKILLS.md` | Onboarding exprés para agentes | Quieres el camino rápido |
@@ -151,8 +152,8 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **No hay lint ni typecheck** (C# se compila solo en el editor de Unity). No hay test runner CLI configurado en `package.json`.
 
-**Tests unitarios (EditMode, Unity Test Runner):** 78 `[Test]` en 7 archivos `Assets/_TacticalFive/Tests/Editor/`:
-- `TradeHelperTests.cs` (20) · `GLLeagueHelperTests.cs` (22) · `AdvancedStatsHelperTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `GameSimulatorTests.cs` (4) · `EditModeSmokeTests.cs` (2)
+**Tests unitarios (EditMode, Unity Test Runner):** 176 `[Test]` en 17 archivos `Assets/_TacticalFive/Tests/Editor/`:
+- `TradeHelperTests.cs` (30) · `StorylineServiceTests.cs` (28) · `GLLeagueHelperTests.cs` (22) · `GameSimulatorTests.cs` (14) · `AdvancedStatsHelperTests.cs` (11) · `GameSaveManagerTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `GamePlanTests.cs` (6) · `PlayerProgressionTests.cs` (6) · `ScoutingHelperTests.cs` (6) · `HistoricalStatsRulesTests.cs` (5) · `CoachSchemeTests.cs` (4) · `DraftGeneratorTests.cs` (4) · `NegotiationHelperTests.cs` (4) · `PlayerDataTests.cs` (4) · `EditModeSmokeTests.cs` (2)
 
 **Correr en el editor:** *Window → General → Test Runner → EditMode → Run All*.
 
@@ -162,9 +163,9 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 ```
 (Linux: típicamente `/opt/unity/Editor/Unity` o similar.)
 
-**Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` depende de `DatabaseManager.Instance` y **no es testeable en EditMode** sin refactor. `GameSimulatorTests.cs` (4 tests) solo cubre helpers públicos estáticos (position multipliers, target minutes).
+**Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` no es testeable en EditMode (depende de `DatabaseManager.Instance`) salvo con `persistToDb:false`; `GameSimulatorTests.cs` cubre sus helpers públicos (rotación vinculante, sustitución, prórroga sin empate, marcador con plantilla corta).
 
-**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, migraciones): corre el Test Runner EditMode.
+**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre el Test Runner EditMode (176 en verde a fecha de esta revisión).
 
 ---
 
@@ -191,11 +192,11 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 ## 11. Estado actual del repo
 
-- **Commit:** `81d9e4f` (2026-08-16) · **Rama:** `main`.
+- **Rama de trabajo:** `auditoria-final` (104 commits por delante de `main`), **sin mergear todavía**. `main` == `origin/main` (`d565623e`).
+- **Última revisión de docs:** auditoría integral 2026-09 (`Docs/AUDITORIA_FINAL.md`, checklist viva). Los 176 tests EditMode en verde.
 - **Versión del juego:** `v1.0.0 · Beta`.
-- **Docs sincronizados con este HEAD**; las desviaciones observadas y riesgos abiertos están en `Docs/TODO_TECHNICAL_DEBT.md`.
 - **`PLAN.md`** (raíz): todas sus entradas están implementadas y mergeadas en `main`; úsalo como histórico, no como TODO.
-- **Trabajo pendiente conocido:** G-League / IR / contratos two-way (`NEXT_PROPOSALS.md` D) y la deuda de `Docs/TODO_TECHNICAL_DEBT.md`.
+- **Trabajo pendiente conocido:** restos de la auditoría (`SEA-11` All-Star/2º quinteto en `season_records`, `QA-10` formato, `QA-11` scrollbar nativa en 4 pantallas, `QA-12` overrides sin `base`), rivalidades/dinastías en curso, y la deuda de `Docs/TODO_TECHNICAL_DEBT.md`.
 
 ---
 

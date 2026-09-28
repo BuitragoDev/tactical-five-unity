@@ -1129,7 +1129,11 @@ using System.Linq;
         }
 
         long capSpace = settings.salary_cap - totalPayroll;
-        result.capSpaceMax = player.salary + (capSpace > 0 ? capSpace : 0);
+        // Re-firma: su salario actual ya libera espacio al renovarlo. FA externo: no está
+        // en la nómina, así que solo cuenta el espacio real (ECO-11: la UI prometía más).
+        result.capSpaceMax = isFromSameTeam
+            ? player.salary + (capSpace > 0 ? capSpace : 0)
+            : (capSpace > 0 ? capSpace : 0);
 
         result.exceptionMax = 0;
         result.exceptionName = "";
@@ -1237,7 +1241,6 @@ using System.Linq;
         if (_selectedPlayer == null || _offerSent) return;
 
         // Asegurar que los valores están dentro de límites
-        if (_renewSalary < 1000000) _renewSalary = 1000000;
         if (_renewYears < 1) _renewYears = 1;
         else if (_renewYears > 5) _renewYears = 5;
 
@@ -1247,14 +1250,33 @@ using System.Linq;
             _renewSalary = TradeHelper.TWO_WAY_SALARY;
             _renewYears = 2;
         }
-        else if (_renewSalary > _renewMaxSalary)
+        else
         {
-            _renewSalary = _renewMaxSalary;
-            RefreshRenewSpinners();
-            if (_renewWarningText != null)
+            // Suelo de mínimo y tope legal juntos: antes el `else if` dejaba pasar una
+            // oferta por encima del máximo cuando el suelo subía el salario (ECO-13).
+            if (!TradeHelper.TryClampOffer(_renewSalary, 1000000, _renewMaxSalary, out long clamped))
             {
-                _renewWarningText.text = $"Oferta ajustada al máximo legal: {FormatMoney(_renewMaxSalary)}.";
-                _renewWarningText.style.display = DisplayStyle.Flex;
+                if (_renewWarningText != null)
+                {
+                    _renewWarningText.text = $"Tu máximo legal ({FormatMoney(_renewMaxSalary)}) está por debajo del mínimo " +
+                                             $"({FormatMoney(1000000)}): no puedes enviar esta oferta.";
+                    _renewWarningText.style.display = DisplayStyle.Flex;
+                }
+                return;
+            }
+
+            if (clamped != _renewSalary)
+            {
+                bool wasAbove = _renewSalary > clamped;
+                _renewSalary = clamped;
+                RefreshRenewSpinners();
+                if (_renewWarningText != null)
+                {
+                    _renewWarningText.text = wasAbove
+                        ? $"Oferta ajustada al máximo legal: {FormatMoney(clamped)}."
+                        : $"Oferta ajustada al mínimo: {FormatMoney(clamped)}.";
+                    _renewWarningText.style.display = DisplayStyle.Flex;
+                }
             }
         }
 
@@ -1565,6 +1587,9 @@ using System.Linq;
     {
         if (_selectedPlayer == null) return;
 
+        // Un contrato de 0 años no se puede rescindir (evita división por cero).
+        if (_selectedPlayer.contract_years <= 0) return;
+
         long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
         int stretchYears = _selectedPlayer.contract_years * 2;
         long annualPayment = remainingSalary / stretchYears;
@@ -1590,12 +1615,20 @@ using System.Linq;
     {
         if (_selectedPlayer == null) return;
 
-        long remainingSalary = _selectedPlayer.salary * _selectedPlayer.contract_years;
-        int stretchYears = _selectedPlayer.contract_years * 2;
+        long remainingSalary = _selectedPlayer.salary * Mathf.Max(0, _selectedPlayer.contract_years);
+        int stretchYears = Mathf.Max(1, _selectedPlayer.contract_years * 2);
         long annualPayment = remainingSalary / stretchYears;
+        // El remanente se absorbe en el tramo de ESTA temporada para que el total
+        // cobrado sea exactamente remainingSalary.
+        long currentSeasonPayment = remainingSalary - annualPayment * (stretchYears - 1);
         int currentDay = _season?.current_game_day ?? 0;
         string playerName = $"{_selectedPlayer.first_name} {_selectedPlayer.last_name}";
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        // Coste real de la rescisión: el tramo de stretch de esta temporada sale del
+        // presupuesto (antes el buyout era gratis).
+        _myTeam.budget -= currentSeasonPayment;
+        DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
 
         _selectedPlayer.team_id = 0;
         _selectedPlayer.last_team_id = 0;
@@ -1606,19 +1639,33 @@ using System.Linq;
         _selectedPlayer.on_trade_block = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
-        long remainder = remainingSalary;
-        for (int y = 0; y < stretchYears; y++)
+        // Sus hilos narrativos se cierran: ya no pertenece al equipo.
+        StorylineService.CloseSubjectStorylines(_selectedPlayer.id);
+
+        // Registro de la temporada actual (solo este tramo: los futuros se cobran en
+        // StartNewSeason desde dead_money).
+        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
         {
-            long payment = (y == stretchYears - 1) ? remainder : annualPayment;
-            remainder -= payment;
-            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
+            team_id = _myTeam.id,
+            season_id = _season?.id ?? 0,
+            record_type = FinanceRecord.TYPE_BUYOUT,
+            game_day = currentDay,
+            amount = currentSeasonPayment,
+            created_at = now
+        });
+
+        // Deuda muerta persistente: los tramos de las temporadas siguientes. Antes se
+        // insertaban todos como finance_records y se borraban en el rollover.
+        int futureYears = stretchYears - 1;
+        if (futureYears > 0)
+        {
+            DatabaseManager.Instance.Db.Insert(new DeadMoneyData
             {
                 team_id = _myTeam.id,
-                season_id = _season?.id ?? 0,
-                record_type = FinanceRecord.TYPE_BUYOUT,
-                game_day = currentDay,
-                amount = payment,
-                created_at = now
+                player_name = playerName,
+                origin_season_id = _season?.id ?? 0,
+                annual_amount = annualPayment,
+                years_remaining = futureYears
             });
         }
 

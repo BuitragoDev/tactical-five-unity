@@ -232,6 +232,10 @@ using System.Linq;
         foreach (var player in sorted)
         {
             var card = CreatePlayerCard(player);
+            // Re-aplicar la selección: el árbol se recrea y antes se perdía, lo que
+            // hacía fallar el .First() que buscaba la tarjeta seleccionada.
+            if (_selectedPlayer != null && player.id == _selectedPlayer.id)
+                card.AddToClassList("training-card--selected");
             grid.Add(card);
         }
 
@@ -568,7 +572,9 @@ using System.Linq;
 
         _activeTraining = DatabaseManager.Instance.GetTeamTraining(_myTeam.id);
         BuildPlayerList();
-        OnPlayerSelected(player, _trainingBody.Query<VisualElement>(className: "training-card--selected").First());
+        var selCard = _trainingBody.Query<VisualElement>(className: "training-card--selected").First();
+        if (selCard != null)
+            OnPlayerSelected(player, selCard);
     }
     private static readonly Dictionary<string, string[]> PrimaryAttrs = new()
     {

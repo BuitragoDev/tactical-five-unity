@@ -14,6 +14,11 @@ using System.Linq;
     private Label _headerMargin;
     private Label _headerChemistry;
     private List<TradeData> _trades = new();
+
+    // Filtros y orden de la lista (usabilidad)
+    private string _typeFilter = "all";      // all | trade | fa | snt
+    private bool _orderDesc = true;          // más recientes primero
+    private Button _filterAllBtn, _filterTradeBtn, _filterFaBtn, _filterSnTBtn, _orderBtn;
     private List<TradeData> _sortedTrades = new();
     private Dictionary<int, TeamData> _teamCache = new();
     private Dictionary<int, PlayerData> _playerCache = new();
@@ -29,6 +34,11 @@ using System.Linq;
         _historialViewport = _root.Q<VisualElement>("HistorialViewport");
         _historialScrollTrack = _root.Q<VisualElement>("HistorialScrollTrack");
         _historialScrollThumb = _root.Q<VisualElement>("HistorialScrollThumb");
+        _filterAllBtn = _root.Q<Button>("HistFilterAll");
+        _filterTradeBtn = _root.Q<Button>("HistFilterTrade");
+        _filterFaBtn = _root.Q<Button>("HistFilterFA");
+        _filterSnTBtn = _root.Q<Button>("HistFilterSnT");
+        _orderBtn = _root.Q<Button>("HistOrderBtn");
         if (_historialViewport != null) _historialViewport.style.overflow = Overflow.Hidden;
 
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
@@ -85,6 +95,52 @@ using System.Linq;
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
+
+        _filterAllBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetTypeFilter("all"); });
+        _filterTradeBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetTypeFilter("trade"); });
+        _filterFaBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetTypeFilter("fa"); });
+        _filterSnTBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetTypeFilter("snt"); });
+        _orderBtn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _orderDesc = !_orderDesc; ApplyFilterAndOrder(); });
+    }
+
+    void SetTypeFilter(string filter)
+    {
+        _typeFilter = filter;
+        ApplyFilterAndOrder();
+    }
+
+    /// <summary>Aplica el filtro de tipo y el orden elegidos y repinta (sin recargar de BD).</summary>
+    void ApplyFilterAndOrder()
+    {
+        if (_filterAllBtn != null)
+        {
+            _filterAllBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "all");
+            _filterTradeBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "trade");
+            _filterFaBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "fa");
+            _filterSnTBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "snt");
+        }
+        if (_orderBtn != null)
+            _orderBtn.text = _orderDesc ? "MÁS RECIENTES ↓" : "MÁS ANTIGUOS ↑";
+
+        _sortedTrades = FilteredTrades().ToList();
+        RenderPage();
+    }
+
+    /// <summary>Movimientos de la temporada según el filtro de tipo (puro sobre la lista cargada).</summary>
+    IEnumerable<TradeData> FilteredTrades()
+    {
+        IEnumerable<TradeData> filtered = _trades ?? new List<TradeData>();
+        filtered = _typeFilter switch
+        {
+            "trade" => filtered.Where(t => t.trade_type == "trade" || t.trade_type == "pick_trade"),
+            "fa"    => filtered.Where(t => t.trade_type == "free_agent"),
+            "snt"   => filtered.Where(t => t.trade_type == "sign_and_trade"),
+            _       => filtered
+        };
+
+        return _orderDesc
+            ? filtered.OrderByDescending(t => t.game_date).ThenByDescending(t => t.id)
+            : filtered.OrderBy(t => t.game_date).ThenBy(t => t.id);
     }
 
     protected override void Refresh()
@@ -152,10 +208,18 @@ using System.Linq;
             if (headerDate != null) headerDate.text = DatabaseManager.Instance.GetCurrentDateString(_manager.id);
         }
 
-        _sortedTrades = _trades
-            .OrderByDescending(t => t.game_date)   // "yyyy-MM-dd" -> orden lexicográfico = cronológico
-            .ThenByDescending(t => t.id)           // a igual fecha, el más reciente insertado arriba
-            .ToList();
+        // Filtro de tipo + orden elegidos (por defecto: todo, más recientes primero).
+        if (_filterAllBtn != null)
+        {
+            _filterAllBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "all");
+            _filterTradeBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "trade");
+            _filterFaBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "fa");
+            _filterSnTBtn.EnableInClassList("historial-filter-btn--active", _typeFilter == "snt");
+        }
+        if (_orderBtn != null)
+            _orderBtn.text = _orderDesc ? "MÁS RECIENTES ↓" : "MÁS ANTIGUOS ↑";
+
+        _sortedTrades = FilteredTrades().ToList();   // "yyyy-MM-dd" -> orden lexicográfico = cronológico
         RenderPage();
     }
 
@@ -167,7 +231,9 @@ using System.Linq;
         {
             var empty = new VisualElement();
             empty.AddToClassList("historial-empty");
-            var lbl = new Label("No hay traspasos esta temporada.");
+            var lbl = new Label(_typeFilter == "all"
+                ? "No hay movimientos esta temporada."
+                : "No hay movimientos de este tipo esta temporada.");
             lbl.AddToClassList("historial-empty-text");
             empty.Add(lbl);
             _historialBody.Add(empty);
@@ -311,7 +377,7 @@ using System.Linq;
     }
 
     // ── ScrollBar ──
-    class ScrollBarData
+    class ScrollBarData : IScrollBarHandle
     {
         public VisualElement Viewport;
         public VisualElement Content;
@@ -327,6 +393,11 @@ using System.Linq;
                                 VisualElement track, VisualElement thumb)
     {
         if (viewport == null || content == null || track == null || thumb == null) return null;
+
+        // Ya enlazada en esta visita (el viewport persiste): no registrar los
+        // handlers otra vez, que se acumulaban al reconstruir la lista.
+        if (ScrollBarBinder.TryGet<ScrollBarData>(viewport, out var bound)) return bound;
+
 
         viewport.style.overflow = Overflow.Hidden;
         viewport.style.flexDirection = FlexDirection.Column;
@@ -405,6 +476,7 @@ using System.Linq;
 
         ApplyScroll(bar);
 
+        ScrollBarBinder.Remember(viewport, bar);
         return bar;
     }
 

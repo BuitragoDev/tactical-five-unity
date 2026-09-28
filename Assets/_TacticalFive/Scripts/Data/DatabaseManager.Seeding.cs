@@ -145,7 +145,7 @@ public partial class DatabaseManager
         Add(69,  "CHA", "Pat",       "Connaughton",      "SG", 33, "USA", 196, 94,  74, 78, 74, 84, 74, 74, 79, 69, 64, 84, 74, 74, 48,  9400000, 1, false, 1, 0, 1, 0);
         Add(112, "CHA", "Ryan",      "Nembhard",         "PG", 23, "CAN", 180,  78, 72, 87, 76, 76, 76, 80, 74, 64, 50, 72, 76, 80, 74,  2400000, 3, false, 0, 0, 0, 0);
         Add(62,  "CHA", "Liam",      "McNeeley",         "SF", 20, "USA", 201, 98,  77, 89, 83, 89, 93, 81, 87, 75, 71, 81, 89, 67, 31,  4500000, 4, false, 0, 0, 0, 0);
-        Add(8,   "CHA", "Buddy",     "Hield",            "SG", 33, "BHS", 196,  78, 74, 78, 70, 74, 90, 88, 66, 66, 64, 72, 68, 76, 66,  9000000, 2, false, 0, 0, 0, 0);
+        Add(81,  "CHA", "Rob",       "Dillingham",       "PG", 21, "USA", 188, 79,  82, 91, 91, 96, 84, 91, 69, 64, 84, 74, 74, 84, 93,  6500000, 4, false, 0, 0, 0, 0);
         Add(70,  "CHA", "Christian", "Anderson Jr.",     "PG", 19, "USA", 185, 84,  69, 84, 84, 79, 84, 74, 64, 59, 74, 74, 72, 61, 52,  4300000, 4, true,  0, 0, 0, 0);
         Add(71,  "CHA", "Hannes",    "Steinbach",        "PF", 20, "DEU", 208, 107, 71, 86, 74, 74, 69, 74, 74, 74, 74, 69, 73, 72, 62,  4700000, 4, true,  0, 0, 0, 0);
 
@@ -159,7 +159,7 @@ public partial class DatabaseManager
         Add(76, "CHI", "Patrick",   "Williams",         "PF", 25, "USA", 201, 97,  77, 88, 74, 74, 69, 74, 74, 79, 84, 79, 74, 87, 81, 18000000, 4, false, 0, 0, 0, 0);
         Add(78, "CHI", "Zach",      "Collins",          "C",  29, "USA", 211, 113, 76, 77, 74, 74, 84, 69, 74, 84, 74, 79, 74, 81, 77, 18000000, 2, false, 0, 0, 0, 0);
         Add(80, "CHI", "Tre",       "Jones",            "PG", 26, "USA", 185, 83,  81, 87, 79, 64, 91, 87, 89, 74, 79, 84, 86, 69, 82,  9000000, 2, false, 0, 0, 0, 0);
-        Add(81, "CHI", "Rob",       "Dillingham",       "PG", 21, "USA", 188, 79,  82, 91, 91, 96, 84, 91, 69, 64, 84, 74, 74, 84, 93,  6500000, 4, false, 0, 0, 0, 0);
+        Add(8,  "CHI", "Buddy",     "Hield",            "SG", 33, "BHS", 196,  78, 74, 78, 70, 74, 90, 88, 66, 66, 64, 72, 68, 76, 66,  9000000, 2, false, 0, 0, 0, 0);
         Add(82, "CHI", "Noa",       "Essengue",         "PF", 19, "FRA", 208, 97,  74, 84, 69, 59, 64, 69, 79, 79, 89, 69, 79, 74, 92,  6500000, 4, false, 0, 0, 0, 0);
         Add(83, "CHI", "Leonard",   "Miller",           "PF", 22, "CAN", 208, 98,  72, 79, 74, 54, 64, 64, 74, 84, 74, 74, 74, 87, 89,  2800000, 3, false, 0, 0, 0, 0);
         Add(84, "CHI", "Jalen",     "Smith",            "C",  26, "USA", 208, 98,  75, 74, 79, 84, 69, 74, 69, 79, 74, 74, 74, 75, 80,  9000000, 2, false, 0, 0, 1, 0);
@@ -184,7 +184,7 @@ public partial class DatabaseManager
         Add(604, "CLE", "Khalifa",   "Diop",             "C",  24, "SEN", 211, 107, 74, 82, 78, 72, 66, 70, 72, 80, 70, 80, 76, 78, 80,  2000000, 1, true,  0, 0, 0, 0);
         Add(99,  "CLE", "Meleek",    "Thomas",           "SG", 19, "USA", 191,  86, 65, 79, 74, 75, 72, 75, 69, 72, 60, 72, 72, 69, 64,  2000000, 2, true,  0, 0, 0, 0);
 
-        // ── DAL ── 13 jugadores
+        // ── DAL ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA                      A FM FP MV
         Add(100, "DAL", "Kyrie",      "Irving",         "PG", 34, "USA", 188,  88, 94, 95, 89, 94, 93, 92, 88, 78, 86, 92, 91, 82, 78, 36500000, 2, false, 1, 0, 4, 0);
         Add(101, "DAL", "Cooper",     "Flagg",          "SF", 19, "USA", 206,  92, 90, 99, 88, 86, 80, 86, 84, 89, 91, 86, 84, 82, 80, 13800000, 4, false, 0, 0, 0, 0);
@@ -196,6 +196,8 @@ public partial class DatabaseManager
         Add(108, "DAL", "Naji",       "Marshall",       "SF", 28, "USA", 198,  99, 80, 84, 81, 80, 80, 78, 78, 82, 78, 78, 80, 80, 61, 17400000, 3, false, 0, 0, 0, 0);
         Add(109, "DAL", "Caleb",      "Martin",         "SF", 30, "USA", 196,  92, 79, 81, 81, 80, 80, 77, 78, 82, 76, 78, 80, 80, 61,  9500000, 2, false, 0, 0, 1, 0);
         Add(5,   "DAL", "Zaccharie",  "Risacher",       "SF", 21, "FRA", 203,  90, 81, 84, 83, 81, 83, 78, 78, 82, 82, 80, 78, 74, 72, 13200000, 2, false, 0, 0, 0, 0);
+        Add(145, "DAL", "Marcus",     "Sasser",         "PG", 25, "USA", 188,  84, 78, 83, 79, 87, 79, 84, 75, 74, 79, 79, 79, 80, 38,  4200000, 2, false, 0, 0, 0, 0);
+        Add(607, "DAL", "Tarik",      "Biberović",      "SF", 25, "BIH", 201,  99, 71, 84, 76, 75, 66, 79, 63, 75, 83, 71, 86, 69, 78,  3000000, 2, true,  0, 0, 0, 0);
         Add(114, "DAL", "Morez",      "Johnson Jr.",    "PF", 19, "USA", 206, 104, 71, 84, 76, 75, 66, 79, 63, 75, 83, 71, 86, 69, 78,  5700000, 4, true,  0, 0, 0, 0);
         Add(115, "DAL", "Sergio",     "de Larrea",      "SF", 20, "ESP", 203,  91, 68, 87, 84, 79, 69, 73, 73, 69, 63, 67, 86, 75, 54,  3600000, 4, true,  0, 0, 0, 0);
         Add(116, "DAL", "Tobi",       "Lawal",          "PF", 21, "NGA", 203, 102, 66, 80, 72, 78, 63, 63, 69, 68, 74, 64, 60, 64, 75,  2000000, 2, true,  0, 0, 0, 0);
@@ -232,7 +234,7 @@ public partial class DatabaseManager
         Add(276, "DET", "Gary",      "Harris",          "SG", 32, "USA", 193,  95, 79, 80, 74, 79, 89, 74, 79, 84, 69, 74, 84, 81, 44,  3000000, 1, false, 0, 0, 0, 0);
         Add(271, "DET", "Taurean",   "Prince",          "SF", 32, "USA", 198,  99, 79, 79, 74, 79, 91, 74, 74, 84, 69, 74, 84, 83, 57,  6000000, 1, false, 0, 0, 0, 0);
         Add(144, "DET", "Ronald",    "Holland II",      "SF", 20, "USA", 203,  93, 80, 88, 79, 64, 79, 79, 84, 86, 89, 84, 82, 82, 84,  9000000, 4, false, 0, 0, 0, 0);
-        Add(145, "DET", "Marcus",    "Sasser",          "PG", 25, "USA", 188,  84, 78, 83, 79, 87, 79, 79, 69, 64, 79, 79, 79, 80, 38,  4200000, 2, false, 0, 0, 0, 0);
+        
         Add(146, "DET", "Javonte",   "Green",           "SF", 33, "USA", 193,  93, 76, 74, 74, 64, 69, 69, 84, 79, 84, 84, 77, 78, 61,  3900000, 1, false, 0, 0, 0, 0);
         Add(147, "DET", "Paul",      "Reed",            "PF", 27, "USA", 206,  95, 80, 80, 79, 59, 74, 74, 89, 94, 89, 79, 79, 80, 85,  5000000, 2, false, 0, 0, 0, 0);
         Add(148, "DET", "Wendell",   "Moore Jr.",       "SG", 24, "USA", 196,  97, 74, 79, 74, 64, 79, 74, 74, 69, 74, 74, 77, 76, 50,  2500000, 2, false, 0, 0, 0, 0);
@@ -242,7 +244,7 @@ public partial class DatabaseManager
 
         // ── GSW ── 17 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA                      A FM FP MV
-        Add(151, "GSW", "Stephen",   "Curry",           "PG", 38, "USA", 188,  84, 98, 95, 99, 95, 99, 99, 99, 95, 68, 99, 95, 99, 69, 59600000, 2, false, 4, 1, 6, 2);
+        Add(151, "GSW", "Stephen",   "Curry",           "PG", 38, "USA", 188,  84, 98, 95, 99, 95, 99, 99, 99, 95, 68, 99, 95, 99, 69, 58000000, 2, false, 4, 1, 6, 2);
         Add(152, "GSW", "Jimmy",     "Butler III",      "SF", 37, "USA", 201, 104, 94, 90, 94, 90, 78, 87, 74, 94, 89, 92, 98, 97, 79, 54000000, 2, false, 0, 0, 2, 0);
         Add(153, "GSW", "Kristaps",  "Porzingis",       "C",  31, "LVA", 221, 109, 89, 89, 70, 78, 95, 92, 72, 78, 94, 90, 96, 99, 97, 20000000, 2, false, 1, 0, 1, 0);
         Add(154, "GSW", "Draymond",  "Green",           "PF", 36, "USA", 198, 104, 86, 86, 88, 78, 84, 80, 64, 84, 99, 90, 80, 82, 82, 26000000, 3, false, 4, 0, 6, 0);
@@ -1077,7 +1079,7 @@ public partial class DatabaseManager
         foreach (var p in allPlayers)
         {
             if (p.is_rookie == 1) continue;
-            if (GetHistoricalPlayerStats(p.first_name, p.last_name) != null) continue;
+            if (GetHistoricalPlayerStats(p.id) != null) continue;
 
             ApplyInitialCareer(p);
             seeded++;
@@ -1138,6 +1140,7 @@ public partial class DatabaseManager
         var team = GetTeamById(p.team_id);
         SaveHistoricalPlayerStats(new HistoricalPlayerStatsData
         {
+            player_id = p.id,
             first_name = p.first_name,
             last_name = p.last_name,
             position = p.position,

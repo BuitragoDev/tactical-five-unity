@@ -3,10 +3,19 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using SQLite;
 
 public static class GameSaveManager
 {
-    private static string BaseDir => Path.Combine(Application.persistentDataPath, "TacticalFive", "saves");
+    /// <summary>
+    /// Directorio de guardado. En tests se sobrescribe con una carpeta temporal para
+    /// poder probar el flujo de slots sin tocar las partidas del jugador.
+    /// </summary>
+    public static string BaseDirOverride { get; set; }
+
+    private static string BaseDir => string.IsNullOrEmpty(BaseDirOverride)
+        ? Path.Combine(Application.persistentDataPath, "TacticalFive", "saves")
+        : BaseDirOverride;
     private static string MetaPath => Path.Combine(BaseDir, "saves.json");
 
     public static int FindNextAvailableSlot()
@@ -22,22 +31,208 @@ public static class GameSaveManager
 
     /// <summary>
     /// Elimina el archivo DB de un slot si no tiene metadatos válidos (partida huérfana).
+    /// Si los metadatos no se pueden leer, NO borra nada (un fallo de lectura no debe
+    /// interpretarse como "no hay ninguna partida").
     /// </summary>
     public static void CleanupOrphanDb(int slotNumber)
     {
-        string dbPath = GetSaveDbPath(slotNumber);
-        var slot = GetSlot(slotNumber);
-        bool hasValidMeta = slot != null && slot.exists;
-        if (!hasValidMeta && File.Exists(dbPath))
+        if (!TryGetAllSlots(out var metaSlots))
         {
-            try { File.Delete(dbPath); } catch { }
+            Debug.LogWarning($"[GameSaveManager] Metadatos ilegibles: se omite la limpieza del slot {slotNumber}");
+            return;
+        }
+
+        var slot = metaSlots.FirstOrDefault(s => s.slotNumber == slotNumber);
+        bool hasValidMeta = slot != null && slot.exists;
+        if (!hasValidMeta)
+        {
+            DeleteDbFiles(slotNumber);
             Debug.Log($"[GameSaveManager] DB huérfana eliminada: slot {slotNumber}");
         }
+    }
+
+    /// <summary>Carpeta de partidas exportadas (backup portable en un .db).</summary>
+    public static string ExportsDir => Path.Combine(BaseDir, "exports");
+
+    /// <summary>Copia la partida del slot a la carpeta de exportaciones. Devuelve la
+    /// ruta del archivo o null si el slot no existe.</summary>
+    public static string ExportSlot(int slotNumber, string managerName, string teamName)
+    {
+        try
+        {
+            string db = GetSaveDbPath(slotNumber);
+            if (!File.Exists(db)) return null;
+
+            // Si es la partida abierta, volcar el WAL antes de copiar para que el
+            // respaldo sea autocontenido.
+            if (DatabaseManager.Instance != null && DatabaseManager.Instance.ActiveSaveSlot == slotNumber)
+            {
+                try { DatabaseManager.Instance.Db.ExecuteScalar<string>("PRAGMA wal_checkpoint(TRUNCATE)"); }
+                catch { }
+            }
+
+            Directory.CreateDirectory(ExportsDir);
+            string name = $"liga_{Sanitize(teamName)}_{Sanitize(managerName)}_{System.DateTime.Now:yyyyMMdd_HHmmss}.db";
+            string dest = Path.Combine(ExportsDir, name);
+            File.Copy(db, dest, true);
+
+            // Sidecars por si el WAL no se pudo truncar.
+            foreach (var side in new[] { "-wal", "-shm" })
+                if (File.Exists(db + side))
+                    File.Copy(db + side, dest + side, true);
+
+            Debug.Log($"[GameSaveManager] Partida exportada: {dest}");
+            return dest;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameSaveManager] Error exportando el slot {slotNumber}: {e.Message}");
+            return null;
+        }
+    }
+
+    /// <summary>Datos de una partida exportada, para pintarla con logo y fecha.</summary>
+    public class ExportInfo
+    {
+        public string path;
+        public string fileName;
+        public string teamName;
+        public string teamLogo;
+        public string managerName;
+        public System.DateTime date;
+        public long sizeBytes;
+    }
+
+    private class ExportDbRow
+    {
+        public int team_id { get; set; }
+        public string name { get; set; }          // nombre del equipo
+        public string logo { get; set; }          // clave del logo
+        public string manager_name { get; set; }
+    }
+
+    /// <summary>Partidas exportadas con sus datos; el equipo/manager se leen del
+    /// propio .db (con la ruta y el nombre de archivo como respaldo).</summary>
+    public static List<ExportInfo> ListExportInfos()
+    {
+        var list = new List<ExportInfo>();
+        foreach (var path in ListExports())
+        {
+            var info = new ExportInfo
+            {
+                path = path,
+                fileName = Path.GetFileName(path),
+                date = File.GetLastWriteTime(path),
+                sizeBytes = new FileInfo(path).Length
+            };
+
+            try
+            {
+                using var conn = new SQLiteConnection(path, SQLiteOpenFlags.ReadOnly);
+                var row = conn.Query<ExportDbRow>(
+                    @"SELECT m.team_id AS team_id, t.name AS name, t.logo AS logo, m.name AS manager_name
+                      FROM managers m LEFT JOIN teams t ON t.id = m.team_id
+                      ORDER BY m.id DESC LIMIT 1").FirstOrDefault();
+                if (row != null)
+                {
+                    info.teamName = row.name;
+                    info.teamLogo = row.logo;
+                    info.managerName = row.manager_name;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogWarning($"[GameSaveManager] No se pudo leer la cabecera de {info.fileName}: {e.Message}");
+            }
+
+            list.Add(info);
+        }
+        return list;
+    }
+
+    /// <summary>Borra una copia exportada (y sus sidecars).</summary>
+    public static bool DeleteExport(string path)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return false;
+            File.Delete(path);
+            foreach (var side in new[] { "-wal", "-shm" })
+                if (File.Exists(path + side)) File.Delete(path + side);
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameSaveManager] No se pudo borrar la copia {path}: {e.Message}");
+            return false;
+        }
+    }
+
+    /// <summary>Lista de partidas exportadas, de la más reciente a la más antigua.</summary>
+    public static List<string> ListExports()
+    {
+        if (!Directory.Exists(ExportsDir)) return new List<string>();
+        return Directory.GetFiles(ExportsDir, "liga_*.db")
+            .OrderByDescending(File.GetLastWriteTime)
+            .ToList();
+    }
+
+    /// <summary>Importa un archivo exportado al siguiente slot libre. Devuelve el slot
+    /// (o -1 si no se pudo).</summary>
+    public static int ImportSave(string filePath)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath)) return -1;
+
+            EnsureBaseDir();
+            int slot = FindNextAvailableSlot();
+            string db = GetSaveDbPath(slot);
+            File.Copy(filePath, db, true);
+
+            foreach (var side in new[] { "-wal", "-shm" })
+            {
+                if (File.Exists(db + side)) File.Delete(db + side);
+                if (File.Exists(filePath + side)) File.Copy(filePath + side, db + side, true);
+            }
+
+            Debug.Log($"[GameSaveManager] Partida importada al slot {slot}: {filePath}");
+            return slot;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"[GameSaveManager] Error importando {filePath}: {e.Message}");
+            return -1;
+        }
+    }
+
+    /// <summary>Nombre de archivo seguro (sin rutas ni caracteres raros).</summary>
+    private static string Sanitize(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "partida";
+        var invalid = Path.GetInvalidFileNameChars();
+        var sb = new System.Text.StringBuilder(text.Length);
+        foreach (char c in text)
+            sb.Append(invalid.Contains(c) || c == ' ' ? '_' : c);
+        return sb.ToString();
     }
 
     public static string GetSaveDbPath(int slotNumber)
     {
         return Path.Combine(BaseDir, $"save_{slotNumber}.db");
+    }
+
+    /// <summary>Borra la DB de un slot junto con sus sidecars de WAL.</summary>
+    private static void DeleteDbFiles(int slotNumber)
+    {
+        string dbPath = GetSaveDbPath(slotNumber);
+        string[] files = { dbPath, dbPath + "-wal", dbPath + "-shm" };
+        foreach (var f in files)
+        {
+            if (!File.Exists(f)) continue;
+            try { File.Delete(f); }
+            catch (Exception e) { Debug.LogWarning($"[GameSaveManager] No se pudo borrar {f}: {e.Message}"); }
+        }
     }
 
     /// <summary>
@@ -47,7 +242,14 @@ public static class GameSaveManager
     public static void CleanupAllOrphanDbs()
     {
         if (!Directory.Exists(BaseDir)) return;
-        var metaSlots = GetAllSlots();
+
+        // Si no se pueden leer los metadatos, no se borra nada.
+        if (!TryGetAllSlots(out var metaSlots))
+        {
+            Debug.LogWarning("[GameSaveManager] Metadatos ilegibles: se omite la limpieza de DBs huérfanas.");
+            return;
+        }
+
         var dbFiles = Directory.GetFiles(BaseDir, "save_*.db");
         foreach (var dbPath in dbFiles)
         {
@@ -56,52 +258,95 @@ public static class GameSaveManager
             if (!int.TryParse(fileName.Substring(5), out int slotNum)) continue;
 
             var slot = metaSlots.FirstOrDefault(s => s.slotNumber == slotNum);
-            bool hasValidMeta = slot != null && slot.exists && !string.IsNullOrEmpty(slot.managerName);
+            // Un slot es válido si los metadatos (fiables) lo marcan como existente.
+            // NO se exige managerName: una partida legítima puede tenerlo vacío.
+            bool hasValidMeta = slot != null && slot.exists;
             if (!hasValidMeta)
             {
-                try { File.Delete(dbPath); } catch { }
+                DeleteDbFiles(slotNum);
                 Debug.Log($"[GameSaveManager] DB huérfana eliminada: slot {slotNum}");
             }
         }
     }
 
-    public static List<SaveSlotInfo> GetAllSlots()
+    /// <summary>
+    /// Lee los slots desde saves.json.
+    /// Devuelve false SOLO si existe un archivo de metadatos pero no se puede leer ni
+    /// por sí mismo ni por su backup; en ese caso los llamadores NO deben borrar nada.
+    /// </summary>
+    public static bool TryGetAllSlots(out List<SaveSlotInfo> slots)
     {
+        slots = new List<SaveSlotInfo>();
         EnsureBaseDir();
-        var slots = new List<SaveSlotInfo>();
+
+        string backup = MetaPath + ".bak";
 
         if (File.Exists(MetaPath))
         {
-            try
+            if (TryReadMeta(MetaPath, out slots))
             {
-                string json = File.ReadAllText(MetaPath);
-                var meta = JsonUtility.FromJson<SaveMeta>(json);
-                if (meta?.slots != null)
-                    slots = meta.slots.ToList();
+                NormalizeSlots(slots);
+                return true;
             }
-            catch (Exception e)
+
+            if (File.Exists(backup) && TryReadMeta(backup, out slots))
             {
-                Debug.LogWarning($"[GameSaveManager] Error leyendo metadatos: {e.Message}");
+                Debug.LogWarning("[GameSaveManager] saves.json ilegible: se usa saves.json.bak");
+                NormalizeSlots(slots);
+                return true;
             }
+
+            Debug.LogError("[GameSaveManager] saves.json ilegible y sin backup válido. No se borrará ninguna DB.");
+            return false;
         }
 
-        // Limpiar metadatos de slots cuyo archivo DB ya no existe
-        var result = new List<SaveSlotInfo>();
+        // Sin archivo principal: el backup, si existe, es la única fuente.
+        if (File.Exists(backup))
+        {
+            if (TryReadMeta(backup, out slots))
+            {
+                NormalizeSlots(slots);
+                return true;
+            }
+            Debug.LogError("[GameSaveManager] saves.json.bak ilegible. No se borrará ninguna DB.");
+            return false;
+        }
+
+        return true; // sin metadata y sin backup: lista vacía válida
+    }
+
+    public static List<SaveSlotInfo> GetAllSlots()
+    {
+        TryGetAllSlots(out var slots);
+        return slots.OrderBy(s => s.slotNumber).ToList();
+    }
+
+    private static bool TryReadMeta(string path, out List<SaveSlotInfo> slots)
+    {
+        slots = new List<SaveSlotInfo>();
+        try
+        {
+            string json = File.ReadAllText(path);
+            var meta = JsonUtility.FromJson<SaveMeta>(json);
+            if (meta?.slots == null) return false;
+            slots = meta.slots.ToList();
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[GameSaveManager] Error leyendo metadatos ({path}): {e.Message}");
+            return false;
+        }
+    }
+
+    // Metadatos desfasados: un slot marcado como existente cuyo .db ya no está.
+    private static void NormalizeSlots(List<SaveSlotInfo> slots)
+    {
         foreach (var slot in slots)
         {
-            string dbPath = GetSaveDbPath(slot.slotNumber);
-            bool fileExists = File.Exists(dbPath);
-            if (slot.exists && !fileExists)
-            {
-                // Metadatos desfasados → limpiar
+            if (slot.exists && !File.Exists(GetSaveDbPath(slot.slotNumber)))
                 slot.exists = false;
-            }
-            // NOTA: NUNCA forzamos exists=true solo porque haya un archivo .db.
-            // Un .db sin metadatos válidos es una partida abandonada (huérfana).
-            result.Add(slot);
         }
-
-        return result.OrderBy(s => s.slotNumber).ToList();
     }
 
     public static SaveSlotInfo GetSlot(int slotNumber)
@@ -112,23 +357,98 @@ public static class GameSaveManager
     public static void SaveSlotInfo(SaveSlotInfo slot)
     {
         EnsureBaseDir();
-        var all = GetAllSlots();
+
+        List<SaveSlotInfo> all;
+        if (!TryGetAllSlots(out all))
+        {
+            // Metadatos ilegibles: preservamos el archivo dañado y reconstruimos una
+            // entrada por cada DB presente para no dejarlas huérfanas.
+            PreserveCorruptMeta();
+            all = RebuildSlotsFromDisk();
+        }
+
         int idx = all.FindIndex(s => s.slotNumber == slot.slotNumber);
         if (idx >= 0) all[idx] = slot;
         else all.Add(slot);
 
         var meta = new SaveMeta { slots = all.ToArray() };
-        string json = JsonUtility.ToJson(meta, true);
-        File.WriteAllText(MetaPath, json);
+        WriteMetaAtomic(JsonUtility.ToJson(meta, true));
+    }
+
+    /// <summary>Escritura atómica de saves.json (tmp + replace, conservando .bak).</summary>
+    private static void WriteMetaAtomic(string json)
+    {
+        string tmp = MetaPath + ".tmp";
+        try
+        {
+            File.WriteAllText(tmp, json);
+            if (File.Exists(MetaPath))
+                File.Replace(tmp, MetaPath, MetaPath + ".bak", true);
+            else
+                File.Move(tmp, MetaPath);
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[GameSaveManager] Escritura atómica no disponible ({e.Message}); usando fallback.");
+            try
+            {
+                File.Copy(tmp, MetaPath, true);
+                if (File.Exists(tmp)) File.Delete(tmp);
+            }
+            catch (Exception e2)
+            {
+                Debug.LogError($"[GameSaveManager] No se pudo guardar saves.json: {e2.Message}");
+            }
+        }
+    }
+
+    /// <summary>Guarda el saves.json ilegible aparte para poder diagnosticarlo.</summary>
+    private static void PreserveCorruptMeta()
+    {
+        try
+        {
+            string dest = MetaPath + ".corrupt-" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            File.Move(MetaPath, dest);
+            Debug.LogWarning($"[GameSaveManager] saves.json ilegible preservado como {dest}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogWarning($"[GameSaveManager] No se pudo preservar saves.json: {e.Message}");
+        }
+    }
+
+    /// <summary>Entradas mínimas para no perder de vista las DBs que existen en disco.</summary>
+    private static List<SaveSlotInfo> RebuildSlotsFromDisk()
+    {
+        var list = new List<SaveSlotInfo>();
+        if (!Directory.Exists(BaseDir)) return list;
+
+        foreach (var dbPath in Directory.GetFiles(BaseDir, "save_*.db"))
+        {
+            string fileName = Path.GetFileNameWithoutExtension(dbPath);
+            if (!fileName.StartsWith("save_")) continue;
+            if (!int.TryParse(fileName.Substring(5), out int slotNum)) continue;
+
+            list.Add(new SaveSlotInfo
+            {
+                slotNumber = slotNum,
+                exists = true,
+                managerName = "(recuperada)",
+                lastPlayedRealDate = File.GetLastWriteTime(dbPath).ToString("dd/MM/yyyy HH:mm")
+            });
+        }
+        Debug.Log($"[GameSaveManager] Metadatos reconstruidos desde disco: {list.Count} partida(s).");
+        return list;
     }
 
     public static void DeleteSave(int slotNumber)
     {
-        string dbPath = GetSaveDbPath(slotNumber);
-        if (File.Exists(dbPath))
-        {
-            try { File.Delete(dbPath); } catch { }
-        }
+        // Si es la partida cargada, cerramos la conexión antes de borrar el archivo:
+        // en Linux un unlink con la conexión abierta deja escrituras huérfanas.
+        if (DatabaseManager.Instance != null && DatabaseManager.Instance.ActiveSaveSlot == slotNumber)
+            DatabaseManager.Instance.CloseActiveSlot();
+
+        DeleteDbFiles(slotNumber);
 
         string photoDir = Path.Combine(Application.persistentDataPath, "PlayerPhotos", slotNumber.ToString());
         if (Directory.Exists(photoDir))

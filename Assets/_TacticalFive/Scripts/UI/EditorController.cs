@@ -189,11 +189,12 @@ public class EditorController : UIScreenController
         _playerDetail = _root.Q<VisualElement>("PlayerDetail");
         _playerDetailPanel = _playerPanel.Q<VisualElement>(className: "editor-detail-panel");
 
-        // Barra de scroll propia (se enlaza una sola vez; los elementos persisten).
-        _teamScroll ??= CustomScrollbar.Bind(
+        // Barras de scroll propias: se re-enlazan en cada visita porque Unity recrea
+        // el árbol del UIDocument al reactivar la pantalla (con ??= quedaban muertas).
+        _teamScroll = CustomScrollbar.Bind(
             _root.Q<VisualElement>("TeamViewport"), _teamList,
             _root.Q<VisualElement>("TeamScrollTrack"), _root.Q<VisualElement>("TeamScrollThumb"));
-        _playerScroll ??= CustomScrollbar.Bind(
+        _playerScroll = CustomScrollbar.Bind(
             _root.Q<VisualElement>("PlayerViewport"), _playerList,
             _root.Q<VisualElement>("PlayerScrollTrack"), _root.Q<VisualElement>("PlayerScrollThumb"));
     }
@@ -336,7 +337,11 @@ public class EditorController : UIScreenController
     void ResetToDefaults()
     {
         if (_isLoading) return;
-        StartCoroutine(ResetToDefaultsCoroutine());
+        // UI-09: acción destructiva (borra el template) → confirmación explícita.
+        ShowConfirm("RESETEAR",
+            "Se borrarán el template (datos base de nuevas partidas) y todas las imágenes " +
+            "personalizadas del editor. Las partidas ya guardadas NO se tocan. ¿Continuar?",
+            () => StartCoroutine(ResetToDefaultsCoroutine()));
     }
 
     IEnumerator ResetToDefaultsCoroutine()
@@ -1404,10 +1409,7 @@ public class EditorController : UIScreenController
         int roleIdx = System.Array.IndexOf(roleChoices, _playerRoleDropdown.Value);
         p.role = (PlayerRole)(roleIdx >= 0 ? roleIdx : 3);
 
-        int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling +
-                  p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-        p.overall = (int)System.Math.Round(sum / 11f);
-        if (p.overall > p.potential) p.overall = p.potential;
+        p.RecalculateOverall();
 
         // Contrato
         long.TryParse(_playerSalary.value, out long sal); p.salary = sal;
@@ -1759,6 +1761,54 @@ public class EditorController : UIScreenController
     {
         _toast.style.display = DisplayStyle.None;
         _toast.Clear();
+    }
+
+    /// <summary>Modal de confirmación para acciones destructivas (UI-09).</summary>
+    void ShowConfirm(string titleText, string message, System.Action onConfirm)
+    {
+        _toast.Clear();
+        _toast.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("editor-modal-box");
+        box.AddToClassList("editor-modal-box--error");
+        _toast.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("editor-modal-header");
+        header.AddToClassList("editor-modal-header--error");
+        box.Add(header);
+
+        var title = new Label(titleText);
+        title.AddToClassList("editor-modal-title");
+        title.AddToClassList("editor-modal-title--error");
+        header.Add(title);
+
+        var body = new VisualElement();
+        body.AddToClassList("editor-modal-body");
+        box.Add(body);
+
+        var text = new Label(message);
+        text.AddToClassList("editor-modal-text");
+        body.Add(text);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("editor-modal-actions");
+        box.Add(actions);
+
+        var cancelBtn = new Button { text = "CANCELAR" };
+        cancelBtn.clicked += () => { PlayClick(); CloseToast(); };
+        cancelBtn.AddToClassList("editor-modal-btn");
+        CursorManager.Instance?.RegisterHandCursor(cancelBtn);
+        actions.Add(cancelBtn);
+
+        var confirmBtn = new Button { text = "RESETEAR" };
+        confirmBtn.clicked += () => { PlayClick(); CloseToast(); onConfirm(); };
+        confirmBtn.AddToClassList("editor-modal-btn");
+        confirmBtn.AddToClassList("editor-modal-btn--danger");
+        confirmBtn.style.marginLeft = 12;
+        CursorManager.Instance?.RegisterHandCursor(confirmBtn);
+        actions.Add(confirmBtn);
     }
 
     // ── EXPLORADOR DE ARCHIVOS (in-game, sin plugins) ─────────────────

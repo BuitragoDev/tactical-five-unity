@@ -25,7 +25,8 @@ using System.Linq;
     private PlayerData _selectedPlayer;
     private VisualElement _selectedSlot;
     private VisualElement _detailEmpty;
-    private ScrollView _detailScroll;
+    private VisualElement _detailScrollRow, _detailViewport;
+    private CustomScrollbar.Handle _detailScrollBar;
     private VisualElement _detailContent;
     private Label _detailPosBadge;
     private Label _detailPlayerName;
@@ -44,6 +45,7 @@ using System.Linq;
     static readonly string[] PosOrder = { "PG", "SG", "SF", "PF", "C" };
     private Button _loadMgmtBtnOn;
     private Button _loadMgmtBtnOff;
+    private VisualElement _gamePlanBody;
 
     static readonly Dictionary<string, (float x, float y)> CourtPositions = new()
     {
@@ -71,7 +73,8 @@ using System.Linq;
         _courtContainer = _root.Q<VisualElement>("CourtContainer");
 
         _detailEmpty = _root.Q<VisualElement>("DetailEmpty");
-        _detailScroll = _root.Q<ScrollView>("DetailScroll");
+        _detailScrollRow = _root.Q<VisualElement>("DetailScrollRow");
+        _detailViewport = _root.Q<VisualElement>("DetailViewport");
         _detailContent = _root.Q<VisualElement>("DetailContent");
         _detailPosBadge = _root.Q<Label>("DetailPosBadge");
         _detailPlayerName = _root.Q<Label>("DetailPlayerName");
@@ -87,6 +90,7 @@ using System.Linq;
 
         _loadMgmtBtnOn = _root.Q<Button>("LoadMgmtBtnOn");
         _loadMgmtBtnOff = _root.Q<Button>("LoadMgmtBtnOff");
+        _gamePlanBody = _root.Q<VisualElement>("GamePlanBody");
         _loadMgmtBtnOn?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLoadMgmt(true); });
         _loadMgmtBtnOff?.RegisterCallback<ClickEvent>(_ => { PlayClick(); SetLoadMgmt(false); });
         if (CursorManager.Instance != null)
@@ -139,6 +143,62 @@ using System.Linq;
         _selectedSlot = null;
         HidePlayerDetail();
         BuildLineup();
+        BuildGamePlanUI();
+    }
+
+    // ── PLAN DE PARTIDO ─────────────────────────────────────
+    /// <summary>Tres filas de opciones (ritmo/ataque/defensa) que se persisten en
+    /// `teams` y que el simulador aplica en cada partido del equipo del usuario.</summary>
+    void BuildGamePlanUI()
+    {
+        if (_gamePlanBody == null || _myTeam == null) return;
+        _gamePlanBody.Clear();
+
+        AddPlanRow("RITMO", new[] { "LENTO", "NORMAL", "RÁPIDO" }, new[] { -1, 0, 1 }, _myTeam.plan_pace,
+            v => _myTeam.plan_pace = v);
+        AddPlanRow("ATAQUE", new[] { "INTERIOR", "EQUILIBRADO", "EXTERIOR" }, new[] { 1, 0, 2 }, _myTeam.plan_offense,
+            v => _myTeam.plan_offense = v);
+        AddPlanRow("DEFENSA", new[] { "CONSERVADORA", "EQUILIBRADA", "AGRESIVA" }, new[] { 0, 1, 2 }, _myTeam.plan_defense,
+            v => _myTeam.plan_defense = v);
+
+        // El asistente matiza el plan con su propio esquema y aporta (o resta) nivel.
+        var assistant = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
+            .FirstOrDefault(e => e.position == CoachScheme.POSITION && e.scheme_set == 1);
+        var caption = new Label();
+        caption.AddToClassList("plan-caption");
+        caption.text = assistant == null
+            ? "SIN ASISTENTE: ficha uno en EMPLEADOS para que aporte su esquema."
+            : $"ASISTENTE {assistant.first_name} {assistant.last_name} (MED {assistant.reputation}) · ESQUEMA {CoachScheme.SchemeLabel(assistant)}";
+        _gamePlanBody.Add(caption);
+    }
+
+    void AddPlanRow(string label, string[] texts, int[] values, int current, Action<int> apply)
+    {
+        var row = new VisualElement();
+        row.AddToClassList("plan-row");
+
+        var lbl = new Label(label);
+        lbl.AddToClassList("plan-label");
+        row.Add(lbl);
+
+        for (int i = 0; i < texts.Length; i++)
+        {
+            int value = values[i];
+            var btn = new Button { text = texts[i] };
+            btn.AddToClassList("plan-btn");
+            if (value == current) btn.AddToClassList("plan-btn--active");
+            btn.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                apply(value);
+                DatabaseManager.Instance.UpdateTeam(_myTeam);
+                BuildGamePlanUI();
+            });
+            CursorManager.Instance?.RegisterHandCursor(btn);
+            row.Add(btn);
+        }
+
+        _gamePlanBody.Add(row);
     }
 
     void EnsureLineupSeeded()
@@ -430,7 +490,12 @@ using System.Linq;
     void ShowPlayerDetail(PlayerData p)
     {
         _detailEmpty.style.display = DisplayStyle.None;
-        _detailScroll.style.display = DisplayStyle.Flex;
+        _detailScrollRow.style.display = DisplayStyle.Flex;
+
+        // Barra de scroll propia del panel de detalle (una vez por visita).
+        if (_detailScrollBar == null || _detailScrollBar.Viewport != _detailViewport)
+            _detailScrollBar = CustomScrollbar.Bind(_detailViewport, _detailContent,
+                _root.Q<VisualElement>("DetailScrollTrack"), _root.Q<VisualElement>("DetailScrollThumb"));
 
         _detailPosBadge.text = string.IsNullOrEmpty(p.secondary_position)
             ? PositionCodes.GetName(p.position)
@@ -469,7 +534,7 @@ using System.Linq;
     void HidePlayerDetail()
     {
         _detailEmpty.style.display = DisplayStyle.Flex;
-        _detailScroll.style.display = DisplayStyle.None;
+        _detailScrollRow.style.display = DisplayStyle.None;
     }
 
     int PlayerAge(PlayerData p)

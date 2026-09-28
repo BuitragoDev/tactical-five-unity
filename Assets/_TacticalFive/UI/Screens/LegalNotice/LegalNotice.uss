@@ -179,3 +179,13 @@
 #ConfigBtnCerrar:hover {
     background-color: rgba(212, 160, 23, 0.25);
 }
+
+/* ── VARIANTE ROJA (peligro/borrado) ──
+   Misma estructura que .modal-box pero en rojo; se aplica junto a la clase base. */
+.modal-box--danger {
+    border-color: rgb(192, 57, 43);
+}
+.modal-box--danger .modal-title {
+    background-color: rgba(192, 57, 43, 0.15);
+    border-bottom-color: rgb(192, 57, 43);
+}

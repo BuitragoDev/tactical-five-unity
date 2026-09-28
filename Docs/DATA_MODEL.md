@@ -70,7 +70,52 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id`, `season_id`, `champion_id`, `finalist_id`, `finals_result`, `east/west/div1..6_champion_id`, `finals_mvp_id`, `finals_mvp_rating`, `season_mvp_id/rating/games`, `rookie_of_year_id/rating/games`, `best_defender_id`, `sixth_man_id`, `most_improved_id`, `all_star_pg/sg/sf/pf/c_id`, `first_team_pg..c`, `second_team_pg..c`.
 
 ### finance_records (`FinanceRecord`)
-`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) Current `ProcessTeamLuxuryTax` writes type 10 as a negative amount, unlike the other expense writers; consumers do not normalize this sign [F].
+`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) `ProcessTeamLuxuryTax` escribe type 10 en **positivo** (`ECO-05`); la migración `loan_records_reclassified` normaliza los registros antiguos.
+
+### storylines (`StorylineData`)
+
+Hilos narrativos persistentes (motor de narrativa, Fase 4). CRUD en el partial
+`DatabaseManager.Storylines.cs`.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | INTEGER PK AI | |
+| `manager_id` / `team_id` | INTEGER | |
+| `type` | TEXT | `StorylineType.*` (racha_positiva, bache, jugador_caliente, sequia, descontento, rumor_traspaso, baja_estrella, presion_gm, caza_playoffs, crisis_economica) |
+| `subject_player_id` | INTEGER | 0 = hilo de equipo |
+| `title` / `summary` | TEXT | para la noticia y la línea temporal |
+| `intensity` | INTEGER | escalón alcanzado |
+| `started_game_day` / `last_update_game_day` / `last_news_game_day` | INTEGER | ciclo y cooldown |
+| `resolved` | INTEGER | 0 abierto / 1 cerrado |
+| `resolution` | TEXT | "" / broken / completed / abandoned (rollover) / departed (el protagonista salió del equipo) |
+| `started_at` | TEXT | |
+
+Los tipos de jugador (`jugador_caliente`, `sequia`) admiten **varios hilos a la vez, uno por
+protagonista** (`subject_player_id`); el resto son de equipo (sujeto 0). Desde el pulido:
+umbral de sequía **relativo** (`max(3, 45 %)` de la media, `ColdThreshold`), mínimo de minutos
+y desempate por relevancia (OVR).
+
+### playoff_series (`PlayoffSeriesData`)
+
+Series de playoffs **ya resueltas** (rivalidades/dinastías). Se escribe al cerrarse la serie
+en `PlayoffsGenerator.AdvancePlayoffSeries`, porque `games` se purga en el rollover: sin esta
+tabla no habría histórico de enfrentamientos. CRUD en `DatabaseManager.Games.cs`.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | INTEGER PK AI | |
+| `manager_id` / `season_id` | INTEGER | |
+| `label` | TEXT | `series_label` original (`playoff-r1-east-1v8`, `playoff-r4-finals`…). **Clave de idempotencia** junto a manager/temporada |
+| `stage` | TEXT | `r1`/`r2`/`r3`/`r4` (Finales) — `PlayoffsGenerator.ParseSeriesLabel` |
+| `conference` | TEXT | `East`/`West`/"" (Finales) |
+| `high_team_id` / `low_team_id` | INTEGER | teamA (ventaja de cancha) / teamB |
+| `high_wins` / `low_wins` | INTEGER | victorias de cada uno en la serie |
+| `winner_id` / `loser_id` | INTEGER | |
+| `game_day` | INTEGER | jornada del último partido de la serie |
+
+> El **play-in no se registra** (son partidos sueltos, no series). Reglas puras de agregación:
+> `RivalryHelper` (rivales, balance, intensidad, último verdugo) y `DynastyHelper` (prestigio y
+> dinastías derivadas de `season_records`).
 
 ### messages (`MessageData`)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.
@@ -141,7 +186,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 ### Records & history tables
 - `historical_records` (`HistoricalRecordData`): all-time single-game records (9 real: Wilt 100pts, 55 reb, Skiles 30 ast, …).
 - `team_records` (`TeamRecordData`): per-team records seeded from `TeamRecordSeeder`.
-- `historical_player_stats` (`HistoricalPlayerStatsData`): career totals for ~120 real legends (totals + computed `ppg, rpg, apg, spg, bpg, fg_pct, fg3_pct, ft_pct`). Re-seeded if all `total_turnovers == 0`.
+- `historical_player_stats` (`HistoricalPlayerStatsData`): career totals for ~120 real legends plus every in-game player (totals + computed `ppg, rpg, apg, spg, bpg, fg_pct, fg3_pct, ft_pct`). Re-seeded if all `total_turnovers == 0`. **Clave `player_id`** (SEA-06): `>0` real player (stable id), `-1` seeder legend (untouchable), `0` legacy ownerless row adopted by unique name during the migration (`HistoricalStatsRules`). Never aggregated by name.
 - `season_game_records` (`SeasonGameRecordData`): season-level single-game records (`team_id, season_id, stat_type, player_name, value, game_date`).
 - `player_season_stats` (`PlayerSeasonStatRow`): per-player per-season aggregates (created via `CreateTable` AND raw SQL in migrations). Archived in `StartNewSeason`.
 - `finals_records` (`FinalsRecord`): real finals 1970-71→today (champ/finalist/keyword/result/mvp).

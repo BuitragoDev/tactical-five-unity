@@ -546,3 +546,16 @@
     -unity-text-align: middle-center;
     margin: 0 6px;
 }
+
+/* Línea de rivalidad (solo playoffs con historia previa) */
+.mpv-rivalry {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    color: rgb(230, 120, 100);
+    letter-spacing: 1px;
+    -unity-text-align: middle-right;
+    align-self: flex-end;
+    margin-bottom: 6px;
+    flex-shrink: 0;
+    display: none;
+}

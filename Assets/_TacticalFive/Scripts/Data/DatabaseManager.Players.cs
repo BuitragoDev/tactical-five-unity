@@ -10,6 +10,45 @@ public partial class DatabaseManager
 {
     // ── PLAYERS ───────────────────────────────────────────
 
+    /// <summary>
+    /// Devuelve el siguiente id de jugador de forma monótona. No reutiliza ids aunque
+    /// se borre el jugador de id máximo (los premios/HOF/retirados guardan player_id).
+    /// </summary>
+    public int AllocatePlayerId()
+    {
+        if (!EnsureDb()) return 0;
+        _db.Execute("CREATE TABLE IF NOT EXISTS id_counters (name TEXT PRIMARY KEY, value INTEGER NOT NULL)");
+        int current = _db.ExecuteScalar<int>("SELECT COALESCE(MAX(value), 0) FROM id_counters WHERE name = 'player'");
+        int next = current > 0
+            ? current + 1
+            : _db.ExecuteScalar<int>("SELECT COALESCE(MAX(id), 0) + 1 FROM players");
+        _db.Execute("INSERT OR REPLACE INTO id_counters (name, value) VALUES ('player', ?)", next);
+        return next;
+    }
+
+    /// <summary>
+    /// Mueve un jugador a otro equipo en un traspaso: actualiza team_id y last_team_id
+    /// (los Bird rights viajan con el jugador, pero solo el equipo nuevo cuenta como
+    /// "su último equipo") y limpia los flags de IR/two-way/G-League/trade block.
+    /// </summary>
+    public void MovePlayerToTeam(PlayerData p, int newTeamId)
+    {
+        int oldTeamId = p.team_id;
+
+        p.team_id = newTeamId;
+        p.last_team_id = newTeamId;
+        p.is_on_ir = 0;
+        p.is_two_way = 0;
+        p.g_league_assigned = 0;
+        p.on_trade_block = 0;
+        UpdatePlayer(p);
+
+        // Si cambia de equipo, sus hilos narrativos (solo existen del equipo del usuario)
+        // se cierran al instante; el siguiente día se vuelven a comprobar por seguridad.
+        if (oldTeamId != newTeamId)
+            StorylineService.CloseSubjectStorylines(p.id);
+    }
+
     public List<PlayerData> GetFreeAgents()
     {
         if (!EnsureDb()) return new List<PlayerData>();

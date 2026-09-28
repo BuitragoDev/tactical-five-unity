@@ -125,6 +125,7 @@ public static class DraftGenerator
         // Swap: el poseedor (current_team_id) del pick marcado como swap se queda con el
         // slot mejor (menor índice) entre su pick y el del equipo partner; el propietario
         // del pick partner se lleva el peor. Aplica solo si la posición del partner es mejor.
+        int ownersBefore = CountDistinctOwners(owners);
         foreach (var swapPick in picks.Where(p => p.is_swap == 1))
         {
             if (swapPick.protected_from > 0) continue;
@@ -143,24 +144,41 @@ public static class DraftGenerator
             }
             if (selfSlot == -1 || partnerSlot == -1 || selfSlot == partnerSlot) continue;
 
-            var swapHolder = teamsById.TryGetValue(swapPick.current_team_id, out var sh)
-                ? sh : slotById(swapPick.current_team_id);
-            var partnerHolder = teamsById.TryGetValue(partner.current_team_id, out var ph)
-                ? ph : slotById(partner.current_team_id);
-
             if (partnerSlot < selfSlot)
-            {
-                owners[partnerSlot] = swapHolder;
-                owners[selfSlot] = partnerHolder;
-            }
+                ApplySwap(owners, selfSlot, partnerSlot);
         }
+
+        // ECO-15: un swap debe ser una permutación de dos slots (nunca reduce el número de
+        // dueños distintos). Guarda de regresión.
+        int ownersAfter = CountDistinctOwners(owners);
+        if (ownersAfter < ownersBefore)
+            UnityEngine.Debug.LogWarning($"[Draft] Swap solapado: dueños distintos {ownersBefore} → {ownersAfter}");
 
         return owners;
     }
 
-    static TeamData slotById(int teamId)
+    /// <summary>
+    /// Intercambia los dueños de los dos slots de un swap (ECO-15). Usar los dueños reales
+    /// de los slots —no los `current_team_id` de los picks— garantiza que el intercambio
+    /// es una permutación y no sobreescribe a un tercero. Puro.
+    /// </summary>
+    public static void ApplySwap(IDictionary<int, TeamData> owners, int selfSlot, int partnerSlot)
     {
-        return DatabaseManager.Instance.GetAllTeams().FirstOrDefault(t => t.id == teamId);
+        if (owners == null || selfSlot == partnerSlot) return;
+        if (!owners.TryGetValue(selfSlot, out var a) || !owners.TryGetValue(partnerSlot, out var b)) return;
+        if (a == null || b == null) return;
+        owners[selfSlot] = b;
+        owners[partnerSlot] = a;
+    }
+
+    /// <summary>Número de equipos distintos que poseen un pick en la ronda (puro).</summary>
+    public static int CountDistinctOwners(IDictionary<int, TeamData> owners)
+    {
+        if (owners == null) return 0;
+        var seen = new System.Collections.Generic.HashSet<int>();
+        foreach (var t in owners.Values)
+            if (t != null) seen.Add(t.id);
+        return seen.Count;
     }
 
     // ── INTERACTIVE DRAFT SUPPORT ────────────────────────────────────
@@ -257,7 +275,7 @@ public static class DraftGenerator
         return (order, classLabel, classQuality);
     }
 
-    public static List<DraftProspect> GenerateProspectPool(string classLabel, float classQuality, int count = 75)
+    public static List<DraftProspect> GenerateProspectPool(string classLabel, float classQuality, int count = 75, int scoutReputation = 3)
     {
         var generationalPicks = new HashSet<int>();
         if (classLabel == "historic")
@@ -337,7 +355,14 @@ public static class DraftGenerator
                 attrs[attr] = (int)Mathf.Clamp(baseAvg + mod + roll + traitBonus, 30, 99);
             }
 
-            int overall = (int)System.Math.Round(attrs.Values.Average());
+            int trueOverall = (int)System.Math.Round(attrs.Values.Average());
+            // Evaluación con error de scouting: lo que se muestra (y usa la IA) es una
+            // estimación; el valor real se revela al elegir el pick.
+            int scoutRange = ScoutingHelper.MaxError(scoutReputation);
+            int scoutError = ScoutingHelper.ErrorFor(scoutReputation,
+                UnityEngine.Random.Range(-scoutRange, scoutRange + 1),
+                UnityEngine.Random.Range(-scoutRange, scoutRange + 1));
+            int overall = ScoutingHelper.Estimate(trueOverall, scoutError);
 
             int potential;
             if (isGenerational)
@@ -375,17 +400,19 @@ public static class DraftGenerator
                 weight_kg = weight,
                 overall = overall,
                 potential = potential,
-                speed = attrs["speed"],
-                shooting = attrs["shooting"],
-                three_point = attrs["three_point"],
-                passing = attrs["passing"],
-                dribbling = attrs["ball_handling"],
-                defense = attrs["defense"],
-                rebounding = attrs["rebounding"],
-                athleticism = attrs["athleticism"],
-                iq = attrs["iq"],
-                steals = attrs["steals"],
-                blocks = attrs["blocks"],
+                scout_error = scoutError,
+                scout_range = scoutRange,
+                speed = ScoutingHelper.Estimate(attrs["speed"], scoutError),
+                shooting = ScoutingHelper.Estimate(attrs["shooting"], scoutError),
+                three_point = ScoutingHelper.Estimate(attrs["three_point"], scoutError),
+                passing = ScoutingHelper.Estimate(attrs["passing"], scoutError),
+                dribbling = ScoutingHelper.Estimate(attrs["ball_handling"], scoutError),
+                defense = ScoutingHelper.Estimate(attrs["defense"], scoutError),
+                rebounding = ScoutingHelper.Estimate(attrs["rebounding"], scoutError),
+                athleticism = ScoutingHelper.Estimate(attrs["athleticism"], scoutError),
+                iq = ScoutingHelper.Estimate(attrs["iq"], scoutError),
+                steals = ScoutingHelper.Estimate(attrs["steals"], scoutError),
+                blocks = ScoutingHelper.Estimate(attrs["blocks"], scoutError),
                 trait = trait,
                 is_generational = isGenerational
             });
@@ -404,7 +431,9 @@ public static class DraftGenerator
         {
             var twoWayCount = DatabaseManager.Instance.Db.Table<PlayerData>()
                 .Count(p => p.team_id == drafTeamId && p.is_two_way == 1);
-            asTwoWay = twoWayCount < TradeHelper.MAX_TWO_WAY;
+            // ECO-14: también exige edad ≤ 23 (antes solo la ronda y el cupo).
+            asTwoWay = twoWayCount < TradeHelper.MAX_TWO_WAY
+                    && TradeHelper.IsEligibleForTwoWayAge(prospect.age);
         }
 
         long salary;
@@ -418,10 +447,11 @@ public static class DraftGenerator
             salary = (long)UnityEngine.Random.Range(1500000, 4000001);
         salary = (salary / 100000) * 100000;
 
-        int nextId = DatabaseManager.Instance.Db.Table<PlayerData>().Any()
-            ? DatabaseManager.Instance.Db.Table<PlayerData>().Max(p => p.id) + 1
-            : 1;
+        int nextId = DatabaseManager.Instance.AllocatePlayerId();
 
+        // Se revela el valor real: la estimación mostrada puede ser optimista (bust) o
+        // pesimista (boom).
+        int se = prospect.scout_error;
         var player = new PlayerData
         {
             id = nextId,
@@ -435,19 +465,19 @@ public static class DraftGenerator
             college = prospect.college,
             height_cm = prospect.height_cm,
             weight_kg = prospect.weight_kg,
-            overall = prospect.overall,
-            potential = prospect.potential,
-            speed = prospect.speed,
-            shooting = prospect.shooting,
-            three_point = prospect.three_point,
-            passing = prospect.passing,
-            dribbling = prospect.dribbling,
-            defense = prospect.defense,
-            rebounding = prospect.rebounding,
-            athleticism = prospect.athleticism,
-            iq = prospect.iq,
-            steals = prospect.steals,
-            blocks = prospect.blocks,
+            overall = ScoutingHelper.Reveal(prospect.overall, se),
+            potential = ScoutingHelper.Reveal(prospect.potential, se),
+            speed = ScoutingHelper.Reveal(prospect.speed, se),
+            shooting = ScoutingHelper.Reveal(prospect.shooting, se),
+            three_point = ScoutingHelper.Reveal(prospect.three_point, se),
+            passing = ScoutingHelper.Reveal(prospect.passing, se),
+            dribbling = ScoutingHelper.Reveal(prospect.dribbling, se),
+            defense = ScoutingHelper.Reveal(prospect.defense, se),
+            rebounding = ScoutingHelper.Reveal(prospect.rebounding, se),
+            athleticism = ScoutingHelper.Reveal(prospect.athleticism, se),
+            iq = ScoutingHelper.Reveal(prospect.iq, se),
+            steals = ScoutingHelper.Reveal(prospect.steals, se),
+            blocks = ScoutingHelper.Reveal(prospect.blocks, se),
             injury_days = 0,
             injury_type = "",
             treated = 0,
@@ -458,6 +488,8 @@ public static class DraftGenerator
             is_rookie = 1
         };
 
+        // El overall debe seguir siendo la media de los atributos (capada por potencial).
+        player.RecalculateOverall();
         DatabaseManager.Instance.AssignJerseyNumber(player, drafTeamId);
         DatabaseManager.Instance.Db.Insert(player);
         PlayerPhotoHelper.CreateRookiePhoto(player.id);

@@ -11,6 +11,10 @@ public partial class DatabaseManager
     // ── SEASON ────────────────────────────────────────────
     public SeasonData CreateSeason(int managerId, string gameMode)
     {
+        // Solo puede haber una temporada activa por manager: desactivar las previas
+        // (evita que GetActiveSeason devuelva una fila arbitraria).
+        _db.Execute("UPDATE seasons SET is_active = 0 WHERE manager_id = ? AND is_active = 1", managerId);
+
         // Find the max year_start from existing seasons, default to 2025
         var lastSeason = _db.Table<SeasonData>()
             .OrderByDescending(s => s.year_start)
@@ -42,6 +46,7 @@ public partial class DatabaseManager
     {
         return _db.Table<SeasonData>()
                 .Where(s => s.manager_id == managerId && s.is_active == 1)
+                .OrderByDescending(s => s.id)
                 .FirstOrDefault();
     }
 
@@ -86,15 +91,20 @@ public partial class DatabaseManager
         // Borrar amistosos anteriores de este manager/temporada
         if (games.Count == 0) return;
         int managerId = games[0].manager_id;
-        var existing = _db.Table<GameData>()
-                        .Where(g => g.manager_id == managerId
-                                && g.game_type == "preseason")
-                        .ToList();
-        foreach (var g in existing)
-            _db.Delete(g);
 
-        foreach (var g in games)
-            _db.Insert(g);
+        // Atómico: borrado + inserción no puede quedar a medias.
+        _db.RunInTransaction(() =>
+        {
+            var existing = _db.Table<GameData>()
+                            .Where(g => g.manager_id == managerId
+                                    && g.game_type == "preseason")
+                            .ToList();
+            foreach (var g in existing)
+                _db.Delete(g);
+
+            foreach (var g in games)
+                _db.Insert(g);
+        });
     }
 
     public List<GameData> GetPreseasonGames(int managerId)
@@ -106,21 +116,24 @@ public partial class DatabaseManager
                 .ToList();
     }
 
-    public void SaveRegularSeasonGames(List<GameData> games)
+    /// <summary>Guarda los partidos de liga regular. Devuelve false si no se pudieron
+    /// persistir (el llamador NO debe marcar la temporada como generada).</summary>
+    public bool SaveRegularSeasonGames(List<GameData> games)
     {
-        // Insertar en lotes para mejor rendimiento
-        _db.BeginTransaction();
         try
         {
-            foreach (var g in games)
-                _db.Insert(g);
-            _db.Commit();
+            _db.RunInTransaction(() =>
+            {
+                foreach (var g in games)
+                    _db.Insert(g);
+            });
             Debug.Log($"[DB] {games.Count} partidos de liga regular guardados.");
+            return true;
         }
         catch (Exception e)
         {
-            _db.Rollback();
             Debug.LogError($"[DB] Error guardando partidos: {e.Message}");
+            return false;
         }
     }
 
@@ -223,15 +236,26 @@ public partial class DatabaseManager
                   .ToList();
     }
 
-    public List<GameData> GetStandingsGames(int managerId)
+    public List<GameData> GetStandingsGames(int managerId, int seasonId = 0)
     {
-        return _db.Table<GameData>()
+        var q = _db.Table<GameData>()
                 .Where(g => g.manager_id == managerId
                         && g.game_type == "regular"
-                        && g.is_played == 1)
-                .OrderBy(g => g.game_day)
+                        && g.is_played == 1);
+        if (seasonId > 0)
+            q = q.Where(g => g.season_id == seasonId);
+        return q.OrderBy(g => g.game_day)
                 .ThenBy(g => g.id)
                 .ToList();
+    }
+
+    /// <summary>Últimos `limit` mensajes del manager (vista previa del dashboard).</summary>
+    public List<MessageData> GetRecentMessages(int managerId, int limit)
+    {
+        if (!EnsureDb() || limit <= 0) return new List<MessageData>();
+        return _db.Query<MessageData>(
+            "SELECT * FROM messages WHERE manager_id = ? ORDER BY id DESC LIMIT ?",
+            managerId, limit).ToList();
     }
 
     public void UpdateSeason(SeasonData season)
@@ -283,6 +307,44 @@ public partial class DatabaseManager
         return _db.Table<GameData>()
                   .Where(g => g.manager_id == managerId && g.game_type == "playoff")
                   .OrderBy(g => g.game_day)
+                  .ToList();
+    }
+
+    // ── SERIES DE PLAYOFFS (rivalidades/dinastías) ──────────────
+
+    /// <summary>
+    /// Registra una serie de playoffs al completarse. **Idempotente** por
+    /// (manager_id, season_id, label): el bucle diario reprocesa las series ya cerradas.
+    /// </summary>
+    public void RecordPlayoffSeries(PlayoffSeriesData series)
+    {
+        if (!EnsureDb() || series == null) return;
+        bool exists = _db.Table<PlayoffSeriesData>()
+                          .Any(s => s.manager_id == series.manager_id
+                                 && s.season_id == series.season_id
+                                 && s.label == series.label);
+        if (exists) return;
+        _db.Insert(series);
+    }
+
+    /// <summary>Todas las series resueltas de la partida (cronológico).</summary>
+    public List<PlayoffSeriesData> GetPlayoffSeries(int managerId)
+    {
+        if (!EnsureDb()) return new List<PlayoffSeriesData>();
+        return _db.Table<PlayoffSeriesData>()
+                  .Where(s => s.manager_id == managerId)
+                  .OrderBy(s => s.season_id).ThenBy(s => s.id)
+                  .ToList();
+    }
+
+    /// <summary>Series resueltas en las que participó un equipo (más recientes primero).</summary>
+    public List<PlayoffSeriesData> GetPlayoffSeriesOfTeam(int managerId, int teamId)
+    {
+        if (!EnsureDb()) return new List<PlayoffSeriesData>();
+        return _db.Table<PlayoffSeriesData>()
+                  .Where(s => s.manager_id == managerId
+                           && (s.high_team_id == teamId || s.low_team_id == teamId))
+                  .OrderByDescending(s => s.season_id).ThenByDescending(s => s.id)
                   .ToList();
     }
 

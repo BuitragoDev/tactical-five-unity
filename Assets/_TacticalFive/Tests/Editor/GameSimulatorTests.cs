@@ -195,4 +195,110 @@ public class GameSimulatorTests
         Assert.That(players[5].starter, Is.False);
         Assert.That(players[0].starter, Is.True);
     }
+
+    // ── Integridad de resultados y rotación (Fase 2) ─────────────
+
+    static List<PlayerData> AutoRoster(int baseId, int size = 12)
+    {
+        var list = new List<PlayerData>();
+        for (int i = 0; i < size; i++)
+        {
+            list.Add(new PlayerData
+            {
+                id = baseId + i,
+                first_name = "J" + i,
+                last_name = "Test",
+                position = PositionCodes.Order[i % PositionCodes.Order.Length],
+                secondary_position = PositionCodes.Order[(i + 2) % PositionCodes.Order.Length],
+                role = i < 1 ? PlayerRole.Estrella : i < 5 ? PlayerRole.Titular : PlayerRole.Banquillo,
+                overall = 80, speed = 80, shooting = 80, three_point = 80, passing = 80,
+                dribbling = 80, defense = 80, rebounding = 80, athleticism = 80, iq = 80,
+                steals = 80, blocks = 80, fisico = 99, morale = 50, rotation_minutes = -1
+            });
+        }
+        return list;
+    }
+
+    static GameData FakeGame() => new GameData
+    {
+        id = 1, season_id = 1, manager_id = 1, game_day = 1, game_date = "2026-10-22",
+        home_team_id = 1, away_team_id = 2, game_type = "regular"
+    };
+
+    [Test]
+    public void SimulateGame_ShortRoster_NeverEndsInTie()
+    {
+        // Con <2 jugadores se usa el marcador aleatorio de respaldo: nunca debe empatar.
+        var home = AutoRoster(1, 1);
+        var away = AutoRoster(100, 1);
+        for (int i = 0; i < 300; i++)
+        {
+            var r = GameSimulator.SimulateGame(FakeGame(), home, away, persistToDb: false);
+            Assert.That(r.home_score, Is.Not.EqualTo(r.away_score),
+                $"Empate en la iteración {i}: {r.home_score}-{r.away_score}");
+        }
+    }
+
+    [Test]
+    public void SimulateGame_FullRosters_AlwaysProducesWinner()
+    {
+        var home = AutoRoster(1);
+        var away = AutoRoster(100);
+        for (int i = 0; i < 60; i++)
+        {
+            var r = GameSimulator.SimulateGame(FakeGame(), home, away, persistToDb: false);
+            Assert.That(r.home_score, Is.Not.EqualTo(r.away_score));
+        }
+    }
+
+    [Test]
+    public void PrepareRotationMetadata_AllZeroPlans_FallsBackToAutomatic()
+    {
+        var ps = new List<GameSimulator.PlayerStatSnapshot>
+        {
+            Plan("PG", "SG", PlayerRole.Estrella,   90, 0, true),
+            Plan("SG", "SF", PlayerRole.Titular,    80, 0, true),
+            Plan("SF", "PF", PlayerRole.Banquillo,  75, 0, false),
+            Plan("PF", "C",  PlayerRole.Banquillo,  75, 0, false),
+            Plan("C",  "PF", PlayerRole.Banquillo,  75, 0, false),
+            Plan("PG", "SG", PlayerRole.Banquillo,  75, 0, false)
+        };
+
+        GameSimulator.PrepareRotationMetadata(ps);
+
+        Assert.That(ps.TrueForAll(p => !p.fixed_minutes), "Con todo a 0 la rotación vuelve a automática");
+        Assert.That(ps.TrueForAll(p => p.target_minutes > 0), "La heurística debe asignar minutos");
+    }
+
+    [Test]
+    public void InitialOnCourt_Strict_SkipsZeroMinuteStarter()
+    {
+        var ps = new List<GameSimulator.PlayerStatSnapshot>
+        {
+            Plan("PG", "SG", PlayerRole.Estrella,  90,  0, true),  // titular con plan 0: no debe empezar
+            Plan("SG", "SF", PlayerRole.Titular,   85, 30, true),
+            Plan("SF", "PF", PlayerRole.Titular,   84, 30, true),
+            Plan("PF", "C",  PlayerRole.Titular,   83, 30, true),
+            Plan("C",  "PF", PlayerRole.Titular,   82, 30, true),
+            Plan("PG", "SG", PlayerRole.Banquillo, 78, 20, false)
+        };
+
+        var on = GameSimulator.InitialOnCourt(ps, strict: true);
+
+        Assert.That(on.Count, Is.EqualTo(5));
+        Assert.That(on.Contains(0), Is.False, "Un titular con plan 0 no debe empezar");
+        Assert.That(on.Contains(5), Is.True, "Debe entrar el siguiente con minutos");
+    }
+
+    [Test]
+    public void InitialOnCourt_NonStrict_TakesFirstFive()
+    {
+        var ps = new List<GameSimulator.PlayerStatSnapshot>();
+        for (int i = 0; i < 8; i++)
+            ps.Add(Plan("PG", "SG", PlayerRole.Banquillo, 80, -1, i < 5));
+
+        var on = GameSimulator.InitialOnCourt(ps, strict: false);
+
+        Assert.That(on, Is.EquivalentTo(new[] { 0, 1, 2, 3, 4 }));
+    }
 }

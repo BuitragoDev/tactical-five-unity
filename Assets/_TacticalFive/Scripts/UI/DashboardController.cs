@@ -86,10 +86,14 @@ using System.Threading.Tasks;
     private Label _teamArenaCapacity;
     private VisualElement _teamReputationStars;
     private VisualElement _messagesBody;
+    private Label _storylineBadge; // Label (no VisualElement): se le escribe .text
 
     // Datos
     private List<TeamData> _allTeams;
     private List<GameData> _allGames;
+    // Récords por equipo calculados una vez por carga de _allGames (evita recorrer
+    // todos los partidos en cada llamada a GetTeamRecordShort).
+    private Dictionary<int, (int w, int l)> _teamRecordCache;
     private List<PlayerData> _players = new();
     private Dictionary<string, PlayerData> _playerByName = new();
 
@@ -124,6 +128,7 @@ using System.Threading.Tasks;
     private System.DateTime? _fastSimTarget;
     private string _fastSimStartDate;
     private bool _fastSimAborted;
+    private string _fastSimErrorMessage;
     private List<int> _fastSimAbortEmptySlots = new();
     private List<(LineupData li, PlayerData p)> _fastSimAbortInjured = new();
     private bool _fastSimSkipPreBatch;
@@ -230,6 +235,17 @@ using System.Threading.Tasks;
         _fastSimOfferPauseActive = false;
         _fastSimAbortOffers = false;
         GameResultCache.FastSimTargetDate = null;
+
+        // Liberar SIEMPRE el estado de carga: si no, _isLoading queda a true y el
+        // botón de avanzar deja de responder al volver (soft-lock). La transacción
+        // del día que pudiera quedar abierta la revierte el finally de ProcessGameDayRoutine.
+        _isLoading = false;
+        _spinScheduler?.Pause();
+        _spinScheduler = null;
+        if (_loadingSpinner != null) _loadingSpinner.style.display = DisplayStyle.None;
+        _btnAction?.SetEnabled(true);
+        SetSidebarNavigationEnabled(true);
+        ScreenManager.NavigationLocked = false;
     }
 
     void Update()
@@ -408,6 +424,17 @@ using System.Threading.Tasks;
         // Mensajes
         _messagesBody = _root.Q<VisualElement>("MessagesBody");
 
+        // Badge de hilo narrativo activo, junto al título del panel de noticias.
+        _storylineBadge = null;
+        var messagesHeaderLeft = _messagesBody?.parent?.parent?.Q<VisualElement>(className: "panel-header-left");
+        if (messagesHeaderLeft != null)
+        {
+            _storylineBadge = new Label();
+            _storylineBadge.AddToClassList("storyline-badge");
+            _storylineBadge.style.display = DisplayStyle.None;
+            messagesHeaderLeft.Add(_storylineBadge);
+        }
+
         // Forzar anchos de columnas Row 2 (USS flex no es fiable en build)
         var standingsPanel = _root.Q<VisualElement>("PanelStandings");
         if (standingsPanel != null)
@@ -466,6 +493,7 @@ using System.Threading.Tasks;
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
 
         // Clasificación: mostrar por defecto la conferencia de mi equipo
         if (_myTeam != null)
@@ -904,6 +932,9 @@ using System.Threading.Tasks;
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
+            // Red de seguridad: si no quedan partidos pero la fase no es terminal,
+            // avanzar/cerrar la temporada en lugar de dejar la partida bloqueada.
+            TryEscapeStuckPhase();
             if (!fastSim) HideLoading();
             yield break;
         }
@@ -961,7 +992,10 @@ using System.Threading.Tasks;
                         }
                         if (p.injury_days <= 0 && !teamsPlayToday.Contains(team.id))
                         {
-                            p.fisico = Mathf.Min(99, p.fisico + 8);
+                            // +10 en día de descanso: compensa el desgaste de la
+                            // temporada sin que los titulares acaben hundidos (antes
+                            // +8 dejaba un drenaje neto que hacía caer el acierto).
+                            p.fisico = Mathf.Min(99, p.fisico + 10);
                             conn.Update(p);
                         }
                     }
@@ -1196,11 +1230,12 @@ using System.Threading.Tasks;
         db.BeginTransaction();
         try
         {
+            // SIM-08: limpieza INCONDICIONAL. En un día sin partidos previos que crea
+            // clasificatorios, `gamesToday` se leyó vacío y quedaban resultados del día
+            // anterior mezclados en el cache.
+            GameResultCache.Clear();
             if (gamesToday.Count > 0)
-            {
-                GameResultCache.Clear();
                 GameResultCache.LastGameDay = gameDay;
-            }
         }
         catch (System.Exception ex)
         {
@@ -1253,6 +1288,9 @@ using System.Threading.Tasks;
             {
                 QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, gameDay, _season?.current_date ?? "");
 
+                // Motor de narrativa: abre/escala/cierra hilos (rachas) con noticias y efectos.
+                StorylineService.ProcessDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
+
                 AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
             }
 
@@ -1293,7 +1331,9 @@ using System.Threading.Tasks;
                         var awayP = GetActivePlayers(elimGame.away_team_id);
                         int elimHomeChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.home_team_id);
                         int elimAwayChem = DatabaseManager.Instance.GetTeamChemistry(elimGame.away_team_id);
-                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem, elimGame.home_team_id == _myTeam.id);
+                        var elimResult = GameSimulator.SimulateGame(elimGame, homeP, awayP, elimHomeChem, elimAwayChem,
+                            homePlan: PlanFor(elimGame.home_team_id), awayPlan: PlanFor(elimGame.away_team_id),
+                            homeCoachBonus: CoachBonusFor(elimGame.home_team_id), awayCoachBonus: CoachBonusFor(elimGame.away_team_id));
                         DatabaseManager.Instance.UpdateGame(elimGame);
                         ProcessGameFinances(elimGame, elimResult);
                         UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
@@ -1594,8 +1634,21 @@ using System.Threading.Tasks;
             ShowOfferResultModal("ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.\n\n" + ex.Message, -1);
             yield break;
         }
+        finally
+        {
+            // Red de seguridad: si la corrutina se aborta a mitad (StopAllCoroutines al
+            // salir de la pantalla) Unity ejecuta este finally. Sin él, la transacción
+            // quedaría abierta y bloquearía todas las escrituras de la sesión.
+            if (db.IsInTransaction)
+            {
+                try { db.Rollback(); } catch { }
+                GameResultCache.Clear();
+                Debug.LogWarning("[GameDay] Día abortado a mitad de transacción: revertido.");
+            }
+        }
 
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
 
         if (_showDeadlineWeekModal)
         {
@@ -1689,7 +1742,9 @@ using System.Threading.Tasks;
         var awayStarters = new HashSet<int>(awayPlayers.Take(5).Select(p => p.id));
         GameResultCache.GameStarters[game.id] = new HashSet<int>(homeStarters.Concat(awayStarters));
 
-        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem, isMyHomeGame);
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem,
+            homePlan: PlanFor(game.home_team_id), awayPlan: PlanFor(game.away_team_id),
+            homeCoachBonus: CoachBonusFor(game.home_team_id), awayCoachBonus: CoachBonusFor(game.away_team_id));
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
 
@@ -1710,6 +1765,9 @@ using System.Threading.Tasks;
                 mvp_player_id = mvpStats.player_id
             };
             DatabaseManager.Instance.SaveAllStarRecord(record);
+
+            // Convocatoria (sustituye a las stats del partido, que ya no se persisten).
+            DatabaseManager.Instance.SaveAllStarRoster(_manager.id, _season.id, homePlayers, awayPlayers);
 
             bool alreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
                 .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ALLSTAR
@@ -1802,7 +1860,7 @@ using System.Threading.Tasks;
         var myAffiliate = _myTeam != null ? DatabaseManager.Instance.GetGLeagueTeamByNbaTeam(_myTeam.id) : null;
         bool isMyHomeGame = myAffiliate != null && homeTeam.id == myAffiliate.id;
 
-        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, isMyHomeGame, persistToDb:false, glLeague:true);
+        var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, 50, 50, persistToDb:false, glLeague:true);
         DatabaseManager.Instance.UpdateGame(game);
 
         // Solo acumular stats de liga regular en gleague_season_stats;
@@ -1843,6 +1901,9 @@ using System.Threading.Tasks;
         if (fastSim)
         {
             _fastSimAborted = true;
+            // Guardar el motivo: al terminar el bucle se muestra al jugador (antes
+            // el error solo quedaba en la consola y la simulación se detenía en silencio).
+            _fastSimErrorMessage = $"{step}: {ex.Message}";
             _fastSimAbortEmptySlots.Clear();
             _fastSimAbortInjured.Clear();
         }
@@ -1864,6 +1925,7 @@ using System.Threading.Tasks;
         }
 
         _fastSimAborted = false;
+        _fastSimErrorMessage = null;
         _fastSimSkipPreBatch = false;
         _fastSimAutoFixAttempts = 0;
         _fastSimAbortEmptySlots = new List<int>();
@@ -2102,6 +2164,7 @@ using System.Threading.Tasks;
             _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
             _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
             _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
             Refresh();
 
             // Renderizar un frame por día para que el spinner de la cabecera
@@ -2114,11 +2177,18 @@ using System.Threading.Tasks;
         _players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
         _myTeam = DatabaseManager.Instance.GetTeamById(_myTeam.id);
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        _teamRecordCache = null;
         Refresh();
         GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
         HideLoading();
 
-        if (!_fastSimAborted && !_fastSimStopRequested)
+        if (_fastSimErrorMessage != null)
+        {
+            // La simulación se detuvo por un error: avisar en vez de salir en silencio.
+            ShowOfferResultModal("ERROR EN LA SIMULACIÓN",
+                "La simulación se detuvo por un error y el último día no se aplicó.\n\n" + _fastSimErrorMessage, -1);
+        }
+        else if (!_fastSimAborted && !_fastSimStopRequested)
         {
             // Calcular W/L del período simulado
             string endDate = _season?.current_date ?? _fastSimTarget?.ToString("yyyy-MM-dd") ?? "";
@@ -2262,6 +2332,10 @@ using System.Threading.Tasks;
         _btnAction.SetEnabled(false);
         _loadingSpinner.style.display = DisplayStyle.Flex;
 
+        // Bloquear navegación (sidebar + config → Menú principal) mientras corre.
+        SetSidebarNavigationEnabled(false);
+        ScreenManager.NavigationLocked = true;
+
         _spinScheduler = _root.schedule.Execute(() =>
         {
             if (_loadingSpinner == null) return;
@@ -2279,6 +2353,8 @@ using System.Threading.Tasks;
         _loadingSpinner.style.display = DisplayStyle.None;
         _btnAction.SetEnabled(true);
         _isLoading = false;
+        SetSidebarNavigationEnabled(true);
+        ScreenManager.NavigationLocked = false;
     }
 
     void CheckBudgetAfterGame()
@@ -2352,6 +2428,7 @@ using System.Threading.Tasks;
         db.BeginTransaction();
         try
         {
+        bool agentCounterShown = false; // solo una contraoferta por tanda (el resto, al inbox)
         foreach (var offer in offers)
         {
             var player = DatabaseManager.Instance.GetPlayerById(offer.player_id);
@@ -2457,9 +2534,23 @@ using System.Threading.Tasks;
                     if (leagueSettings != null)
                     {
                         bool proManagerOnly = _manager.game_mode == "promanager";
+                        bool ownRecentFA = DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id);
                         if (offer.is_two_way == 1)
                         {
-                            offerLegal = true;
+                            // El límite de 2 two-way se valida en la maduración: la UI
+                            // solo lo comprueba al abrir la oferta y se podían colar.
+                            offerLegal = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY
+                                      && TradeHelper.IsEligibleForTwoWay(player);
+                            illegalReason = "ya tienes 2 contratos two-way (o el jugador no es elegible)";
+                        }
+                        else if (ownRecentFA)
+                        {
+                            // FA propio reciente: se mantienen los Bird Rights (la UI ya
+                            // ofertaba con este máximo y la maduración los rechazaba).
+                            var bd = RosterController.GetMaxOfferBreakdown(player, leagueSettings, totalPayroll, true, proManagerOnly);
+                            long birdMax = bd.birdMax > 0 ? bd.birdMax : bd.capSpaceMax;
+                            offerLegal = offer.offer_salary <= birdMax;
+                            illegalReason = $"supera el máximo con Bird Rights (${birdMax:N0})";
                         }
                         else if (totalPayroll <= leagueSettings.salary_cap)
                         {
@@ -2613,6 +2704,38 @@ using System.Threading.Tasks;
                         category = NewsCategory.CLUB,
                         news_type = NewsType.FICHAJE_RECHAZADO
                     });
+
+                    // Contraoferta del agente (si queda margen legal y no es two-way).
+                    // El máximo legal se recalcula aquí: las variables de cap del bloque
+                    // anterior viven en otro ámbito.
+                    if (offer.is_two_way != 1 && !agentCounterShown)
+                    {
+                        var lsNegFA = DatabaseManager.Instance.GetLeagueSettings();
+                        if (lsNegFA != null)
+                        {
+                            long payrollFA = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary);
+                            long capFA = lsNegFA.salary_cap;
+                            long apron1FA = lsNegFA.apron > 0 ? lsNegFA.apron : TradeHelper.FIRST_APRON;
+                            long apron2FA = lsNegFA.repeater_apron > 0 ? lsNegFA.repeater_apron : TradeHelper.SECOND_APRON;
+                            long ntMleFA = lsNegFA.mid_level > 0 ? lsNegFA.mid_level : TradeHelper.NT_MLE;
+                            long tMleFA = lsNegFA.taxpayer_mid_level > 0 ? lsNegFA.taxpayer_mid_level : TradeHelper.T_MLE;
+                            long minFA = lsNegFA.minimum_salary > 0 ? lsNegFA.minimum_salary : TradeHelper.MIN_SALARY;
+                            bool proFA = _manager.game_mode == "promanager";
+
+                            long legalMax = payrollFA <= capFA ? Math.Max(0, capFA - payrollFA)
+                                          : (proFA && payrollFA <= apron1FA) ? tMleFA
+                                          : payrollFA <= apron1FA ? ntMleFA
+                                          : payrollFA <= apron2FA ? tMleFA
+                                          : minFA;
+
+                            long counter = NegotiationHelper.CounterSalary(offer.offer_salary, (int)acceptScore, legalMax);
+                            if (counter > offer.offer_salary)
+                            {
+                                agentCounterShown = true;
+                                ShowAgentCounterModal(player, counter, offer.offer_years, isRenewal: false);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -2705,6 +2828,22 @@ using System.Threading.Tasks;
                         category = NewsCategory.CLUB,
                         news_type = NewsType.OFERTA_RECHAZADA
                     });
+
+                    // Contraoferta del agente (la re-firma propia puede pasar del cap,
+                    // así que el techo es el valor de mercado del jugador).
+                    if (offer.is_two_way != 1 && !agentCounterShown)
+                    {
+                        var lsNeg = DatabaseManager.Instance.GetLeagueSettings();
+                        long capNeg = lsNeg != null ? lsNeg.salary_cap : TradeHelper.SALARY_CAP;
+                        long market = DatabaseManager.Instance.EstimateMarketSalary(player.GetCalculatedAverage(), capNeg);
+                        long legalMax = Math.Max(offer.offer_salary, market);
+                        long counter = NegotiationHelper.CounterSalary(offer.offer_salary, (int)acceptScore, legalMax);
+                        if (counter > offer.offer_salary)
+                        {
+                            agentCounterShown = true;
+                            ShowAgentCounterModal(player, counter, offer.offer_years, isRenewal: true);
+                        }
+                    }
                 }
             }
 
@@ -2763,6 +2902,145 @@ using System.Threading.Tasks;
             : resultSummary;
 
         ShowOfferResultModal(title, text, resultType);
+    }
+
+    // ── NEGOCIACIÓN CON EL AGENTE ───────────────────────────────────
+    /// <summary>Contraoferta del agente tras un rechazo por dinero: aceptarla ficha
+    /// (o renueva) con las nuevas condiciones; retirarse deja al jugador como estaba.</summary>
+    void ShowAgentCounterModal(PlayerData player, long counterSalary, int years, bool isRenewal)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box--modern");
+        box.style.width = 760;
+        _firedOverlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
+        var title = new Label("EL AGENTE PIDE MÁS");
+        title.AddToClassList("fired-modal-title");
+        header.Add(title);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+        var text = new Label();
+        text.AddToClassList("modal-text");
+        text.text = $"{player.first_name} {player.last_name} rechazó tu oferta, pero su agente cerraría por " +
+                    $"${counterSalary:N0} durante {years} año{(years != 1 ? "s" : "")}.\n\n¿Aceptas las nuevas condiciones?";
+        body.Add(text);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.style.flexDirection = FlexDirection.Row;
+        actions.style.marginTop = 18;
+
+        var accept = new Button { text = "ACEPTAR" };
+        accept.AddToClassList("btn-modal-confirm");
+        accept.RegisterCallback<ClickEvent>(_ => { PlayClick(); AcceptAgentCounter(player, counterSalary, years, isRenewal); });
+        CursorManager.Instance?.RegisterHandCursor(accept);
+        actions.Add(accept);
+
+        var reject = new Button { text = "RETIRARSE" };
+        reject.AddToClassList("btn-modal-confirm");
+        reject.AddToClassList("btn-modal-confirm--danger");
+        reject.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _firedOverlay.style.display = DisplayStyle.None;
+            Refresh();
+        });
+        CursorManager.Instance?.RegisterHandCursor(reject);
+        actions.Add(reject);
+
+        box.Add(actions);
+    }
+
+    void AcceptAgentCounter(PlayerData player, long counterSalary, int years, bool isRenewal)
+    {
+        _firedOverlay.style.display = DisplayStyle.None;
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        string playerName = $"{player.first_name} {player.last_name}";
+
+        if (!isRenewal && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER)
+        {
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 0,
+                sender_id = 0,
+                title = "Plantilla completa",
+                body = $"No se pudo fichar a {playerName}: la plantilla está al máximo ({TradeHelper.MAX_ROSTER}).",
+                game_day = _season.current_game_day,
+                game_date = _season.current_date,
+                created_at = now,
+                date_sent = now,
+                is_read = 0,
+                category = NewsCategory.CLUB,
+                news_type = NewsType.FICHAJE_RECHAZADO
+            });
+            Refresh();
+            return;
+        }
+
+        player.salary = counterSalary;
+        player.contract_years = years;
+        player.guaranteed_years = years;
+        player.has_team_option = 0;
+        player.has_player_option = 0;
+
+        if (!isRenewal)
+        {
+            player.is_two_way = 0;
+            DatabaseManager.Instance.MovePlayerToTeam(player, _myTeam.id);
+            DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
+            DatabaseManager.Instance.UpdatePlayer(player);
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season?.id ?? 0,
+                game_day = _season?.current_game_day ?? 0,
+                game_date = _season?.current_date ?? now,
+                team_id_from = 0,
+                team_id_to = _myTeam.id,
+                player_id = player.id,
+                trade_type = "free_agent"
+            });
+            AchievementService.EvaluateSignStarFA(_manager.id, _myTeam.id, _season?.id ?? 0, player);
+        }
+        else
+        {
+            // Re-firma de un FA propio reciente: devolverlo al equipo.
+            if (player.team_id == 0 && DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id))
+            {
+                DatabaseManager.Instance.MovePlayerToTeam(player, _myTeam.id);
+                DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
+            }
+            DatabaseManager.Instance.UpdatePlayer(player);
+        }
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
+            title = $"{(isRenewal ? "Contrato renovado" : "Fichaje")}: {playerName}",
+            body = isRenewal
+                ? NewsTexts.Renovacion(playerName, _myTeam.name, (int)counterSalary, years)
+                : NewsTexts.Fichaje(playerName, _myTeam.name, (int)counterSalary, years),
+            game_day = _season.current_game_day,
+            game_date = _season.current_date,
+            created_at = now,
+            date_sent = now,
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = isRenewal ? NewsType.RENOVACION : NewsType.FICHAJE
+        });
+
+        Debug.Log($"[Negotiation] Contraoferta aceptada: {playerName} ${counterSalary:N0} x {years}");
+        Refresh();
     }
 
     void ShowOfferResultModal(string title, string text, int resultType)
@@ -4309,6 +4587,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "IR AL MENU PRINCIPAL";
+        btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {
@@ -4375,6 +4654,91 @@ using System.Threading.Tasks;
             return (int)(date - seasonStart).TotalDays + 1;
         else
             return -(int)(seasonStart - date).TotalDays;
+    }
+
+    /// <summary>
+    /// Red de seguridad contra soft-locks de temporada. Se llama cuando no quedan
+    /// partidos pendientes pero la fase no es terminal (calendario parcial, datos
+    /// heredados de un guardado fallido, play-in sin seeds...): regenera el
+    /// calendario si falta o avanza/cierra la fase para que la partida no se quede
+    /// bloqueada para siempre.
+    /// </summary>
+    void TryEscapeStuckPhase()
+    {
+        if (_season == null || _manager == null) return;
+
+        int Count(string type) => DatabaseManager.Instance.Db.Table<GameData>()
+            .Count(g => g.manager_id == _manager.id && g.game_type == type);
+        bool NoPending(string type) => !DatabaseManager.Instance.Db.Table<GameData>()
+            .Any(g => g.manager_id == _manager.id && g.game_type == type && g.is_played == 0);
+
+        // 1. Temporada regular sin calendario (fallo de guardado heredado): regenerar.
+        if ((_season.phase == "preseason" || _season.phase == "regular") && Count("regular") == 0)
+        {
+            int count = ScheduleGenerator.GenerateSchedule(_season, DatabaseManager.Instance.GetAllTeams());
+            if (count > 0)
+            {
+                try
+                {
+                    var glTeams = DatabaseManager.Instance.GetGLeagueTeams();
+                    if (glTeams.Count > 0)
+                        GLeagueScheduleGenerator.GenerateSchedule(_season, glTeams);
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"[Dashboard] Error regenerando calendario G-League: {ex.Message}");
+                }
+
+                _season.generated = 1;
+                _season.phase = "regular";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.LogWarning($"[Dashboard] Temporada sin calendario: regenerados {count} partidos de liga regular.");
+            }
+            else
+            {
+                Debug.LogError("[Dashboard] No se pudo regenerar el calendario de la temporada.");
+            }
+            return;
+        }
+
+        // 2. Regular completa pero sin transición hecha.
+        if ((_season.phase == "preseason" || _season.phase == "regular") && NoPending("regular"))
+        {
+            PlayoffsGenerator.GeneratePlayIn(_season, _manager.id);
+            _season.phase = "playin";
+            DatabaseManager.Instance.UpdateSeason(_season);
+            Debug.LogWarning("[Dashboard] Regular sin partidos pendientes: Play-In generado y fase avanzada.");
+            return;
+        }
+
+        // 3. Play-In completo: generar playoffs o cerrar la temporada si no hay seeds.
+        if (_season.phase == "playin" && NoPending("playin"))
+        {
+            int created = PlayoffsGenerator.GeneratePlayoffs(_season, _manager.id);
+            if (created > 0)
+            {
+                _season.phase = "playoff";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.LogWarning($"[Dashboard] Play-In sin partidos pendientes: playoffs generados ({created}).");
+            }
+            else
+            {
+                // Sin seeds suficientes no se puede construir el bracket: cerrar la
+                // temporada es preferible a dejarla bloqueada para siempre.
+                _season.phase = "finished";
+                DatabaseManager.Instance.UpdateSeason(_season);
+                Debug.LogError("[Dashboard] Play-In sin partidos y sin seeds suficientes: temporada cerrada como 'finished'.");
+            }
+            return;
+        }
+
+        // 4. Playoffs completos.
+        if (_season.phase == "playoff" && NoPending("playoff"))
+        {
+            _season.phase = "finished";
+            DatabaseManager.Instance.UpdateSeason(_season);
+            Debug.LogWarning("[Dashboard] Playoffs sin partidos pendientes: temporada cerrada.");
+        }
     }
 
     int FindNextGameDay()
@@ -4536,7 +4900,6 @@ using System.Threading.Tasks;
     //  AI TRANSFERS
     // ═══════════════════════════════════════════
 
-    enum TeamStrategy { Rebuild, Balanced, Contend }
 
     bool IsDeadlineWeek()
     {
@@ -4600,6 +4963,35 @@ using System.Threading.Tasks;
     TeamStrategy GetTeamStrategy(int teamId)
     {
         return _teamStrategyCache.TryGetValue(teamId, out var s) ? s : TeamStrategy.Balanced;
+    }
+
+    /// <summary>Plan de partido de un equipo: el del usuario es persistente; el de
+    /// la IA se deriva de su estrategia de GM.</summary>
+    GamePlan PlanFor(int teamId)
+    {
+        if (_myTeam != null && teamId == _myTeam.id)
+        {
+            var userPlan = new GamePlan { pace = _myTeam.plan_pace, offense = _myTeam.plan_offense, defense = _myTeam.plan_defense };
+            var assistant = GetMyAssistant();
+            return CoachScheme.Blend(userPlan, assistant);
+        }
+        return GamePlan.FromStrategy(GetTeamStrategy(teamId));
+    }
+
+    /// <summary>Asistente del equipo del usuario (aporta esquema y bonus).</summary>
+    EmployeeData GetMyAssistant()
+    {
+        if (_myTeam == null) return null;
+        return DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
+            .FirstOrDefault(e => e.position == CoachScheme.POSITION && e.scheme_set == 1);
+    }
+
+    /// <summary>Bonus de rating del cuerpo técnico del equipo indicado.</summary>
+    int CoachBonusFor(int teamId)
+    {
+        if (_myTeam == null || teamId != _myTeam.id) return 0;
+        var assistant = GetMyAssistant();
+        return assistant != null ? CoachScheme.RatingBonus(assistant.reputation) : 0;
     }
 
     void ProcessAIMarket(int gameDay)
@@ -4924,9 +5316,15 @@ using System.Threading.Tasks;
         long cap = leagueSettings.salary_cap;
         int renewedCount = 0, lostCount = 0;
 
+        // Una sola query agregada en vez de una por jugador (N+1).
+        var gamesByPlayer = DatabaseManager.Instance.GetGamesPlayedByPlayerInSeason(_manager.id, _season.id);
+
         foreach (var team in allTeams)
         {
             if (team.id == _myTeam.id) continue;
+
+            // Nómina en curso del equipo (se actualiza al renovar).
+            long teamPayroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(p => p.salary);
 
             var expiringPlayers = db.Query<PlayerData>(
                 "SELECT * FROM players WHERE team_id = ? AND contract_years = 1 AND is_two_way = 0 AND is_on_ir = 0",
@@ -4939,7 +5337,20 @@ using System.Threading.Tasks;
 
                 var offer = CalculateAIRenewalOffer(player, team, cap);
 
-                int gamesPlayed = DatabaseManager.Instance.GetPlayerGamesPlayedInSeason(player.id, _season.id);
+                // No renovar si deja al equipo por encima del 2º apron (evita que las
+                // nóminas IA se disparen temporada a temporada).
+                long projected = teamPayroll - player.salary + offer.salary;
+                if (!TradeHelper.CanAIRenew(projected, leagueSettings))
+                {
+                    player.renewal_cooldown_day = _season.current_game_day + 15;
+                    db.Update(player);
+                    lostCount++;
+                    if (player.overall >= 90)
+                        AddAIRenewalNotification(player, team, false, offer);
+                    continue;
+                }
+
+                int gamesPlayed = gamesByPlayer.GetValueOrDefault(player.id, 0);
                 int teamChem = DatabaseManager.Instance.GetTeamChemistry(team.id);
                 float acceptScore = RosterController.CalculateAcceptScore(
                     player, offer.salary, offer.years, gamesPlayed, teamChem);
@@ -4955,6 +5366,7 @@ using System.Threading.Tasks;
                     player.has_player_option = 0;
                     player.renewal_cooldown_day = _season.current_game_day + 365;
                     db.Update(player);
+                    teamPayroll = projected;
                     renewedCount++;
 
                     if (player.overall >= 90)
@@ -5381,6 +5793,9 @@ using System.Threading.Tasks;
         int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(team.id);
         if (rosterCount >= TradeHelper.MAX_ROSTER && twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
 
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long aiPayroll = roster.Sum(p => p.salary);
+
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
         var pendingSATIds = GetPendingSATIds();
 
@@ -5411,6 +5826,11 @@ using System.Threading.Tasks;
             int chance = (int)Mathf.Clamp(team.reputation * 20 - player.overall * 0.5f + 30, 5, 95);
             if (_aiRng.Next(0, 100) >= chance) continue;
 
+            // Los two-way no computan contra el cap (igual que para el usuario).
+            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY : player.salary + 2_000_000;
+            if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings))
+                continue; // no cabe en el cap/excepciones: probar otro candidato
+
             player.team_id = team.id;
             player.last_team_id = team.id;
             if (signAsTwoWay)
@@ -5423,9 +5843,10 @@ using System.Threading.Tasks;
             else
             {
                 int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
-                player.salary += 2_000_000;
+                player.salary = newSalary;
                 player.contract_years = years;
                 player.guaranteed_years = years;
+                aiPayroll += newSalary;
             }
             DatabaseManager.Instance.AssignJerseyNumber(player, team.id);
             DatabaseManager.Instance.UpdatePlayer(player);
@@ -5921,6 +6342,53 @@ List<int> offeredPickIds = new List<int>();
             PlayClick();
             var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
+            // ── Revalidación obligatoria antes de mutar ──
+            // La oferta se generó cuando la plantilla/nómina eran otras; entre medias
+            // el jugador pudo fichar/cortar. Sin revalidar se pueden crear plantillas
+            // >17 o traspasos que incumplen el salary matching / apron.
+            {
+                // Salario estimado de los FA propios que se firmarían (S&T).
+                var signSalaries = new Dictionary<int, long>();
+                if (ourSATFAs != null && ourSATFAs.Count > 0)
+                {
+                    var lsSat = DatabaseManager.Instance.GetLeagueSettings();
+                    long myPaySat = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+                    foreach (var fa in ourSATFAs)
+                    {
+                        var bd = RosterController.GetMaxOfferBreakdown(fa, lsSat, myPaySat, true);
+                        long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(), lsSat != null ? lsSat.salary_cap : TradeHelper.SALARY_CAP);
+                        signSalaries[fa.id] = bd.birdMax > 0 ? bd.birdMax : market;
+                    }
+                }
+
+                var leagueChk = DatabaseManager.Instance.GetLeagueSettings();
+                long firstApronChk = leagueChk?.apron > 0 ? leagueChk.apron : TradeHelper.FIRST_APRON;
+                long secondApronChk = leagueChk?.repeater_apron > 0 ? leagueChk.repeater_apron : TradeHelper.SECOND_APRON;
+                long luxuryTaxChk = leagueChk?.luxury_tax > 0 ? leagueChk.luxury_tax : TradeHelper.LUXURY_TAX;
+
+                var errorsChk = TradeHelper.ValidateTrade(
+                    theirPlayers, ourPlayers,
+                    DatabaseManager.Instance.GetRosterCount(offer.team_id_from),
+                    DatabaseManager.Instance.GetRosterCount(_myTeam.id),
+                    _myTeam.name, DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary),
+                    aiTeam != null ? aiTeam.name : "IA",
+                    DatabaseManager.Instance.GetPlayersByTeam(offer.team_id_from).Sum(p => p.salary),
+                    aiTeam != null && aiTeam.first_apron_hard_capped == 1,
+                    _myTeam.first_apron_hard_capped == 1,
+                    firstApronChk, secondApronChk, luxuryTaxChk,
+                    null,
+                    signSalaries.Count > 0 ? signSalaries : null);
+
+                if (errorsChk.Count > 0)
+                {
+                    DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
+                    _firedOverlay.style.display = DisplayStyle.None;
+                    ShowOfferResultModal("TRASPASO NO VÁLIDO",
+                        "La oferta ya no es válida con tu plantilla actual:\n\n" + string.Join("\n", errorsChk), -1);
+                    return;
+                }
+            }
+
             // S&T: firmar los FA propios antes de traspazarlos a la IA
             if (ourSATFAs != null && ourSATFAs.Count > 0)
             {
@@ -5960,8 +6428,7 @@ List<int> offeredPickIds = new List<int>();
 
             foreach (var p in ourPlayers)
             {
-                p.team_id = offer.team_id_from;
-                DatabaseManager.Instance.UpdatePlayer(p);
+                DatabaseManager.Instance.MovePlayerToTeam(p, offer.team_id_from);
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
@@ -5976,8 +6443,7 @@ List<int> offeredPickIds = new List<int>();
 
             foreach (var p in theirPlayers)
             {
-                p.team_id = _myTeam.id;
-                DatabaseManager.Instance.UpdatePlayer(p);
+                DatabaseManager.Instance.MovePlayerToTeam(p, _myTeam.id);
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
                     season_id = _season?.id ?? 0,
@@ -6737,6 +7203,7 @@ List<int> offeredPickIds = new List<int>();
             activeIds.Add(player.id);
 
             var last5Stats = DatabaseManager.Instance.GetPlayerGameStats(player.id)
+                .Where(s => s.minutes > 0)
                 .OrderByDescending(s => s.game_id).Take(5).ToList();
             float avgRating = last5Stats.Count > 0 ? (float)last5Stats.Average(s => s.rating) : 15f;
 
@@ -6931,7 +7398,7 @@ List<int> offeredPickIds = new List<int>();
         if (result.injuries == null) return;
         foreach (var inj in result.injuries)
         {
-            if (inj.player_id == _myTeam.id || true) // Notify for all injuries affecting my team
+            // Avisar solo de las lesiones de jugadores de mi equipo.
             {
                 var player = DatabaseManager.Instance.GetPlayerById(inj.player_id);
                 if (player != null && player.team_id == _myTeam.id)
@@ -7077,8 +7544,10 @@ List<int> offeredPickIds = new List<int>();
     {
         if (_myTeam == null || _season == null || _manager == null) return;
 
-        // Payroll on game days ~1, 31, 61, 91, 121, 151, 181 (1st of each month)
-        int[] payrollDays = { 1, 31, 61, 91, 121, 151, 181 };
+        // Nómina mensual: 12 plazos de `salario/12` repartidos cada 15 días de la
+        // temporada (~181 días). Antes eran 7 pagos al año, así que solo se cobraba
+        // ~58% de la nómina y los presupuestos divergían al alza.
+        int[] payrollDays = { 1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166 };
         if (!payrollDays.Contains(gameDay)) return;
 
         foreach (var team in DatabaseManager.Instance.GetAllTeams())
@@ -7194,7 +7663,9 @@ List<int> offeredPickIds = new List<int>();
                 season_id = _season.id,
                 record_type = FinanceRecord.TYPE_TAX,
                 game_day = gameDay,
-                amount = -monthlyTax,
+                // Positivo como el resto de gastos: GetTotalExpenses suma los importes
+                // y con signo negativo el balance salía inflado.
+                amount = monthlyTax,
                 created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             });
         }
@@ -7329,20 +7800,23 @@ List<int> offeredPickIds = new List<int>();
 
     string GetTeamRecordShort(int teamId)
     {
-        int w = 0, l = 0;
-        foreach (var g in _allGames)
+        if (_teamRecordCache == null)
         {
-            if (g.is_played != 1 || g.game_type != "regular") continue;
-            if (g.home_team_id == teamId)
+            _teamRecordCache = new Dictionary<int, (int w, int l)>();
+            void Add(int id, bool won)
             {
-                if (g.home_score > g.away_score) w++; else l++;
+                var cur = _teamRecordCache.TryGetValue(id, out var r) ? r : (0, 0);
+                _teamRecordCache[id] = won ? (cur.Item1 + 1, cur.Item2) : (cur.Item1, cur.Item2 + 1);
             }
-            else if (g.away_team_id == teamId)
+            foreach (var g in _allGames)
             {
-                if (g.away_score > g.home_score) w++; else l++;
+                if (g.is_played != 1 || g.game_type != "regular") continue;
+                Add(g.home_team_id, g.home_score > g.away_score);
+                Add(g.away_team_id, g.away_score > g.home_score);
             }
         }
-        return $"{w} - {l}";
+        var rec = _teamRecordCache.TryGetValue(teamId, out var r2) ? r2 : (0, 0);
+        return $"{rec.Item1} - {rec.Item2}";
     }
 
     // ── PRÓXIMO PARTIDO ──────────────────────────────────
@@ -7701,12 +8175,38 @@ List<int> offeredPickIds = new List<int>();
 
     // ── MENSAJES ────────────────────────────────────────
 
+    /// <summary>Badge con el hilo narrativo activo más relevante del equipo.</summary>
+    void RefreshStorylineBadge()
+    {
+        if (_storylineBadge == null) return;
+
+        var active = DatabaseManager.Instance.GetActiveStorylines(_manager.id, _myTeam.id);
+
+        // Los hilos de jugador cuyo protagonista ya no está en la plantilla no se muestran
+        // (el motor los cierra al avanzar el día; esto evita verlos antes).
+        var rosterIds = new HashSet<int>(_players.Select(p => p.id));
+        active = active.Where(s => s.subject_player_id <= 0 || rosterIds.Contains(s.subject_player_id)).ToList();
+
+        if (active.Count == 0)
+        {
+            _storylineBadge.style.display = DisplayStyle.None;
+            return;
+        }
+
+        var top = active.OrderByDescending(s => s.intensity).First();
+        _storylineBadge.text = $"HILO: {top.title.ToUpper()}";
+        _storylineBadge.tooltip = string.Join("\n", active.Select(s => $"{s.title} (escalón {s.intensity})"));
+        _storylineBadge.style.display = DisplayStyle.Flex;
+    }
+
     void RefreshMessages()
     {
         if (_messagesBody == null || _manager == null) return;
         _messagesBody.Clear();
+        RefreshStorylineBadge();
 
-        var all = DatabaseManager.Instance.GetMessages(_manager.id);
+        // Solo los últimos: antes se cargaba toda la bandeja en cada refresco.
+        var all = DatabaseManager.Instance.GetRecentMessages(_manager.id, 20);
         if (all == null || all.Count == 0)
         {
             var lbl = new Label("NO HAY NOTICIAS");
@@ -7717,7 +8217,7 @@ List<int> offeredPickIds = new List<int>();
 
         var latest = all.OrderByDescending(m => m.id)
                         .Where(m => !m.title.StartsWith("Premios del Mes"))
-.Take(5).ToList();
+                        .Take(5).ToList();
 
         foreach (var msg in latest)
         {
@@ -7757,7 +8257,8 @@ List<int> offeredPickIds = new List<int>();
         string nt = msg.news_type;
 
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
-            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION)
+            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
+            || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)
         {
             string teamName = ExtractFirstTeamFromBody(msg.body);
             if (teamName != null)
@@ -7788,7 +8289,10 @@ List<int> offeredPickIds = new List<int>();
         }
 
         if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
-            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP)
+            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP
+            // Hilos narrativos de jugador: foto del protagonista
+            || nt == NewsType.SEQUIA || nt == NewsType.BAJA_ESTRELLA
+            || nt == NewsType.RUMOR_TRASPASO || nt == NewsType.DESCONTENTO)
         {
             string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
             if (playerName != null && _playerByName.TryGetValue(playerName, out var p))

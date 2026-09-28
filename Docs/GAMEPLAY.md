@@ -246,6 +246,79 @@ La G-League es una liga paralela real con calendario, partidos simulados, clasif
 
 ---
 
+## Narrative engine (storylines) — Fase 4
+
+Los **hilos narrativos** convierten los resultados reales en situaciones con continuidad
+(se abren, escalan y se cierran) y consecuencias. Viven en la tabla `storylines`
+(persistentes; el histórico sobrevive al rollover) y los gestiona `StorylineService`
+(estado) + `StorylineCatalog` (detectores **puros** y testables) a partir de un
+`StorylineContext` construido 1 vez por día y solo para el equipo del usuario.
+
+- **Ciclo:** `Start` → `Escalate` → `Resolve`. Cada transición escribe una noticia de
+  **PRENSA** (`MessageData`) y aplica consecuencias.
+- **Presupuestos:** máximo **4 hilos activos** por equipo; cada tipo tiene **cooldown**
+  (10-25 días) antes de poder reabrirse (**por protagonista** en los tipos de jugador);
+  los efectos se clampean por día
+  (moral ±3, química ±3, afición ±5) para no duplicar lo que ya mueven los partidos
+  (moral por forma/rol, afición por resultado).
+- **Hilos por jugador:** `jugador_caliente` y `sequia` admiten **varios hilos a la vez**
+  (hasta 2 protagonistas cada uno, `StorylineCatalog.MAX_PLAYER_HILOS`), porque cada
+  `storyline` lleva su `subject_player_id`: la sequía de un jugador no tapa la de otro.
+  El resto de tipos son de equipo (sujeto 0) y siguen siendo únicos.
+- **Tipos y umbrales** (`StorylineCatalog`):
+  | Tipo | Señal | Umbral |
+  |---|---|---|
+  | `racha_positiva` / `bache` | racha del equipo | 5 victorias/derrotas (escala cada 5) |
+  | `jugador_caliente` | puntos por partido | 3 partidos seguidos ≥27 (escala cada 2) |
+  | `sequia` | puntos por partido | 3 partidos seguidos por debajo de **su** umbral: `max(3, 45 % de su media anotadora de la temporada)`; exige ≥12 min de media y no aplica a `UltimoRecurso` |
+  | `descontento` | moral + minutos vs rol | moral <35 y <50% de los minutos esperados |
+  | `rumor_traspaso` | trade block / contrato expirante | expirante con moral <40 o en el mercado |
+  | `baja_estrella` | lesión | OVR ≥85 y ≥7 días de baja |
+  | `presion_gm` | afición y confianza | afición <30 y trust <45 |
+  | `caza_playoffs` | rank de conferencia | ≤25 partidos restantes y rank ≥7 |
+  | `crisis_economica` | presupuesto | presupuesto <0 o ≥2 avisos |
+  | `revancha_playoffs` | serie en curso vs historial | rival que nos eliminó antes (peso doble si fue en las Finales) |
+  | `dinastia` | `season_records` | 3+ títulos en 8 temporadas; escala con cada título |
+- **Elegibilidad de los hilos de jugador:** el umbral de sequía es **relativo** (un
+  especialista defensivo de 5 puntos no está "seco" cada noche; una estrella de 30 sí lo
+  está al anotar 14), se exige protagonismo (≥12 min de media en los últimos partidos) y
+  se excluye al `UltimoRecurso`. Los partidos sin minutos (DNP) no cuentan ni rompen la
+  racha: la racha se mide sobre partidos jugados; el que no juega es historia de
+  `descontento`, no de `sequia`.
+- **Desempate:** a igual racha, se narra la del jugador **más relevante** (mayor OVR; a
+  igual OVR, la media más alta).
+- **Visibilidad:** pestaña **HISTORIA** en Palmarés (activos + histórico con línea
+  temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
+- **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
+  motor (QN sigue con las del resto de la liga).
+
+## Rivalidades y dinastías
+
+- **Registro de series:** cada serie de playoffs se guarda **al cerrarse** en `playoff_series`
+  (`PlayoffsGenerator.AdvancePlayoffSeries`): `games` se purga en el rollover, así que el
+  histórico de cruces no se puede reconstruir después. Idempotente por
+  `(manager_id, season_id, label)`; el play-in no se registra.
+- **Rivalidad (`RivalryHelper`, puro):** agrega los cruces con cada rival → series, balance
+  V-D, cruces en Finales, último enfrentamiento y una **intensidad** = `series×10 +
+  finales×20 − |balance|×2` (+15 si el último cruce fue en las 3 últimas temporadas). A igual
+  intensidad desempata el número de series. `LastEliminationBy` devuelve el último verdugo.
+- **Prestigio y dinastía (`DynastyHelper`, puro):** derivados de `season_records`, sin esquema
+  nuevo: `Prestigio = títulos×3 + finales×2 + títulos de conferencia`. `IsDynasty` = **3+
+  títulos en una ventana de 8 temporadas**.
+- **Hilos:** `revancha_playoffs` se abre al cruzarse en una serie con el equipo que nos eliminó
+  antes (escalón 2 si fue en las Finales) y se cierra cuando esa serie deja de estar en juego;
+  `dinastia` se abre al alcanzar la ventana de títulos y escala con cada título nuevo (cooldown
+  30 días; el rollover cierra los hilos como `abandoned`, así que se reanuncia cada temporada).
+- **Cierre por salida del protagonista:** si un jugador con hilo abierto sale del equipo
+  (traspaso, buyout, agente libre o retiro), el hilo se cierra con `resolution = departed`
+  y con mensaje "el jugador salió del equipo". Se cierra **al instante** en el traspaso/buyout
+  (`StorylineService.CloseSubjectStorylines`) y `ProcessDay` lo re-verifica cada día como red
+  de seguridad (cierre silencioso: sin noticia ni efectos). El **badge** del Dashboard además
+  filtra los hilos cuyo protagonista ya no está en la plantilla, así que nunca se ve uno obsoleto.
+- **UI:** pestaña **RIVALIDADES** en Palmarés (ranking de prestigio/dinastías de la liga +
+  rivalidades de mi equipo) y una línea de rivalidad en el **PRONÓSTICO** de la previa cuando el
+  partido es de playoffs y hay historia previa.
+
 ## Cross-mechanic interaction diagram
 
 ```mermaid
