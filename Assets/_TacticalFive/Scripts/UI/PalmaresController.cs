@@ -16,7 +16,7 @@ public class PalmaresController : UIScreenController
     private Button _tabRivalidades;
     private VisualElement _tabContentRivalidades;
     private VisualElement _dinastiasBody, _rivalidadesBody;
-    private ScrollBar _dinastiasBar, _rivalidadesBar;
+    private CustomScrollbar.Handle _dinastiasBar, _rivalidadesBar;
     private VisualElement _historiaBody;
     private CustomScrollbar.Handle _historiaBar;
     private VisualElement _tabContentEquipos;
