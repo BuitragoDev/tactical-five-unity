@@ -46,7 +46,7 @@
 | CRÍTICOS | 9 | 9 |
 | ALTOS | 21 | **21** |
 | MEDIOS | ~32 | **32** |
-| BAJOS | ~12 | ~9 (quedan `QA-10` parcial, `QA-11` scrollbar nativa y `QA-12` overrides sin `base`) |
+| BAJOS | ~12 | **11** (queda `QA-12` overrides sin `base` y detalles menores) |
 | Tests | — | **191** (de los 25 propuestos: 10 cerrados, 15 requieren DB/UI) |
 
 > **Fase 1 completada.** **Fase 2 muy avanzada:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (índices, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11`, todo), economía (`ECO-03/04/05/07/08`, `SEA-10`), rendimiento (`REN-01`, `CON-07`, `CON-08`), UI (`UI-03/05/06`), limpieza de código muerto y corrección de docs (`QA-07/08`), y **tests de persistencia** (`GameSaveManagerTests`, 7) con `BaseDirOverride`.
@@ -630,7 +630,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 - `[x]` `QA-08` · `|| true` muerto → eliminado. → condición muerta. → Simplificar.
 - `[x]` `QA-09` · `GLeaguePostSeason` pasa `isHome=false` fijo → el parámetro ya no existe; la ventaja se deriva de `game.home_team_id` (SIM-01). (sin ventaja de casa en playoffs GL). → Pasar el flag real (tras arreglar `SIM-01`).
 - `[x]` `QA-10` · Formato de números inconsistente → `StatFormat` (cultura única con punto decimal) en Perfil y Stats; tooltips de eFG%/TS%/PER/VAL/TO/MIN (`es-ES` vs `InvariantCulture` en `PlayerProfileController.cs:193-206`) y solo hay tooltips en roles/badges G-League. → Centralizar formato y añadir tooltips (ver §9-A).
-- `[ ]` `QA-11` · `GamesController`/4 pantallas siguen usando `ScrollView` nativo pese al aviso de `Docs/UI_TOOLKIT.md:44` (`PreseasonController.cs:291`, `PlayoffsController.cs:25`, `SelectTeamController.cs:76`, `QuintetoController.cs:74`). → Migrar a la scrollbar propia.
+- `[x]` `QA-11` · 4 pantallas usaban `ScrollView` nativo sin el parche de barra (`Preseason`, `Playoffs`, `SelectTeam` ×3, `Quinteto`). → Migradas a la **barra propia** (`CustomScrollbar`: viewport + content + track/thumb). Las otras 12 pantallas con `ScrollView` nativo sí usan `ScrollBarBinder` (patrón aceptado).
 - `[ ]` `QA-12` · 13 controllers hacen override de `RegisterCallbacks()` sin `base` (los 12 documentados + `PreGameController`). → No copiar el patrón; migrar gradualmente a la base (algunos son de arranque y no la necesitan).
 
 ---
@@ -887,6 +887,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-28 | este commit | `QA-11` | Migradas a la barra propia las 4 pantallas pendientes: **Playoffs** (`PlayoffsScroll`→viewport/content, con el reset al colapsar paneles), **Preseason** (grid), **Quinteto** (panel de detalle, que alterna visible/oculto) y **SelectTeam** (grid, detalle y modal de plantilla). Enlazado una vez por visita (el árbol se recrea en Unity 6). |
 | 2026-09-28 | este commit | `QA-10` | `StatFormat`: cultura única para cifras de stats (punto decimal, antes Perfil usaba coma y Stats punto) + **tooltips** de eFG%/TS%/PER/VAL/TO/MIN en Perfil y de las cabeceras avanzadas en Stats. |
 | 2026-09-28 | este commit | `SEA-11` + regresión `SIM-14` | El All-Star ya no escribe `player_game_stats` (`SIM-14`) pero `GetAllStarAppearances` los contaba: nueva tabla **`all_star_roster`** (convocatoria por temporada, titulares+suplentes) escrita al simular el partido, usada por Palmarés y por `GetPlayerAwards` (la trayectoria ve a los 24, no a 5). Cierra `SEA-11`. |
 | 2026-09-27 | este commit | §9-B · rivalidades/dinastías | Tabla **`playoff_series`** (registro idempotente al cerrar cada serie en `AdvancePlayoffSeries`; el play-in no cuenta) + reglas puras `RivalryHelper` (rivales, balance, intensidad, último verdugo) y `DynastyHelper` (prestigio y dinastías desde `season_records`, 3+ títulos en 8 temporadas) + 2 hilos (`revancha_playoffs`, `dinastia`) + **pestaña RIVALIDADES** en Palmarés + línea de rivalidad en el PRONÓSTICO. +13 tests (191). |

@@ -283,18 +283,17 @@ public class PreseasonController : UIScreenController
 
     // ── TEAMS GRID ────────────────────────────────────────
 
+    private CustomScrollbar.Handle _teamsScrollBar;
+
     void BuildTeamsGrid()
     {
         _teamsGrid.Clear();
 
-        // Configurar el contenedor del ScrollView
-        var scroll = _root.Q<ScrollView>("TeamsScroll");
-        if (scroll != null)
-        {
-            scroll.contentContainer.style.flexDirection = FlexDirection.Row;
-            scroll.contentContainer.style.flexWrap = Wrap.Wrap;
-            scroll.contentContainer.style.alignContent = Align.FlexStart;
-        }
+        // Barra de scroll propia: enlazar una vez por visita (el árbol se recrea).
+        var viewport = _root.Q<VisualElement>("TeamsViewport");
+        if (viewport != null && (_teamsScrollBar == null || _teamsScrollBar.Viewport != viewport))
+            _teamsScrollBar = CustomScrollbar.Bind(viewport, _teamsGrid,
+                _root.Q<VisualElement>("TeamsScrollTrack"), _root.Q<VisualElement>("TeamsScrollThumb"));
 
         _teamAvgCache.Clear();
         foreach (var team in _allTeams)

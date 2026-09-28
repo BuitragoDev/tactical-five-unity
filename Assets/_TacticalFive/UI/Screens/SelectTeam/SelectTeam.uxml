@@ -21,16 +21,22 @@
                     <ui:Button name="TabEast" text="ESTE" class="tab-btn"/>
                     <ui:Button name="TabWest" text="OESTE" class="tab-btn"/>
                 </ui:VisualElement>
-                <ui:ScrollView name="GridScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="grid-scroll">
-                    <ui:VisualElement name="TeamsGrid" class="teams-grid"/>
-                </ui:ScrollView>
+                <ui:VisualElement class="grid-scroll-row">
+                    <ui:VisualElement name="GridViewport" class="grid-viewport">
+                        <ui:VisualElement name="TeamsGrid" class="teams-grid"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="GridScrollTrack" class="grid-scrollbar">
+                        <ui:VisualElement name="GridScrollThumb" class="grid-scrollbar-thumb" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
             <ui:VisualElement name="RightPanel" class="right-panel">
                 <ui:VisualElement name="DetailPlaceholder" class="detail-placeholder">
                     <ui:Label text="SELECCIONA UN EQUIPO" class="placeholder-text"/>
                 </ui:VisualElement>
-                <ui:ScrollView name="DetailScroll" horizontal-scrolling-enabled="false" mode="Vertical" class="right-scroll">
-                    <ui:VisualElement name="DetailPanel" class="detail-panel">
+                <ui:VisualElement name="DetailScrollRow" class="right-scroll-row">
+                  <ui:VisualElement name="DetailViewport" class="right-viewport">
+                    <ui:VisualElement name="DetailPanel" class="detail-panel right-content">
                         <ui:VisualElement class="detail-header">
                             <ui:VisualElement name="DetailLogo" class="detail-logo"/>
                             <ui:VisualElement class="detail-name-wrap">
@@ -102,8 +108,12 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:Button name="BtnShowSquad" text="VER PLANTILLA" class="btn-squad"/>
-                    </ui:VisualElement>
-                </ui:ScrollView>
+                                        </ui:VisualElement>
+                  </ui:VisualElement>
+                  <ui:VisualElement name="DetailScrollTrack" class="right-scrollbar">
+                    <ui:VisualElement name="DetailScrollThumb" class="right-scrollbar-thumb" />
+                  </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
@@ -121,12 +131,17 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-            <ui:ScrollView class="modal-scroll" horizontal-scrolling-enabled="false" mode="Vertical">
-                <ui:VisualElement class="modal-columns">
-                    <ui:VisualElement name="SquadColumnLeft" class="modal-column"/>
-                    <ui:VisualElement name="SquadColumnRight" class="modal-column"/>
+            <ui:VisualElement class="modal-scroll-row">
+                <ui:VisualElement name="SquadModalViewport" class="modal-viewport">
+                    <ui:VisualElement class="modal-columns modal-content">
+                        <ui:VisualElement name="SquadColumnLeft" class="modal-column"/>
+                        <ui:VisualElement name="SquadColumnRight" class="modal-column"/>
+                    </ui:VisualElement>
                 </ui:VisualElement>
-            </ui:ScrollView>
+                <ui:VisualElement name="SquadModalScrollTrack" class="modal-scrollbar">
+                    <ui:VisualElement name="SquadModalScrollThumb" class="modal-scrollbar-thumb" />
+                </ui:VisualElement>
+            </ui:VisualElement>
             <ui:VisualElement class="modal-footer">
                 <ui:Button name="BtnCloseSquad" text="CERRAR" class="modal-close"/>
             </ui:VisualElement>

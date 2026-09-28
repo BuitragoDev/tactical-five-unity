@@ -106,9 +106,9 @@
                         <ui:VisualElement name="DetailEmpty" class="detail-empty">
                             <ui:Label class="detail-empty-text" text="PASA EL RATÓN SOBRE UN JUGADOR" />
                         </ui:VisualElement>
-                        <ui:ScrollView name="DetailScroll" class="detail-scroll"
-                                       horizontal-scrolling-enabled="false" mode="Vertical">
-                            <ui:VisualElement name="DetailContent">
+                        <ui:VisualElement name="DetailScrollRow" class="detail-scroll-row">
+                          <ui:VisualElement name="DetailViewport" class="detail-viewport">
+                            <ui:VisualElement name="DetailContent" class="detail-content">
                                 <ui:VisualElement class="detail-top">
                                     <ui:VisualElement class="detail-name-block">
                                         <ui:Label name="DetailPlayerName" class="detail-player-name" text="" />
@@ -144,8 +144,12 @@
                                         <ui:Label class="season-stat-label" text="TAP" />
                                     </ui:VisualElement>
                                 </ui:VisualElement>
-                            </ui:VisualElement>
-                        </ui:ScrollView>
+                                                        </ui:VisualElement>
+                          </ui:VisualElement>
+                          <ui:VisualElement name="DetailScrollTrack" class="detail-scrollbar">
+                            <ui:VisualElement name="DetailScrollThumb" class="detail-scrollbar-thumb" />
+                          </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>

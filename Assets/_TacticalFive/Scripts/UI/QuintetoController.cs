@@ -25,7 +25,8 @@ using System.Linq;
     private PlayerData _selectedPlayer;
     private VisualElement _selectedSlot;
     private VisualElement _detailEmpty;
-    private ScrollView _detailScroll;
+    private VisualElement _detailScrollRow, _detailViewport, _detailContent;
+    private CustomScrollbar.Handle _detailScrollBar;
     private VisualElement _detailContent;
     private Label _detailPosBadge;
     private Label _detailPlayerName;
@@ -72,7 +73,9 @@ using System.Linq;
         _courtContainer = _root.Q<VisualElement>("CourtContainer");
 
         _detailEmpty = _root.Q<VisualElement>("DetailEmpty");
-        _detailScroll = _root.Q<ScrollView>("DetailScroll");
+        _detailScrollRow = _root.Q<VisualElement>("DetailScrollRow");
+        _detailViewport = _root.Q<VisualElement>("DetailViewport");
+        _detailContent = _root.Q<VisualElement>("DetailContent");
         _detailContent = _root.Q<VisualElement>("DetailContent");
         _detailPosBadge = _root.Q<Label>("DetailPosBadge");
         _detailPlayerName = _root.Q<Label>("DetailPlayerName");
@@ -488,7 +491,12 @@ using System.Linq;
     void ShowPlayerDetail(PlayerData p)
     {
         _detailEmpty.style.display = DisplayStyle.None;
-        _detailScroll.style.display = DisplayStyle.Flex;
+        _detailScrollRow.style.display = DisplayStyle.Flex;
+
+        // Barra de scroll propia del panel de detalle (una vez por visita).
+        if (_detailScrollBar == null || _detailScrollBar.Viewport != _detailViewport)
+            _detailScrollBar = CustomScrollbar.Bind(_detailViewport, _detailContent,
+                _root.Q<VisualElement>("DetailScrollTrack"), _root.Q<VisualElement>("DetailScrollThumb"));
 
         _detailPosBadge.text = string.IsNullOrEmpty(p.secondary_position)
             ? PositionCodes.GetName(p.position)
@@ -527,7 +535,7 @@ using System.Linq;
     void HidePlayerDetail()
     {
         _detailEmpty.style.display = DisplayStyle.Flex;
-        _detailScroll.style.display = DisplayStyle.None;
+        _detailScrollRow.style.display = DisplayStyle.None;
     }
 
     int PlayerAge(PlayerData p)
