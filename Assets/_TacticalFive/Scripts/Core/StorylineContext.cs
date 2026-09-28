@@ -28,6 +28,17 @@ public class StorylineContext
     /// <summary>Puntos por partido de la temporada por jugador (base de los umbrales relativos).</summary>
     public Dictionary<int, float> SeasonPpg = new();
 
+    /// <summary>Series de playoffs ya resueltas en las que participó mi equipo (rivalidades).</summary>
+    public List<PlayoffSeriesData> MySeries = new();
+    /// <summary>Todos los season_records de la partida (dinastías/prestigio).</summary>
+    public List<SeasonRecord> SeasonRecords = new();
+    /// <summary>Rival de la serie de playoffs en curso (0 si no hay serie activa de mi equipo).</summary>
+    public int CurrentSeriesOpponentId;
+    /// <summary>Etiqueta de la serie en curso (`playoff-r1-east-1v8`…).</summary>
+    public string CurrentSeriesLabel = "";
+    /// <summary>Equipo rival de la serie en curso (null si no hay serie activa).</summary>
+    public TeamData CurrentSeriesOpponent;
+
     /// <summary>Posición en la conferencia (1 = primero; 0 = sin dato).</summary>
     public int ConferenceRank;
     /// <summary>Partidos de liga regular que quedan.</summary>
@@ -61,6 +72,25 @@ public class StorylineContext
             DatabaseManager.Instance.GetStandingsGames(manager.id));
 
         ctx.Roster = DatabaseManager.Instance.GetPlayersByTeam(myTeam.id);
+
+        // Rivalidades/dinastías: series ya resueltas de mi equipo, series que se están
+        // jugando ahora (partidos de playoff sin jugar) y el palmarés completo.
+        ctx.MySeries = DatabaseManager.Instance.GetPlayoffSeriesOfTeam(manager.id, myTeam.id);
+        ctx.SeasonRecords = DatabaseManager.Instance.GetAllSeasonRecords();
+
+        var nextPlayoff = DatabaseManager.Instance.Db.Table<GameData>()
+            .Where(g => g.manager_id == manager.id && g.game_type == "playoff" && g.is_played == 0
+                     && (g.home_team_id == myTeam.id || g.away_team_id == myTeam.id))
+            .OrderBy(g => g.game_day)
+            .FirstOrDefault();
+        if (nextPlayoff != null)
+        {
+            ctx.CurrentSeriesLabel = nextPlayoff.series_label ?? "";
+            ctx.CurrentSeriesOpponentId = nextPlayoff.home_team_id == myTeam.id
+                ? nextPlayoff.away_team_id
+                : nextPlayoff.home_team_id;
+            ctx.CurrentSeriesOpponent = DatabaseManager.Instance.GetTeamById(ctx.CurrentSeriesOpponentId);
+        }
 
         // Una consulta para los últimos partidos de toda la plantilla (los partidos de
         // la temporada se purgan en el rollover, así que todas las filas son actuales).

@@ -527,7 +527,8 @@ public class MessagesController : UIScreenController
         string nt = msg.news_type;
 
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
-            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION)
+            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
+            || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)
         {
             string teamName = ExtractFirstTeamFromBody(msg.body);
             if (teamName != null)
@@ -558,7 +559,10 @@ public class MessagesController : UIScreenController
         }
 
         if (nt == NewsType.TRIPLE_DOBLE || nt == NewsType.EXPLOSION
-            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP)
+            || nt == NewsType.FICHAJE || nt == NewsType.HARD_CAP
+            // Hilos narrativos de jugador: foto del protagonista
+            || nt == NewsType.SEQUIA || nt == NewsType.BAJA_ESTRELLA
+            || nt == NewsType.RUMOR_TRASPASO || nt == NewsType.DESCONTENTO)
         {
             string playerName = ExtractFirstFromBody(msg.body, _playerByName.Keys);
             if (playerName != null && _playerByName.TryGetValue(playerName, out var p))

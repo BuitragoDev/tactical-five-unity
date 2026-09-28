@@ -11,6 +11,8 @@ public static class NewsType
     public const string BAJA_ESTRELLA = "baja_estrella";
     public const string RUMOR_TRASPASO = "rumor_traspaso";
     public const string DESCONTENTO = "descontento";
+    public const string REVANCHA = "revancha";
+    public const string DINASTIA = "dinastia";
 
     // ── PARTIDOS / RESULTADOS ──
     public const string RESULTADO = "resultado";

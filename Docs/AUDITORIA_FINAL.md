@@ -47,7 +47,7 @@
 | ALTOS | 21 | **21** |
 | MEDIOS | ~32 | ~31 (solo `SEA-11` parcial: All-Star / 2º quinteto) |
 | BAJOS | ~12 | ~9 (quedan `QA-10` parcial, `QA-11` scrollbar nativa y `QA-12` overrides sin `base`) |
-| Tests | — | **176** (de los 25 propuestos: 10 cerrados, 15 requieren DB/UI) |
+| Tests | — | **191** (de los 25 propuestos: 10 cerrados, 15 requieren DB/UI) |
 
 > **Fase 1 completada.** **Fase 2 muy avanzada:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (índices, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11` parcial), economía (`ECO-03/04/05/07/08`, `SEA-10`), rendimiento (`REN-01`, `CON-07`, `CON-08`), UI (`UI-03/05/06`), limpieza de código muerto y corrección de docs (`QA-07/08`), y **tests de persistencia** (`GameSaveManagerTests`, 7) con `BaseDirOverride`.
 > **Fase 2 cerrada salvo dos menores diferidos a propósito:** `UI-04` (re-bind del scrollbar *dentro* de una visita en 7 pantallas; el `BindScrollBar` está duplicado y el riesgo de romper el scroll supera al beneficio: hacerlo al unificar la scrollbar compartida) y `CON-05` (cachear standings por día; el coste real es ~1.230 filas/día, impacto bajo). Los tests de `InitSaveSlot`/`StartNewSeason` necesitan una `DatabaseManager` viva en EditMode (se abordarán si se añade un arnés de tests con DB).
@@ -776,7 +776,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | `[ ]` | Parte médico y recuperación realista | Tipos de lesión con tiempos y recaídas | `injury_days`, `GameSimulator` | Media |
 | `[ ]` | Camp de pretemporada con decisiones | Foco por jugador, efectos y coste de fatiga | `TrainingData`, `Records` (rollover) | Media |
 | `[x]` | IA con gestión real de cap (`ECO-06`) | Helper de cap compartido con el usuario | `TradeHelper`, `DashboardController` (`ECO-06`) | Alta |
-| `[~]` | Rivalidades/dinastías (en curso: tabla `playoff_series` + prestige desde `season_records` + 2 hilos) | Récords de series y prestige de franquicia | `season_records`, `standings` | Media |
+| `[x]` | Rivalidades/dinastías: tabla `playoff_series` (registro al cerrar la serie) + `RivalryHelper`/`DynastyHelper` (prestige desde `season_records`) + pestaña RIVALIDADES + 2 hilos (`revancha_playoffs`, `dinastia`) + línea en el PRONÓSTICO | Récords de series y prestige de franquicia | `season_records`, `standings` | Media |
 
 ### C. Grandes (1-3 meses)
 | Estado | Idea | Aporta | Sistemas a tocar | Prioridad |
@@ -789,7 +789,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | `[ ]` | All-Star weekend jugable | Contenido | `GameSimulator`, `all_star_records` | Baja-media |
 
 ### D. Killer features
-1. **Modo histórico / eras** — empezar en cualquier temporada histórica con plantillas/palmarés reales (base ya existente: `HallOfFameSeeder`, `PalmaresSeeder`, `HistoricalPlayerStatsSeeder`, `RetiredNumberSeeder`) y reescribir la historia. *Coste:* alto (necesita datasets y lógica de bootstrap de liga). *Riesgo:* datos.
+1. **Modo histórico / eras** *(pendiente)* — empezar en cualquier temporada histórica con plantillas/palmarés reales (base ya existente: `HallOfFameSeeder`, `PalmaresSeeder`, `HistoricalPlayerStatsSeeder`, `RetiredNumberSeeder`) y reescribir la historia. *Coste:* alto (necesita datasets y lógica de bootstrap de liga). *Riesgo:* datos.
 2. **Motor de narrativa ("storylines") — HECHO** (v2): 10 tipos de hilo con detectores puros, `storylines` persistente, pestaña HISTORIA, badge y noticias de PRENSA con efectos; hilos por jugador y umbrales relativos en el pulido posterior. *Impacto:* convierte números en drama.
 3. **MyLeague / Editor total** — llevar `EditorController` a editor de liga completo (equipos, ciudades, reglas, draft classes, logos, pabellones — ya hay `CustomScopes`/`TeamImages`) con export/import. *Coste:* alto. *Impacto:* multiplica la vida útil.
 4. **Broadcast en vivo narrado** — posición a posición con comentario (ya se captura `PlayByPlayLogs`) + odds internas. *Coste:* bajo-medio. *Impacto:* espectáculo.
@@ -852,7 +852,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 - [x] `CON-05`: récords por equipo cacheados por carga de partidos (antes 4 recorridos por refresco).
 - [x] `UI-04`: barra de scroll enlazada **una vez por visita** (`ScrollBarBinder` con `ConditionalWeakTable`); fin de los handlers duplicados en las 7 pantallas del patrón copiado.
 - [x] QoL: **copias de seguridad** desde Cargar Partida (`GUARDAR COPIA` / `RESTAURAR COPIA`): backup `.db` en `saves/exports` con `wal_checkpoint`, restauración al siguiente slot libre, modales con **logo del equipo**, alto fijo + scroll lateral, fecha/tamaño, borrado de copias y botón **ABRIR CARPETA**. El resumen de temporada y el autosave diario ya existían.
-- [x] Killer feature: **Motor de narrativa** completo (v2) — 10 tipos de hilo, catálogo de **detectores puros**, `StorylineContext` (1-2 queries/día), máx. 4 activos + cooldown por tipo/protagonista, noticias de PRENSA y efectos clampeados; **pestaña HISTORIA** en Palmarés y **badge** en el Dashboard; hilos cerrados como `abandoned` en el rollover. 19 tests. **Pulido posterior:** hilos de jugador con **varios protagonistas**, sequía con umbral **relativo** (`max(3, 45 %)`), mínimo de minutos y desempate por relevancia. **Pendiente:** rivalidades/dinastías (en curso, ver §9-B) e hitos de legado.
+- [x] Killer feature: **Motor de narrativa** completo (v2) — 10 tipos de hilo, catálogo de **detectores puros**, `StorylineContext` (1-2 queries/día), máx. 4 activos + cooldown por tipo/protagonista, noticias de PRENSA y efectos clampeados; **pestaña HISTORIA** en Palmarés y **badge** en el Dashboard; hilos cerrados como `abandoned` en el rollover. 19 tests. **Pulido posterior:** hilos de jugador con **varios protagonistas**, sequía con umbral **relativo** (`max(3, 45 %)`), mínimo de minutos y desempate por relevancia. **Rivalidades/dinastías hechas después** (ver §9-B) y enganchadas al motor como hilos. **Pendiente:** hitos de legado (agregado de carrera por jugador).
 
 ---
 
@@ -887,6 +887,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | 2026-09-26 | `18d72664` | SIM-05, CON-06 | Alineación incompleta (<5 sanos) pasa a resultado sintético con aviso, en vez de simular con 2-4 en pista; partidos jugados por jugador en **una sola query** (`GetGamesPlayedByPlayerInSeason`) para las renovaciones IA (fin del N+1). |
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
+| 2026-09-27 | este commit | §9-B · rivalidades/dinastías | Tabla **`playoff_series`** (registro idempotente al cerrar cada serie en `AdvancePlayoffSeries`; el play-in no cuenta) + reglas puras `RivalryHelper` (rivales, balance, intensidad, último verdugo) y `DynastyHelper` (prestigio y dinastías desde `season_records`, 3+ títulos en 8 temporadas) + 2 hilos (`revancha_playoffs`, `dinastia`) + **pestaña RIVALIDADES** en Palmarés + línea de rivalidad en el PRONÓSTICO. +13 tests (191). |
 | 2026-09-27 | este commit | Fase 4 · narrativa (pulido) | **Hilos por jugador:** `jugador_caliente` y `sequia` admiten varios a la vez (uno por protagonista, `detectPlayers` + `StorylineSubjects`, tope `MAX_PLAYER_HILOS=2`; `MAX_ACTIVE` 3→4, cooldown por protagonista). **Sequía creíble:** umbral relativo a la media (`ColdThreshold`, suelo 3), mínimo 12 min de media, sin `UltimoRecurso`, desempate por OVR y cierre del hilo con su sujeto (antes aplicaba moral a toda la plantilla). +3 tests (176). |
 | 2026-09-27 | este commit | Fase 2 · BAJOS | Cerrados `QA-02` (clamp de años de contrato), `QA-03/04` (slots/borrado), `QA-05` (template validado y rename atómico), `QA-06` (`_transitioning`), `QA-07` (docs de callbacks), `QA-08` (`|| true`), `QA-09` (ventaja de casa en playoffs GL), `UI-08` (NRE de `FullScreenUI`), `UI-09` (confirmación al RESETEAR del Editor). Quedan solo `QA-10` (formato), `QA-11` (scrollbar nativa en 4 pantallas), `QA-12` (overrides sin `base`) y `SEA-11` (All-Star/2º quinteto). |
 | 2026-09-27 | este commit | Fase 2 · MEDIOS | Cerrados `ECO-11` (máximo del FA externo), `ECO-13` (`TryClampOffer`), `ECO-14` (edad two-way), `ECO-15` (`ApplySwap`/`CountDistinctOwners`), `SIM-06` (lesiones solo a quien juega), `SIM-07/08` (`GameResultCache` al cargar y limpieza incondicional del día), `SEA-11` (DPOY y 6º hombre a `season_records`), y marcados por verificación `ECO-12`, `SIM-09/10/11/14`, `CON-05`, `UI-10`. +7 tests (167). Quedan `UI-08/09` y los BAJOS. |
@@ -929,7 +930,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 
 - Archivos `.cs`: **172** · Líneas: **68.325** (a 2026-09-27, tras las Fases 1-4)
 - Pantallas `UIDocument`: **47** (todas con `case` en `GoTo` y campo asignado)
-- Tests EditMode: **176** (17 archivos) — `TradeHelperTests` 30 · `StorylineServiceTests` 28 · `GLLeagueHelperTests` 22 · `GameSimulatorTests` 14 · `AdvancedStatsHelperTests` 11 · `GameSaveManagerTests` 11 · `ObjectiveHelperTests` 10 · `HallOfFameHelperTests` 9 · `GamePlanTests` 6 · `PlayerProgressionTests` 6 · `ScoutingHelperTests` 6 · `HistoricalStatsRulesTests` 5 · `CoachSchemeTests` 4 · `DraftGeneratorTests` 4 · `NegotiationHelperTests` 4 · `PlayerDataTests` 4 · `EditModeSmokeTests` 2
+- Tests EditMode: **191** (19 archivos) — `TradeHelperTests` 30 · `StorylineServiceTests` 28 · `GLLeagueHelperTests` 22 · `GameSimulatorTests` 14 · `AdvancedStatsHelperTests` 11 · `GameSaveManagerTests` 11 · `ObjectiveHelperTests` 10 · `HallOfFameHelperTests` 9 · `GamePlanTests` 6 · `PlayerProgressionTests` 6 · `ScoutingHelperTests` 6 · `HistoricalStatsRulesTests` 5 · `CoachSchemeTests` 4 · `DraftGeneratorTests` 4 · `NegotiationHelperTests` 4 · `PlayerDataTests` 4 · `RivalryHelperTests` 5 · `DynastyHelperTests` 5 · `EditModeSmokeTests` 2
 - Archivos con `[Indexed]`: **4**
 - Superficie de red/procesos externos: **ninguna** (no hay `UnityWebRequest`, `HttpClient`, `Process.Start`): el "apartado de seguridad" se reduce a robustez frente a datos corruptos.
 

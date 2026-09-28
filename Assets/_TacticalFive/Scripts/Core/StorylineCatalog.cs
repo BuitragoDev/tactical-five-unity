@@ -78,6 +78,8 @@ public static class StorylineCatalog
         new StorylineDef { type = StorylineType.JugadorCaliente, cooldownDays = 15, detect = DetectHotHand, detectPlayers = DetectHotHandPlayers },
         new StorylineDef { type = StorylineType.Sequia,          cooldownDays = 15, detect = DetectSlump,   detectPlayers = DetectSlumpPlayers },
         new StorylineDef { type = StorylineType.CrisisEconomica, cooldownDays = 25, detect = DetectEconomicCrisis },
+        new StorylineDef { type = StorylineType.RevanchaPlayoffs, cooldownDays = 30, detect = DetectRevenge },
+        new StorylineDef { type = StorylineType.Dinastia,          cooldownDays = 30, detect = DetectDynasty },
     };
 
     public static StorylineDef Find(string type) => All.FirstOrDefault(d => d.type == type);
@@ -724,6 +726,122 @@ public static class StorylineCatalog
                     : $"{subject.first_name} {subject.last_name} acumula {best.Value.Item2} partidos por debajo de los {ColdThreshold(ctx, subject)} puntos. Empieza a ser un problema serio para el equipo.",
                 newsType = up ? NewsType.EXPLOSION : NewsType.SEQUIA,
                 morale = up ? 2 : -2
+            });
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Revancha de playoffs: serie en curso contra el equipo que nos eliminó antes (más
+    /// peso si fue en las Finales). Se cierra cuando esa serie deja de estar en juego.
+    /// </summary>
+    public static List<StorylineTransition> DetectRevenge(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        int opponentId = ctx.CurrentSeriesOpponentId;
+        var elimination = opponentId > 0
+            ? RivalryHelper.LastEliminationBy(ctx.MySeries, ctx.myTeam.id, opponentId)
+            : null;
+
+        var result = new List<StorylineTransition>();
+
+        if (active == null)
+        {
+            if (elimination == null) return result;
+
+            string rival = ctx.CurrentSeriesOpponent != null ? ctx.CurrentSeriesOpponent.name : "el rival";
+            bool finals = elimination.stage == "r4";
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Start,
+                intensity = finals ? 2 : 1,
+                title = $"Revancha contra {rival}",
+                summary = finals ? "Se cruzan otra vez en las Finales" : "Reencuentro de playoffs",
+                body = finals
+                    ? $"{ctx.myTeam.name} vuelve a cruzarse con {rival} en las Finales, el mismo rival que le arrebató el título. La serie se vive como una auténtica revancha."
+                    : $"{ctx.myTeam.name} se mide otra vez a {rival} en playoffs, el equipo que le dejó fuera la última vez que se cruzaron. Hay cuentas pendientes.",
+                newsType = NewsType.REVANCHA,
+                fan = finals ? 3 : 2,
+                morale = 2
+            });
+            return result;
+        }
+
+        if (elimination == null)
+        {
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Resolve,
+                resolution = StorylineResolution.Completed,
+                title = "La revancha llega a su fin",
+                summary = "La serie con el viejo verdugo ya no está en juego",
+                body = $"{active.title} llega a su fin: la serie con ese rival ya no está en juego.",
+                newsType = NewsType.REVANCHA
+            });
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Dinastía: mi equipo acumula títulos en una ventana corta (3+ en 8 temporadas). Se
+    /// anuncia al inicio de la temporada siguiente a cada título y escala con cada uno.
+    /// </summary>
+    public static List<StorylineTransition> DetectDynasty(StorylineContext ctx, StorylineDef def, StorylineData active)
+    {
+        var prestige = DynastyHelper.Of(ctx.SeasonRecords, ctx.myTeam.id);
+        var result = new List<StorylineTransition>();
+
+        if (!prestige.isDynasty)
+        {
+            if (active == null) return result;
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Resolve,
+                resolution = StorylineResolution.Broken,
+                title = "Fin de la dinastía",
+                summary = "Ya no hay 3 títulos en 8 temporadas",
+                body = $"{active.title} llega a su fin: los títulos ya no se concentran en una ventana de {DynastyHelper.DYNASTY_WINDOW} temporadas.",
+                newsType = NewsType.DINASTIA
+            });
+            return result;
+        }
+
+        int milestone = Mathf.Clamp(prestige.titles - (DynastyHelper.DYNASTY_TITLES - 1), 1, 4);
+        string window = $"{prestige.titles} títulos en {DynastyHelper.DYNASTY_WINDOW} temporadas";
+
+        if (active == null)
+        {
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Start,
+                intensity = milestone,
+                title = $"Dinastía en {ctx.myTeam.name}",
+                summary = window,
+                body = $"{ctx.myTeam.name} ha construido una dinastía: {window}. La liga entera mira al proyecto como la referencia de la década.",
+                newsType = NewsType.DINASTIA,
+                fan = 3,
+                chemistry = 1,
+                morale = 2
+            });
+            return result;
+        }
+
+        if (milestone > active.intensity)
+        {
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Escalate,
+                intensity = milestone,
+                title = $"La dinastía de {ctx.myTeam.name} crece",
+                summary = window,
+                body = $"{ctx.myTeam.name} suma otro título a su dinastía: {window}. Cada vez son más los que hablan de un ciclo histórico.",
+                newsType = NewsType.DINASTIA,
+                fan = 2,
+                morale = 1
             });
         }
         return result;

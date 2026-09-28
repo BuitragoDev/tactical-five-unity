@@ -16,6 +16,10 @@ public static class StorylineType
     public const string PresionGM = "presion_gm";             // afición/confianza bajo mínimos
     public const string CazaPlayoffs = "caza_playoffs";       // pelea por el play-in / riesgo lottery
     public const string CrisisEconomica = "crisis_economica"; // presupuesto en rojo
+
+    // Rivalidades / dinastías
+    public const string RevanchaPlayoffs = "revancha_playoffs"; // reencuentro con quien nos eliminó
+    public const string Dinastia = "dinastia";                  // ventana de títulos (3+ en 8 años)
 }
 
 /// <summary>Motivo del cierre del hilo.</summary>

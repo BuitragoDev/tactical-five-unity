@@ -8247,7 +8247,8 @@ List<int> offeredPickIds = new List<int>();
         string nt = msg.news_type;
 
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
-            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION)
+            || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
+            || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)
         {
             string teamName = ExtractFirstTeamFromBody(msg.body);
             if (teamName != null)

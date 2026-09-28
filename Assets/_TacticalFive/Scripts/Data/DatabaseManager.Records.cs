@@ -2142,6 +2142,15 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    /// <summary>Todos los season_records de la partida (para dinastías/prestigio histórico).</summary>
+    public List<SeasonRecord> GetAllSeasonRecords()
+    {
+        if (!EnsureDb()) return new List<SeasonRecord>();
+        return _db.Table<SeasonRecord>()
+                  .OrderBy(r => r.season_id)
+                  .ToList();
+    }
+
     public HistoricalRecordData GetHistoricalRecord(string statType)
     {
         if (!EnsureDb()) return null;

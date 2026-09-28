@@ -659,3 +659,75 @@
     padding: 12px;
     white-space: normal;
 }
+
+/* ── PESTAÑA RIVALIDADES (dinastías + series de playoffs) ── */
+.rival-hint {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(150, 162, 186);
+    margin-bottom: 10px;
+}
+.rival-body {
+    flex-direction: column;
+    flex-shrink: 0; /* el contenido desborda el viewport: así el scroll tiene recorrido */
+}
+.rival-row {
+    flex-direction: row;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background-color: rgba(42, 95, 201, 0.08);
+    border-width: 1px;
+    border-color: rgb(60, 70, 92);
+    border-radius: 8px;
+}
+.rival-logo {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    margin-right: 10px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.rival-col {
+    flex-direction: column;
+    flex-grow: 1;
+    min-width: 0;
+}
+.rival-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(240, 244, 250);
+}
+.rival-meta {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 15px;
+    color: rgb(179, 190, 214);
+}
+.rival-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    flex-shrink: 0;
+    font-size: 14px;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    margin-left: 8px;
+    border-width: 1px;
+    border-radius: 6px;
+    color: rgb(150, 162, 186);
+    border-color: rgb(60, 70, 92);
+    -unity-text-align: middle-center;
+}
+.rival-badge--hot {
+    color: rgb(248, 196, 64);
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.12);
+}
+.rival-empty {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(150, 162, 186);
+    padding: 12px;
+    white-space: normal;
+}

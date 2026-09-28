@@ -70,7 +70,7 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id`, `season_id`, `champion_id`, `finalist_id`, `finals_result`, `east/west/div1..6_champion_id`, `finals_mvp_id`, `finals_mvp_rating`, `season_mvp_id/rating/games`, `rookie_of_year_id/rating/games`, `best_defender_id`, `sixth_man_id`, `most_improved_id`, `all_star_pg/sg/sf/pf/c_id`, `first_team_pg..c`, `second_team_pg..c`.
 
 ### finance_records (`FinanceRecord`)
-`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) Current `ProcessTeamLuxuryTax` writes type 10 as a negative amount, unlike the other expense writers; consumers do not normalize this sign [F].
+`id`, `team_id`, `season_id`, `record_type`, `game_day`, `amount`, `created_at`. Types: `1=Taquilla, 2=Abonos, 3=Patrocinios, 4=Televisión, 5=Remodelación, 6=Despido, 7=Sueldos jugadores, 8=Sueldos empleados, 9=Préstamo, 10=Luxury tax, 11=Buyout`. (`GetTotalIncome` = types ≤4; `GetTotalExpenses` = types ≥5.) `ProcessTeamLuxuryTax` escribe type 10 en **positivo** (`ECO-05`); la migración `loan_records_reclassified` normaliza los registros antiguos.
 
 ### storylines (`StorylineData`)
 
@@ -89,6 +89,33 @@ Hilos narrativos persistentes (motor de narrativa, Fase 4). CRUD en el partial
 | `resolved` | INTEGER | 0 abierto / 1 cerrado |
 | `resolution` | TEXT | "" / broken / completed / abandoned (rollover) |
 | `started_at` | TEXT | |
+
+Los tipos de jugador (`jugador_caliente`, `sequia`) admiten **varios hilos a la vez, uno por
+protagonista** (`subject_player_id`); el resto son de equipo (sujeto 0). Desde el pulido:
+umbral de sequía **relativo** (`max(3, 45 %)` de la media, `ColdThreshold`), mínimo de minutos
+y desempate por relevancia (OVR).
+
+### playoff_series (`PlayoffSeriesData`)
+
+Series de playoffs **ya resueltas** (rivalidades/dinastías). Se escribe al cerrarse la serie
+en `PlayoffsGenerator.AdvancePlayoffSeries`, porque `games` se purga en el rollover: sin esta
+tabla no habría histórico de enfrentamientos. CRUD en `DatabaseManager.Games.cs`.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | INTEGER PK AI | |
+| `manager_id` / `season_id` | INTEGER | |
+| `label` | TEXT | `series_label` original (`playoff-r1-east-1v8`, `playoff-r4-finals`…). **Clave de idempotencia** junto a manager/temporada |
+| `stage` | TEXT | `r1`/`r2`/`r3`/`r4` (Finales) — `PlayoffsGenerator.ParseSeriesLabel` |
+| `conference` | TEXT | `East`/`West`/"" (Finales) |
+| `high_team_id` / `low_team_id` | INTEGER | teamA (ventaja de cancha) / teamB |
+| `high_wins` / `low_wins` | INTEGER | victorias de cada uno en la serie |
+| `winner_id` / `loser_id` | INTEGER | |
+| `game_day` | INTEGER | jornada del último partido de la serie |
+
+> El **play-in no se registra** (son partidos sueltos, no series). Reglas puras de agregación:
+> `RivalryHelper` (rivales, balance, intensidad, último verdugo) y `DynastyHelper` (prestigio y
+> dinastías derivadas de `season_records`).
 
 ### messages (`MessageData`)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.

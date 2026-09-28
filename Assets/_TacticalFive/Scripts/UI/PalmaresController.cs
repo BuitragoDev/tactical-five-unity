@@ -13,6 +13,10 @@ public class PalmaresController : UIScreenController
     private Button _tabSalonFama;
     private Button _tabHistoria;
     private VisualElement _tabContentHistoria;
+    private Button _tabRivalidades;
+    private VisualElement _tabContentRivalidades;
+    private VisualElement _dinastiasBody, _rivalidadesBody;
+    private ScrollBar _dinastiasBar, _rivalidadesBar;
     private VisualElement _historiaBody;
     private CustomScrollbar.Handle _historiaBar;
     private VisualElement _tabContentEquipos;
@@ -73,6 +77,7 @@ public class PalmaresController : UIScreenController
         _tabAllStar = _root.Q<Button>("TabAllStar");
         _tabSalonFama = _root.Q<Button>("TabSalonFama");
         _tabHistoria = _root.Q<Button>("TabHistoria");
+        _tabRivalidades = _root.Q<Button>("TabRivalidades");
 
         _tabContentEquipos = _root.Q<VisualElement>("TabContentEquipos");
         _tabContentJugadores = _root.Q<VisualElement>("TabContentJugadores");
@@ -81,6 +86,9 @@ public class PalmaresController : UIScreenController
         _tabContentSalonFama = _root.Q<VisualElement>("TabContentSalonFama");
         _tabContentHistoria = _root.Q<VisualElement>("TabContentHistoria");
         _historiaBody = _root.Q<VisualElement>("HistoriaBody");
+        _tabContentRivalidades = _root.Q<VisualElement>("TabContentRivalidades");
+        _dinastiasBody = _root.Q<VisualElement>("DinastiasBody");
+        _rivalidadesBody = _root.Q<VisualElement>("RivalidadesBody");
 
         _titlesRankingBody = _root.Q<VisualElement>("TitlesRankingBody");
         _finalsHistoryBody = _root.Q<VisualElement>("FinalsHistoryBody");
@@ -152,6 +160,7 @@ public class PalmaresController : UIScreenController
         _tabAllStar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("allstar"); });
         _tabSalonFama?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("salonfama"); });
         _tabHistoria?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("historia"); });
+        _tabRivalidades?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowTab("rivalidades"); });
     }
 
     protected override void Refresh()
@@ -168,6 +177,7 @@ public class PalmaresController : UIScreenController
         _tabAllStar.RemoveFromClassList("palmares-tab--active");
         _tabSalonFama.RemoveFromClassList("palmares-tab--active");
         _tabHistoria?.RemoveFromClassList("palmares-tab--active");
+        _tabRivalidades?.RemoveFromClassList("palmares-tab--active");
 
         _tabContentEquipos.style.display = DisplayStyle.None;
         _tabContentJugadores.style.display = DisplayStyle.None;
@@ -175,6 +185,7 @@ public class PalmaresController : UIScreenController
         _tabContentAllStar.style.display = DisplayStyle.None;
         _tabContentSalonFama.style.display = DisplayStyle.None;
         if (_tabContentHistoria != null) _tabContentHistoria.style.display = DisplayStyle.None;
+        if (_tabContentRivalidades != null) _tabContentRivalidades.style.display = DisplayStyle.None;
 
         switch (tab)
         {
@@ -207,6 +218,11 @@ public class PalmaresController : UIScreenController
                 _tabHistoria.AddToClassList("palmares-tab--active");
                 _tabContentHistoria.style.display = DisplayStyle.Flex;
                 BuildHistoriaTab();
+                break;
+            case "rivalidades":
+                _tabRivalidades.AddToClassList("palmares-tab--active");
+                _tabContentRivalidades.style.display = DisplayStyle.Flex;
+                BuildRivalidadesTab();
                 break;
         }
     }
@@ -270,6 +286,145 @@ public class PalmaresController : UIScreenController
         _historiaBar = CustomScrollbar.Bind(
             _root.Q<VisualElement>("HistoriaViewport"), _historiaBody,
             _root.Q<VisualElement>("HistoriaTrack"), _root.Q<VisualElement>("HistoriaThumb"));
+    }
+
+    // ── PESTAÑA RIVALIDADES (dinastías + series de playoffs) ──
+
+    void BuildRivalidadesTab()
+    {
+        if (_dinastiasBody == null || _rivalidadesBody == null || _manager == null || _myTeam == null) return;
+        _dinastiasBody.Clear();
+        _rivalidadesBody.Clear();
+
+        BuildDinastiasList();
+        BuildRivalidadesList();
+
+        _dinastiasBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("DinastiasViewport"), _dinastiasBody,
+            _root.Q<VisualElement>("DinastiasTrack"), _root.Q<VisualElement>("DinastiasThumb"));
+        _rivalidadesBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("RivalidadesViewport"), _rivalidadesBody,
+            _root.Q<VisualElement>("RivalidadesTrack"), _root.Q<VisualElement>("RivalidadesThumb"));
+    }
+
+    /// <summary>Ranking de prestigio de la liga (títulos/finales/conferencias por equipo).</summary>
+    void BuildDinastiasList()
+    {
+        var ranking = DynastyHelper.LeagueRanking(DatabaseManager.Instance.GetAllSeasonRecords(), 12);
+        if (ranking.Count == 0)
+        {
+            _dinastiasBody.Add(EmptyRivalLabel("Todavía no hay títulos registrados."));
+            return;
+        }
+
+        foreach (var p in ranking)
+        {
+            var team = _allTeams?.FirstOrDefault(t => t.id == p.teamId);
+
+            var row = new VisualElement();
+            row.AddToClassList("rival-row");
+
+            var logo = new VisualElement();
+            logo.AddToClassList("rival-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var col = new VisualElement();
+            col.AddToClassList("rival-col");
+
+            var name = new Label(team?.name ?? $"Equipo {p.teamId}");
+            name.AddToClassList("rival-title");
+            col.Add(name);
+
+            var meta = new Label($"{p.titles} títulos · {p.finals} finales · {p.conferenceTitles} conferencias");
+            meta.AddToClassList("rival-meta");
+            col.Add(meta);
+            row.Add(col);
+
+            var badge = new Label(p.isDynasty ? "DINASTÍA" : $"PRESTIGIO {p.prestige}");
+            badge.AddToClassList("rival-badge");
+            if (p.isDynasty) badge.AddToClassList("rival-badge--hot");
+            row.Add(badge);
+
+            _dinastiasBody.Add(row);
+        }
+    }
+
+    /// <summary>Rivales de mi equipo en playoffs (balance de series y último cruce).</summary>
+    void BuildRivalidadesList()
+    {
+        var series = DatabaseManager.Instance.GetPlayoffSeriesOfTeam(_manager.id, _myTeam.id);
+        var rivals = RivalryHelper.RivalsOf(series, _myTeam.id, _season?.id ?? 0);
+
+        if (rivals.Count == 0)
+        {
+            _rivalidadesBody.Add(EmptyRivalLabel("Sin cruces de playoffs todavía: las rivalidades aparecerán aquí."));
+            return;
+        }
+
+        var seasons = DatabaseManager.Instance.GetAllSeasons();
+
+        foreach (var r in rivals)
+        {
+            var team = _allTeams?.FirstOrDefault(t => t.id == r.opponentId);
+
+            var row = new VisualElement();
+            row.AddToClassList("rival-row");
+
+            var logo = new VisualElement();
+            logo.AddToClassList("rival-logo");
+            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+                logo.style.backgroundImage = new StyleBackground(sp);
+            row.Add(logo);
+
+            var col = new VisualElement();
+            col.AddToClassList("rival-col");
+
+            var name = new Label(team?.name ?? $"Equipo {r.opponentId}");
+            name.AddToClassList("rival-title");
+            col.Add(name);
+
+            string lastYear = "";
+            var lastSeason = seasons?.FirstOrDefault(x => x.id == r.lastSeasonId);
+            if (lastSeason != null)
+                lastYear = $" {lastSeason.year_start}-{lastSeason.year_end % 100:D2}";
+
+            var meta = new Label(
+                $"{r.series} series · {r.wins}-{r.losses}"
+                + (string.IsNullOrEmpty(r.lastStage) ? "" : $" · último: {StageLabel(r.lastStage)}{lastYear} ({RivalryResultLabel(r.lastWon)})"));
+            meta.AddToClassList("rival-meta");
+            col.Add(meta);
+            row.Add(col);
+
+            var badge = new Label(IntensityLabel(r.intensity));
+            badge.AddToClassList("rival-badge");
+            if (r.intensity >= 30) badge.AddToClassList("rival-badge--hot");
+            row.Add(badge);
+
+            _rivalidadesBody.Add(row);
+        }
+    }
+
+    static string StageLabel(string stage) => stage switch
+    {
+        "r1" => "1ª ronda",
+        "r2" => "2ª ronda",
+        "r3" => "final de conferencia",
+        "r4" => "FINALES",
+        _ => stage ?? ""
+    };
+
+    static string RivalryResultLabel(bool won) => won ? "ganamos" : "eliminados";
+
+    static string IntensityLabel(int intensity)
+        => intensity >= 30 ? "RIVALIDAD FUERTE" : intensity >= 15 ? "RIVALIDAD" : "CRUCE";
+
+    static Label EmptyRivalLabel(string text)
+    {
+        var lbl = new Label(text);
+        lbl.AddToClassList("rival-empty");
+        return lbl;
     }
 
     static string ResolutionLabel(string resolution) => resolution switch

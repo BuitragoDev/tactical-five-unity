@@ -277,6 +277,8 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   | `presion_gm` | afición y confianza | afición <30 y trust <45 |
   | `caza_playoffs` | rank de conferencia | ≤25 partidos restantes y rank ≥7 |
   | `crisis_economica` | presupuesto | presupuesto <0 o ≥2 avisos |
+  | `revancha_playoffs` | serie en curso vs historial | rival que nos eliminó antes (peso doble si fue en las Finales) |
+  | `dinastia` | `season_records` | 3+ títulos en 8 temporadas; escala con cada título |
 - **Elegibilidad de los hilos de jugador:** el umbral de sequía es **relativo** (un
   especialista defensivo de 5 puntos no está "seco" cada noche; una estrella de 30 sí lo
   está al anotar 14), se exige protagonismo (≥12 min de media en los últimos partidos) y
@@ -289,6 +291,27 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
   motor (QN sigue con las del resto de la liga).
+
+## Rivalidades y dinastías
+
+- **Registro de series:** cada serie de playoffs se guarda **al cerrarse** en `playoff_series`
+  (`PlayoffsGenerator.AdvancePlayoffSeries`): `games` se purga en el rollover, así que el
+  histórico de cruces no se puede reconstruir después. Idempotente por
+  `(manager_id, season_id, label)`; el play-in no se registra.
+- **Rivalidad (`RivalryHelper`, puro):** agrega los cruces con cada rival → series, balance
+  V-D, cruces en Finales, último enfrentamiento y una **intensidad** = `series×10 +
+  finales×20 − |balance|×2` (+15 si el último cruce fue en las 3 últimas temporadas). A igual
+  intensidad desempata el número de series. `LastEliminationBy` devuelve el último verdugo.
+- **Prestigio y dinastía (`DynastyHelper`, puro):** derivados de `season_records`, sin esquema
+  nuevo: `Prestigio = títulos×3 + finales×2 + títulos de conferencia`. `IsDynasty` = **3+
+  títulos en una ventana de 8 temporadas**.
+- **Hilos:** `revancha_playoffs` se abre al cruzarse en una serie con el equipo que nos eliminó
+  antes (escalón 2 si fue en las Finales) y se cierra cuando esa serie deja de estar en juego;
+  `dinastia` se abre al alcanzar la ventana de títulos y escala con cada título nuevo (cooldown
+  30 días; el rollover cierra los hilos como `abandoned`, así que se reanuncia cada temporada).
+- **UI:** pestaña **RIVALIDADES** en Palmarés (ranking de prestigio/dinastías de la liga +
+  rivalidades de mi equipo) y una línea de rivalidad en el **PRONÓSTICO** de la previa cuando el
+  partido es de playoffs y hay historia previa.
 
 ## Cross-mechanic interaction diagram
 

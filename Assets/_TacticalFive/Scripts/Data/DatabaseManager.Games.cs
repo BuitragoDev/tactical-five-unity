@@ -310,4 +310,42 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    // ── SERIES DE PLAYOFFS (rivalidades/dinastías) ──────────────
+
+    /// <summary>
+    /// Registra una serie de playoffs al completarse. **Idempotente** por
+    /// (manager_id, season_id, label): el bucle diario reprocesa las series ya cerradas.
+    /// </summary>
+    public void RecordPlayoffSeries(PlayoffSeriesData series)
+    {
+        if (!EnsureDb() || series == null) return;
+        bool exists = _db.Table<PlayoffSeriesData>()
+                          .Any(s => s.manager_id == series.manager_id
+                                 && s.season_id == series.season_id
+                                 && s.label == series.label);
+        if (exists) return;
+        _db.Insert(series);
+    }
+
+    /// <summary>Todas las series resueltas de la partida (cronológico).</summary>
+    public List<PlayoffSeriesData> GetPlayoffSeries(int managerId)
+    {
+        if (!EnsureDb()) return new List<PlayoffSeriesData>();
+        return _db.Table<PlayoffSeriesData>()
+                  .Where(s => s.manager_id == managerId)
+                  .OrderBy(s => s.season_id).ThenBy(s => s.id)
+                  .ToList();
+    }
+
+    /// <summary>Series resueltas en las que participó un equipo (más recientes primero).</summary>
+    public List<PlayoffSeriesData> GetPlayoffSeriesOfTeam(int managerId, int teamId)
+    {
+        if (!EnsureDb()) return new List<PlayoffSeriesData>();
+        return _db.Table<PlayoffSeriesData>()
+                  .Where(s => s.manager_id == managerId
+                           && (s.high_team_id == teamId || s.low_team_id == teamId))
+                  .OrderByDescending(s => s.season_id).ThenByDescending(s => s.id)
+                  .ToList();
+    }
+
 }

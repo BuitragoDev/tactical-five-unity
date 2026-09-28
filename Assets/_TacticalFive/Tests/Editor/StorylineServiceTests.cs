@@ -513,4 +513,105 @@ public class StorylineServiceTests
         };
         Assert.That(StorylineService.CurrentStreak(games, 1), Is.EqualTo(2));
     }
+
+    // ── RIVALIDADES Y DINASTÍAS ─────────────────────────────
+
+    static PlayoffSeriesData Series(int season, string stage, int high, int low, int winner)
+        => new PlayoffSeriesData
+        {
+            season_id = season, stage = stage, label = $"playoff-{stage}-x",
+            high_team_id = high, low_team_id = low,
+            winner_id = winner, loser_id = winner == high ? low : high,
+            game_day = 100
+        };
+
+    [Test]
+    public void DetectRevenge_OpensWhenFacingOldExecutioner()
+    {
+        var ctx = Ctx();
+        ctx.myTeam = new TeamData { id = 1, name = "Mi Equipo" };
+        ctx.CurrentSeriesOpponentId = 2;
+        ctx.CurrentSeriesOpponent = new TeamData { id = 2, name = "Viejos Rivales" };
+        ctx.MySeries = new List<PlayoffSeriesData> { Series(2028, "r4", 2, 1, 2) }; // me eliminaron en las Finales
+
+        var def = StorylineCatalog.Find(StorylineType.RevanchaPlayoffs);
+        var t = StorylineCatalog.DetectRevenge(ctx, def, null);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Start));
+        Assert.That(t[0].intensity, Is.EqualTo(2), "fue en las Finales");
+        Assert.That(t[0].body, Does.Contain("Viejos Rivales"));
+    }
+
+    [Test]
+    public void DetectRevenge_DoesNotOpenWithoutHistory()
+    {
+        var ctx = Ctx();
+        ctx.myTeam = new TeamData { id = 1, name = "Mi Equipo" };
+        ctx.CurrentSeriesOpponentId = 2;
+        ctx.CurrentSeriesOpponent = new TeamData { id = 2, name = "Nuevos" };
+        ctx.MySeries = new List<PlayoffSeriesData>();
+
+        var def = StorylineCatalog.Find(StorylineType.RevanchaPlayoffs);
+        Assert.That(StorylineCatalog.DetectRevenge(ctx, def, null), Is.Empty);
+    }
+
+    [Test]
+    public void DetectRevenge_ResolvesWhenSeriesIsNotInPlay()
+    {
+        var ctx = Ctx();
+        ctx.myTeam = new TeamData { id = 1, name = "Mi Equipo" };
+        ctx.CurrentSeriesOpponentId = 0; // sin serie activa
+
+        var active = new StorylineData { id = 7, type = StorylineType.RevanchaPlayoffs,
+                                         title = "Revancha contra X", resolved = 0 };
+        var def = StorylineCatalog.Find(StorylineType.RevanchaPlayoffs);
+        var t = StorylineCatalog.DetectRevenge(ctx, def, active);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+    }
+
+    [Test]
+    public void DetectDynasty_OpensWithThreeTitlesInWindow()
+    {
+        var ctx = Ctx();
+        ctx.myTeam = new TeamData { id = 1, name = "Mi Equipo" };
+        ctx.SeasonRecords = new List<SeasonRecord>
+        {
+            new SeasonRecord { season_id = 1, champion_id = 1 },
+            new SeasonRecord { season_id = 2, champion_id = 1 },
+            new SeasonRecord { season_id = 3, champion_id = 1 }
+        };
+
+        var def = StorylineCatalog.Find(StorylineType.Dinastia);
+        var t = StorylineCatalog.DetectDynasty(ctx, def, null);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Start));
+        Assert.That(t[0].intensity, Is.EqualTo(1), "3 títulos -> escalón 1");
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(0), "es un hilo de equipo");
+    }
+
+    [Test]
+    public void DetectDynasty_EscalatesWithMoreTitles()
+    {
+        var ctx = Ctx();
+        ctx.myTeam = new TeamData { id = 1, name = "Mi Equipo" };
+        ctx.SeasonRecords = new List<SeasonRecord>
+        {
+            new SeasonRecord { season_id = 1, champion_id = 1 },
+            new SeasonRecord { season_id = 2, champion_id = 1 },
+            new SeasonRecord { season_id = 3, champion_id = 1 },
+            new SeasonRecord { season_id = 4, champion_id = 1 }
+        };
+
+        var active = new StorylineData { id = 5, type = StorylineType.Dinastia, intensity = 1, resolved = 0 };
+        var def = StorylineCatalog.Find(StorylineType.Dinastia);
+        var t = StorylineCatalog.DetectDynasty(ctx, def, active);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Escalate));
+        Assert.That(t[0].intensity, Is.EqualTo(2));
+    }
 }
