@@ -1639,6 +1639,9 @@ using System.Linq;
         _selectedPlayer.on_trade_block = 0;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
+        // Sus hilos narrativos se cierran: ya no pertenece al equipo.
+        StorylineService.CloseSubjectStorylines(_selectedPlayer.id);
+
         // Registro de la temporada actual (solo este tramo: los futuros se cobran en
         // StartNewSeason desde dead_money).
         DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord

@@ -432,6 +432,7 @@ public class PalmaresController : UIScreenController
         StorylineResolution.Broken => "terminó",
         StorylineResolution.Completed => "resuelto",
         StorylineResolution.Abandoned => "cerrado al acabar la temporada",
+        StorylineResolution.Departed => "el jugador salió del equipo",
         _ => resolution
     };
 

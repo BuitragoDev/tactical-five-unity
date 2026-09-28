@@ -614,4 +614,45 @@ public class StorylineServiceTests
         Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Escalate));
         Assert.That(t[0].intensity, Is.EqualTo(2));
     }
+
+    // ── CIERRE POR SALIDA DEL PROTAGONISTA ──────────────────
+
+    [Test]
+    public void DetectStarInjury_ClosesWhenSubjectLeftTeam()
+    {
+        // El hilo sigue abierto pero el jugador ya no está en la plantilla (traspasado).
+        var otro = new PlayerData { id = 2, role = PlayerRole.Titular };
+        var ctx = Ctx(otro);
+        var active = new StorylineData
+        {
+            id = 9, type = StorylineType.BajaEstrella, subject_player_id = 99,
+            title = "Baja sensible: Cooper Flagg", resolved = 0
+        };
+
+        var def = StorylineCatalog.Find(StorylineType.BajaEstrella);
+        var t = StorylineCatalog.DetectStarInjury(ctx, def, active);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(t[0].resolution, Is.EqualTo(StorylineResolution.Departed));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(99), "el cierre mantiene al protagonista");
+    }
+
+    [Test]
+    public void DepartedHilos_OnlyPlayerHilosMissingFromRoster()
+    {
+        var actives = new List<StorylineData>
+        {
+            new StorylineData { id = 1, type = StorylineType.PresionGM, subject_player_id = 0 },      // equipo: no se toca
+            new StorylineData { id = 2, type = StorylineType.Sequia, subject_player_id = 7 },         // sigue en plantilla
+            new StorylineData { id = 3, type = StorylineType.BajaEstrella, subject_player_id = 99,   // se fue
+                                title = "Baja sensible: X", resolved = 0 },
+            new StorylineData { id = 4, type = StorylineType.Sequia, subject_player_id = 55, resolved = 1 } // ya cerrado
+        };
+
+        var gone = StorylineCatalog.DepartedHilos(actives, new HashSet<int> { 7 });
+
+        Assert.That(gone, Has.Count.EqualTo(1), "solo el hilo de jugador ausente");
+        Assert.That(gone[0].subject_player_id, Is.EqualTo(99));
+    }
 }

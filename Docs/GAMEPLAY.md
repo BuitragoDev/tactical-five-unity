@@ -309,6 +309,12 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   antes (escalón 2 si fue en las Finales) y se cierra cuando esa serie deja de estar en juego;
   `dinastia` se abre al alcanzar la ventana de títulos y escala con cada título nuevo (cooldown
   30 días; el rollover cierra los hilos como `abandoned`, así que se reanuncia cada temporada).
+- **Cierre por salida del protagonista:** si un jugador con hilo abierto sale del equipo
+  (traspaso, buyout, agente libre o retiro), el hilo se cierra con `resolution = departed`
+  y con mensaje "el jugador salió del equipo". Se cierra **al instante** en el traspaso/buyout
+  (`StorylineService.CloseSubjectStorylines`) y `ProcessDay` lo re-verifica cada día como red
+  de seguridad (cierre silencioso: sin noticia ni efectos). El **badge** del Dashboard además
+  filtra los hilos cuyo protagonista ya no está en la plantilla, así que nunca se ve uno obsoleto.
 - **UI:** pestaña **RIVALIDADES** en Palmarés (ranking de prestigio/dinastías de la liga +
   rivalidades de mi equipo) y una línea de rivalidad en el **PRONÓSTICO** de la previa cuando el
   partido es de playoffs y hay historia previa.

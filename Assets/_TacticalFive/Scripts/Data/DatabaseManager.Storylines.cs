@@ -26,6 +26,15 @@ public partial class DatabaseManager
                   .FirstOrDefault();
     }
 
+    /// <summary>Hilos abiertos cuyo protagonista es el jugador indicado (en cualquier equipo).</summary>
+    public List<StorylineData> GetActiveStorylinesBySubject(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return new List<StorylineData>();
+        return _db.Table<StorylineData>()
+                  .Where(s => s.resolved == 0 && s.subject_player_id == playerId)
+                  .ToList();
+    }
+
     /// <summary>Hilo abierto de un tipo para un protagonista concreto (hilos por jugador).</summary>
     public StorylineData GetActiveStoryline(int managerId, int teamId, string type, int subjectPlayerId)
     {

@@ -87,7 +87,7 @@ Hilos narrativos persistentes (motor de narrativa, Fase 4). CRUD en el partial
 | `intensity` | INTEGER | escalón alcanzado |
 | `started_game_day` / `last_update_game_day` / `last_news_game_day` | INTEGER | ciclo y cooldown |
 | `resolved` | INTEGER | 0 abierto / 1 cerrado |
-| `resolution` | TEXT | "" / broken / completed / abandoned (rollover) |
+| `resolution` | TEXT | "" / broken / completed / abandoned (rollover) / departed (el protagonista salió del equipo) |
 | `started_at` | TEXT | |
 
 Los tipos de jugador (`jugador_caliente`, `sequia`) admiten **varios hilos a la vez, uno por

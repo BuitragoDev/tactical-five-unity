@@ -89,13 +89,32 @@ public static class StorylineService
         var allActives = DatabaseManager.Instance.GetActiveStorylines(manager.id, myTeam.id);
         int openedToday = 0;
 
+        // Red de seguridad: cualquier hilo de JUGADOR cuyo protagonista ya no esté en la
+        // plantilla (traspaso, FA, buyout o retiro) se cierra de forma silenciosa.
+        var rosterIds = new HashSet<int>(ctx.Roster.Select(p => p.id));
+        foreach (var gone in StorylineCatalog.DepartedHilos(allActives, rosterIds))
+        {
+            if (gone.resolved != 0) continue;
+            Apply(ctx, gone, new StorylineTransition
+            {
+                type = gone.type,
+                action = Action.Resolve,
+                resolution = StorylineResolution.Departed,
+                subjectPlayerId = gone.subject_player_id,
+                summary = "El jugador salió del equipo",
+                body = ""   // silencioso: ni noticia ni efectos
+            });
+        }
+
         foreach (var def in StorylineCatalog.All)
         {
             // Los hilos por jugador se gobiernan por protagonista (varios a la vez, uno por
             // jugador); el resto son de equipo (sujeto 0, uno por tipo).
             var subjects = new StorylineSubjects
             {
-                Actives = allActives.Where(a => a.type == def.type).ToList()
+                // Solo hilos abiertos: los cerrados en el paso anterior (protagonista que
+                // salió del equipo) no deben volver a procesarse.
+                Actives = allActives.Where(a => a.type == def.type && a.resolved == 0).ToList()
             };
 
             List<StorylineTransition> transitions;
@@ -120,6 +139,30 @@ public static class StorylineService
                 Apply(ctx, subjects.For(t.subjectPlayerId), t);
                 if (t.action == Action.Start) openedToday++;
             }
+        }
+    }
+
+    /// <summary>
+    /// Cierra al instante los hilos abiertos de un jugador que acaba de salir del equipo
+    /// (traspaso, buyout). Silencioso. `ProcessDay` lo vuelve a comprobar como red de
+    /// seguridad al día siguiente, así que esto solo evita que la fila quede abierta.
+    /// </summary>
+    public static void CloseSubjectStorylines(int playerId, string summary = "El jugador salió del equipo")
+    {
+        if (playerId <= 0) return;
+        try
+        {
+            foreach (var s in DatabaseManager.Instance.GetActiveStorylinesBySubject(playerId))
+            {
+                s.resolved = 1;
+                s.resolution = StorylineResolution.Departed;
+                if (!string.IsNullOrEmpty(summary)) s.summary = summary;
+                DatabaseManager.Instance.UpdateStoryline(s);
+            }
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning($"[Storyline] No se pudieron cerrar los hilos de {playerId}: {e.Message}");
         }
     }
 

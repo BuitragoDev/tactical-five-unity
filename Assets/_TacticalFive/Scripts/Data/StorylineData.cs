@@ -28,6 +28,7 @@ public static class StorylineResolution
     public const string Broken = "broken";       // la situación terminó sola (racha rota...)
     public const string Completed = "completed"; // se cumplió el objetivo del hilo
     public const string Abandoned = "abandoned"; // se cerró al acabar la temporada
+    public const string Departed = "departed";   // el protagonista salió del equipo (traspaso/FA/buyout)
 }
 
 /// <summary>

@@ -8181,6 +8181,12 @@ List<int> offeredPickIds = new List<int>();
         if (_storylineBadge == null) return;
 
         var active = DatabaseManager.Instance.GetActiveStorylines(_manager.id, _myTeam.id);
+
+        // Los hilos de jugador cuyo protagonista ya no está en la plantilla no se muestran
+        // (el motor los cierra al avanzar el día; esto evita verlos antes).
+        var rosterIds = new HashSet<int>(_players.Select(p => p.id));
+        active = active.Where(s => s.subject_player_id <= 0 || rosterIds.Contains(s.subject_player_id)).ToList();
+
         if (active.Count == 0)
         {
             _storylineBadge.style.display = DisplayStyle.None;

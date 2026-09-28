@@ -33,6 +33,8 @@ public partial class DatabaseManager
     /// </summary>
     public void MovePlayerToTeam(PlayerData p, int newTeamId)
     {
+        int oldTeamId = p.team_id;
+
         p.team_id = newTeamId;
         p.last_team_id = newTeamId;
         p.is_on_ir = 0;
@@ -40,6 +42,11 @@ public partial class DatabaseManager
         p.g_league_assigned = 0;
         p.on_trade_block = 0;
         UpdatePlayer(p);
+
+        // Si cambia de equipo, sus hilos narrativos (solo existen del equipo del usuario)
+        // se cierran al instante; el siguiente día se vuelven a comprobar por seguridad.
+        if (oldTeamId != newTeamId)
+            StorylineService.CloseSubjectStorylines(p.id);
     }
 
     public List<PlayerData> GetFreeAgents()

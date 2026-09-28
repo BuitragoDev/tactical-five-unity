@@ -160,6 +160,20 @@ public static class StorylineCatalog
         return PlayerStreakTransitions(ctx, def, active, best, StorylineType.JugadorCaliente, up: true);
     }
 
+    /// <summary>
+    /// Hilos de JUGADOR cuyo protagonista ya no está en la plantilla (traspaso, FA o
+    /// buyout). Puro: los cierra el servicio de forma silenciosa. Los hilos de equipo
+    /// (sujeto 0) no se tocan.
+    /// </summary>
+    public static List<StorylineData> DepartedHilos(IEnumerable<StorylineData> actives,
+                                                    IReadOnlyCollection<int> rosterIds)
+    {
+        var roster = rosterIds as HashSet<int> ?? new HashSet<int>(rosterIds ?? new List<int>());
+        return (actives ?? Enumerable.Empty<StorylineData>())
+              .Where(a => a != null && a.subject_player_id > 0 && !roster.Contains(a.subject_player_id))
+              .ToList();
+    }
+
     /// <summary>Jugador en sequía: 3+ partidos por debajo de SU umbral (relativo a su media).</summary>
     public static List<StorylineTransition> DetectSlump(StorylineContext ctx, StorylineDef def, StorylineData active)
     {
@@ -379,7 +393,23 @@ public static class StorylineCatalog
         if (active != null)
         {
             var subj = ctx.FindPlayer(active.subject_player_id);
-            if (subj == null) return result;
+            // El protagonista ya no está en el equipo (traspaso/FA/buyout): el hilo se
+            // cierra. Antes se devolvía sin transición y quedaba abierto hasta el rollover.
+            if (subj == null)
+            {
+                result.Add(new StorylineTransition
+                {
+                    type = def.type,
+                    action = StorylineService.Action.Resolve,
+                    resolution = StorylineResolution.Departed,
+                    subjectPlayerId = active.subject_player_id,
+                    summary = "El jugador salió del equipo",
+                    title = $"Se cierra la baja de {active.title.Replace("Baja sensible: ", "")}",
+                    body = $"{active.title} deja de estar activo: el jugador ya no pertenece al {ctx.myTeam.name}.",
+                    newsType = NewsType.BAJA_ESTRELLA
+                });
+                return result;
+            }
 
             if (subj.injury_days <= 0)
             {
