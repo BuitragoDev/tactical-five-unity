@@ -110,6 +110,7 @@
 14. **`PlayerData.rotation_minutes` es `[Ignore]`** (transitorio): nunca añadas una columna `rotation_minutes` a `players` sin revisar quién la rellena (`DashboardController.GetActivePlayers`).
 15. **Histórico de carrera por `player_id`, nunca por nombre** (`historical_player_stats`): `>0` jugador real, `-1` leyenda del seeder (intocable), `0` fila antigua sin dueño (solo se adopta en la migración si el nombre identifica a un ÚNICO jugador). Reglas puras en `HistoricalStatsRules` (`RowForPlayer`/`CanAdopt`/`IsLegendRow`). No vuelvas a resolver carreras por nombre: los pools de nombres solapan con las leyendas (SEA-06).
 16. **`playoff_series` se escribe al cerrar cada serie** (`PlayoffsGenerator.AdvancePlayoffSeries`, idempotente por `manager_id+season_id+label`): `games` se purga en el rollover, así que es la **única** fuente de rivalidades (play-in excluido). Agregaciones puras en `RivalryHelper`/`DynastyHelper`; dinastías/prestige se derivan de `season_records` (no añadas columnas a `teams`).
+17. **El All-Star no persiste `player_game_stats`** (`SIM-14`): las convocatorias viven en **`all_star_roster`** (`SaveAllStarRoster` en el partido de las estrellas) y son la única fuente de `GetAllStarAppearances` (Palmarés) y de los `award_type="all_star"` de la trayectoria. Las columnas `season_records.all_star_pg..c` son legado sin uso.
 
 ## 9. Audit warnings that must remain visible
 

@@ -1766,6 +1766,9 @@ using System.Threading.Tasks;
             };
             DatabaseManager.Instance.SaveAllStarRecord(record);
 
+            // Convocatoria (sustituye a las stats del partido, que ya no se persisten).
+            DatabaseManager.Instance.SaveAllStarRoster(_manager.id, _season.id, homePlayers, awayPlayers);
+
             bool alreadySent = DatabaseManager.Instance.Db.Table<MessageData>()
                 .Any(m => m.manager_id == _manager.id && m.news_type == NewsType.ALLSTAR
                        && m.game_day == game.game_day);

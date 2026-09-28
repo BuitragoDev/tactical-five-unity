@@ -471,6 +471,43 @@ public partial class DatabaseManager
         _db.Insert(record);
     }
 
+    /// <summary>
+    /// Guarda la convocatoria del All-Star de la temporada (una vez por temporada, idempotente:
+    /// borra la previa de esa temporada). Titulares = primeros 5 de cada conferencia.
+    /// </summary>
+    public void SaveAllStarRoster(int managerId, int seasonId, List<PlayerData> east, List<PlayerData> west)
+    {
+        if (!EnsureDb()) return;
+        _db.Execute("DELETE FROM all_star_roster WHERE manager_id = ? AND season_id = ?", managerId, seasonId);
+
+        var rows = new List<AllStarRosterData>();
+        void AddConference(List<PlayerData> players, string conference)
+        {
+            if (players == null) return;
+            for (int i = 0; i < players.Count; i++)
+                rows.Add(new AllStarRosterData
+                {
+                    manager_id = managerId,
+                    season_id = seasonId,
+                    conference = conference,
+                    player_id = players[i].id,
+                    is_starter = i < 5 ? 1 : 0
+                });
+        }
+        AddConference(east, "East");
+        AddConference(west, "West");
+        if (rows.Count > 0) _db.InsertAll(rows);
+    }
+
+    /// <summary>Temporadas en las que un jugador fue convocado al All-Star (para la trayectoria).</summary>
+    public List<int> GetAllStarSeasonIds(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return new List<int>();
+        return _db.Query<int>(
+            "SELECT DISTINCT season_id FROM all_star_roster WHERE player_id = ? ORDER BY season_id",
+            playerId);
+    }
+
     public class AllStarAppearanceEntry
     {
         public int player_id { get; set; }
@@ -485,13 +522,12 @@ public partial class DatabaseManager
 
         var fromGames = _db.Query<AllStarAppearanceEntry>(@"
             SELECT p.id as player_id, p.first_name || ' ' || p.last_name as player_name,
-                   t.logo as team_logo, COUNT(DISTINCT g.season_id) as appearances
-            FROM player_game_stats pgs
-            JOIN games g ON pgs.game_id = g.id
-            JOIN players p ON pgs.player_id = p.id
+                   t.logo as team_logo, COUNT(DISTINCT r.season_id) as appearances
+            FROM all_star_roster r
+            JOIN players p ON r.player_id = p.id
             JOIN teams t ON p.team_id = t.id
-            WHERE g.game_type = 'allstar' AND g.manager_id = ?
-            GROUP BY pgs.player_id", managerId);
+            WHERE r.manager_id = ?
+            GROUP BY r.player_id", managerId);
 
         var fromSeed = _db.Table<AllStarAppearanceSeed>().ToList();
 
@@ -1099,12 +1135,6 @@ public partial class DatabaseManager
             if (r.champion_id == playerId)
                 awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "champion" });
 
-            // All-Star
-            if (r.all_star_pg_id == playerId || r.all_star_sg_id == playerId ||
-                r.all_star_sf_id == playerId || r.all_star_pf_id == playerId ||
-                r.all_star_c_id == playerId)
-                awards.Add(new PlayerAwardEntry { season_id = r.season_id, year_start = r.year_start, year_end = r.year_end, award_type = "all_star" });
-
             // First Team
             if (r.first_team_pg == playerId || r.first_team_sg == playerId ||
                 r.first_team_sf == playerId || r.first_team_pf == playerId ||
@@ -1128,6 +1158,20 @@ public partial class DatabaseManager
             var season = _db.Find<SeasonData>(m.season_id);
             if (season != null)
                 awards.Add(new PlayerAwardEntry { season_id = m.season_id, year_start = season.year_start, year_end = season.year_end, award_type = m.award_type });
+        }
+
+        // Convocatorias All-Star (tabla all_star_roster: ve a los 24, no solo al quinteto)
+        foreach (int allStarSeasonId in GetAllStarSeasonIds(playerId))
+        {
+            var season = _db.Find<SeasonData>(allStarSeasonId);
+            if (season != null)
+                awards.Add(new PlayerAwardEntry
+                {
+                    season_id = allStarSeasonId,
+                    year_start = season.year_start,
+                    year_end = season.year_end,
+                    award_type = "all_star"
+                });
         }
 
         return awards;
