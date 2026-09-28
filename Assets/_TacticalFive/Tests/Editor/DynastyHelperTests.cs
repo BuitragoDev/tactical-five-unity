@@ -28,8 +28,9 @@ public class DynastyHelperTests
     public void IsDynasty_TrueForThreeTitlesInWindow()
     {
         Assert.That(DynastyHelper.IsDynasty(new[] { 10, 12, 14 }), Is.True);
-        Assert.That(DynastyHelper.IsDynasty(new[] { 10, 17, 18 }), Is.True, "16 y 17 dentro de la ventana");
+        Assert.That(DynastyHelper.IsDynasty(new[] { 10, 16, 17 }), Is.True, "de 10 a 17 son 8 temporadas (ventana completa)");
         Assert.That(DynastyHelper.IsDynasty(new[] { 10, 11 }), Is.False, "menos de 3 títulos");
+        Assert.That(DynastyHelper.IsDynasty(new[] { 10, 17, 18 }), Is.False, "de 10 a 18 van 9 temporadas: fuera de la ventana");
     }
 
     [Test]
