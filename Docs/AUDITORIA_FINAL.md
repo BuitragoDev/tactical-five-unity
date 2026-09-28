@@ -773,7 +773,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | `[x]` | Negociación de agente (contraofertas al rechazar por dinero) | Extender `OfferData` + `CalculateAcceptScore` con peso de rol/minutos | `OfferData`, `RosterController`, `DashboardController` | Alta |
 | `[x]` | Dashboard de cap/aprons (CAP SHEET + hard cap por NT-MLE + FA con derechos Bird) | Vista de excepciones y espacio salarial | `TradeHelper`, `league_settings` | Alta |
 | `[ ]` | Historial de temporadas navegable | Pantalla nueva desde `player_season_stats` + `season_records` | `player_season_stats`, `SeasonRecord` | Media |
-| `[ ]` | Parte médico y recuperación realista | Tipos de lesión con tiempos y recaídas | `injury_days`, `GameSimulator` | Media |
+| `[ ]` | Parte médico y recuperación realista (→ **backlog E2**) | Tipos de lesión con tiempos y recaídas | `injury_days`, `GameSimulator` | Media |
 | `[ ]` | Camp de pretemporada con decisiones | Foco por jugador, efectos y coste de fatiga | `TrainingData`, `Records` (rollover) | Media |
 | `[x]` | IA con gestión real de cap (`ECO-06`) | Helper de cap compartido con el usuario | `TradeHelper`, `DashboardController` (`ECO-06`) | Alta |
 | `[x]` | Rivalidades/dinastías: tabla `playoff_series` (registro al cerrar la serie) + `RivalryHelper`/`DynastyHelper` (prestige desde `season_records`) + pestaña RIVALIDADES + 2 hilos (`revancha_playoffs`, `dinastia`) + línea en el PRONÓSTICO | Récords de series y prestige de franquicia | `season_records`, `standings` | Media |
@@ -786,14 +786,27 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | `[x]` | Progresión por edad/potencial/minutos (`PlayerProgression`) | Carreras creíbles | `Records.cs` (rollover), `ApplyMentoring` (`SEA-08/09/10`) | Alta |
 | `[~]` | Economía de mercado real: nómina en 12 plazos (`ECO-09`), préstamos (`ECO-10`) y IA con cap; falta asistencia elástica/ciudad/patrocinios por fama | Gestión de franquicia de verdad | `DashboardController` economía, `TeamSettingsData` | Media |
 | `[x]` | Scouting profundo de draft (`ScoutingHelper`: error de informe, bust/boom) | Riesgo real en el draft | `FogOfWarHelper`, `ScoutData`, `DraftGenerator` | Media |
-| `[ ]` | All-Star weekend jugable | Contenido | `GameSimulator`, `all_star_records` | Baja-media |
+| `[ ]` | All-Star weekend jugable (→ **backlog E5**) | Contenido | `GameSimulator`, `all_star_records` | Baja-media |
 
 ### D. Killer features
-1. **Modo histórico / eras** *(pendiente)* — empezar en cualquier temporada histórica con plantillas/palmarés reales (base ya existente: `HallOfFameSeeder`, `PalmaresSeeder`, `HistoricalPlayerStatsSeeder`, `RetiredNumberSeeder`) y reescribir la historia. *Coste:* alto (necesita datasets y lógica de bootstrap de liga). *Riesgo:* datos.
+1. ~~**Modo histórico / eras**~~ — **DESCARTADO por decisión de producto (2026-09).** No volver a proponerlo.
 2. **Motor de narrativa ("storylines") — HECHO** (v2): 10 tipos de hilo con detectores puros, `storylines` persistente, pestaña HISTORIA, badge y noticias de PRENSA con efectos; hilos por jugador y umbrales relativos en el pulido posterior. *Impacto:* convierte números en drama.
-3. **MyLeague / Editor total** — llevar `EditorController` a editor de liga completo (equipos, ciudades, reglas, draft classes, logos, pabellones — ya hay `CustomScopes`/`TeamImages`) con export/import. *Coste:* alto. *Impacto:* multiplica la vida útil.
-4. **Broadcast en vivo narrado** — posición a posición con comentario (ya se captura `PlayByPlayLogs`) + odds internas. *Coste:* bajo-medio. *Impacto:* espectáculo.
-5. **Hotseat/multi-manager local** — varios GMs en la misma liga (la IA ya juega con `TeamStrategy`). *Coste:* medio-alto. *Impacto:* modo social local.
+3. **MyLeague / Editor total** *(no prioritario)* — llevar `EditorController` a editor de liga completo (equipos, ciudades, reglas, draft classes, logos, pabellones — ya hay `CustomScopes`/`TeamImages`) con export/import. *Coste:* alto. *Impacto:* multiplica la vida útil.
+4. **Broadcast en vivo narrado** — posición a posición con comentario (ya se captura `PlayByPlayLogs`) + odds internas. *Coste:* bajo-medio. *Impacto:* espectáculo. → **Movido al backlog E4.**
+5. **Hotseat/multi-manager local** *(no prioritario)* — varios GMs en la misma liga (la IA ya juega con `TeamStrategy`). *Coste:* medio-alto. *Impacto:* modo social local.
+
+### E. Backlog post-auditoría (features nuevas · fijado 2026-09)
+
+Prioridad acordada tras cerrar la auditoría. **No incluye** el modo histórico/eras (descartado).
+
+| # | Feature | Qué incluye | Sistemas | Prioridad |
+|---|---|---|---|---|
+| E1 | **Hitos de legado y carrera por jugador** | Hitos vitales por jugador (20.000 pts, 10.000 reb, 5.000 ast, 2.000 rob/tap, 10× All-Star, 3× MVP…) mostrados en Perfil/Trayectoria, tenidos en cuenta por el HOF y narrados por el motor de hilos (hilo de "hito alcanzado") | `historical_player_stats` (ya por `player_id`), `season_records`, `all_star_roster`, `HallOfFameHelper`, `StorylineCatalog` | **Alta** |
+| E2 | **Parte médico y recuperación realista** | Tipos de lesión con gravedad y pronóstico, riesgo de **recaída** por volver antes de tiempo, evolución diaria y parte médico en Lesionados (el IR ya existe) | `GameSimulator.INJURY_TYPES`, `players.injury_days/treated`, `InjuredController`, médico de plantilla | **Media-alta** |
+| E3 | **Economía de mercado real** | Asistencia **elástica** (precio × resultado × atractivo del rival), ingresos por ciudad/mercado, patrocinios que escalan con fama y TV renegociable | `DashboardController` (economía), `TeamSettingsData`, `SponsorData`, `TvChannelData`, `FinanceRecord`, `AttendanceSummary` | **Media** |
+| E4 | **Broadcast narrado** | Comentario escrito del play-by-play por tipo de jugada, momento del partido y rachas (usa la crónica ya capturada) | `GameSimulator` (captura), `MatchDayController`, `GameResultCache.PlayByPlayLogs` | **Media** |
+| E5 | **All-Star Weekend jugable** | Concurso de triples y de mates como minijuegos por atributos, con premios y récords, además del partido de las estrellas | `GameSimulator`/helper propio, `all_star_records`, `all_star_roster`, PlayerAwards | Baja-media |
+
 
 ---
 
@@ -888,6 +901,7 @@ de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
 | 2026-09-26 | `fbf5de69` | CON-09, CON-10 | Memoria: `TeamImages.Invalidate()` destruye los `Sprite`/`Texture2D` creados en runtime (los de `Resources` no se tocan) y limpia `_previewCache`; `PlayerPhotoHelper` cachea texturas por ruta e invalida al sobrescribir o cambiar de ámbito. |
 | 2026-09-26 | `9c7033f0` | Fase 4 · balance | Asistencias ~55% (antes 35%), desgaste 0.28/min y recuperación +10 (antes 0.30 y +8 → drenaje neto que hundía el acierto), suelo elite de rebotes acotado por los fallos del partido, y All‑Star sin desgaste ni lesiones. |
 | 2026-09-28 | este commit | §9-A · usabilidad | **Historial**: barra de filtros por tipo de movimiento (TODO / TRASPASOS / AGENTES LIBRES / SIGN & TRADE) + orden (más recientes/antiguos) + estado vacío por filtro. **Récords**: selector de temporada (◀ ▶) en la pestaña TEMPORADA para consultar `season_game_records` de campañas pasadas. |
+| 2026-09-28 | este commit | Backlog post-auditoría | Fijado el backlog de **features nuevas** (§9-E): `E1` hitos de legado y carrera por jugador (alta), `E2` parte médico y recaídas (media-alta), `E3` economía de mercado real con asistencia elástica (media), `E4` broadcast narrado (media) y `E5` All-Star Weekend jugable (baja-media). **Modo histórico/eras descartado por decisión de producto.** |
 | 2026-09-28 | este commit | `QA-12` (clasificado) | Los 13 controllers sin `base.RegisterCallbacks()` se documentan como **no-objetivo deliberado**: la base inyecta chrome (sidebar/header), navegación y modal de config, y esas pantallas son pre-partida o transiciones a pantalla completa. |
 | 2026-09-28 | este commit | `QA-11` | Migradas a la barra propia las 4 pantallas pendientes: **Playoffs** (`PlayoffsScroll`→viewport/content, con el reset al colapsar paneles), **Preseason** (grid), **Quinteto** (panel de detalle, que alterna visible/oculto) y **SelectTeam** (grid, detalle y modal de plantilla). Enlazado una vez por visita (el árbol se recrea en Unity 6). |
 | 2026-09-28 | este commit | `QA-10` | `StatFormat`: cultura única para cifras de stats (punto decimal, antes Perfil usaba coma y Stats punto) + **tooltips** de eFG%/TS%/PER/VAL/TO/MIN en Perfil y de las cabeceras avanzadas en Stats. |
