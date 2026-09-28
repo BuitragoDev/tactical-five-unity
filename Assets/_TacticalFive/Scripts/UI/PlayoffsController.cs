@@ -5,7 +5,8 @@ using System.Linq;
     public class PlayoffsController : UIScreenController
 {
     protected override GameScreen ScreenId => GameScreen.Playoffs;
-    private ScrollView _scrollView;
+    private VisualElement _scrollViewport, _scrollContent;
+    private CustomScrollbar.Handle _scrollBar;
     private VisualElement _regularSeasonEmpty;
     private VisualElement _playInPanel;
     private VisualElement _playInBody;
@@ -22,7 +23,8 @@ using System.Linq;
     private Dictionary<string, Sprite> _logoSprites32 = new();
     protected override void CacheReferences()
     {
-        _scrollView = _root.Q<ScrollView>("PlayoffsScroll");
+        _scrollViewport = _root.Q<VisualElement>("PlayoffsViewport");
+        _scrollContent = _root.Q<VisualElement>("PlayoffsContent");
         _regularSeasonEmpty = _root.Q<VisualElement>("RegularSeasonEmpty");
         _playInPanel = _root.Q<VisualElement>("PlayInPanel");
         _playInBody = _root.Q<VisualElement>("PlayInBody");
@@ -136,7 +138,7 @@ using System.Linq;
                     // Re-hide "no disponible" text if Play-In games exist
                     if (panel == _playInPanel && _playInGames.Count > 0)
                         _noPlayInText.style.display = DisplayStyle.None;
-                    if (_scrollView != null) _scrollView.scrollOffset = Vector2.zero;
+                    if (_scrollBar != null) CustomScrollbar.Reset(_scrollBar);
                 }
 
                 UpdateAllArrows();
@@ -148,6 +150,12 @@ using System.Linq;
     protected override void Refresh()
     {
         try { RefreshHeader(); } catch (System.Exception ex) { Debug.LogWarning($"[Playoffs] RefreshHeader error: {ex.Message}"); }
+
+        // Barra de scroll propia: enlazar una vez por visita (en Unity 6 el árbol se
+        // recrea al volver a la pantalla, así que se re-enlaza si el viewport es nuevo).
+        if (_scrollBar == null || _scrollBar.Viewport != _scrollViewport)
+            _scrollBar = CustomScrollbar.Bind(_scrollViewport, _scrollContent,
+                _root.Q<VisualElement>("PlayoffsScrollTrack"), _root.Q<VisualElement>("PlayoffsScrollThumb"));
 
         string phase = _season?.phase ?? "regular";
 
