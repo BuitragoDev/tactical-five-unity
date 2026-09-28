@@ -4587,6 +4587,7 @@ using System.Threading.Tasks;
         actions.AddToClassList("fired-modal-actions");
         var btn = new Button();
         btn.text = "IR AL MENU PRINCIPAL";
+        btn.AddToClassList("btn-modal-confirm");
         btn.AddToClassList("btn-modal-confirm--danger");
         btn.RegisterCallback<ClickEvent>(_ =>
         {

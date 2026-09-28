@@ -769,6 +769,7 @@ public class EmployeesController : UIScreenController
             hireBox.AddToClassList("hire-modal-box--gold");
             _btnHireConfirm.RemoveFromClassList("btn-modal-confirm");
             _btnHireConfirm.RemoveFromClassList("btn-modal-confirm--danger");
+            _btnHireConfirm.AddToClassList("btn-modal-confirm");
             _btnHireConfirm.AddToClassList("btn-modal-confirm--gold");
             _isReplacing = true;
         }
@@ -976,6 +977,7 @@ public class EmployeesController : UIScreenController
         _hireResultBox.AddToClassList("hire-modal-box--negative");
         _btnHireResultOk.RemoveFromClassList("btn-modal-confirm");
         _btnHireResultOk.RemoveFromClassList("btn-modal-cancel");
+        _btnHireResultOk.AddToClassList("btn-modal-confirm");
         _btnHireResultOk.AddToClassList("btn-modal-confirm--danger");
         _btnHireResultOk.text = "CERRAR";
         _hireResultOverlay.style.display = DisplayStyle.Flex;
