@@ -23,6 +23,16 @@
 
             <!-- HISTORIAL CONTENT -->
             <ui:VisualElement class="historial-content">
+                <!-- Filtros y orden -->
+                <ui:VisualElement class="historial-filter-bar">
+                    <ui:Button name="HistFilterAll"   class="historial-filter-btn historial-filter-btn--active" text="TODO" />
+                    <ui:Button name="HistFilterTrade" class="historial-filter-btn" text="TRASPASOS" />
+                    <ui:Button name="HistFilterFA"    class="historial-filter-btn" text="AGENTES LIBRES" />
+                    <ui:Button name="HistFilterSnT"   class="historial-filter-btn" text="SIGN &amp; TRADE" />
+                    <ui:VisualElement class="historial-filter-spacer" />
+                    <ui:Button name="HistOrderBtn"    class="historial-filter-btn" text="MÁS RECIENTES ↓" />
+                </ui:VisualElement>
+
                 <ui:VisualElement class="historial-table">
                     <ui:VisualElement class="historial-table-header">
                         <ui:Label class="historial-table-header-label historial-col historial-col-first" text="FECHA" />
