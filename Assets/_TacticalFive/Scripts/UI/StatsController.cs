@@ -52,14 +52,7 @@ using System.Linq;
     private string _currentStat = "puntos";
     private string _currentMode = "season";
     private string _currentDisplay = "totals";
-    private static readonly System.Globalization.CultureInfo _spanishCI = CreateDotCulture();
-    private static System.Globalization.CultureInfo CreateDotCulture()
-    {
-        var ci = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.InvariantCulture.Clone();
-        ci.NumberFormat.NumberGroupSeparator = ".";
-        ci.NumberFormat.NumberDecimalSeparator = ".";
-        return ci;
-    }
+    private static readonly System.Globalization.CultureInfo _spanishCI = StatFormat.Culture;
     private List<Button> _statTabs = new();
     private List<Button> _filterBtns = new();
     private List<Button> _modeBtns = new();
@@ -705,7 +698,7 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
                 break;
             case "efgpct":
-                _tableHeader.Add(MakeHeaderCell("EFG%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell("EFG%", "col-stat", true, StatFormat.EfgTip));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
@@ -713,14 +706,14 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
                 break;
             case "tspct":
-                _tableHeader.Add(MakeHeaderCell("TS%", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell("TS%", "col-stat", true, StatFormat.TsTip));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
                 break;
             case "per":
-                _tableHeader.Add(MakeHeaderCell("PER", "col-stat", true));
+                _tableHeader.Add(MakeHeaderCell("PER", "col-stat", true, StatFormat.PerTip));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
@@ -764,13 +757,14 @@ using System.Linq;
         }
     }
 
-    Label MakeHeaderCell(string text, string baseClass, bool isBold)
+    Label MakeHeaderCell(string text, string baseClass, bool isBold, string tooltip = null)
     {
         var lbl = new Label();
         lbl.AddToClassList(baseClass);
         lbl.AddToClassList("col-stat--header");
         if (isBold) lbl.AddToClassList("col-stat--bold");
         lbl.text = text;
+        if (!string.IsNullOrEmpty(tooltip)) lbl.tooltip = tooltip;
         return lbl;
     }
 
