@@ -31,6 +31,13 @@
                     <ui:Button name="TabHistorical" class="records-tab" text="HISTÓRICO" />
                 </ui:VisualElement>
 
+                <!-- Selector de temporada (solo pestaña TEMPORADA) -->
+                <ui:VisualElement name="SeasonSelector" class="records-season-selector" style="display: none;">
+                    <ui:Button name="BtnPrevSeason" class="records-season-btn" text="◀" />
+                    <ui:Label name="SeasonSelectorLabel" class="records-season-label" text="" />
+                    <ui:Button name="BtnNextSeason" class="records-season-btn" text="▶" />
+                </ui:VisualElement>
+
                 <!-- Records grid (3 x 3) -->
                 <ui:VisualElement class="records-scroll">
                     <ui:VisualElement name="RecordsBody" class="records-grid" />
