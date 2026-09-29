@@ -1799,6 +1799,7 @@ public class EditorController : UIScreenController
         var cancelBtn = new Button { text = "CANCELAR" };
         cancelBtn.clicked += () => { PlayClick(); CloseToast(); };
         cancelBtn.AddToClassList("editor-modal-btn");
+        cancelBtn.AddToClassList("editor-modal-btn--secondary");
         CursorManager.Instance?.RegisterHandCursor(cancelBtn);
         actions.Add(cancelBtn);
 
