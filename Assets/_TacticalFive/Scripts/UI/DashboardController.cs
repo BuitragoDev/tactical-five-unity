@@ -3671,6 +3671,10 @@ using System.Threading.Tasks;
         var playerList = new VisualElement();
         playerList.AddToClassList("injury-modal-player-list");
 
+        // Iconos de la acción "tratar lesión" (misma imagen que el editor de contenido).
+        var injectionIcon = Resources.Load<Texture2D>("Icons/inyeccion");
+        var treatedIcon = Resources.Load<Texture2D>("Icons/boton-v-64px");
+
         foreach (var (li, p) in injured)
         {
             var card = new VisualElement();
@@ -3744,20 +3748,32 @@ using System.Threading.Tasks;
 
             card.Add(ovrCol);
 
-            // Treat button
+            // Botón de tratamiento: icono de inyección (misma acción; al tratar cambia al
+            // icono de "hecho" y se actualiza el valor de días EN ESTE MISMO modal).
             var treatBtn = new Button();
             bool alreadyTreated = p.treated == 1;
             var medico = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
                 .FirstOrDefault(e => e.position == "MEDICO");
             bool hasMedico = medico != null;
-            treatBtn.text = alreadyTreated ? "TRATADO" : "TRATAR\nLESIÓN";
-            treatBtn.AddToClassList("injury-modal-treat-btn");
-            if (alreadyTreated || !hasMedico)
+
+            void PaintTreatIcon(Texture2D tex, bool done, bool enabled)
             {
-                treatBtn.AddToClassList("injury-modal-treat-btn--done");
-                treatBtn.SetEnabled(false);
+                treatBtn.text = "";
+                if (tex != null) treatBtn.style.backgroundImage = new StyleBackground(tex);
+                treatBtn.EnableInClassList("injury-modal-treat-btn--done", done);
+                treatBtn.SetEnabled(enabled);
+                treatBtn.tooltip = done ? "Lesión ya tratada"
+                               : enabled ? "Tratar lesión (reduce los días de baja)"
+                               : "Sin médico en el equipo: no se puede tratar";
             }
-            else
+
+            treatBtn.AddToClassList("injury-modal-treat-btn");
+            treatBtn.AddToClassList("injury-modal-treat-btn--icon");
+            PaintTreatIcon(alreadyTreated ? treatedIcon : injectionIcon,
+                           done: alreadyTreated,
+                           enabled: !alreadyTreated && hasMedico);
+
+            if (!alreadyTreated && hasMedico)
             {
                 treatBtn.RegisterCallback<ClickEvent>(_ =>
                 {
@@ -3774,9 +3790,11 @@ using System.Threading.Tasks;
                     p.injury_days = Mathf.Clamp(newDays, 1, p.injury_days);
                     p.treated = 1;
                     DatabaseManager.Instance.UpdatePlayer(p);
-                    treatBtn.text = "TRATADO";
-                    treatBtn.AddToClassList("injury-modal-treat-btn--done");
-                    treatBtn.SetEnabled(false);
+
+                    // Refrescar el valor mostrado en el propio modal.
+                    injuryDaysLbl.text = $"{p.injury_days} días";
+                    injuryBadge.tooltip = $"Tratada: quedan {p.injury_days} días de baja";
+                    PaintTreatIcon(treatedIcon, done: true, enabled: false);
                 });
             }
             card.Add(treatBtn);
