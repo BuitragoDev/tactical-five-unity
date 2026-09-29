@@ -5508,13 +5508,27 @@ using System.Threading.Tasks;
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
 
                 long payroll = roster.Sum(p => p.salary);
-                if (salaryCap - payroll < star.salary) continue;
+
+                // Salario nuevo: un rescindido firma por el mínimo (mercado de buyout); el
+                // resto, su precio + un pequeño incremento (como el pase general). Antes se
+                // firmaba con el salario viejo y el equipo nuevo heredaba esa nómina.
+                long newSalary = star.waived_game_day >= 0
+                    ? BuyoutMarketRules.WaivedSalary(leagueSettings?.minimum_salary ?? 0)
+                    : star.salary + 2_000_000;
+
+                // La IA ficha con sus excepciones (espacio → MLE → mínimo), no solo con
+                // espacio de tope: antes ninguna estrella por encima del cap podía firmar.
+                if (!TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings)) continue;
 
                 star.team_id = team.id;
                 star.last_team_id = team.id;
+                star.salary = newSalary;
                 int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
                 star.guaranteed_years = years;
+                star.has_team_option = 0;
+                star.has_player_option = 0;
+                star.waived_game_day = -1;
                 DatabaseManager.Instance.AssignJerseyNumber(star, team.id);
                 DatabaseManager.Instance.UpdatePlayer(star);
 
