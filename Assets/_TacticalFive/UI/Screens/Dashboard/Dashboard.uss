@@ -2508,11 +2508,16 @@
     color: rgb(100, 110, 135);
 }
 
-/* Botón de tratamiento con icono (inyección → hecho): imagen 40x40, sin texto */
+/* Botón de tratamiento con icono: la caja conserva su tamaño y dentro va la imagen 40x40 */
 .injury-modal-treat-btn--icon {
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+}
+.injury-modal-treat-icon {
     width: 40px;
     height: 40px;
-    padding: 0;
+    flex-shrink: 0;
     -unity-background-scale-mode: scale-to-fit;
 }
 

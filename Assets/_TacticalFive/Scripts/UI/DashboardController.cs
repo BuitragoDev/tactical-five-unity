@@ -3756,10 +3756,15 @@ using System.Threading.Tasks;
                 .FirstOrDefault(e => e.position == "MEDICO");
             bool hasMedico = medico != null;
 
+            // La caja del botón conserva su tamaño; dentro va la imagen a 40x40.
+            var treatIcon = new VisualElement();
+            treatIcon.AddToClassList("injury-modal-treat-icon");
+            treatBtn.Add(treatIcon);
+
             void PaintTreatIcon(Texture2D tex, bool done, bool enabled)
             {
                 treatBtn.text = "";
-                if (tex != null) treatBtn.style.backgroundImage = new StyleBackground(tex);
+                if (tex != null) treatIcon.style.backgroundImage = new StyleBackground(tex);
                 treatBtn.EnableInClassList("injury-modal-treat-btn--done", done);
                 treatBtn.SetEnabled(enabled);
                 treatBtn.tooltip = done ? "Lesión ya tratada"
