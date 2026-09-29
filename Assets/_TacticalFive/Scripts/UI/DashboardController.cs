@@ -3414,9 +3414,9 @@ using System.Threading.Tasks;
         string detail = rot.hasInvalid
             ? "Hay minutos de rotación con valores no válidos."
             : rot.Missing > 0
-                ? $"Tienes {rot.total} de {RotationPlanner.TEAM_MINUTES} minutos asignados: faltan {rot.Missing} por repartir."
+                ? "Faltan minutos por asignar en la rotación."
                 : $"Tienes {rot.total} minutos asignados: te pasas por {-rot.Missing}.";
-        var text = new Label(detail + "\n\nAsigna todos los minutos antes de simular o usa el reparto automático.");
+        var text = new Label(detail + "\nAsigna todos los minutos antes de simular o usa el reparto automático.");
         text.AddToClassList("fired-modal-text");
         body.Add(text);
         box.Add(body);
