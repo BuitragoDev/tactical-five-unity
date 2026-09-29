@@ -212,7 +212,7 @@ public class GameSimulatorTests
     {
         var players = new List<GameSimulator.PlayerStatSnapshot>
         {
-            Plan("PG", "SG", PlayerRole.Titular,   88,  5, true),   // 0: 5 -> suelo 2
+            Plan("PG", "SG", PlayerRole.Titular,   88,  1, true),   // 0: 1 -> suelo 2
             Plan("SF", "PF", PlayerRole.Banquillo, 77, 39, false),  // 1: fijo, no lo toca la fatiga
             Plan("C",  "PF", PlayerRole.Banquillo, 75,  0, false),  // 2: 0 se respeta
             Plan("AP", "P",  PlayerRole.Banquillo, 74, 20, false),  // 3: fijo, sin cambios
