@@ -118,6 +118,11 @@ using System.Threading.Tasks;
     private bool _emptyLineupModalResolved;
     private bool _emptyLineupGoToQuinteto;
 
+    // Aviso de rotación incompleta (minutos sin asignar o inválidos)
+    private bool _rotationModalResolved;
+    private bool _rotationModalGoToRotation;
+    private bool _fastSimAbortRotation;
+
     // Load management modal
     private bool _loadMgmtModalResolved;
     private bool _loadMgmtModalGoToQuinteto;
@@ -1214,6 +1219,30 @@ using System.Threading.Tasks;
                     yield break;
                 }
             }
+
+            // Check de ROTACIÓN: o todos los minutos están asignados (240) o la rotación
+            // está en automático (el simulador reparte). Se comprueba al final porque los
+            // auto-rellenos anteriores resetean los minutos a -1 (estado válido).
+            var rotStatus = GetRotationStatus();
+            if (!rotStatus.IsComplete)
+            {
+                if (fastSim)
+                {
+                    _fastSimAborted = true;
+                    _fastSimAbortRotation = true;
+                    yield break;
+                }
+                _rotationModalResolved = false;
+                _rotationModalGoToRotation = false;
+                ShowRotationModal(rotStatus);
+                yield return new WaitUntil(() => _rotationModalResolved);
+                if (_rotationModalGoToRotation)
+                {
+                    HideLoading();
+                    ScreenManager.Instance.GoTo(GameScreen.Rotation);
+                    yield break;
+                }
+            }
         }
 
         // ── PreGame: navegar ANTES de simular ──
@@ -2043,6 +2072,23 @@ using System.Threading.Tasks;
                         ScreenManager.Instance.GoTo(GameScreen.Quinteto);
                         yield break;
                     }
+                    autoFixed = true;
+                }
+                else if (_fastSimAbortRotation)
+                {
+                    _rotationModalResolved = false;
+                    _rotationModalGoToRotation = false;
+                    ShowRotationModal(GetRotationStatus());
+                    yield return new WaitUntil(() => _rotationModalResolved);
+                    if (_rotationModalGoToRotation)
+                    {
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Rotation);
+                        yield break;
+                    }
+                    _fastSimAbortRotation = false;
                     autoFixed = true;
                 }
                 else if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
@@ -3306,6 +3352,110 @@ using System.Threading.Tasks;
         });
         actions.Add(btn);
         box.Add(actions);
+    }
+
+    /// <summary>
+    /// Estado del reparto de minutos de la rotación del equipo del usuario (solo convocados
+    /// jugables). `IsComplete` = sin jugables, todo en automático, o 240 exactos y válidos.
+    /// </summary>
+    RotationStatus GetRotationStatus()
+    {
+        if (_myTeam == null) return new RotationStatus();
+
+        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        if (lineup.Count == 0) return new RotationStatus();
+
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var byId = players.ToDictionary(p => p.id);
+
+        var slots = new List<RotationSlot>();
+        foreach (var l in lineup)
+        {
+            if (l.slot != 0 && l.slot != 1) continue;
+            if (!byId.TryGetValue(l.player_id, out var p) || p == null) continue;
+            slots.Add(new RotationSlot
+            {
+                playerId = p.id,
+                minutes = l.rotation_minutes,
+                playable = p.injury_days == 0 && p.g_league_assigned != 1,
+                suggestion = GameSimulator.GetSuggestedMinutes(p, l.slot == 0)
+            });
+        }
+
+        return RotationPlanner.Evaluate(slots);
+    }
+
+    /// <summary>Aviso de rotación incompleta: minutos sin asignar, excedidos o inválidos.</summary>
+    void ShowRotationModal(RotationStatus rot)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box--modern");
+        var gold = new Color32(212, 160, 23, 255);
+        box.style.borderTopColor = new StyleColor(gold);
+        box.style.borderBottomColor = new StyleColor(gold);
+        box.style.borderLeftColor = new StyleColor(gold);
+        box.style.borderRightColor = new StyleColor(gold);
+        _firedOverlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
+        var title = new Label("ROTACIÓN INCOMPLETA");
+        title.AddToClassList("fired-modal-title");
+        header.Add(title);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+
+        string detail = rot.hasInvalid
+            ? "Hay minutos de rotación con valores no válidos."
+            : rot.Missing > 0
+                ? $"Tienes {rot.total} de {RotationPlanner.TEAM_MINUTES} minutos asignados: faltan {rot.Missing} por repartir."
+                : $"Tienes {rot.total} minutos asignados: te pasas por {-rot.Missing}.";
+        var text = new Label(detail + "\n\nAsigna todos los minutos antes de simular o usa el reparto automático.");
+        text.AddToClassList("fired-modal-text");
+        body.Add(text);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
+
+        var goBtn = new Button();
+        goBtn.text = "IR A ROTACIÓN";
+        goBtn.AddToClassList("btn-modal-confirm");
+        goBtn.AddToClassList("btn-modal-confirm--gold");
+        goBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _rotationModalGoToRotation = true;
+            _rotationModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        actions.Add(goBtn);
+
+        var autoBtn = new Button();
+        autoBtn.text = "ASIGNAR AUTOMÁTICAMENTE";
+        autoBtn.AddToClassList("btn-modal-confirm");
+        autoBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            DatabaseManager.Instance.AutoAssignRotationMinutes(_myTeam.id, allPlayers);
+            _rotationModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        actions.Add(autoBtn);
+        box.Add(actions);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(goBtn);
+            CursorManager.Instance.RegisterHandCursor(autoBtn);
+        }
     }
 
     List<int> GetEmptyStarterSlots()

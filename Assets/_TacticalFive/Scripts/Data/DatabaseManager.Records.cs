@@ -3629,6 +3629,42 @@ public partial class DatabaseManager
         _db.Update(existing);
     }
 
+    /// <summary>
+    /// Asigna automáticamente los 240 minutos entre los convocados jugables (reparto de
+    /// `RotationPlanner` con suelo de 8 min) y los persiste. Es lo que hace el botón AUTO
+    /// de la pantalla ROTACIÓN y el botón del aviso de rotación del Dashboard.
+    /// </summary>
+    public void AutoAssignRotationMinutes(int teamId, List<PlayerData> players)
+    {
+        if (!EnsureDb() || players == null) return;
+
+        var lineup = GetTeamLineup(teamId);
+        if (lineup.Count == 0) return;
+
+        var byId = players.ToDictionary(p => p.id);
+        var entries = new List<(LineupData l, PlayerData p)>();
+        foreach (var l in lineup)
+        {
+            if (l.slot != 0 && l.slot != 1) continue;
+            if (!byId.TryGetValue(l.player_id, out var p) || p == null) continue;
+            if (p.injury_days > 0 || p.g_league_assigned == 1) continue;
+            entries.Add((l, p));
+        }
+        if (entries.Count == 0) return;
+
+        var suggestions = entries.Select(e => GameSimulator.GetSuggestedMinutes(e.p, e.l.slot == 0)).ToList();
+        var mins = RotationPlanner.AutoAssign(suggestions);
+
+        _db.RunInTransaction(() =>
+        {
+            for (int i = 0; i < entries.Count && i < mins.Length; i++)
+            {
+                entries[i].l.rotation_minutes = mins[i];
+                _db.Update(entries[i].l);
+            }
+        });
+    }
+
     /// <summary>Número máximo de NO CONVOCADOS (slot 2) en la convocatoria.</summary>
     public const int INACTIVE_SLOTS = 5;
 

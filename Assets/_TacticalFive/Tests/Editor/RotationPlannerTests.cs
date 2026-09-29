@@ -65,4 +65,74 @@ public class RotationPlannerTests
         Assert.That(mins.Length, Is.EqualTo(40));
         Assert.That(Sum(mins), Is.EqualTo(RotationPlanner.TEAM_MINUTES));
     }
+
+    // ── EVALUACIÓN DEL ESTADO (aviso del Dashboard) ─────────
+
+    static RotationSlot Slot(int minutes, int suggestion, bool playable = true)
+        => new RotationSlot { playerId = 1, minutes = minutes, suggestion = suggestion, playable = playable };
+
+    [Test]
+    public void Evaluate_AllAutoIsComplete()
+    {
+        var st = RotationPlanner.Evaluate(new List<RotationSlot>
+        {
+            Slot(-1, 39), Slot(-1, 31), Slot(0, 15), Slot(-1, 8)
+        });
+
+        Assert.That(st.allAuto, Is.True, "todos -1/0 = el simulador reparte");
+        Assert.That(st.total, Is.EqualTo(RotationPlanner.TEAM_MINUTES));
+        Assert.That(st.IsComplete, Is.True);
+    }
+
+    [Test]
+    public void Evaluate_FullAssignmentIsComplete()
+    {
+        var st = RotationPlanner.Evaluate(new List<RotationSlot>
+        {
+            Slot(48, 39), Slot(48, 31), Slot(48, 31), Slot(48, 31), Slot(48, 31)
+        });
+
+        Assert.That(st.allAuto, Is.False);
+        Assert.That(st.total, Is.EqualTo(RotationPlanner.TEAM_MINUTES));
+        Assert.That(st.IsComplete, Is.True);
+    }
+
+    [Test]
+    public void Evaluate_DetectsMissingMinutes()
+    {
+        var st = RotationPlanner.Evaluate(new List<RotationSlot>
+        {
+            Slot(48, 39), Slot(48, 39), Slot(48, 31), Slot(48, 31), Slot(39, 31)
+        });
+
+        Assert.That(st.total, Is.EqualTo(231));
+        Assert.That(st.Missing, Is.EqualTo(9));
+        Assert.That(st.IsComplete, Is.False);
+    }
+
+    [Test]
+    public void Evaluate_DetectsExcessMinutes()
+    {
+        var st = RotationPlanner.Evaluate(new List<RotationSlot>
+        {
+            Slot(48, 39), Slot(48, 39), Slot(48, 31), Slot(48, 31), Slot(48, 31), Slot(20, 15)
+        });
+
+        Assert.That(st.total, Is.EqualTo(260));
+        Assert.That(st.Missing, Is.EqualTo(-20));
+        Assert.That(st.IsComplete, Is.False);
+    }
+
+    [Test]
+    public void Evaluate_DetectsInvalidAndIgnoresUnplayable()
+    {
+        var invalid = RotationPlanner.Evaluate(new List<RotationSlot> { Slot(-2, 30), Slot(100, 30) });
+        Assert.That(invalid.hasInvalid, Is.True, "-2 y 100 están fuera de rango");
+        Assert.That(invalid.IsComplete, Is.False);
+
+        // Los no disponibles (lesionados/G-League) no cuentan; sin jugables no hay aviso.
+        var allOut = RotationPlanner.Evaluate(new List<RotationSlot> { Slot(20, 30, playable: false) });
+        Assert.That(allOut.playableCount, Is.EqualTo(0));
+        Assert.That(allOut.IsComplete, Is.True);
+    }
 }

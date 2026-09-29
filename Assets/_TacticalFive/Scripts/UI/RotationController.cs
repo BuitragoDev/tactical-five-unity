@@ -149,9 +149,21 @@ public class RotationController : UIScreenController
             .Where(ls => { var p = FindPlayer(ls.player_id); return p != null && IsPlayable(p); })
             .ToList();
 
-        // Misma regla que el simulador: sin ningún plan positivo (todos -1 o 0) la
-        // rotación es automática.
-        _allAuto = entries.Count > 0 && entries.All(ls => ls.rotation_minutes <= 0);
+        // Misma regla que el simulador (y que el aviso del Dashboard): sin ningún plan
+        // positivo (todos -1 o 0) la rotación es automática.
+        var slots = entries.Select(ls =>
+        {
+            var p = FindPlayer(ls.player_id);
+            return new RotationSlot
+            {
+                playerId = ls.player_id,
+                minutes = ls.rotation_minutes,
+                playable = true,
+                suggestion = SuggestedFor(p, ls.slot == 0)
+            };
+        }).ToList();
+
+        _allAuto = RotationPlanner.Evaluate(slots).allAuto;
         if (!_allAuto) return;
 
         var sug = entries.Select(ls => SuggestedFor(FindPlayer(ls.player_id), ls.slot == 0)).ToList();
@@ -556,21 +568,12 @@ public class RotationController : UIScreenController
             .ToList();
         if (entries.Count == 0) return;
 
-        var sug = new int[entries.Count];
-        for (int i = 0; i < entries.Count; i++)
-            sug[i] = SuggestedFor(FindPlayer(entries[i].player_id), entries[i].slot == 0);
-
-        // Reparto proporcional de 240 con suelo y tope (misma fuente que la vista automática).
-        var mins = RotationPlanner.AutoAssign(sug);
-
-        for (int i = 0; i < entries.Count && i < mins.Length; i++)
-        {
-            entries[i].rotation_minutes = mins[i];
-            DatabaseManager.Instance.SetLineupMinutes(entries[i].player_id, mins[i]);
-        }
+        // Fuente única del reparto (misma que el aviso del Dashboard).
+        DatabaseManager.Instance.AutoAssignRotationMinutes(_myTeam.id, _players);
 
         _allAuto = false;
         _autoSplit.Clear();
+        _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
         BuildRows();
         UpdateSummary();
     }

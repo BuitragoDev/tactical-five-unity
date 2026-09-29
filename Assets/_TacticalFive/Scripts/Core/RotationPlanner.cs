@@ -1,14 +1,43 @@
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>Un convocado para calcular el estado de la rotación.</summary>
+public class RotationSlot
+{
+    public int playerId;
+    /// <summary>`team_lineup.rotation_minutes` (-1 = automático).</summary>
+    public int minutes;
+    /// <summary>Disponible para jugar (ni lesionado ni en G-League).</summary>
+    public bool playable;
+    /// <summary>Minutos que sugeriría el simulador (heurística por rol/OVR/slot).</summary>
+    public int suggestion;
+}
+
+/// <summary>Estado del reparto de minutos de la rotación.</summary>
+public class RotationStatus
+{
+    /// <summary>Minutos efectivos de los convocados jugables.</summary>
+    public int total;
+    /// <summary>Ningún convocado jugable tiene plan positivo: el simulador reparte 240.</summary>
+    public bool allAuto;
+    /// <summary>Algún valor fuera de rango (-1/0..48).</summary>
+    public bool hasInvalid;
+    public int playableCount;
+
+    /// <summary>Minutos que faltan (&gt;0) o sobran (&lt;0) para llegar a 240.</summary>
+    public int Missing => RotationPlanner.TEAM_MINUTES - total;
+
+    /// <summary>La rotación está lista: sin jugables, en automático, o 240 exactos y válidos.</summary>
+    public bool IsComplete => playableCount == 0 || allAuto || (!hasInvalid && total == RotationPlanner.TEAM_MINUTES);
+}
+
 /// <summary>
 /// Reparto automático de los 240 minutos de un partido entre la convocatoria. Puro y
 /// testeable: lo usan el botón AUTO de ROTACIÓN y la vista del estado "todo automático",
 /// de forma que lo que se muestra coincide con lo que se juega cuando se fijan los valores.
 /// </summary>
 public static class RotationPlanner
-{
-    public const int TEAM_MINUTES = 240;
+{    public const int TEAM_MINUTES = 240;
     public const int MAX_PER_PLAYER = 48;
     /// <summary>Suelo por jugador: el mismo que aplica el simulador a los minutos fijados.</summary>
     public const int MIN_PER_PLAYER = GameSimulator.MIN_FIXED_MINUTES;
@@ -76,5 +105,34 @@ public static class RotationPlanner
         }
 
         return mins;
+    }
+
+    /// <summary>
+    /// Evalúa el reparto actual: total de los convocados jugables, si está todo en
+    /// automático y si hay valores inválidos. Es la misma cuenta que muestra la pantalla
+    /// ROTACIÓN (fijos tal cual; los `-1` con su sugerencia salvo si todo es automático).
+    /// </summary>
+    public static RotationStatus Evaluate(IReadOnlyList<RotationSlot> slots)
+    {
+        var st = new RotationStatus();
+        if (slots == null) return st;
+
+        var playable = slots.Where(s => s != null && s.playable).ToList();
+        st.playableCount = playable.Count;
+        if (playable.Count == 0) return st;
+
+        st.hasInvalid = playable.Any(s => s.minutes < -1 || s.minutes > MAX_PER_PLAYER);
+        st.allAuto = playable.All(s => s.minutes <= 0);
+        if (st.allAuto)
+        {
+            st.total = TEAM_MINUTES;   // el simulador reparte los 240 automáticamente
+            return st;
+        }
+
+        int total = 0;
+        foreach (var s in playable)
+            total += s.minutes >= 0 ? System.Math.Min(s.minutes, MAX_PER_PLAYER) : System.Math.Max(0, s.suggestion);
+        st.total = total;
+        return st;
     }
 }
