@@ -6430,6 +6430,7 @@ List<int> offeredPickIds = new List<int>();
         // ── Teams row ──
         var body = new VisualElement();
         body.AddToClassList("fired-modal-body");
+        body.AddToClassList("trade-offer-body");
 
         var teamsRow = new VisualElement();
         teamsRow.AddToClassList("trade-modal-teams");
