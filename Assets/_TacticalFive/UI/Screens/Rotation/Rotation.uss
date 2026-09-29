@@ -273,6 +273,10 @@
 .rot-min-val--custom {
     color: rgb(248, 196, 64);
 }
+/* Reparto automático (no es una personalización del usuario) */
+.rot-min-val--auto {
+    color: rgb(150, 162, 186);
+}
 
 .rot-sug {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");

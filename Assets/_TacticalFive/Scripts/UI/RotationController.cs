@@ -23,6 +23,12 @@ public class RotationController : UIScreenController
     private List<LineupData> _lineup;
     private readonly Dictionary<int, int> _suggested = new();
 
+    // Estado "todo automático": ningún convocado tiene minutos fijados (todos -1). La
+    // pantalla muestra entonces el reparto automático de 240 (como el botón AUTO) para no
+    // pintar un exceso irreal: las sugerencias por jugador no suman 240.
+    private bool _allAuto;
+    private readonly Dictionary<int, int> _autoSplit = new();
+
     // Sliders vivos de la lista, para recalcular el tope de minutos (240 en total).
     private readonly List<(LineupData ls, PlayerData p, bool playable, CustomSlider slider)> _sliders = new();
 
@@ -86,6 +92,7 @@ public class RotationController : UIScreenController
 
         _lineup = DatabaseManager.Instance.EnsureLineupSeeded(_myTeam.id, _players);
         BuildSuggested();
+        ComputeAutoSplit();
 
         if (_subtitle != null)
             _subtitle.text = $"REPARTE LOS {TEAM_MINUTES} MINUTOS DEL PARTIDO ENTRE TUS CONVOCADOS";
@@ -128,12 +135,60 @@ public class RotationController : UIScreenController
         return GameSimulator.GetSuggestedMinutes(p, starter);
     }
 
-    // Minutos efectivos: los fijados por el usuario o, si no (slot -1), lo sugerido.
+    /// <summary>
+    /// Si NINGÚN convocado tiene minutos fijados, calcula el reparto automático de 240
+    /// (reparto proporcional del botón AUTO) para mostrarlo tal cual. Así la pantalla
+    /// nunca abre con "minutos excedidos" cuando en realidad no hay nada configurado.
+    /// </summary>
+    void ComputeAutoSplit()
+    {
+        _autoSplit.Clear();
+        if (_lineup == null) { _allAuto = false; return; }
+
+        var entries = ActiveEntries()
+            .Where(ls => { var p = FindPlayer(ls.player_id); return p != null && IsPlayable(p); })
+            .ToList();
+
+        // Misma regla que el simulador: sin ningún plan positivo (todos -1 o 0) la
+        // rotación es automática.
+        _allAuto = entries.Count > 0 && entries.All(ls => ls.rotation_minutes <= 0);
+        if (!_allAuto) return;
+
+        var sug = entries.Select(ls => SuggestedFor(FindPlayer(ls.player_id), ls.slot == 0)).ToList();
+        var mins = RotationPlanner.AutoAssign(sug);
+        for (int i = 0; i < entries.Count && i < mins.Length; i++)
+            _autoSplit[entries[i].player_id] = mins[i];
+    }
+
+    // Minutos efectivos: los fijados por el usuario o, si no (slot -1), el reparto
+    // automático de 240 (o la sugerencia del simulador si no se pudo repartir).
     int Effective(LineupData ls, PlayerData p)
     {
-        if (ls.rotation_minutes >= 0)
+        if (!_allAuto && ls.rotation_minutes >= 0)
             return Mathf.Min(ls.rotation_minutes, MAX_MINUTES);
+        if (p != null && _autoSplit.TryGetValue(p.id, out var auto)) return auto;
         return SuggestedFor(p, ls.slot == 0);
+    }
+
+    /// <summary>
+    /// Fija (persiste) el reparto automático mostrado. Se llama en cuanto el usuario toca
+    /// un slider en estado automático: a partir de ahí la BD coincide con la pantalla.
+    /// </summary>
+    void MaterializeAutoSplit()
+    {
+        if (!_allAuto || _lineup == null) return;
+
+        foreach (var ls in ActiveEntries())
+        {
+            var p = FindPlayer(ls.player_id);
+            if (p == null) continue;
+            int mins = _autoSplit.TryGetValue(p.id, out var split) ? split : 0;
+            ls.rotation_minutes = mins;
+            DatabaseManager.Instance.SetLineupMinutes(p.id, mins);
+        }
+
+        _allAuto = false;
+        _autoSplit.Clear();
     }
 
     List<LineupData> ActiveEntries()
@@ -262,7 +317,8 @@ public class RotationController : UIScreenController
         sugCell.Add(sugDelta);
         row.Add(sugCell);
 
-        ApplyRowValues(valLbl, sugBase, sugDelta, effective, suggested);
+        bool isAuto = _allAuto;
+        ApplyRowValues(valLbl, sugBase, sugDelta, effective, suggested, isAuto);
 
         var cs = new CustomSlider(slider, fill, dragger);
         _sliders.Add((ls, p, playable, cs));
@@ -273,6 +329,13 @@ public class RotationController : UIScreenController
         cs.OnValueChanged = v =>
         {
             int minutes = Mathf.Clamp(Mathf.RoundToInt(v * MAX_MINUTES), 0, MAX_MINUTES);
+
+            // Primera interacción en estado automático: se fija el reparto mostrado (para
+            // que la BD y la pantalla digan lo mismo) y en el mismo gesto se aplica el
+            // cambio del usuario. No se reconstruyen las filas para no cortar el arrastre:
+            // el resto conserva el aspecto "automático" hasta la próxima visita.
+            if (_allAuto) MaterializeAutoSplit();
+
             ls.rotation_minutes = minutes;
             DatabaseManager.Instance.SetLineupMinutes(playerId, minutes);
 
@@ -284,10 +347,21 @@ public class RotationController : UIScreenController
         return row;
     }
 
-    void ApplyRowValues(Label valLbl, Label sugBase, Label sugDelta, int minutes, int suggested)
+    void ApplyRowValues(Label valLbl, Label sugBase, Label sugDelta, int minutes, int suggested,
+                        bool isAuto = false)
     {
         valLbl.text = minutes.ToString();
-        valLbl.EnableInClassList("rot-min-val--custom", minutes != suggested);
+        valLbl.EnableInClassList("rot-min-val--auto", isAuto);
+        valLbl.EnableInClassList("rot-min-val--custom", !isAuto && minutes != suggested);
+
+        if (isAuto)
+        {
+            // Reparto automático: no es una personalización del usuario, no hay delta.
+            sugDelta.text = string.Empty;
+            sugDelta.style.display = DisplayStyle.None;
+            sugDelta.tooltip = null;
+            return;
+        }
 
         sugBase.text = suggested.ToString();
         sugBase.tooltip = $"Sugerido por el simulador: {suggested} min";
@@ -351,6 +425,7 @@ public class RotationController : UIScreenController
         {
             _remainingHint.text = remaining > 0 ? "MINUTOS POR REPARTIR"
                                 : remaining < 0 ? "MINUTOS EXCEDIDOS"
+                                : _allAuto ? "REPARTO AUTOMÁTICO (240)"
                                 : "REPARTO EXACTO (240)";
         }
 
@@ -485,43 +560,20 @@ public class RotationController : UIScreenController
         if (entries.Count == 0) return;
 
         var sug = new int[entries.Count];
-        float sumSug = 0f;
         for (int i = 0; i < entries.Count; i++)
-        {
-            var p = FindPlayer(entries[i].player_id);
-            sug[i] = SuggestedFor(p, entries[i].slot == 0);
-            sumSug += sug[i];
-        }
-        if (sumSug <= 0f) sumSug = entries.Count;
+            sug[i] = SuggestedFor(FindPlayer(entries[i].player_id), entries[i].slot == 0);
 
-        // Reparto proporcional de 240 minutos: suelo + resto a las mayores fracciones.
-        var mins = new int[entries.Count];
-        var frac = new float[entries.Count];
-        int assigned = 0;
-        for (int i = 0; i < entries.Count; i++)
-        {
-            float raw = sug[i] / sumSug * TEAM_MINUTES;
-            int floor = Mathf.FloorToInt(raw);
-            mins[i] = Mathf.Min(MAX_MINUTES, floor);
-            frac[i] = raw - floor;
-            assigned += mins[i];
-        }
+        // Reparto proporcional de 240 con suelo y tope (misma fuente que la vista automática).
+        var mins = RotationPlanner.AutoAssign(sug);
 
-        int leftover = TEAM_MINUTES - assigned;
-        foreach (int i in Enumerable.Range(0, entries.Count).OrderByDescending(k => frac[k]))
-        {
-            if (leftover <= 0) break;
-            if (mins[i] >= MAX_MINUTES) continue;
-            mins[i]++;
-            leftover--;
-        }
-
-        for (int i = 0; i < entries.Count; i++)
+        for (int i = 0; i < entries.Count && i < mins.Length; i++)
         {
             entries[i].rotation_minutes = mins[i];
             DatabaseManager.Instance.SetLineupMinutes(entries[i].player_id, mins[i]);
         }
 
+        _allAuto = false;
+        _autoSplit.Clear();
         BuildRows();
         UpdateSummary();
     }
@@ -539,6 +591,9 @@ public class RotationController : UIScreenController
             DatabaseManager.Instance.SetLineupMinutes(ls.player_id, 0);
         }
 
+        // RESET deja todo a 0 = el simulador vuelve a repartir automáticamente; la pantalla
+        // lo muestra con el reparto de 240 (no como "0 minutos" para todos).
+        ComputeAutoSplit();
         BuildRows();
         UpdateSummary();
     }

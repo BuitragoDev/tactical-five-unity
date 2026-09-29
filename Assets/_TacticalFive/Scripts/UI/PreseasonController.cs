@@ -519,6 +519,25 @@ public class PreseasonController : UIScreenController
             }
         }
 
+        // === Convocatoria del equipo del usuario ===
+        // Al crear la partida se genera como el botón CONVOCATORIA AUTOMÁTICA (5 titulares +
+        // banquillo + no convocados), para que Quinteto/Rotación ya estén definidos. Los
+        // minutos de rotación quedan en automático (-1): el simulador los reparte cada
+        // partido y la pantalla ROTACIÓN muestra ese reparto sin excesos.
+        if (isNewGame && _myTeam != null)
+        {
+            try
+            {
+                var myPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+                if (myPlayers.Count > 0)
+                    DatabaseManager.Instance.EnsureLineupSeeded(_myTeam.id, myPlayers);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogWarning($"[Preseason] No se pudo generar la convocatoria inicial: {ex.Message}");
+            }
+        }
+
         // === Metadata del slot: la partida solo queda "válida" cuando la temporada y
         // el calendario ya están persistidos. ===
         GameSaveManager.SaveSlotInfo(new SaveSlotInfo
