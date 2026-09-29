@@ -43,8 +43,8 @@
 ### Quarters, rotations, overtime
 - 4 quarters via `SimQuarter`; `teamPoss = clamp(round(pace/4 * rand(0.96,1.04)), 22, 28)` per team per quarter.
 - Rotations via `SubSchedule` (Q1/Q3 subs at 4' and 8'; Q2/Q4 at 2',5',8',10.5'). El equipo con rotación configurada (vinculante) usa ventanas densas cada 1,5' (7 por cuarto) para poder cumplir sus planes; el rival mantiene las de siempre. Overtime: 24 possessions (`minsPerPoss = 5/24`), sub at 2.5'. Up to 5 OTs.
-- Substitution policy: `DoSub` changes 1–2 players at each scheduled stoppage. En modo no vinculante (IA) elige al que sale por minutos sobre su objetivo y al que entra por encaje posicional, minutos pendientes y OVR. Stars (`role=Estrella` or OVR≥85) target 39 minutes when starting (38–40 in normal variation), titular starters 27–31, titular bench players 21, bench players 15 and last-resort players 8. A player with `fisico < 30` has its target reduced by 6 minutes, with a floor of 8. Interior coverage is preserved when possible; stars are protected from early substitutions and can return later in the game.
-- **Rotación vinculante (solo el equipo del usuario):** con minutos configurados en ROTACIÓN (`fixed_minutes`), `GameSimulator.PickSubstitution` (helper puro) respeta el plan: sale quien más se pasa de su objetivo (desempate: ratio, plan menor, OVR) y entra, ponderando el encaje posicional (×1.0/×0.85/×0.6), quien tiene minutos pendientes; nunca se reinserta a quien agotó su plan mientras haya relevos con minutos, y el cambio no deja la pista sin interiores. Si nadie tiene minutos pendientes no hay cambio (los de pista completan si la suma no llega a 240). Suelo de **8 min** por jugador con plan > 0; `0` = no juega. La fatiga no altera un plan configurado. La protección de estrellas por minutos **efectivos** (incluyendo el cuarto en curso) también es exclusiva de este modo: la IA conserva la regla antigua (minutos globales).
+- Substitution policy: `DoSub` changes 1–2 players at each scheduled stoppage. En modo no vinculante (IA) elige al que sale por minutos sobre su objetivo y al que entra por encaje posicional, minutos pendientes y OVR. **Objetivo por media** (`GetTargetMinutes`): titular ≥90 → 40, ≥85 → 34, ≥80 → 33, ≥75 → 26, por debajo → 20; suplente ≥90 → 32, ≥85 → 28, ≥80 → 22, ≥75 → 14, por debajo → 12; **rol `UltimoRecurso` → suelo (2 min)**. A player with `fisico < 30` has its target reduced by 6 minutes, con suelo de 2 (`MIN_FIXED_MINUTES`). El rol es la escala de `PlayerRoleRules.FromOverall` (seed, draft y migración `role_from_overall`). Interior coverage is preserved when possible; stars are protected from early substitutions and can return later in the game.
+- **Rotación vinculante (solo el equipo del usuario):** con minutos configurados en ROTACIÓN (`fixed_minutes`), `GameSimulator.PickSubstitution` (helper puro) respeta el plan: sale quien más se pasa de su objetivo (desempate: ratio, plan menor, OVR) y entra, ponderando el encaje posicional (×1.0/×0.85/×0.6), quien tiene minutos pendientes; nunca se reinserta a quien agotó su plan mientras haya relevos con minutos, y el cambio no deja la pista sin interiores. Si nadie tiene minutos pendientes no hay cambio (los de pista completan si la suma no llega a 240). Suelo de **2 min** (`MIN_FIXED_MINUTES`) por jugador con plan > 0; `0` = no juega. La fatiga no altera un plan configurado. La protección de estrellas por minutos **efectivos** (incluyendo el cuarto en curso) también es exclusiva de este modo: la IA conserva la regla antigua (minutos globales).
 - **Origen del objetivo:** `PrepareRotationMetadata` usa `target_minutes` si el jugador tiene minutos fijados en la pantalla ROTACIÓN (`PlayerData.rotation_minutes ≥ 0`); si no (`-1`), aplica la heurística anterior. La fatiga (`fisico < 30`) resta 6 minutos (mínimo 8) solo en los objetivos heurísticos (IA). Solo el equipo del jugador usa minutos configurados; la IA, la G-League y el All-Star siguen con la heurística.
 
 ### Elite floors
@@ -77,10 +77,14 @@ If a team has <2 available players, result is random-ish (105–125 vs 100–120
 - `AutoSeedLineup` builds a default rotation (starters by position, bench by role). `EnsureLineupSeeded(teamId, players)` (compartido por Quinteto y Rotación) lo crea si la tabla está vacía, borra filas de jugadores que ya no están y mete a los nuevos en NO CONVOCADOS (máx. 5).
 - **Pantalla ROTACIÓN** (`GameScreen.Rotation`, `RotationController`): reparto manual de los **240 minutos** de un partido (5 × 48) entre los 12 convocados.
   - Se guarda en **`team_lineup.rotation_minutes`** (migración `ALTER TABLE ... DEFAULT -1`); **`-1` = automático**, `0..48` = fijo. No se guarda en `players` (hay un campo transitorio `[Ignore] PlayerData.rotation_minutes` para dárselo al simulador).
-  - `GetActivePlayers(_myTeam.id)` copia el valor a cada jugador convocado → `InitPS` lo mete en `PlayerStatSnapshot.target_minutes` (`fixed_minutes = true`) → `PrepareRotationMetadata` lo aplica (suelo 8) y `PickSubstitution` lo respeta de verdad.
+  - `GetActivePlayers(_myTeam.id)` copia el valor a cada jugador convocado → `InitPS` lo mete en `PlayerStatSnapshot.target_minutes` (`fixed_minutes = true`) → `PrepareRotationMetadata` lo aplica (suelo 2) y `PickSubstitution` lo respeta de verdad.
   - Columna **SUG.** = `GameSimulator.GetSuggestedMinutes(player, starter)` (misma heurística, sin fatiga).
   - Panel **MINUTOS POR POSICIÓN** (solo lectura): suma de minutos por posición primaria y secundaria, escala relativa a 48.
-  - **AUTO (240)** reparte los 240 minutos proporcionalmente a lo sugerido (suelo + resto a las mayores fracciones, tope 48). **RESET** pone todos los minutos a `0` (reparto desde cero); `0` es un valor real, no el centinela `-1` de automático, que solo queda en una convocatoria nunca tocada. Si el total configurado es 0 el equipo vuelve al reparto automático.
+  - **AUTO (240)** reparte los 240 minutos con `RotationPlanner.AutoAssign` (proporcional a los objetivos, **suelo 2 min** —el mismo que aplica el simulador— y tope 48; la suma es exactamente 240) entre una **rotación corta** (`ROTATION_SIZE = 10`: solo los 10 mejores objetivos reparten minutos; el fondo se queda en el suelo). **RESET** pone todos los minutos a `0` (reparto desde cero); `0` es un valor real, no el centinela `-1` de automático, que solo queda en una convocatoria nunca tocada. Si el total configurado es 0 el equipo vuelve al reparto automático.
+  - **Referencia = cuota de 240:** las sugerencias por jugador (heurística por media/rol) **no suman 240**, así que compararlas en bruto daba negativos a todos los convocados (imposibles de cuadrar). La columna **SUGERIDO** y los **±** se calculan contra la **cuota de 240** del jugador (`RotationPlanner.AutoAssign` sobre sus ideales, suelo 2, tope 48): en automático **todos los deltas son 0** y con reparto manual los deltas suman 0 (siempre cuadrables). El tooltip muestra el ideal bruto (*"Ideal del simulador: X min · cuota de 240: Y min"*).
+  - **Estado automático (sin plan positivo):** si ningún convocado tiene plan (todos `-1` o `0`) la pantalla lo marca ("REPARTO AUTOMÁTICO (240)") y la **primera vez que el usuario toca un slider se fija ese reparto** y luego se aplica el cambio. Así lo mostrado y lo jugado coinciden desde ese momento.
+  - **Convocatoria al crear la partida:** al pulsar **CONTINUAR** en Preseason (partida nueva) se genera la convocatoria como el botón **CONVOCATORIA AUTOMÁTICA** (`EnsureLineupSeeded`), con los minutos de rotación en automático.
+  - **Aviso antes de simular:** junto a los avisos de lesionados/quinteto vacío, el Dashboard comprueba la rotación **cada día que juega tu equipo** (también durante la simulación rápida, que se pausa): si `RotationPlanner.Evaluate` no la da por lista (ni 240 exactos y válidos, ni todo en automático) muestra **ROTACIÓN INCOMPLETA** con el detalle ("faltan 9", "te pasas por 10"…), **IR A ROTACIÓN** (dorado) y **ASIGNAR AUTOMÁTICAMENTE** (verde, `DatabaseManager.AutoAssignRotationMinutes` = reparto de 240 con suelo 2, persistido, igual que el botón AUTO). Los convocados no disponibles (lesionados/G-League) no cuentan.
   - Solo cuentan en los totales los convocados jugables (`injury_days == 0` y `g_league_assigned != 1`).
 - **Moral post-partido** (`UpdatePlayersMoraleAfterGame`): los minutos esperados de cada jugador son ahora su `target_minutes` efectivo (configurado o heurístico); si es 0, se usa la tabla fija por rol (Estrella 40 / Titular 28 / Banquillo 10 / Último 3).
 - `GetActivePlayers(teamId)` returns the active 12 used in simulation (starters first → `GameResultCache.GameStarters`).
@@ -291,6 +295,58 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
   motor (QN sigue con las del resto de la liga).
+
+## Quintetos de la temporada (pantalla Quintos)
+
+- La pantalla **MEJORES QUINTETOS DE TEMPORADA** muestra el **primer** y el **segundo** quinteto
+  de la temporada y de rookies (`QuintetPicker`, puro: por posición PG/SG/SF/PF/C, aceptando la
+  secundaria, el mejor por rating medio **sin repetir jugador** entre posiciones ni quintetos;
+  mínimos de partidos 65 / 40, los mismos que el primero).
+- Un **toggle en la cabecera** (PRIMER QUINTETO / SEGUNDO QUINTETO) cambia ambos paneles a la
+  vez; al entrar en la pantalla siempre se muestra el primero. Títulos, subtítulos y badges se
+  actualizan al mostrar el segundo.
+- El **segundo quinteto es solo informativo**: no se escribe en `quintet_records` (Historial de
+  Quintetos) ni afecta a las Apariciones de la pestaña QUINTETOS de Palmarés, que se siguen
+  alimentando solo del primer quinteto (y del seed histórico).
+
+## Mercado de buyout (rescindidos)
+
+- **Al rescindir** (buyout) un jugador pasa a la agencia libre con **contrato a 0** y su nuevo
+  precio es el **mínimo de liga**: el equipo que le corta sigue pagando el resto como
+  `dead_money` (stretch), igual que en la NBA. Se marca `players.waived_game_day` con la
+  jornada de la rescisión. **Su contrato de rescindido es de mínimo y 1 año**
+  (`BuyoutMarketRules.ContractYears`), no de varios años: una estrella no puede quedarse
+  cobrando el mínimo durante 3 temporadas.
+- **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el
+  lote de fondo) **solo si tiene 75+ de media** (`BuyoutMarketRules.MinOverall`); por debajo
+  queda como agente libre normal y decide el mercado general (los equipos con hueco eligen
+  antes a los mejores de cada posición). A partir de esa jornada, los destinos —**contender &gt; balanced &gt;
+  rebuild**; a igual estrategia, el equipo con menos jugadores en su posición; luego mejor
+  plantilla y más **prestigio**— se ordenan con `BuyoutMarketRules.RankDestinations` y entre
+  los **3 mejores postores** se sortea el destino de forma **ponderada** (`PickSuitor`: el 1º
+  tiene el doble de probabilidad que el 2º y el triple que el 3º). El elegido le firma **por el
+  mínimo** (hueco de plantilla y encaje en `TradeHelper.CanAISignExternal`), genera el
+  `TradeData` de agencia libre y una **noticia** ("Mercado de buyout: X firma con Y").
+- **Fichajes de la IA con excepciones:** tanto el pase de estrellas como el general usan la
+  regla completa (`CanAISignExternal`: espacio de tope → MLE → mínimo) y **asignan el salario
+  nuevo** al firmar. Antes el pase de estrellas exigía espacio de tope puro (nadie sobre el
+  cap podía fichar) y heredaba el salario viejo (bombas de nómina).
+- **Precio al expirar:** cuando un contrato llega a 0 en el rollover, el precio pedido no se
+  queda anclado al salario viejo: si está por debajo de su valor de mercado
+  (`TradeHelper.MarketValueByOvr`: 85+ → 35 % del tope, 80+ → 30 %, 75+ → 25 %) se sube a ese
+  valor. Así el jugador que firmó por el mínimo deja de ser barato para siempre.
+- **Renovación por su calidad:** en `CalculateAIRenewalOffer`, si su valor de mercado es **3× o
+  más** que su salario actual (`TradeHelper.ShouldRenewAtMarket`, típico de un rescindido que
+  firmó por el mínimo), la oferta va a valor de mercado **sin el tope no-Bird del 120 %**:
+  para una estrella eso es su **máximo por experiencia** (25/30/35 % del tope según años). El
+  resto de jugadores mantiene sus topes Bird.
+- **Re-firma con Bird rights:** un FA reciente cuyo último equipo conserva sus derechos
+  (`ProcessOwnFreeAgentResignings`: expiró contrato o declinó su opción) puede volver a él con
+  un contrato acorde a su valor, aunque el equipo esté por encima del tope (límite del 2º
+  apron, igual que las renovaciones). Corre antes que el resto de pases de FA, para que el
+  equipo con derechos tenga la primera oportunidad.
+- La marca `waived_game_day` se limpia al firmar (`MovePlayerToTeam`, ofertas aceptadas) y en
+  el rollover.
 
 ## Rivalidades y dinastías
 

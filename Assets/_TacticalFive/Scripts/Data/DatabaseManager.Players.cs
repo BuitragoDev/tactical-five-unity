@@ -41,6 +41,7 @@ public partial class DatabaseManager
         p.is_two_way = 0;
         p.g_league_assigned = 0;
         p.on_trade_block = 0;
+        p.waived_game_day = -1;   // ya tiene equipo: deja de ser un FA del mercado de buyout
         UpdatePlayer(p);
 
         // Si cambia de equipo, sus hilos narrativos (solo existen del equipo del usuario)

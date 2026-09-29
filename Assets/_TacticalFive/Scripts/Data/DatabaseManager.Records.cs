@@ -1875,6 +1875,21 @@ public partial class DatabaseManager
         return GetBestPerPosition(seasonId, managerId, true, 40);
     }
 
+    /// <summary>
+    /// Los dos mejores quintetos de la temporada (informativo: **no se persiste** en
+    /// `quintet_records` ni afecta a las apariciones de Palmarés).
+    /// </summary>
+    public List<List<PlayerAwardInfo>> GetAllStarTeams(int seasonId, int managerId, int teams = QuintetPicker.Teams)
+    {
+        return GetBestPerPositionTeams(seasonId, managerId, null, 65, teams);
+    }
+
+    /// <summary>Los dos mejores quintetos de rookies (informativo, no se persiste).</summary>
+    public List<List<PlayerAwardInfo>> GetAllRookieTeams(int seasonId, int managerId, int teams = QuintetPicker.Teams)
+    {
+        return GetBestPerPositionTeams(seasonId, managerId, true, 40, teams);
+    }
+
     PlayerAwardInfo QueryTopPlayer(int seasonId, int managerId, bool? rookieOnly, int minGames)
     {
         if (!EnsureDb()) return null;
@@ -1915,7 +1930,18 @@ public partial class DatabaseManager
 
     List<PlayerAwardInfo> GetBestPerPosition(int seasonId, int managerId, bool? rookieOnly, int minGames)
     {
-        if (!EnsureDb()) return new List<PlayerAwardInfo>();
+        var teams = GetBestPerPositionTeams(seasonId, managerId, rookieOnly, minGames, 1);
+        return teams.Count > 0 ? teams[0] : new List<PlayerAwardInfo>();
+    }
+
+    /// <summary>
+    /// Mejores quintetos de la temporada (1º, 2º…): mismos mínimos de partidos que el 1º,
+    /// sin repetir jugador y sin persistir nada. La selección vive en `QuintetPicker` (puro).
+    /// </summary>
+    List<List<PlayerAwardInfo>> GetBestPerPositionTeams(int seasonId, int managerId, bool? rookieOnly,
+                                                        int minGames, int teams)
+    {
+        if (!EnsureDb()) return new List<List<PlayerAwardInfo>>();
         string rookieFilter = rookieOnly == true ? "AND p.is_rookie = 1" : "";
         string sql = $@"
             SELECT p.id, p.photo, p.first_name, p.last_name, p.position, p.secondary_position,
@@ -1933,38 +1959,46 @@ public partial class DatabaseManager
             HAVING games >= ?
             ORDER BY avg_rating DESC";
         var allRows = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, minGames);
-        var result = new List<PlayerAwardInfo>();
-        string[] positions = { "PG", "SG", "SF", "PF", "C" };
-        var assigned = new HashSet<int>();
-        foreach (var pos in positions)
+
+        // Selección pura (1º y 2º quinteto, sin repetir jugador).
+        var candidates = allRows.Select(r => new QuintetCandidate
         {
-            PlayerAwardQueryRow best = null;
-            foreach (var row in allRows)
+            PlayerId = r.id,
+            Photo = r.photo ?? "",
+            PlayerName = $"{r.first_name} {r.last_name}",
+            Position = r.position,
+            SecondaryPosition = r.secondary_position,
+            TeamName = r.team_name ?? "",
+            TeamLogo = r.team_logo ?? "",
+            AvgPts = (float)r.avg_pts,
+            AvgReb = (float)r.avg_reb,
+            AvgAst = (float)r.avg_ast,
+            AvgRating = (float)r.avg_rating
+        }).ToList();
+
+        var picked = QuintetPicker.Pick(candidates, teams);
+
+        var result = new List<List<PlayerAwardInfo>>();
+        foreach (var team in picked)
+        {
+            var quintet = new List<PlayerAwardInfo>();
+            foreach (var slot in team)
             {
-                if (assigned.Contains(row.id)) continue;
-                if (row.position == pos || (!string.IsNullOrEmpty(row.secondary_position) && row.secondary_position == pos))
+                quintet.Add(new PlayerAwardInfo
                 {
-                    if (best == null || row.avg_rating > best.avg_rating)
-                        best = row;
-                }
-            }
-            if (best != null)
-            {
-                assigned.Add(best.id);
-                result.Add(new PlayerAwardInfo
-                {
-                    PlayerId = best.id,
-                    Photo = best.photo ?? "",
-                    PlayerName = $"{best.first_name} {best.last_name}",
-                    TeamName = best.team_name ?? "",
-                    TeamKeyword = best.team_logo ?? "",
-                    Position = pos,
-                    AvgPts = (float)best.avg_pts,
-                    AvgReb = (float)best.avg_reb,
-                    AvgAst = (float)best.avg_ast,
-                    AvgRating = (float)best.avg_rating
+                    PlayerId = slot.player.PlayerId,
+                    Photo = slot.player.Photo,
+                    PlayerName = slot.player.PlayerName,
+                    TeamName = slot.player.TeamName,
+                    TeamKeyword = slot.player.TeamLogo,
+                    Position = slot.position,
+                    AvgPts = slot.player.AvgPts,
+                    AvgReb = slot.player.AvgReb,
+                    AvgAst = slot.player.AvgAst,
+                    AvgRating = slot.player.AvgRating
                 });
             }
+            result.Add(quintet);
         }
         return result;
     }
@@ -2792,6 +2826,9 @@ public partial class DatabaseManager
         foreach (var ss in _db.Table<PlayerSeasonStatRow>().Where(x => x.season_id == oldSeasonId))
             mpgByPlayer[ss.player_id] = ss.games > 0 ? (int)System.Math.Round(ss.total_minutes / ss.games) : -1;
 
+        // Valor de mercado del tope para reajustar el precio pedido al expirar (una vez).
+        long rolloverCap = GetLeagueSettings()?.salary_cap ?? TradeHelper.SALARY_CAP;
+
         foreach (var p in remaining)
         {
             if (p.is_rookie == 1)
@@ -2929,6 +2966,11 @@ public partial class DatabaseManager
                 if (oldTeamId != 0 && p.last_team_id == 0)
                     p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                 p.team_id = 0;
+
+                // El precio pedido no se queda anclado al salario viejo: si está por debajo
+                // de su valor de mercado (p. ej. fichó por el mínimo tras una rescisión), sube.
+                long marketValue = TradeHelper.MarketValueByOvr(p.overall, rolloverCap);
+                if (marketValue > p.salary) p.salary = marketValue;
             }
 
             // Track team changes for seasons_with_team
@@ -3253,7 +3295,7 @@ public partial class DatabaseManager
 
         // 7e. Reset del estado transitorio de temporada: lesiones, fatiga, trade block,
         // química y confianza no deben viajar entre temporadas.
-        _db.Execute("UPDATE players SET injury_days = 0, injury_type = '', treated = 0, fisico = 99, on_trade_block = 0");
+        _db.Execute("UPDATE players SET injury_days = 0, injury_type = '', treated = 0, fisico = 99, on_trade_block = 0, waived_game_day = -1");
         _db.Execute("UPDATE teams SET team_chemistry = 50");
         _db.Execute("UPDATE managers SET fan_confidence = 50");
 
@@ -3627,6 +3669,42 @@ public partial class DatabaseManager
         if (existing == null) return;
         existing.rotation_minutes = minutes;
         _db.Update(existing);
+    }
+
+    /// <summary>
+    /// Asigna automáticamente los 240 minutos entre los convocados jugables (reparto de
+    /// `RotationPlanner` con suelo de 8 min) y los persiste. Es lo que hace el botón AUTO
+    /// de la pantalla ROTACIÓN y el botón del aviso de rotación del Dashboard.
+    /// </summary>
+    public void AutoAssignRotationMinutes(int teamId, List<PlayerData> players)
+    {
+        if (!EnsureDb() || players == null) return;
+
+        var lineup = GetTeamLineup(teamId);
+        if (lineup.Count == 0) return;
+
+        var byId = players.ToDictionary(p => p.id);
+        var entries = new List<(LineupData l, PlayerData p)>();
+        foreach (var l in lineup)
+        {
+            if (l.slot != 0 && l.slot != 1) continue;
+            if (!byId.TryGetValue(l.player_id, out var p) || p == null) continue;
+            if (p.injury_days > 0 || p.g_league_assigned == 1) continue;
+            entries.Add((l, p));
+        }
+        if (entries.Count == 0) return;
+
+        var suggestions = entries.Select(e => GameSimulator.GetSuggestedMinutes(e.p, e.l.slot == 0)).ToList();
+        var mins = RotationPlanner.AutoAssign(suggestions);
+
+        _db.RunInTransaction(() =>
+        {
+            for (int i = 0; i < entries.Count && i < mins.Length; i++)
+            {
+                entries[i].l.rotation_minutes = mins[i];
+                _db.Update(entries[i].l);
+            }
+        });
     }
 
     /// <summary>Número máximo de NO CONVOCADOS (slot 2) en la convocatoria.</summary>

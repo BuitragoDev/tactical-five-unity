@@ -452,6 +452,9 @@ public static class DraftGenerator
         // Se revela el valor real: la estimación mostrada puede ser optimista (bust) o
         // pesimista (boom).
         int se = prospect.scout_error;
+        // Media real revelada (la estimación mostrada puede ser optimista o pesimista).
+        int revealedOverall = ScoutingHelper.Reveal(prospect.overall, se);
+
         var player = new PlayerData
         {
             id = nextId,
@@ -465,7 +468,8 @@ public static class DraftGenerator
             college = prospect.college,
             height_cm = prospect.height_cm,
             weight_kg = prospect.weight_kg,
-            overall = ScoutingHelper.Reveal(prospect.overall, se),
+            overall = revealedOverall,
+            role = PlayerRoleRules.FromOverall(revealedOverall),
             potential = ScoutingHelper.Reveal(prospect.potential, se),
             speed = ScoutingHelper.Reveal(prospect.speed, se),
             shooting = ScoutingHelper.Reveal(prospect.shooting, se),

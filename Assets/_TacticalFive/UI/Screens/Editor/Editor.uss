@@ -609,6 +609,18 @@
     color: rgb(240, 145, 125);
 }
 
+/* Variante neutra/gris (solo para botones concretos: no afecta a .editor-modal-btn) */
+.editor-modal-btn--secondary {
+    background-color: rgba(120, 132, 158, 0.10);
+    border-color: rgb(90, 100, 120);
+    color: rgb(179, 190, 214);
+}
+
+.editor-modal-btn--secondary:hover {
+    background-color: rgba(120, 132, 158, 0.22);
+    color: rgb(220, 228, 242);
+}
+
 
 /* ══ EXPLORADOR DE ARCHIVOS ══ */
 .editor-browser-overlay {

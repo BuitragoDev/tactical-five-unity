@@ -48,9 +48,48 @@ public class GameSimulatorTests
             starter = false
         };
 
-        Assert.That(GameSimulator.GetTargetMinutes(star), Is.EqualTo(39));
-        Assert.That(GameSimulator.GetTargetMinutes(bench), Is.EqualTo(15));
+        // Tabla nueva: estrella (OVR>=90) titular 40; banquillo de media baja 12.
+        Assert.That(GameSimulator.GetTargetMinutes(star), Is.EqualTo(40));
+        Assert.That(GameSimulator.GetTargetMinutes(bench), Is.EqualTo(12));
         Assert.That(GameSimulator.GetTargetMinutes(star), Is.GreaterThan(GameSimulator.GetTargetMinutes(bench)));
+
+        // Tramos por media y fondo de banquillo.
+        Assert.That(GameSimulator.GetTargetMinutes(new GameSimulator.PlayerStatSnapshot
+        { role = PlayerRole.Titular, overall = 86, starter = true }), Is.EqualTo(34));
+        Assert.That(GameSimulator.GetTargetMinutes(new GameSimulator.PlayerStatSnapshot
+        { role = PlayerRole.Titular, overall = 82, starter = false }), Is.EqualTo(22));
+        Assert.That(GameSimulator.GetTargetMinutes(new GameSimulator.PlayerStatSnapshot
+        { role = PlayerRole.Banquillo, overall = 76, starter = true }), Is.EqualTo(26));
+        Assert.That(GameSimulator.GetTargetMinutes(new GameSimulator.PlayerStatSnapshot
+        { role = PlayerRole.UltimoRecurso, overall = 95, starter = true }),
+            Is.EqualTo(GameSimulator.MIN_FIXED_MINUTES), "último recurso = suelo, aunque tenga media");
+    }
+
+    [Test]
+    public void GetTargetMinutes_GLeagueScalesTheSameTableDown()
+    {
+        var star = new GameSimulator.PlayerStatSnapshot { role = PlayerRole.Estrella, overall = 92, starter = true };
+        Assert.That(GameSimulator.GetTargetMinutes(star, glLeague: true), Is.EqualTo(30), "40 × 0.75");
+        Assert.That(GameSimulator.GetTargetMinutes(star), Is.EqualTo(40));
+
+        var last = new GameSimulator.PlayerStatSnapshot { role = PlayerRole.UltimoRecurso, overall = 80, starter = false };
+        Assert.That(GameSimulator.GetTargetMinutes(last, glLeague: true),
+            Is.EqualTo(GameSimulator.MIN_FIXED_MINUTES), "el fondo nunca baja del suelo");
+    }
+
+    [Test]
+    public void FixedPlans_RespectTheTwoMinuteFloor()
+    {
+        var players = new List<GameSimulator.PlayerStatSnapshot>
+        {
+            Plan("PG", "SG", PlayerRole.Titular, 85, 1, true),   // 0: 1 -> suelo 2
+            Plan("SG", "SF", PlayerRole.Titular, 85, 3, true)    // 1: 3 -> se respeta (ya no sube a 8)
+        };
+
+        GameSimulator.PrepareRotationMetadata(players);
+
+        Assert.That(players[0].target_minutes, Is.EqualTo(GameSimulator.MIN_FIXED_MINUTES));
+        Assert.That(players[1].target_minutes, Is.EqualTo(3));
     }
 
     // ── Rotación vinculante (pantalla ROTACIÓN) ─────────────────
@@ -173,7 +212,7 @@ public class GameSimulatorTests
     {
         var players = new List<GameSimulator.PlayerStatSnapshot>
         {
-            Plan("PG", "SG", PlayerRole.Titular,   88,  5, true),   // 0: 5 -> suelo 8
+            Plan("PG", "SG", PlayerRole.Titular,   88,  1, true),   // 0: 1 -> suelo 2
             Plan("SF", "PF", PlayerRole.Banquillo, 77, 39, false),  // 1: fijo, no lo toca la fatiga
             Plan("C",  "PF", PlayerRole.Banquillo, 75,  0, false),  // 2: 0 se respeta
             Plan("AP", "P",  PlayerRole.Banquillo, 74, 20, false),  // 3: fijo, sin cambios
@@ -190,7 +229,7 @@ public class GameSimulatorTests
         Assert.That(players[0].target_minutes, Is.EqualTo(GameSimulator.MIN_FIXED_MINUTES));
         Assert.That(players[1].target_minutes, Is.EqualTo(39), "La fatiga no baja un plan configurado");
         Assert.That(players[2].target_minutes, Is.EqualTo(0));
-        Assert.That(players[5].target_minutes, Is.EqualTo(15), "Sin configurar usa la heurística de suplente");
+        Assert.That(players[5].target_minutes, Is.EqualTo(12), "Sin configurar usa la heurística de suplente");
         Assert.That(players[5].fixed_minutes, Is.False);
         Assert.That(players[5].starter, Is.False);
         Assert.That(players[0].starter, Is.True);

@@ -118,6 +118,11 @@ using System.Threading.Tasks;
     private bool _emptyLineupModalResolved;
     private bool _emptyLineupGoToQuinteto;
 
+    // Aviso de rotación incompleta (minutos sin asignar o inválidos)
+    private bool _rotationModalResolved;
+    private bool _rotationModalGoToRotation;
+    private bool _fastSimAbortRotation;
+
     // Load management modal
     private bool _loadMgmtModalResolved;
     private bool _loadMgmtModalGoToQuinteto;
@@ -1214,6 +1219,30 @@ using System.Threading.Tasks;
                     yield break;
                 }
             }
+
+            // Check de ROTACIÓN: o todos los minutos están asignados (240) o la rotación
+            // está en automático (el simulador reparte). Se comprueba al final porque los
+            // auto-rellenos anteriores resetean los minutos a -1 (estado válido).
+            var rotStatus = GetRotationStatus();
+            if (!rotStatus.IsComplete)
+            {
+                if (fastSim)
+                {
+                    _fastSimAborted = true;
+                    _fastSimAbortRotation = true;
+                    yield break;
+                }
+                _rotationModalResolved = false;
+                _rotationModalGoToRotation = false;
+                ShowRotationModal(rotStatus);
+                yield return new WaitUntil(() => _rotationModalResolved);
+                if (_rotationModalGoToRotation)
+                {
+                    HideLoading();
+                    ScreenManager.Instance.GoTo(GameScreen.Rotation);
+                    yield break;
+                }
+            }
         }
 
         // ── PreGame: navegar ANTES de simular ──
@@ -2045,6 +2074,23 @@ using System.Threading.Tasks;
                     }
                     autoFixed = true;
                 }
+                else if (_fastSimAbortRotation)
+                {
+                    _rotationModalResolved = false;
+                    _rotationModalGoToRotation = false;
+                    ShowRotationModal(GetRotationStatus());
+                    yield return new WaitUntil(() => _rotationModalResolved);
+                    if (_rotationModalGoToRotation)
+                    {
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Rotation);
+                        yield break;
+                    }
+                    _fastSimAbortRotation = false;
+                    autoFixed = true;
+                }
                 else if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
                 {
                     _loadMgmtModalResolved = false;
@@ -2616,6 +2662,7 @@ using System.Threading.Tasks;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
                     player.is_two_way = offer.is_two_way;
+                    player.waived_game_day = -1;
                     player.seasons_with_team = 1;
                     DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(player);
@@ -3308,6 +3355,110 @@ using System.Threading.Tasks;
         box.Add(actions);
     }
 
+    /// <summary>
+    /// Estado del reparto de minutos de la rotación del equipo del usuario (solo convocados
+    /// jugables). `IsComplete` = sin jugables, todo en automático, o 240 exactos y válidos.
+    /// </summary>
+    RotationStatus GetRotationStatus()
+    {
+        if (_myTeam == null) return new RotationStatus();
+
+        var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        if (lineup.Count == 0) return new RotationStatus();
+
+        var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+        var byId = players.ToDictionary(p => p.id);
+
+        var slots = new List<RotationSlot>();
+        foreach (var l in lineup)
+        {
+            if (l.slot != 0 && l.slot != 1) continue;
+            if (!byId.TryGetValue(l.player_id, out var p) || p == null) continue;
+            slots.Add(new RotationSlot
+            {
+                playerId = p.id,
+                minutes = l.rotation_minutes,
+                playable = p.injury_days == 0 && p.g_league_assigned != 1,
+                suggestion = GameSimulator.GetSuggestedMinutes(p, l.slot == 0)
+            });
+        }
+
+        return RotationPlanner.Evaluate(slots);
+    }
+
+    /// <summary>Aviso de rotación incompleta: minutos sin asignar, excedidos o inválidos.</summary>
+    void ShowRotationModal(RotationStatus rot)
+    {
+        _firedOverlay.Clear();
+        _firedOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("fired-modal-box--modern");
+        var gold = new Color32(212, 160, 23, 255);
+        box.style.borderTopColor = new StyleColor(gold);
+        box.style.borderBottomColor = new StyleColor(gold);
+        box.style.borderLeftColor = new StyleColor(gold);
+        box.style.borderRightColor = new StyleColor(gold);
+        _firedOverlay.Add(box);
+
+        var header = new VisualElement();
+        header.AddToClassList("fired-modal-header");
+        header.AddToClassList("fired-modal-header--warning");
+        var title = new Label("ROTACIÓN INCOMPLETA");
+        title.AddToClassList("fired-modal-title");
+        header.Add(title);
+        box.Add(header);
+
+        var body = new VisualElement();
+        body.AddToClassList("fired-modal-body");
+
+        string detail = rot.hasInvalid
+            ? "Hay minutos de rotación con valores no válidos."
+            : rot.Missing > 0
+                ? "Faltan minutos por asignar en la rotación."
+                : $"Tienes {rot.total} minutos asignados: te pasas por {-rot.Missing}.";
+        var text = new Label(detail + "\nAsigna todos los minutos antes de simular o usa el reparto automático.");
+        text.AddToClassList("fired-modal-text");
+        body.Add(text);
+        box.Add(body);
+
+        var actions = new VisualElement();
+        actions.AddToClassList("fired-modal-actions");
+
+        var goBtn = new Button();
+        goBtn.text = "IR A ROTACIÓN";
+        goBtn.AddToClassList("btn-modal-confirm");
+        goBtn.AddToClassList("btn-modal-confirm--gold");
+        goBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _rotationModalGoToRotation = true;
+            _rotationModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        actions.Add(goBtn);
+
+        var autoBtn = new Button();
+        autoBtn.text = "ASIGNAR AUTOMÁTICAMENTE";
+        autoBtn.AddToClassList("btn-modal-confirm");
+        autoBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            var allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
+            DatabaseManager.Instance.AutoAssignRotationMinutes(_myTeam.id, allPlayers);
+            _rotationModalResolved = true;
+            _firedOverlay.style.display = DisplayStyle.None;
+        });
+        actions.Add(autoBtn);
+        box.Add(actions);
+
+        if (CursorManager.Instance != null)
+        {
+            CursorManager.Instance.RegisterHandCursor(goBtn);
+            CursorManager.Instance.RegisterHandCursor(autoBtn);
+        }
+    }
+
     List<int> GetEmptyStarterSlots()
     {
         var lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
@@ -3521,6 +3672,10 @@ using System.Threading.Tasks;
         var playerList = new VisualElement();
         playerList.AddToClassList("injury-modal-player-list");
 
+        // Iconos de la acción "tratar lesión" (misma imagen que el editor de contenido).
+        var injectionIcon = Resources.Load<Texture2D>("Icons/inyeccion");
+        var treatedIcon = Resources.Load<Texture2D>("Icons/boton-v-64px");
+
         foreach (var (li, p) in injured)
         {
             var card = new VisualElement();
@@ -3594,20 +3749,38 @@ using System.Threading.Tasks;
 
             card.Add(ovrCol);
 
-            // Treat button
+            // Botón de tratamiento: icono de inyección (misma acción; al tratar cambia al
+            // icono de "hecho" y se actualiza el valor de días EN ESTE MISMO modal).
             var treatBtn = new Button();
             bool alreadyTreated = p.treated == 1;
             var medico = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id)
                 .FirstOrDefault(e => e.position == "MEDICO");
             bool hasMedico = medico != null;
-            treatBtn.text = alreadyTreated ? "TRATADO" : "TRATAR\nLESIÓN";
-            treatBtn.AddToClassList("injury-modal-treat-btn");
-            if (alreadyTreated || !hasMedico)
+
+            // La caja del botón conserva su tamaño; dentro va la imagen a 40x40.
+            var treatIcon = new VisualElement();
+            treatIcon.AddToClassList("injury-modal-treat-icon");
+            treatBtn.Add(treatIcon);
+
+            void PaintTreatIcon(Texture2D tex, bool done, bool enabled)
             {
-                treatBtn.AddToClassList("injury-modal-treat-btn--done");
-                treatBtn.SetEnabled(false);
+                treatBtn.text = "";
+                if (tex != null) treatIcon.style.backgroundImage = new StyleBackground(tex);
+                treatBtn.EnableInClassList("injury-modal-treat-btn--done", done);
+                treatBtn.SetEnabled(enabled);
+                treatBtn.tooltip = done ? "Lesión ya tratada"
+                               : enabled ? "Tratar lesión (reduce los días de baja)"
+                               : "Sin médico en el equipo: no se puede tratar";
             }
-            else
+
+            treatBtn.AddToClassList("injury-modal-treat-btn");
+            treatBtn.AddToClassList("injury-modal-treat-btn--icon");
+            CursorManager.Instance?.RegisterHandCursor(treatBtn);
+            PaintTreatIcon(alreadyTreated ? treatedIcon : injectionIcon,
+                           done: alreadyTreated,
+                           enabled: !alreadyTreated && hasMedico);
+
+            if (!alreadyTreated && hasMedico)
             {
                 treatBtn.RegisterCallback<ClickEvent>(_ =>
                 {
@@ -3624,9 +3797,11 @@ using System.Threading.Tasks;
                     p.injury_days = Mathf.Clamp(newDays, 1, p.injury_days);
                     p.treated = 1;
                     DatabaseManager.Instance.UpdatePlayer(p);
-                    treatBtn.text = "TRATADO";
-                    treatBtn.AddToClassList("injury-modal-treat-btn--done");
-                    treatBtn.SetEnabled(false);
+
+                    // Refrescar el valor mostrado en el propio modal.
+                    injuryDaysLbl.text = $"{p.injury_days} días";
+                    injuryBadge.tooltip = $"Tratada: quedan {p.injury_days} días de baja";
+                    PaintTreatIcon(treatedIcon, done: true, enabled: false);
                 });
             }
             card.Add(treatBtn);
@@ -5002,6 +5177,8 @@ using System.Threading.Tasks;
         db.BeginTransaction();
         try
         {
+            ProcessBuyoutMarket(gameDay);
+            ProcessOwnFreeAgentResignings(gameDay);
             ProcessAITransfers(gameDay);
             ProcessStarFreeAgentSignings(gameDay);
             ProcessAIRenewals();
@@ -5183,6 +5360,191 @@ using System.Threading.Tasks;
         return false;
     }
 
+    /// <summary>
+    /// Mercado de buyout: los jugadores rescindidos que siguen libres reciben destino de la
+    /// IA en cuanto pasa la jornada de su rescisión. Firman por el mínimo y se genera noticia.
+    /// Se ejecuta en el lote de fondo (conexión ambient), antes de los demás pases de FA.
+    /// </summary>
+    void ProcessBuyoutMarket(int gameDay)
+    {
+        if (_season == null || _myTeam == null) return;
+
+        // Solo los jugadores de 75+ de media tienen destino inmediato: un rescindido de
+        // 68 se queda en agentes libres y decide el mercado general.
+        var waived = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => BuyoutMarketRules.CanSignOn(p.waived_game_day, gameDay)
+                     && BuyoutMarketRules.IsWanted(p.GetCalculatedAverage()))
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+        if (waived.Count == 0) return;
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long minSalary = BuyoutMarketRules.WaivedSalary(settings?.minimum_salary ?? 0);
+        var teams = DatabaseManager.Instance.GetAllTeams().Where(t => t.id != _myTeam.id).ToList();
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        foreach (var p in waived)
+        {
+            var candidates = new List<BuyoutCandidate>();
+            foreach (var t in teams)
+            {
+                var roster = DatabaseManager.Instance.GetPlayersByTeam(t.id);
+                long payroll = roster.Sum(x => x.salary);
+                bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_ROSTER
+                            && TradeHelper.CanAISignExternal(payroll, minSalary, settings);
+
+                candidates.Add(new BuyoutCandidate
+                {
+                    teamId = t.id,
+                    strategy = GetTeamStrategy(t.id),
+                    teamAvg = roster.Count > 0 ? (float)roster.Average(x => x.GetCalculatedAverage()) : 0f,
+                    samePosCount = roster.Count(x => x.position == p.position),
+                    reputation = t.reputation,
+                    hasRoom = hasRoom
+                });
+            }
+
+            // Entre los mejores postores (contender > balanced > rebuild, con hueco en su
+            // posición y mejor proyecto/prestigio) se sortea el destino ponderadamente: el
+            // mejor candidato es el más probable, pero no siempre el elegido.
+            var ranked = BuyoutMarketRules.RankDestinations(candidates);
+            int pick = BuyoutMarketRules.PickSuitor(ranked.Count, _aiRng);
+            if (pick < 0) continue;
+
+            var team = teams.FirstOrDefault(t => t.id == ranked[pick].teamId);
+            if (team == null) continue;
+
+            p.team_id = team.id;
+            p.last_team_id = team.id;
+            p.salary = minSalary;
+            // Firma de mínimo de 1 año (mercado de buyout): al expirar, su equipo puede
+            // renovarle por su valor real o pierde sus derechos al abrirse el mercado.
+            p.contract_years = BuyoutMarketRules.ContractYears;
+            p.guaranteed_years = BuyoutMarketRules.ContractYears;
+            p.has_team_option = 0;
+            p.has_player_option = 0;
+            p.waived_game_day = -1;
+            DatabaseManager.Instance.AssignJerseyNumber(p, team.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season.id,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = 0,
+                team_id_to = team.id,
+                player_id = p.id,
+                trade_type = "free_agent"
+            });
+
+            string playerName = $"{p.first_name} {p.last_name}";
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 2,
+                sender_id = 0,
+                title = $"Mercado de buyout: {playerName} firma con {team.name}",
+                body = NewsTexts.MercadoBuyout(playerName, team.name),
+                game_day = gameDay,
+                game_date = _season.current_date,
+                created_at = now,
+                date_sent = now,
+                is_read = 0,
+                category = NewsCategory.LIGA,
+                news_type = NewsType.FICHAJE
+            });
+
+            Debug.Log($"[BuyoutMarket] {team.name} firma a {playerName} (OVR {p.GetCalculatedAverage()}) por el mínimo " +
+                      $"[postor {pick + 1}/{ranked.Count}]");
+        }
+    }
+
+    /// <summary>
+    /// Re-firma de **agentes libres propios con Bird rights**: un FA reciente cuyo último
+    /// equipo conserva sus derechos (expiró contrato o declinó su opción) puede volver a él
+    /// con un contrato acorde a su valor de mercado, aunque el equipo esté por encima del
+    /// tope (límite del 2º apron, como las renovaciones). Es lo que permite que un jugador
+    /// que firmó por el mínimo tras una rescisión cobre después lo que le corresponde.
+    /// Se ejecuta en el lote de fondo, antes de los demás pases de FA.
+    /// </summary>
+    void ProcessOwnFreeAgentResignings(int gameDay)
+    {
+        if (_season == null || _myTeam == null) return;
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long cap = settings?.salary_cap ?? TradeHelper.SALARY_CAP;
+
+        var candidates = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => p.last_team_id > 0 && p.last_team_id != _myTeam.id && p.seasons_with_team > 0)
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+        if (candidates.Count == 0) return;
+
+        Dictionary<int, int> gamesByPlayer = null;
+
+        foreach (var p in candidates)
+        {
+            if (p.renewal_cooldown_day > gameDay) continue;
+
+            var team = DatabaseManager.Instance.GetTeamById(p.last_team_id);
+            if (team == null) continue;
+            if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_ROSTER) continue;
+            if (CalculateTeamRenewalScore(p, team, cap) < 50f) continue;
+
+            var offer = CalculateAIRenewalOffer(p, team, cap);
+            long payroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(x => x.salary);
+
+            // Como en las renovaciones: nunca dejar al equipo por encima del 2º apron.
+            if (!TradeHelper.CanAIRenew(payroll + offer.salary, settings))
+            {
+                p.renewal_cooldown_day = gameDay + 15;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                continue;
+            }
+
+            gamesByPlayer ??= DatabaseManager.Instance.GetGamesPlayedByPlayerInSeason(_manager.id, _season.id);
+            int gamesPlayed = gamesByPlayer.GetValueOrDefault(p.id, 0);
+            int teamChem = DatabaseManager.Instance.GetTeamChemistry(team.id);
+            float acceptScore = RosterController.CalculateAcceptScore(
+                p, offer.salary, offer.years, gamesPlayed, teamChem);
+
+            if (_aiRng.Next(1, 101) > acceptScore)
+            {
+                p.renewal_cooldown_day = gameDay + 15;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                continue;
+            }
+
+            p.team_id = team.id;
+            p.last_team_id = team.id;
+            p.salary = offer.salary;
+            p.contract_years = offer.years;
+            p.guaranteed_years = offer.teamOption ? offer.years - 1 : offer.years;
+            p.has_team_option = offer.teamOption ? 1 : 0;
+            p.has_player_option = 0;
+            p.waived_game_day = -1;
+            p.renewal_cooldown_day = gameDay + 365;
+            DatabaseManager.Instance.AssignJerseyNumber(p, team.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season.id,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = 0,
+                team_id_to = team.id,
+                player_id = p.id,
+                trade_type = "free_agent"
+            });
+
+            if (p.overall >= 90) AddAIRenewalNotification(p, team, true, offer);
+            Debug.Log($"[OwnFA] {team.name} re-firma a {p.first_name} {p.last_name} " +
+                      $"(OVR {p.overall}) por {offer.salary:N0} $ / {offer.years} año(s) con Bird rights");
+        }
+    }
+
     void ProcessStarFreeAgentSignings(int gameDay)
     {
         if (_season == null) return;
@@ -5195,7 +5557,6 @@ using System.Threading.Tasks;
         if (stars.Count == 0) return;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         var allTeams = DatabaseManager.Instance.GetAllTeams()
             .Where(t => t.id != _myTeam.id)
             .ToList();
@@ -5243,13 +5604,31 @@ using System.Threading.Tasks;
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
 
                 long payroll = roster.Sum(p => p.salary);
-                if (salaryCap - payroll < star.salary) continue;
+                bool fromBuyout = star.waived_game_day >= 0;
+
+                // Salario nuevo: un rescindido firma por el mínimo (mercado de buyout); el
+                // resto, su precio + un pequeño incremento (como el pase general). Antes se
+                // firmaba con el salario viejo y el equipo nuevo heredaba esa nómina.
+                long newSalary = fromBuyout
+                    ? BuyoutMarketRules.WaivedSalary(leagueSettings?.minimum_salary ?? 0)
+                    : star.salary + 2_000_000;
+
+                // La IA ficha con sus excepciones (espacio → MLE → mínimo), no solo con
+                // espacio de tope: antes ninguna estrella por encima del cap podía firmar.
+                if (!TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings)) continue;
 
                 star.team_id = team.id;
                 star.last_team_id = team.id;
-                int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
+                star.salary = newSalary;
+                // El rescindido firma 1 año (y al expirar su equipo puede renovarle por su
+                // valor real, o re-firmarle con Bird rights).
+                int years = fromBuyout ? BuyoutMarketRules.ContractYears
+                          : star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
                 star.guaranteed_years = years;
+                star.has_team_option = 0;
+                star.has_player_option = 0;
+                star.waived_game_day = -1;
                 DatabaseManager.Instance.AssignJerseyNumber(star, team.id);
                 DatabaseManager.Instance.UpdatePlayer(star);
 
@@ -5424,9 +5803,9 @@ using System.Threading.Tasks;
 
     long EstimateMarketValue(PlayerData player, long cap)
     {
-        if (player.overall >= 85) return (long)(cap * 0.35);
-        if (player.overall >= 80) return (long)(cap * 0.30);
-        if (player.overall >= 75) return (long)(cap * 0.25);
+        // Umbrales por OVR en una sola fuente (TradeHelper); por debajo, el salario actual.
+        long byOvr = TradeHelper.MarketValueByOvr(player.overall, cap);
+        if (byOvr > 0) return byOvr;
         if (player.overall >= 70) return (long)Mathf.Max(player.salary * 110 / 100, TradeHelper.MIN_SALARY);
         return (long)Mathf.Max(player.salary * 105 / 100, TradeHelper.MIN_SALARY);
     }
@@ -5442,6 +5821,23 @@ using System.Threading.Tasks;
 
         long marketValue = EstimateMarketValue(player, cap);
         long salary = (long)Mathf.Min(maxByExp, marketValue);
+
+        // Muy por debajo de su valor de mercado (p. ej. fichó por el mínimo tras una
+        // rescisión): el equipo le renueva a su valor real (para una estrella, su máximo
+        // por experiencia), sin el tope no-Bird del 120 % sobre el salario mínimo.
+        if (marketValue >= player.salary * 3)
+        {
+            salary = (long)(Mathf.Round(salary / 100_000f) * 100_000);
+            if (salary < TradeHelper.MIN_SALARY) salary = TradeHelper.MIN_SALARY;
+
+            int yearsLow;
+            if (player.age <= 25) yearsLow = 5;
+            else if (player.age <= 28) yearsLow = 4;
+            else if (player.age <= 32) yearsLow = 3;
+            else if (player.age <= 35) yearsLow = 2;
+            else yearsLow = 1;
+            return (salary, yearsLow, player.age >= 30);
+        }
 
         if (player.seasons_with_team >= 3)
         {
@@ -5827,7 +6223,10 @@ using System.Threading.Tasks;
             if (_aiRng.Next(0, 100) >= chance) continue;
 
             // Los two-way no computan contra el cap (igual que para el usuario).
-            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY : player.salary + 2_000_000;
+            long minSalary = leagueSettings?.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
+            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY
+                           : player.waived_game_day >= 0 ? minSalary      // mercado de buyout
+                           : player.salary + 2_000_000;
             if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings))
                 continue; // no cabe en el cap/excepciones: probar otro candidato
 
@@ -5842,10 +6241,12 @@ using System.Threading.Tasks;
             }
             else
             {
-                int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
+                int years = player.waived_game_day >= 0 ? BuyoutMarketRules.ContractYears
+                          : player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
                 player.salary = newSalary;
                 player.contract_years = years;
                 player.guaranteed_years = years;
+                player.waived_game_day = -1;
                 aiPayroll += newSalary;
             }
             DatabaseManager.Instance.AssignJerseyNumber(player, team.id);
@@ -6280,6 +6681,7 @@ List<int> offeredPickIds = new List<int>();
         // ── Teams row ──
         var body = new VisualElement();
         body.AddToClassList("fired-modal-body");
+        body.AddToClassList("trade-offer-body");
 
         var teamsRow = new VisualElement();
         teamsRow.AddToClassList("trade-modal-teams");

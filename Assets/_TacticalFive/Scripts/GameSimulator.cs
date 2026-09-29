@@ -364,7 +364,8 @@ public static class GameSimulator
 
     // Suelo de minutos para una rotación configurada: un plan entre 1 y 7 se sube a 8
     // (0 se respeta: el jugador no entra salvo necesidad).
-    public const int MIN_FIXED_MINUTES = 8;
+    /// <summary>Suelo de minutos de un plan fijado (y del fondo del banquillo).</summary>
+    public const int MIN_FIXED_MINUTES = 2;
 
     /// <summary>
     /// Índices del quinteto inicial. Con rotación vinculante (strict) un titular con
@@ -419,20 +420,36 @@ public static class GameSimulator
             if (players[i].target_minutes < 0)
                 players[i].target_minutes = GetTargetMinutes(players[i], glLeague);
             if (players[i].fisico < 30)
-                players[i].target_minutes = Mathf.Max(8, players[i].target_minutes - 6);
+                players[i].target_minutes = Mathf.Max(MIN_FIXED_MINUTES, players[i].target_minutes - 6);
         }
     }
 
     public static int GetTargetMinutes(PlayerStatSnapshot player, bool glLeague = false)
     {
-        bool isStar = player.role == PlayerRole.Estrella || player.overall >= 85;
-        // En G-League la estrella juega menos minutos aún, repartiendo carga con más banquillo.
-        if (isStar) return glLeague ? (player.starter ? 31 : 22) : (player.starter ? 39 : 28);
-        if (player.starter)
-            return player.role == PlayerRole.Titular || player.overall >= 78 ? 31 : 27;
-        if (player.role == PlayerRole.Titular || player.overall >= 75) return 21;
-        if (player.role == PlayerRole.Banquillo) return 15;
-        return 8;
+        // Tabla por media: las estrellas juegan 40, los titulares de nivel medio ~30 y el
+        // fondo del banquillo poco. El rol solo decide el tramo bajo (Último recurso = suelo).
+        int minutes;
+        if (player.role == PlayerRole.UltimoRecurso) minutes = MIN_FIXED_MINUTES;
+        else if (player.starter)
+        {
+            if (player.overall >= 90) minutes = 40;
+            else if (player.overall >= 85) minutes = 34;
+            else if (player.overall >= 80) minutes = 33;
+            else if (player.overall >= 75) minutes = 26;
+            else minutes = 20;
+        }
+        else
+        {
+            if (player.overall >= 90) minutes = 32;
+            else if (player.overall >= 85) minutes = 28;
+            else if (player.overall >= 80) minutes = 22;
+            else if (player.overall >= 75) minutes = 14;
+            else minutes = 12;
+        }
+
+        // G-League: reparto algo más corto (los prospectos comparten más carga).
+        if (glLeague) return Mathf.Max(MIN_FIXED_MINUTES, Mathf.RoundToInt(minutes * 0.75f));
+        return minutes;
     }
 
     /// <summary>Minutos que sugeriría el simulador a un jugador (columna SUGERIDO de la

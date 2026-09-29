@@ -111,7 +111,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 38px 32px;
+    padding: 0 32px 20px 32px;
     background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/banner_premios.png");
     background-size: cover;
     background-position: center;
@@ -163,7 +163,10 @@
    ═══════════════════════════════════════════ */
 .qt-panel {
     flex-direction: column;
+    /* Reparto igual (mitad y mitad): el ancho no depende del contenido del quinteto. */
     flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
     background-color: rgb(17, 24, 34);
     border-width: 2px;
     padding: 20px 24px;
@@ -287,6 +290,7 @@
     border-width: 1px;
     padding: 12px 14px 14px 14px;
     flex-grow: 1;
+    min-width: 0;
     margin-right: 10px;
     position: relative;
 }
@@ -384,4 +388,37 @@
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
     -unity-text-align: middle-center;
+}
+
+/* ── Toggle 1er / 2º quinteto (cabecera) ── */
+.qt-quintet-toggle {
+    flex-direction: row;
+    margin-top: 14px;
+}
+.qt-toggle-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    letter-spacing: 2px;
+    padding: 7px 18px;
+    margin-right: 8px;
+    background-color: rgba(18, 22, 32, 0.75);
+    border-width: 2px;
+    border-color: rgb(90, 100, 120);
+    color: rgb(179, 190, 214);
+    border-radius: 8px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+}
+.qt-toggle-btn:hover {
+    background-color: rgba(120, 132, 158, 0.25);
+    color: rgb(220, 228, 242);
+}
+.qt-toggle-btn--active {
+    background-color: rgba(212, 160, 23, 0.18);
+    border-color: rgb(212, 160, 23);
+    color: rgb(248, 196, 64);
+}
+.qt-toggle-btn--active:hover {
+    background-color: rgba(212, 160, 23, 0.28);
+    color: rgb(255, 214, 110);
 }

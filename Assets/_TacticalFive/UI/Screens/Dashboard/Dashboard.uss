@@ -2057,7 +2057,12 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-start;
-    padding: 20px 32px 0 32px;
+    padding: 0 32px 0 32px;
+}
+
+/* Cuerpo del modal de propuesta de intercambio: menos aire bajo la cabecera */
+.trade-offer-body {
+    padding-top: 10px;
 }
 
 .trade-modal-team-panel {
@@ -2127,6 +2132,12 @@
     background-color: rgb(34, 36, 42);
     -unity-background-scale-mode: scale-to-fit;
     flex-shrink: 0;
+}
+/* Propuesta de intercambio: fichas más compactas (el modal no cabe con muchas piezas) */
+.trade-modal-team-panel .trade-modal-player-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 40px;
 }
 
 .trade-modal-player-info {
@@ -2242,8 +2253,8 @@
     border-radius: 8px;
     border-width: 1px;
     border-color: rgba(212, 160, 23, 0.25);
-    padding: 12px 14px;
-    margin-bottom: 8px;
+    padding: 0 14px;
+    margin-bottom: 6px;
 }
 
 /* ── Analysis section ── */
@@ -2495,6 +2506,19 @@
     border-color: rgb(100, 110, 135);
     background-color: rgba(100, 110, 135, 0.10);
     color: rgb(100, 110, 135);
+}
+
+/* Botón de tratamiento con icono: la caja conserva su tamaño y dentro va la imagen 40x40 */
+.injury-modal-treat-btn--icon {
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+}
+.injury-modal-treat-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    -unity-background-scale-mode: scale-to-fit;
 }
 
 .injury-modal-treat-btn--done:hover {

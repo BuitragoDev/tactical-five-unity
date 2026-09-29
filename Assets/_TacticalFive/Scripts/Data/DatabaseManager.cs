@@ -652,6 +652,7 @@ public partial class DatabaseManager : MonoBehaviour
         bool addedGuaranteed = AddColumnIfMissing("players", "guaranteed_years", "guaranteed_years INTEGER DEFAULT 0");
         AddColumnIfMissing("players", "has_team_option", "has_team_option INTEGER DEFAULT 0");
         AddColumnIfMissing("players", "has_player_option", "has_player_option INTEGER DEFAULT 0");
+        AddColumnIfMissing("players", "waived_game_day", "waived_game_day INTEGER DEFAULT -1");
         if (addedGuaranteed)
             _db.Execute("UPDATE players SET guaranteed_years = contract_years WHERE contract_years > 0");
 
@@ -920,6 +921,23 @@ public partial class DatabaseManager : MonoBehaviour
         catch (System.Exception ex)
         {
             Debug.LogError($"[DB] Migration error for on_trade_block: {ex.Message}");
+        }
+
+        // Los jugadores con rol "Último recurso" pero media digna (74+) reciben su rol por
+        // media: el draft no asignaba rol y todos los rookies quedaban en Último recurso
+        // (con la tabla nueva eso son 2 minutos de rotación).
+        if (!IsMigrationApplied("role_from_overall"))
+        {
+            var sinRol = _db.Table<PlayerData>()
+                            .Where(p => p.role == PlayerRole.UltimoRecurso && p.overall >= 74)
+                            .ToList();
+            foreach (var p in sinRol)
+            {
+                p.role = PlayerRoleRules.FromOverall(p.overall);
+                _db.Update(p);
+            }
+            MarkMigrationApplied("role_from_overall");
+            Debug.Log($"[DB] Migration: rol por media asignado a {sinRol.Count} jugadores");
         }
 
         // Limpieza one-time: las filas de player_game_stats con 0 minutos (DNPs)

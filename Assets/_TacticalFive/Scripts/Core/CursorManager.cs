@@ -40,7 +40,12 @@ public class CursorManager : MonoBehaviour
     public void RegisterHandCursor(VisualElement element)
     {
         if (element == null) return;
-        element.RegisterCallback<MouseEnterEvent>(_ => SetHandCursor(), TrickleDown.TrickleDown);
+        // Solo cuando el elemento está habilitado: un botón deshabilitado no debe mostrar
+        // la mano (p. ej. el de tratamiento cuando ya se ha usado o no hay médico).
+        element.RegisterCallback<MouseEnterEvent>(_ =>
+        {
+            if (element.enabledSelf) SetHandCursor();
+        }, TrickleDown.TrickleDown);
         element.RegisterCallback<MouseLeaveEvent>(_ => SetDefaultCursor(), TrickleDown.TrickleDown);
     }
 }
