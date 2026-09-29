@@ -23,7 +23,6 @@
             <ui:VisualElement class="qt-screen-overlay"/>
             <ui:VisualElement class="qt-screen-title-group">
                 <ui:Label text="MEJORES QUINTETOS DE TEMPORADA" class="qt-screen-title"/>
-                <ui:Label text="Mejores Quintetos" class="qt-screen-subtitle"/>
                 <ui:VisualElement class="qt-quintet-toggle">
                     <ui:Button name="BtnFirstQuintet" class="qt-toggle-btn qt-toggle-btn--active" text="PRIMER QUINTETO"/>
                     <ui:Button name="BtnSecondQuintet" class="qt-toggle-btn" text="SEGUNDO QUINTETO"/>
