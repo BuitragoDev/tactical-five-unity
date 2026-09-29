@@ -24,6 +24,10 @@
             <ui:VisualElement class="qt-screen-title-group">
                 <ui:Label text="MEJORES QUINTETOS DE TEMPORADA" class="qt-screen-title"/>
                 <ui:Label text="Mejores Quintetos" class="qt-screen-subtitle"/>
+                <ui:VisualElement class="qt-quintet-toggle">
+                    <ui:Button name="BtnFirstQuintet" class="qt-toggle-btn qt-toggle-btn--active" text="PRIMER QUINTETO"/>
+                    <ui:Button name="BtnSecondQuintet" class="qt-toggle-btn" text="SEGUNDO QUINTETO"/>
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 
@@ -34,11 +38,11 @@
             <ui:VisualElement class="qt-panel qt-panel--gold">
                 <ui:VisualElement class="qt-panel-header">
                     <ui:VisualElement class="qt-panel-title-group">
-                        <ui:Label text="MEJOR QUINTETO" class="qt-panel-title"/>
-                        <ui:Label text="DE LA TEMPORADA" class="qt-panel-subtitle qt-panel-subtitle--gold"/>
+                        <ui:Label name="FivePanelTitle" text="MEJOR QUINTETO" class="qt-panel-title"/>
+                        <ui:Label name="FivePanelSubtitle" text="DE LA TEMPORADA" class="qt-panel-subtitle qt-panel-subtitle--gold"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-trophy-badge qt-trophy-badge--gold">
-                        <ui:Label text="ALL-NBA" class="qt-trophy-label"/>
+                        <ui:Label name="FivePanelBadge" text="ALL-NBA" class="qt-trophy-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Label text="Los cinco mejores jugadores de la temporada regular." class="qt-panel-desc"/>
@@ -156,11 +160,11 @@
             <ui:VisualElement class="qt-panel qt-panel--blue">
                 <ui:VisualElement class="qt-panel-header">
                     <ui:VisualElement class="qt-panel-title-group">
-                        <ui:Label text="MEJOR QUINTETO" class="qt-panel-title"/>
-                        <ui:Label text="DE ROOKIES" class="qt-panel-subtitle qt-panel-subtitle--blue"/>
+                        <ui:Label name="RookPanelTitle" text="MEJOR QUINTETO" class="qt-panel-title"/>
+                        <ui:Label name="RookPanelSubtitle" text="DE ROOKIES" class="qt-panel-subtitle qt-panel-subtitle--blue"/>
                     </ui:VisualElement>
                     <ui:VisualElement class="qt-trophy-badge qt-trophy-badge--blue">
-                        <ui:Label text="ROOKIE TEAM" class="qt-trophy-label"/>
+                        <ui:Label name="RookPanelBadge" text="ROOKIE TEAM" class="qt-trophy-label"/>
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Label text="Los cinco mejores jugadores novatos de la temporada." class="qt-panel-desc"/>

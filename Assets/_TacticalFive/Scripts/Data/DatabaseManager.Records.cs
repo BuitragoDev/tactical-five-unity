@@ -1875,6 +1875,21 @@ public partial class DatabaseManager
         return GetBestPerPosition(seasonId, managerId, true, 40);
     }
 
+    /// <summary>
+    /// Los dos mejores quintetos de la temporada (informativo: **no se persiste** en
+    /// `quintet_records` ni afecta a las apariciones de Palmarés).
+    /// </summary>
+    public List<List<PlayerAwardInfo>> GetAllStarTeams(int seasonId, int managerId, int teams = QuintetPicker.Teams)
+    {
+        return GetBestPerPositionTeams(seasonId, managerId, null, 65, teams);
+    }
+
+    /// <summary>Los dos mejores quintetos de rookies (informativo, no se persiste).</summary>
+    public List<List<PlayerAwardInfo>> GetAllRookieTeams(int seasonId, int managerId, int teams = QuintetPicker.Teams)
+    {
+        return GetBestPerPositionTeams(seasonId, managerId, true, 40, teams);
+    }
+
     PlayerAwardInfo QueryTopPlayer(int seasonId, int managerId, bool? rookieOnly, int minGames)
     {
         if (!EnsureDb()) return null;
@@ -1915,7 +1930,18 @@ public partial class DatabaseManager
 
     List<PlayerAwardInfo> GetBestPerPosition(int seasonId, int managerId, bool? rookieOnly, int minGames)
     {
-        if (!EnsureDb()) return new List<PlayerAwardInfo>();
+        var teams = GetBestPerPositionTeams(seasonId, managerId, rookieOnly, minGames, 1);
+        return teams.Count > 0 ? teams[0] : new List<PlayerAwardInfo>();
+    }
+
+    /// <summary>
+    /// Mejores quintetos de la temporada (1º, 2º…): mismos mínimos de partidos que el 1º,
+    /// sin repetir jugador y sin persistir nada. La selección vive en `QuintetPicker` (puro).
+    /// </summary>
+    List<List<PlayerAwardInfo>> GetBestPerPositionTeams(int seasonId, int managerId, bool? rookieOnly,
+                                                        int minGames, int teams)
+    {
+        if (!EnsureDb()) return new List<List<PlayerAwardInfo>>();
         string rookieFilter = rookieOnly == true ? "AND p.is_rookie = 1" : "";
         string sql = $@"
             SELECT p.id, p.photo, p.first_name, p.last_name, p.position, p.secondary_position,
@@ -1933,38 +1959,46 @@ public partial class DatabaseManager
             HAVING games >= ?
             ORDER BY avg_rating DESC";
         var allRows = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, minGames);
-        var result = new List<PlayerAwardInfo>();
-        string[] positions = { "PG", "SG", "SF", "PF", "C" };
-        var assigned = new HashSet<int>();
-        foreach (var pos in positions)
+
+        // Selección pura (1º y 2º quinteto, sin repetir jugador).
+        var candidates = allRows.Select(r => new QuintetCandidate
         {
-            PlayerAwardQueryRow best = null;
-            foreach (var row in allRows)
+            PlayerId = r.id,
+            Photo = r.photo ?? "",
+            PlayerName = $"{r.first_name} {r.last_name}",
+            Position = r.position,
+            SecondaryPosition = r.secondary_position,
+            TeamName = r.team_name ?? "",
+            TeamLogo = r.team_logo ?? "",
+            AvgPts = (float)r.avg_pts,
+            AvgReb = (float)r.avg_reb,
+            AvgAst = (float)r.avg_ast,
+            AvgRating = (float)r.avg_rating
+        }).ToList();
+
+        var picked = QuintetPicker.Pick(candidates, teams);
+
+        var result = new List<List<PlayerAwardInfo>>();
+        foreach (var team in picked)
+        {
+            var quintet = new List<PlayerAwardInfo>();
+            foreach (var slot in team)
             {
-                if (assigned.Contains(row.id)) continue;
-                if (row.position == pos || (!string.IsNullOrEmpty(row.secondary_position) && row.secondary_position == pos))
+                quintet.Add(new PlayerAwardInfo
                 {
-                    if (best == null || row.avg_rating > best.avg_rating)
-                        best = row;
-                }
-            }
-            if (best != null)
-            {
-                assigned.Add(best.id);
-                result.Add(new PlayerAwardInfo
-                {
-                    PlayerId = best.id,
-                    Photo = best.photo ?? "",
-                    PlayerName = $"{best.first_name} {best.last_name}",
-                    TeamName = best.team_name ?? "",
-                    TeamKeyword = best.team_logo ?? "",
-                    Position = pos,
-                    AvgPts = (float)best.avg_pts,
-                    AvgReb = (float)best.avg_reb,
-                    AvgAst = (float)best.avg_ast,
-                    AvgRating = (float)best.avg_rating
+                    PlayerId = slot.player.PlayerId,
+                    Photo = slot.player.Photo,
+                    PlayerName = slot.player.PlayerName,
+                    TeamName = slot.player.TeamName,
+                    TeamKeyword = slot.player.TeamLogo,
+                    Position = slot.position,
+                    AvgPts = slot.player.AvgPts,
+                    AvgReb = slot.player.AvgReb,
+                    AvgAst = slot.player.AvgAst,
+                    AvgRating = slot.player.AvgRating
                 });
             }
+            result.Add(quintet);
         }
         return result;
     }

@@ -295,6 +295,19 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
   motor (QN sigue con las del resto de la liga).
 
+## Quintetos de la temporada (pantalla Quintos)
+
+- La pantalla **MEJORES QUINTETOS DE TEMPORADA** muestra el **primer** y el **segundo** quinteto
+  de la temporada y de rookies (`QuintetPicker`, puro: por posición PG/SG/SF/PF/C, aceptando la
+  secundaria, el mejor por rating medio **sin repetir jugador** entre posiciones ni quintetos;
+  mínimos de partidos 65 / 40, los mismos que el primero).
+- Un **toggle en la cabecera** (PRIMER QUINTETO / SEGUNDO QUINTETO) cambia ambos paneles a la
+  vez; al entrar en la pantalla siempre se muestra el primero. Títulos, subtítulos y badges se
+  actualizan al mostrar el segundo.
+- El **segundo quinteto es solo informativo**: no se escribe en `quintet_records` (Historial de
+  Quintetos) ni afecta a las Apariciones de la pestaña QUINTETOS de Palmarés, que se siguen
+  alimentando solo del primer quinteto (y del seed histórico).
+
 ## Mercado de buyout (rescindidos)
 
 - **Al rescindir** (buyout) un jugador pasa a la agencia libre con **contrato a 0** y su nuevo
