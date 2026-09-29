@@ -170,7 +170,9 @@ public static class StorylineCatalog
     {
         var roster = rosterIds as HashSet<int> ?? new HashSet<int>(rosterIds ?? new List<int>());
         return (actives ?? Enumerable.Empty<StorylineData>())
-              .Where(a => a != null && a.subject_player_id > 0 && !roster.Contains(a.subject_player_id))
+              .Where(a => a != null && a.resolved == 0            // solo hilos abiertos
+                       && a.subject_player_id > 0
+                       && !roster.Contains(a.subject_player_id))
               .ToList();
     }
 
