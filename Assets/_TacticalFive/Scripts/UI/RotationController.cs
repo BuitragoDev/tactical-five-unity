@@ -27,7 +27,10 @@ public class RotationController : UIScreenController
     // pantalla muestra entonces el reparto automático de 240 (como el botón AUTO) para no
     // pintar un exceso irreal: las sugerencias por jugador no suman 240.
     private bool _allAuto;
-    private readonly Dictionary<int, int> _autoSplit = new();
+    /// <summary>Cuota de 240 de cada jugador (referencia de la columna SUGERIDO y de los ±).</summary>
+    private readonly Dictionary<int, int> _referenceSplit = new();
+    /// <summary>Ideal bruto del simulador (solo para el tooltip).</summary>
+    private readonly Dictionary<int, int> _rawIdeal = new();
 
     // Sliders vivos de la lista, para recalcular el tope de minutos (240 en total).
     private readonly List<(LineupData ls, PlayerData p, bool playable, CustomSlider slider)> _sliders = new();
@@ -92,7 +95,7 @@ public class RotationController : UIScreenController
 
         _lineup = DatabaseManager.Instance.EnsureLineupSeeded(_myTeam.id, _players);
         BuildSuggested();
-        ComputeAutoSplit();
+        ComputeReferenceSplit();
 
         if (_subtitle != null)
             _subtitle.text = $"REPARTE LOS {TEAM_MINUTES} MINUTOS DEL PARTIDO ENTRE TUS CONVOCADOS";
@@ -140,45 +143,53 @@ public class RotationController : UIScreenController
     /// (reparto proporcional del botón AUTO) para mostrarlo tal cual. Así la pantalla
     /// nunca abre con "minutos excedidos" cuando en realidad no hay nada configurado.
     /// </summary>
-    void ComputeAutoSplit()
+    /// <summary>
+    /// Calcula la <b>cuota de 240</b> de cada convocado jugable (y guarda el ideal bruto del
+    /// simulador para el tooltip). Es la referencia de la columna SUGERIDO y de los ±: las
+    /// sugerencias por jugador no suman 240, así que compararlas en bruto daba negativos a
+    /// todos (y no había forma de cuadrarlos). Se calcula siempre, no solo en automático.
+    /// </summary>
+    void ComputeReferenceSplit()
     {
-        _autoSplit.Clear();
+        _referenceSplit.Clear();
+        _rawIdeal.Clear();
         if (_lineup == null) { _allAuto = false; return; }
 
         var entries = ActiveEntries()
             .Where(ls => { var p = FindPlayer(ls.player_id); return p != null && IsPlayable(p); })
             .ToList();
+        if (entries.Count == 0) { _allAuto = false; return; }
 
         // Misma regla que el simulador (y que el aviso del Dashboard): sin ningún plan
         // positivo (todos -1 o 0) la rotación es automática.
-        var slots = entries.Select(ls =>
+        var slots = entries.Select(ls => new RotationSlot
         {
-            var p = FindPlayer(ls.player_id);
-            return new RotationSlot
-            {
-                playerId = ls.player_id,
-                minutes = ls.rotation_minutes,
-                playable = true,
-                suggestion = SuggestedFor(p, ls.slot == 0)
-            };
+            playerId = ls.player_id,
+            minutes = ls.rotation_minutes,
+            playable = true,
+            suggestion = SuggestedFor(FindPlayer(ls.player_id), ls.slot == 0)
         }).ToList();
 
         _allAuto = RotationPlanner.Evaluate(slots).allAuto;
-        if (!_allAuto) return;
 
-        var sug = entries.Select(ls => SuggestedFor(FindPlayer(ls.player_id), ls.slot == 0)).ToList();
-        var mins = RotationPlanner.AutoAssign(sug);
-        for (int i = 0; i < entries.Count && i < mins.Length; i++)
-            _autoSplit[entries[i].player_id] = mins[i];
+        var raw = entries.Select(ls => SuggestedFor(FindPlayer(ls.player_id), ls.slot == 0)).ToList();
+        var share = RotationPlanner.AutoAssign(raw);
+        for (int i = 0; i < entries.Count && i < raw.Count; i++)
+        {
+            _rawIdeal[entries[i].player_id] = raw[i];
+            _referenceSplit[entries[i].player_id] = i < share.Length ? share[i] : raw[i];
+        }
     }
 
     // Minutos efectivos: los fijados por el usuario o, si no (slot -1), el reparto
     // automático de 240 (o la sugerencia del simulador si no se pudo repartir).
     int Effective(LineupData ls, PlayerData p)
     {
+        // Plan fijado por el usuario: se muestra tal cual (suelo de minutos aplicado por el
+        // simulador aparte). Sin fijar (-1) o en modo automático: su cuota de 240.
         if (!_allAuto && ls.rotation_minutes >= 0)
             return Mathf.Min(ls.rotation_minutes, MAX_MINUTES);
-        if (p != null && _autoSplit.TryGetValue(p.id, out var auto)) return auto;
+        if (p != null && _referenceSplit.TryGetValue(p.id, out var share)) return share;
         return SuggestedFor(p, ls.slot == 0);
     }
 
@@ -194,13 +205,14 @@ public class RotationController : UIScreenController
         {
             var p = FindPlayer(ls.player_id);
             if (p == null) continue;
-            int mins = _autoSplit.TryGetValue(p.id, out var split) ? split : 0;
+            int mins = _referenceSplit.TryGetValue(p.id, out var split) ? split : 0;
             ls.rotation_minutes = mins;
             DatabaseManager.Instance.SetLineupMinutes(p.id, mins);
         }
 
         _allAuto = false;
-        _autoSplit.Clear();
+        // La referencia se mantiene durante la visita (el resto de filas la usa para sus ±);
+        // se recalcula en cada Refresh.
     }
 
     List<LineupData> ActiveEntries()
@@ -241,7 +253,8 @@ public class RotationController : UIScreenController
 
     VisualElement CreateRow(PlayerData p, LineupData ls, bool starter)
     {
-        int suggested = SuggestedFor(p, starter);
+        int rawIdeal = SuggestedFor(p, starter);
+        int suggested = _referenceSplit.TryGetValue(p.id, out var share) ? share : rawIdeal;
         int effective = Effective(ls, p);
         bool playable = IsPlayable(p);
 
@@ -330,7 +343,8 @@ public class RotationController : UIScreenController
         row.Add(sugCell);
 
         bool isAuto = _allAuto;
-        ApplyRowValues(valLbl, sugBase, sugDelta, effective, suggested, isAuto);
+        int rawForTip = _rawIdeal.TryGetValue(p.id, out var ri) ? ri : rawIdeal;
+        ApplyRowValues(valLbl, sugBase, sugDelta, effective, suggested, isAuto, rawForTip);
 
         var cs = new CustomSlider(slider, fill, dragger);
         _sliders.Add((ls, p, playable, cs));
@@ -351,8 +365,11 @@ public class RotationController : UIScreenController
             ls.rotation_minutes = minutes;
             DatabaseManager.Instance.SetLineupMinutes(playerId, minutes);
 
-            int sug = SuggestedFor(FindPlayer(playerId), entrySlot == 0);
-            ApplyRowValues(valLbl, sugBase, sugDelta, minutes, sug);
+            int raw = _rawIdeal.TryGetValue(playerId, out var ri2)
+                ? ri2
+                : SuggestedFor(FindPlayer(playerId), entrySlot == 0);
+            int reference = _referenceSplit.TryGetValue(playerId, out var sh) ? sh : raw;
+            ApplyRowValues(valLbl, sugBase, sugDelta, minutes, reference, false, raw);
             UpdateSummary();
         };
 
@@ -360,19 +377,20 @@ public class RotationController : UIScreenController
     }
 
     void ApplyRowValues(Label valLbl, Label sugBase, Label sugDelta, int minutes, int suggested,
-                        bool isAuto = false)
+                        bool isAuto = false, int rawIdeal = -1)
     {
         valLbl.text = minutes.ToString();
         valLbl.EnableInClassList("rot-min-val--auto", isAuto);
         valLbl.EnableInClassList("rot-min-val--custom", !isAuto && minutes != suggested);
 
-        // La sugerencia del simulador se muestra siempre (es la referencia de la fila),
-        // también en el estado automático.
+        // La referencia es la CUOTA de 240 del jugador (proporcional a su ideal), para que
+        // el reparto automático cuadre a 0 y los ajustes manuales sean cuadrables.
         sugBase.text = suggested.ToString();
-        sugBase.tooltip = $"Sugerido por el simulador: {suggested} min";
+        sugBase.tooltip = rawIdeal > 0 && rawIdeal != suggested
+            ? $"Ideal del simulador: {rawIdeal} min · cuota de {RotationPlanner.TEAM_MINUTES}: {suggested} min"
+            : $"Sugerido: {suggested} min (cuota de {RotationPlanner.TEAM_MINUTES})";
 
-        // El delta se calcula siempre (también en el reparto automático): compara los
-        // minutos asignados con la sugerencia del simulador.
+        // El delta compara los minutos asignados con esa cuota (0 = cuadra).
         int delta = minutes - suggested;
         if (delta == 0)
         {
@@ -389,10 +407,8 @@ public class RotationController : UIScreenController
         sugDelta.EnableInClassList("rot-sug-delta--pos", delta > 0);
         sugDelta.EnableInClassList("rot-sug-delta--neg", delta < 0);
         sugDelta.tooltip = delta > 0
-            ? (isAuto ? $"El reparto automático da {delta} min más que la sugerencia ({suggested} min)"
-                      : $"Vas {delta} min por encima de la sugerencia ({suggested} min)")
-            : (isAuto ? $"El reparto automático da {-delta} min menos que la sugerencia ({suggested} min)"
-                      : $"Vas {-delta} min por debajo de la sugerencia ({suggested} min)");
+            ? $"Vas {delta} min por encima de su cuota de {RotationPlanner.TEAM_MINUTES} ({suggested} min)"
+            : $"Vas {-delta} min por debajo de su cuota de {RotationPlanner.TEAM_MINUTES} ({suggested} min)";
     }
 
     Label CreateBadge(string text, bool isGL)
@@ -571,9 +587,9 @@ public class RotationController : UIScreenController
         // Fuente única del reparto (misma que el aviso del Dashboard).
         DatabaseManager.Instance.AutoAssignRotationMinutes(_myTeam.id, _players);
 
-        _allAuto = false;
-        _autoSplit.Clear();
         _lineup = DatabaseManager.Instance.GetTeamLineup(_myTeam.id);
+        // La referencia se recalcula: la cuota de 240 coincide con lo asignado (deltas 0).
+        ComputeReferenceSplit();
         BuildRows();
         UpdateSummary();
     }
@@ -593,7 +609,7 @@ public class RotationController : UIScreenController
 
         // RESET deja todo a 0 = el simulador vuelve a repartir automáticamente; la pantalla
         // lo muestra con el reparto de 240 (no como "0 minutos" para todos).
-        ComputeAutoSplit();
+        ComputeReferenceSplit();
         BuildRows();
         UpdateSummary();
     }

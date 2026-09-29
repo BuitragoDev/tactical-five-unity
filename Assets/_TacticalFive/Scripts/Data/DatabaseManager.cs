@@ -923,6 +923,23 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for on_trade_block: {ex.Message}");
         }
 
+        // Los jugadores con rol "Último recurso" pero media digna (74+) reciben su rol por
+        // media: el draft no asignaba rol y todos los rookies quedaban en Último recurso
+        // (con la tabla nueva eso son 2 minutos de rotación).
+        if (!IsMigrationApplied("role_from_overall"))
+        {
+            var sinRol = _db.Table<PlayerData>()
+                            .Where(p => p.role == PlayerRole.UltimoRecurso && p.overall >= 74)
+                            .ToList();
+            foreach (var p in sinRol)
+            {
+                p.role = PlayerRoleRules.FromOverall(p.overall);
+                _db.Update(p);
+            }
+            MarkMigrationApplied("role_from_overall");
+            Debug.Log($"[DB] Migration: rol por media asignado a {sinRol.Count} jugadores");
+        }
+
         // Limpieza one-time: las filas de player_game_stats con 0 minutos (DNPs)
         // inflaban los partidos jugados y diluían las medias. Ya no se persisten
         // (GameSimulator) y aquí se borran las existentes.
