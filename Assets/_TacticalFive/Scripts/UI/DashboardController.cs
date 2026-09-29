@@ -3774,6 +3774,7 @@ using System.Threading.Tasks;
 
             treatBtn.AddToClassList("injury-modal-treat-btn");
             treatBtn.AddToClassList("injury-modal-treat-btn--icon");
+            CursorManager.Instance?.RegisterHandCursor(treatBtn);
             PaintTreatIcon(alreadyTreated ? treatedIcon : injectionIcon,
                            done: alreadyTreated,
                            enabled: !alreadyTreated && hasMedico);
