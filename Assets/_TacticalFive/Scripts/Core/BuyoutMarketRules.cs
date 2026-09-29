@@ -23,6 +23,16 @@ public static class BuyoutMarketRules
     /// <summary>Duración del contrato de un rescindido: firma de mínimo de 1 año.</summary>
     public const int ContractYears = 1;
 
+    /// <summary>
+    /// Media mínima para que el mercado de buyout le busque destino **al día siguiente**.
+    /// Por debajo, el jugador queda como agente libre normal (el mercado general decidirá
+    /// si algún equipo con hueco le ficha más adelante).
+    /// </summary>
+    public const int MinOverall = 75;
+
+    /// <summary>¿Merece un destino inmediato en el mercado de buyout?</summary>
+    public static bool IsWanted(int overall) => overall >= MinOverall;
+
     public static int Priority(TeamStrategy strategy)
         => strategy == TeamStrategy.Contend ? 3
          : strategy == TeamStrategy.Balanced ? 2

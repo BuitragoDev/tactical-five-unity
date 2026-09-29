@@ -65,6 +65,16 @@ public class BuyoutMarketRulesTests
     }
 
     [Test]
+    public void IsWanted_OnlyFrom75Overall()
+    {
+        Assert.That(BuyoutMarketRules.IsWanted(90), Is.True);
+        Assert.That(BuyoutMarketRules.IsWanted(75), Is.True, "el umbral entra");
+        Assert.That(BuyoutMarketRules.IsWanted(74), Is.False, "por debajo se queda en agentes libres");
+        Assert.That(BuyoutMarketRules.IsWanted(68), Is.False);
+        Assert.That(BuyoutMarketRules.MinOverall, Is.EqualTo(75));
+    }
+
+    [Test]
     public void ContractYears_IsOneYear()
     {
         Assert.That(BuyoutMarketRules.ContractYears, Is.EqualTo(1),

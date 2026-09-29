@@ -5369,8 +5369,11 @@ using System.Threading.Tasks;
     {
         if (_season == null || _myTeam == null) return;
 
+        // Solo los jugadores de 75+ de media tienen destino inmediato: un rescindido de
+        // 68 se queda en agentes libres y decide el mercado general.
         var waived = DatabaseManager.Instance.GetFreeAgents()
-            .Where(p => BuyoutMarketRules.CanSignOn(p.waived_game_day, gameDay))
+            .Where(p => BuyoutMarketRules.CanSignOn(p.waived_game_day, gameDay)
+                     && BuyoutMarketRules.IsWanted(p.GetCalculatedAverage()))
             .OrderByDescending(p => p.GetCalculatedAverage())
             .ToList();
         if (waived.Count == 0) return;

@@ -304,7 +304,9 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   (`BuyoutMarketRules.ContractYears`), no de varios años: una estrella no puede quedarse
   cobrando el mínimo durante 3 temporadas.
 - **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el
-  lote de fondo): a partir de esa jornada, el mejor destino —**contender &gt; balanced &gt;
+  lote de fondo) **solo si tiene 75+ de media** (`BuyoutMarketRules.MinOverall`); por debajo
+  queda como agente libre normal y decide el mercado general (los equipos con hueco eligen
+  antes a los mejores de cada posición). A partir de esa jornada, el mejor destino —**contender &gt; balanced &gt;
   rebuild**; a igual estrategia, el equipo con menos jugadores en su posición y luego el de
   mejor media— le firma **por el mínimo** (hueco de plantilla y encaje en
   `TradeHelper.CanAISignExternal`), genera el `TradeData` de agencia libre y una **noticia**
