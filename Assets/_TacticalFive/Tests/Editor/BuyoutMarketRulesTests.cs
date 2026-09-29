@@ -7,8 +7,10 @@ using NUnit.Framework;
 /// </summary>
 public class BuyoutMarketRulesTests
 {
-    static BuyoutCandidate Team(int id, TeamStrategy strategy, int samePos = 0, float avg = 70f, bool room = true)
-        => new BuyoutCandidate { teamId = id, strategy = strategy, samePosCount = samePos, teamAvg = avg, hasRoom = room };
+    static BuyoutCandidate Team(int id, TeamStrategy strategy, int samePos = 0, float avg = 70f,
+                                bool room = true, int reputation = 3)
+        => new BuyoutCandidate { teamId = id, strategy = strategy, samePosCount = samePos,
+                                 teamAvg = avg, hasRoom = room, reputation = reputation };
 
     [Test]
     public void BestDestination_PrefersContender()
@@ -86,5 +88,41 @@ public class BuyoutMarketRulesTests
     {
         Assert.That(BuyoutMarketRules.WaivedSalary(2_100_000), Is.EqualTo(2_100_000));
         Assert.That(BuyoutMarketRules.WaivedSalary(0), Is.EqualTo(TradeHelper.MIN_SALARY), "sin ajuste usa el mínimo base");
+    }
+
+    [Test]
+    public void RankDestinations_TieBreakByPrestigeThenId()
+    {
+        var ranked = BuyoutMarketRules.RankDestinations(new List<BuyoutCandidate>
+        {
+            Team(1, TeamStrategy.Balanced, samePos: 1, avg: 76f, reputation: 2),
+            Team(2, TeamStrategy.Balanced, samePos: 1, avg: 76f, reputation: 5),
+            Team(3, TeamStrategy.Balanced, samePos: 1, avg: 76f, reputation: 5)
+        });
+
+        Assert.That(ranked[0].teamId, Is.EqualTo(2), "a igual estrategia/necesidad/plantilla, más prestigio");
+        Assert.That(ranked[1].teamId, Is.EqualTo(3), "y a igual prestigio, el id más bajo");
+        Assert.That(ranked[2].teamId, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void PickSuitor_FavorsTheBestButNotAlways()
+    {
+        var rng = new System.Random(12345);
+        int[] picks = new int[3];
+        for (int i = 0; i < 3000; i++) picks[BuyoutMarketRules.PickSuitor(3, rng)]++;
+
+        Assert.That(picks[0], Is.GreaterThan(picks[1]), "el mejor destino es el más probable");
+        Assert.That(picks[1], Is.GreaterThan(picks[2]));
+        Assert.That(picks[2], Is.GreaterThan(0), "pero el tercero también puede salir");
+    }
+
+    [Test]
+    public void PickSuitor_HandlesFewOrNoCandidates()
+    {
+        var rng = new System.Random(1);
+        Assert.That(BuyoutMarketRules.PickSuitor(0, rng), Is.EqualTo(-1));
+        Assert.That(BuyoutMarketRules.PickSuitor(1, rng), Is.EqualTo(0), "con un solo postor no hay sorteo");
+        Assert.That(BuyoutMarketRules.PickSuitor(2, rng), Is.InRange(0, 1));
     }
 }

@@ -5399,14 +5399,19 @@ using System.Threading.Tasks;
                     strategy = GetTeamStrategy(t.id),
                     teamAvg = roster.Count > 0 ? (float)roster.Average(x => x.GetCalculatedAverage()) : 0f,
                     samePosCount = roster.Count(x => x.position == p.position),
+                    reputation = t.reputation,
                     hasRoom = hasRoom
                 });
             }
 
-            int destination = BuyoutMarketRules.BestDestination(candidates);
-            if (destination <= 0) continue;
+            // Entre los mejores postores (contender > balanced > rebuild, con hueco en su
+            // posición y mejor proyecto/prestigio) se sortea el destino ponderadamente: el
+            // mejor candidato es el más probable, pero no siempre el elegido.
+            var ranked = BuyoutMarketRules.RankDestinations(candidates);
+            int pick = BuyoutMarketRules.PickSuitor(ranked.Count, _aiRng);
+            if (pick < 0) continue;
 
-            var team = teams.FirstOrDefault(t => t.id == destination);
+            var team = teams.FirstOrDefault(t => t.id == ranked[pick].teamId);
             if (team == null) continue;
 
             p.team_id = team.id;
@@ -5450,7 +5455,8 @@ using System.Threading.Tasks;
                 news_type = NewsType.FICHAJE
             });
 
-            Debug.Log($"[BuyoutMarket] {team.name} firma a {playerName} (OVR {p.GetCalculatedAverage()}) por el mínimo");
+            Debug.Log($"[BuyoutMarket] {team.name} firma a {playerName} (OVR {p.GetCalculatedAverage()}) por el mínimo " +
+                      $"[postor {pick + 1}/{ranked.Count}]");
         }
     }
 

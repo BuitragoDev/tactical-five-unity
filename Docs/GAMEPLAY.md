@@ -306,11 +306,13 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 - **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el
   lote de fondo) **solo si tiene 75+ de media** (`BuyoutMarketRules.MinOverall`); por debajo
   queda como agente libre normal y decide el mercado general (los equipos con hueco eligen
-  antes a los mejores de cada posición). A partir de esa jornada, el mejor destino —**contender &gt; balanced &gt;
-  rebuild**; a igual estrategia, el equipo con menos jugadores en su posición y luego el de
-  mejor media— le firma **por el mínimo** (hueco de plantilla y encaje en
-  `TradeHelper.CanAISignExternal`), genera el `TradeData` de agencia libre y una **noticia**
-  ("Mercado de buyout: X firma con Y").
+  antes a los mejores de cada posición). A partir de esa jornada, los destinos —**contender &gt; balanced &gt;
+  rebuild**; a igual estrategia, el equipo con menos jugadores en su posición; luego mejor
+  plantilla y más **prestigio**— se ordenan con `BuyoutMarketRules.RankDestinations` y entre
+  los **3 mejores postores** se sortea el destino de forma **ponderada** (`PickSuitor`: el 1º
+  tiene el doble de probabilidad que el 2º y el triple que el 3º). El elegido le firma **por el
+  mínimo** (hueco de plantilla y encaje en `TradeHelper.CanAISignExternal`), genera el
+  `TradeData` de agencia libre y una **noticia** ("Mercado de buyout: X firma con Y").
 - **Fichajes de la IA con excepciones:** tanto el pase de estrellas como el general usan la
   regla completa (`CanAISignExternal`: espacio de tope → MLE → mínimo) y **asignan el salario
   nuevo** al firmar. Antes el pase de estrellas exigía espacio de tope puro (nadie sobre el

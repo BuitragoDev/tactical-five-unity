@@ -8,6 +8,8 @@ public class BuyoutCandidate
     public TeamStrategy strategy;
     public float teamAvg;
     public int samePosCount;
+    /// <summary>Prestigio del equipo (1-5): atrae más a los jugadores.</summary>
+    public int reputation;
     /// <summary>Puede firmarle: hueco de plantilla y encaje en cap/excepciones (el mínimo siempre cabe).</summary>
     public bool hasRoom;
 }
@@ -38,20 +40,60 @@ public static class BuyoutMarketRules
          : strategy == TeamStrategy.Balanced ? 2
          : 1;
 
+    /// <summary>
+    /// Cuántos equipos pujan de verdad por un jugador rescindido. Entre ellos se sortea el
+    /// destino (ponderado por el puesto en el ranking), como en la realidad: el mejor
+    /// candidato es el más probable, pero no el único.
+    /// </summary>
+    public const int SuitorCount = 3;
+
+    /// <summary>Equipos candidatos ordenados de mejor a peor destino para el jugador.</summary>
+    public static List<BuyoutCandidate> RankDestinations(IReadOnlyList<BuyoutCandidate> candidates)
+    {
+        if (candidates == null) return new List<BuyoutCandidate>();
+
+        return candidates
+            .Where(c => c != null && c.hasRoom)
+            // El jugador quiere competir: contender > balanced > rebuild.
+            .OrderByDescending(c => Priority(c.strategy))
+            // Minutos disponibles: menos jugadores en su posición = más hueco.
+            .ThenBy(c => c.samePosCount)
+            // Proyecto: mejor plantilla y más prestigio atraen más.
+            .ThenByDescending(c => c.teamAvg)
+            .ThenByDescending(c => c.reputation)
+            // Desempate estable (para que el ranking sea reproducible).
+            .ThenBy(c => c.teamId)
+            .ToList();
+    }
+
     /// <summary>Mejor destino (teamId) o -1 si ninguno puede firmarle.</summary>
     public static int BestDestination(IReadOnlyList<BuyoutCandidate> candidates)
     {
-        if (candidates == null) return -1;
+        var ranked = RankDestinations(candidates);
+        return ranked.Count > 0 ? ranked[0].teamId : -1;
+    }
 
-        var best = candidates
-            .Where(c => c != null && c.hasRoom)
-            .OrderByDescending(c => Priority(c.strategy))
-            .ThenBy(c => c.samePosCount)
-            .ThenByDescending(c => c.teamAvg)
-            .ThenBy(c => c.teamId)
-            .FirstOrDefault();
+    /// <summary>
+    /// Sorteo ponderado entre los `SuitorCount` mejores candidatos del ranking: el 1º tiene
+    /// el doble de probabilidad que el 2º y el triple que el 3º. Devuelve el índice elegido
+    /// (0 = mejor destino) o -1 si no hay candidatos. Puro (recibe el RNG del hilo de IA).
+    /// </summary>
+    public static int PickSuitor(int rankedCount, System.Random rng)
+    {
+        int n = System.Math.Min(SuitorCount, rankedCount);
+        if (n <= 0) return -1;
+        if (rng == null) return 0;
+        if (n == 1) return 0;
 
-        return best != null ? best.teamId : -1;
+        int total = n * (n + 1) / 2;            // 3, 2, 1 → 6
+        int roll = rng.Next(1, total + 1);
+        int acc = 0;
+        for (int i = 0; i < n; i++)
+        {
+            acc += n - i;                        // peso del puesto i
+            if (roll <= acc) return i;
+        }
+        return 0;
     }
 
     /// <summary>¿Puede la IA firmarle en esta jornada? (el mismo día de la rescisión o después)</summary>
