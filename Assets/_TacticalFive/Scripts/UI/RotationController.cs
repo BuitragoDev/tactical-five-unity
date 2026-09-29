@@ -354,17 +354,20 @@ public class RotationController : UIScreenController
         valLbl.EnableInClassList("rot-min-val--auto", isAuto);
         valLbl.EnableInClassList("rot-min-val--custom", !isAuto && minutes != suggested);
 
+        // La sugerencia del simulador se muestra siempre (es la referencia de la fila),
+        // también en el estado automático.
+        sugBase.text = suggested.ToString();
+        sugBase.tooltip = $"Sugerido por el simulador: {suggested} min";
+
         if (isAuto)
         {
-            // Reparto automático: no es una personalización del usuario, no hay delta.
+            // Reparto automático: no es una personalización del usuario, así que no hay
+            // delta que mostrar (la sugerencia de referencia sí se ve).
             sugDelta.text = string.Empty;
             sugDelta.style.display = DisplayStyle.None;
             sugDelta.tooltip = null;
             return;
         }
-
-        sugBase.text = suggested.ToString();
-        sugBase.tooltip = $"Sugerido por el simulador: {suggested} min";
 
         int delta = minutes - suggested;
         if (delta == 0)
