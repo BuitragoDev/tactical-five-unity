@@ -5178,6 +5178,7 @@ using System.Threading.Tasks;
         try
         {
             ProcessBuyoutMarket(gameDay);
+            ProcessOwnFreeAgentResignings(gameDay);
             ProcessAITransfers(gameDay);
             ProcessStarFreeAgentSignings(gameDay);
             ProcessAIRenewals();
@@ -5408,9 +5409,10 @@ using System.Threading.Tasks;
             p.team_id = team.id;
             p.last_team_id = team.id;
             p.salary = minSalary;
-            int years = p.age > 35 ? 1 : p.age > 32 ? 2 : 3;
-            p.contract_years = years;
-            p.guaranteed_years = years;
+            // Firma de mínimo de 1 año (mercado de buyout): al expirar, su equipo puede
+            // renovarle por su valor real o pierde sus derechos al abrirse el mercado.
+            p.contract_years = BuyoutMarketRules.ContractYears;
+            p.guaranteed_years = BuyoutMarketRules.ContractYears;
             p.has_team_option = 0;
             p.has_player_option = 0;
             p.waived_game_day = -1;
@@ -5446,6 +5448,91 @@ using System.Threading.Tasks;
             });
 
             Debug.Log($"[BuyoutMarket] {team.name} firma a {playerName} (OVR {p.GetCalculatedAverage()}) por el mínimo");
+        }
+    }
+
+    /// <summary>
+    /// Re-firma de **agentes libres propios con Bird rights**: un FA reciente cuyo último
+    /// equipo conserva sus derechos (expiró contrato o declinó su opción) puede volver a él
+    /// con un contrato acorde a su valor de mercado, aunque el equipo esté por encima del
+    /// tope (límite del 2º apron, como las renovaciones). Es lo que permite que un jugador
+    /// que firmó por el mínimo tras una rescisión cobre después lo que le corresponde.
+    /// Se ejecuta en el lote de fondo, antes de los demás pases de FA.
+    /// </summary>
+    void ProcessOwnFreeAgentResignings(int gameDay)
+    {
+        if (_season == null || _myTeam == null) return;
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long cap = settings?.salary_cap ?? TradeHelper.SALARY_CAP;
+
+        var candidates = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => p.last_team_id > 0 && p.last_team_id != _myTeam.id && p.seasons_with_team > 0)
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+        if (candidates.Count == 0) return;
+
+        Dictionary<int, int> gamesByPlayer = null;
+
+        foreach (var p in candidates)
+        {
+            if (p.renewal_cooldown_day > gameDay) continue;
+
+            var team = DatabaseManager.Instance.GetTeamById(p.last_team_id);
+            if (team == null) continue;
+            if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_ROSTER) continue;
+            if (CalculateTeamRenewalScore(p, team, cap) < 50f) continue;
+
+            var offer = CalculateAIRenewalOffer(p, team, cap);
+            long payroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(x => x.salary);
+
+            // Como en las renovaciones: nunca dejar al equipo por encima del 2º apron.
+            if (!TradeHelper.CanAIRenew(payroll + offer.salary, settings))
+            {
+                p.renewal_cooldown_day = gameDay + 15;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                continue;
+            }
+
+            gamesByPlayer ??= DatabaseManager.Instance.GetGamesPlayedByPlayerInSeason(_manager.id, _season.id);
+            int gamesPlayed = gamesByPlayer.GetValueOrDefault(p.id, 0);
+            int teamChem = DatabaseManager.Instance.GetTeamChemistry(team.id);
+            float acceptScore = RosterController.CalculateAcceptScore(
+                p, offer.salary, offer.years, gamesPlayed, teamChem);
+
+            if (_aiRng.Next(1, 101) > acceptScore)
+            {
+                p.renewal_cooldown_day = gameDay + 15;
+                DatabaseManager.Instance.UpdatePlayer(p);
+                continue;
+            }
+
+            p.team_id = team.id;
+            p.last_team_id = team.id;
+            p.salary = offer.salary;
+            p.contract_years = offer.years;
+            p.guaranteed_years = offer.teamOption ? offer.years - 1 : offer.years;
+            p.has_team_option = offer.teamOption ? 1 : 0;
+            p.has_player_option = 0;
+            p.waived_game_day = -1;
+            p.renewal_cooldown_day = gameDay + 365;
+            DatabaseManager.Instance.AssignJerseyNumber(p, team.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season.id,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = 0,
+                team_id_to = team.id,
+                player_id = p.id,
+                trade_type = "free_agent"
+            });
+
+            if (p.overall >= 90) AddAIRenewalNotification(p, team, true, offer);
+            Debug.Log($"[OwnFA] {team.name} re-firma a {p.first_name} {p.last_name} " +
+                      $"(OVR {p.overall}) por {offer.salary:N0} $ / {offer.years} año(s) con Bird rights");
         }
     }
 
@@ -5508,11 +5595,12 @@ using System.Threading.Tasks;
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
 
                 long payroll = roster.Sum(p => p.salary);
+                bool fromBuyout = star.waived_game_day >= 0;
 
                 // Salario nuevo: un rescindido firma por el mínimo (mercado de buyout); el
                 // resto, su precio + un pequeño incremento (como el pase general). Antes se
                 // firmaba con el salario viejo y el equipo nuevo heredaba esa nómina.
-                long newSalary = star.waived_game_day >= 0
+                long newSalary = fromBuyout
                     ? BuyoutMarketRules.WaivedSalary(leagueSettings?.minimum_salary ?? 0)
                     : star.salary + 2_000_000;
 
@@ -5523,7 +5611,10 @@ using System.Threading.Tasks;
                 star.team_id = team.id;
                 star.last_team_id = team.id;
                 star.salary = newSalary;
-                int years = star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
+                // El rescindido firma 1 año (y al expirar su equipo puede renovarle por su
+                // valor real, o re-firmarle con Bird rights).
+                int years = fromBuyout ? BuyoutMarketRules.ContractYears
+                          : star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
                 star.guaranteed_years = years;
                 star.has_team_option = 0;
@@ -5703,9 +5794,9 @@ using System.Threading.Tasks;
 
     long EstimateMarketValue(PlayerData player, long cap)
     {
-        if (player.overall >= 85) return (long)(cap * 0.35);
-        if (player.overall >= 80) return (long)(cap * 0.30);
-        if (player.overall >= 75) return (long)(cap * 0.25);
+        // Umbrales por OVR en una sola fuente (TradeHelper); por debajo, el salario actual.
+        long byOvr = TradeHelper.MarketValueByOvr(player.overall, cap);
+        if (byOvr > 0) return byOvr;
         if (player.overall >= 70) return (long)Mathf.Max(player.salary * 110 / 100, TradeHelper.MIN_SALARY);
         return (long)Mathf.Max(player.salary * 105 / 100, TradeHelper.MIN_SALARY);
     }
@@ -5721,6 +5812,23 @@ using System.Threading.Tasks;
 
         long marketValue = EstimateMarketValue(player, cap);
         long salary = (long)Mathf.Min(maxByExp, marketValue);
+
+        // Muy por debajo de su valor de mercado (p. ej. fichó por el mínimo tras una
+        // rescisión): el equipo le renueva a su valor real (para una estrella, su máximo
+        // por experiencia), sin el tope no-Bird del 120 % sobre el salario mínimo.
+        if (marketValue >= player.salary * 3)
+        {
+            salary = (long)(Mathf.Round(salary / 100_000f) * 100_000);
+            if (salary < TradeHelper.MIN_SALARY) salary = TradeHelper.MIN_SALARY;
+
+            int yearsLow;
+            if (player.age <= 25) yearsLow = 5;
+            else if (player.age <= 28) yearsLow = 4;
+            else if (player.age <= 32) yearsLow = 3;
+            else if (player.age <= 35) yearsLow = 2;
+            else yearsLow = 1;
+            return (salary, yearsLow, player.age >= 30);
+        }
 
         if (player.seasons_with_team >= 3)
         {
@@ -6124,7 +6232,8 @@ using System.Threading.Tasks;
             }
             else
             {
-                int years = player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
+                int years = player.waived_game_day >= 0 ? BuyoutMarketRules.ContractYears
+                          : player.age > 35 ? 1 : player.age > 32 ? 2 : player.age > 28 ? 3 : player.age > 25 ? 4 : 5;
                 player.salary = newSalary;
                 player.contract_years = years;
                 player.guaranteed_years = years;

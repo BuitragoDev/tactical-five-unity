@@ -20,6 +20,9 @@ public class BuyoutCandidate
 /// </summary>
 public static class BuyoutMarketRules
 {
+    /// <summary>Duración del contrato de un rescindido: firma de mínimo de 1 año.</summary>
+    public const int ContractYears = 1;
+
     public static int Priority(TeamStrategy strategy)
         => strategy == TeamStrategy.Contend ? 3
          : strategy == TeamStrategy.Balanced ? 2

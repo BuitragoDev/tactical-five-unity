@@ -295,4 +295,29 @@ public class TradeHelperTests
         Assert.That(TradeHelper.IsEligibleForTwoWayAge(23), Is.True);
         Assert.That(TradeHelper.IsEligibleForTwoWayAge(24), Is.False);
     }
+
+    // ── VALOR DE MERCADO Y RENOVACIÓN A MERCADO ─────────────
+
+    [Test]
+    public void MarketValueByOvr_UsesCapFractions()
+    {
+        long cap = 140_000_000;
+        Assert.That(TradeHelper.MarketValueByOvr(90, cap), Is.EqualTo((long)(cap * 0.35)));
+        Assert.That(TradeHelper.MarketValueByOvr(85, cap), Is.EqualTo((long)(cap * 0.35)));
+        Assert.That(TradeHelper.MarketValueByOvr(80, cap), Is.EqualTo((long)(cap * 0.30)));
+        Assert.That(TradeHelper.MarketValueByOvr(75, cap), Is.EqualTo((long)(cap * 0.25)));
+        Assert.That(TradeHelper.MarketValueByOvr(74, cap), Is.EqualTo(0), "por debajo de 75 no hay valor por OVR");
+        Assert.That(TradeHelper.MarketValueByOvr(90, 0), Is.EqualTo(0));
+    }
+
+    [Test]
+    public void ShouldRenewAtMarket_OnlyWhenFarBelowMarket()
+    {
+        // Firmó por el mínimo tras una rescisión: 49M vs 2M → renovación a mercado.
+        Assert.That(TradeHelper.ShouldRenewAtMarket(49_000_000, 2_000_000), Is.True);
+        // Un jugador pagado cerca de su valor mantiene los topes Bird.
+        Assert.That(TradeHelper.ShouldRenewAtMarket(30_000_000, 25_000_000), Is.False);
+        Assert.That(TradeHelper.ShouldRenewAtMarket(0, 2_000_000), Is.False);
+        Assert.That(TradeHelper.ShouldRenewAtMarket(10_000_000, 0), Is.False, "sin salario actual no aplica");
+    }
 }

@@ -2792,6 +2792,9 @@ public partial class DatabaseManager
         foreach (var ss in _db.Table<PlayerSeasonStatRow>().Where(x => x.season_id == oldSeasonId))
             mpgByPlayer[ss.player_id] = ss.games > 0 ? (int)System.Math.Round(ss.total_minutes / ss.games) : -1;
 
+        // Valor de mercado del tope para reajustar el precio pedido al expirar (una vez).
+        long rolloverCap = GetLeagueSettings()?.salary_cap ?? TradeHelper.SALARY_CAP;
+
         foreach (var p in remaining)
         {
             if (p.is_rookie == 1)
@@ -2929,6 +2932,11 @@ public partial class DatabaseManager
                 if (oldTeamId != 0 && p.last_team_id == 0)
                     p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                 p.team_id = 0;
+
+                // El precio pedido no se queda anclado al salario viejo: si está por debajo
+                // de su valor de mercado (p. ej. fichó por el mínimo tras una rescisión), sube.
+                long marketValue = TradeHelper.MarketValueByOvr(p.overall, rolloverCap);
+                if (marketValue > p.salary) p.salary = marketValue;
             }
 
             // Track team changes for seasons_with_team

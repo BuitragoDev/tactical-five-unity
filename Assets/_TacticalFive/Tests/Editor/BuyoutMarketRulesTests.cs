@@ -65,6 +65,13 @@ public class BuyoutMarketRulesTests
     }
 
     [Test]
+    public void ContractYears_IsOneYear()
+    {
+        Assert.That(BuyoutMarketRules.ContractYears, Is.EqualTo(1),
+            "el rescindido firma el mínimo por 1 año; luego su equipo renueva o pierde los derechos");
+    }
+
+    [Test]
     public void WaivedSalary_IsTheLeagueMinimum()
     {
         Assert.That(BuyoutMarketRules.WaivedSalary(2_100_000), Is.EqualTo(2_100_000));

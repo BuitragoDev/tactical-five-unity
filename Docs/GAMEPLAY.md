@@ -300,7 +300,9 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 - **Al rescindir** (buyout) un jugador pasa a la agencia libre con **contrato a 0** y su nuevo
   precio es el **mínimo de liga**: el equipo que le corta sigue pagando el resto como
   `dead_money` (stretch), igual que en la NBA. Se marca `players.waived_game_day` con la
-  jornada de la rescisión.
+  jornada de la rescisión. **Su contrato de rescindido es de mínimo y 1 año**
+  (`BuyoutMarketRules.ContractYears`), no de varios años: una estrella no puede quedarse
+  cobrando el mínimo durante 3 temporadas.
 - **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el
   lote de fondo): a partir de esa jornada, el mejor destino —**contender &gt; balanced &gt;
   rebuild**; a igual estrategia, el equipo con menos jugadores en su posición y luego el de
@@ -311,6 +313,20 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   regla completa (`CanAISignExternal`: espacio de tope → MLE → mínimo) y **asignan el salario
   nuevo** al firmar. Antes el pase de estrellas exigía espacio de tope puro (nadie sobre el
   cap podía fichar) y heredaba el salario viejo (bombas de nómina).
+- **Precio al expirar:** cuando un contrato llega a 0 en el rollover, el precio pedido no se
+  queda anclado al salario viejo: si está por debajo de su valor de mercado
+  (`TradeHelper.MarketValueByOvr`: 85+ → 35 % del tope, 80+ → 30 %, 75+ → 25 %) se sube a ese
+  valor. Así el jugador que firmó por el mínimo deja de ser barato para siempre.
+- **Renovación por su calidad:** en `CalculateAIRenewalOffer`, si su valor de mercado es **3× o
+  más** que su salario actual (`TradeHelper.ShouldRenewAtMarket`, típico de un rescindido que
+  firmó por el mínimo), la oferta va a valor de mercado **sin el tope no-Bird del 120 %**:
+  para una estrella eso es su **máximo por experiencia** (25/30/35 % del tope según años). El
+  resto de jugadores mantiene sus topes Bird.
+- **Re-firma con Bird rights:** un FA reciente cuyo último equipo conserva sus derechos
+  (`ProcessOwnFreeAgentResignings`: expiró contrato o declinó su opción) puede volver a él con
+  un contrato acorde a su valor, aunque el equipo esté por encima del tope (límite del 2º
+  apron, igual que las renovaciones). Corre antes que el resto de pases de FA, para que el
+  equipo con derechos tenga la primera oportunidad.
 - La marca `waived_game_day` se limpia al firmar (`MovePlayerToTeam`, ofertas aceptadas) y en
   el rollover.
 

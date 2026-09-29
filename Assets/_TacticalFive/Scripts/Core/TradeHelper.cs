@@ -189,6 +189,29 @@ public static class TradeHelper
     /// apron, T por debajo del 2º) → salario mínimo. Nunca deja el payroll por
     /// encima del 2º apron salvo con un contrato mínimo.
     /// </summary>
+    /// <summary>
+    /// ¿La renovación debe ir a valor de mercado en vez de al tope de derechos Bird?
+    /// Caso típico: un jugador que firmó por el mínimo tras una rescisión (su valor de
+    /// mercado es 3× o más que su salario actual). Para una estrella, eso es su máximo
+    /// por experiencia; el resto de jugadores mantiene sus topes Bird.
+    /// </summary>
+    public static bool ShouldRenewAtMarket(long marketValue, long currentSalary)
+        => currentSalary > 0 && marketValue >= currentSalary * 3;
+
+    /// <summary>
+    /// Valor de mercado por OVR como fracción del tope (85+ → 35 %, 80+ → 30 %, 75+ → 25 %).
+    /// 0 si el jugador está por debajo de esos umbrales (su precio lo marca su salario).
+    /// Fuente única para el precio de un agente libre al expirar y para las renovaciones IA.
+    /// </summary>
+    public static long MarketValueByOvr(int overall, long cap)
+    {
+        if (cap <= 0) return 0;
+        if (overall >= 85) return (long)(cap * 0.35);
+        if (overall >= 80) return (long)(cap * 0.30);
+        if (overall >= 75) return (long)(cap * 0.25);
+        return 0;
+    }
+
     public static bool CanAISignExternal(long payroll, long newSalary, LeagueSettingsData s)
     {
         if (s == null) return true;
