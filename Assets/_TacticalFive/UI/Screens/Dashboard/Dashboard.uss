@@ -2508,9 +2508,11 @@
     color: rgb(100, 110, 135);
 }
 
-/* Botón de tratamiento con icono (inyección → hecho): sin texto, imagen ajustada */
+/* Botón de tratamiento con icono (inyección → hecho): imagen 40x40, sin texto */
 .injury-modal-treat-btn--icon {
-    padding: 6px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
     -unity-background-scale-mode: scale-to-fit;
 }
 
