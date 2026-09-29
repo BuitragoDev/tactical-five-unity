@@ -359,16 +359,8 @@ public class RotationController : UIScreenController
         sugBase.text = suggested.ToString();
         sugBase.tooltip = $"Sugerido por el simulador: {suggested} min";
 
-        if (isAuto)
-        {
-            // Reparto automático: no es una personalización del usuario, así que no hay
-            // delta que mostrar (la sugerencia de referencia sí se ve).
-            sugDelta.text = string.Empty;
-            sugDelta.style.display = DisplayStyle.None;
-            sugDelta.tooltip = null;
-            return;
-        }
-
+        // El delta se calcula siempre (también en el reparto automático): compara los
+        // minutos asignados con la sugerencia del simulador.
         int delta = minutes - suggested;
         if (delta == 0)
         {
@@ -385,8 +377,10 @@ public class RotationController : UIScreenController
         sugDelta.EnableInClassList("rot-sug-delta--pos", delta > 0);
         sugDelta.EnableInClassList("rot-sug-delta--neg", delta < 0);
         sugDelta.tooltip = delta > 0
-            ? $"Vas {delta} min por encima de la sugerencia ({suggested} min)"
-            : $"Vas {-delta} min por debajo de la sugerencia ({suggested} min)";
+            ? (isAuto ? $"El reparto automático da {delta} min más que la sugerencia ({suggested} min)"
+                      : $"Vas {delta} min por encima de la sugerencia ({suggested} min)")
+            : (isAuto ? $"El reparto automático da {-delta} min menos que la sugerencia ({suggested} min)"
+                      : $"Vas {-delta} min por debajo de la sugerencia ({suggested} min)");
     }
 
     Label CreateBadge(string text, bool isGL)
