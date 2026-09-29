@@ -426,15 +426,26 @@ public static class GameSimulator
 
     public static int GetTargetMinutes(PlayerStatSnapshot player, bool glLeague = false)
     {
-        // Tabla por media (el fondo del banquillo juega muy poco). El rol solo decide el
-        // tramo bajo: los `UltimoRecurso` van al suelo.
+        // Tabla por media: las estrellas juegan 40, los titulares de nivel medio ~30 y el
+        // fondo del banquillo poco. El rol solo decide el tramo bajo (Último recurso = suelo).
         int minutes;
         if (player.role == PlayerRole.UltimoRecurso) minutes = MIN_FIXED_MINUTES;
-        else if (player.overall >= 90) minutes = player.starter ? 37 : 28;
-        else if (player.overall >= 85) minutes = player.starter ? 31 : 24;
-        else if (player.overall >= 80) minutes = player.starter ? 24 : 19;
-        else if (player.overall >= 75) minutes = player.starter ? 17 : 13;
-        else minutes = player.starter ? 10 : 8;
+        else if (player.starter)
+        {
+            if (player.overall >= 90) minutes = 40;
+            else if (player.overall >= 85) minutes = 34;
+            else if (player.overall >= 80) minutes = 33;
+            else if (player.overall >= 75) minutes = 26;
+            else minutes = 20;
+        }
+        else
+        {
+            if (player.overall >= 90) minutes = 32;
+            else if (player.overall >= 85) minutes = 28;
+            else if (player.overall >= 80) minutes = 22;
+            else if (player.overall >= 75) minutes = 14;
+            else minutes = 12;
+        }
 
         // G-League: reparto algo más corto (los prospectos comparten más carga).
         if (glLeague) return Mathf.Max(MIN_FIXED_MINUTES, Mathf.RoundToInt(minutes * 0.75f));

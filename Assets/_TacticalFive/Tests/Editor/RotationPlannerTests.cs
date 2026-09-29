@@ -55,7 +55,25 @@ public class RotationPlannerTests
     }
 
     [Test]
-    public void AutoAssign_DropsFloorWhenThereAreTooManyPlayers()
+    public void AutoAssign_KeepsAShortRotation()
+    {
+        // 12 convocados: solo los ROTATION_SIZE mejores reparten los minutos; el fondo queda
+        // en el suelo (rotación corta, como en la NBA).
+        var mins = RotationPlanner.AutoAssign(Realistic);
+
+        Assert.That(Sum(mins), Is.EqualTo(RotationPlanner.TEAM_MINUTES));
+
+        // La lista viene ordenada de mayor a menor ideal: los dos últimos son los que salen.
+        Assert.That(mins[Realistic.Length - 1], Is.EqualTo(RotationPlanner.MIN_PER_PLAYER));
+        Assert.That(mins[Realistic.Length - 2], Is.EqualTo(RotationPlanner.MIN_PER_PLAYER));
+
+        int inRotation = 0;
+        foreach (var m in mins) if (m > RotationPlanner.MIN_PER_PLAYER) inRotation++;
+        Assert.That(inRotation, Is.EqualTo(RotationPlanner.ROTATION_SIZE), "10 jugadores con minutos reales");
+    }
+
+    [Test]
+    public void AutoAssign_ManyPlayers_StillSumsTeamMinutes()
     {
         var many = new List<int>();
         for (int i = 0; i < 40; i++) many.Add(10);

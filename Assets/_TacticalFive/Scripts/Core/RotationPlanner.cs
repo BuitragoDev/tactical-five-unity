@@ -39,6 +39,11 @@ public class RotationStatus
 public static class RotationPlanner
 {    public const int TEAM_MINUTES = 240;
     public const int MAX_PER_PLAYER = 48;
+    /// <summary>
+    /// Tamaño de la rotación: solo los 10 mejores objetivos reparten los 240 minutos (como
+    /// una rotación NBA real). El resto de convocados se queda en el suelo.
+    /// </summary>
+    public const int ROTATION_SIZE = 10;
     /// <summary>Suelo por jugador: el mismo que aplica el simulador a los minutos fijados.</summary>
     public const int MIN_PER_PLAYER = GameSimulator.MIN_FIXED_MINUTES;
 
@@ -60,6 +65,14 @@ public static class RotationPlanner
         bool floorFits = MIN_PER_PLAYER * n <= total;
         int min = floorFits ? MIN_PER_PLAYER : 0;
 
+        // Rotación corta: los ROTATION_SIZE mejores objetivos reparten los minutos; el resto
+        // se queda en el suelo (no entran en el reparto).
+        int rotationSize = System.Math.Min(ROTATION_SIZE, n);
+        var inRotation = Enumerable.Range(0, n)
+            .OrderByDescending(i => sugar[i]).ThenBy(i => i)
+            .Take(rotationSize)
+            .ToHashSet();
+
         var mins = new int[n];
         var cap = new int[n];
         int assigned = 0;
@@ -70,15 +83,20 @@ public static class RotationPlanner
             assigned += min;
         }
 
-        int extra = total - assigned;
-        if (extra <= 0) return mins;   // sin margen (o suelo justo): se devuelve el mínimo
+        // Los que quedan fuera de la rotación solo suman su suelo; los que entran reparten
+        // el resto (manteniendo la suma exacta en `total`).
+        int pool = total - min * n;               // minutos a repartir entre la rotación
+        if (pool <= 0) return mins;
 
-        // Reparto por mayores fracciones, respetando el tope por jugador.
+        float rotSum = 0f;
+        foreach (int i in inRotation) rotSum += sugar[i];
+        if (rotSum <= 0f) rotSum = rotationSize;
+
         var remainders = new float[n];
         int distributed = 0;
-        for (int i = 0; i < n; i++)
+        foreach (int i in inRotation)
         {
-            float raw = extra * (sugar[i] / sum);
+            float raw = pool * (sugar[i] / rotSum);
             int whole = (int)raw;
             if (whole > cap[i]) whole = cap[i];
             mins[i] += whole;
@@ -87,7 +105,8 @@ public static class RotationPlanner
         }
 
         int leftover = total - (assigned + distributed);
-        var order = Enumerable.Range(0, n).OrderByDescending(i => remainders[i]).ThenByDescending(i => sugar[i]).ToList();
+        var order = Enumerable.Range(0, n).Where(i => inRotation.Contains(i))
+                              .OrderByDescending(i => remainders[i]).ThenByDescending(i => sugar[i]).ToList();
         int guard = 0;
         while (leftover > 0 && guard < n * MAX_PER_PLAYER)
         {
@@ -100,7 +119,7 @@ public static class RotationPlanner
                 leftover--;
                 gave = true;
             }
-            if (!gave) break;   // todo el mundo en el tope
+            if (!gave) break;   // toda la rotación en el tope
             guard++;
         }
 
