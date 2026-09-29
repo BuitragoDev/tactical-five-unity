@@ -652,6 +652,7 @@ public partial class DatabaseManager : MonoBehaviour
         bool addedGuaranteed = AddColumnIfMissing("players", "guaranteed_years", "guaranteed_years INTEGER DEFAULT 0");
         AddColumnIfMissing("players", "has_team_option", "has_team_option INTEGER DEFAULT 0");
         AddColumnIfMissing("players", "has_player_option", "has_player_option INTEGER DEFAULT 0");
+        AddColumnIfMissing("players", "waived_game_day", "waived_game_day INTEGER DEFAULT -1");
         if (addedGuaranteed)
             _db.Execute("UPDATE players SET guaranteed_years = contract_years WHERE contract_years > 0");
 

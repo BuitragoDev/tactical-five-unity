@@ -43,6 +43,9 @@ public class PlayerData
     public int morale { get; set; } = 50;
     public int fisico { get; set; } = 99;
     public int on_trade_block { get; set; }
+    /// <summary>Jornada en la que el jugador fue rescindido (buyout) y quedó libre; -1 = no aplica.
+    /// Mientras sea ≥ 0 su precio de mercado es el mínimo (mercado de buyout).</summary>
+    public int waived_game_day { get; set; } = -1;
     public int rings { get; set; }
     public int finals_mvps { get; set; }
     public int finals_played { get; set; }

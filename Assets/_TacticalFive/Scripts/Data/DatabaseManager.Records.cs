@@ -3253,7 +3253,7 @@ public partial class DatabaseManager
 
         // 7e. Reset del estado transitorio de temporada: lesiones, fatiga, trade block,
         // química y confianza no deben viajar entre temporadas.
-        _db.Execute("UPDATE players SET injury_days = 0, injury_type = '', treated = 0, fisico = 99, on_trade_block = 0");
+        _db.Execute("UPDATE players SET injury_days = 0, injury_type = '', treated = 0, fisico = 99, on_trade_block = 0, waived_game_day = -1");
         _db.Execute("UPDATE teams SET team_chemistry = 50");
         _db.Execute("UPDATE managers SET fan_confidence = 50");
 

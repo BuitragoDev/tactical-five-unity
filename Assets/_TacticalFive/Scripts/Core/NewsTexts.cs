@@ -266,6 +266,16 @@ public static class NewsTexts
 
     // ── TEMPORADA / MORAL ──
 
+    /// <summary>Fichaje de un jugador rescindido por otra franquicia (mercado de buyout).</summary>
+    public static string MercadoBuyout(string playerName, string teamName)
+    {
+        return $"{playerName} ya tiene nuevo equipo: firma con {teamName} por el mínimo tras su rescisión.\n\n" +
+            "El jugador quedó libre después del acuerdo de rescisión con su anterior equipo y llega para reforzar " +
+            "la rotación en el tramo decisivo de la temporada.\n\n" +
+            $"La operación es una oportunidad de mercado: {teamName} suma talento a coste mínimo y el jugador " +
+            "busca relanzar su carrera en un proyecto competitivo.";
+    }
+
     public static string Bienvenida(string teamName, string playerName, int ovr)
     {
         return $"¡Bienvenido al {teamName}, {playerName}!\n\n" +

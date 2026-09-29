@@ -295,6 +295,25 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
   motor (QN sigue con las del resto de la liga).
 
+## Mercado de buyout (rescindidos)
+
+- **Al rescindir** (buyout) un jugador pasa a la agencia libre con **contrato a 0** y su nuevo
+  precio es el **mínimo de liga**: el equipo que le corta sigue pagando el resto como
+  `dead_money` (stretch), igual que en la NBA. Se marca `players.waived_game_day` con la
+  jornada de la rescisión.
+- **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el
+  lote de fondo): a partir de esa jornada, el mejor destino —**contender &gt; balanced &gt;
+  rebuild**; a igual estrategia, el equipo con menos jugadores en su posición y luego el de
+  mejor media— le firma **por el mínimo** (hueco de plantilla y encaje en
+  `TradeHelper.CanAISignExternal`), genera el `TradeData` de agencia libre y una **noticia**
+  ("Mercado de buyout: X firma con Y").
+- **Fichajes de la IA con excepciones:** tanto el pase de estrellas como el general usan la
+  regla completa (`CanAISignExternal`: espacio de tope → MLE → mínimo) y **asignan el salario
+  nuevo** al firmar. Antes el pase de estrellas exigía espacio de tope puro (nadie sobre el
+  cap podía fichar) y heredaba el salario viejo (bombas de nómina).
+- La marca `waived_game_day` se limpia al firmar (`MovePlayerToTeam`, ofertas aceptadas) y en
+  el rollover.
+
 ## Rivalidades y dinastías
 
 - **Registro de series:** cada serie de playoffs se guarda **al cerrarse** en `playoff_series`

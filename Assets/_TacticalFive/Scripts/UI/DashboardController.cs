@@ -2662,6 +2662,7 @@ using System.Threading.Tasks;
                     player.has_team_option = offer.has_team_option;
                     player.has_player_option = offer.has_player_option;
                     player.is_two_way = offer.is_two_way;
+                    player.waived_game_day = -1;
                     player.seasons_with_team = 1;
                     DatabaseManager.Instance.AssignJerseyNumber(player, _myTeam.id);
                     DatabaseManager.Instance.UpdatePlayer(player);
@@ -5176,6 +5177,7 @@ using System.Threading.Tasks;
         db.BeginTransaction();
         try
         {
+            ProcessBuyoutMarket(gameDay);
             ProcessAITransfers(gameDay);
             ProcessStarFreeAgentSignings(gameDay);
             ProcessAIRenewals();
@@ -5357,6 +5359,96 @@ using System.Threading.Tasks;
         return false;
     }
 
+    /// <summary>
+    /// Mercado de buyout: los jugadores rescindidos que siguen libres reciben destino de la
+    /// IA en cuanto pasa la jornada de su rescisión. Firman por el mínimo y se genera noticia.
+    /// Se ejecuta en el lote de fondo (conexión ambient), antes de los demás pases de FA.
+    /// </summary>
+    void ProcessBuyoutMarket(int gameDay)
+    {
+        if (_season == null || _myTeam == null) return;
+
+        var waived = DatabaseManager.Instance.GetFreeAgents()
+            .Where(p => BuyoutMarketRules.CanSignOn(p.waived_game_day, gameDay))
+            .OrderByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+        if (waived.Count == 0) return;
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long minSalary = BuyoutMarketRules.WaivedSalary(settings?.minimum_salary ?? 0);
+        var teams = DatabaseManager.Instance.GetAllTeams().Where(t => t.id != _myTeam.id).ToList();
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        foreach (var p in waived)
+        {
+            var candidates = new List<BuyoutCandidate>();
+            foreach (var t in teams)
+            {
+                var roster = DatabaseManager.Instance.GetPlayersByTeam(t.id);
+                long payroll = roster.Sum(x => x.salary);
+                bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_ROSTER
+                            && TradeHelper.CanAISignExternal(payroll, minSalary, settings);
+
+                candidates.Add(new BuyoutCandidate
+                {
+                    teamId = t.id,
+                    strategy = GetTeamStrategy(t.id),
+                    teamAvg = roster.Count > 0 ? (float)roster.Average(x => x.GetCalculatedAverage()) : 0f,
+                    samePosCount = roster.Count(x => x.position == p.position),
+                    hasRoom = hasRoom
+                });
+            }
+
+            int destination = BuyoutMarketRules.BestDestination(candidates);
+            if (destination <= 0) continue;
+
+            var team = teams.FirstOrDefault(t => t.id == destination);
+            if (team == null) continue;
+
+            p.team_id = team.id;
+            p.last_team_id = team.id;
+            p.salary = minSalary;
+            int years = p.age > 35 ? 1 : p.age > 32 ? 2 : 3;
+            p.contract_years = years;
+            p.guaranteed_years = years;
+            p.has_team_option = 0;
+            p.has_player_option = 0;
+            p.waived_game_day = -1;
+            DatabaseManager.Instance.AssignJerseyNumber(p, team.id);
+            DatabaseManager.Instance.UpdatePlayer(p);
+
+            DatabaseManager.Instance.InsertTrade(new TradeData
+            {
+                season_id = _season.id,
+                game_day = gameDay,
+                game_date = _season.current_date,
+                team_id_from = 0,
+                team_id_to = team.id,
+                player_id = p.id,
+                trade_type = "free_agent"
+            });
+
+            string playerName = $"{p.first_name} {p.last_name}";
+            DatabaseManager.Instance.AddMessage(new MessageData
+            {
+                manager_id = _manager.id,
+                sender_type = 2,
+                sender_id = 0,
+                title = $"Mercado de buyout: {playerName} firma con {team.name}",
+                body = NewsTexts.MercadoBuyout(playerName, team.name),
+                game_day = gameDay,
+                game_date = _season.current_date,
+                created_at = now,
+                date_sent = now,
+                is_read = 0,
+                category = NewsCategory.LIGA,
+                news_type = NewsType.FICHAJE
+            });
+
+            Debug.Log($"[BuyoutMarket] {team.name} firma a {playerName} (OVR {p.GetCalculatedAverage()}) por el mínimo");
+        }
+    }
+
     void ProcessStarFreeAgentSignings(int gameDay)
     {
         if (_season == null) return;
@@ -5369,7 +5461,6 @@ using System.Threading.Tasks;
         if (stars.Count == 0) return;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         var allTeams = DatabaseManager.Instance.GetAllTeams()
             .Where(t => t.id != _myTeam.id)
             .ToList();
@@ -6001,7 +6092,10 @@ using System.Threading.Tasks;
             if (_aiRng.Next(0, 100) >= chance) continue;
 
             // Los two-way no computan contra el cap (igual que para el usuario).
-            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY : player.salary + 2_000_000;
+            long minSalary = leagueSettings?.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
+            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY
+                           : player.waived_game_day >= 0 ? minSalary      // mercado de buyout
+                           : player.salary + 2_000_000;
             if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings))
                 continue; // no cabe en el cap/excepciones: probar otro candidato
 
@@ -6020,6 +6114,7 @@ using System.Threading.Tasks;
                 player.salary = newSalary;
                 player.contract_years = years;
                 player.guaranteed_years = years;
+                player.waived_game_day = -1;
                 aiPayroll += newSalary;
             }
             DatabaseManager.Instance.AssignJerseyNumber(player, team.id);

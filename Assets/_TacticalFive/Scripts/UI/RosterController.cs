@@ -1637,6 +1637,17 @@ using System.Linq;
         _selectedPlayer.is_on_ir = 0;
         _selectedPlayer.is_two_way = 0;
         _selectedPlayer.on_trade_block = 0;
+
+        // Mercado de buyout: queda libre con contrato a 0 y su nuevo precio es el mínimo
+        // (el equipo que le rescinde sigue pagando el resto como dead money). Se marca la
+        // jornada de la rescisión para que la IA le busque equipo de inmediato.
+        long minSalary = DatabaseManager.Instance.GetLeagueSettings()?.minimum_salary ?? TradeHelper.MIN_SALARY;
+        _selectedPlayer.salary = minSalary;
+        _selectedPlayer.contract_years = 0;
+        _selectedPlayer.guaranteed_years = 0;
+        _selectedPlayer.has_team_option = 0;
+        _selectedPlayer.has_player_option = 0;
+        _selectedPlayer.waived_game_day = currentDay;
         DatabaseManager.Instance.UpdatePlayer(_selectedPlayer);
 
         // Sus hilos narrativos se cierran: ya no pertenece al equipo.
