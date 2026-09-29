@@ -111,7 +111,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 38px 32px;
+    padding: 0 32px;
     background-image: url("project://database/Assets/_TacticalFive/Art/Resources/Backgrounds/banner_premios.png");
     background-size: cover;
     background-position: center;
