@@ -371,6 +371,11 @@ public class InjuredController : UIScreenController
 
         bool hasMedico = _medico != null;
 
+        // Se agrupan las cards en filas de 3 (rejilla). El espaciado entre filas vive en la
+        // fila (clase injury-row), no en la card, para que la última fila no deje hueco.
+        const int CARDS_PER_ROW = 3;
+        VisualElement row = null;
+
         for (int i = 0; i < total; i++)
         {
             var player = _injuredPlayers[i];
@@ -701,7 +706,14 @@ public class InjuredController : UIScreenController
             card.Add(footer);
 
             cardWrapper.Add(card);
-            _injuredCards.Add(cardWrapper);
+
+            if (row == null || row.childCount >= CARDS_PER_ROW)
+            {
+                row = new VisualElement();
+                row.AddToClassList("injury-row");
+                _injuredCards.Add(row);
+            }
+            row.Add(cardWrapper);
         }
 
         // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
