@@ -83,7 +83,7 @@
                             <ui:Label class="th-season" text="TEMPORADA" />
                             <ui:Label class="th-team" text="EQUIPO" />
                         <ui:Label class="th-gp" text="PJ" />
-                        <ui:Label class="th-mp" text="MP" />
+                        <ui:Label class="th-mp" text="MIN" />
                         <ui:Label class="th-pts" text="PTS" />
                             <ui:Label class="th-reb" text="REB" />
                             <ui:Label class="th-ast" text="AST" />
