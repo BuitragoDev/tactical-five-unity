@@ -182,7 +182,7 @@
     flex-direction: column;
     flex-grow: 1;
     min-height: 0;
-    height: 336px;
+    height: 260px;
     overflow: hidden;
     position: relative;
 }
