@@ -1806,6 +1806,11 @@ using System.Threading.Tasks;
         {
             homePlayers = BuildAllStarRoster("East");
             awayPlayers = BuildAllStarRoster("West");
+            // El All-Star es una exhibición: no debe arrastrar la rotación de los equipos
+            // reales. Sin esto, los convocados con minutos fijados en su equipo (0 incluido)
+            // entran en modo strict y el resto se queda sin jugar.
+            foreach (var p in homePlayers) p.rotation_minutes = -1;
+            foreach (var p in awayPlayers) p.rotation_minutes = -1;
         }
         else
         {
