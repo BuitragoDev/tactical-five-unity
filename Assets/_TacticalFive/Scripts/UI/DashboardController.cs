@@ -9178,6 +9178,10 @@ List<int> offeredPickIds = new List<int>();
         var roster = new List<PlayerData>();
         var usedIds = new HashSet<int>();
 
+        // Por posición se toman los 3 mejores por valoración: el 1º de cada puesto es titular
+        // y el 2º/3º suplentes. Los 5 titulares (mejor B/E/A/AP/P) van primero para que
+        // `Take(5)` y `SaveAllStarRoster` (i < 5) los identifiquen correctamente.
+        var byPosition = new Dictionary<string, List<PlayerData>>();
         foreach (var pos in PositionCodes.Order)
         {
             var selected = candidates
@@ -9187,12 +9191,18 @@ List<int> offeredPickIds = new List<int>();
                 .ThenByDescending(p => p.overall)
                 .Take(3)
                 .ToList();
-            foreach (var p in selected)
-            {
-                usedIds.Add(p.id);
-                roster.Add(p);
-            }
+            byPosition[pos] = selected;
+            foreach (var p in selected) usedIds.Add(p.id);
         }
+
+        // 5 titulares: el mejor de cada posición principal.
+        foreach (var pos in PositionCodes.Order)
+            if (byPosition[pos].Count > 0) roster.Add(byPosition[pos][0]);
+
+        // Suplentes: el 2º/3º de cada posición.
+        foreach (var pos in PositionCodes.Order)
+            for (int i = 1; i < byPosition[pos].Count; i++)
+                roster.Add(byPosition[pos][i]);
 
         // Relleno si alguna posición no llega a 3 (por valoración, luego overall).
         if (roster.Count < 15)
