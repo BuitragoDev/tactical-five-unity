@@ -363,7 +363,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(122, 138, 170);
-    margin-top: 4px;
+    margin-top: 0;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
