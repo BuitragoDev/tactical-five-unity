@@ -28,14 +28,19 @@
 
                 <!-- LEFT PANEL -->
                 <ui:VisualElement class="training-left">
-                    <ui:ScrollView name="TrainingScroll" class="training-scroll">
-                        <ui:VisualElement class="training-section">
-                            <ui:VisualElement class="training-section-header">
-                                <ui:Label class="training-section-title" text="PLANTILLA" />
+                    <ui:VisualElement class="training-scroll-row">
+                        <ui:VisualElement name="TrainingScrollViewport" class="training-scroll-viewport">
+                            <ui:VisualElement name="TrainingScrollContent" class="training-section">
+                                <ui:VisualElement class="training-section-header">
+                                    <ui:Label class="training-section-title" text="PLANTILLA" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="TrainingBody" class="training-section-body training-cards-grid" />
                             </ui:VisualElement>
-                            <ui:VisualElement name="TrainingBody" class="training-section-body training-cards-grid" />
                         </ui:VisualElement>
-                    </ui:ScrollView>
+                        <ui:VisualElement name="TrainingScrollTrack" class="training-scrollbar">
+                            <ui:VisualElement name="TrainingScrollThumb" class="training-scrollbar-thumb" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- RIGHT PANEL -->

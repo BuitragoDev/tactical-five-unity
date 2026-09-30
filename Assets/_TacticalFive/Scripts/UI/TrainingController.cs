@@ -18,6 +18,7 @@ using System.Linq;
 
     // Left: player list
     private VisualElement _trainingBody;
+    private CustomScrollbar.Handle _rosterScrollBar;
 
     // Right
     private VisualElement _trainingRightBody;
@@ -99,6 +100,14 @@ using System.Linq;
 
         _trainingBody = _root.Q<VisualElement>("TrainingBody");
         _trainingRightBody = _root.Q<VisualElement>("TrainingRightBody");
+
+        // Barra de scroll propia para la lista de plantilla (se re-enlaza en cada visita).
+        var rosterViewport = _root.Q<VisualElement>("TrainingScrollViewport");
+        var rosterContent = _root.Q<VisualElement>("TrainingScrollContent");
+        var rosterTrack = _root.Q<VisualElement>("TrainingScrollTrack");
+        var rosterThumb = _root.Q<VisualElement>("TrainingScrollThumb");
+        _rosterScrollBar = CustomScrollbar.Bind(rosterViewport, rosterContent, rosterTrack, rosterThumb);
+
         _asistenteCard = _root.Q<VisualElement>("AsistenteCard");
         _noAsistente = _root.Q<VisualElement>("NoAsistente");
         _attrPanel = _root.Q<VisualElement>("TrainingAttrPanel");
@@ -240,6 +249,9 @@ using System.Linq;
         }
 
         _trainingBody.Add(grid);
+
+        // Recalcula la barra con la lista reconstruida.
+        CustomScrollbar.Reset(_rosterScrollBar);
     }
 
     VisualElement CreatePlayerCard(PlayerData player)
