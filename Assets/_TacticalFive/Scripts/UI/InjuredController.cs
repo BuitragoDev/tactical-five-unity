@@ -193,7 +193,10 @@ public class InjuredController : UIScreenController
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuLesionados")?.AddToClassList("nav-submenu-item--active");
         _treatmentResultOverlay.style.display = DisplayStyle.None;
-        _forceReturnOverlay.style.display = DisplayStyle.None;
+        // El modal de alta forzada se controla por clases del tema (modal-overlay--visible
+        // + modal-box--visible); al refrescar se limpian ambas.
+        _forceReturnOverlay.RemoveFromClassList("modal-overlay--visible");
+        _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.RemoveFromClassList("modal-box--visible");
     }
 
     protected override void RefreshHeader()
@@ -662,13 +665,21 @@ public class InjuredController : UIScreenController
                 }
                 buttons.Add(treatBtn);
 
-                // E2: alta forzada (volver antes de tiempo). Desde la IR solo si cabe en la plantilla.
+                // E2: alta forzada (volver antes de tiempo). Desde la IR solo si cabe en la
+                // plantilla; con ≤1 día restante no tiene sentido (el riesgo no compensa).
                 var forceBtn = new Button();
                 forceBtn.AddToClassList("btn-card-force");
                 bool forceBlocked = onIR && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER;
+                bool tooClose = player.injury_days <= 1;
                 if (forceBlocked)
                 {
                     forceBtn.text = "PLANTILLA LLENA";
+                    forceBtn.AddToClassList("btn-card-no-apt--disabled");
+                    forceBtn.SetEnabled(false);
+                }
+                else if (tooClose)
+                {
+                    forceBtn.text = "SIN FORZAR";
                     forceBtn.AddToClassList("btn-card-no-apt--disabled");
                     forceBtn.SetEnabled(false);
                 }
@@ -836,6 +847,11 @@ public class InjuredController : UIScreenController
     void OpenForceReturnModal(PlayerData player)
     {
         if (player == null || player.injury_days <= 0) return;
+
+        // Realista: no tiene sentido "forzar" un alta a falta de 1 día (el riesgo asumido
+        // no compensa). El botón se deshabilita en la card con el mismo criterio.
+        if (player.injury_days <= 1) return;
+
         _forceReturnPlayer = player;
 
         var def = InjuryCatalog.ByName(player.injury_type);
@@ -848,12 +864,27 @@ public class InjuredController : UIScreenController
         _forceReturnDiag.text = $"Diagn\u00f3stico: {player.injury_type} ({InjuryCatalog.SeverityLabel(sev)}) \u2014 {player.injury_days} d\u00edas restantes";
         _forceReturnRisk.text = $"Riesgo de reca\u00edda asumido: {risk}%";
 
-        _forceReturnOverlay.style.display = DisplayStyle.Flex;
+        // Advertencia visual según el riesgo: verde (<25), dorado (25-49), rojo (≥50).
+        _forceReturnRisk.RemoveFromClassList("modal-paragraph--highlight");
+        _forceReturnRisk.RemoveFromClassList("force-return-risk--low");
+        _forceReturnRisk.RemoveFromClassList("force-return-risk--mid");
+        _forceReturnRisk.RemoveFromClassList("force-return-risk--high");
+        if (risk >= 50)
+            _forceReturnRisk.AddToClassList("force-return-risk--high");
+        else if (risk >= 25)
+            _forceReturnRisk.AddToClassList("force-return-risk--mid");
+        else
+            _forceReturnRisk.AddToClassList("force-return-risk--low");
+
+        _forceReturnOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _forceReturnOverlay.AddToClassList("modal-overlay--visible");
+        _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
     }
 
     void CloseForceReturnModal()
     {
-        _forceReturnOverlay.style.display = DisplayStyle.None;
+        _forceReturnOverlay.RemoveFromClassList("modal-overlay--visible");
+        _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.RemoveFromClassList("modal-box--visible");
         _forceReturnPlayer = null;
     }
 

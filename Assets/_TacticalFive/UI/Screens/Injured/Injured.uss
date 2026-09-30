@@ -677,6 +677,17 @@
     overflow: hidden;
 }
 
+/* Advertencia del riesgo de recaída en el modal de alta forzada */
+.force-return-risk--low {
+    color: rgb(100, 200, 140);
+}
+.force-return-risk--mid {
+    color: rgb(212, 160, 23);
+}
+.force-return-risk--high {
+    color: rgb(230, 120, 100);
+}
+
 .injured-modal-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 34px;
