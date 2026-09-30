@@ -460,7 +460,7 @@
 
 .card-pronostico {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(150, 162, 190);
     letter-spacing: 1px;
     margin-top: 2px;
