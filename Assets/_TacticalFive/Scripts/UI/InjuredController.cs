@@ -665,19 +665,20 @@ public class InjuredController : UIScreenController
                 }
                 buttons.Add(treatBtn);
 
-                // E2: alta forzada (volver antes de tiempo). Desde la IR solo si cabe en la
-                // plantilla; con ≤1 día restante no tiene sentido (el riesgo no compensa).
+                // E2: alta forzada (volver antes de tiempo). Solo se permite entre 2 y 7 días
+                // restantes (regla InjuryHelper.CanForceReturn); fuera de ese rango "SIN FORZAR".
+                // Desde la IR además debe caber en la plantilla.
                 var forceBtn = new Button();
                 forceBtn.AddToClassList("btn-card-force");
                 bool forceBlocked = onIR && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER;
-                bool tooClose = player.injury_days <= 1;
+                bool canForce = InjuryHelper.CanForceReturn(player.injury_days);
                 if (forceBlocked)
                 {
                     forceBtn.text = "PLANTILLA LLENA";
                     forceBtn.AddToClassList("btn-card-no-apt--disabled");
                     forceBtn.SetEnabled(false);
                 }
-                else if (tooClose)
+                else if (!canForce)
                 {
                     forceBtn.text = "SIN FORZAR";
                     forceBtn.AddToClassList("btn-card-no-apt--disabled");
@@ -848,9 +849,8 @@ public class InjuredController : UIScreenController
     {
         if (player == null || player.injury_days <= 0) return;
 
-        // Realista: no tiene sentido "forzar" un alta a falta de 1 día (el riesgo asumido
-        // no compensa). El botón se deshabilita en la card con el mismo criterio.
-        if (player.injury_days <= 1) return;
+        // Solo forzable entre 2 y 7 días restantes (regla pura).
+        if (!InjuryHelper.CanForceReturn(player.injury_days)) return;
 
         _forceReturnPlayer = player;
 
@@ -859,10 +859,13 @@ public class InjuredController : UIScreenController
             ? def.severity
             : InjuryCatalog.SeverityOf(player.injury_total_days > 0 ? player.injury_total_days : player.injury_days);
         int risk = InjuryHelper.ForceReturnRisk(player.injury_days, sev);
+        int perGame = InjuryHelper.RelapseChancePercent(risk, player.fisico);
 
         _forceReturnWho.text = $"{player.first_name} {player.last_name}";
         _forceReturnDiag.text = $"Diagn\u00f3stico: {player.injury_type} ({InjuryCatalog.SeverityLabel(sev)}) \u2014 {player.injury_days} d\u00edas restantes";
-        _forceReturnRisk.text = $"Riesgo de reca\u00edda asumido: {risk}%";
+        // B1: además del riesgo nominal, se muestra la probabilidad REAL por partido.
+        _forceReturnRisk.text =
+            $"Riesgo asumido: {risk}% nominal \u00b7 {perGame}% de reca\u00edda por partido jugado";
 
         // Advertencia visual según el riesgo: verde (<25), dorado (25-49), rojo (≥50).
         _forceReturnRisk.RemoveFromClassList("modal-paragraph--highlight");

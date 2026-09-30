@@ -78,6 +78,33 @@ public class InjuryHelperTests
     }
 
     [Test]
+    public void RelapseChancePerGame_HighRiskIsNotablyHigh()
+    {
+        // B2: un 90% nominal debe dar una probabilidad por partido alta (~0.54), no ~0.31.
+        float chance = InjuryHelper.RelapseChancePerGame(90, 90);
+        Assert.That(chance, Is.GreaterThanOrEqualTo(0.5f));
+        Assert.That(chance, Is.LessThanOrEqualTo(0.75f));
+    }
+
+    [Test]
+    public void RelapseChancePercent_RoundsCorrectly()
+    {
+        Assert.That(InjuryHelper.RelapseChancePercent(0, 90), Is.EqualTo(0));
+        Assert.That(InjuryHelper.RelapseChancePercent(90, 90), Is.InRange(50, 75));
+    }
+
+    [Test]
+    public void CanForceReturn_OnlyBetweenTwoAndSevenDays()
+    {
+        Assert.That(InjuryHelper.CanForceReturn(0), Is.False);
+        Assert.That(InjuryHelper.CanForceReturn(1), Is.False, "con 1 día no compensa");
+        Assert.That(InjuryHelper.CanForceReturn(2), Is.True);
+        Assert.That(InjuryHelper.CanForceReturn(7), Is.True);
+        Assert.That(InjuryHelper.CanForceReturn(8), Is.False, "más de 7 días = demasiado grave");
+        Assert.That(InjuryHelper.CanForceReturn(90), Is.False);
+    }
+
+    [Test]
     public void RelapseChancePerGame_HigherWhenTired()
     {
         float fresh = InjuryHelper.RelapseChancePerGame(50, 90);

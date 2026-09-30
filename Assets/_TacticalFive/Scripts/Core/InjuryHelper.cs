@@ -31,6 +31,16 @@ public static class InjuryHelper
         return Math.Max(0, next);
     }
 
+    /// <summary>Máximo de días restantes que aún permite forzar el alta (más que eso = demasiado grave).</summary>
+    public const int MAX_FORCE_RETURN_DAYS = 7;
+
+    /// <summary>
+    /// ¿Se puede forzar el alta con estos días restantes? Solo entre 2 y 7 días: con 0-1 no
+    /// compensa (ya se recupera) y con más de 7 la lesión es demasiado grave para arriesgarse.
+    /// </summary>
+    public static bool CanForceReturn(int daysRemaining)
+        => daysRemaining >= 2 && daysRemaining <= MAX_FORCE_RETURN_DAYS;
+
     /// <summary>Riesgo (0-100) que asume el jugador si se le da el alta antes de tiempo.</summary>
     public static int ForceReturnRisk(int remaining, InjurySeverity sev)
     {
@@ -39,14 +49,22 @@ public static class InjuryHelper
         return Math.Min(90, risk);
     }
 
-    /// <summary>Probabilidad extra de lesión por partido jugado con riesgo de recaída pendiente.</summary>
+    /// <summary>
+    /// Probabilidad de recaída POR PARTIDO jugado (0-1) con un riesgo pendiente. Se mantiene
+    /// por debajo del riesgo nominal (un 90% no implica caer seguro en cada partido), pero lo
+    /// bastante alta para que se note. Con físico bajo (<50) aumenta un 50%.
+    /// </summary>
     public static float RelapseChancePerGame(int risk, int fisico)
     {
         if (risk <= 0) return 0f;
-        float baseChance = risk / 100f * 0.35f;
+        float baseChance = risk / 100f * 0.6f;
         if (fisico < 50) baseChance *= 1.5f;
-        return baseChance;
+        return Math.Min(0.75f, baseChance);
     }
+
+    /// <summary>Probabilidad de recaída por partido en porcentaje (para el parte médico/UI).</summary>
+    public static int RelapseChancePercent(int risk, int fisico)
+        => (int)System.Math.Round(RelapseChancePerGame(risk, fisico) * 100f);
 
     /// <summary>Cuánto baja el riesgo cada día: descansar lo cura; jugar lo mantiene.</summary>
     public static int RiskDecayForDay(bool playedToday) => playedToday ? 10 : 25;

@@ -253,12 +253,15 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
   y se limpia la IR.
 - **Alta forzada (volver antes de tiempo):** el botón **FORZAR ALTA** (parte médico) devuelve al
   jugador de inmediato a cambio de un **riesgo de recaída** (`players.recovery_risk`, 0-100, calculado
-  con `InjuryHelper.ForceReturnRisk` a partir de los días que faltaban y la gravedad). Ese riesgo se
-  guarda en el historial como "alta_forzada". **Mientras exista riesgo**, cada partido que juega suma
-  `InjuryHelper.RelapseChancePerGame` a la probabilidad de lesionarse y, si cae, la lesión es la
-  **recaída** (`InjuryHelper.Relapse`): misma familia y una gravedad mayor (o la misma agravada +25 %
-  si ya era la peor). Descansar reduce el riesgo (`RiskDecayForDay`: −25 sin partido, −10 jugando);
-  al llegar a 0 desaparece.
+  con `InjuryHelper.ForceReturnRisk` a partir de los días que faltaban y la gravedad). **Solo se puede
+  forzar entre 2 y 7 días restantes** (`InjuryHelper.CanForceReturn`; con ≤1 día o con >7 días el botón
+  queda en **SIN FORZAR** y `ForceReturnFromInjury` lo ignora). Ese riesgo se guarda en el historial como
+  "alta_forzada". **Mientras exista riesgo**, cada partido que juega suma `InjuryHelper.RelapseChancePerGame`
+  a la probabilidad de lesionarse (`risk/100 × 0.60`, ×1.5 si `fisico < 50`, tope 0.75; el modal muestra la
+  **probabilidad real por partido** además del % nominal) y, si cae, la lesión es la **recaída**
+  (`InjuryHelper.Relapse`): misma familia y una gravedad mayor (o la misma agravada +25 % si ya era la
+  peor). El riesgo **solo puede materializarse jugando partido** (no en descanso/entrenamiento).
+  Descansar reduce el riesgo (`RiskDecayForDay`: −25 sin partido, −10 jugando); al llegar a 0 desaparece.
 - **Pantalla LESIONADOS:** lista a los lesionados **y** a los que volvieron antes de tiempo (en
   vigilancia, sin baja pero con riesgo); muestra gravedad, pronóstico, progreso y el tratamiento
   (reduce días según la reputación del médico). El riesgo pendiente también aparece en el detalle de

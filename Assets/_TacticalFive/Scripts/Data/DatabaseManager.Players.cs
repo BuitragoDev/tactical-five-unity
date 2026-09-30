@@ -135,6 +135,9 @@ public partial class DatabaseManager
     {
         if (p == null || p.injury_days <= 0) return;
 
+        // Regla: solo se puede forzar entre 2 y 7 días restantes (ver InjuryHelper).
+        if (!InjuryHelper.CanForceReturn(p.injury_days)) return;
+
         var def = InjuryCatalog.ByName(p.injury_type);
         var sev = def != null
             ? def.severity
