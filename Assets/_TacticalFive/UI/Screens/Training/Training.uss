@@ -200,8 +200,8 @@
 }
 
 .training-card-photo {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
