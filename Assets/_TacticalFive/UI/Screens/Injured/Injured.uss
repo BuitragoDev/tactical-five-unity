@@ -403,31 +403,6 @@
     color: rgb(39, 174, 96);
 }
 
-.card-severity-bar {
-    flex-direction: row;
-    flex-shrink: 0;
-}
-
-.severity-segment {
-    width: 14px;
-    height: 6px;
-    margin-right: 3px;
-    border-radius: 2px;
-    background-color: rgb(42, 51, 71);
-}
-
-.severity-segment--filled-red {
-    background-color: rgb(192, 57, 43);
-}
-
-.severity-segment--filled-orange {
-    background-color: rgb(212, 160, 23);
-}
-
-.severity-segment--filled-green {
-    background-color: rgb(39, 174, 96);
-}
-
 /* ── PARTE MÉDICO (E2): pronóstico, progreso y riesgo ── */
 
 .card-pronostico {

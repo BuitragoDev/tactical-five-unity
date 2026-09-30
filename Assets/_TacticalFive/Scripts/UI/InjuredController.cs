@@ -575,24 +575,6 @@ public class InjuredController : UIScreenController
                 sevLabel.AddToClassList("card-severity-label--severa");
             severity.Add(sevLabel);
 
-            var bar = new VisualElement();
-            bar.AddToClassList("card-severity-bar");
-            int segments = atRisk ? 4 : GetSeveritySegments(sev);
-            string segColor = atRisk ? "green" : (sev <= InjurySeverity.Moderada ? "orange" : "red");
-            for (int s = 0; s < 4; s++)
-            {
-                var seg = new VisualElement();
-                seg.AddToClassList("severity-segment");
-                if (s < segments)
-                {
-                    seg.AddToClassList(segColor == "green" ? "severity-segment--filled-green"
-                        : segColor == "orange" ? "severity-segment--filled-orange"
-                        : "severity-segment--filled-red");
-                }
-                bar.Add(seg);
-            }
-            severity.Add(bar);
-
             // Jugador que volvió antes de tiempo: se muestra su riesgo de recaída.
             if (atRisk)
             {
@@ -828,14 +810,6 @@ public class InjuredController : UIScreenController
 
         return _injuryIcons.TryGetValue("lesion", out var fallbackTex) ? fallbackTex : null;
     }
-
-    int GetSeveritySegments(InjurySeverity sev) => sev switch
-    {
-        InjurySeverity.Leve => 1,
-        InjurySeverity.Moderada => 2,
-        InjurySeverity.Grave => 3,
-        _ => 4
-    };
 
     // ── IR (RESERVA DE LESIONADOS) ──
 
