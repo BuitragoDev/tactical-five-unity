@@ -109,6 +109,11 @@ If a team has <2 available players, result is random-ish (105–125 vs 100–120
   Noticia del fin de semana (`NewsType.ALLSTAR`) y campeones visibles en **Palmarés → All-Star**.
 - **Narrativa:** los concursos usan `System.Random` con semilla (no afectan al resultado del partido,
   que sigue con `BuildAllStarRoster`).
+- **Boxscore:** el All-Star **sí persiste `player_game_stats`** con los `team_id` de conferencia
+  (`-1`/`-2` que usa su `GameData`) para que MatchDay/GameResults muestren el boxscore. Todas las
+  agregaciones de carrera/Stats filtran `game_type='regular'` (o `!= 'allstar'`), de modo que esas
+  filas no cuentan como partidos jugados ni entran en medias/carrera. No aplica récords, fatiga,
+  lesiones, moral ni finanzas.
 
 ## 4. Contracts & salary cap
 

@@ -264,8 +264,10 @@ public static class GameSimulator
         // (la pantalla Stats filtra solo temporada regular).
         // Los partidos G-League no escriben en player_game_stats: sus stats
         // viven en gleague_season_stats y las gestiona el llamador.
-        // El All-Star tampoco escribe: sus equipos no existen como team_id reales (SIM-14).
-        if (persistToDb && game.game_type != "allstar")
+        // El All-Star SÍ persiste su boxscore (con los team_id de conferencia -1/-2 que
+        // usa el GameData) para que MatchDay/GameResults lo muestren; las agregaciones de
+        // carrera/Stats filtran por game_type='regular', así que no contamina medias.
+        if (persistToDb)
         {
             DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
             // Solo se persisten los jugadores que realmente jugaron: las filas con

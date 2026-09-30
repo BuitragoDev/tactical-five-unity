@@ -9207,6 +9207,10 @@ List<int> offeredPickIds = new List<int>();
                 .ToList();
         }
 
+        if (roster.Count == 0)
+            Debug.LogError($"[Dashboard] All-Star: convocatoria vacía para la conferencia {conference}. " +
+                           "No se puede simular el partido de las estrellas.");
+
         return roster;
     }
 
