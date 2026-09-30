@@ -109,8 +109,8 @@ public class MilestoneHelperTests
     [Test]
     public void LegendCareer_HasAllMilestones()
     {
-        var legend = Career(points: 40000, rebounds: 12000, assists: 10000, steals: 2200, blocks: 1200,
-                            threes: 2400, games: 1500, dd: 600, td: 100, allStars: 20, mvps: 4,
+        var legend = Career(points: 40000, rebounds: 16000, assists: 11000, steals: 2200, blocks: 2500,
+                            threes: 3200, games: 1500, dd: 600, td: 100, allStars: 20, mvps: 4,
                             rings: 4, fmvps: 4);
 
         var reached = MilestoneHelper.Reached(legend);
