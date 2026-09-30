@@ -45,6 +45,10 @@ using System.Linq;
 
     // Tabla
     private VisualElement _trajectoryTableBody;
+    private VisualElement _trajectoryTableScrollViewport;
+    private VisualElement _trajectoryTableScrollTrack;
+    private VisualElement _trajectoryTableScrollThumb;
+    private CustomScrollbar.Handle _tableScrollBar;
     private VisualElement _trajectoryEmpty;
     private VisualElement _trajectoryStatsSection;
     private PlayerData _player;
@@ -73,12 +77,16 @@ using System.Linq;
         _trajectoryMilestones = _root.Q<VisualElement>("TrajectoryMilestones");
         _trajectoryMilestonesBody = _root.Q<VisualElement>("TrajectoryMilestonesBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
+        _trajectoryTableScrollViewport = _root.Q<VisualElement>("TrajectoryTableScrollViewport");
+        _trajectoryTableScrollTrack = _root.Q<VisualElement>("TrajectoryTableScrollTrack");
+        _trajectoryTableScrollThumb = _root.Q<VisualElement>("TrajectoryTableScrollThumb");
         _trajectoryEmpty = _root.Q<VisualElement>("TrajectoryEmpty");
         _trajectoryStatsSection = _root.Q<VisualElement>("TrajectoryStatsSection");
 
-        var scrollView = _root.Q<ScrollView>();
-        if (scrollView != null)
-            scrollView.contentContainer.style.flexGrow = 0;
+        // Barra de scroll propia de la tabla de temporadas: se re-enlaza en cada visita
+        // (Unity recrea el árbol del UIDocument al reactivar la pantalla).
+        _tableScrollBar = CustomScrollbar.Bind(_trajectoryTableScrollViewport, _trajectoryTableBody,
+                                               _trajectoryTableScrollTrack, _trajectoryTableScrollThumb);
 
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -326,6 +334,9 @@ using System.Linq;
             ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
 
         _trajectoryTableBody.Add(totalRow);
+
+        // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
+        CustomScrollbar.Reset(_tableScrollBar);
     }
 
     static Label CreateCell(string className, string text)

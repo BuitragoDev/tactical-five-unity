@@ -91,11 +91,16 @@
                             <ui:Label class="th-blk" text="TAP" />
                             <ui:Label class="th-val" text="VAL" />
                         </ui:VisualElement>
-                        <ui:ScrollView class="trajectory-table-body-scroll"
-                                       horizontal-scrolling-enabled="false"
-                                       mode="Vertical">
-                            <ui:VisualElement name="TrajectoryTableBody" class="trajectory-table-body" />
-                        </ui:ScrollView>
+                        <ui:VisualElement class="trajectory-table-body-scroll">
+                            <ui:VisualElement class="trajectory-scroll-row">
+                                <ui:VisualElement name="TrajectoryTableScrollViewport" class="trajectory-table-viewport">
+                                    <ui:VisualElement name="TrajectoryTableBody" class="trajectory-table-body" />
+                                </ui:VisualElement>
+                                <ui:VisualElement name="TrajectoryTableScrollTrack" class="trajectory-scrollbar">
+                                    <ui:VisualElement name="TrajectoryTableScrollThumb" class="trajectory-scrollbar-thumb" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
 
