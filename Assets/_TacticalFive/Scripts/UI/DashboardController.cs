@@ -1806,11 +1806,11 @@ using System.Threading.Tasks;
         {
             homePlayers = BuildAllStarRoster("East");
             awayPlayers = BuildAllStarRoster("West");
-            // El All-Star es una exhibición: no debe arrastrar la rotación de los equipos
-            // reales. Sin esto, los convocados con minutos fijados en su equipo (0 incluido)
-            // entran en modo strict y el resto se queda sin jugar.
-            foreach (var p in homePlayers) p.rotation_minutes = -1;
-            foreach (var p in awayPlayers) p.rotation_minutes = -1;
+            // Exhibición: reparto explícito de los 240 minutos entre los convocados para
+            // que jueguen todos (con la heurística por rol solo entraban 6-7). Ignora la
+            // rotación de los equipos reales.
+            AssignAllStarMinutes(homePlayers);
+            AssignAllStarMinutes(awayPlayers);
         }
         else
         {
@@ -9129,6 +9129,29 @@ List<int> offeredPickIds = new List<int>();
             elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
+    /// <summary>
+    /// Convocatoria del partido de las estrellas: los **3 mejores de cada posición por
+    /// valoración media de la temporada regular** (15 por conferencia), excluyendo a los
+    /// lesionados. Si un jugador aún no tiene partidos (valoración 0) sirve el overall como
+    /// desempate.
+    /// </summary>
+    /// <summary>
+    /// Reparto de los 240 minutos del partido de exhibición entre los convocados (todos deben
+    /// jugar). Marca `rotation_minutes` de forma vinculante para que el simulador lo respete.
+    /// </summary>
+    void AssignAllStarMinutes(List<PlayerData> players)
+    {
+        if (players == null || players.Count == 0) return;
+
+        const int TEAM_MINUTES = 240;
+        int n = players.Count;
+        int baseMin = TEAM_MINUTES / n;          // 16 con 15 jugadores
+        int remainder = TEAM_MINUTES - baseMin * n;
+
+        for (int i = 0; i < n; i++)
+            players[i].rotation_minutes = baseMin + (i < remainder ? 1 : 0);
+    }
+
     List<PlayerData> BuildAllStarRoster(string conference)
     {
         var allTeams = DatabaseManager.Instance.GetAllTeams();
@@ -9137,23 +9160,31 @@ List<int> offeredPickIds = new List<int>();
             .Select(t => t.id)
             .ToHashSet();
 
-        var allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>()
+        var candidates = DatabaseManager.Instance.Db.Table<PlayerData>()
             .Where(p => p.team_id != 0 && p.injury_days == 0 && p.g_league_assigned == 0)
-            .ToList();
-
-        var candidates = allPlayers
+            .ToList()
             .Where(p => conferenceTeamIds.Contains(p.team_id))
             .ToList();
 
-        var roster = new List<PlayerData>();
-        HashSet<int> usedIds = new();
-        var positions = PositionCodes.Order;
+        // Valoración media (rating) de la temporada regular por jugador.
+        var avgRating = new Dictionary<int, double>();
+        var gamesPlayed = new Dictionary<int, int>();
+        foreach (var s in DatabaseManager.Instance.GetSeasonPlayerStatsAggregates(_manager.id, _season.id))
+        {
+            avgRating[s.player_id] = s.gp > 0 ? (double)s.total_rating / s.gp : 0;
+            gamesPlayed[s.player_id] = s.gp;
+        }
 
-        foreach (var pos in positions)
+        var roster = new List<PlayerData>();
+        var usedIds = new HashSet<int>();
+
+        foreach (var pos in PositionCodes.Order)
         {
             var selected = candidates
                 .Where(p => p.position == pos)
-                .OrderByDescending(p => p.overall)
+                .OrderByDescending(p => avgRating.TryGetValue(p.id, out var r) ? r : 0)
+                .ThenByDescending(p => gamesPlayed.TryGetValue(p.id, out var g) ? g : 0)
+                .ThenByDescending(p => p.overall)
                 .Take(3)
                 .ToList();
             foreach (var p in selected)
@@ -9163,11 +9194,13 @@ List<int> offeredPickIds = new List<int>();
             }
         }
 
+        // Relleno si alguna posición no llega a 3 (por valoración, luego overall).
         if (roster.Count < 15)
         {
             var remaining = candidates
                 .Where(p => !usedIds.Contains(p.id))
-                .OrderByDescending(p => p.overall)
+                .OrderByDescending(p => avgRating.TryGetValue(p.id, out var r) ? r : 0)
+                .ThenByDescending(p => p.overall)
                 .Take(15 - roster.Count);
             roster.AddRange(remaining);
         }
