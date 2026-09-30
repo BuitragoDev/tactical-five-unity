@@ -48,7 +48,7 @@ public static class PlayByPlayNarrator
         if (desc.Contains("tiros libres")) return ("ft", desc);
         if (desc.Contains("rebote") || desc.Contains("Rebote")) return ("rebound", desc);
         if (desc.Contains("anota y añade")) return ("andone", desc);
-        if (desc.Contains("anota de dos")) return ("two", desc);
+        if (desc.Contains("anota de 2")) return ("two", desc);
         if (desc.Contains("encesta")) return ("score", desc);
         return ("other", desc);
     }
@@ -79,12 +79,12 @@ public static class PlayByPlayNarrator
         switch (tag)
         {
             case "three":
-                return Mix(roll, "¡Desde más allá del arco!", "¡Lluvia de tres!", "¡Y la muñeca, caliente!",
+                return Mix(roll, "¡Desde más allá del arco!", "¡Lluvia de 3!", "¡Y la muñeca, caliente!",
                                  "¡Le sobra tiempo!", "¡Bomba desde el perímetro!");
             case "two":
                 return Mix(roll, "", "", "¡Con autoridad!", "¡Qué elegancia!", "¡Se la puso donde quiso!");
             case "andone":
-                return Mix(roll, "¡Y hay falta!", "¡Canasta y libre!", "¡Jugada de tres puntos!");
+                return Mix(roll, "¡Y hay falta!", "¡Canasta y libre!", "¡Jugada de 3 puntos!");
             case "block":
                 return Mix(roll, "¡A volar!", "¡Eso no pasa!", "¡Manos de hierro!", "¡Se lo comió!");
             case "turnover":

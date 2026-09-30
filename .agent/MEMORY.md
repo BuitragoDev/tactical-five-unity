@@ -118,9 +118,9 @@
 
 ## 9. Audit warnings that must remain visible
 
-- `FastSimRoutine` yields while the day transaction is open; do not describe FastSim as fully atomic until the boundary is fixed.
+- ~~`FastSimRoutine` yields while the day transaction is open~~ — **resuelto (B38):** la fase simulación + bookkeeping ya no contiene `yield return` entre `BeginTransaction` y `Commit`; vive en una transacción de un solo frame (el respiro de la UI en fast sim se da antes de abrirla).
 - `BuildTemplateDatabaseInBackground` temporarily swaps the shared `_dbField` from a worker thread; isolate template generation before allowing concurrent editor/save operations.
-- `StartNewSeason` currently skips rookies in its progression loop.
+- ~~`StartNewSeason` currently skips rookies in its progression loop~~ — **resuelto (B41):** los rookies de primer año envejecen y progresan; solo se saltan el decremento de contrato (`RolloverRules.ShouldDecrementContract`).
 - Team ratings include injured players and the local bonus is gated by the user's-home flag in the current Dashboard path.
 - Luxury-tax records are negative while expense aggregation treats expense amounts as positive.
 

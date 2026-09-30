@@ -34,11 +34,10 @@ _(none open — see resolved B1 below)_
 - **Fix [F]:** the previous real season is resolved by manager; ratings load from raw stats or archived per-season aggregates; the winner is upserted into `season_records` during `SaveSeasonEndRecords`.
 - **References:** `DatabaseManager.Records.cs` (`GetMostImprovedPlayer`, `GetSeasonPlayerRatings`, `SaveSeasonEndRecords`), `PlayerAwardsController.cs`.
 
-### B38. `FastSim` yields inside the day transaction — **OPEN**
+### B38. `FastSim` yields inside the day transaction — **DONE**
 - **Type:** data integrity / coroutine lifecycle.
-- **Detail [F]:** `DashboardController.FastSimRoutine` / `ProcessGameDayRoutine(fastSim:true)` contains `yield return` between `BeginTransaction` and `Commit` (`DashboardController.cs`, around lines 969, 999, 1019, 1169).
-- **Impact:** the connection remains in an open transaction across frames; exceptions, navigation or concurrent DB work can leave locks or partial state. This contradicts the intended atomic day pipeline.
-- **Fix:** keep simulation/bookkeeping transaction work synchronous within one frame, or split into precomputed data plus a short commit transaction with explicit cancellation/rollback tests.
+- **Detail [F]:** `ProcessGameDayRoutine` contenía `yield return null` (solo en `fastSim`) entre `BeginTransaction` y `Commit` en el bucle de simulación y el de química.
+- **Fix:** se eliminaron esos yields: la fase simulación + bookkeeping es síncrona y vive en una **única transacción de un solo frame**; el respiro de la UI en simulación rápida se da **antes** de abrir la transacción. El `finally` sigue revirtiendo ante aborto (`StopAllCoroutines` en `OnDisable`), y los errores hacen `Rollback` explícito. Ya no hay `yield return` entre `BeginTransaction` y `Commit`.
 
 ### B39. Template build replaces shared `_dbField` from a worker thread — **DONE**
 - **Type:** race condition / persistence.
@@ -52,11 +51,10 @@ _(none open — see resolved B1 below)_
 - **Impact:** sorting, AI evaluation and UI ratings can disagree with the attribute grid by one or more points after mentoring.
 - **Fix:** ✅ `PlayerData.GetCalculatedAverage()` redondea y capa por `potential`; `RecalculateOverall()` se llama tras cada mutación (mentoring/progresión/entrenamiento/G-League). Tests `PlayerDataTests` + `PlayerProgressionTests` (`SEA-08/09`).
 
-### B41. Rookies skipped by season progression — **OPEN (parcial)**
+### B41. Rookies skipped by season progression — **DONE**
 - **Type:** gameplay correctness.
-- **Detail [F]:** `StartNewSeason` continues before aging/contract progression for `is_rookie == 1` (`DatabaseManager.Records.cs:2632-2638`).
-- **Impact:** rookie age, contract years and team tenure do not advance through the rollover path. *(Re-verificado 2026-09: `DatabaseManager.Records.cs:2744` sigue haciendo `continue` con `is_rookie == 1`.)*
-- **Fix:** separate “newly drafted this season” handling from normal next-season progression and add a two-season regression test.
+- **Detail [F]:** `StartNewSeason` hacía `continue` con `is_rookie == 1` antes de envejecer, así que el rookie no cumplía años ni progresaba en su primer año.
+- **Fix:** regla pura `RolloverRules.ShouldDecrementContract(isFirstYearRookie)` (contrato de rookie no decrementa el primer año) aplicada en `StartNewSeason` y `NewSeasonController.CheckRosterAndStart`. El rookie **sí envejece, progresa y recalcula overall**; solo se salta el decremento de contrato. +4 tests (`RolloverRulesTests`).
 
 ### B42. Local advantage and injury rating use wrong population — **DONE**
 - **Type:** simulation correctness.

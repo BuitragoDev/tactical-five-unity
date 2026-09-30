@@ -1130,7 +1130,12 @@ using System.Threading.Tasks;
             if (fastSim) yield return null;
 
             // Paso 2: scouts, entrenamiento y renovaciones
-            db.BeginTransaction();
+        // B38: la fase de simulación + bookkeeping es síncrona y se ejecuta dentro de una
+        // única transacción en un solo frame (sin yields entre BeginTransaction y Commit).
+        // El respiro de la UI en simulación rápida se da AQUÍ, antes de abrirla.
+        if (fastSim) yield return null;
+
+        db.BeginTransaction();
             try
             {
                 ProcessScouts();
@@ -1334,7 +1339,6 @@ using System.Threading.Tasks;
                 HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
                 yield break;
             }
-            if (fastSim) yield return null;
         }
 
         // Recalculate team chemistry for all teams involved today
@@ -1354,7 +1358,6 @@ using System.Threading.Tasks;
                 HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
                 yield break;
             }
-            if (fastSim) yield return null;
         }
 
         try

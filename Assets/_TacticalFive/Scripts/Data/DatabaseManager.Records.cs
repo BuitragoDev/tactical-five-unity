@@ -3086,11 +3086,9 @@ public partial class DatabaseManager
 
         foreach (var p in remaining)
         {
-            if (p.is_rookie == 1)
-            {
-                _db.Update(p);
-                continue;
-            }
+            // B41: un rookie en su primer año envejece y progresa como cualquier otro;
+            // lo único que NO hace es decrementar su contrato de rookie (todavía).
+            bool isFirstYearRookie = p.is_rookie == 1;
 
             p.age += 1;
 
@@ -3210,8 +3208,13 @@ public partial class DatabaseManager
                 _db.Update(p);
                 continue;
             }
-            p.contract_years = System.Math.Max(0, p.contract_years - 1);
-            p.guaranteed_years = System.Math.Max(0, p.guaranteed_years - 1);
+            // B41: el contrato de rookie no decrementa en su primer año (pero el jugador
+            // ya envejeció y progresó arriba).
+            if (RolloverRules.ShouldDecrementContract(isFirstYearRookie))
+            {
+                p.contract_years = System.Math.Max(0, p.contract_years - 1);
+                p.guaranteed_years = System.Math.Max(0, p.guaranteed_years - 1);
+            }
             if (p.contract_years <= 0)
             {
                 p.contract_years = 0;
