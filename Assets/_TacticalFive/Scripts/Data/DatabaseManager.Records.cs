@@ -561,6 +561,54 @@ public partial class DatabaseManager
         if (rows.Count > 0) _db.InsertAll(rows);
     }
 
+    // ── ALL-STAR WEEKEND (E5): CONCURSOS ──────────────────
+
+    /// <summary>Guarda un evento del All-Star Weekend y su lista de participantes.</summary>
+    public void SaveAllStarEvent(AllStarEventData evt, List<AllStarEventParticipantData> participants)
+    {
+        if (!EnsureDb() || evt == null) return;
+
+        _db.Execute("DELETE FROM all_star_events WHERE manager_id = ? AND season_id = ? AND event_type = ?",
+            evt.manager_id, evt.season_id, evt.event_type);
+        _db.Insert(evt);
+
+        if (participants != null && participants.Count > 0)
+        {
+            foreach (var p in participants) p.event_id = evt.id;
+            _db.InsertAll(participants);
+        }
+    }
+
+    /// <summary>Eventos del All-Star Weekend de un manager (todas las temporadas), más recientes primero.</summary>
+    public List<AllStarEventData> GetAllStarEvents(int managerId)
+    {
+        if (!EnsureDb()) return new List<AllStarEventData>();
+        return _db.Table<AllStarEventData>()
+                  .Where(e => e.manager_id == managerId)
+                  .OrderByDescending(e => e.season_id)
+                  .ToList();
+    }
+
+    /// <summary>Participantes de un evento concreto.</summary>
+    public List<AllStarEventParticipantData> GetAllStarEventParticipants(int eventId)
+    {
+        if (!EnsureDb()) return new List<AllStarEventParticipantData>();
+        return _db.Table<AllStarEventParticipantData>()
+                  .Where(p => p.event_id == eventId)
+                  .OrderBy(p => p.rank)
+                  .ToList();
+    }
+
+    /// <summary>Eventos del All-Star Weekend ganados por un jugador (trayectoria/badge).</summary>
+    public List<AllStarEventData> GetAllStarEventWins(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return new List<AllStarEventData>();
+        return _db.Table<AllStarEventData>()
+                  .Where(e => e.winner_player_id == playerId)
+                  .OrderByDescending(e => e.season_id)
+                  .ToList();
+    }
+
     /// <summary>Temporadas en las que un jugador fue convocado al All-Star (para la trayectoria).</summary>
     public List<int> GetAllStarSeasonIds(int playerId)
     {

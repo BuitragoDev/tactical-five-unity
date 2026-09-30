@@ -79,7 +79,5 @@ public static class RetiredNumberSeeder
         ("Steve", "Nash", 13),
         // GSW
         ("Rick", "Barry", 24),
-        // MEM
-        ("Marc", "Gasol", 33),
     };
 }

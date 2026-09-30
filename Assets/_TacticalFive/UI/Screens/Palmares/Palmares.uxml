@@ -146,6 +146,8 @@
                             </ui:VisualElement>
                         </ui:VisualElement>
                         <ui:VisualElement class="palmares-right">
+                            <ui:Label class="palmares-section-title" text="CAMPEONES DE CONCURSOS" />
+                            <ui:VisualElement name="AllStarContestsBody" class="palmares-table-body" />
                             <ui:Label class="palmares-section-title" text="HISTORIAL DE ALL-STAR" />
                             <ui:VisualElement class="palmares-table-header">
                                 <ui:Label class="th-season" text="AÑO" />

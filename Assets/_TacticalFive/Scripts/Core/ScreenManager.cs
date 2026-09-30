@@ -60,6 +60,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument theCityDocument;
     [SerializeField] private UIDocument buscadorDocument;
     [SerializeField] private UIDocument gleagueDocument;
+    [SerializeField] private UIDocument allStarDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -269,6 +270,9 @@ public class ScreenManager : MonoBehaviour
                 break;
             case GameScreen.GLeague:
                 ShowOnly(gleagueDocument);
+                break;
+            case GameScreen.AllStar:
+                ShowOnly(allStarDocument);
                 break;
         }
     }

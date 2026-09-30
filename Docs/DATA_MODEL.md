@@ -134,6 +134,11 @@ Hitos de carrera alcanzados (E1). Una fila por hito y jugador; se registran una 
 `teams` añade `market_size` (0-100, tamaño de mercado: asistencia y valor de contratos; en partidas
 antiguas se rellena por reputación).
 
+### all_star_events (`AllStarEventData`) + all_star_event_participants (`AllStarEventParticipantData`)
+
+All-Star Weekend (E5): una fila por concurso y temporada (`slam_dunk` / `three_point`) con su
+campeón y puntuación, y una fila por participante (rango, puntos, `is_winner`) ligada por `event_id`.
+
 ### injury_history (`InjuryHistoryData`)
 
 Parte médico (E2): una fila por lesión cerrada (sobrevive a traspasos y temporadas).

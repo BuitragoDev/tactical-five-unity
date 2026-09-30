@@ -19,7 +19,7 @@
 ## 3. Current development state (observed)
 
 **Functional (implemented in code):**
-- Full screen set (**47 pantallas**, incl. Loading/MainMenu; navigation via `ScreenManager`; **all controllers inherit `UIScreenController`** base).
+- Full screen set (**48 pantallas**, incl. Loading/MainMenu; navigation via `ScreenManager`; **all controllers inherit `UIScreenController`** base).
 - New game (Manager / ProManager), load game (slots), editor (template DB).
 - Preseason + schedule generation; regular season; Play-In; Playoffs; season end awards; draft (with **protections + swaps**); new season loop.
 - Salary cap, Bird Rights, exceptions, aprons, hard cap flag, luxury tax (monthly `annual/12`), buyout (stretch), offers (renewal/FA, 7-day maturation, **TO/PO contract options**), AI trades (strategy-aware `TeamStrategy`), star FA signings, **trade deadline (Feb 7) with rush IA**, **S&T de FA propio**.
@@ -52,7 +52,7 @@
 | Decision | Reason (observed/deduced) |
 |---|---|
 | Single scene + `UIDocument` screens, `ScreenManager` toggling `SetActive` | All UI in one place; cheap navigation; controllers rebuild in `OnEnable` |
-| `UIScreenController` base class for all 47 controllers | Centralizes full-screen, chrome (Header/Sidebar), nav, cursors, config modal — removed ~60% boilerplate |
+| `UIScreenController` base class for all 48 controllers | Centralizes full-screen, chrome (Header/Sidebar), nav, cursors, config modal — removed ~60% boilerplate |
 | SQLite as the save/state store | Sim data is relational (teams/players/games/stats); template DB gives fast, consistent new games; avoids JSON save parsing |
 | Static utility classes for simulation rules | Stateless, testable helpers; controllers call them directly |
 | No event bus; DB-messages + static hand-offs | Simplest possible decoupling for a single-player sim; avoids async complexity |
@@ -115,6 +115,7 @@
 19. **Hitos de carrera (E1):** `player_milestones` (una fila por hito y `player_id`, sobrevive al retiro). La carrera se calcula como **histórico (`historical_player_stats`, por `player_id`) + temporada en curso (todos los tipos menos All-Star) + honores** (`rings/finals_mvps/season_mvps` y All-Star de `all_star_roster` + `allstar_appearances_seed`) en `DatabaseManager.BuildCareerTotals`. `MilestoneService.EvaluateDay` corre cada día antes del motor de narrativa, registra lo nuevo y emite **una noticia agrupada por jugador** (`NewsType.LEGADO`); la **primera vez por partida** hace una línea base silenciosa (`milestones_baselined`). El hilo `hito_alcanzado` (por jugador, dura el día) **no duplica la noticia**: solo da badge y efecto. El HOF induciendo con **10× All-Star o 3× MVP** es parte de esta feature.
 20. **Parte médico (E2):** las lesiones viven en `players` (`injury_type`, `injury_days` restantes, `injury_total_days` total, `treated`, `recovery_risk`) + `injury_history` (una fila por episodio cerrado, `outcome` recuperado/alta_forzada). El catálogo puro es `InjuryCatalog` (27 lesiones con gravedad/familia/riesgo) y las reglas `InjuryHelper` (evolución con el médico de plantilla, alta forzada, recaída, progreso). **La evolución diaria la hace el pre-lote de fondo** (`InjuryHelper.EvolveDays`, no `injury_days--`); **la recaída solo puede dispararse con `recovery_risk > 0`** y produce una lesión más grave de la misma familia; el riesgo baja con el descanso (−25) o jugando (−10) y al llegar a 0 se limpia `injury_type`. `recovery_risk > 0` ⇒ `injury_type` no vacío (invariante). La lista de LESIONADOS incluye a los jugadores en vigilancia (días = 0 y riesgo > 0).
 21. **Economía de mercado (E3):** `teams.market_size` (0-100, migración que rellena por reputación en partidas viejas) + reglas puras en `MarketEconomy` (asistencia elástica `EstimateHomeAttendance`, precio de referencia, `DealValueMultiplier`) y `ContractMarket` (renovación/escala de patrocinio y TV). La asistencia ahora la decide `MarketEconomy` (no la fórmula inline): demanda por mercado/rival/racha/objetivo × factor de precio; la confianza de la afición **solo** pesa en partidos del usuario en casa (`includeFanConfidence`). Los ingresos por partido de patrocinio/TV escalan con fama+mercado. Al expirar un contrato, `StartNewSeason` (`RenewMarketDealsForTeam`) intenta sustituto con prob. `0.45 + mercado×0.35 + reputación×0.20`. No reintroduzcas la fórmula antigua en `CalculateAttendance`.
+22. **All-Star Weekend (E5):** la convocatoria pasa a **12 por conferencia (5 titulares + 7 suplentes)** con `AllStarSelectionHelper` (puro) y se guarda en `all_star_roster` (fuente de apariciones en Palmarés/HOF, ya existente). Los concursos de mates (`SlamDunkContest`) y triples (`ThreePointContest`) son **puros** y se simulan una vez por temporada en `DashboardController.TryRunAllStarWeekendContests` (antes del partido), persistiendo en `all_star_events` + participantes. Pantalla nueva `GameScreen.AllStar` (config de titulares). **Los concursos no alteran el resultado del partido** ni las stats; el partido sigue usando `BuildAllStarRoster`. Recompensa: +6 moral al campeón y +1 reputación posible a su equipo.
 
 ## 9. Audit warnings that must remain visible
 

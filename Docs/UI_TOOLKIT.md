@@ -47,7 +47,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
 
 ## 4. Controller pattern — `UIScreenController` base
 
-**[F] All 47 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:
+**[F] All 48 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:
 
 ```csharp
 protected virtual void OnEnable()

@@ -42,6 +42,7 @@ public class PalmaresController : UIScreenController
     private List<DatabaseManager.AllStarAppearanceEntry> _allStarAppearancesData;
     private VisualElement _allStarHistoryBody;
     private List<AllStarRecord> _allStarHistoryData;
+    private VisualElement _allStarContestsBody;
     private VisualElement _hoFBody;
     private List<HallOfFameData> _hoFData;
     private Dictionary<int, int> _milestoneCounts = new();
@@ -98,6 +99,7 @@ public class PalmaresController : UIScreenController
         _quintetAppearancesBody = _root.Q<VisualElement>("QuintetAppearancesBody");
         _quintetHistoryBody = _root.Q<VisualElement>("QuintetHistoryBody");
         _allStarAppearancesBody = _root.Q<VisualElement>("AllStarAppearancesBody");
+        _allStarContestsBody = _root.Q<VisualElement>("AllStarContestsBody");
         _allStarHistoryBody = _root.Q<VisualElement>("AllStarHistoryBody");
         _hoFBody = _root.Q<VisualElement>("HallOfFameBody");
 
@@ -147,6 +149,9 @@ public class PalmaresController : UIScreenController
 
         var logos64 = TeamImages.Logos(64);
         foreach (var s in logos64) _logoSprites64[s.name] = s;
+
+        _allStarLogos.Clear();
+        foreach (var s in logos32) _allStarLogos[s.name] = s;
 
         _allTeams = DatabaseManager.Instance.GetAllTeams();
         _seasonRecords = DatabaseManager.Instance.GetAllSeasonRecords(_season?.id ?? 0);
@@ -794,8 +799,57 @@ public class PalmaresController : UIScreenController
         _allStarHistoryData = allStarData;
         _allStarAppearancesData = null;
         RenderAllStarAppearances();
+        RenderAllStarContests();
         RenderAllStarHistory();
     }
+
+    /// <summary>Campeones de los concursos del All-Star Weekend (E5).</summary>
+    void RenderAllStarContests()
+    {
+        if (_allStarContestsBody == null) return;
+        _allStarContestsBody.Clear();
+
+        var events = DatabaseManager.Instance.GetAllStarEvents(_manager.id)
+            .OrderByDescending(e => e.season_id)
+            .ToList();
+
+        if (events.Count == 0)
+        {
+            var emptyLbl = new Label { text = "Aún no hay concursos de All-Star registrados" };
+            emptyLbl.AddToClassList("no-data-cell");
+            _allStarContestsBody.Add(emptyLbl);
+            return;
+        }
+
+        foreach (var e in events)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("palmares-table-row");
+
+            string label = e.event_type == "slam_dunk" ? "Mates" : "Triples";
+            var yearLbl = new Label { text = $"{e.season_id}  {label}" };
+            yearLbl.AddToClassList("td-season");
+            row.Add(yearLbl);
+
+            var logo = new VisualElement();
+            logo.AddToClassList("td-logo");
+            if (!string.IsNullOrEmpty(e.winner_team_logo) && _allStarLogos.TryGetValue(e.winner_team_logo, out var sprite))
+                logo.style.backgroundImage = new StyleBackground(sprite);
+            row.Add(logo);
+
+            var nameLbl = new Label { text = e.winner_name };
+            nameLbl.AddToClassList("td-winner");
+            row.Add(nameLbl);
+
+            var ptsLbl = new Label { text = $"{e.winner_score} pts" };
+            ptsLbl.AddToClassList("td-result");
+            row.Add(ptsLbl);
+
+            _allStarContestsBody.Add(row);
+        }
+    }
+
+    Dictionary<string, Sprite> _allStarLogos = new();
 
     void RenderAllStarAppearances()
     {
