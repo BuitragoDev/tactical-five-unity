@@ -114,6 +114,8 @@ public class AllStarContestTests
         Assert.That(results.Count(r => r.champion), Is.EqualTo(1));
         Assert.That(results[0].champion, Is.True, "el champion es el primero del ranking");
         Assert.That(results.Select(r => r.rank).OrderBy(x => x), Is.EqualTo(Enumerable.Range(1, 8)));
-        Assert.That(results.All(r => r.roundScores.Count == 2), Is.True, "clasificatoria + final");
+        // Todos juegan la clasificatoria; solo los 3 finalistas añaden la ronda final.
+        Assert.That(results.All(r => r.roundScores.Count >= 1), Is.True, "todos puntúan la clasificatoria");
+        Assert.That(results.Count(r => r.roundScores.Count == 2), Is.EqualTo(3), "3 finalistas");
     }
 }

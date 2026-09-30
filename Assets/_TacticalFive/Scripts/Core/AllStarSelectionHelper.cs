@@ -83,13 +83,29 @@ public static class AllStarSelectionHelper
             foreach (var c in atPos) { picked.Add(c); used.Add(c.player_id); }
         }
 
-        // Wildcards hasta 12
+        // Wildcards hasta 12: primero completan las posiciones con menos de 2, y solo si
+        // aún faltan plazas repiten posición (respetando el reparto 2 por puesto siempre que
+        // haya candidatos suficientes).
+        var capacity = new Dictionary<string, int>();
+        foreach (var pos in PositionCodes.Order)
+            capacity[pos] = picked.Count(c => c.position == pos);
+
+        // Pase 1: rellenar posiciones por debajo de 2.
         foreach (var c in pool)
         {
             if (picked.Count >= ROSTER_SIZE) break;
             if (used.Contains(c.player_id)) continue;
-            picked.Add(c);
-            used.Add(c.player_id);
+            if (capacity.TryGetValue(c.position, out var n) && n >= 2) continue;
+            picked.Add(c); used.Add(c.player_id);
+            if (capacity.ContainsKey(c.position)) capacity[c.position]++;
+        }
+
+        // Pase 2: si aún faltan plazas, los mejores disponibles (pueden repetir posición).
+        foreach (var c in pool)
+        {
+            if (picked.Count >= ROSTER_SIZE) break;
+            if (used.Contains(c.player_id)) continue;
+            picked.Add(c); used.Add(c.player_id);
         }
 
         // 5 titulares: el mejor de cada posición

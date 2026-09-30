@@ -62,13 +62,14 @@ public static class ThreePointContest
     public static List<ThreePointResult> Run(IEnumerable<(int player_id, string name, string logo, int threePoint)> field,
                                             Random rng, int qualifiers = 3)
     {
-        var participants = field.Select(f => new ThreePointResult
+        var list = field.ToList();
+        var participants = list.Select(f => new ThreePointResult
         {
             player_id = f.player_id,
             player_name = f.name,
             team_logo = f.logo
         }).ToList();
-        var attributes = field.ToDictionary(f => f.player_id, f => f.threePoint);
+        var attributes = list.ToDictionary(f => f.player_id, f => f.threePoint);
 
         // Ronda clasificatoria
         foreach (var p in participants)

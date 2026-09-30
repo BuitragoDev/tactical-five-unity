@@ -62,13 +62,20 @@ public class AllStarSelectionHelperTests
     }
 
     [Test]
-    public void Select_TwoPerPosition()
+    public void Select_AtLeastTwoPerPosition_WithWildcards()
     {
+        // Regla real: mínimo 2 por posición (el núcleo); los 2 wildcards restantes pueden
+        // repetir posición. Con 12 plazas y 10 huecos de posición, los 2 últimos son wildcards.
         var ranked = AllStarSelectionHelper.Rank(StandardPool(), p => (20, 60));
         var roster = AllStarSelectionHelper.Select(ranked);
 
         foreach (var pos in PositionCodes.Order)
-            Assert.That(roster.Count(r => r.position == pos), Is.EqualTo(2), $"pos {pos}");
+            Assert.That(roster.Count(r => r.position == pos), Is.GreaterThanOrEqualTo(2), $"pos {pos}");
+
+        // Reparto 2-por-posición en los primeros 10 elegidos.
+        var core = roster.Take(10).ToList();
+        foreach (var pos in PositionCodes.Order)
+            Assert.That(core.Count(r => r.position == pos), Is.EqualTo(2), $"núcleo posición {pos}");
     }
 
     [Test]
