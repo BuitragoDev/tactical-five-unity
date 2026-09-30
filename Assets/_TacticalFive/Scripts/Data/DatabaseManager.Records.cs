@@ -105,6 +105,68 @@ public partial class DatabaseManager
         Debug.Log($"[DB] {PalmaresSeeder.FinalsData.Count} finales, {PalmaresSeeder.AwardsData.Count} premios, {PalmaresSeeder.QuintetData.Count} quintetos insertados.");
     }
 
+    // ── MERCADO DE CONTRATOS (E3) ─────────────────────────
+
+    /// <summary>
+    /// Renegociación de patrocinio/TV al expirar (E3). Un equipo con mercado y prestigio
+    /// encuentra sustituto con su contrato base re-escalado por fama; uno pequeño puede
+    /// quedarse sin acuerdo. Cada contrato se resuelve por separado.
+    /// </summary>
+    void RenewMarketDealsForTeam(TeamData team, TeamSettingsData settings)
+    {
+        if (team == null || settings == null) return;
+
+        bool needSponsor = settings.sponsor_id == 0;
+        bool needTv = settings.tv_channel_id == 0;
+        if (!needSponsor && !needTv) return;
+
+        if (needSponsor)
+        {
+            var available = GetAvailableSponsors();
+            if (available != null && available.Count > 0
+                && ContractMarket.FindsReplacement(team.reputation, team.market_size, Rng.NextDouble()))
+            {
+                var pick = available[Rng.Next(available.Count)];
+                settings.sponsor_id = pick.id;
+                settings.sponsor_years_remaining = pick.contract_years > 0 ? pick.contract_years : 3;
+                Debug.Log($"[DB] Renovación de patrocinio: {team.name} → {pick.name}");
+            }
+        }
+
+        if (needTv)
+        {
+            var available = GetAvailableTVChannels();
+            if (available != null && available.Count > 0
+                && ContractMarket.FindsReplacement(team.reputation, team.market_size, Rng.NextDouble()))
+            {
+                var pick = available[Rng.Next(available.Count)];
+                settings.tv_channel_id = pick.id;
+                settings.tv_years_remaining = pick.contract_years > 0 ? pick.contract_years : 3;
+                Debug.Log($"[DB] Renovación de TV: {team.name} → {pick.name}");
+            }
+        }
+    }
+
+    /// <summary>Patrocinios sin equipo asignado (candidatos a renovación).</summary>
+    public List<SponsorData> GetAvailableSponsors()
+    {
+        if (!EnsureDb()) return new List<SponsorData>();
+        return _db.Table<SponsorData>()
+                  .Where(s => s.team_id == 0)
+                  .ToList();
+    }
+
+    /// <summary>Canales de TV sin equipo asignado (candidatos a renovación).</summary>
+    public List<TvChannelData> GetAvailableTVChannels()
+    {
+        if (!EnsureDb()) return new List<TvChannelData>();
+        return _db.Table<TvChannelData>()
+                  .Where(c => c.team_id == 0)
+                  .ToList();
+    }
+
+    // ── FIN DE MERCADO DE CONTRATOS ───────────────────────
+
     void SeedAllStarData()
     {
         var appearances = new List<AllStarAppearanceSeed>
@@ -3212,6 +3274,7 @@ public partial class DatabaseManager
                     var activeSponsor = GetActiveSponsor(team.id);
                     if (activeSponsor != null)
                         FireSponsor(activeSponsor);
+                    RenewMarketDealsForTeam(team, settings);
                 }
                 changed = true;
             }
@@ -3224,6 +3287,7 @@ public partial class DatabaseManager
                     var activeChannel = GetActiveTVChannel(team.id);
                     if (activeChannel != null)
                         FireTVChannel(activeChannel);
+                    RenewMarketDealsForTeam(team, settings);
                 }
                 changed = true;
             }

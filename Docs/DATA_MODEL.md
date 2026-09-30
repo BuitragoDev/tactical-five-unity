@@ -131,6 +131,9 @@ Hitos de carrera alcanzados (E1). Una fila por hito y jugador; se registran una 
 | `team_id` | INTEGER | equipo en ese momento |
 | `created_at` | TEXT | |
 
+`teams` añade `market_size` (0-100, tamaño de mercado: asistencia y valor de contratos; en partidas
+antiguas se rellena por reputación).
+
 ### injury_history (`InjuryHistoryData`)
 
 Parte médico (E2): una fila por lesión cerrada (sobrevive a traspasos y temporadas).

@@ -152,7 +152,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **No hay lint ni typecheck** (C# se compila solo en el editor de Unity). No hay test runner CLI configurado en `package.json`.
 
-**Tests unitarios (EditMode, Unity Test Runner):** 265 `[Test]` en 18 archivos `Assets/_TacticalFive/Tests/Editor/`:
+**Tests unitarios (EditMode, Unity Test Runner):** 278 `[Test]` en 18 archivos `Assets/_TacticalFive/Tests/Editor/`:
 - `TradeHelperTests.cs` (30) · `StorylineServiceTests.cs` (28) · `GLLeagueHelperTests.cs` (22) · `GameSimulatorTests.cs` (14) · `AdvancedStatsHelperTests.cs` (11) · `GameSaveManagerTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `GamePlanTests.cs` (6) · `PlayerProgressionTests.cs` (6) · `ScoutingHelperTests.cs` (6) · `HistoricalStatsRulesTests.cs` (5) · `CoachSchemeTests.cs` (4) · `DraftGeneratorTests.cs` (4) · `NegotiationHelperTests.cs` (4) · `PlayerDataTests.cs` (4) · `EditModeSmokeTests.cs` (2)
 
 **Correr en el editor:** *Window → General → Test Runner → EditMode → Run All*.
@@ -165,7 +165,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` no es testeable en EditMode (depende de `DatabaseManager.Instance`) salvo con `persistToDb:false`; `GameSimulatorTests.cs` cubre sus helpers públicos (rotación vinculante, sustitución, prórroga sin empate, marcador con plantilla corta).
 
-**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre el Test Runner EditMode (265 en verde a fecha de esta revisión).
+**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre el Test Runner EditMode (278 en verde a fecha de esta revisión).
 
 ---
 

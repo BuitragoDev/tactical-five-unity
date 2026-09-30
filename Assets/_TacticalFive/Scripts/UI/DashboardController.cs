@@ -7453,60 +7453,81 @@ List<int> offeredPickIds = new List<int>();
         };
     }
 
+    /// <summary>Ganados y jugados de un equipo desde la lista de partidos de la liga.</summary>
+    static (int wins, int played) TeamRecord(List<GameData> allGames, int teamId)
+    {
+        int wins = 0, played = 0;
+        foreach (var g in allGames)
+        {
+            if (g.home_team_id == teamId)
+            {
+                played++;
+                if (g.home_score > g.away_score) wins++;
+            }
+            else if (g.away_team_id == teamId)
+            {
+                played++;
+                if (g.away_score > g.home_score) wins++;
+            }
+        }
+        return (wins, played);
+    }
+
+    /// <summary>Racha reciente del equipo (últimos 10 partidos) como factor 0.85-1.10.</summary>
+    float GetAttendanceStreakFactor(List<GameData> allGames, int teamId)
+    {
+        var last10 = allGames
+            .Where(g => g.home_team_id == teamId || g.away_team_id == teamId)
+            .OrderByDescending(g => g.game_day).ThenByDescending(g => g.id)
+            .Take(10).ToList();
+        if (last10.Count == 0) return 1.0f;
+        int wins = last10.Count(g =>
+            (g.home_team_id == teamId && g.home_score > g.away_score) ||
+            (g.away_team_id == teamId && g.away_score > g.home_score));
+        float recent = (float)wins / last10.Count;
+        return Mathf.Clamp(0.85f + recent * 0.25f, 0.85f, 1.10f);
+    }
+
+    /// <summary>
+    /// Asistencia (E3): demanda elástica según mercado, rival, racha y precio; el precio de
+    /// referencia depende del mercado y la reputación, y su exceso castiga la ocupación.
+    /// </summary>
     int CalculateAttendance(GameData game, TeamData homeTeam)
     {
+        if (homeTeam == null || homeTeam.capacity <= 0) return 0;
+
         bool myTeamIsHome = game.home_team_id == _myTeam.id;
-        bool myTeamIsAway = game.away_team_id == _myTeam.id;
 
-        var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
-        var homeTeamGames = teamGames.Where(g => g.home_team_id == homeTeam.id || g.away_team_id == homeTeam.id).ToList();
-        int wins = homeTeamGames.Count(g =>
-            (g.home_team_id == homeTeam.id && g.home_score > g.away_score) ||
-            (g.away_team_id == homeTeam.id && g.away_score > g.home_score));
-        int totalPlayed = homeTeamGames.Count;
-        float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
+        var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        var (homeWins, homePlayed) = TeamRecord(allGames, homeTeam.id);
+        float homeWinPct = homePlayed > 0 ? (float)homeWins / homePlayed : 0.5f;
 
-        float baseAttendance;
-        float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
+        var rival = DatabaseManager.Instance.GetTeamById(
+            game.home_team_id == homeTeam.id ? game.away_team_id : game.home_team_id);
+        var (rivalWins, rivalPlayed) = TeamRecord(allGames, rival != null ? rival.id : 0);
+        float rivalWinPct = rivalPlayed > 0 ? (float)rivalWins / rivalPlayed : 0.5f;
 
-        if (myTeamIsHome)
-        {
-            // My home game: fan confidence + rival reputation
-            var rival = DatabaseManager.Instance.GetTeamById(game.away_team_id);
-            float rivalRepFactor = rival != null ? (rival.reputation / 5f) * 0.08f : 0f;
-            baseAttendance = homeTeam.capacity * (
-                0.30f +
-                (_manager.fan_confidence / 100f) * 0.35f +
-                winPct * 0.15f +
-                rivalRepFactor
-            );
-        }
-        else if (myTeamIsAway)
-        {
-            // My away game: home team base + bonus from my reputation as visiting draw
-            float myRepFactor = (_myTeam.reputation / 5f) * 0.06f;
-            baseAttendance = homeTeam.capacity * (
-                0.55f +
-                winPct * 0.30f +
-                myRepFactor
-            );
-        }
-        else
-        {
-            // Other teams' games: standard formula
-            baseAttendance = homeTeam.capacity * (0.55f + winPct * 0.40f);
-        }
+        float objectiveFactor = GetObjectiveComplianceFactor(homeTeam, allGames);
+        float streakFactor = GetAttendanceStreakFactor(allGames, homeTeam.id);
 
-        // Ticket price elasticity: more expensive → fewer attendees
-        // Smooth exponential decay from 1.0 at $30 down to ~0.20 at $500
+        int ticketPrice = 50;
         var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
-        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : 50;
-        float priceFactor = Mathf.Clamp(Mathf.Exp(-(ticketPrice - 30f) / 150f), 0.20f, 1.0f);
+        if (finSettings != null) ticketPrice = (int)finSettings.ticket_price;
 
-        // Objective compliance: not on track for the team's season target
-        float objectiveFactor = GetObjectiveComplianceFactor(homeTeam, teamGames);
-
-        return (int)Mathf.Min(homeTeam.capacity, baseAttendance * randomFactor * priceFactor * objectiveFactor);
+        return MarketEconomy.EstimateHomeAttendance(
+            homeTeam.capacity,
+            homeWinPct,
+            rivalWinPct,
+            rival != null ? rival.reputation : 3,
+            homeTeam.market_size,
+            homeTeam.reputation,
+            objectiveFactor,
+            streakFactor,
+            _manager.fan_confidence / 100f,
+            myTeamIsHome,
+            ticketPrice,
+            UnityEngine.Random.value,
+            UnityEngine.Random.value);
     }
 
     float GetObjectiveComplianceFactor(TeamData homeTeam, List<GameData> teamGames)
@@ -7742,13 +7763,15 @@ List<int> offeredPickIds = new List<int>();
         // Skip sponsor/TV processing if settings aren't configured
         if (finSettings == null) return;
 
-        // Sponsor home game income
+        // Sponsor home game income (E3: escala con la fama y el mercado del equipo)
         if (finSettings.sponsor_id > 0 && finSettings.sponsor_years_remaining > 0)
         {
             var sponsor = DatabaseManager.Instance.GetSponsorById(finSettings.sponsor_id);
             if (sponsor != null)
             {
-                homeTeam.budget += sponsor.home_game_income;
+                long sponsorIncome = ContractMarket.SponsorHomeGameIncome(
+                    sponsor.home_game_income, homeTeam.reputation, homeTeam.market_size);
+                homeTeam.budget += sponsorIncome;
                 DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
                 SyncMyTeamBudget(homeTeam);
                 DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
@@ -7757,18 +7780,20 @@ List<int> offeredPickIds = new List<int>();
                     season_id = _season.id,
                     record_type = FinanceRecord.TYPE_SPONSORSHIP,
                     game_day = game.game_day,
-                    amount = sponsor.home_game_income
+                    amount = sponsorIncome
                 });
             }
         }
 
-        // TV home game income
+        // TV home game income (E3: escala con la fama y el mercado del equipo)
         if (finSettings.tv_channel_id > 0 && finSettings.tv_years_remaining > 0)
         {
             var tv = DatabaseManager.Instance.GetTVChannelById(finSettings.tv_channel_id);
             if (tv != null)
             {
-                homeTeam.budget += tv.home_game_income;
+                long tvIncome = ContractMarket.SponsorHomeGameIncome(
+                    tv.home_game_income, homeTeam.reputation, homeTeam.market_size);
+                homeTeam.budget += tvIncome;
                 DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
                 SyncMyTeamBudget(homeTeam);
                 DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
@@ -7777,7 +7802,7 @@ List<int> offeredPickIds = new List<int>();
                     season_id = _season.id,
                     record_type = FinanceRecord.TYPE_TV,
                     game_day = game.game_day,
-                    amount = tv.home_game_income
+                    amount = tvIncome
                 });
             }
         }
@@ -8149,7 +8174,9 @@ List<int> offeredPickIds = new List<int>();
 
         float baseRatio = 0.5f;
         float priceFactor = (2000 - finSettings.subscription_price) / 10000f;
-        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * reputationMult * randomFactor);
+        // E3: un gran mercado vende más abonos (0.9x - 1.15x).
+        float marketMult = 0.90f + MarketEconomy.MarketNormalized(_myTeam.market_size) * 0.25f;
+        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * reputationMult * marketMult * randomFactor);
         numSubscribers = (int)Mathf.Clamp(numSubscribers, 0, _myTeam.capacity);
 
         long subAmount = numSubscribers * finSettings.subscription_price;

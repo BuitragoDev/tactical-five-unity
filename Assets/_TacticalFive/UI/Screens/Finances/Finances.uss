@@ -631,3 +631,23 @@
     border-width: 0;
     padding: 2px 10px;
 }
+
+
+/* ── E3: mercado local en TAQUILLA ── */
+
+.ticket-market-box {
+    margin-top: 12px;
+    padding: 8px 14px;
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(120, 95, 30, 0.15);
+    border-radius: 4px;
+}
+
+.ticket-market-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    letter-spacing: 1px;
+    color: rgb(212, 160, 23);
+    white-space: normal;
+}

@@ -259,6 +259,17 @@ using System.Linq;
         var settings = _teamSettings ?? new TeamSettingsData { ticket_price = 50, subscription_price = 2100 };
         bool campaignClosed = IsSubscriptionCampaignClosed();
 
+        // E3: contexto de mercado (afecta a asistencia, abonos y derechos).
+        var marketLbl = _root.Q<Label>("MarketInfoLabel");
+        if (marketLbl != null && _myTeam != null)
+        {
+            string tier = _myTeam.market_size >= 85 ? "GRAN MERCADO"
+                        : _myTeam.market_size >= 60 ? "MERCADO MEDIO"
+                        : "MERCADO PEQUEÑO";
+            float fair = MarketEconomy.FairTicketPrice(_myTeam.market_size, _myTeam.reputation);
+            marketLbl.text = $"{tier} · índice {_myTeam.market_size}/100 · entrada de referencia ~${fair:F0}. Un gran mercado llena más y paga mejores contratos, incluso con malos resultados.";
+        }
+
         // Build ticket price grid
         _ticketPriceGrid.Clear();
         foreach (var price in _ticketPriceOptions)

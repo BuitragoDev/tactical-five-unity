@@ -912,6 +912,11 @@ public partial class DatabaseManager : MonoBehaviour
         AddColumnIfMissing("teams", "plan_offense", "plan_offense INTEGER DEFAULT 0");
         AddColumnIfMissing("teams", "plan_defense", "plan_defense INTEGER DEFAULT 1");
 
+        // E3: tamaño de mercado (economía). Las partidas antiguas no lo traen: se rellena por
+        // reputación (proxy) para que la asistencia/patrocinios no arranquen a cero.
+        if (AddColumnIfMissing("teams", "market_size", "market_size INTEGER DEFAULT 0"))
+            _db.Execute("UPDATE teams SET market_size = MIN(100, 28 + reputation * 14) WHERE market_size = 0");
+
         // Add on_trade_block to players if missing
         try
         {

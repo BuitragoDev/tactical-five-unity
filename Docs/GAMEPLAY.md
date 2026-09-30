@@ -116,15 +116,34 @@ Read-only projection: current payroll vs cap/apron/space, per-year committed pay
 
 ## 5. Economy
 
+### Tamaño de mercado (`teams.market_size`)
+- Nuevo campo 0-100 (E3): los grandes mercados llenan más el pabellón y pagan mejores contratos
+  de patrocinio/TV, incluso con malos resultados. Reglas puras en `MarketEconomy`
+  (`MarketNormalized`, `DealValueMultiplier`). Rango real: Nueva York 98 / LA Lakers 96 → Memphis 56
+  / New Orleans 50. En partidas antiguas se rellena por reputación (`28 + reputación × 14`).
+
+### Asistencia elástica (E3) — `MarketEconomy.EstimateHomeAttendance`
+- **Demanda** (`Demand01`) = `0.34 + winPct×0.20 + mercado×0.10 + atractivoRival×0.09 + winPctRival×0.05`
+  (+`confianzaAfición×0.13` **solo** en partidos del usuario en casa) × objetivo × racha × ruido(±10 %).
+  El **atractivo del rival** es su reputación (0-1) y también cuenta su récord.
+- **Precio:** el precio de referencia `FairTicketPrice` sube con mercado y reputación; subir el
+  precio por encima castiga la ocupación (`AttendancePriceFactor`, saturación al alza: barato
+  como máximo +10 %, caro decayendo exponencialmente). El aforo final es
+  `capacity × demanda × factorPrecio`, capado a `capacity`.
+- **Racha** (últimos 10: 0.85–1.10) y **cumplimiento del objetivo** de temporada siguen aplicando.
+- La misma fórmula la usa el resumen de partido y la vista previa. `ProcessGameFinances` guarda la
+  asistencia en `game_attendance`.
+
 ### Income per home game (`ProcessGameFinances`)
-- `attendance = CalculateAttendance(...)` (formula in `SYSTEMS.md §S8`).
-- `ticketRevenue = attendance × ticket_price × arenaMultiplier` (by PABELLON staff reputation 1.03–1.20).
-- Sponsor `home_game_income` and TV `home_game_income` added if contract active.
+- `attendance = CalculateAttendance(...)` (fórmula E3 arriba).
+- `ticketRevenue = attendance × ticket_price × arenaMultiplier` (por reputación del PABELLON, 1.03–1.20).
+- Sponsor `home_game_income` y TV `home_game_income` **escalan con fama y mercado**
+  (`ContractMarket.SponsorHomeGameIncome` → 0.70x-1.50x según reputación + mercado).
 - All recorded as `FinanceRecord` (types 1/3/4) and added to `TeamData.budget`.
 
 ### Monthly
 - `ProcessMonthlyPayroll` on `payrollDays = {1,31,61,91,121,151,181}`: player salaries `sum/12` (type 7) + employees `sum/12` (type 8), each guarded against double-pay per day. **Luxury tax on the same days** (`ProcessTeamLuxuryTax`): `annualTax = CalculateLuxuryTax(sum(player salaries), luxury_threshold)`; if >0 deduct `annual/12` (type 10). — `DashboardController.cs:5032-5153`
-- `ProcessSubscriptionRevenue` (game days 10–12 ≈ Nov 1): `numSubscribers = clamp(capacity * (0.5 + (2000 − subscription_price)/10000) * (1 + wins_first4*0.05) * (0.7 + reputation/5*0.6) * rand(0.85–1.15), 0, capacity)`; income = subscribers × price (type 2).
+- `ProcessSubscriptionRevenue` (game days 10–12 ≈ Nov 1): `numSubscribers = clamp(capacity * (0.5 + (2000 − subscription_price)/10000) * (1 + wins_first4*0.05) * (0.7 + reputation/5*0.6) * (0.90 + market/100*0.25) * rand(0.85–1.15), 0, capacity)`; income = subscribers × price (type 2). **E3:** un gran mercado vende más abonos (×0.90-1.15).
 
 ### One-off
 - **Arena renovations** (`ArenaController`): Grada General +3000/$10M/3wk; Tribuna +2000/$20M/5wk; VIP +1000/$35M/8wk; discounted by PABELLON reputation (0.80–0.97); max capacity 50,000.
@@ -132,7 +151,7 @@ Read-only projection: current payroll vs cap/apron/space, per-year committed pay
 - **Luxury tax** (`TradeHelper.CalculateLuxuryTax`): brackets above threshold — `(5M,1.5),(5M,1.75),(5M,2.5),(5M,3.25),(∞,3.75)`; charged monthly `annual/12` (type 10).
 - **Buyout with stretch** (`RosterController.ConfirmBuyout`): `remaining = salary × contract_years`; `stretchYears = contract_years × 2`; `annual = remaining/stretchYears` (last year takes remainder); player → FA; TYPE_BUYOUT (11) records per year.
 - **Budget warnings:** budget red 3+ times (2 in ProManager) → fired modal (`CheckBudgetWarning`).
-- **Sponsors/TV renegotiation:** max 3 sponsors, max 3 TV; `initial_income` + `home_game_income`; contracts in years.
+- **Sponsors/TV renegotiation (E3):** max 3 sponsors, max 3 TV; `initial_income` + `home_game_income`; contratos por años. **Al expirar** (`RenewMarketDealsForTeam`, en `StartNewSeason`), el equipo busca sustituto disponible con probabilidad `0.45 + mercado×0.35 + reputación×0.20` (`MarketEconomy.ShouldRenewDeal`): los grandes mercados casi siempre renuevan; los pequeños pueden quedarse sin contrato. Los importes base de la oferta se escalan por fama al firmar.
 
 ## 6. Roster management
 

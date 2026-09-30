@@ -18,6 +18,8 @@ public class TeamData
     public int    overall                  { get; set; }
     public long   budget                   { get; set; }
     public int    reputation               { get; set; }
+    /// <summary>Tamaño de mercado (0-100): llena el pabellón y encarece los derechos con malos resultados.</summary>
+    public int    market_size              { get; set; }
     public int    facilities               { get; set; }
     public string logo                     { get; set; }
     public string jersey_home              { get; set; }
