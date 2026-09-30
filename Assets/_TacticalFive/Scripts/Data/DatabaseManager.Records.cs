@@ -1188,19 +1188,24 @@ public partial class DatabaseManager
         var careers = BuildCareerTotals(managerId, seasonId);
         var rows = new List<MilestoneData>();
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        int currentDay = GetActiveSeason(managerId)?.current_game_day ?? 0;
+
+        // Equipo actual de cada jugador en una sola query (evita N+1 en la línea base).
+        var teamByPlayer = new Dictionary<int, int>();
+        foreach (var p in _db.Query<PlayerHonorsRow>("SELECT id, team_id, 0 AS rings, 0 AS finals_mvps, 0 AS season_mvps FROM players"))
+            teamByPlayer[p.id] = p.team_id;
 
         foreach (var kv in careers)
         {
             foreach (var d in MilestoneHelper.Reached(kv.Value))
             {
-                var p = GetPlayerById(kv.Key);
                 rows.Add(new MilestoneData
                 {
                     player_id = kv.Key,
                     milestone = d.key,
                     season_id = seasonId,
-                    game_day = GetActiveSeason(managerId)?.current_game_day ?? 0,
-                    team_id = p?.team_id ?? 0,
+                    game_day = currentDay,
+                    team_id = teamByPlayer.TryGetValue(kv.Key, out var tid) ? tid : 0,
                     created_at = now
                 });
             }
