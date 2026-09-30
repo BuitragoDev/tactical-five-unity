@@ -226,7 +226,7 @@
     flex-basis: 33.33%;
     min-width: 0;
     padding: 0 8px;
-    margin-bottom: 36px;
+    margin-bottom: 100px;
 }
 
 .injury-card-inner {
