@@ -93,28 +93,6 @@ If a team has <2 available players, result is random-ish (105–125 vs 100–120
 - **Simulación rápida** (`CalendarController` → "SIMULAR HASTA FECHA"): `FastSimRoutine` (`DashboardController.cs:1324`) avanza días con `ProcessGameDayRoutine(fastSim:true)`; spinner gira continuo, botón **DETENER** activo; pausa ante ofertas maduradas (modal IR A QUINTETO / SEGUIR SIMULANDO) y traspasos entrantes (`ShowNextPendingTradeOffer`); al terminar modal "SIMULACIÓN COMPLETADA".
 - All-Star rosters: `BuildAllStarRoster("East"|"West")`.
 
-### All-Star Weekend (E5)
-- **Convocatoria:** 12 por conferencia = **5 titulares + 7 suplentes** (2 por posición + 2 wildcards),
-  elegidos por `AllStarSelectionHelper` (puro) con `AllStarScore` = `rating_medio×0.70 + overall×0.30×volumen + volumen×8`
-  (`volumen = min(1, partidos/20)`). Sustituye al viejo "15 por conferencia".
-- **Pantalla ALL-STAR** (`GameScreen.AllStar`, submenú Competiciones): muestra los 24 convocados y
-  permite **alternar TITULAR/SUPLENTE** por clic (máx 5 por conferencia); el resto lo compone la IA.
-- **Concursos (simulación + animación):** el día del partido (`TryRunAllStarWeekendContests`) se disputan
-  una vez por temporada y se guardan en `all_star_events` + `all_star_event_participants`:
-  - **Mates** (`SlamDunkContest`): 8 participantes por atletismo/velocidad/altura; cada uno tira varios
-    mates (dificultad vs. `Skill`) con puntuación de jueces 0-50; el mejor de cada ronda cuenta.
-  - **Triples** (`ThreePointContest`): 8 tiradores por atributo de tres; 5 carros (4×1 + 1 dinero ×2)
-    + 2 tiros de media pista ×3 = 36 máx; clasificatoria + final a 3.
-- **Recompensa:** campeón de cada concurso → **+6 moral**; su equipo puede ganar **+1 reputación** (25 %).
-  Noticia del fin de semana (`NewsType.ALLSTAR`) y campeones visibles en **Palmarés → All-Star**.
-- **Narrativa:** los concursos usan `System.Random` con semilla (no afectan al resultado del partido,
-  que sigue con `BuildAllStarRoster`).
-- **Boxscore:** el All-Star **sí persiste `player_game_stats`** con los `team_id` de conferencia
-  (`-1`/`-2` que usa su `GameData`) para que MatchDay/GameResults muestren el boxscore. Todas las
-  agregaciones de carrera/Stats filtran `game_type='regular'` (o `!= 'allstar'`), de modo que esas
-  filas no cuentan como partidos jugados ni entran en medias/carrera. No aplica récords, fatiga,
-  lesiones, moral ni finanzas.
-
 ## 4. Contracts & salary cap
 
 Constants (2025-26, `TradeHelper.cs:7-14`): cap `174,647,000`, luxury `220,428,000`, 1st apron `229,015,000`, 2nd apron `241,686,000`, NT-MLE `14.1M`, T-MLE `5.7M`, minimum `2M`, max roster 17. Cap, luxury and aprons **+5% per season** (`StartNewSeason`).

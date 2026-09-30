@@ -1806,9 +1806,6 @@ using System.Threading.Tasks;
         {
             homePlayers = BuildAllStarRoster("East");
             awayPlayers = BuildAllStarRoster("West");
-
-            // E5: antes del partido se disputan los concursos del All-Star Weekend.
-            TryRunAllStarWeekendContests(game);
         }
         else
         {
@@ -9127,97 +9124,51 @@ List<int> offeredPickIds = new List<int>();
             elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
-    /// <summary>
-    /// All-Star Weekend (E5): simula los concursos de mates y triples una vez por temporada,
-    /// guarda los resultados y deja campeones en la trayectoria. Devuelve false si ya se
-    /// habían celebrado (idempotente por temporada).
-    /// </summary>
-    bool TryRunAllStarWeekendContests(GameData allStarGame)
+    List<PlayerData> BuildAllStarRoster(string conference)
     {
-        if (_season == null || _manager == null) return false;
+        var allTeams = DatabaseManager.Instance.GetAllTeams();
+        var conferenceTeamIds = allTeams
+            .Where(t => t.conference == conference)
+            .Select(t => t.id)
+            .ToHashSet();
 
-        bool already = DatabaseManager.Instance.Db.Table<AllStarEventData>()
-            .Any(e => e.manager_id == _manager.id && e.season_id == _season.id);
-        if (already) return false;
-
-        var allPlayers = DatabaseManager.Instance.GetAllPlayers()
-            .Where(p => p != null && p.team_id > 0 && p.injury_days == 0 && p.g_league_assigned == 0)
+        var allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>()
+            .Where(p => p.team_id != 0 && p.injury_days == 0 && p.g_league_assigned == 0)
             .ToList();
-        var seasonStats = DatabaseManager.Instance.GetSeasonPlayerStatsAggregates(_manager.id, _season.id);
 
-        var east = AllStarWeekendService.BuildConferenceRoster(_manager.id, _season.id, "East", allPlayers, seasonStats);
-        var west = AllStarWeekendService.BuildConferenceRoster(_manager.id, _season.id, "West", allPlayers, seasonStats);
+        var candidates = allPlayers
+            .Where(p => conferenceTeamIds.Contains(p.team_id))
+            .ToList();
 
-        AllStarWeekendService.RunContests(_manager.id, _season.id, east, west, allPlayers, new System.Random());
+        var roster = new List<PlayerData>();
+        HashSet<int> usedIds = new();
+        var positions = PositionCodes.Order;
 
-        string seasonLabel = $"{_season.year_start}-{_season.year_end}";
-        AllStarWeekendService.AnnounceContests(_manager.id, _season.id, seasonLabel);
-
-        // Recompensa suave: pequeño empujón de moral al campeón de cada concurso y prestigio
-        // al equipo del campeón (sin tocar el dinero).
-        var events = DatabaseManager.Instance.GetAllStarEvents(_manager.id)
-            .Where(e => e.season_id == _season.id).ToList();
-        foreach (var e in events)
+        foreach (var pos in positions)
         {
-            var winner = DatabaseManager.Instance.GetPlayerById(e.winner_player_id);
-            if (winner == null) continue;
-            winner.morale = Mathf.Clamp(winner.morale + 6, 0, 100);
-            DatabaseManager.Instance.UpdatePlayer(winner);
-
-            var team = DatabaseManager.Instance.GetTeamById(winner.team_id);
-            if (team != null && team.reputation < 5 && UnityEngine.Random.value < 0.25f)
+            var selected = candidates
+                .Where(p => p.position == pos)
+                .OrderByDescending(p => p.overall)
+                .Take(3)
+                .ToList();
+            foreach (var p in selected)
             {
-                team.reputation = Mathf.Min(5, team.reputation + 1);
-                DatabaseManager.Instance.UpdateTeam(team);
+                usedIds.Add(p.id);
+                roster.Add(p);
             }
         }
 
-        Debug.Log($"[Dashboard] All-Star Weekend {seasonLabel}: concursos disputados.");
-        return true;
-    }
-
-    /// <summary>
-    /// Convocatoria del partido de las estrellas (E5): 12 por conferencia (5 titulares + 7
-    /// suplentes) con el mismo criterio que la pantalla ALL-STAR, ordenados titulares primero.
-    /// </summary>
-    List<PlayerData> BuildAllStarRoster(string conference)
-    {
-        var allPlayers = GetAllNbaPlayers();
-        var candidates = AllStarWeekendService.BuildConferenceRoster(
-            _manager.id, _season.id, conference, allPlayers,
-            DatabaseManager.Instance.GetSeasonPlayerStatsAggregates(_manager.id, _season.id));
-
-        var byId = allPlayers.GroupBy(p => p.id).ToDictionary(g => g.Key, g => g.First());
-        var roster = candidates
-            .Select(c => byId.GetValueOrDefault(c.player_id))
-            .Where(p => p != null)
-            .ToList();
-
-        if (roster.Count == 0)
+        if (roster.Count < 15)
         {
-            // Fallback: si no hay convocatoria calculable, mantén a los mejores por OVR.
-            var allTeams = DatabaseManager.Instance.GetAllTeams();
-            var confIds = allTeams.Where(t => t.conference == conference).Select(t => t.id).ToHashSet();
-            roster = DatabaseManager.Instance.Db.Table<PlayerData>()
-                .Where(p => p.team_id != 0 && p.injury_days == 0 && p.g_league_assigned == 0)
-                .ToList()
-                .Where(p => confIds.Contains(p.team_id))
+            var remaining = candidates
+                .Where(p => !usedIds.Contains(p.id))
                 .OrderByDescending(p => p.overall)
-                .Take(AllStarSelectionHelper.ROSTER_SIZE)
-                .ToList();
+                .Take(15 - roster.Count);
+            roster.AddRange(remaining);
         }
-
-        if (roster.Count == 0)
-            Debug.LogError($"[Dashboard] All-Star: convocatoria vacía para la conferencia {conference}. " +
-                           "No se puede simular el partido de las estrellas.");
 
         return roster;
     }
-
-    List<PlayerData> GetAllNbaPlayers()
-        => DatabaseManager.Instance.GetAllPlayers()
-            .Where(p => p != null && p.team_id > 0 && p.injury_days == 0 && p.g_league_assigned == 0)
-            .ToList();
 
     // ── CLASE AUXILIAR ───────────────────────────────────
 

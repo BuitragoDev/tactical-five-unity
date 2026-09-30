@@ -46,8 +46,7 @@ public enum GameScreen
     InfoLeague,
     TheCity,
     Buscador,
-    GLeague,
-    AllStar
+    GLeague
 }
 
 public enum GameMode

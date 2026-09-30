@@ -8,8 +8,8 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  UI LAYER — UI Toolkit (48 UIDocument screens + 2 injected components) │
-│  MainMenu.unity (single scene, 48 screen GameObjects)                   │
+│  UI LAYER — UI Toolkit (47 UIDocument screens + 2 injected components) │
+│  MainMenu.unity (single scene, 47 screen GameObjects)                   │
 │  ScreenManager (navigates by toggling SetActive)                        │
 │  UIScreenController (base class: header/sidebar/nav/config injection)   │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -60,7 +60,7 @@ Common pattern: `public static X Instance { get; private set; }` + guard in `Awa
 | Singleton | Auto-create | `DontDestroyOnLoad` | Notes |
 |---|---|---|---|
 | `AudioManager` | **Yes** — `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]` creates a GameObject `"AudioManager"` | Yes | Also loads volumes/quality from `PlayerPrefs` and plays menu music |
-| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Yes** (`ScreenManager.cs:64`) | Holds 48 serialized `UIDocument` refs |
+| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Yes** (`ScreenManager.cs:64`) | Holds 47 serialized `UIDocument` refs |
 | `CursorManager` | No (GameObject `CursorManager` in scene) | Yes | **Single instance** (the old duplicate was removed) |
 | `DatabaseManager` | No (co-located on the `ScreenManager` GameObject) | Yes | Opens no DB in `Awake`; slot init is driven by UI flow |
 
@@ -106,11 +106,11 @@ Detailed per-phase doc: see `SCENES.md` (single scene) and `SAVE_SYSTEM.md` (slo
 
 ## 5. Navigation model
 
-- `GameScreen` enum (**48 values**, `GameEnums.cs`) maps 1:1 to serialized `UIDocument` fields on `ScreenManager` (`ScreenManager.cs:8-49`). Verified: every enum value has a `case` in `GoTo` and every case maps to a distinct document. No dead enum values remain.
+- `GameScreen` enum (**47 values**, `GameEnums.cs`) maps 1:1 to serialized `UIDocument` fields on `ScreenManager` (`ScreenManager.cs:8-49`). Verified: every enum value has a `case` in `GoTo` and every case maps to a distinct document. No dead enum values remain.
 - `GoTo(screen, mode)`:
   1. Sets `CurrentMode` if `mode != None`.
   2. Sets `CurrentScreen`.
-  3. `switch` → `ShowOnly(document)` → iterates all 48 docs, `SetActive(false)`, then `SetActive(true)` on target.
+  3. `switch` → `ShowOnly(document)` → iterates all 47 docs, `SetActive(false)`, then `SetActive(true)` on target.
 - Screens are **never destroyed**; each controller re-binds everything in `OnEnable` (via the `UIScreenController` base pipeline).
 - `GameScreen` values: Loading, MainMenu, SelectTeam, Preseason, Dashboard, Roster, Calendar, Standings, Palmares, Results, Playoffs, Stats, Records, Market, Finances, Loans, Sponsors, TV, Arena, Messages, MatchDay, GameResults, LoadGame, Employees, Injured, Cartera, SeasonSummary, PlayerAwards, Quintos, EndSeason, NewSeason, Editor, Historial, Training, Quinteto, Dorsales, Manager, Trajectory, Premios, PlayerProfile, Logros.
 

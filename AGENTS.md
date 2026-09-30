@@ -11,7 +11,7 @@
 
 **Tactical Five** — sim de gestión NBA (tipo Football Manager pero de baloncesto), **single-player**, en español, `v1.0.0 · Beta`.
 - **Motor:** Unity `6000.3.15f1` (Unity 6), **UI Toolkit** (UXML/USS), escritorio 1920×1080.
-- **Arquitectura:** **una única escena** (`MainMenu.unity`) con **48 pantallas** como GameObjects `UIDocument`; todo el estado vive en **SQLite**.
+- **Arquitectura:** **una única escena** (`MainMenu.unity`) con **47 pantallas** como GameObjects `UIDocument`; todo el estado vive en **SQLite**.
 - **Juego:** gestionas una de 30 franquicias NBA-like en temporadas infinitas: plantillas, traspasos, agentes libres, salary cap, finanzas, entrenamiento, moral/química/lesiones, draft, playoffs, premios, récords, Hall of Fame, dorsales retirados, logros del GM.
 - **Empresa/producto:** BuitragoStudio · TacticalFive.
 
@@ -28,7 +28,7 @@
 | `Docs/ARCHITECTURE.md` | Módulos, singletons, ciclo de vida, dependencias (Mermaid) | Tareas que cruzan sistemas |
 | `Docs/GAMEPLAY.md` | **Todas las mecánicas con fórmulas exactas** | Tocas simulación, economía, contratos, moral, draft |
 | `Docs/SYSTEMS.md` | 18 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
-| `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, **48 pantallas**, árbol de navegación | Trabajas en UI |
+| `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, **47 pantallas**, árbol de navegación | Trabajas en UI |
 | `Docs/CUSTOM_SCROLLBAR.md` | **Barra de scroll propia** (viewport + content + track/thumb) — el `ScrollView` de Unity no es fiable con el tema actual | Necesitas una lista larga con scroll arrastrable |
 | `Docs/SCENES.md` | La escena única, sus 44 GameObjects | Tocas la escena / añades pantalla |
 | `Docs/EVENTS.md` | Todos los canales de comunicación (static, DB messages, PlayerPrefs, callbacks) | Añades un evento/mensaje nuevo |
@@ -64,7 +64,7 @@
 
 | Hecho | Consecuencia |
 |---|---|
-| **Escena única** `MainMenu.unity`; **48 pantallas** como `UIDocument` GOs; `ScreenManager.GoTo(GameScreen, mode)` conmuta `SetActive` | No cargues escenas. Nunca navegues con `SetActive` directo — usa `ScreenManager.Instance.GoTo`. |
+| **Escena única** `MainMenu.unity`; **47 pantallas** como `UIDocument` GOs; `ScreenManager.GoTo(GameScreen, mode)` conmuta `SetActive` | No cargues escenas. Nunca navegues con `SetActive` directo — usa `ScreenManager.Instance.GoTo`. |
 | **Toda la persistencia es SQLite** vía `DatabaseManager.Instance` (sqlite-net incluido; `DatabaseManager` dividido en **9 partial classes** por dominio: `.Teams/.Players/.Staff/.Manager/.Games/.Seeding/.Records/.Achievements`) | Nunca abras tu propia conexión. Todo acceso pasa por `DatabaseManager`. |
 | **Sin prefabs y sin ScriptableObjects de juego.** Contenido = seeders + tablas SQLite; vistas = UXML+USS | Para nueva entidad → tabla+seeder; para vista nueva → UXML+USS. |
 | **Sin event bus** (ni `Action`/`UnityEvent` entre sistemas). Comunicación: mensajes DB (`MessageData`), estado estático (`GameResultCache`, `ScreenManager.*`, cola de toasts de `AchievementService`), `PlayerPrefs` (solo settings), callbacks UI | No inventes un sistema de eventos. Sigue los canales existentes. |
@@ -152,7 +152,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **No hay lint ni typecheck** (C# se compila solo en el editor de Unity). No hay test runner CLI configurado en `package.json`.
 
-**Tests unitarios (EditMode, Unity Test Runner):** 295 `[Test]` en 18 archivos `Assets/_TacticalFive/Tests/Editor/`:
+**Tests unitarios (EditMode, Unity Test Runner):** 278 `[Test]` en 18 archivos `Assets/_TacticalFive/Tests/Editor/`:
 - `TradeHelperTests.cs` (30) · `StorylineServiceTests.cs` (28) · `GLLeagueHelperTests.cs` (22) · `GameSimulatorTests.cs` (14) · `AdvancedStatsHelperTests.cs` (11) · `GameSaveManagerTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `GamePlanTests.cs` (6) · `PlayerProgressionTests.cs` (6) · `ScoutingHelperTests.cs` (6) · `HistoricalStatsRulesTests.cs` (5) · `CoachSchemeTests.cs` (4) · `DraftGeneratorTests.cs` (4) · `NegotiationHelperTests.cs` (4) · `PlayerDataTests.cs` (4) · `EditModeSmokeTests.cs` (2)
 
 **Correr en el editor:** *Window → General → Test Runner → EditMode → Run All*.
@@ -165,7 +165,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` no es testeable en EditMode (depende de `DatabaseManager.Instance`) salvo con `persistToDb:false`; `GameSimulatorTests.cs` cubre sus helpers públicos (rotación vinculante, sustitución, prórroga sin empate, marcador con plantilla corta).
 
-**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre el Test Runner EditMode (295 en verde a fecha de esta revisión).
+**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre el Test Runner EditMode (278 en verde a fecha de esta revisión).
 
 ---
 
@@ -173,8 +173,8 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 | Archivo | Rol |
 |---|---|
-| `Scripts/Core/ScreenManager.cs` | Navegación (48 `UIDocument`, `GoTo` switch) |
-| `Scripts/Core/UIScreenController.cs` | Base de los 48 controllers (chrome, nav, config modal) |
+| `Scripts/Core/ScreenManager.cs` | Navegación (47 `UIDocument`, `GoTo` switch) |
+| `Scripts/Core/UIScreenController.cs` | Base de los 47 controllers (chrome, nav, config modal) |
 | `Scripts/Data/DatabaseManager.cs` + 8 partials | Único acceso a DB (~150 métodos públicos) |
 | `Scripts/Data/GameSaveManager.cs` | Slots, `template.db`, `saves.json` |
 | `Scripts/GameSimulator.cs` | Motor de partidos (por posesión) |

@@ -467,8 +467,6 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<SeasonAttendanceSummaryData>();
         _db.CreateTable<PlayoffSeriesData>();
         _db.CreateTable<AllStarRosterData>();
-        _db.CreateTable<AllStarEventData>();
-        _db.CreateTable<AllStarEventParticipantData>();
         _db.CreateTable<MilestoneData>();
         _db.CreateTable<InjuryHistoryData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");

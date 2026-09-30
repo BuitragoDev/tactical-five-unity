@@ -7,7 +7,7 @@
 ## 1. `MainMenu.unity`
 
 ### Objective
-Host the entire game: boot/loading, menus, and all 48 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
+Host the entire game: boot/loading, menus, and all 47 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
 
 ### Root GameObjects (49; 50 con `RotationDocument`)
 
@@ -17,11 +17,11 @@ Host the entire game: boot/loading, menus, and all 48 management screens as iner
 | ScreenManager | ScreenManager + DatabaseManager | yes |
 | CursorManager | CursorManager (own GO, single instance) | yes |
 | LoadingDocument | UIDocument + FullScreenUI + LoadingController | yes |
-| 47 × pantalla (46 `*Document` + `TheCity`) | UIDocument + FullScreenUI + controller | no |
+| 46 × pantalla (45 `*Document` + `TheCity`) | UIDocument + FullScreenUI + controller | no |
 
-**[F] 45 documents carry `FullScreenUI`; `SelectTeamDocument` and `PreseasonDocument` do not** (they render full-screen via UXML/controller logic only).
+**[F] 44 documents carry `FullScreenUI`; `SelectTeamDocument` and `PreseasonDocument` do not** (they render full-screen via UXML/controller logic only).
 
-### Screen documents (48 en `GameScreen`; 47 creados en la escena)
+### Screen documents (47 en `GameScreen`; 46 creados en la escena)
 
 | Document GO | Controller |
 |---|---|
@@ -72,7 +72,6 @@ Host the entire game: boot/loading, menus, and all 48 management screens as iner
 | NewSeasonDocument | NewSeasonController |
 | QuintosDocument | QuintosController |
 | GLeagueDocument | GLeagueController |
-| AllStarDocument | AllStarController |
 
 ### Serialization notes
 - `ScreenManager` has **one serialized `UIDocument` field per `GameScreen` value** (all have cases in `GoTo` — no dead enum values).

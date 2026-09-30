@@ -56,9 +56,6 @@
                 <ui:Button name="SubmenuGLeague" class="nav-submenu-item">
                     <ui:Label text="G-LEAGUE" class="nav-submenu-label"/>
                 </ui:Button>
-                <ui:Button name="SubmenuAllStar" class="nav-submenu-item">
-                    <ui:Label text="ALL-STAR" class="nav-submenu-label"/>
-                </ui:Button>
             </ui:VisualElement>
             <ui:Button name="NavPalmares" class="nav-item">
                 <ui:VisualElement name="NavPalmaresIcon" class="nav-icon"/>
