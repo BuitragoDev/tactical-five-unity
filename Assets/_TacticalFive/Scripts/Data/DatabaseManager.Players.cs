@@ -96,6 +96,82 @@ public partial class DatabaseManager
         UpdatePlayer(player);
     }
 
+    // ── PARTE MÉDICO (E2) ─────────────────────────────────
+
+    /// <summary>
+    /// Cierra el expediente de una lesión y lo guarda en el historial médico del jugador.
+    /// `outcome`: recuperado | alta_forzada | recaida.
+    /// </summary>
+    public void RecordInjuryHistory(PlayerData p, string outcome, int days,
+                                    string injuryType = null, string severity = null,
+                                    int seasonId = 0, int gameDay = 0, string date = null)
+    {
+        if (p == null || !EnsureDb()) return;
+        string diag = injuryType ?? p.injury_type ?? "";
+        var def = InjuryCatalog.ByName(diag);
+        string sevLabel = severity ?? InjuryCatalog.SeverityLabel(def != null ? def.severity : InjuryCatalog.SeverityOf(days));
+
+        _db.Insert(new InjuryHistoryData
+        {
+            player_id = p.id,
+            team_id = p.team_id,
+            injury_type = diag,
+            severity = sevLabel,
+            days = days,
+            season_id = seasonId,
+            game_day = gameDay,
+            date = string.IsNullOrEmpty(date) ? GetCurrentDateString(0) : date,
+            outcome = outcome,
+            treated = p.treated
+        });
+    }
+
+    /// <summary>
+    /// Alta forzada (E2): devuelve al jugador antes de tiempo. Cierra el expediente en el
+    /// historial como "alta_forzada" y le deja un riesgo de recaída proporcional a los días
+    /// que le faltaban. Si estaba en la reserva de lesionados, sale de ella.
+    /// </summary>
+    public void ForceReturnFromInjury(PlayerData p, int seasonId = 0, int gameDay = 0, string date = null)
+    {
+        if (p == null || p.injury_days <= 0) return;
+
+        var def = InjuryCatalog.ByName(p.injury_type);
+        var sev = def != null
+            ? def.severity
+            : InjuryCatalog.SeverityOf(p.injury_total_days > 0 ? p.injury_total_days : p.injury_days);
+        int episodeDays = p.injury_total_days > 0 ? p.injury_total_days : p.injury_days;
+
+        RecordInjuryHistory(p, "alta_forzada", episodeDays, p.injury_type,
+                            InjuryCatalog.SeverityLabel(sev), seasonId, gameDay, date);
+
+        p.recovery_risk = InjuryHelper.ForceReturnRisk(p.injury_days, sev);
+        p.injury_days = 0;
+        p.injury_total_days = 0;
+        p.treated = 0;
+        if (p.is_on_ir == 1) p.is_on_ir = 0;
+        UpdatePlayer(p);
+    }
+
+    /// <summary>Historial médico de un jugador, de la lesión más reciente a la más antigua.</summary>
+    public List<InjuryHistoryData> GetInjuryHistory(int playerId, int limit = 6)
+    {
+        if (!EnsureDb()) return new List<InjuryHistoryData>();
+        return _db.Table<InjuryHistoryData>()
+                  .Where(h => h.player_id == playerId)
+                  .OrderByDescending(h => h.id)
+                  .Take(limit)
+                  .ToList();
+    }
+
+    /// <summary>Nº de lesiones registradas por jugador (para el parte médico del perfil).</summary>
+    public Dictionary<int, int> GetInjuryCounts()
+    {
+        if (!EnsureDb()) return new Dictionary<int, int>();
+        return _db.Query<InjuryHistoryData>("SELECT player_id FROM injury_history")
+                  .GroupBy(h => h.player_id)
+                  .ToDictionary(g => g.Key, g => g.Count());
+    }
+
     public List<PlayerData> GetAllPlayers()
     {
         if (!EnsureDb()) return new List<PlayerData>();

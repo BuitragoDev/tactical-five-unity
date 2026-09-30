@@ -959,6 +959,7 @@ using System.Threading.Tasks;
                 conn.BeginTransaction();
                 var recovered = new List<(int id, string first, string last)>();
                 var recoveredFromIR = new List<int>();
+                var rng = new System.Random();
 
                 var teamsPlayToday = new HashSet<int>();
                 if (gameDay > 0)
@@ -970,18 +971,53 @@ using System.Threading.Tasks;
                     }
                 }
 
+                // E2: reputación del jefe de servicios médicos por equipo (acelera la recuperación).
+                var medicoByTeam = new Dictionary<int, int>();
+                foreach (var e in conn.Table<EmployeeData>().Where(e => e.position == "MEDICO").ToList())
+                    medicoByTeam[e.team_id] = e.reputation;
+
+                string today = _season?.current_date ?? "";
+                int seasonId = _season?.id ?? 0;
+
                 var allTeams = conn.Table<TeamData>().ToList();
                 foreach (var team in allTeams)
                 {
                     var players = conn.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
+                    int medicoRep = medicoByTeam.TryGetValue(team.id, out var rep) ? rep : 0;
                     foreach (var p in players)
                     {
                         if (p.injury_days > 0)
                         {
-                            p.injury_days--;
+                            var def = InjuryCatalog.ByName(p.injury_type);
+                            var sev = def != null
+                                ? def.severity
+                                : InjuryCatalog.SeverityOf(p.injury_total_days > 0 ? p.injury_total_days : p.injury_days);
+
+                            p.injury_days = InjuryHelper.EvolveDays(
+                                p.injury_days, p.injury_total_days, sev, medicoRep, p.fisico, rng.NextDouble());
+
                             if (p.injury_days <= 0)
                             {
+                                int episodeDays = p.injury_total_days > 0 ? p.injury_total_days : 1;
+
+                                // Parte médico: se cierra el expediente en el historial.
+                                conn.Insert(new InjuryHistoryData
+                                {
+                                    player_id = p.id,
+                                    team_id = p.team_id,
+                                    injury_type = p.injury_type,
+                                    severity = InjuryCatalog.SeverityLabel(sev),
+                                    days = episodeDays,
+                                    season_id = seasonId,
+                                    game_day = gameDay,
+                                    date = today,
+                                    outcome = "recuperado",
+                                    treated = p.treated
+                                });
+
                                 p.injury_days = 0;
+                                p.injury_total_days = 0;
+                                p.recovery_risk = 0;
                                 p.injury_type = "";
                                 p.treated = 0;
                                 if (p.is_on_ir == 1)
@@ -992,6 +1028,17 @@ using System.Threading.Tasks;
                                 }
                                 if (p.team_id == _myTeam.id)
                                     recovered.Add((p.id, p.first_name, p.last_name));
+                            }
+                            conn.Update(p);
+                        }
+                        else if (p.recovery_risk > 0)
+                        {
+                            // Alta forzada: descansar cura el riesgo; jugar lo mantiene vivo.
+                            p.recovery_risk -= InjuryHelper.RiskDecayForDay(teamsPlayToday.Contains(team.id));
+                            if (p.recovery_risk <= 0)
+                            {
+                                p.recovery_risk = 0;
+                                p.injury_type = "";
                             }
                             conn.Update(p);
                         }

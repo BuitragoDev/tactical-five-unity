@@ -57,7 +57,7 @@ If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `reb
 - `PlayerGameStats` rows per player; `GameData` updated (scores, quarters, `is_played=1`).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
 - Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
-- Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (see `SYSTEMS.md §S12`).
+- Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (`InjuryCatalog`, ver "Lesiones y parte médico").
 
 ### Play-by-play en vivo (Vista de Partido)
 - Toggle **Vista de Partido** en los modales de Configuración: `Directa` (0) o `Play-by-play` (1), persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()`). Solo aplica al flujo día a día (no fast sim).
@@ -215,6 +215,34 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 ## 16. IR / two-way contracts / G-League (Propuesta D)
 
 `GLeagueHelper` (`Scripts/Core/GLeagueHelper.cs`) + constantes en `TradeHelper` (`TWO_WAY_SALARY = 578_000`, `MAX_TWO_WAY = 2`, `IR_MIN_DAYS = 90`, `IsEligibleForTwoWay` = edad ≤23, `IsEligibleForIR` = `injury_days ≥ 90`).
+
+### Lesiones y parte médico (E2)
+
+- **Catálogo (`InjuryCatalog`, puro):** 27 lesiones con `family`, rango de días, peso en el sorteo,
+  **gravedad** (`Leve`/`Moderada`/`Grave`/`Crítica`) y `relapseRisk`. El simulador sortea con
+  `InjuryCatalog.Pick(roll)` y los días con `InjuryHelper.RollDays`. Probabilidad base 0.008/partido
+  (×`1 + (30−fisico)*0.15` si `fisico < 30`); solo se lesiona quien juega (0 minutos ⇒ no).
+- **Pronóstico y progreso:** la lesión guarda `players.injury_total_days` (duración total de la
+  "temporada" de la lesión) y `injury_days` (restantes). El parte médico muestra gravedad,
+  pronóstico (`InjuryCatalog.Pronostico`), barra de **recuperación** (`InjuryHelper.RecoveryProgress`)
+  y el historial de las últimas lesiones del jugador (`injury_history`, en Perfil).
+- **Evolución diaria** (pre-lote, hilo de fondo): `InjuryHelper.EvolveDays` resta 1 día (2 si el jefe
+  de servicios médicos tiene reputación ≥4 y la lesión es leve/moderada, acelerado con ≥5); las
+  graves/críticas con `fisico < 40` pueden estancarse/retroceder un día (nunca por encima del
+  pronóstico). Al completar la recuperación se cierra el expediente en `injury_history` ("recuperado")
+  y se limpia la IR.
+- **Alta forzada (volver antes de tiempo):** el botón **FORZAR ALTA** (parte médico) devuelve al
+  jugador de inmediato a cambio de un **riesgo de recaída** (`players.recovery_risk`, 0-100, calculado
+  con `InjuryHelper.ForceReturnRisk` a partir de los días que faltaban y la gravedad). Ese riesgo se
+  guarda en el historial como "alta_forzada". **Mientras exista riesgo**, cada partido que juega suma
+  `InjuryHelper.RelapseChancePerGame` a la probabilidad de lesionarse y, si cae, la lesión es la
+  **recaída** (`InjuryHelper.Relapse`): misma familia y una gravedad mayor (o la misma agravada +25 %
+  si ya era la peor). Descansar reduce el riesgo (`RiskDecayForDay`: −25 sin partido, −10 jugando);
+  al llegar a 0 desaparece.
+- **Pantalla LESIONADOS:** lista a los lesionados **y** a los que volvieron antes de tiempo (en
+  vigilancia, sin baja pero con riesgo); muestra gravedad, pronóstico, progreso y el tratamiento
+  (reduce días según la reputación del médico). El riesgo pendiente también aparece en el detalle de
+  Plantilla.
 
 ### IR (reserva de lesionados)
 - `players.is_on_ir` (0/1). Botón PONER/SACAR IR en `InjuredController` (`SetPlayerIR`). PONER IR exige elegibilidad y limpia `g_league_assigned`; SACAR IR exige plantilla < `MAX_ROSTER`.

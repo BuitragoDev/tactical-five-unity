@@ -38,6 +38,10 @@ public class PlayerData
     public int injury_days { get; set; }
     public string injury_type { get; set; }
     public int treated { get; set; }
+    /// <summary>Duración total de la lesión actual (para el progreso del parte médico). 0 = sin lesión.</summary>
+    public int injury_total_days { get; set; }
+    /// <summary>0-100: riesgo de recaída tras un alta forzada (volver antes de tiempo). 0 = sin riesgo.</summary>
+    public int recovery_risk { get; set; }
     public int renewal_cooldown_day { get; set; }
     public int seasons_with_team { get; set; } = 1;
     public int morale { get; set; } = 50;

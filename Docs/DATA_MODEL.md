@@ -131,6 +131,25 @@ Hitos de carrera alcanzados (E1). Una fila por hito y jugador; se registran una 
 | `team_id` | INTEGER | equipo en ese momento |
 | `created_at` | TEXT | |
 
+### injury_history (`InjuryHistoryData`)
+
+Parte médico (E2): una fila por lesión cerrada (sobrevive a traspasos y temporadas).
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | INTEGER PK AI | |
+| `player_id` | INTEGER | índice |
+| `team_id` | INTEGER | equipo en el momento de la lesión |
+| `injury_type` | TEXT | diagnóstico (nombre del catálogo) |
+| `severity` | TEXT | LEVE / MODERADA / GRAVE / CRÍTICA |
+| `days` | INTEGER | días totales de baja del episodio |
+| `season_id` / `game_day` / `date` | INTEGER/TEXT | cuándo se cerró |
+| `outcome` | TEXT | `recuperado` o `alta_forzada` |
+| `treated` | INTEGER | 1 si pasó por tratamiento |
+
+`players` añade `injury_total_days` (duración total de la lesión en curso) y `recovery_risk`
+(0-100, riesgo de recaída tras un alta forzada).
+
 ### messages (`MessageData`)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.
 

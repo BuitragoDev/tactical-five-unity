@@ -725,10 +725,16 @@ using System.Linq;
                 _detailPhoto.style.backgroundImage = StyleKeyword.None;
         }
 
-        // Salud
+        // Salud (E2: distingue la baja del riesgo de recaída tras un alta forzada)
         if (p.injury_days > 0)
         {
             _detailHealth.text = $"🏥   {p.injury_type} — {p.injury_days} días de baja";
+            _detailHealth.RemoveFromClassList("detail-health-ok");
+            _detailHealth.AddToClassList("detail-health-injured");
+        }
+        else if (p.recovery_risk > 0)
+        {
+            _detailHealth.text = $"⚠   Alta forzada — riesgo de recaída {p.recovery_risk}%";
             _detailHealth.RemoveFromClassList("detail-health-ok");
             _detailHealth.AddToClassList("detail-health-injured");
         }
