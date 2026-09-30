@@ -264,8 +264,12 @@ public static class GameSimulator
         // (la pantalla Stats filtra solo temporada regular).
         // Los partidos G-League no escriben en player_game_stats: sus stats
         // viven en gleague_season_stats y las gestiona el llamador.
-        // El All-Star tampoco escribe: sus equipos no existen como team_id reales (SIM-14).
-        if (persistToDb && game.game_type != "allstar")
+        // El All-Star SÍ persiste su boxscore, con los team_id de conferencia (-1/-2) que
+        // usa su GameData, para que MatchDay/GameResults lo muestren. Las consultas de
+        // carrera/medias filtran por game_type='regular', así que no cuentan como partido
+        // jugado ni entran en el histórico (ver GetGamesPlayedByPlayerInSeason y
+        // UpdateHistoricalPlayerStatsFromSeason).
+        if (persistToDb)
         {
             DatabaseManager.Instance.DeletePlayerGameStatsForGame(game.id);
             // Solo se persisten los jugadores que realmente jugaron: las filas con
@@ -1267,69 +1271,30 @@ public static class GameSimulator
 
             var player = DatabaseManager.Instance.GetPlayerById(ps.player_id);
             if (player == null || player.injury_days > 0) continue;
+
+            // E2: un jugador que volvió antes de tiempo (alta forzada) arrastra riesgo de
+            // recaída; si se lesiona en ese estado, la lesión es una recaída más grave.
+            bool relapse = player.recovery_risk > 0;
             float injuryChance = 0.008f;
             if (ps.fisico < 30)
                 injuryChance *= 1f + (30f - ps.fisico) * 0.15f;
+            if (relapse)
+                injuryChance += InjuryHelper.RelapseChancePerGame(player.recovery_risk, ps.fisico);
             if (UnityEngine.Random.value >= injuryChance) continue;
 
-            var injury = PickInjury();
-            player.injury_type = injury.type;
-            player.injury_days = UnityEngine.Random.Range(injury.minDays, injury.maxDays + 1);
+            InjuryDef injury = relapse
+                ? InjuryHelper.Relapse(InjuryCatalog.ByName(player.injury_type), UnityEngine.Random.value)
+                : InjuryCatalog.Pick(UnityEngine.Random.value);
+            int days = InjuryHelper.RollDays(injury, UnityEngine.Random.value);
+            player.injury_type = injury.name;
+            player.injury_days = days;
+            player.injury_total_days = days;
             player.treated = 0;
+            player.recovery_risk = 0;
             DatabaseManager.Instance.UpdatePlayer(player);
-            injuries.Add((ps.player_id, injury.type, player.injury_days));
+            injuries.Add((ps.player_id, injury.name, days));
         }
         return injuries;
     }
 
-    static (string type, int minDays, int maxDays, int weight)[] INJURY_TYPES =
-    {
-        // Muy comunes
-        ("Sobrecarga muscular", 1, 3, 60),
-        ("Calambres musculares", 1, 2, 55),
-        ("Golpe / contusión leve", 1, 4, 50),
-        ("Esguince leve de tobillo", 3, 7, 40),
-        ("Distensión muscular", 5, 10, 35),
-        ("Tendinitis leve", 4, 8, 30),
-        ("Lumbalgia", 3, 8, 28),
-
-        // Comunes
-        ("Esguince moderado de tobillo", 8, 14, 25),
-        ("Contusión ósea", 10, 21, 20),
-        ("Tendinitis rotuliana", 7, 14, 18),
-        ("Fascitis plantar", 7, 15, 15),
-        ("Esguince de muñeca", 7, 14, 15),
-        ("Lesión en el gemelo", 10, 18, 14),
-        ("Contractura muscular", 5, 12, 14),
-
-        // Poco frecuentes
-        ("Rotura fibrilar leve", 14, 21, 12),
-        ("Subluxación de dedo", 10, 18, 10),
-        ("Esguince grave de tobillo", 14, 28, 8),
-        ("Luxación de hombro", 21, 35, 7),
-        ("Fractura por estrés", 21, 35, 6),
-        ("Rotura fibrilar grave", 21, 42, 5),
-
-        // Graves
-        ("Rotura parcial de ligamentos", 28, 65, 4),
-        ("Rotura de ligamentos", 42, 90, 3),
-        ("Rotura de menisco", 35, 70, 3),
-        ("Fractura de mano", 30, 66, 2),
-        ("Fractura de muñeca", 45, 75, 2),
-        ("Rotura del tendón de Aquiles", 120, 240, 1),
-        ("Rotura del ligamento cruzado anterior", 180, 300, 1),
-    };
-
-    static (string type, int minDays, int maxDays, int weight) PickInjury()
-    {
-        int total = INJURY_TYPES.Sum(i => i.weight);
-        float r = UnityEngine.Random.value * total;
-        float cum = 0;
-        foreach (var inj in INJURY_TYPES)
-        {
-            cum += inj.weight;
-            if (r <= cum) return inj;
-        }
-        return INJURY_TYPES[0];
-    }
 }

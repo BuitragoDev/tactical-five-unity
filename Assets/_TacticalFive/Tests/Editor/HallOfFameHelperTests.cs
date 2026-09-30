@@ -69,4 +69,26 @@ public class HallOfFameHelperTests
         Assert.That(HallOfFameHelper.ShouldInduct(rings: 0, finalsMvps: 0,
             careerPoints: 0, careerRebounds: 0, careerAssists: 0), Is.False);
     }
+
+    [Test]
+    public void ShouldInduct_TenAllStarsIsEnough()
+    {
+        Assert.That(HallOfFameHelper.ShouldInduct(0, 0, 0, 0, 0, allStars: 10), Is.True);
+        Assert.That(HallOfFameHelper.ShouldInduct(0, 0, 0, 0, 0, allStars: 9), Is.False);
+    }
+
+    [Test]
+    public void ShouldInduct_ThreeSeasonMvpsIsEnough()
+    {
+        Assert.That(HallOfFameHelper.ShouldInduct(0, 0, 0, 0, 0, seasonMvps: 3), Is.True);
+        Assert.That(HallOfFameHelper.ShouldInduct(0, 0, 0, 0, 0, seasonMvps: 2), Is.False);
+    }
+
+    [Test]
+    public void ShouldInduct_KeepsTheClassicCriteria()
+    {
+        Assert.That(HallOfFameHelper.ShouldInduct(rings: 1, 0, 0, 0, 0), Is.True);
+        Assert.That(HallOfFameHelper.ShouldInduct(0, 0, careerPoints: 30000, 0, 0), Is.True);
+        Assert.That(HallOfFameHelper.ShouldInduct(0, 0, 0, 0, 0), Is.False);
+    }
 }

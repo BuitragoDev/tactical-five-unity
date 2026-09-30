@@ -375,21 +375,55 @@
     white-space: nowrap;
 }
 
+/* Cuerpo de la tabla con barra propia: alto fijo ~8 filas, la cabecera queda fuera y fija. */
 .trajectory-table-body-scroll {
-    flex-grow: 1;
+    flex-shrink: 0;
+    height: 272px;
+}
+
+.trajectory-scroll-row {
+    flex-direction: row;
+    height: 100%;
     min-height: 0;
 }
 
-.trajectory-table-body-scroll .unity-scroll-view__content-viewport {
+.trajectory-table-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
     overflow: hidden;
+    position: relative;
 }
 
-.trajectory-table-body-scroll .unity-scroll-view__content-container {
-    flex-grow: 0;
+.trajectory-scrollbar {
+    width: 12px;
+    min-width: 12px;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-left: 4px;
+    background-color: rgba(25, 18, 8, 0.92);
+    border-left-width: 1px;
+    border-left-color: rgba(120, 95, 30, 0.35);
+    position: relative;
+}
+
+.trajectory-scrollbar-thumb {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 0;
+    height: 40px;
+    background-color: rgb(160, 128, 30);
+    border-radius: 3px;
+}
+
+.trajectory-scrollbar:hover .trajectory-scrollbar-thumb {
+    background-color: rgb(212, 160, 23);
 }
 
 .trajectory-table-body {
     flex-direction: column;
+    flex-shrink: 0;
 }
 
 .trajectory-table-row {
@@ -471,4 +505,67 @@
     font-size: 18px;
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
+}
+
+/* ── HITOS DE CARRERA (E1) ── */
+.trajectory-milestones {
+    flex-direction: column;
+    margin-top: 14px;
+}
+.trajectory-milestones-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.trajectory-milestone {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 8px 8px 0;
+    padding: 6px 12px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 8px;
+}
+.trajectory-milestone-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.trajectory-milestone-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(248, 196, 64);
+}
+.trajectory-milestone-date {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(150, 162, 186);
+    margin-left: 8px;
+}
+.trajectory-milestone--next {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(60, 90, 150);
+}
+.trajectory-milestone--next .trajectory-milestone-text { color: rgb(150, 190, 255); }
+.trajectory-milestone-progress {
+    width: 120px;
+    height: 6px;
+    margin-left: 10px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+}
+.trajectory-milestone-progress-fill {
+    height: 6px;
+    background-color: rgb(212, 160, 23);
+    border-radius: 3px;
+}
+.trajectory-milestone-pct {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(179, 190, 214);
+    margin-left: 8px;
 }

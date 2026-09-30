@@ -24,13 +24,25 @@ public class InjuredController : UIScreenController
 
     // Injured cards
     private VisualElement _injuredCards;
-    private VisualElement _injuredPaginator;
+    private VisualElement _injuredViewport;
+    private VisualElement _injuredScrollTrack;
+    private VisualElement _injuredScrollThumb;
+    private CustomScrollbar.Handle _injuredScrollBar;
 
     // League injured modal
     private VisualElement _leagueInjuredOverlay;
     private VisualElement _leagueInjuredList;
     private Button _btnLeagueInjured;
     private Button _btnLeagueInjuredClose;
+
+    // Force return modal (E2)
+    private VisualElement _forceReturnOverlay;
+    private Label _forceReturnWho;
+    private Label _forceReturnDiag;
+    private Label _forceReturnRisk;
+    private Button _btnForceReturnCancel;
+    private Button _btnForceReturnConfirm;
+    private PlayerData _forceReturnPlayer;
 
     // Treatment result modal
     private VisualElement _treatmentResultOverlay;
@@ -51,9 +63,7 @@ public class InjuredController : UIScreenController
     private Texture2D _calendarTex;
     private Texture2D _personTex;
 
-    // Pagination
-    private int _currentPage;
-    private const int ITEMS_PER_PAGE = 6;
+    // League injured modal data
     private List<(TeamData team, PlayerData player)> _leagueInjuredPlayers = new();
 
     // League injured scrollbar
@@ -74,12 +84,25 @@ public class InjuredController : UIScreenController
         _medStaffCard = _root.Q<VisualElement>("MedStaffCard");
         _medStaffEmpty = _root.Q<VisualElement>("MedStaffEmpty");
         _injuredCards = _root.Q<VisualElement>("InjuredCards");
-        _injuredPaginator = _root.Q<VisualElement>("InjuredPaginator");
+        _injuredViewport = _root.Q<VisualElement>("InjuredViewport");
+        _injuredScrollTrack = _root.Q<VisualElement>("InjuredScrollTrack");
+        _injuredScrollThumb = _root.Q<VisualElement>("InjuredScrollThumb");
+
+        // Barra de scroll propia para la lista de lesionados (se re-enlaza en cada visita).
+        _injuredScrollBar = CustomScrollbar.Bind(_injuredViewport, _injuredCards,
+                                                 _injuredScrollTrack, _injuredScrollThumb);
 
         _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
         _leagueInjuredList = _root.Q<VisualElement>("LeagueInjuredList");
         _btnLeagueInjured = _root.Q<Button>("BtnLeagueInjured");
         _btnLeagueInjuredClose = _root.Q<Button>("BtnLeagueInjuredClose");
+
+        _forceReturnOverlay = _root.Q<VisualElement>("ForceReturnOverlay");
+        _forceReturnWho = _root.Q<Label>("ForceReturnWho");
+        _forceReturnDiag = _root.Q<Label>("ForceReturnDiag");
+        _forceReturnRisk = _root.Q<Label>("ForceReturnRisk");
+        _btnForceReturnCancel = _root.Q<Button>("BtnForceReturnCancel");
+        _btnForceReturnConfirm = _root.Q<Button>("BtnForceReturnConfirm");
 
         _treatmentResultOverlay = _root.Q<VisualElement>("TreatmentResultOverlay");
         _treatmentResultTitle = _root.Q<Label>("TreatmentResultTitle");
@@ -127,8 +150,9 @@ public class InjuredController : UIScreenController
     void ReloadData()
     {
         _allPlayers = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        _injuredPlayers = _allPlayers.Where(p => p.injury_days > 0).ToList();
-        _currentPage = 0;
+        // El parte médico incluye a los lesionados y a los que volvieron antes de tiempo
+        // (sin baja pero con riesgo de recaída pendiente).
+        _injuredPlayers = _allPlayers.Where(p => p.injury_days > 0 || p.recovery_risk > 0).ToList();
 
         var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         _medico = staff.FirstOrDefault(e => e.position == "MEDICO");
@@ -138,6 +162,13 @@ public class InjuredController : UIScreenController
     {
         base.RegisterCallbacks();
         _btnTreatmentOk?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseTreatmentResult(); });
+        _btnForceReturnCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseForceReturnModal(); });
+        _btnForceReturnConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmForceReturn(); });
+        _forceReturnOverlay?.RegisterCallback<ClickEvent>(e =>
+        {
+            if (e.target == _forceReturnOverlay)
+            { PlayClick(); CloseForceReturnModal(); }
+        });
         _btnLeagueInjured?.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenLeagueInjuredModal(); });
         _btnLeagueInjuredClose?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseLeagueInjuredModal(); });
         _leagueInjuredOverlay?.RegisterCallback<ClickEvent>(e =>
@@ -148,6 +179,8 @@ public class InjuredController : UIScreenController
         if (CursorManager.Instance == null) return;
         var cursor = CursorManager.Instance;
         cursor.RegisterHandCursor(_btnTreatmentOk);
+        cursor.RegisterHandCursor(_btnForceReturnCancel);
+        cursor.RegisterHandCursor(_btnForceReturnConfirm);
         cursor.RegisterHandCursor(_btnLeagueInjured);
         cursor.RegisterHandCursor(_btnLeagueInjuredClose);
     }
@@ -160,6 +193,10 @@ public class InjuredController : UIScreenController
         _root.Q<VisualElement>("RosterSubmenu")?.AddToClassList("nav-submenu--visible");
         _root.Q<Button>("SubmenuLesionados")?.AddToClassList("nav-submenu-item--active");
         _treatmentResultOverlay.style.display = DisplayStyle.None;
+        // El modal de alta forzada se controla por clases del tema (modal-overlay--visible
+        // + modal-box--visible); al refrescar se limpian ambas.
+        _forceReturnOverlay.RemoveFromClassList("modal-overlay--visible");
+        _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.RemoveFromClassList("modal-box--visible");
     }
 
     protected override void RefreshHeader()
@@ -302,9 +339,6 @@ public class InjuredController : UIScreenController
     void BuildInjuredCards()
     {
         _injuredCards.Clear();
-        _injuredPaginator?.Clear();
-        if (_injuredPaginator != null)
-            _injuredPaginator.style.display = DisplayStyle.None;
 
         int total = _injuredPlayers.Count;
 
@@ -331,25 +365,31 @@ public class InjuredController : UIScreenController
 
             emptyWrapper.Add(emptyInner);
             _injuredCards.Add(emptyWrapper);
+            CustomScrollbar.Reset(_injuredScrollBar);
             return;
         }
 
-        int totalPages = Mathf.CeilToInt((float)total / ITEMS_PER_PAGE);
-        if (totalPages < 1) totalPages = 1;
-        if (_currentPage >= totalPages) _currentPage = totalPages - 1;
-        if (_currentPage < 0) _currentPage = 0;
-
-        int startIdx = _currentPage * ITEMS_PER_PAGE;
-        int endIdx = Mathf.Min(startIdx + ITEMS_PER_PAGE, total);
-
         bool hasMedico = _medico != null;
 
-        for (int i = startIdx; i < endIdx; i++)
+        // Se agrupan las cards en filas de 3 (rejilla). El espaciado entre filas vive en la
+        // fila (clase injury-row), no en la card, para que la última fila no deje hueco.
+        const int CARDS_PER_ROW = 3;
+        VisualElement row = null;
+
+        for (int i = 0; i < total; i++)
         {
             var player = _injuredPlayers[i];
             bool isRecovered = player.injury_days == 0;
+            bool atRisk = isRecovered && player.recovery_risk > 0;
             bool alreadyTreated = player.treated == 1;
             bool onIR = player.is_on_ir == 1;
+
+            var def = InjuryCatalog.ByName(player.injury_type);
+            var sev = def != null
+                ? def.severity
+                : InjuryCatalog.SeverityOf(player.injury_total_days > 0 ? player.injury_total_days : player.injury_days);
+            int totalDays = player.injury_total_days > 0 ? player.injury_total_days : player.injury_days;
+            int progress = InjuryHelper.RecoveryProgress(player.injury_days, totalDays);
 
             var cardWrapper = new VisualElement();
             cardWrapper.AddToClassList("injury-card");
@@ -391,7 +431,12 @@ public class InjuredController : UIScreenController
 
             var statusLbl = new Label();
             statusLbl.AddToClassList("card-status");
-            if (isRecovered)
+            if (atRisk)
+            {
+                statusLbl.AddToClassList("card-status--recovered");
+                statusLbl.text = "! ALTA FORZADA";
+            }
+            else if (isRecovered)
             {
                 statusLbl.AddToClassList("card-status--recovered");
                 statusLbl.text = "\u2713 RECUPERADO";
@@ -436,14 +481,16 @@ public class InjuredController : UIScreenController
             injuryName.AddToClassList("card-injury-name");
             if (isRecovered)
                 injuryName.AddToClassList("card-injury-name--recovered");
-            injuryName.text = isRecovered
-                ? "Fase final de recuperaci\u00f3n"
-                : (string.IsNullOrEmpty(player.injury_type) ? "Lesi\u00f3n" : player.injury_type);
+            injuryName.text = atRisk
+                ? "En vigilancia m\u00e9dica"
+                : (isRecovered
+                    ? "Fase final de recuperaci\u00f3n"
+                    : (string.IsNullOrEmpty(player.injury_type) ? "Lesi\u00f3n" : player.injury_type));
             injuryInfo.Add(injuryName);
 
             var subtitleLbl = new Label();
             subtitleLbl.AddToClassList("card-injury-subtitle");
-            subtitleLbl.text = "Duraci\u00f3n estimada";
+            subtitleLbl.text = atRisk ? "Alta forzada" : "Duraci\u00f3n estimada";
             injuryInfo.Add(subtitleLbl);
 
             var daysRow = new VisualElement();
@@ -461,10 +508,43 @@ public class InjuredController : UIScreenController
             daysLbl.AddToClassList("card-injury-days-text");
             if (isRecovered)
                 daysLbl.AddToClassList("card-injury-days-text--recovered");
-            daysLbl.text = $"{player.injury_days} d\u00eda{(player.injury_days != 1 ? "s" : "")}";
+            daysLbl.text = atRisk
+                ? "Sin baja"
+                : $"{player.injury_days} d\u00eda{(player.injury_days != 1 ? "s" : "")}";
             daysRow.Add(daysLbl);
 
             injuryInfo.Add(daysRow);
+
+            // Pronóstico del parte médico (rango total de la lesión).
+            var pronLbl = new Label(atRisk
+                ? $"Riesgo de reca\u00edda: {player.recovery_risk}%"
+                : $"Pron\u00f3stico: {(def != null ? InjuryCatalog.Pronostico(def) : $"{totalDays} d\u00edas")}");
+            pronLbl.AddToClassList("card-pronostico");
+            injuryInfo.Add(pronLbl);
+
+            // Progreso de recuperación (E2).
+            if (!atRisk)
+            {
+                var progressRow = new VisualElement();
+                progressRow.AddToClassList("card-progress-row");
+
+                var track = new VisualElement();
+                track.AddToClassList("card-progress-track");
+                var fill = new VisualElement();
+                fill.AddToClassList("card-progress-fill");
+                if (progress < 40) fill.AddToClassList("card-progress-fill--low");
+                else if (progress < 75) fill.AddToClassList("card-progress-fill--mid");
+                fill.style.width = new StyleLength(new Length(progress, LengthUnit.Percent));
+                track.Add(fill);
+                progressRow.Add(track);
+
+                var progLbl = new Label($"Recuperaci\u00f3n {progress}%");
+                progLbl.AddToClassList("card-progress-text");
+                progressRow.Add(progLbl);
+
+                injuryInfo.Add(progressRow);
+            }
+
             body.Add(injuryInfo);
 
             card.Add(body);
@@ -490,44 +570,34 @@ public class InjuredController : UIScreenController
 
             var sevLabel = new Label();
             sevLabel.AddToClassList("card-severity-label");
-            string sevText = GetSeverityLabel(player.injury_days);
-            sevLabel.text = sevText;
-            if (isRecovered || player.injury_days == 0)
+            sevLabel.text = atRisk ? "VIGILANCIA" : InjuryCatalog.SeverityLabel(sev);
+            if (atRisk)
                 sevLabel.AddToClassList("card-severity-label--safe");
-            else if (player.injury_days <= 3)
-                sevLabel.AddToClassList("card-severity-label--leve");
-            else if (player.injury_days <= 14)
-                sevLabel.AddToClassList("card-severity-label--moderada");
+            else if (sev <= InjurySeverity.Moderada)
+                sevLabel.AddToClassList(sev == InjurySeverity.Leve ? "card-severity-label--leve" : "card-severity-label--moderada");
             else
                 sevLabel.AddToClassList("card-severity-label--severa");
             severity.Add(sevLabel);
 
-            var bar = new VisualElement();
-            bar.AddToClassList("card-severity-bar");
-            int segments = GetSeveritySegments(player.injury_days);
-            string segColor = isRecovered || player.injury_days == 0
-                ? "green"
-                : (player.injury_days <= 14 ? "orange" : "red");
-            for (int s = 0; s < 4; s++)
+            // Jugador que volvió antes de tiempo: se muestra su riesgo de recaída.
+            if (atRisk)
             {
-                var seg = new VisualElement();
-                seg.AddToClassList("severity-segment");
-                if (s < segments)
-                {
-                    seg.AddToClassList(segColor == "green" ? "severity-segment--filled-green"
-                        : segColor == "orange" ? "severity-segment--filled-orange"
-                        : "severity-segment--filled-red");
-                }
-                bar.Add(seg);
+                var riskLbl = new Label($"RIESGO {player.recovery_risk}%");
+                riskLbl.AddToClassList("card-risk-badge");
+                severity.Add(riskLbl);
             }
-            severity.Add(bar);
+
             footer.Add(severity);
 
             // ── BUTTONS ──
             var buttons = new VisualElement();
             buttons.AddToClassList("card-buttons");
 
-            if (isRecovered)
+            if (atRisk)
+            {
+                // En vigilancia médica: no hay acción posible, solo esperar/descansar.
+            }
+            else if (isRecovered)
             {
                 var aptoBtn = new Button();
                 aptoBtn.AddToClassList("btn-card-apt");
@@ -599,59 +669,60 @@ public class InjuredController : UIScreenController
                     }
                 }
                 buttons.Add(treatBtn);
+
+                // E2: alta forzada (volver antes de tiempo). Solo se permite entre 2 y 7 días
+                // restantes (regla InjuryHelper.CanForceReturn); fuera de ese rango "SIN FORZAR".
+                // Desde la IR además debe caber en la plantilla.
+                var forceBtn = new Button();
+                forceBtn.AddToClassList("btn-card-force");
+                bool forceBlocked = onIR && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER;
+                bool canForce = InjuryHelper.CanForceReturn(player.injury_days);
+                if (forceBlocked)
+                {
+                    forceBtn.text = "PLANTILLA LLENA";
+                    forceBtn.AddToClassList("btn-card-no-apt--disabled");
+                    forceBtn.SetEnabled(false);
+                }
+                else if (!canForce)
+                {
+                    forceBtn.text = "SIN FORZAR";
+                    forceBtn.AddToClassList("btn-card-no-apt--disabled");
+                    forceBtn.SetEnabled(false);
+                }
+                else
+                {
+                    forceBtn.text = "FORZAR ALTA";
+                    forceBtn.RegisterCallback<ClickEvent>(_ => { PlayClick(); OpenForceReturnModal(player); });
+                    if (CursorManager.Instance != null)
+                    {
+                        forceBtn.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
+                        forceBtn.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
+                    }
+                }
+                buttons.Add(forceBtn);
             }
 
             footer.Add(buttons);
             card.Add(footer);
 
             cardWrapper.Add(card);
-            _injuredCards.Add(cardWrapper);
+
+            if (row == null || row.childCount >= CARDS_PER_ROW)
+            {
+                row = new VisualElement();
+                row.AddToClassList("injury-row");
+                _injuredCards.Add(row);
+            }
+            row.Add(cardWrapper);
         }
 
-        // ── PAGINATION BAR ──
-        if (totalPages > 1 && _injuredPaginator != null)
-        {
-            _injuredPaginator.style.display = DisplayStyle.Flex;
+        // La última fila no lleva el margen grande entre filas (solo un pequeño colchón
+        // para que el scroll no corte las cards).
+        if (row != null)
+            row.AddToClassList("injury-row--last");
 
-            var btnPrev = new Button();
-            btnPrev.AddToClassList("injured-paginator-btn");
-            btnPrev.text = "\u25C0";
-            btnPrev.SetEnabled(_currentPage > 0);
-            if (_currentPage == 0) btnPrev.AddToClassList("injured-paginator-btn--disabled");
-            int prevPage = _currentPage - 1;
-            btnPrev.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(prevPage); });
-            if (CursorManager.Instance != null)
-            {
-                btnPrev.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
-                btnPrev.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
-            }
-            _injuredPaginator.Add(btnPrev);
-
-            var pageLbl = new Label();
-            pageLbl.AddToClassList("injured-paginator-label");
-            pageLbl.text = $"{_currentPage + 1} / {totalPages}";
-            _injuredPaginator.Add(pageLbl);
-
-            var btnNext = new Button();
-            btnNext.AddToClassList("injured-paginator-btn");
-            btnNext.text = "\u25B6";
-            btnNext.SetEnabled(_currentPage < totalPages - 1);
-            if (_currentPage >= totalPages - 1) btnNext.AddToClassList("injured-paginator-btn--disabled");
-            int nextPage = _currentPage + 1;
-            btnNext.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(nextPage); });
-            if (CursorManager.Instance != null)
-            {
-                btnNext.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
-                btnNext.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
-            }
-            _injuredPaginator.Add(btnNext);
-        }
-    }
-
-    void GoToPage(int page)
-    {
-        _currentPage = page;
-        BuildInjuredCards();
+        // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
+        CustomScrollbar.Reset(_injuredScrollBar);
     }
 
     // ── HELPERS ──
@@ -723,22 +794,6 @@ public class InjuredController : UIScreenController
         return _injuryIcons.TryGetValue("lesion", out var fallbackTex) ? fallbackTex : null;
     }
 
-    string GetSeverityLabel(int injuryDays)
-    {
-        if (injuryDays <= 0) return "SIN RIESGO";
-        if (injuryDays <= 3) return "LEVE";
-        if (injuryDays <= 14) return "MODERADA";
-        return "SEVERA";
-    }
-
-    int GetSeveritySegments(int injuryDays)
-    {
-        if (injuryDays <= 0) return 4;
-        if (injuryDays <= 3) return 1;
-        if (injuryDays <= 14) return 2;
-        return 3;
-    }
-
     // ── IR (RESERVA DE LESIONADOS) ──
 
     void SetPlayerIR(PlayerData player, bool onIR)
@@ -803,6 +858,88 @@ public class InjuredController : UIScreenController
     void CloseTreatmentResult()
     {
         _treatmentResultOverlay.style.display = DisplayStyle.None;
+    }
+
+    // ── ALTA FORZADA (E2) ──
+
+    void OpenForceReturnModal(PlayerData player)
+    {
+        if (player == null || player.injury_days <= 0) return;
+
+        // Solo forzable entre 2 y 7 días restantes (regla pura).
+        if (!InjuryHelper.CanForceReturn(player.injury_days)) return;
+
+        _forceReturnPlayer = player;
+
+        var def = InjuryCatalog.ByName(player.injury_type);
+        var sev = def != null
+            ? def.severity
+            : InjuryCatalog.SeverityOf(player.injury_total_days > 0 ? player.injury_total_days : player.injury_days);
+        int risk = InjuryHelper.ForceReturnRisk(player.injury_days, sev);
+        int perGame = InjuryHelper.RelapseChancePercent(risk, player.fisico);
+
+        _forceReturnWho.text = $"{player.first_name} {player.last_name}";
+        _forceReturnDiag.text = $"Diagn\u00f3stico: {player.injury_type} ({InjuryCatalog.SeverityLabel(sev)}) \u2014 {player.injury_days} d\u00edas restantes";
+        // B1: además del riesgo nominal, se muestra la probabilidad REAL por partido.
+        _forceReturnRisk.text =
+            $"Riesgo asumido: {risk}% nominal \u00b7 {perGame}% de reca\u00edda por partido jugado";
+
+        // Advertencia visual según el riesgo: verde (<25), dorado (25-49), rojo (≥50).
+        _forceReturnRisk.RemoveFromClassList("modal-paragraph--highlight");
+        _forceReturnRisk.RemoveFromClassList("force-return-risk--low");
+        _forceReturnRisk.RemoveFromClassList("force-return-risk--mid");
+        _forceReturnRisk.RemoveFromClassList("force-return-risk--high");
+        if (risk >= 50)
+            _forceReturnRisk.AddToClassList("force-return-risk--high");
+        else if (risk >= 25)
+            _forceReturnRisk.AddToClassList("force-return-risk--mid");
+        else
+            _forceReturnRisk.AddToClassList("force-return-risk--low");
+
+        _forceReturnOverlay.style.backgroundColor = new StyleColor(new Color(0, 0, 0, 0.35f));
+        _forceReturnOverlay.AddToClassList("modal-overlay--visible");
+        _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.AddToClassList("modal-box--visible");
+    }
+
+    void CloseForceReturnModal()
+    {
+        _forceReturnOverlay.RemoveFromClassList("modal-overlay--visible");
+        _forceReturnOverlay.Q<VisualElement>(null, "modal-box")?.RemoveFromClassList("modal-box--visible");
+        _forceReturnPlayer = null;
+    }
+
+    void ConfirmForceReturn()
+    {
+        var player = _forceReturnPlayer;
+        if (player == null) { CloseForceReturnModal(); return; }
+
+        string name = $"{player.first_name} {player.last_name}";
+        string diag = player.injury_type;
+        int risk = 0;
+
+        DatabaseManager.Instance.ForceReturnFromInjury(
+            player, _season?.id ?? 0, _season?.current_game_day ?? 0, _season?.current_date);
+        risk = player.recovery_risk;
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
+            title = $"Alta forzada: {name}",
+            body = $"El jugador vuelve antes de tiempo de su {diag.ToLowerInvariant()}. El cuerpo m\u00e9dico estima un {risk}% de riesgo de reca\u00edda hasta que se recupere del todo: descansar lo reduce, jugar lo mantiene.",
+            game_day = _season?.current_game_day ?? 0,
+            game_date = _season?.current_date ?? "",
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            is_read = 0,
+            category = NewsCategory.LESIONES,
+            news_type = NewsType.LESION
+        });
+
+        CloseForceReturnModal();
+        ReloadData();
+        Refresh();
     }
 
     // ── LEAGUE INJURED ──

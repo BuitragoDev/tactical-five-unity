@@ -467,6 +467,8 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<SeasonAttendanceSummaryData>();
         _db.CreateTable<PlayoffSeriesData>();
         _db.CreateTable<AllStarRosterData>();
+        _db.CreateTable<MilestoneData>();
+        _db.CreateTable<InjuryHistoryData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeaguePlayers_TeamId ON gleague_players(gleague_team_id)");
@@ -653,6 +655,8 @@ public partial class DatabaseManager : MonoBehaviour
         AddColumnIfMissing("players", "has_team_option", "has_team_option INTEGER DEFAULT 0");
         AddColumnIfMissing("players", "has_player_option", "has_player_option INTEGER DEFAULT 0");
         AddColumnIfMissing("players", "waived_game_day", "waived_game_day INTEGER DEFAULT -1");
+        AddColumnIfMissing("players", "injury_total_days", "injury_total_days INTEGER DEFAULT 0");
+        AddColumnIfMissing("players", "recovery_risk", "recovery_risk INTEGER DEFAULT 0");
         if (addedGuaranteed)
             _db.Execute("UPDATE players SET guaranteed_years = contract_years WHERE contract_years > 0");
 
@@ -908,6 +912,11 @@ public partial class DatabaseManager : MonoBehaviour
         AddColumnIfMissing("teams", "plan_offense", "plan_offense INTEGER DEFAULT 0");
         AddColumnIfMissing("teams", "plan_defense", "plan_defense INTEGER DEFAULT 1");
 
+        // E3: tamaño de mercado (economía). Las partidas antiguas no lo traen: se rellena por
+        // reputación (proxy) para que la asistencia/patrocinios no arranquen a cero.
+        if (AddColumnIfMissing("teams", "market_size", "market_size INTEGER DEFAULT 0"))
+            _db.Execute("UPDATE teams SET market_size = MIN(100, 28 + reputation * 14) WHERE market_size = 0");
+
         // Add on_trade_block to players if missing
         try
         {
@@ -938,6 +947,15 @@ public partial class DatabaseManager : MonoBehaviour
             }
             MarkMigrationApplied("role_from_overall");
             Debug.Log($"[DB] Migration: rol por media asignado a {sinRol.Count} jugadores");
+        }
+
+        // E2: las lesiones anteriores al parte médico no guardaban la duración total; se
+        // rellena con los días restantes para que el progreso arranque en un valor razonable.
+        if (!IsMigrationApplied("injury_totals_backfill"))
+        {
+            _db.Execute("UPDATE players SET injury_total_days = injury_days WHERE injury_days > 0 AND injury_total_days = 0");
+            MarkMigrationApplied("injury_totals_backfill");
+            Debug.Log("[DB] Migration: duración total de lesiones en curso rellenada");
         }
 
         // Limpieza one-time: las filas de player_game_stats con 0 minutos (DNPs)
@@ -1333,7 +1351,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
     }
 
-    bool IsMigrationApplied(string name)
+    public bool IsMigrationApplied(string name)
     {
         try
         {
@@ -1346,7 +1364,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
     }
 
-    void MarkMigrationApplied(string name)
+    public void MarkMigrationApplied(string name)
     {
         try
         {

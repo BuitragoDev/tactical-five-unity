@@ -251,6 +251,68 @@
 }
 
 /* Attributes section */
+.playerprofile-injuries {
+    flex-direction: column;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    background-color: rgb(18, 21, 28);
+    border-radius: 4px;
+}
+
+.playerprofile-injuries-body {
+    flex-direction: column;
+    margin-top: 6px;
+}
+
+.playerprofile-injury-row {
+    flex-direction: row;
+    align-items: center;
+    height: 26px;
+    flex-shrink: 0;
+}
+
+.playerprofile-injury-date {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(150, 162, 190);
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.playerprofile-injury-type {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    color: rgb(179, 190, 214);
+    letter-spacing: 1px;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.playerprofile-injury-days {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(150, 162, 190);
+    width: 70px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+}
+
+.playerprofile-injury-outcome {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    letter-spacing: 1px;
+    width: 110px;
+    -unity-text-align: middle-right;
+    flex-shrink: 0;
+    color: rgb(150, 162, 190);
+}
+
+.playerprofile-injury-outcome--forced {
+    color: rgb(230, 120, 100);
+}
+
 .playerprofile-attrs-section {
     background-color: rgb(28, 33, 48);
     border-width: 1px;
@@ -301,7 +363,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
     color: rgb(122, 138, 170);
-    margin-top: 4px;
+    margin-top: -8px;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -364,4 +426,49 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;
     color: rgb(122, 138, 170);
+}
+
+/* ── HITOS DE CARRERA (E1) ── */
+.playerprofile-milestones {
+    flex-direction: column;
+    margin-top: 8px;
+}
+.playerprofile-milestones-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.playerprofile-milestone {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 6px 6px 0;
+    padding: 4px 10px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 8px;
+}
+.playerprofile-milestone-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.playerprofile-milestone-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    color: rgb(248, 196, 64);
+}
+.playerprofile-milestone--next {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(60, 90, 150);
+}
+.playerprofile-milestone--next .playerprofile-milestone-text { color: rgb(150, 190, 255); }
+.playerprofile-milestone-pct {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    color: rgb(179, 190, 214);
+    margin-left: 8px;
 }

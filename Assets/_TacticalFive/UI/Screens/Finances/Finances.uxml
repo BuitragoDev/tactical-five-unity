@@ -70,6 +70,10 @@
                             <ui:VisualElement name="SubscriptionPriceGrid" class="price-grid" />
                         </ui:VisualElement>
                     </ui:VisualElement>
+                    <!-- E3: mercado local -->
+                    <ui:VisualElement name="MarketInfoBox" class="ticket-market-box">
+                        <ui:Label name="MarketInfoLabel" class="ticket-market-label" text="" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- Tab Content: INGRESOS -->

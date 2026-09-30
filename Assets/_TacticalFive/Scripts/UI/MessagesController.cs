@@ -526,6 +526,14 @@ public class MessagesController : UIScreenController
     {
         string nt = msg.news_type;
 
+        // Hitos de legado (E1): icono de récord/trofeo.
+        if (nt == NewsType.LEGADO)
+        {
+            var legacyTex = Resources.Load<Texture2D>(MilestoneCatalog.SectionIcon);
+            if (legacyTex != null) { icon.style.backgroundImage = new StyleBackground(legacyTex); return true; }
+            return false;
+        }
+
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
             || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
             || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)

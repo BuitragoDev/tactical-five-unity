@@ -959,6 +959,7 @@ using System.Threading.Tasks;
                 conn.BeginTransaction();
                 var recovered = new List<(int id, string first, string last)>();
                 var recoveredFromIR = new List<int>();
+                var rng = new System.Random();
 
                 var teamsPlayToday = new HashSet<int>();
                 if (gameDay > 0)
@@ -970,18 +971,53 @@ using System.Threading.Tasks;
                     }
                 }
 
+                // E2: reputación del jefe de servicios médicos por equipo (acelera la recuperación).
+                var medicoByTeam = new Dictionary<int, int>();
+                foreach (var e in conn.Table<EmployeeData>().Where(e => e.position == "MEDICO").ToList())
+                    medicoByTeam[e.team_id] = e.reputation;
+
+                string today = _season?.current_date ?? "";
+                int seasonId = _season?.id ?? 0;
+
                 var allTeams = conn.Table<TeamData>().ToList();
                 foreach (var team in allTeams)
                 {
                     var players = conn.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
+                    int medicoRep = medicoByTeam.TryGetValue(team.id, out var rep) ? rep : 0;
                     foreach (var p in players)
                     {
                         if (p.injury_days > 0)
                         {
-                            p.injury_days--;
+                            var def = InjuryCatalog.ByName(p.injury_type);
+                            var sev = def != null
+                                ? def.severity
+                                : InjuryCatalog.SeverityOf(p.injury_total_days > 0 ? p.injury_total_days : p.injury_days);
+
+                            p.injury_days = InjuryHelper.EvolveDays(
+                                p.injury_days, p.injury_total_days, sev, medicoRep, p.fisico, rng.NextDouble());
+
                             if (p.injury_days <= 0)
                             {
+                                int episodeDays = p.injury_total_days > 0 ? p.injury_total_days : 1;
+
+                                // Parte médico: se cierra el expediente en el historial.
+                                conn.Insert(new InjuryHistoryData
+                                {
+                                    player_id = p.id,
+                                    team_id = p.team_id,
+                                    injury_type = p.injury_type,
+                                    severity = InjuryCatalog.SeverityLabel(sev),
+                                    days = episodeDays,
+                                    season_id = seasonId,
+                                    game_day = gameDay,
+                                    date = today,
+                                    outcome = "recuperado",
+                                    treated = p.treated
+                                });
+
                                 p.injury_days = 0;
+                                p.injury_total_days = 0;
+                                p.recovery_risk = 0;
                                 p.injury_type = "";
                                 p.treated = 0;
                                 if (p.is_on_ir == 1)
@@ -992,6 +1028,17 @@ using System.Threading.Tasks;
                                 }
                                 if (p.team_id == _myTeam.id)
                                     recovered.Add((p.id, p.first_name, p.last_name));
+                            }
+                            conn.Update(p);
+                        }
+                        else if (p.recovery_risk > 0)
+                        {
+                            // Alta forzada: descansar cura el riesgo; jugar lo mantiene vivo.
+                            p.recovery_risk -= InjuryHelper.RiskDecayForDay(teamsPlayToday.Contains(team.id));
+                            if (p.recovery_risk <= 0)
+                            {
+                                p.recovery_risk = 0;
+                                p.injury_type = "";
                             }
                             conn.Update(p);
                         }
@@ -1083,7 +1130,12 @@ using System.Threading.Tasks;
             if (fastSim) yield return null;
 
             // Paso 2: scouts, entrenamiento y renovaciones
-            db.BeginTransaction();
+        // B38: la fase de simulación + bookkeeping es síncrona y se ejecuta dentro de una
+        // única transacción en un solo frame (sin yields entre BeginTransaction y Commit).
+        // El respiro de la UI en simulación rápida se da AQUÍ, antes de abrirla.
+        if (fastSim) yield return null;
+
+        db.BeginTransaction();
             try
             {
                 ProcessScouts();
@@ -1287,7 +1339,6 @@ using System.Threading.Tasks;
                 HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
                 yield break;
             }
-            if (fastSim) yield return null;
         }
 
         // Recalculate team chemistry for all teams involved today
@@ -1307,7 +1358,6 @@ using System.Threading.Tasks;
                 HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
                 yield break;
             }
-            if (fastSim) yield return null;
         }
 
         try
@@ -1316,6 +1366,9 @@ using System.Threading.Tasks;
             if (nbaGamesToday.Count > 0)
             {
                 QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, gameDay, _season?.current_date ?? "");
+
+                // Hitos de legado (E1): antes de los hilos, para que la narrativa los vea.
+                MilestoneService.EvaluateDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
 
                 // Motor de narrativa: abre/escala/cierra hilos (rachas) con noticias y efectos.
                 StorylineService.ProcessDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
@@ -1756,6 +1809,11 @@ using System.Threading.Tasks;
         {
             homePlayers = BuildAllStarRoster("East");
             awayPlayers = BuildAllStarRoster("West");
+            // Exhibición: reparto explícito de los 240 minutos entre los convocados para
+            // que jueguen todos (con la heurística por rol solo entraban 6-7). Ignora la
+            // rotación de los equipos reales.
+            AssignAllStarMinutes(homePlayers);
+            AssignAllStarMinutes(awayPlayers);
         }
         else
         {
@@ -7403,60 +7461,81 @@ List<int> offeredPickIds = new List<int>();
         };
     }
 
+    /// <summary>Ganados y jugados de un equipo desde la lista de partidos de la liga.</summary>
+    static (int wins, int played) TeamRecord(List<GameData> allGames, int teamId)
+    {
+        int wins = 0, played = 0;
+        foreach (var g in allGames)
+        {
+            if (g.home_team_id == teamId)
+            {
+                played++;
+                if (g.home_score > g.away_score) wins++;
+            }
+            else if (g.away_team_id == teamId)
+            {
+                played++;
+                if (g.away_score > g.home_score) wins++;
+            }
+        }
+        return (wins, played);
+    }
+
+    /// <summary>Racha reciente del equipo (últimos 10 partidos) como factor 0.85-1.10.</summary>
+    float GetAttendanceStreakFactor(List<GameData> allGames, int teamId)
+    {
+        var last10 = allGames
+            .Where(g => g.home_team_id == teamId || g.away_team_id == teamId)
+            .OrderByDescending(g => g.game_day).ThenByDescending(g => g.id)
+            .Take(10).ToList();
+        if (last10.Count == 0) return 1.0f;
+        int wins = last10.Count(g =>
+            (g.home_team_id == teamId && g.home_score > g.away_score) ||
+            (g.away_team_id == teamId && g.away_score > g.home_score));
+        float recent = (float)wins / last10.Count;
+        return Mathf.Clamp(0.85f + recent * 0.25f, 0.85f, 1.10f);
+    }
+
+    /// <summary>
+    /// Asistencia (E3): demanda elástica según mercado, rival, racha y precio; el precio de
+    /// referencia depende del mercado y la reputación, y su exceso castiga la ocupación.
+    /// </summary>
     int CalculateAttendance(GameData game, TeamData homeTeam)
     {
+        if (homeTeam == null || homeTeam.capacity <= 0) return 0;
+
         bool myTeamIsHome = game.home_team_id == _myTeam.id;
-        bool myTeamIsAway = game.away_team_id == _myTeam.id;
 
-        var teamGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
-        var homeTeamGames = teamGames.Where(g => g.home_team_id == homeTeam.id || g.away_team_id == homeTeam.id).ToList();
-        int wins = homeTeamGames.Count(g =>
-            (g.home_team_id == homeTeam.id && g.home_score > g.away_score) ||
-            (g.away_team_id == homeTeam.id && g.away_score > g.home_score));
-        int totalPlayed = homeTeamGames.Count;
-        float winPct = totalPlayed > 0 ? (float)wins / totalPlayed : 0.5f;
+        var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
+        var (homeWins, homePlayed) = TeamRecord(allGames, homeTeam.id);
+        float homeWinPct = homePlayed > 0 ? (float)homeWins / homePlayed : 0.5f;
 
-        float baseAttendance;
-        float randomFactor = 0.92f + UnityEngine.Random.value * 0.16f;
+        var rival = DatabaseManager.Instance.GetTeamById(
+            game.home_team_id == homeTeam.id ? game.away_team_id : game.home_team_id);
+        var (rivalWins, rivalPlayed) = TeamRecord(allGames, rival != null ? rival.id : 0);
+        float rivalWinPct = rivalPlayed > 0 ? (float)rivalWins / rivalPlayed : 0.5f;
 
-        if (myTeamIsHome)
-        {
-            // My home game: fan confidence + rival reputation
-            var rival = DatabaseManager.Instance.GetTeamById(game.away_team_id);
-            float rivalRepFactor = rival != null ? (rival.reputation / 5f) * 0.08f : 0f;
-            baseAttendance = homeTeam.capacity * (
-                0.30f +
-                (_manager.fan_confidence / 100f) * 0.35f +
-                winPct * 0.15f +
-                rivalRepFactor
-            );
-        }
-        else if (myTeamIsAway)
-        {
-            // My away game: home team base + bonus from my reputation as visiting draw
-            float myRepFactor = (_myTeam.reputation / 5f) * 0.06f;
-            baseAttendance = homeTeam.capacity * (
-                0.55f +
-                winPct * 0.30f +
-                myRepFactor
-            );
-        }
-        else
-        {
-            // Other teams' games: standard formula
-            baseAttendance = homeTeam.capacity * (0.55f + winPct * 0.40f);
-        }
+        float objectiveFactor = GetObjectiveComplianceFactor(homeTeam, allGames);
+        float streakFactor = GetAttendanceStreakFactor(allGames, homeTeam.id);
 
-        // Ticket price elasticity: more expensive → fewer attendees
-        // Smooth exponential decay from 1.0 at $30 down to ~0.20 at $500
+        int ticketPrice = 50;
         var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
-        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : 50;
-        float priceFactor = Mathf.Clamp(Mathf.Exp(-(ticketPrice - 30f) / 150f), 0.20f, 1.0f);
+        if (finSettings != null) ticketPrice = (int)finSettings.ticket_price;
 
-        // Objective compliance: not on track for the team's season target
-        float objectiveFactor = GetObjectiveComplianceFactor(homeTeam, teamGames);
-
-        return (int)Mathf.Min(homeTeam.capacity, baseAttendance * randomFactor * priceFactor * objectiveFactor);
+        return MarketEconomy.EstimateHomeAttendance(
+            homeTeam.capacity,
+            homeWinPct,
+            rivalWinPct,
+            rival != null ? rival.reputation : 3,
+            homeTeam.market_size,
+            homeTeam.reputation,
+            objectiveFactor,
+            streakFactor,
+            _manager.fan_confidence / 100f,
+            myTeamIsHome,
+            ticketPrice,
+            UnityEngine.Random.value,
+            UnityEngine.Random.value);
     }
 
     float GetObjectiveComplianceFactor(TeamData homeTeam, List<GameData> teamGames)
@@ -7692,13 +7771,15 @@ List<int> offeredPickIds = new List<int>();
         // Skip sponsor/TV processing if settings aren't configured
         if (finSettings == null) return;
 
-        // Sponsor home game income
+        // Sponsor home game income (E3: escala con la fama y el mercado del equipo)
         if (finSettings.sponsor_id > 0 && finSettings.sponsor_years_remaining > 0)
         {
             var sponsor = DatabaseManager.Instance.GetSponsorById(finSettings.sponsor_id);
             if (sponsor != null)
             {
-                homeTeam.budget += sponsor.home_game_income;
+                long sponsorIncome = ContractMarket.SponsorHomeGameIncome(
+                    sponsor.home_game_income, homeTeam.reputation, homeTeam.market_size);
+                homeTeam.budget += sponsorIncome;
                 DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
                 SyncMyTeamBudget(homeTeam);
                 DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
@@ -7707,18 +7788,20 @@ List<int> offeredPickIds = new List<int>();
                     season_id = _season.id,
                     record_type = FinanceRecord.TYPE_SPONSORSHIP,
                     game_day = game.game_day,
-                    amount = sponsor.home_game_income
+                    amount = sponsorIncome
                 });
             }
         }
 
-        // TV home game income
+        // TV home game income (E3: escala con la fama y el mercado del equipo)
         if (finSettings.tv_channel_id > 0 && finSettings.tv_years_remaining > 0)
         {
             var tv = DatabaseManager.Instance.GetTVChannelById(finSettings.tv_channel_id);
             if (tv != null)
             {
-                homeTeam.budget += tv.home_game_income;
+                long tvIncome = ContractMarket.SponsorHomeGameIncome(
+                    tv.home_game_income, homeTeam.reputation, homeTeam.market_size);
+                homeTeam.budget += tvIncome;
                 DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
                 SyncMyTeamBudget(homeTeam);
                 DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
@@ -7727,7 +7810,7 @@ List<int> offeredPickIds = new List<int>();
                     season_id = _season.id,
                     record_type = FinanceRecord.TYPE_TV,
                     game_day = game.game_day,
-                    amount = tv.home_game_income
+                    amount = tvIncome
                 });
             }
         }
@@ -8099,7 +8182,9 @@ List<int> offeredPickIds = new List<int>();
 
         float baseRatio = 0.5f;
         float priceFactor = (2000 - finSettings.subscription_price) / 10000f;
-        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * reputationMult * randomFactor);
+        // E3: un gran mercado vende más abonos (0.9x - 1.15x).
+        float marketMult = 0.90f + MarketEconomy.MarketNormalized(_myTeam.market_size) * 0.25f;
+        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * reputationMult * marketMult * randomFactor);
         numSubscribers = (int)Mathf.Clamp(numSubscribers, 0, _myTeam.capacity);
 
         long subAmount = numSubscribers * finSettings.subscription_price;
@@ -8658,6 +8743,14 @@ List<int> offeredPickIds = new List<int>();
     {
         string nt = msg.news_type;
 
+        // Hitos de legado (E1): icono de récord/trofeo.
+        if (nt == NewsType.LEGADO)
+        {
+            var legacyTex = Resources.Load<Texture2D>(MilestoneCatalog.SectionIcon);
+            if (legacyTex != null) { icon.style.backgroundImage = new StyleBackground(legacyTex); return true; }
+            return false;
+        }
+
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
             || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION
             || nt == NewsType.REVANCHA || nt == NewsType.DINASTIA)
@@ -9039,6 +9132,29 @@ List<int> offeredPickIds = new List<int>();
             elem.style.backgroundImage = new StyleBackground(fallback);
     }
 
+    /// <summary>
+    /// Convocatoria del partido de las estrellas: los **3 mejores de cada posición por
+    /// valoración media de la temporada regular** (15 por conferencia), excluyendo a los
+    /// lesionados. Si un jugador aún no tiene partidos (valoración 0) sirve el overall como
+    /// desempate.
+    /// </summary>
+    /// <summary>
+    /// Reparto de los 240 minutos del partido de exhibición entre los convocados (todos deben
+    /// jugar). Marca `rotation_minutes` de forma vinculante para que el simulador lo respete.
+    /// </summary>
+    void AssignAllStarMinutes(List<PlayerData> players)
+    {
+        if (players == null || players.Count == 0) return;
+
+        const int TEAM_MINUTES = 240;
+        int n = players.Count;
+        int baseMin = TEAM_MINUTES / n;          // 16 con 15 jugadores
+        int remainder = TEAM_MINUTES - baseMin * n;
+
+        for (int i = 0; i < n; i++)
+            players[i].rotation_minutes = baseMin + (i < remainder ? 1 : 0);
+    }
+
     List<PlayerData> BuildAllStarRoster(string conference)
     {
         var allTeams = DatabaseManager.Instance.GetAllTeams();
@@ -9047,37 +9163,57 @@ List<int> offeredPickIds = new List<int>();
             .Select(t => t.id)
             .ToHashSet();
 
-        var allPlayers = DatabaseManager.Instance.Db.Table<PlayerData>()
+        var candidates = DatabaseManager.Instance.Db.Table<PlayerData>()
             .Where(p => p.team_id != 0 && p.injury_days == 0 && p.g_league_assigned == 0)
-            .ToList();
-
-        var candidates = allPlayers
+            .ToList()
             .Where(p => conferenceTeamIds.Contains(p.team_id))
             .ToList();
 
-        var roster = new List<PlayerData>();
-        HashSet<int> usedIds = new();
-        var positions = PositionCodes.Order;
+        // Valoración media (rating) de la temporada regular por jugador.
+        var avgRating = new Dictionary<int, double>();
+        var gamesPlayed = new Dictionary<int, int>();
+        foreach (var s in DatabaseManager.Instance.GetSeasonPlayerStatsAggregates(_manager.id, _season.id))
+        {
+            avgRating[s.player_id] = s.gp > 0 ? (double)s.total_rating / s.gp : 0;
+            gamesPlayed[s.player_id] = s.gp;
+        }
 
-        foreach (var pos in positions)
+        var roster = new List<PlayerData>();
+        var usedIds = new HashSet<int>();
+
+        // Por posición se toman los 3 mejores por valoración: el 1º de cada puesto es titular
+        // y el 2º/3º suplentes. Los 5 titulares (mejor B/E/A/AP/P) van primero para que
+        // `Take(5)` y `SaveAllStarRoster` (i < 5) los identifiquen correctamente.
+        var byPosition = new Dictionary<string, List<PlayerData>>();
+        foreach (var pos in PositionCodes.Order)
         {
             var selected = candidates
                 .Where(p => p.position == pos)
-                .OrderByDescending(p => p.overall)
+                .OrderByDescending(p => avgRating.TryGetValue(p.id, out var r) ? r : 0)
+                .ThenByDescending(p => gamesPlayed.TryGetValue(p.id, out var g) ? g : 0)
+                .ThenByDescending(p => p.overall)
                 .Take(3)
                 .ToList();
-            foreach (var p in selected)
-            {
-                usedIds.Add(p.id);
-                roster.Add(p);
-            }
+            byPosition[pos] = selected;
+            foreach (var p in selected) usedIds.Add(p.id);
         }
 
+        // 5 titulares: el mejor de cada posición principal.
+        foreach (var pos in PositionCodes.Order)
+            if (byPosition[pos].Count > 0) roster.Add(byPosition[pos][0]);
+
+        // Suplentes: el 2º/3º de cada posición.
+        foreach (var pos in PositionCodes.Order)
+            for (int i = 1; i < byPosition[pos].Count; i++)
+                roster.Add(byPosition[pos][i]);
+
+        // Relleno si alguna posición no llega a 3 (por valoración, luego overall).
         if (roster.Count < 15)
         {
             var remaining = candidates
                 .Where(p => !usedIds.Contains(p.id))
-                .OrderByDescending(p => p.overall)
+                .OrderByDescending(p => avgRating.TryGetValue(p.id, out var r) ? r : 0)
+                .ThenByDescending(p => p.overall)
                 .Take(15 - roster.Count);
             roster.AddRange(remaining);
         }

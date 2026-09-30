@@ -42,12 +42,17 @@
                     <!-- INJURED PLAYERS -->
                     <ui:VisualElement name="InjuredSection" class="injured-section">
                         <ui:Label class="section-title" text="JUGADORES LESIONADOS" />
-                        <ui:VisualElement name="InjuredCards" class="injured-cards" />
+                        <ui:VisualElement class="injured-scroll-row">
+                            <ui:VisualElement name="InjuredViewport" class="injured-viewport">
+                                <ui:VisualElement name="InjuredCards" class="injured-cards" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="InjuredScrollTrack" class="injured-scrollbar">
+                                <ui:VisualElement name="InjuredScrollThumb" class="injured-scrollbar-thumb" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>
-
-                <ui:VisualElement name="InjuredPaginator" class="injured-paginator" />
 
                 <ui:Button name="BtnLeagueInjured" class="btn-league-injured" text="VER LESIONADOS DE LA LIGA" />
 
@@ -88,6 +93,24 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:Button name="BtnLeagueInjuredClose" class="modal-close" text="CERRAR" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+
+        <!-- ══ MODAL CONFIRMAR ALTA FORZADA (E2) ══ -->
+        <ui:VisualElement name="ForceReturnOverlay" class="modal-overlay">
+            <ui:VisualElement name="ForceReturnBox" class="modal-box" style="width: 640px;">
+                <ui:Label class="modal-title" text="ALTA FORZADA" />
+                <ui:VisualElement class="modal-body">
+                    <ui:Label name="ForceReturnWho" class="modal-paragraph modal-paragraph--highlight" text="" />
+                    <ui:Label name="ForceReturnDiag" class="modal-paragraph" text="" />
+                    <ui:Label name="ForceReturnRisk" class="modal-paragraph modal-paragraph--highlight" text="" />
+                    <ui:Label class="modal-paragraph" text="Al forzar el alta el jugador queda disponible de inmediato, pero arrastra un riesgo de recaída: si se lesiona antes de que desaparezca, la nueva lesión será más grave. Descansar reduce el riesgo; jugar lo mantiene." />
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="BtnForceReturnCancel" class="modal-btn modal-btn--secondary" text="CANCELAR" />
+                    <ui:VisualElement class="modal-spacer" />
+                    <ui:Button name="BtnForceReturnConfirm" class="modal-btn modal-btn--danger" text="FORZAR ALTA" />
+                </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
 

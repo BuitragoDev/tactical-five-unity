@@ -13,6 +13,7 @@ public static class NewsType
     public const string DESCONTENTO = "descontento";
     public const string REVANCHA = "revancha";
     public const string DINASTIA = "dinastia";
+    public const string LEGADO = "legado";   // hito de carrera (E1)
 
     // ── PARTIDOS / RESULTADOS ──
     public const string RESULTADO = "resultado";

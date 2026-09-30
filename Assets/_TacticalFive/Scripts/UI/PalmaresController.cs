@@ -44,6 +44,7 @@ public class PalmaresController : UIScreenController
     private List<AllStarRecord> _allStarHistoryData;
     private VisualElement _hoFBody;
     private List<HallOfFameData> _hoFData;
+    private Dictionary<int, int> _milestoneCounts = new();
 
     // ── Scrollbar elements (viewport, track, thumb per list) ──
     private VisualElement _titlesRankingViewport, _titlesRankingTrack, _titlesRankingThumb;
@@ -908,6 +909,7 @@ public class PalmaresController : UIScreenController
             return byPts != 0 ? byPts : string.Compare(a.FullName, b.FullName, System.StringComparison.Ordinal);
         });
         _hoFData = members;
+        _milestoneCounts = DatabaseManager.Instance.GetMilestoneCountsByPlayer();
         RenderHoF();
     }
 
@@ -930,7 +932,11 @@ public class PalmaresController : UIScreenController
             row.AddToClassList("palmares-data-row");
 
             row.Add(MakeHoFCell((i + 1).ToString(), "td-hof-rank", true));
-            row.Add(MakeHoFCell(m.FullName, "td-hof-name", false));
+            var nameCell = MakeHoFCell(m.FullName, "td-hof-name", false);
+            // Etiqueta ligera de legado: nº de hitos de carrera registrados (E1).
+            if (m.player_id > 0 && _milestoneCounts.TryGetValue(m.player_id, out var mCount) && mCount > 0)
+                nameCell.tooltip = $"{mCount} hito(s) de carrera";
+            row.Add(nameCell);
             row.Add(MakeHoFCell(PositionCodes.GetName(m.position), "td-hof-pos", false));
             row.Add(MakeHoFCell(GetHoFTeamName(m), "td-hof-team", false));
             row.Add(MakeHoFCell(m.rings.ToString(), "td-hof-rings", false));

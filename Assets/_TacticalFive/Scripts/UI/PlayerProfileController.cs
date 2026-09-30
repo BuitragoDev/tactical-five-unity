@@ -25,6 +25,10 @@ using System.Linq;
 
     private VisualElement _profileSeasonSection;
     private VisualElement _profileSeasonBody;
+    private VisualElement _profileMilestones;
+    private VisualElement _profileMilestonesBody;
+    private VisualElement _profileInjuries;
+    private VisualElement _profileInjuriesBody;
     private VisualElement _profileAttrsSection;
     private VisualElement _profileAttrsBody;
     private VisualElement _profileAttrsLocked;
@@ -55,6 +59,10 @@ using System.Linq;
         _profileMvpSeasonCount = _root.Q<Label>("ProfileMvpSeasonCount");
         _profileSeasonSection = _root.Q<VisualElement>("ProfileSeasonSection");
         _profileSeasonBody = _root.Q<VisualElement>("ProfileSeasonBody");
+        _profileMilestones = _root.Q<VisualElement>("ProfileMilestones");
+        _profileMilestonesBody = _root.Q<VisualElement>("ProfileMilestonesBody");
+        _profileInjuries = _root.Q<VisualElement>("ProfileInjuries");
+        _profileInjuriesBody = _root.Q<VisualElement>("ProfileInjuriesBody");
         _profileAttrsSection = _root.Q<VisualElement>("ProfileAttrsSection");
         _profileAttrsBody = _root.Q<VisualElement>("ProfileAttrsBody");
         _profileAttrsLocked = _root.Q<VisualElement>("ProfileAttrsLocked");
@@ -89,6 +97,8 @@ using System.Linq;
         bool canView = FogOfWarHelper.CanViewRatings(_player, _myTeam.id, _scoutedPlayerIds);
         FillPlayerHeader(canView);
         BuildSeasonStats();
+        BuildMilestones();
+        BuildInjuryHistory();
         BuildAttrs(canView);
     }
 
@@ -146,6 +156,79 @@ using System.Linq;
 
         var tex = PlayerPhotoHelper.Load(_player.id, _player.photo);
         _profilePhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
+    }
+
+    /// <summary>Hitos de carrera (E1): conseguidos + el siguiente con progreso.</summary>
+    void BuildMilestones()
+    {
+        if (_profileMilestones == null || _profileMilestonesBody == null || _player == null) return;
+        _profileMilestonesBody.Clear();
+
+        var registered = DatabaseManager.Instance.GetPlayerMilestones(_player.id);
+        var careers = DatabaseManager.Instance.BuildCareerTotals(_manager.id, _season?.id ?? 0);
+        careers.TryGetValue(_player.id, out var career);
+        var next = MilestoneHelper.NextOverall(career);
+
+        if (registered.Count == 0 && next == null)
+        {
+            _profileMilestones.style.display = DisplayStyle.None;
+            return;
+        }
+        _profileMilestones.style.display = DisplayStyle.Flex;
+
+        foreach (var m in registered)
+        {
+            var def = MilestoneCatalog.ByKey(m.milestone);
+            if (def == null) continue;
+            _profileMilestonesBody.Add(MilestoneUI.Achieved(def, "", "playerprofile"));
+        }
+
+        if (next != null)
+        {
+            var n = next.Value;
+            _profileMilestonesBody.Add(MilestoneUI.Next(n.next, n.current, n.percent, "playerprofile", withBar: false));
+        }
+    }
+
+    /// <summary>Parte médico (E2): últimas lesiones cerradas del jugador.</summary>
+    void BuildInjuryHistory()
+    {
+        if (_profileInjuries == null || _profileInjuriesBody == null || _player == null) return;
+        _profileInjuriesBody.Clear();
+
+        var history = DatabaseManager.Instance.GetInjuryHistory(_player.id, 6);
+        if (history.Count == 0)
+        {
+            _profileInjuries.style.display = DisplayStyle.None;
+            return;
+        }
+        _profileInjuries.style.display = DisplayStyle.Flex;
+
+        foreach (var h in history)
+        {
+            var row = new VisualElement();
+            row.AddToClassList("playerprofile-injury-row");
+
+            var dateLbl = new Label(string.IsNullOrEmpty(h.date) ? "—" : h.date);
+            dateLbl.AddToClassList("playerprofile-injury-date");
+            row.Add(dateLbl);
+
+            var typeLbl = new Label(string.IsNullOrEmpty(h.injury_type) ? "Lesión" : h.injury_type);
+            typeLbl.AddToClassList("playerprofile-injury-type");
+            row.Add(typeLbl);
+
+            var daysLbl = new Label($"{h.days} d");
+            daysLbl.AddToClassList("playerprofile-injury-days");
+            row.Add(daysLbl);
+
+            bool forced = h.outcome == "alta_forzada";
+            var outcomeLbl = new Label(forced ? "ALTA FORZADA" : "RECUPERADO");
+            outcomeLbl.AddToClassList("playerprofile-injury-outcome");
+            if (forced) outcomeLbl.AddToClassList("playerprofile-injury-outcome--forced");
+            row.Add(outcomeLbl);
+
+            _profileInjuriesBody.Add(row);
+        }
     }
 
     void BuildSeasonStats()

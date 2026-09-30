@@ -276,6 +276,18 @@ public static class NewsTexts
             "busca relanzar su carrera en un proyecto competitivo.";
     }
 
+    /// <summary>Hito de carrera alcanzado (E1).</summary>
+    public static string Hito(string playerName, string milestones, bool major)
+    {
+        string remate = major
+            ? "Una marca que le coloca entre los grandes de la historia de la liga y que ya forma parte de su legado."
+            : "Un nuevo escalón en una carrera que sigue creciendo partido a partido.";
+        return $"{playerName} alcanza un nuevo hito en su carrera: {milestones}." +
+               "\n\n" +
+               remate +
+               "\n\nLa afición lo celebró en pie y la prensa ya lo sitúa entre los nombres que marcan una época.";
+    }
+
     public static string Bienvenida(string teamName, string playerName, int ovr)
     {
         return $"¡Bienvenido al {teamName}, {playerName}!\n\n" +

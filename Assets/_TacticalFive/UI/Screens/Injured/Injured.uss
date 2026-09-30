@@ -168,13 +168,67 @@
 
 .injured-section {
     flex-direction: column;
+    flex-shrink: 0;
+}
+
+/* Fila: viewport + barra de scroll propia (alto de una fila de tarjetas). */
+.injured-scroll-row {
+    flex-direction: row;
     flex-grow: 1;
+    min-height: 0;
+}
+
+.injured-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    height: 280px;
+    overflow: hidden;
+    position: relative;
+}
+
+.injured-scrollbar {
+    width: 12px;
+    min-width: 12px;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-left: 4px;
+    background-color: rgba(25, 18, 8, 0.92);
+    border-left-width: 1px;
+    border-left-color: rgba(120, 95, 30, 0.35);
+    position: relative;
+}
+
+.injured-scrollbar-thumb {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 0;
+    height: 40px;
+    background-color: rgb(160, 128, 30);
+    border-radius: 3px;
+}
+
+.injured-scrollbar:hover .injured-scrollbar-thumb {
+    background-color: rgb(212, 160, 23);
 }
 
 .injured-cards {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     margin: 0 -8px;
+    flex-shrink: 0;
+}
+
+/* Fila de 3 cards: el espaciado entre filas está aquí (no en la card). La última
+   fila lleva solo un colchón pequeño para que el scroll no corte las cards. */
+.injury-row {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin-bottom: 100px;
+}
+
+.injury-row--last {
+    margin-bottom: 10px;
 }
 
 /* ── CARD ── */
@@ -183,7 +237,6 @@
     flex-basis: 33.33%;
     min-width: 0;
     padding: 0 8px;
-    margin-bottom: 16px;
 }
 
 .injury-card-inner {
@@ -403,29 +456,87 @@
     color: rgb(39, 174, 96);
 }
 
-.card-severity-bar {
+/* ── PARTE MÉDICO (E2): pronóstico, progreso y riesgo ── */
+
+.card-pronostico {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 16px;
+    color: rgb(150, 162, 190);
+    letter-spacing: 1px;
+    margin-top: 2px;
+}
+
+.card-progress-row {
     flex-direction: row;
-    flex-shrink: 0;
+    align-items: center;
+    margin-top: 6px;
 }
 
-.severity-segment {
-    width: 14px;
+.card-progress-track {
+    width: 120px;
     height: 6px;
-    margin-right: 3px;
-    border-radius: 2px;
+    border-radius: 3px;
     background-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
-.severity-segment--filled-red {
-    background-color: rgb(192, 57, 43);
+.card-progress-fill {
+    height: 6px;
+    border-radius: 3px;
+    background-color: rgb(39, 174, 96);
 }
 
-.severity-segment--filled-orange {
+.card-progress-fill--mid {
     background-color: rgb(212, 160, 23);
 }
 
-.severity-segment--filled-green {
-    background-color: rgb(39, 174, 96);
+.card-progress-fill--low {
+    background-color: rgb(192, 57, 43);
+}
+
+.card-progress-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(179, 190, 214);
+    letter-spacing: 1px;
+    margin-left: 8px;
+}
+
+.card-risk-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: rgb(230, 120, 100);
+    background-color: rgba(192, 57, 43, 0.15);
+    border-width: 1px;
+    border-color: rgb(192, 57, 43);
+    border-radius: 6px;
+    padding: 2px 8px;
+    margin-left: 8px;
+    flex-shrink: 0;
+}
+
+.btn-card-force {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    background-color: rgba(192, 57, 43, 0.10);
+    border-width: 2px;
+    border-color: rgb(192, 57, 43);
+    color: rgb(230, 120, 100);
+    font-size: 18px;
+    letter-spacing: 1px;
+    padding: 6px 14px;
+    -unity-text-align: middle-center;
+    border-radius: 6px;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+.btn-card-force:hover {
+    background-color: rgba(192, 57, 43, 0.25);
+    color: rgb(240, 145, 125);
 }
 
 /* ── CARD BUTTONS ── */
@@ -454,6 +565,12 @@
 }
 .btn-card-no-apt:hover {
     background-color: rgba(42, 95, 201, 0.25);
+}
+
+/* Deshabilitado: el hover no debe cambiar el color */
+.btn-card-no-apt.btn-card-no-apt--disabled:hover {
+    background-color: rgba(42, 51, 71, 0.10);
+    color: rgb(90, 103, 128);
 }
 
 .btn-card-apt {
@@ -498,6 +615,17 @@
 .btn-card-treat--disabled {
     background-color: rgba(42, 51, 71, 0.10);
     border-color: rgb(42, 51, 71);
+    color: rgb(90, 103, 128);
+}
+
+/* Deshabilitado: el hover no debe cambiar el color (mayor especificidad que el :hover base) */
+.btn-card-treat.btn-card-treat--disabled:hover {
+    background-color: rgba(42, 51, 71, 0.10);
+    color: rgb(90, 103, 128);
+}
+
+.btn-card-force.btn-card-no-apt--disabled:hover {
+    background-color: rgba(42, 51, 71, 0.10);
     color: rgb(90, 103, 128);
 }
 
@@ -553,51 +681,6 @@
     white-space: normal;
 }
 
-/* ── PAGINATOR ── */
-
-.injured-paginator {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    align-self: stretch;
-    flex-shrink: 0;
-    margin-top: 12px;
-    margin-bottom: 10px;
-    padding: 8px 0;
-}
-
-.injured-paginator-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(42, 95, 201, 0.10);
-    border-width: 2px;
-    border-color: rgb(42, 95, 201);
-    color: rgb(100, 150, 230);
-    font-size: 14px;
-    padding: 6px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    min-width: 40px;
-    -unity-text-align: middle-center;
-}
-.injured-paginator-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
-}
-
-.injured-paginator-btn--disabled {
-    background-color: rgba(42, 51, 71, 0.10);
-    border-color: rgb(42, 51, 71);
-    color: rgb(90, 103, 128);
-}
-
-.injured-paginator-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 20px;
-    color: rgb(179, 190, 214);
-    margin-left: 16px;
-    margin-right: 16px;
-    -unity-text-align: middle-center;
-}
-
 /* ── TREATMENT RESULT MODAL ── */
 
 .injured-modal-overlay {
@@ -619,6 +702,17 @@
     flex-direction: column;
     align-items: center;
     overflow: hidden;
+}
+
+/* Advertencia del riesgo de recaída en el modal de alta forzada */
+.force-return-risk--low {
+    color: rgb(100, 200, 140);
+}
+.force-return-risk--mid {
+    color: rgb(212, 160, 23);
+}
+.force-return-risk--high {
+    color: rgb(230, 120, 100);
 }
 
 .injured-modal-title {

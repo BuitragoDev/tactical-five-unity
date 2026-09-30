@@ -36,6 +36,8 @@ public class StorylineContext
     public int CurrentSeriesOpponentId;
     /// <summary>Etiqueta de la serie en curso (`playoff-r1-east-1v8`…).</summary>
     public string CurrentSeriesLabel = "";
+    /// <summary>Claves de los hitos de carrera alcanzados hoy por jugador, para el hilo `hito_alcanzado`.</summary>
+    public Dictionary<int, List<string>> TodayMilestones = new();
     /// <summary>Equipo rival de la serie en curso (null si no hay serie activa).</summary>
     public TeamData CurrentSeriesOpponent;
 
@@ -72,6 +74,10 @@ public class StorylineContext
             DatabaseManager.Instance.GetStandingsGames(manager.id));
 
         ctx.Roster = DatabaseManager.Instance.GetPlayersByTeam(myTeam.id);
+
+        // Hitos del día (los calcula MilestoneService justo antes, en el mismo día).
+        foreach (var kv in MilestoneService.TodayByPlayer)
+            ctx.TodayMilestones[kv.Key] = kv.Value.Select(d => d.key).ToList();
 
         // Rivalidades/dinastías: series ya resueltas de mi equipo, series que se están
         // jugando ahora (partidos de playoff sin jugar) y el palmarés completo.

@@ -67,6 +67,18 @@
                     <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
                 </ui:VisualElement>
 
+                <!-- Hitos de carrera (E1) -->
+                <ui:VisualElement name="ProfileMilestones" class="playerprofile-milestones" style="display: none;">
+                    <ui:Label class="playerprofile-section-label" text="HITOS DE CARRERA" />
+                    <ui:VisualElement name="ProfileMilestonesBody" class="playerprofile-milestones-body" />
+                </ui:VisualElement>
+
+                <!-- Historial médico (E2) -->
+                <ui:VisualElement name="ProfileInjuries" class="playerprofile-injuries" style="display: none;">
+                    <ui:Label class="playerprofile-section-label" text="ÚLTIMAS LESIONES" />
+                    <ui:VisualElement name="ProfileInjuriesBody" class="playerprofile-injuries-body" />
+                </ui:VisualElement>
+
                 <!-- Attributes section -->
                 <ui:VisualElement name="ProfileAttrsSection" class="playerprofile-attrs-section">
                     <ui:Label class="playerprofile-section-label" text="ATRIBUTOS" />

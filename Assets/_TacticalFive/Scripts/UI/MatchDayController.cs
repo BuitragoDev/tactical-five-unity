@@ -47,6 +47,7 @@ public class MatchDayController : UIScreenController
     private VisualElement _pbpHomeBoxFooter, _pbpAwayBoxFooter;
     private Dictionary<int, PlayerLiveBox> _pbpPlayers = new();
     private int _pbpGameId, _pbpHomeTeamId, _pbpAwayTeamId;
+    private readonly System.Random _pbpNarrator = new System.Random();
     private float _pbpTotalMinutes;
     private PanelTotals _homeTotals, _awayTotals;
     private Label _homeTotalPts, _homeTotalTc, _homeTotalTp, _homeTotalTl, _homeTotalReb, _homeTotalAst, _homeTotalStl, _homeTotalBlk, _homeTotalTo, _homeTotalPf;
@@ -817,7 +818,7 @@ public class MatchDayController : UIScreenController
             if (_pbpProgressLabel != null)
                 _pbpProgressLabel.text = $"{Mathf.RoundToInt(pct)}%";
 
-            _pbpText.text = ev.text;
+            _pbpText.text = PlayByPlayNarrator.Narrate(ev.text, ev.homeScore, ev.awayScore, ev.quarter, _pbpNarrator.NextDouble());
             ApplyPbpDeltas(ev.deltas);
             yield return new WaitForSecondsRealtime(PBP_BASE_SECONDS / _pbpSpeed);
         }

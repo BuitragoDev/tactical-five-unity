@@ -57,13 +57,14 @@ If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `reb
 - `PlayerGameStats` rows per player; `GameData` updated (scores, quarters, `is_played=1`).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
 - Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
-- Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (see `SYSTEMS.md §S12`).
+- Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (`InjuryCatalog`, ver "Lesiones y parte médico").
 
 ### Play-by-play en vivo (Vista de Partido)
 - Toggle **Vista de Partido** en los modales de Configuración: `Directa` (0) o `Play-by-play` (1), persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()`). Solo aplica al flujo día a día (no fast sim).
 - `GameSimulator` captura la crónica sin alterar el resultado: `PlayByPlayEvent` (quarter, texto en español, marcador acumulado, `timeElapsed`, deltas `StatDelta` por jugador). `CaptureBox`/`DiffBox` generan los deltas tras cada posesión + minutos por jugador; hay meta-eventos de inicio de cuarto/prórroga y fin de partido. Solo se guarda en `GameResultCache.PlayByPlayLogs[game.id]` cuando `GetSimMode()==1`.
 - Overlay inmersivo en `MatchDay`: nombres + logos, marcador acumulado, reloj `mm:ss`, barra de progreso 0–100%, **boxscore en vivo** por equipo (12 columnas) reordenado por VAL descendente y totales recalculados desde los jugadores.
 - Velocidades **x1/x3/x5/x10** (persistidas en `TF_PbpSpeed`; base 2 s/evento) y botón **SALTAR** (avanza al final reconstruyendo el boxscore; al acabar cambia a **IR AL RESUMEN**). — `MatchDayController.cs`
+- **Broadcast narrado (E4):** `PlayByPlayNarrator` (puro) reescribe cada jugada cruda con comentario **en español y con personalidad**, según el tipo (triple, dos, tapón, pérdida, tiros libres, rebote, 2+1) y el contexto (marcador apretado, paliza, prórroga). No altera el resultado ni las stats: solo la presentación del `ev.text` en el overlay de `MatchDay`.
 
 ### Previa / pronóstico (Matchup Preview)
 `MatchupPreview.Compute(home, away, isHome, managerId, seasonId)` (`Stats/MatchupPreview.cs`): calcula ratings de equipo (misma fórmula que el simulador + bonus de química y casa) + **forma reciente** (`(avgRating − 50) * 0.25` sobre los últimos 5 partidos jugados) → probabilidad de victoria `1/(1+exp(−diff*0.08))`. Declara FAVORITO solo si `|prob−0.5| > 0.005`. Estrellas = top 3 OVR de cada equipo. Se muestra en `MatchDayController.ShowMatchupPreview` (entre el banner y el boxscore).
@@ -116,15 +117,34 @@ Read-only projection: current payroll vs cap/apron/space, per-year committed pay
 
 ## 5. Economy
 
+### Tamaño de mercado (`teams.market_size`)
+- Nuevo campo 0-100 (E3): los grandes mercados llenan más el pabellón y pagan mejores contratos
+  de patrocinio/TV, incluso con malos resultados. Reglas puras en `MarketEconomy`
+  (`MarketNormalized`, `DealValueMultiplier`). Rango real: Nueva York 98 / LA Lakers 96 → Memphis 56
+  / New Orleans 50. En partidas antiguas se rellena por reputación (`28 + reputación × 14`).
+
+### Asistencia elástica (E3) — `MarketEconomy.EstimateHomeAttendance`
+- **Demanda** (`Demand01`) = `0.34 + winPct×0.20 + mercado×0.10 + atractivoRival×0.09 + winPctRival×0.05`
+  (+`confianzaAfición×0.13` **solo** en partidos del usuario en casa) × objetivo × racha × ruido(±10 %).
+  El **atractivo del rival** es su reputación (0-1) y también cuenta su récord.
+- **Precio:** el precio de referencia `FairTicketPrice` sube con mercado y reputación; subir el
+  precio por encima castiga la ocupación (`AttendancePriceFactor`, saturación al alza: barato
+  como máximo +10 %, caro decayendo exponencialmente). El aforo final es
+  `capacity × demanda × factorPrecio`, capado a `capacity`.
+- **Racha** (últimos 10: 0.85–1.10) y **cumplimiento del objetivo** de temporada siguen aplicando.
+- La misma fórmula la usa el resumen de partido y la vista previa. `ProcessGameFinances` guarda la
+  asistencia en `game_attendance`.
+
 ### Income per home game (`ProcessGameFinances`)
-- `attendance = CalculateAttendance(...)` (formula in `SYSTEMS.md §S8`).
-- `ticketRevenue = attendance × ticket_price × arenaMultiplier` (by PABELLON staff reputation 1.03–1.20).
-- Sponsor `home_game_income` and TV `home_game_income` added if contract active.
+- `attendance = CalculateAttendance(...)` (fórmula E3 arriba).
+- `ticketRevenue = attendance × ticket_price × arenaMultiplier` (por reputación del PABELLON, 1.03–1.20).
+- Sponsor `home_game_income` y TV `home_game_income` **escalan con fama y mercado**
+  (`ContractMarket.SponsorHomeGameIncome` → 0.70x-1.50x según reputación + mercado).
 - All recorded as `FinanceRecord` (types 1/3/4) and added to `TeamData.budget`.
 
 ### Monthly
 - `ProcessMonthlyPayroll` on `payrollDays = {1,31,61,91,121,151,181}`: player salaries `sum/12` (type 7) + employees `sum/12` (type 8), each guarded against double-pay per day. **Luxury tax on the same days** (`ProcessTeamLuxuryTax`): `annualTax = CalculateLuxuryTax(sum(player salaries), luxury_threshold)`; if >0 deduct `annual/12` (type 10). — `DashboardController.cs:5032-5153`
-- `ProcessSubscriptionRevenue` (game days 10–12 ≈ Nov 1): `numSubscribers = clamp(capacity * (0.5 + (2000 − subscription_price)/10000) * (1 + wins_first4*0.05) * (0.7 + reputation/5*0.6) * rand(0.85–1.15), 0, capacity)`; income = subscribers × price (type 2).
+- `ProcessSubscriptionRevenue` (game days 10–12 ≈ Nov 1): `numSubscribers = clamp(capacity * (0.5 + (2000 − subscription_price)/10000) * (1 + wins_first4*0.05) * (0.7 + reputation/5*0.6) * (0.90 + market/100*0.25) * rand(0.85–1.15), 0, capacity)`; income = subscribers × price (type 2). **E3:** un gran mercado vende más abonos (×0.90-1.15).
 
 ### One-off
 - **Arena renovations** (`ArenaController`): Grada General +3000/$10M/3wk; Tribuna +2000/$20M/5wk; VIP +1000/$35M/8wk; discounted by PABELLON reputation (0.80–0.97); max capacity 50,000.
@@ -132,7 +152,7 @@ Read-only projection: current payroll vs cap/apron/space, per-year committed pay
 - **Luxury tax** (`TradeHelper.CalculateLuxuryTax`): brackets above threshold — `(5M,1.5),(5M,1.75),(5M,2.5),(5M,3.25),(∞,3.75)`; charged monthly `annual/12` (type 10).
 - **Buyout with stretch** (`RosterController.ConfirmBuyout`): `remaining = salary × contract_years`; `stretchYears = contract_years × 2`; `annual = remaining/stretchYears` (last year takes remainder); player → FA; TYPE_BUYOUT (11) records per year.
 - **Budget warnings:** budget red 3+ times (2 in ProManager) → fired modal (`CheckBudgetWarning`).
-- **Sponsors/TV renegotiation:** max 3 sponsors, max 3 TV; `initial_income` + `home_game_income`; contracts in years.
+- **Sponsors/TV renegotiation (E3):** max 3 sponsors, max 3 TV; `initial_income` + `home_game_income`; contratos por años. **Al expirar** (`RenewMarketDealsForTeam`, en `StartNewSeason`), el equipo busca sustituto disponible con probabilidad `0.45 + mercado×0.35 + reputación×0.20` (`MarketEconomy.ShouldRenewDeal`): los grandes mercados casi siempre renuevan; los pequeños pueden quedarse sin contrato. Los importes base de la oferta se escalan por fama al firmar.
 
 ## 6. Roster management
 
@@ -216,6 +236,37 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 `GLeagueHelper` (`Scripts/Core/GLeagueHelper.cs`) + constantes en `TradeHelper` (`TWO_WAY_SALARY = 578_000`, `MAX_TWO_WAY = 2`, `IR_MIN_DAYS = 90`, `IsEligibleForTwoWay` = edad ≤23, `IsEligibleForIR` = `injury_days ≥ 90`).
 
+### Lesiones y parte médico (E2)
+
+- **Catálogo (`InjuryCatalog`, puro):** 27 lesiones con `family`, rango de días, peso en el sorteo,
+  **gravedad** (`Leve`/`Moderada`/`Grave`/`Crítica`) y `relapseRisk`. El simulador sortea con
+  `InjuryCatalog.Pick(roll)` y los días con `InjuryHelper.RollDays`. Probabilidad base 0.008/partido
+  (×`1 + (30−fisico)*0.15` si `fisico < 30`); solo se lesiona quien juega (0 minutos ⇒ no).
+- **Pronóstico y progreso:** la lesión guarda `players.injury_total_days` (duración total de la
+  "temporada" de la lesión) y `injury_days` (restantes). El parte médico muestra gravedad,
+  pronóstico (`InjuryCatalog.Pronostico`), barra de **recuperación** (`InjuryHelper.RecoveryProgress`)
+  y el historial de las últimas lesiones del jugador (`injury_history`, en Perfil).
+- **Evolución diaria** (pre-lote, hilo de fondo): `InjuryHelper.EvolveDays` resta 1 día (2 si el jefe
+  de servicios médicos tiene reputación ≥4 y la lesión es leve/moderada, acelerado con ≥5); las
+  graves/críticas con `fisico < 40` pueden estancarse/retroceder un día (nunca por encima del
+  pronóstico). Al completar la recuperación se cierra el expediente en `injury_history` ("recuperado")
+  y se limpia la IR.
+- **Alta forzada (volver antes de tiempo):** el botón **FORZAR ALTA** (parte médico) devuelve al
+  jugador de inmediato a cambio de un **riesgo de recaída** (`players.recovery_risk`, 0-100, calculado
+  con `InjuryHelper.ForceReturnRisk` a partir de los días que faltaban y la gravedad). **Solo se puede
+  forzar entre 2 y 7 días restantes** (`InjuryHelper.CanForceReturn`; con ≤1 día o con >7 días el botón
+  queda en **SIN FORZAR** y `ForceReturnFromInjury` lo ignora). Ese riesgo se guarda en el historial como
+  "alta_forzada". **Mientras exista riesgo**, cada partido que juega suma `InjuryHelper.RelapseChancePerGame`
+  a la probabilidad de lesionarse (`risk/100 × 0.60`, ×1.5 si `fisico < 50`, tope 0.75; el modal muestra la
+  **probabilidad real por partido** además del % nominal) y, si cae, la lesión es la **recaída**
+  (`InjuryHelper.Relapse`): misma familia y una gravedad mayor (o la misma agravada +25 % si ya era la
+  peor). El riesgo **solo puede materializarse jugando partido** (no en descanso/entrenamiento).
+  Descansar reduce el riesgo (`RiskDecayForDay`: −25 sin partido, −10 jugando); al llegar a 0 desaparece.
+- **Pantalla LESIONADOS:** lista a los lesionados **y** a los que volvieron antes de tiempo (en
+  vigilancia, sin baja pero con riesgo); muestra gravedad, pronóstico, progreso y el tratamiento
+  (reduce días según la reputación del médico). El riesgo pendiente también aparece en el detalle de
+  Plantilla.
+
 ### IR (reserva de lesionados)
 - `players.is_on_ir` (0/1). Botón PONER/SACAR IR en `InjuredController` (`SetPlayerIR`). PONER IR exige elegibilidad y limpia `g_league_assigned`; SACAR IR exige plantilla < `MAX_ROSTER`.
 - **No cuenta en el tope:** `GetRosterCount(teamId)` excluye `is_on_ir = 1` (usado por firma de FAs, traspasos IA, `StartNewSeason`, `TrimRostersToMaxSize`, mercado).
@@ -283,6 +334,7 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   | `crisis_economica` | presupuesto | presupuesto <0 o ≥2 avisos |
   | `revancha_playoffs` | serie en curso vs historial | rival que nos eliminó antes (peso doble si fue en las Finales) |
   | `dinastia` | `season_records` | 3+ títulos en 8 temporadas; escala con cada título |
+  | `hito_alcanzado` | `player_milestones` (del día) | hito de carrera alcanzado hoy (un hilo por protagonista, dura el día) |
 - **Elegibilidad de los hilos de jugador:** el umbral de sequía es **relativo** (un
   especialista defensivo de 5 puntos no está "seco" cada noche; una estrella de 30 sí lo
   está al anotar 14), se exige protagonismo (≥12 min de media en los últimos partidos) y
@@ -295,6 +347,30 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
   motor (QN sigue con las del resto de la liga).
+
+## Hitos de legado (carrera por jugador) — E1
+
+- **Carrera = histórico + temporada en curso + honores**, todo por `player_id`:
+  `historical_player_stats` (temporadas anteriores, ya indexado por id) + los agregados de la
+  temporada actual (todos los tipos de partido) + `players.rings/finals_mvps/season_mvps` y las
+  convocatorias All-Star (`all_star_roster` de la partida + `allstar_appearances_seed`).
+- **Catálogo** (`MilestoneCatalog`, puro): puntos (10k/15k/20k/25k/30k), rebotes (5k/10k/15k),
+  asistencias (2.5k/5k/7.5k/10k), robos (1k/2k), tapones (500/1k/2k), triples (1k/2k/3k),
+  partidos (500/1k), dobles-dobles (200/400), triples-dobles (20/50), All-Star (3/5/10),
+  MVP de temporada (1/2/3), anillos (1/2/3) y MVP de las Finales (1/2). Los redondos son `major`
+  (más efecto y noticia destacada). Progreso y "próximo hito" en `MilestoneHelper` (puro).
+- **Detección diaria** (`MilestoneService.EvaluateDay`, dentro del día simulado, justo antes del
+  motor de narrativa): registra en **`player_milestones`** cada hito nuevo (una vez) y emite una
+  **noticia agrupada por jugador** ("Hito histórico: X" · `NewsType.LEGADO`, icono de récord).
+  **Línea base silenciosa**: la primera vez por partida se registran sin noticia los hitos que los
+  jugadores ya cumplen (p. ej. las leyendas del seed) para no soltar un aluvión el día 1.
+- **Narrativa:** tipo `hito_alcanzado` (hilo por jugador, dura el día del hito): título "Hito
+  histórico: X", efecto de moral/afición (mayor si es `major`) y **sin noticia propia** (la emite
+  `MilestoneService` para no duplicar); se cierra en silencio cuando el día pasa.
+- **Salón de la Fama:** `HallOfFameHelper.ShouldInduct` añade **10× All-Star** o **3× MVP de
+  temporada** como criterios de inducción (además de anillo/MVP Finales/30k pts/15k reb/10k ast).
+- **UI:** chips de hitos conseguidos + **próximo hito con barra de progreso** en **Trayectoria** y
+  **Perfil**; en el **Salón de la Fama** (Palmarés) la fila lleva el nº de hitos en el tooltip.
 
 ## Quintetos de la temporada (pantalla Quintos)
 

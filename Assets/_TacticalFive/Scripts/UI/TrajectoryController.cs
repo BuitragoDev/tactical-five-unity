@@ -39,8 +39,16 @@ using System.Linq;
     private VisualElement _trajectoryAwards;
     private VisualElement _trajectoryAwardsBody;
 
+    // Hitos de carrera (E1)
+    private VisualElement _trajectoryMilestones;
+    private VisualElement _trajectoryMilestonesBody;
+
     // Tabla
     private VisualElement _trajectoryTableBody;
+    private VisualElement _trajectoryTableScrollViewport;
+    private VisualElement _trajectoryTableScrollTrack;
+    private VisualElement _trajectoryTableScrollThumb;
+    private CustomScrollbar.Handle _tableScrollBar;
     private VisualElement _trajectoryEmpty;
     private VisualElement _trajectoryStatsSection;
     private PlayerData _player;
@@ -66,13 +74,19 @@ using System.Linq;
         _trajectoryMvpSeasonCount = _root.Q<Label>("TrajectoryMvpSeasonCount");
         _trajectoryAwards = _root.Q<VisualElement>("TrajectoryAwards");
         _trajectoryAwardsBody = _root.Q<VisualElement>("TrajectoryAwardsBody");
+        _trajectoryMilestones = _root.Q<VisualElement>("TrajectoryMilestones");
+        _trajectoryMilestonesBody = _root.Q<VisualElement>("TrajectoryMilestonesBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
+        _trajectoryTableScrollViewport = _root.Q<VisualElement>("TrajectoryTableScrollViewport");
+        _trajectoryTableScrollTrack = _root.Q<VisualElement>("TrajectoryTableScrollTrack");
+        _trajectoryTableScrollThumb = _root.Q<VisualElement>("TrajectoryTableScrollThumb");
         _trajectoryEmpty = _root.Q<VisualElement>("TrajectoryEmpty");
         _trajectoryStatsSection = _root.Q<VisualElement>("TrajectoryStatsSection");
 
-        var scrollView = _root.Q<ScrollView>();
-        if (scrollView != null)
-            scrollView.contentContainer.style.flexGrow = 0;
+        // Barra de scroll propia de la tabla de temporadas: se re-enlaza en cada visita
+        // (Unity recrea el árbol del UIDocument al reactivar la pantalla).
+        _tableScrollBar = CustomScrollbar.Bind(_trajectoryTableScrollViewport, _trajectoryTableBody,
+                                               _trajectoryTableScrollTrack, _trajectoryTableScrollThumb);
 
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -109,6 +123,7 @@ using System.Linq;
         if (_player == null) return;
         FillPlayerHeader();
         BuildAwards();
+        BuildMilestones();
         BuildStatsTable();
     }
 
@@ -176,6 +191,43 @@ using System.Linq;
             badge.AddToClassList(GetAwardClass(award.award_type));
             badge.text = GetAwardText(award);
             _trajectoryAwardsBody.Add(badge);
+        }
+    }
+
+    /// <summary>Hitos de carrera del jugador (E1): conseguidos + el siguiente con progreso.</summary>
+    void BuildMilestones()
+    {
+        if (_trajectoryMilestones == null || _trajectoryMilestonesBody == null || _player == null) return;
+        _trajectoryMilestonesBody.Clear();
+
+        var registered = DatabaseManager.Instance.GetPlayerMilestones(_player.id);
+        var careers = DatabaseManager.Instance.BuildCareerTotals(_manager.id, _season?.id ?? 0);
+        careers.TryGetValue(_player.id, out var career);
+        var next = MilestoneHelper.NextOverall(career);
+
+        if (registered.Count == 0 && next == null)
+        {
+            _trajectoryMilestones.style.display = DisplayStyle.None;
+            return;
+        }
+        _trajectoryMilestones.style.display = DisplayStyle.Flex;
+
+        var seasonLabels = DatabaseManager.Instance.GetAllSeasons()
+            .ToDictionary(x => x.id, x => $"{x.year_start}-{x.year_end % 100:D2}");
+
+        foreach (var m in registered)
+        {
+            var def = MilestoneCatalog.ByKey(m.milestone);
+            if (def == null) continue;
+            string date = seasonLabels.TryGetValue(m.season_id, out var lbl) && !string.IsNullOrEmpty(lbl)
+                ? $"T {lbl}" : "";
+            _trajectoryMilestonesBody.Add(MilestoneUI.Achieved(def, date, "trajectory"));
+        }
+
+        if (next != null)
+        {
+            var n = next.Value;
+            _trajectoryMilestonesBody.Add(MilestoneUI.Next(n.next, n.current, n.percent, "trajectory", withBar: true));
         }
     }
 
@@ -282,6 +334,9 @@ using System.Linq;
             ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
 
         _trajectoryTableBody.Add(totalRow);
+
+        // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
+        CustomScrollbar.Reset(_tableScrollBar);
     }
 
     static Label CreateCell(string className, string text)

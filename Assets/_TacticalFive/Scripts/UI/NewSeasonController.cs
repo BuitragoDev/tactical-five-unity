@@ -370,7 +370,9 @@ public class NewSeasonController : UIScreenController
             var prePlayers = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
             foreach (var p in prePlayers)
             {
-                if (p.is_rookie == 1) continue; // igual que StartNewSeason: los rookies no decrementan
+                // B41: el contrato de rookie no decrementa en su primer año (su edad y
+                // progresión las aplica StartNewSeason). Mismo criterio en ambas rutas.
+                if (!RolloverRules.ShouldDecrementContract(p.is_rookie == 1)) continue;
                 int oldTeamId = p.team_id;
                 p.contract_years = System.Math.Max(0, p.contract_years - 1);
                 p.guaranteed_years = System.Math.Max(0, p.guaranteed_years - 1);
