@@ -567,6 +567,12 @@
     background-color: rgba(42, 95, 201, 0.25);
 }
 
+/* Deshabilitado: el hover no debe cambiar el color */
+.btn-card-no-apt.btn-card-no-apt--disabled:hover {
+    background-color: rgba(42, 51, 71, 0.10);
+    color: rgb(90, 103, 128);
+}
+
 .btn-card-apt {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     background-color: rgba(39, 174, 96, 0.10);
@@ -609,6 +615,17 @@
 .btn-card-treat--disabled {
     background-color: rgba(42, 51, 71, 0.10);
     border-color: rgb(42, 51, 71);
+    color: rgb(90, 103, 128);
+}
+
+/* Deshabilitado: el hover no debe cambiar el color (mayor especificidad que el :hover base) */
+.btn-card-treat.btn-card-treat--disabled:hover {
+    background-color: rgba(42, 51, 71, 0.10);
+    color: rgb(90, 103, 128);
+}
+
+.btn-card-force.btn-card-no-apt--disabled:hover {
+    background-color: rgba(42, 51, 71, 0.10);
     color: rgb(90, 103, 128);
 }
 
