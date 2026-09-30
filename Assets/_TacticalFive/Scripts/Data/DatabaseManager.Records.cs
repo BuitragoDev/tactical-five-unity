@@ -704,6 +704,7 @@ public partial class DatabaseManager
               FROM player_game_stats ps
               JOIN games g ON ps.game_id = g.id
               WHERE g.manager_id = ? AND g.season_id = ? AND g.is_played = 1
+                    AND g.game_type = 'regular'
                     AND ps.minutes > 0
               GROUP BY ps.player_id",
             managerId, seasonId);
@@ -1477,6 +1478,7 @@ public partial class DatabaseManager
               FROM player_game_stats ps
               JOIN games g ON ps.game_id = g.id
               WHERE g.season_id = ? AND g.is_played = 1
+                    AND g.game_type = 'regular'
               GROUP BY ps.player_id",
             seasonId);
 
