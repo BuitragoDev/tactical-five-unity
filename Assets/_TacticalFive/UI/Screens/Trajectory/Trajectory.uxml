@@ -69,6 +69,12 @@
                     <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
                 </ui:VisualElement>
 
+                <!-- Hitos de carrera (E1) -->
+                <ui:VisualElement name="TrajectoryMilestones" class="trajectory-milestones" style="display: none;">
+                    <ui:Label class="trajectory-section-label" text="HITOS DE CARRERA" />
+                    <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
+                </ui:VisualElement>
+
                 <!-- Tabla de estadísticas -->
                 <ui:VisualElement name="TrajectoryStatsSection" class="trajectory-stats-section">
                     <ui:Label class="trajectory-section-label" text="ESTADÍSTICAS POR TEMPORADA" />

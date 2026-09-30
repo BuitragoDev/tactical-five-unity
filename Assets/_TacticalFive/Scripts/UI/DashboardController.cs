@@ -1317,6 +1317,9 @@ using System.Threading.Tasks;
             {
                 QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, gameDay, _season?.current_date ?? "");
 
+                // Hitos de legado (E1): antes de los hilos, para que la narrativa los vea.
+                MilestoneService.EvaluateDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
+
                 // Motor de narrativa: abre/escala/cierra hilos (rachas) con noticias y efectos.
                 StorylineService.ProcessDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
 
@@ -8657,6 +8660,14 @@ List<int> offeredPickIds = new List<int>();
     bool SetNewsImageByType(VisualElement icon, MessageData msg)
     {
         string nt = msg.news_type;
+
+        // Hitos de legado (E1): icono de récord/trofeo.
+        if (nt == NewsType.LEGADO)
+        {
+            var legacyTex = Resources.Load<Texture2D>(MilestoneCatalog.SectionIcon);
+            if (legacyTex != null) { icon.style.backgroundImage = new StyleBackground(legacyTex); return true; }
+            return false;
+        }
 
         if (nt == NewsType.HITO || nt == NewsType.RACHA_VICTORIAS || nt == NewsType.MALA_RACHA
             || nt == NewsType.CAMPANADA || nt == NewsType.RESULTADO || nt == NewsType.GLEAGUE_CHAMPION

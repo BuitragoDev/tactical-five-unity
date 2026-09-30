@@ -472,3 +472,66 @@
     color: rgb(122, 138, 170);
     -unity-text-align: middle-center;
 }
+
+/* ── HITOS DE CARRERA (E1) ── */
+.trajectory-milestones {
+    flex-direction: column;
+    margin-top: 14px;
+}
+.trajectory-milestones-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.trajectory-milestone {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 8px 8px 0;
+    padding: 6px 12px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 8px;
+}
+.trajectory-milestone-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 8px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.trajectory-milestone-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 16px;
+    color: rgb(248, 196, 64);
+}
+.trajectory-milestone-date {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(150, 162, 186);
+    margin-left: 8px;
+}
+.trajectory-milestone--next {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(60, 90, 150);
+}
+.trajectory-milestone--next .trajectory-milestone-text { color: rgb(150, 190, 255); }
+.trajectory-milestone-progress {
+    width: 120px;
+    height: 6px;
+    margin-left: 10px;
+    background-color: rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+}
+.trajectory-milestone-progress-fill {
+    height: 6px;
+    background-color: rgb(212, 160, 23);
+    border-radius: 3px;
+}
+.trajectory-milestone-pct {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(179, 190, 214);
+    margin-left: 8px;
+}

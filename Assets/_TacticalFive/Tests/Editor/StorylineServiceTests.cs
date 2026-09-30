@@ -655,4 +655,57 @@ public class StorylineServiceTests
         Assert.That(gone, Has.Count.EqualTo(1), "solo el hilo de jugador ausente");
         Assert.That(gone[0].subject_player_id, Is.EqualTo(99));
     }
+
+    // ── HITOS DE LEGADO (E1) ────────────────────────────────
+
+    [Test]
+    public void DetectMilestonePlayers_OpensOneHiloPerPlayer()
+    {
+        var luka = new PlayerData { id = 1, first_name = "Luka", last_name = "Doncic", overall = 94 };
+        var rook = new PlayerData { id = 2, first_name = "Cooper", last_name = "Flagg", overall = 82 };
+        var ctx = Ctx(luka, rook);
+        ctx.TodayMilestones[1] = new List<string> { "points_20000" };   // hito major
+        ctx.TodayMilestones[2] = new List<string> { "allstar_3" };
+
+        var def = StorylineCatalog.Find(StorylineType.HitoAlcanzado);
+        var t = StorylineCatalog.DetectMilestonePlayers(ctx, def, new StorylineSubjects());
+
+        Assert.That(t, Has.Count.EqualTo(2), "cada protagonista con hito tiene su hilo");
+        var lukaT = t.Find(x => x.subjectPlayerId == 1);
+        Assert.That(lukaT, Is.Not.Null);
+        Assert.That(lukaT.action, Is.EqualTo(StorylineService.Action.Start));
+        Assert.That(lukaT.intensity, Is.EqualTo(2), "20.000 puntos es major");
+        Assert.That(lukaT.summary, Is.Not.Empty);
+    }
+
+    [Test]
+    public void DetectMilestonePlayers_ResolvesWhenTheDayPasses()
+    {
+        var luka = new PlayerData { id = 1, first_name = "Luka", last_name = "Doncic" };
+        var ctx = Ctx(luka);   // sin hitos hoy
+
+        var subjects = new StorylineSubjects
+        {
+            Actives = new List<StorylineData>
+            {
+                new StorylineData { id = 5, type = StorylineType.HitoAlcanzado, subject_player_id = 1,
+                                    title = "Hito histórico: Luka Doncic", resolved = 0 }
+            }
+        };
+
+        var def = StorylineCatalog.Find(StorylineType.HitoAlcanzado);
+        var t = StorylineCatalog.DetectMilestonePlayers(ctx, def, subjects);
+
+        Assert.That(t, Has.Count.EqualTo(1));
+        Assert.That(t[0].action, Is.EqualTo(StorylineService.Action.Resolve));
+        Assert.That(t[0].subjectPlayerId, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void DetectMilestonePlayers_DoesNothingWithoutMilestones()
+    {
+        var ctx = Ctx(new PlayerData { id = 1 });
+        var def = StorylineCatalog.Find(StorylineType.HitoAlcanzado);
+        Assert.That(StorylineCatalog.DetectMilestonePlayers(ctx, def, new StorylineSubjects()), Is.Empty);
+    }
 }

@@ -283,6 +283,7 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   | `crisis_economica` | presupuesto | presupuesto <0 o ≥2 avisos |
   | `revancha_playoffs` | serie en curso vs historial | rival que nos eliminó antes (peso doble si fue en las Finales) |
   | `dinastia` | `season_records` | 3+ títulos en 8 temporadas; escala con cada título |
+  | `hito_alcanzado` | `player_milestones` (del día) | hito de carrera alcanzado hoy (un hilo por protagonista, dura el día) |
 - **Elegibilidad de los hilos de jugador:** el umbral de sequía es **relativo** (un
   especialista defensivo de 5 puntos no está "seco" cada noche; una estrella de 30 sí lo
   está al anotar 14), se exige protagonismo (≥12 min de media en los últimos partidos) y
@@ -295,6 +296,30 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   temporal) y un **badge** en el panel de noticias del Dashboard con el hilo activo.
 - **Solape con `QuickNewsGenerator`:** las rachas del equipo del usuario las narra el
   motor (QN sigue con las del resto de la liga).
+
+## Hitos de legado (carrera por jugador) — E1
+
+- **Carrera = histórico + temporada en curso + honores**, todo por `player_id`:
+  `historical_player_stats` (temporadas anteriores, ya indexado por id) + los agregados de la
+  temporada actual (todos los tipos de partido) + `players.rings/finals_mvps/season_mvps` y las
+  convocatorias All-Star (`all_star_roster` de la partida + `allstar_appearances_seed`).
+- **Catálogo** (`MilestoneCatalog`, puro): puntos (10k/15k/20k/25k/30k), rebotes (5k/10k/15k),
+  asistencias (2.5k/5k/7.5k/10k), robos (1k/2k), tapones (500/1k/2k), triples (1k/2k/3k),
+  partidos (500/1k), dobles-dobles (200/400), triples-dobles (20/50), All-Star (3/5/10),
+  MVP de temporada (1/2/3), anillos (1/2/3) y MVP de las Finales (1/2). Los redondos son `major`
+  (más efecto y noticia destacada). Progreso y "próximo hito" en `MilestoneHelper` (puro).
+- **Detección diaria** (`MilestoneService.EvaluateDay`, dentro del día simulado, justo antes del
+  motor de narrativa): registra en **`player_milestones`** cada hito nuevo (una vez) y emite una
+  **noticia agrupada por jugador** ("Hito histórico: X" · `NewsType.LEGADO`, icono de récord).
+  **Línea base silenciosa**: la primera vez por partida se registran sin noticia los hitos que los
+  jugadores ya cumplen (p. ej. las leyendas del seed) para no soltar un aluvión el día 1.
+- **Narrativa:** tipo `hito_alcanzado` (hilo por jugador, dura el día del hito): título "Hito
+  histórico: X", efecto de moral/afición (mayor si es `major`) y **sin noticia propia** (la emite
+  `MilestoneService` para no duplicar); se cierra en silencio cuando el día pasa.
+- **Salón de la Fama:** `HallOfFameHelper.ShouldInduct` añade **10× All-Star** o **3× MVP de
+  temporada** como criterios de inducción (además de anillo/MVP Finales/30k pts/15k reb/10k ast).
+- **UI:** chips de hitos conseguidos + **próximo hito con barra de progreso** en **Trayectoria** y
+  **Perfil**; en el **Salón de la Fama** (Palmarés) la fila lleva el nº de hitos en el tooltip.
 
 ## Quintetos de la temporada (pantalla Quintos)
 

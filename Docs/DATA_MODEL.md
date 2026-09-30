@@ -117,6 +117,20 @@ tabla no habría histórico de enfrentamientos. CRUD en `DatabaseManager.Games.c
 > `RivalryHelper` (rivales, balance, intensidad, último verdugo) y `DynastyHelper` (prestigio y
 > dinastías derivadas de `season_records`).
 
+### player_milestones (`MilestoneData`)
+
+Hitos de carrera alcanzados (E1). Una fila por hito y jugador; se registran una sola vez
+(noticia única, fecha) y **sobreviven al retiro** del jugador.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `id` | INTEGER PK AI | |
+| `player_id` | INTEGER | índice; clave estable del jugador |
+| `milestone` | TEXT | clave del hito (`points_10000`, `allstar_10`, `mvp_3`…) según `MilestoneCatalog` |
+| `season_id` / `game_day` | INTEGER | cuándo se alcanzó |
+| `team_id` | INTEGER | equipo en ese momento |
+| `created_at` | TEXT | |
+
 ### messages (`MessageData`)
 `id`, `manager_id`, `title`, `body`, `date_sent`, `is_read`, `game_day`, `message_type`, `related_id`, `sender_type` (0=system,1=player,2=news), `sender_id`, `game_date`, `created_at`.
 

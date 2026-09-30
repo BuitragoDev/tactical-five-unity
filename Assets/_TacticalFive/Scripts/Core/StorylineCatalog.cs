@@ -80,6 +80,7 @@ public static class StorylineCatalog
         new StorylineDef { type = StorylineType.CrisisEconomica, cooldownDays = 25, detect = DetectEconomicCrisis },
         new StorylineDef { type = StorylineType.RevanchaPlayoffs, cooldownDays = 30, detect = DetectRevenge },
         new StorylineDef { type = StorylineType.Dinastia,          cooldownDays = 30, detect = DetectDynasty },
+        new StorylineDef { type = StorylineType.HitoAlcanzado,     cooldownDays = 10, detectPlayers = DetectMilestonePlayers },
     };
 
     public static StorylineDef Find(string type) => All.FirstOrDefault(d => d.type == type);
@@ -760,6 +761,60 @@ public static class StorylineCatalog
                 morale = up ? 2 : -2
             });
         }
+        return result;
+    }
+
+    /// <summary>
+    /// Hitos de carrera (E1): un hilo por protagonista el día que alcanza un hito (20.000
+    /// puntos, 10× All-Star…). El hilo dura ese día: cuando el jugador deja de tener hitos
+    /// hoy, se cierra en silencio (la noticia la emite `MilestoneService`).
+    /// </summary>
+    public static List<StorylineTransition> DetectMilestonePlayers(StorylineContext ctx, StorylineDef def,
+                                                                   StorylineSubjects subjects)
+    {
+        var result = new List<StorylineTransition>();
+
+        // Cierra los hilos de protagonistas que ya no tienen hitos hoy.
+        foreach (var active in subjects.Actives)
+        {
+            if (active.subject_player_id <= 0) continue;
+            if (ctx.TodayMilestones.ContainsKey(active.subject_player_id)) continue;
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Resolve,
+                resolution = StorylineResolution.Completed,
+                subjectPlayerId = active.subject_player_id,
+                title = "",
+                body = ""   // silencioso: la noticia ya la dio MilestoneService
+            });
+        }
+
+        // Abre un hilo por cada protagonista con hitos hoy (uno por jugador).
+        foreach (var kv in ctx.TodayMilestones)
+        {
+            var p = ctx.FindPlayer(kv.Key);
+            if (p == null || subjects.For(p.id) != null) continue;
+
+            var defs = kv.Value.Select(MilestoneCatalog.ByKey).Where(d => d != null).ToList();
+            if (defs.Count == 0) continue;
+            bool major = defs.Any(d => d.major);
+
+            result.Add(new StorylineTransition
+            {
+                type = def.type,
+                action = StorylineService.Action.Start,
+                intensity = major ? 2 : 1,
+                subjectPlayerId = p.id,
+                title = $"Hito histórico: {p.first_name} {p.last_name}",
+                summary = string.Join(", ", defs.Select(MilestoneCatalog.Label)),
+                body = "",   // la noticia la emite MilestoneService (evita duplicar)
+                newsType = NewsType.LEGADO,
+                fan = major ? 4 : 2,
+                morale = major ? 2 : 1
+            });
+        }
+
         return result;
     }
 

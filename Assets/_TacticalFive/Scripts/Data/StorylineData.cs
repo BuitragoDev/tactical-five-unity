@@ -20,6 +20,7 @@ public static class StorylineType
     // Rivalidades / dinastías
     public const string RevanchaPlayoffs = "revancha_playoffs"; // reencuentro con quien nos eliminó
     public const string Dinastia = "dinastia";                  // ventana de títulos (3+ en 8 años)
+    public const string HitoAlcanzado = "hito_alcanzado";        // hito de carrera (E1)
 }
 
 /// <summary>Motivo del cierre del hilo.</summary>

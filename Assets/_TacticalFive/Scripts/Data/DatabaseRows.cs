@@ -263,3 +263,20 @@ public class PlayerGamesRow
     public int player_id { get; set; }
     public int games { get; set; }
 }
+
+/// <summary>Contadores de honores de un jugador (para los hitos de carrera).</summary>
+public class PlayerHonorsRow
+{
+    public int id { get; set; }
+    public int team_id { get; set; }
+    public int rings { get; set; }
+    public int finals_mvps { get; set; }
+    public int season_mvps { get; set; }
+}
+
+/// <summary>Convocatorias All-Star de un jugador dentro de la partida.</summary>
+public class AllStarSeasonCountRow
+{
+    public int player_id { get; set; }
+    public int appearances { get; set; }
+}

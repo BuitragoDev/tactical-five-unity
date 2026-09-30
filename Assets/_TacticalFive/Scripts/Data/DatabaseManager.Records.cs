@@ -1029,6 +1029,189 @@ public partial class DatabaseManager
         }
     }
 
+    // ── HITOS DE CARRERA (E1) ─────────────────────────────
+
+    public List<MilestoneData> GetPlayerMilestones(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return new List<MilestoneData>();
+        return _db.Table<MilestoneData>()
+                  .Where(m => m.player_id == playerId)
+                  .OrderBy(m => m.season_id).ThenBy(m => m.id)
+                  .ToList();
+    }
+
+    /// <summary>Claves de hito ya registradas por jugador (para no repetir la noticia).</summary>
+    public Dictionary<int, List<string>> GetMilestoneKeysByPlayer()
+    {
+        var dict = new Dictionary<int, List<string>>();
+        if (!EnsureDb()) return dict;
+        foreach (var m in _db.Table<MilestoneData>().ToList())
+        {
+            if (!dict.TryGetValue(m.player_id, out var list))
+            {
+                list = new List<string>();
+                dict[m.player_id] = list;
+            }
+            list.Add(m.milestone);
+        }
+        return dict;
+    }
+
+    /// <summary>Nº de hitos registrados por jugador (etiqueta de Palmarés).</summary>
+    public Dictionary<int, int> GetMilestoneCountsByPlayer()
+    {
+        var dict = new Dictionary<int, int>();
+        if (!EnsureDb()) return dict;
+        foreach (var m in _db.Table<MilestoneData>().ToList())
+            dict[m.player_id] = dict.TryGetValue(m.player_id, out var n) ? n + 1 : 1;
+        return dict;
+    }
+
+    public void InsertMilestones(List<MilestoneData> milestones)
+    {
+        if (!EnsureDb() || milestones == null || milestones.Count == 0) return;
+        _db.InsertAll(milestones);
+    }
+
+    /// <summary>Convocatorias All-Star de carrera: las de la partida + las del seed histórico.</summary>
+    public int GetCareerAllStarCount(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return 0;
+        int fromGame = _db.ExecuteScalar<int>(
+            "SELECT COUNT(DISTINCT season_id) FROM all_star_roster WHERE player_id = ?", playerId);
+        int fromSeed = _db.ExecuteScalar<int>(
+            "SELECT COALESCE(SUM(appearances), 0) FROM allstar_appearances_seed WHERE player_id = ?", playerId);
+        return fromGame + fromSeed;
+    }
+
+    public bool HasMilestone(int playerId, string milestone)
+    {
+        if (!EnsureDb()) return false;
+        return _db.Table<MilestoneData>()
+                  .Any(m => m.player_id == playerId && m.milestone == milestone);
+    }
+
+    /// <summary>
+    /// Totales de carrera de cada jugador: histórico (`historical_player_stats`, por
+    /// `player_id`) + temporada en curso (todos los tipos menos el All-Star, igual que el
+    /// archivado) + honores (contadores de `players` y convocatorias All-Star de la partida
+    /// más las del seed histórico).
+    /// </summary>
+    public Dictionary<int, CareerTotals> BuildCareerTotals(int managerId, int seasonId)
+    {
+        var result = new Dictionary<int, CareerTotals>();
+        if (!EnsureDb()) return result;
+
+        void Add(int playerId, int points, int rebounds, int assists, int steals, int blocks,
+                 int threes, int games, int dd, int td)
+        {
+            var t = result.TryGetValue(playerId, out var cur) ? cur : new CareerTotals();
+            t.points += points; t.rebounds += rebounds; t.assists += assists;
+            t.steals += steals; t.blocks += blocks; t.threePointers += threes;
+            t.games += games; t.doubleDoubles += dd; t.tripleDoubles += td;
+            result[playerId] = t;
+        }
+
+        // Temporadas anteriores (las leyendas sembradas llevan player_id <= 0: se ignoran).
+        foreach (var h in _db.Table<HistoricalPlayerStatsData>().ToList())
+        {
+            if (h.player_id <= 0) continue;
+            Add(h.player_id, h.total_points, h.total_rebounds, h.total_assists, h.total_steals,
+                h.total_blocks, h.total_fg3m, h.games, h.total_double_doubles, h.total_triple_doubles);
+        }
+
+        // Temporada en curso (todos los tipos de partido menos el All-Star, como el archivado).
+        if (seasonId > 0)
+        {
+            var aggregates = _db.Query<SeasonStatsAggregate>(
+                @"SELECT ps.player_id, COUNT(*) AS gp,
+                         SUM(ps.points) AS total_points, SUM(ps.rebounds) AS total_rebounds,
+                         SUM(ps.assists) AS total_assists, SUM(ps.steals) AS total_steals,
+                         SUM(ps.blocks) AS total_blocks, SUM(ps.fgm) AS total_fgm,
+                         SUM(ps.fga) AS total_fga, SUM(ps.fg3m) AS total_fg3m,
+                         SUM(ps.fg3a) AS total_fg3a, SUM(ps.ftm) AS total_ftm,
+                         SUM(ps.fta) AS total_fta, SUM(ps.turnovers) AS total_turnovers,
+                         SUM(ps.minutes) AS total_minutes, SUM(ps.rating) AS total_rating,
+                         SUM(ps.double_double) AS total_dd, SUM(ps.triple_double) AS total_td
+                  FROM player_game_stats ps
+                  JOIN games g ON ps.game_id = g.id
+                  WHERE g.manager_id = ? AND g.season_id = ? AND g.is_played = 1
+                        AND g.game_type != 'allstar'
+                  GROUP BY ps.player_id",
+                managerId, seasonId);
+            foreach (var a in aggregates)
+                Add(a.player_id, a.total_points, a.total_rebounds, a.total_assists, a.total_steals,
+                    a.total_blocks, a.total_fg3m, a.gp, a.total_dd, a.total_td);
+        }
+
+        // Honores y convocatorias All-Star.
+        foreach (var p in _db.Query<PlayerHonorsRow>(
+            "SELECT id, team_id, rings, finals_mvps, season_mvps FROM players"))
+        {
+            var t = result.TryGetValue(p.id, out var cur) ? cur : new CareerTotals();
+            t.rings += p.rings;
+            t.finalsMvps += p.finals_mvps;
+            t.seasonMvps += p.season_mvps;
+            result[p.id] = t;
+        }
+
+        foreach (var r in _db.Query<AllStarSeasonCountRow>(
+            "SELECT player_id, COUNT(DISTINCT season_id) AS appearances FROM all_star_roster WHERE manager_id = ? GROUP BY player_id",
+            managerId))
+        {
+            if (r.player_id <= 0) continue;
+            var t = result.TryGetValue(r.player_id, out var cur) ? cur : new CareerTotals();
+            t.allStars += r.appearances;
+            result[r.player_id] = t;
+        }
+
+        foreach (var s in _db.Table<AllStarAppearanceSeed>().ToList())
+        {
+            if (s.player_id <= 0) continue;
+            var t = result.TryGetValue(s.player_id, out var cur) ? cur : new CareerTotals();
+            t.allStars += s.appearances;
+            result[s.player_id] = t;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Línea base (una vez por partida): registra **sin noticias** los hitos que los jugadores
+    /// ya cumplen al activar el sistema (p. ej. las leyendas del seed con 40.000 puntos).
+    /// Devuelve true si acaba de hacerse (el evaluador del día no debe emitir noticias).
+    /// </summary>
+    public bool EnsureMilestonesBaselined(int managerId, int seasonId)
+    {
+        if (!EnsureDb() || IsMigrationApplied("milestones_baselined")) return false;
+
+        var careers = BuildCareerTotals(managerId, seasonId);
+        var rows = new List<MilestoneData>();
+        string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        foreach (var kv in careers)
+        {
+            foreach (var d in MilestoneHelper.Reached(kv.Value))
+            {
+                var p = GetPlayerById(kv.Key);
+                rows.Add(new MilestoneData
+                {
+                    player_id = kv.Key,
+                    milestone = d.key,
+                    season_id = seasonId,
+                    game_day = GetActiveSeason(managerId)?.current_game_day ?? 0,
+                    team_id = p?.team_id ?? 0,
+                    created_at = now
+                });
+            }
+        }
+
+        if (rows.Count > 0) _db.InsertAll(rows);
+        MarkMigrationApplied("milestones_baselined");
+        Debug.Log($"[DB] Migration: hitos de carrera baselinados ({rows.Count} registros)");
+        return true;
+    }
+
     // ── HISTORICAL PLAYER STATS ───────────────────────────
 
     public List<HistoricalPlayerStatsData> GetAllHistoricalPlayerStats()
@@ -1298,7 +1481,10 @@ public partial class DatabaseManager
             int ast = hist?.total_assists ?? 0;
             int fmvps = Math.Max(p.finals_mvps,
                 _db.Table<FinalsRecord>().Count(f => f.mvp == $"{p.first_name} {p.last_name}"));
-            return HallOfFameHelper.ShouldInduct(p.rings, fmvps, pts, reb, ast);
+            // E1: 10× All-Star o 3× MVP de temporada también inducen.
+            return HallOfFameHelper.ShouldInduct(p.rings, fmvps, pts, reb, ast,
+                                                 allStars: GetCareerAllStarCount(p.id),
+                                                 seasonMvps: p.season_mvps);
         }
         catch { return false; }
     }

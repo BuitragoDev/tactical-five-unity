@@ -365,3 +365,48 @@
     font-size: 18px;
     color: rgb(122, 138, 170);
 }
+
+/* ── HITOS DE CARRERA (E1) ── */
+.playerprofile-milestones {
+    flex-direction: column;
+    margin-top: 8px;
+}
+.playerprofile-milestones-body {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+.playerprofile-milestone {
+    flex-direction: row;
+    align-items: center;
+    margin: 0 6px 6px 0;
+    padding: 4px 10px;
+    background-color: rgba(212, 160, 23, 0.10);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 8px;
+}
+.playerprofile-milestone-icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    flex-shrink: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.playerprofile-milestone-text {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    color: rgb(248, 196, 64);
+}
+.playerprofile-milestone--next {
+    background-color: rgba(42, 95, 201, 0.10);
+    border-color: rgb(60, 90, 150);
+}
+.playerprofile-milestone--next .playerprofile-milestone-text { color: rgb(150, 190, 255); }
+.playerprofile-milestone-pct {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    color: rgb(179, 190, 214);
+    margin-left: 8px;
+}
