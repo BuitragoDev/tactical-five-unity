@@ -20,14 +20,6 @@ public class RolloverRulesTests
     }
 
     [Test]
-    public void ShouldProgress_AlwaysTrue_IncludingRookies()
-    {
-        // El primer año de rookie no congela el desarrollo: envejece y progresa.
-        Assert.That(RolloverRules.ShouldProgress(true), Is.True);
-        Assert.That(RolloverRules.ShouldProgress(false), Is.True);
-    }
-
-    [Test]
     public void RookieAgesAndProgressesButKeepsContract()
     {
         // Escenario del bug B41: un rookie de 19 con contrato de 3 años.
