@@ -42,12 +42,17 @@
                     <!-- INJURED PLAYERS -->
                     <ui:VisualElement name="InjuredSection" class="injured-section">
                         <ui:Label class="section-title" text="JUGADORES LESIONADOS" />
-                        <ui:VisualElement name="InjuredCards" class="injured-cards" />
+                        <ui:VisualElement class="injured-scroll-row">
+                            <ui:VisualElement name="InjuredViewport" class="injured-viewport">
+                                <ui:VisualElement name="InjuredCards" class="injured-cards" />
+                            </ui:VisualElement>
+                            <ui:VisualElement name="InjuredScrollTrack" class="injured-scrollbar">
+                                <ui:VisualElement name="InjuredScrollThumb" class="injured-scrollbar-thumb" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>
-
-                <ui:VisualElement name="InjuredPaginator" class="injured-paginator" />
 
                 <ui:Button name="BtnLeagueInjured" class="btn-league-injured" text="VER LESIONADOS DE LA LIGA" />
 

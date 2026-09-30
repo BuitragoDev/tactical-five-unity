@@ -24,7 +24,10 @@ public class InjuredController : UIScreenController
 
     // Injured cards
     private VisualElement _injuredCards;
-    private VisualElement _injuredPaginator;
+    private VisualElement _injuredViewport;
+    private VisualElement _injuredScrollTrack;
+    private VisualElement _injuredScrollThumb;
+    private CustomScrollbar.Handle _injuredScrollBar;
 
     // League injured modal
     private VisualElement _leagueInjuredOverlay;
@@ -60,9 +63,7 @@ public class InjuredController : UIScreenController
     private Texture2D _calendarTex;
     private Texture2D _personTex;
 
-    // Pagination
-    private int _currentPage;
-    private const int ITEMS_PER_PAGE = 6;
+    // League injured modal data
     private List<(TeamData team, PlayerData player)> _leagueInjuredPlayers = new();
 
     // League injured scrollbar
@@ -83,7 +84,13 @@ public class InjuredController : UIScreenController
         _medStaffCard = _root.Q<VisualElement>("MedStaffCard");
         _medStaffEmpty = _root.Q<VisualElement>("MedStaffEmpty");
         _injuredCards = _root.Q<VisualElement>("InjuredCards");
-        _injuredPaginator = _root.Q<VisualElement>("InjuredPaginator");
+        _injuredViewport = _root.Q<VisualElement>("InjuredViewport");
+        _injuredScrollTrack = _root.Q<VisualElement>("InjuredScrollTrack");
+        _injuredScrollThumb = _root.Q<VisualElement>("InjuredScrollThumb");
+
+        // Barra de scroll propia para la lista de lesionados (se re-enlaza en cada visita).
+        _injuredScrollBar = CustomScrollbar.Bind(_injuredViewport, _injuredCards,
+                                                 _injuredScrollTrack, _injuredScrollThumb);
 
         _leagueInjuredOverlay = _root.Q<VisualElement>("LeagueInjuredOverlay");
         _leagueInjuredList = _root.Q<VisualElement>("LeagueInjuredList");
@@ -146,7 +153,6 @@ public class InjuredController : UIScreenController
         // El parte médico incluye a los lesionados y a los que volvieron antes de tiempo
         // (sin baja pero con riesgo de recaída pendiente).
         _injuredPlayers = _allPlayers.Where(p => p.injury_days > 0 || p.recovery_risk > 0).ToList();
-        _currentPage = 0;
 
         var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
         _medico = staff.FirstOrDefault(e => e.position == "MEDICO");
@@ -330,9 +336,6 @@ public class InjuredController : UIScreenController
     void BuildInjuredCards()
     {
         _injuredCards.Clear();
-        _injuredPaginator?.Clear();
-        if (_injuredPaginator != null)
-            _injuredPaginator.style.display = DisplayStyle.None;
 
         int total = _injuredPlayers.Count;
 
@@ -359,20 +362,13 @@ public class InjuredController : UIScreenController
 
             emptyWrapper.Add(emptyInner);
             _injuredCards.Add(emptyWrapper);
+            CustomScrollbar.Reset(_injuredScrollBar);
             return;
         }
 
-        int totalPages = Mathf.CeilToInt((float)total / ITEMS_PER_PAGE);
-        if (totalPages < 1) totalPages = 1;
-        if (_currentPage >= totalPages) _currentPage = totalPages - 1;
-        if (_currentPage < 0) _currentPage = 0;
-
-        int startIdx = _currentPage * ITEMS_PER_PAGE;
-        int endIdx = Mathf.Min(startIdx + ITEMS_PER_PAGE, total);
-
         bool hasMedico = _medico != null;
 
-        for (int i = startIdx; i < endIdx; i++)
+        for (int i = 0; i < total; i++)
         {
             var player = _injuredPlayers[i];
             bool isRecovered = player.injury_days == 0;
@@ -696,50 +692,8 @@ public class InjuredController : UIScreenController
             _injuredCards.Add(cardWrapper);
         }
 
-        // ── PAGINATION BAR ──
-        if (totalPages > 1 && _injuredPaginator != null)
-        {
-            _injuredPaginator.style.display = DisplayStyle.Flex;
-
-            var btnPrev = new Button();
-            btnPrev.AddToClassList("injured-paginator-btn");
-            btnPrev.text = "\u25C0";
-            btnPrev.SetEnabled(_currentPage > 0);
-            if (_currentPage == 0) btnPrev.AddToClassList("injured-paginator-btn--disabled");
-            int prevPage = _currentPage - 1;
-            btnPrev.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(prevPage); });
-            if (CursorManager.Instance != null)
-            {
-                btnPrev.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
-                btnPrev.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
-            }
-            _injuredPaginator.Add(btnPrev);
-
-            var pageLbl = new Label();
-            pageLbl.AddToClassList("injured-paginator-label");
-            pageLbl.text = $"{_currentPage + 1} / {totalPages}";
-            _injuredPaginator.Add(pageLbl);
-
-            var btnNext = new Button();
-            btnNext.AddToClassList("injured-paginator-btn");
-            btnNext.text = "\u25B6";
-            btnNext.SetEnabled(_currentPage < totalPages - 1);
-            if (_currentPage >= totalPages - 1) btnNext.AddToClassList("injured-paginator-btn--disabled");
-            int nextPage = _currentPage + 1;
-            btnNext.RegisterCallback<ClickEvent>(_ => { PlayClick(); GoToPage(nextPage); });
-            if (CursorManager.Instance != null)
-            {
-                btnNext.RegisterCallback<MouseEnterEvent>(_ => CursorManager.Instance.SetHandCursor());
-                btnNext.RegisterCallback<MouseLeaveEvent>(_ => CursorManager.Instance.SetDefaultCursor());
-            }
-            _injuredPaginator.Add(btnNext);
-        }
-    }
-
-    void GoToPage(int page)
-    {
-        _currentPage = page;
-        BuildInjuredCards();
+        // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
+        CustomScrollbar.Reset(_injuredScrollBar);
     }
 
     // ── HELPERS ──
