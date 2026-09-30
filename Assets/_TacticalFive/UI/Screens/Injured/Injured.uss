@@ -219,12 +219,16 @@
     flex-shrink: 0;
 }
 
-/* Fila de 3 cards: el espaciado entre filas está aquí (no en la card), así la
-   última fila no deja margen inferior. */
+/* Fila de 3 cards: el espaciado entre filas está aquí (no en la card). La última
+   fila lleva solo un colchón pequeño para que el scroll no corte las cards. */
 .injury-row {
     flex-direction: row;
     flex-shrink: 0;
     margin-bottom: 100px;
+}
+
+.injury-row--last {
+    margin-bottom: 10px;
 }
 
 /* ── CARD ── */

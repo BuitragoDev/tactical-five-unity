@@ -716,6 +716,11 @@ public class InjuredController : UIScreenController
             row.Add(cardWrapper);
         }
 
+        // La última fila no lleva el margen grande entre filas (solo un pequeño colchón
+        // para que el scroll no corte las cards).
+        if (row != null)
+            row.AddToClassList("injury-row--last");
+
         // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
         CustomScrollbar.Reset(_injuredScrollBar);
     }
