@@ -458,7 +458,7 @@
 }
 
 .playerprofile-attr-badge {
-    width: 94px;
+    width: 93px;
     background-color: rgb(22, 26, 36);
     border-radius: 8px;
     border-width: 1px;
