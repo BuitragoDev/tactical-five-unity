@@ -280,7 +280,7 @@
 
 .playerprofile-stat-card-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     margin-top: 4px;
 }
@@ -489,7 +489,7 @@
 
 .playerprofile-attr-badge-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 18px;
     color: rgb(122, 138, 170);
     margin-top: 2px;
     text-transform: uppercase;
