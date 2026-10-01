@@ -480,7 +480,7 @@
 .playerprofile-trajectory-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     color: rgb(120, 160, 230);
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgba(42, 95, 201, 0.9);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
