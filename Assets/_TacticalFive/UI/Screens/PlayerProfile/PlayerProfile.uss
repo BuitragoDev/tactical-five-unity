@@ -246,6 +246,12 @@
     flex-wrap: wrap;
 }
 
+/* El panel de estadísticas conserva el alto del panel base: centra las tarjetas
+   verticalmente en el cuerpo. */
+.playerprofile-panel--full .playerprofile-panel-body {
+    justify-content: center;
+}
+
 .playerprofile-stat-card {
     width: 105px;
     background-color: rgb(22, 26, 36);
