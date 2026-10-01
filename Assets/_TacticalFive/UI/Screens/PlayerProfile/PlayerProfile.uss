@@ -86,8 +86,8 @@
 }
 
 .playerprofile-photo {
-    width: 130px;
-    height: 130px;
+    width: 180px;
+    height: 180px;
     border-radius: 8px;
     background-color: rgb(200, 200, 200);
     background-size: cover;
