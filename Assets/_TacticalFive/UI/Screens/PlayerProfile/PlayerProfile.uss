@@ -282,7 +282,7 @@
     flex-direction: row;
     flex-shrink: 0;
     margin-top: 16px;
-    align-items: flex-start;
+    align-items: stretch;
 }
 
 .playerprofile-panel {
