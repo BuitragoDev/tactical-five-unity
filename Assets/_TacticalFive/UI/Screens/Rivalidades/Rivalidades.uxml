@@ -7,7 +7,7 @@
     <Style src="../LegalNotice/LegalNotice.uss" />
     <Style src="Rivalidades.uss" />
 
-    <ui:VisualElement name="RivalidadesRoot" class="palmares-root">
+    <ui:VisualElement name="RivalidadesRoot" class="palmares-root rivalidades-split">
 
         <ui:VisualElement class="palmares-main">
 
