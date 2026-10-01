@@ -366,7 +366,7 @@
 
 .playerprofile-info-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 22px;
     color: rgb(220, 226, 240);
 }
 
