@@ -481,7 +481,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 15px;
     color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(28, 22, 4);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
     border-radius: 8px;
@@ -494,7 +494,7 @@
 }
 
 .playerprofile-trajectory-btn:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(48, 38, 8);
     color: rgb(240, 200, 80);
 }
 
