@@ -483,7 +483,7 @@
     color: rgb(0, 0, 0);
     background-color: rgb(212, 160, 23);
     border-width: 2px;
-    border-color: rgb(120, 95, 30);
+    border-color: rgb(255, 255, 255);
     border-radius: 8px;
     padding: 10px 16px;
     letter-spacing: 1px;
