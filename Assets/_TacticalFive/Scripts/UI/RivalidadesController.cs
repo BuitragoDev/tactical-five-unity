@@ -93,7 +93,6 @@ public class RivalidadesController : UIScreenController
             stats.AddToClassList("rival-stats");
             stats.Add(MakeStatBadge($"{p.titles} TÍTULOS", "rival-stat--titles"));
             stats.Add(MakeStatBadge($"{p.finals} FINALES", "rival-stat--finals"));
-            stats.Add(MakeStatBadge($"{p.conferenceTitles} CONFERENCIAS", "rival-stat--conf"));
             col.Add(stats);
 
             row.Add(col);

@@ -766,11 +766,6 @@
     border-color: rgb(60, 90, 150);
     background-color: rgba(42, 95, 201, 0.12);
 }
-.rival-stat--conf {
-    color: rgb(100, 200, 140);
-    border-color: rgb(39, 130, 72);
-    background-color: rgba(39, 174, 96, 0.12);
-}
 .rival-empty {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
