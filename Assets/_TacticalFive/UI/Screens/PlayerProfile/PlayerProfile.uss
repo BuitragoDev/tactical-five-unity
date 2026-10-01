@@ -302,7 +302,7 @@
     border-radius: 4px;
     margin-right: 14px;
     min-width: 0;
-    height: 300px;
+    height: 350px;
     flex-direction: column;
     overflow: hidden;
 }
