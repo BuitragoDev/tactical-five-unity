@@ -296,9 +296,10 @@
 .playerprofile-panel {
     flex-grow: 1;
     flex-basis: 0;
-    background-color: rgb(28, 33, 48);
+    background-color: rgb(18, 21, 28);
     border-width: 1px;
-    border-color: rgb(42, 51, 71);
+    border-color: rgb(120, 95, 30);
+    border-radius: 4px;
     margin-right: 14px;
     min-width: 0;
     height: 300px;
