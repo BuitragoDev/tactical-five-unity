@@ -142,8 +142,8 @@
 }
 
 .playerprofile-team-logo {
-    width: 34px;
-    height: 34px;
+    width: 64px;
+    height: 64px;
     margin-right: 8px;
     background-size: contain;
     background-repeat: no-repeat;
@@ -153,7 +153,7 @@
 
 .playerprofile-player-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 22px;
     color: rgb(180, 194, 220);
 }
 
