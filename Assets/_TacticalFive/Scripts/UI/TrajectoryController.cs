@@ -48,6 +48,7 @@ using System.Linq;
 
     // Tabla
     private VisualElement _trajectoryTableBody;
+    private VisualElement _trajectoryTableTotals;
     private VisualElement _trajectoryTableScrollViewport;
     private VisualElement _trajectoryTableScrollTrack;
     private VisualElement _trajectoryTableScrollThumb;
@@ -84,6 +85,7 @@ using System.Linq;
         _trajectoryMilestones = _root.Q<VisualElement>("TrajectoryMilestones");
         _trajectoryMilestonesBody = _root.Q<VisualElement>("TrajectoryMilestonesBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
+        _trajectoryTableTotals = _root.Q<VisualElement>("TrajectoryTableTotals");
         _trajectoryTableScrollViewport = _root.Q<VisualElement>("TrajectoryTableScrollViewport");
         _trajectoryTableScrollTrack = _root.Q<VisualElement>("TrajectoryTableScrollTrack");
         _trajectoryTableScrollThumb = _root.Q<VisualElement>("TrajectoryTableScrollThumb");
@@ -357,29 +359,28 @@ using System.Linq;
         int totalBlk = merged.Sum(s => s.total_blocks);
         int totalRat = merged.Sum(s => s.total_rating);
 
-        var totalRow = new VisualElement();
-        totalRow.AddToClassList("trajectory-table-row");
-        totalRow.AddToClassList("trajectory-table-row--totals");
-
-        totalRow.Add(CreateCell("td-season", "TOTAL"));
-        totalRow.Add(CreateCell("td-team", ""));
-        totalRow.Add(CreateCell("td-gp", totalGames.ToString()));
-        totalRow.Add(CreateCell("td-mp", totalGames > 0
-            ? (totalMinutes / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-pts", totalGames > 0
-            ? ((float)totalPts / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-reb", totalGames > 0
-            ? ((float)totalReb / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-ast", totalGames > 0
-            ? ((float)totalAst / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-stl", totalGames > 0
-            ? ((float)totalStl / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-blk", totalGames > 0
-            ? ((float)totalBlk / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-val", totalGames > 0
-            ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
-
-        _trajectoryTableBody.Add(totalRow);
+        // Fila de totales carrera: va en el footer FIJO (fuera del scroll).
+        if (_trajectoryTableTotals != null)
+        {
+            _trajectoryTableTotals.Clear();
+            _trajectoryTableTotals.Add(CreateCell("td-season", "TOTAL"));
+            _trajectoryTableTotals.Add(CreateCell("td-team", ""));
+            _trajectoryTableTotals.Add(CreateCell("td-gp", totalGames.ToString()));
+            _trajectoryTableTotals.Add(CreateCell("td-mp", totalGames > 0
+                ? (totalMinutes / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-pts", totalGames > 0
+                ? ((float)totalPts / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-reb", totalGames > 0
+                ? ((float)totalReb / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-ast", totalGames > 0
+                ? ((float)totalAst / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-stl", totalGames > 0
+                ? ((float)totalStl / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-blk", totalGames > 0
+                ? ((float)totalBlk / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-val", totalGames > 0
+                ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
+        }
 
         // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
         CustomScrollbar.Reset(_tableScrollBar);

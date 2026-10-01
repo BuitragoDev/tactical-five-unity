@@ -147,6 +147,8 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
                             </ui:VisualElement>
+                            <!-- Fila de totales fija, fuera del scroll -->
+                            <ui:VisualElement name="TrajectoryTableTotals" class="trajectory-table-row trajectory-table-row--totals" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
