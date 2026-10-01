@@ -141,7 +141,7 @@
 
 .palmares-section-title {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 22px;
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(212, 160, 23);
@@ -663,7 +663,7 @@
 /* ── PESTAÑA RIVALIDADES (dinastías + series de playoffs) ── */
 .rival-hint {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(150, 162, 186);
     margin-bottom: 10px;
 }
