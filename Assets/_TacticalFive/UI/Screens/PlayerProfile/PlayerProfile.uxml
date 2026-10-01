@@ -65,7 +65,7 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
-                            <ui:VisualElement class="playerprofile-ovr-block">
+                            <ui:VisualElement name="ProfileOvrBlock" class="playerprofile-ovr-block">
                                 <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
                                 <ui:Label class="playerprofile-ovr-label" text="MED" />
                             </ui:VisualElement>

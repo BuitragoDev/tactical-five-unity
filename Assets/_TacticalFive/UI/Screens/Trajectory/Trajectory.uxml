@@ -66,7 +66,7 @@
                                     </ui:VisualElement>
                                 </ui:VisualElement>
 
-                                <ui:VisualElement class="trajectory-ovr-block">
+                                <ui:VisualElement name="TrajectoryOvrBlock" class="trajectory-ovr-block">
                                     <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />
                                     <ui:Label class="trajectory-ovr-label" text="MED" />
                                 </ui:VisualElement>

@@ -13,6 +13,7 @@ using System.Linq;
     private Label _profileNumber;
     private VisualElement _profileTeamLogo;
     private VisualElement _profileBannerBg;
+    private VisualElement _profileOvrBlock;
     private Label _profileOvr;
     private VisualElement _profileRingsIcon;
     private Label _profileRingsCount;
@@ -49,6 +50,7 @@ using System.Linq;
         _profileNumber = _root.Q<Label>("ProfileNumber");
         _profileTeamLogo = _root.Q<VisualElement>("ProfileTeamLogo");
         _profileBannerBg = _root.Q<VisualElement>("ProfileBannerBg");
+        _profileOvrBlock = _root.Q<VisualElement>("ProfileOvrBlock");
         _profileOvr = _root.Q<Label>("ProfileOvr");
         _profileRingsIcon = _root.Q<VisualElement>("ProfileRingsIcon");
         _profileRingsCount = _root.Q<Label>("ProfileRingsCount");
@@ -132,10 +134,26 @@ using System.Linq;
             _profileBannerBg.style.backgroundImage = arenaSprite != null ? new StyleBackground(arenaSprite) : StyleKeyword.None;
         }
 
+        int ovr = _player.GetCalculatedAverage();
         if (canView)
-            _profileOvr.text = _player.GetCalculatedAverage().ToString();
+            _profileOvr.text = ovr.ToString();
         else
-            _profileOvr.text = FogOfWarHelper.GetRatingBand(_player.GetCalculatedAverage(), _player.id);
+            _profileOvr.text = FogOfWarHelper.GetRatingBand(ovr, _player.id);
+
+        // MED por rango (como los atributos): <40 rojo, <70 dorado, resto verde.
+        // Con fog-of-war (sin ver ratings) el badge queda neutro.
+        if (_profileOvrBlock != null)
+        {
+            _profileOvrBlock.RemoveFromClassList("playerprofile-ovr-block--high");
+            _profileOvrBlock.RemoveFromClassList("playerprofile-ovr-block--mid");
+            _profileOvrBlock.RemoveFromClassList("playerprofile-ovr-block--low");
+            if (canView)
+            {
+                if (ovr < 40) _profileOvrBlock.AddToClassList("playerprofile-ovr-block--low");
+                else if (ovr < 70) _profileOvrBlock.AddToClassList("playerprofile-ovr-block--mid");
+                else _profileOvrBlock.AddToClassList("playerprofile-ovr-block--high");
+            }
+        }
 
         var ringsSprite = Resources.Load<Sprite>("Icons/trofeo64px");
         if (ringsSprite != null)

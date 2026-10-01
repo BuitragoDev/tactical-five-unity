@@ -26,6 +26,7 @@ using System.Linq;
     private Label _trajectoryPlayerTeam;
     private VisualElement _trajectoryBannerBg;
     private Label _trajectoryOvr;
+    private VisualElement _trajectoryOvrBlock;
     private Button _btnGoToProfile;
     private VisualElement _trajectoryRingsIcon;
     private Label _trajectoryRingsCount;
@@ -67,6 +68,7 @@ using System.Linq;
         _trajectoryBannerBg = _root.Q<VisualElement>("TrajectoryBannerBg");
         _btnGoToProfile = _root.Q<Button>("BtnGoToProfile");
         _trajectoryOvr = _root.Q<Label>("TrajectoryOvr");
+        _trajectoryOvrBlock = _root.Q<VisualElement>("TrajectoryOvrBlock");
         _trajectoryRingsIcon = _root.Q<VisualElement>("TrajectoryRingsIcon");
         _trajectoryRingsCount = _root.Q<Label>("TrajectoryRingsCount");
         _trajectoryFinalsIcon = _root.Q<VisualElement>("TrajectoryFinalsIcon");
@@ -169,15 +171,16 @@ using System.Linq;
 
         int ovr = _player.GetCalculatedAverage();
         _trajectoryOvr.text = ovr.ToString();
-        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--high");
-        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--mid");
-        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--low");
-        if (ovr > 84)
-            _trajectoryOvr.AddToClassList("trajectory-ovr--high");
-        else if (ovr >= 70)
-            _trajectoryOvr.AddToClassList("trajectory-ovr--mid");
-        else
-            _trajectoryOvr.AddToClassList("trajectory-ovr--low");
+        // MED por rango (como los atributos): <40 rojo, <70 dorado, resto verde.
+        if (_trajectoryOvrBlock != null)
+        {
+            _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--high");
+            _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--mid");
+            _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--low");
+            if (ovr < 40) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--low");
+            else if (ovr < 70) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--mid");
+            else _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--high");
+        }
 
         var ringsSprite = Resources.Load<Sprite>("Icons/trofeo64px");
         if (ringsSprite != null)
