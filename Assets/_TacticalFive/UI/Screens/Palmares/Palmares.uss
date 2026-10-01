@@ -748,7 +748,7 @@
 }
 .rival-stat-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     letter-spacing: 1px;
     padding: 2px 8px;
     margin: 2px 6px 2px 0;
