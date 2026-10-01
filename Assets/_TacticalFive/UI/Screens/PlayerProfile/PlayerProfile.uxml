@@ -87,7 +87,7 @@
                     </ui:VisualElement>
 
                     <!-- ÚLTIMAS LESIONES -->
-                    <ui:VisualElement name="ProfileInjuries" class="playerprofile-panel">
+                    <ui:VisualElement name="ProfileInjuries" class="playerprofile-panel playerprofile-panel--last">
                         <ui:Label class="playerprofile-section-label" text="ÚLTIMAS LESIONES" />
                         <ui:VisualElement name="ProfileInjuriesBody" class="playerprofile-injuries-body" />
                     </ui:VisualElement>

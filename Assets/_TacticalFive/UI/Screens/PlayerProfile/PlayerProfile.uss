@@ -275,8 +275,7 @@
     min-width: 0;
 }
 
-.playerprofile-panel:last-child,
-.playerprofile-columns > .playerprofile-panel:nth-child(3) {
+.playerprofile-panel--last {
     margin-right: 0;
 }
 
