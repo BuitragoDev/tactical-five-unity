@@ -298,7 +298,7 @@
 
 .trajectory-panel-cell .trajectory-panel {
     margin-top: 0;
-    height: 290px;
+    height: 285px;
 }
 
 /* Scroll propio dentro de los paneles (hitos/logros). */
