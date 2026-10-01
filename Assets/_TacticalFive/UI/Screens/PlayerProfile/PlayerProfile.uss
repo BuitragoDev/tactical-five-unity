@@ -44,14 +44,39 @@
     background-color: rgb(74, 128, 240);
 }
 
-/* Header */
+/* Header (banner con imagen del pabellón de fondo) */
 .playerprofile-banner {
+    position: relative;
+    overflow: hidden;
+    border-width: 1px;
+    border-color: rgb(42, 51, 71);
+    flex-shrink: 0;
+}
+
+.playerprofile-banner-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-color: rgb(28, 33, 48);
+}
+
+.playerprofile-banner-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(13, 16, 24, 0.72);
+}
+
+.playerprofile-banner-inner {
     flex-direction: row;
     align-items: center;
     padding: 16px 24px;
-    background-color: rgb(28, 33, 48);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
+    position: relative;
+}
+
+.playerprofile-banner-right {
+    flex-direction: column;
+    align-items: flex-end;
     flex-shrink: 0;
 }
 
@@ -131,8 +156,6 @@
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    margin-right: 24px;
-    margin-left: auto;
 }
 
 .playerprofile-honor-item {
@@ -461,8 +484,7 @@
     -unity-text-transform: uppercase;
     cursor: pointer;
     flex-shrink: 0;
-    margin-left: 20px;
-    align-self: flex-start;
+    margin-top: 12px;
 }
 
 .playerprofile-trajectory-btn:hover {

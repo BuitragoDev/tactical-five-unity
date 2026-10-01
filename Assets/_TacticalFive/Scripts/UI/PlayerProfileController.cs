@@ -12,6 +12,7 @@ using System.Linq;
     private Label _profilePlayerTeam;
     private Label _profileNumber;
     private VisualElement _profileTeamLogo;
+    private VisualElement _profileBannerBg;
     private Label _profileOvr;
     private VisualElement _profileRingsIcon;
     private Label _profileRingsCount;
@@ -47,6 +48,7 @@ using System.Linq;
         _profilePlayerTeam = _root.Q<Label>("ProfilePlayerTeam");
         _profileNumber = _root.Q<Label>("ProfileNumber");
         _profileTeamLogo = _root.Q<VisualElement>("ProfileTeamLogo");
+        _profileBannerBg = _root.Q<VisualElement>("ProfileBannerBg");
         _profileOvr = _root.Q<Label>("ProfileOvr");
         _profileRingsIcon = _root.Q<VisualElement>("ProfileRingsIcon");
         _profileRingsCount = _root.Q<Label>("ProfileRingsCount");
@@ -98,6 +100,7 @@ using System.Linq;
         if (_player == null) return;
         bool canView = FogOfWarHelper.CanViewRatings(_player, _myTeam.id, _scoutedPlayerIds);
         FillPlayerHeader(canView);
+        BuildSeasonStats();
         BuildPersonalInfo();
         BuildInjuryHistory();
         BuildAttrs(canView);
@@ -118,6 +121,16 @@ using System.Linq;
             _profileTeamLogo.style.backgroundImage = new StyleBackground(logoSprite);
         else
             _profileTeamLogo.style.backgroundImage = StyleKeyword.None;
+
+        // Imagen del pabellón del equipo como fondo del banner.
+        if (_profileBannerBg != null)
+        {
+            string arenaKey = team?.logo;
+            if (arenaKey == "sixers") arenaKey = "76ers"; // desajuste de nombre de archivo de arena
+            var arenaSprite = !string.IsNullOrEmpty(arenaKey) ? TeamImages.Arena(arenaKey) : null;
+            if (arenaSprite == null) arenaSprite = TeamImages.Arena("default");
+            _profileBannerBg.style.backgroundImage = arenaSprite != null ? new StyleBackground(arenaSprite) : StyleKeyword.None;
+        }
 
         if (canView)
             _profileOvr.text = _player.GetCalculatedAverage().ToString();
