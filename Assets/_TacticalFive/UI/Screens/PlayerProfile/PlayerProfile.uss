@@ -347,9 +347,9 @@
     margin-bottom: 14px;
 }
 
-/* Los paneles apilados van justos de alto: sin padding extra. */
+/* Los paneles apilados van justos de alto: sin padding vertical, se mantiene el izquierdo. */
 .playerprofile-col-stack .playerprofile-panel-body {
-    padding: 2px 10px;
+    padding: 2px 16px;
 }
 
 .playerprofile-col-stack .playerprofile-info-field {
