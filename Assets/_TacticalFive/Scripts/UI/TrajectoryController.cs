@@ -17,15 +17,17 @@ using System.Linq;
     private Label _headerSeason;
     private Label _headerDate;
 
-    // Cabecera jugador
+    // Cabecera jugador (banner)
     private VisualElement _trajectoryPhoto;
     private Label _trajectoryPlayerName;
+    private Label _trajectoryNumber;
     private Label _trajectoryPlayerPos;
-    private Label _trajectoryRoleName;
-    private VisualElement _trajectoryRoleIcon;
-    private Label _trajectoryMeta;
-    private Label _trajectoryNationality;
+    private VisualElement _trajectoryTeamLogo;
+    private Label _trajectoryPlayerTeam;
+    private VisualElement _trajectoryBannerBg;
     private Label _trajectoryOvr;
+    private VisualElement _trajectoryOvrBlock;
+    private Button _btnGoToProfile;
     private VisualElement _trajectoryRingsIcon;
     private Label _trajectoryRingsCount;
     private VisualElement _trajectoryFinalsIcon;
@@ -34,6 +36,7 @@ using System.Linq;
     private Label _trajectoryMvpFinalsCount;
     private VisualElement _trajectoryMvpSeasonIcon;
     private Label _trajectoryMvpSeasonCount;
+    private Dictionary<string, Sprite> _teamLogos = new();
 
     // Logros
     private VisualElement _trajectoryAwards;
@@ -45,25 +48,31 @@ using System.Linq;
 
     // Tabla
     private VisualElement _trajectoryTableBody;
+    private VisualElement _trajectoryTableTotals;
     private VisualElement _trajectoryTableScrollViewport;
     private VisualElement _trajectoryTableScrollTrack;
     private VisualElement _trajectoryTableScrollThumb;
     private CustomScrollbar.Handle _tableScrollBar;
+    private CustomScrollbar.Handle _milestonesScrollBar;
+    private CustomScrollbar.Handle _awardsScrollBar;
     private VisualElement _trajectoryEmpty;
     private VisualElement _trajectoryStatsSection;
     private PlayerData _player;
+    private HashSet<int> _scoutedPlayerIds;
     private List<PlayerCareerSeasonRow> _careerHistory;
     private List<PlayerAwardEntry> _awards;
     protected override void CacheReferences()
     {
         _trajectoryPhoto = _root.Q<VisualElement>("TrajectoryPhoto");
         _trajectoryPlayerName = _root.Q<Label>("TrajectoryPlayerName");
+        _trajectoryNumber = _root.Q<Label>("TrajectoryNumber");
         _trajectoryPlayerPos = _root.Q<Label>("TrajectoryPlayerPos");
-        _trajectoryRoleName = _root.Q<Label>("TrajectoryRoleName");
-        _trajectoryRoleIcon = _root.Q<VisualElement>("TrajectoryRoleIcon");
-        _trajectoryMeta = _root.Q<Label>("TrajectoryMeta");
-        _trajectoryNationality = _root.Q<Label>("TrajectoryNationality");
+        _trajectoryTeamLogo = _root.Q<VisualElement>("TrajectoryTeamLogo");
+        _trajectoryPlayerTeam = _root.Q<Label>("TrajectoryPlayerTeam");
+        _trajectoryBannerBg = _root.Q<VisualElement>("TrajectoryBannerBg");
+        _btnGoToProfile = _root.Q<Button>("BtnGoToProfile");
         _trajectoryOvr = _root.Q<Label>("TrajectoryOvr");
+        _trajectoryOvrBlock = _root.Q<VisualElement>("TrajectoryOvrBlock");
         _trajectoryRingsIcon = _root.Q<VisualElement>("TrajectoryRingsIcon");
         _trajectoryRingsCount = _root.Q<Label>("TrajectoryRingsCount");
         _trajectoryFinalsIcon = _root.Q<VisualElement>("TrajectoryFinalsIcon");
@@ -77,6 +86,7 @@ using System.Linq;
         _trajectoryMilestones = _root.Q<VisualElement>("TrajectoryMilestones");
         _trajectoryMilestonesBody = _root.Q<VisualElement>("TrajectoryMilestonesBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
+        _trajectoryTableTotals = _root.Q<VisualElement>("TrajectoryTableTotals");
         _trajectoryTableScrollViewport = _root.Q<VisualElement>("TrajectoryTableScrollViewport");
         _trajectoryTableScrollTrack = _root.Q<VisualElement>("TrajectoryTableScrollTrack");
         _trajectoryTableScrollThumb = _root.Q<VisualElement>("TrajectoryTableScrollThumb");
@@ -87,6 +97,14 @@ using System.Linq;
         // (Unity recrea el árbol del UIDocument al reactivar la pantalla).
         _tableScrollBar = CustomScrollbar.Bind(_trajectoryTableScrollViewport, _trajectoryTableBody,
                                                _trajectoryTableScrollTrack, _trajectoryTableScrollThumb);
+
+        // Barras propias de los paneles de hitos y logros (2 columnas).
+        _milestonesScrollBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("TrajectoryMilestonesViewport"), _trajectoryMilestonesBody,
+            _root.Q<VisualElement>("TrajectoryMilestonesScrollTrack"), _root.Q<VisualElement>("TrajectoryMilestonesScrollThumb"));
+        _awardsScrollBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("TrajectoryAwardsViewport"), _trajectoryAwardsBody,
+            _root.Q<VisualElement>("TrajectoryAwardsScrollTrack"), _root.Q<VisualElement>("TrajectoryAwardsScrollThumb"));
 
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -112,10 +130,22 @@ using System.Linq;
 
         _careerHistory = DatabaseManager.Instance.GetPlayerCareerHistory(playerId, _manager.id);
         _awards = DatabaseManager.Instance.GetPlayerAwards(playerId);
+
+        _scoutedPlayerIds = DatabaseManager.Instance.GetScoutedPlayerIds(_myTeam != null ? _myTeam.id : 0);
+
+        _teamLogos.Clear();
+        foreach (var s in TeamImages.Logos(64))
+            _teamLogos[s.name] = s;
     }
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
+        _btnGoToProfile?.RegisterCallback<ClickEvent>(_ =>
+        {
+            if (_player == null) return;
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.PlayerProfile);
+        });
     }
     protected override void Refresh()
     {
@@ -132,23 +162,47 @@ using System.Linq;
         _trajectoryPlayerName.text = $"{_player.first_name} {_player.last_name}".ToUpper();
         _trajectoryPlayerPos.text = $"{PositionCodes.GetName(_player.position)} · {PositionCodes.GetName(_player.secondary_position)}";
 
-        UpdateRoleIcon(_trajectoryRoleIcon, _player.role);
-        _trajectoryRoleName.text = GetRoleName(_player.role);
+        // Dorsal (oculto si no tiene).
+        _trajectoryNumber.text = _player.number > 0 ? $"#{_player.number}" : "";
+        _trajectoryNumber.style.display = _player.number > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
-        _trajectoryMeta.text = $"{_player.age} años · {_player.height_cm / 100f:F2}m · {_player.weight_kg}kg";
-        _trajectoryNationality.text = CountryCodes.GetName(_player.nationality);
+        // Equipo del jugador (o agente libre) + escudo.
+        var team = DatabaseManager.Instance.GetTeamById(_player.team_id);
+        _trajectoryPlayerTeam.text = team?.name ?? "Agente libre";
+        if (team != null && _teamLogos.TryGetValue(team.logo, out var logoSprite))
+            _trajectoryTeamLogo.style.backgroundImage = new StyleBackground(logoSprite);
+        else
+            _trajectoryTeamLogo.style.backgroundImage = StyleKeyword.None;
+
+        // Imagen del pabellón del equipo como fondo del banner.
+        if (_trajectoryBannerBg != null)
+        {
+            string arenaKey = team?.logo;
+            if (arenaKey == "sixers") arenaKey = "76ers";
+            var arenaSprite = !string.IsNullOrEmpty(arenaKey) ? TeamImages.Arena(arenaKey) : null;
+            if (arenaSprite == null) arenaSprite = TeamImages.Arena("default");
+            _trajectoryBannerBg.style.backgroundImage = arenaSprite != null ? new StyleBackground(arenaSprite) : StyleKeyword.None;
+        }
 
         int ovr = _player.GetCalculatedAverage();
-        _trajectoryOvr.text = ovr.ToString();
-        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--high");
-        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--mid");
-        _trajectoryOvr.RemoveFromClassList("trajectory-ovr--low");
-        if (ovr > 84)
-            _trajectoryOvr.AddToClassList("trajectory-ovr--high");
-        else if (ovr >= 70)
-            _trajectoryOvr.AddToClassList("trajectory-ovr--mid");
-        else
-            _trajectoryOvr.AddToClassList("trajectory-ovr--low");
+        // Fog-of-war: si no es de mi equipo y no está ojeado, se muestra el rango, no la media.
+        bool canView = FogOfWarHelper.CanViewRatings(_player, _myTeam.id, _scoutedPlayerIds);
+        _trajectoryOvr.text = canView ? ovr.ToString() : FogOfWarHelper.GetRatingBand(ovr, _player.id);
+
+        // MED por rango (como los atributos): <40 rojo, <70 dorado, resto verde.
+        // Con fog-of-war el badge queda neutro.
+        if (_trajectoryOvrBlock != null)
+        {
+            _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--high");
+            _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--mid");
+            _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--low");
+            if (canView)
+            {
+                if (ovr < 40) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--low");
+                else if (ovr < 70) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--mid");
+                else _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--high");
+            }
+        }
 
         var ringsSprite = Resources.Load<Sprite>("Icons/trofeo64px");
         if (ringsSprite != null)
@@ -192,6 +246,8 @@ using System.Linq;
             badge.text = GetAwardText(award);
             _trajectoryAwardsBody.Add(badge);
         }
+
+        CustomScrollbar.Reset(_awardsScrollBar);
     }
 
     /// <summary>Hitos de carrera del jugador (E1): conseguidos + el siguiente con progreso.</summary>
@@ -229,6 +285,8 @@ using System.Linq;
             var n = next.Value;
             _trajectoryMilestonesBody.Add(MilestoneUI.Next(n.next, n.current, n.percent, "trajectory", withBar: true));
         }
+
+        CustomScrollbar.Reset(_milestonesScrollBar);
     }
 
     void BuildStatsTable()
@@ -311,29 +369,28 @@ using System.Linq;
         int totalBlk = merged.Sum(s => s.total_blocks);
         int totalRat = merged.Sum(s => s.total_rating);
 
-        var totalRow = new VisualElement();
-        totalRow.AddToClassList("trajectory-table-row");
-        totalRow.AddToClassList("trajectory-table-row--totals");
-
-        totalRow.Add(CreateCell("td-season", "TOTAL"));
-        totalRow.Add(CreateCell("td-team", ""));
-        totalRow.Add(CreateCell("td-gp", totalGames.ToString()));
-        totalRow.Add(CreateCell("td-mp", totalGames > 0
-            ? (totalMinutes / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-pts", totalGames > 0
-            ? ((float)totalPts / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-reb", totalGames > 0
-            ? ((float)totalReb / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-ast", totalGames > 0
-            ? ((float)totalAst / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-stl", totalGames > 0
-            ? ((float)totalStl / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-blk", totalGames > 0
-            ? ((float)totalBlk / totalGames).ToString("F1", fmt) : "0.0"));
-        totalRow.Add(CreateCell("td-val", totalGames > 0
-            ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
-
-        _trajectoryTableBody.Add(totalRow);
+        // Fila de totales carrera: va en el footer FIJO (fuera del scroll).
+        if (_trajectoryTableTotals != null)
+        {
+            _trajectoryTableTotals.Clear();
+            _trajectoryTableTotals.Add(CreateCell("td-season", "TOTAL"));
+            _trajectoryTableTotals.Add(CreateCell("td-team", ""));
+            _trajectoryTableTotals.Add(CreateCell("td-gp", totalGames.ToString()));
+            _trajectoryTableTotals.Add(CreateCell("td-mp", totalGames > 0
+                ? (totalMinutes / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-pts", totalGames > 0
+                ? ((float)totalPts / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-reb", totalGames > 0
+                ? ((float)totalReb / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-ast", totalGames > 0
+                ? ((float)totalAst / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-stl", totalGames > 0
+                ? ((float)totalStl / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-blk", totalGames > 0
+                ? ((float)totalBlk / totalGames).ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-val", totalGames > 0
+                ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
+        }
 
         // Vuelve al inicio y recalcula el thumb con la lista reconstruida.
         CustomScrollbar.Reset(_tableScrollBar);
@@ -345,28 +402,6 @@ using System.Linq;
         lbl.AddToClassList(className);
         lbl.text = text;
         return lbl;
-    }
-
-    static string GetRoleName(PlayerRole role) => role switch
-    {
-        PlayerRole.Estrella => "Estrella",
-        PlayerRole.Titular => "Titular",
-        PlayerRole.Banquillo => "Banquillo",
-        _ => "Último recurso"
-    };
-
-    void UpdateRoleIcon(VisualElement icon, PlayerRole role)
-    {
-        string iconName = role switch
-        {
-            PlayerRole.Estrella => "rol_estrella",
-            PlayerRole.Titular => "rol_titular",
-            PlayerRole.Banquillo => "rol_banquillo",
-            _ => "rol_ultimoRecurso"
-        };
-        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
-        icon.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
-        icon.tooltip = GetRoleName(role);
     }
 
     static string GetAwardClass(string awardType) => awardType switch

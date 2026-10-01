@@ -285,8 +285,14 @@ public class MatchDayController : UIScreenController
         _root.Q<Button>("SubmenuPabellon")?.RegisterCallback<ClickEvent>(_ => { PlayClick(); _root.Q<VisualElement>("CitySubmenu")?.RemoveFromClassList("nav-submenu--visible"); ScreenManager.Instance.GoTo(GameScreen.Arena); });
         _root.Q<Button>("NavManager")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Manager); });
-        _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
+        _root.Q<Button>("NavActualidad")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
+        _root.Q<Button>("SubmenuNoticias")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
+        _root.Q<Button>("SubmenuHilos")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Hilos); });
+        _root.Q<Button>("SubmenuRivalidades")?.RegisterCallback<ClickEvent>(_ =>
+            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Rivalidades); });
 
         _root.Q<Button>("BtnReset")?.RegisterCallback<ClickEvent>(_ =>
             { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.MainMenu); });
@@ -298,7 +304,7 @@ public class MatchDayController : UIScreenController
                 "NavDashboard", "NavRoster", "NavCalendar",
                 "NavCompeticiones", "NavPalmares", "NavPlayoffs",
                 "NavStats", "NavRecords", "NavMarket", "NavFinances",
-                "NavSponsors", "NavTV", "NavCity", "NavManager", "NavMessages", "BtnReset",
+                "NavSponsors", "NavTV", "NavCity", "NavManager", "NavActualidad", "SubmenuNoticias", "SubmenuHilos", "SubmenuRivalidades", "BtnReset",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
                 "SubmenuBuscador",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",

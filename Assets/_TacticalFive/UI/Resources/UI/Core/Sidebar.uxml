@@ -56,6 +56,9 @@
                 <ui:Button name="SubmenuGLeague" class="nav-submenu-item">
                     <ui:Label text="G-LEAGUE" class="nav-submenu-label"/>
                 </ui:Button>
+                <ui:Button name="SubmenuRivalidades" class="nav-submenu-item">
+                    <ui:Label text="RIVALIDADES" class="nav-submenu-label"/>
+                </ui:Button>
             </ui:VisualElement>
             <ui:Button name="NavPalmares" class="nav-item">
                 <ui:VisualElement name="NavPalmaresIcon" class="nav-icon"/>
@@ -145,10 +148,19 @@
                     <ui:Label text="LOGROS DEL GM" class="nav-submenu-label"/>
                 </ui:Button>
             </ui:VisualElement>
-            <ui:Button name="NavMessages" class="nav-item">
-                <ui:VisualElement name="NavMessagesIcon" class="nav-icon"/>
-                <ui:Label text="NOTICIAS" class="nav-label"/>
+            <ui:Button name="NavActualidad" class="nav-item">
+                <ui:VisualElement name="NavActualidadIcon" class="nav-icon"/>
+                <ui:Label text="ACTUALIDAD" class="nav-label"/>
+                <ui:Label text="▼" class="nav-arrow" />
             </ui:Button>
+            <ui:VisualElement name="ActualidadSubmenu" class="nav-submenu">
+                <ui:Button name="SubmenuNoticias" class="nav-submenu-item">
+                    <ui:Label text="NOTICIAS" class="nav-submenu-label"/>
+                </ui:Button>
+                <ui:Button name="SubmenuHilos" class="nav-submenu-item">
+                    <ui:Label text="HILOS" class="nav-submenu-label"/>
+                </ui:Button>
+            </ui:VisualElement>
         </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

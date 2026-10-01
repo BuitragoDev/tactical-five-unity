@@ -60,6 +60,8 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument theCityDocument;
     [SerializeField] private UIDocument buscadorDocument;
     [SerializeField] private UIDocument gleagueDocument;
+    [SerializeField] private UIDocument hilosDocument;
+    [SerializeField] private UIDocument rivalidadesDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -270,6 +272,12 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.GLeague:
                 ShowOnly(gleagueDocument);
                 break;
+            case GameScreen.Hilos:
+                ShowOnly(hilosDocument);
+                break;
+            case GameScreen.Rivalidades:
+                ShowOnly(rivalidadesDocument);
+                break;
         }
     }
 
@@ -331,6 +339,8 @@ public class ScreenManager : MonoBehaviour
         if (theCityDocument != null) theCityDocument.gameObject.SetActive(false);
         if (buscadorDocument != null) buscadorDocument.gameObject.SetActive(false);
         if (gleagueDocument != null) gleagueDocument.gameObject.SetActive(false);
+        if (hilosDocument != null) hilosDocument.gameObject.SetActive(false);
+        if (rivalidadesDocument != null) rivalidadesDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

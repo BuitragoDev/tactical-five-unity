@@ -2,8 +2,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 /// <summary>
-/// Chips de hitos de carrera (E1) compartidos por Trayectoria y Perfil. El prefijo de clase
-/// (`trajectory` / `playerprofile`) selecciona los estilos del USS de cada pantalla.
+/// Chips de hitos de carrera (E1), usados por Trayectoria. El prefijo de clase
+/// (`trajectory`) selecciona los estilos del USS de esa pantalla.
 /// </summary>
 public static class MilestoneUI
 {

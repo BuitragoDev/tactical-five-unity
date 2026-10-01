@@ -19,7 +19,7 @@
 ## 3. Current development state (observed)
 
 **Functional (implemented in code):**
-- Full screen set (**47 pantallas**, incl. Loading/MainMenu; navigation via `ScreenManager`; **all controllers inherit `UIScreenController`** base).
+- Full screen set (**49 pantallas**, incl. Loading/MainMenu; navigation via `ScreenManager`; **all controllers inherit `UIScreenController`** base).
 - New game (Manager / ProManager), load game (slots), editor (template DB).
 - Preseason + schedule generation; regular season; Play-In; Playoffs; season end awards; draft (with **protections + swaps**); new season loop.
 - Salary cap, Bird Rights, exceptions, aprons, hard cap flag, luxury tax (monthly `annual/12`), buyout (stretch), offers (renewal/FA, 7-day maturation, **TO/PO contract options**), AI trades (strategy-aware `TeamStrategy`), star FA signings, **trade deadline (Feb 7) with rush IA**, **S&T de FA propio**.
@@ -52,7 +52,7 @@
 | Decision | Reason (observed/deduced) |
 |---|---|
 | Single scene + `UIDocument` screens, `ScreenManager` toggling `SetActive` | All UI in one place; cheap navigation; controllers rebuild in `OnEnable` |
-| `UIScreenController` base class for all 47 controllers | Centralizes full-screen, chrome (Header/Sidebar), nav, cursors, config modal — removed ~60% boilerplate |
+| `UIScreenController` base class for all 49 controllers | Centralizes full-screen, chrome (Header/Sidebar), nav, cursors, config modal — removed ~60% boilerplate |
 | SQLite as the save/state store | Sim data is relational (teams/players/games/stats); template DB gives fast, consistent new games; avoids JSON save parsing |
 | Static utility classes for simulation rules | Stateless, testable helpers; controllers call them directly |
 | No event bus; DB-messages + static hand-offs | Simplest possible decoupling for a single-player sim; avoids async complexity |

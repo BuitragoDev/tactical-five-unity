@@ -14,92 +14,141 @@
             <!-- CONTENT -->
             <ui:VisualElement class="trajectory-content">
 
-                <!-- Cabecera del jugador -->
-                <ui:VisualElement class="trajectory-header">
-                    <ui:VisualElement name="TrajectoryPhoto" class="trajectory-photo" />
-                    <ui:VisualElement class="trajectory-name-block">
-                        <ui:Label name="TrajectoryPlayerName" class="trajectory-player-name" text="" />
-                        <ui:Label name="TrajectoryPlayerPos" class="trajectory-player-pos" text="" />
-                        <ui:VisualElement class="trajectory-role-row">
-                            <ui:VisualElement name="TrajectoryRoleIcon" class="trajectory-role-icon" />
-                            <ui:Label name="TrajectoryRoleName" class="trajectory-role-text" text="" />
-                        </ui:VisualElement>
-                        <ui:Label name="TrajectoryMeta" class="trajectory-meta" text="" />
-                        <ui:Label name="TrajectoryNationality" class="trajectory-nationality" text="" />
-                    </ui:VisualElement>
-                    <ui:VisualElement name="TrajectoryHonors" class="trajectory-honors">
-                        <ui:VisualElement class="trajectory-honor-item">
-                            <ui:VisualElement class="trajectory-honor-row">
-                                <ui:VisualElement name="TrajectoryRingsIcon" class="trajectory-honor-icon" />
-                                <ui:Label name="TrajectoryRingsCount" class="trajectory-honor-count" text="0" />
-                            </ui:VisualElement>
-                            <ui:Label class="trajectory-honor-label" text="CAMPEONATOS" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="trajectory-honor-item">
-                            <ui:VisualElement class="trajectory-honor-row">
-                                <ui:VisualElement name="TrajectoryFinalsIcon" class="trajectory-honor-icon" />
-                                <ui:Label name="TrajectoryFinalsCount" class="trajectory-honor-count" text="0" />
-                            </ui:VisualElement>
-                            <ui:Label class="trajectory-honor-label" text="FINALES" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="trajectory-honor-item" style="margin-left: 100px;">
-                            <ui:VisualElement class="trajectory-honor-row">
-                                <ui:VisualElement name="TrajectoryMvpSeasonIcon" class="trajectory-honor-icon" />
-                                <ui:Label name="TrajectoryMvpSeasonCount" class="trajectory-honor-count" text="0" />
-                            </ui:VisualElement>
-                            <ui:Label class="trajectory-honor-label" text="MVP" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="trajectory-honor-item">
-                            <ui:VisualElement class="trajectory-honor-row">
-                                <ui:VisualElement name="TrajectoryMvpFinalsIcon" class="trajectory-honor-icon" />
-                                <ui:Label name="TrajectoryMvpFinalsCount" class="trajectory-honor-count" text="0" />
-                            </ui:VisualElement>
-                            <ui:Label class="trajectory-honor-label" text="MVP FINALS" />
-                        </ui:VisualElement>
-                    </ui:VisualElement>
-                    <ui:VisualElement class="trajectory-ovr-block">
-                        <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />
-                        <ui:Label class="trajectory-ovr-label" text="MED" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <!-- ══ BANNER DE IDENTIDAD (estilo PlayerProfile) ══ -->
+                <ui:VisualElement class="trajectory-banner">
+                    <ui:VisualElement name="TrajectoryBannerBg" class="trajectory-banner-bg" />
+                    <ui:VisualElement class="trajectory-banner-overlay" />
+                    <ui:VisualElement class="trajectory-banner-inner">
+                        <ui:VisualElement name="TrajectoryPhoto" class="trajectory-photo" />
 
-                <!-- Logros -->
-                <ui:VisualElement name="TrajectoryAwards" class="trajectory-awards" style="display: none;">
-                    <ui:Label class="trajectory-section-label" text="LOGROS" />
-                    <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
-                </ui:VisualElement>
-
-                <!-- Hitos de carrera (E1) -->
-                <ui:VisualElement name="TrajectoryMilestones" class="trajectory-milestones" style="display: none;">
-                    <ui:Label class="trajectory-section-label" text="HITOS DE CARRERA" />
-                    <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
-                </ui:VisualElement>
-
-                <!-- Tabla de estadísticas -->
-                <ui:VisualElement name="TrajectoryStatsSection" class="trajectory-stats-section">
-                    <ui:Label class="trajectory-section-label" text="ESTADÍSTICAS POR TEMPORADA" />
-                    <ui:VisualElement class="trajectory-table">
-                        <ui:VisualElement class="trajectory-table-header">
-                            <ui:Label class="th-season" text="TEMPORADA" />
-                            <ui:Label class="th-team" text="EQUIPO" />
-                        <ui:Label class="th-gp" text="PJ" />
-                        <ui:Label class="th-mp" text="MIN" />
-                        <ui:Label class="th-pts" text="PTS" />
-                            <ui:Label class="th-reb" text="REB" />
-                            <ui:Label class="th-ast" text="AST" />
-                            <ui:Label class="th-stl" text="ROB" />
-                            <ui:Label class="th-blk" text="TAP" />
-                            <ui:Label class="th-val" text="VAL" />
+                        <ui:VisualElement class="trajectory-identity">
+                            <ui:VisualElement class="trajectory-name-row">
+                                <ui:Label name="TrajectoryPlayerName" class="trajectory-player-name" text="" />
+                                <ui:Label name="TrajectoryNumber" class="trajectory-number" text="" />
+                            </ui:VisualElement>
+                            <ui:Label name="TrajectoryPlayerPos" class="trajectory-player-pos" text="" />
+                            <ui:VisualElement class="trajectory-team-row">
+                                <ui:VisualElement name="TrajectoryTeamLogo" class="trajectory-team-logo" />
+                                <ui:Label name="TrajectoryPlayerTeam" class="trajectory-player-team" text="" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement class="trajectory-table-body-scroll">
-                            <ui:VisualElement class="trajectory-scroll-row">
-                                <ui:VisualElement name="TrajectoryTableScrollViewport" class="trajectory-table-viewport">
-                                    <ui:VisualElement name="TrajectoryTableBody" class="trajectory-table-body" />
+
+                        <ui:VisualElement class="trajectory-banner-right">
+                            <ui:VisualElement class="trajectory-honors-row">
+                                <ui:VisualElement name="TrajectoryHonors" class="trajectory-honors">
+                                    <ui:VisualElement class="trajectory-honor-item">
+                                        <ui:VisualElement class="trajectory-honor-row">
+                                            <ui:VisualElement name="TrajectoryRingsIcon" class="trajectory-honor-icon" />
+                                            <ui:Label name="TrajectoryRingsCount" class="trajectory-honor-count" text="0" />
+                                        </ui:VisualElement>
+                                        <ui:Label class="trajectory-honor-label" text="CAMPEONATOS" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="trajectory-honor-item">
+                                        <ui:VisualElement class="trajectory-honor-row">
+                                            <ui:VisualElement name="TrajectoryFinalsIcon" class="trajectory-honor-icon" />
+                                            <ui:Label name="TrajectoryFinalsCount" class="trajectory-honor-count" text="0" />
+                                        </ui:VisualElement>
+                                        <ui:Label class="trajectory-honor-label" text="FINALES" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="trajectory-honor-item">
+                                        <ui:VisualElement class="trajectory-honor-row">
+                                            <ui:VisualElement name="TrajectoryMvpSeasonIcon" class="trajectory-honor-icon" />
+                                            <ui:Label name="TrajectoryMvpSeasonCount" class="trajectory-honor-count" text="0" />
+                                        </ui:VisualElement>
+                                        <ui:Label class="trajectory-honor-label" text="MVP" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement class="trajectory-honor-item">
+                                        <ui:VisualElement class="trajectory-honor-row">
+                                            <ui:VisualElement name="TrajectoryMvpFinalsIcon" class="trajectory-honor-icon" />
+                                            <ui:Label name="TrajectoryMvpFinalsCount" class="trajectory-honor-count" text="0" />
+                                        </ui:VisualElement>
+                                        <ui:Label class="trajectory-honor-label" text="MVP FINALS" />
+                                    </ui:VisualElement>
                                 </ui:VisualElement>
-                                <ui:VisualElement name="TrajectoryTableScrollTrack" class="trajectory-scrollbar">
-                                    <ui:VisualElement name="TrajectoryTableScrollThumb" class="trajectory-scrollbar-thumb" />
+
+                                <ui:VisualElement name="TrajectoryOvrBlock" class="trajectory-ovr-block">
+                                    <ui:Label name="TrajectoryOvr" class="trajectory-ovr-val" text="" />
+                                    <ui:Label class="trajectory-ovr-label" text="MED" />
                                 </ui:VisualElement>
                             </ui:VisualElement>
+
+                            <ui:Button name="BtnGoToProfile" class="trajectory-goto-btn" text="IR A PERFIL DEL JUGADOR" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+
+                <!-- ══ Paneles: HITOS DE CARRERA + LOGROS (2 columnas) ══ -->
+                <ui:VisualElement class="trajectory-panels-row">
+
+                    <ui:VisualElement class="trajectory-panel-cell">
+                        <ui:VisualElement name="TrajectoryMilestones" class="trajectory-panel" style="display: none;">
+                            <ui:VisualElement class="trajectory-panel-header">
+                                <ui:Label class="trajectory-panel-title" text="HITOS DE CARRERA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="trajectory-panel-body">
+                                <ui:VisualElement class="trajectory-panel-scroll-row">
+                                    <ui:VisualElement name="TrajectoryMilestonesViewport" class="trajectory-panel-viewport">
+                                        <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="TrajectoryMilestonesScrollTrack" class="trajectory-panel-scrollbar">
+                                        <ui:VisualElement name="TrajectoryMilestonesScrollThumb" class="trajectory-panel-scrollbar-thumb" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="trajectory-panel-cell">
+                        <ui:VisualElement name="TrajectoryAwards" class="trajectory-panel" style="display: none;">
+                            <ui:VisualElement class="trajectory-panel-header">
+                                <ui:Label class="trajectory-panel-title" text="LOGROS" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="trajectory-panel-body">
+                                <ui:VisualElement class="trajectory-panel-scroll-row">
+                                    <ui:VisualElement name="TrajectoryAwardsViewport" class="trajectory-panel-viewport">
+                                        <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="TrajectoryAwardsScrollTrack" class="trajectory-panel-scrollbar">
+                                        <ui:VisualElement name="TrajectoryAwardsScrollThumb" class="trajectory-panel-scrollbar-thumb" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+
+                <!-- ══ Panel: ESTADÍSTICAS POR TEMPORADA ══ -->
+                <ui:VisualElement name="TrajectoryStatsSection" class="trajectory-panel">
+                    <ui:VisualElement class="trajectory-panel-header">
+                        <ui:Label class="trajectory-panel-title" text="ESTADÍSTICAS POR TEMPORADA" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="trajectory-panel-body">
+                        <ui:VisualElement class="trajectory-table">
+                            <ui:VisualElement class="trajectory-table-header">
+                                <ui:Label class="th-season" text="TEMPORADA" />
+                                <ui:Label class="th-team" text="EQUIPO" />
+                                <ui:Label class="th-gp" text="PJ" />
+                                <ui:Label class="th-mp" text="MIN" />
+                                <ui:Label class="th-pts" text="PTS" />
+                                <ui:Label class="th-reb" text="REB" />
+                                <ui:Label class="th-ast" text="AST" />
+                                <ui:Label class="th-stl" text="ROB" />
+                                <ui:Label class="th-blk" text="TAP" />
+                                <ui:Label class="th-val" text="VAL" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="trajectory-table-body-scroll">
+                                <ui:VisualElement class="trajectory-scroll-row">
+                                    <ui:VisualElement name="TrajectoryTableScrollViewport" class="trajectory-table-viewport">
+                                        <ui:VisualElement name="TrajectoryTableBody" class="trajectory-table-body" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="TrajectoryTableScrollTrack" class="trajectory-scrollbar">
+                                        <ui:VisualElement name="TrajectoryTableScrollThumb" class="trajectory-scrollbar-thumb" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+                            <!-- Fila de totales fija, fuera del scroll -->
+                            <ui:VisualElement name="TrajectoryTableTotals" class="trajectory-table-row trajectory-table-row--totals" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>

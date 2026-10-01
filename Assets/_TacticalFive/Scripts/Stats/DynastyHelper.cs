@@ -7,10 +7,9 @@ public class FranchisePrestige
     public int teamId;
     public int titles;
     public int finals;
-    public int conferenceTitles;
     public int firstTitleSeasonId;
     public int lastTitleSeasonId;
-    /// <summary>títulos×3 + finales×2 + títulos de conferencia.</summary>
+    /// <summary>títulos×3 + finales×2.</summary>
     public int prestige;
     /// <summary>¿Dinastía? 3+ títulos dentro de la ventana (ver `DynastyHelper`).</summary>
     public bool isDynasty;
@@ -26,8 +25,8 @@ public static class DynastyHelper
     public const int DYNASTY_TITLES = 3;   // títulos necesarios
     public const int DYNASTY_WINDOW = 8;   // ventana de temporadas para considerarlo dinastía
 
-    public static int Prestige(int titles, int finals, int conferenceTitles)
-        => titles * 3 + finals * 2 + conferenceTitles;
+    public static int Prestige(int titles, int finals)
+        => titles * 3 + finals * 2;
 
     /// <summary>¿3+ títulos en una ventana de 8 temporadas? (temporadas ordenables por id)</summary>
     public static bool IsDynasty(IEnumerable<int> titleSeasonIds)
@@ -46,18 +45,18 @@ public static class DynastyHelper
     {
         var list = (records ?? Enumerable.Empty<SeasonRecord>()).Where(r => r != null).ToList();
         var titleSeasons = list.Where(r => r.champion_id == teamId).Select(r => r.season_id).ToList();
+        // "Finales" = veces campeón o subcampeón. El campeón de conferencia es siempre el
+        // finalista, así que no se cuenta aparte (dato redundante).
         int finals = list.Count(r => r.champion_id == teamId || r.finalist_id == teamId);
-        int confTitles = list.Count(r => r.east_champion_id == teamId || r.west_champion_id == teamId);
 
         return new FranchisePrestige
         {
             teamId = teamId,
             titles = titleSeasons.Count,
             finals = finals,
-            conferenceTitles = confTitles,
             firstTitleSeasonId = titleSeasons.Count > 0 ? titleSeasons.Min() : 0,
             lastTitleSeasonId = titleSeasons.Count > 0 ? titleSeasons.Max() : 0,
-            prestige = Prestige(titleSeasons.Count, finals, confTitles),
+            prestige = Prestige(titleSeasons.Count, finals),
             isDynasty = IsDynasty(titleSeasons)
         };
     }
@@ -75,8 +74,6 @@ public static class DynastyHelper
         {
             if (r.champion_id > 0) teamIds.Add(r.champion_id);
             if (r.finalist_id > 0) teamIds.Add(r.finalist_id);
-            if (r.east_champion_id > 0) teamIds.Add(r.east_champion_id);
-            if (r.west_champion_id > 0) teamIds.Add(r.west_champion_id);
         }
 
         var ranking = teamIds.Select(id => Of(list, id))

@@ -17,6 +17,7 @@ public static class SidebarController
         new() { screen = GameScreen.Dashboard,   navName = "NavDashboard" },
         new() { screen = GameScreen.Roster,      navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuJugadores" },
         new() { screen = GameScreen.Trajectory,  navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuJugadores" },
+        new() { screen = GameScreen.PlayerProfile, navName = "NavRoster",  submenuName = "RosterSubmenu",  submenuItemName = "SubmenuJugadores" },
         new() { screen = GameScreen.Quinteto,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuQuinteto" },
         new() { screen = GameScreen.Rotation,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuRotacion" },
         new() { screen = GameScreen.Training,    navName = "NavRoster",    submenuName = "RosterSubmenu",  submenuItemName = "SubmenuEntrenamiento" },
@@ -46,7 +47,9 @@ public static class SidebarController
         new() { screen = GameScreen.Arena,       navName = "NavCity",     submenuName = "CitySubmenu",     submenuItemName = "SubmenuPabellon" },
         new() { screen = GameScreen.Manager,     navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuManager" },
         new() { screen = GameScreen.Logros,      navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuLogros" },
-        new() { screen = GameScreen.Messages,    navName = "NavMessages" },
+        new() { screen = GameScreen.Messages,    navName = "NavActualidad", submenuName = "ActualidadSubmenu", submenuItemName = "SubmenuNoticias" },
+        new() { screen = GameScreen.Hilos,       navName = "NavActualidad", submenuName = "ActualidadSubmenu", submenuItemName = "SubmenuHilos" },
+        new() { screen = GameScreen.Rivalidades, navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuRivalidades" },
     };
 
     static VisualTreeAsset _sidebarTemplate;
@@ -91,16 +94,17 @@ public static class SidebarController
             {
                 "NavDashboard", "NavRoster", "NavCalendar", "NavCompeticiones",
                 "NavPalmares", "NavPlayoffs", "NavStats",
-                "NavMarket", "NavFinances", "NavCity", "NavManager", "NavMessages",
+                "NavMarket", "NavFinances", "NavCity", "NavManager", "NavActualidad",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuRotacion", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados", "SubmenuDorsales",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
-                "SubmenuBuscador", "SubmenuGLeague",
+                "SubmenuBuscador", "SubmenuGLeague", "SubmenuRivalidades",
                 "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
                 "SubmenuVerCiudad", "SubmenuPabellon",
                 "SubmenuManager", "SubmenuLogros",
+                "SubmenuNoticias", "SubmenuHilos",
             };
             foreach (var name in cursorNames)
             {
@@ -171,7 +175,7 @@ public static class SidebarController
             {"NavFinancesIcon", "finanzas"},
             {"NavCityIcon", "ciudad"},
             {"NavManagerIcon", "manager"},
-            {"NavMessagesIcon", "mensajes"},
+            {"NavActualidadIcon", "mensajes"},
         };
 
         foreach (var kv in iconMap)

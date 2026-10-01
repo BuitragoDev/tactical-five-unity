@@ -91,7 +91,7 @@ public class UIScreenController : MonoBehaviour
             {"NavFinancesIcon", "finanzas"},
             {"NavCityIcon", "ciudad"},
             {"NavManagerIcon", "manager"},
-            {"NavMessagesIcon", "mensajes"},
+            {"NavActualidadIcon", "mensajes"},
 
         };
 
@@ -260,8 +260,32 @@ public class UIScreenController : MonoBehaviour
             _root.Q<VisualElement>("ManagerSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Manager);
         });
-        _root.Q<Button>("NavMessages")?.RegisterCallback<ClickEvent>(_ =>
-            { PlayClick(); ScreenManager.Instance.GoTo(GameScreen.Messages); });
+        _root.Q<Button>("NavActualidad")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            CloseAllSubmenus();
+            var submenu = _root.Q<VisualElement>("ActualidadSubmenu");
+            if (submenu != null)
+                submenu.EnableInClassList("nav-submenu--visible", !submenu.ClassListContains("nav-submenu--visible"));
+        });
+        _root.Q<Button>("SubmenuNoticias")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<VisualElement>("ActualidadSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+            ScreenManager.Instance.GoTo(GameScreen.Messages);
+        });
+        _root.Q<Button>("SubmenuHilos")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<VisualElement>("ActualidadSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+            ScreenManager.Instance.GoTo(GameScreen.Hilos);
+        });
+        _root.Q<Button>("SubmenuRivalidades")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+            ScreenManager.Instance.GoTo(GameScreen.Rivalidades);
+        });
     }
 
     protected virtual void Refresh()
@@ -286,6 +310,7 @@ public class UIScreenController : MonoBehaviour
         _root.Q<VisualElement>("FinanceSubmenu")?.RemoveFromClassList("nav-submenu--visible");
         _root.Q<VisualElement>("CitySubmenu")?.RemoveFromClassList("nav-submenu--visible");
         _root.Q<VisualElement>("ManagerSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+        _root.Q<VisualElement>("ActualidadSubmenu")?.RemoveFromClassList("nav-submenu--visible");
     }
 
     protected virtual void RefreshHeader()

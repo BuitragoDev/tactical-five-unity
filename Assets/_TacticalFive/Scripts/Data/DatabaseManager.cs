@@ -1486,18 +1486,15 @@ public partial class DatabaseManager : MonoBehaviour
         var teams = GetAllTeams().ToDictionary(t => t.abbreviation, t => t.id);
         var hof = HallOfFameSeeder.Data;
 
-        foreach (var (firstName, lastName, number) in RetiredNumberSeeder.Data)
+        foreach (var (firstName, lastName, abbr, number) in RetiredNumberSeeder.Data)
         {
+            // El equipo va explícito en el seeder (no depende del HOF). Del HOF solo se toman
+            // los datos de vitrina (posición/títulos/puntos) si la leyenda está registrada.
             var legend = hof.FirstOrDefault(x => x.first_name == firstName && x.last_name == lastName);
-            if (legend == null)
-            {
-                Debug.LogWarning($"[DB] Leyenda {firstName} {lastName} no encontrada en HallOfFameSeeder");
-                continue;
-            }
 
-            if (!teams.TryGetValue(legend.team_abbreviation, out var teamId))
+            if (!teams.TryGetValue(abbr, out var teamId))
             {
-                Debug.LogWarning($"[DB] Equipo {legend.team_abbreviation} no encontrado para retirar dorsal {number} de {firstName} {lastName}");
+                Debug.LogWarning($"[DB] Equipo {abbr} no encontrado para retirar dorsal {number} de {firstName} {lastName}");
                 continue;
             }
 
@@ -1508,10 +1505,10 @@ public partial class DatabaseManager : MonoBehaviour
                 player_id = 0,
                 first_name = firstName,
                 last_name = lastName,
-                position = legend.position,
-                rings = legend.rings,
-                career_points = legend.career_points,
-                induction_season = legend.induction_season
+                position = legend?.position ?? "",
+                rings = legend?.rings ?? 0,
+                career_points = legend?.career_points ?? 0,
+                induction_season = legend?.induction_season ?? ""
             });
         }
         Debug.Log($"[DB] Dorsales iniciales de leyendas HOF retirados sembrados.");

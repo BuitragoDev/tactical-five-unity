@@ -46,7 +46,9 @@ public enum GameScreen
     InfoLeague,
     TheCity,
     Buscador,
-    GLeague
+    GLeague,
+    Hilos,
+    Rivalidades
 }
 
 public enum GameMode

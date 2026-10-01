@@ -12,88 +12,128 @@
         <ui:VisualElement class="playerprofile-main">
             <ui:VisualElement class="playerprofile-content">
 
-                <!-- Player header -->
-                <ui:VisualElement class="playerprofile-header">
-                    <ui:VisualElement name="ProfilePhoto" class="playerprofile-photo" />
-                    <ui:VisualElement class="playerprofile-name-block">
-                        <ui:Label name="ProfilePlayerName" class="playerprofile-player-name" text="" />
-                        <ui:Label name="ProfilePlayerPos" class="playerprofile-player-pos" text="" />
-                        <ui:Label name="ProfilePlayerTeam" class="playerprofile-player-team" text="" />
-                        <ui:VisualElement class="playerprofile-role-row">
-                            <ui:VisualElement name="ProfileRoleIcon" class="playerprofile-role-icon" />
-                            <ui:Label name="ProfileRoleName" class="playerprofile-role-text" text="" />
+                <!-- ══ BANNER DE IDENTIDAD (con imagen del pabellón de fondo) ══ -->
+                <ui:VisualElement class="playerprofile-banner">
+                    <ui:VisualElement name="ProfileBannerBg" class="playerprofile-banner-bg" />
+                    <ui:VisualElement class="playerprofile-banner-overlay" />
+
+                    <ui:VisualElement class="playerprofile-banner-inner">
+                        <ui:VisualElement name="ProfilePhoto" class="playerprofile-photo" />
+
+                        <ui:VisualElement class="playerprofile-identity">
+                            <ui:VisualElement class="playerprofile-name-row">
+                                <ui:Label name="ProfilePlayerName" class="playerprofile-player-name" text="" />
+                                <ui:Label name="ProfileNumber" class="playerprofile-number" text="" />
+                            </ui:VisualElement>
+                            <ui:Label name="ProfilePlayerPos" class="playerprofile-player-pos" text="" />
+                            <ui:VisualElement class="playerprofile-team-row">
+                                <ui:VisualElement name="ProfileTeamLogo" class="playerprofile-team-logo" />
+                                <ui:Label name="ProfilePlayerTeam" class="playerprofile-player-team" text="" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:Label name="ProfileMeta" class="playerprofile-meta" text="" />
+
+                        <ui:VisualElement class="playerprofile-banner-right">
+                            <ui:VisualElement class="playerprofile-honors-row">
+                            <ui:VisualElement name="ProfileHonors" class="playerprofile-honors">
+                                <ui:VisualElement class="playerprofile-honor-item">
+                                    <ui:VisualElement class="playerprofile-honor-row">
+                                        <ui:VisualElement name="ProfileRingsIcon" class="playerprofile-honor-icon" />
+                                        <ui:Label name="ProfileRingsCount" class="playerprofile-honor-count" text="0" />
+                                    </ui:VisualElement>
+                                    <ui:Label class="playerprofile-honor-label" text="CAMPEONATOS" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="playerprofile-honor-item">
+                                    <ui:VisualElement class="playerprofile-honor-row">
+                                        <ui:VisualElement name="ProfileFinalsIcon" class="playerprofile-honor-icon" />
+                                        <ui:Label name="ProfileFinalsCount" class="playerprofile-honor-count" text="0" />
+                                    </ui:VisualElement>
+                                    <ui:Label class="playerprofile-honor-label" text="FINALES" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="playerprofile-honor-item">
+                                    <ui:VisualElement class="playerprofile-honor-row">
+                                        <ui:VisualElement name="ProfileMvpSeasonIcon" class="playerprofile-honor-icon" />
+                                        <ui:Label name="ProfileMvpSeasonCount" class="playerprofile-honor-count" text="0" />
+                                    </ui:VisualElement>
+                                    <ui:Label class="playerprofile-honor-label" text="MVP" />
+                                </ui:VisualElement>
+                                <ui:VisualElement class="playerprofile-honor-item">
+                                    <ui:VisualElement class="playerprofile-honor-row">
+                                        <ui:VisualElement name="ProfileMvpFinalsIcon" class="playerprofile-honor-icon" />
+                                        <ui:Label name="ProfileMvpFinalsCount" class="playerprofile-honor-count" text="0" />
+                                    </ui:VisualElement>
+                                    <ui:Label class="playerprofile-honor-label" text="MVP FINALS" />
+                                </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <ui:VisualElement name="ProfileOvrBlock" class="playerprofile-ovr-block">
+                                <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
+                                <ui:Label class="playerprofile-ovr-label" text="MED" />
+                            </ui:VisualElement>
+                            </ui:VisualElement>
+
+                            <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement name="ProfileHonors" class="playerprofile-honors">
-                        <ui:VisualElement class="playerprofile-honor-item">
-                            <ui:VisualElement class="playerprofile-honor-row">
-                                <ui:VisualElement name="ProfileRingsIcon" class="playerprofile-honor-icon" />
-                                <ui:Label name="ProfileRingsCount" class="playerprofile-honor-count" text="0" />
+                </ui:VisualElement>
+
+                <!-- ══ COLUMNAS: INFORMACIÓN · ATRIBUTOS · LESIONES ══ -->
+                <ui:VisualElement class="playerprofile-columns">
+
+                    <!-- INFORMACIÓN PERSONAL + CONTRACTUAL (apilados) -->
+                    <ui:VisualElement class="playerprofile-col-stack">
+                        <ui:VisualElement class="playerprofile-panel playerprofile-panel--stack-top">
+                            <ui:VisualElement class="playerprofile-panel-header">
+                                <ui:Label class="playerprofile-panel-title" text="INFORMACIÓN PERSONAL" />
                             </ui:VisualElement>
-                            <ui:Label class="playerprofile-honor-label" text="CAMPEONATOS" />
+                            <ui:VisualElement class="playerprofile-panel-body">
+                                <ui:VisualElement name="ProfileInfoBody" class="playerprofile-info-body" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement class="playerprofile-honor-item">
-                            <ui:VisualElement class="playerprofile-honor-row">
-                                <ui:VisualElement name="ProfileFinalsIcon" class="playerprofile-honor-icon" />
-                                <ui:Label name="ProfileFinalsCount" class="playerprofile-honor-count" text="0" />
+
+                        <ui:VisualElement class="playerprofile-panel">
+                            <ui:VisualElement class="playerprofile-panel-header">
+                                <ui:Label class="playerprofile-panel-title" text="INFORMACIÓN CONTRACTUAL" />
                             </ui:VisualElement>
-                            <ui:Label class="playerprofile-honor-label" text="FINALES" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="playerprofile-honor-item" style="margin-left: 100px;">
-                            <ui:VisualElement class="playerprofile-honor-row">
-                                <ui:VisualElement name="ProfileMvpSeasonIcon" class="playerprofile-honor-icon" />
-                                <ui:Label name="ProfileMvpSeasonCount" class="playerprofile-honor-count" text="0" />
+                            <ui:VisualElement class="playerprofile-panel-body">
+                                <ui:VisualElement name="ProfileContractBody" class="playerprofile-info-body" />
                             </ui:VisualElement>
-                            <ui:Label class="playerprofile-honor-label" text="MVP" />
-                        </ui:VisualElement>
-                        <ui:VisualElement class="playerprofile-honor-item">
-                            <ui:VisualElement class="playerprofile-honor-row">
-                                <ui:VisualElement name="ProfileMvpFinalsIcon" class="playerprofile-honor-icon" />
-                                <ui:Label name="ProfileMvpFinalsCount" class="playerprofile-honor-count" text="0" />
-                            </ui:VisualElement>
-                            <ui:Label class="playerprofile-honor-label" text="MVP FINALS" />
                         </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="playerprofile-ovr-block">
-                        <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
-                        <ui:Label class="playerprofile-ovr-label" text="MED" />
+
+                    <!-- ATRIBUTOS (badges) -->
+                    <ui:VisualElement name="ProfileAttrsSection" class="playerprofile-panel">
+                        <ui:VisualElement class="playerprofile-panel-header">
+                            <ui:Label class="playerprofile-panel-title" text="ATRIBUTOS" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="playerprofile-panel-body">
+                            <ui:VisualElement name="ProfileAttrsBody" class="playerprofile-attrs-body" />
+                            <ui:VisualElement name="ProfileAttrsLocked" class="playerprofile-locked">
+                                <ui:Label class="playerprofile-locked-text"
+                                    text="Ojea a este jugador en CARTERA para revelar sus atributos." />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
+
+                    <!-- ÚLTIMAS LESIONES -->
+                    <ui:VisualElement name="ProfileInjuries" class="playerprofile-panel playerprofile-panel--last">
+                        <ui:VisualElement class="playerprofile-panel-header">
+                            <ui:Label class="playerprofile-panel-title" text="ÚLTIMAS LESIONES" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="playerprofile-panel-body">
+                            <ui:VisualElement name="ProfileInjuriesBody" class="playerprofile-injuries-body" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
                 </ui:VisualElement>
 
                 <!-- Season stats section -->
-                <ui:VisualElement name="ProfileSeasonSection" class="playerprofile-season-section">
-                    <ui:Label class="playerprofile-section-label" text="ESTADÍSTICAS DE TEMPORADA" />
-                    <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
-                </ui:VisualElement>
-
-                <!-- Hitos de carrera (E1) -->
-                <ui:VisualElement name="ProfileMilestones" class="playerprofile-milestones" style="display: none;">
-                    <ui:Label class="playerprofile-section-label" text="HITOS DE CARRERA" />
-                    <ui:VisualElement name="ProfileMilestonesBody" class="playerprofile-milestones-body" />
-                </ui:VisualElement>
-
-                <!-- Historial médico (E2) -->
-                <ui:VisualElement name="ProfileInjuries" class="playerprofile-injuries" style="display: none;">
-                    <ui:Label class="playerprofile-section-label" text="ÚLTIMAS LESIONES" />
-                    <ui:VisualElement name="ProfileInjuriesBody" class="playerprofile-injuries-body" />
-                </ui:VisualElement>
-
-                <!-- Attributes section -->
-                <ui:VisualElement name="ProfileAttrsSection" class="playerprofile-attrs-section">
-                    <ui:Label class="playerprofile-section-label" text="ATRIBUTOS" />
-                    <ui:VisualElement name="ProfileAttrsBody" class="playerprofile-attrs-body" />
-                </ui:VisualElement>
-
-                <!-- Attributes locked -->
-                <ui:VisualElement name="ProfileAttrsLocked" class="playerprofile-locked">
-                    <ui:Label class="playerprofile-locked-text"
-                        text="Ojea a este jugador en CARTERA para revelar sus atributos." />
-                </ui:VisualElement>
-
-                <!-- Link to full trajectory -->
-                <ui:VisualElement class="playerprofile-link-row">
-                    <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />
+                <ui:VisualElement name="ProfileSeasonSection" class="playerprofile-panel playerprofile-panel--full">
+                    <ui:VisualElement class="playerprofile-panel-header">
+                        <ui:Label class="playerprofile-panel-title" text="ESTADÍSTICAS DE TEMPORADA" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="playerprofile-panel-body">
+                        <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- No season stats -->

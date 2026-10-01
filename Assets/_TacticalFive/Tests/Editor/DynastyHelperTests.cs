@@ -18,10 +18,10 @@ public class DynastyHelperTests
         };
 
     [Test]
-    public void Prestige_WeightsTitlesFinalsAndConference()
+    public void Prestige_WeightsTitlesAndFinals()
     {
-        Assert.That(DynastyHelper.Prestige(3, 5, 7), Is.EqualTo(3 * 3 + 5 * 2 + 7));
-        Assert.That(DynastyHelper.Prestige(0, 0, 0), Is.EqualTo(0));
+        Assert.That(DynastyHelper.Prestige(3, 5), Is.EqualTo(3 * 3 + 5 * 2));
+        Assert.That(DynastyHelper.Prestige(0, 0), Is.EqualTo(0));
     }
 
     [Test]
@@ -42,24 +42,23 @@ public class DynastyHelperTests
     }
 
     [Test]
-    public void Of_CountsTitlesFinalsAndConferenceTitles()
+    public void Of_CountsTitlesAndFinals()
     {
         var records = new List<SeasonRecord>
         {
-            Record(1, champion: 1, finalist: 2, eastChamp: 1),
-            Record(2, champion: 1, finalist: 3, eastChamp: 1),
-            Record(3, champion: 1, finalist: 4, eastChamp: 1),
-            Record(10, champion: 1, finalist: 5, eastChamp: 1)
+            Record(1, champion: 1, finalist: 2),
+            Record(2, champion: 1, finalist: 3),
+            Record(3, champion: 1, finalist: 4),
+            Record(10, champion: 1, finalist: 5)
         };
 
         var p = DynastyHelper.Of(records, 1);
 
         Assert.That(p.titles, Is.EqualTo(4));
         Assert.That(p.finals, Is.EqualTo(4), "campeón o finalista en las cuatro");
-        Assert.That(p.conferenceTitles, Is.EqualTo(4));
         Assert.That(p.firstTitleSeasonId, Is.EqualTo(1));
         Assert.That(p.lastTitleSeasonId, Is.EqualTo(10));
-        Assert.That(p.prestige, Is.EqualTo(DynastyHelper.Prestige(4, 4, 4)));
+        Assert.That(p.prestige, Is.EqualTo(DynastyHelper.Prestige(4, 4)));
         Assert.That(p.isDynasty, Is.True, "3 títulos seguidos (1, 2, 3) dentro de la ventana");
     }
 
@@ -68,9 +67,9 @@ public class DynastyHelperTests
     {
         var records = new List<SeasonRecord>
         {
-            Record(1, champion: 1, finalist: 2, eastChamp: 1, westChamp: 2),
-            Record(2, champion: 1, finalist: 3, eastChamp: 1),
-            Record(3, champion: 2, finalist: 1, eastChamp: 2, westChamp: 1)
+            Record(1, champion: 1, finalist: 2),
+            Record(2, champion: 1, finalist: 3),
+            Record(3, champion: 2, finalist: 1)
         };
 
         var ranking = DynastyHelper.LeagueRanking(records);
