@@ -281,6 +281,23 @@
     padding: 12px 16px;
 }
 
+/* Dos paneles en 2 columnas (50% fijo cada uno). */
+.trajectory-panels-row {
+    flex-direction: row;
+    flex-shrink: 0;
+    margin: 16px -8px 0 -8px;
+}
+
+.trajectory-panel-cell {
+    width: 50%;
+    flex-shrink: 0;
+    padding: 0 8px;
+}
+
+.trajectory-panel-cell .trajectory-panel {
+    margin-top: 0;
+}
+
 /* ── Logros ── */
 .trajectory-awards-body {
     flex-direction: row;

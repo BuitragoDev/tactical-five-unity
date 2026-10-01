@@ -77,24 +77,31 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
-                <!-- ══ Panel: HITOS DE CARRERA ══ -->
-                <ui:VisualElement name="TrajectoryMilestones" class="trajectory-panel" style="display: none;">
-                    <ui:VisualElement class="trajectory-panel-header">
-                        <ui:Label class="trajectory-panel-title" text="HITOS DE CARRERA" />
-                    </ui:VisualElement>
-                    <ui:VisualElement class="trajectory-panel-body">
-                        <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
-                    </ui:VisualElement>
-                </ui:VisualElement>
+                <!-- ══ Paneles: HITOS DE CARRERA + LOGROS (2 columnas) ══ -->
+                <ui:VisualElement class="trajectory-panels-row">
 
-                <!-- ══ Panel: LOGROS ══ -->
-                <ui:VisualElement name="TrajectoryAwards" class="trajectory-panel" style="display: none;">
-                    <ui:VisualElement class="trajectory-panel-header">
-                        <ui:Label class="trajectory-panel-title" text="LOGROS" />
+                    <ui:VisualElement class="trajectory-panel-cell">
+                        <ui:VisualElement name="TrajectoryMilestones" class="trajectory-panel" style="display: none;">
+                            <ui:VisualElement class="trajectory-panel-header">
+                                <ui:Label class="trajectory-panel-title" text="HITOS DE CARRERA" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="trajectory-panel-body">
+                                <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
-                    <ui:VisualElement class="trajectory-panel-body">
-                        <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
+
+                    <ui:VisualElement class="trajectory-panel-cell">
+                        <ui:VisualElement name="TrajectoryAwards" class="trajectory-panel" style="display: none;">
+                            <ui:VisualElement class="trajectory-panel-header">
+                                <ui:Label class="trajectory-panel-title" text="LOGROS" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="trajectory-panel-body">
+                                <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
+                            </ui:VisualElement>
+                        </ui:VisualElement>
                     </ui:VisualElement>
+
                 </ui:VisualElement>
 
                 <!-- ══ Panel: ESTADÍSTICAS POR TEMPORADA ══ -->
