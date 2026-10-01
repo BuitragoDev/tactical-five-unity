@@ -79,13 +79,24 @@
                 <!-- ══ COLUMNAS: INFORMACIÓN · ATRIBUTOS · LESIONES ══ -->
                 <ui:VisualElement class="playerprofile-columns">
 
-                    <!-- INFORMACIÓN PERSONAL -->
-                    <ui:VisualElement class="playerprofile-panel">
-                        <ui:VisualElement class="playerprofile-panel-header">
-                            <ui:Label class="playerprofile-panel-title" text="INFORMACIÓN PERSONAL" />
+                    <!-- INFORMACIÓN PERSONAL + CONTRACTUAL (apilados) -->
+                    <ui:VisualElement class="playerprofile-col-stack">
+                        <ui:VisualElement class="playerprofile-panel playerprofile-panel--stack-top">
+                            <ui:VisualElement class="playerprofile-panel-header">
+                                <ui:Label class="playerprofile-panel-title" text="INFORMACIÓN PERSONAL" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="playerprofile-panel-body">
+                                <ui:VisualElement name="ProfileInfoBody" class="playerprofile-info-body" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
-                        <ui:VisualElement class="playerprofile-panel-body">
-                            <ui:VisualElement name="ProfileInfoBody" class="playerprofile-info-body" />
+
+                        <ui:VisualElement class="playerprofile-panel">
+                            <ui:VisualElement class="playerprofile-panel-header">
+                                <ui:Label class="playerprofile-panel-title" text="INFORMACIÓN CONTRACTUAL" />
+                            </ui:VisualElement>
+                            <ui:VisualElement class="playerprofile-panel-body">
+                                <ui:VisualElement name="ProfileContractBody" class="playerprofile-info-body" />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 

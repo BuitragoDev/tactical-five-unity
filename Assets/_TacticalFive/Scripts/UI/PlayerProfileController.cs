@@ -27,6 +27,7 @@ using System.Linq;
     private VisualElement _profileSeasonSection;
     private VisualElement _profileSeasonBody;
     private VisualElement _profileInfoBody;
+    private VisualElement _profileContractBody;
     private VisualElement _profileInjuries;
     private VisualElement _profileInjuriesBody;
     private VisualElement _profileAttrsSection;
@@ -63,6 +64,7 @@ using System.Linq;
         _profileSeasonSection = _root.Q<VisualElement>("ProfileSeasonSection");
         _profileSeasonBody = _root.Q<VisualElement>("ProfileSeasonBody");
         _profileInfoBody = _root.Q<VisualElement>("ProfileInfoBody");
+        _profileContractBody = _root.Q<VisualElement>("ProfileContractBody");
         _profileInjuries = _root.Q<VisualElement>("ProfileInjuries");
         _profileInjuriesBody = _root.Q<VisualElement>("ProfileInjuriesBody");
         _profileAttrsSection = _root.Q<VisualElement>("ProfileAttrsSection");
@@ -104,6 +106,7 @@ using System.Linq;
         FillPlayerHeader(canView);
         BuildSeasonStats();
         BuildPersonalInfo();
+        BuildContractInfo();
         BuildInjuryHistory();
         BuildAttrs(canView);
     }
@@ -179,19 +182,32 @@ using System.Linq;
         _profilePhoto.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
     }
 
-    /// <summary>Información personal: una sola fuente, sin repetir posición/equipo (ya en el banner).</summary>
+    /// <summary>Información personal: sin repetir posición/equipo (ya en el banner).</summary>
     void BuildPersonalInfo()
     {
         if (_profileInfoBody == null || _player == null) return;
         _profileInfoBody.Clear();
 
-        AddInfoField("NOMBRE", _player.first_name);
-        AddInfoField("APELLIDOS", _player.last_name);
-        AddInfoField("PAÍS", CountryCodes.GetName(_player.nationality), CountryCodes.GetFlagPath(_player.nationality));
+        AddInfoField("NACIONALIDAD", CountryCodes.GetName(_player.nationality), CountryCodes.GetFlagPath(_player.nationality));
+        AddInfoRoleField("ROL", GetRoleName(_player.role), _player.role);
         AddInfoField("ALTURA", $"{_player.height_cm} cm");
         AddInfoField("PESO", $"{_player.weight_kg} kg");
-        AddInfoField("ROOKIE", _player.is_rookie == 1 ? "Sí" : "No");
-        AddInfoRoleField("ROL", GetRoleName(_player.role), _player.role);
+    }
+
+    /// <summary>Información contractual: salario, años, opciones y condición.</summary>
+    void BuildContractInfo()
+    {
+        if (_profileContractBody == null || _player == null) return;
+        _profileContractBody.Clear();
+
+        string option = _player.has_team_option == 1 ? "Team Option"
+                      : _player.has_player_option == 1 ? "Player Option"
+                      : "—";
+
+        AddInfoField("SALARIO", $"${_player.salary:N0}");
+        AddInfoField("AÑOS DE CONTRATO", _player.contract_years.ToString());
+        AddInfoField("AÑOS GARANTIZADOS", _player.guaranteed_years.ToString());
+        AddInfoField("OPCIÓN", option);
     }
 
     void AddInfoField(string label, string value, string flagPath = null)

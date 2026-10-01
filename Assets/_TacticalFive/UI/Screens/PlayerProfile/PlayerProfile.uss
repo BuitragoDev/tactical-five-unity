@@ -326,6 +326,27 @@
     margin-right: 0;
 }
 
+/* Columna izquierda con dos paneles apilados (Información + Contractual). */
+.playerprofile-col-stack {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    height: 400px;
+    flex-direction: column;
+    margin-right: 14px;
+}
+
+.playerprofile-col-stack .playerprofile-panel {
+    margin-right: 0;
+    height: auto;
+    flex-grow: 1;
+    flex-basis: 0;
+}
+
+.playerprofile-col-stack .playerprofile-panel--stack-top {
+    margin-bottom: 14px;
+}
+
 /* Cabecera de panel (como PLANTILLA de Entrenamiento) */
 .playerprofile-panel-header {
     flex-direction: row;
