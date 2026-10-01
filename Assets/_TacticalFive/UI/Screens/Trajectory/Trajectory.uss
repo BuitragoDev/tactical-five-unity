@@ -351,7 +351,7 @@
 
 .trajectory-award-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 14px;
+    font-size: 18px;
     padding: 4px 12px;
     margin: 0 8px 8px 0;
     border-radius: 4px;
