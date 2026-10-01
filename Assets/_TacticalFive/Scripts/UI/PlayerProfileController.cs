@@ -298,7 +298,7 @@ using System.Linq;
             var row = new VisualElement();
             row.AddToClassList("playerprofile-injury-row");
 
-            var dateLbl = new Label(string.IsNullOrEmpty(h.date) ? "—" : h.date);
+            var dateLbl = new Label(FormatInjuryDate(h.date));
             dateLbl.AddToClassList("playerprofile-injury-date");
             row.Add(dateLbl);
 
@@ -473,6 +473,19 @@ using System.Linq;
             badge.Add(labLbl);
             _profileAttrsBody.Add(badge);
         }
+    }
+
+    /// <summary>Fecha en formato dd/MM/yyyy (la BD guarda yyyy-MM-dd o dd/MM/yyyy).</summary>
+    static string FormatInjuryDate(string date)
+    {
+        if (string.IsNullOrEmpty(date)) return "—";
+        if (System.DateTime.TryParseExact(date, "yyyy-MM-dd",
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None, out var exact))
+            return exact.ToString("dd/MM/yyyy");
+        if (System.DateTime.TryParse(date, out var parsed))
+            return parsed.ToString("dd/MM/yyyy");
+        return date;
     }
 
     static string GetRoleName(PlayerRole role) => role switch
