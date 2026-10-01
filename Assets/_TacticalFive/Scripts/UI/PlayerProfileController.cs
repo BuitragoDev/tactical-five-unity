@@ -188,10 +188,10 @@ using System.Linq;
         if (_profileInfoBody == null || _player == null) return;
         _profileInfoBody.Clear();
 
-        AddInfoField("NACIONALIDAD", CountryCodes.GetName(_player.nationality), CountryCodes.GetFlagPath(_player.nationality));
-        AddInfoRoleField("ROL", GetRoleName(_player.role), _player.role);
-        AddInfoField("ALTURA", $"{_player.height_cm} cm");
-        AddInfoField("PESO", $"{_player.weight_kg} kg");
+        AddInfoField(_profileInfoBody, "NACIONALIDAD", CountryCodes.GetName(_player.nationality), CountryCodes.GetFlagPath(_player.nationality));
+        AddInfoRoleField(_profileInfoBody, "ROL", GetRoleName(_player.role), _player.role);
+        AddInfoField(_profileInfoBody, "ALTURA", $"{_player.height_cm} cm");
+        AddInfoField(_profileInfoBody, "PESO", $"{_player.weight_kg} kg");
     }
 
     /// <summary>Información contractual: salario, años, opciones y condición.</summary>
@@ -204,14 +204,15 @@ using System.Linq;
                       : _player.has_player_option == 1 ? "Player Option"
                       : "—";
 
-        AddInfoField("SALARIO", $"${_player.salary:N0}");
-        AddInfoField("AÑOS DE CONTRATO", _player.contract_years.ToString());
-        AddInfoField("AÑOS GARANTIZADOS", _player.guaranteed_years.ToString());
-        AddInfoField("OPCIÓN", option);
+        AddInfoField(_profileContractBody, "SALARIO", $"${_player.salary:N0}");
+        AddInfoField(_profileContractBody, "AÑOS DE CONTRATO", _player.contract_years.ToString());
+        AddInfoField(_profileContractBody, "AÑOS GARANTIZADOS", _player.guaranteed_years.ToString());
+        AddInfoField(_profileContractBody, "OPCIÓN", option);
     }
 
-    void AddInfoField(string label, string value, string flagPath = null)
+    void AddInfoField(VisualElement target, string label, string value, string flagPath = null)
     {
+        if (target == null) return;
         var field = new VisualElement();
         field.AddToClassList("playerprofile-info-field");
 
@@ -237,11 +238,12 @@ using System.Linq;
         row.Add(valLbl);
 
         field.Add(row);
-        _profileInfoBody.Add(field);
+        target.Add(field);
     }
 
-    void AddInfoRoleField(string label, string value, PlayerRole role)
+    void AddInfoRoleField(VisualElement target, string label, string value, PlayerRole role)
     {
+        if (target == null) return;
         var field = new VisualElement();
         field.AddToClassList("playerprofile-info-field");
 
@@ -273,7 +275,7 @@ using System.Linq;
         row.Add(valLbl);
 
         field.Add(row);
-        _profileInfoBody.Add(field);
+        target.Add(field);
     }
 
     /// <summary>Parte médico (E2): últimas lesiones cerradas del jugador.</summary>
