@@ -329,8 +329,8 @@ using System.Linq;
         AddStatCard("PTS", StatFormat.One(avgPts));
         AddStatCard("REB", StatFormat.One(avgReb));
         AddStatCard("AST", StatFormat.One(avgAst));
-        AddStatCard("ROB", StatFormat.Two(avgStl));
-        AddStatCard("TAP", StatFormat.Two(avgBlk));
+        AddStatCard("ROB", StatFormat.One(avgStl));
+        AddStatCard("TAP", StatFormat.One(avgBlk));
         AddStatCard("TO", StatFormat.One(avgTov), StatFormat.TovTip);
         AddStatCard("MIN", StatFormat.One(avgMin), StatFormat.MinTip);
         AddStatCard("TC%", StatFormat.One(fgPct));
@@ -414,18 +414,21 @@ using System.Linq;
 
         foreach (var (label, val) in attrs)
         {
+            // Los atributos se muestran siempre en 0-99 (la moral interna llega a 100).
+            int shown = Mathf.Clamp(val, 0, 99);
+
             var badge = new VisualElement();
             badge.AddToClassList("playerprofile-attr-badge");
 
             var valLbl = new Label();
             valLbl.AddToClassList("playerprofile-attr-badge-value");
-            if (val >= 70)
+            if (shown >= 70)
                 valLbl.AddToClassList("playerprofile-attr-badge-value--high");
-            else if (val >= 40)
+            else if (shown >= 40)
                 valLbl.AddToClassList("playerprofile-attr-badge-value--mid");
             else
                 valLbl.AddToClassList("playerprofile-attr-badge-value--low");
-            valLbl.text = val.ToString();
+            valLbl.text = shown.ToString();
 
             var labLbl = new Label();
             labLbl.AddToClassList("playerprofile-attr-badge-label");
