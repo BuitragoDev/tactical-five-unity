@@ -86,7 +86,14 @@
                                 <ui:Label class="trajectory-panel-title" text="HITOS DE CARRERA" />
                             </ui:VisualElement>
                             <ui:VisualElement class="trajectory-panel-body">
-                                <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
+                                <ui:VisualElement class="trajectory-panel-scroll-row">
+                                    <ui:VisualElement name="TrajectoryMilestonesViewport" class="trajectory-panel-viewport">
+                                        <ui:VisualElement name="TrajectoryMilestonesBody" class="trajectory-milestones-body" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="TrajectoryMilestonesScrollTrack" class="trajectory-panel-scrollbar">
+                                        <ui:VisualElement name="TrajectoryMilestonesScrollThumb" class="trajectory-panel-scrollbar-thumb" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
@@ -97,7 +104,14 @@
                                 <ui:Label class="trajectory-panel-title" text="LOGROS" />
                             </ui:VisualElement>
                             <ui:VisualElement class="trajectory-panel-body">
-                                <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
+                                <ui:VisualElement class="trajectory-panel-scroll-row">
+                                    <ui:VisualElement name="TrajectoryAwardsViewport" class="trajectory-panel-viewport">
+                                        <ui:VisualElement name="TrajectoryAwardsBody" class="trajectory-awards-body" />
+                                    </ui:VisualElement>
+                                    <ui:VisualElement name="TrajectoryAwardsScrollTrack" class="trajectory-panel-scrollbar">
+                                        <ui:VisualElement name="TrajectoryAwardsScrollThumb" class="trajectory-panel-scrollbar-thumb" />
+                                    </ui:VisualElement>
+                                </ui:VisualElement>
                             </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>

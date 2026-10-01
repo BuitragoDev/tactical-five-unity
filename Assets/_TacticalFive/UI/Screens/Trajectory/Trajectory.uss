@@ -278,10 +278,12 @@
 
 .trajectory-panel-body {
     flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
     padding: 12px 16px;
 }
 
-/* Dos paneles en 2 columnas (50% fijo cada uno). */
+/* Dos paneles en 2 columnas (50% fijo cada uno), misma altura. */
 .trajectory-panels-row {
     flex-direction: row;
     flex-shrink: 0;
@@ -296,12 +298,55 @@
 
 .trajectory-panel-cell .trajectory-panel {
     margin-top: 0;
+    height: 240px;
+}
+
+/* Scroll propio dentro de los paneles (hitos/logros). */
+.trajectory-panel-scroll-row {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.trajectory-panel-viewport {
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.trajectory-panel-scrollbar {
+    width: 12px;
+    min-width: 12px;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin-left: 4px;
+    background-color: rgba(25, 18, 8, 0.92);
+    border-left-width: 1px;
+    border-left-color: rgba(120, 95, 30, 0.35);
+    position: relative;
+}
+
+.trajectory-panel-scrollbar-thumb {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    top: 0;
+    height: 40px;
+    background-color: rgb(160, 128, 30);
+    border-radius: 3px;
+}
+
+.trajectory-panel-scrollbar:hover .trajectory-panel-scrollbar-thumb {
+    background-color: rgb(212, 160, 23);
 }
 
 /* ── Logros ── */
 .trajectory-awards-body {
     flex-direction: row;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .trajectory-award-badge {
@@ -585,6 +630,7 @@
 .trajectory-milestones-body {
     flex-direction: row;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 .trajectory-milestone {
     flex-direction: row;

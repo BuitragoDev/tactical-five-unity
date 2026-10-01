@@ -52,6 +52,8 @@ using System.Linq;
     private VisualElement _trajectoryTableScrollTrack;
     private VisualElement _trajectoryTableScrollThumb;
     private CustomScrollbar.Handle _tableScrollBar;
+    private CustomScrollbar.Handle _milestonesScrollBar;
+    private CustomScrollbar.Handle _awardsScrollBar;
     private VisualElement _trajectoryEmpty;
     private VisualElement _trajectoryStatsSection;
     private PlayerData _player;
@@ -92,6 +94,14 @@ using System.Linq;
         // (Unity recrea el árbol del UIDocument al reactivar la pantalla).
         _tableScrollBar = CustomScrollbar.Bind(_trajectoryTableScrollViewport, _trajectoryTableBody,
                                                _trajectoryTableScrollTrack, _trajectoryTableScrollThumb);
+
+        // Barras propias de los paneles de hitos y logros (2 columnas).
+        _milestonesScrollBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("TrajectoryMilestonesViewport"), _trajectoryMilestonesBody,
+            _root.Q<VisualElement>("TrajectoryMilestonesScrollTrack"), _root.Q<VisualElement>("TrajectoryMilestonesScrollThumb"));
+        _awardsScrollBar = CustomScrollbar.Bind(
+            _root.Q<VisualElement>("TrajectoryAwardsViewport"), _trajectoryAwardsBody,
+            _root.Q<VisualElement>("TrajectoryAwardsScrollTrack"), _root.Q<VisualElement>("TrajectoryAwardsScrollThumb"));
 
         _headerTeamLogo = _root.Q<VisualElement>("HeaderTeamLogo");
         _headerTeamName = _root.Q<Label>("HeaderTeamName");
@@ -224,6 +234,8 @@ using System.Linq;
             badge.text = GetAwardText(award);
             _trajectoryAwardsBody.Add(badge);
         }
+
+        CustomScrollbar.Reset(_awardsScrollBar);
     }
 
     /// <summary>Hitos de carrera del jugador (E1): conseguidos + el siguiente con progreso.</summary>
@@ -261,6 +273,8 @@ using System.Linq;
             var n = next.Value;
             _trajectoryMilestonesBody.Add(MilestoneUI.Next(n.next, n.current, n.percent, "trajectory", withBar: true));
         }
+
+        CustomScrollbar.Reset(_milestonesScrollBar);
     }
 
     void BuildStatsTable()
