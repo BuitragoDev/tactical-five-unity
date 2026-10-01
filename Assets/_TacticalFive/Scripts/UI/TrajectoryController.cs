@@ -58,6 +58,7 @@ using System.Linq;
     private VisualElement _trajectoryEmpty;
     private VisualElement _trajectoryStatsSection;
     private PlayerData _player;
+    private HashSet<int> _scoutedPlayerIds;
     private List<PlayerCareerSeasonRow> _careerHistory;
     private List<PlayerAwardEntry> _awards;
     protected override void CacheReferences()
@@ -130,6 +131,8 @@ using System.Linq;
         _careerHistory = DatabaseManager.Instance.GetPlayerCareerHistory(playerId, _manager.id);
         _awards = DatabaseManager.Instance.GetPlayerAwards(playerId);
 
+        _scoutedPlayerIds = DatabaseManager.Instance.GetScoutedPlayerIds(_myTeam != null ? _myTeam.id : 0);
+
         _teamLogos.Clear();
         foreach (var s in TeamImages.Logos(64))
             _teamLogos[s.name] = s;
@@ -182,16 +185,23 @@ using System.Linq;
         }
 
         int ovr = _player.GetCalculatedAverage();
-        _trajectoryOvr.text = ovr.ToString();
+        // Fog-of-war: si no es de mi equipo y no está ojeado, se muestra el rango, no la media.
+        bool canView = FogOfWarHelper.CanViewRatings(_player, _myTeam.id, _scoutedPlayerIds);
+        _trajectoryOvr.text = canView ? ovr.ToString() : FogOfWarHelper.GetRatingBand(ovr, _player.id);
+
         // MED por rango (como los atributos): <40 rojo, <70 dorado, resto verde.
+        // Con fog-of-war el badge queda neutro.
         if (_trajectoryOvrBlock != null)
         {
             _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--high");
             _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--mid");
             _trajectoryOvrBlock.RemoveFromClassList("trajectory-ovr-block--low");
-            if (ovr < 40) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--low");
-            else if (ovr < 70) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--mid");
-            else _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--high");
+            if (canView)
+            {
+                if (ovr < 40) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--low");
+                else if (ovr < 70) _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--mid");
+                else _trajectoryOvrBlock.AddToClassList("trajectory-ovr-block--high");
+            }
         }
 
         var ringsSprite = Resources.Load<Sprite>("Icons/trofeo64px");
