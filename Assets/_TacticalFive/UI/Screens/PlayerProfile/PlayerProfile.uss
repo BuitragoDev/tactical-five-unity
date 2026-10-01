@@ -352,7 +352,7 @@
 
 .playerprofile-info-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     letter-spacing: 1px;
     text-transform: uppercase;
