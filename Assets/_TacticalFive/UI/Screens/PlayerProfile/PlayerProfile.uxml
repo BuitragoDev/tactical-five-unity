@@ -116,9 +116,13 @@
                 </ui:VisualElement>
 
                 <!-- Season stats section -->
-                <ui:VisualElement name="ProfileSeasonSection" class="playerprofile-season-section">
-                    <ui:Label class="playerprofile-section-label" text="ESTADÍSTICAS DE TEMPORADA" />
-                    <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
+                <ui:VisualElement name="ProfileSeasonSection" class="playerprofile-panel playerprofile-panel--full">
+                    <ui:VisualElement class="playerprofile-panel-header">
+                        <ui:Label class="playerprofile-panel-title" text="ESTADÍSTICAS DE TEMPORADA" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="playerprofile-panel-body">
+                        <ui:VisualElement name="ProfileSeasonBody" class="playerprofile-stats-grid" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
 
                 <!-- No season stats -->
