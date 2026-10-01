@@ -118,10 +118,10 @@
 
 /* La pantalla Rivalidades da ~200px más a la columna DINASTÍAS (su .uxml reutiliza estas clases). */
 .palmares-root.rivalidades-split .palmares-left {
-    flex: 0 0 calc(20% + 200px);
+    flex: 0 0 34%;
 }
 .palmares-root.rivalidades-split .palmares-right {
-    flex: 1 1 auto;
+    flex: 0 0 66%;
 }
 
 .palmares-left {
