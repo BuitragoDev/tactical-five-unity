@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using System.Linq;
 
 /// <summary>
 /// Pantalla HILOS: situaciones narrativas de la temporada que se abren, escalan y se
@@ -79,8 +80,8 @@ public class HilosController : UIScreenController
             }
 
             string meta = active
-                ? $"Jornada {s.started_game_day} · escalón {s.intensity}"
-                : $"Jornada {s.started_game_day} → {s.last_update_game_day}"
+                ? $"Activo desde el {FormatGameDayDate(s.started_game_day)} · {IntensityLabel(s.intensity)}"
+                : $"Del {FormatGameDayDate(s.started_game_day)} al {FormatGameDayDate(s.last_update_game_day)}"
                   + (string.IsNullOrEmpty(s.resolution) ? "" : $" · {ResolutionLabel(s.resolution)}");
             var metaLbl = new Label(meta);
             metaLbl.AddToClassList("historia-meta");
@@ -95,6 +96,33 @@ public class HilosController : UIScreenController
             _root.Q<VisualElement>("HistoriaViewport"), _historiaBody,
             _root.Q<VisualElement>("HistoriaTrack"), _root.Q<VisualElement>("HistoriaThumb"));
     }
+
+    /// <summary>
+    /// Convierte una jornada interna a la fecha de la partida (dd/MM/yyyy): usa el
+    /// game_date de un partido de esa jornada y, si no lo hay, la deriva del inicio
+    /// de temporada (22 de octubre + días).
+    /// </summary>
+    string FormatGameDayDate(int gameDay)
+    {
+        if (gameDay <= 0) return "—";
+        var game = DatabaseManager.Instance.GetAllGamesByGameDay(_manager.id, gameDay)
+            .FirstOrDefault(g => !string.IsNullOrEmpty(g.game_date));
+        if (game != null && System.DateTime.TryParse(game.game_date, out var gd))
+            return gd.ToString("dd/MM/yyyy");
+        if (_season != null)
+            return new System.DateTime(_season.year_start, 10, 22)
+                .AddDays(gameDay - 1).ToString("dd/MM/yyyy");
+        return "—";
+    }
+
+    /// <summary>Intensidad del hilo redactada de forma clara.</summary>
+    static string IntensityLabel(int intensity) => intensity switch
+    {
+        <= 1 => "acaba de empezar",
+        2 => "va a más",
+        3 => "en su punto álgido",
+        _ => "al máximo"
+    };
 
     static string ResolutionLabel(string resolution) => resolution switch
     {
