@@ -231,7 +231,7 @@
 /* Section labels */
 .playerprofile-section-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
     color: rgb(212, 160, 23);
     margin-bottom: 12px;
     letter-spacing: 2px;
@@ -377,7 +377,7 @@
 
 .playerprofile-injury-date {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(150, 162, 190);
     width: 90px;
     flex-shrink: 0;
@@ -385,7 +385,7 @@
 
 .playerprofile-injury-type {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 15px;
+    font-size: 16px;
     color: rgb(179, 190, 214);
     letter-spacing: 1px;
     flex-grow: 1;
@@ -394,7 +394,7 @@
 
 .playerprofile-injury-days {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 14px;
+    font-size: 16px;
     color: rgb(150, 162, 190);
     width: 50px;
     -unity-text-align: middle-right;
@@ -403,7 +403,7 @@
 
 .playerprofile-injury-outcome {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 12px;
+    font-size: 16px;
     letter-spacing: 1px;
     width: 96px;
     -unity-text-align: middle-right;
@@ -417,7 +417,7 @@
 
 .playerprofile-injury-empty {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 15px;
+    font-size: 16px;
     color: rgb(122, 138, 170);
     padding: 8px 0;
 }
