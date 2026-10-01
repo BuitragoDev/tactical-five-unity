@@ -15,7 +15,7 @@ public class RivalidadesController : UIScreenController
     private CustomScrollbar.Handle _dinastiasBar, _rivalidadesBar;
 
     private List<TeamData> _allTeams;
-    private Dictionary<string, Sprite> _logoSprites32 = new();
+    private Dictionary<string, Sprite> _logoSprites64 = new();
 
     protected override void CacheReferences()
     {
@@ -34,8 +34,8 @@ public class RivalidadesController : UIScreenController
             if (tex != null) icon.style.backgroundImage = new StyleBackground(tex);
         }
 
-        _logoSprites32.Clear();
-        foreach (var s in TeamImages.Logos(32)) _logoSprites32[s.name] = s;
+        _logoSprites64.Clear();
+        foreach (var s in TeamImages.Logos(64)) _logoSprites64[s.name] = s;
         _allTeams = DatabaseManager.Instance.GetAllTeams();
     }
 
@@ -78,7 +78,7 @@ public class RivalidadesController : UIScreenController
 
             var logo = new VisualElement();
             logo.AddToClassList("rival-logo");
-            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+            if (team != null && _logoSprites64.TryGetValue(team.logo, out var sp))
                 logo.style.backgroundImage = new StyleBackground(sp);
             row.Add(logo);
 
@@ -89,9 +89,13 @@ public class RivalidadesController : UIScreenController
             name.AddToClassList("rival-title");
             col.Add(name);
 
-            var meta = new Label($"{p.titles} títulos · {p.finals} finales · {p.conferenceTitles} conferencias");
-            meta.AddToClassList("rival-meta");
-            col.Add(meta);
+            var stats = new VisualElement();
+            stats.AddToClassList("rival-stats");
+            stats.Add(MakeStatBadge($"{p.titles} TÍTULOS", "rival-stat--titles"));
+            stats.Add(MakeStatBadge($"{p.finals} FINALES", "rival-stat--finals"));
+            stats.Add(MakeStatBadge($"{p.conferenceTitles} CONFERENCIAS", "rival-stat--conf"));
+            col.Add(stats);
+
             row.Add(col);
 
             var badge = new Label(p.isDynasty ? "DINASTÍA" : $"PRESTIGIO {p.prestige}");
@@ -101,6 +105,14 @@ public class RivalidadesController : UIScreenController
 
             _dinastiasBody.Add(row);
         }
+    }
+
+    static Label MakeStatBadge(string text, string colorClass)
+    {
+        var lbl = new Label(text);
+        lbl.AddToClassList("rival-stat-badge");
+        lbl.AddToClassList(colorClass);
+        return lbl;
     }
 
     /// <summary>Rivales de mi equipo en playoffs (balance de series y último cruce).</summary>
@@ -129,7 +141,7 @@ public class RivalidadesController : UIScreenController
 
             var logo = new VisualElement();
             logo.AddToClassList("rival-logo");
-            if (team != null && _logoSprites32.TryGetValue(team.logo, out var sp))
+            if (team != null && _logoSprites64.TryGetValue(team.logo, out var sp))
                 logo.style.backgroundImage = new StyleBackground(sp);
             row.Add(logo);
 
@@ -186,7 +198,7 @@ public class RivalidadesController : UIScreenController
     {
         if (_myTeam == null || _manager == null) return;
 
-        if (_logoSprites32.TryGetValue(_myTeam.logo, out var sprite))
+        if (_logoSprites64.TryGetValue(_myTeam.logo, out var sprite))
             _root.Q<VisualElement>("HeaderTeamLogo").style.backgroundImage = new StyleBackground(sprite);
 
         _root.Q<Label>("HeaderTeamName").text = _myTeam.name.ToUpper();

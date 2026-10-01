@@ -124,6 +124,12 @@
     flex: 0 0 66%;
 }
 
+/* En Rivalidades el escudo de las filas es más grande (logos de 64). */
+.palmares-root.rivalidades-split .rival-logo {
+    width: 64px;
+    height: 64px;
+}
+
 .palmares-left {
     flex: 0 0 20%;
     background-color: rgb(22, 26, 36);
@@ -723,14 +729,44 @@
     margin-left: 8px;
     border-width: 1px;
     border-radius: 6px;
-    color: rgb(150, 162, 186);
-    border-color: rgb(60, 70, 92);
-    -unity-text-align: middle-center;
+    cursor: default;
 }
 .rival-badge--hot {
     color: rgb(248, 196, 64);
     border-color: rgb(212, 160, 23);
     background-color: rgba(212, 160, 23, 0.12);
+}
+
+/* Badges de títulos/finales/conferencias de una franquicia */
+.rival-stats {
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-top: 4px;
+}
+.rival-stat-badge {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    margin: 2px 6px 2px 0;
+    border-width: 1px;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+.rival-stat--titles {
+    color: rgb(248, 196, 64);
+    border-color: rgb(212, 160, 23);
+    background-color: rgba(212, 160, 23, 0.12);
+}
+.rival-stat--finals {
+    color: rgb(150, 190, 255);
+    border-color: rgb(60, 90, 150);
+    background-color: rgba(42, 95, 201, 0.12);
+}
+.rival-stat--conf {
+    color: rgb(100, 200, 140);
+    border-color: rgb(39, 130, 72);
+    background-color: rgba(39, 174, 96, 0.12);
 }
 .rival-empty {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
