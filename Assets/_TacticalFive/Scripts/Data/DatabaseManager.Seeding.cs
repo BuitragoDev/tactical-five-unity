@@ -665,7 +665,7 @@ public partial class DatabaseManager
         {("Victor", "Wembanyama"), 1},
         {("LeBron", "James"), 23},
         {("Anthony", "Edwards"), 5},
-        {("Jayson", "Tatum"), 0},
+        {("Jayson", "Tatum"), 4},
         {("Kevin", "Durant"), 35},
         {("Joel", "Embiid"), 21},
         {("Devin", "Booker"), 1},

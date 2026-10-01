@@ -121,7 +121,7 @@ protected virtual void OnEnable()
 | 36 | NewSeason | `Screens/NewSeason` | `NewSeasonController` | Post-draft rollover (options, re-signs, decremento de contratos antes del control de plantilla >17, StartNewSeason async) |
 | 37 | SeasonSummary | `Screens/SeasonSummary` | `SeasonSummaryController` | Season recap |
 | 38 | PlayerAwards | `Screens/PlayerAwards` | `PlayerAwardsController` | Player awards |
-| 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Player season stats + career + attributes + fog-of-war gate + honors |
+| 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Banner (foto, dorsal, escudo, honores, MED, trayectoria) + 3 columnas (Información Personal · Atributos como badges · Últimas Lesiones) + stats de temporada; fog-of-war gate |
 | 40 | Quintos | `Screens/Quintos` | `QuintosController` | Season All-Star/Rookie quintets |
 | 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career |
 | 42 | PreGame | `Screens/PreGame` | `PreGameController` | Previas del partido: pronóstico/favorito, registros, ofensiva/defensiva + rango, bajas, alineaciones y claves; botones VOLVER/JUGAR |
