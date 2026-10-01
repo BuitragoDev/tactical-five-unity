@@ -347,6 +347,19 @@
     margin-bottom: 14px;
 }
 
+/* Los paneles apilados van justos de alto: sin padding extra. */
+.playerprofile-col-stack .playerprofile-panel-body {
+    padding: 2px 10px;
+}
+
+.playerprofile-col-stack .playerprofile-info-field {
+    padding: 2px 6px 2px 0;
+}
+
+.playerprofile-col-stack .playerprofile-info-label {
+    margin-bottom: 1px;
+}
+
 /* Cabecera de panel (como PLANTILLA de Entrenamiento) */
 .playerprofile-panel-header {
     flex-direction: row;
