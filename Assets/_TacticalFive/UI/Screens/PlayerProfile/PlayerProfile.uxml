@@ -81,24 +81,36 @@
 
                     <!-- INFORMACIÓN PERSONAL -->
                     <ui:VisualElement class="playerprofile-panel">
-                        <ui:Label class="playerprofile-section-label" text="INFORMACIÓN PERSONAL" />
-                        <ui:VisualElement name="ProfileInfoBody" class="playerprofile-info-body" />
+                        <ui:VisualElement class="playerprofile-panel-header">
+                            <ui:Label class="playerprofile-panel-title" text="INFORMACIÓN PERSONAL" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="playerprofile-panel-body">
+                            <ui:VisualElement name="ProfileInfoBody" class="playerprofile-info-body" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- ATRIBUTOS (badges) -->
                     <ui:VisualElement name="ProfileAttrsSection" class="playerprofile-panel">
-                        <ui:Label class="playerprofile-section-label" text="ATRIBUTOS" />
-                        <ui:VisualElement name="ProfileAttrsBody" class="playerprofile-attrs-body" />
-                        <ui:VisualElement name="ProfileAttrsLocked" class="playerprofile-locked">
-                            <ui:Label class="playerprofile-locked-text"
-                                text="Ojea a este jugador en CARTERA para revelar sus atributos." />
+                        <ui:VisualElement class="playerprofile-panel-header">
+                            <ui:Label class="playerprofile-panel-title" text="ATRIBUTOS" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="playerprofile-panel-body">
+                            <ui:VisualElement name="ProfileAttrsBody" class="playerprofile-attrs-body" />
+                            <ui:VisualElement name="ProfileAttrsLocked" class="playerprofile-locked">
+                                <ui:Label class="playerprofile-locked-text"
+                                    text="Ojea a este jugador en CARTERA para revelar sus atributos." />
+                            </ui:VisualElement>
                         </ui:VisualElement>
                     </ui:VisualElement>
 
                     <!-- ÚLTIMAS LESIONES -->
                     <ui:VisualElement name="ProfileInjuries" class="playerprofile-panel playerprofile-panel--last">
-                        <ui:Label class="playerprofile-section-label" text="ÚLTIMAS LESIONES" />
-                        <ui:VisualElement name="ProfileInjuriesBody" class="playerprofile-injuries-body" />
+                        <ui:VisualElement class="playerprofile-panel-header">
+                            <ui:Label class="playerprofile-panel-title" text="ÚLTIMAS LESIONES" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="playerprofile-panel-body">
+                            <ui:VisualElement name="ProfileInjuriesBody" class="playerprofile-injuries-body" />
+                        </ui:VisualElement>
                     </ui:VisualElement>
 
                 </ui:VisualElement>
