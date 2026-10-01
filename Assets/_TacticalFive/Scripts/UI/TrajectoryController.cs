@@ -17,15 +17,16 @@ using System.Linq;
     private Label _headerSeason;
     private Label _headerDate;
 
-    // Cabecera jugador
+    // Cabecera jugador (banner)
     private VisualElement _trajectoryPhoto;
     private Label _trajectoryPlayerName;
+    private Label _trajectoryNumber;
     private Label _trajectoryPlayerPos;
-    private Label _trajectoryRoleName;
-    private VisualElement _trajectoryRoleIcon;
-    private Label _trajectoryMeta;
-    private Label _trajectoryNationality;
+    private VisualElement _trajectoryTeamLogo;
+    private Label _trajectoryPlayerTeam;
+    private VisualElement _trajectoryBannerBg;
     private Label _trajectoryOvr;
+    private Button _btnGoToProfile;
     private VisualElement _trajectoryRingsIcon;
     private Label _trajectoryRingsCount;
     private VisualElement _trajectoryFinalsIcon;
@@ -34,6 +35,7 @@ using System.Linq;
     private Label _trajectoryMvpFinalsCount;
     private VisualElement _trajectoryMvpSeasonIcon;
     private Label _trajectoryMvpSeasonCount;
+    private Dictionary<string, Sprite> _teamLogos = new();
 
     // Logros
     private VisualElement _trajectoryAwards;
@@ -58,11 +60,12 @@ using System.Linq;
     {
         _trajectoryPhoto = _root.Q<VisualElement>("TrajectoryPhoto");
         _trajectoryPlayerName = _root.Q<Label>("TrajectoryPlayerName");
+        _trajectoryNumber = _root.Q<Label>("TrajectoryNumber");
         _trajectoryPlayerPos = _root.Q<Label>("TrajectoryPlayerPos");
-        _trajectoryRoleName = _root.Q<Label>("TrajectoryRoleName");
-        _trajectoryRoleIcon = _root.Q<VisualElement>("TrajectoryRoleIcon");
-        _trajectoryMeta = _root.Q<Label>("TrajectoryMeta");
-        _trajectoryNationality = _root.Q<Label>("TrajectoryNationality");
+        _trajectoryTeamLogo = _root.Q<VisualElement>("TrajectoryTeamLogo");
+        _trajectoryPlayerTeam = _root.Q<Label>("TrajectoryPlayerTeam");
+        _trajectoryBannerBg = _root.Q<VisualElement>("TrajectoryBannerBg");
+        _btnGoToProfile = _root.Q<Button>("BtnGoToProfile");
         _trajectoryOvr = _root.Q<Label>("TrajectoryOvr");
         _trajectoryRingsIcon = _root.Q<VisualElement>("TrajectoryRingsIcon");
         _trajectoryRingsCount = _root.Q<Label>("TrajectoryRingsCount");
@@ -112,10 +115,20 @@ using System.Linq;
 
         _careerHistory = DatabaseManager.Instance.GetPlayerCareerHistory(playerId, _manager.id);
         _awards = DatabaseManager.Instance.GetPlayerAwards(playerId);
+
+        _teamLogos.Clear();
+        foreach (var s in TeamImages.Logos(64))
+            _teamLogos[s.name] = s;
     }
     protected override void RegisterCallbacks()
     {
         base.RegisterCallbacks();
+        _btnGoToProfile?.RegisterCallback<ClickEvent>(_ =>
+        {
+            if (_player == null) return;
+            PlayClick();
+            ScreenManager.Instance.GoTo(GameScreen.PlayerProfile);
+        });
     }
     protected override void Refresh()
     {
@@ -132,11 +145,27 @@ using System.Linq;
         _trajectoryPlayerName.text = $"{_player.first_name} {_player.last_name}".ToUpper();
         _trajectoryPlayerPos.text = $"{PositionCodes.GetName(_player.position)} · {PositionCodes.GetName(_player.secondary_position)}";
 
-        UpdateRoleIcon(_trajectoryRoleIcon, _player.role);
-        _trajectoryRoleName.text = GetRoleName(_player.role);
+        // Dorsal (oculto si no tiene).
+        _trajectoryNumber.text = _player.number > 0 ? $"#{_player.number}" : "";
+        _trajectoryNumber.style.display = _player.number > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
-        _trajectoryMeta.text = $"{_player.age} años · {_player.height_cm / 100f:F2}m · {_player.weight_kg}kg";
-        _trajectoryNationality.text = CountryCodes.GetName(_player.nationality);
+        // Equipo del jugador (o agente libre) + escudo.
+        var team = DatabaseManager.Instance.GetTeamById(_player.team_id);
+        _trajectoryPlayerTeam.text = team?.name ?? "Agente libre";
+        if (team != null && _teamLogos.TryGetValue(team.logo, out var logoSprite))
+            _trajectoryTeamLogo.style.backgroundImage = new StyleBackground(logoSprite);
+        else
+            _trajectoryTeamLogo.style.backgroundImage = StyleKeyword.None;
+
+        // Imagen del pabellón del equipo como fondo del banner.
+        if (_trajectoryBannerBg != null)
+        {
+            string arenaKey = team?.logo;
+            if (arenaKey == "sixers") arenaKey = "76ers";
+            var arenaSprite = !string.IsNullOrEmpty(arenaKey) ? TeamImages.Arena(arenaKey) : null;
+            if (arenaSprite == null) arenaSprite = TeamImages.Arena("default");
+            _trajectoryBannerBg.style.backgroundImage = arenaSprite != null ? new StyleBackground(arenaSprite) : StyleKeyword.None;
+        }
 
         int ovr = _player.GetCalculatedAverage();
         _trajectoryOvr.text = ovr.ToString();
@@ -345,28 +374,6 @@ using System.Linq;
         lbl.AddToClassList(className);
         lbl.text = text;
         return lbl;
-    }
-
-    static string GetRoleName(PlayerRole role) => role switch
-    {
-        PlayerRole.Estrella => "Estrella",
-        PlayerRole.Titular => "Titular",
-        PlayerRole.Banquillo => "Banquillo",
-        _ => "Último recurso"
-    };
-
-    void UpdateRoleIcon(VisualElement icon, PlayerRole role)
-    {
-        string iconName = role switch
-        {
-            PlayerRole.Estrella => "rol_estrella",
-            PlayerRole.Titular => "rol_titular",
-            PlayerRole.Banquillo => "rol_banquillo",
-            _ => "rol_ultimoRecurso"
-        };
-        var tex = Resources.Load<Texture2D>($"Icons/{iconName}");
-        icon.style.backgroundImage = tex != null ? new StyleBackground(tex) : StyleKeyword.None;
-        icon.tooltip = GetRoleName(role);
     }
 
     static string GetAwardClass(string awardType) => awardType switch

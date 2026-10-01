@@ -1,5 +1,6 @@
 /* ══════════════════════════════════════════
    TRAYECTORIA — Trajectory.uss
+   Estilo basado en PlayerProfile (banner + paneles).
    ══════════════════════════════════════════ */
 
 .trajectory-root {
@@ -27,114 +28,129 @@
     padding: 16px 28px 24px 28px;
 }
 
-/* ── Back button ── */
-.trajectory-back-btn {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgb(42, 95, 201);
-    border-width: 0;
-    color: rgb(255, 255, 255);
-    font-size: 24px;
-    letter-spacing: 2px;
-    -unity-text-transform: uppercase;
-    padding: 10px 18px;
-    margin-bottom: 10px;
-    -unity-text-align: middle-center;
-    flex-shrink: 0;
-}
-.trajectory-back-btn:hover {
-    background-color: rgb(74, 128, 240);
-}
-
-/* ── Cabecera jugador ── */
-.trajectory-header {
-    flex-direction: row;
-    align-items: center;
-    padding: 0 16px;
-    background-color: rgb(28, 33, 48);
+/* ── BANNER (mismo estilo que PlayerProfile) ── */
+.trajectory-banner {
+    position: relative;
+    overflow: hidden;
     border-width: 1px;
     border-color: rgb(42, 51, 71);
     flex-shrink: 0;
 }
 
+.trajectory-banner-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-color: rgb(28, 33, 48);
+}
+
+.trajectory-banner-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(13, 16, 24, 0.72);
+}
+
+.trajectory-banner-inner {
+    flex-direction: row;
+    align-items: center;
+    padding: 16px 24px;
+    position: relative;
+}
+
+.trajectory-banner-right {
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
 .trajectory-photo {
-    width: 100px;
-    height: 100px;
-    border-radius: 50px;
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
     background-color: rgb(200, 200, 200);
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
-    margin-right: 16px;
+    margin-right: 20px;
 }
 
-.trajectory-name-block {
+.trajectory-identity {
     flex-direction: column;
     flex-grow: 1;
     min-width: 0;
 }
 
+.trajectory-name-row {
+    flex-direction: row;
+    align-items: center;
+}
+
 .trajectory-player-name {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 28px;
+    font-size: 34px;
     color: rgb(255, 255, 255);
     text-transform: uppercase;
     -unity-text-align: middle-left;
 }
 
+.trajectory-number {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 20px;
+    color: rgb(100, 150, 230);
+    background-color: rgba(42, 95, 201, 0.15);
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
+    border-radius: 6px;
+    padding: 2px 10px;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
 .trajectory-player-pos {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
+    font-size: 22px;
     color: rgb(212, 160, 23);
-    margin-top: 2px;
+    margin-top: 6px;
 }
 
-.trajectory-role-row {
+.trajectory-team-row {
     flex-direction: row;
     align-items: center;
-    margin-top: 2px;
+    margin-top: 6px;
 }
 
-.trajectory-role-text {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(122, 138, 170);
-}
-
-.trajectory-role-icon {
-    width: 20px;
-    height: 20px;
+.trajectory-team-logo {
+    width: 64px;
+    height: 64px;
+    margin-right: 8px;
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    margin-right: 10px;
+    flex-shrink: 0;
 }
 
-.trajectory-meta {
+.trajectory-player-team {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(122, 138, 170);
-    margin-top: 2px;
+    font-size: 24px;
+    color: rgb(180, 194, 220);
 }
 
-.trajectory-nationality {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 18px;
-    color: rgb(122, 138, 170);
+.trajectory-honors-row {
+    flex-direction: row;
+    align-items: stretch;
 }
 
 .trajectory-honors {
     flex-direction: row;
     align-items: center;
     flex-shrink: 0;
-    margin-right: 32px;
 }
 
 .trajectory-honor-item {
     flex-direction: column;
     align-items: center;
-    margin-right: 20px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-right: 14px;
     padding: 8px 14px;
     border-width: 1px;
     border-color: rgb(42, 95, 201);
@@ -158,29 +174,32 @@
 
 .trajectory-honor-count {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 92px;
+    font-size: 42px;
     color: rgb(212, 160, 23);
 }
 
 .trajectory-honor-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 22px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgb(85, 102, 119);
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    letter-spacing: 2px;
     -unity-text-align: middle-center;
 }
 
 .trajectory-ovr-block {
     flex-direction: column;
     align-items: center;
-    flex-shrink: 0;
-    margin-left: 32px;
+    justify-content: center;
+    padding: 8px 24px;
+    background-color: rgb(22, 26, 36);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: rgb(42, 95, 201);
 }
 
 .trajectory-ovr-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 92px;
+    font-size: 42px;
 }
 
 .trajectory-ovr--high {
@@ -194,46 +213,80 @@
 }
 
 .trajectory-ovr-label {
-    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
-    font-size: 22px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: rgb(85, 102, 119);
-}
-
-/* ── Section label ── */
-.trajectory-section-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 16px;
+    font-size: 18px;
+    color: rgb(122, 138, 170);
+    margin-top: 2px;
     letter-spacing: 2px;
-    color: rgb(85, 102, 119);
-    margin-top: 16px;
-    margin-bottom: 8px;
-    text-transform: uppercase;
 }
 
-/* ── Logros ── */
-.trajectory-awards {
-    flex-direction: column;
-    padding: 12px 16px;
-    background-color: rgb(28, 33, 48);
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
+.trajectory-goto-btn {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    color: rgb(255, 255, 255);
+    background-color: rgba(42, 95, 201, 0.9);
+    border-width: 2px;
+    border-color: rgb(42, 95, 201);
     border-radius: 8px;
+    font-size: 24px;
+    letter-spacing: 2px;
+    -unity-text-transform: uppercase;
+    padding: 10px 18px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 12px;
+}
+
+.trajectory-goto-btn:hover {
+    background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
+}
+
+/* ── PANELES (cabecera estilo PLANTILLA de Entrenamiento) ── */
+.trajectory-panel {
+    flex-direction: column;
+    flex-shrink: 0;
+    margin-top: 16px;
+    background-color: rgb(18, 21, 28);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.trajectory-panel-header {
+    flex-direction: row;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: rgba(120, 95, 30, 0.15);
+    border-bottom-width: 1px;
+    border-bottom-color: rgb(120, 95, 30);
     flex-shrink: 0;
 }
 
+.trajectory-panel-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+}
+
+.trajectory-panel-body {
+    flex-direction: column;
+    padding: 12px 16px;
+}
+
+/* ── Logros ── */
 .trajectory-awards-body {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
 }
 
 .trajectory-award-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
     padding: 4px 12px;
+    margin: 0 8px 8px 0;
     border-radius: 4px;
     -unity-text-align: middle-center;
     white-space: nowrap;
@@ -329,9 +382,8 @@
     background-color: rgb(28, 33, 48);
     border-width: 1px;
     border-color: rgb(42, 51, 71);
+    border-radius: 4px;
     overflow: hidden;
-    flex-grow: 1;
-    min-height: 0;
 }
 
 .trajectory-table-header {
@@ -508,10 +560,6 @@
 }
 
 /* ── HITOS DE CARRERA (E1) ── */
-.trajectory-milestones {
-    flex-direction: column;
-    margin-top: 14px;
-}
 .trajectory-milestones-body {
     flex-direction: row;
     flex-wrap: wrap;
