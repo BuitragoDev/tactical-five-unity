@@ -244,6 +244,7 @@
 .playerprofile-stats-grid {
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 /* El panel de estadísticas conserva el alto del panel base: centra las tarjetas
