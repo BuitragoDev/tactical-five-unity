@@ -47,7 +47,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
 
 ## 4. Controller pattern — `UIScreenController` base
 
-**[F] All 47 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:
+**[F] All 48 screen controllers inherit `UIScreenController`** (base in `Scripts/Core/UIScreenController.cs`, 575 ln). The base centralizes:
 
 ```csharp
 protected virtual void OnEnable()
@@ -79,7 +79,7 @@ protected virtual void OnEnable()
 - **Callback lifecycle [F, corregido]:** las pantallas se desactivan con `SetActive(false)` pero no se destruyen. **En Unity 6 `UIDocument.OnDisable()` anula `rootVisualElement` y `OnEnable` vuelve a construir el árbol, así que los handlers NO se acumulan entre visitas.** El riesgo real es re-bindear *dentro* de una misma visita al reconstruir listas (resuelto con `ScrollBarBinder`, `UI-04`).
 - `BtnActionTarget` is never overridden; `OnBtnActionClicked` overridden by `CalendarController` and `DashboardController`.
 
-## 5. Screens inventory (43 en esta tabla; 47 en el enum)
+## 5. Screens inventory (44 en esta tabla; 48 en el enum)
 
 | # | Screen | UXML folder | Controller | Notes |
 |---|---|---|---|---|
@@ -129,9 +129,10 @@ protected virtual void OnEnable()
 | 44 | TheCity | `Screens/TheCity` | `TheCityController` | Mapa/ciudad con burbujas de acceso directo (hospital, pabellón, entrenamiento, clasificación, empleados, finanzas, prensa, estadísticas, palmarés). **GameObject `TheCity` (sin sufijo `Document`)** |
 | 45 | Buscador | `Screens/Buscador` | `BuscadorController` | Buscador de jugadores: filtros posición/edad/equipo/OVR/solo FA, orden por columna y scrollbar propia |
 | 46 | GLeague | `Screens/GLeague` | `GLeagueController` | G-League con 4 pestañas: PLANTILLA (plantilla completa de la filial — prospectos + asignados NBA — con RECUPERAR en los asignados, y elegibles), RESULTADOS (la tabla de partidos del filial por fecha), CLASIFICACIÓN (Este/Oeste, corte playoff) y ESTADÍSTICAS (top-5 promedios); reutiliza clases de Stats.uss y Standings.uss |
+| 48 | Hilos | `Screens/Hilos` | `HilosController` | Hilos narrativos de la temporada (movido desde la pestaña HISTORIA de Palmarés); submenú ACTUALIDAD |
 | 47 | Rotation | `Screens/Rotation` | `RotationController` | **ROTACIÓN** (submenu PLANTILLA, tras QUINTETO): reparto de los 240 minutos del partido entre los 12 convocados. Slider por jugador (0-48) + columnas POS / ROL / MED / MIN / SUG. (heurística `GameSimulator.GetSuggestedMinutes`), panel de solo lectura MINUTOS POR POSICIÓN (principal/secundaria), contador de minutos restantes y botones AUTO (240) / RESET (todo a 0). Los sliders nunca permiten pasar de 240 min en total (`CustomSlider.MaxValue`): con el reparto completo (o excedido) cada barra solo puede bajar hasta que alguien libere minutos. Se persiste en `team_lineup.rotation_minutes` (`-1` = automático) y el simulador lo usa como `target_minutes` en `PrepareRotationMetadata`, **vinculante** para tu equipo vía `PickSubstitution` (suelo 8 min; 0 = no juega) |
 
-> **Nota de conteo (verificado contra `GameEnums.cs`):** la tabla lista los **47 valores** de `GameScreen` (incluye `Rotation`, la última). Las referencias a "41 pantallas" en otros documentos son históricas y están actualizadas en este pase.
+> **Nota de conteo (verificado contra `GameEnums.cs`):** la tabla lista los **48 valores** de `GameScreen` (incluye `Rotation`, la última). Las referencias a "41 pantallas" en otros documentos son históricas y están actualizadas en este pase.
 
 **Sidebar navigation (verified, `SidebarController.cs:15-45`):**
 - **INICIO** → Dashboard
@@ -144,7 +145,7 @@ protected virtual void OnEnable()
 - **FINANZAS** (FinanceSubmenu) → Decisiones (Finances), Préstamos (Loans), Patrocinadores (Sponsors), Televisión (TV)
 - **PABELLÓN** → Arena
 - **MANAGER** (ManagerSubmenu) → Manager, Logros
-- **NOTICIAS** → Messages
+- **ACTUALIDAD** (submenu) → NOTICIAS (Messages) · HILOS (Hilos)
 
 ## 6. Navigation tree
 

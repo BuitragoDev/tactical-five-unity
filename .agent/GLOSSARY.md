@@ -85,7 +85,7 @@
 |---|---|---|
 | `ScreenManager` | `Scripts/Core/ScreenManager.cs` | Navigation singleton |
 | `DatabaseManager` | `Scripts/Data/DatabaseManager.cs` (9 partials) | DB singleton (facade + seed + migrations) |
-| `UIScreenController` | `Scripts/Core/UIScreenController.cs` | Base class for all 47 screen controllers (chrome, nav, config modal) |
+| `UIScreenController` | `Scripts/Core/UIScreenController.cs` | Base class for all 48 screen controllers (chrome, nav, config modal) |
 | `AchievementService` / `AchievementCatalog` | `Scripts/Core/*` | 28 GM achievements + toast queue |
 | `AdvancedStatsHelper` / `FogOfWarHelper` / `HallOfFameHelper` / `MatchupPreview` / `ObjectiveHelper` | `Scripts/Stats/*` | Analytics, scouting fog, HOF, match forecast, objective logic |
 | `GameSaveManager` | `Scripts/Data/GameSaveManager.cs` | Save slots & template |

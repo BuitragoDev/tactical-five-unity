@@ -6,7 +6,7 @@
 >
 > - **Auditoría realizada sobre:** `main` @ `d565623e` (post-merge de `minutos-ui`).
 > - **Rama de trabajo de la auditoría:** `auditoria-final`.
-> - **Alcance:** 152 archivos `.cs` (~62.400 líneas), 85 tests EditMode, 47 pantallas, 1 escena, 9 partials de `DatabaseManager`.
+> - **Alcance:** 152 archivos `.cs` (~62.400 líneas), 85 tests EditMode, 48 pantallas, 1 escena, 9 partials de `DatabaseManager`.
 > - **Nota sobre líneas:** todas las referencias `archivo:línea` corresponden al commit auditado. Si el código se mueve, **vuelve a localizar por grep** antes de tocar (los IDs y descripciones siguen valiendo).
 
 ---
@@ -96,11 +96,11 @@
 ## 2. Arquitectura actual y dependencias
 
 ```
-UI Toolkit (47 UIDocument, 1 escena MainMenu.unity)
+UI Toolkit (48 UIDocument, 1 escena MainMenu.unity)
   ScreenManager.GoTo(GameScreen) → ShowOnly() (SetActive x47)
   UIScreenController (base) → OnEnable: MakeFullscreen → CacheReferences → LoadData → RegisterCallbacks → Refresh
         │
-        ├── 47 controllers delgados (toda la lógica de UI en OnEnable)
+        ├── 48 controllers delgados (toda la lógica de UI en OnEnable)
         │
 LÓGICA (static puro)                          SINGLETONS
   GameSimulator (posesiones, ~1230 ln)          ScreenManager

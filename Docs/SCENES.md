@@ -7,7 +7,7 @@
 ## 1. `MainMenu.unity`
 
 ### Objective
-Host the entire game: boot/loading, menus, and all 47 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
+Host the entire game: boot/loading, menus, and all 48 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
 
 ### Root GameObjects (49; 50 con `RotationDocument`)
 
@@ -21,7 +21,7 @@ Host the entire game: boot/loading, menus, and all 47 management screens as iner
 
 **[F] 44 documents carry `FullScreenUI`; `SelectTeamDocument` and `PreseasonDocument` do not** (they render full-screen via UXML/controller logic only).
 
-### Screen documents (47 en `GameScreen`; 46 creados en la escena)
+### Screen documents (48 en `GameScreen`; 47 creados en la escena)
 
 | Document GO | Controller |
 |---|---|
@@ -72,6 +72,7 @@ Host the entire game: boot/loading, menus, and all 47 management screens as iner
 | NewSeasonDocument | NewSeasonController |
 | QuintosDocument | QuintosController |
 | GLeagueDocument | GLeagueController |
+| HilosDocument | HilosController |
 
 ### Serialization notes
 - `ScreenManager` has **one serialized `UIDocument` field per `GameScreen` value** (all have cases in `GoTo` — no dead enum values).

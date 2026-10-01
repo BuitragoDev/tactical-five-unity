@@ -47,7 +47,8 @@ public static class SidebarController
         new() { screen = GameScreen.Arena,       navName = "NavCity",     submenuName = "CitySubmenu",     submenuItemName = "SubmenuPabellon" },
         new() { screen = GameScreen.Manager,     navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuManager" },
         new() { screen = GameScreen.Logros,      navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuLogros" },
-        new() { screen = GameScreen.Messages,    navName = "NavMessages" },
+        new() { screen = GameScreen.Messages,    navName = "NavActualidad", submenuName = "ActualidadSubmenu", submenuItemName = "SubmenuNoticias" },
+        new() { screen = GameScreen.Hilos,       navName = "NavActualidad", submenuName = "ActualidadSubmenu", submenuItemName = "SubmenuHilos" },
     };
 
     static VisualTreeAsset _sidebarTemplate;
@@ -92,7 +93,7 @@ public static class SidebarController
             {
                 "NavDashboard", "NavRoster", "NavCalendar", "NavCompeticiones",
                 "NavPalmares", "NavPlayoffs", "NavStats",
-                "NavMarket", "NavFinances", "NavCity", "NavManager", "NavMessages",
+                "NavMarket", "NavFinances", "NavCity", "NavManager", "NavActualidad",
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuRotacion", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados", "SubmenuDorsales",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
@@ -102,6 +103,7 @@ public static class SidebarController
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
                 "SubmenuVerCiudad", "SubmenuPabellon",
                 "SubmenuManager", "SubmenuLogros",
+                "SubmenuNoticias", "SubmenuHilos",
             };
             foreach (var name in cursorNames)
             {
@@ -172,7 +174,7 @@ public static class SidebarController
             {"NavFinancesIcon", "finanzas"},
             {"NavCityIcon", "ciudad"},
             {"NavManagerIcon", "manager"},
-            {"NavMessagesIcon", "mensajes"},
+            {"NavActualidadIcon", "mensajes"},
         };
 
         foreach (var kv in iconMap)
