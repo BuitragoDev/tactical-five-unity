@@ -494,10 +494,10 @@
     white-space: nowrap;
 }
 
-/* Cuerpo de la tabla con barra propia: alto fijo ~8 filas, la cabecera queda fuera y fija. */
+/* Cuerpo de la tabla con barra propia: alto fijo, la cabecera queda fuera y fija. */
 .trajectory-table-body-scroll {
     flex-shrink: 0;
-    height: 272px;
+    height: 200px;
 }
 
 .trajectory-scroll-row {
