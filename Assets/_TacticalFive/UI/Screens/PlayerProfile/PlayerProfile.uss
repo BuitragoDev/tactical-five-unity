@@ -460,10 +460,10 @@
 
 .playerprofile-attr-badge {
     width: 93px;
-    background-color: rgb(39, 174, 96);
+    background-color: rgb(30, 130, 72);
     border-radius: 8px;
     border-width: 2px;
-    border-color: rgb(28, 130, 72);
+    border-color: rgb(20, 90, 50);
     padding: 8px 4px;
     margin: 0 8px 8px 0;
     flex-direction: column;
@@ -471,8 +471,8 @@
 }
 
 .playerprofile-attr-badge--mid {
-    background-color: rgb(212, 160, 23);
-    border-color: rgb(160, 120, 17);
+    background-color: rgb(160, 120, 17);
+    border-color: rgb(115, 85, 10);
 }
 
 .playerprofile-attr-badge--low {
