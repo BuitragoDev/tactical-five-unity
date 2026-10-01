@@ -61,6 +61,7 @@ public class ScreenManager : MonoBehaviour
     [SerializeField] private UIDocument buscadorDocument;
     [SerializeField] private UIDocument gleagueDocument;
     [SerializeField] private UIDocument hilosDocument;
+    [SerializeField] private UIDocument rivalidadesDocument;
 
     public static int SelectedPlayerId { get; set; }
 
@@ -274,6 +275,9 @@ public class ScreenManager : MonoBehaviour
             case GameScreen.Hilos:
                 ShowOnly(hilosDocument);
                 break;
+            case GameScreen.Rivalidades:
+                ShowOnly(rivalidadesDocument);
+                break;
         }
     }
 
@@ -336,6 +340,7 @@ public class ScreenManager : MonoBehaviour
         if (buscadorDocument != null) buscadorDocument.gameObject.SetActive(false);
         if (gleagueDocument != null) gleagueDocument.gameObject.SetActive(false);
         if (hilosDocument != null) hilosDocument.gameObject.SetActive(false);
+        if (rivalidadesDocument != null) rivalidadesDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }

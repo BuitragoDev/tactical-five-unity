@@ -48,7 +48,7 @@ User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()
 
 ## 4. Technical architecture in one paragraph
 
-- **One scene, zero prefabs, zero game ScriptableObjects.** All UI is **UI Toolkit** (`UIDocument` per screen, **48 screens**) instantiated in the scene `MainMenu.unity`; `ScreenManager` (singleton) shows/hides GameObjects to navigate. No `SceneManager.LoadScene` anywhere.
+- **One scene, zero prefabs, zero game ScriptableObjects.** All UI is **UI Toolkit** (`UIDocument` per screen, **49 screens**) instantiated in the scene `MainMenu.unity`; `ScreenManager` (singleton) shows/hides GameObjects to navigate. No `SceneManager.LoadScene` anywhere.
 - **Persistence is SQLite** (bundled `sqlite-net` `SQLite.cs` + native plugin `Assets/Plugins/SQLite/{x86_64,Linux/x86_64}`) behind the `DatabaseManager` singleton (**split into 9 partial classes by domain**; main file ~968 lines). One `.db` file per save slot under `persistentDataPath/TacticalFive/`. **Heavy batches run off the main thread** via `RunInBackground`/`RunInBackgroundAsync` with WAL + a per-thread `AsyncLocal` "ambient" connection.
 - **Simulation core** lives in static utility classes: `GameSimulator`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `TradeHelper`, `QuickNewsGenerator`, `ObjectiveHelper`, `MatchupPreview`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`.
 - **UI is procedural**: controllers extend the `UIScreenController` base class; tables/rows are built by hand (no `ListView`); header and sidebar are injected at runtime from `Resources/UI/Core/`.
@@ -64,7 +64,7 @@ Assets/_TacticalFive/
     Data/      DatabaseManager (partials ×9), GameSaveManager, SQLite, Constants,
                LeagueSettings, SaveSlotInfo + ~45 table model classes + seeders
     Stats/     AdvancedStatsHelper, FogOfWarHelper, HallOfFameHelper, MatchupPreview
-    UI/        48 screen controllers + CustomSlider (all inherit UIScreenController in Core)
+    UI/        49 screen controllers + CustomSlider (all inherit UIScreenController in Core)
     (root)     GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper, ObjectiveHelper
   Scenes/      MainMenu.unity  (the only scene)
   UI/
@@ -85,7 +85,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 | Fact | Reference |
 |---|---|
 | Only one scene in build: `MainMenu.unity` | `ProjectSettings/EditorBuildSettings.asset` |
-| Navigation = `ScreenManager.GoTo(GameScreen, GameMode)` toggling `UIDocument` GameObjects; **48 screens, all wired** | `ScreenManager.cs:83-215` |
+| Navigation = `ScreenManager.GoTo(GameScreen, GameMode)` toggling `UIDocument` GameObjects; **49 screens, all wired** | `ScreenManager.cs:83-215` |
 | All persistence through `DatabaseManager.Instance` (SQLite) | `DatabaseManager.cs` |
 | Save slots = `save_{n}.db` + `saves.json`; template = `template.db`; **schema versioned** (`schema_migrations` + `PRAGMA user_version = 2`) | `GameSaveManager.cs`, `DatabaseManager.cs:286` |
 | Salary cap / aprons constants (2025-26) in `TradeHelper.cs`; caps grow +5%/season | `TradeHelper.cs:7-14`, `StartNewSeason` |
@@ -93,7 +93,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 | `overall` is intended to derive from 11 attributes and `potential`, but current integer division and mentoring make the invariant imperfect | `PlayerData.cs`, `DatabaseManager.Records.cs` |
 | No C# event bus — cross-controller communication via DB, `GameResultCache` statics, `PlayerPrefs`, and `ScreenManager` static state | `EVENTS.md` |
 | Audio/volumes/graphics persisted in `PlayerPrefs` keys `TF_Audio_*`, `TF_Graphics_Quality`, `TF_SimMode`, `TF_PbpSpeed`, `TF_LoadMgmt_Enabled` | `AudioManager.cs`, `UIScreenController.cs`, `MatchDayController.cs` |
-| All 48 screen controllers inherit `UIScreenController` (base: fullscreen, header/sidebar injection, nav, config modal, sim-mode toggle) | `UIScreenController.cs` |
+| All 49 screen controllers inherit `UIScreenController` (base: fullscreen, header/sidebar injection, nav, config modal, sim-mode toggle) | `UIScreenController.cs` |
 
 ## 7. Critical systems (deep links)
 
@@ -106,7 +106,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 
 ## 8. State of development (observed)
 
-- Very mature feature set (48 screens, full season cycle, records/awards/HOF/retired numbers, finances, personnel, morale, injuries, draft, playoffs, GM achievements, play-by-play).
+- Very mature feature set (49 screens, full season cycle, records/awards/HOF/retired numbers, finances, personnel, morale, injuries, draft, playoffs, GM achievements, play-by-play).
 - Branding/labels: product "TacticalFive", company "BuitragoStudio", version `v1.0.0 Beta`.
 - Current audit commit: `81d9e4f` (merge de `crear-mejoras2`, 2026-08-16), containing the feature set below.
 - **Features landed in the 2026-09 audit branch (`auditoria-final`):** rotation binding (`team_lineup.rotation_minutes`), G-League as a full league (30 affiliates + playoffs), play-by-play/pronóstico ya existentes, narrativa v2, plan de partido, staff con esquemas, progresión por edad/potencial, scouting con riesgo, negociación de agente, DPOY/6º hombre en `season_records`, export/import de partidas.

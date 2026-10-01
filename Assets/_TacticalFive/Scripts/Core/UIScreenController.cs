@@ -280,6 +280,12 @@ public class UIScreenController : MonoBehaviour
             _root.Q<VisualElement>("ActualidadSubmenu")?.RemoveFromClassList("nav-submenu--visible");
             ScreenManager.Instance.GoTo(GameScreen.Hilos);
         });
+        _root.Q<Button>("SubmenuRivalidades")?.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _root.Q<VisualElement>("CompetitionsSubmenu")?.RemoveFromClassList("nav-submenu--visible");
+            ScreenManager.Instance.GoTo(GameScreen.Rivalidades);
+        });
     }
 
     protected virtual void Refresh()

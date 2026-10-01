@@ -49,6 +49,7 @@ public static class SidebarController
         new() { screen = GameScreen.Logros,      navName = "NavManager", submenuName = "ManagerSubmenu", submenuItemName = "SubmenuLogros" },
         new() { screen = GameScreen.Messages,    navName = "NavActualidad", submenuName = "ActualidadSubmenu", submenuItemName = "SubmenuNoticias" },
         new() { screen = GameScreen.Hilos,       navName = "NavActualidad", submenuName = "ActualidadSubmenu", submenuItemName = "SubmenuHilos" },
+        new() { screen = GameScreen.Rivalidades, navName = "NavCompeticiones", submenuName = "CompetitionsSubmenu", submenuItemName = "SubmenuRivalidades" },
     };
 
     static VisualTreeAsset _sidebarTemplate;
@@ -97,7 +98,7 @@ public static class SidebarController
                 "SubmenuJugadores", "SubmenuQuinteto", "SubmenuRotacion", "SubmenuEntrenamiento",
                 "SubmenuEmpleados", "SubmenuLesionados", "SubmenuDorsales",
                 "SubmenuResultados", "SubmenuClasificacion", "SubmenuInfoLiga",
-                "SubmenuBuscador", "SubmenuGLeague",
+                "SubmenuBuscador", "SubmenuGLeague", "SubmenuRivalidades",
                 "SubmenuPalmares", "SubmenuRecords", "SubmenuPremios",
                 "SubmenuOfertas", "SubmenuCartera", "SubmenuHistorial",
                 "SubmenuDecisiones", "SubmenuPrestamos", "SubmenuSponsors", "SubmenuTV",
