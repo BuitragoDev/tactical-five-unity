@@ -495,8 +495,8 @@
 }
 
 .playerprofile-trajectory-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
-    color: rgb(150, 190, 255);
+    background-color: rgb(42, 95, 201);
+    color: rgb(255, 255, 255);
 }
 
 /* Attributes locked (dentro del panel de atributos) */
