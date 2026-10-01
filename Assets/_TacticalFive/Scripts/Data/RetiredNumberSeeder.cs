@@ -1,85 +1,90 @@
 using System.Collections.Generic;
-using System.Linq;
 
+/// <summary>
+/// Dorsales retirados de leyendas históricas, por franquicia. Cada entrada lleva la
+/// abreviatura del equipo explícita (no depende de que la leyenda esté en el Salón de la
+/// Fama), de modo que el dorsal se siembra siempre en la franquicia correcta.
+/// Se combina con <see cref="VeteranRetiredNumberSeeder"/> (veteranos activos).
+/// </summary>
 public static class RetiredNumberSeeder
 {
-    public static List<(string FirstName, string LastName, int Number)> Data => new()
+    public static List<(string FirstName, string LastName, string Abbreviation, int Number)> Data => new()
     {
         // BOS
-        ("Larry", "Bird", 33),
-        ("John", "Havlicek", 17),
-        ("Bob", "Cousy", 14),
-        ("Kevin", "McHale", 32),
-        ("Paul", "Pierce", 34),
+        ("Larry", "Bird", "BOS", 33),
+        ("John", "Havlicek", "BOS", 17),
+        ("Bob", "Cousy", "BOS", 14),
+        ("Kevin", "McHale", "BOS", 32),
+        ("Paul", "Pierce", "BOS", 34),
         // LAL
-        ("Kareem", "Abdul-Jabbar", 33),
-        ("Kobe", "Bryant", 24),
-        ("Wilt", "Chamberlain", 13),
-        ("Jerry", "West", 44),
-        ("George", "Mikan", 99),
-        ("Shaquille", "O'Neal", 34),
-        ("Elgin", "Baylor", 22),
+        ("Kareem", "Abdul-Jabbar", "LAL", 33),
+        ("Kobe", "Bryant", "LAL", 24),
+        ("Wilt", "Chamberlain", "LAL", 13),
+        ("Jerry", "West", "LAL", 44),
+        ("George", "Mikan", "LAL", 99),
+        ("Shaquille", "O'Neal", "LAL", 34),
+        ("Elgin", "Baylor", "LAL", 22),
         // CHI
-        ("Michael", "Jordan", 23),
-        ("Scottie", "Pippen", 33),
-        ("Dennis", "Rodman", 91),
-        ("Artis", "Gilmore", 53),
+        ("Michael", "Jordan", "CHI", 23),
+        ("Scottie", "Pippen", "CHI", 33),
+        ("Dennis", "Rodman", "CHI", 91),
+        ("Artis", "Gilmore", "CHI", 53),
         // DET
-        ("Isiah", "Thomas", 11),
-        ("Joe", "Dumars", 4),
-        ("Chauncey", "Billups", 1),
-        ("Grant", "Hill", 32),
-        ("Ben", "Wallace", 3),
+        ("Isiah", "Thomas", "DET", 11),
+        ("Joe", "Dumars", "DET", 4),
+        ("Chauncey", "Billups", "DET", 1),
+        ("Grant", "Hill", "DET", 32),
+        ("Ben", "Wallace", "DET", 3),
         // PHI
-        ("Julius", "Erving", 6),
-        ("Hal", "Greer", 15),
-        ("Billy", "Cunningham", 32),
-        ("Moses", "Malone", 2),
+        ("Julius", "Erving", "PHI", 6),
+        ("Hal", "Greer", "PHI", 15),
+        ("Billy", "Cunningham", "PHI", 32),
+        ("Moses", "Malone", "PHI", 2),
         // NYK
-        ("Patrick", "Ewing", 33),
-        ("Willis", "Reed", 19),
-        ("Walter", "Frazier", 10),
-        ("Earl", "Monroe", 15),
+        ("Patrick", "Ewing", "NYK", 33),
+        ("Willis", "Reed", "NYK", 19),
+        ("Walter", "Frazier", "NYK", 10),
+        ("Earl", "Monroe", "NYK", 15),
         // PRT
-        ("Clyde", "Drexler", 22),
-        ("Bill", "Walton", 32),
+        ("Clyde", "Drexler", "PRT", 22),
+        ("Bill", "Walton", "PRT", 32),
         // MIA
-        ("Dwyane", "Wade", 3),
-        ("Alonzo", "Mourning", 33),
+        ("Dwyane", "Wade", "MIA", 3),
+        ("Alonzo", "Mourning", "MIA", 33),
         // SAS
-        ("David", "Robinson", 50),
-        ("Tony", "Parker", 9),
-        ("Manu", "Ginóbili", 20),
+        ("David", "Robinson", "SAS", 50),
+        ("Tony", "Parker", "SAS", 9),
+        ("Manu", "Ginóbili", "SAS", 20),
         // HOU
-        ("Hakeem", "Olajuwon", 34),
-        ("Yao", "Ming", 11),
+        ("Hakeem", "Olajuwon", "HOU", 34),
+        ("Yao", "Ming", "HOU", 11),
         // DAL
-        ("Dirk", "Nowitzki", 41),
+        ("Dirk", "Nowitzki", "DAL", 41),
         // IND
-        ("Reggie", "Miller", 31),
+        ("Reggie", "Miller", "IND", 31),
         // MIN
-        ("Kevin", "Garnett", 21),
+        ("Kevin", "Garnett", "MIN", 21),
         // ORL
-        ("Dwight", "Howard", 12),
-        ("Tracy", "McGrady", 1),
+        ("Dwight", "Howard", "ORL", 12),
+        ("Tracy", "McGrady", "ORL", 1),
         // BKN
-        ("Jason", "Kidd", 5),
-        ("Dražen", "Petrović", 3),
+        ("Jason", "Kidd", "BKN", 5),
+        ("Dražen", "Petrović", "BKN", 3),
         // TOR
-        ("Vince", "Carter", 15),
-        ("Chris", "Bosh", 1),
+        ("Vince", "Carter", "TOR", 15),
+        ("Chris", "Bosh", "TOR", 1),
         // SAC
-        ("Oscar", "Robertson", 14),
-        ("Chris", "Webber", 4),
-        ("Vlade", "Divac", 21),
+        ("Oscar", "Robertson", "SAC", 14),
+        ("Chris", "Webber", "SAC", 4),
+        ("Vlade", "Divac", "SAC", 21),
         // UTA
-        ("Karl", "Malone", 32),
-        ("Pete", "Maravich", 7),
+        ("Karl", "Malone", "UTA", 32),
+        ("Pete", "Maravich", "UTA", 7),
         // PHX
-        ("Steve", "Nash", 13),
+        ("Steve", "Nash", "PHX", 13),
         // GSW
-        ("Rick", "Barry", 24),
+        ("Rick", "Barry", "GSW", 24),
         // MEM
-        ("Marc", "Gasol", 33),
+        ("Marc", "Gasol", "MEM", 33),
     };
 }

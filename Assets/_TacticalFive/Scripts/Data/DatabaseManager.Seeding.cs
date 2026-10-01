@@ -96,23 +96,25 @@ public partial class DatabaseManager
         Add(13,  "ATL", "Zuby",     "Ejiofor",          "PF", 21, "NGA", 203,  78, 68, 78, 60, 72, 68, 70, 74, 76, 74, 74, 70, 64, 68,  3800000, 4, true,  0, 0, 0, 0);
         Add(14,  "ATL", "Henri",    "Veesaar",          "C",  22, "EST", 213,  78, 68, 82, 72, 74, 70, 70, 76, 70, 66, 68, 72, 66, 68,  2000000, 4, true,  0, 0, 0, 0);
 
-        // ── BOS ── 15 jugadores
+        // ── BOS ── 17 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA                      A FM FP MV
-        Add(15, "BOS", "Jayson",    "Tatum",            "PF", 28, "USA", 203,  95, 94, 96, 97, 99, 99, 91, 96, 94, 88, 96, 99, 94, 75, 54100000, 4, false, 1, 0, 2, 0);
-        Add(16, "BOS", "Paul",      "George",           "SF", 36, "USA", 206, 100, 86, 87, 89, 91, 89, 87, 84, 84, 74, 96, 91, 87, 68, 35000000, 2, false, 0, 0, 0, 0);
-        Add(17, "BOS", "Derrick",   "White",            "PG", 32, "USA", 193,  86, 89, 90, 91, 94, 91, 91, 96, 74, 84, 96, 94, 79, 85, 28100000, 3, false, 1, 0, 2, 0);
-        Add(18, "BOS", "Payton",    "Pritchard",        "PG", 28, "USA", 185,  88, 84, 90, 84, 94, 84, 89, 83, 78, 84, 89, 74, 74, 74,  7200000, 3, false, 1, 0, 2, 0);
-        Add(19, "BOS", "Sam",       "Hauser",           "SF", 28, "USA", 201,  98, 80, 88, 79, 99, 74, 69, 79, 84, 79, 89, 77, 77, 62, 10000000, 4, false, 1, 0, 2, 0);
-        Add(20, "BOS", "Neemias",   "Queta",            "C",  27, "PRT", 213, 111, 81, 84, 79, 59, 74, 74, 91, 94, 84, 84, 89, 89, 65, 11000000, 4, false, 1, 0, 1, 0);
-        Add(21, "BOS", "Mike",      "Conley",           "PG", 38, "USA", 185,  79, 79, 78, 79, 91, 94, 84, 79, 64, 64, 99, 77, 74, 72, 10000000, 1, false, 0, 0, 0, 0);
-        Add(22, "BOS", "Mitchell",  "Robinson",         "C",  28, "USA", 213, 111, 82, 85, 84, 54, 74, 69, 99, 99, 94, 84, 82, 84, 99, 14000000, 3, false, 1, 0, 1, 0);
-        Add(23, "BOS", "Jordan",    "Walsh",            "SF", 22, "USA", 201,  93, 78, 82, 74, 64, 69, 74, 89, 79, 91, 74, 81, 79, 78,  2200000, 2, false, 1, 0, 1, 0);
-        Add(24, "BOS", "Baylor",    "Scheierman",       "SG", 25, "USA", 198,  92, 77, 84, 74, 89, 74, 69, 74, 74, 74, 84, 81, 80, 62,  2600000, 2, false, 0, 0, 0, 0);
-        Add(26, "BOS", "Hugo",      "Gonzalez",         "SF", 20, "ESP", 198,  91, 76, 88, 79, 69, 84, 79, 69, 94, 89, 74, 69, 66, 76,  2200000, 4, false, 0, 0, 0, 0);
-        Add(27, "BOS", "Luka",      "Garza",            "C",  27, "USA", 208, 110, 75, 84, 84, 91, 79, 74, 64, 74, 64, 84, 74, 73, 74,  2300000, 1, false, 0, 0, 0, 0);
-        Add(30, "BOS", "Ron",       "Harper Jr.",       "SF", 26, "USA", 198, 111, 74, 84, 74, 84, 64, 69, 69, 74, 79, 74, 74, 74, 62,  1200000, 2, false, 0, 0, 0, 0);
-        Add(31, "BOS", "Chris",     "Cenac Jr.",        "PF", 21, "USA", 208, 102, 73, 88, 84, 64, 69, 69, 69, 79, 74, 69, 79, 78, 58,  3500000, 4, true,  0, 0, 0, 0);
-        Add(32, "BOS", "Dillon",    "Mitchell",         "SF", 22, "USA", 203,  93, 72, 89, 79, 79, 64, 69, 84, 79, 91, 74, 72, 62, 58,  2000000, 2, true,  0, 0, 0, 0);
+        Add(15, "BOS", "Jayson",    "Tatum",            "PF", 28, "USA", 203,  95, 94, 96, 97, 99, 99, 91, 96, 94, 88, 96, 99, 94, 75, 58000000, 4, false, 1, 0, 2, 0);
+        Add(16, "BOS", "Paul",      "George",           "SF", 36, "USA", 206, 100, 86, 87, 89, 91, 89, 87, 84, 84, 74, 96, 91, 87, 68, 54000000, 2, false, 0, 0, 0, 0);
+        Add(17, "BOS", "Derrick",   "White",            "PG", 32, "USA", 193,  86, 89, 90, 91, 94, 91, 91, 96, 74, 84, 96, 94, 79, 85, 30100000, 3, false, 1, 0, 2, 0);
+        Add(18, "BOS", "Payton",    "Pritchard",        "PG", 28, "USA", 185,  88, 84, 90, 84, 94, 84, 89, 83, 78, 84, 89, 74, 74, 74,  7200000, 2, false, 1, 0, 2, 0);
+        Add(19, "BOS", "Sam",       "Hauser",           "SF", 28, "USA", 201,  98, 80, 88, 79, 99, 74, 69, 79, 84, 79, 89, 77, 77, 62, 10000000, 3, false, 1, 0, 2, 0);
+        Add(20, "BOS", "Neemias",   "Queta",            "C",  27, "PRT", 213, 111, 81, 84, 79, 59, 74, 74, 91, 94, 84, 84, 89, 89, 65,  2600000, 1, false, 1, 0, 1, 0);
+        Add(21, "BOS", "Mike",      "Conley",           "PG", 38, "USA", 185,  79, 79, 78, 79, 91, 94, 84, 79, 64, 64, 99, 77, 74, 72,  3800000, 1, false, 0, 0, 0, 0);
+        Add(22, "BOS", "Mitchell",  "Robinson",         "C",  28, "USA", 213, 111, 82, 85, 84, 54, 74, 69, 99, 99, 94, 84, 82, 84, 99, 15100000, 3, false, 1, 0, 1, 0);
+        Add(23, "BOS", "Jordan",    "Walsh",            "SF", 22, "USA", 201,  93, 78, 82, 74, 64, 69, 74, 89, 79, 91, 74, 81, 79, 78,  2200000, 1, false, 1, 0, 1, 0);
+        Add(24, "BOS", "Baylor",    "Scheierman",       "SG", 25, "USA", 198,  92, 77, 84, 74, 89, 74, 69, 74, 74, 74, 84, 81, 80, 62,  2600000, 1, false, 0, 0, 0, 0);
+        Add(26, "BOS", "Hugo",      "Gonzalez",         "SF", 20, "ESP", 198,  91, 76, 88, 79, 69, 84, 79, 69, 94, 89, 74, 69, 66, 76,  2900000, 4, false, 0, 0, 0, 0);
+        Add(27, "BOS", "Luka",      "Garza",            "C",  27, "USA", 208, 110, 75, 84, 84, 91, 79, 74, 64, 74, 64, 84, 74, 73, 74,  2800000, 1, false, 0, 0, 0, 0);
+        Add(30, "BOS", "Ron",       "Harper Jr.",       "SF", 26, "USA", 198, 111, 74, 84, 74, 84, 64, 69, 69, 74, 79, 74, 74, 74, 62,  3200000, 3, false, 0, 0, 0, 0);
+        Add(405,"BOS", "Devin",     "Carter",           "PG", 24, "USA", 188,  86, 77, 79, 81, 79, 81, 81, 87, 79, 84, 81, 84, 26, 58,  2400000, 1, false, 0, 0, 0, 0);
+        Add(28, "BOS", "Amari",     "Williams",         "C",  24, "GBR", 211, 113, 71, 79, 71, 65, 52, 67, 59, 77, 89, 85, 77, 58, 81,   700000, 1, false, 0, 0, 0, 0);
+        Add(31, "BOS", "Chris",     "Cenac Jr.",        "PF", 21, "USA", 208, 102, 73, 88, 84, 64, 69, 69, 69, 79, 74, 69, 79, 78, 58,  2900000, 4, true,  0, 0, 0, 0);
+        Add(32, "BOS", "Dillon",    "Mitchell",         "SF", 22, "USA", 203,  93, 72, 89, 79, 79, 64, 69, 84, 79, 91, 74, 72, 62, 58,   700000, 1, true,  0, 0, 0, 0);
 
         // ── BKN ── 15 jugadores
         // ----------------------------------------------------------------------- OV  PO  VE  2P  3P  PA  DR  DF  RB  AT  IQ  RO  TA                      A FM FP MV
@@ -552,7 +554,6 @@ public partial class DatabaseManager
         Add(401, "SAC", "Malik",    "Monk",             "SG", 28, "USA", 191,  90, 77, 85, 79, 84, 87, 84, 64, 64, 74, 84, 77, 64, 58, 18000000, 3, false, 0, 0, 0, 0);
         Add(402, "SAC", "Keegan",   "Murray",           "SF", 26, "USA", 203, 102, 78, 79, 81, 87, 77, 79, 84, 81, 79, 81, 77, 53, 58, 22000000, 4, false, 0, 0, 0, 0);
         Add(403, "SAC", "De'Andre", "Hunter",           "SF", 28, "USA", 203, 102, 76, 84, 81, 87, 72, 79, 89, 79, 76, 76, 84, 39, 58, 20000000, 3, false, 0, 0, 0, 0);
-        Add(405, "SAC", "Devin",    "Carter",           "PG", 23, "USA", 188,  86, 77, 79, 81, 79, 81, 81, 87, 79, 84, 81, 84, 26, 58,  6000000, 4, false, 0, 0, 0, 0);
         Add(407, "SAC", "Patrick",  "Baldwin Jr.",      "SF", 23, "USA", 206, 100, 72, 79, 79, 89, 74, 74, 74, 74, 74, 79, 69, 27, 55,  3000000, 3, false, 0, 0, 0, 0);
         Add(408, "SAC", "Precious", "Achiuwa",          "PF", 27, "NGA", 203, 104, 72, 76, 78, 51, 58, 74, 78, 84, 80, 62, 72, 81, 78,  9000000, 2, false, 0, 0, 0, 0);
         Add(409, "SAC", "Drew",     "Eubanks",          "C",  29, "USA", 208, 111, 71, 76, 78, 49, 54, 68, 78, 86, 74, 62, 72, 88, 82,  5000000, 2, false, 0, 0, 0, 0);
@@ -747,12 +748,9 @@ public partial class DatabaseManager
     static List<(int TeamId, int Number)> BuildRetiredNumbersByTeam(Dictionary<string, int> teamByAbbr)
     {
         var result = new List<(int TeamId, int Number)>();
-        var hof = HallOfFameSeeder.Data;
-        foreach (var (firstName, lastName, number) in RetiredNumberSeeder.Data)
+        foreach (var (firstName, lastName, abbr, number) in RetiredNumberSeeder.Data)
         {
-            var legend = hof.FirstOrDefault(x => x.first_name == firstName && x.last_name == lastName);
-            if (legend == null) continue;
-            if (teamByAbbr.TryGetValue(legend.team_abbreviation, out var tid))
+            if (teamByAbbr.TryGetValue(abbr, out var tid))
                 result.Add((tid, number));
         }
         foreach (var (firstName, lastName, abbr, number) in VeteranRetiredNumberSeeder.Data)
@@ -1029,7 +1027,6 @@ public partial class DatabaseManager
         AddFA(598, "Bruno",         "Fernando",         "C",  26, "ANG", 206, 109, 66, 72, 70, 52, 24, 50, 50, 60, 78, 68, 60, 44, 48,  2000000, 1);
         AddFA(599, "Justin",        "Minaya",           "C",  26, "USA", 203, 102, 62, 70, 68, 54, 32, 50, 50, 60, 74, 64, 58, 42, 44,  2000000, 1);
         AddFA(600, "Tony",          "Bradley",          "C",  27, "USA", 211, 113, 66, 72, 68, 56, 24, 48, 48, 60, 76, 66, 60, 42, 50,  2000000, 1);
-        AddFA(28, "Amari",          "Williams",         "C",  24, "GBR", 211, 113, 71, 79, 71, 65, 52, 67, 59, 77, 89, 85, 77, 58, 81,  1200000, 4);
         AddFA(25, "Dalano",         "Banton",           "PG", 26, "CAN", 203, 92,  76, 78, 90, 82, 75, 81, 84, 79, 67, 83, 81, 73, 41,  2500000, 1);
         AddFA(29, "Max",            "Shulga",           "PG", 24, "UKR", 193, 88,  69, 76, 82, 75, 78, 77, 79, 67, 57, 73, 77, 63, 31,  1200000, 4);
         AddFA(53, "Tyler",          "Bilodeau",         "SF", 22, "USA", 203, 97,  59, 70, 78, 74, 74, 72, 76, 76, 68, 80, 76, 70, 52,  2000000, 2);
