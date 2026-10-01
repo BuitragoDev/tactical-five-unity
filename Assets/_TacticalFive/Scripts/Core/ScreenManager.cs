@@ -335,6 +335,7 @@ public class ScreenManager : MonoBehaviour
         if (theCityDocument != null) theCityDocument.gameObject.SetActive(false);
         if (buscadorDocument != null) buscadorDocument.gameObject.SetActive(false);
         if (gleagueDocument != null) gleagueDocument.gameObject.SetActive(false);
+        if (hilosDocument != null) hilosDocument.gameObject.SetActive(false);
         if (target != null) target.gameObject.SetActive(true);
     }
 }
