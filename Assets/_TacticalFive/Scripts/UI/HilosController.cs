@@ -52,6 +52,13 @@ public class HilosController : UIScreenController
             return;
         }
 
+        // Abiertos primero, luego cerrados; dentro de cada grupo, los más recientes arriba.
+        storylines = storylines
+            .OrderBy(s => s.resolved)                       // abiertos (0) antes que cerrados (1)
+            .ThenByDescending(s => s.last_update_game_day)
+            .ThenByDescending(s => s.id)
+            .ToList();
+
         foreach (var s in storylines)
         {
             bool active = s.resolved == 0;
