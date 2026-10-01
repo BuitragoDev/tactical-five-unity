@@ -730,6 +730,9 @@
     border-width: 1px;
     border-radius: 6px;
     cursor: default;
+    color: rgb(179, 190, 214);
+    border-color: rgb(70, 82, 110);
+    background-color: rgba(42, 51, 71, 0.45);
 }
 .rival-badge--hot {
     color: rgb(248, 196, 64);
