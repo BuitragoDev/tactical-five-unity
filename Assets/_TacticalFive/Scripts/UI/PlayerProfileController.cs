@@ -419,15 +419,14 @@ using System.Linq;
 
             var badge = new VisualElement();
             badge.AddToClassList("playerprofile-attr-badge");
+            // Rangos como en Roster/Quinteto: <40 rojo, <70 dorado, resto verde.
+            if (shown < 40)
+                badge.AddToClassList("playerprofile-attr-badge--low");
+            else if (shown < 70)
+                badge.AddToClassList("playerprofile-attr-badge--mid");
 
             var valLbl = new Label();
             valLbl.AddToClassList("playerprofile-attr-badge-value");
-            if (shown >= 70)
-                valLbl.AddToClassList("playerprofile-attr-badge-value--high");
-            else if (shown >= 40)
-                valLbl.AddToClassList("playerprofile-attr-badge-value--mid");
-            else
-                valLbl.AddToClassList("playerprofile-attr-badge-value--low");
             valLbl.text = shown.ToString();
 
             var labLbl = new Label();

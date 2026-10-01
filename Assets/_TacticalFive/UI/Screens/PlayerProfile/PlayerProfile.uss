@@ -460,38 +460,36 @@
 
 .playerprofile-attr-badge {
     width: 93px;
-    background-color: rgb(22, 26, 36);
+    background-color: rgb(39, 174, 96);
     border-radius: 8px;
-    border-width: 1px;
-    border-color: rgb(42, 51, 71);
+    border-width: 2px;
+    border-color: rgb(28, 130, 72);
     padding: 8px 4px;
     margin: 0 8px 8px 0;
     flex-direction: column;
     align-items: center;
 }
 
+.playerprofile-attr-badge--mid {
+    background-color: rgb(212, 160, 23);
+    border-color: rgb(160, 120, 17);
+}
+
+.playerprofile-attr-badge--low {
+    background-color: rgb(192, 57, 43);
+    border-color: rgb(140, 42, 31);
+}
+
 .playerprofile-attr-badge-value {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 32px;
-    color: rgb(220, 226, 240);
-}
-
-.playerprofile-attr-badge-value--high {
-    color: rgb(39, 174, 96);
-}
-
-.playerprofile-attr-badge-value--mid {
-    color: rgb(212, 160, 23);
-}
-
-.playerprofile-attr-badge-value--low {
-    color: rgb(192, 57, 43);
+    color: rgb(255, 255, 255);
 }
 
 .playerprofile-attr-badge-label {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 16px;
-    color: rgb(122, 138, 170);
+    color: rgb(255, 255, 255);
     margin-top: 2px;
     text-transform: uppercase;
     letter-spacing: 1px;
