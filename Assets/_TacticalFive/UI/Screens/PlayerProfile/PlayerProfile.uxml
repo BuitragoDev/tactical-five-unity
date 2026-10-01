@@ -33,6 +33,7 @@
                         </ui:VisualElement>
 
                         <ui:VisualElement class="playerprofile-banner-right">
+                            <ui:VisualElement class="playerprofile-honors-row">
                             <ui:VisualElement name="ProfileHonors" class="playerprofile-honors">
                                 <ui:VisualElement class="playerprofile-honor-item">
                                     <ui:VisualElement class="playerprofile-honor-row">
@@ -64,12 +65,13 @@
                                 </ui:VisualElement>
                             </ui:VisualElement>
 
-                            <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />
-                        </ui:VisualElement>
+                            <ui:VisualElement class="playerprofile-ovr-block">
+                                <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
+                                <ui:Label class="playerprofile-ovr-label" text="MED" />
+                            </ui:VisualElement>
+                            </ui:VisualElement>
 
-                        <ui:VisualElement class="playerprofile-ovr-block">
-                            <ui:Label name="ProfileOvr" class="playerprofile-ovr-val" text="" />
-                            <ui:Label class="playerprofile-ovr-label" text="MED" />
+                            <ui:Button name="ProfileTrajectoryBtn" class="playerprofile-trajectory-btn" text="VER TRAYECTORIA COMPLETA" />
                         </ui:VisualElement>
                     </ui:VisualElement>
                 </ui:VisualElement>
