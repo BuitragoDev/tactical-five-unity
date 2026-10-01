@@ -480,10 +480,10 @@
 .playerprofile-trajectory-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 15px;
-    color: rgb(212, 160, 23);
-    background-color: rgb(28, 22, 4);
+    color: rgb(0, 0, 0);
+    background-color: rgb(212, 160, 23);
     border-width: 2px;
-    border-color: rgb(212, 160, 23);
+    border-color: rgb(120, 95, 30);
     border-radius: 8px;
     padding: 10px 16px;
     letter-spacing: 1px;
@@ -494,8 +494,8 @@
 }
 
 .playerprofile-trajectory-btn:hover {
-    background-color: rgb(48, 38, 8);
-    color: rgb(240, 200, 80);
+    background-color: rgb(240, 200, 80);
+    color: rgb(0, 0, 0);
 }
 
 /* Attributes locked (dentro del panel de atributos) */
