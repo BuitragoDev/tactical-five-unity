@@ -497,7 +497,7 @@
 /* Cuerpo de la tabla con barra propia: alto fijo, la cabecera queda fuera y fija. */
 .trajectory-table-body-scroll {
     flex-shrink: 0;
-    height: 200px;
+    height: 215px;
 }
 
 .trajectory-scroll-row {
