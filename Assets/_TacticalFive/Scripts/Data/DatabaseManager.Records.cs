@@ -2136,13 +2136,16 @@ public partial class DatabaseManager
     /// </summary>
     public List<List<PlayerAwardInfo>> GetAllStarTeams(int seasonId, int managerId, int teams = QuintetPicker.Teams)
     {
-        return GetBestPerPositionTeams(seasonId, managerId, null, 65, teams);
+        // allowFallback: ningún puesto se queda vacío aunque no haya nadie con 65 partidos.
+        return GetBestPerPositionTeams(seasonId, managerId, null, 65, teams, allowFallback: true);
     }
 
     /// <summary>Los dos mejores quintetos de rookies (informativo, no se persiste).</summary>
     public List<List<PlayerAwardInfo>> GetAllRookieTeams(int seasonId, int managerId, int teams = QuintetPicker.Teams)
     {
-        return GetBestPerPositionTeams(seasonId, managerId, true, 40, teams);
+        // allowFallback: ningún puesto se queda vacío aunque no haya ningún rookie con 40
+        // partidos en esa posición (p. ej. solo hay 6 pivots rookie en la liga).
+        return GetBestPerPositionTeams(seasonId, managerId, true, 40, teams, allowFallback: true);
     }
 
     PlayerAwardInfo QueryTopPlayer(int seasonId, int managerId, bool? rookieOnly, int minGames)
@@ -2192,9 +2195,13 @@ public partial class DatabaseManager
     /// <summary>
     /// Mejores quintetos de la temporada (1º, 2º…): mismos mínimos de partidos que el 1º,
     /// sin repetir jugador y sin persistir nada. La selección vive en `QuintetPicker` (puro).
+    ///
+    /// Con `allowFallback`, si ningún candidato que llega al mínimo de partidos cubre una
+    /// posición, el puesto se rellena con el mejor disponible de esa posición (con al menos
+    /// un partido jugado) para que no quede ningún hueco en el quinteto.
     /// </summary>
     List<List<PlayerAwardInfo>> GetBestPerPositionTeams(int seasonId, int managerId, bool? rookieOnly,
-                                                        int minGames, int teams)
+                                                        int minGames, int teams, bool allowFallback = false)
     {
         if (!EnsureDb()) return new List<List<PlayerAwardInfo>>();
         string rookieFilter = rookieOnly == true ? "AND p.is_rookie = 1" : "";
@@ -2211,27 +2218,36 @@ public partial class DatabaseManager
             WHERE g.season_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
               AND g.manager_id = ? {rookieFilter}
             GROUP BY ps.player_id
-            HAVING games >= ?
             ORDER BY avg_rating DESC";
-        var allRows = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId, minGames);
+        var allRows = _db.Query<PlayerAwardQueryRow>(sql, seasonId, managerId);
+
+        // El mínimo de partidos se aplica aquí (no en SQL) para poder conservar como
+        // respaldo a los que no lo alcanzan: los que cumplen el mínimo rellenan los
+        // puestos; los demás solo entran si queda algún puesto vacío.
+        var qualified = new List<QuintetCandidate>();
+        var backups = new List<QuintetCandidate>();
+        foreach (var r in allRows)
+        {
+            var candidate = new QuintetCandidate
+            {
+                PlayerId = r.id,
+                Photo = r.photo ?? "",
+                PlayerName = $"{r.first_name} {r.last_name}",
+                Position = r.position,
+                SecondaryPosition = r.secondary_position,
+                TeamName = r.team_name ?? "",
+                TeamLogo = r.team_logo ?? "",
+                AvgPts = (float)r.avg_pts,
+                AvgReb = (float)r.avg_reb,
+                AvgAst = (float)r.avg_ast,
+                AvgRating = (float)r.avg_rating
+            };
+            if (r.games >= minGames) qualified.Add(candidate);
+            else if (r.games >= 1) backups.Add(candidate);
+        }
 
         // Selección pura (1º y 2º quinteto, sin repetir jugador).
-        var candidates = allRows.Select(r => new QuintetCandidate
-        {
-            PlayerId = r.id,
-            Photo = r.photo ?? "",
-            PlayerName = $"{r.first_name} {r.last_name}",
-            Position = r.position,
-            SecondaryPosition = r.secondary_position,
-            TeamName = r.team_name ?? "",
-            TeamLogo = r.team_logo ?? "",
-            AvgPts = (float)r.avg_pts,
-            AvgReb = (float)r.avg_reb,
-            AvgAst = (float)r.avg_ast,
-            AvgRating = (float)r.avg_rating
-        }).ToList();
-
-        var picked = QuintetPicker.Pick(candidates, teams);
+        var picked = QuintetPicker.Pick(qualified, teams, allowFallback ? backups : null);
 
         var result = new List<List<PlayerAwardInfo>>();
         foreach (var team in picked)

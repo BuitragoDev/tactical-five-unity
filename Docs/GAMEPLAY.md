@@ -199,7 +199,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - Monthly awards (Manager/Jugador/Rookie del Mes) via `EvaluateMonthlyAwards` (1st of Dec–Apr).
 - Season-end records: `SaveSeasonEndRecords` (MVP, ROY, best defender, sixth man, most improved, All-NBA/rookie quintets, All-Star teams, finals MVP, champion).
 - **Player honor counters** (`players.*`, migrated, default 0): `rings` (+1 campeón), `finals_mvps` (+1 MVP Finales = mejor rating medio del campeón), `finals_played` (+1 a ambos finalistas), `season_mvps` (+1 MVP regular con ≥65 partidos). Shown in `PlayerProfile`/`Trajectory` headers (CAMPEONATOS / FINALES / MVP / MVP FINALS).
-- **Season quintets** (`QuintosController`): "Mejor Quinteto" (All-Star) + "Mejor Quinteto de Rookies" (5 players each, one per position by primary *or* secondary, min 65 games, best avg rating, regular games only). Note: **only the first team** is produced (`GetBestPerPosition`, `DatabaseManager.Records.cs:1857`).
+- **Season quintets** (`QuintosController`): "Mejor Quinteto" (All-Star) + "Mejor Quinteto de Rookies" (5 players each, one per position by primary *or* secondary, min 65/40 games, best avg rating, regular games only). If no candidate reaching the minimum covers a position, the slot is filled with the best available at that position (≥1 game played) so no position is left empty. Note: **only the first team** is produced (`GetBestPerPosition`, `DatabaseManager.Records.cs:1857`).
 - **Hall of Fame** (`HallOfFameHelper`): induction if 1 ring OR 1 Finals MVP OR ≥30k pts OR ≥15k reb OR ≥10k ast (career totals). Candidates = retiring players (age ≥40) who `WouldInduct`; inducted in `StartNewSeason` (`TryInductIntoHallOfFame`); ~100 preloaded legends from `HallOfFameSeeder`. Displayed in `Palmares` (HOF panel) and `EndSeason` (Fame panel).
 - **Retired numbers** (`DorsalesController`): seed of 53 legends + 17 active veterans (`RetiredNumberSeeder`/`VeteranRetiredNumberSeeder`); `ShouldRetireNumber` (WouldInduct + seasons_with_team ≥10); `TryRetireNumber` at retirement; `AssignJerseyNumber` reserves retired numbers (1–99, avoids taken). Screen shows current roster numbers + retired.
 - Career stats archived per season (`UpdateHistoricalPlayerStatsFromSeason`, `player_season_stats`).
@@ -378,6 +378,13 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
   de la temporada y de rookies (`QuintetPicker`, puro: por posición PG/SG/SF/PF/C, aceptando la
   secundaria, el mejor por rating medio **sin repetir jugador** entre posiciones ni quintetos;
   mínimos de partidos 65 / 40, los mismos que el primero).
+- **Ningún puesto queda vacío**: si en una posición no hay ningún jugador que alcance el
+  mínimo de partidos (p. ej. solo hay 6 pivots rookie en la liga y ninguno llega a 40), el
+  puesto se rellena con el **mejor disponible de esa posición con al menos 1 partido jugado**
+  (`GetBestPerPositionTeams(..., allowFallback: true)` → `QuintetPicker.Pick(candidatos, n, respaldo)`).
+  El respaldo nunca desplaza a un jugador que sí cumple el mínimo. El singular
+  `GetBestPerPosition` (que usa el logro de All-Star de `AchievementService`) **no** aplica
+  respaldo: un jugador con pocos partidos no debe completar un logro de All-NBA.
 - Un **toggle en la cabecera** (PRIMER QUINTETO / SEGUNDO QUINTETO) cambia ambos paneles a la
   vez; al entrar en la pantalla siempre se muestra el primero. Títulos, subtítulos y badges se
   actualizan al mostrar el segundo.

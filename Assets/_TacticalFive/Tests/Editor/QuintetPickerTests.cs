@@ -94,4 +94,68 @@ public class QuintetPickerTests
 
         Assert.That(teams[0][0].player.PlayerId, Is.EqualTo(2));
     }
+
+    [Test]
+    public void Pick_FillsEmptyPositionWithFallback()
+    {
+        // No hay ningún pivote que llegue al mínimo de partidos.
+        var cands = new List<QuintetCandidate>
+        {
+            P(1, "PG", 90f), P(2, "SG", 89f), P(3, "SF", 88f), P(5, "C", 86f)
+        };
+        var fallbacks = new List<QuintetCandidate> { P(4, "PF", 20f) };
+
+        var teams = QuintetPicker.Pick(cands, 1, fallbacks);
+
+        Assert.That(teams[0], Has.Count.EqualTo(5), "el puesto vacío se rellena con el respaldo");
+        Assert.That(teams[0][3].position, Is.EqualTo("PF"));
+        Assert.That(teams[0][3].player.PlayerId, Is.EqualTo(4));
+    }
+
+    [Test]
+    public void Pick_WithoutFallbacksKeepsTheHole()
+    {
+        var cands = new List<QuintetCandidate> { P(1, "PG", 90f) };
+
+        var teams = QuintetPicker.Pick(cands, 1);
+
+        Assert.That(teams[0], Has.Count.EqualTo(1), "sin respaldo el hueco se mantiene");
+    }
+
+    [Test]
+    public void Pick_StrictCandidateWinsOverFallback()
+    {
+        // El respaldo tiene mejor rating, pero no llega al mínimo: no desplaza al que sí llega.
+        var cands = new List<QuintetCandidate> { P(1, "PG", 90f) };
+        var fallbacks = new List<QuintetCandidate> { P(2, "PG", 99f) };
+
+        var teams = QuintetPicker.Pick(cands, 1, fallbacks);
+
+        Assert.That(teams[0], Has.Count.EqualTo(1));
+        Assert.That(teams[0][0].player.PlayerId, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Pick_FallbackIsNotRepeatedInSecondQuintet()
+    {
+        var cands = new List<QuintetCandidate>
+        {
+            P(1, "PG", 90f), P(2, "SG", 89f), P(3, "SF", 88f), P(5, "C", 86f),
+            P(7, "PG", 80f), P(8, "SG", 79f), P(9, "SF", 78f), P(10, "C", 77f)
+        };
+        var fallbacks = new List<QuintetCandidate> { P(4, "PF", 20f), P(6, "PF", 15f) };
+
+        var teams = QuintetPicker.Pick(cands, 2, fallbacks);
+
+        Assert.That(teams[0], Has.Count.EqualTo(5));
+        Assert.That(teams[1], Has.Count.EqualTo(5));
+        var ids1 = new HashSet<int>();
+        foreach (var s in teams[0]) ids1.Add(s.player.PlayerId);
+        foreach (var s in teams[1])
+        {
+            Assert.That(ids1.Contains(s.player.PlayerId), Is.False, "el 2º quinteto no repite a nadie del 1º");
+        }
+        Assert.That(teams[0][3].player.PlayerId, Is.EqualTo(4), "el 1er quinteto usa el mejor respaldo");
+        Assert.That(teams[1][3].player.PlayerId, Is.EqualTo(6), "el 2º quinteto usa el siguiente respaldo");
+    }
 }
