@@ -137,6 +137,14 @@ using System.Threading.Tasks;
     private List<int> _fastSimAbortEmptySlots = new();
     private List<(LineupData li, PlayerData p)> _fastSimAbortInjured = new();
     private bool _fastSimSkipPreBatch;
+    /// <summary>
+    /// Día de partido para el que ya se commiteó el pre-lote (lesiones/físico,
+    /// entrenamiento, mercado IA) y temporada a la que pertenece. Se usa para no
+    /// aplicarlo dos veces cuando la pantalla de previa pide simular el día, y se
+    /// limpia al cerrar el día para que el siguiente haga el suyo.
+    /// </summary>
+    private int _preBatchGameDay = int.MinValue;
+    private int _preBatchSeasonId = -1;
     private int _fastSimAutoFixAttempts;
     private bool _fastSimRunning;
     private bool _fastSimStopRequested;
@@ -226,7 +234,11 @@ using System.Threading.Tasks;
         {
             _simulateFromPreGame = false;
             ShowLoading();
-            _root.schedule.Execute(() => StartCoroutine(ProcessGameDayRoutine(skipPreBatch: true))).ExecuteLater(0);
+            // El pre-lote solo se omite si ya se commiteó para ESTE día (flujo normal:
+            // AVANZAR DÍA → previa → IR AL PARTIDO). Si la previa se abrió con el
+            // enlace "VER PREVIA" sin haber avanzado el día, el pre-lote aún no se ha
+            // hecho y debe aplicarse ahora (lesiones, entrenamiento, mercado IA).
+            _root.schedule.Execute(() => StartCoroutine(ProcessGameDayRoutine(skipPreBatch: PreBatchAlreadyDone()))).ExecuteLater(0);
         }
     }
 
@@ -659,7 +671,7 @@ using System.Threading.Tasks;
                     .FirstOrDefault();
                 if (firstPre != null)
                     return System.DateTime.Parse(firstPre.game_date).ToString("dd/MM/yyyy");
-                return new System.DateTime(_season.year_start, 10, 22).ToString("dd/MM/yyyy");
+                return CalendarHelper.SeasonStart(_season.year_start).ToString("dd/MM/yyyy");
             }
 
             if (_season.current_game_day < 0)
@@ -673,7 +685,7 @@ using System.Threading.Tasks;
                     return System.DateTime.Parse(lastGame.game_date).ToString("dd/MM/yyyy");
             }
 
-            var seasonStart = new System.DateTime(_season.year_start, 10, 22);
+            var seasonStart = CalendarHelper.SeasonStart(_season.year_start);
             return seasonStart.AddDays(_season.current_game_day - 1).ToString("dd/MM/yyyy");
         }
         catch { return ""; }
@@ -808,6 +820,18 @@ using System.Threading.Tasks;
     {
         _simulateFromPreGame = true;
         ScreenManager.Instance.GoTo(GameScreen.Dashboard);
+    }
+
+    /// <summary>
+    /// ¿El pre-lote (lesiones/físico, entrenamiento, mercado IA) del día pendiente ya se
+    /// aplicó? Si la previa se abrió con "VER PREVIA" sin haber avanzado el día, no se ha
+    /// hecho todavía y debe aplicarse al simular.
+    /// </summary>
+    bool PreBatchAlreadyDone()
+    {
+        if (_season == null || _manager == null) return false;
+        if (_preBatchSeasonId != _season.id) return false;
+        return _preBatchGameDay == FindNextGameDay();
     }
 
     List<PlayerData> GetActivePlayers(int teamId)
@@ -1171,6 +1195,14 @@ using System.Threading.Tasks;
                 HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
                 yield break;
             }
+        }
+
+        // El pre-lote de este día queda commiteado: si más adelante se vuelve a simular
+        // el MISMO día (pantalla de previa → IR AL PARTIDO) no debe repetirse.
+        if (!effectiveSkipPreBatch)
+        {
+            _preBatchGameDay = gameDay;
+            _preBatchSeasonId = _season?.id ?? -1;
         }
 
         // Si hay jugadores recuperados y estamos en fast-sim, interrumpir
@@ -1700,6 +1732,10 @@ using System.Threading.Tasks;
         }
             DatabaseManager.Instance.UpdateSeason(_season);
             db.Commit();
+
+            // El día queda cerrado: el siguiente día necesita su propio pre-lote.
+            _preBatchGameDay = int.MinValue;
+            _preBatchSeasonId = -1;
         }
         catch (System.Exception ex)
         {
@@ -4880,13 +4916,10 @@ using System.Threading.Tasks;
         box.Add(actions);
     }
 
-    int DateToGameDay(System.DateTime date)
+    /// <summary>Índice de día de partido de una fecha (regla en <see cref="CalendarHelper"/>).</summary>
+    static int DateToGameDay(SeasonData season, System.DateTime date)
     {
-        var seasonStart = new System.DateTime(_season.year_start, 10, 22);
-        if (date >= seasonStart)
-            return (int)(date - seasonStart).TotalDays + 1;
-        else
-            return -(int)(seasonStart - date).TotalDays;
+        return CalendarHelper.DateToGameDay(season.year_start, date);
     }
 
     /// <summary>
@@ -4974,35 +5007,51 @@ using System.Threading.Tasks;
         }
     }
 
+    /// <summary>
+    /// Día de partido pendiente: el que se simula al avanzar. 0 = no quedan partidos.
+    /// Fuente única de verdad: la usa el botón de acción del Dashboard ("DÍA DE PARTIDO")
+    /// y la pantalla de previa para saber si el partido que muestra es el de hoy.
+    /// </summary>
     int FindNextGameDay()
     {
+        return FindNextGameDay(_season, _manager.id);
+    }
+
+    /// <summary>
+    /// Versión estática de <see cref="FindNextGameDay()"/> para poder consultarla desde
+    /// otras pantallas (p. ej. PreGame) sin depender de la instancia del Dashboard.
+    /// </summary>
+    public static int FindNextGameDay(SeasonData season, int managerId)
+    {
+        if (season == null) return 0;
+
         bool anyUnplayed = DatabaseManager.Instance.Db.Table<GameData>()
-            .Any(g => g.manager_id == _manager.id && g.is_played == 0);
+            .Any(g => g.manager_id == managerId && g.is_played == 0);
         if (!anyUnplayed) return 0;
 
         // New system: use current_date for day-by-day advancement
-        if (!string.IsNullOrEmpty(_season.current_date))
+        if (!string.IsNullOrEmpty(season.current_date))
         {
-            var currentDate = System.DateTime.Parse(_season.current_date);
+            var currentDate = System.DateTime.Parse(season.current_date);
 
             // Only skip the Feb break if there are no unplayed games on that date
             // (the All-Star game is scheduled during the break, Feb 13)
             bool hasUnplayedToday = DatabaseManager.Instance.Db.Table<GameData>()
-                .Any(g => g.manager_id == _manager.id
-                       && g.game_date == _season.current_date
+                .Any(g => g.manager_id == managerId
+                       && g.game_date == season.current_date
                        && g.is_played == 0);
 
             if (!hasUnplayedToday && currentDate.Month == 2 && currentDate.Day >= 8 && currentDate.Day <= 14)
                 currentDate = new System.DateTime(currentDate.Year, 2, 15);
 
-            return DateToGameDay(currentDate);
+            return DateToGameDay(season, currentDate);
         }
 
         // Fallback for old saves without current_date
-        if (_season.current_game_day == 0)
+        if (season.current_game_day == 0)
         {
             var nextPreseason = DatabaseManager.Instance.Db.Table<GameData>()
-                .Where(g => g.manager_id == _manager.id
+                .Where(g => g.manager_id == managerId
                          && g.is_played == 0
                          && g.game_day < 0)
                 .OrderByDescending(g => g.game_day)
@@ -5011,7 +5060,7 @@ using System.Threading.Tasks;
             return 1;
         }
 
-        return _season.current_game_day + 1;
+        return season.current_game_day + 1;
     }
 
     List<PlayerData> ProcessInjuries()

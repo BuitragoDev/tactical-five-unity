@@ -124,7 +124,7 @@ protected virtual void OnEnable()
 | 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Banner (foto, dorsal, escudo, honores, MED, trayectoria) + 3 columnas (Información Personal · Atributos como badges · Últimas Lesiones) + stats de temporada; fog-of-war gate |
 | 40 | Quintos | `Screens/Quintos` | `QuintosController` | Season All-Star/Rookie quintets |
 | 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career |
-| 42 | PreGame | `Screens/PreGame` | `PreGameController` | Previas del partido: pronóstico/favorito, registros, ofensiva/defensiva + rango, bajas, alineaciones y claves; botones VOLVER/JUGAR |
+| 42 | PreGame | `Screens/PreGame` | `PreGameController` | Previas del partido: pronóstico/favorito, registros, ofensiva/defensiva + rango, bajas, alineaciones y claves; botón VOLVER y "IR AL PARTIDO" (visible **solo si el partido es el del día pendiente**; si es dentro de 2-3 días se oculta, y con él el atajo "D") |
 | 43 | InfoLeague | `Screens/InfoLeague` | `InfoLeagueController` | Información de la liga: pestañas FINANZAS (economía de la competición) y EQUIPOS (plantillas por conferencia Este/Oeste) |
 | 44 | TheCity | `Screens/TheCity` | `TheCityController` | Mapa/ciudad con burbujas de acceso directo (hospital, pabellón, entrenamiento, clasificación, empleados, finanzas, prensa, estadísticas, palmarés). **GameObject `TheCity` (sin sufijo `Document`)** |
 | 45 | Buscador | `Screens/Buscador` | `BuscadorController` | Buscador de jugadores: filtros posición/edad/equipo/OVR/solo FA, orden por columna y scrollbar propia |

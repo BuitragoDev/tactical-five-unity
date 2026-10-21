@@ -21,6 +21,8 @@ public class PreGameController : UIScreenController
 
     private Button _btnBack, _btnGoMatch;
     private Label _headerTitleType;
+    /// <summary>La previa muestra el partido del día pendiente (el que se puede ir a ver).</summary>
+    private bool _matchIsPendingDay;
 
     private List<TeamData> _allTeams;
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -100,7 +102,8 @@ public class PreGameController : UIScreenController
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.D))
+        // La tecla D hace lo mismo que el botón: solo si el partido es el de hoy.
+        if (_matchIsPendingDay && Input.GetKeyDown(KeyCode.D))
         {
             PlayClick();
             DashboardController.RequestSimulateAndGoToMatchDay();
@@ -109,12 +112,27 @@ public class PreGameController : UIScreenController
 
     void LoadMatchPreview()
     {
-        if (_season == null || _myTeam == null) return;
+        if (_season == null || _myTeam == null)
+        {
+            SetGoMatchVisible(false);
+            return;
+        }
 
         // Usar el mismo criterio que el panel "Próximo Partido" del Dashboard:
         // el próximo partido no jugado del equipo, sin depender de current_date.
         var myGame = DatabaseManager.Instance.GetNextGame(_manager.id, _myTeam.id);
-        if (myGame == null) return;
+        if (myGame == null)
+        {
+            SetGoMatchVisible(false);
+            return;
+        }
+
+        // "IR AL PARTIDO" solo tiene sentido si la previa muestra el partido del día
+        // pendiente (el que se simula al avanzar el día). Si el partido es de dentro de
+        // 2-3 días, el botón se oculta: al pulsarlo se simularía el día equivocado.
+        int pendingDay = DashboardController.FindNextGameDay(_season, _manager.id);
+        _matchIsPendingDay = pendingDay != 0 && myGame.game_day == pendingDay;
+        SetGoMatchVisible(_matchIsPendingDay);
 
         if (_headerTitleType != null)
         {
@@ -210,6 +228,12 @@ public class PreGameController : UIScreenController
     }
 
     // ── Helpers ──
+
+    void SetGoMatchVisible(bool visible)
+    {
+        if (_btnGoMatch == null) return;
+        _btnGoMatch.style.display = visible ? DisplayStyle.Flex : DisplayStyle.None;
+    }
 
     void SetStatLabel(Label lbl, string text)
     {
