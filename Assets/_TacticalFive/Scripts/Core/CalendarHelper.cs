@@ -25,4 +25,17 @@ public static class CalendarHelper
             return (int)(date - seasonStart).TotalDays + 1;
         return -(int)(seasonStart - date).TotalDays;
     }
+
+    /// <summary>
+    /// Fecha de calendario de un índice de día de partido (inverso de
+    /// <see cref="DateToGameDay"/>): 1 → 22/10, 9 → 30/10, −47 → 5/9.
+    /// El 0 es un centinela ("temporada sin empezar") y se resuelve como el 22/10.
+    /// </summary>
+    public static System.DateTime GameDayToDate(int yearStart, int gameDay)
+    {
+        var seasonStart = SeasonStart(yearStart);
+        if (gameDay >= 1) return seasonStart.AddDays(gameDay - 1);
+        if (gameDay == 0) return seasonStart;
+        return seasonStart.AddDays(gameDay);
+    }
 }

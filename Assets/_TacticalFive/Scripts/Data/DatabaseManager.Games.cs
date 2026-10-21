@@ -44,10 +44,55 @@ public partial class DatabaseManager
 
     public SeasonData GetActiveSeason(int managerId)
     {
-        return _db.Table<SeasonData>()
+        var season = _db.Table<SeasonData>()
                 .Where(s => s.manager_id == managerId && s.is_active == 1)
                 .OrderByDescending(s => s.id)
                 .FirstOrDefault();
+        EnsureSeasonDate(season, managerId);
+        return season;
+    }
+
+    /// <summary>Último aviso de fecha desincronizada (evita repetir el log).</summary>
+    static string _lastSeasonDateWarning;
+
+    /// <summary>
+    /// El calendario avanza un día por día y `game_day` es el índice de día relativo
+    /// al 22/10, así que la fecha de la temporada **debe** ser siempre la del día
+    /// `current_game_day + 1` (día 8 → 30/10).
+    ///
+    /// Si la columna se ha quedado desincronizada (partidas viejas, saltos manuales),
+    /// se corrige **en memoria**: de lo contrario el "día pendiente" se calcularía
+    /// sobre una fecha equivocada y el botón "DÍA DE PARTIDO" del Dashboard (y el
+    /// "IR AL PARTIDO" de la previa) no aparecerían. No se escribe aquí: la base de
+    /// datos se repara sola en el siguiente commit del día, porque el Dashboard
+    /// persiste su objeto ya saneado.
+    ///
+    /// La pretemporada manda: sus amistosos tienen días negativos y su propia fecha.
+    /// </summary>
+    void EnsureSeasonDate(SeasonData season, int managerId)
+    {
+        if (season == null) return;
+        if (season.phase == "preseason") return;
+
+        string expected = CalendarHelper.GameDayToDate(season.year_start, season.current_game_day + 1)
+                                .ToString("yyyy-MM-dd");
+        if (season.current_date == expected) return;
+
+        // Si quedan amistosos de pretemporada sin jugar, su fecha es la buena.
+        bool pendingPreseason = _db.Table<GameData>()
+                .Any(g => g.manager_id == managerId
+                       && g.game_type == "preseason"
+                       && g.is_played == 0);
+        if (pendingPreseason) return;
+
+        // Aviso una sola vez por inconsistencia (GetActiveSeason se llama mucho).
+        string warning = $"[DB] Fecha de temporada desincronizada ({season.current_date} → {expected}); corregida en memoria.";
+        if (_lastSeasonDateWarning != warning)
+        {
+            _lastSeasonDateWarning = warning;
+            Debug.LogWarning(warning);
+        }
+        season.current_date = expected;
     }
 
     public int GetCurrentDay(int managerId)

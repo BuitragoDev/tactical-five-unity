@@ -68,4 +68,54 @@ public class CalendarHelperTests
             date = date.AddDays(1);
         }
     }
+
+    [Test]
+    public void GameDayToDate_SeasonStart_IsOctober22()
+    {
+        Assert.That(CalendarHelper.GameDayToDate(2026, 1), Is.EqualTo(new DateTime(2026, 10, 22)));
+    }
+
+    [Test]
+    public void GameDayToDate_NinthDay_IsOctober30()
+    {
+        // El día siguiente al 8 (30/10) es el 9 → el calendario del día 8 es el 30/10.
+        Assert.That(CalendarHelper.GameDayToDate(2026, 9), Is.EqualTo(new DateTime(2026, 10, 30)));
+    }
+
+    [Test]
+    public void GameDayToDate_PreseasonDay_IsSeptember()
+    {
+        // 5/09 está 47 días antes del 22/10 → día -47.
+        Assert.That(CalendarHelper.GameDayToDate(2026, -47), Is.EqualTo(new DateTime(2026, 9, 5)));
+    }
+
+    [Test]
+    public void GameDayToDate_Zero_IsSeasonStart()
+    {
+        Assert.That(CalendarHelper.GameDayToDate(2026, 0), Is.EqualTo(new DateTime(2026, 10, 22)));
+    }
+
+    [Test]
+    public void DateToGameDay_AndGameDayToDate_AreInverse()
+    {
+        for (int day = -60; day <= 180; day++)
+        {
+            var date = CalendarHelper.GameDayToDate(2026, day);
+            Assert.That(CalendarHelper.DateToGameDay(2026, date), Is.EqualTo(day == 0 ? 1 : day),
+                $"ida y vuelta falla en el día {day}");
+        }
+    }
+
+    [Test]
+    public void DateToGameDay_AndGameDayToDate_AreInverseForEveryDate()
+    {
+        var date = new DateTime(2026, 9, 1);
+        for (int i = 0; i < 260; i++)
+        {
+            int day = CalendarHelper.DateToGameDay(2026, date);
+            Assert.That(CalendarHelper.GameDayToDate(2026, day), Is.EqualTo(date),
+                $"ida y vuelta falla en {date:yyyy-MM-dd}");
+            date = date.AddDays(1);
+        }
+    }
 }
