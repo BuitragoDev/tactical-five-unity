@@ -19,11 +19,18 @@ public static class CustomScopes
     static string _active = Template;
     static bool _legacyMigrated;
 
+    /// <summary>Raíz de datos alternativa (tests). Vacío = `persistentDataPath/TacticalFive`.</summary>
+    public static string RootOverride { get; set; }
+
+    private static string DataRoot => string.IsNullOrEmpty(RootOverride)
+        ? Path.Combine(Application.persistentDataPath, "TacticalFive")
+        : RootOverride;
+
     /// <summary>Ámbito activo ("template" o "save_{n}").</summary>
     public static string Active => _active;
 
     public static string ScopeRoot(string scope) =>
-        Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom",
+        Path.Combine(DataRoot, "Custom",
             string.IsNullOrEmpty(scope) ? Template : scope);
 
     public static string ActiveRoot => ScopeRoot(_active);
@@ -91,7 +98,7 @@ public static class CustomScopes
         _legacyMigrated = true;
         try
         {
-            string root = Path.Combine(Application.persistentDataPath, "TacticalFive", "Custom");
+            string root = Path.Combine(DataRoot, "Custom");
             string legacyLogos = Path.Combine(root, "Logos");
             string legacyArenas = Path.Combine(root, "Arenas");
             if (!Directory.Exists(legacyLogos) && !Directory.Exists(legacyArenas)) return false;

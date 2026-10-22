@@ -215,5 +215,16 @@
                 </ui:VisualElement>
             </ui:VisualElement>
         </ui:VisualElement>
+        <ui:VisualElement name="ErrorModalOverlay" class="modal-overlay" style="display: none;">
+            <ui:VisualElement name="ErrorModalBox" class="modal-box modal-box--danger">
+                <ui:Label name="ErrorModalTitle" text="NO SE PUDO INICIAR LA PARTIDA" class="modal-title"/>
+                <ui:VisualElement class="modal-body">
+                    <ui:Label name="ErrorModalText" text="" class="modal-paragraph"/>
+                </ui:VisualElement>
+                <ui:VisualElement class="modal-actions">
+                    <ui:Button name="ErrorModalCerrar" text="CERRAR" class="modal-btn modal-btn--secondary"/>
+                </ui:VisualElement>
+            </ui:VisualElement>
+        </ui:VisualElement>
     </ui:VisualElement>
 </ui:UXML>

@@ -23,8 +23,8 @@ All under `Application.persistentDataPath`:
 
 - **SQLite per slot** — the save IS the database (45 tables). No JSON serialization of game state, no `JsonUtility` on game data (only used for `saves.json`).
 - **`saves.json` metadata** (`SaveMeta { SaveSlotInfo[] slots }`): `slotNumber, exists, managerName, teamName, teamLogo, seasonYear, currentDate, lastPlayedRealDate, currentGameDay, gameMode`.
-- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` (Editor flow + boot check). The current copy list includes `trades`, while the dynamic-table list also includes `trades`; this is an actual documentation/code ambiguity that must be resolved by deciding whether trade history is seed content or empty per-slot state.
-- **`CloneFromTemplate()`** (`DatabaseManager.cs:203`) — creates dynamic tables, then inserts template data preserving IDs. The clone operation is not wrapped in one transaction [F]; interruption can leave a partially populated slot and `InitSaveSlot` may not retry if it sees data.
+- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` (flujo del Editor **y alta de partida nueva**: `InitSaveSlot` lo construye al vuelo si falta, para que una instalación sin Editor —build en una máquina recién formateada— funcione). The current copy list includes `trades`, while the dynamic-table list also includes `trades`; this is an actual documentation/code ambiguity that must be resolved by deciding whether trade history is seed content or empty per-slot state.
+- **`CloneFromTemplate()`** (`DatabaseManager.cs:203`) — creates dynamic tables, then inserts template data preserving IDs. El clon y el seed van juntos dentro de un `_db.RunInTransaction` en `InitSaveSlot`; los seeders **no deben abrir su propia transacción** (`IsInTransaction` guard) porque sqlite-net lanza `InvalidOperationException` al anidar.
 - **Template build moved off the main thread** (`BuildTemplateDatabaseInBackground`, guarded by `_templateLock`).
 
 ## 3. Save / load flows
@@ -97,7 +97,7 @@ All under `Application.persistentDataPath`:
 
 ## 8. Open questions
 
-- Whether `template.db` is intended to ship with the game or be generated at first run on each machine ([D] generated; the Editor flow suggests dev-tool).
+- ~~Whether `template.db` is intended to ship with the game or be generated at first run on each machine~~ — **resuelto (2026-10-22):** se genera al vuelo en el primer alta de partida (`InitSaveSlot` → `EnsureTemplateDb`) si no existe; no se distribuye con el juego. El Editor lo reconstruye/edita.
 - `saves.json` writes are synchronous `JsonUtility.ToJson` — safe on main thread [F]; no conflict handling between concurrent editor sessions [H].
 - Whether `trades` belongs to the static template copy or the empty dynamic set; current documentation/code classification is inconsistent [F].
 - Whether `BuildTemplateDatabaseInBackground` can overlap normal UI database calls. It temporarily replaces the shared `_dbField` while running on a worker thread, creating a race risk [F].

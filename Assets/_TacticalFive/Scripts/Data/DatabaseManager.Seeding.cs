@@ -645,19 +645,24 @@ public partial class DatabaseManager
         Add(478, "WAS", "AJ",          "Dybantsa",      "SF", 19, "USA", 206,  95, 75, 94, 84, 84, 79, 84, 84, 74, 84, 69, 75, 64, 74, 13500000, 4, true, 0, 0, 0, 0);
         Add(479, "WAS", "Felix",       "Okpara",        "C",  22, "NGA", 213, 107, 68, 74, 69, 59, 64, 64, 84, 89, 79, 69, 28, 79, 58,  2000000, 2, true, 0, 0, 0, 0);
 
-        _db.BeginTransaction();
+        // Si ya hay una transacción abierta (InitSaveSlot crea la partida dentro de
+        // una), NO se abre otra: sqlite-net lanza InvalidOperationException y el alta
+        // de una partida nueva fallaba en silencio cuando no había template.db.
+        bool ownTransaction = !_db.IsInTransaction;
+        if (ownTransaction) _db.BeginTransaction();
         try
         {
             AssignSeedJerseyNumbers(players, teamByAbbr);
             foreach (var p in players)
                 _db.Insert(p);
-            _db.Commit();
+            if (ownTransaction) _db.Commit();
             Debug.Log($"[DB] {players.Count} jugadores insertados.");
         }
         catch (System.Exception e)
         {
-            _db.Rollback();
+            if (ownTransaction) _db.Rollback();
             Debug.LogError($"[DB] Error insertando jugadores: {e.Message}");
+            if (!ownTransaction) throw;   // que la transacción externa haga rollback
         }
     }
 
@@ -1047,18 +1052,21 @@ public partial class DatabaseManager
         AddFA(476, "Anthony",       "Gill",             "PF", 32, "USA", 203, 104, 76, 78, 78, 82, 80, 76, 80, 88, 75, 86, 84, 82, 25,  4000000, 1);
         AddFA(249, "Richie",        "Saunders",         "SG", 24, "USA", 196, 95,  61, 73, 80, 84, 86, 74, 74, 74, 58, 76, 76, 68, 40,  2000000, 2);
 
-        _db.BeginTransaction();
+        // Igual que SeedPlayers: nunca anidar transacciones (sqlite-net lanza).
+        bool ownTransaction = !_db.IsInTransaction;
+        if (ownTransaction) _db.BeginTransaction();
         try
         {
             foreach (var fa in freeAgents)
                 _db.Insert(fa);
-            _db.Commit();
+            if (ownTransaction) _db.Commit();
             Debug.Log($"[DB] {freeAgents.Count} agentes libres insertados.");
         }
         catch (System.Exception e)
         {
-            _db.Rollback();
+            if (ownTransaction) _db.Rollback();
             Debug.LogError($"[DB] Error insertando agentes libres: {e.Message}");
+            if (!ownTransaction) throw;   // que la transacción externa haga rollback
         }
     }
 

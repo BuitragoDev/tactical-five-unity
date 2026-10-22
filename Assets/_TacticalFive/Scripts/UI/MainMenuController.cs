@@ -32,6 +32,11 @@ public class MainMenuController : UIScreenController
     private Button _btnProCancel;
     private Button _btnProConfirm;
 
+    private VisualElement _errorModalOverlay;
+    private VisualElement _errorModalBox;
+    private Label _errorModalText;
+    private Button _btnErrorModalCerrar;
+
     protected override void OnEnable()
     {
         base.OnEnable();
@@ -73,6 +78,12 @@ public class MainMenuController : UIScreenController
         _proModalBox      = _root.Q<VisualElement>("ProModalBox");
         _btnProCancel     = _root.Q<Button>("BtnProCancel");
         _btnProConfirm    = _root.Q<Button>("BtnProConfirm");
+
+        // Modal de error al crear/abrir la partida
+        _errorModalOverlay  = _root.Q<VisualElement>("ErrorModalOverlay");
+        _errorModalBox      = _root.Q<VisualElement>("ErrorModalBox");
+        _errorModalText     = _root.Q<Label>("ErrorModalText");
+        _btnErrorModalCerrar = _root.Q<Button>("ErrorModalCerrar");
     }
 
     protected override void RegisterCallbacks()
@@ -100,6 +111,9 @@ public class MainMenuController : UIScreenController
         // Callbacks modal ProManager
         _btnProConfirm?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ConfirmProManager(); });
         _btnProCancel?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseProModal(); });
+
+        // Callback modal de error
+        _btnErrorModalCerrar?.RegisterCallback<ClickEvent>(_ => { PlayClick(); CloseErrorModal(); });
 
         // Hover CTA tarjetas
         RegisterCardHover("BtnManager",    "CtaManager");
@@ -134,6 +148,7 @@ public class MainMenuController : UIScreenController
                 CursorManager.Instance.RegisterHandCursor(_configBtnQualityUltra);
                 CursorManager.Instance.RegisterHandCursor(_btnProCancel);
                 CursorManager.Instance.RegisterHandCursor(_btnProConfirm);
+                CursorManager.Instance.RegisterHandCursor(_btnErrorModalCerrar);
             }
         }).StartingIn(100);
 
@@ -144,7 +159,9 @@ public class MainMenuController : UIScreenController
         {
             if (e.keyCode == KeyCode.Escape)
             {
-                if (_bugReportOverlay.style.display == DisplayStyle.Flex)
+                if (_errorModalOverlay?.style.display == DisplayStyle.Flex)
+                    CloseErrorModal();
+                else if (_bugReportOverlay.style.display == DisplayStyle.Flex)
                     CloseBugReportModal();
                 else if (_exitModalOverlay.style.display == DisplayStyle.Flex)
                     CloseExitModal();
@@ -329,6 +346,8 @@ public class MainMenuController : UIScreenController
         if (!DatabaseManager.Instance.InitSaveSlot(slot))
         {
             Debug.LogError("[MainMenu] No se pudo crear/abrir la partida. Se cancela el inicio.");
+            ShowInitErrorModal("No se pudo crear la partida nueva.",
+                DatabaseManager.Instance.LastInitError);
             return;
         }
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.Manager);
@@ -347,6 +366,9 @@ public class MainMenuController : UIScreenController
         if (!DatabaseManager.Instance.InitSaveSlot(slot))
         {
             Debug.LogError("[MainMenu] No se pudo crear/abrir la partida ProManager. Se cancela el inicio.");
+            CloseProModal();
+            ShowInitErrorModal("No se pudo crear la partida nueva de ProManager.",
+                DatabaseManager.Instance.LastInitError);
             return;
         }
         ScreenManager.Instance.GoTo(GameScreen.SelectTeam, GameMode.ProManager);
@@ -369,6 +391,33 @@ public class MainMenuController : UIScreenController
     {
         _proModalOverlay.style.display = DisplayStyle.None;
         _proModalBox.style.display     = DisplayStyle.None;
+    }
+
+    /// <summary>
+    /// Aviso visible cuando la partida no se puede crear/abrir (sin espacio, permisos,
+    /// DB corrupta...). Antes solo quedaba en el log y el botón parecía no hacer nada.
+    /// </summary>
+    void ShowInitErrorModal(string message, string detail)
+    {
+        if (_errorModalOverlay == null) return;
+
+        if (_errorModalText != null)
+        {
+            string text = string.IsNullOrEmpty(detail)
+                ? $"{message}\n\nNo se han podido preparar los datos de la partida."
+                : $"{message}\n\nDetalle técnico: {detail}";
+            _errorModalText.text = text;
+        }
+
+        CursorManager.Instance?.SetDefaultCursor();
+        _errorModalOverlay.style.display = DisplayStyle.Flex;
+        _errorModalBox.style.display     = DisplayStyle.Flex;
+    }
+
+    void CloseErrorModal()
+    {
+        _errorModalOverlay.style.display = DisplayStyle.None;
+        _errorModalBox.style.display     = DisplayStyle.None;
     }
 
     void OnLoadGameClicked()

@@ -31,10 +31,25 @@ public partial class DatabaseManager : MonoBehaviour
     private int _activeSaveSlot = 0;
     private bool _isTemplateSession = false;
 
-    public string TemplateDbPath =>
-        Path.Combine(Application.persistentDataPath, "TacticalFive", "template.db");
+    /// <summary>
+    /// Raíz de datos alternativa (tests). Vacío = `persistentDataPath/TacticalFive`,
+    /// que es donde viven `template.db` y las carpetas de imágenes personalizadas.
+    /// </summary>
+    public static string DataRootOverride { get; set; }
+
+    private static string DataRoot => string.IsNullOrEmpty(DataRootOverride)
+        ? Path.Combine(Application.persistentDataPath, "TacticalFive")
+        : DataRootOverride;
+
+    public string TemplateDbPath => Path.Combine(DataRoot, "template.db");
 
     public int ActiveSaveSlot => _activeSaveSlot;
+
+    /// <summary>
+    /// Motivo del último fallo de <see cref="InitSaveSlot"/> (null si fue bien).
+    /// La pantalla de menú lo muestra al jugador en lugar de fallar en silencio.
+    /// </summary>
+    public string LastInitError { get; private set; }
 
     private string DbPath => GameSaveManager.GetSaveDbPath(_activeSaveSlot);
 
@@ -59,6 +74,7 @@ public partial class DatabaseManager : MonoBehaviour
     /// </summary>
     public bool InitSaveSlot(int slotNumber)
     {
+        LastInitError = null;
         try
         {
             // No cambiar de conexión/partida mientras un lote de fondo sigue escribiendo:
@@ -94,6 +110,20 @@ public partial class DatabaseManager : MonoBehaviour
 
             if (isNewGame)
             {
+                // Instalación nueva (máquina recién formateada, primer arranque): no
+                // existe template.db, que antes solo generaba el Editor. Se construye
+                // aquí para que el alta use el camino probado (clon) y para que las
+                // siguientes partidas nuevas no tengan que sembrar de cero.
+                if (!File.Exists(TemplateDbPath))
+                {
+                    try { EnsureTemplateDb(); }
+                    catch (Exception tpl)
+                    {
+                        Debug.LogWarning($"[DB] No se pudo generar el template ({tpl.Message}); " +
+                                         "se sembrará la partida directamente.");
+                    }
+                }
+
                 // Clon + seed en una sola transacción: un fallo no puede dejar la
                 // partida a medias (tablas sin jugadores, etc.).
                 _db.RunInTransaction(() =>
@@ -134,6 +164,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (Exception e)
         {
+            LastInitError = e.Message;
             Debug.LogError($"[DB] Error inicializando el slot {slotNumber}: {e.Message}\n{e.StackTrace}");
             if (_dbField != null)
             {

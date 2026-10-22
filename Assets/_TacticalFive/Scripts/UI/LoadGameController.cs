@@ -453,6 +453,10 @@ public class LoadGameController : UIScreenController
         if (!DatabaseManager.Instance.InitSaveSlot(slotNumber))
         {
             Debug.LogError($"[LoadGame] No se pudo abrir la partida del slot {slotNumber} (DB corrupta o bloqueada).");
+            string detail = DatabaseManager.Instance.LastInitError;
+            ShowMessageModal("ERROR AL CARGAR",
+                "No se ha podido abrir esta partida (archivo dañado, bloqueado o sin permisos)."
+                + (string.IsNullOrEmpty(detail) ? "" : $"\n\nDetalle técnico: {detail}"), null);
             return;
         }
         // SIM-07: limpia el traspaso de resultados en memoria (escena única, nunca se
