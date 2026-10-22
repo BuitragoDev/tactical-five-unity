@@ -5441,6 +5441,8 @@ using System.Threading.Tasks;
 
     // Fire sale de un equipo en reconstrucción: ofrece veteranos (edad >= 30, salario alto)
     // a cambio de jugadores jóvenes o picks de equipos contender/balanced.
+    // EXENTO a propósito del filtro de valor (TradeValueHelper): en un fire sale el rebuild
+    // regala talento a cambio de juventud/rondas; es su plan, no un error de valoración.
     bool TrySellVeteran(TeamData seller, List<PlayerData> sellerRoster, int seasonId, int gameDay, HashSet<int> tradedThisSeason)
     {
         var vets = sellerRoster
@@ -6105,6 +6107,9 @@ using System.Threading.Tasks;
             .OrderBy(_ => _aiRng.Next(0, 1000))
             .ToList();
 
+        // Rondas disponibles del equipo que propone (una sola consulta para todo el ciclo).
+        var aPickPool = GetFuturePicksForTeam(teamA.id, true);
+
         foreach (var teamB in allTeams)
         {
             var rosterB = DatabaseManager.Instance.GetPlayersByTeam(teamB.id);
@@ -6139,21 +6144,25 @@ using System.Threading.Tasks;
 
             // Los contender suelen añadir un pick futuro como "sweetener" (R1 + a veces R2)
             List<DraftPickData> teamAPicks = null;
-            if (teamAStrategy == TeamStrategy.Contend && target.overall > 84)
+            if (teamAStrategy == TeamStrategy.Contend && target.overall > 84 && aPickPool.Count > 0)
             {
-                var futurePicks = GetFuturePicksForTeam(teamA.id, true);
-                if (futurePicks.Count > 0)
-                    teamAPicks = futurePicks.Take((float)_aiRng.NextDouble() < 0.4f && futurePicks.Count > 1 ? 2 : 1).ToList();
+                teamAPicks = aPickPool
+                    .Take((float)_aiRng.NextDouble() < 0.4f && aPickPool.Count > 1 ? 2 : 1)
+                    .ToList();
             }
 
-            // Try 1-for-1
+            // Try 1-for-1 (de peor a mejor jugador): sólo si el traspaso es razonable para
+            // los DOS equipos (nadie regala talento sin compensación).
             foreach (var c in tradeableCandidates)
             {
+                var aGives = new List<PlayerData> { c };
+                var aPicks = teamAPicks;
+                if (!IsAITradeFair(teamA, aGives, teamB, new List<PlayerData> { target }, ref aPicks, aPickPool)) continue;
                 if (TryExecuteTrade(teamA, rosterA, teamB, rosterB,
-                        new List<PlayerData> { c },
+                        aGives,
                         new List<PlayerData> { target },
                         seasonId, gameDay,
-                        aSelectedPicks: teamAPicks))
+                        aSelectedPicks: aPicks.Count > 0 ? aPicks : null))
                 {
                     tradedThisSeason.Add(c.id);
                     tradedThisSeason.Add(target.id);
@@ -6166,11 +6175,14 @@ using System.Threading.Tasks;
             {
                 for (int j = i + 1; j < tradeableCandidates.Count; j++)
                 {
+                    var aGives = new List<PlayerData> { tradeableCandidates[i], tradeableCandidates[j] };
+                    var aPicks = teamAPicks;
+                    if (!IsAITradeFair(teamA, aGives, teamB, new List<PlayerData> { target }, ref aPicks, aPickPool)) continue;
                     if (TryExecuteTrade(teamA, rosterA, teamB, rosterB,
-                            new List<PlayerData> { tradeableCandidates[i], tradeableCandidates[j] },
+                            aGives,
                             new List<PlayerData> { target },
                             seasonId, gameDay,
-                            aSelectedPicks: teamAPicks))
+                            aSelectedPicks: aPicks.Count > 0 ? aPicks : null))
                     {
                         tradedThisSeason.Add(tradeableCandidates[i].id);
                         tradedThisSeason.Add(tradeableCandidates[j].id);
@@ -6178,6 +6190,49 @@ using System.Threading.Tasks;
                         return true;
                     }
                 }
+            }
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// ¿El traspaso IA-IA es razonable para LOS DOS equipos? (Ninguno entrega mucho más
+    /// valor del que recibe ni un jugador claramente mejor que el que se lleva.) Si tal
+    /// cual no cuadra, el equipo que lo propone intenta compensar con una ronda; si aun
+    /// así no cuadra, no hay trato. El fire-sale de <see cref="TrySellVeteran"/> queda
+    /// fuera a propósito: ahí un rebuild SÍ regala veteranos por jóvenes/picks.
+    /// </summary>
+    bool IsAITradeFair(TeamData teamA, List<PlayerData> aGives, TeamData teamB, List<PlayerData> bGives,
+                       ref List<DraftPickData> aPicks, List<DraftPickData> pickPool)
+    {
+        long cap = GetValueCap();
+        int draftYear = _season?.year_end ?? 0;
+        var strategyA = GetTeamStrategy(teamA.id);
+        var strategyB = GetTeamStrategy(teamB.id);
+
+        var picks = aPicks != null ? new List<DraftPickData>(aPicks) : new List<DraftPickData>();
+
+        bool Fair(List<DraftPickData> current) =>
+            TradeValueHelper.IsSaneBothWays(strategyA, aGives, current, strategyB, bGives, null, cap, draftYear);
+
+        if (Fair(picks)) { aPicks = picks; return true; }
+
+        // El "sweetener" de contender puede romper el equilibrio: primero sin él.
+        if (picks.Count > 0)
+        {
+            picks.Clear();
+            if (Fair(picks)) { aPicks = picks; return true; }
+        }
+
+        // Compensar con una ronda del que propone el traspaso.
+        if (pickPool != null)
+        {
+            foreach (var pk in pickPool)
+            {
+                if (picks.Any(x => x.id == pk.id)) continue;
+                picks.Add(pk);
+                if (Fair(picks)) { aPicks = picks; return true; }
+                picks.Remove(pk);
             }
         }
         return false;
@@ -6474,30 +6529,44 @@ using System.Threading.Tasks;
                         .ToList();
                     if (aiHealthyForSA.Count > 0)
                     {
-                        long estimatedSalary = faTarget.salary;
+                        long cap = GetValueCap();
+                        int draftYear = _season?.year_end ?? 0;
+                        double faValue = TradeValueHelper.PlayerValue(faTarget, cap);
+
+                        // Valor: nunca ofrecer a alguien claramente mejor que el FA pedido
+                        // y buscar el paquete de valor más parecido (antes: salario parecido,
+                        // que no dice nada del talento).
                         var faPack = aiHealthyForSA
-                            .OrderBy(p => Mathf.Abs(p.salary - estimatedSalary))
+                            .Where(p => p.overall <= faTarget.overall + TradeValueHelper.MaxOvrGap)
+                            .OrderBy(p => Math.Abs(TradeValueHelper.PlayerValue(p, cap) - faValue))
                             .Take(2)
                             .ToList();
                         if (faPack.Count > 0)
                         {
                             var futurePicks = GetFuturePicksForTeam(aiTeam.id, true);
-                            var saPicks = new List<int>();
+                            var saPicks = new List<DraftPickData>();
                             if (futurePicks.Count > 0 && (float)_aiRng.NextDouble() > 0.4f)
-                                saPicks.Add(futurePicks[0].id);
-                            DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
+                                saPicks.Add(futurePicks[0]);
+
+                            var saCheck = TradeValueHelper.CheckOffer(GetTeamStrategy(aiTeam.id), faPack, saPicks,
+                                new List<PlayerData> { faTarget }, null, cap, draftYear);
+                            if (saCheck.Sane && saCheck.Outgoing >= saCheck.Incoming * TradeValueHelper.MinOfferRatio)
                             {
-                                manager_id = _manager.id,
-                                team_id_from = aiTeam.id,
-                                player_ids_out = TradeOfferData.JoinIds(new List<int> { faTarget.id }),
-                                player_ids_in = TradeOfferData.JoinIds(faPack.Select(p => p.id).ToList()),
-                                pick_ids_out = TradeOfferData.JoinIds(new List<int>()),
-                                pick_ids_in = TradeOfferData.JoinIds(saPicks),
-                                day_sent = gameDay,
-                                processed = 0
-                            });
-                            Debug.Log($"[AITrades] {aiTeam.name} propone S&T por {faTarget.first_name} {faTarget.last_name} (FA propio del usuario)");
-                            break;
+                                DatabaseManager.Instance.AddTradeOffer(new TradeOfferData
+                                {
+                                    manager_id = _manager.id,
+                                    team_id_from = aiTeam.id,
+                                    player_ids_out = TradeOfferData.JoinIds(new List<int> { faTarget.id }),
+                                    player_ids_in = TradeOfferData.JoinIds(faPack.Select(p => p.id).ToList()),
+                                    pick_ids_out = TradeOfferData.JoinIds(new List<int>()),
+                                    pick_ids_in = TradeOfferData.JoinIds(saPicks.Select(pk => pk.id).ToList()),
+                                    day_sent = gameDay,
+                                    processed = 0
+                                });
+                                Debug.Log($"[AITrades] {aiTeam.name} propone S&T por {faTarget.first_name} {faTarget.last_name} (FA propio del usuario)");
+                                break;
+                            }
+                            Debug.Log($"[AITrades] {aiTeam.name} descarta el S&T por {faTarget.last_name}: {saCheck.Reason ?? "valor desequilibrado"}");
                         }
                     }
                 }
@@ -6517,47 +6586,70 @@ using System.Threading.Tasks;
             var offerPack = BuildOfferPackage(aiHealthy, aiRoster.Count, target, userRoster, aiTeam, aiStrategy, tradedThisSeason);
             if (offerPack == null) continue;
 
-List<int> offeredPickIds = new List<int>();
-            List<int> wantedPickIds = new List<int>();
+            long valueCap = GetValueCap();
+            int valueDraftYear = _season?.year_end ?? 0;
+            double valueTolerance = TradeValueHelper.Tolerance(aiStrategy);
             bool isContender = IsTeamContender(aiTeam);
 
-            // Compensación por valor: el hueco de nivel entre el jugador que quiere la
-            // IA (target = el tuyo) y lo mejor que ofrece en jugadores.
-            int packBest = offerPack.Max(p => p.overall);
-            int gap = target.overall - packBest;
+            var offeredPicks = new List<DraftPickData>();
+            var wantedPicks = new List<DraftPickData>();
 
-            // Brecha demasiado grande para compensarla con rondas: no hay trato justo.
-            if (gap >= 9)
-                continue;
+            // Compensación por VALOR (antes se comparaba sólo el mejor OVR del paquete, lo
+            // que dejaba pasar "dos estrellas por un rol" e incluso pedía una ronda tuya).
+            double incomingValue = TradeValueHelper.PlayerValue(target, valueCap);
+            double outgoingValue = TradeValueHelper.PlayersValue(offerPack, valueCap);
 
-            // Quien ofrece jugadores PEORES añade rondas para igualar el valor.
-            if (gap >= 5)
+            // La IA se queda corta: paga la diferencia con rondas (nunca por encima de lo
+            // que su estrategia tolera).
+            if (outgoingValue < incomingValue * 0.95)
             {
-                var payPicks = GetFuturePicksForTeam(aiTeam.id, gap >= 7);
-                foreach (var pk in payPicks)
-                    offeredPickIds.Add(pk.id);
+                bool deepGap = incomingValue - outgoingValue > outgoingValue * 0.5;
+                foreach (var pk in GetFuturePicksForTeam(aiTeam.id, deepGap))
+                {
+                    double pickValue = TradeValueHelper.PickValue(pk, valueDraftYear);
+                    if (offeredPicks.Any(x => x.id == pk.id)) continue;
+                    if (outgoingValue + pickValue > incomingValue * valueTolerance) break;
+                    offeredPicks.Add(pk);
+                    outgoingValue += pickValue;
+                }
             }
-            // Caso inverso (raro): la IA ofrece mejor talento y pide una ronda tuya como
-            // suplemento, siempre con prob modestia y nunca como abuso del bug original.
-            else if (gap <= -5)
+            // La IA entrega más valor (dentro de la tolerancia): pide una ronda tuya como
+            // compensación. Nunca las dos cosas a la vez.
+            else if (outgoingValue > incomingValue * 1.02)
             {
-                var askPicks = GetFuturePicksForTeam(_myTeam.id, gap <= -7);
+                var askPicks = GetFuturePicksForTeam(_myTeam.id, false);
                 if (askPicks.Count > 0 && (float)_aiRng.NextDouble() < 0.5f)
-                    wantedPickIds.Add(askPicks[0].id);
+                {
+                    wantedPicks.Add(askPicks[0]);
+                    incomingValue += TradeValueHelper.PickValue(askPicks[0], valueDraftYear);
+                }
             }
 
-            // Deadline: los contenders presionan y añaden su R1 como incentivo extra.
+            // Deadline: los contenders presionan y añaden su R1 como incentivo, si sigue
+            // cuadrando el valor.
             if (IsDeadlineWeek() && isContender)
             {
-                var dlPicks = GetFuturePicksForTeam(aiTeam.id, true);
-                if (dlPicks.Count > 0)
-                    offeredPickIds.Add(dlPicks[0].id);
+                foreach (var pk in GetFuturePicksForTeam(aiTeam.id, true))
+                {
+                    if (offeredPicks.Any(x => x.id == pk.id)) continue;
+                    double pickValue = TradeValueHelper.PickValue(pk, valueDraftYear);
+                    if (outgoingValue + pickValue > incomingValue * valueTolerance) break;
+                    offeredPicks.Add(pk);
+                    outgoingValue += pickValue;
+                }
             }
 
-            // Evitar picks repetidos: GetFuturePicksForTeam elige año aleatorio y puede
-            // devolver el mismo pick en varias llamadas (payPicks + dlPicks).
-            offeredPickIds = offeredPickIds.Distinct().ToList();
-            wantedPickIds = wantedPickIds.Distinct().ToList();
+            // Puerta de valor: ni regalar talento (CheckOffer: nada mejor que el objetivo
+            // ni entregar más valor del tolerado) ni plantear una oferta insultante.
+            var offerCheck = TradeValueHelper.CheckOffer(aiStrategy, offerPack, offeredPicks,
+                new List<PlayerData> { target }, wantedPicks, valueCap, valueDraftYear);
+            if (!offerCheck.Sane || offerCheck.Outgoing < offerCheck.Incoming * TradeValueHelper.MinOfferRatio)
+            {
+                Debug.Log($"[AITrades] {aiTeam.name} descarta ofertar por {target.last_name} "
+                        + $"({target.overall}): {offerCheck.Reason ?? "oferta demasiado baja"} "
+                        + $"[da {offerCheck.Outgoing:0.0} / recibe {offerCheck.Incoming:0.0}]");
+                continue;
+            }
 
             var wantIds = new List<int> { target.id };
             var offeredIds = offerPack.Select(p => p.id).ToList();
@@ -6567,8 +6659,8 @@ List<int> offeredPickIds = new List<int>();
                 team_id_from = aiTeam.id,
                 player_ids_out = TradeOfferData.JoinIds(wantIds),
                 player_ids_in = TradeOfferData.JoinIds(offeredIds),
-                pick_ids_out = TradeOfferData.JoinIds(wantedPickIds),
-                pick_ids_in = TradeOfferData.JoinIds(offeredPickIds),
+                pick_ids_out = TradeOfferData.JoinIds(wantedPicks.Select(pk => pk.id).ToList()),
+                pick_ids_in = TradeOfferData.JoinIds(offeredPicks.Select(pk => pk.id).ToList()),
                 day_sent = gameDay,
                 processed = 0
             });
@@ -6586,6 +6678,22 @@ List<int> offeredPickIds = new List<int>();
             .Where(p => !excludedIds.Contains(p.id) && p.is_rookie == 0)
             .ToList();
         if (tradeable.Count == 0) return null;
+
+        // La IA sólo persigue a quien PUEDE pagar: nunca objetivos muy por encima de su
+        // mejor jugador traspasable (no se plantea pedir una estrella para regalar un rol).
+        // Los contenders tienen algo más de margen porque completan el pago con rondas.
+        int bestTradeable = aiRoster
+            .Where(p => p.overall < 87 && p.is_rookie == 0)
+            .Select(p => p.overall)
+            .DefaultIfEmpty(0)
+            .Max();
+        if (bestTradeable > 0)
+        {
+            tradeable = tradeable
+                .Where(p => p.overall <= bestTradeable + TradeValueHelper.TargetOvrMargin(aiStrategy))
+                .ToList();
+            if (tradeable.Count == 0) return null;
+        }
 
         // Trade block: si el usuario ha puesto jugadores en el mercado, la IA
         // los prioriza con un 60 % de probabilidad (siempre que encajen en la
@@ -6672,60 +6780,89 @@ List<int> offeredPickIds = new List<int>();
         bool aiHardCapped = aiTeam.first_apron_hard_capped == 1;
         bool userHardCapped = _myTeam.first_apron_hard_capped == 1;
 
+        // Valor: el paquete ha de poder pagar al objetivo y no puede regalar más de lo
+        // que la estrategia permite (ver TradeValueHelper).
+        long cap = GetValueCap();
+        double targetValue = TradeValueHelper.PlayerValue(target, cap);
+        double tolerance = TradeValueHelper.Tolerance(aiStrategy);
+
         // Protección universal: estrellas (OVR >= 87) nunca se ofrecen.
         // Contender además protege jóvenes prometedores (edad < 26 y OVR >= 82).
         // Rebuild solo ofrece veteranos (age >= 25).
+        // Nadie claramente mejor que el objetivo: un 84/85 no se entrega por un 76 por
+        // mucho que los salarios encajen (MaxOvrGap).
         var tradeable = aiAvailable.Where(p => !tradedThisSeason.Contains(p.id)
-                                              && p.is_rookie == 0 && p.overall < 87).ToList();
+                                              && p.is_rookie == 0 && p.overall < 87
+                                              && p.overall <= target.overall + TradeValueHelper.MaxOvrGap).ToList();
         if (aiStrategy == TeamStrategy.Contend)
             tradeable = tradeable.Where(p => !(p.age < 26 && p.overall >= 82)).ToList();
         if (aiStrategy == TeamStrategy.Rebuild)
             tradeable = tradeable.Where(p => p.age >= 25).ToList();
         if (tradeable.Count == 0) return null;
 
-        // Try 1-for-1: closest salary match first
-        foreach (var p in tradeable.OrderBy(p => Mathf.Abs(p.salary - target.salary)))
+        bool CapOk(List<PlayerData> pack) =>
+            TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
+                aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
+                aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0;
+
+        // 1-por-1: el valor más parecido al del objetivo (antes se ordenaba por salario,
+        // que no dice nada del talento), y nunca por encima de lo que la estrategia tolera.
+        foreach (var p in tradeable.OrderBy(p => Math.Abs(TradeValueHelper.PlayerValue(p, cap) - targetValue)))
         {
+            if (TradeValueHelper.PlayerValue(p, cap) > targetValue * tolerance) continue;
             var pack = new List<PlayerData> { p };
-            if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                    aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
-                    aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
-                return pack;
+            if (CapOk(pack)) return pack;
         }
 
-        // Try 2-for-1
+        // 2-por-1: combinaciones ordenadas por cercanía de valor (profundidad por calidad).
+        var pairs = new List<(double distance, List<PlayerData> pack)>();
         for (int i = 0; i < tradeable.Count; i++)
         {
             for (int j = i + 1; j < tradeable.Count; j++)
             {
-                var pack = new List<PlayerData> { tradeable[i], tradeable[j] };
-                if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                        aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
-                        aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
-                    return pack;
+                double v = TradeValueHelper.PlayerValue(tradeable[i], cap)
+                         + TradeValueHelper.PlayerValue(tradeable[j], cap);
+                if (v > targetValue * tolerance) continue;
+                pairs.Add((Math.Abs(v - targetValue), new List<PlayerData> { tradeable[i], tradeable[j] }));
             }
         }
+        foreach (var (_, pack) in pairs.OrderBy(x => x.distance))
+            if (CapOk(pack)) return pack;
 
-        // Try 3-for-1
+        // 3-por-1 (sólo si la plantilla lo aguanta), mismo criterio de valor.
         if (aiRosterCount - 3 >= 10)
         {
+            var triples = new List<(double distance, List<PlayerData> pack)>();
             for (int i = 0; i < tradeable.Count; i++)
             {
                 for (int j = i + 1; j < tradeable.Count; j++)
                 {
                     for (int k = j + 1; k < tradeable.Count; k++)
                     {
-                        var pack = new List<PlayerData> { tradeable[i], tradeable[j], tradeable[k] };
-                        if (TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                                aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
-                                aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0)
-                            return pack;
+                        double v = TradeValueHelper.PlayerValue(tradeable[i], cap)
+                                 + TradeValueHelper.PlayerValue(tradeable[j], cap)
+                                 + TradeValueHelper.PlayerValue(tradeable[k], cap);
+                        if (v > targetValue * tolerance) continue;
+                        triples.Add((Math.Abs(v - targetValue),
+                            new List<PlayerData> { tradeable[i], tradeable[j], tradeable[k] }));
                     }
                 }
             }
+            foreach (var (_, pack) in triples.OrderBy(x => x.distance))
+                if (CapOk(pack)) return pack;
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Cap salarial para la valoración de traspasos (crece +5 %/año; nunca usar la
+    /// constante a pelo para no desincronizarse con la partida).
+    /// </summary>
+    long GetValueCap()
+    {
+        var ls = DatabaseManager.Instance.GetLeagueSettings();
+        return ls != null && ls.salary_cap > 0 ? ls.salary_cap : TradeHelper.SALARY_CAP;
     }
 
     void ShowNextPendingTradeOffer()
