@@ -154,6 +154,7 @@ using System.Threading.Tasks;
     private bool _offerModalGoToQuinteto;
     private bool _tradeOfferModalResolved;
     private bool _tradeOfferAccepted;
+    private bool _tradeOfferGoToQuinteto;
     private int _pendingTradeChem;
     private bool _fastSimAbortRecovered;
     private bool _recoveryModalResolved;
@@ -251,6 +252,9 @@ using System.Threading.Tasks;
         _fastSimStopRequested = false;
         _fastSimOfferPauseActive = false;
         _fastSimAbortOffers = false;
+        _tradeOfferModalResolved = true;   // ningún modal pendiente puede bloquear la próxima simulación
+        _tradeOfferAccepted = false;
+        _tradeOfferGoToQuinteto = false;
         GameResultCache.FastSimTargetDate = null;
 
         // Liberar SIEMPRE el estado de carga: si no, _isLoading queda a true y el
@@ -2057,6 +2061,9 @@ using System.Threading.Tasks;
         _fastSimAbortRecovered = false;
         _fastSimOfferPauseActive = false;
         _offerModalGoToQuinteto = false;
+        _tradeOfferModalResolved = true;
+        _tradeOfferAccepted = false;
+        _tradeOfferGoToQuinteto = false;
 
         ShowLoading();
 
@@ -2231,18 +2238,34 @@ using System.Threading.Tasks;
                     {
                         _tradeOfferModalResolved = false;
                         _tradeOfferAccepted = false;
+                        _tradeOfferGoToQuinteto = false;
                         ShowNextPendingTradeOffer();
-                        if (_firedOverlay.style.display != DisplayStyle.Flex) continue;
+                        // Sin modal no hay nada que esperar: se corta el bucle (antes un
+                        // `continue` podía dejarlo girando en vacío).
+                        if (_firedOverlay.style.display != DisplayStyle.Flex) break;
                         yield return new WaitUntil(() => _tradeOfferModalResolved);
                         if (_tradeOfferAccepted)
                         {
                             tradeAccepted = true;
                             break;
                         }
+                        if (_tradeOfferGoToQuinteto) break;
                     }
 
                     _fastSimOfferPauseActive = false;
                     _fastSimAbortOffers = false;
+
+                    // Aviso de una oferta que dejó de ser válida: el jugador eligió
+                    // IR A QUINTETO para arreglar la plantilla.
+                    if (_tradeOfferGoToQuinteto)
+                    {
+                        _tradeOfferGoToQuinteto = false;
+                        _fastSimRunning = false;
+                        SetSidebarNavigationEnabled(true);
+                        HideLoading();
+                        ScreenManager.Instance.GoTo(GameScreen.Quinteto);
+                        yield break;
+                    }
 
                     if (tradeAccepted)
                     {
@@ -3184,7 +3207,13 @@ using System.Threading.Tasks;
         Refresh();
     }
 
-    void ShowOfferResultModal(string title, string text, int resultType)
+    /// <summary>
+    /// Modal de resultado de ofertas/errores. `onFastSimResolved` lo invocan los botones
+    /// de la simulación rápida para liberar la espera de la corrutina correspondiente:
+    /// sin él, cerrar el modal dejaba la simulación bloqueada para siempre.
+    /// </summary>
+    void ShowOfferResultModal(string title, string text, int resultType,
+                              System.Action<bool> onFastSimResolved = null)
     {
         _firedOverlay.Clear();
         _firedOverlay.style.display = DisplayStyle.Flex;
@@ -3210,7 +3239,10 @@ using System.Threading.Tasks;
             : "";
         header.AddToClassList(headerMod);
 
-        string subtitleText = resultType == 1 ? "OFERTAS ACEPTADAS"
+        // El título lo decide quien llama ("TRASPASO NO VÁLIDO", "ERROR AL SIMULAR EL
+        // DÍA"...). Antes se ignoraba y siempre se veía "OFERTAS RECHAZADAS".
+        string subtitleText = !string.IsNullOrEmpty(title) ? title
+            : resultType == 1 ? "OFERTAS ACEPTADAS"
             : resultType == 0 ? "HAY OFERTAS RECHAZADAS"
             : "OFERTAS RECHAZADAS";
         var subtitle = new Label(subtitleText);
@@ -3299,6 +3331,7 @@ using System.Threading.Tasks;
                 _firedOverlay.style.display = DisplayStyle.None;
                 _offerModalGoToQuinteto = true;
                 _offerModalResolved = true;
+                onFastSimResolved?.Invoke(true);
             });
             actions.Add(goToQuintetoBtn);
 
@@ -3311,6 +3344,7 @@ using System.Threading.Tasks;
                 _firedOverlay.style.display = DisplayStyle.None;
                 _offerModalGoToQuinteto = false;
                 _offerModalResolved = true;
+                onFastSimResolved?.Invoke(false);
             });
             actions.Add(continueBtn);
 
@@ -3334,6 +3368,9 @@ using System.Threading.Tasks;
             {
                 PlayClick();
                 _firedOverlay.style.display = DisplayStyle.None;
+                // Aunque no haya simulación en curso, quien pasó un callback debe quedar
+                // liberado (nunca dejar una espera sin resolver).
+                onFastSimResolved?.Invoke(false);
                 ShowNextPendingTradeOffer();
             });
             actions.Add(btn);
@@ -6751,7 +6788,66 @@ List<int> offeredPickIds = new List<int>();
             return;
         }
 
+        // Revalidación al mostrarla: la IA validó el traspaso cuando lo generó, pero la
+        // oferta puede quedar pendiente varios días y desde entonces la nómina, la
+        // plantilla o el hard cap cambian. Sin esto se enseñaban ofertas que solo
+        // fallaban al aceptarlas. Las obsoletas se descartan sin molestar al jugador.
+        var staleErrors = ValidatePendingTradeOffer(offer, ourPlayers, theirPlayers, ourSATFAs);
+        if (staleErrors.Count > 0)
+        {
+            DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
+            Debug.LogWarning($"[AITrades] Oferta de {offer.team_id_from} descartada por obsoleta: {string.Join(" | ", staleErrors)}");
+            ShowNextPendingTradeOffer();
+            return;
+        }
+
         ShowTradeOfferModal(offer, ourPlayers, theirPlayers, ourPicks, theirPicks, ourSATFAs);
+    }
+
+    /// <summary>
+    /// Revalida una oferta de traspaso de la IA con la plantilla y la nómina ACTUALES.
+    /// Equivale a la validación que hace la IA al generarla (<see cref="TradeHelper.ValidateTrade"/>),
+    /// con el mismo reparto de lados que al aceptar: A = equipo IA (envía), B = mi equipo (recibe).
+    /// Devuelve la lista de errores (vacía = la oferta sigue siendo válida).
+    /// </summary>
+    List<string> ValidatePendingTradeOffer(TradeOfferData offer, List<PlayerData> ourPlayers,
+                                           List<PlayerData> theirPlayers, List<PlayerData> ourSATFAs)
+    {
+        var aiTeam = _allTeams?.FirstOrDefault(t => t.id == offer.team_id_from)
+                     ?? DatabaseManager.Instance.GetTeamById(offer.team_id_from);
+
+        // S&T: los FA propios que se firmarían viajan con su nuevo contrato (Bird rights).
+        var signSalaries = new Dictionary<int, long>();
+        if (ourSATFAs != null && ourSATFAs.Count > 0)
+        {
+            var lsSat = DatabaseManager.Instance.GetLeagueSettings();
+            long myPaySat = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+            foreach (var fa in ourSATFAs)
+            {
+                var bd = RosterController.GetMaxOfferBreakdown(fa, lsSat, myPaySat, true);
+                long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(),
+                    lsSat != null ? lsSat.salary_cap : TradeHelper.SALARY_CAP);
+                signSalaries[fa.id] = bd.birdMax > 0 ? bd.birdMax : market;
+            }
+        }
+
+        var leagueChk = DatabaseManager.Instance.GetLeagueSettings();
+        long firstApronChk = leagueChk?.apron > 0 ? leagueChk.apron : TradeHelper.FIRST_APRON;
+        long secondApronChk = leagueChk?.repeater_apron > 0 ? leagueChk.repeater_apron : TradeHelper.SECOND_APRON;
+        long luxuryTaxChk = leagueChk?.luxury_tax > 0 ? leagueChk.luxury_tax : TradeHelper.LUXURY_TAX;
+
+        return TradeHelper.ValidateTrade(
+            theirPlayers, ourPlayers,
+            DatabaseManager.Instance.GetRosterCount(offer.team_id_from),
+            DatabaseManager.Instance.GetRosterCount(_myTeam.id),
+            _myTeam.name, DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary),
+            aiTeam != null ? aiTeam.name : "IA",
+            DatabaseManager.Instance.GetPlayersByTeam(offer.team_id_from).Sum(p => p.salary),
+            aiTeam != null && aiTeam.first_apron_hard_capped == 1,
+            _myTeam.first_apron_hard_capped == 1,
+            firstApronChk, secondApronChk, luxuryTaxChk,
+            null,
+            signSalaries.Count > 0 ? signSalaries : null);
     }
 
     void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers,
@@ -6856,44 +6952,22 @@ List<int> offeredPickIds = new List<int>();
             // el jugador pudo fichar/cortar. Sin revalidar se pueden crear plantillas
             // >17 o traspasos que incumplen el salary matching / apron.
             {
-                // Salario estimado de los FA propios que se firmarían (S&T).
-                var signSalaries = new Dictionary<int, long>();
-                if (ourSATFAs != null && ourSATFAs.Count > 0)
-                {
-                    var lsSat = DatabaseManager.Instance.GetLeagueSettings();
-                    long myPaySat = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
-                    foreach (var fa in ourSATFAs)
-                    {
-                        var bd = RosterController.GetMaxOfferBreakdown(fa, lsSat, myPaySat, true);
-                        long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(), lsSat != null ? lsSat.salary_cap : TradeHelper.SALARY_CAP);
-                        signSalaries[fa.id] = bd.birdMax > 0 ? bd.birdMax : market;
-                    }
-                }
-
-                var leagueChk = DatabaseManager.Instance.GetLeagueSettings();
-                long firstApronChk = leagueChk?.apron > 0 ? leagueChk.apron : TradeHelper.FIRST_APRON;
-                long secondApronChk = leagueChk?.repeater_apron > 0 ? leagueChk.repeater_apron : TradeHelper.SECOND_APRON;
-                long luxuryTaxChk = leagueChk?.luxury_tax > 0 ? leagueChk.luxury_tax : TradeHelper.LUXURY_TAX;
-
-                var errorsChk = TradeHelper.ValidateTrade(
-                    theirPlayers, ourPlayers,
-                    DatabaseManager.Instance.GetRosterCount(offer.team_id_from),
-                    DatabaseManager.Instance.GetRosterCount(_myTeam.id),
-                    _myTeam.name, DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary),
-                    aiTeam != null ? aiTeam.name : "IA",
-                    DatabaseManager.Instance.GetPlayersByTeam(offer.team_id_from).Sum(p => p.salary),
-                    aiTeam != null && aiTeam.first_apron_hard_capped == 1,
-                    _myTeam.first_apron_hard_capped == 1,
-                    firstApronChk, secondApronChk, luxuryTaxChk,
-                    null,
-                    signSalaries.Count > 0 ? signSalaries : null);
+                var errorsChk = ValidatePendingTradeOffer(offer, ourPlayers, theirPlayers, ourSATFAs);
 
                 if (errorsChk.Count > 0)
                 {
                     DatabaseManager.Instance.MarkTradeOfferProcessed(offer.id, 2);
                     _firedOverlay.style.display = DisplayStyle.None;
+                    // El callback resuelve la espera de la simulación rápida: sin él la
+                    // corrutina se quedaba en el WaitUntil y el juego quedaba bloqueado.
                     ShowOfferResultModal("TRASPASO NO VÁLIDO",
-                        "La oferta ya no es válida con tu plantilla actual:\n\n" + string.Join("\n", errorsChk), -1);
+                        "La oferta ya no es válida con tu plantilla actual:\n\n" + string.Join("\n", errorsChk), -1,
+                        onFastSimResolved: goToQuinteto =>
+                        {
+                            _tradeOfferModalResolved = true;
+                            _tradeOfferAccepted = false;
+                            _tradeOfferGoToQuinteto = goToQuinteto;
+                        });
                     return;
                 }
             }
