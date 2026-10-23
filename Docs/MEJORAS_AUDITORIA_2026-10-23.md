@@ -539,4 +539,4 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-23 | F0 | `F0-01` | `a9f351ba` | Auditor de seed (`SeedAuditorTests`, 26 casos). Reproduce el informe y añade el bug de `overall` de G-League. Suite EditMode: **360/360 en verde**. |
 | 2026-10-23 | F0 | `F0-04` | `a9f351ba` | Fórmula única del `overall` en `PlayerRating`; arreglado G-League (OV 5–7 → el de sus atributos) y añadida la migración `gleague_overall_recalc`. Auditor: **0 errores · 103 avisos**. Suite EditMode: **368/368**. |
 | 2026-10-23 | F0 | `F0-03` | `e87a5db5` | Matching salarial con límite único y error con cifra exacta; corregido buffer duplicado. Suite EditMode: **372/372**. |
-| 2026-10-23 | F0 | `F0-02` | *(sin commitear)* | Diagnóstico determinista del calendario: 1.230 partidos, 82 por equipo y todos los cruces; localía 27–55. El generador queda intacto para F5. Suite EditMode: **373/373**. |
+| 2026-10-23 | F0 | `F0-02` | `d07ca502` | Diagnóstico determinista del calendario: 1.230 partidos, 82 por equipo y todos los cruces; localía 27–55. El generador queda intacto para F5. Suite EditMode: **373/373**. |
