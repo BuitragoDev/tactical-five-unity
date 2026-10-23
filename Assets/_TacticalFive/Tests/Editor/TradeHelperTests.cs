@@ -137,16 +137,59 @@ public class TradeHelperTests
         var b = new List<PlayerData> { Player(5_000_000) };
         var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", 250_000_000L, "Lakers", 100_000_000L, false, true);
         Assert.That(errors, Has.Some.Contains("múltiples jugadores"));
-        Assert.That(errors, Has.Some.Contains("salario ≤ al que envía"));
+        Assert.That(errors, Has.Some.Contains($"${5_000_000:N0}"));
     }
 
     [Test]
-    public void ValidateTrade_FirstApron_Applies110PercentRule()
+    public void ValidateTrade_FirstApron_ErrorShowsTheExactLimitApplied()
     {
-        var a = new List<PlayerData> { Player(10_000_000) };
-        var b = new List<PlayerData> { Player(5_000_000) };
-        var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", 235_000_000L, "Lakers", 100_000_000L);
-        Assert.That(errors, Has.Some.Contains("110%"));
+        const long salaryOut = 10_000_000;
+        const long salaryIn = 11_000_001;
+        long projectedPayroll = TradeHelper.FIRST_APRON + 1;
+        long currentPayroll = projectedPayroll - salaryIn + salaryOut;
+        var incoming = new List<PlayerData> { Player(salaryIn) };
+        var outgoing = new List<PlayerData> { Player(salaryOut) };
+
+        var errors = TradeHelper.ValidateTrade(incoming, outgoing, 12, 12, "Bulls", currentPayroll);
+
+        Assert.That(errors, Has.Some.Contains($"${11_000_000:N0}"));
+        Assert.That(errors, Has.Some.Contains("primer apron"));
+    }
+
+    [TestCase(10_000_000L, TradeHelper.SECOND_APRON + 1, false, 10_000_000L)]
+    [TestCase(10_000_000L, TradeHelper.FIRST_APRON + 1, false, 11_000_000L)]
+    [TestCase(5_000_000L, 100_000_000L, false, 10_250_000L)]
+    public void ValidateTrade_SalaryMatchingBoundaries_AreExactAndMessageMatches(
+        long salaryOut, long projectedPayroll, bool hardCap, long expectedLimit)
+    {
+        Assert.That(TradeHelper.GetMaxIncomingSalary(salaryOut, projectedPayroll, hardCap), Is.EqualTo(expectedLimit));
+
+        // Just below and exactly at the limit are accepted; one dollar above is rejected.
+        Assert.That(ErrorsForIncoming(salaryOut, projectedPayroll, hardCap, expectedLimit - 1), Is.Empty);
+        Assert.That(ErrorsForIncoming(salaryOut, projectedPayroll, hardCap, expectedLimit), Is.Empty);
+
+        var over = ErrorsForIncoming(salaryOut, projectedPayroll, hardCap, expectedLimit + 1);
+        Assert.That(over, Has.Some.Contains($"${expectedLimit:N0}"));
+    }
+
+    [Test]
+    public void GetMaxIncomingSalary_BelowFirstApron_UsesSingleCBAAdjustmentPerBracket()
+    {
+        Assert.That(TradeHelper.GetMaxIncomingSalary(7_499_999L, 100_000_000L), Is.EqualTo(15_249_998L));
+        Assert.That(TradeHelper.GetMaxIncomingSalary(7_500_000L, 100_000_000L), Is.EqualTo(15_000_000L));
+        Assert.That(TradeHelper.GetMaxIncomingSalary(28_999_999L, 100_000_000L), Is.EqualTo(36_499_999L));
+        Assert.That(TradeHelper.GetMaxIncomingSalary(29_000_000L, 100_000_000L), Is.EqualTo(36_500_000L));
+    }
+
+    static List<string> ErrorsForIncoming(long salaryOut, long projectedPayroll, bool hardCap, long salaryIn)
+    {
+        // Mantener fija la nómina proyectada para probar cada tramo y solo variar el
+        // salario entrante alrededor de su límite. Se valida el lado de Bulls (B).
+        long currentPayroll = projectedPayroll - salaryIn + salaryOut;
+        var incoming = new List<PlayerData> { Player(salaryIn) };
+        var outgoing = new List<PlayerData> { Player(salaryOut) };
+        return TradeHelper.ValidateTrade(incoming, outgoing, 12, 12, "Bulls", currentPayroll,
+            teamBHardCapped: hardCap);
     }
 
     [Test]

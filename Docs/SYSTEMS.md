@@ -56,7 +56,7 @@
 
 - **Files:** `TradeHelper.cs` (293 ln), `TradeData.cs`, `TradeOfferData.cs`, `MarketController.cs`, `DashboardController.cs`.
 - **Constants (2025-26):** `SALARY_CAP=174_647_000`, `LUXURY_TAX=220_428_000`, `FIRST_APRON=229_015_000`, `SECOND_APRON=241_686_000`, `NT_MLE=14_100_000`, `T_MLE=5_700_000`, `MIN_SALARY=2_000_000`, `MAX_ROSTER=17`. +5%/season in `StartNewSeason`.
-- **`ValidateTrade(...)`:** roster limits (min 10 / max 17), apron-tier salary matching (2nd apron/hard-capped: no aggregation, incoming ≤ outgoing; 1st apron: ≤110% outgoing; else `out*2+250K` <7.5M / `+7.5M` <29M / `125%+250K`). S&T players don't count as outgoing roster/payroll on their own side but count as incoming salary for the other side.
+- **`ValidateTrade(...)`:** roster limits (min 10 / max 17), apron-tier salary matching via `GetMaxIncomingSalary` (single source for calculation and error text): 2nd apron/hard-capped: no aggregation, incoming ≤ outgoing; 1st apron: ≤110% outgoing; below 1st: `out*2+250K` <7.5M / `out+7.5M` <29M / `out*125%+250K`. Each buffer is applied once. S&T players don't count as outgoing roster/payroll on their own side but count as incoming salary for the other side.
 - **`PickBonus`:** R1 `10 + (30-slot)/3`; R2 `5 + (30-slot)/5`; else 3; protected top-N subtracts `protected_from*2`, min 1.
 - **`CalculateLuxuryTax(payroll)`:** brackets `(5M,1.5),(5M,1.75),(5M,2.5),(5M,3.25),(∞,3.75)` above `LUXURY_TAX`.
 - **`EvaluateTrade(...)`:** AI accept decision → `acceptScore` 0–100 (pick sweeteners ±PickBonus, player quality steps 90/85/80/75, `clamp(aTotalOvr-bTotalOvr,-20,20)`, financial branches by B payroll vs aprons ±, roster need +15 if ≤12 / +5 if ≤14, age factor, `Random.Range(-5,6)`), threshold 50 (40 if B>2nd apron, 45 if >1st apron).

@@ -19,7 +19,7 @@
 
 | Fase | Contenido | Ítems | Hechos |
 |---|---|---:|---:|
-| **0** | Higiene y quick wins | 6 | 2 |
+| **0** | Higiene y quick wins | 6 | 3 |
 | **1** | Datos y balance del seed | 7 | 0 |
 | **2** | Motor de simulación | 12 | 0 |
 | **3** | Calibración y reproducibilidad | 7 | 0 |
@@ -30,7 +30,7 @@
 | **8** | Arquitectura y rendimiento | 8 | 0 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **69** | **2** |
+| | **TOTAL** | **69** | **3** |
 
 ### Grafo de dependencias
 
@@ -80,10 +80,11 @@ flowchart LR
   - *Criterio:* un test genera calendario para una temporada sintética y publica en el fallo: partidos totales, partidos por equipo, localías por equipo y parejas faltantes. En esta fase **no** se arregla el generador (eso es F5-01/F5-02); sirve de línea base reproducible.
   - *Punto de partida:* `ScheduleGenerator.cs:10`; `Tests/Editor/CalendarHelperTests.cs`.
 
-- [ ] **F0-03 · Corregir el margen salarial duplicado de `TradeHelper`**
+- [x] **F0-03 · Corregir el margen salarial duplicado de `TradeHelper`**
   - *Ref:* `ECO-02` · *Esfuerzo:* S · *Depende:* —
   - *Criterio:* el límite del 110% se define una sola vez; existen tests justo por debajo, igual y por encima del umbral en las tres ramas (por encima del 2º apron, entre 1º y 2º, por debajo del 1º) y el texto de error coincide con el número aplicado.
   - *Punto de partida:* `TradeHelper.cs:59–76`; `Tests/Editor/TradeHelperTests.cs`.
+  - *Hecho (2026-10-23):* `TradeHelper.GetMaxIncomingSalary` es la fuente única para el límite y su mensaje. Se eliminó el +$250K extra por debajo del primer apron y el buffer del tramo 110% (los docs CBA describen 110% exacto); el mensaje ahora indica el máximo aplicado. Tests bajo/igual/sobre los tres niveles y tests de los dos cortes de salario. Suite EditMode: **372/372**.
 
 - [x] **F0-04 · Una sola fórmula de `overall`**
   - *Ref:* `ROST-01` · *Esfuerzo:* S · *Depende:* —
@@ -534,5 +535,6 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | Fecha | Fase | Ítems cerrados | Commit | Notas |
 |---|---|---|---|---|
 | 2026-10-23 | — | — | `e76bf723` | Creación del plan a partir de `AUDITORIA_2026-10-23.md`. |
-| 2026-10-23 | F0 | `F0-01` | *(sin commitear)* | Auditor de seed (`SeedAuditorTests`, 26 casos). Reproduce el informe y añade el bug de `overall` de G-League. Suite EditMode: **360/360 en verde**. |
-| 2026-10-23 | F0 | `F0-04` | *(sin commitear)* | Fórmula única del `overall` en `PlayerRating`; arreglado G-League (OV 5–7 → el de sus atributos) y añadida la migración `gleague_overall_recalc`. Auditor: **0 errores · 103 avisos**. Suite EditMode: **368/368**. |
+| 2026-10-23 | F0 | `F0-01` | `a9f351ba` | Auditor de seed (`SeedAuditorTests`, 26 casos). Reproduce el informe y añade el bug de `overall` de G-League. Suite EditMode: **360/360 en verde**. |
+| 2026-10-23 | F0 | `F0-04` | `a9f351ba` | Fórmula única del `overall` en `PlayerRating`; arreglado G-League (OV 5–7 → el de sus atributos) y añadida la migración `gleague_overall_recalc`. Auditor: **0 errores · 103 avisos**. Suite EditMode: **368/368**. |
+| 2026-10-23 | F0 | `F0-03` | *(pendiente de commit)* | Matching salarial con límite único y error con cifra exacta; corregido buffer duplicado. Suite EditMode: **372/372**. |

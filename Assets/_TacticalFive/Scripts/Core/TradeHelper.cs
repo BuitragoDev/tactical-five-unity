@@ -17,6 +17,13 @@ public static class TradeHelper
     public const int MAX_TWO_WAY_AGE = 23;
     public const int IR_MIN_DAYS = 90;
 
+    // Salary matching (ECO-02): una sola fuente para los tramos del CBA.
+    public const int FIRST_APRON_MATCHING_PERCENT = 110;
+    public const long SALARY_MATCHING_BUFFER = 250_000;
+    public const long SALARY_MATCHING_LOW_BRACKET = 7_500_000;
+    public const long SALARY_MATCHING_MIDDLE_BRACKET = 29_000_000;
+    public const long SALARY_MATCHING_MIDDLE_ALLOWANCE = 7_500_000;
+
     public static bool IsEligibleForTwoWay(PlayerData p)
     {
         return p != null && IsEligibleForTwoWayAge(p.age);
@@ -49,32 +56,49 @@ public static class TradeHelper
         long newPayroll, string teamName, bool hardCappedToFirstApron,
         List<string> errors, long firstApron = FIRST_APRON, long secondApron = SECOND_APRON)
     {
-        if (newPayroll > secondApron || (hardCappedToFirstApron && newPayroll > firstApron))
+        bool restrictedByApron = newPayroll > secondApron || (hardCappedToFirstApron && newPayroll > firstApron);
+        if (restrictedByApron)
         {
             if (playersInCount > 1)
                 errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. No puede recibir múltiples jugadores.");
-            if (salaryOut < salaryIn)
-                errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. Solo puede recibir salario ≤ al que envía.");
         }
-        else if (newPayroll > firstApron)
-        {
-            var maxReceive = (long)(salaryOut * 1.10);
-            if (salaryIn > maxReceive + 250_000)
-                errors.Add($"{teamName} está en el primer apron. Solo puede recibir hasta el 110% del salario que envía.");
-        }
-        else
-        {
-            long maxReceive;
-            if (salaryOut < 7_500_000)
-                maxReceive = salaryOut * 2 + 250_000;
-            else if (salaryOut < 29_000_000)
-                maxReceive = salaryOut + 7_500_000;
-            else
-                maxReceive = (long)(salaryOut * 1.25 + 250_000);
 
-            if (salaryIn > maxReceive + 250_000)
+        long maxReceive = GetMaxIncomingSalary(salaryOut, newPayroll, hardCappedToFirstApron, firstApron, secondApron);
+        if (salaryIn > maxReceive)
+        {
+            if (restrictedByApron)
+                errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. Solo puede recibir hasta ${maxReceive:N0}.");
+            else if (newPayroll > firstApron)
+                errors.Add($"{teamName} está en el primer apron. Solo puede recibir hasta ${maxReceive:N0}.");
+            else
                 errors.Add($"{teamName} no puede recibir más de ${maxReceive:N0}.");
         }
+    }
+
+    /// <summary>
+    /// Límite exacto del salario entrante según la nómina proyectada. Por encima del
+    /// segundo apron (o sobre el primero con hard cap) no puede aumentar salario; entre
+    /// aprons se aplica el porcentaje definido arriba; por debajo del primero se aplica
+    /// el matching por tramos. El mismo valor se usa para validar y redactar el error.
+    /// </summary>
+    public static long GetMaxIncomingSalary(long salaryOut, long projectedPayroll,
+        bool hardCappedToFirstApron = false,
+        long firstApron = FIRST_APRON,
+        long secondApron = SECOND_APRON)
+    {
+        if (projectedPayroll > secondApron || (hardCappedToFirstApron && projectedPayroll > firstApron))
+            return salaryOut;
+
+        if (projectedPayroll > firstApron)
+            return salaryOut * FIRST_APRON_MATCHING_PERCENT / 100;
+
+        if (salaryOut < SALARY_MATCHING_LOW_BRACKET)
+            return salaryOut * 2 + SALARY_MATCHING_BUFFER;
+
+        if (salaryOut < SALARY_MATCHING_MIDDLE_BRACKET)
+            return salaryOut + SALARY_MATCHING_MIDDLE_ALLOWANCE;
+
+        return salaryOut * 125 / 100 + SALARY_MATCHING_BUFFER;
     }
 
     public static int PickBonus(DraftPickData pk, int currentDraftYear = 0)
