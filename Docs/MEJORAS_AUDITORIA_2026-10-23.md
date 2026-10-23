@@ -19,7 +19,7 @@
 
 | Fase | Contenido | Ítems | Hechos |
 |---|---|---:|---:|
-| **0** | Higiene y quick wins | 6 | 3 |
+| **0** | Higiene y quick wins | 6 | 4 |
 | **1** | Datos y balance del seed | 7 | 0 |
 | **2** | Motor de simulación | 12 | 0 |
 | **3** | Calibración y reproducibilidad | 7 | 0 |
@@ -30,7 +30,7 @@
 | **8** | Arquitectura y rendimiento | 8 | 0 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **69** | **3** |
+| | **TOTAL** | **69** | **4** |
 
 ### Grafo de dependencias
 
@@ -75,10 +75,11 @@ flowchart LR
   - *Punto de partida:* `DatabaseManager.Seeding.cs`; patrón de test en `Tests/Editor/SaveSlotInitTests.cs`.
   - *Hecho (2026-10-23):* `Tests/Editor/SeedAuditorTests.cs` — siembra una partida temporal y audita 30 equipos, 606 jugadores y 360 prospectos con 24 reglas de error + 5 de aviso. Reproduce los hallazgos manuales del informe (235 OV, 86 atributos bajos, 3 plantillas fuera de rango) y **destapó un bug nuevo en G-League** (ver F0-04).
 
-- [ ] **F0-02 · Test diagnóstico de invariantes de calendario (solo reporta)**
+- [x] **F0-02 · Test diagnóstico de invariantes de calendario (solo reporta)**
   - *Ref:* `CAL-02` · *Esfuerzo:* S · *Depende:* —
   - *Criterio:* un test genera calendario para una temporada sintética y publica en el fallo: partidos totales, partidos por equipo, localías por equipo y parejas faltantes. En esta fase **no** se arregla el generador (eso es F5-01/F5-02); sirve de línea base reproducible.
   - *Punto de partida:* `ScheduleGenerator.cs:10`; `Tests/Editor/CalendarHelperTests.cs`.
+  - *Hecho (2026-10-23):* `Tests/Editor/ScheduleGeneratorDiagnosticTests.cs` genera una temporada 2026-27 en slot temporal con semilla fija y restaura `UnityEngine.Random.state`. Informe: **1.230/1.230** partidos, **82 por equipo**, 435/435 cruces completos; pero la localía está muy sesgada (**27–55** por equipo, solo 5 equipos en 41/41). Se deja como línea base para F5-01/F5-02; no se toca `ScheduleGenerator`. Suite EditMode: **373/373**.
 
 - [x] **F0-03 · Corregir el margen salarial duplicado de `TradeHelper`**
   - *Ref:* `ECO-02` · *Esfuerzo:* S · *Depende:* —
@@ -538,3 +539,4 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-23 | F0 | `F0-01` | `a9f351ba` | Auditor de seed (`SeedAuditorTests`, 26 casos). Reproduce el informe y añade el bug de `overall` de G-League. Suite EditMode: **360/360 en verde**. |
 | 2026-10-23 | F0 | `F0-04` | `a9f351ba` | Fórmula única del `overall` en `PlayerRating`; arreglado G-League (OV 5–7 → el de sus atributos) y añadida la migración `gleague_overall_recalc`. Auditor: **0 errores · 103 avisos**. Suite EditMode: **368/368**. |
 | 2026-10-23 | F0 | `F0-03` | `e87a5db5` | Matching salarial con límite único y error con cifra exacta; corregido buffer duplicado. Suite EditMode: **372/372**. |
+| 2026-10-23 | F0 | `F0-02` | *(sin commitear)* | Diagnóstico determinista del calendario: 1.230 partidos, 82 por equipo y todos los cruces; localía 27–55. El generador queda intacto para F5. Suite EditMode: **373/373**. |
