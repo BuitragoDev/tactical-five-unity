@@ -91,9 +91,11 @@ public static class GLeagueSeeder
                 attrs[attr] = value;
             }
 
-            int overall = Mathf.Min(potential, attrs["speed"] + attrs["shooting"] + attrs["three_point"]
-                + attrs["passing"] + attrs["dribbling"] + attrs["defense"] + attrs["rebounding"]
-                + attrs["athleticism"] + attrs["iq"] + attrs["steals"] + attrs["blocks"]) / 11;
+            // Overall derivado de los atributos (fuente única: PlayerRating).
+            int overall = PlayerRating.FromAttributes(
+                attrs["speed"], attrs["shooting"], attrs["three_point"], attrs["passing"],
+                attrs["dribbling"], attrs["defense"], attrs["rebounding"], attrs["athleticism"],
+                attrs["iq"], attrs["steals"], attrs["blocks"], potential);
 
             var (firstName, lastName) = NamePools.GeneratePlayerNames(Rng);
 

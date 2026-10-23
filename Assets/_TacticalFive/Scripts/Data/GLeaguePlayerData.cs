@@ -26,13 +26,11 @@ public class GLeaguePlayerData
     public string photo { get; set; }
 
     /// <summary>Media de los 11 atributos (redondeada) capada por el potencial.
-    /// Mismo invariante que `PlayerData`: fuente única del overall.</summary>
+    /// Mismo invariante que `PlayerData`: delega en `PlayerRating` (fuente única).</summary>
     public int GetCalculatedAverage()
     {
-        int sum = speed + shooting + three_point + passing + dribbling + defense
-                + rebounding + athleticism + iq + steals + blocks;
-        int avg = (int)System.Math.Round(sum / 11.0);
-        return potential > 0 ? System.Math.Min(avg, potential) : avg;
+        return PlayerRating.FromAttributes(speed, shooting, three_point, passing, dribbling, defense,
+                                           rebounding, athleticism, iq, steals, blocks, potential);
     }
 
     /// <summary>Recalcula y fija `overall` desde los atributos (tras el desarrollo).</summary>

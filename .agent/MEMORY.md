@@ -66,7 +66,7 @@
 
 ## 6. Confirmed assumptions
 
-- `overall` is intended to be the mean of 11 attributes capped by `potential`, but current code uses integer division and mentoring does not recalculate it; verify this invariant before relying on post-mentoring ratings.
+- `overall` es la media redondeada de los 11 atributos capada por `potential`, calculada **solo** por `PlayerRating.FromSum`/`FromAttributes` (fuente única). Seeder, G-League, draft, desarrollo y mentoring recalculan con ella (`RecalculateOverall()`); no la dupliques.
 - `PlayerData.id` manual (seed 1..~600) — stable across cloned slots.
 - `league_settings` seeded from `TradeHelper` constants + `bi_annual=5.1M`; `StartNewSeason` raises all caps +5%.
 - Employee `reputation` (1–5) drives ticket multiplier and renovation discounts (not `skill`; `EmployeeData` has no `skill` field).

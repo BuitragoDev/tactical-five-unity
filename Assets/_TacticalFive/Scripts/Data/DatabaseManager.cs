@@ -608,11 +608,7 @@ public partial class DatabaseManager : MonoBehaviour
             var allPlayers = _db.Table<PlayerData>().ToList();
             foreach (var p in allPlayers)
             {
-                int sum = p.speed + p.shooting + p.three_point + p.passing + p.dribbling
-                        + p.defense + p.rebounding + p.athleticism + p.iq + p.steals + p.blocks;
-                int calc = (int)System.Math.Round(sum / 11f);
-                if (calc > p.potential)
-                    calc = p.potential;
+                int calc = p.GetCalculatedAverage();   // fuente única: PlayerRating
                 if (p.overall != calc)
                 {
                     p.overall = calc;
@@ -621,6 +617,27 @@ public partial class DatabaseManager : MonoBehaviour
             }
             MarkMigrationApplied("overall_recalc");
             Debug.Log("[DB] Migration: recalculated overall for all players");
+        }
+
+        // Los prospectos G-League nacían con overall = potential / 11 (fórmula mal
+        // escrita en GLeagueSeeder): las partidas viejas hay que corregirlas una vez.
+        if (!IsMigrationApplied("gleague_overall_recalc"))
+        {
+            var prospects = _db.Table<GLeaguePlayerData>().ToList();
+            int fixedProspects = 0;
+            foreach (var p in prospects)
+            {
+                int calc = p.GetCalculatedAverage();   // fuente única: PlayerRating
+                if (p.overall != calc)
+                {
+                    p.overall = calc;
+                    _db.Update(p);
+                    fixedProspects++;
+                }
+            }
+            MarkMigrationApplied("gleague_overall_recalc");
+            if (fixedProspects > 0)
+                Debug.Log($"[DB] Migration: recalculated overall for {fixedProspects} G-League prospects");
         }
 
         // Add slot_index to team_lineup if missing

@@ -89,7 +89,7 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 
 ## 9. Critical dependencies / invariants
 
-- `overall` is intended to equal the mean of 11 attributes capped by `potential`, but current code uses integer division and mentoring does not recalculate it. Preserve the intended invariant when touching rating mutations and verify `PlayerData.GetCalculatedAverage()` before changing formulas.
+- `overall` es la media redondeada de los 11 atributos capada por `potential`, con **fuente única** en `PlayerRating` (`Scripts/Data/PlayerRating.cs`). Seed, G-League, draft y mentoring llaman a `RecalculateOverall()`; no dupliques la fórmula.
 - Cap/apron constants live in `TradeHelper.cs` (2025-26); `league_settings` copies them; `StartNewSeason` raises them +5%.
 - `GameResultCache.Clear()` at the start of each simulated day — don't forget.
 - Player salary model: `players.salary` annual; `contract_years`; renewal/FA offers mature after 7 days.

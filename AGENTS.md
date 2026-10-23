@@ -119,7 +119,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 ## 7. Invariantes críticas (no romper)
 
-1. **`overall` pretende ser `mean(11 atributos)` capado por `potential`**, pero `GetCalculatedAverage()` usa división entera y `ApplyMentoring()` no lo recalcula. Mantenlo consistente y verifica cada mutación de atributos.
+1. **`overall` = `PlayerRating.FromAttributes(...)`** — media de los 11 atributos redondeada y capada por `potential`. **Fuente única:** `Scripts/Data/PlayerRating.cs`; `PlayerData` y `GLeaguePlayerData` delegan en ella, y la usan seed, G-League y migraciones. Tras mutar atributos, llama a `RecalculateOverall()`. No dupliques la fórmula.
 2. **Constantes de cap/apron en `TradeHelper.cs`** (única fuente; `league_settings` es copia; +5%/año).
 3. **`GameResultCache.Clear()` al inicio de cada día simulado** — olvidarlo corrompe el flujo de resultados.
 4. **`seasons.phase` machine:** `preseason → regular → playin → playoff → finished` — conduce dashboard, playoffs, premios.

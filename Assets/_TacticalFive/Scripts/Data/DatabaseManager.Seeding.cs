@@ -23,8 +23,8 @@ public partial class DatabaseManager
         {
             int teamId = teamByAbbr.TryGetValue(abbr, out var tid) ? tid : 0;
 
-            int calcOvr = (spd + sht + thr + pas + drb + def + reb + ath + iq + stl + blk) / 11;
-            if (calcOvr > pot) calcOvr = pot;
+            // Overall derivado de los atributos (fuente única: PlayerRating).
+            int calcOvr = PlayerRating.FromAttributes(spd, sht, thr, pas, drb, def, reb, ath, iq, stl, blk, pot);
 
             players.Add(new PlayerData
             {
@@ -870,8 +870,8 @@ public partial class DatabaseManager
                   int drb, int def, int reb, int ath, int iq, int stl, int blk,
                   long sal, int yrs, int rings = 0, int finalsMvps = 0, int finalsPlayed = 0, int seasonMvps = 0)
         {
-            int calcOvr = (spd + sht + thr + pas + drb + def + reb + ath + iq + stl + blk) / 11;
-            if (calcOvr > pot) calcOvr = pot;
+            // Overall derivado de los atributos (fuente única: PlayerRating).
+            int calcOvr = PlayerRating.FromAttributes(spd, sht, thr, pas, drb, def, reb, ath, iq, stl, blk, pot);
 
             freeAgents.Add(new PlayerData
             {
