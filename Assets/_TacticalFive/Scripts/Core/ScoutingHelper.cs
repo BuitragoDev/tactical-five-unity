@@ -29,11 +29,16 @@ public static class ScoutingHelper
         return (a + b) / 2;
     }
 
-    /// <summary>Valor mostrado por el ojeador a partir del valor real.</summary>
-    public static int Estimate(int trueValue, int error) => Mathf.Clamp(trueValue + error, 25, 99);
+    /// <summary>
+    /// Valor mostrado por el ojeador a partir del valor real. El suelo 25 es el límite
+    /// de esta estimación, no el mínimo legal de un atributo (`PlayerAttributeScale`).
+    /// </summary>
+    public static int Estimate(int trueValue, int error) =>
+        PlayerAttributeScale.ClampScoutingEstimate(trueValue + error);
 
     /// <summary>Valor real a partir de la estimación y el error guardado.</summary>
-    public static int Reveal(int estimate, int error) => Mathf.Clamp(estimate - error, 25, 99);
+    public static int Reveal(int estimate, int error) =>
+        PlayerAttributeScale.ClampScoutingEstimate(estimate - error);
 
     /// <summary>Reputación del mejor ojeador del equipo (1 si no hay ninguno).</summary>
     public static int ScoutReputation(List<EmployeeData> staff)

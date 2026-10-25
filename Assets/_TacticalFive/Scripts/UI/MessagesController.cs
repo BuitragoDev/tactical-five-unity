@@ -607,7 +607,7 @@ public class MessagesController : UIScreenController
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }
         }
 
-        if (nt == NewsType.LESION || nt == NewsType.RESERVA_IR)
+        if (nt == NewsType.LESION || nt == NewsType.RESERVA_IR || nt == NewsType.PLANTILLA_CORTA)
         {
             var tex = _noticiasSprites.GetValueOrDefault("lesionados");
             if (tex != null) { icon.style.backgroundImage = new StyleBackground(tex); return true; }

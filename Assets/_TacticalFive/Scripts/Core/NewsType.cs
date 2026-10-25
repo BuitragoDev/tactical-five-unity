@@ -19,6 +19,7 @@ public static class NewsType
     public const string RESULTADO = "resultado";
     public const string GLEAGUE_CHAMPION = "gleague_champion";
     public const string ALLSTAR = "allstar";
+    public const string PLANTILLA_CORTA = "plantilla_corta";
 
     // ── LESIONES ──
     public const string RECUPERACION = "recuperacion";

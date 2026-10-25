@@ -388,6 +388,24 @@
     margin-left: 16px;
 }
 
+/* Error de alta: se muestra un resumen corto; el informe completo va a la consola. */
+#ErrorModalBox {
+    width: 760px;
+    max-height: 620px;
+    flex-direction: column;
+}
+#ErrorModalBox .modal-body {
+    max-height: 440px;
+    overflow: hidden;
+    padding: 18px 26px;
+}
+#ErrorModalBox .modal-paragraph {
+    font-size: 19px;
+    color: rgb(190, 198, 215);
+    white-space: normal;
+    -unity-text-align: middle-left;
+}
+
 /* ── HERO ── */
 .hero {
     flex-grow: 1;
@@ -793,4 +811,3 @@
 .settings-quality-btn--wide {
     width: 130px;
 }
-

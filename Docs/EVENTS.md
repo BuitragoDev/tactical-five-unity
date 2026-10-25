@@ -79,6 +79,7 @@ All inserted via `DatabaseManager.AddMessage(MessageData)`. `sender_type`: **0 =
 | Migration name | Purpose |
 |---|---|
 | `overall_recalc` | Recompute `overall` = mean of 11 attrs (cap by potential) |
+| `overall_recalc_v2` | Recalculate all saved player `overall` values with the canonical `PlayerRating` implementation |
 | `draft_picks_reset` | Wipe `draft_picks` and reseed for the active season (uses previous standings) |
 
 (Column-based additive migrations still use `PRAGMA table_info`; see `DATA_MODEL.md §5`.)

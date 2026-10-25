@@ -78,7 +78,9 @@ public static class GLeagueHelper
 
     static void SetAttr(PlayerData p, string name, int value)
     {
-        int v = Mathf.Min(p.potential, Mathf.Max(30, value));
+        // El desarrollo incrementa un atributo existente; no lo eleva artificialmente
+        // al suelo de generación (30). El rango legal general es 1-99.
+        int v = Mathf.Min(p.potential, PlayerAttributeScale.ClampValid(value));
         switch (name)
         {
             case "speed": p.speed = v; break;

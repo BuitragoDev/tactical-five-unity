@@ -90,40 +90,31 @@ public partial class DatabaseManager : MonoBehaviour
 
             _activeSaveSlot = slotNumber;
             _isTemplateSession = false;
+            string savePath = GameSaveManager.GetSaveDbPath(slotNumber);
+            bool isNewGame = !HasSeededTeams(savePath);
+
+            // El template se valida/reconstruye antes de abrir o crear el archivo del
+            // slot. Un template viejo no debe dejar una save vacía como residuo.
+            if (isNewGame)
+                EnsureTemplateDb();
+
             // Las imágenes personalizadas se guardan por ámbito (save_{n}).
             TeamImages.SetScope($"save_{slotNumber}");
 
             // Crear directorio de guardados si no existe
-            string dir = Path.GetDirectoryName(DbPath);
+            string dir = Path.GetDirectoryName(savePath);
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
-            _dbField = new SQLiteConnection(DbPath);
+            _dbField = new SQLiteConnection(savePath);
             _db.ExecuteScalar<string>("PRAGMA journal_mode=WAL");
             // CreateTables/RunMigrations ya fallan si el archivo está corrupto: es
             // nuestra detección temprana de DB ilegible.
             CreateTables();
             RunMigrations();
 
-            bool hasExistingData = _db.Table<TeamData>().Count() > 0;
-            bool isNewGame = !hasExistingData;
-
             if (isNewGame)
             {
-                // Instalación nueva (máquina recién formateada, primer arranque): no
-                // existe template.db, que antes solo generaba el Editor. Se construye
-                // aquí para que el alta use el camino probado (clon) y para que las
-                // siguientes partidas nuevas no tengan que sembrar de cero.
-                if (!File.Exists(TemplateDbPath))
-                {
-                    try { EnsureTemplateDb(); }
-                    catch (Exception tpl)
-                    {
-                        Debug.LogWarning($"[DB] No se pudo generar el template ({tpl.Message}); " +
-                                         "se sembrará la partida directamente.");
-                    }
-                }
-
                 // Clon + seed en una sola transacción: un fallo no puede dejar la
                 // partida a medias (tablas sin jugadores, etc.).
                 _db.RunInTransaction(() =>
@@ -131,6 +122,7 @@ public partial class DatabaseManager : MonoBehaviour
                     if (File.Exists(TemplateDbPath))
                         CloneFromTemplate();
                     SeedStaticDataIfNeeded();
+                    ValidateSeedDatabase(_db, $"partida nueva (slot {slotNumber})");
                 });
                 MarkMigrationApplied("slot_initialized");
             }
@@ -164,7 +156,10 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (Exception e)
         {
-            LastInitError = e.Message;
+            var auditError = e as SeedAudit.SeedAuditException;
+            LastInitError = auditError != null
+                ? auditError.UserSummary
+                : (e.Message.Length > 1200 ? e.Message.Substring(0, 1200) + "…" : e.Message);
             Debug.LogError($"[DB] Error inicializando el slot {slotNumber}: {e.Message}\n{e.StackTrace}");
             if (_dbField != null)
             {
@@ -311,28 +306,42 @@ public partial class DatabaseManager : MonoBehaviour
 
     public void EnsureTemplateDb()
     {
-        // QA-05: un template de 0 bytes o parcial (build interrumpido) se reconstruye.
-        if (File.Exists(TemplateDbPath) && new FileInfo(TemplateDbPath).Length > 1024) return;
-
-        EnsureTemplateDirectory(TemplateDbPath);
-
-        // Se construye en un temporal y se publica con rename: si el proceso muere a
-        // mitad, nunca queda un template a medias en su ruta definitiva.
-        string tmp = TemplateDbPath + ".tmp";
-        try { if (File.Exists(tmp)) File.Delete(tmp); } catch { }
-        BuildTemplateFile(tmp);
-
-        try
+        lock (_templateLock)
         {
-            if (File.Exists(TemplateDbPath)) File.Delete(TemplateDbPath);
-            File.Move(tmp, TemplateDbPath);
+            if (File.Exists(TemplateDbPath) && new FileInfo(TemplateDbPath).Length > 1024)
+            {
+                try
+                {
+                    if (_isTemplateSession)
+                        CloseTemplateSession();
+
+                    using (var existing = new SQLiteConnection(TemplateDbPath))
+                    {
+                        ValidateSeedDatabase(existing, "template existente", includeGLeague: false);
+                        string fingerprint = GetMeta(existing, "seed_fingerprint");
+                        if (string.Equals(fingerprint, SeedBaseline.Fingerprint, StringComparison.Ordinal))
+                            return;
+                    }
+
+                    Debug.LogWarning("[DB] Template obsoleto (sin sello o de otra versión del seed); se reconstruirá.");
+                }
+                catch (Exception ex)
+                {
+                    var auditError = ex as SeedAudit.SeedAuditException;
+                    Debug.LogWarning("[DB] Template inválido/corrupto; se reconstruirá. " +
+                                     (auditError != null ? auditError.UserSummary : ex.Message));
+                    if (auditError != null)
+                        Debug.Log("[DB] Informe completo del template obsoleto:\n" + auditError.FullReport);
+                }
+            }
+
+            EnsureTemplateDirectory(TemplateDbPath);
+            string tmp = TemplateDbPath + ".tmp";
+            TryDeleteFile(tmp);
+            BuildTemplateFile(tmp);
+            PublishTemplateFile(tmp);
+            Debug.Log($"[DB] Template database created/refreshed: {TemplateDbPath}");
         }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[DB] No se pudo publicar el template: {ex.Message}");
-            throw;
-        }
-        Debug.Log($"[DB] Template database created: {TemplateDbPath}");
     }
 
     private static readonly object _templateLock = new();
@@ -347,6 +356,25 @@ public partial class DatabaseManager : MonoBehaviour
             EnsureTemplateDirectory(dbPath);
             BuildTemplateFile(dbPath);
             Debug.Log($"[DB] Template database created (background): {dbPath}");
+        }
+    }
+
+    /// <summary>
+    /// Reconstruye el template con el seed actual y lo publica de forma atómica: se
+    /// genera en `.tmp`, se valida y solo entonces sustituye al definitivo (que queda
+    /// como `.bak`). Si la construcción falla, el template anterior sigue intacto.
+    /// Lo usa el reset del Editor, que antes borraba el template antes de construir.
+    /// </summary>
+    public void RebuildTemplateDb()
+    {
+        lock (_templateLock)
+        {
+            EnsureTemplateDirectory(TemplateDbPath);
+            string tmp = TemplateDbPath + ".tmp";
+            TryDeleteFile(tmp);
+            BuildTemplateFile(tmp);
+            PublishTemplateFile(tmp);
+            Debug.Log($"[DB] Template database rebuilt: {TemplateDbPath}");
         }
     }
 
@@ -367,6 +395,20 @@ public partial class DatabaseManager : MonoBehaviour
             CreateTables();
             RunMigrations();
             SeedStaticDataIfNeeded();
+
+            // El auditor es el gate real: un seed inválido no se publica. La huella
+            // se comprueba después para que nunca enmascare un error de datos.
+            ValidateSeedDatabase(conn, $"template generado ({dbPath})", includeGLeague: false);
+
+            string fingerprint = SeedBaseline.Compute(conn);
+            SetMeta(conn, "seed_fingerprint", fingerprint);
+            // La huella solo detecta "el seed cambió desde la última revisión": si no
+            // coincide, el template se reconstruye con el seed actual y se avisa. El
+            // EditMode (SeedBaseline tests) es quien exige actualizar la constante.
+            if (!string.Equals(fingerprint, SeedBaseline.Fingerprint, StringComparison.Ordinal))
+                Debug.LogWarning(
+                    "[DB] El seed cambió respecto a SeedBaseline.Fingerprint; el template se " +
+                    $"reconstruyó con el seed actual. Actualiza la constante tras revisarlo: {fingerprint}");
         }
         finally
         {
@@ -399,6 +441,104 @@ public partial class DatabaseManager : MonoBehaviour
             Directory.CreateDirectory(directory);
     }
 
+    /// <summary>Audita una base sembrada antes de publicarla o clonarla.</summary>
+    void ValidateSeedDatabase(SQLiteConnection database, string source)
+        => ValidateSeedDatabase(database, source, includeGLeague: true);
+
+    void ValidateSeedDatabase(SQLiteConnection database, string source, bool includeGLeague)
+    {
+        SeedAudit.Report report;
+        try
+        {
+            report = SeedAudit.Run(
+                database.Table<TeamData>().ToList(),
+                database.Table<PlayerData>().ToList(),
+                database.Table<LeagueSettingsData>().FirstOrDefault(),
+                includeGLeague ? database.Table<GLeagueTeamData>().ToList() : null,
+                includeGLeague ? database.Table<GLeaguePlayerData>().ToList() : null,
+                includeGLeague);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException(
+                $"No se pudo auditar el seed de {source}: {ex.Message}", ex);
+        }
+
+        report.ThrowIfInvalid(source);
+    }
+
+    private static bool HasSeededTeams(string databasePath)
+    {
+        if (!File.Exists(databasePath) || new FileInfo(databasePath).Length == 0)
+            return false;
+
+        using var probe = new SQLiteConnection(databasePath);
+        bool hasTable = probe.ExecuteScalar<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='teams'") > 0;
+        return hasTable && probe.Table<TeamData>().Count() > 0;
+    }
+
+    private static string GetMeta(SQLiteConnection database, string key)
+    {
+        bool hasTable = database.ExecuteScalar<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='db_meta'") > 0;
+        if (!hasTable) return null;
+        return database.Table<DbMetaData>().Where(m => m.key == key).Select(m => m.value).FirstOrDefault();
+    }
+
+    private static void SetMeta(SQLiteConnection database, string key, string value)
+    {
+        database.CreateTable<DbMetaData>();
+        var row = database.Table<DbMetaData>().FirstOrDefault(m => m.key == key);
+        if (row == null)
+            database.Insert(new DbMetaData { key = key, value = value });
+        else
+        {
+            row.value = value;
+            database.Update(row);
+        }
+    }
+
+    private void PublishTemplateFile(string temporaryPath)
+    {
+        string backupPath = TemplateDbPath + ".bak";
+        string walPath = TemplateDbPath + "-wal";
+        string shmPath = TemplateDbPath + "-shm";
+        string backupWalPath = backupPath + "-wal";
+        string backupShmPath = backupPath + "-shm";
+        bool hadWal = File.Exists(walPath);
+        bool hadShm = File.Exists(shmPath);
+
+        if (!File.Exists(TemplateDbPath))
+        {
+            File.Move(temporaryPath, TemplateDbPath);
+            return;
+        }
+
+        // Conserva el template previo para diagnóstico/recuperación. La publicación
+        // del temporal sobre el destino usa replace atómico en el mismo filesystem.
+        File.Copy(TemplateDbPath, backupPath, true);
+        if (hadWal) File.Copy(walPath, backupWalPath, true);
+        if (hadShm) File.Copy(shmPath, backupShmPath, true);
+        try
+        {
+            TryDeleteFile(walPath);
+            TryDeleteFile(shmPath);
+            File.Replace(temporaryPath, TemplateDbPath, null);
+        }
+        catch
+        {
+            if (hadWal && File.Exists(backupWalPath)) File.Copy(backupWalPath, walPath, true);
+            if (hadShm && File.Exists(backupShmPath)) File.Copy(backupShmPath, shmPath, true);
+            throw;
+        }
+    }
+
+    private static void TryDeleteFile(string path)
+    {
+        try { if (File.Exists(path)) File.Delete(path); } catch { }
+    }
+
     public void CloseTemplateSession()
     {
         if (!_isTemplateSession) return;
@@ -413,7 +553,9 @@ public partial class DatabaseManager : MonoBehaviour
 
     void CloneFromTemplate()
     {
-        var template = new SQLiteConnection(TemplateDbPath);
+        using var template = new SQLiteConnection(TemplateDbPath);
+        ValidateSeedDatabase(template, $"template antes de clonar ({TemplateDbPath})", includeGLeague: false);
+
         template.CreateTable<TradeData>();
         template.CreateTable<TrainingData>();
         template.CreateTable<PlayerPersonalityData>();
@@ -436,7 +578,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.InsertAll(template.Table<AllStarAppearanceSeed>().ToList());
         _db.InsertAll(template.Table<TradeData>().ToList());
         _db.InsertAll(template.Table<HallOfFameData>().ToList());
-        template.Close();
+        _db.InsertAll(template.Table<DbMetaData>().ToList());
         Debug.Log("[DB] Static data cloned from template");
     }
 
@@ -500,6 +642,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<AllStarRosterData>();
         _db.CreateTable<MilestoneData>();
         _db.CreateTable<InjuryHistoryData>();
+        _db.CreateTable<DbMetaData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeaguePlayers_TeamId ON gleague_players(gleague_team_id)");
@@ -617,6 +760,23 @@ public partial class DatabaseManager : MonoBehaviour
             }
             MarkMigrationApplied("overall_recalc");
             Debug.Log("[DB] Migration: recalculated overall for all players");
+        }
+
+        // La fórmula canónica se corrigió después de que `overall_recalc` pudiera
+        // quedar aplicada con truncamiento. Esta segunda migración vuelve a derivar
+        // el valor para saves existentes; solo se marca si todo el lote termina bien.
+        if (!IsMigrationApplied("overall_recalc_v2"))
+        {
+            var allPlayers = _db.Table<PlayerData>().ToList();
+            foreach (var p in allPlayers)
+            {
+                int calc = p.GetCalculatedAverage();
+                if (p.overall == calc) continue;
+                p.overall = calc;
+                _db.Update(p);
+            }
+            MarkMigrationApplied("overall_recalc_v2");
+            Debug.Log("[DB] Migration: canonical overall recalculated for all players (v2)");
         }
 
         // Los prospectos G-League nacían con overall = potential / 11 (fórmula mal

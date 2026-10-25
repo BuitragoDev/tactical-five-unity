@@ -21,11 +21,12 @@ All under `Application.persistentDataPath`:
 
 ## 2. Save model
 
-- **SQLite per slot** — the save IS the database (45 tables). No JSON serialization of game state, no `JsonUtility` on game data (only used for `saves.json`).
+- **SQLite per slot** — the save IS the database. No JSON serialization of game state, no `JsonUtility` on game data (only used for `saves.json`).
 - **`saves.json` metadata** (`SaveMeta { SaveSlotInfo[] slots }`): `slotNumber, exists, managerName, teamName, teamLogo, seasonYear, currentDate, lastPlayedRealDate, currentGameDay, gameMode`.
-- **`template.db`** — created by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` (flujo del Editor **y alta de partida nueva**: `InitSaveSlot` lo construye al vuelo si falta, para que una instalación sin Editor —build en una máquina recién formateada— funcione). The current copy list includes `trades`, while the dynamic-table list also includes `trades`; this is an actual documentation/code ambiguity that must be resolved by deciding whether trade history is seed content or empty per-slot state.
+- **`template.db`** — created/validated by `DatabaseManager.EnsureTemplateDb()` / `BuildTemplateDatabaseInBackground()` before a new slot is opened. `InitSaveSlot` refreshes it if its `db_meta.seed_fingerprint` is absent/outdated or its cloned seed data fails audit. The rebuild uses a validated `.tmp`, preserves the previous DB as `.bak`, and atomically replaces the target (`RebuildTemplateDb` is the Editor reset path). Fingerprint scope: `teams`, `players`, `league_settings`; the Editor may keep valid custom edits. A fingerprint mismatch is a **freshness warning**, not a block: the build always audits first, then logs the current hash (the EditMode test is what requires updating `SeedBaseline.Fingerprint`). The current copy list includes `trades`, while the dynamic-table list also includes `trades`; this is an actual documentation/code ambiguity that must be resolved by deciding whether trade history is seed content or empty per-slot state.
 - **`CloneFromTemplate()`** (`DatabaseManager.cs:203`) — creates dynamic tables, then inserts template data preserving IDs. El clon y el seed van juntos dentro de un `_db.RunInTransaction` en `InitSaveSlot`; los seeders **no deben abrir su propia transacción** (`IsInTransaction` guard) porque sqlite-net lanza `InvalidOperationException` al anidar.
 - **Template build moved off the main thread** (`BuildTemplateDatabaseInBackground`, guarded by `_templateLock`).
+- **F1-06/F1-08 seed gate:** `SeedAudit` is the only blocking gate: it validates the tables actually cloned before publication and before the first clone, and validates the complete new slot inside its transaction. An old/corrupt template is logged and rebuilt automatically; an invalid freshly seeded template or final slot still blocks and rolls back. The UI gets a short summary; Unity Console gets the full report. G-League is seeded per slot and excluded from template validation. A seed fingerprint that differs from `SeedBaseline.Fingerprint` only rebuilds the template and logs a warning — it never blocks a new game. Informational roster-size and low-but-legal attribute values do not block.
 
 ## 3. Save / load flows
 
@@ -37,7 +38,7 @@ All under `Application.persistentDataPath`:
    - close previous connection; set `_activeSaveSlot`;
    - `new SQLiteConnection(dbPath)` (ReadWrite|Create, ticks);
    - `CreateTables()` → `RunMigrations()` (+ `PRAGMA user_version`);
-   - if slot empty: clone template (if exists) or seed; else do nothing.
+    - if slot empty: ensure/rebuild and audit template before creating the slot DB, clone, seed missing content, then audit the complete slot in one transaction; else apply migrations to the existing slot.
 4. `GoTo(SelectTeam, mode)`.
 5. `SelectTeamController` creates `ManagerData` + `SeasonData`.
 6. `PreseasonController.OnContinue` commits metadata: `GameSaveManager.SaveSlotInfo(...)` (exists=true, names, logo, seasonYear, lastPlayedRealDate, currentGameDay=0, gameMode).
@@ -67,7 +68,7 @@ All under `Application.persistentDataPath`:
 
 - **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2` (`DatabaseManager.cs:41,290-291`). The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state). The current code assigns `PRAGMA user_version = 2` unconditionally rather than branching on prior versions; functional migration state is therefore carried mainly by named migrations and column checks.
 - **Additive column migrations stay idempotent:** `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
-- **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `draft_picks_reset`, `draft_picks_multiyear` (see `EVENTS.md §4`).
+- **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `overall_recalc_v2`, `draft_picks_reset`, `draft_picks_multiyear` (see `EVENTS.md §4`).
 - **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN` (e.g. `players.last_team_id = team_id` for players on a roster).
 - **Implication:** older saves open fine on newer code; newer saves with extra columns read fine by older code only if older code ignores extra columns (it does — sqlite-net maps known fields only).
 
@@ -75,7 +76,7 @@ All under `Application.persistentDataPath`:
 
 | Category | Tables |
 |---|---|
-| Meta | `saves.json` (slots) |
+| Meta | `saves.json` (slots), `db_meta` (seed fingerprint) |
 | Static content (template, 15) | teams, players, league_settings, sponsors, tv_channels, historical_records, team_records, historical_player_stats, finals_records, awards_records, quintet_records, all_star_records, all_star_appearance_seed, trades, hof_players |
 | Progress | managers, seasons, games, game_attendance |
 | Per-game | player_game_stats, finals_player_stats, season_game_records |

@@ -55,7 +55,7 @@ public static class NewsTexts
             ? "\n\nDada la gravedad de la lesión, se ha decidido activar la reserva de lesionados. El jugador permanecerá fuera de la convocatoria mientras completa su rehabilitación y no computará en la nómina del tope salarial."
             : "\n\nEl cuerpo médico trabajará para acelerar su recuperación, aunque se espera que pierda al menos los próximos compromisos.";
         return $"Se ha confirmado que {playerName} sufre una lesión de tipo \"{injuryType}\" que lo mantendrá fuera de las canchas durante aproximadamente {daysOut} días.\n\n" +
-            $"La lesión se produjo durante el último encuentro y las pruebas médicas realizadas esta mañana han revelado la extensión del daño. El jugador ya ha comenzado el proceso de rehabilitación bajo supervisión del staff médico.{textoIr}" +
+            $"La lesión se ha detectado al término del último encuentro: el jugador lo terminó, pero las pruebas médicas realizadas después han revelado la extensión del daño. Ya ha comenzado el proceso de rehabilitación bajo supervisión del staff médico.{textoIr}" +
             "\n\nLa ausencia de " + playerName + " obliga al cuerpo técnico a reajustar la rotación y buscar alternativas para cubrir su puesto en la pista.";
     }
 

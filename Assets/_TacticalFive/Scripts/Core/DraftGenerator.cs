@@ -352,7 +352,9 @@ public static class DraftGenerator
                         _ => 0
                     };
                 }
-                attrs[attr] = (int)Mathf.Clamp(baseAvg + mod + roll + traitBonus, 30, 99);
+                // El suelo del perfil de generación es 30; el rango legal de atributos
+                // es 1-99 y el scouting aplica su propio suelo de estimación (25).
+                attrs[attr] = PlayerAttributeScale.ClampGenerated((int)(baseAvg + mod + roll + traitBonus));
             }
 
             int trueOverall = (int)System.Math.Round(attrs.Values.Average());

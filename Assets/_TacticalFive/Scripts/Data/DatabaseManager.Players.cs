@@ -266,6 +266,29 @@ public partial class DatabaseManager
         _db.Update(player);
     }
 
+    /// <summary>
+    /// F2-09: actualiza en lote los jugadores que cambiaron tras un partido (físico,
+    /// lesión) en una sola transacción. Si el llamador ya tiene una abierta (la del
+    /// día) escribe dentro de ella; nunca anida un <c>BEGIN</c>.
+    /// </summary>
+    public void UpdatePlayersBatch(IList<PlayerData> players)
+    {
+        if (!EnsureDb() || players == null || players.Count == 0) return;
+
+        bool own = !_db.IsInTransaction;
+        if (own) _db.BeginTransaction();
+        try
+        {
+            _db.UpdateAll(players, runInTransaction: false);
+            if (own) _db.Commit();
+        }
+        catch
+        {
+            if (own) _db.Rollback();
+            throw;
+        }
+    }
+
     public List<PlayerData> GetTopPlayersByStat(int managerId, string stat, int count = 1)
     {
         if (!EnsureDb()) return new List<PlayerData>();

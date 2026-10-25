@@ -194,7 +194,7 @@ public partial class DatabaseManager
         if (prop == null) return;
 
         int val = (int)prop.GetValue(player);
-        val = Mathf.Min(val + 2, 99);
+        val = PlayerAttributeScale.ClampValid(val + 2);
         prop.SetValue(player, val);
 
         // Overall = media de atributos capada por potencial (fuente única).

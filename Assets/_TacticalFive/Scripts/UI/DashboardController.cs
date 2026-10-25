@@ -1871,9 +1871,16 @@ using System.Threading.Tasks;
 
         var result = GameSimulator.SimulateGame(game, homePlayers, awayPlayers, homeChem, awayChem,
             homePlan: PlanFor(game.home_team_id), awayPlan: PlanFor(game.away_team_id),
-            homeCoachBonus: CoachBonusFor(game.home_team_id), awayCoachBonus: CoachBonusFor(game.away_team_id));
+            homeCoachBonus: CoachBonusFor(game.home_team_id), awayCoachBonus: CoachBonusFor(game.away_team_id),
+            capturePlayByPlay: game.game_type != "allstar" && UIScreenController.GetSimMode() == 1);
         DatabaseManager.Instance.UpdateGame(game);
         GameResultCache.SimulatedGameIds.Add(game.id);
+
+        // Plantilla corta (F2-06): el partido se simuló con los disponibles o se resolvió
+        // por incomparecencia. Si afecta al equipo del jugador, se le avisa.
+        if (result.shortRoster && game.game_type != "allstar"
+            && (game.home_team_id == _myTeam.id || game.away_team_id == _myTeam.id))
+            NotifyShortRoster(result, game);
 
         if (UIScreenController.GetSimMode() == 1 && result.playByPlay != null)
             GameResultCache.PlayByPlayLogs[game.id] = result.playByPlay;
@@ -1950,6 +1957,61 @@ using System.Threading.Tasks;
         DatabaseManager.Instance.UpdateRelationshipsAfterGame(
             game.away_team_id, game.id, !homeWon,
             result.away_stats.Where(s => s.minutes > 0).Select(s => s.player_id).ToList());
+    }
+
+    // ── AVISO DE PLANTILLA CORTA (F2-06) ─────────────────────
+
+    // El motor ya no inventa el marcador cuando faltan jugadores: simula con los
+    // disponibles (1–4) o resuelve una incomparecencia (0–20). El jugador recibe un
+    // mensaje explicando lo que ha pasado con su equipo.
+    void NotifyShortRoster(GameSimulator.GameResult result, GameData game)
+    {
+        bool isHome = game.home_team_id == _myTeam.id;
+        int mine = isHome ? result.home_stats.Count : result.away_stats.Count;
+        int rivalCount = isHome ? result.away_stats.Count : result.home_stats.Count;
+        int rivalId = isHome ? game.away_team_id : game.home_team_id;
+        string rival = DatabaseManager.Instance.GetTeamById(rivalId)?.name ?? "el rival";
+
+        bool iForfeited = result.walkover && (isHome ? result.home_score == 0 : result.away_score == 0);
+        bool rivalForfeited = result.walkover && (isHome ? result.away_score == 0 : result.home_score == 0);
+
+        string title, body;
+        if (iForfeited)
+        {
+            title = "Incomparecencia";
+            body = $"No tenías ningún jugador sano disponible: el partido ante {rival} se pierde 0–20 por incomparecencia. Revisa la enfermería y la plantilla cuanto antes.";
+        }
+        else if (rivalForfeited)
+        {
+            title = "Incomparecencia del rival";
+            body = $"{rival} no pudo presentar a ningún jugador sano: el partido se gana 20–0 por incomparecencia.";
+        }
+        else if (mine < 5)
+        {
+            title = "Plantilla incompleta";
+            body = $"Has jugado ante {rival} con solo {mine} jugadores sanos. El resultado y el box score se han simulado con los disponibles; conviene reforzar la plantilla.";
+        }
+        else
+        {
+            title = "Plantilla incompleta del rival";
+            body = $"{rival} ha jugado ante ti con solo {rivalCount} jugadores sanos. El resultado y el box score se han simulado con los disponibles.";
+        }
+
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 0,
+            sender_id = 0,
+            title = title,
+            body = body,
+            game_day = _season.current_game_day,
+            game_date = _season.current_date,
+            created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            is_read = 0,
+            category = NewsCategory.CLUB,
+            news_type = NewsType.PLANTILLA_CORTA
+        });
     }
 
     // ── G-LEAGUE: SIMULACIÓN DE PARTIDOS DE LA FILIAL ──────

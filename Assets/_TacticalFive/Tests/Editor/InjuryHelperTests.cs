@@ -168,4 +168,61 @@ public class InjuryHelperTests
         for (int i = 0; i <= 20; i++)
             Assert.That(InjuryHelper.RollDays(d, i / 20.0), Is.InRange(4, 8));
     }
+
+    // ── RIESGO DE LESIÓN POR PARTIDO (F2-07) ────────────
+
+    [Test]
+    public void MatchRiskPerGame_NoMinutes_NoRisk()
+    {
+        // Quien no juega no se lesiona, por muy bajo que tenga el físico o el riesgo.
+        Assert.That(InjuryHelper.MatchRiskPerGame(0, 99, 0), Is.EqualTo(0f));
+        Assert.That(InjuryHelper.MatchRiskPerGame(0, 5, 90), Is.EqualTo(0f));
+        Assert.That(InjuryHelper.MatchRiskPerGame(-3, 50, 50), Is.EqualTo(0f));
+    }
+
+    [Test]
+    public void MatchRiskPerGame_IsProportionalToExposure()
+    {
+        // Referencia: 36 minutos = probabilidad base (0,8 %).
+        Assert.That(InjuryHelper.MatchRiskPerGame(36, 90, 0),
+            Is.EqualTo(InjuryHelper.INJURY_BASE_PER_GAME).Within(1e-6f));
+        Assert.That(InjuryHelper.MatchRiskPerGame(18, 90, 0),
+            Is.EqualTo(InjuryHelper.INJURY_BASE_PER_GAME / 2).Within(1e-6f));
+
+        float r5 = InjuryHelper.MatchRiskPerGame(5, 90, 0);
+        float r20 = InjuryHelper.MatchRiskPerGame(20, 90, 0);
+        float r36 = InjuryHelper.MatchRiskPerGame(36, 90, 0);
+        float r44 = InjuryHelper.MatchRiskPerGame(44, 90, 0);
+        TestContext.WriteLine($"Riesgo por partido: 5 min {r5:P3} · 20 min {r20:P3} · 36 min {r36:P3} · 44 min {r44:P3}");
+
+        Assert.That(r5, Is.LessThan(r20));
+        Assert.That(r20, Is.LessThan(r36));
+        Assert.That(r36, Is.LessThan(r44));
+        Assert.That(r44, Is.GreaterThan(r5 * 8f), "40 minutos arriesgan mucho más que 5");
+    }
+
+    [Test]
+    public void MatchRiskPerGame_LowFisico_IncreasesRisk()
+    {
+        float rested = InjuryHelper.MatchRiskPerGame(36, 90, 0);
+        float tired = InjuryHelper.MatchRiskPerGame(36, 20, 0);
+        Assert.That(tired, Is.GreaterThan(rested));
+        // (30 - 20) * 0.15 = 1.5 → x2.5 sobre la base.
+        Assert.That(tired, Is.EqualTo(rested * 2.5f).Within(1e-5f));
+    }
+
+    [Test]
+    public void MatchRiskPerGame_RelapseRiskAddsToTheBase()
+    {
+        float healthy = InjuryHelper.MatchRiskPerGame(30, 80, 0);
+        float risky = InjuryHelper.MatchRiskPerGame(30, 80, 60);
+        Assert.That(risky, Is.GreaterThan(healthy));
+        Assert.That(risky, Is.EqualTo(healthy + InjuryHelper.RelapseChancePerGame(60, 80)).Within(1e-6f));
+    }
+
+    [Test]
+    public void MatchRiskPerGame_CanNeverExceedCertainty()
+    {
+        Assert.That(InjuryHelper.MatchRiskPerGame(48, 1, 100), Is.LessThanOrEqualTo(1f));
+    }
 }

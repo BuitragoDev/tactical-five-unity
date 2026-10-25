@@ -7,9 +7,9 @@
 ## 1. `MainMenu.unity`
 
 ### Objective
-Host the entire game: boot/loading, menus, and all 49 management screens as inert `UIDocument` GameObjects, plus the persistent singletons.
+Host the entire game: boot/loading, menus, and the management screens as inert `UIDocument` GameObjects, plus the persistent singletons. For the current screen count use `python3 Tools/project_status.py`.
 
-### Root GameObjects (49; 50 con `RotationDocument`)
+### Root GameObjects
 
 | GameObject | Components | Active at boot |
 |---|---|---|
@@ -17,11 +17,11 @@ Host the entire game: boot/loading, menus, and all 49 management screens as iner
 | ScreenManager | ScreenManager + DatabaseManager | yes |
 | CursorManager | CursorManager (own GO, single instance) | yes |
 | LoadingDocument | UIDocument + FullScreenUI + LoadingController | yes |
-| 46 × pantalla (45 `*Document` + `TheCity`) | UIDocument + FullScreenUI + controller | no |
+| Pantallas registradas | UIDocument + FullScreenUI + controller | no |
 
 **[F] 44 documents carry `FullScreenUI`; `SelectTeamDocument` and `PreseasonDocument` do not** (they render full-screen via UXML/controller logic only).
 
-### Screen documents (49 en `GameScreen`; 48 creados en la escena)
+### Screen documents (inventario registrado en `GameScreen`)
 
 | Document GO | Controller |
 |---|---|

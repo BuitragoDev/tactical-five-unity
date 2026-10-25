@@ -405,7 +405,7 @@ public class MainMenuController : UIScreenController
         {
             string text = string.IsNullOrEmpty(detail)
                 ? $"{message}\n\nNo se han podido preparar los datos de la partida."
-                : $"{message}\n\nDetalle técnico: {detail}";
+                : $"{message}\n\n{detail}";
             _errorModalText.text = text;
         }
 

@@ -47,7 +47,7 @@ _(none open — see resolved B1 below)_
 
 ### B40. `overall` derived value is stale/inconsistent — **DONE**
 - **Type:** gameplay correctness / data invariant.
-- **Detail [F]:** `PlayerData.GetCalculatedAverage()` uses integer division; `DatabaseManager.Records.ApplyMentoring()` changes attributes without recalculating `overall`.
+- **Detail [F, antes del fix]:** el snapshot que originó B40 truncaba `PlayerData.GetCalculatedAverage()` y `ApplyMentoring()` no recalculaba `overall`. Ambos defectos se corrigieron como se describe abajo; la situación actual es redondeo/capado vía `PlayerRating` y recálculo tras mentoring.
 - **Impact:** sorting, AI evaluation and UI ratings can disagree with the attribute grid by one or more points after mentoring.
 - **Fix:** ✅ `PlayerData.GetCalculatedAverage()` redondea y capa por `potential`; `RecalculateOverall()` se llama tras cada mutación (mentoring/progresión/entrenamiento/G-League). Tests `PlayerDataTests` + `PlayerProgressionTests` (`SEA-08/09`).
 
@@ -79,7 +79,7 @@ _(none open — see resolved B1 below)_
 - **Note:** the 12 controllers that override `RegisterCallbacks()` without `base` (Editor, EndSeason, GameResults, LoadGame, MainMenu, MatchDay, NewSeason, PlayerAwards, Preseason, Quintos, SeasonSummary, SelectTeam) don't get the config modal via the base — verify each still exposes settings (most are boot/menu/slot screens).
 
 ### B5. No UI base controller — **DONE**
-- **Detail [F]:** `UIScreenController` base exists (`Scripts/Core/UIScreenController.cs`, 575 ln); **all 49 controllers inherit it** (`UI_TOOLKIT.md §4`). Provides full-screen, chrome injection (Header/Sidebar), nav wiring, cursors, config modal, `RefreshHeader`.
+- **Detail [F]:** `UIScreenController` base exists (`Scripts/Core/UIScreenController.cs`, 575 ln); screen controllers inherit it (`UI_TOOLKIT.md §4`). The current number of screens is reported by `python3 Tools/project_status.py`. Provides full-screen, chrome injection (Header/Sidebar), nav wiring, cursors, config modal, `RefreshHeader`.
 - **Remaining quirk:** **12 controllers override `RegisterCallbacks()` without `base`** (see B4 note). `GameResultsController` re-implements nav/submenu/cursor wiring in its override referencing 3 non-existent sidebar elements (`NavRecords`/`NavSponsors`/`NavTV`) — null-safe but confusing.
 
 ### B7. `GameScreen.Settings` dead — **DONE**

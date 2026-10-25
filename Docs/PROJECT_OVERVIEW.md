@@ -2,7 +2,7 @@
 
 > **Purpose of this document:** entry point to the whole project. Read this first, then follow the reading order at the bottom.
 
-**Version analyzed:** Unity `6000.3.15f1` (Unity 6), editor build with a single scene, in-app version shown as `v1.0.0 · Beta` (`MainMenu.uxml` footer). Code analyzed at HEAD `8460d21` (2026-09-27, rama `auditoria-final`). La **checklist viva** del estado está en `Docs/AUDITORIA_FINAL.md`. Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
+**Snapshot analizado:** Unity 6, editor build with a single scene. The code snapshot was HEAD `8460d21` (2026-09-27, rama `auditoria-final`); it is not necessarily the current checkout. The current game/editor versions, branch, HEAD, EditMode cases and screens are calculated with `python3 Tools/project_status.py` (`Docs/PROJECT_STATUS.md`). Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
 
 **Product:** *Tactical Five* — a single-player NBA-management simulation game, entirely in Spanish, played with mouse/keyboard on desktop (target resolution 1920×1080). It is a "GM mode" (no playable basketball): the player manages a franchise season by season, simulating games and making roster/financial decisions.
 
@@ -48,9 +48,9 @@ User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()
 
 ## 4. Technical architecture in one paragraph
 
-- **One scene, zero prefabs, zero game ScriptableObjects.** All UI is **UI Toolkit** (`UIDocument` per screen, **49 screens**) instantiated in the scene `MainMenu.unity`; `ScreenManager` (singleton) shows/hides GameObjects to navigate. No `SceneManager.LoadScene` anywhere.
+- **One scene, zero prefabs, zero game ScriptableObjects.** All UI is **UI Toolkit** (`UIDocument` per screen) instantiated in the scene `MainMenu.unity`; `ScreenManager` (singleton) shows/hides GameObjects to navigate. No `SceneManager.LoadScene` anywhere.
 - **Persistence is SQLite** (bundled `sqlite-net` `SQLite.cs` + native plugin `Assets/Plugins/SQLite/{x86_64,Linux/x86_64}`) behind the `DatabaseManager` singleton (**split into 9 partial classes by domain**; main file ~968 lines). One `.db` file per save slot under `persistentDataPath/TacticalFive/`. **Heavy batches run off the main thread** via `RunInBackground`/`RunInBackgroundAsync` with WAL + a per-thread `AsyncLocal` "ambient" connection.
-- **Simulation core** lives in static utility classes: `GameSimulator`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `TradeHelper`, `QuickNewsGenerator`, `ObjectiveHelper`, `MatchupPreview`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`.
+- **Simulation core** lives in static utility classes: `GameSimulator`, `MonteCarloRunner` (offline deterministic lab), `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `TradeHelper`, `QuickNewsGenerator`, `ObjectiveHelper`, `MatchupPreview`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`.
 - **UI is procedural**: controllers extend the `UIScreenController` base class; tables/rows are built by hand (no `ListView`); header and sidebar are injected at runtime from `Resources/UI/Core/`.
 
 ## 5. Project structure
@@ -59,12 +59,12 @@ User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()
 Assets/_TacticalFive/
   Scripts/
     Core/      ScreenManager, UIScreenController, FullScreenUI, AudioManager, CursorManager,
-               GameEnums, TradeHelper, DraftGenerator, PlayoffsGenerator, ScheduleGenerator,
+               GameEnums, TradeHelper, MonteCarloRunner, DraftGenerator, PlayoffsGenerator, ScheduleGenerator,
                AchievementCatalog, AchievementService, GmAchievementType
     Data/      DatabaseManager (partials ×9), GameSaveManager, SQLite, Constants,
                LeagueSettings, SaveSlotInfo + ~45 table model classes + seeders
     Stats/     AdvancedStatsHelper, FogOfWarHelper, HallOfFameHelper, MatchupPreview
-    UI/        49 screen controllers + CustomSlider (all inherit UIScreenController in Core)
+    UI/        screen controllers + CustomSlider (all inherit UIScreenController in Core)
     (root)     GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper, ObjectiveHelper
   Scenes/      MainMenu.unity  (the only scene)
   UI/
@@ -85,20 +85,21 @@ Docs/  .agent/            this knowledge base (keep in sync)
 | Fact | Reference |
 |---|---|
 | Only one scene in build: `MainMenu.unity` | `ProjectSettings/EditorBuildSettings.asset` |
-| Navigation = `ScreenManager.GoTo(GameScreen, GameMode)` toggling `UIDocument` GameObjects; **49 screens, all wired** | `ScreenManager.cs:83-215` |
+| Navigation = `ScreenManager.GoTo(GameScreen, GameMode)` toggling the registered `UIDocument` GameObjects | `ScreenManager.cs:83-215` |
 | All persistence through `DatabaseManager.Instance` (SQLite) | `DatabaseManager.cs` |
 | Save slots = `save_{n}.db` + `saves.json`; template = `template.db`; **schema versioned** (`schema_migrations` + `PRAGMA user_version = 2`) | `GameSaveManager.cs`, `DatabaseManager.cs:286` |
 | Salary cap / aprons constants (2025-26) in `TradeHelper.cs`; caps grow +5%/season | `TradeHelper.cs:7-14`, `StartNewSeason` |
 | Gameplay targets Oct 22; persisted season is initially Sep 5 and preseason advances the date | `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs` |
 | `overall` = media redondeada de 11 atributos capada por `potential`, con **fuente única** en `PlayerRating` | `Scripts/Data/PlayerRating.cs`, `PlayerData.cs` |
 | No C# event bus — cross-controller communication via DB, `GameResultCache` statics, `PlayerPrefs`, and `ScreenManager` static state | `EVENTS.md` |
+| Partido reproducible por inyección: `GameSimulator.SimulateGame` acepta `IRandomSource`; null conserva `UnityEngine.Random`, `SeededRandomSource(seed)` reproduce el mismo partido | F3-01, `GameSimulator.cs`, `IRandomSource.cs` |
 | Audio/volumes/graphics persisted in `PlayerPrefs` keys `TF_Audio_*`, `TF_Graphics_Quality`, `TF_SimMode`, `TF_PbpSpeed`, `TF_LoadMgmt_Enabled` | `AudioManager.cs`, `UIScreenController.cs`, `MatchDayController.cs` |
-| All 49 screen controllers inherit `UIScreenController` (base: fullscreen, header/sidebar injection, nav, config modal, sim-mode toggle) | `UIScreenController.cs` |
+| Screen controllers inherit `UIScreenController` (base: fullscreen, header/sidebar injection, nav, config modal, sim-mode toggle) | `UIScreenController.cs` |
 
 ## 7. Critical systems (deep links)
 
 1. **Database/persistence** → `SYSTEMS.md` (§S1/S2), `DATA_MODEL.md`, `SAVE_SYSTEM.md`
-2. **Simulation engine** → `GAMEPLAY.md` (§ match simulation), `SYSTEMS.md` (§S3)
+2. **Simulation engine / calibration lab** → `GAMEPLAY.md` (§ match simulation), `SYSTEMS.md` (§S3), `MONTE_CARLO_LAB.md`
 3. **Economy & salary cap** → `GAMEPLAY.md` (§ economy, contracts), `SYSTEMS.md` (§S7/S8/S9)
 4. **UI Toolkit navigation** → `UI_TOOLKIT.md`
 5. **Season cycle (draft/playoffs/schedule)** → `SYSTEMS.md` (§S4–S6)
@@ -106,9 +107,9 @@ Docs/  .agent/            this knowledge base (keep in sync)
 
 ## 8. State of development (observed)
 
-- Very mature feature set (49 screens, full season cycle, records/awards/HOF/retired numbers, finances, personnel, morale, injuries, draft, playoffs, GM achievements, play-by-play).
-- Branding/labels: product "TacticalFive", company "BuitragoStudio", version `v1.0.0 Beta`.
-- Current audit commit: `81d9e4f` (merge de `crear-mejoras2`, 2026-08-16), containing the feature set below.
+- Very mature feature set (full season cycle, records/awards/HOF/retired numbers, finances, personnel, morale, injuries, draft, playoffs, GM achievements, play-by-play).
+- Branding/labels: product "TacticalFive", company "BuitragoStudio"; the live in-app version is reported by `Docs/PROJECT_STATUS.md`.
+- The feature notes below describe dated development snapshots, not the current branch or HEAD; use the canonical status command above for live version and counts.
 - **Features landed in the 2026-09 audit branch (`auditoria-final`):** rotation binding (`team_lineup.rotation_minutes`), G-League as a full league (30 affiliates + playoffs), play-by-play/pronóstico ya existentes, narrativa v2, plan de partido, staff con esquemas, progresión por edad/potencial, scouting con riesgo, negociación de agente, DPOY/6º hombre en `season_records`, export/import de partidas.
 - **Recent features landed before that (previous doc snapshot `50b1a86`):** play-by-play overlay, S&T of own FA (Bird rights), contract options TO/PO with re-sign, trade deadline event, AI GM strategy, GM achievements (28), PlayerProfile screen, advanced analytics (eFG%/TS%/PER), fog-of-war in ratings, async DB (background WAL threads), load management, trade block, Hall of Fame, retired numbers (Dorsales screen), season quintets (Quintos), matchup preview, protected picks + swaps, position-based athletic decline + mentoring, `UIScreenController` base, `DatabaseManager` partial split, `schema_migrations` versioning, atomic game-day transaction, IR (reserva de lesionados), two-way contracts, G-League (liga de desarrollo ligera).
 - **Resolved debt:** duplicate `CursorManager` fixed (single instance now), `SettingsController`/`SQLiteAsync.cs` deleted, dead `GameScreen.Settings` removed, `GetTopPlayersByStat` real SQL aggregation, B8 (sync DB) closed for heavy batches. See `TODO_TECHNICAL_DEBT.md`.

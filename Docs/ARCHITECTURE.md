@@ -8,8 +8,8 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│  UI LAYER — UI Toolkit (49 UIDocument screens + 2 injected components) │
-│  MainMenu.unity (single scene, 49 screen GameObjects)                   │
+│  UI LAYER — UI Toolkit (UIDocument screens + 2 injected components)     │
+│  MainMenu.unity (single scene, screen GameObjects)                      │
 │  ScreenManager (navigates by toggling SetActive)                        │
 │  UIScreenController (base class: header/sidebar/nav/config injection)   │
 ├─────────────────────────────────────────────────────────────────────────┤
@@ -40,7 +40,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 |---|---|---|
 | **Navigation** | `ScreenManager.cs`, `GameEnums.cs`, `UIScreenController.cs`, `FullScreenUI.cs` | Screen enum, show/hide documents, global selected player / game mode, base controller |
 | **Persistence** | `DatabaseManager.cs` + 8 partials (`DatabaseManager.{Teams,Players,Staff,Manager,Games,Seeding,Records,Achievements}.cs`), `GameSaveManager.cs`, `SQLite.cs`, `SaveSlotInfo.cs` | Tables, queries, migrations, seeding, slots/template, background-thread execution |
-| **Simulation** | `GameSimulator.cs` (936 ln) | Possession-by-possession match sim, stats, injuries, fatigue, play-by-play capture |
+| **Simulation/calibration** | `GameSimulator.cs`, `MonteCarloRunner.cs`, `MonteCarloCalibration.cs` | Possession sim; seeded offline league lab, versioned acceptance profile and markdown report (`MonteCarloLabWindow`, Editor-only) |
 | **Season generation** | `ScheduleGenerator.cs`, `PlayoffsGenerator.cs`, `DraftGenerator.cs` | 82-game schedule + All-Star; Play-In/Playoffs; draft lottery + class |
 | **Salary/trades** | `TradeHelper.cs` | Cap constants, trade validation, luxury tax, AI accept evaluation, pick bonus |
 | **Economy** | `FinanceRecord.cs`, `LoanData.cs`, `SponsorData.cs`, `TvChannelData.cs`, `TeamSettingsData.cs` | Budget, ticket/subscription, sponsors, TV, loans, renovations (logic in controllers) |
@@ -49,9 +49,15 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Legacy/history** | `HallOfFameData`/`HallOfFameSeeder`/`HallOfFameHelper`, `RetiredNumberData` + 2 seeders, `PalmaresSeeder`, `TeamRecordSeeder`, `HistoricalPlayerStatsSeeder`, `GmAchievementData` | HOF, retired numbers, palmarés, records, achievements |
 | **Media** | `MessageData.cs`, `QuickNewsGenerator.cs`, `TvChannelData.cs` | Inbox, news generation |
 | **Analytics/forecast** | `Stats/AdvancedStatsHelper.cs`, `Stats/FogOfWarHelper.cs`, `Stats/MatchupPreview.cs` | eFG%/TS%/PER, scout fog-of-war, pre-match forecast |
-| **UI controllers** | `Scripts/UI/*.cs` (47, all inheriting `UIScreenController` in Core) | One per screen; bind UXML, load data, handle clicks |
+| **UI controllers** | `Scripts/UI/*.cs`, inheriting `UIScreenController` in Core | One per screen; bind UXML, load data, handle clicks |
 | **Reusable UI** | `HeaderController.cs`, `SidebarController.cs` (static helpers), `CustomSlider.cs` | Injected header/sidebar; custom slider control |
 | **Assets** | `Art/Resources/*`, `UI/*` | Textures, audio, fonts, UXML/USS, panel settings |
+
+### Simulation randomness (F3-01)
+
+- `GameSimulator.SimulateGame(..., IRandomSource random = null)` receives a random source. `null` preserves the game behavior through `UnityRandomSource` (`UnityEngine.Random`); tests and offline tools can pass `SeededRandomSource(seed)`.
+- The source is threaded explicitly through quarter/overtime, possession, shots, rebounds, fouls, substitutions and injury rolls. The seeded implementation is local-state SplitMix64 and does not touch Unity APIs: identical seed + inputs produce identical scores, box score, quarters and play-by-play.
+- This boundary currently covers **game simulation only**. Schedule generation, draft generation and background AI continue to use their existing random sources; they are separate streams and not part of F3-01's reproducibility guarantee.
 
 ## 3. Singletons
 
@@ -60,7 +66,7 @@ Common pattern: `public static X Instance { get; private set; }` + guard in `Awa
 | Singleton | Auto-create | `DontDestroyOnLoad` | Notes |
 |---|---|---|---|
 | `AudioManager` | **Yes** — `[RuntimeInitializeOnLoadMethod(BeforeSceneLoad)]` creates a GameObject `"AudioManager"` | Yes | Also loads volumes/quality from `PlayerPrefs` and plays menu music |
-| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Yes** (`ScreenManager.cs:64`) | Holds 47 serialized `UIDocument` refs |
+| `ScreenManager` | No (GameObject `ScreenManager` in scene) | **Yes** (`ScreenManager.cs:64`) | Holds serialized `UIDocument` refs; live count via `Tools/project_status.py` |
 | `CursorManager` | No (GameObject `CursorManager` in scene) | Yes | **Single instance** (the old duplicate was removed) |
 | `DatabaseManager` | No (co-located on the `ScreenManager` GameObject) | Yes | Opens no DB in `Awake`; slot init is driven by UI flow |
 
@@ -106,11 +112,11 @@ Detailed per-phase doc: see `SCENES.md` (single scene) and `SAVE_SYSTEM.md` (slo
 
 ## 5. Navigation model
 
-- `GameScreen` enum (**49 values**, `GameEnums.cs`) maps 1:1 to serialized `UIDocument` fields on `ScreenManager` (`ScreenManager.cs:8-49`). Verified: every enum value has a `case` in `GoTo` and every case maps to a distinct document. No dead enum values remain.
+- `GameScreen` enum maps 1:1 to serialized `UIDocument` fields on `ScreenManager` (`ScreenManager.cs`). `Tools/project_status.py` checks that the enum, serialized fields, and `GoTo` cases have matching counts and values.
 - `GoTo(screen, mode)`:
   1. Sets `CurrentMode` if `mode != None`.
   2. Sets `CurrentScreen`.
-  3. `switch` → `ShowOnly(document)` → iterates all 49 docs, `SetActive(false)`, then `SetActive(true)` on target.
+  3. `switch` → `ShowOnly(document)` → iterates the registered docs, `SetActive(false)`, then `SetActive(true)` on target.
 - Screens are **never destroyed**; each controller re-binds everything in `OnEnable` (via the `UIScreenController` base pipeline).
 - `GameScreen` values: Loading, MainMenu, SelectTeam, Preseason, Dashboard, Roster, Calendar, Standings, Palmares, Results, Playoffs, Stats, Records, Market, Finances, Loans, Sponsors, TV, Arena, Messages, MatchDay, GameResults, LoadGame, Employees, Injured, Cartera, SeasonSummary, PlayerAwards, Quintos, EndSeason, NewSeason, Editor, Historial, Training, Quinteto, Dorsales, Manager, Trajectory, Premios, PlayerProfile, Logros.
 
@@ -139,7 +145,7 @@ flowchart LR
 flowchart TD
     DB[DatabaseManager] --> SQLITE[(SQLite sqlite-net)]
     GSS[GameSaveManager] --> DB
-    SC[ScreenManager] --> UI[UIDocument x47]
+    SC[ScreenManager] --> UI[registered UIDocument screens]
     UI_C[UI controllers x40] --> USC[UIScreenController base]
     USC --> DB
     USC --> SC
@@ -193,6 +199,7 @@ Legend: solid = direct call; the biggest coupling is every controller → `Datab
 | `SeedPlayers` / `SeedFreeAgents` | `Seeding.cs:630,1048` | `BeginTransaction` |
 | **`StartNewSeason`** | `Records.cs:2570-3070` | single giant transaction wrapping the whole rollover |
 | Day processing (steps 2/4) | `DashboardController.cs:846,969,1627,1962,3130` | manual `BeginTransaction`/`Commit` |
+| Post-game batch (stats + physique/injuries) | `GameSimulator.cs` → `UpdatePlayersBatch`/`SavePlayerGameStatsBatch` | writes inside the open day transaction (`own = !_db.IsInTransaction`, never nests `BEGIN`) |
 | Injury/fatigue recovery batch | `DashboardController.cs:775-805` | inside `RunInBackground` |
 
 ## 9. Shared helper patterns

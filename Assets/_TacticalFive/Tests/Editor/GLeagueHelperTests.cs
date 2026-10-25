@@ -117,6 +117,33 @@ public class GLeagueHelperTests
     }
 
     [Test]
+    public void ProcessDevelopmentTick_DoesNotRaiseAValidLowAttributeToGenerationFloor()
+    {
+        var p = new PlayerData
+        {
+            team_id = 1,
+            g_league_assigned = 1,
+            potential = 99,
+            speed = 99, shooting = 99, three_point = 99, passing = 99,
+            dribbling = 99, defense = 99, rebounding = 99, athleticism = 99,
+            iq = 99, steals = 99, blocks = 6
+        };
+
+        UnityEngine.Random.State previousState = UnityEngine.Random.state;
+        try
+        {
+            UnityEngine.Random.InitState(10505);
+            Assert.That(GLeagueHelper.ProcessDevelopmentTick(p), Is.True);
+            Assert.That(p.blocks, Is.EqualTo(7), "El tick debe mejorar el atributo en +1, no saltarlo a 30.");
+            Assert.That(p.GetCalculatedAverage(), Is.EqualTo(p.overall));
+        }
+        finally
+        {
+            UnityEngine.Random.state = previousState;
+        }
+    }
+
+    [Test]
     public void ProcessDevelopmentTick_OnlyAppliesToAssignedPlayers()
     {
         var notAssigned = new PlayerData

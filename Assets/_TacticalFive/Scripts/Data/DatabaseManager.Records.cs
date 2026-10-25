@@ -654,6 +654,29 @@ public partial class DatabaseManager
         _db.Insert(stats);
     }
 
+    /// <summary>
+    /// F2-09: guarda en lote las estadísticas de un partido (una fila por jugador).
+    /// Una sola transacción propia; si el llamador ya tiene una abierta (la del día)
+    /// escribe dentro de ella y no anida un <c>BEGIN</c>.
+    /// </summary>
+    public void SavePlayerGameStatsBatch(IList<PlayerGameStats> stats)
+    {
+        if (!EnsureDb() || stats == null || stats.Count == 0) return;
+
+        bool own = !_db.IsInTransaction;
+        if (own) _db.BeginTransaction();
+        try
+        {
+            _db.InsertAll(stats, runInTransaction: false);
+            if (own) _db.Commit();
+        }
+        catch
+        {
+            if (own) _db.Rollback();
+            throw;
+        }
+    }
+
     public List<PlayerGameStats> GetPlayerGameStats(int playerId)
     {
         return _db.Table<PlayerGameStats>()
@@ -3170,7 +3193,7 @@ public partial class DatabaseManager
                     priorityAttrs.Contains(name),
                     Rng.Next(-1, 2));
                 change += GetPositionDeclineModifier(p.position, name, p.age);
-                return Math.Max(0, Math.Min(99, current + change));
+                return PlayerAttributeScale.ClampValid(current + change);
             }
 
             p.speed = Apply("speed", p.speed);
@@ -4404,7 +4427,7 @@ public partial class DatabaseManager
 
                 string targetAttr = attrs[Rng.Next(0, attrs.Length)];
                 int oldVal = GetAttr(young, targetAttr);
-                int newVal = Math.Min(99, oldVal + bonus);
+                int newVal = PlayerAttributeScale.ClampValid(oldVal + bonus);
                 SetAttr(young, targetAttr, newVal);
                 young.RecalculateOverall(); // el overall debe seguir a los atributos
                 _db.Update(young);

@@ -87,7 +87,7 @@ public static class GLeagueSeeder
                     "athleticism" => 0,
                     _ => 0
                 };
-                int value = Mathf.Clamp(baseAvg + posMod + Rng.Next(-7, 8), 30, potential);
+                int value = PlayerAttributeScale.ClampGenerated(baseAvg + posMod + Rng.Next(-7, 8), potential);
                 attrs[attr] = value;
             }
 

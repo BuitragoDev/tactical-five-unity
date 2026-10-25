@@ -31,10 +31,10 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 `id` (PK, `[AutoIncrement]` in the model; seeded IDs are expected to remain stable), `name`, `abbreviation`, `city`, `conference` (East/West), `division`, `arena`, `capacity`, `owner`, `attack`, `defense`, `overall`, `budget`, `reputation` (1–5), `facilities` (1–5), `logo`, `jersey_home`, `jersey_away`, `salary_margin`, `objective` (TEXT: "Campeonato"|"Playoffs"|"Play-In"|"Zona tranquila"|…, migrated), `team_chemistry`, `first_apron_hard_capped` (int 0/1, migrated), `arena_renovation_type/count/cost/end_day` (set via ArenaController), `arena_renovation_end_day`.
 
 ### players (`PlayerData`)
-`id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated), `number` (dorsal), `on_trade_block` (0/1, marcado desde Roster → jugador TRANSFERIBLE en Market). Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
+`id` (PK manual), `team_id` (0 = FA), `first_name`, `last_name`, `position` (PG/SG/SF/PF/C), `secondary_position` (migrated), `age`, `nationality` (ISO3), `college` (migrated), `height_cm`, `weight_kg`, `overall`, `potential`, and the 11 attributes: `speed, shooting, three_point, passing, dribbling, defense, rebounding, athleticism, iq, steals, blocks`. Then `salary`, `contract_years`, `is_rookie` (0/1), `injury_days`, `injury_type`, `treated`, `renewal_cooldown_day` (migrated), `seasons_with_team`, `morale` (migrated, default 50), `fisico` (migrated, default 99), `role` (migrated, `PlayerRole` int), `photo` (migrated), `number` (dorsal), `on_trade_block` (0/1, marcado desde Roster → jugador TRANSFERIBLE en Market). `salary` es un único importe anual que el juego usa tanto para nómina como para el cap; no hay columnas separadas para salario base/cash y cap hit. En las entradas Houston del seed 2026-27 revisadas en F1-04 se guarda el **cap hit** (p. ej. los mínimos con reembolso CBA), no una base cash distinta. Contract options (migrated): `guaranteed_years` (0 if the last year is an option), `has_team_option` (0/1), `has_player_option` (0/1 — mutually exclusive with team option), `last_team_id` (migrated; último equipo para el que jugó, 0 si nunca/FA externo — habilita Bird rights al re-firmar). `contract_years` includes both guaranteed years and the option year.
 - **Honores de carrera (migrados, default 0):** `rings` (campeonatos ganados), `finals_mvps` (MVP de las Finales), `finals_played` (finales disputadas), `season_mvps` (MVP de temporada regular). Se incrementan en `SaveSeasonEndRecords` (ver GAMEPLAY §11). Se muestran como contadores en el header de `PlayerProfile` y `Trajectory` (CAMPEONATOS / FINALES / MVP / MVP FINALS).
 - **IR / two-way / G-League (migrados, default 0):** `is_on_ir` (1 = en reserva de lesionados, no cuenta en el tope de plantilla), `is_two_way` (1 = contrato two-way, salario `TWO_WAY_SALARY`, máx 2/equipo, edad ≤23), `g_league_assigned` (1 = asignado a la liga de desarrollo, no juega en NBA). Ver GAMEPLAY §14.
-- `GetCalculatedAverage()` currently returns integer `sum / 11`, so it truncates rather than rounds. Training, progression and migrations recalculate/cap `overall`; mentoring currently changes attributes without that recalculation. “Always recomputed” is an intended invariant, not a guaranteed current fact [F].
+- `GetCalculatedAverage()` delegates to `PlayerRating.FromAttributes`: the mean of 11 attributes is rounded and capped by `potential`. Training, progression, mentoring, draft and migrations recalculate `overall` after attribute mutations.
 
 ### managers (`ManagerData`)
 `id` (AI), `name`, `team_id`, `game_mode`, `created_at`, `lastPlayedRealDate`, `currentGameDay`, `currentDate`, `trust`, `morale`, `fan_confidence` (migrated, default 50), `budget_red_warnings` (migrated, default 0), `is_fired` (migrated, default 0; 1 = despedido, bloquea cargar la partida), `career_reg_wins/losses`, `career_po_wins/losses`, `championships`, `seasons_completed` (migrated).
@@ -219,6 +219,9 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 ### schema_migrations (internal)
 `name` (TEXT PK), `applied_at` (TEXT). Creada en `RunMigrations`; registra migraciones one-time por slot.
 
+### db_meta (`DbMetaData`, internal)
+`key` (TEXT PK), `value` (TEXT). Guarda `seed_fingerprint` en el template y se clona a cada slot para trazabilidad. La huella cubre las filas persistidas de `teams`, `players` y `league_settings` (orden estable por id, SHA-256); las ediciones válidas del Editor se conservan y no se comparan con el contenido canónico.
+
 ### Records & history tables
 - `historical_records` (`HistoricalRecordData`): all-time single-game records (9 real: Wilt 100pts, 55 reb, Skiles 30 ast, …).
 - `team_records` (`TeamRecordData`): per-team records seeded from `TeamRecordSeeder`.
@@ -240,10 +243,10 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 
 | Seed | Source | Volume | Notes |
 |---|---|---|---|
-| Teams | `SeedTeams` | 30 | Real NBA 2025-26 (division, arena, capacity, owner, attrs, budget, reputation, facilities, logo/jerseys, salary_margin, objective) |
+| Teams | `SeedTeams` | 30 | 30 franquicias; metadatos de división, arena, capacidad, owner, atributos, presupuesto, reputación, instalaciones, logos/jerseys, salary_margin y objetivo |
 | League settings | `SeedLeagueSettings` | 1 | TradeHelper constants + bi_annual 5.1M + taxpayer_mid_level |
-| Players | `SeedPlayers` | ~490 | 15-16 per team; role thresholds: ≥88 Estrella, ≥78 Titular, ≥68 Banquillo; `overall` recomputed as mean |
-| Free agents | `SeedFreeAgents` | ~142 | `team_id=0`; role thresholds lower (≥80/≥70/≥60) |
+| Players | `SeedPlayers` | 519 llamadas `Add` (519 asignados) | Plantillas de 16–18 por equipo; distribución manual en `DatabaseManager.Seeding.cs`. Rol por `PlayerRoleRules.FromOverall`: ≥90 Estrella, ≥83 Titular, ≥74 Banquillo; `overall` vía `PlayerRating` |
+| Free agents | `SeedFreeAgents` | 120 llamadas `AddFA` | `team_id=0`; John Konchar (id 461) también entra por `AddFA`; roles de este helper: ≥80 Estrella, ≥70 Titular, ≥60 Banquillo |
 | Sponsors | `SeedSponsors` | 20 | 3 active random |
 | TV channels | `SeedTvChannels` | 10 | 3 active random; re-seed if all `initial_income==0` |
 | Historical records | `SeedHistoricalRecords` | 9 | Wilt, Skiles, etc. |
@@ -256,6 +259,10 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 | Dorsales retirados | `RetiredNumberSeeder`/`VeteranRetiredNumberSeeder` | 53 + 17 | leyendas con `player_id=0` |
 | Draft picks | `SeedDraftPicksMultiYear` | 60/año × 4 años (actual + 3) | año actual con posiciones (standings inversos) + futuros sin posición; `RolloverDraftPicks` los rota |
 | Personalities/relationships | `SeedTeamPersonalities`/`SeedTeamRelationships`/`EnsureTeamRelationshipsSeeded` | per team | non-deterministic `System.Random` |
+
+Los conteos del bloque `SeedPlayers`/`SeedFreeAgents` son el snapshot del checkout revisado (2026-10-24): 519 asignados + 120 agentes libres = 639 jugadores, no cupos permanentes. El seed es manual y los totales se deben recalcular cuando el usuario cambie esas listas.
+
+**Validación previa a partida nueva (F1-06/F1-08):** `Scripts/Data/SeedAudit.cs` es el auditor puro compartido por EditMode y runtime y **el único gate bloqueante**. `EnsureTemplateDb` verifica `db_meta.seed_fingerprint` y audita teams/players/settings que realmente clona; si falta el sello, cambió o el contenido es inválido/corrupto, reconstruye el template en `.tmp`, conserva `template.db.bak` y publica con replace atómico tras validar (orden: sembrar → auditar → sellar → publicar, para que la huella no enmascare errores de datos). La G-League no se clona (se siembra por slot) y no bloquea el template. Un seed recién construido inválido y el slot completo al terminar el clon siguen lanzando ERROR y revirtiendo. Una huella distinta de `SeedBaseline.Fingerprint` **solo avisa y reconstruye** (el test de EditMode es quien exige actualizar la constante). Errores del template previo se registran en consola con el informe completo; el modal solo recibe un resumen compacto. Tamaño de roster y atributos legales <25 son informativos.
 
 ## 5. Migrations (`RunMigrations`, DatabaseManager.cs:286)
 
@@ -295,6 +302,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 
 **Data migrations (registradas en `schema_migrations`, viven con el slot):**
 - `overall_recalc`: recompute `overall` for all players as mean of 11 attrs (cap potential).
+- `overall_recalc_v2`: vuelve a aplicar `PlayerRating` a todas las partidas existentes para reparar valores calculados con la fórmula antigua; solo se marca aplicada al terminar el lote.
 - `draft_picks_reset`: wipe `draft_picks` and reseed for the active season (using previous season's standings if available).
 - `draft_picks_multiyear`: wipe `draft_picks` and reseed 4 years (current + 3) for the active season (`draft_year` column added via `ALTER TABLE`).
 

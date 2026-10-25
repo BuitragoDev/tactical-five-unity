@@ -66,6 +66,35 @@ public static class InjuryHelper
     public static int RelapseChancePercent(int risk, int fisico)
         => (int)System.Math.Round(RelapseChancePerGame(risk, fisico) * 100f);
 
+    // ── RIESGO DE LESIÓN POR PARTIDO (F2-07) ─────────────────────
+
+    /// <summary>Minutos de exposición con los que se mantiene la probabilidad base.</summary>
+    public const int INJURY_REFERENCE_MINUTES = 36;
+
+    /// <summary>Probabilidad base de lesión en un partido a plena exposición (36 min).</summary>
+    public const float INJURY_BASE_PER_GAME = 0.008f;
+
+    /// <summary>
+    /// Probabilidad (0-1) de lesionarse en UN partido. Escala con la **exposición**
+    /// (minutos jugados, proporcional sobre 36), con el **físico bajo** (&lt; 30) y con el
+    /// **riesgo de recaída** pendiente de un alta forzada. 0 minutos ⇒ 0: quien no juega
+    /// no se lesiona. El sorteo es **postpartido**: no altera minutos ni resultado.
+    /// </summary>
+    public static float MatchRiskPerGame(int minutes, int fisico, int recoveryRisk)
+    {
+        if (minutes <= 0) return 0f;
+
+        float chance = INJURY_BASE_PER_GAME * minutes / INJURY_REFERENCE_MINUTES;
+        if (fisico < 30)
+            chance *= 1f + (30 - fisico) * 0.15f;
+        chance += RelapseChancePerGame(recoveryRisk, fisico);
+        return Math.Min(1f, chance);
+    }
+
+    /// <summary>Riesgo de lesión por partido en porcentaje (parte médico/UI).</summary>
+    public static int MatchRiskPercent(int minutes, int fisico, int recoveryRisk)
+        => (int)System.Math.Round(MatchRiskPerGame(minutes, fisico, recoveryRisk) * 100f);
+
     /// <summary>Cuánto baja el riesgo cada día: descansar lo cura; jugar lo mantiene.</summary>
     public static int RiskDecayForDay(bool playedToday) => playedToday ? 10 : 25;
 

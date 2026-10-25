@@ -3,15 +3,15 @@
 > Instrucciones de contexto para agentes IA y desarrolladores que trabajan en este proyecto.
 > Este archivo **se carga automáticamente** en cada sesión de opencode (raíz del repo).
 > Es la puerta de entrada a la base de conocimiento completa (`Docs/` + `.agent/`).
-> Estado verificado: HEAD `81d9e4f` (2026-08-16) · rama `main`.
+> **Estado dinámico:** rama, HEAD, versiones y conteos actuales → `python3 Tools/project_status.py` (`Docs/PROJECT_STATUS.md`). No copies esos valores aquí.
 
 ---
 
 ## 1. Qué es este proyecto (30 segundos)
 
-**Tactical Five** — sim de gestión NBA (tipo Football Manager pero de baloncesto), **single-player**, en español, `v1.0.0 · Beta`.
-- **Motor:** Unity `6000.3.15f1` (Unity 6), **UI Toolkit** (UXML/USS), escritorio 1920×1080.
-- **Arquitectura:** **una única escena** (`MainMenu.unity`) con **49 pantallas** como GameObjects `UIDocument`; todo el estado vive en **SQLite**.
+**Tactical Five** — sim de gestión NBA (tipo Football Manager pero de baloncesto), **single-player**, en español.
+- **Motor:** Unity 6, **UI Toolkit** (UXML/USS), escritorio 1920×1080. La versión exacta del editor y la versión visible del juego están en `Docs/PROJECT_STATUS.md`.
+- **Arquitectura:** **una única escena** (`MainMenu.unity`) con pantallas UI Toolkit como GameObjects `UIDocument`; todo el estado vive en **SQLite**.
 - **Juego:** gestionas una de 30 franquicias NBA-like en temporadas infinitas: plantillas, traspasos, agentes libres, salary cap, finanzas, entrenamiento, moral/química/lesiones, draft, playoffs, premios, récords, Hall of Fame, dorsales retirados, logros del GM.
 - **Empresa/producto:** BuitragoStudio · TacticalFive.
 
@@ -25,14 +25,16 @@
 | Doc | Contenido | Lee esto cuando… |
 |---|---|---|
 | `Docs/PROJECT_OVERVIEW.md` | Qué es el juego, stack, bucles de juego, estado | Empiezas cualquier tarea |
+| `Docs/PROJECT_STATUS.md` | Estado dinámico: versiones, rama, HEAD, tests y pantallas | Necesitas datos actuales del checkout |
+| `Docs/THIRD_PARTY_ASSETS.md` | Inventario de origen, licencias y atribuciones; pendientes de verificar | Añades o distribuyes assets/dependencias |
 | `Docs/ARCHITECTURE.md` | Módulos, singletons, ciclo de vida, dependencias (Mermaid) | Tareas que cruzan sistemas |
 | `Docs/GAMEPLAY.md` | **Todas las mecánicas con fórmulas exactas** | Tocas simulación, economía, contratos, moral, draft |
 | `Docs/SYSTEMS.md` | 18 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
-| `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, **49 pantallas**, árbol de navegación | Trabajas en UI |
+| `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, inventario de pantallas y árbol de navegación | Trabajas en UI |
 | `Docs/CUSTOM_SCROLLBAR.md` | **Barra de scroll propia** (viewport + content + track/thumb) — el `ScrollView` de Unity no es fiable con el tema actual | Necesitas una lista larga con scroll arrastrable |
 | `Docs/SCENES.md` | La escena única, sus 44 GameObjects | Tocas la escena / añades pantalla |
 | `Docs/EVENTS.md` | Todos los canales de comunicación (static, DB messages, PlayerPrefs, callbacks) | Añades un evento/mensaje nuevo |
-| `Docs/DATA_MODEL.md` | **Las 42 tablas SQLite campo a campo**, seeds, migraciones | Cambias esquema, añades tabla/columna |
+| `Docs/DATA_MODEL.md` | Tablas SQLite campo a campo, seeds, migraciones | Cambias esquema, añades tabla/columna |
 | `Docs/SAVE_SYSTEM.md` | Slots, `template.db`, flujos save/load, versionado | Trabajas en persistencia |
 | `Docs/CODE_GUIDELINES.md` | Convenciones reales, patrones a seguir/evitar | **Antes de escribir cualquier código nuevo** |
 | `Docs/TODO_TECHNICAL_DEBT.md` | Deuda técnica priorizada P0–P3 + código muerto | Arreglas bugs o decides refactors |
@@ -64,13 +66,18 @@
 
 | Hecho | Consecuencia |
 |---|---|
-| **Escena única** `MainMenu.unity`; **49 pantallas** como `UIDocument` GOs; `ScreenManager.GoTo(GameScreen, mode)` conmuta `SetActive` | No cargues escenas. Nunca navegues con `SetActive` directo — usa `ScreenManager.Instance.GoTo`. |
+| **Escena única** `MainMenu.unity`; pantallas como `UIDocument` GOs; `ScreenManager.GoTo(GameScreen, mode)` conmuta `SetActive` | No cargues escenas. Nunca navegues con `SetActive` directo — usa `ScreenManager.Instance.GoTo`. |
 | **Toda la persistencia es SQLite** vía `DatabaseManager.Instance` (sqlite-net incluido; `DatabaseManager` dividido en **9 partial classes** por dominio: `.Teams/.Players/.Staff/.Manager/.Games/.Seeding/.Records/.Achievements`) | Nunca abras tu propia conexión. Todo acceso pasa por `DatabaseManager`. |
 | **Sin prefabs y sin ScriptableObjects de juego.** Contenido = seeders + tablas SQLite; vistas = UXML+USS | Para nueva entidad → tabla+seeder; para vista nueva → UXML+USS. |
 | **Sin event bus** (ni `Action`/`UnityEvent` entre sistemas). Comunicación: mensajes DB (`MessageData`), estado estático (`GameResultCache`, `ScreenManager.*`, cola de toasts de `AchievementService`), `PlayerPrefs` (solo settings), callbacks UI | No inventes un sistema de eventos. Sigue los canales existentes. |
 | **Todos los controllers heredan `UIScreenController`** (base en `Scripts/Core/UIScreenController.cs`, 575 ln): fullscreen, inyección Header/Sidebar, navegación, cursores, modal de configuración, `RefreshHeader` | Nuevas pantallas: hereda la base y sobreescribe solo lo que difiera. |
+| **Media de equipo** = media de los `overall` canónicos de todos sus jugadores asignados (`team_id`) | Es descriptiva, no un objetivo fijo de 85; no normalices todos los equipos a la misma media. |
+| **Estrellas por equipo** | Rol Estrella desde OVR 90, evaluado por jugador (`PlayerRoleRules`); no hay máximo de estrellas por franquicia. No alteres ratings para imponer unicidad. |
+| **Escala de atributos** | Rango legal 1–99; atributos bajos pueden ser intencionales. El suelo 30 de generación y el 25 de scouting son límites de proceso, no el mínimo legal. |
+| **Plantillas del seed** | `DatabaseManager.Seeding.cs` es la fuente canónica y la mantiene el usuario. 14–17 es referencia de juego, no validación: el auditor informa el tamaño pero no lo impone. Nunca reasignes jugadores reales para cuadrar conteos. |
+| **Template antes de clonar** | `EnsureTemplateDb` compara `db_meta.seed_fingerprint`, audita los datos clonados y reconstruye templates obsoletos/rotos en `.tmp` con backup `.bak`; solo publica tras auditar. La G-League no se clona ni bloquea la validación del template. El slot nuevo sí se audita completo y un ERROR revierte. La huella es frescura, no validez: si no coincide con `SeedBaseline.Fingerprint` avisa y reconstruye; el test de EditMode es quien exige actualizar la constante tras revisar un cambio en teams/players/league_settings. |
 | **Reglas de juego en clases static puras:** `GameSimulator`, `TradeHelper`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `QuickNewsGenerator`, `AchievementService`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `MatchupPreview`, `ObjectiveHelper`, `GLeagueHelper`, `TradeValueHelper` | Reglas nuevas → helper static; controllers delgados. |
-| **Simulación no determinista** (`UnityEngine.Random` en main thread; `System.Random` thread-static `_aiRng`/`Rng` en hilos de fondo) | No esperes resultados reproducibles. |
+| **Aleatoriedad de simulación** | El juego usa `UnityRandomSource` (adaptador de `UnityEngine.Random`) por defecto; `GameSimulator.SimulateGame` acepta `IRandomSource` y `SeededRandomSource` para reproducir un partido con la misma semilla. Los lotes IA en background conservan sus `System.Random` thread-static (`_aiRng`/`Rng`). |
 | **Async DB:** los lotes pesados van fuera del main thread vía `RunInBackground`/`RunInBackgroundAsync` (WAL + conexión ambient `AsyncLocal` + `Task.Run`). La simulación de partido y el draft se quedan en main thread **intencionadamente** | Los helpers de DB escriben en la conexión ambient del lote; **no toques `_db` fuera del main thread**. |
 | **Schema versionado:** `schema_migrations` (migraciones de datos por nombre) + `PRAGMA user_version = 2`; migraciones de columnas aditivas vía `PRAGMA table_info` | Migración nueva: o `ALTER TABLE ADD COLUMN` (schema) o registro en `schema_migrations` (datos). |
 | **Transacciones:** el día de partido (`ProcessGameDayRoutine`) y `StartNewSeason` son atómicos (savepoints anidados en playoffs) | No rompas los bloques transaccionales del día; no introduzcas `yield return null` dentro del bloque sim+bookkeeping. |
@@ -152,8 +159,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **No hay lint ni typecheck** (C# se compila solo en el editor de Unity). No hay test runner CLI configurado en `package.json`.
 
-**Tests unitarios (EditMode, Unity Test Runner):** 290 `[Test]` en 18 archivos `Assets/_TacticalFive/Tests/Editor/`:
-- `TradeHelperTests.cs` (30) · `StorylineServiceTests.cs` (28) · `GLLeagueHelperTests.cs` (22) · `GameSimulatorTests.cs` (14) · `AdvancedStatsHelperTests.cs` (11) · `GameSaveManagerTests.cs` (11) · `ObjectiveHelperTests.cs` (10) · `HallOfFameHelperTests.cs` (9) · `GamePlanTests.cs` (6) · `PlayerProgressionTests.cs` (6) · `ScoutingHelperTests.cs` (6) · `HistoricalStatsRulesTests.cs` (5) · `CoachSchemeTests.cs` (4) · `DraftGeneratorTests.cs` (4) · `NegotiationHelperTests.cs` (4) · `PlayerDataTests.cs` (4) · `EditModeSmokeTests.cs` (2)
+**Tests unitarios (EditMode, Unity Test Runner):** viven en `Assets/_TacticalFive/Tests/Editor/`. El conteo vigente se calcula con `python3 Tools/project_status.py`; no mantengas un total manual aquí.
 
 **Correr en el editor:** *Window → General → Test Runner → EditMode → Run All*.
 
@@ -165,7 +171,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 **Nota sobre tests:** los tests viven **sin asmdef** en una carpeta `Editor` (compilan en `Assembly-CSharp-Editor`) — es una limitación conocida de Unity 6 (un test assembly no puede referenciar la predefined assembly). `GameSimulator.SimulateGame` no es testeable en EditMode (depende de `DatabaseManager.Instance`) salvo con `persistToDb:false`; `GameSimulatorTests.cs` cubre sus helpers públicos (rotación vinculante, sustitución, prórroga sin empate, marcador con plantilla corta).
 
-**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre el Test Runner EditMode (290 en verde a fecha de esta revisión).
+**Verificación tras tocar reglas puras** (`TradeHelper`, `AdvancedStatsHelper`, `ObjectiveHelper`, `HallOfFameHelper`, `StorylineCatalog`, `PlayerProgression`, `DraftGenerator`, migraciones): corre la suite EditMode completa.
 
 ---
 
@@ -173,8 +179,8 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 | Archivo | Rol |
 |---|---|
-| `Scripts/Core/ScreenManager.cs` | Navegación (47 `UIDocument`, `GoTo` switch) |
-| `Scripts/Core/UIScreenController.cs` | Base de los 49 controllers (chrome, nav, config modal) |
+| `Scripts/Core/ScreenManager.cs` | Navegación y registro de `UIDocument` (`GoTo` switch) |
+| `Scripts/Core/UIScreenController.cs` | Base de controllers (chrome, nav, config modal) |
 | `Scripts/Data/DatabaseManager.cs` + 8 partials | Único acceso a DB (~150 métodos públicos) |
 | `Scripts/Data/GameSaveManager.cs` | Slots, `template.db`, `saves.json` |
 | `Scripts/GameSimulator.cs` | Motor de partidos (por posesión) |
@@ -182,7 +188,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 | `Scripts/UI/DashboardController.cs` | El hub: día, sim, traspasos IA, economía, modales |
 | `Scripts/UI/RosterController.cs` | Plantilla, renovaciones, buyouts, trade block |
 | `Scripts/UI/MarketController.cs` | Traspasos, FA, S&T, deadline |
-| `Scripts/Core/GameEnums.cs` | `GameScreen` (47), `GameMode` |
+| `Scripts/Core/GameEnums.cs` | `GameScreen`, `GameMode` |
 | `Scripts/Core/GLeagueHelper.cs` | Reglas G-League: asignación, desarrollo, codificación ids |
 | `Scripts/Core/GLeagueScheduleGenerator.cs` | Calendario G-League (28 partidos/filial) |
 | `Scripts/Core/GLeaguePostSeason.cs` | Playoffs G-League (QF→SF→CF→Final, mejor de 3) |
@@ -190,13 +196,12 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 
 ---
 
-## 11. Estado actual del repo
+## 11. Estado del repo
 
-- **Rama de trabajo:** `auditoria-final` (104 commits por delante de `main`), **sin mergear todavía**. `main` == `origin/main` (`d565623e`).
-- **Última revisión de docs:** auditoría integral 2026-09 (`Docs/AUDITORIA_FINAL.md`, checklist viva). Los 176 tests EditMode en verde.
-- **Versión del juego:** `v1.0.0 · Beta`.
-- **`PLAN.md`** (raíz): todas sus entradas están implementadas y mergeadas en `main`; úsalo como histórico, no como TODO.
-- **Trabajo pendiente conocido:** restos de la auditoría (`SEA-11` All-Star/2º quinteto en `season_records`, `QA-10` formato, `QA-11` scrollbar nativa en 4 pantallas, `QA-12` overrides sin `base`), rivalidades/dinastías en curso, y la deuda de `Docs/TODO_TECHNICAL_DEBT.md`.
+- **Rama, HEAD, versiones y conteos:** se calculan al vuelo con `python3 Tools/project_status.py`; no se registran como snapshot en este archivo.
+- **Auditoría integral:** `Docs/AUDITORIA_FINAL.md` conserva su análisis fechado; para el estado de mejoras aprobado y su progreso usa `Docs/MEJORAS_AUDITORIA_2026-10-23.md`.
+- **Versión del juego:** consultar `Docs/PROJECT_STATUS.md` (se obtiene del footer de MainMenu).
+- **`PLAN.md`** (raíz): úsalo como histórico; el trabajo pendiente se sigue en `Docs/MEJORAS_AUDITORIA_2026-10-23.md` y `Docs/TODO_TECHNICAL_DEBT.md`.
 
 ---
 

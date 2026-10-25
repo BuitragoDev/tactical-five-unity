@@ -3,6 +3,7 @@
 > **Documento vivo de trabajo.** Aquí está por escrito TODO lo que hay que arreglar, en qué orden y por qué.
 > Cada hallazgo tiene su propia ficha con estado marcable (`[ ]` pendiente → `[x]` hecho).
 > Úsalo como checklist maestro: marca `[x]` al terminar, y anota en la **§12 Bitácora** la fecha/commit.
+> **Alcance histórico:** los commits, conteos y métricas de las secciones/bitácoras describen sus snapshots fechados. Para versión, rama, HEAD, número actual de tests y pantallas ejecuta `python3 Tools/project_status.py` (`Docs/PROJECT_STATUS.md`).
 >
 > - **Auditoría realizada sobre:** `main` @ `d565623e` (post-merge de `minutos-ui`).
 > - **Rama de trabajo de la auditoría:** `auditoria-final`.
@@ -47,7 +48,7 @@
 | ALTOS | 21 | **21** |
 | MEDIOS | ~32 | **32** |
 | BAJOS | ~12 | **11** (queda `QA-12` overrides sin `base` y detalles menores) |
-| Tests | — | **290** |
+| Tests (conteo vigente) | — | `python3 Tools/project_status.py` |
 
 > **Fase 1 completada.** **Fase 2 muy avanzada:** integridad de simulación (`SIM-01/02/03/04/12/13`), esquema (índices, `[Table]`, `SEA-12`, ids monótonos), `season_records` (`SEA-11`, todo), economía (`ECO-03/04/05/07/08`, `SEA-10`), rendimiento (`REN-01`, `CON-07`, `CON-08`), UI (`UI-03/05/06`), limpieza de código muerto y corrección de docs (`QA-07/08`), y **tests de persistencia** (`GameSaveManagerTests`, 7) con `BaseDirOverride`.
 > **Fase 2 cerrada salvo dos menores diferidos a propósito:** `UI-04` (re-bind del scrollbar *dentro* de una visita en 7 pantallas; el `BindScrollBar` está duplicado y el riesgo de romper el scroll supera al beneficio: hacerlo al unificar la scrollbar compartida) y `CON-05` (cachear standings por día; el coste real es ~1.230 filas/día, impacto bajo). Los tests de `InitSaveSlot`/`StartNewSeason` necesitan una `DatabaseManager` viva en EditMode (se abordarán si se añade un arnés de tests con DB).
@@ -694,7 +695,7 @@ DATOS (SQLite sqlite-net, 1 .db por slot)
 
 ## 8. Tests recomendados
 
-> Los tests viven en `Assets/_TacticalFive/Tests/Editor/` (sin asmdef, EditMode). Los que requieren DB necesitan refactor para inyectar ruta (ver nota en `AGENTS.md §9`). Hoy: 85 tests.
+> Los tests viven en `Assets/_TacticalFive/Tests/Editor/` (sin asmdef, EditMode). Los que requieren DB necesitan refactor para inyectar ruta (ver nota en `AGENTS.md §9`). El número actual se calcula con `python3 Tools/project_status.py`; los conteos de esta auditoría son históricos.
 
 **Simulación (`GameSimulatorTests`)**
 - [x] `SimulateGame_Overtime_AlwaysProducesWinner` (`SIM-04`) → `SimulateGame_ShortRoster_NeverEndsInTie` + `SimulateGame_FullRosters_AlwaysProducesWinner`
@@ -748,7 +749,7 @@ Además de los de la lista, se añadieron suites para lo construido en Fases 2-4
 `PlayerDataTests` (4, invariant del overall), `PlayerProgressionTests` (6),
 `GamePlanTests` (6), `CoachSchemeTests` (4), `ScoutingHelperTests` (6),
 `NegotiationHelperTests` (4) y `StorylineServiceTests` (19, incluye los detectores
-de narrativa y regresiones del filtro de partidos). Total actual: **155 tests**.
+de narrativa y regresiones del filtro de partidos). En el snapshot de esta sección: **155 tests** (no es el conteo actual).
 
 ## 9. Nuevas funcionalidades
 
@@ -963,7 +964,7 @@ Prioridad acordada tras cerrar la auditoría. **No incluye** el modo histórico/
 ## Anexo · Métricas de la auditoría
 
 - Archivos `.cs`: **172** · Líneas: **68.325** (a 2026-09-27, tras las Fases 1-4)
-- Pantallas `UIDocument`: **47** (todas con `case` en `GoTo` y campo asignado)
+- Pantallas `UIDocument`: **47** en el snapshot analizado; conteo vigente y sincronización con `GameScreen`/`GoTo`: `python3 Tools/project_status.py`.
 - Tests EditMode: **191** (19 archivos) — `TradeHelperTests` 30 · `StorylineServiceTests` 28 · `GLLeagueHelperTests` 22 · `GameSimulatorTests` 14 · `AdvancedStatsHelperTests` 11 · `GameSaveManagerTests` 11 · `ObjectiveHelperTests` 10 · `HallOfFameHelperTests` 9 · `GamePlanTests` 6 · `PlayerProgressionTests` 6 · `ScoutingHelperTests` 6 · `HistoricalStatsRulesTests` 5 · `CoachSchemeTests` 4 · `DraftGeneratorTests` 4 · `NegotiationHelperTests` 4 · `PlayerDataTests` 4 · `RivalryHelperTests` 5 · `DynastyHelperTests` 5 · `EditModeSmokeTests` 2
 - Archivos con `[Indexed]`: **4**
 - Superficie de red/procesos externos: **ninguna** (no hay `UnityWebRequest`, `HttpClient`, `Process.Start`): el "apartado de seguridad" se reduce a robustez frente a datos corruptos.

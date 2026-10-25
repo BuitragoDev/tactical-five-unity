@@ -18,49 +18,103 @@
 
 ## 2. Match simulation (core mechanic)
 
-**Script:** `GameSimulator.cs` (936 ln). **Data:** `GameData`, `PlayerData` (11 attributes + `morale` + `fisico`), `LineupData` (rotation). **DTOs:** `PlayerStatSnapshot`, `TeamStats`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome`, `GameResult`.
+**Script:** `GameSimulator.cs` (~1.370 ln). **Data:** `GameData`, `PlayerData` (11 attributes + `morale` + `fisico`), `LineupData` (rotation). **DTOs:** `PlayerStatSnapshot`, `TeamStats`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome`, `PossessionTally`, `PossessionState`, `GameResult`.
+
+### Fuente de aleatoriedad (F3-01)
+- `GameSimulator.SimulateGame(..., IRandomSource random = null)`: el juego pasa `null` y usa `UnityRandomSource`, un adaptador directo de `UnityEngine.Random`; los tests y herramientas pueden pasar `new SeededRandomSource(seed)` (SplitMix64 local, sin dependencias de Unity).
+- La misma fuente se pasa explícitamente por ritmo/posesiones, cambios, tiros, anotación, faltas, rebotes, tiros libres, prórrogas/desempate y chequeo de lesiones. **Misma semilla + mismas entradas = mismo marcador, cuartos, box score y play-by-play.** El test `SimulateGame_MismaSemillaYEntradas_ProduceElMismoResultado` lo verifica.
+- El alcance es `GameSimulator`: calendario, draft y RNG de la IA en background continúan usando sus fuentes actuales.
 
 ### Team ratings
 - Player rating = `clamp(overall + (morale − 50) * 0.1, 0, 99)`.
 - Team rating uses the `homePlayers`/`awayPlayers` lists, which include injured players, while active simulation lists filter injuries. Therefore “all healthy players” is the intended rule, not the current implementation [F].
 - The simulator applies `+1.5` only when `isMyHomeGame` is true. In the current Dashboard call path this is the user's home game, so AI-vs-AI and the user's away games do not receive a local bonus [F]. Chemistry: home ×0.15, away ×0.10.
-- `pace = clamp(101 + (homeRating + awayRating − 140) * 0.06 + rand(−2, 2), 95, 107)`.
+- **F3-04:** `pace = clamp(96 + (homeRating + awayRating − 140) * 0.06 + rand(−2, 2) + ajuste de plan + SpeedPaceDelta, 92, 110)`. El centro baja para el ritmo observado de 2024-25; cada periodo conserva posesiones iguales para los dos equipos.
 
-### Possession model (`RunPossession`, :505-586)
-- Turnover probability: `0.11 + (defR − offR) * 0.0003`.
+### Possession model (`PossessionState`, `RunPossession`, `PlayPossession`, `RunPossessionChain`)
+- **La posesión es la unidad que alterna.** El atacante lo decide una regla explícita (`PossessionState`, F2-02), no el azar: cada periodo lo abre el equipo que no abrió el anterior (`BeginPeriod(n)`: Q1 local, Q2 visitante, Q3 local, Q4 visitante, prórrogas alternando) y, dentro del periodo, el balón cambia al cerrar cada posesión (`NextPossession()`; canasta, pérdida, tapón o rebote defensivo) y **sigue en el mismo equipo si el rebote es ofensivo** (F2-01): `PossessionOutcome.offensiveRebound` encadena otro ataque con `RunPossessionChain`, hasta `MAX_ATTACKS_PER_POSSESSION` (4) por seguridad. `PossessionTally` separa *posesiones* (alternancia) de *posesiones usadas* (ataques): la diferencia son las segundas oportunidades, que ahora puntúan.
+- **Equilibrio resultante:** cada periodo regular reparte `teamPoss × 2` posesiones en mitades iguales. La fase final F3-05 puede añadir hasta tres posesiones, por lo que el total del partido ya no garantiza igualdad exacta entre equipos. En la liga sintética F3-04 previa a F3-05 el ritmo medio fue **98,13** y `PTS/POS` ≈ **1,16**.
+- Turnover probability: `TurnoverChance(offR, defR, BallSecurity, plan)` = `clamp(GameSimulator.BASE_TURNOVER_CHANCE (0.147) + (defR − offR) * 0.0003 + ForcedTurnoverDelta − (BallSecurity − 70) * 0.0015, 0.02, 0.30)`, donde `BallSecurity` es el bote medio de los manejadores (PG/SG/SF) en pista. La base se ajustó en F3-04 al volumen NBA observado; el bote y el plan siguen moviendo la probabilidad.
 - Shooter selection: weighted by `(overall/100)^2.2 * FisicoPenalty`, where `FisicoPenalty = 1` if `fisico ≥ 30`, else `0.75 + (fisico/30)*0.25`.
-- Shot type by position: PG 40% / SG 46% / SF 38% / PF 33% / C 18% from three, adjusted `+ (three_point − 75)*0.002`, clamped 0.10–0.55, × FisicoPenalty.
+- Shot type by position (F3-04): PG 45% / SG 51% / SF 43% / PF 38% / C 23% from three, adjusted `+ (three_point − 75)*0.002 + (three_point − shooting) * 0.0015 * iq/100`, clamped 0.10–0.55, × FisicoPenalty. El término de IQ es la **selección de tiro** (F2-04): el jugador listo insiste en su punto fuerte.
 - Defense: best `defense` on the floor; `di = (defense − 70) * 0.005`.
-- 3PT FG%: `clamp((0.35 + (three_point−70)*0.005) * fp − di, 0.28, 0.51)`.
-- 2PT FG%: `clamp((0.50 + (shooting−70)*0.005) * fp − di*0.25, 0.40, 0.67)`.
-- And-one: 6% on made 2; 75% FT. Foul on miss: 18% (3pt) / 14% (2pt), 3 FTs on 2P 10% of the time; `ftPct = 0.75 + (overall−70)*0.002`.
-- Blocks: one collective block roll per missed shot, with each defender weighted by `clamp((blocks−60)/400, 0, 0.10) × position multiplier` and total chance capped at 20%. Multipliers: PG 0.20, SG 0.30, SF 0.55, PF 1.15, C 1.30. The successful defender is selected from those weights, not by list order.
-- Rebounds: defensive `sum(reb^3 × position multiplier)` vs offensive `sum(reb^2.5 × position multiplier)`; the individual winner uses the same context-specific weight. Defensive multipliers: PG 0.45, SG 0.55, SF 0.80, PF 1.20, C 1.35. Offensive multipliers: PG 0.35, SG 0.50, SF 0.75, PF 1.20, C 1.40.
-- Assists: 35% chance, passer weight `passing^3`.
+- 3PT FG% (F3-04): `clamp((BASE_THREE_POINT_PERCENT 0.400 + (three_point−70)*THREE_POINT_ATTRIBUTE_SLOPE 0.0035) * fp − di, 0.28, 0.51)`.
+- 2PT FG% (F3-04): `clamp((BASE_TWO_POINT_PERCENT 0.5165 + (shooting−70)*TWO_POINT_ATTRIBUTE_SLOPE 0.0025) * fp − di*0.25 + FinishingBonus(athleticism), 0.40, 0.67)`, con `FinishingBonus = (athleticism − 70) * 0.0018` (F2-04). Se comprime la pendiente de atributos alrededor del promedio para que el diferencial de OVR no abra brechas de acierto fuera de la distribución NBA.
+- And-one: 6% on made 2; el libre adicional lo tira `ShootFreeThrows`. Foul on miss: 12% (3pt) / 8% (2pt). Una falta de dos no concede un tercer tiro adicional.
+- Blocks (F3-04): one collective block roll per missed shot, with each defender weighted by `clamp((blocks−60)/800, 0, 0.05) × position multiplier` and total chance capped at 12%. Multipliers: PG 0.20, SG 0.30, SF 0.55, PF 1.15, C 1.30. The successful defender is selected from those weights, not by list order.
+- Rebounds (F3-04): both teams use the same `reb^3 × position multiplier × ReboundAthleticismFactor` exponent; the offensive team then receives `OFFENSIVE_REBOUND_WEIGHT_SCALE = 0.42`. This removes the old exponent mismatch (`def reb^3` vs `off reb^2.5`, which penalized attack by ~8× at reb=80) and brings offensive boards toward the NBA share without guaranteeing any rebound. `ReboundAthleticismFactor = clamp(1 + (athleticism − 70) * 0.004, 0.7, 1.4)` (F2-04). **Si gana el ataque, el rebote es ofensivo y la posesión continúa con otro ataque del mismo equipo.** Defensive multipliers: PG 0.45, SG 0.55, SF 0.80, PF 1.20, C 1.35. Offensive multipliers: PG 0.35, SG 0.50, SF 0.75, PF 1.20, C 1.40.
+- Assists (F3-04): `BASE_ASSISTED_FIELD_GOAL_CHANCE = 63%` de las canastas llevan asistencia (62% en la G-League), pasador ponderado `passing^3`; es la **única** fuente de asistencias (no hay pisos).
 - Turnovers: handler PG/SG/SF weighted `1/FisicoPenalty`; only 50% become steals, steal weight `steals_attr^3`.
-- Fouls: random C/PF on court.
+- **Faltas:** peso por posición (C 2,0 · PF 1,6 · SF 1,1 · SG 0,9 · PG 0,8) amortiguado por las faltas ya cometidas (`max(0,35; 1 − pf×0,10)`): los interiores faltan más y quien está en problemas de faltas defiende con más cuidado. Falta sin tiro en la penetración (`ReachInFoulChance` = 12,5% + delta del plan defensivo): si deja al rival en bonus son 2 tiros libres; si no, el ataque continúa (no consume posesión extra).
+
+### Faltas, bonus y tiros libres (F2-03)
+- **Cómputo:** `FoulState` lleva las faltas de equipo del periodo (se reinician con `BeginPeriod`) y `DefenseFouls.RegisterFoul()` cuenta la falta del equipo que defiende y devuelve si deja al atacante **en bonus**. Umbral: 4.ª falta de equipo del periodo; en los dos últimos minutos del 4.º cuarto y de cada prórroga (`IsClutch`: minuto ≥ 10 en cuartos, ≥ 3 en prórrogas) baja a la 2.ª. En la NBA el umbral normal es la 5.ª: aquí se usa la 4.ª a propósito para acercar `fta` a los valores reales sin inflar el número de faltas.
+- **Tiros libres:** un único punto de tiro, `ShootFreeThrows(shooter, shots, out liveRebound)` → `0.75 + (overall−70)×0,002`. Si el **último** libre se falla, `liveRebound = true` y `AttachLiveRebound` resuelve la pelea con `DoReb`: un rebote ofensivo mantiene la posesión (segunda oportunidad) y uno defensivo la cierra. Si el último entra, el balón muere.
+- **Expulsión:** `EjectFouledOut` saca de la pista a quien llega a `PERSONAL_FOUL_LIMIT` (6) y mete al mejor suplente por encaje posicional, minutos pendientes y OVR (nunca a otro expulsado ni a quien tiene plan 0); `PickSubstitution` tampoco vuelve a meter a un expulsado. Sin banca disponible el equipo sigue con cuatro y se avisa en el play-by-play.
+- **Medición histórica F2-03** (10 partidos, plantilla homogénea): 40 tiros libres y 26 faltas por partido. El baseline de calibración F3-04 usa 30 equipos sintéticos ×82 partidos; resultados vigentes más abajo.
+
+### Atributos con efecto propio (F2-04)
+Los once atributos del jugador llegan al `PlayerStatSnapshot` y mueven una métrica concreta. Los cuatro que antes se ignoraban:
+
+| Atributo | Efecto | Fórmula |
+|---|---|---|
+| `speed` | Ritmo del partido (transición) | `SpeedPaceDelta = (velocidad media de ambos equipos − 70) × 0,15` posesiones |
+| `dribbling` | Pérdidas de balón | `BallSecurity` = bote medio de los manejadores en pista; `TurnoverChance` resta `(bote − 70) × 0,0015` |
+| `athleticism` | Finalización cerca del aro y rebote | `FinishingBonus = (atl − 70) × 0,0018` al TC de dos; `ReboundAthleticismFactor = clamp(1 + (atl − 70) × 0,004, 0,7; 1,4)` en el peso de rebote |
+| `iq` | Selección de tiro | término `(three_point − shooting) × 0,0015 × iq/100` en la probabilidad de triple |
+
+- **Medición vigente** (EditMode F3-04, 20–30 partidos por escenario): velocidad 90 → **101,4** posesiones vs velocidad 45 → **95,1**; bote 95 → **11,9** pérdidas vs bote 45 → **19,7**; atletismo 95 → **56,5 %** en tiros de dos vs 40 → **51,7 %**; IQ 95 → **46,8** triples intentados vs IQ 20 → **40,3** (con el triple como punto fuerte).
+- **Dirección de efecto acordada:** un atributo alto siempre mejora su métrica y uno bajo la empeora; los efectos son aditivos y acotados (`clamp`) para que ningún valor 1–99 rompa los rangos del partido.
+
+### Calibración ofensiva F3-04
+- Se ajustaron en `GameSimulator` el ritmo base (96), la base de pérdidas (0,147), los porcentajes y pendientes de 2P/3P, la selección por posición (PG45/SG51/SF43/PF38/C23), faltas, asistencias (63%), tapones y rebote ofensivo. Se quitó además la concesión aleatoria de un tercer libre en una falta de dos puntos: no corresponde a las reglas NBA. El rebote ofensivo ya no compara `reb^2.5` con `reb^3`; comparte el exponente defensivo y usa escala de ataque 0,42.
+- La mejora se mide con `MonteCarloCalibrationGate.EvaluateOffense`: comprueba media de liga **y** P5/P50/P95 por equipo-temporada para PTS, FG%, 3P%, FTA, pérdidas y asistencias, además de que ningún equipo sintético quede sistemáticamente fuera del rango NBA/tolerancia.
+- Resultado reproducible (semilla `20261024`, 30×82): **98,13** posesiones, **113,96** PTS, **45,50%** FG, **35,29%** 3P, **22,79** FTA, **14,70** pérdidas y **26,16** asistencias por equipo-partido; **Gate ofensivo ACEPTADO**, incluidas colas por equipo. REB **44,29** y PF **18,13** también caen en las bandas de media del perfil.
+- El gate general aún marca partidos-jugador perdidos por lesión (F3-06); la validación del informe sintético conserva ese fallo visible y no bloquea el gate ofensivo F3-04.
 
 ### Quarters, rotations, overtime
-- 4 quarters via `SimQuarter`; `teamPoss = clamp(round(pace/4 * rand(0.96,1.04)), 22, 28)` per team per quarter.
-- Rotations via `SubSchedule` (Q1/Q3 subs at 4' and 8'; Q2/Q4 at 2',5',8',10.5'). El equipo con rotación configurada (vinculante) usa ventanas densas cada 1,5' (7 por cuarto) para poder cumplir sus planes; el rival mantiene las de siempre. Overtime: 24 possessions (`minsPerPoss = 5/24`), sub at 2.5'. Up to 5 OTs.
+- 4 quarters via `SimQuarter`; `teamPoss = clamp(round(pace/4 * rand(0.96,1.04)), 22, 28)` **posesiones** por equipo y cuarto (`totalPoss = teamPoss × 2`, mitades iguales). El saque de cada cuarto lo fija `PossessionState.BeginPeriod` (alterno, ver modelo de posesiones). Los ataques pueden superar las posesiones por los rebotes ofensivos.
+- **Fase final F3-05:** como los cuartos son de posesiones fijas y el motor no simula un reloj de posesión, al cerrar el 4.º cuarto se comprueba el **marcador acumulado del partido**. Si la diferencia es de 1–6 puntos, se añaden hasta **3 posesiones** alternando desde el equipo que va por detrás; se corta al empate (prórroga), a la remontada o cuando el margen supera 6. No se añaden libres artificiales: cada posesión pasa por `PlayPossession` y sus reglas ordinarias. `PossessionTally.lateExtensionPossessions` expone cuántas se añadieron. El reloj de la crónica se limita a 11,98' para no mostrar tiempos negativos; es una aproximación de final de partido, no una simulación exacta de faltas/tiempos muertos NBA.
+- Rotations via `SubSchedule` (Q1/Q3 subs at 4' and 8'; Q2/Q4 at 2',5',8',10.5'). Todo equipo con **plan de minutos** (configurado o estratégico automático, ver más abajo) usa ventanas densas cada 1,5' (7 por cuarto) para poder cumplirlo; solo la G-League y el All-Star mantienen el calendario antiguo. Overtime: 24 possessions (`minsPerPoss = 5/24`), sub at 2.5', saque alterno (`BeginPeriod(5+n)`). Up to 5 OTs.
 - Substitution policy: `DoSub` changes 1–2 players at each scheduled stoppage. En modo no vinculante (IA) elige al que sale por minutos sobre su objetivo y al que entra por encaje posicional, minutos pendientes y OVR. **Objetivo por media** (`GetTargetMinutes`): titular ≥90 → 40, ≥85 → 34, ≥80 → 33, ≥75 → 26, por debajo → 20; suplente ≥90 → 32, ≥85 → 28, ≥80 → 22, ≥75 → 14, por debajo → 12; **rol `UltimoRecurso` → suelo (2 min)**. A player with `fisico < 30` has its target reduced by 6 minutes, con suelo de 2 (`MIN_FIXED_MINUTES`). El rol es la escala de `PlayerRoleRules.FromOverall` (seed, draft y migración `role_from_overall`). Interior coverage is preserved when possible; stars are protected from early substitutions and can return later in the game.
-- **Rotación vinculante (solo el equipo del usuario):** con minutos configurados en ROTACIÓN (`fixed_minutes`), `GameSimulator.PickSubstitution` (helper puro) respeta el plan: sale quien más se pasa de su objetivo (desempate: ratio, plan menor, OVR) y entra, ponderando el encaje posicional (×1.0/×0.85/×0.6), quien tiene minutos pendientes; nunca se reinserta a quien agotó su plan mientras haya relevos con minutos, y el cambio no deja la pista sin interiores. Si nadie tiene minutos pendientes no hay cambio (los de pista completan si la suma no llega a 240). Suelo de **2 min** (`MIN_FIXED_MINUTES`) por jugador con plan > 0; `0` = no juega. La fatiga no altera un plan configurado. La protección de estrellas por minutos **efectivos** (incluyendo el cuarto en curso) también es exclusiva de este modo: la IA conserva la regla antigua (minutos globales).
-- **Origen del objetivo:** `PrepareRotationMetadata` usa `target_minutes` si el jugador tiene minutos fijados en la pantalla ROTACIÓN (`PlayerData.rotation_minutes ≥ 0`); si no (`-1`), aplica la heurística anterior. La fatiga (`fisico < 30`) resta 6 minutos (mínimo 8) solo en los objetivos heurísticos (IA). Solo el equipo del jugador usa minutos configurados; la IA, la G-League y el All-Star siguen con la heurística.
+- **Rotación vinculante (`planned`):** `GameSimulator.PickSubstitution` (helper puro) respeta el plan —igual con minutos configurados en ROTACIÓN que con el reparto estratégico automático—: sale quien más se pasa de su objetivo (desempate: ratio, plan menor, OVR) y entra, ponderando el encaje posicional (×1.0/×0.85/×0.6), quien tiene minutos pendientes; nunca se reinserta a quien agotó su plan mientras haya relevos con minutos, y el cambio no deja la pista sin interiores. Si nadie tiene minutos pendientes no hay cambio (los de pista completan si la suma no llega a 240). Suelo de **2 min** (`MIN_FIXED_MINUTES`) por jugador con plan > 0; `0` = no juega. La fatiga no altera un plan configurado por el jugador. La protección de estrellas usa los minutos **efectivos** (incluyendo el cuarto en curso) siempre que el partido tenga plan.
+- **Origen del objetivo:** `PrepareRotationMetadata` usa `target_minutes` si el jugador tiene minutos fijados en la pantalla ROTACIÓN (`PlayerData.rotation_minutes ≥ 0`); si no (`-1`), aplica la heurística anterior. La fatiga (`fisico < 30`) resta 6 minutos (mínimo 8) solo en los objetivos heurísticos (IA). El equipo del usuario usa minutos configurados; IA, G-League y All-Star usan sus reglas automáticas correspondientes.
+- **Rotación estratégica automática (F2-11, IA y equipo del usuario sin configurar):** si **ningún** convocado tiene minutos fijados, `PrepareRotationMetadata` calcula de una vez el reparto de los **240** minutos: un ideal por jugador (`GetAutomaticMinutes`: promesa del rol —Estrella 34 / Titular 27 / Banquillo 15 / Último 2—, ±4 por nivel dentro del rol, −10/−20 % si llega cansado, +2 al titular) y `RotationPlanner.AutoAssign` lo normaliza (rotación corta de 10, suelo 2, suma exacta 240). El plan queda **vinculante** (`planned`), así que la IA usa las mismas ventanas densas y el mismo `PickSubstitution` que el equipo del usuario. La pantalla ROTACIÓN calcula su columna SUGERIDO y su reparto automático con **la misma función**, de modo que lo que se ve es lo que se juega. La G-League (`glLeague`) mantiene la heurística de OVR y el All-Star sigue con sus minutos fijos.
+- **Medición F2-11** (12 jugadores homogéneos: 1 estrella, 4 titulares, 7 banquillo; 10 partidos): antes la heurística pedía **319 minutos** de los 240 del partido (+33 %); ahora juega estrella **36,2**, titular **30,1** y banquillo **11,9** por jugador, con la suma del partido en 239–241. Coste: ~+0,3 ms por partido (18–20 ms por día de 15 partidos frente a 15 ms).
 
-### Elite floors
-If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `rebounding ≥ 95` → boards floor `round(min/48*10)` (split oreb/dreb half/half); `steals ≥ 90` → steals floor `round(min/48*3)`; `blocks ≥ 95` → blocks floor `round(min/48*3)`. — `GameSimulator.cs:168-189`
+### Box score = suma de acciones (sin pisos)
+- **Ninguna estadística se reescribe después de simular** (F2-05): el box score es exactamente lo que el jugador hizo en el partido. Se eliminaron los antiguos «pisos elite» que subían asistencias (`passing ≥ 95`), rebotes (`rebounding ≥ 95`), robos (`steals ≥ 90`) y tapones (`blocks ≥ 95`) de todo jugador con ≥ 20 minutos.
+- **Invariantes que se cumplen por construcción:** asistencias ≤ canastas anotadas del equipo (solo hay asistencia en una canasta), tapones ≤ fallos del rival (un tapón es un fallo), robos ≤ pérdidas del rival (solo la mitad de las pérdidas acaban en robo) y rebotes ≤ fallos totales + libres fallados (cada rebote sale de un fallo). El `rating` y los dobles-dobles se calculan sobre esas cifras reales.
+- **Medición del impacto** (20 partidos, plantillas con atributos elite): de los jugadores con ≥ 20 minutos, 177 quedan por debajo del antiguo mínimo de asistencias, 127 de rebotes, 163 de robos y 61 de tapones; la distribución de líderes se valida en la Fase 3 sin pisos.
+
+### Resultados y paridad F3-05
+- `MonteCarloOutcomeGate` valida en 100 temporadas completas (123.000 partidos) victorias medias, dispersión de victorias, mínimos/máximos por temporada, correlación OVR↔victorias y tasa de prórrogas contra la referencia NBA 2024-25. Resultado con semilla `20261024`: **41,00** victorias/equipo-temporada; desviación **14,02**; mínimo medio **15,80**; máximo medio **67,09**; correlación **0,928**; OT **5,11 %** (6.286/123.000). Todas las bandas de F3-05 pasan.
+- Para aislar la calibración del motor, el banco usa una liga sintética propia: `SYNTHETIC_BASE_OVR=73.36` y `SYNTHETIC_OVR_SPREAD=8.6` (rango de bases por equipo 73,36–81,96). Esta compresión es propia del laboratorio; **no cambia ratings, seed ni franquicias del juego**.
+
+### Persistencia del partido en lote (F2-09)
+- **Un partido = unas pocas escrituras.** Las filas de `player_game_stats` se acumulan y se insertan con `DatabaseManager.SavePlayerGameStatsBatch`; los cambios de fatiga/lesión se aplican **en memoria** sobre los `PlayerData` ya cargados y se escriben con `UpdatePlayersBatch`. Antes, cada jugador costaba un `GetPlayerById` + `UpdatePlayer` (físico), otra lectura en el chequeo de lesiones y un `Insert` por fila, todos en autocommit.
+- **Dentro de la transacción del día:** ambos helpers usan `bool own = !_db.IsInTransaction`: si el día ya tiene una abierta escriben en ella y **nunca anidan un `BEGIN`**. La semántica es idéntica (mismo `físico`, mismas lesiones, mismas filas); los cambios solo se ven al final del partido, no a mitad.
+- **Medición** (360 filas = 15 partidos × 24 jugadores, con WAL como las partidas reales): **426 ms escribiendo una por una vs 2 ms en lote**. Un día de liga ahorra ~0,4 s solo en estadísticas y otro tanto en las actualizaciones de jugadores.
+
+### Plantilla corta e incomparecencia (F2-06)
+- **Nunca se inventa el marcador.** Con **1–4 jugadores sanos** se juega con los que hay: el quinteto inicial, las sustituciones y el box score salen de la simulación real, y `GameResult.shortRoster = true` avisa al llamador. El antiguo resultado aleatorio (105–125 / 100–120) ya no existe.
+- **Incomparecencia:** si un equipo no tiene **ningún** jugador sano (`homePS.Count == 0` o `awayPS.Count == 0`) no se puede jugar: se resuelve **0–20** para el rival (regla NBA; los 20 puntos se reparten 5 por cuarto), `GameResult.walkover = true`, sin estadísticas de jugador (el equipo que sí se presenta queda con 0 minutos y no genera filas en `player_game_stats`). Si ninguno de los dos puede presentarse, gana el local 20–0.
+- **Aviso al jugador:** `DashboardController.NotifyShortRoster` inserta un `MessageData` (`NewsType.PLANTILLA_CORTA`, categoría CLUB) cuando la plantilla corta afecta a su equipo, explicando si ha jugado con N jugadores sanos o si ha habido incomparecencia (propia o del rival).
+- **Medición:** 3 vs 4 jugadores (20 partidos, atributos homogéneos) → 117–125 de media; el marcador siempre cuadra con el desglose de tiros. La penalización competitiva por plantilla corta (fatiga/ritmo) se calibra en Fase 3, no con un marcador artificial.
 
 ### Rating & double-double
 `rating = points + oreb + dreb + ast + stl + blk − (fga−fgm) − (fta−ftm) − to − pf`. ≥3 categories of 10+ → triple-double; ≥2 → double-double. — `GameSimulator.cs:191-205`
 
 ### Persisted outputs
 - `PlayerGameStats` rows per player; `GameData` updated (scores, quarters, `is_played=1`).
+- Incomparecencia (F2-06): el `GameData` se persiste con `is_played=1` y el marcador 0–20, pero **sin filas** de `player_game_stats`, fatiga ni lesiones (no se jugó).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
 - Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
-- Injuries: base prob 0.008/game, multiplied by `1 + (30−fisico)*0.15` when `fisico < 30`; 27 weighted types (`InjuryCatalog`, ver "Lesiones y parte médico").
+- Injuries: probabilidad por partido según la **exposición** (`InjuryHelper.MatchRiskPerGame`): base 0,008 a 36 minutos y proporcional por debajo (5 min ≈ 0,11 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y + riesgo de recaída si viene de un alta forzada; 0 minutos ⇒ 0. El sorteo es **postpartido** (no altera minutos ni resultado). 27 tipos ponderados (`InjuryCatalog`, ver "Lesiones y parte médico").
 
 ### Play-by-play en vivo (Vista de Partido)
 - Toggle **Vista de Partido** en los modales de Configuración: `Directa` (0) o `Play-by-play` (1), persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()`). Solo aplica al flujo día a día (no fast sim).
+- **Captura bajo demanda (F2-08):** el llamador pasa `capturePlayByPlay` a `SimulateGame` (`DashboardController` lo pone a `GetSimMode()==1`, y el All-Star nunca). En **Directa** no se construyen snapshots ni deltas por posesión ni la lista de crónica (`GameResult.playByPlay == null`): el resultado es idéntico y se ahorra todo el coste de algo que se descartaba. Medición de un día de 15 partidos (simulación pura): **15 ms en directa vs 33 ms con crónica**.
 - `GameSimulator` captura la crónica sin alterar el resultado: `PlayByPlayEvent` (quarter, texto en español, marcador acumulado, `timeElapsed`, deltas `StatDelta` por jugador). `CaptureBox`/`DiffBox` generan los deltas tras cada posesión + minutos por jugador; hay meta-eventos de inicio de cuarto/prórroga y fin de partido. Solo se guarda en `GameResultCache.PlayByPlayLogs[game.id]` cuando `GetSimMode()==1`.
 - Overlay inmersivo en `MatchDay`: nombres + logos, marcador acumulado, reloj `mm:ss`, barra de progreso 0–100%, **boxscore en vivo** por equipo (12 columnas) reordenado por VAL descendente y totales recalculados desde los jugadores.
 - Velocidades **x1/x3/x5/x10** (persistidas en `TF_PbpSpeed`; base 2 s/evento) y botón **SALTAR** (avanza al final reconstruyendo el boxscore; al acabar cambia a **IR AL RESUMEN**). — `MatchDayController.cs`
@@ -69,8 +123,8 @@ If `minutes ≥ 20`: `passing ≥ 95` → assists floor `round(min/48*10)`; `reb
 ### Previa / pronóstico (Matchup Preview)
 `MatchupPreview.Compute(home, away, isHome, managerId, seasonId)` (`Stats/MatchupPreview.cs`): calcula ratings de equipo (misma fórmula que el simulador + bonus de química y casa) + **forma reciente** (`(avgRating − 50) * 0.25` sobre los últimos 5 partidos jugados) → probabilidad de victoria `1/(1+exp(−diff*0.08))`. Declara FAVORITO solo si `|prob−0.5| > 0.005`. Estrellas = top 3 OVR de cada equipo. Se muestra en `MatchDayController.ShowMatchupPreview` (entre el banner y el boxscore).
 
-### Fallback
-If a team has <2 available players, result is random-ish (105–125 vs 100–120) with `DistributeQuarters` (partition into 4 balanced quarters).
+### Plantilla corta
+Si un equipo no llega a cinco sanos se simula con los disponibles y, sin ninguno sano, se aplica incomparecencia 0–20 (ver «Plantilla corta e incomparecencia» en §2). No existe ya marcador aleatorio de respaldo.
 
 ## 3. Lineups & rotations
 
@@ -79,7 +133,7 @@ If a team has <2 available players, result is random-ish (105–125 vs 100–120
 - **Pantalla ROTACIÓN** (`GameScreen.Rotation`, `RotationController`): reparto manual de los **240 minutos** de un partido (5 × 48) entre los 12 convocados.
   - Se guarda en **`team_lineup.rotation_minutes`** (migración `ALTER TABLE ... DEFAULT -1`); **`-1` = automático**, `0..48` = fijo. No se guarda en `players` (hay un campo transitorio `[Ignore] PlayerData.rotation_minutes` para dárselo al simulador).
   - `GetActivePlayers(_myTeam.id)` copia el valor a cada jugador convocado → `InitPS` lo mete en `PlayerStatSnapshot.target_minutes` (`fixed_minutes = true`) → `PrepareRotationMetadata` lo aplica (suelo 2) y `PickSubstitution` lo respeta de verdad.
-  - Columna **SUG.** = `GameSimulator.GetSuggestedMinutes(player, starter)` (misma heurística, sin fatiga).
+  - Columna **SUG.** = `GameSimulator.GetSuggestedMinutes(player, starter)` → `GetAutomaticMinutes` (rol + nivel + forma física): la misma función con la que el simulador reparte los 240.
   - Panel **MINUTOS POR POSICIÓN** (solo lectura): suma de minutos por posición primaria y secundaria, escala relativa a 48.
   - **AUTO (240)** reparte los 240 minutos con `RotationPlanner.AutoAssign` (proporcional a los objetivos, **suelo 2 min** —el mismo que aplica el simulador— y tope 48; la suma es exactamente 240) entre una **rotación corta** (`ROTATION_SIZE = 10`: solo los 10 mejores objetivos reparten minutos; el fondo se queda en el suelo). **RESET** pone todos los minutos a `0` (reparto desde cero); `0` es un valor real, no el centinela `-1` de automático, que solo queda en una convocatoria nunca tocada. Si el total configurado es 0 el equipo vuelve al reparto automático.
   - **Referencia = cuota de 240:** las sugerencias por jugador (heurística por media/rol) **no suman 240**, así que compararlas en bruto daba negativos a todos los convocados (imposibles de cuadrar). La columna **SUGERIDO** y los **±** se calculan contra la **cuota de 240** del jugador (`RotationPlanner.AutoAssign` sobre sus ideales, suelo 2, tope 48): en automático **todos los deltas son 0** y con reparto manual los deltas suman 0 (siempre cuadrables). El tooltip muestra el ideal bruto (*"Ideal del simulador: X min · cuota de 240: Y min"*).
@@ -205,12 +259,12 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - **Retired numbers** (`DorsalesController`): seed of 53 legends + 17 active veterans (`RetiredNumberSeeder`/`VeteranRetiredNumberSeeder`); `ShouldRetireNumber` (WouldInduct + seasons_with_team ≥10); `TryRetireNumber` at retirement; `AssignJerseyNumber` reserves retired numbers (1–99, avoids taken). Screen shows current roster numbers + retired.
 - Career stats archived per season (`UpdateHistoricalPlayerStatsFromSeason`, `player_season_stats`).
 - Records: historical + team + season single-game via `CheckAndUpdateRecords`; **record-break achievements** hooked inside it.
-- Aging/progression (`StartNewSeason`): the loop skips `is_rookie == 1` before applying age, contract and attribute progression. Non-rookies receive band deltas + position-based athletic decline + mentoring, retirements ≥40 and contract expiry → FA. The broad rule “all players age/progress” is therefore not true for current rookies [F].
+- Aging/progression (`StartNewSeason`): first-year rookies age and progress like other players; they alone skip contract-year decrement. Players receive age-band deltas + position-based athletic decline + mentoring, retirements ≥40 and contract expiry → FA.
 
 ## 12. Player values & role
 
-- `PlayerRole` thresholds: seed players ≥88 Estrella / ≥78 Titular / ≥68 Banquillo; FAs lower (≥80/≥70/≥60).
-- `PlayerData.GetCalculatedAverage()` currently computes integer `sum / 11`, so it truncates rather than rounds. `ApplyMentoring()` changes attributes without persisting a recalculated `overall`; training/progression/migration do recalculate it. The invariant stated elsewhere is an intended rule, not an always-true runtime invariant [F].
+- `PlayerRoleRules.FromOverall` is the shared role source for team seed/draft/migration: ≥90 Estrella / ≥83 Titular / ≥74 Banquillo; below is UltimoRecurso. The `AddFA` seed helper intentionally uses lower thresholds (≥80/≥70/≥60).
+- `PlayerData.GetCalculatedAverage()` delegates to `PlayerRating`: the mean of 11 attributes is rounded and capped by `potential`. Training, progression, mentoring and migrations recalculate `overall` after attribute changes.
 - `secondary_position` = adjacent position (PG→SG, SF→PF, PF→C, C→PF); **SG toma Base si `height_cm < 198` y Alero si `≥ 198`** (migration `UPDATE`, `DatabaseManager.cs:405-424`).
 
 ## 13. Fog of war (ojeadores)
@@ -241,8 +295,14 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 - **Catálogo (`InjuryCatalog`, puro):** 27 lesiones con `family`, rango de días, peso en el sorteo,
   **gravedad** (`Leve`/`Moderada`/`Grave`/`Crítica`) y `relapseRisk`. El simulador sortea con
-  `InjuryCatalog.Pick(roll)` y los días con `InjuryHelper.RollDays`. Probabilidad base 0.008/partido
-  (×`1 + (30−fisico)*0.15` si `fisico < 30`); solo se lesiona quien juega (0 minutos ⇒ no).
+  `InjuryCatalog.Pick(roll)` y los días con `InjuryHelper.RollDays`.
+- **Riesgo por partido (`InjuryHelper.MatchRiskPerGame(minutos, físico, riesgo), F2-07`):**
+  base **0,008 a 36 minutos** de exposición y proporcional al resto (5 min ≈ 0,11 %, 20 min ≈ 0,44 %,
+  44 min ≈ 0,98 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y **+ `RelapseChancePerGame`** si el jugador
+  viene de un alta forzada (`recovery_risk > 0`), con tope 1. **0 minutos ⇒ 0 lesiones.** El sorteo es
+  **postpartido**: no altera minutos, rotación ni resultado, y la noticia de la bandeja lo dice
+  («la lesión se ha detectado al término del último encuentro»). Los titulares con mucha carga asumen
+  un riesgo real; el fondo del banquillo casi nunca se rompe.
 - **Pronóstico y progreso:** la lesión guarda `players.injury_total_days` (duración total de la
   "temporada" de la lesión) y `injury_days` (restantes). El parte médico muestra gravedad,
   pronóstico (`InjuryCatalog.Pronostico`), barra de **recuperación** (`InjuryHelper.RecoveryProgress`)
@@ -506,8 +566,8 @@ flowchart LR
 ## Additional open questions
 
 - ¿El bonus de cancha debe aplicarse a cualquier equipo local o solo al equipo del manager?
-- ¿La exclusión de rookies en `StartNewSeason` es intencional o un bug de progresión/contratos?
-- ¿La fórmula de `overall` debe truncar (`sum / 11`) o redondear matemáticamente?
+- ~~¿La exclusión de rookies en `StartNewSeason` es intencional o un bug de progresión/contratos?~~ — **resuelta (B41):** rookies progresan; solo omiten el decremento de contrato en su primera temporada.
+- ~~¿La fórmula de `overall` debe truncar (`sum / 11`) o redondear matemáticamente?~~ — **resuelta (F0-04):** `PlayerRating` redondea la media y la capa por potencial.
 - ¿El signo negativo del impuesto de lujo es intencional para un gráfico concreto o debe normalizarse en `GetTotalExpenses`?
 
 ## Simulación de rebotes y tapones

@@ -299,9 +299,23 @@ public class EditorController : UIScreenController
         {
             _allTeams = new List<TeamData>();
             _allPlayers = new List<PlayerData>();
-            _loadError = "No se pudo cargar la base de datos del Editor: " + ex.Message;
+            _loadError = "No se pudo cargar la base de datos del Editor: " + DescribeSeedError(ex);
             Debug.LogError($"[Editor] Error cargando la base de datos: {ex}");
         }
+    }
+
+    /// <summary>
+    /// Mensaje corto para los modales del Editor. El detalle completo del auditor se
+    /// queda en la consola (un volcado de cientos de líneas no cabe en el modal).
+    /// </summary>
+    static string DescribeSeedError(System.Exception ex)
+    {
+        if (ex is SeedAudit.SeedAuditException audit)
+        {
+            Debug.Log("[Editor] Informe completo del seed:\n" + audit.FullReport);
+            return audit.UserSummary;
+        }
+        return ex.Message;
     }
 
     protected override void RegisterCallbacks()
@@ -355,21 +369,20 @@ public class EditorController : UIScreenController
 
         DatabaseManager.Instance.CloseTemplateSession();
 
-        if (System.IO.File.Exists(DatabaseManager.Instance.TemplateDbPath))
-            System.IO.File.Delete(DatabaseManager.Instance.TemplateDbPath);
-
+        // Ya no se borra el template antes de construir: el nuevo se genera en `.tmp`,
+        // se audita y solo entonces sustituye al anterior (que queda como `.bak`). Si
+        // el seed es inválido, el template que había sigue ahí.
         _templateReady = false;
         string errorMsg = null;
-        string templatePath = DatabaseManager.Instance.TemplateDbPath;
         Task.Run(() =>
         {
             try
             {
-                DatabaseManager.Instance.BuildTemplateDatabaseInBackground(templatePath);
+                DatabaseManager.Instance.RebuildTemplateDb();
             }
             catch (System.Exception ex)
             {
-                errorMsg = ex.Message;
+                errorMsg = DescribeSeedError(ex);
                 Debug.LogError($"[Editor] Error building template: {ex}");
             }
             finally
@@ -1392,17 +1405,17 @@ public class EditorController : UIScreenController
 
         int.TryParse(_playerPot.value, out int pot); p.potential = pot;
 
-        int.TryParse(_playerSpeed.value, out int spd); p.speed = Mathf.Clamp(spd, 0, 99);
-        int.TryParse(_playerShooting.value, out int sho); p.shooting = Mathf.Clamp(sho, 0, 99);
-        int.TryParse(_player3pt.value, out int thr); p.three_point = Mathf.Clamp(thr, 0, 99);
-        int.TryParse(_playerPassing.value, out int pas); p.passing = Mathf.Clamp(pas, 0, 99);
-        int.TryParse(_playerDribbling.value, out int dri); p.dribbling = Mathf.Clamp(dri, 0, 99);
-        int.TryParse(_playerDefense.value, out int def); p.defense = Mathf.Clamp(def, 0, 99);
-        int.TryParse(_playerRebounding.value, out int reb); p.rebounding = Mathf.Clamp(reb, 0, 99);
-        int.TryParse(_playerAthleticism.value, out int ath); p.athleticism = Mathf.Clamp(ath, 0, 99);
-        int.TryParse(_playerIq.value, out int iq); p.iq = Mathf.Clamp(iq, 0, 99);
-        int.TryParse(_playerSteals.value, out int stl); p.steals = Mathf.Clamp(stl, 0, 99);
-        int.TryParse(_playerBlocks.value, out int blk); p.blocks = Mathf.Clamp(blk, 0, 99);
+        int.TryParse(_playerSpeed.value, out int spd); p.speed = PlayerAttributeScale.ClampValid(spd);
+        int.TryParse(_playerShooting.value, out int sho); p.shooting = PlayerAttributeScale.ClampValid(sho);
+        int.TryParse(_player3pt.value, out int thr); p.three_point = PlayerAttributeScale.ClampValid(thr);
+        int.TryParse(_playerPassing.value, out int pas); p.passing = PlayerAttributeScale.ClampValid(pas);
+        int.TryParse(_playerDribbling.value, out int dri); p.dribbling = PlayerAttributeScale.ClampValid(dri);
+        int.TryParse(_playerDefense.value, out int def); p.defense = PlayerAttributeScale.ClampValid(def);
+        int.TryParse(_playerRebounding.value, out int reb); p.rebounding = PlayerAttributeScale.ClampValid(reb);
+        int.TryParse(_playerAthleticism.value, out int ath); p.athleticism = PlayerAttributeScale.ClampValid(ath);
+        int.TryParse(_playerIq.value, out int iq); p.iq = PlayerAttributeScale.ClampValid(iq);
+        int.TryParse(_playerSteals.value, out int stl); p.steals = PlayerAttributeScale.ClampValid(stl);
+        int.TryParse(_playerBlocks.value, out int blk); p.blocks = PlayerAttributeScale.ClampValid(blk);
         int.TryParse(_playerMorale.value, out int mor); p.morale = Mathf.Clamp(mor, 0, 99);
 
         string[] roleChoices = { "Estrella", "Titular", "Banquillo", "Último recurso" };

@@ -11,6 +11,12 @@
 
 **Convención de lectura:** cada hallazgo lleva evidencia `archivo:línea` verificada contra este commit. Lo que no pudo comprobarse se marca explícitamente como **No verificado**. Las opiniones de diseño se separan en la §8.
 
+**Aclaración de diseño posterior (F1-01):** no existe un requisito de que cada franquicia alcance una media de equipo 85. La media se define como la media de los `overall` de todos los jugadores asignados (`team_id`); cada `overall` deriva de sus 11 atributos y se capa por `potential`. Por tanto, el rango 72,00–82,86 reportado en la tabla histórica de abajo es una observación de aquel snapshot, **no un incumplimiento** ni una instrucción para normalizar los equipos. La medición actual se registra en F1-03/ROST-02.
+
+**Aclaración posterior de seed (F1-02, resuelta):** `DatabaseManager.Seeding.cs` es la fuente canónica de plantillas y la mantiene el usuario a mano; 14–17 (`TradeHelper.MAX_ROSTER` = 17, mínimo jugable 12) es la referencia de juego, **no una validación** del auditor: el tamaño de plantilla se publica como dato (`RosterOutOfRange`) y no genera hallazgo. John Konchar (id 461) pasa de NYK a agentes libres conservando `last_team_id` NYK; Trevon Brazile (id 134) permanece en DEN; RayJ Dennis usa el id 611 (ATL) y Tristan Enaruna el 612 (CLE). Estado actual: 479 asignados + 129 FA = 608; **27 de 30 equipos en 14–17**, quedan ATL 18, DEN 18 y PRT 13 como ajuste manual opcional (2 fuera, 1 dentro). El repo no tiene fuente externa de plantillas, así que el auditor solo valida consistencia interna.
+
+**Aclaración de escala de atributos (decisión F1-05):** 1–99 es el rango legal. Los 86 valores bajo 25 (83 blocks, 2 three_point, 1 steals) son legales y no se corrigen ni se clasifican como defecto automáticamente. El 30 de generación de prospectos y el 25 de scouting son límites de procesos distintos. La implementación queda en curso: los tests de escala aislados pasan, pero el EditMode completo está bloqueado por una colisión de ID 610 en `DatabaseManager.Seeding.cs` que requiere resolver la entrada de RayJ Dennis.
+
 ---
 
 ## 1. Resumen ejecutivo
@@ -27,7 +33,7 @@
 
 ### Cinco riesgos principales
 
-1. **El seeder contradice el convenio de balanceo:** ningún equipo alcanza la media OV 85 declarada (rango real 72,00–82,86), y el seeder trunca la media mientras el modelo redondea, afectando a **235 de 606** jugadores sembrados.
+1. **El seeder calcula algunos OVR de forma distinta al modelo:** trunca la media mientras el modelo redondea, afectando a **235 de 606** jugadores sembrados. El rango de media por equipo (72,00–82,86 en ese snapshot) es descriptivo; no se fijó un objetivo uniforme de 85.
 2. **La simulación no modela el rebote ofensivo:** el OREB se anota como estadística pero no conserva la posesión; la siguiente posesión se decide con una moneda. El box score no es causa del marcador en ese punto.
 3. **La valoración de traspasos es desigual:** la IA usa `TradeValueHelper`, pero la evaluación de las ofertas del usuario sigue con una heurística de OVR en `TradeHelper.EvaluateTrade`. Dos mercados con dos economías.
 4. **El CBA está modelado de forma parcial e internamente inconsistente:** el matching salarial suma margen dos veces, la restricción de apron se aplica con el conteo de jugadores equivocado y no hay separación entre plazas estándar y two-way.
@@ -36,7 +42,7 @@
 ### Diez acciones prioritarias
 
 1. Unificar la fórmula de `overall` en una sola función usada por seeder, draft, editor y migraciones.
-2. Decidir qué significa exactamente "media de equipo 85" y normalizar los 30 equipos contra esa definición antes de sembrar.
+2. Documentar la media descriptiva de equipo y revisar cualquier regla explícita de balance sin imponer un mínimo uniforme de 85.
 3. Añadir un test de invariantes del calendario: 82 partidos, 41/41 en casa/fuera, 1.230 filas, cero partidos perdidos.
 4. Corregir la secuencia de posesiones para que un OREB mantenga el balón y un FT fallado genere rebote vivo.
 5. Unificar la valoración de traspasos en un único evaluador compartido por IA y usuario.
@@ -143,16 +149,16 @@ flowchart TD
 | ECO-04 | Riesgo | Alta | `MarketController.ExecuteTradeNow` aplica contratos, hard cap, jugadores, dorsales, picks, historial y mensajes en escrituras separadas: un error intermedio deja la operación parcial. En el S&T extendido, el salario cambia **después** de revalidar. | `MarketController.cs:2022–2057, 2074–2135, 2155–2233`. | Revalidar con los nuevos salarios y ejecutar toda la operación en una transacción SQLite con rollback y mensaje explícito. | M | Alto |
 | ECO-05 | Mejora | Alta | El modelo controla un máximo de 17 pero no separa plazas estándar y two-way; `ValidateTrade` acepta mínimo 10. El seeder crea todos los jugadores con `is_two_way=0` y deja equipos de 18. | `TradeHelper.cs:14–17, 126–162`; `DatabaseManager.Seeding.cs:29–75`. | Definir cupos explícitos y validarlos al sembrar, firmar, traspasar y volver de IR. Confirmar el número two-way contra el CBA objetivo. | M | Alto |
 | ECO-06 | Deuda técnica | Alta | No hay estado RFA/UFA ni cap holds. El draft asigna salarios aleatorios por rango de pick y contratos de cuatro años en lugar de una escala por puesto. | `PlayerData.cs:31–37`; `DraftGenerator.cs:439–493`; búsquedas de RFA/cap hold sin resultados. | Añadir derechos, cap holds y rookie scale como reglas versionadas por temporada. | L | Alto |
-| ECO-07 | Duda | Media | Los importes iniciales están internamente ordenados y se copian a `league_settings`; el rollover escala cap, aprons, MLE y mínimo exactamente +5% anual. No se verificaron las cifras oficiales 2026/27 ni los máximos contractuales. | `TradeHelper.cs:7–18`; `DatabaseManager.Manager.cs:54–68`; `DatabaseManager.Records.cs:3531–3543`. | Confirmar montos 2026/27 con fuente oficial y soportar crecimiento variable y repeater tax si se busca fidelidad. | M | Alto |
+| ECO-07 | Diferencia de diseño pendiente | En seguimiento | NBA publicó para 2026-27 cap $164,961,000, tax $200,428,000, aprons $209,015,000/$221,686,000. El juego conserva valores internos $174,647,000/$220,428,000/$229,015,000/$241,686,000 y crecimiento +5%; F1-04 no los modificó. | [NBA.com, topes 2026-27](https://www.nba.com/news/nba-salary-cap-2026-27-season); `TradeHelper.cs:7–18`; rollover `DatabaseManager.Records.cs`. | Decidir en un ítem separado si los topes del juego son una calibración intencional o deben seguir el CBA real; no cambiar la fuente única fuera de `TradeHelper`. | M | Alto |
 
 ### 3.6 Jugadores, progresión y roster
 
 | ID | Tipo | Severidad | Descripción | Evidencia | Recomendación | Esfuerzo | Impacto |
 |---|---|---|---|---|---|---|---|
-| ROST-01 | Bug de datos | Alta | El seeder calcula OV con división entera (`suma / 11`) mientras `PlayerData.GetCalculatedAverage()` redondea. Difieren **235 de 606** jugadores: 202 de plantilla y 33 agentes libres. | `DatabaseManager.Seeding.cs:19–28, 47–48`; `PlayerData.cs:71–85`. | Una única función de cálculo compartida por seeder, draft, editor y migraciones. Test que la verifique sobre todo el seed. | S | Alto |
-| ROST-02 | Bug de datos | Alta | El parámetro `ovr` del helper no se usa: se recalcula desde atributos. El balance declarado no se cumple: **ningún equipo alcanza media 85** (rango 72,00–82,86) y tres equipos (NYK, OKC, PHI) tienen dos jugadores ≥90, contra la unicidad de estrellas descrita. | `DatabaseManager.Seeding.cs:19–28, 47`; métricas en §4.1. | Definir primero qué significa "media 85" (roster activo, 15 estándar o rating de quinteto) y normalizar los datos con protección de potencial. | L | Alto |
-| ROST-03 | Mejora | Media | El seed contiene 478 jugadores de equipo y 128 agentes libres (606), no ~336. Las plantillas van de 13 a 18: Denver y New York tienen 18 (por encima del máximo configurado) y Portland 13. | `DatabaseManager.Seeding.cs:79–646, 924–1053`; `TradeHelper.cs:14`. | Validador de plantilla antes de clonar el template; distinguir estándar, two-way e IR con procedencia. | M | Medio |
-| ROST-04 | Mejora | Media | Hay 86 valores de atributo por debajo de 25 (mínimo 6), mientras el generador de draft aplica suelo 30/25. Los perfiles sembrados y los generados no comparten escala. | Seeder `DatabaseManager.Seeding.cs:19–76`; `DraftGenerator.cs:335–356`. | Definir escala permitida y validar perfiles por posición/arquetipo; decidir si los valores bajos son intencionales. | M | Medio |
+| ROST-01 | Bug de datos | Resuelto (F0-04) | En el snapshot original, 235 de 606 OVR discrepaban por truncamiento en el seeder. El seed, el modelo y las migraciones ahora comparten `PlayerRating`; la auditoría actual no encuentra errores de OVR. | `PlayerRating.cs`; `PlayerData.cs`; `GLeaguePlayerData.cs`; migraciones `overall_recalc`/`gleague_overall_recalc`. | Mantener `PlayerRating` como fuente única y no duplicar la fórmula. | — | — |
+| ROST-02 | Decisión de diseño | Resuelta (F1-03) | La media del roster es descriptiva (72,38–83,36 en el seed actual; media simple 76,83), no objetivo común. Se permiten varias Estrellas (OVR ≥90) por equipo: 18 en total; NYK/PHI tienen 2 y OKC 3. No hay regla de unicidad implementada ni confirmada. | `DatabaseManager.Seeding.cs` (OVR canónico por atributos); `PlayerRoleRules.cs:10–14`; métrica reproducida sobre los 30 rosters. | No normalizar a 85 ni ajustar ratings/reasignar jugadores por la distribución actual. El parámetro `ovr` del helper `Add` es redundante; `PlayerRating` sigue siendo fuente única. | — | — |
+| ROST-03 | Decisión de datos | Resuelta (F1-02) | El seed contiene 479 jugadores de equipo y 129 agentes libres (608). El rango 14–17 es referencia de juego, no validación: 27 de 30 equipos lo cumplen y los desvíos (ATL 18, DEN 18, PRT 13) se informan sin ser hallazgo. | `DatabaseManager.Seeding.cs`; `TradeHelper.cs:14`; auditor de seed (`SeedAuditorTests.cs`). | Mantener el seed como fuente canónica manual; el auditor publica el desglose por equipo (estándar/two-way/IR). | — | — |
+| ROST-04 | Decisión de escala | Resuelta (F1-05) | Hay 86 valores por debajo de 25 (mínimo 6), principalmente blocks. Se aceptan dentro del rango legal 1–99; no son defectos por sí solos. | Seeder `DatabaseManager.Seeding.cs`; `PlayerAttributeScale`; `DraftGenerator.cs`; `ScoutingHelper.cs`. | Mantenerlos; preservar los límites propios de generación (30) y scouting (25) como reglas distintas. EditMode completo verificado en F1-05. | — | — |
 
 ### 3.7 Gestión táctica y cuerpo técnico
 
@@ -214,7 +220,9 @@ Las comprobaciones de esta sección se hicieron **leyendo y contabilizando los s
 | Plantillas de 18 jugadores | DEN, NYK |
 | Plantillas por debajo de 14 | PRT (13) |
 
-**Medias por equipo (OV tal como lo siembra el seeder):**
+**Medias por equipo en el snapshot auditado (OV sembrado con la fórmula antigua):**
+
+La tabla documenta distribución, no un umbral de aceptación. El OVR de los jugadores se unificó después en F0-04.
 
 | Equipo | N | Media | Equipo | N | Media |
 |---|---:|---:|---|---:|---:|
@@ -234,12 +242,11 @@ Las comprobaciones de esta sección se hicieron **leyendo y contabilizando los s
 | SAS | 16 | 80,31 | TOR | 15 | 75,60 |
 | UTA | 15 | 76,00 | WAS | 16 | 75,12 |
 
-**Incumplimientos contra reglas internas del propio proyecto:**
+**Otros incumplimientos contra reglas internas del propio proyecto:**
 
-1. Todos los equipos incumplen la media OV 85 declarada como convenio de balanceo.
-2. La media de atributos/OV no se sostiene en 235 registros hasta que alguna operación recalcula el valor.
-3. Denver y New York superan el máximo configurado de 17 jugadores; Portland queda por debajo del estándar de 14.
-4. Ningún jugador del seed tiene `is_two_way=1`: las 18 plazas de Denver y New York no se explican por contratos two-way dentro del modelo.
+1. La media de atributos/OV no se sostiene en 235 registros hasta que alguna operación recalcula el valor (corregido después en F0-04).
+2. Denver y New York superan el máximo configurado de 17 jugadores; Portland queda por debajo del estándar de 14.
+3. Ningún jugador del seed tiene `is_two_way=1`: las 18 plazas de Denver y New York no se explican por contratos two-way dentro del modelo.
 
 ### 4.2 Contratos y cap
 
@@ -254,7 +261,7 @@ Los importes iniciales están internamente ordenados:
 
 `SeedLeagueSettings` copia esas constantes a `league_settings` y el rollover las escala +5% anual. **No se verificó que sean los valores oficiales definitivos de 2026/27.**
 
-Nómina calculada sobre los 478 jugadores sembrados:
+Nómina calculada sobre los 478 jugadores de equipo del **snapshot original de auditoría** (el seed posterior se actualizó en F1-02/F1-04/F1-07):
 
 | Situación | Equipos |
 |---|---:|
@@ -267,9 +274,13 @@ Superar cap o apron **no demuestra infracción**: pueden aplicarse Bird rights, 
 
 **Alertas que requieren revisión contractual (no infracciones concluyentes):**
 
-- **9 salarios por debajo del mínimo interno de $2M**, varios sin marca de rookie ni two-way y con $700K (p. ej. Thanasis Antetokounmpo $1,2M, Pat Spencer $1,5M, Pete Nance $1,8M). El mínimo CBA depende de experiencia y año; el juego fija uno universal.
+- **En el snapshot original:** 9 salarios por debajo del mínimo interno de $2M, varios sin marca de rookie ni two-way. El conteo posterior y sus correcciones se documentan en F1-04.
 - Embiid figura con $65M, el 37,2% del cap declarado. Sin año de firma ni desglose de bonos no puede concluirse infracción del máximo.
-- `SeedFreeAgents` comenta "140 jugadores" pero contiene 128 llamadas `AddFA`.
+- `SeedFreeAgents` comentaba "140 jugadores" frente a 128 llamadas `AddFA`; el comentario ya no fija ese total (F1-07).
+
+**Actualización F1-04 (seed de trabajo, 2026-10-23):** el recuento actual encontró 14 salarios inferiores a `TradeHelper.MIN_SALARY` ($2M), no 9: 8 jugadores asignados y 6 agentes libres, todos con `is_rookie=0` e `is_two_way=0` (Amari Williams, Tyler Bilodeau, PJ Hall, Drew Peterson, Brandon Boston, Pete Nance, Thanasis Antetokounmpo, Pat Spencer, Lachlan Olbrich, Taelon Peter, Chris Manon, Kobe Sanders, Max Shulga y Tyler Smith). Por decisión del usuario, se elevaron a $2M (aumento agregado $10,9M); la regla del auditor es ahora ERROR y no quedan incumplimientos. También se actualizaron los cap hits de 13 contratos HOU verificables y sus años/opciones cuando constan. Joel Embiid pasa de $65M/5 años a $57,985,752/3 años restantes, dos garantizados y PO 2028-29: extensión máxima firmada el 20-09-2024. El payroll resultante de las entradas HOU del seed es $207,164,502, bajo el apron interno y bajo el apron NBA 2026-27. Holiday, Jeff Green y Tristen Newton no constan con contrato activo 2026-27 en la fuente consultada; se conservaron sin reasignarlos.
+
+**Actualización F1-06/F1-08:** `SeedAudit` vive en runtime (`Scripts/Data`). El slot nuevo y un template recién construido con ERROR siguen bloqueando y revirtiendo. Para resolver la incidencia del template antiguo del 24-10-2026, `EnsureTemplateDb` comprueba `db_meta.seed_fingerprint` y reconstruye templates sin sello, obsoletos o inválidos mediante temporal + backup + replace atómico; valida solo lo que clona (no G-League). El modal presenta resumen y la consola conserva el detalle. Los tamaños fuera de 14–17 y atributos legales <25 siguen siendo informativos. Se añadió `overall_recalc_v2` para saves creados con la fórmula de OVR anterior.
 
 ### 4.3 Atributos y posiciones
 
@@ -358,14 +369,15 @@ Los valores NBA de referencia son **rangos aproximados de temporadas recientes**
 
 ## 8. Preguntas abiertas y dudas de diseño
 
-1. ¿"OV medio de equipo 85" significa media simple de todo el roster, solo los 15 estándar, o rating del quinteto? El código no normaliza ninguna de las tres a 85.
-2. ¿Los 478 jugadores de equipo + 128 agentes libres son intencionales y sustituyen la cifra de ~336 manejada en el contexto? ¿Representan una temporada concreta o una realidad alternativa?
-3. ¿Se mantiene el máximo de dos two-way como regla de balance propia o se modela el CBA objetivo? El código fija 2 y elegibilidad por edad.
-4. ¿Qué edición y fecha del CBA debe representar el juego? Las constantes están ordenadas, pero no se certifica aquí su vigencia oficial.
-5. ¿`TheCity` debe ser un hub de navegación o una pantalla con decisiones económicas propias?
-6. ¿La prioridad es un resultado estadístico consistente y reproducible, o mantener aleatoriedad opaca? Para calibrar conviene RNG reproducible al menos en herramientas de debug.
-7. ¿"PER" pretende ser el PER de la NBA o una valoración propia por 48 minutos? La UI lo etiqueta PER pero la fórmula no es la oficial.
-8. ¿El producto seguirá siendo solo español y 1920×1080, o debe prepararse para idiomas y resoluciones adicionales?
+1. **Resuelta (F1-07):** el seed actual contiene 480 llamadas `Add` (479 asignados + 1 FA) y 128 `AddFA` (129 FA en total), 608 registros. Es la lista manual canónica del usuario, no una cuota ni una fuente externa de pertenencia a equipos. Los conteos de 478 + 128 y ~336 eran snapshots/contexto históricos.
+2. ¿Se mantiene el máximo de dos two-way como regla de balance propia o se modela el CBA objetivo? El código fija 2 y elegibilidad por edad.
+3. ¿Qué edición y fecha del CBA debe representar el juego? Las constantes están ordenadas, pero no se certifica aquí su vigencia oficial.
+4. ¿`TheCity` debe ser un hub de navegación o una pantalla con decisiones económicas propias?
+
+**Duda resuelta después de la auditoría (F1-01):** no se pretende que los equipos lleguen todos a OVR medio 85; la media se usa como estadística descriptiva del roster completo.
+5. ¿La prioridad es un resultado estadístico consistente y reproducible, o mantener aleatoriedad opaca? Para calibrar conviene RNG reproducible al menos en herramientas de debug.
+6. ¿"PER" pretende ser el PER de la NBA o una valoración propia por 48 minutos? La UI lo etiqueta PER pero la fórmula no es la oficial.
+7. ¿El producto seguirá siendo solo español y 1920×1080, o debe prepararse para idiomas y resoluciones adicionales?
 
 ---
 
