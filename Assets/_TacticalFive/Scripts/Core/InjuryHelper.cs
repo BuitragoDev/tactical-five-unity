@@ -72,7 +72,14 @@ public static class InjuryHelper
     public const int INJURY_REFERENCE_MINUTES = 36;
 
     /// <summary>Probabilidad base de lesión en un partido a plena exposición (36 min).</summary>
-    public const float INJURY_BASE_PER_GAME = 0.008f;
+    public const float INJURY_BASE_PER_GAME = 0.20f;
+
+    /// <summary>El simulador protege una convocatoria mínima de cinco jugadores sanos.</summary>
+    public const int MIN_HEALTHY_PLAYERS = 5;
+
+    /// <summary>Un nuevo episodio solo puede dejar al equipo con cinco o más sanos.</summary>
+    public static bool CanSustainMatchInjury(int healthyAvailable)
+        => healthyAvailable > MIN_HEALTHY_PLAYERS;
 
     /// <summary>
     /// Probabilidad (0-1) de lesionarse en UN partido. Escala con la **exposición**

@@ -29,12 +29,12 @@ string markdown = report.ToMarkdown();
 
 ## Metodología y unidades
 
-- Cada equipo tiene una plantilla sintética estable de 12 jugadores, ratings derivados
-  de sus 11 atributos mediante `PlayerRating`. La base OVR va de **73,36 a 81,96** con
-  `SYNTHETIC_BASE_OVR=73.36` y `SYNTHETIC_OVR_SPREAD=8.6`; la curva concentra más equipos
-  en el centro-bajo. Esta dispersión se calibró en F3-05 para aproximar la distribución
-  NBA de puntos y victorias, no para clonar el seed. **No son los rosters reales ni se
-  modifican los ratings del juego.**
+- Cada equipo tiene una plantilla sintética estable de **15 jugadores**, ratings derivados
+  de sus 11 atributos mediante `PlayerRating`. La base OVR va de **72,08 a 82,68** con
+  `SYNTHETIC_BASE_OVR=72.08` y `SYNTHETIC_OVR_SPREAD=10.6`; la curva concentra más equipos
+  en el centro-bajo. La distribución se calibró para aproximar las bandas NBA de puntos,
+  victorias y lesiones, no para clonar el seed. **No son los rosters reales ni se modifican
+  los ratings del juego.**
 - Calendario round-robin circular: cada ronda cruza a todos los equipos una vez y el
   ciclo se repite/trunca hasta llegar a `gamesPerTeam`. Las rondas de partido están
   separadas por un día de descanso: en los días de calendario el runner evoluciona las
@@ -56,6 +56,8 @@ string markdown = report.ToMarkdown();
   correlación Pearson OVR↔victorias y porcentaje de partidos que llegan a OT. El gate se
   acepta con **100 temporadas** (123.000 partidos); la muestra de una sola temporada solo
   sirve como comprobación rápida, no como aceptación estadística.
+- El informe expone el mínimo de jugadores sanos disponible antes de un partido y las
+  duraciones observadas por gravedad junto a la media ponderada y rango del `InjuryCatalog`.
 
 ## Perfil de aceptación F3-03
 
@@ -165,7 +167,42 @@ directo de motor verifica que los partidos que llegan a OT estaban empatados al 
 el reglamento. El volumen de libres no se incrementa artificialmente.
 
 La compresión sintética de OVR (base 73,36, spread 8,6, media aproximada conservada en
-76,8) permite que el **gate ofensivo F3-04 vuelva a pasar** sin tocar sus tolerancias:
-P95 de puntos por equipo-temporada 125,43 (límite 126,295), máximo medio por equipo
-126,27 (límite 127,9). El resto del gate global sigue mostrando las alertas de lesiones
-reservadas a F3-06; no se ocultan ni afectan a los gates ofensivo y de resultados.
+76,8) fue el primer ajuste de F3-05. F3-06 amplió la dispersión y el roster sintético a
+15 jugadores (`72.08`, `10.6`) para medir disponibilidad contra los mismos 30 rosters NBA;
+el gate ofensivo y el de resultados siguen aprobados con esa población. El reporte de
+F3-06 abajo contiene el resultado vigente conjunto.
+
+## Calibración F3-06: lesiones y disponibilidad
+
+`PlayerGamesMissed` cuenta los jugadores lesionados que faltan a cada partido (una ausencia
+por jugador-partido), no la duración teórica de la lesión. El gate de `NBA-2024-25-v2`
+compara la media **326,97–466,97** partidos-jugador por equipo-temporada y los percentiles
+P5/P50/P95 con bandas fijadas en la tabla del perfil. `PlayerDaysOut` sigue siendo
+informativo porque la referencia publica partidos, no días calendario.
+
+La tasa base de `InjuryHelper.MatchRiskPerGame` es **0,20 a 36 min**; la probabilidad sigue
+siendo proporcional a la exposición, con ajuste por físico bajo y recaída. Al aplicar un
+episodio postpartido, `CanSustainMatchInjury` no permite que la convocatoria caiga debajo
+de cinco sanos. El reporte registra además la menor convocatoria sana observada y las
+duraciones por gravedad.
+
+Semilla `20261024`, 100 temporadas / 123.000 partidos:
+
+| Métrica | Resultado | Banda | Estado |
+|---|---:|---:|---|
+| Partidos-jugador perdidos, media | 392,65 | 326,97–466,97 | OK |
+| P5 por equipo-temporada | 299 | 240–320 | OK |
+| P50 por equipo-temporada | 391 | 329–429 | OK |
+| P95 por equipo-temporada | 490 | 474,05–554,05 | OK |
+| Mínimo de jugadores sanos | 5 | ≥5 | OK |
+
+| Gravedad | Episodios | Media observada | Media catálogo ponderada | Rango del catálogo |
+|---|---:|---:|---:|---:|
+| Leve | 137.968 | 2,57 días | 2,57 días | 1–7 |
+| Moderada | 150.200 | 9,60 días | 9,59 días | 3–21 |
+| Grave | 32.789 | 29,69 días | 29,78 días | 14–75 |
+| Crítica | 3.329 | 122,39 días | 123,60 días | 42–300 |
+
+En la misma ejecución pasan todos los gates anteriores: F3-04 ofensivo y global, F3-05
+(W=41,00; SD=14,52; mínimos=17,10; máximos=68,26; r=0,957; OT=5,01 %) y F3-06. Las
+tolerancias del perfil no se ampliaron.

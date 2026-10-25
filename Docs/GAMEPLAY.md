@@ -70,7 +70,7 @@ Los once atributos del jugador llegan al `PlayerStatSnapshot` y mueven una métr
 - Se ajustaron en `GameSimulator` el ritmo base (96), la base de pérdidas (0,147), los porcentajes y pendientes de 2P/3P, la selección por posición (PG45/SG51/SF43/PF38/C23), faltas, asistencias (63%), tapones y rebote ofensivo. Se quitó además la concesión aleatoria de un tercer libre en una falta de dos puntos: no corresponde a las reglas NBA. El rebote ofensivo ya no compara `reb^2.5` con `reb^3`; comparte el exponente defensivo y usa escala de ataque 0,42.
 - La mejora se mide con `MonteCarloCalibrationGate.EvaluateOffense`: comprueba media de liga **y** P5/P50/P95 por equipo-temporada para PTS, FG%, 3P%, FTA, pérdidas y asistencias, además de que ningún equipo sintético quede sistemáticamente fuera del rango NBA/tolerancia.
 - Resultado reproducible (semilla `20261024`, 30×82): **98,13** posesiones, **113,96** PTS, **45,50%** FG, **35,29%** 3P, **22,79** FTA, **14,70** pérdidas y **26,16** asistencias por equipo-partido; **Gate ofensivo ACEPTADO**, incluidas colas por equipo. REB **44,29** y PF **18,13** también caen en las bandas de media del perfil.
-- El gate general aún marca partidos-jugador perdidos por lesión (F3-06); la validación del informe sintético conserva ese fallo visible y no bloquea el gate ofensivo F3-04.
+- En la medición de F3-04 el gate general todavía marcaba partidos-jugador perdidos por lesión; F3-06 calibra después esa métrica sin bloquear ni ampliar el gate ofensivo.
 
 ### Quarters, rotations, overtime
 - 4 quarters via `SimQuarter`; `teamPoss = clamp(round(pace/4 * rand(0.96,1.04)), 22, 28)` **posesiones** por equipo y cuarto (`totalPoss = teamPoss × 2`, mitades iguales). El saque de cada cuarto lo fija `PossessionState.BeginPeriod` (alterno, ver modelo de posesiones). Los ataques pueden superar las posesiones por los rebotes ofensivos.
@@ -89,7 +89,14 @@ Los once atributos del jugador llegan al `PlayerStatSnapshot` y mueven una métr
 
 ### Resultados y paridad F3-05
 - `MonteCarloOutcomeGate` valida en 100 temporadas completas (123.000 partidos) victorias medias, dispersión de victorias, mínimos/máximos por temporada, correlación OVR↔victorias y tasa de prórrogas contra la referencia NBA 2024-25. Resultado con semilla `20261024`: **41,00** victorias/equipo-temporada; desviación **14,02**; mínimo medio **15,80**; máximo medio **67,09**; correlación **0,928**; OT **5,11 %** (6.286/123.000). Todas las bandas de F3-05 pasan.
-- Para aislar la calibración del motor, el banco usa una liga sintética propia: `SYNTHETIC_BASE_OVR=73.36` y `SYNTHETIC_OVR_SPREAD=8.6` (rango de bases por equipo 73,36–81,96). Esta compresión es propia del laboratorio; **no cambia ratings, seed ni franquicias del juego**.
+- Para aislar la calibración del motor, el banco usa una liga sintética propia de 15 jugadores: `SYNTHETIC_BASE_OVR=72.08` y `SYNTHETIC_OVR_SPREAD=10.6` (rango de bases 72,08–82,68). La distribución es propia del laboratorio; **no cambia ratings, seed ni franquicias del juego**.
+
+### Lesiones y disponibilidad F3-06
+- El riesgo base pasa de 0,8 % a **20 % por jugador a 36 minutos**, conservando el escalado por exposición, físico bajo y recaída: 5 min ≈ 2,78 %, 20 min ≈ 11,11 %, 44 min ≈ 24,44 % (físico normal y sin recaída). No es una probabilidad plana: quien no juega mantiene riesgo 0.
+- `CheckInjuries` sigue aplicando la lesión postpartido, pero `InjuryHelper.CanSustainMatchInjury` evita asignar una nueva si deja menos de **cinco jugadores sanos** en la convocatoria que el simulador usará. Las plantillas cortas preexistentes (1–4) y las incomparecencias siguen manejándose como antes.
+- Aceptación de 100 temporadas / 123.000 partidos, semilla `20261024`: **392,65** partidos-jugador perdidos por equipo-temporada; P5/P50/P95 = **299/391/490**, dentro de las bandas declaradas (media 326,97–466,97; P5 240–320; P50 329–429; P95 474,05–554,05). El mínimo observado fue **5 jugadores sanos**.
+- Duración observada frente a la media ponderada del catálogo: leve **2,57/2,57 días** (137.968 episodios), moderada **9,60/9,59** (150.200), grave **29,69/29,78** (32.789) y crítica **122,39/123,60** (3.329); todos los rangos muestreados quedan dentro de `InjuryCatalog`.
+- Con lesiones activas, F3-04, F3-05 y F3-06 pasan juntos: victorias 41,00; SD 14,52; mín. 17,10; máx. 68,26; r=0,957; OT 5,01 %. No se modifica el seed real.
 
 ### Persistencia del partido en lote (F2-09)
 - **Un partido = unas pocas escrituras.** Las filas de `player_game_stats` se acumulan y se insertan con `DatabaseManager.SavePlayerGameStatsBatch`; los cambios de fatiga/lesión se aplican **en memoria** sobre los `PlayerData` ya cargados y se escriben con `UpdatePlayersBatch`. Antes, cada jugador costaba un `GetPlayerById` + `UpdatePlayer` (físico), otra lectura en el chequeo de lesiones y un `Insert` por fila, todos en autocommit.
@@ -110,7 +117,7 @@ Los once atributos del jugador llegan al `PlayerStatSnapshot` y mueven una métr
 - Incomparecencia (F2-06): el `GameData` se persiste con `is_played=1` y el marcador 0–20, pero **sin filas** de `player_game_stats`, fatiga ni lesiones (no se jugó).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
 - Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
-- Injuries: probabilidad por partido según la **exposición** (`InjuryHelper.MatchRiskPerGame`): base 0,008 a 36 minutos y proporcional por debajo (5 min ≈ 0,11 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y + riesgo de recaída si viene de un alta forzada; 0 minutos ⇒ 0. El sorteo es **postpartido** (no altera minutos ni resultado). 27 tipos ponderados (`InjuryCatalog`, ver "Lesiones y parte médico").
+- Injuries: probabilidad por partido según la **exposición** (`InjuryHelper.MatchRiskPerGame`): base 0,20 a 36 minutos y proporcional por debajo (5 min ≈ 2,78 %, 20 min ≈ 11,11 %, 44 min ≈ 24,44 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y + riesgo de recaída si viene de un alta forzada; 0 minutos ⇒ 0. El sorteo es **postpartido** (no altera minutos ni resultado) y respeta cinco sanos mínimos al asignar lesiones. 27 tipos ponderados (`InjuryCatalog`, ver "Lesiones y parte médico").
 
 ### Play-by-play en vivo (Vista de Partido)
 - Toggle **Vista de Partido** en los modales de Configuración: `Directa` (0) o `Play-by-play` (1), persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()`). Solo aplica al flujo día a día (no fast sim).
@@ -296,13 +303,13 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - **Catálogo (`InjuryCatalog`, puro):** 27 lesiones con `family`, rango de días, peso en el sorteo,
   **gravedad** (`Leve`/`Moderada`/`Grave`/`Crítica`) y `relapseRisk`. El simulador sortea con
   `InjuryCatalog.Pick(roll)` y los días con `InjuryHelper.RollDays`.
-- **Riesgo por partido (`InjuryHelper.MatchRiskPerGame(minutos, físico, riesgo), F2-07`):**
-  base **0,008 a 36 minutos** de exposición y proporcional al resto (5 min ≈ 0,11 %, 20 min ≈ 0,44 %,
-  44 min ≈ 0,98 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y **+ `RelapseChancePerGame`** si el jugador
+- **Riesgo por partido (`InjuryHelper.MatchRiskPerGame(minutos, físico, riesgo), F2-07/F3-06`):**
+  base **0,20 a 36 minutos** de exposición y proporcional al resto (5 min ≈ 2,78 %, 20 min ≈ 11,11 %,
+  44 min ≈ 24,44 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y **+ `RelapseChancePerGame`** si el jugador
   viene de un alta forzada (`recovery_risk > 0`), con tope 1. **0 minutos ⇒ 0 lesiones.** El sorteo es
   **postpartido**: no altera minutos, rotación ni resultado, y la noticia de la bandeja lo dice
-  («la lesión se ha detectado al término del último encuentro»). Los titulares con mucha carga asumen
-  un riesgo real; el fondo del banquillo casi nunca se rompe.
+  («la lesión se ha detectado al término del último encuentro»). `CanSustainMatchInjury` impide que
+  una nueva lesión deje menos de cinco sanos en la convocatoria del encuentro siguiente.
 - **Pronóstico y progreso:** la lesión guarda `players.injury_total_days` (duración total de la
   "temporada" de la lesión) y `injury_days` (restantes). El parte médico muestra gravedad,
   pronóstico (`InjuryCatalog.Pronostico`), barra de **recuperación** (`InjuryHelper.RecoveryProgress`)

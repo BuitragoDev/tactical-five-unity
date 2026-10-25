@@ -8,8 +8,8 @@ public static class HistoricalPlayerStatsSeeder
         int fgm, int fga, int fg3m, int fg3a, int ftm, int fta,
         int dd, int td, int tov)> Data = new()
     {
+        // ---- JUGADORES RETIRADOS ----
         // ---------------------------------------------------------------------------------------------------- PJ    PTOS   REB    ASI    ROB   TAP   FGM    FGA    FG3M  FG3A  FTM   FTA    DD   TD   PER
-        ("LeBron",      "James",            "SF", 97, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      1492, 40474, 11185, 11009, 2275, 1111, 15111, 30976, 2410, 7101, 7842, 10789, 620, 125, 5021),
         ("Kareem",      "Abdul-Jabbar",     "C",  96, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      1560, 38387, 17440, 5660,  1160, 3189, 15837, 28307, 1,    18,   6712, 9304,  630, 21,  2527),
         ("Karl",        "Malone",           "PF", 94, "Utah Jazz",              "UTA", "logos/jazz.png",        1476, 36928, 14968, 5248,  2085, 1145, 13528, 26210, 85,   332,  9787, 13188, 814, 4,   4524),
         ("Kobe",        "Bryant",           "SG", 96, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      1346, 33643, 7047,  6306,  1944, 640,  11719, 26200, 1827, 5546, 8378, 10011, 180, 21,  4010),
@@ -86,7 +86,7 @@ public static class HistoricalPlayerStatsSeeder
         ("Gail",        "Goodrich",         "SG", 87, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      1031, 16208, 3160,  4017,  0,    0,    6317,  13440, 0,    0,    3574, 4270,  100, 0,   2281),
         ("Jamaal",      "Wilkes",           "SF", 87, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      828,  14644, 4652,  2291,  913,  291,  5930,  11739, 13,   63,   2771, 3414,  120, 0,   1451),
         ("James",       "Worthy",           "SF", 89, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      926,  16320, 4708,  2791,  1041, 624,  6619,  11573, 117,  425,  2965, 4041,  120, 0,   1881),
-        ("Pete",        "Maravich",         "SG", 90, "New Orleans Jazz",       "UTA", "logos/jazz.png",        658,  15948, 2747,  3563,  0, 0, 5944, 12709, 0,     0,    4060, 4740, 80,    0,   0,   1821),
+        ("Pete",        "Maravich",         "SG", 90, "New Orleans Jazz",       "UTA", "logos/jazz.png",        658,  15948, 2747,  3563,  0,    0,    5944,  12709, 0,    0,    4060, 4740,  80,  0,   1821),
         ("Adrian",      "Dantley",          "SF", 88, "Utah Jazz",              "UTA", "logos/jazz.png",        955,  19783, 5455,  2830,  802,  175,  7039,  12816, 12,   67,   5693, 6818,  150, 0,   2381),
         ("George",      "McGinnis",         "PF", 86, "Indiana Pacers",         "IND", "logos/pacers.png",      685,  13535, 7288,  2887,  973,  238,  5062,  11029, 45,   194,  3366, 4764,  180, 7,   1651),
         ("Reggie",      "Theus",            "SG", 86, "Sacramento Kings",       "SAC", "logos/kings.png",       933,  19015, 3406,  5202,  922,  216,  7114,  14327, 367,  1127, 4420, 5452,  160, 2,   2581),
@@ -103,23 +103,586 @@ public static class HistoricalPlayerStatsSeeder
         ("Ricky",       "Rubio",            "PG", 81, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      698,  7570,  2830,  5160,  1226, 94,   2468,  6364,  637,  1969, 1997, 2370,  135, 7,   1768),
         ("Marc",        "Gasol",            "C",  88, "Memphis Grizzlies",      "MEM", "logos/grizlies.png",    891,  12514, 6604,  2996,  792,  1254, 4635,  9638,  431,  1197, 2813, 3625,  198, 5,   1755),
 
-        ("James", "Harden", "SG", 93, "Los Angeles Clippers", "LAC", "logos/clippers.png", 1072, 25885, 6090, 7340, 1718, 619, 7843, 18448, 3141, 8808, 7058, 8159, 350, 80, 3721),
-        ("Stephen", "Curry", "PG", 96, "Golden State Warriors", "GSW", "logos/warriors.png", 941, 23668, 4812, 5721, 1532, 228, 7721, 16297, 3747, 8815, 4479, 4957, 180, 10, 2891),
-        ("Kevin", "Durant", "SF", 96, "Phoenix Suns", "PHX", "logos/suns.png", 1020, 28924, 7529, 4982, 1185, 1363, 10292, 19705, 2027, 5209, 6313, 7123, 250, 18, 3121),
-        ("Damian", "Lillard", "PG", 92, "Milwaukee Bucks", "MIL", "logos/bucks.png", 868, 22573, 3564, 5524, 872, 314, 7203, 16732, 3027, 7978, 5140, 5743, 180, 5, 2781),
-        ("Kyrie", "Irving", "PG", 92, "Dallas Mavericks", "DAL", "logos/mavericks.png", 742, 18048, 2872, 4155, 825, 282, 6621, 13713, 1830, 4623, 2976, 3337, 100, 3, 2281),
-        ("Kawhi", "Leonard", "SF", 93, "Los Angeles Clippers", "LAC", "logos/clippers.png", 647, 15116, 4429, 2044, 1059, 458, 5604, 11157, 1192, 3074, 2716, 3150, 160, 2, 1281),
-        ("Jimmy", "Butler", "SF", 89, "Miami Heat", "MIA", "logos/heat.png", 853, 16094, 4674, 3782, 1350, 399, 5247, 11117, 860, 2583, 4740, 5739, 200, 19, 2181),
-        ("Paul", "George", "SF", 91, "Philadelphia 76ers", "PHI", "logos/76ers.png", 867, 19023, 5397, 3254, 1408, 368, 6504, 14942, 2411, 6379, 3604, 4178, 180, 4, 2381),
-        ("Anthony", "Davis", "PF", 93, "Los Angeles Lakers", "LAL", "logos/lakers.png", 740, 18183, 8314, 2267, 1055, 1825, 6645, 12714, 537, 1569, 4356, 5572, 300, 4, 1881),
-        ("Giannis", "Antetokounmpo", "PF", 96, "Milwaukee Bucks", "MIL", "logos/bucks.png", 813, 21219, 9375, 3922, 1009, 1147, 8118, 13809, 1011, 3455, 3972, 6104, 481, 56, 2781),
-        ("Nikola", "Jokic", "C", 97, "Denver Nuggets", "DEN", "logos/nuggets.png", 707, 17431, 8545, 5668, 945, 603, 6879, 11703, 1299, 3451, 2374, 2859, 557, 197, 2481),
-        ("Joel", "Embiid", "C", 94, "Philadelphia 76ers", "PHI", "logos/76ers.png", 433, 13742, 4868, 1778, 495, 864, 4564, 9192, 716, 2064, 3898, 4689, 150, 9, 1481),
-        ("Luka", "Doncic", "PG", 96, "Dallas Mavericks", "DAL", "logos/mavericks.png", 430, 13291, 3652, 3399, 504, 179, 4543, 10108, 1461, 4326, 2744, 3408, 120, 90, 1481),
-        ("Jayson", "Tatum", "SF", 92, "Boston Celtics", "BOS", "logos/celtics.png", 552, 14086, 4498, 2443, 646, 423, 4969, 11284, 1616, 4571, 2532, 3024, 120, 5, 1451),
-        ("Devin", "Booker", "SG", 91, "Phoenix Suns", "PHX", "logos/suns.png", 612, 15820, 2736, 3224, 555, 237, 5584, 11860, 1500, 4009, 3152, 3589, 100, 0, 1881),
-        ("Donovan", "Mitchell", "SG", 89, "Cleveland Cavaliers", "CLE", "logos/cavaliers.png", 513, 13067, 2235, 2473, 616, 217, 4519, 10314, 1553, 4309, 2476, 2981, 80, 0, 1481),
-        ("Ja", "Morant", "PG", 88, "Memphis Grizzlies", "MEM", "logos/grizzlies.png", 356, 8530, 1402, 2906, 356, 142, 3118, 6737, 574, 1744, 1720, 2290, 80, 12, 1281),
-        ("Trae", "Young", "PG", 88, "Atlanta Hawks", "ATL", "logos/hawks.png", 441, 11234, 1493, 4339, 397, 53, 3631, 8644, 1443, 4081, 2529, 2926, 80, 11, 1681),
+        // ---- BOSTON CELTICS ----
+        ("Jayson",      "Tatum",            "PF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     601,  14132, 4453,  2328,  661,  387,  4907,  10716, 1593, 4324, 2725, 3246,  156, 5,   1428),
+        ("Paul",        "George",           "SF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     945,  19338, 5880,  3502,  1601, 417,  6625,  15066, 2449, 6382, 3639, 4271,  128, 4,   2487),
+        ("Derrick",     "White",            "PG",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     571,  7666,  2147,  2479,  493,  544,  2650,  6045,  1153, 3200, 1213, 1412,  19,  1,   828),
+        ("Mitchell",    "Robinson",         "C",   0, "Boston Celtics",         "BOS", "logos/celtics.png",     397,  2976,  3164,  264,   362,  690,  1278,  1820,  0,    0,    420,  827,   67,  0,   275),
+        ("Sam",         "Hauser",           "SF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     334,  2613,  1033,  341,   149,  84,   918,   2079,  720,  1747, 57,   67,    0,   0,   122),
+        ("Payton",      "Pritchard",        "PG",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     426,  4498,  1264,  1291,  243,  46,   1657,  3628,  873,  2217, 311,  358,   14,  1,   387),
+        ("Ron",         "Harper Jr.",       "SF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     40,   147,   62,    29,    10,   10,   55,    134,   31,   95,   6,    7,     0,   0,   8),
+        ("Devin",       "Carter",           "PG",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     74,   477,   201,   142,   55,   13,   168,   419,   48,   175,  93,   138,   0,   0,   72),
+        ("Hugo",        "González",         "SF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     74,   289,   246,   40,    42,   21,   117,   246,   42,   116,  13,   26,    2,   0,   38),
+        ("Luka",        "Garza",            "C",   0, "Boston Celtics",         "BOS", "logos/celtics.png",     193,  1161,  529,   119,   49,   40,   423,   800,   104,  283,  211,  290,   4,   0,   96),
+        ("Baylor",      "Scheierman",       "SG",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     108,  540,   334,   149,   59,   8,    190,   443,   123,  325,  37,   43,    4,   0,   58),
+        ("Neemias",     "Queta",            "C",   0, "Boston Celtics",         "BOS", "logos/celtics.png",     186,  1297,  1036,  198,   92,   173,  548,   853,   1,    11,   200,  283,   19,  0,   135),
+        ("Mike",        "Conley",           "PG",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     1226, 16715, 3547,  6782,  1638, 256,  5856,  13419, 1986, 5131, 3017, 3652,  83,  0,   2214),
+        ("Jordan",      "Walsh",            "SF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     129,  461,   361,   78,    66,   43,   172,   365,   65,   189,  52,   71,    2,   0,   55),
+        ("Amari",       "Williams",         "C",   0, "Boston Celtics",         "BOS", "logos/celtics.png",     22,   30,    40,    10,    3,    10,   10,    20,    0,    0,    10,   14,    0,   0,   11),
+        ("Dillon",      "Mitchell",         "SF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+        ("Chris",       "Cenac Jr.",        "PF",  0, "Boston Celtics",         "BOS", "logos/celtics.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+
+        // ---- ATLANTA HAWKS ----
+        ("Nickeil",     "Alexander-Walker", "SG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       459,  4882,  1216,  1168,  358,  192,  1728,  4048,  811,  2183, 615,  762,   5,   0,   608),
+        ("Jalen",       "Johnson",          "SF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       256,  3644,  1895,  1036,  253,  150,  1410,  2835,  268,  799,  556,  740,   89,  15,  501),
+        ("Dyson",       "Daniels",          "SG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       272,  2555,  1393,  1080,  506,  122,  1083,  2219,  171,  573,  218,  355,   25,  2,   406),
+        ("CJ",          "McCollum",         "SG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       863,  16838, 3119,  3298,  768,  361,  6396,  14120, 2180, 5521, 1866, 2344,  22,  1,   1561),
+        ("Aaron",       "Wiggins",          "SF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       339,  2962,  1069,  477,   245,  90,   1140,  2341,  378,  995,  304,  388,   3,   0,   316),
+        ("Jock",        "Landale",          "C",   0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       289,  1913,  1114,  330,   94,   123,  748,   1447,  145,  432,  272,  377,   15,  0,   202),
+        ("Luguentz",    "Dort",             "SG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       432,  5018,  1648,  670,   409,  177,  1713,  4230,  862,  2411, 730,  926,   5,   0,   460),
+        ("Onyeka",      "Okongwu",          "C",   0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       381,  4083,  2620,  625,   287,  407,  1593,  2781,  219,  616,  678,  897,   67,  0,   416),
+        ("RayJ",        "Dennis",           "PG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       28,   104,   38,    47,    11,   6,    37,    116,   20,   66,   10,   11,    0,   0,   22),
+        ("Keshon",      "Gilbert",          "PG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       4,    17,    5,     12,    3,    4,    5,     12,    0,    3,    7,    7,     0,   0,   8),
+        ("Jalen",       "Wilson",           "PF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       176,  1306,  515,   240,   73,   11,   432,   1077,  200,  588,  242,  307,   1,   0,   136),
+        ("Dorian",      "Finney-Smith",     "SF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       628,  5032,  2765,  887,   501,  271,  1837,  4241,  947,  2640, 411,  570,   13,  0,   536),
+        ("Asa",         "Newell",           "PF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       44,   227,   96,    26,    16,   15,   91,    169,   29,   75,   16,   29,    2,   0,   23),
+        ("Corey",       "Kispert",          "SF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       350,  3761,  954,   524,   151,  70,   1350,  2852,  666,  1751, 395,  492,   1,   0,   312),
+        ("Mouhamed",    "Gueye",            "SF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       116,  563,   436,   100,   94,   76,   211,   484,   64,   220,  77,   110,   5,   0,   49),
+        ("Kingston",    "Flemings",         "PG",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+        ("Zuby",        "Ejiofor",          "PF",  0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+        ("Henri",       "Veesaar",          "C",   0, "Atlanta Hawks",          "ATL", "logos/hawks.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+
+        // ---- BROOKLYN NETS ----
+        ("Michael",     "Porter Jr.",       "SF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        397,  6856,  2576,  643,   261,  214,  2567,  5205,  1019, 2559, 703,  866,   69,  0,   524),
+        ("Julius",      "Randle",           "PF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        789,  15184, 7024,  3108,  572,  302,  5476,  11591, 959,  2889, 3273, 4312,  300, 17,  2211),
+        ("Terance",     "Mann",             "SG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        475,  3786,  1651,  980,   268,  106,  1448,  2917,  385,  1038, 505,  646,   12,  0,   388),
+        ("Day'Ron",     "Sharpe",           "C",   0, "Brooklyn Nets",          "BKN", "logos/nets.png",        253,  1777,  1492,  375,   157,  159,  726,   1287,  32,   117,  293,  445,   19,  0,   311),
+        ("Moritz",      "Wagner",           "C",   0, "Brooklyn Nets",          "BKN", "logos/nets.png",        399,  3575,  1551,  466,   200,  111,  1270,  2454,  282,  872,  753,  932,   13,  0,   437),
+        ("Keon",        "Ellis",            "SG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        225,  1480,  479,   283,   260,  139,  510,   1096,  306,  752,  154,  198,   0,   0,   150),
+        ("Egor",        "Dëmin",            "PG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        52,   536,   165,   173,   42,   17,   179,   449,   124,  322,  54,   65,    1,   0,   86),
+        ("Noah",        "Clowney",          "PF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        135,  1362,  535,   166,   82,   82,   433,   1096,  228,  686,  268,  334,   2,   0,   163),
+        ("Josh",        "Minott",           "SF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        142,  579,   247,   77,    68,   47,   205,   414,   84,   212,  85,   102,   2,   0,   59),
+        ("Nolan",       "Traoré",           "PG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        56,   499,   99,    213,   45,   23,   182,   479,   61,   192,  74,   94,    1,   0,   129),
+        ("Drake",       "Powell",           "SG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        63,   408,   111,   91,    36,   14,   144,   358,   51,   182,  69,   77,    0,   0,   60),
+        ("Ben",         "Saraf",            "PG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        44,   332,   92,    145,   38,   8,    120,   303,   19,   90,   73,   88,    0,   0,   99),
+        ("Danny",       "Wolf",             "PF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        57,   508,   281,   127,   30,   32,   178,   440,   68,   211,  84,   109,   2,   0,   73),
+        ("Grant",       "Nelson",           "PF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        4,    17,    6,     5,     1,    5,    5,     9,     0,    0,    7,    10,    0,   0,   4),
+        ("Chaney",      "Johnson",          "PF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        17,   139,   79,    36,    15,   9,    51,    94,    9,    30,   28,   35,    1,   0,   20),
+        ("Joshua",      "Jefferson",        "SF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+        ("Tyler",       "Bilodeau",         "SF",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+        ("Mikel",       "Brown Jr.",        "PG",  0, "Brooklyn Nets",          "BKN", "logos/nets.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0),
+
+        // ---- CHARLOTTE HORNETS ----
+        ("Grayson",     "Allen",            "SG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     454,  5091,  1371,  1007,  362,  125,  1685,  3807,  1014, 2519, 707,  825,   2,   0,   482),
+        ("Naz",         "Reid",             "C",   0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     483,  5745,  2460,  712,   332,  445,  2176,  4522,  731,  1972, 662,  909,   33,  0,   610),
+        ("Dennis",      "Schröder",         "PG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     912,  12494, 2624,  4438,  749,  132,  4551,  10580, 1135, 3328, 2257, 2700,  52,  0,   2010),
+        ("Brandon",     "Miller",           "SF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     166,  3158,  765,   490,   161,  106,  1128,  2618,  492,  1319, 410,  475,   6,   0,   371),
+        ("Moussa",      "Diabaté",          "C",   0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     177,  1066,  1147,  205,   114,  121,  430,   709,   2,    10,   204,  322,   27,  0,   145),
+        ("Royce",       "O'Neale",          "SF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     678,  5009,  3245,  1644,  567,  294,  1766,  4157,  1138, 2924, 339,  443,   21,  1,   703),
+        ("Ryan",        "Kalkbrenner",      "C",   0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     69,   521,   377,   54,    32,   101,  219,   291,   0,    5,    83,   116,   3,   0,   62),
+        ("Sion",        "James",            "SG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     82,   441,   287,   163,   52,   20,   138,   372,   83,   236,  82,   98,    0,   0,   65),
+        ("Liam",        "McNeeley",         "SF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     31,   132,   73,    24,    5,    3,    38,    95,    24,   60,   32,   39,    0,   0,   13),
+        ("Christian",   "Anderson Jr.",     "PG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("PJ",          "Hall",             "PF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     38,   119,   97,    14,    3,    14,   44,    83,    5,    13,   26,   33,    1,   0,   18),
+        ("Hannes",      "Steinbach",        "PF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Michael",     "Ajayi",            "SF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Kylan",       "Boswell",          "PG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Coby",        "White",            "SG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     472,  7273,  1709,  1818,  317,  77,   2556,  5885,  1100, 2985, 1061, 1240,  15,  0,   880),
+        ("Kon",         "Knueppel",         "SG",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     81,   1498,  432,   274,   57,   19,   515,   1084,  273,  642,  195,  226,   7,   0,   161),
+        ("Tidjane",     "Salaün",           "PF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     97,   575,   429,   101,   45,   21,   194,   504,   94,   288,  93,   134,   3,   0,   84),
+        ("Grant",       "Williams",         "PF",  0, "Charlotte Hornets",      "CHA", "logos/hornets.png",     416,  2976,  1535,  608,   220,  218,  1024,  2277,  498,  1318, 430,  553,   6,   0,   418),
+
+        // ---- CHICAGO BULLS ----
+        ("Josh",        "Giddey",           "PG",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       334,  4861,  2548,  2197,  299,  167,  1914,  4150,  422,  1251, 611,  800,   112, 31,  948),
+        ("Nic",         "Claxton",          "C",   0, "Chicago Bulls",          "CHI", "logos/bulls.png",       380,  4024,  2875,  788,   266,  611,  1728,  2777,  11,   59,   557,  1003,  87,  2,   437),
+        ("Norman",      "Powell",           "SG",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       675,  9418,  1850,  1084,  571,  176,  3271,  6948,  1215, 3069, 1661, 2015,  2,   0,   884),
+        ("Patrick",     "Williams",         "PF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       348,  3141,  1341,  509,   282,  216,  1165,  2660,  434,  1138, 377,  495,   6,   0,   433),
+        ("Isaac",       "Okoro",            "SF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       397,  3292,  1103,  636,   309,  155,  1187,  2550,  392,  1129, 526,  710,   1,   0,   309),
+        ("Caleb",       "Wilson",           "SF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Buddy",       "Hield",            "SG",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       765,  11122, 3052,  1846,  653,  236,  4030,  9313,  2201, 5569, 861,  1006,  12,  0,   1203),
+        ("Jalen",       "Smith",            "C",   0, "Chicago Bulls",          "CHI", "logos/bulls.png",       324,  2831,  1787,  287,   95,   229,  1059,  2115,  313,  916,  400,  532,   35,  0,   255),
+        ("Zach",        "Collins",          "C",   0, "Chicago Bulls",          "CHI", "logos/bulls.png",       388,  3110,  1883,  700,   162,  259,  1184,  2442,  250,  749,  492,  643,   18,  0,   525),
+        ("Tre",         "Jones",            "PG",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       362,  3397,  1030,  1740,  330,  46,   1316,  2615,  182,  583,  583,  694,   20,  3,   412),
+        ("Matas",       "Buzelis",          "SF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       157,  1940,  726,   237,   84,   191,  698,   1518,  269,  761,  275,  346,   5,   0,   233),
+        ("Noa",         "Essengue",         "PF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       2,    0,     0,     0,     1,    0,    0,     3,     0,    2,    0,    0,     0,   0,   0),
+        ("Dailyn",      "Swain",            "SF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Leonard",     "Miller",           "PF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       76,   410,   212,   48,    21,   17,   164,   297,   34,   109,  48,   63,    3,   0,   39),
+        ("Tobe",        "Awaka",            "PF",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jaylin",      "Sellers",          "SG",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jordan",      "Hawkins",          "SG",  0, "Chicago Bulls",          "CHI", "logos/bulls.png",       174,  1386,  394,   178,   62,   40,   475,   1269,  266,  765,  170,  205,   0,   0,   132),
+
+        // ---- CLEVELAND CAVALIERS ----
+        ("Donovan",     "Mitchell",         "SG",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   609,  15272, 2640,  2928,  844,  193,  5398,  11915, 1842, 5035, 2634, 3122,  29,  0,   1645),
+        ("Evan",        "Mobley",           "PF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   334,  5592,  2994,  1018,  270,  532,  2241,  4094,  214,  692,  896,  1329,  131, 0,   636),
+        ("James",       "Harden",           "PG",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   1221, 29339, 6809,  8873,  1794, 683,  8661,  19733, 3390, 9323, 8627, 10002, 409, 82,  4505),
+        ("Jarrett",     "Allen",            "C",   0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   624,  8148,  5715,  1048,  426,  750,  3249,  5070,  20,   126,  1630, 2291,  249, 0,   842),
+        ("Mario",       "Hezonja",          "SF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   330,  2284,  1026,  415,   243,  80,   854,   2047,  266,  833,  310,  382,   4,   1,   371),
+        ("Peyton",      "Watson",           "SF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   225,  1947,  792,   302,   142,  253,  726,   1515,  180,  499,  315,  452,   2,   0,   215),
+        ("Sam",         "Merrill",          "SG",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   225,  1796,  456,   371,   117,  26,   602,   1419,  471,  1185, 121,  136,   1,   0,   108),
+        ("Jaylon",      "Tyson",            "SF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   113,  1039,  434,   191,   67,   31,   394,   819,   153,  356,  98,   131,   8,   0,   125),
+        ("Thomas",      "Bryant",           "C",   0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   393,  3328,  1907,  359,   133,  260,  1310,  2286,  217,  623,  491,  629,   39,  0,   262),
+        ("Nae'Qwan",    "Tomlin",           "PF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   69,   410,   207,   55,    41,   35,   163,   346,   29,   125,  55,   72,    1,   0,   31),
+        ("Craig",       "Porter Jr.",       "PG",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   166,  762,   396,   394,   95,   68,   304,   626,   66,   175,  88,   128,   0,   0,   142),
+        ("Tyrese",      "Proctor",          "PG",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   50,   272,   64,    74,    25,   0,    93,    225,   46,   131,  40,   45,    1,   0,   40),
+        ("Meleek",      "Thomas",           "SG",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Khalifa",     "Diop",             "C",   0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Riley",       "Minix",            "SF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   10,   35,    8,     5,     2,    1,    14,    24,    4,    13,   3,    3,     0,   0,   3),
+        ("Tristan",     "Enaruna",          "PF",  0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   9,    37,    14,    7,     5,    0,    14,    28,    3,    10,   6,    8,     0,   0,   3),
+        ("Ernest",      "Udeh Jr.",         "C",   0, "Cleveland Cavaliers",    "CLE", "logos/cavaliers.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- DALLAS MAVERICKS ----
+        ("Cooper",      "Flagg",            "SF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   70,   1473,  466,   316,   84,   64,   559,   1194,  72,   244,  283,  342,   13,  0,   161),
+        ("Marcus",      "Sasser",           "PG",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   166,  1158,  233,   444,   101,  20,   425,   985,   192,  498,  116,  135,   2,   0,   175),
+        ("Naji",        "Marshall",         "SF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   373,  3765,  1485,  916,   314,  61,   1389,  2949,  296,  987,  691,  889,   12,  0,   477),
+        ("Kyrie",       "Irving",           "PG",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   779,  18433, 3173,  4365,  1022, 337,  6787,  14313, 1876, 4763, 2983, 3360,  72,  3,   1942),
+        ("P.J.",        "Washington",       "PF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   446,  5914,  2676,  976,   433,  442,  2205,  4919,  756,  2135, 748,  1061,  46,  0,   721),
+        ("Morez",       "Johnson Jr.",      "PF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Max",         "Christie",         "SG",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   263,  2106,  724,   378,   140,  82,   719,   1662,  363,  940,  305,  353,   0,   0,   232),
+        ("Zaccharie",   "Risacher",         "SF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   142,  1583,  525,   168,   111,  73,   601,   1315,  217,  602,  164,  239,   1,   0,   150),
+        ("Moussa",      "Cissé",            "C",   0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   38,   170,   216,   9,     19,   45,   66,    115,   0,    0,    38,   81,    2,   0,   30),
+        ("Daniel",      "Gafford",          "C",   0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   433,  4021,  2505,  455,   232,  653,  1660,  2364,  0,    1,    701,  1040,  53,  0,   423),
+        ("Sergio",      "de Larrea",        "PG",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Santi",       "Aldama",           "PF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   278,  2895,  1513,  570,   183,  172,  1088,  2349,  396,  1144, 323,  471,   26,  0,   271),
+        ("Walter",      "Clayton Jr.",      "PG",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   69,   538,   139,   279,   44,   19,   177,   461,   75,   244,  109,  121,   1,   0,   116),
+        ("Jett",        "Howard",           "SG",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   133,  597,   164,   95,    25,   24,   213,   543,   116,  356,  55,   66,    0,   0,   54),
+        ("Tarik",       "Biberovic",        "SF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Tobi",        "Lawal",            "PF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Caleb",       "Martin",           "SF",  0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   369,  2832,  1354,  590,   311,  147,  1050,  2350,  337,  945,  395,  549,   7,   0,   352),
+        ("Dereck",      "Lively II",        "C",   0, "Dallas Mavericks",       "DAL", "logos/mavericks.png",   98,   827,   685,   158,   60,   144,  366,   505,   0,    2,    95,   164,   16,  0,   101),
+
+        // ---- DENVER NUGGETS ----
+        ("Aaron",       "Gordon",           "PF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     756,  10339, 4683,  2035,  543,  455,  3894,  8035,  823,  2459, 1728, 2477,  115, 2,   1106),
+        ("Nikola",      "Jokić",            "C",   0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     810,  18009, 8977,  6080,  1041, 589,  6880,  12274, 926,  2559, 3323, 4030,  558, 198, 2419),
+        ("DeMar",       "DeRozan",          "SF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     1264, 26711, 5434,  5185,  1250, 416,  9563,  20320, 662,  2194, 6923, 8209,  71,  1,   2475),
+        ("Christian",   "Braun",            "SG",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     281,  2704,  1108,  516,   198,  101,  1043,  1982,  229,  627,  389,  513,   8,   0,   214),
+        ("Jamal",       "Murray",           "PG",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     611,  11528, 2348,  3044,  608,  226,  4208,  9159,  1391, 3567, 1721, 1970,  49,  1,   1257),
+        ("Cameron",     "Johnson",          "SF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     394,  5055,  1548,  796,   322,  127,  1740,  3810,  899,  2270, 676,  796,   7,   0,   359),
+        ("Ryan",        "Nembhard",         "PG",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     60,   397,   133,   316,   25,   2,    162,   390,   48,   135,  25,   31,    4,   0,   85),
+        ("Trevon",      "Brazile",          "PF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("DaRon",       "Holmes",           "PF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     25,   93,    35,    16,    1,    6,    31,    61,    20,   45,   11,   14,    0,   0,   12),
+        ("Tyus",        "Jones",            "PG",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     749,  5447,  1450,  3181,  704,  68,   2109,  4782,  732,  1970, 497,  605,   33,  2,   582),
+        ("Marvin",      "Bagley III",       "PF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     349,  4106,  2255,  338,   158,  224,  1656,  3116,  149,  483,  645,  941,   65,  0,   392),
+        ("Bryce",       "Hopkins",          "PF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Julian",      "Strawther",        "SG",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     172,  1228,  317,   191,   81,   29,   441,   1027,  193,  557,  153,  191,   0,   0,   116),
+        ("Zeke",        "Nnaji",            "PF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     303,  1243,  701,   129,   98,   140,  466,   927,   115,  333,  196,  292,   3,   0,   129),
+        ("Spencer",     "Jones",            "SF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     84,   378,   226,   56,    57,   34,   143,   296,   58,   161,  34,   54,    1,   0,   36),
+        ("Cam",         "Whitmore",         "SF",  0, "Denver Nuggets",         "DEN", "logos/nuggets.png",     119,  1249,  389,   97,    76,   38,   468,   1039,  160,  459,  153,  215,   3,   0,   110),
+
+        // ---- DETROIT PISTONS ----
+        ("Cade",        "Cunningham",       "PG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     272,  6119,  1476,  2164,  307,  179,  2278,  5068,  524,  1543, 1039, 1237,  96,  14,  1030),
+        ("Jalen",       "Duren",            "C",   0, "Detroit Pistons",        "DET", "logos/pistons.png",     276,  3736,  2848,  569,   188,  254,  1507,  2311,  0,    6,    722,  1010,  145, 0,   487),
+        ("John",        "Collins",          "PF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     541,  8488,  4172,  767,   348,  529,  3300,  6039,  581,  1575, 1307, 1656,  148, 0,   819),
+        ("Duncan",      "Robinson",         "SG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     500,  5737,  1318,  936,   269,  97,   1946,  4449,  1422, 3562, 423,  499,   2,   0,   478),
+        ("Isaiah",      "Joe",              "SG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     392,  3219,  824,   455,   218,  57,   1062,  2434,  765,  1882, 330,  386,   0,   0,   199),
+        ("Ausar",       "Thompson",         "SF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     195,  1871,  1123,  482,   312,  168,  781,   1517,  38,   186,  271,  452,   8,   0,   274),
+        ("Ron",         "Holland",          "SF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Kevin",       "Huerter",          "SG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     551,  6294,  1878,  1592,  507,  199,  2382,  5384,  1123, 3051, 407,  534,   10,  0,   655),
+        ("Paul",        "Reed",             "PF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     325,  1779,  1320,  288,   251,  247,  760,   1344,  45,   145,  214,  310,   17,  0,   218),
+        ("Ebuka",       "Okorie",           "PG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Daniss",      "Jenkins",          "PG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     79,   678,   168,   281,   64,   15,   235,   578,   74,   202,  134,  163,   3,   0,   116),
+        ("Javonte",     "Green",            "SF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     345,  1968,  1043,  243,   320,  131,  706,   1437,  218,  614,  338,  437,   2,   0,   176),
+        ("Taurean",     "Prince",           "SF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     608,  5984,  2172,  1051,  491,  230,  2128,  4966,  1049, 2714, 679,  836,   16,  0,   834),
+        ("Tolu",        "Smith",            "C",   0, "Detroit Pistons",        "DET", "logos/pistons.png",     16,   70,    57,    13,    2,    6,    24,    45,    0,    0,    22,   33,    0,   0,   9),
+        ("Chaz",        "Lanier",           "SG",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     34,   80,    23,    17,    7,    0,    28,    89,    19,   67,   5,    6,     0,   0,   3),
+        ("Elijah",      "Harkless",         "SF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     36,   210,   74,    83,    41,   7,    65,    196,   28,   113,  52,   70,    1,   0,   29),
+        ("Isaac",       "Jones",            "PF",  0, "Detroit Pistons",        "DET", "logos/pistons.png",     47,   143,   62,    13,    5,    11,   57,    90,    3,    10,   26,   40,    0,   0,   17),
+        ("Ugonna",      "Onyenso",          "C",   0, "Detroit Pistons",        "DET", "logos/pistons.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- GOLDEN STATE WARRIORS ----
+        ("Stephen",     "Curry",            "PG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    1069, 26528, 4973,  6743,  1602, 282,  9022,  19155, 4248, 10073,4236, 4645,  170, 10,  3308),
+        ("Brandon",     "Williams",         "PG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    140,  1497,  336,   443,   111,  36,   514,   1141,  94,   336,  375,  484,   3,   0,   229),
+        ("Yaxel",       "Lendeborg",        "PF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Gui",         "Santos",           "SF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    147,  934,   487,   253,   90,   34,   340,   694,   122,  352,  132,  179,   3,   0,   151),
+        ("Gary",        "Payton II",        "SG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    343,  2028,  1028,  435,   328,  99,   870,   1542,  167,  509,  121,  192,   5,   0,   223),
+        ("LJ",          "Cryer",            "SG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    18,   148,   28,    18,    3,    0,    47,    117,   37,   94,   17,   19,    0,   0,   14),
+        ("Will",        "Richard",          "SG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    69,   441,   172,   93,    80,   9,    162,   346,   71,   212,  46,   54,    0,   0,   53),
+        ("Graham",      "Ike",              "PF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Georges",     "Niang",            "SF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    544,  4046,  1354,  534,   177,  78,   1455,  3272,  883,  2214, 253,  297,   2,   0,   379),
+        ("Draymond",    "Green",            "PF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    949,  8235,  6462,  5324,  1244, 931,  3036,  6790,  843,  2628, 1320, 1859,  161, 33,  2208),
+        ("Al",          "Horford",          "C",   0, "Golden State Warriors",  "GSW", "logos/warriors.png",    1183, 15077, 9163,  3745,  896,  1351, 6200,  12224, 1050, 2794, 1627, 2130,  277, 2,   1611),
+        ("De'Anthony",  "Melton",           "SG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    405,  3833,  1474,  1113,  579,  192,  1367,  3338,  614,  1715, 485,  615,   4,   0,   579),
+        ("Malevy",      "Leons",            "PF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    31,   85,    56,    24,    14,   9,    32,    74,    4,    17,   17,   23,    0,   0,   14),
+        ("Kristaps",    "Porziņģis",        "C",   0, "Golden State Warriors",  "GSW", "logos/warriors.png",    533,  10372, 4055,  994,   383,  947,  3626,  7874,  1004, 2757, 2116, 2549,  134, 0,   876),
+        ("Charles",     "Bassey",           "C",   0, "Golden State Warriors",  "GSW", "logos/warriors.png",    126,  564,   540,   100,   47,   108,  245,   386,   3,    13,   71,   108,   5,   0,   93),
+        ("Jimmy",       "Butler",           "SF",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    907,  16658, 4858,  3957,  1455, 387,  5387,  11371, 716,  2169, 5168, 6120,  109, 19,  1459),
+        ("Moses",       "Moody",            "SG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    315,  2515,  770,   325,   184,  106,  873,   1955,  438,  1159, 331,  428,   0,   0,   202),
+        ("Brandin",     "Podziemski",       "SG",  0, "Golden State Warriors",  "GSW", "logos/warriors.png",    220,  2562,  1171,  797,   218,  42,   945,   2092,  358,  955,  314,  415,   14,  0,   294),
+
+        // ---- HOUSTON ROCKETS ----
+        ("Jabari",      "Smith Jr.",        "PF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     289,  3967,  2113,  425,   176,  247,  1428,  3266,  533,  1536, 578,  726,   54,  0,   359),
+        ("Kevin",       "Durant",           "SF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     1201, 32597, 8254,  5280,  1236, 1344, 11258, 22375, 2377, 6070, 7704, 8738,  266, 18,  3800),
+        ("Alperen",     "Şengün",           "C",   0, "Houston Rockets",        "HOU", "logos/rockets.png",     358,  6049,  3086,  1605,  374,  322,  2368,  4572,  142,  506,  1171, 1676,  145, 12,  921),
+        ("Amen",        "Thompson",         "SF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     210,  3005,  1587,  848,   294,  175,  1184,  2187,  58,   265,  579,  792,   54,  4,   418),
+        ("Marcus",      "Smart",            "PG",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     697,  7314,  2354,  3080,  1081, 251,  2456,  6319,  1099, 3387, 1303, 1672,  19,  1,   1290),
+        ("Fred",        "VanVleet",         "PG",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     550,  8204,  1884,  3121,  757,  253,  2763,  6885,  1386, 3731, 1292, 1498,  58,  2,   910),
+        ("Bogdan",      "Bogdanović",       "SG",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     526,  7344,  1738,  1667,  515,  131,  2664,  6115,  1266, 3319, 750,  888,   5,   0,   746),
+        ("Reed",        "Sheppard",         "PG",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     134,  1339,  316,   352,   157,  71,   491,   1185,  275,  718,  82,   102,   2,   0,   160),
+        ("Isaiah",      "Crawford",         "SF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     29,   41,    24,    6,     3,    5,    15,    35,    4,    18,   7,    10,    0,   0,   5),
+        ("Tari",        "Eason",            "SF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     221,  2288,  1387,  288,   296,  144,  897,   1988,  233,  666,  261,  349,   22,  0,   267),
+        ("Bruce",       "Thornton",         "PG",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jae'Sean",    "Tate",             "SF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     342,  2578,  1299,  620,   256,  109,  1023,  2069,  185,  598,  347,  497,   10,  0,   359),
+        ("Clint",       "Capela",           "C",   0, "Houston Rockets",        "HOU", "logos/rockets.png",     739,  8236,  7330,  726,   486,  1014, 3588,  5855,  1,    8,    1059, 1941,  307, 1,   745),
+        ("Quadir",      "Copeland",         "PG",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Steven",      "Adams",            "C",   0, "Houston Rockets",        "HOU", "logos/rockets.png",     796,  6930,  6391,  1193,  668,  723,  2874,  4925,  1,    17,   1181, 2210,  160, 1,   1118),
+        ("Oscar",       "Tshiebwe",         "C",   0, "Houston Rockets",        "HOU", "logos/rockets.png",     49,   344,   317,   43,    31,   7,    144,   235,   0,    0,    56,   88,    7,   0,   31),
+        ("Julian",      "Phillips",         "SF",  0, "Houston Rockets",        "HOU", "logos/rockets.png",     167,  595,   254,   62,    67,   34,   211,   485,   82,   256,  91,   118,   0,   0,   48),
+
+        // ---- INDIANA PACERS ----
+        ("Pascal",      "Siakam",           "PF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      691,  12810, 4594,  2497,  638,  399,  4891,  9841,  797,  2332, 2231, 2960,  133, 6,   1270),
+        ("Tyrese",      "Haliburton",       "PG",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      333,  5842,  1218,  2947,  490,  199,  2110,  4423,  856,  2184, 766,  896,   137, 1,   711),
+        ("Obi",         "Toppin",           "PF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      386,  3353,  1337,  483,   170,  132,  1291,  2478,  412,  1160, 359,  457,   6,   0,   282),
+        ("Andrew",      "Nembhard",         "PG",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      265,  2954,  716,   1384,  263,  38,   1124,  2458,  311,  905,  395,  488,   21,  0,   476),
+        ("Ivica",       "Zubac",            "C",   0, "Indiana Pacers",         "IND", "logos/pacers.png",      632,  6630,  5251,  899,   236,  615,  2745,  4470,  1,    12,   1139, 1572,  194, 1,   791),
+        ("Quenton",     "Jackson",          "SG",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      89,   668,   170,   210,   57,   12,   231,   493,   58,   170,  148,  183,   1,   0,   82),
+        ("Kelly",       "Oubre Jr.",        "SF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      705,  9401,  3284,  827,   754,  350,  3412,  7749,  1068, 3264, 1509, 2007,  42,  0,   797),
+        ("Ben",         "Sheppard",         "SG",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      185,  1043,  461,   252,   110,  22,   378,   903,   201,  587,  86,   104,   0,   0,   78),
+        ("Jarace",      "Walker",           "PF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      184,  1465,  683,   342,   132,  62,   522,   1203,  230,  596,  191,  261,   3,   0,   234),
+        ("Larry",       "Nance Jr.",        "PF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      581,  4335,  3434,  1051,  642,  274,  1779,  3328,  262,  745,  515,  744,   64,  0,   524),
+        ("Braden",      "Smith",            "PG",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jalen",       "Slawson",          "SF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      25,   103,   64,    38,    21,   15,   38,    83,    15,   42,   12,   17,    0,   0,   19),
+        ("Kobe",        "Brown",            "PF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      145,  519,   312,   129,   42,   22,   197,   433,   72,   213,  53,   68,    0,   0,   74),
+        ("Jay",         "Huff",             "C",   0, "Indiana Pacers",         "IND", "logos/pacers.png",      177,  1296,  489,   172,   63,   217,  472,   959,   209,  596,  143,  173,   1,   0,   117),
+        ("T.J.",        "McConnell",        "PG",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      762,  5921,  2178,  3829,  905,  143,  2649,  5113,  188,  548,  435,  556,   28,  3,   1190),
+        ("Johnny",      "Furphy",           "SF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      85,   283,   224,   60,    38,   18,   105,   241,   38,   121,  35,   57,    1,   0,   41),
+        ("Aaron",       "Nesmith",          "SF",  0, "Indiana Pacers",         "IND", "logos/pacers.png",      333,  3191,  1133,  391,   216,  137,  1121,  2476,  515,  1343, 434,  524,   2,   0,   293),
+
+        // ---- LA CLIPPERS ----
+        ("Darius",      "Garland",          "PG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    427,  8049,  1122,  2859,  490,  52,   2944,  6490,  1019, 2621, 1142, 1318,  74,  1,   1257),
+        ("Brandon",     "Ingram",           "SF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    572,  11311, 2996,  2414,  416,  335,  4142,  8829,  822,  2245, 2205, 2785,  39,  3,   1455),
+        ("Max",         "Strus",            "SF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    321,  3343,  1122,  752,   174,  71,   1176,  2751,  742,  2008, 249,  307,   7,   1,   309),
+        ("Rui",         "Hachimura",        "PF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    405,  5098,  1864,  496,   248,  122,  1998,  4007,  492,  1248, 610,  805,   14,  0,   344),
+        ("Derrick",     "Jones Jr.",        "SF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    547,  4094,  1803,  435,   390,  364,  1538,  3039,  376,  1140, 642,  902,   3,   0,   351),
+        ("Keaton",      "Wagler",           "PG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Brook",       "Lopez",            "C",   0, "LA Clippers",            "LAC", "logos/clippers.png",    1180, 18151, 7010,  1711,  678,  2147, 6912,  13989, 1189, 3372, 3138, 3939,  151, 0,   1812),
+        ("Gradey",      "Dick",             "SG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    190,  1742,  472,   217,   127,  19,   615,   1476,  258,  753,  254,  294,   1,   0,   175),
+        ("Isaiah",      "Jackson",          "C",   0, "LA Clippers",            "LAC", "logos/clippers.png",    219,  1540,  987,   168,   129,  263,  615,   1017,  7,    37,   303,  455,   19,  0,   193),
+        ("Bradley",     "Beal",             "SG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    807,  17306, 3251,  3442,  885,  339,  6364,  13712, 1724, 4588, 2854, 3475,  44,  2,   1947),
+        ("Nicolas",     "Batum",            "SF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    1205, 11553, 5656,  3612,  1075, 720,  4091,  9382,  1842, 4971, 1529, 1839,  71,  9,   1703),
+        ("Kris",        "Dunn",             "PG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    489,  3712,  1626,  1912,  728,  185,  1498,  3384,  341,  1013, 375,  506,   11,  0,   745),
+        ("Jordan",      "Miller",           "SG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    105,  763,   245,   170,   62,   16,   275,   542,   47,   150,  166,  212,   1,   0,   90),
+        ("Yanic",       "Konan Niederhäuser","C",   0, "LA Clippers",            "LAC", "logos/clippers.png",    41,   176,   117,   12,    5,    30,   64,    100,   1,    5,    47,   62,    0,   0,   23),
+        ("Kobe",        "Sanders",          "SG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    68,   495,   153,   109,   49,   10,   179,   384,   80,   196,  57,   69,    0,   0,   81),
+        ("Baba",        "Miller",           "SF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Cam",         "Christie",         "SG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    68,   174,   90,    37,    21,   4,    60,    163,   14,   62,   40,   54,    0,   0,   24),
+        ("Nick",        "Martinelli",       "SF",  0, "LA Clippers",            "LAC", "logos/clippers.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jalen",       "Pickett",          "PG",  0, "LA Clippers",            "LAC", "logos/clippers.png",    126,  502,   199,   243,   36,   10,   190,   447,   98,   253,  24,   31,    1,   1,   67),
+        ("Johni",       "Broome",           "C",   0, "LA Clippers",            "LAC", "logos/clippers.png",    11,   10,    16,    4,     3,    2,    4,     24,    0,    5,    2,    6,     0,   0,   3),
+
+        // ---- LOS ANGELES LAKERS ----
+        ("Luka",        "Dončić",           "PG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      514,  15021, 4376,  4230,  661,  237,  5052,  10778, 1632, 4632, 3285, 4349,  273, 90,  2032),
+        ("Walker",      "Kessler",          "C",   0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      201,  1910,  1862,  241,   99,   474,  831,   1220,  17,   64,   231,  424,   57,  0,   226),
+        ("Austin",      "Reaves",           "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      331,  5239,  1307,  1476,  265,  106,  1712,  3547,  611,  1662, 1204, 1392,  26,  3,   641),
+        ("Jake",        "LaRavia",          "SF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      218,  1616,  776,   382,   207,  77,   555,   1258,  215,  612,  291,  385,   5,   0,   236),
+        ("Quentin",     "Grimes",           "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      318,  3531,  1020,  732,   251,  94,   1223,  2743,  599,  1637, 486,  613,   6,   0,   399),
+        ("Ziaire",      "Williams",         "SF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      269,  2336,  809,   319,   223,  76,   823,   1951,  348,  1081, 342,  415,   3,   0,   270),
+        ("Kevon",       "Looney",           "C",   0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      620,  3036,  3509,  990,   313,  332,  1283,  2249,  14,   78,   456,  748,   23,  0,   359),
+        ("Sandro",      "Mamukelashvili",   "PF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      271,  1885,  996,   332,   116,  91,   698,   1412,  246,  672,  243,  329,   11,  0,   162),
+        ("Jaden",       "Hardy",            "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      235,  1969,  395,   313,   83,   22,   703,   1655,  324,  839,  239,  316,   0,   0,   252),
+        ("Matisse",     "Thybulle",         "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      377,  1872,  769,   415,   602,  295,  700,   1600,  336,  964,  136,  199,   0,   0,   227),
+        ("Chris",       "Mañon",            "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      9,    7,     10,    3,     5,    2,    2,     6,     0,    3,    3,    4,     0,   0,   1),
+        ("Bronny",      "James",            "PG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      69,   184,   41,    73,    28,   7,    68,    182,   31,   89,   17,   21,    0,   0,   38),
+        ("Cameron",     "Carr",             "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("AK",          "Okereke",          "PF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Nick",        "Smith Jr.",        "SG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      141,  1078,  223,   235,   36,   15,   405,   1018,  201,  538,  67,   76,    1,   0,   142),
+        ("Collin",      "Sexton",           "PG",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      475,  8708,  1299,  1728,  393,  63,   3144,  6663,  723,  1857, 1697, 2019,  11,  0,   1092),
+        ("Adou",        "Thiero",           "SF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      25,   47,    28,    10,    7,    2,    16,    31,    1,    3,    14,   22,    0,   0,   9),
+        ("Arthur",      "Kaluma",           "PF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jarred",      "Vanderbilt",       "PF",  0, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      374,  2096,  2218,  520,   381,  149,  847,   1550,  78,   269,  324,  512,   22,  0,   351),
+
+        // ---- MEMPHIS GRIZZLIES ----
+        ("Ty",          "Jerome",           "PG",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   244,  2281,  509,   733,   182,  26,   831,   1807,  327,  848,  292,  342,   0,   0,   252),
+        ("Jerami",      "Grant",            "PF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   776,  10488, 3024,  1272,  527,  784,  3543,  7890,  1077, 2937, 2325, 3063,  16,  0,   1033),
+        ("GG",          "Jackson II",       "SF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   132,  1594,  523,   169,   71,   73,   570,   1276,  198,  574,  256,  344,   3,   0,   181),
+        ("Jaylen",      "Wells",            "SG",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   148,  1688,  488,   246,   105,  17,   588,   1374,  267,  757,  245,  306,   1,   0,   143),
+        ("Scotty",      "Pippen Jr.",       "PG",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   116,  1178,  352,   494,   160,  45,   432,   905,   128,  326,  186,  258,   9,   1,   223),
+        ("Cedric",      "Coward",           "SF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   62,   843,   364,   171,   40,   27,   305,   648,   93,   275,  140,  166,   7,   0,   105),
+        ("Quinten",     "Post",             "C",   0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   109,  853,   417,   150,   42,   53,   316,   713,   166,  456,  55,   70,    0,   0,   89),
+        ("Cameron",     "Boozer",           "PF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Zach",        "Edey",             "C",   0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   77,   760,   670,   77,    43,   106,  313,   531,   19,   57,   115,  159,   17,  0,   114),
+        ("Cam",         "Spencer",          "SG",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   97,   904,   213,   434,   61,   12,   297,   638,   165,  377,  145,  153,   6,   0,   99),
+        ("Jahmai",      "Mashack",          "SG",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   31,   192,   81,    69,    37,   14,   77,    195,   19,   75,   19,   35,    2,   1,   49),
+        ("Kris",        "Murray",           "SF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   188,  994,   612,   229,   139,  60,   391,   921,   110,  425,  102,  170,   2,   0,   145),
+        ("Javon",       "Small",            "PG",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   41,   396,   128,   151,   34,   9,    134,   288,   60,   142,  68,   82,    0,   0,   56),
+        ("Carson",      "Cooper",           "C",   0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Karim",       "López",            "SF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Olivier-Maxence","Prosper",       "SF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   145,  852,   392,   113,   73,   23,   302,   628,   85,   244,  163,  231,   1,   0,   69),
+        ("Isaiah",      "Stewart",          "PF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   365,  3212,  2467,  473,   142,  430,  1254,  2439,  227,  662,  477,  647,   42,  0,   421),
+        ("Taylor",      "Hendricks",        "PF",  0, "Memphis Grizzlies",      "MEM", "logos/grizzlies.png",   102,  744,   421,   89,    83,   64,   275,   613,   119,  336,  75,   105,   3,   0,   79),
+
+        // ---- MIAMI HEAT ----
+        ("Giannis",     "Antetokounmpo",    "PF",  0, "Miami Heat",             "MIA", "logos/heat.png",        895,  21531, 8882,  4484,  995,  1088, 7898,  14266, 557,  1953, 5178, 7491,  481, 56,  2701),
+        ("Bam",         "Adebayo",          "C",   0, "Miami Heat",             "MIA", "logos/heat.png",        640,  10391, 5756,  2276,  693,  538,  3934,  7534,  229,  725,  2294, 3021,  264, 8,   1338),
+        ("Andrew",      "Wiggins",          "SF",  0, "Miami Heat",             "MIA", "logos/heat.png",        834,  15214, 3754,  1937,  818,  587,  5653,  12534, 1285, 3552, 2623, 3604,  27,  1,   1528),
+        ("Davion",      "Mitchell",         "PG",  0, "Miami Heat",             "MIA", "logos/heat.png",        371,  2932,  720,   1448,  256,  69,   1163,  2574,  395,  1114, 211,  307,   9,   0,   455),
+        ("Klay",        "Thompson",         "SG",  0, "Miami Heat",             "MIA", "logos/heat.png",        934,  17346, 3184,  2084,  759,  465,  6441,  14385, 2899, 7089, 1565, 1825,  6,   0,   1487),
+        ("Bobby",       "Portis",           "PF",  0, "Miami Heat",             "MIA", "logos/heat.png",        721,  8733,  5113,  955,   436,  259,  3532,  7374,  872,  2221, 797,  1047,  155, 0,   782),
+        ("Nick",        "Richards",         "C",   0, "Miami Heat",             "MIA", "logos/heat.png",        305,  2154,  1761,  172,   70,   253,  829,   1336,  6,    23,   490,  677,   53,  0,   299),
+        ("Myron",       "Gardner",          "SF",  0, "Miami Heat",             "MIA", "logos/heat.png",        45,   163,   122,   44,    20,   8,    59,    123,   26,   64,   19,   26,    1,   0,   17),
+        ("Nikola",      "Jović",            "PF",  0, "Miami Heat",             "MIA", "logos/heat.png",        154,  1272,  556,   333,   96,   46,   442,   1041,  196,  575,  192,  254,   0,   0,   177),
+        ("Tim",         "Hardaway Jr.",     "SG",  0, "Miami Heat",             "MIA", "logos/heat.png",        893,  12230, 2544,  1594,  537,  118,  4208,  10037, 2068, 5659, 1746, 2143,  4,   0,   842),
+        ("Dru",         "Smith",            "PG",  0, "Miami Heat",             "MIA", "logos/heat.png",        108,  565,   247,   239,   140,  34,   199,   464,   66,   195,  101,  122,   0,   0,   80),
+        ("Simone",      "Fontecchio",       "SF",  0, "Miami Heat",             "MIA", "logos/heat.png",        263,  2063,  758,   309,   127,  52,   711,   1704,  396,  1080, 245,  296,   0,   0,   210),
+        ("Pelle",       "Larsson",          "SG",  0, "Miami Heat",             "MIA", "logos/heat.png",        125,  1051,  336,   301,   81,   23,   366,   762,   94,   287,  225,  292,   1,   0,   125),
+        ("Ryan",        "Conwell",          "SG",  0, "Miami Heat",             "MIA", "logos/heat.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Vladislav",   "Goldin",           "C",   0, "Miami Heat",             "MIA", "logos/heat.png",        9,    7,     9,     3,     0,    3,    3,     4,     0,    0,    1,    1,     0,   0,   3),
+        ("Keshad",      "Johnson",          "PF",  0, "Miami Heat",             "MIA", "logos/heat.png",        48,   179,   90,    12,    20,   12,   69,    130,   16,   51,   25,   38,    1,   0,   17),
+        ("Tre",         "Donaldson",        "PG",  0, "Miami Heat",             "MIA", "logos/heat.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jahmir",      "Young",            "PG",  0, "Miami Heat",             "MIA", "logos/heat.png",        20,   36,    7,     15,    1,    0,    14,    30,    4,    11,   4,    4,     0,   0,   4),
+
+        // ---- MILWAUKEE BUCKS ----
+        ("Tyler",       "Herro",            "SG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       394,  7664,  1960,  1596,  286,  82,   2787,  6189,  1068, 2796, 1022, 1164,  26,  1,   875),
+        ("Jaime",       "Jaquez Jr.",       "SF",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       216,  2611,  950,   713,   189,  55,   1018,  2074,  160,  504,  415,  533,   10,  1,   360),
+        ("Kasparas",    "Jakučionis",       "PG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       53,   328,   138,   137,   33,   7,    102,   238,   66,   156,  58,   66,    0,   0,   50),
+        ("Brayden",     "Burries",          "SG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Myles",       "Turner",           "C",   0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       713,  9877,  4727,  916,   490,  1527, 3620,  7329,  903,  2472, 1734, 2255,  124, 0,   992),
+        ("Ryan",        "Rollins",          "PG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       155,  1697,  471,   538,   163,  52,   639,   1348,  239,  586,  180,  225,   7,   0,   278),
+        ("Kel'el",      "Ware",             "C",   0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       141,  1446,  1167,  116,   98,   155,  601,   1113,  127,  344,  117,  163,   39,  0,   119),
+        ("A.J.",        "Green",            "SG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       242,  1756,  496,   312,   91,   19,   580,   1363,  500,  1191, 96,   112,   0,   0,   136),
+        ("Kyle",        "Kuzma",            "SF",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       610,  10106, 3726,  1630,  350,  309,  3842,  8479,  1128, 3366, 1294, 1794,  98,  2,   1293),
+        ("Ousmane",     "Dieng",            "SF",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       166,  899,   417,   250,   64,   36,   347,   820,   133,  424,  72,   100,   5,   0,   138),
+        ("Jericho",     "Sims",             "C",   0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       258,  792,   1125,  208,   63,   105,  350,   472,   0,    1,    92,   153,   9,   1,   171),
+        ("Caris",       "LeVert",           "SG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       584,  7717,  2098,  2264,  599,  239,  2855,  6550,  839,  2437, 1168, 1593,  20,  1,   1000),
+        ("Bogoljub",    "Markovic",         "PF",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Kam",         "Jones",            "PG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       37,   162,   60,    119,   18,   0,    68,    169,   22,   75,   4,    8,     1,   0,   36),
+        ("Nate",        "Ament",            "SF",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Gary",        "Trent Jr.",        "SG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       480,  6227,  1050,  678,   514,  78,   2214,  5274,  1138, 2941, 661,  807,   1,   0,   326),
+        ("Cormac",      "Ryan",             "SG",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       11,   157,   28,    19,    11,   3,    53,    102,   27,   59,   24,   26,    1,   0,   17),
+        ("Pete",        "Nance",            "PF",  0, "Milwaukee Bucks",        "MIL", "logos/bucks.png",       68,   295,   149,   58,    17,   16,   115,   232,   60,   144,  5,    15,    1,   0,   31),
+
+        // ---- MINNESOTA TIMBERWOLVES ----
+        ("Anthony",     "Edwards",          "SG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      442,  10854, 2319,  1826,  587,  282,  3802,  8398,  1314, 3557, 1936, 2413,  34,  0,   1273),
+        ("LaMelo",      "Ball",             "PG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      303,  6304,  1726,  2224,  427,  94,   2222,  5317,  977,  2674, 883,  1041,  77,  11,  971),
+        ("Jaden",       "McDaniels",        "SF",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      439,  4868,  1836,  761,   415,  379,  1911,  3908,  548,  1527, 498,  643,   10,  0,   547),
+        ("Ayo",         "Dosunmu",          "PG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      348,  3878,  1048,  1161,  291,  127,  1526,  3020,  433,  1139, 393,  489,   8,   2,   475),
+        ("Jonathan",    "Kuminga",          "SF",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      294,  3663,  1239,  539,   187,  121,  1368,  2726,  238,  716,  689,  985,   11,  0,   429),
+        ("Terrence",    "Shannon Jr.",      "SG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      75,   379,   96,    70,    21,   6,    132,   285,   42,   107,  73,   91,    1,   0,   39),
+        ("Rudy",        "Gobert",           "C",   0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      905,  11287, 10572, 1251,  634,  1842, 4238,  6441,  0,    22,   2811, 4439,  509, 0,   1443),
+        ("Bones",       "Hyland",           "PG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      257,  2366,  530,   676,   168,  60,   814,   1979,  440,  1189, 298,  358,   3,   0,   307),
+        ("Trey",        "Lyles",            "PF",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      650,  4935,  2826,  697,   260,  229,  1772,  4018,  646,  1864, 745,  1005,  18,  0,   517),
+        ("Jaylen",      "Clark",            "SG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      108,  438,   173,   69,    83,   11,   155,   348,   55,   152,  73,   104,   0,   0,   31),
+        ("Cody",        "Williams",         "SF",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      117,  818,   311,   196,   74,   42,   321,   766,   63,   266,  113,  159,   2,   0,   117),
+        ("Joan",        "Beringer",         "C",   0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      40,   156,   92,    12,    7,    26,   65,    98,    0,    0,    26,   37,    1,   0,   11),
+        ("Isaiah",      "Evans",            "SG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Donte",       "DiVincenzo",       "SG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      498,  5469,  2119,  1512,  599,  146,  1922,  4545,  1161, 3059, 464,  605,   12,  0,   714),
+        ("Zyon",        "Pullin",           "PG",  0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      8,    23,    3,     9,     1,    0,    9,     14,    1,    3,    4,    4,     0,   0,   3),
+        ("Rocco",       "Zikarsky",         "C",   0, "Minnesota Timberwolves", "MIN", "logos/wolves.png",      5,    14,    14,    2,     0,    5,    5,     8,     0,    0,    4,    4,     0,   0,   1),
+
+        // ---- NEW ORLEANS PELICANS ----
+        ("Dejounte",    "Murray",           "PG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    517,  8037,  3000,  2807,  764,  142,  3194,  7035,  623,  1838, 1026, 1294,  102, 20,  1108),
+        ("Zion",        "Williamson",       "PF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    276,  6581,  1768,  1119,  278,  172,  2525,  4275,  33,   102,  1498, 2155,  47,  2,   734),
+        ("Yves",        "Missi",            "C",   0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    139,  1042,  986,   183,   57,   199,  429,   786,   0,    2,    184,  306,   19,  0,   136),
+        ("Saddiq",      "Bey",              "SF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    364,  5374,  1932,  720,   314,  61,   1808,  4327,  801,  2258, 957,  1137,  28,  0,   349),
+        ("Bennedict",   "Mathurin",         "SG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    263,  4263,  1228,  500,   173,  64,   1391,  3144,  353,  1050, 1128, 1346,  14,  0,   502),
+        ("Trey",        "Murphy III",       "SF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    317,  4868,  1353,  712,   318,  141,  1646,  3587,  814,  2131, 762,  868,   8,   0,   334),
+        ("Derik",       "Queen",            "PF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    81,   948,   572,   298,   84,   74,   354,   748,   23,   88,   217,  273,   14,  2,   190),
+        ("Jeremiah",    "Fears",            "PG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    82,   1169,  300,   279,   97,   30,   437,   1006,  101,  306,  194,  246,   3,   0,   178),
+        ("Herbert",     "Jones",            "SF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    296,  2929,  1105,  748,   463,  200,  1060,  2315,  329,  940,  480,  584,   1,   0,   389),
+        ("Jordan",      "Poole",            "SG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    451,  7466,  1187,  1671,  378,  130,  2508,  5999,  1111, 3232, 1339, 1526,  8,   0,   1025),
+        ("Karlo",       "Matković",         "PF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    104,  677,   438,   96,    47,   95,   277,   470,   59,   156,  64,   85,    5,   0,   77),
+        ("Bryce",       "McGowens",         "SG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    160,  901,   286,   169,   64,   24,   299,   683,   98,   279,  205,  266,   0,   0,   94),
+        ("DeAndre",     "Jordan",           "C",   0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    1123, 9536,  10861, 1056,  575,  1577, 3877,  5757,  2,    13,   1780, 3745,  331, 0,   1451),
+        ("Jaron",       "Pierre Jr.",       "PG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Trendon",     "Watford",          "PF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    270,  2051,  965,   539,   123,  93,   789,   1519,  100,  308,  373,  490,   8,   1,   325),
+        ("Malik",       "Dia",              "PF",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("AJ",          "Johnson",          "PG",  0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    77,   380,   114,   123,   23,   6,    139,   389,   36,   147,  66,   77,    0,   0,   65),
+        ("Julian",      "Reese",            "C",   0, "New Orleans Pelicans",   "NOP", "logos/pelicans.png",    13,   154,   137,   24,    18,   8,    63,    119,   0,    0,    28,   44,    5,   0,   32),
+
+        // ---- NEW YORK KNICKS ----
+        ("Jalen",       "Brunson",          "PG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      561,  10748, 1796,  2952,  408,  56,   3930,  8106,  973,  2526, 1915, 2317,  53,  0,   1025),
+        ("Karl-Anthony","Towns",            "C",   0, "New York Knicks",        "NYK", "logos/knicks.png",      720,  16384, 8025,  2263,  588,  811,  5977,  11456, 1230, 3097, 3200, 3811,  478, 4,   1932),
+        ("Josh",        "Hart",             "SG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      596,  6265,  4192,  2005,  630,  192,  2303,  4845,  752,  2147, 907,  1210,  119, 17,  864),
+        ("Andre",       "Drummond",         "C",   0, "New York Knicks",        "NYK", "logos/knicks.png",      967,  11696, 11513, 1187,  1171, 1197, 4899,  9090,  50,   230,  1848, 3780,  501, 0,   1683),
+        ("OG",          "Anunoby",          "SF",  0, "New York Knicks",        "NYK", "logos/knicks.png",      559,  7451,  2495,  976,   741,  337,  2771,  5825,  1020, 2706, 889,  1149,  19,  0,   772),
+        ("Jose",        "Alvarado",         "PG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      296,  2366,  676,   948,   337,  54,   865,   2098,  405,  1160, 231,  305,   4,   0,   324),
+        ("Landry",      "Shamet",           "SG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      449,  3788,  754,   669,   221,  65,   1271,  3057,  823,  2134, 423,  519,   0,   0,   294),
+        ("Mikal",       "Bridges",          "SF",  0, "New York Knicks",        "NYK", "logos/knicks.png",      638,  9385,  2519,  1821,  757,  379,  3531,  7281,  1133, 3051, 1190, 1414,  10,  0,   774),
+        ("Jordan",      "Clarkson",         "SG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      825,  12651, 2650,  2307,  644,  125,  4728,  10820, 1472, 4383, 1723, 2078,  15,  1,   1479),
+        ("Miles",       "McBride",          "PG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      277,  1975,  453,   520,   203,  42,   707,   1728,  393,  1051, 168,  215,   0,   0,   134),
+        ("Pacôme",      "Dadiet",           "SF",  0, "New York Knicks",        "NYK", "logos/knicks.png",      47,   78,    45,    17,    6,    3,    26,    79,    13,   51,   13,   17,    0,   0,   7),
+        ("Tyler",       "Kolek",            "PG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      103,  355,   125,   240,   34,   8,    135,   330,   58,   161,  27,   37,    2,   0,   73),
+        ("Mohamed",     "Diawara",          "SF",  0, "New York Knicks",        "NYK", "logos/knicks.png",      69,   246,   94,    53,    17,   6,    90,    213,   48,   130,  18,   24,    0,   0,   30),
+        ("James",       "Wiseman",          "C",   0, "New York Knicks",        "NYK", "logos/knicks.png",      152,  1363,  838,   113,   30,   103,  575,   1026,  16,   61,   197,  289,   18,  0,   182),
+        ("Tyler",       "Nickel",           "SF",  0, "New York Knicks",        "NYK", "logos/knicks.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Kevin",       "McCullar Jr.",     "SF",  0, "New York Knicks",        "NYK", "logos/knicks.png",      25,   56,    36,    22,    10,   1,    22,    54,    8,    25,   4,    7,     0,   0,   12),
+        ("Jaden",       "Akins",            "SG",  0, "New York Knicks",        "NYK", "logos/knicks.png",      0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- OKLAHOMA CITY THUNDER ----
+        ("Shai",        "Gilgeous-Alexander","PG", 0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     530,  13411, 2503,  2810,  761,  422,  4674,  9193,  729,  2027, 3334, 3857,  44,  2,   1223),
+        ("Jalen",       "Williams",         "SF",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     248,  4464,  1141,  1105,  333,  135,  1731,  3401,  323,  863,  679,  840,   10,  0,   459),
+        ("Chet",        "Holmgren",         "C",   0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     183,  3017,  1519,  378,   119,  392,  1106,  2073,  261,  708,  544,  693,   58,  0,   294),
+        ("Jared",       "McCain",           "SG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     90,   910,   193,   150,   50,   5,    330,   754,   150,  390,  100,  115,   1,   0,   93),
+        ("Alex",        "Caruso",           "SG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     473,  3205,  1356,  1288,  629,  230,  1132,  2582,  478,  1311, 463,  608,   6,   0,   534),
+        ("Ajay",        "Mitchell",         "PG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     93,   1008,  258,   270,   96,   22,   377,   774,   84,   236,  170,  197,   2,   0,   110),
+        ("Cason",       "Wallace",          "PG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     227,  1789,  654,   493,   346,  100,  701,   1515,  273,  730,  114,  142,   1,   0,   177),
+        ("Isaiah",      "Hartenstein",      "C",   0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     426,  3016,  2866,  923,   320,  387,  1260,  2113,  27,   113,  469,  695,   56,  1,   494),
+        ("Aday",        "Mara",             "C",   0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jaylin",      "Williams",         "C",   0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     230,  1311,  1095,  464,   109,  110,  443,   1035,  258,  666,  167,  217,   10,  3,   173),
+        ("Kenrich",     "Williams",         "PF",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     447,  2853,  1796,  774,   328,  105,  1144,  2430,  392,  1066, 173,  307,   6,   0,   326),
+        ("Bennett",     "Stirtz",           "PG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Brooks",      "Barnhizer",        "SF",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     40,   68,    78,    22,    11,   5,    27,    71,    7,    24,   7,    10,    0,   0,   10),
+        ("Thomas",      "Sorber",           "C",   0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Nikola",      "Topić",            "PG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     10,   52,    19,    44,    5,    0,    22,    51,    6,    15,   2,    5,     2,   0,   25),
+        ("Josh",        "Dix",              "SG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Otega",       "Oweh",             "SG",  0, "Oklahoma City Thunder",  "OKC", "logos/thunder.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- ORLANDO MAGIC ----
+        ("Paolo",       "Banchero",         "PF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       270,  6031,  2000,  1292,  218,  154,  2060,  4592,  375,  1183, 1536, 2068,  67,  5,   805),
+        ("Franz",       "Wagner",           "SF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       325,  6251,  1585,  1180,  328,  111,  2307,  4857,  472,  1456, 1165, 1369,  7,   0,   619),
+        ("Wendell",     "Carter Jr.",       "C",   0, "Orlando Magic",          "ORL", "logos/magic.png",       461,  5487,  3750,  919,   307,  330,  2049,  4021,  350,  1106, 1039, 1404,  122, 0,   683),
+        ("Desmond",     "Bane",             "SG",  0, "Orlando Magic",          "ORL", "logos/magic.png",       395,  7227,  1776,  1517,  398,  154,  2628,  5538,  979,  2406, 992,  1114,  15,  1,   741),
+        ("Tristan",     "Da Silva",         "SF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       151,  1295,  529,   237,   101,  43,   478,   1103,  200,  560,  139,  158,   1,   0,   125),
+        ("Goga",        "Bitadze",          "C",   0, "Orlando Magic",          "ORL", "logos/magic.png",       383,  2107,  1639,  454,   174,  396,  838,   1494,  64,   280,  367,  547,   28,  0,   272),
+        ("Jalen",       "Suggs",            "PG",  0, "Orlando Magic",          "ORL", "logos/magic.png",       268,  3384,  922,   1010,  388,  166,  1199,  2836,  459,  1385, 527,  665,   6,   1,   623),
+        ("Jase",        "Richardson",       "SG",  0, "Orlando Magic",          "ORL", "logos/magic.png",       54,   239,   63,    58,    19,   2,    89,    188,   28,   79,   33,   46,    0,   0,   25),
+        ("Jonathan",    "Isaac",            "PF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       328,  2231,  1491,  244,   283,  391,  821,   1860,  228,  722,  361,  493,   10,  0,   233),
+        ("Anthony",     "Black",            "PG",  0, "Orlando Magic",          "ORL", "logos/magic.png",       211,  2011,  613,   567,   212,  114,  722,   1639,  199,  589,  368,  508,   3,   0,   327),
+        ("Jamal",       "Cain",             "SF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       121,  606,   252,   73,    55,   19,   213,   455,   72,   204,  108,  141,   0,   0,   55),
+        ("Jevon",       "Carter",           "PG",  0, "Orlando Magic",          "ORL", "logos/magic.png",       465,  2484,  776,   738,   282,  109,  904,   2287,  550,  1460, 126,  158,   3,   0,   276),
+        ("Nikola",      "Vučević",          "C",   0, "Orlando Magic",          "ORL", "logos/magic.png",       1036, 17684, 10707, 3025,  860,  885,  7524,  15132, 998,  2848, 1638, 2119,  582, 6,   1755),
+        ("Noah",        "Penda",            "SF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       59,   227,   187,   70,    30,   18,   82,    203,   30,   93,   33,   48,    2,   0,   42),
+        ("Colin",       "Castleton",        "C",   0, "Orlando Magic",          "ORL", "logos/magic.png",       46,   152,   142,   32,    11,   10,   57,    119,   2,    16,   36,   45,    0,   0,   28),
+        ("Alex",        "Morales",          "SF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       4,    8,     3,     4,     0,    0,    3,     7,     0,    1,    2,    2,     0,   0,   4),
+        ("Izaiyah",     "Nelson",           "PF",  0, "Orlando Magic",          "ORL", "logos/magic.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- PHILADELPHIA 76ERS ----
+        ("LeBron",      "James",            "SF", 97, "Los Angeles Lakers",     "LAL", "logos/lakers.png",      1492, 40474, 11185, 11009, 2275, 1111, 15111, 30976, 2410, 7101, 7842, 10789, 620, 125, 5021),
+        ("Tyrese",      "Maxey",            "PG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       388,  8182,  1242,  1864,  420,  162,  2929,  6348,  916,  2427, 1408, 1613,  25,  1,   620),
+        ("Jaylen",      "Brown",            "SG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       674,  13474, 3700,  1953,  684,  255,  5034,  10532, 1284, 3588, 2122, 2872,  71,  6,   1536),
+        ("Joel",        "Embiid",           "C",   0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       490,  13544, 5280,  1808,  432,  784,  4458,  8909,  585,  1727, 4043, 4873,  305, 9,   1656),
+        ("VJ",          "Edgecombe",        "SG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       75,   1199,  423,   315,   107,  39,   451,   1030,  149,  421,  148,  181,   7,   0,   137),
+        ("Anfernee",    "Simons",           "SG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       444,  6622,  1108,  1399,  227,  56,   2354,  5452,  1113, 2918, 801,  909,   8,   0,   695),
+        ("Kentavious",  "Caldwell-Pope",    "SG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       963,  10600, 2833,  1791,  1100, 273,  3777,  8845,  1588, 4356, 1458, 1765,  9,   0,   984),
+        ("Adem",        "Bona",             "C",   0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       129,  681,   552,   59,    56,   151,  266,   412,   2,    7,    147,  213,   4,   0,   117),
+        ("Jabari",      "Walker",           "PF",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       252,  1443,  1042,  176,   108,  54,   532,   1149,  117,  362,  262,  355,   14,  0,   156),
+        ("Tacko",       "Fall",             "C",   0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       37,   82,    90,    6,     2,    30,   37,    55,    0,    0,    8,    25,    0,   0,   12),
+        ("Rayan",       "Rupert",           "SF",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       155,  642,   350,   155,   83,   16,   235,   616,   88,   273,  84,   109,   4,   1,   116),
+        ("Caleb",       "Love",             "PG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       49,   509,   114,   123,   27,   4,    190,   490,   93,   292,  36,   49,    0,   0,   62),
+        ("Dean",        "Wade",             "PF",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       342,  1824,  1248,  372,   220,  121,  645,   1499,  406,  1106, 128,  187,   4,   0,   124),
+        ("Ariel",       "Hukporti",         "C",   0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       79,   165,   210,   40,    10,   41,   66,    111,   1,    4,    32,   46,    0,   0,   53),
+        ("Labaron",     "Philon Jr.",       "PG",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Dominick",    "Barlow",           "PF",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       167,  947,   640,   166,   94,   102,  377,   711,   31,   122,  162,  231,   5,   0,   85),
+        ("Justin",      "Edwards",          "SF",  0, "Philadelphia 76ers",     "PHI", "logos/76ers.png",       108,  831,   242,   149,   99,   27,   315,   698,   136,  370,  65,   85,    1,   0,   85),
+
+        // ---- PHOENIX SUNS ----
+        ("Devin",       "Booker",           "SG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        737,  18120, 2966,  3908,  628,  208,  6295,  13588, 1546, 4394, 3984, 4562,  76,  0,   2236),
+        ("Dillon",      "Brooks",           "SF",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        548,  8101,  1797,  1081,  506,  133,  3005,  7132,  1019, 2883, 1072, 1324,  1,   0,   802),
+        ("Jalen",       "Green",            "SG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        339,  6741,  1426,  1121,  274,  99,   2359,  5594,  850,  2505, 1173, 1474,  11,  1,   801),
+        ("Oso",         "Ighodaro",         "C",   0, "Phoenix Suns",           "PHX", "logos/suns.png",        143,  786,   640,   256,   101,  86,   352,   553,   0,    3,    82,   167,   4,   0,   140),
+        ("Miles",       "Bridges",          "PF",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        501,  7956,  3077,  1381,  368,  328,  2972,  6441,  880,  2600, 1132, 1372,  72,  1,   782),
+        ("Duop",        "Reath",            "C",   0, "Phoenix Suns",           "PHX", "logos/suns.png",        146,  905,   380,   103,   50,   60,   333,   739,   145,  406,  94,   121,   1,   0,   75),
+        ("Koa",         "Peat",             "SF",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jamaree",     "Bouyea",           "PG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        65,   316,   112,   107,   38,   20,   130,   290,   27,   98,   29,   43,    0,   0,   51),
+        ("Pat",         "Spencer",          "SG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        111,  578,   208,   285,   62,   8,    229,   541,   65,   192,  55,   72,    1,   0,   104),
+        ("Jordan",      "Goodwin",          "PG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        220,  1545,  912,   516,   242,  69,   591,   1437,  218,  630,  145,  195,   6,   0,   207),
+        ("Ryan",        "Dunn",             "SF",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        144,  918,   564,   159,   104,  69,   369,   839,   138,  433,  42,   86,    5,   0,   96),
+        ("Khaman",      "Maluach",          "C",   0, "Phoenix Suns",           "PHX", "logos/suns.png",        46,   139,   133,   6,     5,    33,   56,    105,   5,    21,   22,   31,    1,   0,   25),
+        ("Rasheer",     "Fleming",          "PF",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        55,   238,   124,   16,    22,   21,   87,    215,   45,   130,  19,   34,    0,   0,   29),
+        ("Collin",      "Gillespie",        "PG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        137,  1293,  426,   476,   133,  21,   452,   1069,  286,  706,  103,  121,   4,   0,   156),
+        ("Mark",        "Williams",         "C",   0, "Phoenix Suns",           "PHX", "logos/suns.png",        166,  2000,  1412,  207,   131,  174,  810,   1287,  1,    5,    379,  499,   54,  0,   193),
+        ("Luke",        "Kennard",          "SG",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        538,  5169,  1483,  1219,  304,  64,   1840,  3951,  1020, 2307, 469,  530,   4,   1,   509),
+        ("Drew",        "Timme",            "PF",  0, "Phoenix Suns",           "PHX", "logos/suns.png",        36,   201,   98,    43,    10,   1,    83,    168,   20,   60,   15,   25,    3,   0,   28),
+
+        // ---- PORTLAND TRAIL BLAZERS ----
+        ("Damian",      "Lillard",          "PG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",900,  22598, 3845,  6069,  874,  267,  7266,  16568, 2804, 7556, 5262, 5853,  154, 5,   2541),
+        ("Deni",        "Avdija",           "SF",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",425,  5643,  2690,  1450,  337,  200,  1933,  4181,  542,  1629, 1235, 1601,  70,  5,   852),
+        ("Toumani",     "Camara",           "SF",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",230,  2509,  1214,  463,   276,  118,  917,   2045,  412,  1124, 263,  362,   9,   0,   337),
+        ("Scoot",       "Henderson",        "PG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",158,  2132,  472,   783,   143,  35,   737,   1824,  249,  727,  409,  510,   10,  0,   462),
+        ("Ja",          "Morant",           "PG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",327,  7331,  1513,  2428,  335,  92,   2639,  5666,  435,  1397, 1618, 2092,  83,  12,  1108),
+        ("Donovan",     "Clingan",          "C",   0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",144,  1370,  1419,  239,   78,   240,  536,   1018,  98,   295,  200,  307,   45,  0,   167),
+        ("Jrue",        "Holiday",          "PG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",1090, 17287, 4585,  6762,  1527, 541,  6754,  14637, 1711, 4621, 2068, 2618,  164, 4,   2819),
+        ("Yang",        "Hansen",           "C",   0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",43,   95,    66,    22,    3,    10,   31,    100,   5,    42,   28,   34,    0,   0,   32),
+        ("Micah",       "Potter",           "C",   0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",111,  709,   465,   110,   42,   36,   242,   494,   115,  296,  110,  131,   8,   0,   86),
+        ("Sidy",        "Cissoko",          "SF",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",109,  460,   209,   135,   61,   29,   162,   397,   63,   223,  73,   112,   0,   0,   84),
+        ("Robert",      "Williams",         "C",   0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",294,  2088,  2018,  385,   207,  475,  928,   1289,  10,   30,   222,  336,   40,  1,   253),
+        ("Vít",         "Krejčí",           "SG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",203,  1320,  483,   371,   120,  59,   471,   1029,  283,  721,  95,   126,   2,   0,   145),
+        ("Jayson",      "Kent",             "SF",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",5,    10,    5,     0,     1,    1,    4,     7,     1,    4,    1,    1,     0,   0,   0),
+        ("Branden",     "Carlson",          "C",   0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",74,   364,   178,   43,    13,   48,   141,   283,   53,   152,  29,   44,    4,   0,   23),
+        ("John",        "Tonje",            "SG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",6,    15,    6,     2,     2,    0,    4,     14,    3,    10,   4,    4,     0,   0,   0),
+        ("Chris",       "Youngblood",       "SG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",34,   71,    28,    12,    4,    3,    22,    63,    18,   54,   9,    10,    0,   0,   2),
+        ("Shaedon",     "Sharpe",           "SG",  0, "Portland Trail Blazers", "PRT", "logos/trailblazers.png",234,  3676,  937,   518,   198,  58,   1373,  3054,  412,  1241, 518,  663,   4,   0,   452),
+
+        // ---- SACRAMENTO KINGS ----
+        ("Zach",        "LaVine",           "SG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       693,  14338, 2773,  2684,  599,  193,  5114,  10878, 1632, 4176, 2478, 2967,  20,  0,   1799),
+        ("Precious",    "Achiuwa",          "PF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       393,  3156,  2305,  414,   246,  259,  1300,  2629,  148,  495,  408,  685,   43,  0,   379),
+        ("Domantas",    "Sabonis",          "C",   0, "Sacramento Kings",       "SAC", "logos/kings.png",       665,  10702, 7096,  3240,  514,  301,  4188,  7487,  315,  920,  2011, 2757,  406, 68,  1713),
+        ("Darius",      "Acuff Jr.",        "PG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Emanuel",     "Sharp",            "SG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("De'Andre",    "Hunter",           "SF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       372,  5454,  1521,  587,   254,  103,  1903,  4254,  662,  1818, 986,  1195,  12,  0,   523),
+        ("Nique",       "Clifford",         "SF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       75,   645,   282,   179,   68,   24,   249,   596,   77,   231,  70,   97,    0,   0,   116),
+        ("Daeqwon",     "Plowden",          "SG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       38,   387,   108,   43,    23,   7,    136,   304,   71,   203,  44,   51,    0,   0,   30),
+        ("Keegan",      "Murray",           "SF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       256,  3411,  1430,  374,   225,  206,  1287,  2877,  574,  1573, 263,  326,   25,  0,   211),
+        ("Alex",        "Karaban",          "SF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jonathan",    "Mogbo",            "PF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       103,  450,   379,   171,   66,   42,   182,   400,   17,   71,   69,   96,    3,   1,   84),
+        ("Malik",       "Monk",             "SG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       585,  7216,  1494,  1842,  354,  198,  2598,  5984,  1062, 2994, 958,  1126,  8,   0,   935),
+        ("Maxime",      "Raynaud",          "C",   0, "Sacramento Kings",       "SAC", "logos/kings.png",       74,   922,   556,   100,   38,   39,   383,   671,   24,   74,   132,  168,   18,  0,   94),
+        ("Killian",     "Hayes",            "PG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       239,  1885,  691,   1202,  270,  101,  731,   1939,  191,  683,  232,  293,   8,   0,   455),
+        ("Ben",         "Simmons",          "PG",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       383,  5021,  2840,  2754,  568,  255,  2076,  3720,  5,    36,   864,  1459,  132, 33,  1151),
+        ("Leaky",       "Black",            "SF",  0, "Sacramento Kings",       "SAC", "logos/kings.png",       41,   175,   123,   46,    26,   19,   65,    155,   28,   75,   17,   23,    0,   0,   20),
+
+        // ---- SAN ANTONIO SPURS ----
+        ("Stephon",     "Castle",           "SG",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       149,  2323,  659,   834,   152,  41,   808,   1805,  176,  577,  531,  728,   24,  5,   394),
+        ("Dylan",       "Harper",           "SG",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       69,   813,   234,   266,   54,   24,   331,   656,   61,   178,  90,   119,   0,   0,   99),
+        ("De'Aaron",    "Fox",              "PG",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       603,  12735, 2352,  3707,  845,  240,  4719,  10006, 946,  2862, 2351, 3146,  78,  1,   1613),
+        ("Victor",      "Wembanyama",       "C",   0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       181,  4238,  1997,  641,   206,  627,  1512,  3123,  392,  1147, 822,  1006,  113, 4,   564),
+        ("Keldon",      "Johnson",          "SF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       452,  6842,  2432,  908,   304,  104,  2541,  5347,  679,  1923, 1081, 1410,  37,  0,   564),
+        ("Julian",      "Champagnie",       "SF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       255,  2395,  1057,  351,   177,  120,  800,   1886,  507,  1351, 288,  338,   8,   0,   211),
+        ("Devin",       "Vassell",          "SG",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       370,  5212,  1413,  955,   376,  157,  1932,  4362,  782,  2103, 566,  701,   4,   0,   393),
+        ("Luke",        "Kornet",           "C",   0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       421,  2287,  1639,  508,   153,  362,  912,   1648,  148,  461,  315,  401,   9,   0,   163),
+        ("Tobias",      "Harris",           "PF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       1033, 16440, 6292,  2450,  827,  565,  6285,  13152, 1391, 3796, 2479, 2959,  116, 1,   1407),
+        ("Harrison",    "Barnes",           "SF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       1070, 14572, 4955,  1887,  722,  190,  5130,  11161, 1578, 4100, 2734, 3373,  41,  0,   1185),
+        ("Carter",      "Bryant",           "SF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       71,   298,   178,   47,    16,   23,   108,   265,   52,   155,  30,   42,    0,   0,   33),
+        ("Jayden",      "Quaintance",       "PF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Tarris",      "Reed Jr.",         "C",   0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jordan",      "McLaughlin",       "PG",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       332,  1261,  447,   845,   245,  34,   470,   1061,  191,  506,  130,  174,   3,   0,   203),
+        ("Ja'Kobi",     "Gillespie",        "PG",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("David",       "Jones García",     "SF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       11,   32,    13,    18,    6,    1,    13,    25,    3,    5,    3,    6,     0,   0,   5),
+        ("Maliq",       "Brown",            "SF",  0, "San Antonio Spurs",      "SAS", "logos/spurs.png",       0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- TORONTO RAPTORS ----
+        ("Kawhi",       "Leonard",          "SF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     798,  16546, 5075,  2470,  1377, 498,  5987,  11994, 1359, 3472, 3213, 3722,  106, 2,   1345),
+        ("Immanuel",    "Quickley",         "PG",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     394,  5692,  1379,  1618,  329,  48,   1905,  4477,  857,  2287, 1025, 1203,  26,  2,   518),
+        ("Scottie",     "Barnes",           "PF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     356,  6204,  2665,  1842,  445,  383,  2412,  5076,  366,  1217, 1014, 1311,  109, 9,   849),
+        ("RJ",          "Barrett",          "SF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     444,  8391,  2450,  1465,  301,  126,  3053,  6835,  739,  2139, 1546, 2209,  26,  2,   969),
+        ("Ja'Kobe",     "Walter",           "SG",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     124,  990,   345,   167,   116,  24,   339,   797,   175,  455,  137,  173,   1,   0,   87),
+        ("Trayce",      "Jackson-Davis",    "C",   0, "Toronto Raptors",        "TOR", "logos/raptors.png",     183,  1128,  797,   225,   69,   138,  478,   758,   1,    5,    171,  308,   11,  0,   117),
+        ("Jamison",     "Battle",           "SF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     120,  611,   247,   77,    24,   13,   223,   492,   140,  344,  25,   32,    0,   0,   46),
+        ("Collin",      "Murray-Boyles",    "PF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     57,   484,   285,   106,   52,   53,   198,   342,   17,   50,   71,   108,   4,   0,   59),
+        ("Allen",       "Graves",           "SF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Jakob",       "Poeltl",           "C",   0, "Toronto Raptors",        "TOR", "logos/raptors.png",     641,  5804,  4476,  1176,  421,  789,  2565,  4033,  3,    7,    671,  1200,  121, 0,   778),
+        ("Alijah",      "Martin",           "SG",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     23,   51,    21,    12,    8,    4,    16,    50,    4,    21,   15,   19,    0,   0,   8),
+        ("Jamal",       "Shead",            "PG",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     157,  1078,  258,   760,   134,  25,   389,   1008,  156,  485,  144,  185,   3,   0,   229),
+        ("Kyle",        "Anderson",         "SF",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     757,  5142,  3217,  2104,  744,  467,  2017,  4198,  295,  868,  813,  1137,  26,  4,   753),
+        ("Jaden",       "Bradley",          "PG",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Malachi",     "Smith",            "PG",  0, "Toronto Raptors",        "TOR", "logos/raptors.png",     15,   124,   51,    49,    12,   4,    48,    99,    20,   46,   8,    8,     1,   0,   14),
+        ("Nate",        "Bittle",           "C",   0, "Toronto Raptors",        "TOR", "logos/raptors.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+
+        // ---- UTAH JAZZ ----
+        ("Keyonte",     "George",           "PG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        196,  3374,  663,   1041,  140,  30,   1080,  2615,  455,  1308, 759,  886,   9,   0,   537),
+        ("Lauri",       "Markkanen",        "PF",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        492,  9323,  3490,  746,   356,  243,  3208,  7012,  1257, 3399, 1650, 1894,  99,  0,   688),
+        ("Jaren",       "Jackson Jr.",      "PF",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        455,  8449,  2530,  696,   467,  846,  3000,  6418,  788,  2243, 1661, 2094,  33,  0,   869),
+        ("Ace",         "Bailey",           "SF",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        72,   993,   302,   131,   60,   49,   395,   892,   137,  398,  66,   88,    1,   0,   107),
+        ("Svi",         "Mykhailiuk",       "SG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        381,  2638,  713,   555,   203,  36,   936,   2259,  542,  1472, 224,  288,   0,   0,   332),
+        ("Darryn",      "Peterson",         "SG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Isaiah",      "Collier",          "PG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        130,  1303,  385,   869,   132,  36,   489,   1070,  69,   269,  256,  363,   21,  0,   356),
+        ("Jaxson",      "Hayes",            "C",   0, "Utah Jazz",              "UTA", "logos/jazz.png",        433,  2991,  1714,  318,   198,  299,  1165,  1753,  33,   118,  628,  911,   12,  0,   294),
+        ("Kyle",        "Filipowski",       "PF",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        149,  1569,  992,   338,   121,  61,   583,   1175,  151,  448,  252,  355,   26,  0,   227),
+        ("Brice",       "Sensabaugh",       "SF",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        178,  2129,  543,   308,   113,  26,   754,   1674,  353,  929,  268,  315,   1,   0,   278),
+        ("Josh",        "Okogie",           "SG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        494,  2994,  1430,  549,   451,  192,  977,   2390,  333,  1068, 707,  960,   5,   0,   387),
+        ("Trey",        "Alexander",        "SG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        33,   79,    23,    20,    8,    3,    32,    78,    9,    29,   6,    9,     0,   0,   8),
+        ("Jusuf",       "Nurkić",           "C",   0, "Utah Jazz",              "UTA", "logos/jazz.png",        631,  7438,  5644,  1664,  588,  669,  2919,  5820,  154,  523,  1446, 2189,  202, 4,   1362),
+        ("Mo",          "Bamba",            "C",   0, "Utah Jazz",              "UTA", "logos/jazz.png",        368,  2471,  2002,  307,   132,  463,  958,   2009,  291,  818,  264,  387,   30,  0,   289),
+        ("Josh",        "Green",            "SG",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        349,  2190,  879,   495,   259,  52,   819,   1707,  327,  845,  225,  319,   2,   0,   298),
+        ("Harrison",    "Ingram",           "SF",  0, "Utah Jazz",              "UTA", "logos/jazz.png",        12,   15,    12,    4,     3,    0,    7,     10,    1,    2,    0,    0,     0,   0,   2),
+        ("Tony",        "Bradley",          "C",   0, "Utah Jazz",              "UTA", "logos/jazz.png",        234,  1015,  887,   118,   50,   115,  439,   710,   9,    19,   128,  187,   6,   0,   124),
+
+        // ---- WASHINGTON WIZARDS ----
+        ("Anthony",     "Davis",            "PF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     807,  19385, 8636,  2065,  1055, 1848, 7269,  13923, 385,  1306, 4462, 5627,  483, 4,   1614),
+        ("Trae",        "Young",            "PG",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     498,  12489, 1717,  4868,  518,  76,   3946,  9112,  1304, 3708, 3293, 3776,  259, 3,   2090),
+        ("Kyshawn",     "George",           "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     116,  1300,  530,   383,   116,  93,   456,   1123,  213,  614,  175,  224,   4,   0,   222),
+        ("Deandre",     "Ayton",            "C",   0, "Washington Wizards",     "WAS", "logos/wizards.png",     470,  7439,  4742,  708,   333,  450,  3308,  5527,  28,   122,  795,  1073,  235, 0,   771),
+        ("Bilal",       "Coulibaly",        "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     178,  1916,  793,   454,   210,  143,  681,   1597,  192,  613,  362,  493,   4,   1,   293),
+        ("Bub",         "Carrington",       "PG",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     164,  1685,  617,   745,   106,  38,   614,   1489,  307,  821,  150,  196,   5,   0,   332),
+        ("Justin",      "Champagnie",       "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     187,  1322,  868,   178,   143,  95,   510,   1033,  151,  437,  151,  199,   12,  0,   117),
+        ("Tre",         "Johnson",          "SG",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     60,   733,   170,   122,   33,   18,   271,   647,   115,  321,  76,   87,    0,   0,   93),
+        ("AJ",          "Dybantsa",         "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Will",        "Riley",            "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     74,   764,   212,   146,   54,   9,    271,   618,   78,   247,  144,  180,   2,   0,   94),
+        ("Tre",         "Mann",             "PG",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     234,  1998,  605,   501,   170,  35,   752,   1869,  300,  870,  194,  244,   1,   1,   277),
+        ("Khris",       "Middleton",        "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     839,  13541, 3931,  3242,  944,  160,  4915,  10727, 1476, 3830, 2235, 2545,  46,  2,   1724),
+        ("Alex",        "Sarr",             "C",   0, "Washington Wizards",     "WAS", "logos/wizards.png",     115,  1652,  790,   291,   83,   196,  642,   1484,  155,  491,  213,  311,   22,  0,   196),
+        ("Anthony",     "Gill",             "PF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     285,  1094,  553,   191,   75,   61,   416,   764,   62,   199,  200,  267,   0,   0,   110),
+        ("Felix",       "Okpara",           "C",   0, "Washington Wizards",     "WAS", "logos/wizards.png",     0,    0,     0,     0,     0,    0,    0,     0,     0,    0,    0,    0,     0,   0,   0), // sin estadísticas NBA (n/d)
+        ("Tristan",     "Vukcevic",         "C",   0, "Washington Wizards",     "WAS", "logos/wizards.png",     94,   856,   313,   107,   39,   63,   301,   626,   98,   282,  156,  200,   2,   0,   114),
+        ("Jamir",       "Watkins",          "SF",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     50,   368,   194,   67,    54,   25,   132,   296,   47,   158,  57,   82,    0,   0,   40),
+        ("Reece",       "Beekman",          "PG",  0, "Washington Wizards",     "WAS", "logos/wizards.png",     36,   93,    39,    63,    33,   2,    35,    107,   7,    40,   16,   21,    0,   0,   21),
     };
 }

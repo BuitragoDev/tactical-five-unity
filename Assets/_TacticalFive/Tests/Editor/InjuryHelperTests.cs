@@ -183,7 +183,7 @@ public class InjuryHelperTests
     [Test]
     public void MatchRiskPerGame_IsProportionalToExposure()
     {
-        // Referencia: 36 minutos = probabilidad base (0,8 %).
+        // F3-06: 36 minutos = probabilidad base calibrada (20 %).
         Assert.That(InjuryHelper.MatchRiskPerGame(36, 90, 0),
             Is.EqualTo(InjuryHelper.INJURY_BASE_PER_GAME).Within(1e-6f));
         Assert.That(InjuryHelper.MatchRiskPerGame(18, 90, 0),
@@ -224,5 +224,13 @@ public class InjuryHelperTests
     public void MatchRiskPerGame_CanNeverExceedCertainty()
     {
         Assert.That(InjuryHelper.MatchRiskPerGame(48, 1, 100), Is.LessThanOrEqualTo(1f));
+    }
+
+    [Test]
+    public void CanSustainMatchInjury_PreservesFiveHealthyPlayers()
+    {
+        Assert.That(InjuryHelper.CanSustainMatchInjury(4), Is.False);
+        Assert.That(InjuryHelper.CanSustainMatchInjury(5), Is.False);
+        Assert.That(InjuryHelper.CanSustainMatchInjury(6), Is.True);
     }
 }

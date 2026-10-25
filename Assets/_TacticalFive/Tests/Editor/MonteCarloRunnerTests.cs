@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using System.Linq;
 
 public class MonteCarloRunnerTests
 {
@@ -97,8 +98,45 @@ public class MonteCarloRunnerTests
             + $"r(OVR,W)={report.outcomes.ovrWinCorrelation.mean:F3}, "
             + $"OT={report.outcomes.overtimeRatePercent.mean:F2}% "
             + $"({report.gamesWithOvertime}/{report.gamesSimulated})");
+        var gamesMissed = report.teamSeasonMetrics[MonteCarloMetric.PlayerGamesMissed];
+        TestContext.WriteLine($"Bajas por equipo-temporada: media={gamesMissed.mean:F2}, "
+            + $"P5={gamesMissed.p5:F2}, P50={gamesMissed.p50:F2}, P95={gamesMissed.p95:F2}; "
+            + $"mínimo roster sano={report.minimumHealthyPlayers}");
+        TestContext.WriteLine($"Mínimo roster sano={report.minimumHealthyPlayers}; "
+            + string.Join(" · ", report.injuryDurations.OrderBy(kv => kv.Key)
+                .Select(kv => $"{InjuryCatalog.SeverityLabel(kv.Key)} {kv.Value.events} episodios, "
+                    + $"media {kv.Value.meanDays:F2}d (catálogo {kv.Value.catalogMeanDays:F2}d)")));
 
         var failures = MonteCarloOutcomeGate.Evaluate(report);
         Assert.That(failures, Is.Empty, string.Join("; ", failures));
+
+        Assert.That(report.minimumHealthyPlayers, Is.GreaterThanOrEqualTo(InjuryHelper.MIN_HEALTHY_PLAYERS),
+            "El laboratorio nunca debe dejar a una franquicia sin cinco jugadores sanos");
+        Assert.That(report.teamBreakdowns.All(t => t.minimumHealthyPlayers >= InjuryHelper.MIN_HEALTHY_PLAYERS),
+            Is.True, "Cada equipo debe conservar al menos cinco jugadores sanos durante las temporadas");
+
+        foreach (var severity in System.Enum.GetValues(typeof(InjurySeverity)).Cast<InjurySeverity>())
+        {
+            Assert.That(report.injuryDurations.TryGetValue(severity, out var duration), Is.True,
+                $"Sin muestra para gravedad {severity}");
+            var catalog = InjuryCatalog.All.Where(d => d.severity == severity).ToArray();
+            double tolerance = severity switch
+            {
+                InjurySeverity.Leve => 1.0,
+                InjurySeverity.Moderada => 2.0,
+                InjurySeverity.Grave => 5.0,
+                _ => 20.0
+            };
+            Assert.That(duration.events, Is.GreaterThan(100), $"Muestra insuficiente para {severity}");
+            Assert.That(duration.meanDays, Is.EqualTo(duration.catalogMeanDays).Within(tolerance),
+                $"Duración media de {severity} alejada de la mezcla ponderada del catálogo");
+            Assert.That(duration.observedMinDays, Is.GreaterThanOrEqualTo(catalog.Min(d => d.minDays)));
+            Assert.That(duration.observedMaxDays, Is.LessThanOrEqualTo(catalog.Max(d => d.maxDays)));
+        }
+
+        var calibrationFailures = MonteCarloCalibrationGate.Evaluate(report);
+        Assert.That(calibrationFailures, Is.Empty,
+            "F3-04/F3-06: calibración ofensiva y partidos-jugador perdidos deben quedar dentro del perfil. "
+            + string.Join("; ", calibrationFailures));
     }
 }

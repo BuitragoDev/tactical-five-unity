@@ -1868,6 +1868,21 @@ public static class GameSimulator
                 player = DatabaseManager.Instance?.GetPlayerById(ps.player_id);
             if (player == null || player.injury_days > 0) continue;
 
+            // F3-06: una lesión postpartido no puede dejar al equipo con menos de cinco
+            // jugadores sanos para el siguiente encuentro. El recuento se actualiza
+            // durante el lote, conforme se asignan las nuevas lesiones.
+            int healthyAvailable = 0;
+            foreach (var candidate in players)
+            {
+                PlayerData rosterPlayer;
+                if (playersById != null)
+                    playersById.TryGetValue(candidate.player_id, out rosterPlayer);
+                else
+                    rosterPlayer = DatabaseManager.Instance?.GetPlayerById(candidate.player_id);
+                if (rosterPlayer != null && rosterPlayer.injury_days <= 0) healthyAvailable++;
+            }
+            if (!InjuryHelper.CanSustainMatchInjury(healthyAvailable)) continue;
+
             // E2: un jugador que volvió antes de tiempo (alta forzada) arrastra riesgo de
             // recaída; si se lesiona en ese estado, la lesión es una recaída más grave.
             // F2-07: el riesgo depende de la exposición (minutos), del físico y del riesgo

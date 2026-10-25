@@ -49,10 +49,10 @@ public sealed class MonteCarloConfig
     public ulong seed = 1;
 
     /// <summary>OVR medio del equipo más débil de la liga sintética (F3-05).</summary>
-    public const double SYNTHETIC_BASE_OVR = 73.36;
+    public const double SYNTHETIC_BASE_OVR = 72.08;
     /// <summary>Diferencia de OVR entre el peor y el mejor equipo sintético. Calibrada
     /// para que victorias y puntos por equipo reproduzcan la paridad de la NBA 2024-25.</summary>
-    public const double SYNTHETIC_OVR_SPREAD = 8.6;
+    public const double SYNTHETIC_OVR_SPREAD = 10.6;
 }
 
 /// <summary>Resultado estadístico de una ejecución de laboratorio.</summary>
@@ -65,6 +65,8 @@ public sealed class MonteCarloReport
     public int gamesSimulated;
     public int gamesWithOvertime;
     public int overtimePeriods;
+    /// <summary>Mínimo de jugadores sanos en cualquier equipo antes de un partido.</summary>
+    public int minimumHealthyPlayers;
     public double overtimeRatePercent => gamesSimulated > 0 ? 100.0 * gamesWithOvertime / gamesSimulated : 0;
     public Dictionary<MonteCarloMetric, MonteCarloMetricSummary> metrics = new();
     /// <summary>Distribuciones agregadas por equipo-temporada (una observación por equipo).</summary>
@@ -72,6 +74,8 @@ public sealed class MonteCarloReport
     /// <summary>Desglose por equipo sintético para detectar desviaciones persistentes.</summary>
     public List<MonteCarloTeamSummary> teamBreakdowns = new();
     public MonteCarloOutcomeSummary outcomes = new();
+    /// <summary>Duraciones observadas agrupadas por gravedad durante la ejecución.</summary>
+    public Dictionary<InjurySeverity, MonteCarloInjurySeveritySummary> injuryDurations = new();
     /// <summary>Diagnóstico temporal de F3-05: recuento de márgenes finales 0..12.</summary>
     public Dictionary<int, int> marginHistogram = new();
 
@@ -87,6 +91,7 @@ public sealed class MonteCarloReport
             $"- Partidos por equipo: {gamesPerTeam}",
             $"- Partidos simulados: {gamesSimulated}",
             $"- Partidos con prórroga: {gamesWithOvertime} ({F(overtimeRatePercent)} %); periodos OT: {overtimePeriods}",
+            $"- Mínimo de jugadores sanos disponibles: {minimumHealthyPlayers}",
             "- Calendario: round-robin circular sintético, repetido hasta alcanzar los partidos por equipo.",
             "- Partidos sin persistencia; entre rondas hay un descanso y un día de partido, y las bajas cuentan días-jugador realmente no disponibles (truncados al final de temporada).",
             "",
@@ -117,8 +122,8 @@ public sealed class MonteCarloReport
             lines.Add("");
             lines.Add("## Consistencia por equipo sintético");
             lines.Add("");
-            lines.Add("| Equipo | OVR | PTS | FG% | FGA | 3PA | FTA | TO | AST | OREB/DREB | W | Games missed |");
-            lines.Add("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
+            lines.Add("| Equipo | OVR | PTS | FG% | FGA | 3PA | FTA | TO | AST | OREB/DREB | W | Games missed | Mín. sanos |");
+            lines.Add("|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|");
             foreach (var team in teamBreakdowns.OrderBy(t => t.teamId))
             {
                 double V(MonteCarloMetric m) => team.metrics.TryGetValue(m, out var s) ? s.mean : 0;
@@ -127,11 +132,27 @@ public sealed class MonteCarloReport
                     + $"| {F(V(MonteCarloMetric.ThreePointAttempts))} | {F(V(MonteCarloMetric.FreeThrowAttempts))} "
                     + $"| {F(V(MonteCarloMetric.Turnovers))} | {F(V(MonteCarloMetric.Assists))} "
                     + $"| {F(V(MonteCarloMetric.OffensiveRebounds))}/{F(V(MonteCarloMetric.DefensiveRebounds))} "
-                    + $"| {F(V(MonteCarloMetric.Wins))} | {F(V(MonteCarloMetric.PlayerGamesMissed))} |");
+                    + $"| {F(V(MonteCarloMetric.Wins))} | {F(V(MonteCarloMetric.PlayerGamesMissed))} "
+                    + $"| {team.minimumHealthyPlayers} |");
             }
         }
         lines.AddRange(MonteCarloCalibrationGate.ToMarkdownLines(this));
         lines.AddRange(MonteCarloOutcomeGate.ToMarkdownLines(this));
+        if (injuryDurations.Count > 0)
+        {
+            lines.Add("");
+            lines.Add("## Duración de lesiones por gravedad");
+            lines.Add("");
+            lines.Add("| Gravedad | Episodios | Media observada (días) | Media esperada del catálogo | Rango catálogo | Rango observado |");
+            lines.Add("|---|---:|---:|---:|---:|---:|");
+            foreach (var severity in Enum.GetValues(typeof(InjurySeverity)).Cast<InjurySeverity>())
+            {
+                if (!injuryDurations.TryGetValue(severity, out var s)) continue;
+                lines.Add($"| {InjuryCatalog.SeverityLabel(severity)} | {s.events} | {F(s.meanDays)} "
+                    + $"| {F(s.catalogMeanDays)} | {s.catalogMinDays}–{s.catalogMaxDays} "
+                    + $"| {s.observedMinDays}–{s.observedMaxDays} |");
+            }
+        }
         if (marginHistogram.Count > 0)
         {
             lines.Add("");
@@ -210,11 +231,23 @@ public sealed class MonteCarloOutcomeSummary
     public MonteCarloMetricSummary overtimePeriodsPerGamePercent = new();
 }
 
+public sealed class MonteCarloInjurySeveritySummary
+{
+    public int events;
+    public double meanDays;
+    public int observedMinDays;
+    public int observedMaxDays;
+    public double catalogMeanDays;
+    public int catalogMinDays;
+    public int catalogMaxDays;
+}
+
 public sealed class MonteCarloTeamSummary
 {
     public int teamId;
     public int seasons;
     public double averageOverall;
+    public int minimumHealthyPlayers;
     public Dictionary<MonteCarloMetric, MonteCarloMetricSummary> metrics = new();
 }
 
@@ -226,7 +259,7 @@ public sealed class MonteCarloTeamSummary
 /// </summary>
 public static class MonteCarloRunner
 {
-    static readonly int[] RosterOvrOffsets = { 7, 5, 4, 3, 2, 1, 0, -1, -3, -5, -6, -7 };
+    static readonly int[] RosterOvrOffsets = { 7, 6, 5, 4, 3, 2, 1, 0, -1, -2, -3, -4, -5, -6, -7 };
     static readonly string[] Positions = { "PG", "SG", "SF", "PF", "C" };
 
     sealed class MetricSamples
@@ -272,6 +305,22 @@ public static class MonteCarloRunner
         public int playerDaysOut;
         public int playerGamesMissed;
         public TeamSeasonTotals seasonTotals = new();
+    }
+
+    sealed class InjuryDurationAccumulator
+    {
+        public int events;
+        public int totalDays;
+        public int observedMinDays = int.MaxValue;
+        public int observedMaxDays;
+
+        public void Add(int days)
+        {
+            events++;
+            totalDays += days;
+            observedMinDays = Math.Min(observedMinDays, days);
+            observedMaxDays = Math.Max(observedMaxDays, days);
+        }
     }
 
     sealed class TeamSeasonTotals
@@ -348,6 +397,7 @@ public static class MonteCarloRunner
             teamId => teamId,
             _ => Enum.GetValues(typeof(MonteCarloMetric)).Cast<MonteCarloMetric>()
                 .ToDictionary(metric => metric, __ => new MetricSamples()));
+        var perTeamMinimumHealthy = Enumerable.Range(1, config.teams).ToDictionary(teamId => teamId, _ => 12);
         var outcomeSamples = new MonteCarloOutcomeSummary();
         var seasonWinStdDev = new MetricSamples();
         var seasonMinWins = new MetricSamples();
@@ -356,10 +406,13 @@ public static class MonteCarloRunner
         var seasonOvertimeRate = new MetricSamples();
         var seasonOvertimePeriodsPerGame = new MetricSamples();
         var teamOverallById = new Dictionary<int, double>();
+        var injuryDurationAccumulators = Enum.GetValues(typeof(InjurySeverity)).Cast<InjurySeverity>()
+            .ToDictionary(severity => severity, _ => new InjuryDurationAccumulator());
         var random = new SeededRandomSource(config.seed);
         int gameId = 1;
         int gamesWithOvertime = 0;
         int overtimePeriods = 0;
+        int minimumHealthyPlayers = int.MaxValue;
         var marginHistogram = new Dictionary<int, int>();
 
         for (int season = 0; season < config.seasons; season++)
@@ -398,6 +451,11 @@ public static class MonteCarloRunner
                     var away = teams[awayIndex];
                     home.playerGamesMissed += home.players.Count(p => p.injury_days > 0);
                     away.playerGamesMissed += away.players.Count(p => p.injury_days > 0);
+                    int homeHealthy = home.players.Count(p => p.injury_days <= 0);
+                    int awayHealthy = away.players.Count(p => p.injury_days <= 0);
+                    perTeamMinimumHealthy[home.id] = Math.Min(perTeamMinimumHealthy[home.id], homeHealthy);
+                    perTeamMinimumHealthy[away.id] = Math.Min(perTeamMinimumHealthy[away.id], awayHealthy);
+                    minimumHealthyPlayers = Math.Min(minimumHealthyPlayers, Math.Min(homeHealthy, awayHealthy));
                     var game = new GameData
                     {
                         id = gameId++,
@@ -414,6 +472,13 @@ public static class MonteCarloRunner
                         persistToDb: false,
                         random: random,
                         simulatePlayerStateWhenNotPersisting: true);
+
+                    foreach (var injury in result.injuries)
+                    {
+                        var definition = InjuryCatalog.ByName(injury.type);
+                        if (definition != null)
+                            injuryDurationAccumulators[definition.severity].Add(injury.days);
+                    }
 
                     int gameOvertimePeriods = Math.Max(0, result.quarters.Count - 4);
                     if (gameOvertimePeriods > 0)
@@ -495,6 +560,7 @@ public static class MonteCarloRunner
             gamesSimulated = gameId - 1,
             gamesWithOvertime = gamesWithOvertime,
             overtimePeriods = overtimePeriods,
+            minimumHealthyPlayers = minimumHealthyPlayers == int.MaxValue ? 0 : minimumHealthyPlayers,
             marginHistogram = marginHistogram,
             outcomes = new MonteCarloOutcomeSummary
             {
@@ -510,13 +576,32 @@ public static class MonteCarloRunner
             report.metrics[metric] = values.Summarize();
         foreach (var (metric, values) in teamSeasonSamples)
             report.teamSeasonMetrics[metric] = values.Summarize();
+        foreach (var (severity, accumulator) in injuryDurationAccumulators)
+        {
+            if (accumulator.events == 0) continue;
+            var definitions = InjuryCatalog.All.Where(d => d.severity == severity).ToArray();
+            int totalWeight = definitions.Sum(d => d.weight);
+            report.injuryDurations[severity] = new MonteCarloInjurySeveritySummary
+            {
+                events = accumulator.events,
+                meanDays = (double)accumulator.totalDays / accumulator.events,
+                observedMinDays = accumulator.observedMinDays,
+                observedMaxDays = accumulator.observedMaxDays,
+                catalogMeanDays = totalWeight > 0
+                    ? definitions.Sum(d => (d.minDays + d.maxDays) * 0.5 * d.weight) / totalWeight
+                    : 0,
+                catalogMinDays = definitions.Length > 0 ? definitions.Min(d => d.minDays) : 0,
+                catalogMaxDays = definitions.Length > 0 ? definitions.Max(d => d.maxDays) : 0
+            };
+        }
         foreach (var (teamId, values) in perTeamSamples)
         {
             var teamSummary = new MonteCarloTeamSummary
             {
                 teamId = teamId,
                 seasons = config.seasons,
-                averageOverall = teamOverallById[teamId]
+                averageOverall = teamOverallById[teamId],
+                minimumHealthyPlayers = perTeamMinimumHealthy[teamId]
             };
             foreach (var (metric, metricSamples) in values)
                 teamSummary.metrics[metric] = metricSamples.Summarize();
@@ -572,7 +657,7 @@ public static class MonteCarloRunner
         // Los offsets suman 0. La liga sintética conserva variación entre equipos, pero
         // su dispersión está calibrada a la paridad de la NBA 2024-25 (F3-05): los
         // equipos sintéticos deben repartir victorias y puntos como los reales, no como
-        // el seed. No pretende clonar franquicias. 12 jugadores, sin DB.
+        // el seed. No pretende clonar franquicias. 15 jugadores (roster NBA de referencia), sin DB.
         double fraction = teamCount <= 1 ? 0.0 : (teamId - 1) / (double)(teamCount - 1);
         float teamBase = (float)(MonteCarloConfig.SYNTHETIC_BASE_OVR
             + MonteCarloConfig.SYNTHETIC_OVR_SPREAD * Math.Pow(fraction, 1.5));

@@ -17,7 +17,7 @@ using SQLite;
 public static class SeedBaseline
 {
     // Actualizar únicamente después de revisar intencionadamente un cambio del seed.
-    public const string Fingerprint = "0f00e6f6ec717175bd6ffbe84d2ce97c2dd64655efb8e3b5097a14443f142e9c";
+    public const string Fingerprint = "3d865e9cc27ba03ec901ed00db96d754aec97aa1b26bb27dd99d2cf74dfc21cb";
 
     public static string Compute(
         IEnumerable<TeamData> teams,
