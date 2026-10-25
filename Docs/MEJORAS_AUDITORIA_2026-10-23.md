@@ -22,7 +22,7 @@
 | **0** | Higiene y quick wins | 6 | 6 |
 | **1** | Datos y balance del seed | 8 | 8 |
 | **2** | Motor de simulación | 12 | 10 |
-| **3** | Calibración y reproducibilidad | 7 | 6 |
+| **3** | Calibración y reproducibilidad | 7 | 7 |
 | **4** | Mercado, CBA y economía | 8 | 0 |
 | **5** | Calendario y competiciones | 5 | 0 |
 | **6** | Histórico y estadísticas | 4 | 0 |
@@ -30,7 +30,7 @@
 | **8** | Arquitectura y rendimiento | 8 | 0 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **30** |
+| | **TOTAL** | **70** | **31** |
 
 ### Grafo de dependencias
 
@@ -312,9 +312,12 @@ flowchart LR
   - *Implementación:* calibración empírica de `InjuryHelper.INJURY_BASE_PER_GAME` de **0,008 a 0,20 a 36 min** (mantiene la proporcionalidad por exposición, ajuste por físico y recaída; cero minutos sigue siendo cero). `CheckInjuries` usa `CanSustainMatchInjury`: no provoca un episodio nuevo si dejaría la convocatoria del partido siguiente con menos de cinco sanos. `MonteCarloRunner` refleja un roster sintético de **15** (comparable con el grano del dato NBA), informa el mínimo de sanos y las duraciones observadas/esperadas ponderadas por gravedad.
   - *Resultado:* aceptación de 100 temporadas (123.000 partidos, semilla `20261024`): **392,65** partidos-jugador perdidos/equipo-temporada; P5/P50/P95 **299/391/490** dentro de media 326,97–466,97, P5 240–320, P50 329–429 y P95 474,05–554,05. Mínimo de sanos **5**. Duraciones observadas vs catálogo ponderado: leve **2,57/2,57 d** (137.968); moderada **9,60/9,59 d** (150.200); grave **29,69/29,78 d** (32.789); crítica **122,39/123,60 d** (3.329). **F3-04/F3-05/F3-06 pasan simultáneamente** (W 41,00; SD 14,52; mín 17,10; máx 68,26; r 0,957; OT 5,01 %). Se amplía el test Monte Carlo de 100 temporadas con assertions de disponibilidad, duraciones y gate global; 1 test unitario de la salvaguarda. **EditMode 461/461**.
 
-- [ ] **F3-07 · CI: compilación + EditMode + auditorías en cada cambio**
+- [x] **F3-07 · CI: compilación + EditMode + auditorías en cada cambio**
   - *Ref:* `PERF-03` · *Esfuerzo:* M · *Depende:* F0-01, F3-02
   - *Criterio:* un runner aislado ejecuta build, 334+ tests, auditor de seed y test de invariantes de calendario; un fallo bloquea la integración. Sin `.asmdef`, documentar la limitación o crear la separación de assemblies.
+  - *Implementación en repo:* `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`.
+  - *Verificación local:* `UNITY_EDITOR_PATH=… bash Tools/ci_unity.sh` produjo el player Linux y pasó **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, diagnóstico de calendario y calibración de 100 temporadas.
+  - *Pendiente externo para cerrar:* registrar/configurar el runner GitHub con las etiquetas `self-hosted`, `linux`, `unity`, y marcar **Build Linux + EditMode (Unity 6000.3.15f1)** como check obligatorio de la rama. El estado remoto de runner/branch protection no puede versionarse desde este repo.
   - *Implementación en repo:* `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`.
   - *Verificación local:* `UNITY_EDITOR_PATH=… bash Tools/ci_unity.sh` produjo el player Linux y pasó **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, diagnóstico de calendario y calibración de 100 temporadas.
   - *Pendiente externo para cerrar:* registrar/configurar el runner GitHub con las etiquetas `self-hosted`, `linux`, `unity`, y marcar **Build Linux + EditMode (Unity 6000.3.15f1)** como check obligatorio de la rama. El estado remoto de runner/branch protection no puede versionarse desde este repo.
@@ -630,3 +633,4 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-25 | F1 | `F1-08` (huella seed actualizada) | `1f836296` | Tras revisar los cambios de seed incluidos en el workspace, `SeedBaseline.Fingerprint` queda en **`3d865e9cc27ba03ec901ed00db96d754aec97aa1b26bb27dd99d2cf74dfc21cb`**. Las 12 pruebas `SaveSlotInitTests` pasan con la huella y la regeneración actualizadas. |
 | 2026-10-25 | F3 | `F3-05` | `21850ef2` | Fase final acotada en Q4 (hasta 3 posesiones alternas cuando el marcador acumulado queda a 1–6) y calibración de dispersión del roster sintético (OVR base 73,36, spread 8,6); el motor logra **5,11 % OT** en 100 temporadas, junto con media 41,00 W, SD 14,02, mínimos 15,80, máximos 67,09 y r=0,928. Gate F3-05 pasa; el gate ofensivo F3-04 pasa en el diagnóstico de 5 temporadas. Las alertas globales restantes son lesiones (F3-06). 2 tests nuevos; timeout del ensayo Monte Carlo ampliado a 600 s. **EditMode 460/460**. |
 | 2026-10-25 | F3 | `F3-06` | `1f836296` | Riesgo base 0,20/36 min (conserva escalado por exposición, físico y recaída), salvaguarda de 5 sanos, roster Monte Carlo de 15 y estadísticas de duración por gravedad. En 100 temporadas: **392,65** partidos-jugador perdidos/equipo-temporada; P5/P50/P95 299/391/490; mínimo sano 5; duraciones coherentes con catálogo. Los gates globales ofensivo/resultados/lesiones pasan. **EditMode 461/461**. |
+| 2026-10-25 | F3 | `F3-07` | *(sin commitear)* | Pipeline CI: `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`. Verificación local: player Linux + **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, calendario y calibración de 100 temporadas. Pendiente externo: registrar el runner con etiqueta `unity` y exigir su check en branch protection. |
