@@ -39,6 +39,10 @@ ehthumbs.db
 Thumbs.db
 Desktop.ini
 
+# Python tooling
+__pycache__/
+*.py[cod]
+
 # Unity crash reports
 sysinfo.txt
 

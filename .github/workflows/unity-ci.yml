@@ -1,0 +1,35 @@
+name: Tactical Five CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tactical-five-unity-editor
+  cancel-in-progress: false
+
+jobs:
+  build-and-editmode:
+    name: Build Linux + EditMode (Unity 6000.3.15f1)
+    runs-on: [self-hosted, linux, unity]
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          clean: true
+
+      - name: Build y suite EditMode
+        run: bash Tools/ci_unity.sh
+
+      - name: Publicar logs, XML y build
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tacticalfive-ci-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/tacticalfive-ci-${{ github.run_id }}-${{ github.run_attempt }}/
+          if-no-files-found: warn

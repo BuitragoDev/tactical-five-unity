@@ -315,6 +315,9 @@ flowchart LR
 - [ ] **F3-07 · CI: compilación + EditMode + auditorías en cada cambio**
   - *Ref:* `PERF-03` · *Esfuerzo:* M · *Depende:* F0-01, F3-02
   - *Criterio:* un runner aislado ejecuta build, 334+ tests, auditor de seed y test de invariantes de calendario; un fallo bloquea la integración. Sin `.asmdef`, documentar la limitación o crear la separación de assemblies.
+  - *Implementación en repo:* `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`.
+  - *Verificación local:* `UNITY_EDITOR_PATH=… bash Tools/ci_unity.sh` produjo el player Linux y pasó **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, diagnóstico de calendario y calibración de 100 temporadas.
+  - *Pendiente externo para cerrar:* registrar/configurar el runner GitHub con las etiquetas `self-hosted`, `linux`, `unity`, y marcar **Build Linux + EditMode (Unity 6000.3.15f1)** como check obligatorio de la rama. El estado remoto de runner/branch protection no puede versionarse desde este repo.
 
 **Puerta de salida F3:** informe de calibración adjunto con las métricas de la tabla objetivo, y CI en verde ejecutando el banco de calibración reducido.
 
