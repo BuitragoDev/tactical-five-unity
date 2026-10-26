@@ -31,6 +31,7 @@
                     <ui:VisualElement class="standings-tabs">
                         <ui:Button name="TabEast" class="standings-tab" text="CONFERENCIA ESTE" />
                         <ui:Button name="TabWest" class="standings-tab" text="CONFERENCIA OESTE" />
+                        <ui:Button name="TabCup" class="standings-tab" text="NBA CUP" />
                     </ui:VisualElement>
 
                     <!-- Standings table -->

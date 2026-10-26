@@ -430,7 +430,8 @@ public static class GameSimulator
         var changedPlayers = new Dictionary<int, PlayerData>();
 
         // Check and update records (exclude All-Star — no records should count)
-        if (persistToDb && game.game_type != "allstar")
+        if (persistToDb && game.game_type != "allstar"
+            && game.game_type != CupHelper.PlayoffGameType)
         {
             DatabaseManager.Instance.CheckAndUpdateRecords(game, homePS, game.home_team_id);
             DatabaseManager.Instance.CheckAndUpdateRecords(game, awayPS, game.away_team_id);

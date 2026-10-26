@@ -529,9 +529,11 @@ using System.Linq;
                 type.text = g.game_type switch
                 {
                     "preseason" => "AMISTOSO",
-                    "regular" => "REGULAR",
+                    "regular" => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix)
+                        ? "NBA CUP" : "REGULAR",
                     "playin" => "PLAY-IN",
                     "playoff" => "PLAYOFF",
+                    CupHelper.PlayoffGameType => "NBA CUP",
                     GLeagueScheduleGenerator.TYPE_REGULAR => "G-LEAGUE",
                     GLeaguePostSeason.TYPE_PLAYOFF => "G-LEAGUE PLAYOFF",
                     _ => g.game_type.ToUpper()

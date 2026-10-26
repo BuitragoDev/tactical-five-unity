@@ -7,6 +7,7 @@ using System.Linq;
     protected override GameScreen ScreenId => GameScreen.Standings;
     private Button _tabEast;
     private Button _tabWest;
+    private Button _tabCup;
     private VisualElement _standingsBody;
 
     // Right panel stat cards
@@ -32,6 +33,7 @@ using System.Linq;
     {
         _tabEast = _root.Q<Button>("TabEast");
         _tabWest = _root.Q<Button>("TabWest");
+        _tabCup = _root.Q<Button>("TabCup");
         _standingsBody = _root.Q<VisualElement>("StandingsBody");
 
         _cardBestAttackLogo = _root.Q<VisualElement>("CardBestAttackLogo");
@@ -80,6 +82,7 @@ using System.Linq;
         base.RegisterCallbacks();
         _tabEast?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("East"); });
         _tabWest?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("West"); });
+        _tabCup?.RegisterCallback<ClickEvent>(_ => { PlayClick(); ShowStandings("Cup"); });
     }
     protected override void Refresh()
     {
@@ -271,9 +274,21 @@ using System.Linq;
 
         _tabEast.RemoveFromClassList("standings-tab--active");
         _tabWest.RemoveFromClassList("standings-tab--active");
+        _tabCup?.RemoveFromClassList("standings-tab--active");
 
         if (filter == "East") _tabEast.AddToClassList("standings-tab--active");
-        else _tabWest.AddToClassList("standings-tab--active");
+        else if (filter == "West") _tabWest.AddToClassList("standings-tab--active");
+        else _tabCup?.AddToClassList("standings-tab--active");
+
+        if (filter == "Cup")
+        {
+            ShowCupStandings();
+            return;
+        }
+
+        var subtitleLabel = _root.Q<Label>("StandingsSubtitle");
+        if (subtitleLabel != null)
+            subtitleLabel.text = filter == "East" ? "CONFERENCIA ESTE" : "CONFERENCIA OESTE";
 
         var filtered = _allTeams.FindAll(t => t.conference == filter);
         var standings = BuildStandings(filtered);
@@ -284,6 +299,70 @@ using System.Linq;
             var team = _allTeams.Find(t => t.id == row.teamId);
             var rowElem = CreateStandingsRow(row, team);
             _standingsBody.Add(rowElem);
+        }
+    }
+
+    void ShowCupStandings()
+    {
+        _standingsBody.Clear();
+        var subtitle = _root.Q<Label>("StandingsSubtitle");
+        if (_season == null)
+        {
+            _standingsBody.Add(new Label("NBA Cup no disponible."));
+            return;
+        }
+
+        var edition = DatabaseManager.Instance.GetCupEdition(_season.id);
+        if (edition == null)
+        {
+            if (subtitle != null) subtitle.text = "NBA CUP · AÚN NO GENERADA";
+            _standingsBody.Add(new Label("La NBA Cup se genera al crear el calendario de la temporada."));
+            return;
+        }
+
+        var standings = DatabaseManager.Instance.GetCupStandings(edition.id);
+        if (standings.Count == 0)
+        {
+            var groupGames = DatabaseManager.Instance.GetCupGames(_season.id, _manager.id)
+                .Where(g => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix))
+                .ToList();
+            standings = CupHelper.ComputeStandings(_allTeams, groupGames);
+        }
+
+        string championText = "";
+        if (edition.champion_team_id > 0)
+        {
+            var champion = _allTeams.Find(t => t.id == edition.champion_team_id);
+            championText = $" · CAMPEÓN: {champion?.name.ToUpper() ?? "???"}";
+        }
+        if (subtitle != null)
+            subtitle.text = $"NBA CUP {edition.year_start}-{edition.year_start + 1}{championText}";
+
+        foreach (var group in standings.GroupBy(s => s.group_name).OrderBy(g => g.Key))
+        {
+            var header = new Label(group.Key.ToUpper());
+            header.style.color = new StyleColor(new Color(0.83f, 0.63f, 0.09f));
+            header.style.unityFontStyleAndWeight = FontStyle.Bold;
+            header.style.fontSize = 15;
+            header.style.marginTop = 10;
+            header.style.marginBottom = 4;
+            header.style.marginLeft = 10;
+            _standingsBody.Add(header);
+
+            foreach (var row in group.OrderBy(r => r.rank))
+            {
+                var standing = new StandingRow
+                {
+                    teamId = row.team_id,
+                    rank = row.rank,
+                    wins = row.wins,
+                    losses = row.losses,
+                    pf = row.points_for,
+                    pa = row.points_against
+                };
+                var team = _allTeams.Find(t => t.id == row.team_id);
+                _standingsBody.Add(CreateStandingsRow(standing, team));
+            }
         }
     }
 

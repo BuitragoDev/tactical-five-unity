@@ -485,6 +485,9 @@ public class PreseasonController : UIScreenController
                 Debug.LogError($"[Preseason] Error generando calendario G-League: {ex.Message}");
             }
 
+            // F5-04: edición de la NBA Cup sobre los partidos de grupo ya marcados.
+            DatabaseManager.Instance.EnsureCupEdition(season, allTeams);
+
             // Marcar temporada como generada
             season.generated = 1;
             season.phase = "regular";

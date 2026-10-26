@@ -146,6 +146,20 @@ public class ScheduleGeneratorDiagnosticTests
             Assert.That(actualPairs.GetValueOrDefault(expected.Key, 0), Is.EqualTo(expected.Value),
                 $"Cruce {expected.Key.first}-{expected.Key.second}: partidos esperados");
 
+        // F5-04: 60 partidos de grupo de la Cup, 4 por equipo y 2 en casa.
+        var cupGames = games.Where(g => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix)).ToList();
+        Assert.That(cupGames, Has.Count.EqualTo(60), "NBA Cup: 60 partidos de grupo");
+        TestContext.WriteLine($"NBA Cup: {cupGames.Count} partidos de grupo; último día {cupGames.Max(g => g.game_day)}.");
+        foreach (var team in teams)
+        {
+            var ownCup = cupGames.Where(g => g.home_team_id == team.id || g.away_team_id == team.id).ToList();
+            Assert.That(ownCup, Has.Count.EqualTo(4), $"{team.abbreviation}: 4 partidos de Cup");
+            Assert.That(ownCup.Count(g => g.home_team_id == team.id), Is.EqualTo(2),
+                $"{team.abbreviation}: 2 locales de Cup");
+            Assert.That(ownCup.Count(g => g.away_team_id == team.id), Is.EqualTo(2),
+                $"{team.abbreviation}: 2 visitas de Cup");
+        }
+
         // F5-03: ningún back-to-back cruza el país sin día de descanso.
         var teamsById = teams.ToDictionary(t => t.id);
         foreach (var team in teams)
@@ -260,6 +274,87 @@ public class ScheduleGeneratorDiagnosticTests
         Assert.That(generated, Is.EqualTo(-1), "Un calendario incompleto debe fallar, no guardarse.");
         Assert.That(db.Db.Table<GameData>().Count(g => g.season_id == season.id), Is.Zero,
             "No debe quedar ningún partido guardado de una generación fallida.");
+    }
+
+    [Test]
+    public void Cup_AdvancesFromGroupsToChampion()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, "No se pudo crear el slot temporal: " + db.LastInitError);
+
+        var teams = db.GetAllTeams();
+        var season = new SeasonData
+        {
+            id = SEASON_ID + 300,
+            manager_id = MANAGER_ID,
+            year_start = 2026,
+            year_end = 2027,
+            phase = "regular",
+            current_game_day = 60,
+            current_date = "2026-12-20"
+        };
+
+        Random.State previousState = Random.state;
+        int generated;
+        try
+        {
+            Random.InitState(DIAGNOSTIC_SEED);
+            generated = ScheduleGenerator.GenerateSchedule(season, teams);
+        }
+        finally
+        {
+            Random.state = previousState;
+        }
+        Assert.That(generated, Is.EqualTo(1230));
+
+        // Sin grupos jugados no se crea eliminatoria.
+        Assert.That(CupHelper.AdvanceIfNeeded(season, teams), Is.Zero);
+        var edition = db.GetCupEdition(season.id);
+        Assert.That(edition, Is.Not.Null);
+        Assert.That(edition.status, Is.EqualTo("group"));
+
+        // Resolver los 60 partidos de grupo con marcadores sintéticos.
+        var groupGames = db.GetCupGames(season.id, MANAGER_ID)
+            .Where(g => (g.series_label ?? "").StartsWith(CupHelper.GroupLabelPrefix)).ToList();
+        Assert.That(groupGames, Has.Count.EqualTo(60));
+        foreach (var game in groupGames)
+        {
+            game.home_score = 100;
+            game.away_score = 90;
+            game.is_played = 1;
+            db.UpdateGame(game);
+        }
+
+        Assert.That(CupHelper.AdvanceIfNeeded(season, teams), Is.EqualTo(4), "cuartos de final");
+        Assert.That(db.GetCupEdition(season.id).status, Is.EqualTo("knockout"));
+
+        PlayCupRound(db, season, CupHelper.QfPrefix, homeWins: true);
+        Assert.That(CupHelper.AdvanceIfNeeded(season, teams), Is.EqualTo(2), "semifinales");
+
+        PlayCupRound(db, season, CupHelper.SfPrefix, homeWins: true);
+        Assert.That(CupHelper.AdvanceIfNeeded(season, teams), Is.EqualTo(1), "final");
+
+        PlayCupRound(db, season, CupHelper.FinalLabel, homeWins: true);
+        CupHelper.AdvanceIfNeeded(season, teams);
+
+        var finished = db.GetCupEdition(season.id);
+        Assert.That(finished.status, Is.EqualTo("finished"));
+        Assert.That(finished.champion_team_id, Is.GreaterThan(0));
+    }
+
+    static void PlayCupRound(DatabaseManager db, SeasonData season, string labelPrefix, bool homeWins)
+    {
+        var games = db.GetCupGames(season.id, season.manager_id)
+            .Where(g => (g.series_label ?? "").StartsWith(labelPrefix) && g.is_played == 0)
+            .ToList();
+        Assert.That(games, Is.Not.Empty, $"ronda {labelPrefix} sin partidos");
+        foreach (var game in games)
+        {
+            game.home_score = homeWins ? 110 : 90;
+            game.away_score = homeWins ? 90 : 110;
+            game.is_played = 1;
+            db.UpdateGame(game);
+        }
     }
 
     static string BuildReport(List<TeamData> teams, List<GameData> games, int generated)

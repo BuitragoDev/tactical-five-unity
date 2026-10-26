@@ -22,6 +22,12 @@
 - Antes de simular, el pre-lote resta al `fisico` de la plantilla el coste del viaje: tramo corto 0, medio 1, largo 2 y costa a costa 3; cada día de descanso reduce un punto (tres días lo absorben). El desgaste por minutos sigue siendo el de `GameSimulator`.
 - El Dashboard muestra en el próximo partido la distancia, los días de descanso y, si aplica, el tramo de gira (`GIRA: N partidos fuera`). MatchDay añade la misma información junto al pabellón.
 
+### NBA Cup (F5-04)
+- **Formato:** 6 grupos de 5 equipos (las 6 divisiones). Cada equipo juega **4 partidos de grupo, 2 en casa y 2 fuera**, contra los otros 4 equipos de su división. Son partidos de temporada regular que ya existen en el calendario: se marcan con `series_label="cup-group-..."` y **cuentan una sola vez** (no se duplican).
+- **Eliminatoria:** 6 campeones de grupo + 1 wildcard por conferencia (mejor segundo). Se siembra 1–8 por victorias, diferencia y puntos; cuartos `1v8, 2v7, 3v6, 4v5`, luego semifinales y final. Son partidos extra `game_type="cup_playoff"` con `series_label="cup-qf-*"`, `"cup-sf-*"` o `"cup-final"`, y **no tocan `seasons.phase`**.
+- **Datos:** `tournament_editions` (edición, estado, campeón, MVP), `tournament_groups` (pertenencia) y `tournament_standings` (W/L, puntos, diferencia, rank). `CupHelper.AdvanceIfNeeded` se ejecuta tras simular el día dentro de la transacción; cuando los 60 partidos de grupo están jugados crea los cuartos, y avanza por rondas hasta el campeón. El MVP sale del mejor `rating` de las estadísticas de la final.
+- **UI:** la pestaña **NBA CUP** de Clasificación muestra los 6 grupos, el campeón y el MVP. El calendario etiqueta los partidos de eliminatoria como `NBA CUP`.
+
 ## 2. Match simulation (core mechanic)
 
 **Script:** `GameSimulator.cs` (~1.370 ln). **Data:** `GameData`, `PlayerData` (11 attributes + `morale` + `fisico`), `LineupData` (rotation). **DTOs:** `PlayerStatSnapshot`, `TeamStats`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome`, `PossessionTally`, `PossessionState`, `GameResult`.

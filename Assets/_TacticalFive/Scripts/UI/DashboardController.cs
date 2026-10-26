@@ -1476,6 +1476,16 @@ using System.Threading.Tasks;
                 AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
             }
 
+        // F5-04: la NBA Cup avanza por datos, sin tocar `seasons.phase`.
+        try
+        {
+            CupHelper.AdvanceIfNeeded(_season, DatabaseManager.Instance.GetAllTeams());
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[Cup] Error avanzando la NBA Cup: {ex.Message}");
+        }
+
         // ── Phase transitions ──
         if (_season.phase == "regular" || _season.phase == "preseason")
         {
@@ -5217,6 +5227,7 @@ using System.Threading.Tasks;
                     Debug.LogError($"[Dashboard] Error regenerando calendario G-League: {ex.Message}");
                 }
 
+                DatabaseManager.Instance.EnsureCupEdition(_season, DatabaseManager.Instance.GetAllTeams());
                 _season.generated = 1;
                 _season.phase = "regular";
                 DatabaseManager.Instance.UpdateSeason(_season);

@@ -97,7 +97,7 @@ protected virtual void OnEnable()
 | 12 | Calendar | `Screens/Calendar` | `CalendarController` | Season schedule + SIMULAR HASTA |
 | 13 | Results | `Screens/Results` | `ResultsController` | Game results list |
 | 14 | Playoffs | `Screens/Playoffs` | `PlayoffsController` | Playoff bracket |
-| 15 | Standings | `Screens/Standings` | `StandingsController` | Conference standings |
+| 15 | Standings | `Screens/Standings` | `StandingsController` | Conference standings + pestaña NBA CUP (grupos, campeón/MVP) |
 | 16 | Stats | `Screens/Stats` | `StatsController` | League stat leaders (+ advanced analytics) |
 | 17 | Records | `Screens/Records` | `RecordsController` | Records screen |
 | 18 | Palmares | `Screens/Palmares` | `PalmaresController` | Historical palmarés + Hall of Fame panel |

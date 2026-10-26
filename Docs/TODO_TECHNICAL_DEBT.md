@@ -70,7 +70,7 @@ _(none open — see resolved B1 below)_
 
 ### B3. `DatabaseManager` is a monolith — **PARTIAL (mostly done)**
 - **Type:** refactor.
-- **Detail [F]:** the main file is now 968 ln (down from ~5,600) split into **9 partial classes** by domain: `.Teams`, `.Players`, `.Staff`, `.Manager`, `.Games`, `.Seeding` (1354 ln), `.Records` (3586 ln), `.Achievements`. `SQLite.cs` (sqlite-net wrapper) is separate.
+- **Detail [F]:** the main file is now 968 ln (down from ~5,600) split into **10 partial classes** by domain: `.Teams`, `.Players`, `.Staff`, `.Manager`, `.Games`, `.Seeding` (1354 ln), `.Records` (3586 ln), `.Achievements`, `.Cup`. `SQLite.cs` (sqlite-net wrapper) is separate.
 - **Remaining:** `DatabaseManager.Records.cs` (3586 ln) and `.Seeding.cs` (1354 ln) are still oversized; DTOs moved out to `DatabaseRows.cs`. Further split optional.
 - **Fix:** split `.Records` into record-checking vs awards vs HOF vs retired-numbers partials.
 

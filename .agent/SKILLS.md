@@ -13,10 +13,10 @@ A single-player **NBA management sim** ("Tactical Five", version and exact Unity
 | Fact | Consequence for you |
 |---|---|
 | **One scene** (`MainMenu.unity`); screens are `UIDocument` GameObjects; `ScreenManager.GoTo(GameScreen, mode)` toggles `SetActive`. | Never load scenes. Never navigate directly with `SetActive` — use `ScreenManager`. |
-| **All persistence = SQLite** via `DatabaseManager.Instance` (bundled sqlite-net + native plugin), split into 9 partials. | Never open your own connection. All data access through `DatabaseManager`. |
+| **All persistence = SQLite** via `DatabaseManager.Instance` (bundled sqlite-net + native plugin), split into 10 partials. | Never open your own connection. All data access through `DatabaseManager`. |
 | **No prefabs, no game ScriptableObjects.** | New views = UXML+USS; new content = seeders + SQLite tables. |
 | **No event bus.** Communication = DB messages (`MessageData`), static state (`GameResultCache`, `ScreenManager.*`, `AchievementService` toast queue), `PlayerPrefs` (settings), DB `schema_migrations` (data migrations), UI callbacks. | Don't invent an event system; follow existing channels. |
-| **Static utility classes** hold game logic (`GameSimulator`, `TradeHelper`, `TravelHelper`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `QuickNewsGenerator`, `AchievementService`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `MatchupPreview`, `ObjectiveHelper`, `TradeValueHelper`). | Put new rules in static helpers; keep controllers thin. |
+| **Static utility classes** hold game logic (`GameSimulator`, `TradeHelper`, `TravelHelper`, `CupHelper`, `DraftGenerator`, `ScheduleGenerator`, `PlayoffsGenerator`, `QuickNewsGenerator`, `AchievementService`, `AdvancedStatsHelper`, `FogOfWarHelper`, `HallOfFameHelper`, `MatchupPreview`, `ObjectiveHelper`, `TradeValueHelper`). | Put new rules in static helpers; keep controllers thin. |
 | Screen controllers inherit `UIScreenController` base (`Scripts/Core/UIScreenController.cs`): full-screen root → `CacheReferences()` → `LoadData()` → `RegisterCallbacks()` → `Refresh()`, plus chrome (Header/Sidebar), nav wiring, cursors and the config modal. Some boot/menu/slot controllers override `RegisterCallbacks()` **without** `base`. | Inherit the base for new screens; override only what differs. |
 | **UI built procedurally** (no `ListView`): `VisualElement` rows via `Clear()`+`Add()`. | Match this pattern for consistency. |
 | **Simulation randomness** | The game defaults to `UnityRandomSource` (a `UnityEngine.Random` adapter); `GameSimulator.SimulateGame` accepts `IRandomSource` and `SeededRandomSource` for repeatable seeded matches. Background AI batches keep their thread-static `System.Random` (`_aiRng`/`Rng`). |
@@ -29,7 +29,7 @@ A single-player **NBA management sim** ("Tactical Five", version and exact Unity
 ```
 Assets/_TacticalFive/
   Scripts/Core/     navigation, audio, cursor, base UIScreenController, generators, trade rules, enums, achievements, stats helpers
-  Scripts/Data/     DatabaseManager (9 partials), GameSaveManager, ~45 table models, seeders, Constants, DatabaseRows
+  Scripts/Data/     DatabaseManager (10 partials), GameSaveManager, ~45 table models, seeders, Constants, DatabaseRows
   Scripts/UI/       screen controllers + CustomSlider
   Scripts/(root)    GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper
   Scenes/           MainMenu.unity

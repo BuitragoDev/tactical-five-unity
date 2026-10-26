@@ -18,6 +18,7 @@ public static class NewsType
     // ── PARTIDOS / RESULTADOS ──
     public const string RESULTADO = "resultado";
     public const string GLEAGUE_CHAMPION = "gleague_champion";
+    public const string CUP_CHAMPION = "cup_champion";
     public const string ALLSTAR = "allstar";
     public const string PLANTILLA_CORTA = "plantilla_corta";
 

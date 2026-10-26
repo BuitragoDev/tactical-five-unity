@@ -226,6 +226,11 @@ public static class ScheduleGenerator
             });
         }
 
+        // F5-04: los partidos de grupo de la NBA Cup son partidos de división ya
+        // existentes; se marcan para que cuenten una sola vez en la temporada.
+        int cupGames = CupHelper.MarkGroupGames(games, teams);
+        Debug.Log($"[Schedule] NBA Cup: {cupGames} partidos de grupo marcados.");
+
         // Si el guardado falla, devolvemos -1 para que el llamador NO marque la
         // temporada como generada (de lo contrario quedaría sin partidos).
         if (!DatabaseManager.Instance.SaveRegularSeasonGames(games))
