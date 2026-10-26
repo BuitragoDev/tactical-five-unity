@@ -1144,7 +1144,10 @@ using System.Threading.Tasks;
                     var roster = conn.Table<PlayerData>().Where(p => p.team_id == team.id && p.is_on_ir == 0).ToList();
                     var standard = roster.Where(p => p.is_two_way == 0)
                         .OrderBy(p => p.GetCalculatedAverage()).ToList();
+                    // SQLite-net solo puede traducir OrderBy por columnas. GetCalculatedAverage()
+                    // es un método C#: primero materializamos y luego ordenamos en memoria.
                     var twoWay = conn.Table<PlayerData>().Where(p => p.team_id == team.id && p.is_two_way == 1)
+                        .ToList()
                         .OrderBy(p => p.GetCalculatedAverage()).ToList();
                     while (standard.Count > TradeHelper.MAX_STANDARD_ROSTER || twoWay.Count > TradeHelper.MAX_TWO_WAY)
                     {
