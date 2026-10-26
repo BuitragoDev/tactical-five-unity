@@ -401,9 +401,10 @@ public class NewSeasonController : UIScreenController
         }
 
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId);
-        if (DatabaseManager.Instance.GetRosterCount(_selectedTeamId) > TradeHelper.MAX_ROSTER)
+        if (DatabaseManager.Instance.GetRosterCount(_selectedTeamId) > TradeHelper.MAX_STANDARD_ROSTER
+            || DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId) > TradeHelper.MAX_TWO_WAY)
         {
-            OpenRosterModal(roster);
+            OpenRosterModal(roster.Where(p => p.is_on_ir == 0).ToList());
             return;
         }
         ExecuteStartSeason();
@@ -471,7 +472,13 @@ public class NewSeasonController : UIScreenController
 
     void OpenRosterModal(List<PlayerData> roster)
     {
-        _rosterPlayers = roster;
+        int standardExcess = Mathf.Max(0,
+            DatabaseManager.Instance.GetRosterCount(_selectedTeamId) - TradeHelper.MAX_STANDARD_ROSTER);
+        int twoWayExcess = Mathf.Max(0,
+            DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId) - TradeHelper.MAX_TWO_WAY);
+        _rosterPlayers = roster
+            .Where(p => p.is_two_way == 0 ? standardExcess > 0 : twoWayExcess > 0)
+            .ToList();
         _rosterActiveCount = DatabaseManager.Instance.GetRosterCount(_selectedTeamId);
 
         _rosterOverlay.Clear();
@@ -485,11 +492,11 @@ public class NewSeasonController : UIScreenController
         title.AddToClassList("ns-roster-title");
         box.Add(title);
 
-        var subtitle = new Label($"Tu plantilla tiene {_rosterActiveCount} jugadores. El máximo es {TradeHelper.MAX_ROSTER}.\nDebes rescindir contratos hasta alcanzar el límite.");
+        var subtitle = new Label($"La plantilla supera uno de sus límites. Libera contratos de la categoría excedida: estándar ({TradeHelper.MAX_STANDARD_ROSTER}) o two-way ({TradeHelper.MAX_TWO_WAY}).");
         subtitle.AddToClassList("ns-roster-subtitle");
         box.Add(subtitle);
 
-        _rosterCountLabel = new Label($"Jugadores: {_rosterActiveCount} / {TradeHelper.MAX_ROSTER}");
+        _rosterCountLabel = new Label($"Estándar: {_rosterActiveCount}/{TradeHelper.MAX_STANDARD_ROSTER} · Two-way: {DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId)}/{TradeHelper.MAX_TWO_WAY}");
         _rosterCountLabel.AddToClassList("ns-roster-count");
         box.Add(_rosterCountLabel);
 
@@ -510,21 +517,22 @@ public class NewSeasonController : UIScreenController
         grid.Add(col3);
         grid.Add(col4);
 
-        int perCol = (int)System.Math.Ceiling(roster.Count / 4f);
-        for (int i = 0; i < roster.Count; i++)
+        int perCol = (int)System.Math.Ceiling(_rosterPlayers.Count / 4f);
+        for (int i = 0; i < _rosterPlayers.Count; i++)
         {
             VisualElement target;
             if (i < perCol) target = col1;
             else if (i < perCol * 2) target = col2;
             else if (i < perCol * 3) target = col3;
             else target = col4;
-            target.Add(BuildPlayerCard(roster[i]));
+            target.Add(BuildPlayerCard(_rosterPlayers[i]));
         }
 
         _btnRosterContinue = new Button();
         _btnRosterContinue.AddToClassList("ns-roster-continue");
         _btnRosterContinue.text = "CONTINUAR A LA SIGUIENTE TEMPORADA";
-        _btnRosterContinue.SetEnabled(_rosterActiveCount <= TradeHelper.MAX_ROSTER);
+        _btnRosterContinue.SetEnabled(_rosterActiveCount <= TradeHelper.MAX_STANDARD_ROSTER
+            && DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId) <= TradeHelper.MAX_TWO_WAY);
         _btnRosterContinue.RegisterCallback<ClickEvent>(_ =>
         {
             PlayClick();
@@ -622,6 +630,8 @@ public class NewSeasonController : UIScreenController
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
         player.team_id = 0;
+        player.is_two_way = 0;
+        player.is_on_ir = 0;
         DatabaseManager.Instance.UpdatePlayer(player);
 
         var selectedTeam = DatabaseManager.Instance.GetTeamById(_selectedTeamId);
@@ -662,9 +672,11 @@ public class NewSeasonController : UIScreenController
         btn.AddToClassList("ns-roster-btn--dismissed");
 
         _rosterActiveCount = DatabaseManager.Instance.GetRosterCount(_selectedTeamId);
-        _rosterCountLabel.text = $"Jugadores: {_rosterActiveCount} / {TradeHelper.MAX_ROSTER}";
+        _rosterCountLabel.text = $"Estándar: {_rosterActiveCount}/{TradeHelper.MAX_STANDARD_ROSTER} · Two-way: {DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId)}/{TradeHelper.MAX_TWO_WAY}";
 
-        if (_rosterActiveCount <= TradeHelper.MAX_ROSTER)
+        bool withinLimits = _rosterActiveCount <= TradeHelper.MAX_STANDARD_ROSTER
+            && DatabaseManager.Instance.GetTwoWayCount(_selectedTeamId) <= TradeHelper.MAX_TWO_WAY;
+        if (withinLimits)
         {
             _btnRosterContinue.SetEnabled(true);
             CursorManager.Instance?.RegisterHandCursor(_btnRosterContinue);

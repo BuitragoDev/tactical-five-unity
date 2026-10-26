@@ -28,8 +28,8 @@ public partial class DatabaseManager
 
     /// <summary>
     /// Mueve un jugador a otro equipo en un traspaso: actualiza team_id y last_team_id
-    /// (los Bird rights viajan con el jugador, pero solo el equipo nuevo cuenta como
-    /// "su último equipo") y limpia los flags de IR/two-way/G-League/trade block.
+    /// (los Bird rights y el tipo de contrato two-way viajan con el jugador) y limpia
+    /// los flags temporales de IR/G-League/trade block.
     /// </summary>
     public void MovePlayerToTeam(PlayerData p, int newTeamId)
     {
@@ -38,7 +38,6 @@ public partial class DatabaseManager
         p.team_id = newTeamId;
         p.last_team_id = newTeamId;
         p.is_on_ir = 0;
-        p.is_two_way = 0;
         p.g_league_assigned = 0;
         p.on_trade_block = 0;
         p.waived_game_day = -1;   // ya tiene equipo: deja de ser un FA del mercado de buyout
@@ -72,19 +71,27 @@ public partial class DatabaseManager
                   .ToList();
     }
 
-    /// <summary>Jugadores que cuentan para el tope de plantilla (excluye IR).</summary>
+    /// <summary>Plazas estándar ocupadas: excluye IR y contratos two-way.</summary>
     public int GetRosterCount(int teamId)
     {
         return _db.Table<PlayerData>()
-                  .Where(p => p.team_id == teamId && p.is_on_ir == 0)
+                  .Where(p => p.team_id == teamId && p.is_on_ir == 0 && p.is_two_way == 0)
                   .Count();
     }
 
-    /// <summary>Jugadores con contrato two-way en un equipo.</summary>
+    /// <summary>Contratos two-way asignados; los lesionados conservan su plaza two-way.</summary>
     public int GetTwoWayCount(int teamId)
     {
         return _db.Table<PlayerData>()
                   .Where(p => p.team_id == teamId && p.is_two_way == 1)
+                  .Count();
+    }
+
+    /// <summary>Jugadores activos fuera de IR, sumando plazas estándar y two-way.</summary>
+    public int GetTotalRosterCount(int teamId)
+    {
+        return _db.Table<PlayerData>()
+                  .Where(p => p.team_id == teamId && p.is_on_ir == 0)
                   .Count();
     }
 

@@ -232,4 +232,62 @@ public class TradeValueHelperTests
         Assert.That(TradeValueHelper.IsSaneBothWays(TeamStrategy.Contend, aGives, null,
                                                     TeamStrategy.Rebuild, bGives, bPicks), Is.False);
     }
+
+    [Test]
+    public void CompareOfferSides_ReportsTheSameTradeWithReciprocalValues()
+    {
+        var aGives = new List<PlayerData> { P(84, 27, salary: 30_000_000L) };
+        var bGives = new List<PlayerData> { P(82, 29, salary: 27_000_000L) };
+        var aPicks = new List<DraftPickData> { Pick1(12, 2027) };
+        var bPicks = new List<DraftPickData> { Pick2(40, 2028) };
+
+        var comparison = TradeValueHelper.CompareOfferSides(
+            TeamStrategy.Balanced, aGives, aPicks,
+            TeamStrategy.Contend, bGives, bPicks,
+            salaryCap: 160_000_000L, currentDraftYear: 2026);
+
+        Assert.That(comparison.TeamA.Incoming, Is.EqualTo(comparison.TeamB.Outgoing).Within(1e-6));
+        Assert.That(comparison.TeamA.Outgoing, Is.EqualTo(comparison.TeamB.Incoming).Within(1e-6));
+        Assert.That(comparison.RecipientSane, Is.EqualTo(comparison.TeamB.Sane));
+    }
+
+    [Test]
+    public void CompareOfferSides_UsesTheNewSalaryForOwnSignAndTradeFA()
+    {
+        var signedFA = P(82, 24, salary: 0);
+        signedFA.id = 101;
+        var otherPlayer = P(82, 28, salary: 20_000_000L);
+        otherPlayer.id = 202;
+        var salaries = new Dictionary<int, long> { [signedFA.id] = 55_000_000L };
+
+        var withoutOverride = TradeValueHelper.CompareOfferSides(
+            TeamStrategy.Balanced, new List<PlayerData> { signedFA }, null,
+            TeamStrategy.Balanced, new List<PlayerData> { otherPlayer }, null,
+            salaryCap: 160_000_000L);
+        var withOverride = TradeValueHelper.CompareOfferSides(
+            TeamStrategy.Balanced, new List<PlayerData> { signedFA }, null,
+            TeamStrategy.Balanced, new List<PlayerData> { otherPlayer }, null,
+            salaryCap: 160_000_000L, teamASignSalaries: salaries);
+
+        Assert.That(withOverride.TeamB.Incoming, Is.LessThan(withoutOverride.TeamB.Incoming),
+            "el contrato nuevo debe afectar al valor del jugador firmado para S&T");
+        Assert.That(withOverride.TeamA.Outgoing, Is.EqualTo(withOverride.TeamB.Incoming).Within(1e-6));
+    }
+
+    [Test]
+    public void TeamStrategyRules_UsesRecordAndRosterSignals()
+    {
+        Assert.That(TeamStrategyRules.Classify(4, 15, new List<PlayerData>()),
+            Is.EqualTo(TeamStrategy.Contend), "los cuatro primeros son contenders");
+        Assert.That(TeamStrategyRules.Classify(8, 15, new List<PlayerData> { P(86), P(85) }),
+            Is.EqualTo(TeamStrategy.Contend), "dos estrellas también hacen contender");
+        Assert.That(TeamStrategyRules.Classify(12, 15, new List<PlayerData>()),
+            Is.EqualTo(TeamStrategy.Rebuild), "los últimos cuatro son rebuild");
+        Assert.That(TeamStrategyRules.Classify(8, 15,
+                new List<PlayerData> { P(75, 24), P(76, 26) }),
+            Is.EqualTo(TeamStrategy.Rebuild), "plantilla joven sin estrellas orienta a rebuild");
+        Assert.That(TeamStrategyRules.Classify(8, 15,
+                new List<PlayerData> { P(79, 30), P(78, 31) }),
+            Is.EqualTo(TeamStrategy.Balanced));
+    }
 }

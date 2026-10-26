@@ -110,23 +110,24 @@ public static class TradeValueHelper
     /// Ajuste por contrato, en los mismos puntos que la curva: un jugador que cobra por
     /// debajo de su valor de mercado suma (activo barato), uno sobrepagado resta.
     /// </summary>
-    public static double ContractAdjustment(PlayerData p, long cap)
+    public static double ContractAdjustment(PlayerData p, long cap, long? salaryOverride = null)
     {
-        if (p == null || p.salary <= 0) return 0;   // sin contrato (FA): no ajustamos
+        long salary = salaryOverride ?? p?.salary ?? 0;
+        if (p == null || salary <= 0) return 0;   // sin contrato (FA): no ajustamos
         if (cap <= 0) cap = TradeHelper.SALARY_CAP;
         long expected = ExpectedSalary(p.overall, cap);
         if (expected <= 0) return 0;
-        double surplusPct = (expected - p.salary) / (double)cap;
+        double surplusPct = (expected - salary) / (double)cap;
         return Math.Max(-6.0, Math.Min(10.0, surplusPct * 100.0));
     }
 
     /// <summary>Valor de traspaso de un jugador (curva × edad × potencial + contrato).</summary>
-    public static double PlayerValue(PlayerData p, long salaryCap = 0)
+    public static double PlayerValue(PlayerData p, long salaryCap = 0, long? salaryOverride = null)
     {
         if (p == null) return 0;
         if (salaryCap <= 0) salaryCap = TradeHelper.SALARY_CAP;
         double value = BaseValue(p.overall) * AgeFactor(p.age) * PotentialFactor(p);
-        value += ContractAdjustment(p, salaryCap);
+        value += ContractAdjustment(p, salaryCap, salaryOverride);
         return Math.Max(0.1, value);
     }
 
@@ -134,8 +135,11 @@ public static class TradeValueHelper
     public static double PickValue(DraftPickData pk, int currentDraftYear = 0)
         => pk == null ? 0 : TradeHelper.PickBonus(pk, currentDraftYear) * 0.8;
 
-    public static double PlayersValue(IEnumerable<PlayerData> players, long salaryCap = 0)
-        => players == null ? 0 : players.Sum(p => PlayerValue(p, salaryCap));
+    public static double PlayersValue(IEnumerable<PlayerData> players, long salaryCap = 0,
+        IReadOnlyDictionary<int, long> salaryOverrides = null)
+        => players == null ? 0 : players.Sum(p => PlayerValue(p, salaryCap,
+            salaryOverrides != null && p != null && salaryOverrides.TryGetValue(p.id, out long salary)
+                ? salary : (long?)null));
 
     public static double PicksValue(IEnumerable<DraftPickData> picks, int currentDraftYear = 0)
         => picks == null ? 0 : picks.Sum(pk => PickValue(pk, currentDraftYear));
@@ -194,6 +198,15 @@ public static class TradeValueHelper
         public double Ratio => Incoming <= 0 ? (Outgoing <= 0 ? 1.0 : double.MaxValue) : Outgoing / Incoming;
     }
 
+    /// <summary>Valoración recíproca del mismo intercambio, vista desde ambos equipos.</summary>
+    public struct OfferComparison
+    {
+        public OfferCheck TeamA;
+        public OfferCheck TeamB;
+        /// <summary>El equipo B es el receptor de la oferta en la pantalla de mercado.</summary>
+        public bool RecipientSane => TeamB.Sane;
+    }
+
     /// <summary>
     /// ¿Es razonable que `quien entrega` dé `givesPlayers` + `givesPicks` a cambio de
     /// `receivesPlayers` + `receivesPicks`? Se analiza el lado de UN equipo; para un
@@ -203,21 +216,48 @@ public static class TradeValueHelper
         TeamStrategy strategy,
         IEnumerable<PlayerData> givesPlayers, IEnumerable<DraftPickData> givesPicks,
         IEnumerable<PlayerData> receivesPlayers, IEnumerable<DraftPickData> receivesPicks,
-        long salaryCap = 0, int currentDraftYear = 0)
+        long salaryCap = 0, int currentDraftYear = 0,
+        IReadOnlyDictionary<int, long> givesSalaryOverrides = null,
+        IReadOnlyDictionary<int, long> receivesSalaryOverrides = null)
         => CheckOfferWithTolerance(Tolerance(strategy), givesPlayers, givesPicks,
-                                   receivesPlayers, receivesPicks, salaryCap, currentDraftYear);
+                                   receivesPlayers, receivesPicks, salaryCap, currentDraftYear,
+                                   givesSalaryOverrides, receivesSalaryOverrides);
+
+    /// <summary>
+    /// Valora una oferta desde ambos equipos. Team A entrega sus activos y recibe los de B;
+    /// Team B obtiene la misma oferta invertida. No valida legalidad de salarios/aprons.
+    /// </summary>
+    public static OfferComparison CompareOfferSides(
+        TeamStrategy teamAStrategy,
+        IEnumerable<PlayerData> teamAGives, IEnumerable<DraftPickData> teamAGivesPicks,
+        TeamStrategy teamBStrategy,
+        IEnumerable<PlayerData> teamBGives, IEnumerable<DraftPickData> teamBGivesPicks,
+        long salaryCap = 0, int currentDraftYear = 0,
+        IReadOnlyDictionary<int, long> teamASignSalaries = null,
+        IReadOnlyDictionary<int, long> teamBSignSalaries = null)
+        => new OfferComparison
+        {
+            TeamA = CheckOffer(teamAStrategy, teamAGives, teamAGivesPicks,
+                teamBGives, teamBGivesPicks, salaryCap, currentDraftYear,
+                teamASignSalaries, teamBSignSalaries),
+            TeamB = CheckOffer(teamBStrategy, teamBGives, teamBGivesPicks,
+                teamAGives, teamAGivesPicks, salaryCap, currentDraftYear,
+                teamBSignSalaries, teamASignSalaries)
+        };
 
     static OfferCheck CheckOfferWithTolerance(
         double tolerance,
         IEnumerable<PlayerData> givesPlayers, IEnumerable<DraftPickData> givesPicks,
         IEnumerable<PlayerData> receivesPlayers, IEnumerable<DraftPickData> receivesPicks,
-        long salaryCap, int currentDraftYear)
+        long salaryCap, int currentDraftYear,
+        IReadOnlyDictionary<int, long> givesSalaryOverrides = null,
+        IReadOnlyDictionary<int, long> receivesSalaryOverrides = null)
     {
         var gives = givesPlayers?.ToList() ?? new List<PlayerData>();
         var receives = receivesPlayers?.ToList() ?? new List<PlayerData>();
 
-        double outgoing = PlayersValue(gives, salaryCap) + PicksValue(givesPicks, currentDraftYear);
-        double incoming = PlayersValue(receives, salaryCap) + PicksValue(receivesPicks, currentDraftYear);
+        double outgoing = PlayersValue(gives, salaryCap, givesSalaryOverrides) + PicksValue(givesPicks, currentDraftYear);
+        double incoming = PlayersValue(receives, salaryCap, receivesSalaryOverrides) + PicksValue(receivesPicks, currentDraftYear);
 
         int bestOut = gives.Count > 0 ? gives.Max(p => p.overall) : 0;
         int bestIn = receives.Count > 0 ? receives.Max(p => p.overall) : 0;

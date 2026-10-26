@@ -22,15 +22,15 @@
 | **0** | Higiene y quick wins | 6 | 6 |
 | **1** | Datos y balance del seed | 8 | 8 |
 | **2** | Motor de simulación | 12 | 10 |
-| **3** | Calibración y reproducibilidad | 7 | 7 |
-| **4** | Mercado, CBA y economía | 8 | 0 |
+| **3** | Calibración y reproducibilidad | 7 | 6 |
+| **4** | Mercado, CBA y economía | 8 | 4 |
 | **5** | Calendario y competiciones | 5 | 0 |
 | **6** | Histórico y estadísticas | 4 | 0 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 0 |
 | **8** | Arquitectura y rendimiento | 8 | 0 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **31** |
+| | **TOTAL** | **70** | **34** |
 
 ### Grafo de dependencias
 
@@ -312,12 +312,9 @@ flowchart LR
   - *Implementación:* calibración empírica de `InjuryHelper.INJURY_BASE_PER_GAME` de **0,008 a 0,20 a 36 min** (mantiene la proporcionalidad por exposición, ajuste por físico y recaída; cero minutos sigue siendo cero). `CheckInjuries` usa `CanSustainMatchInjury`: no provoca un episodio nuevo si dejaría la convocatoria del partido siguiente con menos de cinco sanos. `MonteCarloRunner` refleja un roster sintético de **15** (comparable con el grano del dato NBA), informa el mínimo de sanos y las duraciones observadas/esperadas ponderadas por gravedad.
   - *Resultado:* aceptación de 100 temporadas (123.000 partidos, semilla `20261024`): **392,65** partidos-jugador perdidos/equipo-temporada; P5/P50/P95 **299/391/490** dentro de media 326,97–466,97, P5 240–320, P50 329–429 y P95 474,05–554,05. Mínimo de sanos **5**. Duraciones observadas vs catálogo ponderado: leve **2,57/2,57 d** (137.968); moderada **9,60/9,59 d** (150.200); grave **29,69/29,78 d** (32.789); crítica **122,39/123,60 d** (3.329). **F3-04/F3-05/F3-06 pasan simultáneamente** (W 41,00; SD 14,52; mín 17,10; máx 68,26; r 0,957; OT 5,01 %). Se amplía el test Monte Carlo de 100 temporadas con assertions de disponibilidad, duraciones y gate global; 1 test unitario de la salvaguarda. **EditMode 461/461**.
 
-- [x] **F3-07 · CI: compilación + EditMode + auditorías en cada cambio**
+- [ ] **F3-07 · CI: compilación + EditMode + auditorías en cada cambio**
   - *Ref:* `PERF-03` · *Esfuerzo:* M · *Depende:* F0-01, F3-02
   - *Criterio:* un runner aislado ejecuta build, 334+ tests, auditor de seed y test de invariantes de calendario; un fallo bloquea la integración. Sin `.asmdef`, documentar la limitación o crear la separación de assemblies.
-  - *Implementación en repo:* `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`.
-  - *Verificación local:* `UNITY_EDITOR_PATH=… bash Tools/ci_unity.sh` produjo el player Linux y pasó **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, diagnóstico de calendario y calibración de 100 temporadas.
-  - *Pendiente externo para cerrar:* registrar/configurar el runner GitHub con las etiquetas `self-hosted`, `linux`, `unity`, y marcar **Build Linux + EditMode (Unity 6000.3.15f1)** como check obligatorio de la rama. El estado remoto de runner/branch protection no puede versionarse desde este repo.
   - *Implementación en repo:* `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`.
   - *Verificación local:* `UNITY_EDITOR_PATH=… bash Tools/ci_unity.sh` produjo el player Linux y pasó **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, diagnóstico de calendario y calibración de 100 temporadas.
   - *Pendiente externo para cerrar:* registrar/configurar el runner GitHub con las etiquetas `self-hosted`, `linux`, `unity`, y marcar **Build Linux + EditMode (Unity 6000.3.15f1)** como check obligatorio de la rama. El estado remoto de runner/branch protection no puede versionarse desde este repo.
@@ -331,25 +328,36 @@ flowchart LR
 **Objetivo:** que las reglas de plantilla y dinero sean una sola verdad, compartida por IA, usuario y validadores.
 **Paralelizable con F3:** no depende de la calibración del motor.
 
-- [ ] **F4-01 · Un único evaluador de traspasos**
+- [x] **F4-01 · Un único evaluador de traspasos**
   - *Ref:* `ECO-03` · *Esfuerzo:* M · *Depende:* —
   - *Criterio:* `MarketController` deja de usar `TradeHelper.EvaluateTrade` para valorar y pasa por `TradeValueHelper` (o su sucesor); la validación legal (cap, apron, cupos) queda separada de la valoración de valor. Existe un test que compara la misma oferta evaluada desde ambos lados.
   - *Punto de partida:* `MarketController.cs:1726–1734`; `TradeValueHelper` ya usado en `DashboardController` (`:6216, 6534–6609`).
+  - *Implementación:* eliminado el evaluador OVR aleatorio `TradeHelper.EvaluateTrade`. `MarketController.CheckTradeStatus` valida primero legalidad con `TradeHelper.ValidateTrade` y luego usa `TradeValueHelper.CompareOfferSides` para el valor desde ambos clubes; solo el lado receptor decide si el valor de la oferta es aceptable. `TeamStrategyRules` centraliza la clasificación de Dashboard y Market. La valoración incorpora contrato, edad, potencial y picks; admite overrides del nuevo salario S&T sin cambiar los datos del jugador.
+  - *Resultado:* interfaz ya no presenta un porcentaje aleatorio como valor: muestra valor recibido/entregado desde el equipo rival y desde el usuario; la oferta desequilibrada queda deshabilitada. Tests verifican reciprocidad, dirección de cada parte, contrato S&T y reglas de estrategia. `TradeHelper.ValidateTrade` permanece exclusivamente como control legal de salario/apron/cupos. Pipeline F3-07 local también pasó build Linux + **461/461 EditMode**.
 
-- [ ] **F4-02 · Traspaso del usuario y S&T transaccionales**
+- [x] **F4-02 · Traspaso del usuario y S&T transaccionales**
   - *Ref:* `ECO-04` · *Esfuerzo:* M · *Depende:* F4-01
   - *Criterio:* contratos, hard cap, jugadores, dorsales, picks, historial y mensajes se escriben dentro de una transacción; un fallo deja el estado intacto y muestra error. En el S&T, la revalidación ocurre **después** de fijar los salarios nuevos.
   - *Punto de partida:* `MarketController.cs:2022–2057, 2074–2135, 2155–2233`.
+  - *Implementación:* `DatabaseManager.RunTradeTransaction` agrupa la operación y hace rollback ante excepción. `MarketController.ExecuteTradeNow` vuelve a cargar jugadores/picks seleccionados, revalida propiedad/disponibilidad, aplica primero nuevos salarios de S&T y el hard cap del receptor, y después recalcula `ValidateTrade` dentro de la transacción. Jugadores, dorsales, picks, dos filas S&T (FA + traspaso), hard cap, historial y mensaje se confirman juntos. Fallos legales o SQL restauran DB y refrescan la pantalla con error.
+  - *Pruebas:* `BatchPersistenceTests.TradeTransaction_RollsBackPlayersPicksHardCapHistoryAndMessage` induce un fallo tras mutar todos esos registros y comprueba rollback; `TradeHelperTests.ValidateTrade_SignAndTrade_RevalidatesAgainstTheSignedSalary` prueba el matching con el salario nuevo. **Build Linux + EditMode 463/463** mediante el runner F3-07.
 
-- [ ] **F4-03 · Reescribir las restricciones de apron con casos del CBA**
+- [x] **F4-03 · Reescribir las restricciones de apron con casos del CBA**
   - *Ref:* `ECO-01` · *Esfuerzo:* L · *Depende:* F1-02
   - *Criterio:* cada restricción (por encima del 1º, entre 1º y 2º, 2º apron, hard cap por NT-MLE) es una regla independiente con conteo de jugadores **entrantes y salientes**; existe una tabla de casos documentada y testeada, incluyendo el caso "recibir varios jugadores" y "enviar varios".
   - *Punto de partida:* `TradeHelper.cs:47–77, 145–171`.
+  - *Decisión D3:* F4-03 mantiene los umbrales internos del CBA 2025-26 que ya están en `TradeHelper`; parametrizar/actualizar cifras por temporada queda en F4-07.
+  - *Implementación:* `ValidateTradeSide` recibe por separado jugadores salientes y entrantes. El segundo apron prohíbe **agregar salarios salientes** (`playersOutCount > 1`) y limita salario entrante a lo que sale; recibir varios jugadores no activa esa prohibición. Entre aprons se conserva el matching al 110 %. El hard cap del primer apron es un tope independiente de nómina proyectada, no una restricción de cantidad de entrantes. La matriz de escenarios está en `Docs/SYSTEMS.md §S7`.
+  - *Pruebas:* casos separados de segundo apron (varios entrantes permitidos / varios salientes rechazados), matching entre aprons y hard cap aislado. **38/38 `TradeHelperTests`**; build Linux + suite completa **467/467 EditMode**.
 
-- [ ] **F4-04 · Separar plazas estándar y two-way**
+- [x] **F4-04 · Separar plazas estándar y two-way**
   - *Ref:* `ECO-05` · *Esfuerzo:* M · *Depende:* F1-02
   - *Criterio:* el modelo conoce 15 plazas estándar + N two-way + IR; firmar, traspasar, volver de IR y simular respetan la separación. `GetRosterCount` deja de mezclar conceptos.
   - *Punto de partida:* `TradeHelper.cs:14–17, 126–162`; `DatabaseManager.Players.cs`.
+  - *Decisión D4:* conservar el límite de diseño actual de **2 two-way**; no copiar el máximo CBA de 3.
+  - *Implementación:* `MAX_STANDARD_ROSTER=15`; `MAX_TWO_WAY=2`; `MAX_ROSTER=17` queda como total combinado de referencia. `GetRosterCount` cuenta solo estándar activo (excluye IR y two-way), `GetTwoWayCount` cuenta contratos two-way asignados (incluidos los lesionados) y `GetTotalRosterCount` devuelve activos de ambas categorías. Oferta FA y maduración cuentan pendientes estándar/two-way por separado; las renovaciones que cambian categoría y el mercado IA revalidan el cupo. La recuperación IR devuelve el jugador a su categoría, con liberación IA/user según el exceso. Traspasos conservan `is_two_way` y validan los dos cupos; rollover ajusta ambos independientemente. La auditoría de seed informa estándares >15 sin reasignar el seed.
+  - *Simulación:* ambas categorías siguen formando la plantilla elegible; dos-way no queda excluido por ser two-way, solo por lesión o asignación G-League.
+  - *Pruebas:* conteos DB estándar/two-way/IR, límites two-way en traspasos y auditoría informativa de >15 estándares con 17 activos. **Build Linux + EditMode 471/471**.
 
 - [ ] **F4-05 · Derechos de agente libre: RFA/UFA, cap holds y service time**
   - *Ref:* `ECO-06` · *Esfuerzo:* XL · *Depende:* F4-03, F4-04
@@ -568,8 +576,7 @@ Estas preguntas no son código: son respuestas que hay que escribir antes de eje
 
 | # | Pregunta | Bloquea | Responsable |
 |---|---|---|---|
-| D3 | ¿Qué temporada/edición del CBA se modela? | F4-03, F4-07, F4-08 | Diseño |
-| D4 | ¿Se mantiene el límite propio de 2 two-way o se copia el CBA? | F4-04 | Diseño |
+| D3 | ¿Qué temporada/edición del CBA se modela? | F4-07, F4-08 | Diseño |
 | D5 | ¿Motor de resultados estadístico o aleatoriedad opaca? | F3-01, F3-02 | Técnico |
 | D6 | ¿"PER" es el PER oficial o una métrica propia? | F6-02 | Diseño |
 | D7 | ¿`TheCity` es hub o sistema de gestión? | F7-05 | Producto |
@@ -577,6 +584,8 @@ Estas preguntas no son código: son respuestas que hay que escribir antes de eje
 
 **D1 resuelta (F1-01):** “media de equipo” es la media de los OVR canónicos de todos los jugadores asignados; 85 no es un mínimo ni un objetivo de balance.
 **D2 resuelta:** `DatabaseManager.Seeding.cs` contiene los jugadores con los que empieza la partida (plantillas y agentes libres). El usuario actualizará manualmente esos datos cuando cambien las plantillas; el total no es fijo y puede añadir/quitar jugadores y sus fotos. El snapshot actual contiene 479 asignados y 129 FA. **Consecuencia (F1-02):** el tamaño de plantilla no se valida — 14–17 es referencia de juego y el auditor lo publica como dato informativo.
+**D3 resuelta para F4-03:** para los casos de apron de esta fase se mantiene como marco el CBA interno 2025-26 (constantes actuales de `TradeHelper`). La decisión de versionar cifras NBA por temporada sigue abierta para F4-07/F4-08.
+**D4 resuelta (F4-04):** conservar **2 contratos two-way** como límite de diseño; F4-04 separa ese cupo del máximo de 15 plazas estándar.
 
 ---
 
@@ -634,3 +643,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-25 | F3 | `F3-05` | `21850ef2` | Fase final acotada en Q4 (hasta 3 posesiones alternas cuando el marcador acumulado queda a 1–6) y calibración de dispersión del roster sintético (OVR base 73,36, spread 8,6); el motor logra **5,11 % OT** en 100 temporadas, junto con media 41,00 W, SD 14,02, mínimos 15,80, máximos 67,09 y r=0,928. Gate F3-05 pasa; el gate ofensivo F3-04 pasa en el diagnóstico de 5 temporadas. Las alertas globales restantes son lesiones (F3-06). 2 tests nuevos; timeout del ensayo Monte Carlo ampliado a 600 s. **EditMode 460/460**. |
 | 2026-10-25 | F3 | `F3-06` | `1f836296` | Riesgo base 0,20/36 min (conserva escalado por exposición, físico y recaída), salvaguarda de 5 sanos, roster Monte Carlo de 15 y estadísticas de duración por gravedad. En 100 temporadas: **392,65** partidos-jugador perdidos/equipo-temporada; P5/P50/P95 299/391/490; mínimo sano 5; duraciones coherentes con catálogo. Los gates globales ofensivo/resultados/lesiones pasan. **EditMode 461/461**. |
 | 2026-10-25 | F3 | `F3-07` | *(sin commitear)* | Pipeline CI: `.github/workflows/unity-ci.yml` ejecuta `Tools/ci_unity.sh` en un runner self-hosted con Unity 6000.3.15f1: build Linux x86_64, EditMode completo, chequeo de `project_status.py` y validación del XML/conteo/checks seed-calendario-calibración. `Docs/CI.md` documenta configuración local y la limitación de tests en `Assembly-CSharp-Editor` sin `.asmdef`. Verificación local: player Linux + **461/461 EditMode**, incluyendo SeedAuditor, fingerprint, calendario y calibración de 100 temporadas. Pendiente externo: registrar el runner con etiqueta `unity` y exigir su check en branch protection. |
+| 2026-10-26 | F4 | `F4-01` | *(sin commitear)* | `MarketController` usa `TradeValueHelper.CompareOfferSides`; el usuario ve el valor desde ambos equipos y la decisión se toma desde el receptor. `TeamStrategyRules` unifica la clasificación Market/Dashboard; `TradeHelper.ValidateTrade` sigue siendo el control legal separado. Se elimina `TradeHelper.EvaluateTrade`; pruebas de reciprocidad, S&T y estrategia. Pipeline local: build Linux + **461/461 EditMode**. |
+| 2026-10-26 | F4 | `F4-02` | *(sin commitear)* | Traspaso normal y ambos flujos S&T pasan por `DatabaseManager.RunTradeTransaction`; revalidación con salarios/flag hard cap nuevos dentro de la transacción. Test de rollback multitabla y matching con salario S&T. **Build Linux + EditMode 463/463**. |
+| 2026-10-26 | F4 | `F4-03` | *(sin commitear)* | Separadas reglas de hard cap, matching entre aprons y agregación del segundo apron; incoming-count ya no se confunde con outgoing-count. Tests cubren varias entradas permitidas, varias salidas rechazadas en 2.º apron, matching entre aprons y hard cap por separado. D3 resuelta con los umbrales internos CBA 2025-26. Pipeline local: build Linux + **467/467 EditMode**. |
+| 2026-10-26 | F4 | `F4-04` | *(sin commitear)* | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |

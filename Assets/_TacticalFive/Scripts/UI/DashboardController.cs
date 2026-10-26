@@ -1087,18 +1087,27 @@ using System.Threading.Tasks;
                 {
                     if (team.id == _myTeam.id) continue;
                     var roster = conn.Table<PlayerData>().Where(p => p.team_id == team.id && p.is_on_ir == 0).ToList();
-                    if (roster.Count <= TradeHelper.MAX_ROSTER) continue;
-                    var worst = roster.OrderBy(p => p.GetCalculatedAverage()).FirstOrDefault();
-                    if (worst == null) continue;
-                    worst.team_id = 0;
-                    worst.contract_years = 0;
-                    worst.guaranteed_years = 0;
-                    worst.has_team_option = 0;
-                    worst.has_player_option = 0;
-                    worst.is_two_way = 0;
-                    worst.is_on_ir = 0;
-                    worst.g_league_assigned = 0;
-                    conn.Update(worst);
+                    var standard = roster.Where(p => p.is_two_way == 0)
+                        .OrderBy(p => p.GetCalculatedAverage()).ToList();
+                    var twoWay = conn.Table<PlayerData>().Where(p => p.team_id == team.id && p.is_two_way == 1)
+                        .OrderBy(p => p.GetCalculatedAverage()).ToList();
+                    while (standard.Count > TradeHelper.MAX_STANDARD_ROSTER || twoWay.Count > TradeHelper.MAX_TWO_WAY)
+                    {
+                        var worst = standard.Count > TradeHelper.MAX_STANDARD_ROSTER
+                            ? standard[0]
+                            : twoWay[0];
+                        if (worst.is_two_way == 1) twoWay.RemoveAt(0);
+                        else standard.RemoveAt(0);
+                        worst.team_id = 0;
+                        worst.contract_years = 0;
+                        worst.guaranteed_years = 0;
+                        worst.has_team_option = 0;
+                        worst.has_player_option = 0;
+                        worst.is_two_way = 0;
+                        worst.is_on_ir = 0;
+                        worst.g_league_assigned = 0;
+                        conn.Update(worst);
+                    }
                 }
 
                 conn.Commit();
@@ -1139,15 +1148,15 @@ using System.Threading.Tasks;
 
                 // Si un jugador del usuario sale del IR y la plantilla queda llena,
                 // se muestra un modal para que decida a quién liberar.
-                _pendingIRReleaseCount = 0;
-                foreach (int id in recoveredFromIR)
-                {
-                    if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) > TradeHelper.MAX_ROSTER)
-                    {
-                        _pendingIRReleaseIds.Add(id);
-                        _pendingIRReleaseCount++;
-                    }
-                }
+                _pendingIRReleaseIds.Clear();
+                int standardExcess = Mathf.Max(0,
+                    DatabaseManager.Instance.GetRosterCount(_myTeam.id) - TradeHelper.MAX_STANDARD_ROSTER);
+                var recoveredStandardIds = recoveredFromIR
+                    .Where(id => DatabaseManager.Instance.GetPlayerById(id)?.is_two_way != 1)
+                    .Take(standardExcess)
+                    .ToList();
+                _pendingIRReleaseIds.AddRange(recoveredStandardIds);
+                _pendingIRReleaseCount = recoveredStandardIds.Count;
             }
             catch (System.Exception ex)
             {
@@ -2645,7 +2654,6 @@ using System.Threading.Tasks;
 
         bool hasRenewal = false;
         bool hasSigning = false;
-        int batchSigningsAccepted = 0;
 
         bool batchOk = false;
         string batchErrorMsg = null;
@@ -2715,10 +2723,19 @@ using System.Threading.Tasks;
 
                 if (accepted)
                 {
-                    // Verificar límite de plantilla
+                    // Verificar por separado plazas estándar y contratos two-way.
                     var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
                     int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
-                    if (rosterCount + batchSigningsAccepted >= TradeHelper.MAX_ROSTER)
+                    bool isNewSigning = offer.offer_type == 1;
+                    bool becomesStandard = offer.is_two_way == 0
+                        && (isNewSigning || player.is_two_way == 1);
+                    bool becomesTwoWay = offer.is_two_way == 1
+                        && (isNewSigning || player.is_two_way != 1);
+                    bool noStandardSlot = becomesStandard
+                        && rosterCount >= TradeHelper.MAX_STANDARD_ROSTER;
+                    bool noTwoWaySlot = becomesTwoWay
+                        && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) >= TradeHelper.MAX_TWO_WAY;
+                    if (noStandardSlot || noTwoWaySlot)
                     {
                         rejectedCount++;
                         player.renewal_cooldown_day = _season.current_game_day + 14;
@@ -2732,7 +2749,9 @@ using System.Threading.Tasks;
                             sender_type = 1,
                             sender_id = 0,
                             title = $"Fichaje rechazado: {playerName}",
-                            body = NewsTexts.FichajeRechazado(playerName, _myTeam.name, $"la plantilla está completa ({TradeHelper.MAX_ROSTER} jugadores)"),
+                            body = NewsTexts.FichajeRechazado(playerName, _myTeam.name,
+                                noTwoWaySlot ? $"las plazas two-way están completas ({TradeHelper.MAX_TWO_WAY})"
+                                : $"las plazas estándar están completas ({TradeHelper.MAX_STANDARD_ROSTER})"),
                             game_day = _season.current_game_day,
                             game_date = nowStr,
                             created_at = nowStr,
@@ -2764,7 +2783,9 @@ using System.Threading.Tasks;
                         {
                             // El límite de 2 two-way se valida en la maduración: la UI
                             // solo lo comprueba al abrir la oferta y se podían colar.
-                            offerLegal = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY
+                            int currentTwoWayCount = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id);
+                            int existingTwoWay = player.team_id == _myTeam.id && player.is_two_way == 1 ? 1 : 0;
+                            offerLegal = currentTwoWayCount - existingTwoWay < TradeHelper.MAX_TWO_WAY
                                       && TradeHelper.IsEligibleForTwoWay(player);
                             illegalReason = "ya tienes 2 contratos two-way (o el jugador no es elegible)";
                         }
@@ -2832,7 +2853,6 @@ using System.Threading.Tasks;
                     }
 
                     acceptedCount++;
-                    batchSigningsAccepted++;
                     player.team_id = _myTeam.id;
                     player.last_team_id = _myTeam.id;
                     player.salary = offer.offer_salary;
@@ -3191,7 +3211,7 @@ using System.Threading.Tasks;
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         string playerName = $"{player.first_name} {player.last_name}";
 
-        if (!isRenewal && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER)
+        if (!isRenewal && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_STANDARD_ROSTER)
         {
             DatabaseManager.Instance.AddMessage(new MessageData
             {
@@ -3199,7 +3219,7 @@ using System.Threading.Tasks;
                 sender_type = 0,
                 sender_id = 0,
                 title = "Plantilla completa",
-                body = $"No se pudo fichar a {playerName}: la plantilla está al máximo ({TradeHelper.MAX_ROSTER}).",
+                body = $"No se pudo fichar a {playerName}: las plazas estándar están al máximo ({TradeHelper.MAX_STANDARD_ROSTER}).",
                 game_day = _season.current_game_day,
                 game_date = _season.current_date,
                 created_at = now,
@@ -4339,7 +4359,7 @@ using System.Threading.Tasks;
             return;
         }
         _pendingIRReleaseIds.Clear();
-        if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) <= TradeHelper.MAX_ROSTER)
+        if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) <= TradeHelper.MAX_STANDARD_ROSTER)
         {
             _pendingIRReleaseCount = 0;
             _irReleaseModalResolved = true;
@@ -4369,14 +4389,14 @@ using System.Threading.Tasks;
         var body = new VisualElement();
         body.AddToClassList("fired-modal-body");
 
-        var text = new Label("Un jugador en la reserva de lesionados (IR) se ha recuperado y su plaza vuelve a contar. Tu plantilla supera el m\u00e1ximo de " + TradeHelper.MAX_ROSTER + " jugadores: debes liberar a alguien (buyout).");
+        var text = new Label("Un jugador de plaza estándar en la reserva de lesionados (IR) se ha recuperado. Tu plantilla supera el máximo de " + TradeHelper.MAX_STANDARD_ROSTER + " plazas estándar: debes liberar a alguien (buyout).");
         text.AddToClassList("fired-modal-text");
         body.Add(text);
 
         var list = new VisualElement();
         list.AddToClassList("injured-modal-list");
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id)
-            .Where(p => p.is_on_ir == 0)
+            .Where(p => p.is_on_ir == 0 && p.is_two_way == 0)
             .OrderByDescending(p => p.GetCalculatedAverage())
             .ToList();
         foreach (var p in players)
@@ -4475,7 +4495,7 @@ using System.Threading.Tasks;
         });
 
         _pendingIRReleaseCount--;
-        if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) <= TradeHelper.MAX_ROSTER || _pendingIRReleaseCount <= 0)
+        if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) <= TradeHelper.MAX_STANDARD_ROSTER || _pendingIRReleaseCount <= 0)
         {
             _firedOverlay.style.display = DisplayStyle.None;
             _irReleaseModalResolved = true;
@@ -5303,23 +5323,7 @@ using System.Threading.Tasks;
     TeamStrategy GetTeamStrategy(TeamData team, List<StandingRow> confStandings, List<PlayerData> roster)
     {
         var row = confStandings?.FirstOrDefault(s => s.teamId == team.id);
-        int rank = row?.rank ?? 0;
-        int confSize = confStandings?.Count ?? 0;
-
-        var stars = roster.Count(p => p.overall >= 85);
-        float avgAge = roster.Count > 0 ? (float)roster.Average(p => p.age) : 30f;
-
-        // Contender: top 4 de su conferencia o plantilla con 2+ estrellas (OVR >= 85)
-        bool byRecord = rank > 0 && rank <= 4;
-        bool byRoster = stars >= 2;
-        if (byRecord || byRoster) return TeamStrategy.Contend;
-
-        // Rebuild: últimos 4 de su conferencia o plantilla joven sin estrellas (OVR >= 80)
-        bool weakRecord = rank > 0 && rank >= confSize - 3;
-        bool youngNoStars = avgAge <= 27f && stars == 0 && roster.Count(p => p.overall >= 80) <= 1;
-        if (weakRecord || youngNoStars) return TeamStrategy.Rebuild;
-
-        return TeamStrategy.Balanced;
+        return TeamStrategyRules.Classify(row?.rank ?? 0, confStandings?.Count ?? 0, roster);
     }
 
     // Precalcula la estrategia de todos los equipos una vez por ciclo de traspaso.
@@ -5598,7 +5602,7 @@ using System.Threading.Tasks;
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(t.id);
                 long payroll = roster.Sum(x => x.salary);
-                bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_ROSTER
+                bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_STANDARD_ROSTER
                             && TradeHelper.CanAISignExternal(payroll, minSalary, settings);
 
                 candidates.Add(new BuyoutCandidate
@@ -5697,7 +5701,7 @@ using System.Threading.Tasks;
 
             var team = DatabaseManager.Instance.GetTeamById(p.last_team_id);
             if (team == null) continue;
-            if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_ROSTER) continue;
+            if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_STANDARD_ROSTER) continue;
             if (CalculateTeamRenewalScore(p, team, cap) < 50f) continue;
 
             var offer = CalculateAIRenewalOffer(p, team, cap);
@@ -5806,7 +5810,7 @@ using System.Threading.Tasks;
             foreach (var team in teamsByPriority)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-                if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_ROSTER) continue;
+                if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_STANDARD_ROSTER) continue;
 
                 // Un equipo en reconstrucción no ficha estrellas top (tankea para el draft)
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
@@ -6331,12 +6335,17 @@ using System.Threading.Tasks;
         long luxuryTax = leagueSettings?.luxury_tax > 0 ? leagueSettings.luxury_tax : TradeHelper.LUXURY_TAX;
         var errors = TradeHelper.ValidateTrade(
             aSelected, bSelected,
-            rosterA.Count, rosterB.Count,
+            DatabaseManager.Instance.GetRosterCount(teamA.id),
+            DatabaseManager.Instance.GetRosterCount(teamB.id),
             teamB.name, bPayroll,
             teamA.name, aPayroll,
             teamA.first_apron_hard_capped == 1,
             teamB.first_apron_hard_capped == 1,
-            firstApron, secondApron, luxuryTax);
+            firstApron, secondApron, luxuryTax,
+            teamATwoWayCount: DatabaseManager.Instance.GetTwoWayCount(teamA.id),
+            teamBTwoWayCount: DatabaseManager.Instance.GetTwoWayCount(teamB.id),
+            teamATotalActiveRoster: DatabaseManager.Instance.GetTotalRosterCount(teamA.id),
+            teamBTotalActiveRoster: DatabaseManager.Instance.GetTotalRosterCount(teamB.id));
 
         if (errors.Count > 0) return false;
 
@@ -6345,7 +6354,6 @@ using System.Threading.Tasks;
             p.team_id = teamB.id;
             p.g_league_assigned = 0;
             p.is_on_ir = 0;
-            p.is_two_way = 0;
             p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
             DatabaseManager.Instance.InsertTrade(new TradeData
@@ -6366,7 +6374,6 @@ using System.Threading.Tasks;
             p.team_id = teamA.id;
             p.g_league_assigned = 0;
             p.is_on_ir = 0;
-            p.is_two_way = 0;
             p.on_trade_block = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
             DatabaseManager.Instance.InsertTrade(new TradeData
@@ -6448,7 +6455,7 @@ using System.Threading.Tasks;
     {
         int rosterCount = DatabaseManager.Instance.GetRosterCount(team.id);
         int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(team.id);
-        if (rosterCount >= TradeHelper.MAX_ROSTER && twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
+        if (rosterCount >= TradeHelper.MAX_STANDARD_ROSTER && twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long aiPayroll = roster.Sum(p => p.salary);
@@ -6472,8 +6479,8 @@ using System.Threading.Tasks;
 
         foreach (var player in candidates)
         {
-            // Si la plantilla está llena solo se puede fichar con un contrato two-way
-            bool signAsTwoWay = rosterCount >= TradeHelper.MAX_ROSTER;
+            // Al completar las 15 plazas estándar, la IA solo puede usar plazas two-way.
+            bool signAsTwoWay = rosterCount >= TradeHelper.MAX_STANDARD_ROSTER;
             if (signAsTwoWay)
             {
                 if (twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
@@ -6568,8 +6575,7 @@ using System.Threading.Tasks;
             if (aiRoster.Count < 11) continue;
 
             var userRoster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-            int userRosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
-            if (userRoster.Count < 10 || userRosterCount >= TradeHelper.MAX_ROSTER) continue;
+            if (DatabaseManager.Instance.GetTotalRosterCount(_myTeam.id) < 10) continue;
 
             var userHealthy = userRoster.Where(p => p.injury_days == 0).ToList();
             if (userHealthy.Count == 0) continue;
@@ -6864,8 +6870,13 @@ using System.Threading.Tasks;
 
         bool CapOk(List<PlayerData> pack) =>
             TradeHelper.ValidateTrade(pack, new List<PlayerData> { target },
-                aiRosterCount, userRoster.Count, _myTeam.name, userPayroll,
-                aiTeam.name, aiPayroll, aiHardCapped, userHardCapped).Count == 0;
+                DatabaseManager.Instance.GetRosterCount(aiTeam.id),
+                DatabaseManager.Instance.GetRosterCount(_myTeam.id), _myTeam.name, userPayroll,
+                aiTeam.name, aiPayroll, aiHardCapped, userHardCapped,
+                teamATwoWayCount: DatabaseManager.Instance.GetTwoWayCount(aiTeam.id),
+                teamBTwoWayCount: DatabaseManager.Instance.GetTwoWayCount(_myTeam.id),
+                teamATotalActiveRoster: DatabaseManager.Instance.GetTotalRosterCount(aiTeam.id),
+                teamBTotalActiveRoster: DatabaseManager.Instance.GetTotalRosterCount(_myTeam.id)).Count == 0;
 
         // 1-por-1: el valor más parecido al del objetivo (antes se ordenaba por salario,
         // que no dice nada del talento), y nunca por encima de lo que la estrategia tolera.
@@ -7046,7 +7057,11 @@ using System.Threading.Tasks;
             _myTeam.first_apron_hard_capped == 1,
             firstApronChk, secondApronChk, luxuryTaxChk,
             null,
-            signSalaries.Count > 0 ? signSalaries : null);
+            signSalaries.Count > 0 ? signSalaries : null,
+            teamATwoWayCount: DatabaseManager.Instance.GetTwoWayCount(offer.team_id_from),
+            teamBTwoWayCount: DatabaseManager.Instance.GetTwoWayCount(_myTeam.id),
+            teamATotalActiveRoster: DatabaseManager.Instance.GetTotalRosterCount(offer.team_id_from),
+            teamBTotalActiveRoster: DatabaseManager.Instance.GetTotalRosterCount(_myTeam.id));
     }
 
     void ShowTradeOfferModal(TradeOfferData offer, List<PlayerData> ourPlayers, List<PlayerData> theirPlayers,

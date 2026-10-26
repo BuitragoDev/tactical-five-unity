@@ -140,7 +140,7 @@ public static class SeedAudit
             sb.AppendLine($"Datos auditados: {TeamCount} equipos · {PlayerCount} jugadores · {ProspectCount} prospectos G-League.");
             sb.AppendLine($"Seed NBA: {AssignedPlayerCount} asignados ({StandardPlayerCount} estándar + {TwoWayPlayerCount} two-way) · {FreeAgentCount} agentes libres.");
             sb.AppendLine($"Atributos <{PlayerAttributeScale.LOW_VALUE_INFO_THRESHOLD}: {LowAttributeCount} (válidos; solo informativo).");
-            sb.AppendLine($"Plantillas fuera de {MIN_ROSTER_ACTIVE}-{TradeHelper.MAX_ROSTER}: {RosterOutOfRangeCount} " +
+            sb.AppendLine($"Plantillas fuera del rango activo {MIN_ROSTER_ACTIVE}-{TradeHelper.MAX_ROSTER} o con más de {TradeHelper.MAX_STANDARD_ROSTER} plazas estándar: {RosterOutOfRangeCount} " +
                           "(informativo; el seed de plantillas lo mantiene el usuario).");
             sb.AppendLine($"Resultado: {Errors} errores · {Warnings} avisos · {Findings.Count} hallazgos.");
             sb.AppendLine("Plantillas: " + string.Join(" · ", RosterSummaries));
@@ -367,11 +367,12 @@ public static class SeedAudit
             // El tamaño de plantilla NO se impone: el seed de plantillas lo mantiene el
             // usuario a mano y 14-17 es solo la referencia de juego. Se publica como dato
             // (RosterOutOfRange) para que el desvío no pase desapercibido.
-            if (activeCount < MIN_ROSTER_ACTIVE || activeCount > TradeHelper.MAX_ROSTER)
+            if (activeCount < MIN_ROSTER_ACTIVE || activeCount > TradeHelper.MAX_ROSTER
+                || standardCount > TradeHelper.MAX_STANDARD_ROSTER)
             {
                 r.RosterOutOfRangeCount++;
                 r.RosterOutOfRange.Add(
-                    $"{t.abbreviation}: {activeCount} activos ({standardCount} estándar + {activeTwoWay} two-way; {irCount} IR fuera)");
+                    $"{t.abbreviation}: {activeCount} activos ({standardCount}/{TradeHelper.MAX_STANDARD_ROSTER} estándar + {activeTwoWay}/{TradeHelper.MAX_TWO_WAY} two-way; {irCount} IR fuera)");
             }
 
             int twoWay = roster.Count(p => p.is_two_way == 1);

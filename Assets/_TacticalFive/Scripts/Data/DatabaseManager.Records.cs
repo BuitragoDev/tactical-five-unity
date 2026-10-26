@@ -2926,10 +2926,12 @@ public partial class DatabaseManager
         return all.Where(o => o.processed == 0 && currentDay >= o.day_sent + 7).ToList();
     }
 
-    public int GetPendingFAOfferCount(int managerId)
+    public int GetPendingFAOfferCount(int managerId, bool twoWay = false)
     {
         if (!EnsureDb()) return 0;
-        return _db.Table<OfferData>().Count(o => o.manager_id == managerId && o.offer_type == 1 && o.processed == 0);
+        int twoWayFlag = twoWay ? 1 : 0;
+        return _db.Table<OfferData>().Count(o => o.manager_id == managerId
+            && o.offer_type == 1 && o.processed == 0 && o.is_two_way == twoWayFlag);
     }
 
     public HashSet<int> GetPendingFAPlayerIds(int managerId)
@@ -2989,6 +2991,20 @@ public partial class DatabaseManager
     }
 
     // ── TRADES ─────────────────────────────────────────────
+
+    /// <summary>
+    /// Agrupa toda una operación de traspaso (contratos, hard cap, jugadores, picks,
+    /// historial y mensaje) en una transacción indivisible.
+    /// </summary>
+    public void RunTradeTransaction(Action operation)
+    {
+        if (!EnsureDb()) throw new InvalidOperationException("No hay una partida abierta para ejecutar el traspaso.");
+        if (operation == null) throw new ArgumentNullException(nameof(operation));
+        if (_db.IsInTransaction)
+            throw new InvalidOperationException("No se puede iniciar un traspaso dentro de otra transacción.");
+
+        _db.RunInTransaction(operation);
+    }
 
     public void InsertTrade(TradeData trade)
     {
@@ -3463,7 +3479,7 @@ public partial class DatabaseManager
         AdvanceGLeagueLifecycle();
 
         // 5b. Trim AI teams to max 17
-        TrimRostersToMaxSize(17, newTeamId);
+        TrimRostersToMaxSize(TradeHelper.MAX_STANDARD_ROSTER, newTeamId);
 
         // 6. Fill rosters to 15 for all teams (except the user's new team)
         var allTeams = GetAllTeams();
@@ -3700,14 +3716,29 @@ public partial class DatabaseManager
         {
             if (team.id == excludeTeamId) continue;
             var roster = GetPlayersByTeam(team.id);
-            int rosterCount = GetRosterCount(team.id);
-            if (rosterCount <= maxSize) continue;
-
-            var sorted = roster.OrderBy(p => p.GetCalculatedAverage()).ToList();
-            int excess = rosterCount - maxSize;
+            var standard = roster.Where(p => p.is_two_way == 0 && p.is_on_ir == 0)
+                .OrderBy(p => p.GetCalculatedAverage()).ToList();
+            int excess = Mathf.Max(0, standard.Count - maxSize);
             for (int i = 0; i < excess; i++)
             {
-                var p = sorted[i];
+                var p = standard[i];
+                p.team_id = 0;
+                p.contract_years = 0;
+                p.guaranteed_years = 0;
+                p.has_team_option = 0;
+                p.has_player_option = 0;
+                p.is_two_way = 0;
+                p.is_on_ir = 0;
+                p.g_league_assigned = 0;
+                _db.Update(p);
+            }
+
+            var twoWay = roster.Where(p => p.is_two_way == 1)
+                .OrderBy(p => p.GetCalculatedAverage()).ToList();
+            excess = Mathf.Max(0, twoWay.Count - TradeHelper.MAX_TWO_WAY);
+            for (int i = 0; i < excess; i++)
+            {
+                var p = twoWay[i];
                 p.team_id = 0;
                 p.contract_years = 0;
                 p.guaranteed_years = 0;

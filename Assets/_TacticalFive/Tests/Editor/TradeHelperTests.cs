@@ -116,7 +116,7 @@ public class TradeHelperTests
     {
         var b = new List<PlayerData> { Player(10_000_000), Player(10_000_000), Player(10_000_000) };
         var errors = TradeHelper.ValidateTrade(new List<PlayerData>(), b, 15, 15, "Bulls", 100_000_000L, "Lakers", 100_000_000L);
-        Assert.That(errors, Has.Some.Contains("máximo 17"));
+        Assert.That(errors, Has.Some.Contains("máximo 15"));
     }
 
     [Test]
@@ -126,18 +126,102 @@ public class TradeHelperTests
         // un 2x1 dejaría al equipo que acepta con 18 jugadores.
         var aiSent = new List<PlayerData> { Player(10_000_000), Player(8_000_000) };
         var ourSent = new List<PlayerData> { Player(10_000_000) };
-        var errors = TradeHelper.ValidateTrade(aiSent, ourSent, 15, 17, "Nosotros", 100_000_000L, "IA", 100_000_000L);
-        Assert.That(errors, Has.Some.Contains("máximo 17"));
+        var errors = TradeHelper.ValidateTrade(aiSent, ourSent, 12, 15, "Nosotros", 100_000_000L, "IA", 100_000_000L,
+            teamBTwoWayCount: 2);
+        Assert.That(errors, Has.Some.Contains("máximo 15"));
     }
 
     [Test]
-    public void ValidateTrade_HardCappedSecondApron_RejectsMultiplePlayersAndSalaryGain()
+    public void ValidateTrade_TwoWayIncomingUsesSeparateLimitAndDoesNotConsumeStandardSlot()
+    {
+        var standardOut = new List<PlayerData> { Player(TradeHelper.TWO_WAY_SALARY) };
+        var twoWayIn = new List<PlayerData> { new PlayerData { salary = TradeHelper.TWO_WAY_SALARY, is_two_way = 1 } };
+
+        var errors = TradeHelper.ValidateTrade(standardOut, twoWayIn,
+            15, 12, "Equipo con plazas completas", 100_000_000L, "Rival", 100_000_000L,
+            teamATwoWayCount: 1, teamBTwoWayCount: 1);
+
+        Assert.That(errors, Is.Empty,
+            "el jugador estándar saliente libera esa plaza y el entrante two-way consume solo el cupo two-way");
+    }
+
+    [Test]
+    public void ValidateTrade_TwoWayLimitRejectsThirdContractEvenWithStandardRoom()
+    {
+        var twoWayIn = new List<PlayerData> { new PlayerData { salary = TradeHelper.TWO_WAY_SALARY, is_two_way = 1 } };
+
+        var errors = TradeHelper.ValidateTrade(new List<PlayerData>(), twoWayIn,
+            10, 10, "Equipo A", 100_000_000L, "Equipo B", 100_000_000L,
+            teamATwoWayCount: TradeHelper.MAX_TWO_WAY, teamBTwoWayCount: 1);
+
+        Assert.That(errors, Has.Some.Contains("contratos two-way (máximo 2)"));
+    }
+
+    [Test]
+    public void ValidateTrade_HardCap_RejectsExceedingFirstApronAndSalaryGain()
     {
         var a = new List<PlayerData> { Player(10_000_000), Player(10_000_000) };
         var b = new List<PlayerData> { Player(5_000_000) };
-        var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", 250_000_000L, "Lakers", 100_000_000L, false, true);
-        Assert.That(errors, Has.Some.Contains("múltiples jugadores"));
+        long payrollBelowApron = TradeHelper.FIRST_APRON - 5_000_000L;
+        var errors = TradeHelper.ValidateTrade(a, b, 12, 12, "Bulls", payrollBelowApron, "Lakers", 100_000_000L, false, true);
+        Assert.That(errors, Has.Some.Contains("hard cap del primer apron"));
         Assert.That(errors, Has.Some.Contains($"${5_000_000:N0}"));
+        Assert.That(errors, Has.None.Contains("agregar salarios"),
+            "el hard cap no convierte el conteo de jugadores entrantes en una regla de agregación del segundo apron");
+    }
+
+    [Test]
+    public void ValidateTrade_SecondApron_AllowsReceivingSeveralForOneOutgoing()
+    {
+        var teamASends = new List<PlayerData> { Player(5_000_000), Player(5_000_000) };
+        var teamBSends = new List<PlayerData> { Player(10_000_000) };
+
+        var errors = TradeHelper.ValidateTrade(teamASends, teamBSends,
+            12, 12, "Segundo apron", 250_000_000L, "Equipo A", 100_000_000L);
+
+        Assert.That(errors, Is.Empty,
+            "se permiten varios jugadores entrantes si el equipo del segundo apron no agrega salarios salientes");
+    }
+
+    [Test]
+    public void ValidateTrade_SecondApron_RejectsAggregatingSeveralOutgoingForOneIncoming()
+    {
+        var teamASends = new List<PlayerData> { Player(20_000_000) };
+        var teamBSends = new List<PlayerData> { Player(10_000_000), Player(10_000_000) };
+
+        var errors = TradeHelper.ValidateTrade(teamASends, teamBSends,
+            12, 12, "Segundo apron", 250_000_000L, "Equipo A", 100_000_000L);
+
+        Assert.That(errors, Has.Some.Contains("agregar salarios de 2 jugadores salientes para recibir 1"));
+        Assert.That(errors, Does.Not.Contain("no puede recibir múltiples"));
+    }
+
+    [Test]
+    public void ValidateTrade_BetweenAprons_AllowsMultipleOutgoingWhenMatchingFits()
+    {
+        var teamASends = new List<PlayerData> { Player(20_000_000) };
+        var teamBSends = new List<PlayerData> { Player(10_000_000), Player(10_000_000) };
+        long payroll = TradeHelper.FIRST_APRON + 1_000_000;
+
+        var errors = TradeHelper.ValidateTrade(teamASends, teamBSends,
+            12, 12, "Entre aprons", payroll, "Equipo A", 100_000_000L);
+
+        Assert.That(errors, Is.Empty,
+            "la regla de agregación del segundo apron no se aplica a un equipo entre aprons");
+    }
+
+    [Test]
+    public void ValidateTrade_HardCapped_AllowsSeveralIncomingWithinTheApron()
+    {
+        var teamASends = new List<PlayerData> { Player(5_000_000), Player(5_000_000) };
+        var teamBSends = new List<PlayerData> { Player(10_000_000) };
+
+        var errors = TradeHelper.ValidateTrade(teamASends, teamBSends,
+            12, 12, "Hard cap", 100_000_000L, "Equipo A", 100_000_000L,
+            teamBHardCapped: true);
+
+        Assert.That(errors, Is.Empty,
+            "el hard cap impone el límite de nómina proyectada, no una prohibición de varios entrantes");
     }
 
     [Test]
@@ -202,26 +286,6 @@ public class TradeHelperTests
     }
 
     [Test]
-    public void EvaluateTrade_ScoreClampedAndConsistentWithThreshold()
-    {
-        var a = new List<PlayerData> { Player(10_000_000, 80, 24), Player(5_000_000, 82, 26) };
-        var b = new List<PlayerData> { Player(20_000_000, 90, 28) };
-        var result = TradeHelper.EvaluateTrade(a, b, "Bulls", 12, 100_000_000L);
-        Assert.That(result.AcceptScore, Is.InRange(0, 100));
-        Assert.That(result.Threshold, Is.EqualTo(50));
-        Assert.That(result.WouldAccept, Is.EqualTo(result.AcceptScore >= result.Threshold));
-    }
-
-    [Test]
-    public void EvaluateTrade_SecondApron_LowersThreshold()
-    {
-        var a = new List<PlayerData> { Player(10_000_000, 80, 24) };
-        var b = new List<PlayerData> { Player(5_000_000, 90, 28) };
-        var result = TradeHelper.EvaluateTrade(a, b, "Bulls", 12, 250_000_000L);
-        Assert.That(result.Threshold, Is.EqualTo(40));
-    }
-
-    [Test]
     public void ValidateTrade_SignAndTrade_UsingNewSignedSalary()
     {
         // FA propio firmado a 25M (teamA envia solo el FA via S&T) contra 25M de B.
@@ -234,6 +298,24 @@ public class TradeHelperTests
             false, false, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
         // A envia 25M (firmado) por 25M -> matching correcto en ambos lados.
         Assert.That(errors, Is.Empty);
+    }
+
+    [Test]
+    public void ValidateTrade_SignAndTrade_RevalidatesAgainstTheSignedSalary()
+    {
+        var ownFA = new List<PlayerData> { Player(8_000_000, 85, 26) };
+        var otherPlayer = new List<PlayerData> { Player(15_000_000, 78, 27) };
+        var newSalary = new Dictionary<int, long> { [ownFA[0].id] = 25_000_000L };
+
+        var beforeSigning = TradeHelper.ValidateTrade(ownFA, otherPlayer, 12, 12,
+            "Bulls", 100_000_000L, "Lakers", 100_000_000L);
+        var afterSigning = TradeHelper.ValidateTrade(ownFA, otherPlayer, 12, 12,
+            "Bulls", 100_000_000L, "Lakers", 100_000_000L,
+            teamASignSalaries: newSalary);
+
+        Assert.That(beforeSigning, Is.Empty, "el salario FA previo cabe en el matching");
+        Assert.That(afterSigning, Has.Some.Contains("Bulls no puede recibir más de"),
+            "la revalidación debe usar los 25M del nuevo contrato, no los 8M del FA");
     }
 
     [Test]
@@ -250,17 +332,6 @@ public class TradeHelperTests
         // Sin error de roster (el FA no resta del equipo que firma).
         Assert.That(errors, Does.Not.Contain("mínimo 10"));
         Assert.That(errors, Does.Not.Contain("máximo 17"));
-    }
-
-    [Test]
-    public void EvaluateTrade_SignAndTrade_UsesNewSalaryForMatching()
-    {
-        var a = new List<PlayerData> { Player(8_000_000, 85, 26) };
-        var b = new List<PlayerData> { Player(15_000_000, 80, 27) };
-        var sign = new Dictionary<int, long> { [a[0].id] = 25_000_000L };
-        var result = TradeHelper.EvaluateTrade(a, b, "Bulls", 12, 100_000_000L,
-            null, null, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, sign);
-        Assert.That(result.AcceptScore, Is.InRange(0, 100));
     }
 
     // ── Fase 3: modelo de cap para la IA (ECO-06) ────────────────

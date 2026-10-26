@@ -415,7 +415,7 @@ using System.Linq;
     void RefreshSummary()
     {
         int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
-        _summaryPlayers.text = $"{rosterCount}/{TradeHelper.MAX_ROSTER}";
+        _summaryPlayers.text = $"{rosterCount}/{TradeHelper.MAX_STANDARD_ROSTER}";
         int avgOverall = _players.Count > 0
             ? (int)_players.Average(p => p.GetCalculatedAverage()) : 0;
         _summaryOverall.text = avgOverall.ToString();
@@ -990,11 +990,13 @@ using System.Linq;
         _renewYears = CalculateAutoYears(_selectedPlayer.age);
         _teamOptionActive = false;
         _playerOptionActive = false;
-        _renewTwoWayActive = false;
+        _renewTwoWayActive = _selectedPlayer.is_two_way == 1
+            && TradeHelper.IsEligibleForTwoWay(_selectedPlayer);
 
         // Contrato two-way: solo jugadores jóvenes (≤23) y si quedan plazas
         bool renewTwoWayEligible = TradeHelper.IsEligibleForTwoWay(_selectedPlayer)
-            && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) < TradeHelper.MAX_TWO_WAY;
+            && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id)
+                - (_selectedPlayer.is_two_way == 1 ? 1 : 0) < TradeHelper.MAX_TWO_WAY;
         if (_renewFormRowTwoWay != null)
             _renewFormRowTwoWay.style.display = renewTwoWayEligible ? DisplayStyle.Flex : DisplayStyle.None;
         if (_renewTwoWayToggle != null)
@@ -1245,6 +1247,27 @@ using System.Linq;
     void SendOffer()
     {
         if (_selectedPlayer == null || _offerSent) return;
+
+        if (_renewTwoWayActive && _selectedPlayer.is_two_way != 1
+            && DatabaseManager.Instance.GetTwoWayCount(_myTeam.id) >= TradeHelper.MAX_TWO_WAY)
+        {
+            if (_renewWarningText != null)
+            {
+                _renewWarningText.text = $"No queda plaza two-way (máximo {TradeHelper.MAX_TWO_WAY}).";
+                _renewWarningText.style.display = DisplayStyle.Flex;
+            }
+            return;
+        }
+        if (!_renewTwoWayActive && _selectedPlayer.is_two_way == 1
+            && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_STANDARD_ROSTER)
+        {
+            if (_renewWarningText != null)
+            {
+                _renewWarningText.text = $"No queda plaza estándar (máximo {TradeHelper.MAX_STANDARD_ROSTER}) para convertir este contrato.";
+                _renewWarningText.style.display = DisplayStyle.Flex;
+            }
+            return;
+        }
 
         // Asegurar que los valores están dentro de límites
         if (_renewYears < 1) _renewYears = 1;

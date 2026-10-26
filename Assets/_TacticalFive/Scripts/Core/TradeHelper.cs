@@ -11,9 +11,11 @@ public static class TradeHelper
     public const long NT_MLE = 14_100_000;
     public const long T_MLE = 5_700_000;
     public const long MIN_SALARY = 2_000_000;
-    public const int MAX_ROSTER = 17;
+    public const int MAX_STANDARD_ROSTER = 15;
     public const long TWO_WAY_SALARY = 578_000;
     public const int MAX_TWO_WAY = 2;
+    // Límite combinado de referencia; las validaciones usan cada cupo por separado.
+    public const int MAX_ROSTER = MAX_STANDARD_ROSTER + MAX_TWO_WAY;
     public const int MAX_TWO_WAY_AGE = 23;
     public const int IR_MIN_DAYS = 90;
 
@@ -52,22 +54,30 @@ public static class TradeHelper
     }
 
     static void ValidateTradeSide(
-        long salaryOut, long salaryIn, int playersInCount,
+        long salaryOut, long salaryIn, int playersOutCount, int playersInCount,
         long newPayroll, string teamName, bool hardCappedToFirstApron,
         List<string> errors, long firstApron = FIRST_APRON, long secondApron = SECOND_APRON)
     {
-        bool restrictedByApron = newPayroll > secondApron || (hardCappedToFirstApron && newPayroll > firstApron);
-        if (restrictedByApron)
+        bool aboveSecondApron = newPayroll > secondApron;
+        bool hardCapExceeded = hardCappedToFirstApron && newPayroll > firstApron;
+
+        // Son restricciones independientes: el hard cap limita la nómina proyectada;
+        // el segundo apron prohíbe agregar salarios de varios jugadores salientes.
+        if (hardCapExceeded)
+            errors.Add($"{teamName} está sujeto al hard cap del primer apron y la nómina proyectada sería ${newPayroll:N0} (máximo ${firstApron:N0}).");
+
+        if (aboveSecondApron && playersOutCount > 1)
         {
-            if (playersInCount > 1)
-                errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. No puede recibir múltiples jugadores.");
+            errors.Add($"{teamName} está por encima del segundo apron y no puede agregar salarios de {playersOutCount} jugadores salientes para recibir {playersInCount}.");
         }
 
         long maxReceive = GetMaxIncomingSalary(salaryOut, newPayroll, hardCappedToFirstApron, firstApron, secondApron);
         if (salaryIn > maxReceive)
         {
-            if (restrictedByApron)
-                errors.Add($"{teamName} está en el {(hardCappedToFirstApron ? "hard cap del primer apron" : "segundo apron")}. Solo puede recibir hasta ${maxReceive:N0}.");
+            if (aboveSecondApron)
+                errors.Add($"{teamName} está por encima del segundo apron. Solo puede recibir hasta ${maxReceive:N0}.");
+            else if (hardCappedToFirstApron)
+                errors.Add($"{teamName} está sujeto al hard cap del primer apron. Solo puede recibir hasta ${maxReceive:N0}.");
             else if (newPayroll > firstApron)
                 errors.Add($"{teamName} está en el primer apron. Solo puede recibir hasta ${maxReceive:N0}.");
             else
@@ -162,7 +172,11 @@ public static class TradeHelper
         long secondApron = SECOND_APRON,
         long luxuryTax = LUXURY_TAX,
         Dictionary<int, long> teamASignSalaries = null,
-        Dictionary<int, long> teamBSignSalaries = null)
+        Dictionary<int, long> teamBSignSalaries = null,
+        int teamATwoWayCount = 0,
+        int teamBTwoWayCount = 0,
+        int teamATotalActiveRoster = -1,
+        int teamBTotalActiveRoster = -1)
     {
         var errors = new List<string>();
 
@@ -172,27 +186,47 @@ public static class TradeHelper
         // En un S&T el FA firmado (presente en *SignSalaries) nunca estuvo en la
         // plantilla del equipo que firma: no descuenta roster ni nómina de ese lado,
         // pero sí cuenta como salario entrante para el otro lado (el nuevo contrato).
-        int aOutCount = teamASelected.Count(p => teamASignSalaries == null || !teamASignSalaries.ContainsKey(p.id));
-        int bOutCount = teamBSelected.Count(p => teamBSignSalaries == null || !teamBSignSalaries.ContainsKey(p.id));
+        bool aSignedFA(PlayerData p) => teamASignSalaries != null && teamASignSalaries.ContainsKey(p.id);
+        bool bSignedFA(PlayerData p) => teamBSignSalaries != null && teamBSignSalaries.ContainsKey(p.id);
+        int aOutCount = teamASelected.Count(p => !aSignedFA(p));
+        int bOutCount = teamBSelected.Count(p => !bSignedFA(p));
+        int aStandardOut = teamASelected.Count(p => !aSignedFA(p) && p.is_on_ir == 0 && p.is_two_way != 1);
+        int bStandardOut = teamBSelected.Count(p => !bSignedFA(p) && p.is_on_ir == 0 && p.is_two_way != 1);
+        int aTwoWayOut = teamASelected.Count(p => !aSignedFA(p) && p.is_two_way == 1);
+        int bTwoWayOut = teamBSelected.Count(p => !bSignedFA(p) && p.is_two_way == 1);
+        int aStandardIn = teamBSelected.Count(p => bSignedFA(p) || p.is_two_way != 1);
+        int bStandardIn = teamASelected.Count(p => aSignedFA(p) || p.is_two_way != 1);
+        int aTwoWayIn = teamBSelected.Count(p => !bSignedFA(p) && p.is_two_way == 1);
+        int bTwoWayIn = teamASelected.Count(p => !aSignedFA(p) && p.is_two_way == 1);
         long aRosterOut = teamASelected.Where(p => teamASignSalaries == null || !teamASignSalaries.ContainsKey(p.id)).Sum(p => p.salary);
         long bRosterOut = teamBSelected.Where(p => teamBSignSalaries == null || !teamBSignSalaries.ContainsKey(p.id)).Sum(p => p.salary);
 
-        var aAfter = teamATotalRoster - aOutCount + teamBSelected.Count;
-        var bAfter = teamBTotalRoster - bOutCount + teamASelected.Count;
+        int aAfter = teamATotalRoster - aStandardOut + aStandardIn;
+        int bAfter = teamBTotalRoster - bStandardOut + bStandardIn;
+        int aTwoWayAfter = teamATwoWayCount - aTwoWayOut + aTwoWayIn;
+        int bTwoWayAfter = teamBTwoWayCount - bTwoWayOut + bTwoWayIn;
+        int aActiveAfter = (teamATotalActiveRoster >= 0 ? teamATotalActiveRoster : teamATotalRoster + teamATwoWayCount)
+            - teamASelected.Count(p => !aSignedFA(p) && p.is_on_ir == 0) + teamBSelected.Count;
+        int bActiveAfter = (teamBTotalActiveRoster >= 0 ? teamBTotalActiveRoster : teamBTotalRoster + teamBTwoWayCount)
+            - teamBSelected.Count(p => !bSignedFA(p) && p.is_on_ir == 0) + teamASelected.Count;
 
-        if (aAfter < 10) errors.Add($"{(teamAName ?? "Tu equipo")} tendría solo {aAfter} jugadores (mínimo 10)");
-        if (aAfter > MAX_ROSTER) errors.Add($"{(teamAName ?? "Tu equipo")} tendría {aAfter} jugadores (máximo {MAX_ROSTER})");
-        if (bAfter < 10) errors.Add($"{teamBName} tendría solo {bAfter} jugadores (mínimo 10)");
-        if (bAfter > MAX_ROSTER) errors.Add($"{teamBName} tendría {bAfter} jugadores (máximo {MAX_ROSTER})");
+        if (aActiveAfter < 10) errors.Add($"{(teamAName ?? "Tu equipo")} tendría solo {aActiveAfter} jugadores (mínimo 10)");
+        if (aAfter > MAX_STANDARD_ROSTER) errors.Add($"{(teamAName ?? "Tu equipo")} tendría {aAfter} plazas estándar (máximo {MAX_STANDARD_ROSTER})");
+        if (aTwoWayAfter > MAX_TWO_WAY) errors.Add($"{(teamAName ?? "Tu equipo")} tendría {aTwoWayAfter} contratos two-way (máximo {MAX_TWO_WAY})");
+        if (bActiveAfter < 10) errors.Add($"{teamBName} tendría solo {bActiveAfter} jugadores (mínimo 10)");
+        if (bAfter > MAX_STANDARD_ROSTER) errors.Add($"{teamBName} tendría {bAfter} plazas estándar (máximo {MAX_STANDARD_ROSTER})");
+        if (bTwoWayAfter > MAX_TWO_WAY) errors.Add($"{teamBName} tendría {bTwoWayAfter} contratos two-way (máximo {MAX_TWO_WAY})");
 
         if (!string.IsNullOrEmpty(teamAName))
         {
             var aPayroll = teamACurrentPayroll - aRosterOut + bSalaryOut;
-            ValidateTradeSide(aSalaryOut, bSalaryOut, teamBSelected.Count, aPayroll, teamAName, teamAHardCapped, errors, firstApron, secondApron);
+            ValidateTradeSide(aSalaryOut, bSalaryOut, aOutCount, teamBSelected.Count,
+                aPayroll, teamAName, teamAHardCapped, errors, firstApron, secondApron);
         }
 
         var bPayroll = teamBCurrentPayroll - bRosterOut + aSalaryOut;
-        ValidateTradeSide(bSalaryOut, aSalaryOut, teamASelected.Count, bPayroll, teamBName, teamBHardCapped, errors, firstApron, secondApron);
+        ValidateTradeSide(bSalaryOut, aSalaryOut, bOutCount, teamASelected.Count,
+            bPayroll, teamBName, teamBHardCapped, errors, firstApron, secondApron);
 
         return errors;
     }
@@ -281,135 +315,4 @@ public static class TradeHelper
         return tax;
     }
 
-    public static TradeResult EvaluateTrade(
-        List<PlayerData> teamASelected,
-        List<PlayerData> teamBSelected,
-        string teamBName,
-        int teamBTotalRoster,
-        long teamBCurrentPayroll,
-        List<DraftPickData> teamASelectedPicks = null,
-        List<DraftPickData> teamBSelectedPicks = null,
-        long firstApron = FIRST_APRON,
-        long secondApron = SECOND_APRON,
-        long luxuryTax = LUXURY_TAX,
-        Dictionary<int, long> teamASignSalaries = null,
-        Dictionary<int, long> teamBSignSalaries = null,
-        int currentDraftYear = 0)
-    {
-        var aSalaryOut = teamASelected.Sum(p => SalaryOf(p, teamASignSalaries));
-        var bSalaryOut = teamBSelected.Sum(p => SalaryOf(p, teamBSignSalaries));
-        int bOutCount = teamBSelected.Count(p => teamBSignSalaries == null || !teamBSignSalaries.ContainsKey(p.id));
-
-        var bBestOvr = teamBSelected.Count > 0 ? teamBSelected.Max(p => p.overall) : 0;
-        var aBestOvr = teamASelected.Count > 0 ? teamASelected.Max(p => p.overall) : 0;
-        var bAvgOvr = teamBSelected.Count > 0 ? teamBSelected.Average(p => p.overall) : 0;
-        var aAvgOvr = teamASelected.Count > 0 ? teamASelected.Average(p => p.overall) : 0;
-        var aTotalOvr = teamASelected.Sum(p => p.overall);
-        var bTotalOvr = teamBSelected.Sum(p => p.overall);
-
-        int acceptScore = 0;
-
-        // Picks as sweetener: B receives A's picks, A receives B's picks
-        if (teamASelectedPicks != null)
-        {
-            foreach (var pk in teamASelectedPicks)
-                acceptScore += PickBonus(pk, currentDraftYear);
-        }
-        if (teamBSelectedPicks != null)
-        {
-            foreach (var pk in teamBSelectedPicks)
-                acceptScore -= PickBonus(pk, currentDraftYear);
-        }
-
-        // Player quality comparison
-        if (bBestOvr >= 90)
-        {
-            if (aBestOvr >= 90) acceptScore += 40 + (aBestOvr - bBestOvr) * 3;
-            else if (aBestOvr >= 85) acceptScore += 15 + (aBestOvr - bBestOvr) * 2;
-            else acceptScore -= 50;
-        }
-        else if (bBestOvr >= 85)
-        {
-            if (aBestOvr >= 85) acceptScore += 30 + (aBestOvr - bBestOvr) * 2;
-            else if (aBestOvr >= 80) acceptScore += 10;
-            else acceptScore -= 30;
-        }
-        else if (bBestOvr >= 80)
-        {
-            if (aBestOvr >= 80) acceptScore += 20;
-            else if (aBestOvr >= 75) acceptScore += 5;
-            else acceptScore -= 15;
-        }
-        else
-        {
-            if (aAvgOvr >= bAvgOvr) acceptScore += 10;
-            else acceptScore -= 10;
-        }
-
-        // Total OVR comparison
-        acceptScore += Mathf.Clamp(aTotalOvr - bTotalOvr, -20, 20);
-
-        // Financial situation
-        if (teamBCurrentPayroll > secondApron)
-        {
-            if (aSalaryOut > bSalaryOut) acceptScore += 30;
-            else acceptScore -= 20;
-        }
-        else if (teamBCurrentPayroll > firstApron)
-        {
-            if (aSalaryOut > bSalaryOut) acceptScore += 20;
-            else acceptScore -= 10;
-        }
-        else if (teamBCurrentPayroll > luxuryTax)
-        {
-            if (aSalaryOut > bSalaryOut) acceptScore += 15;
-            else if (aSalaryOut < bSalaryOut) acceptScore -= 5;
-        }
-        else
-        {
-            if (aSalaryOut > bSalaryOut) acceptScore += 5;
-            else if (aSalaryOut < bSalaryOut) acceptScore -= 5;
-        }
-
-        // Team needs
-        var bAfter = teamBTotalRoster - bOutCount + teamASelected.Count;
-        if (bAfter <= 12) acceptScore += 15;
-        else if (bAfter <= 14) acceptScore += 5;
-
-        // Age factor
-        if (teamASelected.Count > 0 && teamBSelected.Count > 0)
-        {
-            var aAvgAge = teamASelected.Average(p => p.age);
-            var bAvgAge = teamBSelected.Average(p => p.age);
-            if (aAvgAge < bAvgAge - 3) acceptScore += 10;
-            else if (aAvgAge > bAvgAge + 3) acceptScore -= 5;
-        }
-
-        // Randomness
-        acceptScore += Random.Range(-5, 6);
-
-        acceptScore = Mathf.Clamp(acceptScore, 0, 100);
-
-        var threshold = 50;
-        if (teamBCurrentPayroll > secondApron) threshold = 40;
-        else if (teamBCurrentPayroll > firstApron) threshold = 45;
-
-        return new TradeResult
-        {
-            WouldAccept = acceptScore >= threshold,
-            AcceptScore = acceptScore,
-            Threshold = threshold,
-            TeamASelected = teamASelected,
-            TeamBSelected = teamBSelected
-        };
-    }
-}
-
-public class TradeResult
-{
-    public bool WouldAccept;
-    public int AcceptScore;
-    public int Threshold;
-    public List<PlayerData> TeamASelected;
-    public List<PlayerData> TeamBSelected;
 }

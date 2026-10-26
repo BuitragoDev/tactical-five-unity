@@ -614,7 +614,7 @@ public class InjuredController : UIScreenController
                 if (onIR)
                 {
                     int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
-                    if (rosterCount >= TradeHelper.MAX_ROSTER)
+                    if (player.is_two_way != 1 && rosterCount >= TradeHelper.MAX_STANDARD_ROSTER)
                     {
                         noAptBtn.AddToClassList("btn-card-no-apt--disabled");
                         noAptBtn.SetEnabled(false);
@@ -675,7 +675,8 @@ public class InjuredController : UIScreenController
                 // Desde la IR además debe caber en la plantilla.
                 var forceBtn = new Button();
                 forceBtn.AddToClassList("btn-card-force");
-                bool forceBlocked = onIR && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER;
+                bool forceBlocked = onIR && player.is_two_way != 1
+                    && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_STANDARD_ROSTER;
                 bool canForce = InjuryHelper.CanForceReturn(player.injury_days);
                 if (forceBlocked)
                 {
@@ -805,7 +806,8 @@ public class InjuredController : UIScreenController
         }
         else
         {
-            if (DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_ROSTER) return;
+            if (player.is_two_way != 1
+                && DatabaseManager.Instance.GetRosterCount(_myTeam.id) >= TradeHelper.MAX_STANDARD_ROSTER) return;
         }
         DatabaseManager.Instance.SetOnIR(player, onIR);
         DatabaseManager.Instance.AddMessage(new MessageData

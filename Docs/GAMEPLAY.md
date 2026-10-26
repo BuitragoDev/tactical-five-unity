@@ -336,19 +336,20 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
   Plantilla.
 
 ### IR (reserva de lesionados)
-- `players.is_on_ir` (0/1). Botón PONER/SACAR IR en `InjuredController` (`SetPlayerIR`). PONER IR exige elegibilidad y limpia `g_league_assigned`; SACAR IR exige plantilla < `MAX_ROSTER`.
-- **No cuenta en el tope:** `GetRosterCount(teamId)` excluye `is_on_ir = 1` (usado por firma de FAs, traspasos IA, `StartNewSeason`, `TrimRostersToMaxSize`, mercado).
-- **Recuperación:** en el pre-lote diario (hilo de fondo), al curarse (`injury_days ≤ 0`) se limpia `is_on_ir`. Si un equipo IA queda con >17 activos libera al peor; el usuario recibe el modal "PLANTILLA LLENA" (`ShowPendingIRReleaseModal`/`ReleasePlayerForIR`, buyout `TYPE_BUYOUT`). FastSim pausa ante este modal.
+- `players.is_on_ir` (0/1). Botón PONER/SACAR IR en `InjuredController` (`SetPlayerIR`). PONER IR exige elegibilidad y limpia `g_league_assigned`; al SACAR IR, un jugador estándar requiere hueco entre las 15 plazas estándar y un two-way conserva su cupo two-way.
+- **Cupo activo:** la IR queda aparte; `GetRosterCount(teamId)` excluye IR y two-way. El jugador estándar recuperado vuelve a ocupar plaza estándar; un two-way recuperado no consume ninguna de ellas.
+- **Recuperación:** en el pre-lote diario (hilo de fondo), al curarse (`injury_days ≤ 0`) se limpia `is_on_ir`. La IA corrige por separado excedentes de plazas estándar (>15) y two-way (>2); si el usuario supera las 15 plazas estándar recibe el modal `ShowPendingIRReleaseModal` para liberar a alguien (buyout `TYPE_BUYOUT`). FastSim pausa ante este modal.
 
 ### Contratos two-way
-- `players.is_two_way` / `offers.is_two_way` (0/1). Contrato de **salario fijo** `TWO_WAY_SALARY` y **2 años**, máx 2 por equipo (`MAX_TWO_WAY`), solo edad ≤23 (`IsEligibleForTwoWay`).
-- **Cuenta en la plantilla:** `GetRosterCount` (tope de `MAX_ROSTER = 17`) solo excluye `is_on_ir`, no `is_two_way` → un jugador two-way ocupa plaza entre los 17. Tampoco se excluye de la masa salarial (los cálculos de payroll hacen `.Sum(p => p.salary)` sin filtrar `is_two_way`). **No reduce ni el roster ni el payroll.**
+- `players.is_two_way` / `offers.is_two_way` (0/1). Contrato de **salario fijo** `TWO_WAY_SALARY` y **2 años**, máx 2 por equipo (`MAX_TWO_WAY`), solo edad ≤23 (`IsEligibleForTwoWay`). El diseño mantiene este máximo propio de 2.
+- **Cupos separados:** máximo 15 plazas estándar (`MAX_STANDARD_ROSTER`) + 2 contratos two-way (`MAX_TWO_WAY`); `MAX_ROSTER=17` es el total activo combinado de referencia. `GetRosterCount` devuelve estándar activo; `GetTwoWayCount` devuelve contratos two-way asignados incluso si están en IR; `GetTotalRosterCount` suma las categorías activas y excluye IR. El salario two-way no reduce el payroll mostrado, aunque no aplica al chequeo de cap al firmar.
 - Su única ventaja mecánica: **la firma salta la validación del salary cap**. `SendFAOffer`/`ProcessMaturedOffers`, si `is_two_way == 1`, no comparan el salario contra el cap ni aplican excepciones/aprons. Por eso el toggle dice "No afecta al salary cap", pero eso aplica a la validación de la oferta, no al payroll posterior.
 - Para que un two-way no juegue en NBA hace falta asignarlo a G-League (`g_league_assigned = 1`); ser two-way por sí solo no lo excluye (`GetActivePlayers` excluye `injury_days` y `g_league_assigned`, no `is_two_way`).
 - Oferta FA del usuario: toggle TWO-WAY en `MarketController` (limpia TO/PO, fija salario/años, salta validación de cap en `SendFAOffer`). `ProcessMaturedOffers` salta los checks de cap si `offer.is_two_way == 1` y copia `player.is_two_way` al firmar.
-- IA: `TrySignFreeAgent` firma como two-way cuando la plantilla ya está llena (≥17) pero quedan plazas two-way; rookies de 2ª ronda (`DraftGenerator`) con `is_two_way = 1` si el equipo tiene <2.
+- Traspasos conservan el tipo two-way y validan cada cupo del equipo receptor; un two-way no se convierte silenciosamente en plaza estándar. Two-way sigue siendo elegible para simulación, salvo que esté lesionado o asignado a G-League.
+- IA: `TrySignFreeAgent` firma como two-way cuando las 15 plazas estándar están llenas pero quedan plazas two-way; rookies de 2ª ronda (`DraftGenerator`) con `is_two_way = 1` si el equipo tiene <2.
 
-> **`MIN_SALARY` vs `TWO_WAY_SALARY`** — no son el mismo concepto ni una incoherencia. `MIN_SALARY` (2 000 000) es el piso de un contrato de plantilla regular. `TWO_WAY_SALARY` (578 000) es un importe fijo de un tipo de contrato aparte ("beca de desarrollo"): es menor porque su ventaja es saltarse el chequeo del cap al fichar, no reducir roster/payroll (ambos siguen contando, ver arriba). Coexisten en `TradeHelper` porque representan regímenes distintos.
+> **`MIN_SALARY` vs `TWO_WAY_SALARY`** — no son el mismo concepto ni una incoherencia. `MIN_SALARY` (2 000 000) es el piso de un contrato de plantilla regular. `TWO_WAY_SALARY` (578 000) es un importe fijo de un tipo de contrato aparte ("beca de desarrollo"): es menor porque su ventaja es saltarse el chequeo del cap al fichar; coexisten en `TradeHelper` porque representan regímenes distintos.
 
 ### G-League (liga de desarrollo)
 - `players.g_league_assigned` (0/1). Botones ASIGNAR G / G-LEAGUE en `RosterController` (`GLeagueHelper.CanAssign` = sano, no IR, no ya asignado; `HasEnoughActive` exige ≥12 activos tras asignar). Al asignar, el jugador sale de la convocatoria activa (slot 2 inactivo).

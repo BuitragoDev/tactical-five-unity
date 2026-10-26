@@ -214,6 +214,19 @@ public class SeedAuditorTests
         Assert.That(report.RosterOutOfRangeCount, Is.Zero);
     }
 
+    [Test]
+    public void PlazasEstandarPorEncimaDe15_SeInformanAunqueElTotalSea17()
+    {
+        var teams = new List<TeamData> { SyntheticTeam(1, "CCC") };
+        var players = Enumerable.Range(1, 17).Select(i => SyntheticPlayer(i, 1)).ToList();
+        players[16].is_two_way = 1;
+
+        var report = SeedAudit.Run(teams, players, null, null, null);
+
+        Assert.That(report.RosterOutOfRangeCount, Is.EqualTo(1));
+        Assert.That(report.RosterOutOfRange.Single(), Does.Contain("16/15 estándar"));
+    }
+
     static TeamData SyntheticTeam(int id, string abbreviation) => new TeamData
     {
         id = id, name = "Equipo " + abbreviation, abbreviation = abbreviation,
