@@ -18,7 +18,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -26,7 +26,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -162,7 +162,7 @@
     letter-spacing: 2px;
     -unity-text-transform: upper;
     color: rgb(100, 200, 140);
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     border-radius: 8px;
@@ -173,22 +173,22 @@
 }
 
 .sponsor-card-btn:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(150, 220, 180);
 }
 
 .sponsor-card-btn:active {
-    background-color: rgba(39, 174, 96, 0.35);
+    background-color: rgb(25, 75, 52);
 }
 
 .sponsor-card-btn--disabled {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(120, 130, 150);
 }
 
 .sponsor-card-btn--disabled:hover {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     color: rgb(120, 130, 150);
 }
 

@@ -25,7 +25,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -33,7 +33,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -169,9 +169,9 @@
     width: 46px;
     height: 46px;
     border-radius: 23px;
-    background-color: rgba(42, 95, 201, 0.12);
+    background-color: rgb(21, 30, 49);
     border-width: 1px;
-    border-color: rgba(74, 128, 240, 0.45);
+    border-color: rgb(43, 69, 123);
     align-items: center;
     justify-content: center;
     margin-right: 14px;
@@ -318,7 +318,7 @@
     height: 30px;
     margin: 0 10px;
     font-size: 16px;
-    background-color: rgba(42, 95, 201, 0.12);
+    background-color: rgb(21, 30, 49);
     border-width: 1px;
     border-color: rgb(60, 70, 92);
     color: rgb(200, 212, 232);
@@ -327,7 +327,7 @@
     cursor: pointer;
 }
 .records-season-btn:hover {
-    background-color: rgba(42, 95, 201, 0.28);
+    background-color: rgb(25, 42, 76);
     color: rgb(235, 242, 255);
 }
 .records-season-label {

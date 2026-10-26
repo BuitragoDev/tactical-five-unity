@@ -6,7 +6,7 @@
 .modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0);
+    background-color: rgb(18, 21, 28);
     align-items: center;
     justify-content: center;
     display: none;
@@ -43,7 +43,7 @@
     -unity-text-transform: upper;
     color: rgb(255, 255, 255);
     padding: 10px 24px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
     border-top-width: 0;
@@ -92,7 +92,7 @@
     letter-spacing: 3px;
     -unity-text-transform: upper;
     color: rgb(120, 160, 230);
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
@@ -102,7 +102,7 @@
 }
 
 .modal-close:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -134,35 +134,35 @@
 }
 
 .modal-btn--secondary {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
 }
 
 .modal-btn--secondary:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(200, 210, 230);
 }
 
 .modal-btn--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 
 .modal-btn--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
 .modal-btn--primary {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
 }
 
 .modal-btn--primary:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -172,12 +172,12 @@
 }
 #ConfigBtnCerrar {
     color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-color: rgb(212, 160, 23);
     margin: 16px 20px;
 }
 #ConfigBtnCerrar:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
 }
 
 /* ── VARIANTE ROJA (peligro/borrado) ──
@@ -186,6 +186,6 @@
     border-color: rgb(192, 57, 43);
 }
 .modal-box--danger .modal-title {
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-bottom-color: rgb(192, 57, 43);
 }

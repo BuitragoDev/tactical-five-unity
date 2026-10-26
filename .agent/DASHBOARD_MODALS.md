@@ -9,7 +9,7 @@
 
 ```
 ┌──────────────────────────────────────┐
-│  TÍTULO DEL MODAL  (32px bold,      │  ← header: bg rgba(translúcido), border-bottom
+│  TÍTULO DEL MODAL  (32px bold,      │  ← header: bg rgb() oscuro, border-bottom
 │  color blanco, padding 12px 24px)    │
 ├──────────────────────────────────────┤
 │                                      │

@@ -86,7 +86,7 @@
 .qt-btn-end {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -100,7 +100,7 @@
     cursor: pointer;
 }
 .qt-btn-end:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -125,7 +125,7 @@
 .qt-screen-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(22, 26, 36, 0.82);
+    background-color: rgb(21, 25, 35);
 }
 
 .qt-screen-title-group {
@@ -401,7 +401,7 @@
     letter-spacing: 2px;
     padding: 7px 18px;
     margin-right: 8px;
-    background-color: rgba(18, 22, 32, 0.75);
+    background-color: rgb(18, 22, 31);
     border-width: 2px;
     border-color: rgb(90, 100, 120);
     color: rgb(179, 190, 214);
@@ -410,15 +410,15 @@
     cursor: pointer;
 }
 .qt-toggle-btn:hover {
-    background-color: rgba(120, 132, 158, 0.25);
+    background-color: rgb(44, 49, 60);
     color: rgb(220, 228, 242);
 }
 .qt-toggle-btn--active {
-    background-color: rgba(212, 160, 23, 0.18);
+    background-color: rgb(53, 46, 27);
     border-color: rgb(212, 160, 23);
     color: rgb(248, 196, 64);
 }
 .qt-toggle-btn--active:hover {
-    background-color: rgba(212, 160, 23, 0.28);
+    background-color: rgb(72, 60, 27);
     color: rgb(255, 214, 110);
 }

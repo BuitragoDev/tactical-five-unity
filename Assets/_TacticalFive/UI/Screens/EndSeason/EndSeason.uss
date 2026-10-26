@@ -119,7 +119,7 @@
 .end-season-root .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -133,18 +133,18 @@
     cursor: pointer;
 }
 .end-season-root .btn-action:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 .end-season-root .btn-action:disabled {
     opacity: 0.4;
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     border-color: rgb(42, 51, 71);
 }
 .btn-lottery {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -159,7 +159,7 @@
     cursor: pointer;
 }
 .btn-lottery:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -247,7 +247,7 @@
 .es-panel-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(22, 26, 36, 0.95);
+    background-color: rgb(22, 26, 36);
 }
 
 /* ── PANEL CONTENT (above overlay) ── */
@@ -287,7 +287,7 @@
     margin-bottom: 14px;
     padding-bottom: 8px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(212, 160, 23, 0.3);
+    border-bottom-color: rgb(76, 63, 26);
     flex-shrink: 0;
 }
 
@@ -504,7 +504,7 @@
 
 /* ── DRAFT BUTTON (pre-draft) ── */
 .btn-draft {
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
@@ -520,7 +520,7 @@
     cursor: pointer;
 }
 .btn-draft:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(240, 192, 64);
 }
 
@@ -558,7 +558,7 @@
 .draft-banner-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(22, 26, 36, 0.82);
+    background-color: rgb(21, 25, 35);
 }
 .draft-banner-left {
     position: relative;
@@ -582,7 +582,7 @@
     position: relative;
     flex-direction: row;
     align-items: center;
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
     padding: 8px 20px;
@@ -645,7 +645,7 @@
 .draft-col-count {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
-    background-color: rgba(42, 95, 201, 0.20);
+    background-color: rgb(23, 36, 63);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
     color: rgb(42, 95, 201);
@@ -677,7 +677,7 @@
     background-color: rgb(28, 33, 48);
 }
 .draft-prospect--selected {
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     border-color: rgb(212, 160, 23);
     border-width: 2px;
 }
@@ -736,21 +736,21 @@
     margin-left: 6px;
 }
 .draft-prospect-med--high {
-    background-color: rgba(39, 174, 96, 0.20);
+    background-color: rgb(22, 52, 42);
     border-width: 1px;
     border-color: rgb(39, 174, 96);
     color: rgb(39, 174, 96);
     padding: 2px 6px;
 }
 .draft-prospect-med--mid {
-    background-color: rgba(212, 160, 23, 0.20);
+    background-color: rgb(57, 49, 27);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
     padding: 2px 6px;
 }
 .draft-prospect-med--low {
-    background-color: rgba(192, 57, 43, 0.20);
+    background-color: rgb(53, 28, 31);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
     color: rgb(192, 57, 43);
@@ -782,16 +782,16 @@
 .draft-my-pick-badge {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgb(37, 40, 46);
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgb(54, 56, 62);
     color: rgb(212, 160, 23);
     padding: 4px 10px;
     margin-right: 8px;
     margin-bottom: 4px;
 }
 .draft-my-pick-badge--current {
-    background-color: rgba(212, 160, 23, 0.20);
+    background-color: rgb(57, 49, 27);
     border-color: rgb(212, 160, 23);
     color: rgb(255, 255, 255);
 }
@@ -882,7 +882,7 @@
     padding: 4px 12px;
 }
 .draft-card-ovr-badge--high {
-    background-color: rgba(39, 174, 96, 0.20);
+    background-color: rgb(22, 52, 42);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
 }
@@ -890,7 +890,7 @@
     color: rgb(39, 174, 96);
 }
 .draft-card-ovr-badge--mid {
-    background-color: rgba(212, 160, 23, 0.20);
+    background-color: rgb(57, 49, 27);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
 }
@@ -898,7 +898,7 @@
     color: rgb(212, 160, 23);
 }
 .draft-card-ovr-badge--low {
-    background-color: rgba(192, 57, 43, 0.20);
+    background-color: rgb(53, 28, 31);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
 }
@@ -1009,7 +1009,7 @@
     color: rgb(122, 138, 170);
 }
 .draft-need-badge--high {
-    background-color: rgba(39, 174, 96, 0.20);
+    background-color: rgb(22, 52, 42);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
 }
@@ -1017,7 +1017,7 @@
     color: rgb(39, 174, 96);
 }
 .draft-need-badge--mid {
-    background-color: rgba(212, 160, 23, 0.20);
+    background-color: rgb(57, 49, 27);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
 }
@@ -1025,7 +1025,7 @@
     color: rgb(212, 160, 23);
 }
 .draft-need-badge--low {
-    background-color: rgba(192, 57, 43, 0.20);
+    background-color: rgb(53, 28, 31);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
 }
@@ -1044,7 +1044,7 @@
 .btn-draft-pick {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 280px;
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
@@ -1058,18 +1058,18 @@
     cursor: pointer;
 }
 .btn-draft-pick:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(240, 192, 64);
 }
 .btn-draft-pick:disabled {
     opacity: 0.4;
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     border-color: rgb(42, 51, 71);
 }
 .btn-auto-pick {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 280px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -1084,7 +1084,7 @@
     cursor: pointer;
 }
 .btn-auto-pick:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 .draft-action-arrow {
@@ -1128,7 +1128,7 @@
 .draft-log-entry--current {
     border-color: rgb(212, 160, 23);
     border-width: 2px;
-    background-color: rgba(212, 160, 23, 0.08);
+    background-color: rgb(34, 32, 28);
 }
 .draft-log-num {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -1181,19 +1181,19 @@
     margin-left: 6px;
 }
 .draft-log-med--high {
-    background-color: rgba(39, 174, 96, 0.20);
+    background-color: rgb(22, 52, 42);
     border-width: 1px;
     border-color: rgb(39, 174, 96);
     color: rgb(39, 174, 96);
 }
 .draft-log-med--mid {
-    background-color: rgba(212, 160, 23, 0.20);
+    background-color: rgb(57, 49, 27);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
 }
 .draft-log-med--low {
-    background-color: rgba(192, 57, 43, 0.20);
+    background-color: rgb(53, 28, 31);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
     color: rgb(192, 57, 43);
@@ -1203,7 +1203,7 @@
 .lottery-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgb(3, 3, 4);
     align-items: center;
     justify-content: center;
     display: none;
@@ -1223,7 +1223,7 @@
     align-items: center;
     justify-content: center;
     padding: 16px 24px;
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
 }
@@ -1254,7 +1254,7 @@
     padding: 12px 0;
     border-radius: 8px;
     border-width: 2px;
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
     -unity-text-transform: upper;
@@ -1263,7 +1263,7 @@
     cursor: pointer;
 }
 .modal-close-btn:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(240, 192, 64);
 }
 .lottery-grid {
@@ -1331,7 +1331,7 @@
 }
 .lottery-bar-container {
     height: 4px;
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: rgb(32, 35, 42);
 }
 .lottery-bar-fill {
     height: 100%;
@@ -1345,7 +1345,7 @@
     padding: 14px 48px;
     border-radius: 8px;
     border-width: 2px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
     -unity-text-transform: upper;
@@ -1354,7 +1354,7 @@
     cursor: pointer;
 }
 .lottery-close-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 .lottery-draft-row {

@@ -89,7 +89,7 @@
 .new-season-root .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -103,7 +103,7 @@
     cursor: pointer;
 }
 .new-season-root .btn-action:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(150, 220, 180);
 }
 
@@ -191,7 +191,7 @@
     font-size: 16px;
     letter-spacing: 2px;
     color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.1);
+    background-color: rgb(37, 35, 28);
     padding: 4px 12px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
@@ -210,7 +210,7 @@
 .ns-roster-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgb(3, 3, 4);
     align-items: center;
     justify-content: center;
     display: none;
@@ -307,15 +307,15 @@
     flex-shrink: 0;
 }
 .ns-roster-med--high {
-    background-color: rgba(39, 174, 96, 0.12);
+    background-color: rgb(21, 39, 36);
     border-color: rgb(39, 174, 96);
 }
 .ns-roster-med--mid {
-    background-color: rgba(212, 160, 23, 0.12);
+    background-color: rgb(41, 38, 27);
     border-color: rgb(212, 160, 23);
 }
 .ns-roster-med--low {
-    background-color: rgba(192, 57, 43, 0.12);
+    background-color: rgb(39, 25, 30);
     border-color: rgb(192, 57, 43);
 }
 .ns-roster-med-lbl {
@@ -447,11 +447,11 @@
 }
 
 .ns-option-btn--exercise:hover {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 .ns-option-btn--exercise.ns-option-btn--selected {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     border-color: rgb(39, 174, 96);
 }
 
@@ -461,10 +461,10 @@
 }
 
 .ns-option-btn--decline:hover {
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
 }
 
 .ns-option-btn--decline.ns-option-btn--selected {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     border-color: rgb(192, 57, 43);
 }

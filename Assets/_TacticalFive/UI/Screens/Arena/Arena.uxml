@@ -171,7 +171,7 @@
         <!-- ══ MODAL CONFIRMAR MEJORA ══ -->
         <ui:VisualElement name="ConfirmRenovationOverlay" class="modal-overlay">
             <ui:VisualElement name="ConfirmRenovationBox" class="modal-box" style="width: 650px; background-color: rgb(13, 14, 18); border-width: 1px; border-color: rgb(120, 95, 30); border-radius: 12px; padding: 0; overflow: hidden;">
-                <ui:VisualElement class="arena-confirm-header" style="flex-direction: row; align-items: center; padding: 16px 24px; background-color: rgba(120, 95, 30, 0.15); border-bottom-width: 1px; border-bottom-color: rgb(120, 95, 30);">
+                <ui:VisualElement class="arena-confirm-header" style="flex-direction: row; align-items: center; padding: 16px 24px; background-color: rgb(33, 32, 28); border-bottom-width: 1px; border-bottom-color: rgb(120, 95, 30);">
                     <ui:Label name="ConfirmRenovationIcon" text="🔧" style="font-size: 24px; margin-right: 12px;" />
                     <ui:Label name="ConfirmRenovationTitle" text="CONFIRMAR MEJORA" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 28px; letter-spacing: 2px; color: rgb(212, 160, 23);" />
                 </ui:VisualElement>
@@ -191,8 +191,8 @@
                         <ui:Label name="ConfirmRenovationCapacity" text="" style="-unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf'); font-size: 18px; color: rgb(39, 174, 96);" />
                     </ui:VisualElement>
                     <ui:VisualElement style="flex-direction: row;">
-                        <ui:Button name="ConfirmRenovationNo" text="CANCELAR" style="flex-grow: 1; margin-right: 6px; height: 44px; background-color: rgba(192, 57, 43, 0.10); border-width: 2px; border-color: rgb(192, 57, 43); color: rgb(230, 120, 100); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
-                        <ui:Button name="ConfirmRenovationYes" text="INICIAR MEJORA" style="flex-grow: 1; margin-left: 6px; height: 44px; background-color: rgba(39, 174, 96, 0.10); border-width: 2px; border-color: rgb(39, 174, 96); color: rgb(100, 200, 140); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
+                        <ui:Button name="ConfirmRenovationNo" text="CANCELAR" style="flex-grow: 1; margin-right: 6px; height: 44px; background-color: rgb(35, 25, 30); border-width: 2px; border-color: rgb(192, 57, 43); color: rgb(230, 120, 100); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
+                        <ui:Button name="ConfirmRenovationYes" text="INICIAR MEJORA" style="flex-grow: 1; margin-left: 6px; height: 44px; background-color: rgb(20, 36, 35); border-width: 2px; border-color: rgb(39, 174, 96); color: rgb(100, 200, 140); font-size: 18px; letter-spacing: 1px; border-radius: 8px; -unity-text-align: middle-center; cursor: pointer; -unity-font: url('project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf');" />
                     </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>

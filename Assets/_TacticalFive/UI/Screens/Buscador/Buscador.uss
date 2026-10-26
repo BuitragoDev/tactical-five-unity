@@ -19,7 +19,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -27,7 +27,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -135,7 +135,7 @@
 .buscador-team-btn--active {
     color: rgb(212, 160, 23);
     border-color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.08);
+    background-color: rgb(34, 32, 28);
 }
 
 .buscador-clear-btn {

@@ -101,7 +101,7 @@ Botón de acción principal:
     flex-grow: 1;
     flex-basis: 0;
     margin-left: 6px;
-    background-color: rgba(39, 174, 96, 0.10);   /* verde */
+    background-color: rgb(20, 36, 35);   /* verde compuesto sobre fondo oscuro */
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -115,7 +115,7 @@ Botón de acción principal:
     cursor: pointer;
 }
 .btn-action:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
 }
 ```
 
@@ -123,12 +123,12 @@ Botón de peligro/rescisión:
 
 ```css
 .btn-action--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 .btn-action--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 ```
@@ -151,7 +151,7 @@ Para paneles con cabecera estilo dorado/marrón:
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
 }
@@ -186,7 +186,7 @@ subtítulo dorado. El patrón actual de Roster es:
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -194,7 +194,7 @@ subtítulo dorado. El patrón actual de Roster es:
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -217,7 +217,7 @@ subtítulo dorado. El patrón actual de Roster es:
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 0 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 ```
 

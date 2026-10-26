@@ -27,7 +27,7 @@
 .btn-back {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 200px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(100, 160, 230);
@@ -39,7 +39,7 @@
     border-radius: 8px;
 }
 .btn-back:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(140, 190, 255);
 }
 .header-title {
@@ -65,7 +65,7 @@
 .btn-continue {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 200px;
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -77,11 +77,11 @@
     border-radius: 8px;
 }
 .btn-continue:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(140, 220, 170);
 }
 .btn-continue:disabled {
-    background-color: rgba(100, 110, 130, 0.08);
+    background-color: rgb(25, 28, 36);
     border-color: rgb(100, 110, 130);
     color: rgb(100, 110, 130);
 }
@@ -277,7 +277,7 @@
 /* Botón quitar en slot */
 .btn-remove-slot {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     border-radius: 8px;
@@ -291,7 +291,7 @@
     -unity-text-align: middle-center;
 }
 .btn-remove-slot:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -369,9 +369,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(18, 24, 34, 0.92);
+    background-color: rgb(18, 24, 34);
     border-left-width: 1px;
-    border-left-color: rgba(42, 95, 201, 0.35);
+    border-left-color: rgb(26, 47, 89);
     position: relative;
 }
 .teams-scrollbar-thumb {

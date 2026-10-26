@@ -44,7 +44,7 @@
     padding: 10px 14px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 
 .market-section-icon {
@@ -86,7 +86,7 @@
 
 .market-team-chip.active {
     border-color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.08);
+    background-color: rgb(34, 32, 28);
 }
 
 .market-team-chip-logo {
@@ -101,7 +101,7 @@
     align-items: center;
     justify-content: center;
     width: 100%;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
@@ -112,7 +112,7 @@
 }
 
 .market-btn-negotiate:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     border-color: rgb(74, 128, 240);
 }
 
@@ -133,20 +133,20 @@
 }
 
 .market-btn-negotiate--disabled {
-    background-color: rgba(100, 110, 130, 0.08);
-    border-color: rgba(100, 110, 130, 0.30);
+    background-color: rgb(25, 28, 36);
+    border-color: rgb(43, 48, 59);
     cursor: default;
     pointer-events: none;
 }
 .market-btn-negotiate--disabled:hover {
-    background-color: rgba(100, 110, 130, 0.08);
-    border-color: rgba(100, 110, 130, 0.30);
+    background-color: rgb(25, 28, 36);
+    border-color: rgb(43, 48, 59);
 }
 .market-btn-negotiate--disabled .market-btn-negotiate-text {
-    color: rgba(100, 110, 130, 0.50);
+    color: rgb(59, 66, 79);
 }
 .market-btn-negotiate--disabled:hover .market-btn-negotiate-text {
-    color: rgba(100, 110, 130, 0.50);
+    color: rgb(59, 66, 79);
 }
 
 /* ── TRADE PANELS ── */
@@ -189,7 +189,7 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
     flex-shrink: 0;
@@ -223,12 +223,12 @@
     align-items: center;
     padding: 7px 10px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.3);
+    border-bottom-color: rgb(25, 30, 41);
     min-height: 37px;
 }
 
 .market-trade-row:hover {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgb(25, 28, 35);
 }
 
 .market-trade-row.selected {
@@ -240,9 +240,9 @@
     font-size: 13px;
     color: rgb(200, 160, 30);
     padding: 8px 10px 2px 10px;
-    background-color: rgba(200, 160, 30, 0.08);
+    background-color: rgb(33, 32, 28);
     border-top-width: 1px;
-    border-top-color: rgba(200, 160, 30, 0.4);
+    border-top-color: rgb(91, 77, 29);
 }
 
 .market-trade-col-name {
@@ -412,21 +412,21 @@
 }
 
 .market-trade-status-box.invalid {
-    background-color: rgba(192, 57, 43, 0.1);
+    background-color: rgb(35, 25, 30);
     border-width: 1px;
-    border-color: rgba(192, 57, 43, 0.3);
+    border-color: rgb(70, 32, 32);
 }
 
 .market-trade-status-box.valid {
-    background-color: rgba(39, 174, 96, 0.1);
+    background-color: rgb(20, 36, 35);
     border-width: 1px;
-    border-color: rgba(39, 174, 96, 0.3);
+    border-color: rgb(24, 67, 48);
 }
 
 .market-trade-status-box.rejected {
-    background-color: rgba(230, 126, 34, 0.1);
+    background-color: rgb(39, 32, 29);
     border-width: 1px;
-    border-color: rgba(230, 126, 34, 0.3);
+    border-color: rgb(82, 52, 30);
 }
 
 .market-trade-status-icon {
@@ -497,12 +497,12 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(200, 160, 30);
-    background-color: rgba(200, 160, 30, 0.1);
+    background-color: rgb(36, 35, 28);
     white-space: nowrap;
     flex-shrink: 0;
 }
 .market-btn-sat-toggle:hover {
-    background-color: rgba(200, 160, 30, 0.25);
+    background-color: rgb(64, 56, 28);
 }
 
 /* ── FREE AGENTS ── */
@@ -511,7 +511,7 @@
     align-items: center;
     padding: 4px 20px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.3);
+    border-bottom-color: rgb(25, 30, 41);
     height: 48px;
     min-height: 48px;
     max-height: 48px;
@@ -520,7 +520,7 @@
 }
 
 .market-fa-row:hover {
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgb(25, 28, 35);
 }
 
 .market-fa-col-name {
@@ -589,7 +589,7 @@
 }
 
 .market-btn-fa-sign {
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -605,12 +605,12 @@
 }
 
 .market-btn-fa-sign:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(150, 220, 180);
 }
 
 .market-btn-fa-sign:disabled {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(120, 130, 150);
     cursor: default;
@@ -618,7 +618,7 @@
 }
 
 .market-btn-fa-profile {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(100, 150, 230);
@@ -635,7 +635,7 @@
 }
 
 .market-btn-fa-profile:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -652,7 +652,7 @@
 .market-modal {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgb(5, 6, 8);
     z-index: 1000;
     align-items: center;
     justify-content: center;
@@ -731,7 +731,7 @@
 
 .btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
@@ -743,7 +743,7 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-cancel:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     border-color: rgb(140, 150, 170);
     color: rgb(200, 210, 230);
 }
@@ -798,7 +798,7 @@
 .market-closed-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgb(3, 3, 4);
     align-items: center;
     justify-content: center;
     z-index: 500;
@@ -911,7 +911,7 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
 }
@@ -938,12 +938,12 @@
 }
 .market-team-chip:hover {
     border-color: rgb(100, 150, 230);
-    background-color: rgba(42, 95, 201, 0.18);
+    background-color: rgb(22, 34, 59);
 }
 .market-team-chip.active {
     border-width: 2px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.12);
+    background-color: rgb(41, 38, 27);
 }
 .market-team-chip-logo {
     width: 80px;
@@ -965,7 +965,7 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
 }
@@ -980,10 +980,10 @@
     min-height: 54px;
     max-height: 54px;
     padding: 7px 20px;
-    background-color: rgba(13, 20, 33, 0.55);
+    background-color: rgb(15, 20, 31);
 }
 .market-fa-row:hover {
-    background-color: rgba(42, 95, 201, 0.16);
+    background-color: rgb(22, 33, 56);
 }
 .market-fa-col-photo {
     width: 44px;
@@ -1010,7 +1010,7 @@
     z-index: 900;
     align-items: center;
     justify-content: center;
-    background-color: rgba(3, 8, 16, 0.92);
+    background-color: rgb(4, 9, 17);
     padding: 16px;
 }
 .market-trade-modal-box {
@@ -1020,7 +1020,7 @@
     flex-direction: column;
     background-color: rgb(18, 21, 28);
     border-width: 1px;
-    border-color: rgba(120, 95, 30, 0.60);
+    border-color: rgb(79, 65, 29);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -1031,9 +1031,9 @@
     justify-content: space-between;
     flex-shrink: 0;
     padding: 14px 20px;
-    background-color: rgba(15, 17, 23, 0.95);
+    background-color: rgb(15, 17, 23);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 95, 201, 0.30);
+    border-bottom-color: rgb(25, 43, 80);
 }
 .market-trade-modal-heading,
 .market-fa-modal-heading {
@@ -1083,7 +1083,7 @@
 .market-modal-close {
     width: 38px; height: 38px;
     padding: 0;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     border-radius: 8px;
@@ -1094,7 +1094,7 @@
     cursor: pointer;
 }
 .market-modal-close:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(255, 170, 150);
 }
 /* 3-column content */
@@ -1114,22 +1114,22 @@
     flex-direction: column;
     background-color: rgb(10, 24, 46);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.50);
+    border-color: rgb(26, 60, 124);
     border-radius: 8px;
     overflow: hidden;
 }
 .market-trade-panel--other {
-    border-color: rgba(212, 80, 80, 0.50);
+    border-color: rgb(115, 50, 54);
 }
 .market-trade-panel-header {
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     flex-shrink: 0;
 }
 .market-trade-panel--other .market-trade-panel-header {
-    background-color: rgba(212, 80, 80, 0.12);
+    background-color: rgb(41, 28, 34);
 }
 .market-trade-panel-logo {
     width: 64px; height: 64px;
@@ -1162,14 +1162,14 @@
 .market-trade-panel-stats {
     flex-direction: row;
     padding: 8px 14px;
-    background-color: rgba(42, 95, 201, 0.08);
+    background-color: rgb(20, 27, 42);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 95, 201, 0.25);
+    border-bottom-color: rgb(24, 40, 71);
     flex-shrink: 0;
 }
 .market-trade-panel--other .market-trade-panel-stats {
-    background-color: rgba(212, 80, 80, 0.06);
-    border-bottom-color: rgba(212, 80, 80, 0.20);
+    background-color: rgb(30, 25, 31);
+    border-bottom-color: rgb(57, 33, 38);
 }
 .market-trade-stat {
     flex-direction: row;
@@ -1196,13 +1196,13 @@
 .market-trade-panel-section-title {
     flex-shrink: 0;
     padding: 6px 14px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-top-width: 1px;
-    border-top-color: rgba(42, 95, 201, 0.20);
+    border-top-color: rgb(23, 36, 63);
 }
 .market-trade-panel--other .market-trade-panel-section-title {
-    background-color: rgba(212, 80, 80, 0.08);
-    border-top-color: rgba(212, 80, 80, 0.15);
+    background-color: rgb(34, 26, 32);
+    border-top-color: rgb(47, 30, 36);
 }
 .market-trade-panel-section-text {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-SemiBold.ttf");
@@ -1221,7 +1221,7 @@
     margin-left: 2px;
     background-color: transparent;
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.30);
+    border-color: rgb(25, 43, 80);
     border-radius: 4px;
     color: rgb(140, 160, 190);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
@@ -1229,21 +1229,21 @@
     cursor: pointer;
 }
 .market-trade-filter-btn--active {
-    background-color: rgba(42, 95, 201, 0.30);
+    background-color: rgb(25, 43, 80);
     border-color: rgb(42, 95, 201);
     color: rgb(255, 255, 255);
 }
 /* filtros del panel rival: tonos rojos */
 .market-trade-panel--other .market-trade-filter-btn {
-    border-color: rgba(212, 80, 80, 0.35);
+    border-color: rgb(86, 42, 46);
     color: rgb(200, 150, 150);
 }
 .market-trade-panel--other .market-trade-filter-btn:hover {
-    background-color: rgba(212, 80, 80, 0.20);
+    background-color: rgb(57, 33, 38);
     color: rgb(240, 180, 180);
 }
 .market-trade-panel--other .market-trade-filter-btn--active {
-    background-color: rgba(212, 80, 80, 0.40);
+    background-color: rgb(96, 45, 49);
     border-color: rgb(212, 80, 80);
     color: rgb(255, 220, 220);
 }
@@ -1254,10 +1254,10 @@
     /* El listado pierde 16px por la barra lateral (12px + 4px de margen). */
     padding: 5px 26px 5px 10px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 95, 201, 0.25);
+    border-bottom-color: rgb(24, 40, 71);
 }
 .market-trade-panel--other .market-trade-table-header {
-    border-bottom-color: rgba(212, 80, 80, 0.35);
+    border-bottom-color: rgb(86, 42, 46);
 }
 /* panel body = viewport con scroll manual (sin ScrollView de Unity) */
 .market-trade-panel-body {
@@ -1287,9 +1287,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(4, 12, 25, 0.92);
+    background-color: rgb(5, 13, 25);
     border-left-width: 1px;
-    border-left-color: rgba(65, 105, 165, 0.35);
+    border-left-color: rgb(34, 50, 76);
     position: relative;
 }
 .market-trade-scrollbar-thumb {
@@ -1306,7 +1306,7 @@
 }
 /* barra del panel rival: tonos rojos */
 .market-trade-panel--other .market-trade-scrollbar {
-    border-left-color: rgba(212, 80, 80, 0.35);
+    border-left-color: rgb(86, 42, 46);
 }
 .market-trade-panel--other .market-trade-scrollbar-thumb {
     background-color: rgb(212, 80, 80);
@@ -1321,7 +1321,7 @@
     min-height: 152px;
     padding: 6px 0px 6px 12px;
     overflow: hidden;
-    background-color: rgba(4, 13, 28, 0.55);
+    background-color: rgb(10, 17, 28);
 }
 .market-trade-picks-title-bar {
     flex-shrink: 0;
@@ -1371,9 +1371,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(4, 12, 25, 0.92);
+    background-color: rgb(5, 13, 25);
     border-left-width: 1px;
-    border-left-color: rgba(65, 105, 165, 0.35);
+    border-left-color: rgb(34, 50, 76);
     position: relative;
 }
 .market-trade-picks-scrollbar-thumb {
@@ -1389,7 +1389,7 @@
     background-color: rgb(75, 135, 235);
 }
 .market-trade-panel--other .market-trade-picks-scrollbar {
-    border-left-color: rgba(212, 80, 80, 0.35);
+    border-left-color: rgb(86, 42, 46);
 }
 .market-trade-panel--other .market-trade-picks-scrollbar-thumb {
     background-color: rgb(212, 80, 80);
@@ -1406,7 +1406,7 @@
     flex-direction: column;
     background-color: rgb(10, 24, 46);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.50);
+    border-color: rgb(26, 60, 124);
     border-radius: 8px;
     padding: 14px;
     overflow: hidden;
@@ -1424,7 +1424,7 @@
     flex-shrink: 0;
     margin-bottom: 10px;
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.30);
+    border-color: rgb(25, 43, 80);
     border-radius: 6px;
     overflow: hidden;
 }
@@ -1432,22 +1432,22 @@
     flex-direction: row;
     align-items: center;
     padding: 6px 10px;
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
 }
 .market-summary-receive-header--other {
-    background-color: rgba(212, 80, 80, 0.15);
+    background-color: rgb(47, 30, 36);
 }
 .market-summary-badge {
     padding: 2px 6px;
     margin-right: 8px;
-    background-color: rgba(42, 95, 201, 0.40);
+    background-color: rgb(28, 51, 97);
     border-radius: 4px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     color: rgb(180, 210, 255);
 }
 .market-summary-badge--other {
-    background-color: rgba(212, 80, 80, 0.40);
+    background-color: rgb(96, 45, 49);
     color: rgb(255, 180, 180);
 }
 .market-summary-receive-title {
@@ -1475,7 +1475,7 @@
     align-items: center;
     padding: 4px 10px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 95, 201, 0.10);
+    border-bottom-color: rgb(20, 28, 45);
 }
 .market-summary-player-row:last-child {
     border-bottom-width: 0;
@@ -1487,7 +1487,7 @@
     background-size: cover;
     background-position: center;
     flex-shrink: 0;
-    background-color: rgba(42, 95, 201, 0.20);
+    background-color: rgb(23, 36, 63);
 }
 .market-summary-player-name {
     flex-grow: 1;
@@ -1507,7 +1507,7 @@
     flex-shrink: 0;
     padding: 8px 0;
     border-top-width: 1px;
-    border-top-color: rgba(42, 95, 201, 0.25);
+    border-top-color: rgb(24, 40, 71);
 }
 .market-summary-salary-row {
     flex-direction: row;
@@ -1540,16 +1540,16 @@
     border-width: 1px;
 }
 .market-trade-status-box.valid {
-    background-color: rgba(39, 174, 96, 0.10);
-    border-color: rgba(39, 174, 96, 0.40);
+    background-color: rgb(20, 36, 35);
+    border-color: rgb(26, 82, 55);
 }
 .market-trade-status-box.invalid {
-    background-color: rgba(192, 57, 43, 0.10);
-    border-color: rgba(192, 57, 43, 0.40);
+    background-color: rgb(35, 25, 30);
+    border-color: rgb(88, 35, 34);
 }
 .market-trade-status-box.rejected {
-    background-color: rgba(192, 57, 43, 0.10);
-    border-color: rgba(192, 57, 43, 0.40);
+    background-color: rgb(35, 25, 30);
+    border-color: rgb(88, 35, 34);
 }
 .market-trade-status-icon {
     font-size: 18px;
@@ -1580,7 +1580,7 @@
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     border-radius: 8px;
-    background-color: rgba(39, 174, 96, 0.14);
+    background-color: rgb(21, 42, 38);
     color: rgb(100, 210, 145);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
@@ -1588,7 +1588,7 @@
     cursor: pointer;
 }
 .market-btn-confirm-trade:hover {
-    background-color: rgba(39, 174, 96, 0.30);
+    background-color: rgb(24, 67, 48);
 }
 /* action buttons */
 .market-trade-btn {
@@ -1602,34 +1602,34 @@
     -unity-text-align: middle-center;
 }
 .market-trade-btn--confirm {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
     letter-spacing: 2px;
 }
 .market-trade-btn--confirm:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 .market-trade-btn--confirm.market-trade-btn--disabled {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(150, 155, 165);
 }
 .market-trade-btn--confirm.market-trade-btn--disabled:hover {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     color: rgb(150, 155, 165);
 }
 .market-trade-btn--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
     letter-spacing: 2px;
 }
 .market-trade-btn--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(255, 150, 130);
 }
 
@@ -1643,7 +1643,7 @@
     z-index: 1000;
     align-items: center;
     justify-content: center;
-    background-color: rgba(3, 8, 16, 0.90);
+    background-color: rgb(4, 9, 17);
     display: none;
 }
 .market-fa-modal-box {
@@ -1661,7 +1661,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
-    background-color: rgba(42, 95, 201, 0.16);
+    background-color: rgb(22, 33, 56);
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 95, 201);
 }
@@ -1682,9 +1682,9 @@
 .market-fa-modal-body .renew-form-row {
     margin-bottom: 14px;
     padding: 10px 12px;
-    background-color: rgba(7, 16, 30, 0.65);
+    background-color: rgb(11, 18, 29);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.35);
+    border-color: rgb(26, 47, 89);
     border-radius: 6px;
 }
 .market-fa-modal-body .renew-form-label {
@@ -1698,14 +1698,14 @@
 .market-fa-modal-body .btn-spin {
     width: 34px;
     height: 34px;
-    background-color: rgba(42, 95, 201, 0.16);
+    background-color: rgb(22, 33, 56);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
     border-radius: 6px;
     color: rgb(120, 170, 235);
 }
 .market-fa-modal-body .btn-spin:hover {
-    background-color: rgba(42, 95, 201, 0.35);
+    background-color: rgb(26, 47, 89);
 }
 .market-fa-modal-body .renew-options-toggles {
     flex-direction: row;
@@ -1715,7 +1715,7 @@
     flex-grow: 1;
     margin-left: 6px;
     padding: 9px 10px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 7px;
@@ -1728,7 +1728,7 @@
     margin-top: 8px;
     margin-bottom: 8px;
     padding: 9px 12px;
-    background-color: rgba(7, 16, 30, 0.50);
+    background-color: rgb(12, 18, 29);
     border-radius: 6px;
     font-size: 18px;
 }
@@ -1764,20 +1764,20 @@
     cursor: pointer;
 }
 .market-fa-modal-actions .btn-modal-cancel {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 .market-fa-modal-actions .btn-modal-cancel:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
 }
 .market-fa-modal-actions .btn-modal-confirm {
-    background-color: rgba(39, 174, 96, 0.12);
+    background-color: rgb(21, 39, 36);
     border-color: rgb(39, 174, 96);
     color: rgb(100, 210, 145);
 }
 .market-fa-modal-actions .btn-modal-confirm:hover {
-    background-color: rgba(39, 174, 96, 0.28);
+    background-color: rgb(24, 64, 47);
 }
 
 /* ── TRADE SUCCESS MODAL (copied from Roster renew modal) ── */
@@ -1869,7 +1869,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.80);
+    background-color: rgb(4, 4, 6);
     align-items: center;
     justify-content: center;
 }
@@ -1887,16 +1887,16 @@
     flex-direction: row;
     align-items: center;
     padding: 20px 28px;
-    background-color: rgba(39, 174, 96, 0.12);
+    background-color: rgb(21, 39, 36);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(39, 174, 96, 0.30);
+    border-bottom-color: rgb(24, 67, 48);
 }
 .trade-check-icon {
     width: 56px;
     height: 56px;
     margin-right: 18px;
     flex-shrink: 0;
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     border-radius: 28px;
@@ -1936,7 +1936,7 @@
     cursor: pointer;
 }
 .trade-close-x:hover {
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     color: rgb(255, 255, 255);
 }
 /* Green line */
@@ -1955,18 +1955,18 @@
     flex-basis: 0;
     flex-direction: column;
     border-width: 1px;
-    border-color: rgba(0, 140, 210, 0.30);
+    border-color: rgb(13, 57, 83);
     border-radius: 8px;
-    background-color: rgba(10, 18, 45, 0.50);
+    background-color: rgb(14, 20, 36);
     overflow: hidden;
 }
 .trade-team-header-row {
     flex-direction: row;
     align-items: center;
     padding: 14px 16px;
-    background-color: rgba(10, 18, 45, 0.80);
+    background-color: rgb(12, 19, 42);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(0, 140, 210, 0.20);
+    border-bottom-color: rgb(14, 45, 64);
 }
 .trade-team-logo-lg {
     width: 64px;
@@ -1999,9 +1999,9 @@
 .trade-table-header {
     flex-direction: row;
     padding: 8px 14px;
-    background-color: rgba(15, 25, 55, 0.80);
+    background-color: rgb(16, 24, 50);
     border-bottom-width: 1px;
-    border-bottom-color: rgba(0, 140, 210, 0.15);
+    border-bottom-color: rgb(15, 39, 55);
 }
 .trade-th {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -2029,7 +2029,7 @@
     align-items: center;
     padding: 8px 14px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(0, 140, 210, 0.08);
+    border-bottom-color: rgb(17, 31, 43);
 }
 .trade-player-row:last-child {
     border-bottom-width: 0;
@@ -2040,7 +2040,7 @@
     margin-right: 10px;
     flex-shrink: 0;
     border-radius: 25px;
-    background-color: rgba(0, 140, 210, 0.15);
+    background-color: rgb(15, 39, 55);
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
@@ -2075,7 +2075,7 @@
     align-items: center;
     padding: 8px 14px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(0, 140, 210, 0.08);
+    border-bottom-color: rgb(17, 31, 43);
 }
 .trade-pick-icon {
     width: 40px;
@@ -2124,9 +2124,9 @@
     flex-direction: row;
     margin: 0 24px 16px;
     padding: 14px 20px;
-    background-color: rgba(10, 18, 45, 0.60);
+    background-color: rgb(13, 19, 38);
     border-width: 1px;
-    border-color: rgba(0, 140, 210, 0.20);
+    border-color: rgb(14, 45, 64);
     border-radius: 8px;
     align-items: center;
 }
@@ -2163,7 +2163,7 @@
 .trade-info-divider {
     width: 1px;
     height: 36px;
-    background-color: rgba(0, 140, 210, 0.20);
+    background-color: rgb(14, 45, 64);
     margin: 0 16px;
 }
 /* Button */
@@ -2173,7 +2173,7 @@
     padding: 0 24px 24px;
 }
 .trade-btn {
-    background-color: rgba(39, 174, 96, 0.12);
+    background-color: rgb(21, 39, 36);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(39, 174, 96);
@@ -2187,7 +2187,7 @@
     cursor: pointer;
 }
 .trade-btn:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(80, 200, 140);
 }
 
@@ -2470,21 +2470,21 @@
 .market-fa-modal-body .renew-toggle-btn--team-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 .market-fa-modal-body .renew-toggle-btn--player-active,
 .market-fa-modal-body .renew-toggle-btn--player-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 .market-fa-modal-body .renew-toggle-btn--tw-active,
 .market-fa-modal-body .renew-toggle-btn--tw-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 /* ── TABLE HEADER PHOTO ── */
@@ -2520,9 +2520,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(25, 18, 8, 0.92);
+    background-color: rgb(24, 18, 10);
     border-left-width: 1px;
-    border-left-color: rgba(120, 95, 30, 0.35);
+    border-left-color: rgb(54, 47, 29);
     position: relative;
 }
 
@@ -2542,11 +2542,11 @@
 /* Cancelar neutro del pie del modal (el rojo de .btn-modal-cancel es de peligro):
    en la confirmación de traspaso cancelar no es destructivo, así que va en gris. */
 .market-fa-modal-actions .btn-modal-cancel--neutral {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
 }
 .market-fa-modal-actions .btn-modal-cancel--neutral:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(200, 210, 230);
 }

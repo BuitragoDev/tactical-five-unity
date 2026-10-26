@@ -25,7 +25,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -33,7 +33,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -58,7 +58,7 @@
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 0 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 
 .injured-content {
@@ -193,9 +193,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(25, 18, 8, 0.92);
+    background-color: rgb(24, 18, 10);
     border-left-width: 1px;
-    border-left-color: rgba(120, 95, 30, 0.35);
+    border-left-color: rgb(54, 47, 29);
     position: relative;
 }
 
@@ -314,12 +314,12 @@
 
 .card-status--injured {
     color: rgb(230, 120, 100);
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
 }
 
 .card-status--recovered {
     color: rgb(100, 200, 140);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 /* ── CARD BODY ── */
@@ -344,7 +344,7 @@
     width: 64px;
     height: 64px;
     border-radius: 50%;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     margin-right: 14px;
     flex-shrink: 0;
     align-items: center;
@@ -352,7 +352,7 @@
 }
 
 .card-injury-icon--recovered {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 .card-injury-icon-img {
@@ -508,7 +508,7 @@
     font-size: 14px;
     letter-spacing: 1px;
     color: rgb(230, 120, 100);
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
     border-radius: 6px;
@@ -519,7 +519,7 @@
 
 .btn-card-force {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -535,7 +535,7 @@
 }
 
 .btn-card-force:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -550,7 +550,7 @@
 
 .btn-card-no-apt {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(100, 150, 230);
@@ -564,18 +564,18 @@
     white-space: nowrap;
 }
 .btn-card-no-apt:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 /* Deshabilitado: el hover no debe cambiar el color */
 .btn-card-no-apt.btn-card-no-apt--disabled:hover {
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     color: rgb(90, 103, 128);
 }
 
 .btn-card-apt {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -589,12 +589,12 @@
     white-space: nowrap;
 }
 .btn-card-apt:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
 }
 
 .btn-card-treat {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -609,37 +609,37 @@
     white-space: nowrap;
 }
 .btn-card-treat:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
 }
 
 .btn-card-treat--disabled {
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     border-color: rgb(42, 51, 71);
     color: rgb(90, 103, 128);
 }
 
 /* Deshabilitado: el hover no debe cambiar el color (mayor especificidad que el :hover base) */
 .btn-card-treat.btn-card-treat--disabled:hover {
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     color: rgb(90, 103, 128);
 }
 
 .btn-card-force.btn-card-no-apt--disabled:hover {
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     color: rgb(90, 103, 128);
 }
 
 .btn-card-treat--done {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
 }
 .btn-card-treat--done:hover {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 .btn-card-no-apt--disabled {
-    background-color: rgba(42, 51, 71, 0.10);
+    background-color: rgb(20, 24, 32);
     border-color: rgb(42, 51, 71);
     color: rgb(90, 103, 128);
 }
@@ -686,7 +686,7 @@
 .injured-modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgb(3, 3, 4);
     align-items: center;
     justify-content: center;
     display: none;
@@ -745,7 +745,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 22px;
     letter-spacing: 2px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     color: rgb(100, 150, 230);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
@@ -756,7 +756,7 @@
     flex-shrink: 0;
 }
 .btn-league-injured:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 /* ── LEAGUE INJURED MODAL ── */
@@ -835,9 +835,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(25, 18, 8, 0.92);
+    background-color: rgb(24, 18, 10);
     border-left-width: 1px;
-    border-left-color: rgba(120, 95, 30, 0.35);
+    border-left-color: rgb(54, 47, 29);
     position: relative;
 }
 .league-injured-scrollbar-thumb {
@@ -918,7 +918,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     color: rgb(100, 150, 230);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
@@ -930,7 +930,7 @@
 }
 
 .btn-hire:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 /* ── LEAGUE INJURED MODAL — modern gold border ── */
@@ -944,19 +944,19 @@
 }
 #LeagueInjuredBox .modal-title {
     padding: 10px 24px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
 }
 #BtnLeagueInjuredClose {
     margin: 16px 24px 20px;
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-width: 2px;
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
     border-radius: 8px;
 }
 #BtnLeagueInjuredClose:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(240, 200, 80);
 }

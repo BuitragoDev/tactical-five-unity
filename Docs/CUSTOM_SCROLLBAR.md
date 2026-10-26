@@ -146,9 +146,9 @@ Referencias reales: `Market.uxml:133-141` (mi equipo) y `Market.uxml:196-204` (o
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(4, 12, 25, 0.92);
+    background-color: rgb(5, 13, 25);
     border-left-width: 1px;
-    border-left-color: rgba(65, 105, 165, 0.35);
+    border-left-color: rgb(34, 50, 76);
     position: relative;
 }
 

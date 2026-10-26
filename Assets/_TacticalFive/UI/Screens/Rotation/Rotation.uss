@@ -7,7 +7,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -15,7 +15,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -40,7 +40,7 @@
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 0 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 
 /* ── LAYOUT ── */
@@ -95,7 +95,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 9px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
 }
@@ -215,7 +215,7 @@
     border-bottom-width: 0;
 }
 .rot-row--starter {
-    background-color: rgba(42, 95, 201, 0.06);
+    background-color: rgb(19, 25, 38);
 }
 .rot-row--disabled {
     opacity: 0.45;
@@ -243,11 +243,11 @@
     padding: 1px 6px;
     align-self: flex-start;
     border-radius: 3px;
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(230, 120, 100);
 }
 .rot-badge--gleague {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(120, 160, 235);
 }
 
@@ -411,7 +411,7 @@
     flex-grow: 1;
     flex-basis: 0;
     margin-left: 6px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 235);
@@ -425,20 +425,20 @@
 }
 .rot-btn--lead { margin-left: 0; }
 .rot-btn--primary {
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
 }
 .rot-btn--primary:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
 }
 .rot-btn--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 .rot-btn--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 

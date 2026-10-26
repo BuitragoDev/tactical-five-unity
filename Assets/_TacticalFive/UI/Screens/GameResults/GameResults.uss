@@ -178,7 +178,7 @@
     color: #4a80f0;
     letter-spacing: 1px;
     text-transform: uppercase;
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     padding: 6px 14px;
     border-radius: 4px;
     margin-left: 20px;
@@ -189,7 +189,7 @@
 .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -204,7 +204,7 @@
 }
 
 .btn-action:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -219,7 +219,7 @@
 
 .game-card.my-game {
     border-color: #d4a017;
-    background-color: rgba(212, 160, 23, 0.04);
+    background-color: rgb(26, 27, 28);
 }
 
 .game-card-content {
@@ -272,7 +272,7 @@
     align-items: center;
     justify-content: center;
     padding: 6px 16px;
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: rgb(14, 16, 21);
     border-radius: 4px;
     margin: 0 16px;
     flex-shrink: 0;
@@ -487,7 +487,7 @@
     align-items: center;
     gap: 10px;
     padding: 4px 16px;
-    border-bottom: 1px solid rgba(42, 51, 71, 0.4);
+    border-bottom: 1px solid rgb(28, 33, 45);
 }
 
 .lb-row--last {

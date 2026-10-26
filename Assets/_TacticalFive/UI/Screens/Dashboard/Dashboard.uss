@@ -322,9 +322,9 @@
     border-bottom-width: 3px;
     border-left-width: 3px;
     border-top-color: rgb(212, 160, 23);
-    border-right-color: rgba(122, 138, 170, 0.12);
-    border-bottom-color: rgba(122, 138, 170, 0.12);
-    border-left-color: rgba(122, 138, 170, 0.12);
+    border-right-color: rgb(30, 35, 45);
+    border-bottom-color: rgb(30, 35, 45);
+    border-left-color: rgb(30, 35, 45);
     border-radius: 14px;
     flex-shrink: 0;
     margin: auto 10px auto 0;
@@ -334,7 +334,7 @@
 .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -347,26 +347,26 @@
     border-radius: 8px;
 }
 .btn-action:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 .btn-action--match {
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
 }
 .btn-action--match:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(240, 192, 64);
 }
 .btn-action--simulate {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
 }
 .btn-action--simulate:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 /* ── CONTENT AREA ── */
@@ -422,7 +422,7 @@
     background-color: rgb(18, 21, 28);
 }
 .panel--gold .panel-header {
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-color: rgb(120, 95, 30);
 }
 .panel--gold .panel-title {
@@ -551,7 +551,7 @@
     cursor: pointer;
 }
 .panel-footer:hover {
-    background-color: rgba(42, 95, 201, 0.08);
+    background-color: rgb(20, 27, 42);
 }
 .panel-footer-link {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -718,7 +718,7 @@
     border-left-color: rgb(42, 51, 71);
 }
 .game-meta-footer:hover {
-    background-color: rgba(42, 95, 201, 0.08);
+    background-color: rgb(20, 27, 42);
     border-radius: 2px;
 }
 
@@ -1041,7 +1041,7 @@
     align-items: center;
     padding: 10px 0;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.4);
+    border-bottom-color: rgb(28, 33, 45);
 }
 .team-stat-icon-bg {
     width: 28px;
@@ -1175,7 +1175,7 @@
     border-radius: 50px;
     border-width: 3px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     align-items: center;
     justify-content: center;
     margin-top: 0;
@@ -1208,7 +1208,7 @@
 .fired-modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgb(3, 3, 4);
     align-items: center;
     justify-content: center;
     display: none;
@@ -1286,7 +1286,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 18px;
     letter-spacing: 2px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -1296,7 +1296,7 @@
 }
 
 .fired-modal-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -1315,30 +1315,30 @@
     color: rgb(39, 174, 96);
 }
 .fired-modal-btn--positive {
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
 }
 .fired-modal-btn--positive:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(150, 220, 180);
 }
 .fired-modal-btn--warning {
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
 }
 .fired-modal-btn--warning:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(230, 190, 60);
 }
 .fired-modal-btn--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 .fired-modal-btn--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -1351,7 +1351,7 @@
     font-size: 18px;
     letter-spacing: 1px;
     padding: 12px 20px;
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
@@ -1360,7 +1360,7 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-cancel:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(200, 210, 230);
 }
 
@@ -1369,7 +1369,7 @@
     font-size: 18px;
     letter-spacing: 1px;
     padding: 12px 20px;
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -1378,7 +1378,7 @@
     -unity-text-align: middle-center;
 }
 .btn-modal-confirm:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
 }
 
 /* Red de seguridad: una variante usada sin la clase base debe seguir siendo visible
@@ -1396,35 +1396,35 @@
 }
 
 .btn-modal-confirm--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
     font-size: 18px;
 }
 .btn-modal-confirm--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
 .btn-modal-confirm--gold {
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-color: rgb(212, 160, 23);
     color: rgb(212, 160, 23);
     font-size: 18px;
 }
 .btn-modal-confirm--gold:hover {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(230, 190, 60);
 }
 
 .btn-modal-confirm--blue {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
     color: rgb(100, 150, 230);
     font-size: 18px;
 }
 .btn-modal-confirm--blue:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(130, 180, 255);
 }
 
@@ -1443,23 +1443,23 @@
     flex-shrink: 0;
     align-items: center;
     padding: 10px 24px;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-bottom-width: 1px;
     border-bottom-color: rgb(192, 57, 43);
 }
 
 .fired-modal-header--warning {
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     border-bottom-color: rgb(212, 160, 23);
 }
 
 .fired-modal-header--green {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
     border-bottom-color: rgb(39, 174, 96);
 }
 
 .fired-modal-header--blue {
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     border-bottom-color: rgb(42, 95, 201);
 }
 
@@ -1546,7 +1546,7 @@
 .offer-result-modal-op-card {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.03);
+    background-color: rgb(25, 28, 35);
     border-left-width: 3px;
     border-left-color: rgb(58, 74, 99);
     border-radius: 6px;
@@ -1592,13 +1592,13 @@
     flex-shrink: 0;
 }
 .offer-result-modal-op-badge--positive {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 .offer-result-modal-op-badge--negative {
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
 }
 .offer-result-modal-op-badge--warning {
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
 }
 
 .offer-result-modal-op-badge-text {
@@ -1633,11 +1633,11 @@
 }
 
 .deadline-modal-card {
-    border-color: rgba(212, 160, 23, 0.25);
+    border-color: rgb(66, 56, 27);
 }
 
 .deadline-modal-icon {
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
 }
 
 .deadline-modal-icon-text {
@@ -1655,19 +1655,19 @@
 }
 
 .deadline-modal-badge--trade {
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
 }
 
 .deadline-modal-badge--fa {
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
 }
 
 .deadline-modal-badge--sat {
-    background-color: rgba(155, 89, 182, 0.15);
+    background-color: rgb(39, 31, 51);
     border-width: 1px;
     border-color: rgb(155, 89, 182);
 }
@@ -1865,7 +1865,7 @@
     width: 70px;
     height: 36px;
     margin-left: 6px;
-    background-color: rgba(30, 33, 42, 0.6);
+    background-color: rgb(25, 28, 36);
     border-width: 2px;
     border-color: rgb(60, 65, 75);
     border-radius: 8px;
@@ -1879,17 +1879,17 @@
     transition-duration: 0.15s;
 }
 .settings-quality-btn:hover {
-    background-color: rgba(50, 55, 68, 0.7);
+    background-color: rgb(40, 45, 56);
     border-color: rgb(90, 95, 110);
     color: rgb(200, 210, 230);
 }
 .settings-quality-btn--active {
-    background-color: rgba(60, 65, 78, 0.9);
+    background-color: rgb(56, 61, 73);
     border-color: rgb(120, 125, 140);
     color: rgb(255, 255, 255);
 }
 .settings-quality-btn--active:hover {
-    background-color: rgba(70, 75, 88, 1);
+    background-color: rgb(70, 75, 88);
     border-color: rgb(140, 145, 160);
 }
 .settings-quality-btn--wide {
@@ -1912,21 +1912,21 @@
     transition-duration: 0.15s;
 }
 .settings-btn--secondary {
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
 }
 .settings-btn--secondary:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(200, 210, 230);
 }
 .settings-btn--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 .settings-btn--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -1947,7 +1947,7 @@
 }
 #ConfigExitConfirmBox .modal-title {
     padding: 10px 24px;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-bottom-width: 1px;
     border-bottom-color: rgb(192, 57, 43);
 }
@@ -1959,23 +1959,23 @@
 #ConfigBtnExitYes {
     flex-grow: 1;
     min-width: 0;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 #ConfigBtnExitYes:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 #ConfigBtnExitNo {
     flex-grow: 1;
     min-width: 0;
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
 }
 #ConfigBtnExitNo:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(200, 210, 230);
 }
 
@@ -2029,7 +2029,7 @@
     font-size: 13px;
     letter-spacing: 1px;
     color: rgb(180, 190, 210);
-    background-color: rgba(255, 255, 255, 0.06);
+    background-color: rgb(32, 35, 42);
     border-radius: 4px;
     padding: 6px 14px;
     margin-right: 16px;
@@ -2039,9 +2039,9 @@
     width: 36px;
     height: 36px;
     border-radius: 18px;
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgb(37, 40, 46);
     border-width: 1px;
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgb(54, 56, 62);
     color: rgb(200, 205, 220);
     font-size: 18px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -2049,7 +2049,7 @@
 }
 
 .trade-modal-close-btn:hover {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: rgb(54, 56, 62);
 }
 
 /* ── Teams row ── */
@@ -2249,10 +2249,10 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
     color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.12);
+    background-color: rgb(41, 38, 27);
     border-radius: 8px;
     border-width: 1px;
-    border-color: rgba(212, 160, 23, 0.25);
+    border-color: rgb(66, 56, 27);
     padding: 0 14px;
     margin-bottom: 6px;
 }
@@ -2340,7 +2340,7 @@
     border-color: rgb(212, 160, 23);
     align-items: center;
     justify-content: center;
-    background-color: rgba(212, 160, 23, 0.08);
+    background-color: rgb(34, 32, 28);
 }
 
 .trade-modal-chem-value {
@@ -2370,13 +2370,13 @@
 }
 
 .trade-modal-btn--reject {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(231, 76, 60);
 }
 
 .trade-modal-btn--reject:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
 }
 
 .trade-modal-btn--accept {
@@ -2390,13 +2390,13 @@
 }
 
 .trade-modal-btn--manual {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
 }
 
 .trade-modal-btn--manual:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 /* ── Resumen de simulación rápida ── */
@@ -2446,7 +2446,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-radius: 6px;
     padding: 6px 10px;
     margin-top: 6px;
@@ -2487,7 +2487,7 @@
     border-radius: 8px;
     border-width: 2px;
     border-color: rgb(231, 76, 60);
-    background-color: rgba(231, 76, 60, 0.12);
+    background-color: rgb(44, 28, 32);
     color: rgb(231, 76, 60);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 14px;
@@ -2499,12 +2499,12 @@
 }
 
 .injury-modal-treat-btn:hover {
-    background-color: rgba(231, 76, 60, 0.25);
+    background-color: rgb(71, 35, 36);
 }
 
 .injury-modal-treat-btn--done {
     border-color: rgb(100, 110, 135);
-    background-color: rgba(100, 110, 135, 0.10);
+    background-color: rgb(26, 30, 39);
     color: rgb(100, 110, 135);
 }
 
@@ -2522,7 +2522,7 @@
 }
 
 .injury-modal-treat-btn--done:hover {
-    background-color: rgba(100, 110, 135, 0.10);
+    background-color: rgb(26, 30, 39);
 }
 
 /* ══ Recovery modal (green theme) ══ */
@@ -2557,7 +2557,7 @@
 .recovery-modal-badge {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
     border-radius: 6px;
     padding: 6px 10px;
     margin-top: 6px;
@@ -2604,7 +2604,7 @@
     border-radius: 50%;
     border-width: 2px;
     border-color: rgb(192, 57, 43);
-    background-color: rgba(192, 57, 43, 0.08);
+    background-color: rgb(32, 24, 29);
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
@@ -2621,7 +2621,7 @@
 .empty-modal-badge {
     flex-direction: row;
     align-items: center;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-radius: 6px;
     padding: 6px 10px;
     margin-top: 6px;
@@ -2662,9 +2662,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.25);
+    border-color: rgb(24, 40, 71);
     border-radius: 6px;
     padding: 12px 20px;
     margin-bottom: 20px;
@@ -2747,7 +2747,7 @@
     font-size: 14px;
     letter-spacing: 1px;
     color: rgb(248, 196, 64);
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
     border-radius: 6px;

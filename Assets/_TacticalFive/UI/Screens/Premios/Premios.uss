@@ -21,7 +21,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -29,7 +29,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -116,7 +116,7 @@
     align-items: center;
     padding: 8px 0;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.4);
+    border-bottom-color: rgb(28, 33, 45);
     min-height: 48px;
 }
 
@@ -125,7 +125,7 @@
 }
 
 .premios-data-row:hover {
-    background-color: rgba(42, 51, 71, 0.2);
+    background-color: rgb(23, 27, 37);
 }
 
 /* Data columns */

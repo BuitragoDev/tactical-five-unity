@@ -66,7 +66,7 @@
 .btn-back {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -80,7 +80,7 @@
 }
 
 .btn-back:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -325,7 +325,7 @@
 }
 
 .slot-status-badge--active {
-    background-color: rgba(39, 174, 96, 0.08);
+    background-color: rgb(20, 33, 33);
 }
 .slot-status-badge--active .slot-status-dot {
     background-color: rgb(39, 174, 96);
@@ -335,7 +335,7 @@
 }
 
 .slot-status-badge--fired {
-    background-color: rgba(192, 57, 43, 0.08);
+    background-color: rgb(32, 24, 29);
 }
 .slot-status-badge--fired .slot-status-dot {
     background-color: rgb(192, 57, 43);
@@ -351,7 +351,7 @@
     justify-content: center;
     margin: 6px 16px 0;
     padding: 6px;
-    background-color: rgba(212, 160, 23, 0.08);
+    background-color: rgb(34, 32, 28);
 }
 
 .slot-mode-badge .slot-mode-label {
@@ -378,7 +378,7 @@
 
 .btn-load {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -393,12 +393,12 @@
 }
 
 .btn-load:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
 .btn-load--disabled {
-    background-color: rgba(60, 60, 70, 0.25);
+    background-color: rgb(28, 31, 38);
     border-color: rgb(60, 60, 70);
     color: rgb(80, 85, 95);
     cursor: default;
@@ -406,7 +406,7 @@
 
 .btn-delete {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -421,7 +421,7 @@
 }
 
 .btn-delete:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -438,7 +438,7 @@
 .loadgame-paginator-btn {
     width: 40px;
     height: 40px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -450,7 +450,7 @@
 }
 
 .loadgame-paginator-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -506,12 +506,12 @@
 .loadgame-root > .content-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(15, 17, 23, 0.65);
+    background-color: rgb(16, 18, 25);
     z-index: 5;
 }
 
 .loadgame-root > .modal-overlay {
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgb(7, 8, 11);
 }
 
 /* ══ MODAL BORRAR PARTIDA ══ */
@@ -530,7 +530,7 @@
 #DeleteModalBox .modal-title {
     padding: 10px 24px;
     margin: 0;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-bottom-width: 1px;
     border-bottom-color: rgb(192, 57, 43);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -561,7 +561,7 @@
 #BtnDeleteNo {
     flex-grow: 1;
     min-width: 0;
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
@@ -569,7 +569,7 @@
 }
 
 #BtnDeleteNo:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(190, 200, 220);
 }
 
@@ -577,7 +577,7 @@
     flex-grow: 1;
     min-width: 0;
     margin-left: 16px;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -585,7 +585,7 @@
 }
 
 #BtnDeleteYes:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -609,7 +609,7 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 6px;
-    background-color: rgba(25, 18, 8, 0.92);
+    background-color: rgb(24, 18, 10);
     border-radius: 6px;
 }
 .lgx-thumb {
@@ -631,13 +631,13 @@
     min-height: 80px; /* logo 64px + padding 8+8 */
     padding: 8px 10px;
     margin-bottom: 6px;
-    background-color: rgba(42, 95, 201, 0.08);
+    background-color: rgb(20, 27, 42);
     border-width: 1px;
     border-color: rgb(60, 70, 92);
     border-radius: 8px;
 }
 .lgx-row:hover {
-    background-color: rgba(42, 95, 201, 0.22);
+    background-color: rgb(23, 37, 66);
     border-color: rgb(42, 95, 201);
 }
 .lgx-logo {
@@ -671,7 +671,7 @@
     flex-shrink: 0;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 1px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -680,5 +680,5 @@
     cursor: pointer;
 }
 .lgx-del:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
 }

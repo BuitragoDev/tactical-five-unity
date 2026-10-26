@@ -25,7 +25,7 @@
     margin: 16px 20px 12px 20px;
     border-color: rgb(212, 160, 23);
     border-width: 1px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -33,7 +33,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .standings-screen-icon {
     width: 40px;
@@ -59,7 +59,7 @@
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 0 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 
 .standings-left {

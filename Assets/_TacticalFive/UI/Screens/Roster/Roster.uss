@@ -27,7 +27,7 @@
     margin: 16px 20px 12px 20px;
     border-color: rgb(212, 160, 23);
     border-width: 1px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -35,7 +35,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .roster-screen-icon {
     width: 40px;
@@ -61,7 +61,7 @@
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 0 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 
 /* ── CONTENT AREA ── */
@@ -92,7 +92,7 @@
 }
 .roster-stats-panel.panel--gold .panel-header {
     border-bottom-color: rgb(212, 160, 23);
-    background-color: rgba(212, 160, 23, 0.15);
+    background-color: rgb(47, 42, 27);
 }
 .roster-stats-grid {
     flex-direction: row;
@@ -147,7 +147,7 @@
     flex-direction: row;
     align-items: center;
     padding: 8px 12px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-left-width: 3px;
     border-left-color: rgb(120, 95, 30);
     border-top-width: 0;
@@ -461,7 +461,7 @@
     border-radius: 8px;
     border-width: 2px;
     -unity-text-align: middle-center;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
     flex-grow: 1;
@@ -471,7 +471,7 @@
     white-space: nowrap;
 }
 .detail-link-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 .detail-links-row {
@@ -744,7 +744,7 @@
     flex-basis: 0;
     margin: 0 4px;
     padding: 12px 8px;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
@@ -756,7 +756,7 @@
     cursor: pointer;
 }
 .btn-buyout:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
 }
 
 /* Botón renovar contrato */
@@ -765,7 +765,7 @@
     flex-grow: 1;
     flex-basis: 0;
     padding: 12px 8px;
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -777,11 +777,11 @@
     cursor: pointer;
 }
 .btn-renew:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
 }
 .btn-renew--pending,
 .btn-renew--pending:hover {
-    background-color: rgba(120, 95, 30, 0.10);
+    background-color: rgb(28, 28, 28);
     border-color: rgb(120, 95, 30);
     color: rgb(160, 140, 80);
     cursor: default;
@@ -839,7 +839,7 @@
 .renew-modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0, 0, 0, 0.85);
+    background-color: rgb(3, 3, 4);
     align-items: center;
     justify-content: center;
     display: none;
@@ -945,7 +945,7 @@
 .dismiss-modal-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(3, 8, 16, 0.90);
+    background-color: rgb(4, 9, 17);
     align-items: center;
     justify-content: center;
     display: none;
@@ -971,7 +971,7 @@
     align-items: center;
     align-self: stretch;
     padding: 14px 18px;
-    background-color: rgba(192, 57, 43, 0.20);
+    background-color: rgb(53, 28, 31);
     border-bottom-width: 1px;
     border-bottom-color: rgb(192, 57, 43);
 }
@@ -1000,7 +1000,7 @@
     border-left-width: 3px;
     border-left-color: rgb(212, 160, 23);
     padding: 9px 12px;
-    background-color: rgba(7, 16, 30, 0.50);
+    background-color: rgb(12, 18, 29);
     border-radius: 6px;
 }
 .dismiss-modal-buttons {
@@ -1022,7 +1022,7 @@
 }
 .btn-modal-cancel {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
@@ -1034,7 +1034,7 @@
     border-radius: 8px;
 }
 .btn-modal-cancel:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     border-color: rgb(140, 150, 170);
     color: rgb(200, 210, 230);
 }
@@ -1043,7 +1043,7 @@
     flex-grow: 1;
     flex-basis: 0;
     margin-left: 6px;
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -1056,17 +1056,17 @@
     white-space: normal;
 }
 .btn-modal-confirm:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
 }
 
 .btn-modal-confirm--danger {
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
 }
 
 .btn-modal-confirm--danger:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     border-color: rgb(231, 76, 60);
     color: rgb(240, 145, 125);
 }
@@ -1105,21 +1105,21 @@
 .renew-toggle-btn--team-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 
 .renew-toggle-btn--player-active,
 .renew-toggle-btn--player-active:hover {
     color: rgb(248, 196, 64);
     border-color: rgb(248, 196, 64);
-    background-color: rgba(248, 196, 64, 0.15);
+    background-color: rgb(52, 47, 33);
 }
 
 .renew-toggle-btn--tw-active,
 .renew-toggle-btn--tw-active:hover {
     color: rgb(190, 220, 255);
     border-color: rgb(39, 84, 148);
-    background-color: rgba(39, 84, 148, 0.25);
+    background-color: rgb(23, 37, 58);
 }
 
 /* ── Spinner (increment/decrement buttons + label) ── */
@@ -1186,7 +1186,7 @@
     align-self: stretch;
     justify-content: space-between;
     padding: 14px 18px;
-    background-color: rgba(42, 95, 201, 0.16);
+    background-color: rgb(22, 33, 56);
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 95, 201);
 }
@@ -1227,7 +1227,7 @@
     margin-top: 8px;
     margin-bottom: 8px;
     padding: 9px 12px;
-    background-color: rgba(7, 16, 30, 0.50);
+    background-color: rgb(12, 18, 29);
     border-radius: 6px;
     font-size: 18px;
     -unity-text-align: middle-center;
@@ -1264,9 +1264,9 @@
 .renew-form-row {
     margin-bottom: 14px;
     padding: 10px 12px;
-    background-color: rgba(7, 16, 30, 0.65);
+    background-color: rgb(11, 18, 29);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.35);
+    border-color: rgb(26, 47, 89);
     border-radius: 6px;
 }
 .renew-form-label {
@@ -1280,14 +1280,14 @@
 .btn-spin {
     width: 34px;
     height: 34px;
-    background-color: rgba(42, 95, 201, 0.16);
+    background-color: rgb(22, 33, 56);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
     border-radius: 6px;
     color: rgb(120, 170, 235);
 }
 .btn-spin:hover {
-    background-color: rgba(42, 95, 201, 0.35);
+    background-color: rgb(26, 47, 89);
 }
 .renew-options-toggles {
     flex-direction: row;
@@ -1297,7 +1297,7 @@
     flex-grow: 1;
     margin-left: 6px;
     padding: 9px 10px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 7px;
@@ -1305,33 +1305,33 @@
     font-size: 18px;
 }
 .renew-toggle-btn:hover {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(42, 95, 201);
 }
 .renew-toggle-btn--team-active,
 .renew-toggle-btn--team-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 .renew-toggle-btn--player-active,
 .renew-toggle-btn--player-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 .renew-toggle-btn--tw-active,
 .renew-toggle-btn--tw-active:hover {
     color: rgb(39, 174, 96);
     border-color: rgb(39, 174, 96);
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
 }
 .renew-modal-box .btn-modal-cancel {
     flex-grow: 1;
     flex-basis: 0;
     margin-left: 6px;
     margin-right: 0;
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
@@ -1341,7 +1341,7 @@
     border-radius: 8px;
 }
 .renew-modal-box .btn-modal-cancel:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     border-color: rgb(140, 150, 170);
     color: rgb(200, 210, 230);
 }
@@ -1349,7 +1349,7 @@
     flex-grow: 1;
     flex-basis: 0;
     margin-left: 6px;
-    background-color: rgba(39, 174, 96, 0.12);
+    background-color: rgb(21, 39, 36);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 210, 145);
@@ -1358,5 +1358,5 @@
     padding: 11px 16px;
 }
 .renew-modal-box .btn-modal-confirm:hover {
-    background-color: rgba(39, 174, 96, 0.28);
+    background-color: rgb(24, 64, 47);
 }

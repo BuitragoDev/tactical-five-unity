@@ -64,7 +64,7 @@
 .playerprofile-banner-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(13, 16, 24, 0.72);
+    background-color: rgb(14, 17, 25);
 }
 
 .playerprofile-banner-inner {
@@ -119,7 +119,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 20px;
     color: rgb(100, 150, 230);
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
     border-radius: 6px;
@@ -305,7 +305,7 @@
     flex-direction: column;
     margin-top: 16px;
     border-top-width: 1px;
-    border-top-color: rgba(212, 160, 23, 0.35);
+    border-top-color: rgb(86, 70, 26);
     padding-top: 10px;
 }
 .playerprofile-trends-title {
@@ -326,10 +326,10 @@
     width: 100%;
     padding: 4px 8px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.5);
+    border-bottom-color: rgb(30, 36, 50);
 }
 .playerprofile-trends-row--head {
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .playerprofile-trends-cell {
     width: 80px;
@@ -413,7 +413,7 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
     flex-shrink: 0;
@@ -496,7 +496,7 @@
     align-items: center;
     padding: 6px 0;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.4);
+    border-bottom-color: rgb(28, 33, 45);
     flex-shrink: 0;
 }
 
@@ -603,7 +603,7 @@
 .playerprofile-trajectory-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     color: rgb(255, 255, 255);
-    background-color: rgba(42, 95, 201, 0.9);
+    background-color: rgb(40, 88, 184);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;

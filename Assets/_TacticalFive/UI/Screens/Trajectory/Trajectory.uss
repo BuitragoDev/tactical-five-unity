@@ -48,7 +48,7 @@
 .trajectory-banner-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(13, 16, 24, 0.72);
+    background-color: rgb(14, 17, 25);
 }
 
 .trajectory-banner-inner {
@@ -98,7 +98,7 @@
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 20px;
     color: rgb(100, 150, 230);
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     border-width: 1px;
     border-color: rgb(42, 95, 201);
     border-radius: 6px;
@@ -228,7 +228,7 @@
 .trajectory-goto-btn {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     color: rgb(255, 255, 255);
-    background-color: rgba(42, 95, 201, 0.9);
+    background-color: rgb(40, 88, 184);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     border-radius: 8px;
@@ -263,7 +263,7 @@
     flex-direction: row;
     align-items: center;
     padding: 10px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(120, 95, 30);
     flex-shrink: 0;
@@ -328,9 +328,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(25, 18, 8, 0.92);
+    background-color: rgb(24, 18, 10);
     border-left-width: 1px;
-    border-left-color: rgba(120, 95, 30, 0.35);
+    border-left-color: rgb(54, 47, 29);
     position: relative;
 }
 
@@ -366,87 +366,87 @@
 }
 
 .trajectory-award-badge--mvp {
-    background-color: rgba(212, 160, 23, 0.2);
+    background-color: rgb(57, 49, 27);
     color: rgb(212, 160, 23);
     border-width: 1px;
-    border-color: rgba(212, 160, 23, 0.4);
+    border-color: rgb(96, 77, 26);
 }
 
 .trajectory-award-badge--finals_mvp {
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     color: rgb(231, 76, 60);
     border-width: 1px;
-    border-color: rgba(192, 57, 43, 0.3);
+    border-color: rgb(70, 32, 32);
 }
 
 .trajectory-award-badge--champion {
-    background-color: rgba(39, 174, 96, 0.15);
+    background-color: rgb(21, 44, 38);
     color: rgb(39, 174, 96);
     border-width: 1px;
-    border-color: rgba(39, 174, 96, 0.3);
+    border-color: rgb(24, 67, 48);
 }
 
 .trajectory-award-badge--all_star {
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     color: rgb(92, 145, 251);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.3);
+    border-color: rgb(25, 43, 80);
 }
 
 .trajectory-award-badge--first_team {
-    background-color: rgba(212, 160, 23, 0.1);
+    background-color: rgb(37, 35, 28);
     color: rgb(208, 216, 232);
     border-width: 1px;
-    border-color: rgba(212, 160, 23, 0.25);
+    border-color: rgb(66, 56, 27);
 }
 
 .trajectory-award-badge--second_team {
-    background-color: rgba(122, 138, 170, 0.1);
+    background-color: rgb(28, 33, 42);
     color: rgb(165, 177, 194);
     border-width: 1px;
-    border-color: rgba(122, 138, 170, 0.2);
+    border-color: rgb(39, 44, 56);
 }
 
 .trajectory-award-badge--roty {
-    background-color: rgba(42, 95, 201, 0.12);
+    background-color: rgb(21, 30, 49);
     color: rgb(92, 145, 251);
     border-width: 1px;
-    border-color: rgba(42, 95, 201, 0.25);
+    border-color: rgb(24, 40, 71);
 }
 
 .trajectory-award-badge--dpoy {
-    background-color: rgba(192, 57, 43, 0.1);
+    background-color: rgb(35, 25, 30);
     color: rgb(231, 76, 60);
     border-width: 1px;
-    border-color: rgba(192, 57, 43, 0.2);
+    border-color: rgb(53, 28, 31);
 }
 
 .trajectory-award-badge--sixth_man {
-    background-color: rgba(255, 165, 0, 0.1);
+    background-color: rgb(42, 35, 25);
     color: rgb(255, 165, 0);
     border-width: 1px;
-    border-color: rgba(255, 165, 0, 0.2);
+    border-color: rgb(65, 50, 22);
 }
 
 .trajectory-award-badge--mip {
-    background-color: rgba(39, 174, 96, 0.1);
+    background-color: rgb(20, 36, 35);
     color: rgb(39, 174, 96);
     border-width: 1px;
-    border-color: rgba(39, 174, 96, 0.2);
+    border-color: rgb(22, 52, 42);
 }
 
 .trajectory-award-badge--player_month {
-    background-color: rgba(241, 196, 15, 0.15);
+    background-color: rgb(51, 47, 26);
     color: rgb(241, 196, 15);
     border-width: 1px;
-    border-color: rgba(241, 196, 15, 0.3);
+    border-color: rgb(85, 74, 24);
 }
 
 .trajectory-award-badge--rookie_month {
-    background-color: rgba(46, 204, 113, 0.15);
+    background-color: rgb(22, 48, 41);
     color: rgb(46, 204, 113);
     border-width: 1px;
-    border-color: rgba(46, 204, 113, 0.3);
+    border-color: rgb(26, 76, 54);
 }
 
 /* ── Tabla ── */
@@ -465,7 +465,7 @@
     padding: 8px 12px;
     border-bottom-width: 1px;
     border-bottom-color: rgb(42, 51, 71);
-    background-color: rgba(18, 103, 195, 0.04);
+    background-color: rgb(18, 24, 35);
     flex-shrink: 0;
 }
 
@@ -530,9 +530,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(25, 18, 8, 0.92);
+    background-color: rgb(24, 18, 10);
     border-left-width: 1px;
-    border-left-color: rgba(120, 95, 30, 0.35);
+    border-left-color: rgb(54, 47, 29);
     position: relative;
 }
 
@@ -561,11 +561,11 @@
     padding: 6px 12px;
     flex-shrink: 0;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.3);
+    border-bottom-color: rgb(25, 30, 41);
 }
 
 .trajectory-table-row:hover {
-    background-color: rgba(255, 255, 255, 0.02);
+    background-color: rgb(23, 26, 33);
 }
 
 .td-season { width: 130px; -unity-text-align: middle-left; padding-left: 8px; }
@@ -651,7 +651,7 @@
     align-items: center;
     margin: 0 8px 8px 0;
     padding: 6px 12px;
-    background-color: rgba(212, 160, 23, 0.10);
+    background-color: rgb(37, 35, 28);
     border-width: 1px;
     border-color: rgb(120, 95, 30);
     border-radius: 8px;
@@ -677,7 +677,7 @@
     margin-left: 8px;
 }
 .trajectory-milestone--next {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-color: rgb(60, 90, 150);
 }
 .trajectory-milestone--next .trajectory-milestone-text { color: rgb(150, 190, 255); }
@@ -685,7 +685,7 @@
     width: 120px;
     height: 6px;
     margin-left: 10px;
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgb(46, 49, 55);
     border-radius: 3px;
 }
 .trajectory-milestone-progress-fill {

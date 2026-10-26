@@ -147,7 +147,7 @@
 }
 
 #BtnBugReportSend {
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
@@ -155,12 +155,12 @@
 }
 
 #BtnBugReportSend:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(150, 220, 180);
 }
 
 #BtnBugReportCerrar {
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -168,7 +168,7 @@
 }
 
 #BtnBugReportCerrar:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -185,7 +185,7 @@
 }
 #ExitModalBox .modal-title {
     padding: 10px 24px;
-    background-color: rgba(192, 57, 43, 0.15);
+    background-color: rgb(44, 26, 30);
     border-bottom-width: 1px;
     border-bottom-color: rgb(192, 57, 43);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -212,28 +212,28 @@
 #BtnExitNo {
     flex-grow: 1;
     min-width: 0;
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
     border-radius: 8px;
 }
 #BtnExitNo:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(190, 200, 220);
 }
 #BtnExitYes {
     flex-grow: 1;
     min-width: 0;
     margin-left: 16px;
-    background-color: rgba(192, 57, 43, 0.10);
+    background-color: rgb(35, 25, 30);
     border-width: 2px;
     border-color: rgb(192, 57, 43);
     color: rgb(230, 120, 100);
     border-radius: 8px;
 }
 #BtnExitYes:hover {
-    background-color: rgba(192, 57, 43, 0.25);
+    background-color: rgb(62, 30, 32);
     color: rgb(240, 145, 125);
 }
 
@@ -250,7 +250,7 @@
 }
 #ProModalBox .modal-title {
     padding: 10px 24px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -281,28 +281,28 @@
 #BtnProCancel {
     flex-grow: 1;
     min-width: 0;
-    background-color: rgba(100, 110, 130, 0.10);
+    background-color: rgb(26, 30, 38);
     border-width: 2px;
     border-color: rgb(100, 110, 130);
     color: rgb(160, 170, 190);
     border-radius: 8px;
 }
 #BtnProCancel:hover {
-    background-color: rgba(100, 110, 130, 0.25);
+    background-color: rgb(38, 43, 54);
     color: rgb(190, 200, 220);
 }
 #BtnProConfirm {
     flex-grow: 1;
     min-width: 0;
     margin-left: 16px;
-    background-color: rgba(39, 174, 96, 0.10);
+    background-color: rgb(20, 36, 35);
     border-width: 2px;
     border-color: rgb(39, 174, 96);
     color: rgb(100, 200, 140);
     border-radius: 8px;
 }
 #BtnProConfirm:hover {
-    background-color: rgba(39, 174, 96, 0.25);
+    background-color: rgb(23, 59, 45);
     color: rgb(150, 220, 180);
 }
 
@@ -320,7 +320,7 @@
 #ModalBox .modal-title {
     padding: 10px 24px;
     margin: 0;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -357,7 +357,7 @@
 #BugReportBox .modal-title {
     padding: 10px 24px;
     margin: 0;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-bottom-width: 1px;
     border-bottom-color: rgb(212, 160, 23);
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -783,7 +783,7 @@
     width: 70px;
     height: 36px;
     margin-left: 6px;
-    background-color: rgba(30, 33, 42, 0.6);
+    background-color: rgb(25, 28, 36);
     border-width: 2px;
     border-color: rgb(60, 65, 75);
     border-radius: 8px;
@@ -795,17 +795,17 @@
     -unity-text-transform: upper;
 }
 .settings-quality-btn:hover {
-    background-color: rgba(50, 55, 68, 0.7);
+    background-color: rgb(40, 45, 56);
     border-color: rgb(90, 95, 110);
     color: rgb(200, 210, 230);
 }
 .settings-quality-btn--active {
-    background-color: rgba(60, 65, 78, 0.9);
+    background-color: rgb(56, 61, 73);
     border-color: rgb(120, 125, 140);
     color: rgb(255, 255, 255);
 }
 .settings-quality-btn--active:hover {
-    background-color: rgba(70, 75, 88, 1);
+    background-color: rgb(70, 75, 88);
     border-color: rgb(140, 145, 160);
 }
 .settings-quality-btn--wide {

@@ -84,7 +84,7 @@
 .ss-btn-awards {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -98,7 +98,7 @@
     cursor: pointer;
 }
 .ss-btn-awards:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -184,7 +184,7 @@
 .ss-champ-overlay {
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(22, 26, 36, 0.82);
+    background-color: rgb(21, 25, 35);
 }
 
 .ss-champ-badge {

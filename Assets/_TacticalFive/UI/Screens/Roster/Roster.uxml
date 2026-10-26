@@ -231,7 +231,7 @@
         <!-- ══ MODAL COOLDOWN RENOVACIÓN ══ -->
         <ui:VisualElement name="RenewCooldownOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewCooldownBox" class="renew-modal-box renew-modal-box--negative" style="width: 650px;">
-                <ui:VisualElement class="renew-modal-header" style="background-color: rgba(192, 57, 43, 0.20); border-bottom-color: rgb(192, 57, 43);">
+                <ui:VisualElement class="renew-modal-header" style="background-color: rgb(53, 28, 31); border-bottom-color: rgb(192, 57, 43);">
                     <ui:VisualElement class="renew-modal-heading">
                         <ui:VisualElement name="RenewCooldownIcon" class="renew-modal-icon"/>
                         <ui:VisualElement>
@@ -251,7 +251,7 @@
         <!-- ══ MODAL NO SE PUEDE RENOVAR ══ -->
         <ui:VisualElement name="RenewBlockOverlay" class="renew-modal-overlay">
             <ui:VisualElement name="RenewBlockBox" class="renew-modal-box renew-modal-box--negative" style="width: 650px;">
-                <ui:VisualElement class="renew-modal-header" style="background-color: rgba(192, 57, 43, 0.20); border-bottom-color: rgb(192, 57, 43);">
+                <ui:VisualElement class="renew-modal-header" style="background-color: rgb(53, 28, 31); border-bottom-color: rgb(192, 57, 43);">
                     <ui:VisualElement class="renew-modal-heading">
                         <ui:VisualElement name="RenewBlockIcon" class="renew-modal-icon"/>
                         <ui:VisualElement>

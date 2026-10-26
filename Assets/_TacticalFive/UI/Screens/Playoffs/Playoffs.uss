@@ -23,7 +23,7 @@
     margin: 16px 20px 12px 20px;
     border-color: rgb(212, 160, 23);
     border-width: 1px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -31,7 +31,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .playoffs-screen-icon {
     width: 40px;
@@ -57,7 +57,7 @@
     letter-spacing: 1px;
     color: rgb(212, 160, 23);
     padding: 0 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 
 .playoffs-body {
@@ -89,9 +89,9 @@
     flex-shrink: 0;
     align-self: stretch;
     margin-left: 4px;
-    background-color: rgba(18, 24, 34, 0.92);
+    background-color: rgb(18, 24, 34);
     border-left-width: 1px;
-    border-left-color: rgba(42, 95, 201, 0.35);
+    border-left-color: rgb(26, 47, 89);
     position: relative;
 }
 .playoffs-scrollbar-thumb {

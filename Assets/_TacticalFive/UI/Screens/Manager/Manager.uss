@@ -25,7 +25,7 @@
     margin: 16px 20px 12px 20px;
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
     border-radius: 4px;
     overflow: hidden;
 }
@@ -33,7 +33,7 @@
     flex-direction: row;
     align-items: center;
     padding: 5px 14px;
-    background-color: rgba(120, 95, 30, 0.15);
+    background-color: rgb(33, 32, 28);
 }
 .screen-icon {
     width: 40px;
@@ -358,7 +358,7 @@
 }
 
 .ranking-row--player {
-    background-color: rgba(200, 170, 80, 0.15);
+    background-color: rgb(45, 43, 36);
     border-left-width: 3px;
     border-left-color: rgb(200, 170, 80);
 }
@@ -411,22 +411,22 @@
 }
 
 .ranking-badge--historical {
-    background-color: rgba(110, 126, 155, 0.3);
+    background-color: rgb(46, 52, 66);
     color: rgb(160, 176, 200);
 }
 
 .ranking-badge--inactive {
-    background-color: rgba(212, 160, 23, 0.25);
+    background-color: rgb(66, 56, 27);
     color: rgb(231, 180, 60);
 }
 
 .ranking-badge--player {
-    background-color: rgba(200, 170, 80, 0.35);
+    background-color: rgb(82, 73, 46);
     color: rgb(220, 190, 100);
 }
 
 .ranking-badge--active {
-    background-color: rgba(46, 204, 113, 0.3);
+    background-color: rgb(26, 76, 54);
     color: rgb(46, 204, 113);
 }
 
@@ -444,7 +444,7 @@
     cursor: pointer;
     width: 32px;
     height: 32px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -456,11 +456,11 @@
 }
 
 .ranking-paginator-btn:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
 }
 
 .ranking-paginator-btn--disabled {
-    background-color: rgba(60, 60, 70, 0.25);
+    background-color: rgb(28, 31, 38);
     border-color: rgb(60, 60, 70);
     color: rgb(80, 85, 95);
     cursor: default;

@@ -3,7 +3,7 @@
     --bg-primary: rgb(11, 16, 23);
     --bg-secondary: rgb(17, 24, 34);
     --bg-card: rgb(20, 30, 42);
-    --bg-modal: rgba(0, 0, 0, 0.8);
+    --bg-modal: rgb(4, 4, 6);
 
     /* === BORDES === */
     --border-default: rgb(30, 45, 61);

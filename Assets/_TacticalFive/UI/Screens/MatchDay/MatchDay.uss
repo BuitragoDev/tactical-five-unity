@@ -129,7 +129,7 @@
     color: #4a80f0;
     letter-spacing: 1px;
     text-transform: uppercase;
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     padding: 6px 14px;
     border-radius: 4px;
     margin-left: 20px;
@@ -140,7 +140,7 @@
 .btn-action {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     min-width: 250px;
-    background-color: rgba(42, 95, 201, 0.10);
+    background-color: rgb(20, 28, 45);
     border-width: 2px;
     border-color: rgb(42, 95, 201);
     color: rgb(120, 160, 230);
@@ -155,7 +155,7 @@
 }
 
 .btn-action:hover {
-    background-color: rgba(42, 95, 201, 0.25);
+    background-color: rgb(24, 40, 71);
     color: rgb(150, 190, 255);
 }
 
@@ -211,7 +211,7 @@
     font-weight: 700;
     letter-spacing: 2px;
     color: #d4a017;
-    background-color: rgba(212, 160, 23, 0.12);
+    background-color: rgb(41, 38, 27);
     padding: 2px 8px;
     border-radius: 3px;
     text-transform: uppercase;
@@ -355,7 +355,7 @@
     flex-direction: row;
     padding: 4px;
     border-bottom-width: 1px;
-    border-bottom-color: rgba(42, 51, 71, 0.3);
+    border-bottom-color: rgb(25, 30, 41);
     align-items: center;
     min-height: 30px;
 }
@@ -435,7 +435,7 @@
 .col-val { width: 36px; font-weight: 700; color: #ffffff; -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf"); }
 
 .box-table-footer {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: rgb(14, 17, 22);
     flex-direction: row;
     padding: 10px 8px;
     min-height: 40px;
@@ -596,7 +596,7 @@
     color: #4a80f0;
     letter-spacing: 2px;
     text-transform: uppercase;
-    background-color: rgba(42, 95, 201, 0.15);
+    background-color: rgb(22, 32, 54);
     padding: 4px 14px;
     border-radius: 4px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
@@ -609,7 +609,7 @@
     color: #d4a017;
     letter-spacing: 2px;
     text-transform: uppercase;
-    background-color: rgba(212, 160, 23, 0.12);
+    background-color: rgb(41, 38, 27);
     padding: 4px 14px;
     border-radius: 4px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
