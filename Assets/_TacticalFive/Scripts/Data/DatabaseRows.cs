@@ -106,6 +106,16 @@ public class PlayerCareerSeasonRow
     public int total_steals { get; set; }
     public int total_blocks { get; set; }
     public int total_rating { get; set; }
+    // F6-01: splits de tiro, pérdidas y rebotes ofensivos/defensivos.
+    public int total_fgm { get; set; }
+    public int total_fga { get; set; }
+    public int total_fg3m { get; set; }
+    public int total_fg3a { get; set; }
+    public int total_ftm { get; set; }
+    public int total_fta { get; set; }
+    public int total_turnovers { get; set; }
+    public int total_oreb { get; set; }
+    public int total_dreb { get; set; }
 }
 
 [Table("player_season_stats")]
@@ -130,6 +140,16 @@ public class PlayerSeasonStatRow
     public int total_steals { get; set; }
     public int total_blocks { get; set; }
     public int total_rating { get; set; }
+    // F6-01: splits de tiro, pérdidas y rebotes ofensivos/defensivos.
+    public int total_fgm { get; set; }
+    public int total_fga { get; set; }
+    public int total_fg3m { get; set; }
+    public int total_fg3a { get; set; }
+    public int total_ftm { get; set; }
+    public int total_fta { get; set; }
+    public int total_turnovers { get; set; }
+    public int total_oreb { get; set; }
+    public int total_dreb { get; set; }
 }
 
 public class SeasonAwardRow

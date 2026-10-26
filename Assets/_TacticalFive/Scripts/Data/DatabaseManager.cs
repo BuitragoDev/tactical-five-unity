@@ -1369,14 +1369,51 @@ public partial class DatabaseManager : MonoBehaviour
                 "total_assists INTEGER, " +
                 "total_steals INTEGER, " +
                 "total_blocks INTEGER, " +
-                "total_rating INTEGER" +
+                "total_rating INTEGER, " +
+                "total_fgm INTEGER, " +
+                "total_fga INTEGER, " +
+                "total_fg3m INTEGER, " +
+                "total_fg3a INTEGER, " +
+                "total_ftm INTEGER, " +
+                "total_fta INTEGER, " +
+                "total_turnovers INTEGER, " +
+                "total_oreb INTEGER, " +
+                "total_dreb INTEGER" +
             ")");
             _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerSeasonStats_PlayerId ON player_season_stats(player_id)");
             _db.Execute("CREATE INDEX IF NOT EXISTS IX_PlayerSeasonStats_SeasonId ON player_season_stats(season_id)");
+
+            // F6-01: columnas aditivas para partidas creadas antes de los splits.
+            AddColumnIfMissing("player_season_stats", "total_fgm", "total_fgm INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_fga", "total_fga INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_fg3m", "total_fg3m INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_fg3a", "total_fg3a INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_ftm", "total_ftm INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_fta", "total_fta INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_turnovers", "total_turnovers INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_oreb", "total_oreb INTEGER DEFAULT 0");
+            AddColumnIfMissing("player_season_stats", "total_dreb", "total_dreb INTEGER DEFAULT 0");
         }
         catch (System.Exception ex)
         {
             Debug.LogError($"[DB] Migration error for player_season_stats: {ex.Message}");
+        }
+
+        // F6-01: backfill de los splits para filas archivadas mientras sus
+        // player_game_stats/games todavía existan. Las temporadas ya purgadas
+        // no se pueden reconstruir; quedan a 0 y la UI mostrará el dato no disponible.
+        if (!IsMigrationApplied("player_season_stats_shooting_splits"))
+        {
+            try
+            {
+                BackfillPlayerSeasonShootingSplits();
+                MarkMigrationApplied("player_season_stats_shooting_splits");
+                Debug.Log("[DB] Migration: shooting splits backfilled in player_season_stats");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Migration error backfilling shooting splits: {ex.Message}");
+            }
         }
 
         // Cleanup: el All-Star se guardaba en player_game_stats con ids de equipo

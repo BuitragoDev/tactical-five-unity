@@ -1333,6 +1333,78 @@ public partial class DatabaseManager
                   .FirstOrDefault();
     }
 
+    /// <summary>
+    /// F6-01: rellena splits de tiro, pérdidas y OREB/DREB en filas archivadas
+    /// usando los partidos que aún existan en `player_game_stats`. Las temporadas
+    /// ya purgadas no se pueden reconstruir y se dejan como estén.
+    /// </summary>
+    public void BackfillPlayerSeasonShootingSplits()
+    {
+        _db.Execute(@"
+            UPDATE player_season_stats SET
+                total_fgm = (SELECT COALESCE(SUM(ps.fgm), 0) FROM player_game_stats ps
+                             JOIN games g ON g.id = ps.game_id
+                             WHERE g.season_id = player_season_stats.season_id
+                               AND ps.player_id = player_season_stats.player_id
+                               AND ps.team_id = player_season_stats.team_id
+                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_fga = (SELECT COALESCE(SUM(ps.fga), 0) FROM player_game_stats ps
+                             JOIN games g ON g.id = ps.game_id
+                             WHERE g.season_id = player_season_stats.season_id
+                               AND ps.player_id = player_season_stats.player_id
+                               AND ps.team_id = player_season_stats.team_id
+                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_fg3m = (SELECT COALESCE(SUM(ps.fg3m), 0) FROM player_game_stats ps
+                              JOIN games g ON g.id = ps.game_id
+                              WHERE g.season_id = player_season_stats.season_id
+                                AND ps.player_id = player_season_stats.player_id
+                                AND ps.team_id = player_season_stats.team_id
+                                AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_fg3a = (SELECT COALESCE(SUM(ps.fg3a), 0) FROM player_game_stats ps
+                              JOIN games g ON g.id = ps.game_id
+                              WHERE g.season_id = player_season_stats.season_id
+                                AND ps.player_id = player_season_stats.player_id
+                                AND ps.team_id = player_season_stats.team_id
+                                AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_ftm = (SELECT COALESCE(SUM(ps.ftm), 0) FROM player_game_stats ps
+                             JOIN games g ON g.id = ps.game_id
+                             WHERE g.season_id = player_season_stats.season_id
+                               AND ps.player_id = player_season_stats.player_id
+                               AND ps.team_id = player_season_stats.team_id
+                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_fta = (SELECT COALESCE(SUM(ps.fta), 0) FROM player_game_stats ps
+                             JOIN games g ON g.id = ps.game_id
+                             WHERE g.season_id = player_season_stats.season_id
+                               AND ps.player_id = player_season_stats.player_id
+                               AND ps.team_id = player_season_stats.team_id
+                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_turnovers = (SELECT COALESCE(SUM(ps.turnovers), 0) FROM player_game_stats ps
+                                   JOIN games g ON g.id = ps.game_id
+                                   WHERE g.season_id = player_season_stats.season_id
+                                     AND ps.player_id = player_season_stats.player_id
+                                     AND ps.team_id = player_season_stats.team_id
+                                     AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_oreb = (SELECT COALESCE(SUM(ps.oreb), 0) FROM player_game_stats ps
+                              JOIN games g ON g.id = ps.game_id
+                              WHERE g.season_id = player_season_stats.season_id
+                                AND ps.player_id = player_season_stats.player_id
+                                AND ps.team_id = player_season_stats.team_id
+                                AND g.is_played = 1 AND g.game_type != 'allstar'),
+                total_dreb = (SELECT COALESCE(SUM(ps.dreb), 0) FROM player_game_stats ps
+                              JOIN games g ON g.id = ps.game_id
+                              WHERE g.season_id = player_season_stats.season_id
+                                AND ps.player_id = player_season_stats.player_id
+                                AND ps.team_id = player_season_stats.team_id
+                                AND g.is_played = 1 AND g.game_type != 'allstar')
+            WHERE EXISTS (
+                SELECT 1 FROM player_game_stats ps
+                JOIN games g ON g.id = ps.game_id
+                WHERE g.season_id = player_season_stats.season_id
+                  AND ps.player_id = player_season_stats.player_id
+                  AND ps.team_id = player_season_stats.team_id
+                  AND g.is_played = 1 AND g.game_type != 'allstar')");
+    }
+
     public List<PlayerCareerSeasonRow> GetPlayerCareerHistory(int playerId, int managerId)
     {
         if (!EnsureDb()) return new List<PlayerCareerSeasonRow>();
@@ -1343,7 +1415,9 @@ public partial class DatabaseManager
                      team_abbreviation, team_name,
                      games, total_minutes, total_points,
                      total_rebounds, total_assists,
-                     total_steals, total_blocks, total_rating
+                     total_steals, total_blocks, total_rating,
+                     total_fgm, total_fga, total_fg3m, total_fg3a,
+                     total_ftm, total_fta, total_turnovers, total_oreb, total_dreb
               FROM player_season_stats
               WHERE player_id = ?
 
@@ -1358,7 +1432,16 @@ public partial class DatabaseManager
                      SUM(ps.assists) AS total_assists,
                      SUM(ps.steals) AS total_steals,
                      SUM(ps.blocks) AS total_blocks,
-                     SUM(ps.rating) AS total_rating
+                     SUM(ps.rating) AS total_rating,
+                     SUM(ps.fgm) AS total_fgm,
+                     SUM(ps.fga) AS total_fga,
+                     SUM(ps.fg3m) AS total_fg3m,
+                     SUM(ps.fg3a) AS total_fg3a,
+                     SUM(ps.ftm) AS total_ftm,
+                     SUM(ps.fta) AS total_fta,
+                     SUM(ps.turnovers) AS total_turnovers,
+                     SUM(ps.oreb) AS total_oreb,
+                     SUM(ps.dreb) AS total_dreb
               FROM player_game_stats ps
               JOIN games g ON ps.game_id = g.id
               JOIN seasons s ON g.season_id = s.id
@@ -3082,11 +3165,16 @@ public partial class DatabaseManager
             (player_id, season_id, year_start, year_end, team_id,
              team_abbreviation, team_name,
              games, total_minutes, total_points, total_rebounds, total_assists,
-             total_steals, total_blocks, total_rating)
+             total_steals, total_blocks, total_rating,
+             total_fgm, total_fga, total_fg3m, total_fg3a,
+             total_ftm, total_fta, total_turnovers, total_oreb, total_dreb)
             SELECT ps.player_id, g.season_id, s.year_start, s.year_end,
                    ps.team_id, t.abbreviation, t.name,
                    COUNT(*), SUM(ps.minutes), SUM(ps.points), SUM(ps.rebounds),
-                   SUM(ps.assists), SUM(ps.steals), SUM(ps.blocks), SUM(ps.rating)
+                   SUM(ps.assists), SUM(ps.steals), SUM(ps.blocks), SUM(ps.rating),
+                   SUM(ps.fgm), SUM(ps.fga), SUM(ps.fg3m), SUM(ps.fg3a),
+                   SUM(ps.ftm), SUM(ps.fta), SUM(ps.turnovers),
+                   SUM(ps.oreb), SUM(ps.dreb)
             FROM player_game_stats ps
             JOIN games g ON ps.game_id = g.id
             JOIN seasons s ON g.season_id = s.id

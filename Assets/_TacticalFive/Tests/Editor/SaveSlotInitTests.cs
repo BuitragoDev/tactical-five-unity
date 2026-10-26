@@ -279,6 +279,99 @@ public class SaveSlotInitTests
     }
 
     [Test]
+    public void PlayerSeasonStats_HasShootingSplitColumns()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        foreach (string column in new[]
+                 {
+                     "total_fgm", "total_fga", "total_fg3m", "total_fg3a",
+                     "total_ftm", "total_fta", "total_turnovers", "total_oreb", "total_dreb"
+                 })
+        {
+            int exists = db.Db.ExecuteScalar<int>(
+                "SELECT COUNT(*) FROM pragma_table_info('player_season_stats') WHERE name = ?", column);
+            Assert.That(exists, Is.EqualTo(1), $"Falta {column} en player_season_stats");
+        }
+    }
+
+    [Test]
+    public void BackfillPlayerSeasonShootingSplits_UsaGameStatsDisponibles()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        var game = new GameData
+        {
+            season_id = 777,
+            manager_id = 1,
+            game_day = 1,
+            game_date = "2026-10-22",
+            home_team_id = 1,
+            away_team_id = 2,
+            is_played = 1,
+            game_type = "regular",
+            series_label = ""
+        };
+        db.Db.Insert(game);
+        db.Db.Insert(new PlayerGameStats
+        {
+            game_id = game.id,
+            player_id = 999,
+            team_id = 1,
+            minutes = 30,
+            points = 25,
+            fgm = 9,
+            fga = 18,
+            fg3m = 4,
+            fg3a = 9,
+            ftm = 3,
+            fta = 4,
+            oreb = 2,
+            dreb = 5,
+            rebounds = 7,
+            assists = 6,
+            steals = 1,
+            blocks = 1,
+            turnovers = 3,
+            rating = 24
+        });
+        db.Db.Insert(new PlayerSeasonStatRow
+        {
+            player_id = 999,
+            season_id = 777,
+            year_start = 2026,
+            year_end = 2027,
+            team_id = 1,
+            team_abbreviation = "TST",
+            team_name = "Test",
+            games = 1,
+            total_minutes = 30,
+            total_points = 25,
+            total_rebounds = 7,
+            total_assists = 6,
+            total_steals = 1,
+            total_blocks = 1,
+            total_rating = 24
+        });
+
+        db.BackfillPlayerSeasonShootingSplits();
+
+        var row = db.Db.Table<PlayerSeasonStatRow>()
+            .First(r => r.player_id == 999 && r.season_id == 777 && r.team_id == 1);
+        Assert.That(row.total_fgm, Is.EqualTo(9));
+        Assert.That(row.total_fga, Is.EqualTo(18));
+        Assert.That(row.total_fg3m, Is.EqualTo(4));
+        Assert.That(row.total_fg3a, Is.EqualTo(9));
+        Assert.That(row.total_ftm, Is.EqualTo(3));
+        Assert.That(row.total_fta, Is.EqualTo(4));
+        Assert.That(row.total_turnovers, Is.EqualTo(3));
+        Assert.That(row.total_oreb, Is.EqualTo(2));
+        Assert.That(row.total_dreb, Is.EqualTo(5));
+    }
+
+    [Test]
     public void RebuildTemplateDb_RutaResuelta_NoConsultaPersistentDataPathEnBackground()
     {
         var db = DatabaseManager.Instance;
