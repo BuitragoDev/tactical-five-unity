@@ -1,26 +1,19 @@
 using System;
 
 /// <summary>
-/// Escala salarial de rookies por puesto de draft y temporada (F4-06).
+/// Escala salarial de rookies por puesto de draft y temporada (F4-06/F4-07).
 ///
 /// El salario de un rookie ya no es un <c>Random.Range</c> por tramo: depende solo
 /// del número de elección y del año de la temporada en que debuta. La tabla base
-/// reproduce la forma de la escala de primera ronda del CBA interno 2025-26; las
-/// temporadas posteriores aplican el mismo crecimiento del 5 % que los topes
-/// (<see cref="TradeHelper"/>), y F4-07 podrá sustituirla por cifras oficiales
-/// versionadas temporada a temporada. La segunda ronda usa contratos cercanos al
-/// mínimo, también decrecientes con el pick.
+/// reproduce la forma de la escala de primera ronda de 2025-26; las temporadas
+/// posteriores escalan con el crecimiento del cap de <see cref="CbaTable"/>, la
+/// misma referencia que usan los topes y las excepciones. La segunda ronda usa
+/// contratos cercanos al mínimo, también decrecientes con el pick.
 /// </summary>
 public static class RookieScale
 {
     /// <summary>Temporada de referencia de la tabla (2025-26).</summary>
     public const int BaseSeasonStartYear = 2025;
-
-    /// <summary>Crecimiento anual aplicado a la escala hasta que F4-07 versione el CBA.</summary>
-    public const double AnnualGrowth = 0.05;
-
-    /// <summary>Salario fijo del contrato two-way (no depende del pick).</summary>
-    public const long TwoWaySalary = TradeHelper.TWO_WAY_SALARY;
 
     public const int TotalPicks = 60;
 
@@ -46,7 +39,8 @@ public static class RookieScale
     /// <param name="isTwoWay">Si firma contrato two-way, el salario es el fijo de la liga.</param>
     public static long SalaryFor(int pickNumber, int seasonStartYear, bool isTwoWay = false)
     {
-        if (isTwoWay) return TwoWaySalary;
+        int season = seasonStartYear > 0 ? seasonStartYear : BaseSeasonStartYear;
+        if (isTwoWay) return CbaTable.For(season).TwoWaySalary;
         if (pickNumber < 1) pickNumber = 1;
         if (pickNumber > TotalPicks) pickNumber = TotalPicks;
 
@@ -54,7 +48,7 @@ public static class RookieScale
             ? Round1Base[pickNumber - 1]
             : Round2Start - (pickNumber - 31) * Round2Step;
 
-        return RoundToTenThousand(ApplySeason(baseSalary, seasonStartYear));
+        return RoundToTenThousand(ApplySeason(baseSalary, season));
     }
 
     /// <summary>Importe base de la tabla de primera ronda para un pick (sin crecimiento).</summary>
@@ -76,8 +70,8 @@ public static class RookieScale
     private static double ApplySeason(long baseSalary, int seasonStartYear)
     {
         int season = seasonStartYear > 0 ? seasonStartYear : BaseSeasonStartYear;
-        int years = Math.Max(0, season - BaseSeasonStartYear);
-        return baseSalary * Math.Pow(1.0 + AnnualGrowth, years);
+        if (season <= BaseSeasonStartYear) return baseSalary;
+        return baseSalary * CbaTable.CapRatio(BaseSeasonStartYear, season);
     }
 
     private static long RoundToTenThousand(double amount)

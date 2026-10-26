@@ -88,7 +88,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 | Navigation = `ScreenManager.GoTo(GameScreen, GameMode)` toggling the registered `UIDocument` GameObjects | `ScreenManager.cs:83-215` |
 | All persistence through `DatabaseManager.Instance` (SQLite) | `DatabaseManager.cs` |
 | Save slots = `save_{n}.db` + `saves.json`; template = `template.db`; **schema versioned** (`schema_migrations` + `PRAGMA user_version = 2`) | `GameSaveManager.cs`, `DatabaseManager.cs:286` |
-| Salary cap / aprons constants (2025-26) in `TradeHelper.cs`; caps grow +5%/season | `TradeHelper.cs:7-14`, `StartNewSeason` |
+| Salary cap / aprons / MLE per season in `CbaTable` + `league_settings`; `TradeHelper` keeps the 2026-27 fallback | `CbaTable.cs`, `TradeHelper.cs`, `StartNewSeason` |
 | Gameplay targets Oct 22; persisted season is initially Sep 5 and preseason advances the date | `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs` |
 | `overall` = media redondeada de 11 atributos capada por `potential`, con **fuente única** en `PlayerRating` | `Scripts/Data/PlayerRating.cs`, `PlayerData.cs` |
 | No C# event bus — cross-controller communication via DB, `GameResultCache` statics, `PlayerPrefs`, and `ScreenManager` static state | `EVENTS.md` |

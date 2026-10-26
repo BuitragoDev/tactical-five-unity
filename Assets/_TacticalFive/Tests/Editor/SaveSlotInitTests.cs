@@ -75,6 +75,30 @@ public class SaveSlotInitTests
             "El template debe generarse al vuelo para las siguientes partidas");
     }
 
+    [Test]
+    public void InitSaveSlot_SeedLeagueSettings_UsaLaTablaCba()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        var settings = db.GetLeagueSettings();
+        var cba = CbaTable.For(CbaTable.CurrentSeasonStartYear);
+
+        Assert.That(settings, Is.Not.Null);
+        Assert.That(settings.salary_cap, Is.EqualTo(cba.SalaryCap));
+        Assert.That(settings.luxury_tax, Is.EqualTo(cba.LuxuryTax));
+        Assert.That(settings.apron, Is.EqualTo(cba.FirstApron));
+        Assert.That(settings.repeater_apron, Is.EqualTo(cba.SecondApron));
+        Assert.That(settings.mid_level, Is.EqualTo(cba.NonTaxpayerMle));
+        Assert.That(settings.taxpayer_mid_level, Is.EqualTo(cba.TaxpayerMle));
+        Assert.That(settings.bi_annual, Is.EqualTo(cba.BiAnnual));
+        Assert.That(settings.two_way_salary, Is.EqualTo(cba.TwoWaySalary));
+        Assert.That(settings.season_start_year, Is.EqualTo(CbaTable.CurrentSeasonStartYear));
+        Assert.That(settings.cba_projected, Is.Zero);
+        Assert.That(settings.minimum_salary, Is.EqualTo(TradeHelper.MIN_SALARY),
+            "F4-07 conserva el suelo interno hasta F4-08.");
+    }
+
     // ── SAV-03: la segunda partida reutiliza el template ────────────────────
 
     [Test]

@@ -1424,6 +1424,59 @@ public partial class DatabaseManager : MonoBehaviour
             Debug.LogError($"[DB] Migration error for two_way_salary: {ex.Message}");
         }
 
+        // F4-07: temporada y procedencia de las cifras CBA en league_settings.
+        try
+        {
+            var lsCols3 = _db.Query<ColumnInfo>("PRAGMA table_info(league_settings)");
+            if (!lsCols3.Any(c => c.name == "season_start_year"))
+            {
+                _db.Execute("ALTER TABLE league_settings ADD COLUMN season_start_year INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added season_start_year to league_settings");
+            }
+            if (!lsCols3.Any(c => c.name == "cba_projected"))
+            {
+                _db.Execute("ALTER TABLE league_settings ADD COLUMN cba_projected INTEGER DEFAULT 0");
+                Debug.Log("[DB] Migration: added cba_projected to league_settings");
+            }
+            if (!lsCols3.Any(c => c.name == "cba_source"))
+            {
+                _db.Execute("ALTER TABLE league_settings ADD COLUMN cba_source TEXT DEFAULT ''");
+                Debug.Log("[DB] Migration: added cba_source to league_settings");
+            }
+        }
+        catch (System.Exception ex)
+        {
+            Debug.LogError($"[DB] Migration error for league_settings CBA columns: {ex.Message}");
+        }
+
+        // F4-07: sincroniza una partida existente con la fila CBA de su temporada
+        // activa. Las partidas nuevas reciben la tabla desde SeedLeagueSettings.
+        if (!IsMigrationApplied("cba_table_by_season"))
+        {
+            try
+            {
+                var activeSeason = _db.Table<SeasonData>()
+                    .Where(s => s.is_active == 1)
+                    .OrderByDescending(s => s.id)
+                    .FirstOrDefault();
+                var cbaSettings = GetLeagueSettings();
+                int cbaYear = activeSeason != null
+                    ? activeSeason.year_start
+                    : CbaTable.CurrentSeasonStartYear;
+                if (cbaSettings != null)
+                {
+                    CbaTable.ApplyTo(cbaSettings, cbaYear);
+                    _db.Update(cbaSettings);
+                }
+                MarkMigrationApplied("cba_table_by_season");
+                Debug.Log($"[DB] Migration: CBA table applied to season {cbaYear}-{cbaYear + 1}");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Migration error applying CBA table: {ex.Message}");
+            }
+        }
+
         // Add is_on_ir / is_two_way / g_league_assigned to players if missing
         try
         {

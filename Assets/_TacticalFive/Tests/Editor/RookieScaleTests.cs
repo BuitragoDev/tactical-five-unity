@@ -1,8 +1,9 @@
 using NUnit.Framework;
 
 /// <summary>
-/// F4-06: escala salarial de rookie por puesto de draft y temporada. Reglas puras,
-/// sin base de datos ni UnityEngine.Random.
+/// F4-06/F4-07: escala salarial de rookie por puesto de draft y temporada. Reglas
+/// puras, sin base de datos ni UnityEngine.Random; el crecimiento sigue el cap de
+/// <see cref="CbaTable"/>.
 /// </summary>
 public class RookieScaleTests
 {
@@ -48,15 +49,19 @@ public class RookieScaleTests
     }
 
     [Test]
-    public void Salary_GrowsWithSeasonAtTheConfiguredRate()
+    public void Salary_GrowsWithTheCbaCap()
     {
         long basePick1 = RookieScale.SalaryFor(1, RookieScale.BaseSeasonStartYear);
         long nextSeasonPick1 = RookieScale.SalaryFor(1, RookieScale.BaseSeasonStartYear + 1);
         long tenYears = RookieScale.SalaryFor(1, RookieScale.BaseSeasonStartYear + 10);
 
+        double ratio = CbaTable.CapRatio(RookieScale.BaseSeasonStartYear,
+            RookieScale.BaseSeasonStartYear + 1);
+        long expected = (long)(basePick1 * ratio);
+
         Assert.That(nextSeasonPick1, Is.GreaterThan(basePick1));
         Assert.That(nextSeasonPick1, Is.InRange(
-            (long)(basePick1 * 1.04), (long)(basePick1 * 1.06)));
+            (long)(expected * 0.995), (long)(expected * 1.005)));
         Assert.That(tenYears, Is.GreaterThan(nextSeasonPick1));
     }
 
@@ -68,12 +73,12 @@ public class RookieScaleTests
     }
 
     [Test]
-    public void TwoWayContract_UsesTheFixedLeagueSalary_RegardlessOfPickAndSeason()
+    public void TwoWayContract_UsesTheSeasonTableSalary_RegardlessOfPick()
     {
         for (int pick = 1; pick <= RookieScale.TotalPicks; pick++)
             for (int season = 2025; season <= 2029; season++)
                 Assert.That(RookieScale.SalaryFor(pick, season, isTwoWay: true),
-                    Is.EqualTo(TradeHelper.TWO_WAY_SALARY));
+                    Is.EqualTo(CbaTable.For(season).TwoWaySalary));
     }
 
     [Test]

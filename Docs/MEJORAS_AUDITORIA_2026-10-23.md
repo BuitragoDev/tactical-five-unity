@@ -23,14 +23,14 @@
 | **1** | Datos y balance del seed | 8 | 8 |
 | **2** | Motor de simulación | 12 | 10 |
 | **3** | Calibración y reproducibilidad | 7 | 6 |
-| **4** | Mercado, CBA y economía | 8 | 6 |
+| **4** | Mercado, CBA y economía | 8 | 7 |
 | **5** | Calendario y competiciones | 5 | 0 |
 | **6** | Histórico y estadísticas | 4 | 0 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 0 |
 | **8** | Arquitectura y rendimiento | 8 | 0 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **36** |
+| | **TOTAL** | **70** | **37** |
 
 ### Grafo de dependencias
 
@@ -376,10 +376,14 @@ flowchart LR
   - *Implementación:* `RookieScale` centraliza la tabla (picks 1–30 y 31–60), el crecimiento por temporada y el redondeo a 10.000; `DraftPickSlot.DraftYear` fija el año del draft y `AssignPick` usa `RookieScale.SalaryFor(pick, draftYear, isTwoWay)`. Se elimina el salario aleatorio por tramos y el antiguo plus salarial de los `is_generational` (su ventaja sigue en OVR/potencial). Los contratos de rookie mantienen 4 años garantizados.
   - *Pruebas:* monotonía estricta por pick en primera y segunda ronda (varias temporadas), determinismo para el mismo pick/temporada, crecimiento anual acotado, temporadas anteriores a la base sin descuento, two-way fijo e independiente del pick, clamp de picks fuera de rango y redondeo a 10.000. **Build Linux + EditMode 490/490**.
 
-- [ ] **F4-07 · Parametrizar el CBA por temporada**
+- [x] **F4-07 · Parametrizar el CBA por temporada**
   - *Ref:* `ECO-07` · *Esfuerzo:* L · *Depende:* F1-04
   - *Criterio:* cap, tax, aprons y MLE salen de una tabla por temporada con cifras verificadas contra fuente oficial; deja de ser +5% fijo. Incluye repeater tax si se decide modelarlo.
   - *Punto de partida:* `TradeHelper.cs:7–18`; crecimiento en `DatabaseManager.Records.cs:3531–3543`.
+  - *Decisión D3 (resuelta):* el juego sigue las cifras **oficiales** de la NBA. Se retira el offset interno de +20 M que tenían cap/tax/aprons desde el commit `3e25e147`; `TradeHelper` queda como fallback de 2026-27 y la fuente viva es `CbaTable` + `league_settings`.
+  - *Implementación:* `CbaTable` centraliza 2024-25, 2025-26 y 2026-27 (NBA.com, verificadas) y las proyecciones 2027-28..2034-35 (RealGM, marcadas `Verified=false`). Agotada la tabla, se proyecta +5 % anual y se marca la fila como proyección del juego. `CbaTable.ApplyTo` escribe cap/tax/aprons/MLE/bi-anual/two-way y la temporada en `league_settings`; el seed y `StartNewSeason` lo usan (ya no hay +5 % ciego). Una migración `cba_table_by_season` sincroniza partidas existentes con la fila de su temporada activa. `league_settings` gana `season_start_year`, `cba_projected` y `cba_source`. La escala de rookie escala con el cap de la tabla y el two-way usa el importe de su temporada. El cap sheet proyecta con `CbaTable` y la pantalla de reglas muestra temporada y fuente.
+  - *Repeater tax:* **no se modela en esta fase**; se mantiene el impuesto progresivo estándar de `TradeHelper.CalculateLuxuryTax` y se retira el texto que decía que los repetidores pagaban más.
+  - *Pruebas:* `CbaTableTests` (cifras oficiales, orden, monotonía, proyecciones, `ApplyTo`), `RookieScaleTests` (crecimiento por cap y two-way por temporada), `SaveSlotInitTests` (seed con la tabla) y `EditModeSmokeTests` (fallback 2026-27).
 
 - [ ] **F4-08 · Mínimo salarial por experiencia**
   - *Ref:* `ECO-07`, `F1-04` · *Esfuerzo:* S · *Depende:* F4-07
@@ -591,9 +595,9 @@ Estas preguntas no son código: son respuestas que hay que escribir antes de eje
 
 **D1 resuelta (F1-01):** “media de equipo” es la media de los OVR canónicos de todos los jugadores asignados; 85 no es un mínimo ni un objetivo de balance.
 **D2 resuelta:** `DatabaseManager.Seeding.cs` contiene los jugadores con los que empieza la partida (plantillas y agentes libres). El usuario actualizará manualmente esos datos cuando cambien las plantillas; el total no es fijo y puede añadir/quitar jugadores y sus fotos. El snapshot actual contiene 479 asignados y 129 FA. **Consecuencia (F1-02):** el tamaño de plantilla no se valida — 14–17 es referencia de juego y el auditor lo publica como dato informativo.
-**D3 resuelta para F4-03:** para los casos de apron de esta fase se mantiene como marco el CBA interno 2025-26 (constantes actuales de `TradeHelper`). La decisión de versionar cifras NBA por temporada sigue abierta para F4-07/F4-08.
+**D3 resuelta (F4-07):** el juego versiona las cifras **oficiales** de la NBA por temporada en `CbaTable` (2024-25..2026-27 verificadas; 2027-28..2034-35 como proyección RealGM). Se elimina el offset interno de +20 M y el crecimiento ciego del +5 %; el +5 % solo queda como fallback para temporadas posteriores a la tabla. F4-03 conservó el marco interno vigente en su momento; F4-07 lo sustituye.
 **D4 resuelta (F4-04):** conservar **2 contratos two-way** como límite de diseño; F4-04 separa ese cupo del máximo de 15 plazas estándar.
-**F4-05 (alcance):** las reglas RFA/UFA y holds son una abstracción de juego definida en esta fase; no se atribuyen exactitud CBA. Se versionarán/revisarán junto con los topes en F4-07.
+**F4-05 (alcance):** las reglas RFA/UFA y holds son una abstracción de juego definida en esta fase; no se atribuyen exactitud CBA. Las cifras de topes ya se versionan en `CbaTable` (F4-07); las condiciones legales siguen simplificadas.
 
 ---
 
@@ -656,4 +660,5 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-03` | *(sin commitear)* | Separadas reglas de hard cap, matching entre aprons y agregación del segundo apron; incoming-count ya no se confunde con outgoing-count. Tests cubren varias entradas permitidas, varias salidas rechazadas en 2.º apron, matching entre aprons y hard cap por separado. D3 resuelta con los umbrales internos CBA 2025-26. Pipeline local: build Linux + **467/467 EditMode**. |
 | 2026-10-26 | F4 | `F4-04` | *(sin commitear)* | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | *(sin commitear)* | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
-| 2026-10-26 | F4 | `F4-06` | *(sin commitear)* | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base CBA interno 2025-26 + 5 % anual): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way fijo. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-26 | F4 | `F4-06` | *(sin commitear)* | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-26 | F4 | `F4-07` | *(sin commitear)* | `CbaTable` parametriza cap, luxury tax, aprons, NT-MLE, T-MLE, bi-anual, mínimo y two-way por temporada: 2024-25..2026-27 con cifras oficiales de NBA.com, 2027-28..2034-35 con proyecciones RealGM marcadas `Verified=false` y +5 % anual solo después de la tabla. `CbaTable.ApplyTo` alimenta `league_settings` (`season_start_year`, `cba_projected`, `cba_source`) en el seed y en `StartNewSeason`; la migración `cba_table_by_season` sincroniza partidas antiguas. Se retira el offset interno de +20 M y el +5 % ciego; `TradeHelper` queda como fallback 2026-27. `RookieScale` escala con el cap y el two-way usa el importe de su temporada. Cap sheet y pantalla de reglas muestran temporada/fuente. **Repeater tax no modelado** (impuesto estándar). Tests de cifras oficiales, orden, monotonía, proyecciones, `ApplyTo`, seed, rookie scale y fallback. Build Linux + **499/499 EditMode**. |

@@ -92,7 +92,7 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 ## 9. Critical dependencies / invariants
 
 - `overall` es la media redondeada de los 11 atributos capada por `potential`, con **fuente única** en `PlayerRating` (`Scripts/Data/PlayerRating.cs`). Seed, G-League, draft y mentoring llaman a `RecalculateOverall()`; no dupliques la fórmula.
-- Cap/apron constants live in `TradeHelper.cs` (2025-26); `league_settings` copies them; `StartNewSeason` raises them +5%.
+- Cap/apron/MLE figures live in `CbaTable`; `league_settings` stores the season row (seed and rollover). `TradeHelper` keeps the 2026-27 fallback; always use `CbaTable.For(year)` for other seasons.
 - `GameResultCache.Clear()` at the start of each simulated day — don't forget.
 - Player salary model: `players.salary` annual; `contract_years`; renewal/FA offers mature after 7 days.
 - `first_apron_hard_capped` blocks any transaction above 1st apron after using NT-MLE.

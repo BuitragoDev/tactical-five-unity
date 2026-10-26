@@ -2777,7 +2777,7 @@ public class MarketController : UIScreenController
 
         if (_faTwoWayActive)
         {
-            _faSalary = TradeHelper.TWO_WAY_SALARY;
+            _faSalary = TradeHelper.TwoWaySalary(DatabaseManager.Instance.GetLeagueSettings());
             _faYears = 2;
             RefreshFASpinners();
         }
@@ -2862,7 +2862,7 @@ public class MarketController : UIScreenController
         if (_faTwoWayActive)
         {
             int twoWayCount = DatabaseManager.Instance.GetTwoWayCount(_myTeam.id);
-            _faWarningText.text = $"CONTRATO TWO-WAY: salario fijo ({FormatMoney(TradeHelper.TWO_WAY_SALARY)}) · 2 años. Plazas two-way: {twoWayCount}/{TradeHelper.MAX_TWO_WAY}. No afecta al salary cap.";
+            _faWarningText.text = $"CONTRATO TWO-WAY: salario fijo ({FormatMoney(TradeHelper.TwoWaySalary(leagueSettings))}) · 2 años. Plazas two-way: {twoWayCount}/{TradeHelper.MAX_TWO_WAY}. No afecta al salary cap.";
             _faWarningText.style.display = DisplayStyle.Flex;
             return;
         }
@@ -2995,7 +2995,7 @@ public class MarketController : UIScreenController
     {
         if (_faTwoWayActive)
         {
-            _faSalary = TradeHelper.TWO_WAY_SALARY;
+            _faSalary = TradeHelper.TwoWaySalary(DatabaseManager.Instance.GetLeagueSettings());
             _faYears = 2;
         }
         if (_faSalaryValue != null)
@@ -3016,7 +3016,7 @@ public class MarketController : UIScreenController
         {
             _faTeamOptionActive = false;
             _faPlayerOptionActive = false;
-            _faSalary = TradeHelper.TWO_WAY_SALARY;
+            _faSalary = TradeHelper.TwoWaySalary(DatabaseManager.Instance.GetLeagueSettings());
             _faYears = 2;
         }
         else

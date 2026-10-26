@@ -4,15 +4,19 @@ using System.Linq;
 
 public static class TradeHelper
 {
-    public const long SALARY_CAP = 174_647_000;
-    public const long LUXURY_TAX = 220_428_000;
-    public const long FIRST_APRON = 229_015_000;
-    public const long SECOND_APRON = 241_686_000;
-    public const long NT_MLE = 14_100_000;
-    public const long T_MLE = 5_700_000;
+    // Fallback de la temporada inicial del juego (2026-27). La fuente viva es
+    // `league_settings`, actualizada desde `CbaTable` en el seed y en cada rollover.
+    // No añadas aquí cifras de otra temporada: usa `CbaTable.For(year)`.
+    public const long SALARY_CAP = 164_961_000;
+    public const long LUXURY_TAX = 200_428_000;
+    public const long FIRST_APRON = 209_015_000;
+    public const long SECOND_APRON = 221_686_000;
+    public const long NT_MLE = 15_044_000;
+    public const long T_MLE = 6_064_000;
+    // Suelo interno del seed hasta F4-08 (mínimo por experiencia).
     public const long MIN_SALARY = 2_000_000;
     public const int MAX_STANDARD_ROSTER = 15;
-    public const long TWO_WAY_SALARY = 578_000;
+    public const long TWO_WAY_SALARY = 678_882;
     public const int MAX_TWO_WAY = 2;
     // Límite combinado de referencia; las validaciones usan cada cupo por separado.
     public const int MAX_ROSTER = MAX_STANDARD_ROSTER + MAX_TWO_WAY;
@@ -33,6 +37,24 @@ public static class TradeHelper
 
     /// <summary>Edad máxima para un contrato two-way (misma fuente para FA y draft).</summary>
     public static bool IsEligibleForTwoWayAge(int age) => age <= MAX_TWO_WAY_AGE;
+
+    /// <summary>
+    /// Salario two-way de la temporada activa (tabla CBA en `league_settings`).
+    /// F4-07: el importe ya no es una constante fija; el fallback es 2026-27.
+    /// </summary>
+    public static long TwoWaySalary(LeagueSettingsData settings)
+        => settings != null && settings.two_way_salary > 0
+            ? settings.two_way_salary
+            : TWO_WAY_SALARY;
+
+    /// <summary>
+    /// Suelo salarial de la partida. Hasta F4-08 sigue siendo el mínimo interno de
+    /// 2 M; la tabla CBA ya guarda el mínimo oficial de 0 años para esa fase.
+    /// </summary>
+    public static long MinimumSalary(LeagueSettingsData settings)
+        => settings != null && settings.minimum_salary > 0
+            ? settings.minimum_salary
+            : MIN_SALARY;
 
     /// <summary>
     /// Ajusta una oferta al mínimo legal y al máximo permitido. Devuelve false si no hay

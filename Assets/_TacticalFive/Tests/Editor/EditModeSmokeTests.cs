@@ -11,13 +11,17 @@ public class EditModeSmokeTests
     }
 
     [Test]
-    public void SalaryCaps_MatchLeagueSettingsConstants()
+    public void SalaryCaps_MatchThe2026_27CbaRow()
     {
-        Assert.That(TradeHelper.FIRST_APRON, Is.EqualTo(229_015_000L));
-        Assert.That(TradeHelper.SECOND_APRON, Is.EqualTo(241_686_000L));
-        Assert.That(TradeHelper.LUXURY_TAX, Is.EqualTo(220_428_000L));
-        Assert.That(TradeHelper.NT_MLE, Is.EqualTo(14_100_000L));
-        Assert.That(TradeHelper.T_MLE, Is.EqualTo(5_700_000L));
+        var season = CbaTable.For(2026);
+        Assert.That(TradeHelper.SALARY_CAP, Is.EqualTo(season.SalaryCap));
+        Assert.That(TradeHelper.LUXURY_TAX, Is.EqualTo(season.LuxuryTax));
+        Assert.That(TradeHelper.FIRST_APRON, Is.EqualTo(season.FirstApron));
+        Assert.That(TradeHelper.SECOND_APRON, Is.EqualTo(season.SecondApron));
+        Assert.That(TradeHelper.NT_MLE, Is.EqualTo(season.NonTaxpayerMle));
+        Assert.That(TradeHelper.T_MLE, Is.EqualTo(season.TaxpayerMle));
+        Assert.That(TradeHelper.TWO_WAY_SALARY, Is.EqualTo(season.TwoWaySalary));
+        // F4-08 sustituirá el suelo interno por el mínimo por experiencia.
         Assert.That(TradeHelper.MIN_SALARY, Is.EqualTo(2_000_000L));
     }
 }

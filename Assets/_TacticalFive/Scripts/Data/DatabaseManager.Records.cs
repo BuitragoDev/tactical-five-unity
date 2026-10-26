@@ -3585,18 +3585,18 @@ public partial class DatabaseManager
         }
         AutoSeedLineup(newTeamId, userPlayers);
 
-        // 7. Increase salary cap by 5%
+        // 7. Topes de la nueva temporada desde la tabla CBA (F4-07). La tabla sustituye
+        // el crecimiento ciego del +5 %; el mínimo sigue congelado en el suelo interno
+        // hasta F4-08 (mínimo por experiencia).
         var leagueSettings = GetLeagueSettings();
+        int nextSeasonStartYear = oldSeason != null
+            ? oldSeason.year_start + 1
+            : (leagueSettings != null && leagueSettings.season_start_year > 0
+                ? leagueSettings.season_start_year + 1
+                : CbaTable.CurrentSeasonStartYear + 1);
         if (leagueSettings != null)
         {
-            leagueSettings.salary_cap = (long)(leagueSettings.salary_cap * 1.05);
-            leagueSettings.luxury_tax = (long)(leagueSettings.luxury_tax * 1.05);
-            leagueSettings.apron = (long)(leagueSettings.apron * 1.05);
-            leagueSettings.repeater_apron = (long)(leagueSettings.repeater_apron * 1.05);
-            leagueSettings.mid_level = (long)(leagueSettings.mid_level * 1.05);
-            leagueSettings.taxpayer_mid_level = (long)(leagueSettings.taxpayer_mid_level * 1.05);
-            leagueSettings.bi_annual = (long)(leagueSettings.bi_annual * 1.05);
-            leagueSettings.minimum_salary = (long)(leagueSettings.minimum_salary * 1.05);
+            CbaTable.ApplyTo(leagueSettings, nextSeasonStartYear);
             _db.Update(leagueSettings);
         }
 
@@ -3671,7 +3671,7 @@ public partial class DatabaseManager
         }
 
         // 10. Create new season (preseason)
-        int newYearStart = oldSeason != null ? oldSeason.year_start + 1 : 2027;
+        int newYearStart = nextSeasonStartYear;
         var newSeason = new SeasonData
         {
             year_start = newYearStart,

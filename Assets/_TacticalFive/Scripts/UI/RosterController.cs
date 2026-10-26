@@ -898,7 +898,7 @@ using System.Linq;
         {
             _teamOptionActive = false;
             _playerOptionActive = false;
-            _renewSalary = TradeHelper.TWO_WAY_SALARY;
+            _renewSalary = TradeHelper.TwoWaySalary(DatabaseManager.Instance.GetLeagueSettings());
             _renewYears = 2;
         }
         else
@@ -1276,7 +1276,7 @@ using System.Linq;
         // Contrato two-way: salario fijo y duración de 2 años, sin límites de cap
         if (_renewTwoWayActive)
         {
-            _renewSalary = TradeHelper.TWO_WAY_SALARY;
+            _renewSalary = TradeHelper.TwoWaySalary(DatabaseManager.Instance.GetLeagueSettings());
             _renewYears = 2;
         }
         else

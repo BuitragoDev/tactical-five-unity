@@ -18,9 +18,13 @@ public class TradeHelperTests
     [Test]
     public void CalculateLuxuryTax_ProgressiveBrackets()
     {
-        Assert.That(TradeHelper.CalculateLuxuryTax(230_428_000L), Is.EqualTo(16_250_000L));
-        Assert.That(TradeHelper.CalculateLuxuryTax(240_428_000L), Is.EqualTo(45_000_000L));
-        Assert.That(TradeHelper.CalculateLuxuryTax(245_428_000L), Is.EqualTo(63_750_000L));
+        // F4-07: usa el umbral vigente para no acoplar el test a una temporada concreta.
+        Assert.That(TradeHelper.CalculateLuxuryTax(TradeHelper.LUXURY_TAX + 10_000_000L),
+            Is.EqualTo(16_250_000L));
+        Assert.That(TradeHelper.CalculateLuxuryTax(TradeHelper.LUXURY_TAX + 20_000_000L),
+            Is.EqualTo(45_000_000L));
+        Assert.That(TradeHelper.CalculateLuxuryTax(TradeHelper.LUXURY_TAX + 25_000_000L),
+            Is.EqualTo(63_750_000L));
     }
 
     [Test]

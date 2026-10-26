@@ -2999,7 +2999,9 @@ using System.Threading.Tasks;
                 if (accepted)
                 {
                     acceptedCount++;
-                    player.salary = offer.is_two_way == 1 ? TradeHelper.TWO_WAY_SALARY : offer.offer_salary;
+                    player.salary = offer.is_two_way == 1
+                        ? TradeHelper.TwoWaySalary(DatabaseManager.Instance.GetLeagueSettings())
+                        : offer.offer_salary;
                     player.contract_years = offer.offer_years;
                     player.guaranteed_years = offer.guaranteed_years;
                     player.has_team_option = offer.has_team_option;
@@ -6615,7 +6617,7 @@ using System.Threading.Tasks;
 
             // Los two-way no computan contra el cap (igual que para el usuario).
             long minSalary = leagueSettings?.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
-            long newSalary = signAsTwoWay ? TradeHelper.TWO_WAY_SALARY
+            long newSalary = signAsTwoWay ? TradeHelper.TwoWaySalary(leagueSettings)
                            : player.waived_game_day >= 0 ? minSalary      // mercado de buyout
                            : player.salary + 2_000_000;
             if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings))
@@ -6626,7 +6628,7 @@ using System.Threading.Tasks;
             if (signAsTwoWay)
             {
                 player.is_two_way = 1;
-                player.salary = TradeHelper.TWO_WAY_SALARY;
+                player.salary = TradeHelper.TwoWaySalary(leagueSettings);
                 player.contract_years = 2;
                 player.guaranteed_years = 2;
             }

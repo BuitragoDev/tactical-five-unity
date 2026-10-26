@@ -565,7 +565,7 @@ using System.Linq;
 
         // Tooltips de ayuda (cap/aprons/excepciones son áridos sin contexto)
         _capSheetSalary.tooltip = "Masa salarial efectiva: contratos estándar más cap holds de agentes libres con derechos. Los contratos two-way no cuentan contra el cap.";
-        _capSheetCap.tooltip = "Tope salarial de la liga (crece un 5% cada temporada).";
+        _capSheetCap.tooltip = "Tope salarial de la liga según la tabla CBA de cada temporada.";
         _capSheetSpace.tooltip = "Espacio salarial: tope menos masa salarial. Bajo el tope puedes fichar con espacio; por encima, solo con excepciones.";
         _capSheetApron.tooltip = "1er apron: por encima de él solo puedes usar la Taxpayer MLE y no puedes recibir más salario del que envías en un traspaso.";
         _capExceptionNtMle.tooltip = "Non-Taxpayer MLE: excepción para fichar por encima del tope. Si la usas, quedas sujeto al hard cap del 1er apron.";
@@ -604,7 +604,7 @@ using System.Linq;
         // Projection rows
         for (int yr = 0; yr < CapProjectionYears; yr++)
         {
-            long yearCap = ProjectedCap(cap, yr);
+            long yearCap = ProjectedCap(yr);
             long yearGuaranteed = players.Sum(p => p.is_two_way != 1 && p.guaranteed_years > yr ? p.salary : 0)
                 + (yr == 0 ? activeHolds.Sum(h => h.amount) : 0)
                 + _scenarioPlayers.Where(sp => sp.guaranteedYears > yr).Sum(sp => sp.salary);
@@ -745,9 +745,12 @@ using System.Linq;
             $"{FormatMoney(luxury)} / {FormatMoney(settings != null ? settings.repeater_apron : TradeHelper.SECOND_APRON)}";
     }
 
-    long ProjectedCap(long baseCap, int yearsAhead)
+    long ProjectedCap(int yearsAhead)
     {
-        return (long)(baseCap * System.Math.Pow(1.05, yearsAhead));
+        int startYear = _season != null && _season.year_start > 0
+            ? _season.year_start
+            : CbaTable.CurrentSeasonStartYear;
+        return CbaTable.For(startYear + yearsAhead).SalaryCap;
     }
 
     void BuildScenarioList()

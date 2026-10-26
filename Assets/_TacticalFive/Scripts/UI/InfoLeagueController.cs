@@ -82,16 +82,19 @@ public class InfoLeagueController : UIScreenController
         var settings = DatabaseManager.Instance?.GetLeagueSettings();
         if (settings == null) return;
 
-        var rows = new (string label, long value)[]
+        var rows = new (string label, string value)[]
         {
-            ("LÍMITE SALARIAL", settings.salary_cap),
-            ("LUXURY TAX", settings.luxury_tax),
-            ("1er APRON", settings.apron),
-            ("2º APRON", settings.repeater_apron),
-            ("MID-LEVEL EXCEPTION (NO TAXPAYER)", settings.mid_level),
-            ("MID-LEVEL EXCEPTION (TAXPAYER)", settings.taxpayer_mid_level),
-            ("EXCEPCIÓN BI-ANUAL", settings.bi_annual),
-            ("SALARIO MÍNIMO", settings.minimum_salary),
+            ("TEMPORADA", $"{SeasonStartYear(settings)}-{SeasonStartYear(settings) + 1}"),
+            ("FUENTE", settings.cba_projected == 1 ? "PROYECCIÓN (sin cifra oficial)" : "NBA OFICIAL"),
+            ("LÍMITE SALARIAL", $"{settings.salary_cap:N0} $"),
+            ("LUXURY TAX", $"{settings.luxury_tax:N0} $"),
+            ("1er APRON", $"{settings.apron:N0} $"),
+            ("2º APRON", $"{settings.repeater_apron:N0} $"),
+            ("MID-LEVEL EXCEPTION (NO TAXPAYER)", $"{settings.mid_level:N0} $"),
+            ("MID-LEVEL EXCEPTION (TAXPAYER)", $"{settings.taxpayer_mid_level:N0} $"),
+            ("EXCEPCIÓN BI-ANUAL", $"{settings.bi_annual:N0} $"),
+            ("SALARIO TWO-WAY", $"{settings.two_way_salary:N0} $"),
+            ("SALARIO MÍNIMO", $"{settings.minimum_salary:N0} $"),
         };
 
         foreach (var row in rows)
@@ -101,14 +104,25 @@ public class InfoLeagueController : UIScreenController
 
             var label = new Label(row.label);
             label.AddToClassList("infoleague-finanza-label");
+            if (row.label == "FUENTE")
+                label.tooltip = settings.cba_source;
 
-            var value = new Label($"{row.value:N0} $");
+            var value = new Label(row.value);
             value.AddToClassList("infoleague-finanza-value");
 
             item.Add(label);
             item.Add(value);
             _finanzasBody.Add(item);
         }
+    }
+
+    int SeasonStartYear(LeagueSettingsData settings)
+    {
+        if (settings != null && settings.season_start_year > 0)
+            return settings.season_start_year;
+        return _season != null && _season.year_start > 0
+            ? _season.year_start
+            : CbaTable.CurrentSeasonStartYear;
     }
 
     /* ═══════════════════════════════════════════

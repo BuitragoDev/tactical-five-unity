@@ -47,22 +47,22 @@
                             <ui:Label class="infoleague-regla-texto" text="Los equipos pueden gastar hasta este tope en la nómina de su plantilla. Con las excepciones y los derechos Bird se puede firmar por encima del límite para retener a jugadores propios." />
 
                             <ui:Label class="infoleague-regla-titulo" text="LUXURY TAX" />
-                            <ui:Label class="infoleague-regla-texto" text="Los equipos cuya nómina supere este umbral pagan un impuesto progresivo calculado mensualmente (nómina anual / 12). Los repetidores pagan una tasa mayor que los equipos que entran por primera vez." />
+                            <ui:Label class="infoleague-regla-texto" text="Los equipos cuya nómina supere este umbral pagan un impuesto progresivo calculado mensualmente (nómina anual / 12). El juego modela el impuesto estándar; el repeater tax no está incluido en esta versión." />
 
                             <ui:Label class="infoleague-regla-titulo" text="APRONS" />
                             <ui:Label class="infoleague-regla-texto" text="El primer apron restringe las firmas de agentes libres y las excepciones disponibles. El segundo apron añade más limitaciones: no se pueden agrupar salarios en traspasos ni usar excepciones de varios años. Superar el primer apron tras usar la NT-MLE activa el hard cap." />
 
                             <ui:Label class="infoleague-regla-titulo" text="MID-LEVEL EXCEPTION" />
-                            <ui:Label class="infoleague-regla-texto" text="La NT-MLE (~14,1M) puede usarse una vez por temporada cuando el equipo está por encima del límite salarial y por debajo del primer apron, pero activa el hard cap en el primer apron. La T-MLE (~5,7M) está disponible para equipos en o por encima del primer apron." />
+                            <ui:Label class="infoleague-regla-texto" text="La NT-MLE puede usarse una vez por temporada cuando el equipo está por encima del límite salarial y por debajo del primer apron, pero activa el hard cap en el primer apron. La T-MLE está disponible para equipos en o por encima del primer apron. Ambas se actualizan cada temporada con la tabla CBA." />
 
                             <ui:Label class="infoleague-regla-titulo" text="EXCEPCIÓN BI-ANUAL" />
-                            <ui:Label class="infoleague-regla-texto" text="Permite firmar a un agente libre (~5,1M) solo una vez cada dos años. Se pierde si se usa la NT-MLE o la T-MLE." />
+                            <ui:Label class="infoleague-regla-texto" text="Permite firmar a un agente libre solo una vez cada dos años. Se pierde si se usa la NT-MLE o la T-MLE. Su importe se actualiza cada temporada con la tabla CBA." />
 
                             <ui:Label class="infoleague-regla-titulo" text="SALARIO MÍNIMO" />
                             <ui:Label class="infoleague-regla-texto" text="Importe mínimo por contrato de jugador. Los equipos pueden firmar jugadores al mínimo sin necesidad de espacio salarial." />
 
                             <ui:Label class="infoleague-regla-titulo" text="BIRD RIGHTS Y HARD CAP" />
-                            <ui:Label class="infoleague-regla-texto" text="Un equipo puede renovar a sus propios agentes libres por encima del límite salarial (derechos Bird) si el jugador lleva al menos tres temporadas en el equipo. El límite salarial y los umbrales crecen un 5% cada temporada. La ventana de traspasos cierra el 7 de febrero (deadline)." />
+                            <ui:Label class="infoleague-regla-texto" text="Un equipo puede renovar a sus propios agentes libres por encima del límite salarial (derechos Bird) si el jugador lleva al menos tres temporadas en el equipo. El límite, el impuesto, los aprons y las excepciones se actualizan cada temporada con las cifras oficiales del CBA; las temporadas futuras sin cifra publicada se marcan como proyección. La ventana de traspasos cierra el 7 de febrero (deadline)." />
                         </ui:VisualElement>
                         </ui:ScrollView>
                     </ui:VisualElement>

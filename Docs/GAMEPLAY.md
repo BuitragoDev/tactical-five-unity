@@ -158,7 +158,7 @@ Si un equipo no llega a cinco sanos se simula con los disponibles y, sin ninguno
 
 ## 4. Contracts & salary cap
 
-Constants (2025-26, `TradeHelper.cs:7-14`): cap `174,647,000`, luxury `220,428,000`, 1st apron `229,015,000`, 2nd apron `241,686,000`, NT-MLE `14.1M`, T-MLE `5.7M`, minimum `2M`, max roster 17. Cap, luxury and aprons **+5% per season** (`StartNewSeason`).
+Constants (2026-27, fallback `TradeHelper.cs`): cap `164,961,000`, luxury `200,428,000`, 1st apron `209,015,000`, 2nd apron `221,686,000`, NT-MLE `15,044,000`, T-MLE `6,064,000`, BAE `5,477,000`, minimum `2,000,000` (suelo interno hasta F4-08), two-way `678,882`. La fuente viva es `CbaTable` + `league_settings`: 2024-25..2026-27 son cifras oficiales de la NBA, 2027-28..2034-35 son proyecciones de RealGM y después se proyecta +5 % anual. No se modela repeater tax.
 
 ### Max offer (`RosterController.GetMaxOfferBreakdown`)
 1. `maxByExp`: experience = `max(0, years_of_service)`; ≤6yr → `cap × 25%`, ≤9yr → `cap × 30%`, else `cap × 35%`.
@@ -175,7 +175,7 @@ Acceptance via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll `Random(1,10
 Apron rules, centralized in `TradeHelper.GetMaxIncomingSalary` (the exact returned limit is also shown in validation errors): 2nd apron or hard-capped above 1st (no aggregation, incoming ≤ outgoing); between 1st and 2nd (incoming ≤110% outgoing); below 1st (`2×+250K` for outgoing <7.5M / `out+7.5M` for <29M / `125%+250K` otherwise). The $250K adjustment is applied only once in the applicable bracket. Picks tradable (`draft_picks.current_team_id`) with **protection & swaps** (`protected_from`, `is_swap`, `swap_original_team_id`). **Multi-año:** cada equipo posee los drafts de `year_end..year_end+3` (8 picks al inicio: 4 R1 + 4 R2); las rondas futuras no tienen posición (se resuelve al draftear por el `original_team_id`) y `PickBonus` las descuenta por año (−2/año R1, −1/año R2, mín. 1). S&T of own FA via `MarketController.ProcessSATrade` (Bird max → sign + immediate trade → two `TradeData`; receiver under hard cap; `teamASignSalaries`/`teamBSignSalaries` in validation).
 
 ### Cap sheet (Finances → «CAP SHEET»)
-Proyección de nómina efectiva vs cap/apron/espacio, contratos garantizados/opciones a 5 años (+5%/season) y cap holds activos del año actual. La nómina de cap suma contratos estándar + holds; excluye salarios two-way y evita doble conteo cuando el jugador ya firmó. Los holds son compromisos de cap, no nómina mensual ni impuesto. Finanzas permite renunciar cada hold (el jugador pasa a UFA).
+Proyección de nómina efectiva vs cap/apron/espacio, contratos garantizados/opciones a 5 años (cap proyectado por la tabla CBA de cada temporada) y cap holds activos del año actual. La nómina de cap suma contratos estándar + holds; excluye salarios two-way y evita doble conteo cuando el jugador ya firmó. Los holds son compromisos de cap, no nómina mensual ni impuesto. Finanzas permite renunciar cada hold (el jugador pasa a UFA).
 
 ### Derechos de agente libre y cap holds (F4-05, simplificados)
 - Service time: `years_of_service` sube una vez por temporada de equipo. Legacy saves se estiman por edad/antigüedad (no es historial CBA oficial; editable desde Editor).
@@ -256,7 +256,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 - `ProcessAITransfers` (cycle every ≥10 game days, **3-5 game days during deadline week Feb 1-8**; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 3 per cycle). Each team has a **strategy** (`TeamStrategy`: Contend / Balanced / Rebuild via `GetTeamStrategy`): Contend (top 4 conference or 2+ stars OVR≥85) denser (0.45, 6-day cooldown), hunts upgrades up to OVR 90 including a future pick, protects young (age<26, OVR≥82); Rebuild (bottom 4 or young without stars) sells veterans ≥30 for young/picks (`TrySellVeteran`), 8-day cooldown; Balanced 15-day cooldown. Offers to the player strategy-aware (`PickTradeTarget`/`BuildOfferPackage`). Deadline contenders offer extra picks; titles prefixed `[DEADLINE]`.
 - `ProcessStarFreeAgentSignings`: top FAs (avg > 80) sign with strongest teams; priority Contend > Balanced > Rebuild; Rebuild never signs OVR≥85.
 - `EndSeasonController.ProcessAITeamRenewals`: AI renews its expiring players.
-- `StartNewSeason` refills AI rosters to 15 (best teams first), trims to 17 max, aging/progression, +5% caps, re-signs TV/sponsors. **En NewSeasonController**, antes del control de plantilla >17 del equipo del manager, `CheckRosterAndStart` decrementa un año de contrato y pasa a FA a los no renovados (misma semántica que `StartNewSeason`, que salta ese decremento para el equipo nuevo del manager).
+- `StartNewSeason` refills AI rosters to 15 (best teams first), trims to 17 max, aging/progression, updates caps from `CbaTable`, re-signs TV/sponsors. **En NewSeasonController**, antes del control de plantilla >17 del equipo del manager, `CheckRosterAndStart` decrementa un año de contrato y pasa a FA a los no renovados (misma semántica que `StartNewSeason`, que salta ese decremento para el equipo nuevo del manager).
 
 ## 10. Draft
 
@@ -265,8 +265,8 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 ### Escala salarial de rookie (F4-06)
 
 - `RookieScale.SalaryFor(pickNumber, seasonStartYear, isTwoWay)` es la **fuente única** del salario de draft; `DraftGenerator.AssignPick` la usa con `DraftPickSlot.DraftYear` (año del draft = temporada de debut).
-- Tabla base 2025-26: primera ronda picks 1–30 estrictamente decreciente (13,8 M → 2,7 M); segunda ronda 31–60 decreciente cerca del mínimo (2,0 M → 1,42 M). Cada temporada posterior aplica el mismo **+5 %** de los topes; las anteriores a la base no se descuentan. Importes redondeados a 10.000.
-- Un contrato **two-way** ignora el pick y usa el salario fijo `TWO_WAY_SALARY`; la ventaja de un prospecto generacional queda en OVR/potencial, no en el salario. F4-07 sustituirá la tabla por cifras oficiales versionadas por temporada.
+- Tabla base 2025-26: primera ronda picks 1–30 estrictamente decreciente (13,8 M → 2,7 M); segunda ronda 31–60 decreciente cerca del mínimo (2,0 M → 1,42 M). Cada temporada posterior escala con el crecimiento del cap de `CbaTable`; las anteriores a la base no se descuentan. Importes redondeados a 10.000. El two-way usa el salario de la temporada en la tabla CBA.
+- Un contrato **two-way** ignora el pick y usa el salario two-way de la temporada en `CbaTable`; la ventaja de un prospecto generacional queda en OVR/potencial, no en el salario.
 
 ## 11. Awards, records, legacy & progression
 
