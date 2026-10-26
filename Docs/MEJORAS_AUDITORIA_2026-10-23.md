@@ -460,7 +460,7 @@ flowchart LR
   - *Ref:* `RET-02` · *Esfuerzo:* M · *Depende:* F6-01
   - *Criterio:* Stats/PlayerProfile/Trajectory muestran evolución por temporada y comparación con la liga usando solo datos persistidos; sin gráficos 3D, solo tablas, sparklines o barras.
   - *Punto de partida:* `StatsController.cs`, `PlayerProfileController.cs`, `TrajectoryController.cs`.
-  - *Implementación:* `StatsTrendHelper` deriva PTS/P, TS% y EFI/48 de `PlayerCareerSeasonRow`/`LeagueSeasonAggregateRow`. `DatabaseManager.GetLeagueSeasonAggregates` agrega archivo + temporada en curso. PlayerProfile añade tabla de evolución y comparativa con la liga; Trajectory añade columnas TS%/EFI/48 y una línea de comparación; Stats muestra tres tarjetas de tendencia de liga (TS%, EFI/48, PTS/P) con delta vs temporada anterior. Sin gráficos 3D.
+  - *Implementación:* `StatsTrendHelper` deriva PTS/P, TS% y EFI/48 de `PlayerCareerSeasonRow`/`LeagueSeasonAggregateRow`. `DatabaseManager.GetLeagueSeasonAggregates` agrega archivo + temporada en curso, solo temporada regular. PlayerProfile añade tabla de evolución y comparativa con la liga; Trajectory añade columnas TS%/EFI/48 y una línea de comparación; Stats muestra tres tarjetas de tendencia de liga (TS%, EFI/48, PTS/P) con delta vs temporada anterior. Sin gráficos 3D.
   - *Pruebas:* `StatsTrendHelperTests` (TS%, EFI/48, PTS/P, deltas) y suite completa.
 
 - [x] **F6-04 · Integridad del histórico por `player_id`**
