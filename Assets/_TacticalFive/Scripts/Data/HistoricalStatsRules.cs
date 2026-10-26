@@ -38,4 +38,27 @@ public static class HistoricalStatsRules
 
     /// <summary>¿La fila es del seeder de leyendas (nunca se mezcla con jugadores reales)?</summary>
     public static bool IsLegendRow(HistoricalPlayerStatsData row) => row != null && row.player_id == LEGEND_ID;
+
+    /// <summary>
+    /// Plan de adopción de filas huérfanas: devuelve `id de fila → player_id` solo para
+    /// las filas cuyo nombre identifica a un ÚNICO jugador. Con homónimos no hay entrada:
+    /// la fila se queda sin dueño y la migración la deja intacta.
+    /// </summary>
+    public static Dictionary<int, int> BuildAdoptionPlan(
+        IEnumerable<HistoricalPlayerStatsData> rows,
+        IReadOnlyDictionary<(string first, string last), List<int>> playersByName)
+    {
+        var plan = new Dictionary<int, int>();
+        if (rows == null) return plan;
+        foreach (var row in rows)
+        {
+            if (row == null || row.player_id != UNKNOWN_ID) continue;
+            var key = (row.first_name, row.last_name);
+            if (playersByName != null
+                && playersByName.TryGetValue(key, out var ids)
+                && CanAdopt(row, ids))
+                plan[row.id] = ids[0];
+        }
+        return plan;
+    }
 }

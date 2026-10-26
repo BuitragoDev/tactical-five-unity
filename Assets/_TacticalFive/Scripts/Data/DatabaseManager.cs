@@ -1252,13 +1252,14 @@ public partial class DatabaseManager : MonoBehaviour
             //    quedan sin dueño: esa fila es una mezcla y no se puede repartir.
             var orphans = _db.Table<HistoricalPlayerStatsData>().Where(r => r.player_id == 0).ToList();
             var playersByName = _db.Table<PlayerData>().ToList()
-                .ToLookup(p => (p.first_name, p.last_name));
+                .GroupBy(p => (p.first_name, p.last_name))
+                .ToDictionary(g => g.Key, g => g.Select(p => p.id).ToList());
+            var adoptionPlan = HistoricalStatsRules.BuildAdoptionPlan(orphans, playersByName);
             int adopted = 0;
             foreach (var r in orphans)
             {
-                var ids = playersByName[(r.first_name, r.last_name)].Select(p => p.id).ToList();
-                if (!HistoricalStatsRules.CanAdopt(r, ids)) continue;
-                r.player_id = ids[0];
+                if (!adoptionPlan.TryGetValue(r.id, out int playerId)) continue;
+                r.player_id = playerId;
                 _db.Update(r);
                 adopted++;
             }

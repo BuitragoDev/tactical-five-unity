@@ -71,6 +71,31 @@ public class HistoricalStatsRulesTests
     }
 
     [Test]
+    public void BuildAdoptionPlan_DetectsAmbiguousHomonyms()
+    {
+        var unique = Row(HistoricalStatsRules.UNKNOWN_ID, "Unique", "Player");
+        unique.id = 10;
+        var ambiguous = Row(HistoricalStatsRules.UNKNOWN_ID, "John", "Smith");
+        ambiguous.id = 11;
+        var owned = Row(42, "John", "Smith");
+        owned.id = 12;
+
+        var players = new Dictionary<(string, string), List<int>>
+        {
+            [("Unique", "Player")] = new List<int> { 7 },
+            [("John", "Smith")] = new List<int> { 8, 9 }
+        };
+
+        var plan = HistoricalStatsRules.BuildAdoptionPlan(
+            new List<HistoricalPlayerStatsData> { unique, ambiguous, owned }, players);
+
+        Assert.That(plan, Has.Count.EqualTo(1));
+        Assert.That(plan[10], Is.EqualTo(7), "El nombre único se adopta");
+        Assert.That(plan.ContainsKey(11), Is.False, "Dos homónimos → no se adopta");
+        Assert.That(plan.ContainsKey(12), Is.False, "Una fila con dueño no entra en el plan");
+    }
+
+    [Test]
     public void IsLegendRow_IdentifiesSeederRows()
     {
         Assert.That(HistoricalStatsRules.IsLegendRow(Row(HistoricalStatsRules.LEGEND_ID, "A", "B")), Is.True);
