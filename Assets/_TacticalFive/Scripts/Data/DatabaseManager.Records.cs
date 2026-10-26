@@ -1405,6 +1405,47 @@ public partial class DatabaseManager
                   AND g.is_played = 1 AND g.game_type != 'allstar')");
     }
 
+    /// <summary>F6-03: agregados de liga por temporada (archivo + temporada en curso).</summary>
+    public List<LeagueSeasonAggregateRow> GetLeagueSeasonAggregates(int managerId)
+    {
+        if (!EnsureDb()) return new List<LeagueSeasonAggregateRow>();
+
+        return _db.Query<LeagueSeasonAggregateRow>(@"
+            SELECT season_id, MAX(year_start) AS year_start, MAX(year_end) AS year_end,
+                   SUM(games) AS games, SUM(total_minutes) AS total_minutes,
+                   SUM(total_points) AS total_points, SUM(total_rebounds) AS total_rebounds,
+                   SUM(total_assists) AS total_assists, SUM(total_steals) AS total_steals,
+                   SUM(total_blocks) AS total_blocks,
+                   SUM(total_fgm) AS total_fgm, SUM(total_fga) AS total_fga,
+                   SUM(total_fg3m) AS total_fg3m, SUM(total_fg3a) AS total_fg3a,
+                   SUM(total_ftm) AS total_ftm, SUM(total_fta) AS total_fta,
+                   SUM(total_turnovers) AS total_turnovers,
+                   SUM(total_oreb) AS total_oreb, SUM(total_dreb) AS total_dreb
+            FROM (
+                SELECT season_id, year_start, year_end, games, total_minutes,
+                       total_points, total_rebounds, total_assists, total_steals,
+                       total_blocks, total_fgm, total_fga, total_fg3m, total_fg3a,
+                       total_ftm, total_fta, total_turnovers, total_oreb, total_dreb
+                FROM player_season_stats
+
+                UNION ALL
+
+                SELECT g.season_id, s.year_start, s.year_end, COUNT(*),
+                       SUM(ps.minutes), SUM(ps.points), SUM(ps.rebounds),
+                       SUM(ps.assists), SUM(ps.steals), SUM(ps.blocks),
+                       SUM(ps.fgm), SUM(ps.fga), SUM(ps.fg3m), SUM(ps.fg3a),
+                       SUM(ps.ftm), SUM(ps.fta), SUM(ps.turnovers),
+                       SUM(ps.oreb), SUM(ps.dreb)
+                FROM player_game_stats ps
+                JOIN games g ON ps.game_id = g.id
+                JOIN seasons s ON g.season_id = s.id
+                WHERE g.manager_id = ? AND g.is_played = 1 AND g.game_type != 'allstar'
+                GROUP BY g.season_id
+            )
+            GROUP BY season_id
+            ORDER BY year_start", managerId).ToList();
+    }
+
     public List<PlayerCareerSeasonRow> GetPlayerCareerHistory(int playerId, int managerId)
     {
         if (!EnsureDb()) return new List<PlayerCareerSeasonRow>();

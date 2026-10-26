@@ -283,6 +283,12 @@
     padding: 12px 16px;
 }
 
+.trajectory-league-compare {
+    font-size: 14px;
+    color: rgb(179, 190, 214);
+    margin-bottom: 6px;
+}
+
 /* Dos paneles en 2 columnas (50% fijo cada uno), misma altura. */
 .trajectory-panels-row {
     flex-direction: row;
@@ -464,7 +470,7 @@
 }
 
 .th-season { width: 130px; -unity-text-align: middle-left; padding-left: 8px; }
-.th-team   { width: 480px; -unity-text-align: middle-left; }
+.th-team   { width: 300px; -unity-text-align: middle-left; }
 .th-gp     { width: 80px;  -unity-text-align: middle-center; }
 .th-mp     { width: 70px;  -unity-text-align: middle-center; }
 .th-pts    { width: 70px;  -unity-text-align: middle-center; }
@@ -472,6 +478,8 @@
 .th-ast    { width: 70px;  -unity-text-align: middle-center; }
 .th-stl    { width: 70px;  -unity-text-align: middle-center; }
 .th-blk    { width: 70px;  -unity-text-align: middle-center; }
+.th-ts     { width: 70px;  -unity-text-align: middle-center; }
+.th-efi    { width: 80px;  -unity-text-align: middle-center; }
 .th-val    { width: 70px;  -unity-text-align: middle-center; padding-right: 8px; }
 
 .th-season,
@@ -483,6 +491,8 @@
 .th-ast,
 .th-stl,
 .th-blk,
+.th-ts,
+.th-efi,
 .th-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
     font-size: 16px;
@@ -559,7 +569,7 @@
 }
 
 .td-season { width: 130px; -unity-text-align: middle-left; padding-left: 8px; }
-.td-team   { width: 480px; -unity-text-align: middle-left; }
+.td-team   { width: 300px; -unity-text-align: middle-left; }
 .td-gp     { width: 80px;  -unity-text-align: middle-center; }
 .td-mp     { width: 70px;  -unity-text-align: middle-center; }
 .td-pts    { width: 70px;  -unity-text-align: middle-center; }
@@ -567,6 +577,8 @@
 .td-ast    { width: 70px;  -unity-text-align: middle-center; }
 .td-stl    { width: 70px;  -unity-text-align: middle-center; }
 .td-blk    { width: 70px;  -unity-text-align: middle-center; }
+.td-ts     { width: 70px;  -unity-text-align: middle-center; }
+.td-efi    { width: 80px;  -unity-text-align: middle-center; }
 .td-val    { width: 70px;  -unity-text-align: middle-center; padding-right: 8px; }
 
 .td-season,
@@ -578,6 +590,8 @@
 .td-ast,
 .td-stl,
 .td-blk,
+.td-ts,
+.td-efi,
 .td-val {
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
     font-size: 18px;

@@ -49,6 +49,7 @@ using System.Linq;
     // Tabla
     private VisualElement _trajectoryTableBody;
     private VisualElement _trajectoryTableTotals;
+    private Label _trajectoryLeagueCompare;
     private VisualElement _trajectoryTableScrollViewport;
     private VisualElement _trajectoryTableScrollTrack;
     private VisualElement _trajectoryTableScrollThumb;
@@ -87,6 +88,7 @@ using System.Linq;
         _trajectoryMilestonesBody = _root.Q<VisualElement>("TrajectoryMilestonesBody");
         _trajectoryTableBody = _root.Q<VisualElement>("TrajectoryTableBody");
         _trajectoryTableTotals = _root.Q<VisualElement>("TrajectoryTableTotals");
+        _trajectoryLeagueCompare = _root.Q<Label>("TrajectoryLeagueCompare");
         _trajectoryTableScrollViewport = _root.Q<VisualElement>("TrajectoryTableScrollViewport");
         _trajectoryTableScrollTrack = _root.Q<VisualElement>("TrajectoryTableScrollTrack");
         _trajectoryTableScrollThumb = _root.Q<VisualElement>("TrajectoryTableScrollThumb");
@@ -328,10 +330,35 @@ using System.Linq;
                     total_assists = rows.Sum(r => r.total_assists),
                     total_steals = rows.Sum(r => r.total_steals),
                     total_blocks = rows.Sum(r => r.total_blocks),
-                    total_rating = rows.Sum(r => r.total_rating)
+                    total_rating = rows.Sum(r => r.total_rating),
+                    total_fgm = rows.Sum(r => r.total_fgm),
+                    total_fga = rows.Sum(r => r.total_fga),
+                    total_fg3m = rows.Sum(r => r.total_fg3m),
+                    total_fg3a = rows.Sum(r => r.total_fg3a),
+                    total_ftm = rows.Sum(r => r.total_ftm),
+                    total_fta = rows.Sum(r => r.total_fta),
+                    total_turnovers = rows.Sum(r => r.total_turnovers),
+                    total_oreb = rows.Sum(r => r.total_oreb),
+                    total_dreb = rows.Sum(r => r.total_dreb)
                 };
             })
             .ToList();
+
+        if (_trajectoryLeagueCompare != null)
+        {
+            var latest = merged.OrderByDescending(s => s.year_start).FirstOrDefault();
+            var latestTrend = StatsTrendHelper.FromPlayer(latest);
+            var leagueRows = DatabaseManager.Instance.GetLeagueSeasonAggregates(_manager.id);
+            var leagueTrend = leagueRows
+                .Select(StatsTrendHelper.FromLeague)
+                .FirstOrDefault(t => t != null && t.seasonId == latest?.season_id);
+            _trajectoryLeagueCompare.text = latestTrend != null && leagueTrend != null
+                ? $"COMPARATIVA CON LA LIGA · TS% {StatFormat.One(latestTrend.tsPct)} vs {StatFormat.One(leagueTrend.tsPct)} " +
+                  $"({StatsTrendHelper.Delta(latestTrend.tsPct, leagueTrend.tsPct)}) · " +
+                  $"EFI/48 {StatFormat.One(latestTrend.efi48)} vs {StatFormat.One(leagueTrend.efi48)} " +
+                  $"({StatsTrendHelper.Delta(latestTrend.efi48, leagueTrend.efi48)})"
+                : "";
+        }
 
         foreach (var season in merged)
         {
@@ -353,6 +380,11 @@ using System.Linq;
                 ? ((float)season.total_steals / season.games).ToString("F1", fmt) : "0.0"));
             row.Add(CreateCell("td-blk", season.games > 0
                 ? ((float)season.total_blocks / season.games).ToString("F1", fmt) : "0.0"));
+            var seasonTrend = StatsTrendHelper.FromPlayer(season);
+            row.Add(CreateCell("td-ts", seasonTrend != null
+                ? seasonTrend.tsPct.ToString("F1", fmt) : "0.0"));
+            row.Add(CreateCell("td-efi", seasonTrend != null
+                ? seasonTrend.efi48.ToString("F1", fmt) : "0.0"));
             row.Add(CreateCell("td-val", season.games > 0
                 ? ((float)season.total_rating / season.games).ToString("F1", fmt) : "0.0"));
 
@@ -388,6 +420,25 @@ using System.Linq;
                 ? ((float)totalStl / totalGames).ToString("F1", fmt) : "0.0"));
             _trajectoryTableTotals.Add(CreateCell("td-blk", totalGames > 0
                 ? ((float)totalBlk / totalGames).ToString("F1", fmt) : "0.0"));
+            var totalTrend = StatsTrendHelper.FromPlayer(new PlayerCareerSeasonRow
+            {
+                games = totalGames,
+                total_minutes = totalMinutes,
+                total_points = totalPts,
+                total_rebounds = totalReb,
+                total_assists = totalAst,
+                total_steals = totalStl,
+                total_blocks = totalBlk,
+                total_fgm = merged.Sum(s => s.total_fgm),
+                total_fga = merged.Sum(s => s.total_fga),
+                total_ftm = merged.Sum(s => s.total_ftm),
+                total_fta = merged.Sum(s => s.total_fta),
+                total_turnovers = merged.Sum(s => s.total_turnovers)
+            });
+            _trajectoryTableTotals.Add(CreateCell("td-ts", totalTrend != null
+                ? totalTrend.tsPct.ToString("F1", fmt) : "0.0"));
+            _trajectoryTableTotals.Add(CreateCell("td-efi", totalTrend != null
+                ? totalTrend.efi48.ToString("F1", fmt) : "0.0"));
             _trajectoryTableTotals.Add(CreateCell("td-val", totalGames > 0
                 ? ((float)totalRat / totalGames).ToString("F1", fmt) : "0.0"));
         }

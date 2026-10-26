@@ -124,6 +124,7 @@
                         <ui:Label class="trajectory-panel-title" text="ESTADÍSTICAS POR TEMPORADA" />
                     </ui:VisualElement>
                     <ui:VisualElement class="trajectory-panel-body">
+                        <ui:Label name="TrajectoryLeagueCompare" class="trajectory-league-compare" text="" />
                         <ui:VisualElement class="trajectory-table">
                             <ui:VisualElement class="trajectory-table-header">
                                 <ui:Label class="th-season" text="TEMPORADA" />
@@ -135,6 +136,8 @@
                                 <ui:Label class="th-ast" text="AST" />
                                 <ui:Label class="th-stl" text="ROB" />
                                 <ui:Label class="th-blk" text="TAP" />
+                                <ui:Label class="th-ts" text="TS%" />
+                                <ui:Label class="th-efi" text="EFI/48" />
                                 <ui:Label class="th-val" text="VAL" />
                             </ui:VisualElement>
                             <ui:VisualElement class="trajectory-table-body-scroll">

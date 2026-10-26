@@ -90,6 +90,29 @@ public class HistoricalStatsAggregateRow
     public int total_rating { get; set; }
 }
 
+public class LeagueSeasonAggregateRow
+{
+    public int season_id { get; set; }
+    public int year_start { get; set; }
+    public int year_end { get; set; }
+    public int games { get; set; }
+    public double total_minutes { get; set; }
+    public int total_points { get; set; }
+    public int total_rebounds { get; set; }
+    public int total_assists { get; set; }
+    public int total_steals { get; set; }
+    public int total_blocks { get; set; }
+    public int total_fgm { get; set; }
+    public int total_fga { get; set; }
+    public int total_fg3m { get; set; }
+    public int total_fg3a { get; set; }
+    public int total_ftm { get; set; }
+    public int total_fta { get; set; }
+    public int total_turnovers { get; set; }
+    public int total_oreb { get; set; }
+    public int total_dreb { get; set; }
+}
+
 public class PlayerCareerSeasonRow
 {
     public int season_id { get; set; }

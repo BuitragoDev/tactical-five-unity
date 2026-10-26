@@ -98,7 +98,7 @@ protected virtual void OnEnable()
 | 13 | Results | `Screens/Results` | `ResultsController` | Game results list |
 | 14 | Playoffs | `Screens/Playoffs` | `PlayoffsController` | Playoff bracket |
 | 15 | Standings | `Screens/Standings` | `StandingsController` | Conference standings + pestaña NBA CUP (grupos, campeón/MVP) |
-| 16 | Stats | `Screens/Stats` | `StatsController` | League stat leaders (+ advanced analytics) |
+| 16 | Stats | `Screens/Stats` | `StatsController` | League stat leaders + tarjetas de tendencia de liga (TS%, EFI/48, PTS/P) |
 | 17 | Records | `Screens/Records` | `RecordsController` | Records screen |
 | 18 | Palmares | `Screens/Palmares` | `PalmaresController` | Historical palmarés + Hall of Fame panel |
 | 19 | Premios | `Screens/Premios` | `PremiosController` | Monthly awards |
@@ -123,7 +123,7 @@ protected virtual void OnEnable()
 | 38 | PlayerAwards | `Screens/PlayerAwards` | `PlayerAwardsController` | Player awards |
 | 39 | PlayerProfile | `Screens/PlayerProfile` | `PlayerProfileController` | Banner (foto, dorsal, escudo, honores, MED, trayectoria) + 3 columnas (Información Personal · Atributos como badges · Últimas Lesiones) + stats de temporada; fog-of-war gate |
 | 40 | Quintos | `Screens/Quintos` | `QuintosController` | Season All-Star/Rookie quintets |
-| 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career |
+| 41 | Trajectory | `Screens/Trajectory` | `TrajectoryController` | Player career + evolución TS%/EFI/48 y comparación con la liga |
 | 42 | PreGame | `Screens/PreGame` | `PreGameController` | Previas del partido: pronóstico/favorito, registros, ofensiva/defensiva + rango, bajas, alineaciones y claves; botón VOLVER y "IR AL PARTIDO" (visible **solo si el partido es el del día pendiente**; si es dentro de 2-3 días se oculta, y con él el atajo "D") |
 | 43 | InfoLeague | `Screens/InfoLeague` | `InfoLeagueController` | Información de la liga: pestañas FINANZAS (economía de la competición) y EQUIPOS (plantillas por conferencia Este/Oeste) |
 | 44 | TheCity | `Screens/TheCity` | `TheCityController` | Mapa/ciudad con burbujas de acceso directo (hospital, pabellón, entrenamiento, clasificación, empleados, finanzas, prensa, estadísticas, palmarés). **GameObject `TheCity` (sin sufijo `Document`)** |

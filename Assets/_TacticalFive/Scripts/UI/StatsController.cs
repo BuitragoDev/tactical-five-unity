@@ -46,6 +46,7 @@ using System.Linq;
     protected override GameScreen ScreenId => GameScreen.Stats;
     private VisualElement _statsBody;
     private VisualElement _tableHeader;
+    private VisualElement _statsTrendsRow;
     private Label _panelTitle;
     private List<TeamData> _allTeams;
     private Dictionary<string, Sprite> _logoSprites = new();
@@ -74,6 +75,7 @@ using System.Linq;
     {
         _statsBody = _root.Q<VisualElement>("StatsBody");
         _tableHeader = _root.Q<VisualElement>("TableHeader");
+        _statsTrendsRow = _root.Q<VisualElement>("StatsTrendsRow");
         _panelTitle = _root.Q<Label>("PanelTitle");
 
         _statTabs.Clear();
@@ -164,8 +166,50 @@ using System.Linq;
                 btnMyTeam.text = _myTeam.name.ToUpper();
         }
 
+        BuildLeagueTrends();
         ShowStats(_currentStat);
     }
+
+    void BuildLeagueTrends()
+    {
+        if (_statsTrendsRow == null) return;
+        _statsTrendsRow.Clear();
+
+        var trends = StatsTrendHelper.FromLeague(
+            DatabaseManager.Instance.GetLeagueSeasonAggregates(_manager.id));
+        if (trends.Count == 0) return;
+
+        var current = trends[trends.Count - 1];
+        var previous = trends.Count > 1 ? trends[trends.Count - 2] : null;
+
+        AddTrendCard("TS% LIGA", current.tsPct, previous?.tsPct, "%");
+        AddTrendCard("EFI/48 LIGA", current.efi48, previous?.efi48, "");
+        AddTrendCard("PTS/P LIGA", current.ppg, previous?.ppg, "");
+    }
+
+    void AddTrendCard(string label, float value, float? previous, string suffix)
+    {
+        var card = new VisualElement();
+        card.AddToClassList("stats-trend-card");
+
+        var labelLbl = new Label(label);
+        labelLbl.AddToClassList("stats-trend-label");
+        card.Add(labelLbl);
+
+        var valueLbl = new Label($"{StatFormat.One(value)}{suffix}");
+        valueLbl.AddToClassList("stats-trend-value");
+        card.Add(valueLbl);
+
+        var delta = previous.HasValue
+            ? $"vs anterior: {StatsTrendHelper.Delta(value, previous.Value)}{suffix}"
+            : "sin temporada anterior";
+        var deltaLbl = new Label(delta);
+        deltaLbl.AddToClassList("stats-trend-delta");
+        card.Add(deltaLbl);
+
+        _statsTrendsRow.Add(card);
+    }
+
     protected override void RefreshHeader()
     {
         if (_myTeam == null || _manager == null) return;

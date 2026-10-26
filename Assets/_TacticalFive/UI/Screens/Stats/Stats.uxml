@@ -59,6 +59,9 @@
                     </ui:VisualElement>
                 </ui:VisualElement>
 
+                <!-- F6-03: tendencias de liga por temporada -->
+                <ui:VisualElement name="StatsTrendsRow" class="stats-trends-row" />
+
                 <!-- Stats table -->
                 <ui:VisualElement class="stats-panel">
                     <ui:VisualElement name="StatsHeader" class="stats-panel-header">
