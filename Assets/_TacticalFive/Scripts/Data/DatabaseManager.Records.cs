@@ -1222,7 +1222,7 @@ public partial class DatabaseManager
                   FROM player_game_stats ps
                   JOIN games g ON ps.game_id = g.id
                   WHERE g.manager_id = ? AND g.season_id = ? AND g.is_played = 1
-                        AND g.game_type != 'allstar'
+                        AND g.game_type = 'regular'
                   GROUP BY ps.player_id",
                 managerId, seasonId);
             foreach (var a in aggregates)
@@ -1347,62 +1347,62 @@ public partial class DatabaseManager
                              WHERE g.season_id = player_season_stats.season_id
                                AND ps.player_id = player_season_stats.player_id
                                AND ps.team_id = player_season_stats.team_id
-                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                               AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_fga = (SELECT COALESCE(SUM(ps.fga), 0) FROM player_game_stats ps
                              JOIN games g ON g.id = ps.game_id
                              WHERE g.season_id = player_season_stats.season_id
                                AND ps.player_id = player_season_stats.player_id
                                AND ps.team_id = player_season_stats.team_id
-                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                               AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_fg3m = (SELECT COALESCE(SUM(ps.fg3m), 0) FROM player_game_stats ps
                               JOIN games g ON g.id = ps.game_id
                               WHERE g.season_id = player_season_stats.season_id
                                 AND ps.player_id = player_season_stats.player_id
                                 AND ps.team_id = player_season_stats.team_id
-                                AND g.is_played = 1 AND g.game_type != 'allstar'),
+                                AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_fg3a = (SELECT COALESCE(SUM(ps.fg3a), 0) FROM player_game_stats ps
                               JOIN games g ON g.id = ps.game_id
                               WHERE g.season_id = player_season_stats.season_id
                                 AND ps.player_id = player_season_stats.player_id
                                 AND ps.team_id = player_season_stats.team_id
-                                AND g.is_played = 1 AND g.game_type != 'allstar'),
+                                AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_ftm = (SELECT COALESCE(SUM(ps.ftm), 0) FROM player_game_stats ps
                              JOIN games g ON g.id = ps.game_id
                              WHERE g.season_id = player_season_stats.season_id
                                AND ps.player_id = player_season_stats.player_id
                                AND ps.team_id = player_season_stats.team_id
-                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                               AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_fta = (SELECT COALESCE(SUM(ps.fta), 0) FROM player_game_stats ps
                              JOIN games g ON g.id = ps.game_id
                              WHERE g.season_id = player_season_stats.season_id
                                AND ps.player_id = player_season_stats.player_id
                                AND ps.team_id = player_season_stats.team_id
-                               AND g.is_played = 1 AND g.game_type != 'allstar'),
+                               AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_turnovers = (SELECT COALESCE(SUM(ps.turnovers), 0) FROM player_game_stats ps
                                    JOIN games g ON g.id = ps.game_id
                                    WHERE g.season_id = player_season_stats.season_id
                                      AND ps.player_id = player_season_stats.player_id
                                      AND ps.team_id = player_season_stats.team_id
-                                     AND g.is_played = 1 AND g.game_type != 'allstar'),
+                                     AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_oreb = (SELECT COALESCE(SUM(ps.oreb), 0) FROM player_game_stats ps
                               JOIN games g ON g.id = ps.game_id
                               WHERE g.season_id = player_season_stats.season_id
                                 AND ps.player_id = player_season_stats.player_id
                                 AND ps.team_id = player_season_stats.team_id
-                                AND g.is_played = 1 AND g.game_type != 'allstar'),
+                                AND g.is_played = 1 AND g.game_type = 'regular'),
                 total_dreb = (SELECT COALESCE(SUM(ps.dreb), 0) FROM player_game_stats ps
                               JOIN games g ON g.id = ps.game_id
                               WHERE g.season_id = player_season_stats.season_id
                                 AND ps.player_id = player_season_stats.player_id
                                 AND ps.team_id = player_season_stats.team_id
-                                AND g.is_played = 1 AND g.game_type != 'allstar')
+                                AND g.is_played = 1 AND g.game_type = 'regular')
             WHERE EXISTS (
                 SELECT 1 FROM player_game_stats ps
                 JOIN games g ON g.id = ps.game_id
                 WHERE g.season_id = player_season_stats.season_id
                   AND ps.player_id = player_season_stats.player_id
                   AND ps.team_id = player_season_stats.team_id
-                  AND g.is_played = 1 AND g.game_type != 'allstar')");
+                  AND g.is_played = 1 AND g.game_type = 'regular')");
     }
 
     /// <summary>F6-03: agregados de liga por temporada (archivo + temporada en curso).</summary>
@@ -1439,7 +1439,7 @@ public partial class DatabaseManager
                 FROM player_game_stats ps
                 JOIN games g ON ps.game_id = g.id
                 JOIN seasons s ON g.season_id = s.id
-                WHERE g.manager_id = ? AND g.is_played = 1 AND g.game_type != 'allstar'
+                WHERE g.manager_id = ? AND g.is_played = 1 AND g.game_type = 'regular'
                 GROUP BY g.season_id
             )
             GROUP BY season_id
@@ -1488,7 +1488,7 @@ public partial class DatabaseManager
               JOIN seasons s ON g.season_id = s.id
               LEFT JOIN teams t ON ps.team_id = t.id
               WHERE ps.player_id = ? AND g.manager_id = ? AND g.is_played = 1
-                    AND g.game_type != 'allstar'
+                    AND g.game_type = 'regular'
               GROUP BY g.season_id, ps.team_id
 
               ORDER BY season_id",
@@ -3221,7 +3221,7 @@ public partial class DatabaseManager
             JOIN seasons s ON g.season_id = s.id
             LEFT JOIN teams t ON ps.team_id = t.id
             WHERE g.season_id = ? AND g.is_played = 1
-                  AND g.game_type != 'allstar'
+                  AND g.game_type = 'regular'
             GROUP BY ps.player_id, ps.team_id", oldSeasonId, oldSeasonId);
 
         var allPlayers = _db.Table<PlayerData>().ToList();
