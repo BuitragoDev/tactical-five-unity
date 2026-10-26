@@ -48,7 +48,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Soft stats** | `PlayerPersonalityData.cs`, `PlayerRelationshipData.cs`, `TrainingData.cs`, `LineupData.cs` | Personalities, relationships, training, rotations |
 | **Legacy/history** | `HallOfFameData`/`HallOfFameSeeder`/`HallOfFameHelper`, `RetiredNumberData` + 2 seeders, `PalmaresSeeder`, `TeamRecordSeeder`, `HistoricalPlayerStatsSeeder`, `GmAchievementData` | HOF, retired numbers, palmarés, records, achievements |
 | **Media** | `MessageData.cs`, `QuickNewsGenerator.cs`, `TvChannelData.cs` | Inbox, news generation |
-| **Analytics/forecast** | `Stats/AdvancedStatsHelper.cs`, `Stats/FogOfWarHelper.cs`, `Stats/MatchupPreview.cs` | eFG%/TS%/PER, scout fog-of-war, pre-match forecast |
+| **Analytics/forecast** | `Stats/AdvancedStatsHelper.cs`, `Stats/FogOfWarHelper.cs`, `Stats/MatchupPreview.cs` | eFG%/TS%/EFI/48, scout fog-of-war, pre-match forecast |
 | **UI controllers** | `Scripts/UI/*.cs`, inheriting `UIScreenController` in Core | One per screen; bind UXML, load data, handle clicks |
 | **Reusable UI** | `HeaderController.cs`, `SidebarController.cs` (static helpers), `CustomSlider.cs` | Injected header/sidebar; custom slider control |
 | **Assets** | `Art/Resources/*`, `UI/*` | Textures, audio, fonts, UXML/USS, panel settings |

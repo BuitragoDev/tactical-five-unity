@@ -81,7 +81,7 @@
                                     <ui:Label class="col-ast col-stat--header" text="AST" />
                                     <ui:Label class="col-stl col-stat--header" text="ROB" />
                                     <ui:Label class="col-blk col-stat--header" text="TAP" />
-                                    <ui:Label class="col-to col-stat--header" text="PER" />
+                                    <ui:Label class="col-to col-stat--header" text="TO" />
                                     <ui:Label class="col-pf col-stat--header" text="FP" />
                                     <ui:Label class="col-val col-stat--header" text="VAL" />
                                 </ui:VisualElement>
@@ -106,7 +106,7 @@
                                     <ui:Label class="col-ast col-stat--header" text="AST" />
                                     <ui:Label class="col-stl col-stat--header" text="ROB" />
                                     <ui:Label class="col-blk col-stat--header" text="TAP" />
-                                    <ui:Label class="col-to col-stat--header" text="PER" />
+                                    <ui:Label class="col-to col-stat--header" text="TO" />
                                     <ui:Label class="col-pf col-stat--header" text="FP" />
                                     <ui:Label class="col-val col-stat--header" text="VAL" />
                                 </ui:VisualElement>

@@ -365,7 +365,7 @@ using System.Linq;
                                               agg.total_fgm, agg.total_fga,
                                               agg.total_ftm, agg.total_fta,
                                               agg.total_turnovers);
-        float per = AdvancedStatsHelper.CalcPER(eff, (float)agg.total_minutes);
+        float efi48 = AdvancedStatsHelper.CalcEfi48(eff, (float)agg.total_minutes);
 
         AddStatCard("PTS", StatFormat.One(avgPts));
         AddStatCard("REB", StatFormat.One(avgReb));
@@ -379,7 +379,7 @@ using System.Linq;
         AddStatCard("TL%", StatFormat.One(ftPct));
         AddStatCardAccent("EFG%", StatFormat.One(efgPct), StatFormat.EfgTip);
         AddStatCardAccent("TS%", StatFormat.One(tsPct), StatFormat.TsTip);
-        AddStatCardAccent("PER", StatFormat.One(per), StatFormat.PerTip);
+        AddStatCardAccent("EFI/48", StatFormat.One(efi48), StatFormat.Efi48Tip);
         AddStatCard("VAL", StatFormat.One((float)agg.total_rating / g), StatFormat.ValTip);
     }
 

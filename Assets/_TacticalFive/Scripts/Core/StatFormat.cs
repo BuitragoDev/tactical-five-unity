@@ -29,9 +29,9 @@ public static class StatFormat
     public const string TsTip =
         "TS% (tiro real): puntos / (2 × (intentos de campo + 0.44 × tiros libres)). " +
         "Mide la eficiencia anotadora total, tiros libres incluidos.";
-    public const string PerTip =
-        "PER (valoración por minuto): (puntos + rebotes + asistencias + robos + tapones − fallos − pérdidas) " +
-        "normalizado por minutos jugados.";
+    public const string Efi48Tip =
+        "EFI/48 (eficiencia propia por 48 minutos): (puntos + rebotes + asistencias + robos + tapones − fallos − pérdidas) " +
+        "normalizado por minutos y llevado a 48. No es el PER oficial de la NBA.";
     public const string ValTip =
         "VAL (valoración): puntos + rebotes + asistencias + robotes + tapones − fallos de campo y libres − pérdidas.";
     public const string TovTip = "Pérdidas de balón por partido.";

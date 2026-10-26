@@ -61,7 +61,7 @@ Marcado como pendiente/hueco por los docs (`GAMEPLAY.md` Open questions,
 ## Frente 3 — Simulación & AI (realismo)
 
 - **AI de GMs más inteligente** — **hecho** (rama `crear-mejoras2`): enum `TeamStrategy` (Rebuild/Balanced/Contend) en `DashboardController`; cooldowns y densidad por estrategia (Contend 0.45/6d, Rebuild 0.40/8d, Balanced 0.25/15d; 3-5 en deadline), fire sale de rebuild (`TrySellVeteran`), contender busca upgrades OVR≤90 con pick futuro protegiendo jóvenes, ofertas al usuario según estrategia (`PickTradeTarget`/`BuildOfferPackage`) y Star FA que prioriza contender sobre rebuild (que tankea y no ficha OVR≥85). Ver `SYSTEMS.md` §S.
-- ✅ **Analytics avanzados** — **hecho (parcial)**: eFG%, TS% y PER vía `AdvancedStatsHelper` en Stats + PlayerProfile. Queda WS/espaciado por posición.
+- ✅ **Analytics avanzados** — **hecho (parcial)**: eFG%, TS% y EFI/48 vía `AdvancedStatsHelper` en Stats + PlayerProfile. Queda WS/espaciado por posición.
 - ✅ **Fog-of-war en valoraciones** (el ojeador da rangos, no OVR exacto) — **hecho**: `FogOfWarHelper` + Cartera + PlayerProfile (commit `a924226`).
 - ✅ **Desarrollo/regresión más realista** — declive atlético por posición y mentoring
   de veteranos (**hecho**, commit `2281089`).
@@ -136,7 +136,7 @@ Añadir aquí el estado de cada propuesta cuando se decida abordarla
 | **Picks protegidos + swap** | **Hecho** — `draft_picks.protected_from/is_swap/swap_original_team_id` + resolución en `DraftGenerator` + UI en Market |
 | **Logros/trofeos del GM** | **Hecho** — catálogo 28 logros (`AchievementCatalog`) + `gm_achievements` + pantalla Logros + toast |
 | **Salón de la Fama** | **Hecho** — `HallOfFameHelper` + `hof_players` (~100 leyendas) + inducción en `StartNewSeason` + panel Palmares |
-| **Analytics avanzados (eFG%/TS%/PER)** | **Hecho** — `AdvancedStatsHelper` en Stats + PlayerProfile |
+| **Analytics avanzados (eFG%/TS%/EFI/48)** | **Hecho** — `AdvancedStatsHelper` en Stats + PlayerProfile |
 | **Load management (descanso en back-to-back)** | **Hecho** — `TF_LoadMgmt_Enabled` (Quinteto) + modal de descanso en Dashboard |
 | **Opciones de contrato TO/PO** | **Hecho** — toggles en renovaciones/FA + `guaranteed_years` + `FormatContractYears` |
 | **Re-firma de FA propio (Bird rights)** | **Hecho** — `last_team_id`/`IsOwnRecentFA` + modal de re-firma en NewSeason |

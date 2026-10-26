@@ -37,7 +37,7 @@
                     <ui:Button name="TabPctTL" class="stats-tab" text="% TL" />
                     <ui:Button name="TabEFG" class="stats-tab" text="% EFG" />
                     <ui:Button name="TabTS" class="stats-tab" text="TS%" />
-                    <ui:Button name="TabPER" class="stats-tab" text="PER" />
+                    <ui:Button name="TabEfi48" class="stats-tab" text="EFI/48" />
                     <ui:Button name="TabVal" class="stats-tab" text="VAL" />
                     <ui:Button name="TabPerdidas" class="stats-tab" text="PÉRDIDAS" />
                     <ui:Button name="TabMinutos" class="stats-tab" text="MINUTOS" />

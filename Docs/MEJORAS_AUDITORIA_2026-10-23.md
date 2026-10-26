@@ -449,10 +449,12 @@ flowchart LR
   - *Implementación:* `PlayerSeasonStatRow` y el `INSERT` de `StartNewSeason` guardan FGM/FGA, 3PM/3PA, FTM/FTA, TO, OREB y DREB. Se actualizaron los dos caminos de creación (modelo `CreateTable` y `CREATE TABLE IF NOT EXISTS` raw) y `AddColumnIfMissing`. La migración `player_season_stats_shooting_splits` rellena los splits desde `player_game_stats` en temporadas que aún conservan partidos; las purgadas quedan a 0 (no reconstruibles). eFG% y TS% se calculan con `AdvancedStatsHelper` desde esos totales.
   - *Pruebas:* `SaveSlotInitTests` verifica las columnas nuevas y el backfill con un partido sintético; la suite completa sigue pasando.
 
-- [ ] **F6-02 · Resolver el rótulo/fórmula de PER** `[!]`
+- [x] **F6-02 · Resolver el rótulo/fórmula de PER**
   - *Ref:* §8 pregunta 7 · *Esfuerzo:* S · *Depende:* —
   - *Criterio:* o se implementa el PER oficial, o se renombra la métrica propia y se explica en el tooltip. No puede llamarse PER y no serlo.
   - *Punto de partida:* `AdvancedStatsHelper.CalcPER`; `StatFormat.PerTip`.
+  - *Decisión:* se renombra a **EFI/48** (eficiencia propia por 48 minutos). `CalcPER` pasa a `CalcEfi48` y la fórmula `eff/minutes*48` se conserva; el tooltip dice explícitamente que **no es el PER oficial**. Se actualizan la pestaña de Stats, las cabeceras, PlayerProfile y la documentación. El encabezado de pérdidas del boxscore de MatchDay pasa de `PER` a `TO` para no confundirlo con la métrica.
+  - *Pruebas:* `AdvancedStatsHelperTests` con los nombres nuevos; suite completa.
 
 - [ ] **F6-03 · Tendencias y comparativas en la UI de estadísticas**
   - *Ref:* `RET-02` · *Esfuerzo:* M · *Depende:* F6-01
@@ -602,7 +604,7 @@ Estas preguntas no son código: son respuestas que hay que escribir antes de eje
 |---|---|---|---|
 | D3 | ¿Qué temporada/edición del CBA se modela? | F4-07, F4-08 | Diseño |
 | D5 | ¿Motor de resultados estadístico o aleatoriedad opaca? | F3-01, F3-02 | Técnico |
-| D6 | ¿"PER" es el PER oficial o una métrica propia? | F6-02 | Diseño |
+| D6 | **Resuelta (F6-02):** la métrica propia por 48 minutos se llama **EFI/48**; no se presenta como PER oficial. | F6-02 | Diseño |
 | D7 | ¿`TheCity` es hub o sistema de gestión? | F7-05 | Producto |
 | D8 | ¿Solo español y 1920×1080, o multi-idioma y multi-resolución? | F7-03, F7-06 | Producto |
 
@@ -674,6 +676,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-26 | F6 | `F6-02` | pendiente | La métrica `eff/minutes*48` pasa a llamarse **EFI/48** (`CalcEfi48`, `StatFormat.Efi48Tip`); la UI de Stats y PlayerProfile, el tooltip y la documentación explican que **no es el PER oficial**. El boxscore de MatchDay etiqueta las pérdidas como `TO` en vez de `PER`. Tests renombrados; **522/522 EditMode**. |
 | 2026-10-26 | F6 | `F6-01` | `be97df01` | `player_season_stats` archiva FGM/FGA, 3PM/3PA, FTM/FTA, TO, OREB y DREB. Actualizados modelo + raw SQL + `AddColumnIfMissing`; migración `player_season_stats_shooting_splits` con backfill desde `player_game_stats` cuando la temporada aún existe. eFG%/TS% derivados de los splits. Tests de columnas y backfill. **522/522 EditMode**. |
 | 2026-10-26 | F5 | `F5-05` | `a6a665ea` | Summer League post-draft en NewSeason: hasta 12 rookies/sophomores elegidos por el jugador o saltar; 3 scrimmages, stats en `summer_league_stats`, +1 máximo al atributo más bajo si ≥45 min y no está en potencial. `HasSummerLeagueResults` evita repetir el camp en reintentos; no toca `seasons.phase`. **519/519 EditMode**. |
 | 2026-10-26 | F5 | `F5-04` | `14ecec19` | NBA Cup con modelo NBA real: 60 partidos de grupo sobre los partidos de división existentes (`series_label="cup-group-..."`, 4/equipo, 2-2), por lo que cuentan una sola vez. `tournament_editions/groups/standings`; eliminatoria adicional `cup_playoff` con 6 campeones + wildcard por conferencia, QF/SF/final, campeón y MVP. `CupHelper.AdvanceIfNeeded` dentro de la transacción diaria; no toca `seasons.phase` ni récords regulares. Pestaña NBA CUP en Clasificación. **514/514 EditMode**. |

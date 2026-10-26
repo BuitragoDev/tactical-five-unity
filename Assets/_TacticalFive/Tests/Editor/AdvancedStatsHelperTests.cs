@@ -66,15 +66,15 @@ public class AdvancedStatsHelperTests
     }
 
     [Test]
-    public void CalcPER_StandardPlayer()
+    public void CalcEfi48_StandardPlayer()
     {
-        var per = AdvancedStatsHelper.CalcPER(eff: 600f, minutes: 720f);
-        Assert.That(per, Is.EqualTo(40f).Within(0.01f));
+        var efi48 = AdvancedStatsHelper.CalcEfi48(eff: 600f, minutes: 720f);
+        Assert.That(efi48, Is.EqualTo(40f).Within(0.01f));
     }
 
     [Test]
-    public void CalcPER_ZeroMinutes_ReturnsZero()
+    public void CalcEfi48_ZeroMinutes_ReturnsZero()
     {
-        Assert.That(AdvancedStatsHelper.CalcPER(100f, 0f), Is.EqualTo(0f));
+        Assert.That(AdvancedStatsHelper.CalcEfi48(100f, 0f), Is.EqualTo(0f));
     }
 }

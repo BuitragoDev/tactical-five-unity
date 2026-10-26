@@ -39,7 +39,7 @@ using System.Linq;
     public float avgTov;
     public float efgPct;
     public float tsPct;
-    public float per;
+    public float efi48;
 }
     public class StatsController : UIScreenController
 {
@@ -81,7 +81,7 @@ using System.Linq;
         _modeBtns.Clear();
 
         string[] tabNames = { "TabPuntos", "TabRebotes", "TabAsistencias", "TabRobos", "TabTapones",
-                              "TabPctTC", "TabPct3P", "TabPctTL", "TabEFG", "TabTS", "TabPER",
+                              "TabPctTC", "TabPct3P", "TabPctTL", "TabEFG", "TabTS", "TabEfi48",
                               "TabVal", "TabPerdidas", "TabMinutos", "TabDD", "TabTD" };
         foreach (var name in tabNames)
         {
@@ -118,7 +118,7 @@ using System.Linq;
     {
         base.RegisterCallbacks();
         string[] statKeys = { "puntos", "rebotes", "asistencias", "robos", "tapones",
-                              "pcttc", "pct3p", "pcttl", "efgpct", "tspct", "per",
+                              "pcttc", "pct3p", "pcttl", "efgpct", "tspct", "efi48",
                               "val", "perdidas", "minutos", "dd", "td" };
         for (int i = 0; i < _statTabs.Count && i < statKeys.Length; i++)
         {
@@ -279,7 +279,7 @@ using System.Linq;
             "pcttl" => "TabPctTL",
             "efgpct" => "TabEFG",
             "tspct" => "TabTS",
-            "per" => "TabPER",
+            "efi48" => "TabEfi48",
             "val" => "TabVal",
             "perdidas" => "TabPerdidas",
             "minutos" => "TabMinutos",
@@ -336,7 +336,7 @@ using System.Linq;
             "pcttl" => "PORCENTAJE TIROS LIBRES",
             "efgpct" => "PORCENTAJE EFECTIVO DE CAMPO",
             "tspct" => "PORCENTAJE REAL DE TIRO",
-            "per" => "EFICIENCIA POR MINUTO",
+            "efi48" => "EFICIENCIA POR 48 MINUTOS",
             "val" => "VAL",
             "perdidas" => "PÉRDIDAS",
             "minutos" => "MINUTOS",
@@ -391,7 +391,7 @@ using System.Linq;
             s.tsPct = AdvancedStatsHelper.CalcTS(s.totalPts, s.totalFga, s.totalFta);
             var eff = AdvancedStatsHelper.CalcEff(s.totalPts, s.totalReb, s.totalAst, s.totalStl, s.totalBlk,
                                                   s.totalFgm, s.totalFga, s.totalFtm, s.totalFta, s.totalTov);
-            s.per = AdvancedStatsHelper.CalcPER(eff, s.totalMin);
+            s.efi48 = AdvancedStatsHelper.CalcEfi48(eff, s.totalMin);
         }
 
         // Sort
@@ -601,7 +601,7 @@ using System.Linq;
             "pcttl" => rows.Where(x => x.totalFta >= 5).OrderByDescending(x => x.ftPct).ToList(),
             "efgpct" => rows.Where(x => x.totalFga >= 10).OrderByDescending(x => x.efgPct).ToList(),
             "tspct" => rows.Where(x => x.totalFga >= 10 && x.totalFta >= 5).OrderByDescending(x => x.tsPct).ToList(),
-            "per" => rows.OrderByDescending(x => x.per).ToList(),
+            "efi48" => rows.OrderByDescending(x => x.efi48).ToList(),
             "val" => useAverages
                 ? rows.OrderByDescending(x => x.avgVal).ToList()
                 : rows.OrderByDescending(x => x.totalVal).ToList(),
@@ -656,7 +656,7 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", true));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
-                _tableHeader.Add(MakeHeaderCell($"PER{suffix}", "col-stat", false));
+                _tableHeader.Add(MakeHeaderCell($"EFI/48{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
                 break;
             case "robos":
@@ -712,8 +712,8 @@ using System.Linq;
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"VAL{suffix}", "col-stat", false));
                 break;
-            case "per":
-                _tableHeader.Add(MakeHeaderCell("PER", "col-stat", true, StatFormat.PerTip));
+            case "efi48":
+                _tableHeader.Add(MakeHeaderCell("EFI/48", "col-stat", true, StatFormat.Efi48Tip));
                 _tableHeader.Add(MakeHeaderCell($"PTS{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"REB{suffix}", "col-stat", false));
                 _tableHeader.Add(MakeHeaderCell($"AST{suffix}", "col-stat", false));
@@ -932,8 +932,8 @@ using System.Linq;
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgVal.ToString("N1", _spanishCI) : x.totalVal.ToString("N0", _spanishCI), false, false));
                     break;
-                case "per":
-                    row.Add(MakeCell(x.per.ToString("N1", _spanishCI), true, isLeader));
+                case "efi48":
+                    row.Add(MakeCell(x.efi48.ToString("N1", _spanishCI), true, isLeader));
                     row.Add(MakeCell(useAverages ? x.avgPts.ToString("N1", _spanishCI) : x.totalPts.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgReb.ToString("N1", _spanishCI) : x.totalReb.ToString("N0", _spanishCI), false, false));
                     row.Add(MakeCell(useAverages ? x.avgAst.ToString("N1", _spanishCI) : x.totalAst.ToString("N0", _spanishCI), false, false));

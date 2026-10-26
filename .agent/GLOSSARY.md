@@ -50,7 +50,7 @@
 | **Vista de Partido** | Sim mode Directa / Play-by-play | `TF_SimMode`, `GameResultCache.PlayByPlayLogs`, `MatchDayController` |
 | **Quintos (Quintos)** | Season All-Star / Rookie quintets | `QuintosController`, `GetAllStarTeam`/`GetAllRookieTeam` |
 | **Pronóstico (matchup)** | Pre-match forecast (favorito + win prob) | `MatchupPreview`, `MatchDayController` |
-| **Analytics avanzados** | eFG%, TS%, PER | `AdvancedStatsHelper`, `StatsController`, `PlayerProfileController` |
+| **Analytics avanzados** | eFG%, TS%, EFI/48 | `AdvancedStatsHelper`, `StatsController`, `PlayerProfileController` |
 | **Fog of war** | OVR/atributos ocultos de jugadores no ojeados | `FogOfWarHelper`, `CarteraController`, `PlayerProfileController` |
 | **Picks protegidos / swap** | Draft pick protections & swaps | `DraftPickData.protected_from/is_swap/swap_original_team_id` |
 | **Trade block** | Marcar jugador TRANSFERIBLE | `players.on_trade_block`, `RosterController`, `MarketController` |

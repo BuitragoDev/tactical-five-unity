@@ -179,7 +179,7 @@
 
 ## S18. Advanced analytics & fog of war
 
-- **AdvancedStatsHelper:** eFG%, TS%, PER (simple per-48), `CalcEff`. Consumers: `StatsController`, `PlayerProfileController`.
+- **AdvancedStatsHelper:** eFG%, TS%, EFI/48 (eficiencia propia por 48, no el PER oficial), `CalcEff`. Consumers: `StatsController`, `PlayerProfileController`.
 - **FogOfWarHelper:** hides OVR (band), role, and attributes for un-scouted players; scouted ids set by completed scouts (`CarteraController`); consumers: `CarteraController`, `PlayerProfileController`.
 - **MatchupPreview:** forecast ratings + win probability + favorites + stars; consumer: `MatchDayController`.
 

@@ -1228,10 +1228,12 @@ public class GameSimulatorTests
         { position = "SG", three_point = 90, shooting = 55, iq = 20, fisico = 99 };
 
         int highIq = 0, lowIq = 0;
+        var highIqRandom = new SeededRandomSource(1111);
+        var lowIqRandom = new SeededRandomSource(2222);
         for (int i = 0; i < 2000; i++)
         {
-            if (GameSimulator.ShotType(goodShooter3) == "3") highIq++;
-            if (GameSimulator.ShotType(sameShooterLowIq) == "3") lowIq++;
+            if (GameSimulator.ShotType(goodShooter3, random: highIqRandom) == "3") highIq++;
+            if (GameSimulator.ShotType(sameShooterLowIq, random: lowIqRandom) == "3") lowIq++;
         }
 
         Assert.That(highIq, Is.GreaterThan(lowIq),
@@ -1243,10 +1245,12 @@ public class GameSimulatorTests
         { position = "SG", three_point = 55, shooting = 90, iq = 20, fisico = 99 };
 
         int smart = 0, dumb = 0;
+        var smartRandom = new SeededRandomSource(3333);
+        var dumbRandom = new SeededRandomSource(4444);
         for (int i = 0; i < 2000; i++)
         {
-            if (GameSimulator.ShotType(badShooter3) == "3") smart++;
-            if (GameSimulator.ShotType(badShooter3LowIq) == "3") dumb++;
+            if (GameSimulator.ShotType(badShooter3, random: smartRandom) == "3") smart++;
+            if (GameSimulator.ShotType(badShooter3LowIq, random: dumbRandom) == "3") dumb++;
         }
 
         Assert.That(smart, Is.LessThan(dumb),

@@ -22,7 +22,7 @@ public static class AdvancedStatsHelper
                - tov;
     }
 
-    public static float CalcPER(float eff, float minutes)
+    public static float CalcEfi48(float eff, float minutes)
     {
         if (minutes <= 0f) return 0f;
         return eff / minutes * 48f;

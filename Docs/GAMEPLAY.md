@@ -321,7 +321,7 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 ## 14. Advanced analytics
 
-`AdvancedStatsHelper`: **eFG%** `(fgm + 0.5*fg3m)/fga*100`; **TS%** `points / (2*(fga + 0.44*fta)) * 100`; **PER** `eff/minutes * 48` (simple per-48 efficiency, not the canonical formula); `CalcEff` = `pts+reb+ast+stl+blk − (fga−fgm) − (fta−ftm) − tov`. Shown in `Stats` (league leaders) and `PlayerProfile` (season cards).
+`AdvancedStatsHelper`: **eFG%** `(fgm + 0.5*fg3m)/fga*100`; **TS%** `points / (2*(fga + 0.44*fta)) * 100`; **EFI/48** = `eff/minutes * 48` (eficiencia propia por 48 minutos; **no es el PER oficial**); `CalcEff` = `pts+reb+ast+stl+blk − (fga−fgm) − (fta−ftm) − tov`. Shown in `Stats` (league leaders) y `PlayerProfile` (season cards).
 
 ## 15. GM achievements (Logros)
 
