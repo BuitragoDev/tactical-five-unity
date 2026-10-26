@@ -207,6 +207,11 @@ using System.Linq;
         AddInfoField(_profileContractBody, "SALARIO", $"${_player.salary:N0}");
         AddInfoField(_profileContractBody, "AÑOS DE CONTRATO", _player.contract_years.ToString());
         AddInfoField(_profileContractBody, "AÑOS GARANTIZADOS", _player.guaranteed_years.ToString());
+        AddInfoField(_profileContractBody, "AÑOS DE SERVICIO", _player.years_of_service.ToString());
+        AddInfoField(_profileContractBody, "AGENCIA LIBRE",
+            _player.team_id == 0 && !string.IsNullOrEmpty(_player.free_agent_type)
+                ? _player.free_agent_type
+                : "—");
         AddInfoField(_profileContractBody, "OPCIÓN", option);
     }
 

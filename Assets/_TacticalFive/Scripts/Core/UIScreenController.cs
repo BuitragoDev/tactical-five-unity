@@ -333,7 +333,7 @@ public class UIScreenController : MonoBehaviour
             : new StyleColor(new Color32(39, 174, 96, 255));
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        long totalPayroll = players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         _root.Q<Label>("HeaderPayroll").text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();

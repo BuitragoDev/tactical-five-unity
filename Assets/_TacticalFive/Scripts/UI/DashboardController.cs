@@ -623,13 +623,13 @@ using System.Threading.Tasks;
 
         // Masa salarial real (jugadores + empleados)
         var teamEmployees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-        long totalPayroll = _players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         _headerPayroll.text = $"${totalPayroll / 1_000_000}M";
 
         // Margen salarial = Cap - solo jugadores
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long margin = salaryCap - _players.Sum(p => p.salary);
+        long margin = salaryCap - totalPayroll;
 
         int chemistry = DatabaseManager.Instance.GetTeamChemistry(_myTeam.id);
         string marginText = margin >= 0
@@ -2723,6 +2723,14 @@ using System.Threading.Tasks;
 
                 if (accepted)
                 {
+                    if (TryAIMatchRestrictedOffer(player, offer, nowStr, out string matchedBy))
+                    {
+                        rejectedCount++;
+                        resultSummary += $"✗ {playerName}: OFERTA IGUALADA por {matchedBy} — el jugador permanece con su equipo anterior.\n";
+                        DatabaseManager.Instance.MarkOfferProcessed(offer.id);
+                        continue;
+                    }
+
                     // Verificar por separado plazas estándar y contratos two-way.
                     var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
                     int rosterCount = DatabaseManager.Instance.GetRosterCount(_myTeam.id);
@@ -2765,7 +2773,7 @@ using System.Threading.Tasks;
                     }
 
                     // Verificar espacio salarial / excepciones (FA externo → sin Bird Rights)
-                    long totalPayroll = roster.Sum(p => p.salary);
+                    long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
                     var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
                     long firstApron = leagueSettings?.apron > 0 ? leagueSettings.apron : TradeHelper.FIRST_APRON;
                     long secondApron = leagueSettings?.repeater_apron > 0 ? leagueSettings.repeater_apron : TradeHelper.SECOND_APRON;
@@ -2959,7 +2967,7 @@ using System.Threading.Tasks;
                         var lsNegFA = DatabaseManager.Instance.GetLeagueSettings();
                         if (lsNegFA != null)
                         {
-                            long payrollFA = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(p => p.salary);
+                            long payrollFA = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
                             long capFA = lsNegFA.salary_cap;
                             long apron1FA = lsNegFA.apron > 0 ? lsNegFA.apron : TradeHelper.FIRST_APRON;
                             long apron2FA = lsNegFA.repeater_apron > 0 ? lsNegFA.repeater_apron : TradeHelper.SECOND_APRON;
@@ -3148,6 +3156,72 @@ using System.Threading.Tasks;
             : resultSummary;
 
         ShowOfferResultModal(title, text, resultType);
+    }
+
+    bool TryAIMatchRestrictedOffer(PlayerData player, OfferData offer, string nowStr, out string matchedBy)
+    {
+        matchedBy = null;
+        if (player == null || offer == null || offer.is_two_way == 1
+            || player.free_agent_type != "RFA" || player.last_team_id <= 0
+            || player.last_team_id == _myTeam.id
+            || !FreeAgencyRules.ShouldAIMatch(player.free_agent_type, player.GetCalculatedAverage(),
+                offer.offer_salary, player.qualifying_offer_salary))
+            return false;
+
+        var rightsTeam = DatabaseManager.Instance.GetTeamById(player.last_team_id);
+        if (rightsTeam == null || DatabaseManager.Instance.GetRosterCount(rightsTeam.id) >= TradeHelper.MAX_STANDARD_ROSTER)
+            return false;
+
+        var settings = DatabaseManager.Instance.GetLeagueSettings();
+        long payrollWithoutHold = DatabaseManager.Instance.GetEffectiveTeamPayroll(rightsTeam.id, player.id);
+        long projectedPayroll = payrollWithoutHold + offer.offer_salary;
+        if (!TradeHelper.CanAIRenew(projectedPayroll, settings)) return false;
+        if (rightsTeam.first_apron_hard_capped == 1)
+        {
+            long firstApron = settings?.apron > 0 ? settings.apron : TradeHelper.FIRST_APRON;
+            if (projectedPayroll > firstApron) return false;
+        }
+
+        player.team_id = rightsTeam.id;
+        player.last_team_id = rightsTeam.id;
+        player.salary = offer.offer_salary;
+        player.contract_years = offer.offer_years;
+        player.guaranteed_years = offer.guaranteed_years;
+        player.has_team_option = offer.has_team_option;
+        player.has_player_option = offer.has_player_option;
+        player.is_two_way = 0;
+        player.free_agent_type = "";
+        player.qualifying_offer_salary = 0;
+        player.waived_game_day = -1;
+        DatabaseManager.Instance.AssignJerseyNumber(player, rightsTeam.id);
+        DatabaseManager.Instance.UpdatePlayer(player);
+        DatabaseManager.Instance.InsertTrade(new TradeData
+        {
+            season_id = _season?.id ?? 0,
+            game_day = _season?.current_game_day ?? 0,
+            game_date = _season?.current_date ?? nowStr,
+            team_id_from = 0,
+            team_id_to = rightsTeam.id,
+            player_id = player.id,
+            trade_type = "free_agent"
+        });
+        DatabaseManager.Instance.AddMessage(new MessageData
+        {
+            manager_id = _manager.id,
+            sender_type = 1,
+            sender_id = 0,
+            title = $"Oferta igualada: {player.first_name} {player.last_name}",
+            body = $"{rightsTeam.name} ha ejercido sus derechos sobre {player.first_name} {player.last_name} e igualado tu oferta de {offer.offer_salary:N0} $ por {offer.offer_years} año(s).",
+            game_day = _season?.current_game_day ?? 0,
+            game_date = nowStr,
+            created_at = nowStr,
+            date_sent = nowStr,
+            is_read = 0,
+            category = NewsCategory.TRASPASOS,
+            news_type = NewsType.FICHAJE_CANCELADO
+        });
+        matchedBy = rightsTeam.name;
+        return true;
     }
 
     // ── NEGOCIACIÓN CON EL AGENTE ───────────────────────────────────
@@ -5601,7 +5675,7 @@ using System.Threading.Tasks;
             foreach (var t in teams)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(t.id);
-                long payroll = roster.Sum(x => x.salary);
+                long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(t.id);
                 bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_STANDARD_ROSTER
                             && TradeHelper.CanAISignExternal(payroll, minSalary, settings);
 
@@ -5705,7 +5779,7 @@ using System.Threading.Tasks;
             if (CalculateTeamRenewalScore(p, team, cap) < 50f) continue;
 
             var offer = CalculateAIRenewalOffer(p, team, cap);
-            long payroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(x => x.salary);
+                long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id, p.id);
 
             // Como en las renovaciones: nunca dejar al equipo por encima del 2º apron.
             if (!TradeHelper.CanAIRenew(payroll + offer.salary, settings))
@@ -5815,7 +5889,7 @@ using System.Threading.Tasks;
                 // Un equipo en reconstrucción no ficha estrellas top (tankea para el draft)
                 if (star.GetCalculatedAverage() >= 85 && teamStrategies[team.id] == TeamStrategy.Rebuild) continue;
 
-                long payroll = roster.Sum(p => p.salary);
+                long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
                 bool fromBuyout = star.waived_game_day >= 0;
 
                 // Salario nuevo: un rescindido firma por el mínimo (mercado de buyout); el
@@ -5825,24 +5899,73 @@ using System.Threading.Tasks;
                     ? BuyoutMarketRules.WaivedSalary(leagueSettings?.minimum_salary ?? 0)
                     : star.salary + 2_000_000;
 
+                int years = fromBuyout ? BuyoutMarketRules.ContractYears
+                          : star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
+                TeamData signingTeam = team;
+                bool matchedRFA = false;
+                if (!fromBuyout && star.free_agent_type == "RFA" && star.last_team_id > 0
+                    && star.last_team_id != team.id
+                    && FreeAgencyRules.ShouldAIMatch(star.free_agent_type, star.GetCalculatedAverage(),
+                        newSalary, star.qualifying_offer_salary))
+                {
+                    var rightsTeam = DatabaseManager.Instance.GetTeamById(star.last_team_id);
+                    if (rightsTeam != null
+                        && DatabaseManager.Instance.GetRosterCount(rightsTeam.id) < TradeHelper.MAX_STANDARD_ROSTER)
+                    {
+                        long rightsPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(rightsTeam.id, star.id);
+                        long matchedPayroll = rightsPayroll + newSalary;
+                        bool withinApron = TradeHelper.CanAIRenew(matchedPayroll, leagueSettings);
+                        if (rightsTeam.first_apron_hard_capped == 1)
+                        {
+                            long firstApron = leagueSettings?.apron > 0 ? leagueSettings.apron : TradeHelper.FIRST_APRON;
+                            withinApron &= matchedPayroll <= firstApron;
+                        }
+                        if (withinApron)
+                        {
+                            signingTeam = rightsTeam;
+                            payroll = rightsPayroll;
+                            matchedRFA = true;
+                        }
+                    }
+                }
+
                 // La IA ficha con sus excepciones (espacio → MLE → mínimo), no solo con
                 // espacio de tope: antes ninguna estrella por encima del cap podía firmar.
-                if (!TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings)) continue;
+                if (!matchedRFA && !TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings)) continue;
 
-                star.team_id = team.id;
-                star.last_team_id = team.id;
+                star.team_id = signingTeam.id;
+                star.last_team_id = signingTeam.id;
                 star.salary = newSalary;
                 // El rescindido firma 1 año (y al expirar su equipo puede renovarle por su
                 // valor real, o re-firmarle con Bird rights).
-                int years = fromBuyout ? BuyoutMarketRules.ContractYears
-                          : star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
                 star.contract_years = years;
                 star.guaranteed_years = years;
                 star.has_team_option = 0;
                 star.has_player_option = 0;
                 star.waived_game_day = -1;
-                DatabaseManager.Instance.AssignJerseyNumber(star, team.id);
+                star.free_agent_type = "";
+                star.qualifying_offer_salary = 0;
+                DatabaseManager.Instance.AssignJerseyNumber(star, signingTeam.id);
                 DatabaseManager.Instance.UpdatePlayer(star);
+
+                if (matchedRFA && signingTeam.id == _myTeam.id)
+                {
+                    DatabaseManager.Instance.AddMessage(new MessageData
+                    {
+                        manager_id = _manager.id,
+                        sender_type = 1,
+                        sender_id = 0,
+                        title = $"Oferta RFA igualada: {star.first_name} {star.last_name}",
+                        body = $"Tu franquicia ha igualado la oferta de {newSalary:N0} $ por {star.first_name} {star.last_name} y conserva sus derechos.",
+                        game_day = gameDay,
+                        game_date = _season.current_date,
+                        created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        is_read = 0,
+                        category = NewsCategory.TRASPASOS,
+                        news_type = NewsType.FICHAJE
+                    });
+                }
 
                 DatabaseManager.Instance.InsertTrade(new TradeData
                 {
@@ -5850,12 +5973,12 @@ using System.Threading.Tasks;
                     game_day = gameDay,
                     game_date = _season.current_date,
                     team_id_from = 0,
-                    team_id_to = team.id,
+                    team_id_to = signingTeam.id,
                     player_id = star.id,
                     trade_type = "free_agent"
                 });
 
-                Debug.Log($"[StarFA] {team.name} signed star {star.first_name} {star.last_name} (OVR {star.GetCalculatedAverage()})");
+                Debug.Log($"[StarFA] {signingTeam.name} {(matchedRFA ? "matched" : "signed")} star {star.first_name} {star.last_name} (OVR {star.GetCalculatedAverage()})");
                 signed = true;
                 break;
             }
@@ -5915,7 +6038,7 @@ using System.Threading.Tasks;
             if (team.id == _myTeam.id) continue;
 
             // Nómina en curso del equipo (se actualiza al renovar).
-            long teamPayroll = DatabaseManager.Instance.GetPlayersByTeam(team.id).Sum(p => p.salary);
+            long teamPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
 
             var expiringPlayers = db.Query<PlayerData>(
                 "SELECT * FROM players WHERE team_id = ? AND contract_years = 1 AND is_two_way = 0 AND is_on_ir = 0",
@@ -6327,8 +6450,8 @@ using System.Threading.Tasks;
                          List<DraftPickData> aSelectedPicks = null,
                          List<DraftPickData> bSelectedPicks = null)
     {
-        var aPayroll = rosterA.Sum(p => p.salary);
-        var bPayroll = rosterB.Sum(p => p.salary);
+        var aPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(teamA.id);
+        var bPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(teamB.id);
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long firstApron = leagueSettings?.apron > 0 ? leagueSettings.apron : TradeHelper.FIRST_APRON;
         long secondApron = leagueSettings?.repeater_apron > 0 ? leagueSettings.repeater_apron : TradeHelper.SECOND_APRON;
@@ -6458,13 +6581,13 @@ using System.Threading.Tasks;
         if (rosterCount >= TradeHelper.MAX_STANDARD_ROSTER && twoWayCount >= TradeHelper.MAX_TWO_WAY) return;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long aiPayroll = roster.Sum(p => p.salary);
+        long aiPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
 
         var pendingFAIds = DatabaseManager.Instance.GetPendingFAPlayerIds(_manager.id);
         var pendingSATIds = GetPendingSATIds();
 
         var candidates = freeAgents
-            .Where(p => p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
+            .Where(p => p.free_agent_type != "RFA" && p.position == targetPos && p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
             .OrderByDescending(p => p.overall)
             .ToList();
 
@@ -6472,7 +6595,7 @@ using System.Threading.Tasks;
         {
             // Try any position if no match at targetPos
             candidates = freeAgents
-                .Where(p => p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
+                .Where(p => p.free_agent_type != "RFA" && p.salary <= team.budget && !pendingFAIds.Contains(p.id) && !pendingSATIds.Contains(p.id))
                 .OrderByDescending(p => p.overall)
                 .ToList();
         }
@@ -6841,9 +6964,9 @@ using System.Threading.Tasks;
                                         PlayerData target, List<PlayerData> userRoster, TeamData aiTeam,
                                         TeamStrategy aiStrategy, HashSet<int> tradedThisSeason)
     {
-        long userPayroll = userRoster.Sum(p => p.salary);
+        long userPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         var fullAiRoster = DatabaseManager.Instance.GetPlayersByTeam(aiTeam.id);
-        long aiPayroll = fullAiRoster.Sum(p => p.salary);
+        long aiPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(aiTeam.id);
 
         bool aiHardCapped = aiTeam.first_apron_hard_capped == 1;
         bool userHardCapped = _myTeam.first_apron_hard_capped == 1;
@@ -7031,7 +7154,7 @@ using System.Threading.Tasks;
         if (ourSATFAs != null && ourSATFAs.Count > 0)
         {
             var lsSat = DatabaseManager.Instance.GetLeagueSettings();
-            long myPaySat = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+            long myPaySat = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
             foreach (var fa in ourSATFAs)
             {
                 var bd = RosterController.GetMaxOfferBreakdown(fa, lsSat, myPaySat, true);
@@ -7190,9 +7313,9 @@ using System.Threading.Tasks;
             if (ourSATFAs != null && ourSATFAs.Count > 0)
             {
                 var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-                long myPayroll = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
                 foreach (var fa in ourSATFAs)
                 {
+                    long myPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id, fa.id);
                     var breakdown = RosterController.GetMaxOfferBreakdown(fa, leagueSettings, myPayroll, true);
                     long market = DatabaseManager.Instance.EstimateMarketSalary(fa.GetCalculatedAverage(), leagueSettings != null ? leagueSettings.salary_cap : TradeHelper.SALARY_CAP);
                     long signSalary = breakdown.birdMax > 0 ? breakdown.birdMax : market;
@@ -7676,7 +7799,7 @@ using System.Threading.Tasks;
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long currentPayroll = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id).Sum(x => x.salary);
+        long currentPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         long salaryIn = theirPlayers.Sum(p => p.salary);
         long salaryOut = ourPlayers.Sum(p => p.salary);
         long newPayroll = currentPayroll - salaryOut + salaryIn;

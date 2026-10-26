@@ -613,7 +613,7 @@ public class MarketController : UIScreenController
             : new StyleColor(new Color32(39, 174, 96, 255));
 
         var players = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        long totalPayroll = players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         _root.Q<Label>("HeaderPayroll").text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
@@ -811,8 +811,8 @@ public class MarketController : UIScreenController
         // Team stats
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long myPayroll = _myPlayers.Sum(p => p.salary);
-        long otherPayroll = _otherPlayers.Sum(p => p.salary);
+        long myPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
+        long otherPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_selectedTeam.id);
         long myCapSpace = salaryCap - myPayroll;
         long otherCapSpace = salaryCap - otherPayroll;
 
@@ -1043,7 +1043,7 @@ public class MarketController : UIScreenController
         _myTeamBody.Add(title);
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long myPayroll = _myPlayers.Sum(p => p.salary);
+        long myPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
 
         foreach (var p in _ownSATFAs)
         {
@@ -1676,7 +1676,7 @@ public class MarketController : UIScreenController
     long GetSalaryMargin(TeamData team)
     {
         var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-        var payroll = players.Sum(p => p.salary);
+        var payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id);
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         var cap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
         return cap - payroll;
@@ -1763,8 +1763,8 @@ public class MarketController : UIScreenController
         return TradeHelper.ValidateTrade(
             teamASelected, teamBSelected,
             db.GetRosterCount(teamA.id), db.GetRosterCount(teamB.id),
-            teamB.name, rosterB.Sum(p => p.salary),
-            teamA.name, rosterA.Sum(p => p.salary),
+            teamB.name, db.GetEffectiveTeamPayroll(teamB.id),
+            teamA.name, db.GetEffectiveTeamPayroll(teamA.id),
             teamA.first_apron_hard_capped == 1,
             teamB.first_apron_hard_capped == 1,
             firstApron, secondApron, luxuryTax, teamASignSalaries,
@@ -2589,6 +2589,17 @@ public class MarketController : UIScreenController
 
         var name = new Label($"{player.first_name} {player.last_name}");
         name.AddToClassList("market-fa-col-name");
+        if (player.free_agent_type == "RFA")
+        {
+            var rightsTeam = DatabaseManager.Instance.GetTeamById(player.last_team_id);
+            string teamName = rightsTeam?.name ?? "su equipo anterior";
+            name.text += " · RFA";
+            name.tooltip = $"Agente libre restringido. Oferta cualificante: {FormatMoney(player.qualifying_offer_salary)}. {teamName} conserva el derecho simplificado de igualación.";
+        }
+        else if (player.free_agent_type == "UFA")
+        {
+            name.text += " · UFA";
+        }
         row.Add(name);
 
         var pos = new Label(PositionCodes.GetShort(player.position));
@@ -2688,7 +2699,7 @@ public class MarketController : UIScreenController
 
         // Calcular límites salariales
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long totalPayroll = myPlayers.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         bool isOwnRecentFA = DatabaseManager.Instance.IsOwnRecentFA(player, _myTeam.id);
         bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
         _faMaxSalary = RosterController.CalculateMaxOfferSalary(player, leagueSettings, totalPayroll, isOwnRecentFA, proManagerOnly);
@@ -2862,7 +2873,7 @@ public class MarketController : UIScreenController
         long tMle = leagueSettings.taxpayer_mid_level > 0 ? leagueSettings.taxpayer_mid_level : TradeHelper.T_MLE;
         long minSalary = leagueSettings.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
 
-        long totalPayroll = _myPlayers.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         long newTotal = totalPayroll + _faSalary;
         bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
 
@@ -2938,7 +2949,7 @@ public class MarketController : UIScreenController
         if (settings == null) return;
 
         var roster = DatabaseManager.Instance.GetPlayersByTeam(_myTeam.id);
-        long totalPayroll = roster.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         bool proManagerOnly = _manager != null && _manager.game_mode == "promanager";
         var breakdown = RosterController.GetMaxOfferBreakdown(_pendingFAPlayer, settings, totalPayroll, false, proManagerOnly);
 

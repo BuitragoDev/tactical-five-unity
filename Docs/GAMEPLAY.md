@@ -161,7 +161,7 @@ Si un equipo no llega a cinco sanos se simula con los disponibles y, sin ninguno
 Constants (2025-26, `TradeHelper.cs:7-14`): cap `174,647,000`, luxury `220,428,000`, 1st apron `229,015,000`, 2nd apron `241,686,000`, NT-MLE `14.1M`, T-MLE `5.7M`, minimum `2M`, max roster 17. Cap, luxury and aprons **+5% per season** (`StartNewSeason`).
 
 ### Max offer (`RosterController.GetMaxOfferBreakdown`)
-1. `maxByExp`: experience = `max(0, age − 22)`; ≤6yr → `cap × 25%`, ≤9yr → `cap × 30%`, else `cap × 35%`.
+1. `maxByExp`: experience = `max(0, years_of_service)`; ≤6yr → `cap × 25%`, ≤9yr → `cap × 30%`, else `cap × 35%`.
 2. Own-team renewal tiers by `seasons_with_team`: ≥3 → full Bird → `maxByExp`; 2 → Early Bird → `max(salary×1.75, cap×10.5%)`; else → Non-Bird → `salary×1.20`.
 3. **External FA: `birdMax = 0`** (no Bird rights). **FA propio reciente** (`IsOwnRecentFA`: `team_id==0 && last_team_id==myTeam && seasons_with_team>0`) → Bird rights.
 4. `capSpaceMax = salary + max(0, cap − payroll)`.
@@ -175,7 +175,13 @@ Acceptance via `CalculateAcceptScore` (see `SYSTEMS.md §S9`); roll `Random(1,10
 Apron rules, centralized in `TradeHelper.GetMaxIncomingSalary` (the exact returned limit is also shown in validation errors): 2nd apron or hard-capped above 1st (no aggregation, incoming ≤ outgoing); between 1st and 2nd (incoming ≤110% outgoing); below 1st (`2×+250K` for outgoing <7.5M / `out+7.5M` for <29M / `125%+250K` otherwise). The $250K adjustment is applied only once in the applicable bracket. Picks tradable (`draft_picks.current_team_id`) with **protection & swaps** (`protected_from`, `is_swap`, `swap_original_team_id`). **Multi-año:** cada equipo posee los drafts de `year_end..year_end+3` (8 picks al inicio: 4 R1 + 4 R2); las rondas futuras no tienen posición (se resuelve al draftear por el `original_team_id`) y `PickBonus` las descuenta por año (−2/año R1, −1/año R2, mín. 1). S&T of own FA via `MarketController.ProcessSATrade` (Bird max → sign + immediate trade → two `TradeData`; receiver under hard cap; `teamASignSalaries`/`teamBSignSalaries` in validation).
 
 ### Cap sheet (Finances → «CAP SHEET»)
-Read-only projection: current payroll vs cap/apron/space, per-year committed payroll (5 yrs at +5%/season), expiring players (`contract_years==1` → FA), available exceptions, luxury tax and 2nd apron.
+Proyección de nómina efectiva vs cap/apron/espacio, contratos garantizados/opciones a 5 años (+5%/season) y cap holds activos del año actual. La nómina de cap suma contratos estándar + holds; excluye salarios two-way y evita doble conteo cuando el jugador ya firmó. Los holds son compromisos de cap, no nómina mensual ni impuesto. Finanzas permite renunciar cada hold (el jugador pasa a UFA).
+
+### Derechos de agente libre y cap holds (F4-05, simplificados)
+- Service time: `years_of_service` sube una vez por temporada de equipo. Legacy saves se estiman por edad/antigüedad (no es historial CBA oficial; editable desde Editor).
+- Al expirar contrato u opción, 0–3 años de servicio → **RFA**, 4+ → **UFA**. Two-way queda UFA y no crea hold.
+- Oferta cualificante: `max(salario mínimo, salario anterior × 1,25)`. Cap hold RFA = QO; UFA = 120 % del salario anterior, o 150 % si tuvo ≥3 temporadas con el equipo. Se persiste en `team_cap_holds` hasta firmar o renunciar derechos.
+- Market etiqueta el tipo y QO. Si un jugador acepta una oferta externa como RFA, el equipo anterior iguala automáticamente si el jugador tiene 80+ OVR o el salario no supera 150 % de la QO, y su plantilla/capacidad legal permiten sostener el contrato. La decisión de IA y las reglas de QO/holds son una **abstracción de diseño**, no el procedimiento NBA exacto; F4-07 versionará las cifras CBA.
 
 ## 5. Economy
 
@@ -254,7 +260,13 @@ Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured pla
 
 ## 10. Draft
 
-- 60 picks (2 rounds), lottery odds NBA 2024+ (`{0.140×3, 0.125, 0.105, 0.090, 0.075, 0.060, 0.045, 0.030, 0.020, 0.015, 0.010, 0.005}`), class quality roll (weak −3 / normal / strong +2 / historic +4), generational talents, procedural rookies (attributes, salaries by tier, 4-year contracts, jersey via `AssignJerseyNumber`, rookie photos). `EndSeasonController` runs it; `NewSeasonController` continues. Picks resolve protections and swaps via `BuildSlotOwners`.
+- 60 picks (2 rounds), lottery odds NBA 2024+ (`{0.140×3, 0.125, 0.105, 0.090, 0.075, 0.060, 0.045, 0.030, 0.020, 0.015, 0.010, 0.005}`), class quality roll (weak −3 / normal / strong +2 / historic +4), generational talents, procedural rookies (attributes, **salario por escala de pick y temporada** (`RookieScale`), 4-year contracts, jersey via `AssignJerseyNumber`, rookie photos). `EndSeasonController` runs it; `NewSeasonController` continues. Picks resolve protections and swaps via `BuildSlotOwners`.
+
+### Escala salarial de rookie (F4-06)
+
+- `RookieScale.SalaryFor(pickNumber, seasonStartYear, isTwoWay)` es la **fuente única** del salario de draft; `DraftGenerator.AssignPick` la usa con `DraftPickSlot.DraftYear` (año del draft = temporada de debut).
+- Tabla base 2025-26: primera ronda picks 1–30 estrictamente decreciente (13,8 M → 2,7 M); segunda ronda 31–60 decreciente cerca del mínimo (2,0 M → 1,42 M). Cada temporada posterior aplica el mismo **+5 %** de los topes; las anteriores a la base no se descuentan. Importes redondeados a 10.000.
+- Un contrato **two-way** ignora el pick y usa el salario fijo `TWO_WAY_SALARY`; la ventaja de un prospecto generacional queda en OVR/potencial, no en el salario. F4-07 sustituirá la tabla por cifras oficiales versionadas por temporada.
 
 ## 11. Awards, records, legacy & progression
 

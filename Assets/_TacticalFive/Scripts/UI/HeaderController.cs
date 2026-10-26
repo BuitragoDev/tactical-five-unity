@@ -123,7 +123,7 @@ public static class HeaderController
         SafeSetText(header, "HeaderTeamName", myTeam.name.ToUpper());
         SafeSetText(header, "HeaderManagerName", $"Manager: {manager.name}");
 
-        long totalPayroll = players != null ? players.Sum(p => p.salary) : 0;
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(myTeam.id);
 
         var budget = header.Q<Label>("HeaderBudget");
         if (budget != null)

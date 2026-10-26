@@ -86,6 +86,41 @@ public class BatchPersistenceTests
     }
 
     [Test]
+    public void CapHold_PersistsAndLeavesEffectivePayrollWhenPlayerSigns()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+
+        var player = db.GetFreeAgents().First();
+        const int rightsTeamId = 1;
+        player.last_team_id = rightsTeamId;
+        player.salary = 10_000_000;
+        player.contract_years = 0;
+        player.years_of_service = 2;
+        player.seasons_with_team = 3;
+        player.is_two_way = 0;
+        db.UpdatePlayer(player);
+
+        long payrollBefore = db.GetEffectiveTeamPayroll(rightsTeamId);
+        db.SaveCapHold(player, rightsTeamId, 42, 2_000_000);
+        var hold = db.GetActiveCapHolds(rightsTeamId).Single(h => h.player_id == player.id);
+
+        Assert.That(player.free_agent_type, Is.EqualTo("RFA"));
+        Assert.That(player.qualifying_offer_salary, Is.EqualTo(12_500_000));
+        Assert.That(hold.amount, Is.EqualTo(12_500_000));
+        Assert.That(db.GetEffectiveTeamPayroll(rightsTeamId), Is.EqualTo(payrollBefore + hold.amount));
+
+        player.team_id = rightsTeamId;
+        player.contract_years = 3;
+        player.salary = 12_500_000;
+        db.UpdatePlayer(player);
+
+        Assert.That(db.GetActiveCapHolds(rightsTeamId), Is.Empty);
+        Assert.That(db.GetPlayerById(player.id).free_agent_type, Is.Empty);
+        Assert.That(db.GetPlayerById(player.id).qualifying_offer_salary, Is.Zero);
+    }
+
+    [Test]
     public void Batch_GuardaStatsYJugadoresEnUnaSolaEscritura()
     {
         var db = DatabaseManager.Instance;

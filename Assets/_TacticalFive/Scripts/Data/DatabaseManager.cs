@@ -133,6 +133,12 @@ public partial class DatabaseManager : MonoBehaviour
                 MarkMigrationApplied("slot_initialized");
             }
 
+            if (!IsMigrationApplied("service_years_legacy_estimate"))
+            {
+                _db.RunInTransaction(EstimateLegacyServiceYears);
+                MarkMigrationApplied("service_years_legacy_estimate");
+            }
+
             // Las partidas existentes (creadas antes de la G-League) también
             // necesitan sus filiales y prospectos.
             EnsureGLeagueSeeded();
@@ -591,6 +597,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<GameData>();
         _db.CreateTable<SeasonData>();
         _db.CreateTable<PlayerData>();
+        _db.CreateTable<TeamCapHoldData>();
         try { _db.Execute("ALTER TABLE players ADD COLUMN college TEXT DEFAULT ''"); } catch { }
         _db.CreateTable<EmployeeData>();
         _db.CreateTable<ScoutData>();
@@ -676,11 +683,23 @@ public partial class DatabaseManager : MonoBehaviour
         return true;
     }
 
+    void EstimateLegacyServiceYears()
+    {
+        // Los saves/seed anteriores no guardaban service time. Esta estimación
+        // por edad/antigüedad evita atribuir cero años a toda la plantilla; no
+        // sustituye un historial CBA real.
+        _db.Execute("UPDATE players SET years_of_service = MAX(COALESCE(seasons_with_team, 0), MAX(0, age - 19)) WHERE years_of_service = 0 AND is_rookie = 0 AND (team_id != 0 OR last_team_id != 0)");
+    }
+
     void RunMigrationsCore()
     {
         // Registro de migraciones one-time dentro del DB (los flags viven con el slot;
         // borrar el slot reinicia el estado)
         _db.Execute("CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)");
+
+        AddColumnIfMissing("players", "years_of_service", "years_of_service INTEGER NOT NULL DEFAULT 0");
+        AddColumnIfMissing("players", "free_agent_type", "free_agent_type TEXT NOT NULL DEFAULT ''");
+        AddColumnIfMissing("players", "qualifying_offer_salary", "qualifying_offer_salary INTEGER NOT NULL DEFAULT 0");
 
         // Add fan_confidence to managers if missing
         var managerCols = _db.Query<ColumnInfo>("PRAGMA table_info(managers)");

@@ -33,6 +33,7 @@ using System.Linq;
     private Label _capSheetApron;
     private VisualElement _capProjectionTable;
     private Label _capExpiringLabel;
+    private VisualElement _capHoldsContainer;
     private Label _capExceptionNtMle;
     private Label _capExceptionTMle;
     private Label _capExceptionMin;
@@ -96,6 +97,7 @@ using System.Linq;
         _capSheetApron = _root.Q<Label>("CapSheetApronLabel");
         _capProjectionTable = _root.Q<VisualElement>("CapProjectionTable");
         _capExpiringLabel = _root.Q<Label>("CapExpiringLabel");
+        _capHoldsContainer = _root.Q<VisualElement>("CapHoldsContainer");
         _capExceptionNtMle = _root.Q<Label>("CapExceptionNtMle");
         _capExceptionTMle = _root.Q<Label>("CapExceptionTMle");
         _capExceptionMin = _root.Q<Label>("CapExceptionMin");
@@ -541,8 +543,10 @@ using System.Linq;
         long cap = settings != null ? settings.salary_cap : TradeHelper.SALARY_CAP;
         long luxury = settings != null ? settings.luxury_tax : TradeHelper.LUXURY_TAX;
         long apron = settings != null ? settings.apron : TradeHelper.FIRST_APRON;
+        var activeHolds = DatabaseManager.Instance.GetActiveCapHolds(_myTeam.id);
 
-        long currentPayroll = players.Sum(p => p.salary)
+        long currentPayroll = FreeAgencyRules.EffectivePayroll(players,
+            DatabaseManager.Instance.GetActiveCapHolds(_myTeam.id))
             + _scenarioPlayers.Sum(sp => sp.salary);
         long space = cap - currentPayroll;
 
@@ -560,7 +564,7 @@ using System.Linq;
         _capSheetApron.AddToClassList(currentPayroll > apron ? "cap-summary-value--danger" : "cap-summary-value--income");
 
         // Tooltips de ayuda (cap/aprons/excepciones son áridos sin contexto)
-        _capSheetSalary.tooltip = "Masa salarial actual: suma de los salarios de tu plantilla.";
+        _capSheetSalary.tooltip = "Masa salarial efectiva: contratos estándar más cap holds de agentes libres con derechos. Los contratos two-way no cuentan contra el cap.";
         _capSheetCap.tooltip = "Tope salarial de la liga (crece un 5% cada temporada).";
         _capSheetSpace.tooltip = "Espacio salarial: tope menos masa salarial. Bajo el tope puedes fichar con espacio; por encima, solo con excepciones.";
         _capSheetApron.tooltip = "1er apron: por encima de él solo puedes usar la Taxpayer MLE y no puedes recibir más salario del que envías en un traspaso.";
@@ -601,15 +605,19 @@ using System.Linq;
         for (int yr = 0; yr < CapProjectionYears; yr++)
         {
             long yearCap = ProjectedCap(cap, yr);
-            long yearGuaranteed = players.Sum(p => p.guaranteed_years > yr ? p.salary : 0)
+            long yearGuaranteed = players.Sum(p => p.is_two_way != 1 && p.guaranteed_years > yr ? p.salary : 0)
+                + (yr == 0 ? activeHolds.Sum(h => h.amount) : 0)
                 + _scenarioPlayers.Where(sp => sp.guaranteedYears > yr).Sum(sp => sp.salary);
             long yearOptional = players.Sum(p =>
-                (p.contract_years > yr && p.guaranteed_years <= yr && (p.has_team_option == 1 || p.has_player_option == 1))
+                (p.is_two_way != 1 && p.contract_years > yr && p.guaranteed_years <= yr && (p.has_team_option == 1 || p.has_player_option == 1))
                     ? p.salary : 0)
                 + _scenarioPlayers.Where(sp =>
                     sp.years > yr && sp.guaranteedYears <= yr && (sp.hasTeamOption || sp.hasPlayerOption))
                     .Sum(sp => sp.salary);
-            long yearPayroll = yearGuaranteed + yearOptional;
+            long yearPayroll = CapSheetRules.ProjectedPayroll(players, activeHolds, yr)
+                + _scenarioPlayers.Where(sp => sp.guaranteedYears > yr
+                    || (sp.years > yr && sp.guaranteedYears <= yr && (sp.hasTeamOption || sp.hasPlayerOption)))
+                    .Sum(sp => sp.salary);
             long yearSpace = yearCap - yearPayroll;
             string optionSuffix = yearOptional > 0 ? " (Opc)" : "";
 
@@ -657,6 +665,8 @@ using System.Linq;
         }
 
         // Expiring players
+        var capHolds = activeHolds
+            .ToDictionary(h => h.player_id, h => h);
         var expiring = players
             .Where(p => p.contract_years == 1)
             .OrderByDescending(p => p.salary)
@@ -672,7 +682,10 @@ using System.Linq;
                 string optMarker = "";
                 if (p.has_team_option == 1 && p.guaranteed_years == 0) optMarker = " (TO)";
                 if (p.has_player_option == 1 && p.guaranteed_years == 0) optMarker = " (PO)";
-                return $"{p.first_name} {p.last_name} ({PositionName(p.position, p.secondary_position)}) - {FormatMoney(p.salary)}{optMarker}";
+                string rights = capHolds.TryGetValue(p.id, out var hold)
+                    ? $" · {hold.rights_type} HOLD {FormatMoney(hold.amount)}"
+                    : "";
+                return $"{p.first_name} {p.last_name} ({PositionName(p.position, p.secondary_position)}) - {FormatMoney(p.salary)}{optMarker}{rights}";
             }));
         }
 
@@ -686,6 +699,37 @@ using System.Linq;
         {
             string names = string.Join(", ", ownBirdFAs.Select(p => $"{p.first_name} {p.last_name}"));
             _capExpiringLabel.text += $"\nDERECHOS BIRD (re-firmables por encima del tope): {names}";
+        }
+
+        _capHoldsContainer?.Clear();
+        if (activeHolds.Count > 0 && _capHoldsContainer != null)
+        {
+            foreach (var hold in activeHolds.OrderByDescending(h => h.amount))
+            {
+                var player = DatabaseManager.Instance.GetPlayerById(hold.player_id);
+                if (player == null) continue;
+
+                var row = new VisualElement();
+                row.style.flexDirection = FlexDirection.Row;
+                row.style.alignItems = Align.Center;
+                row.style.marginTop = 4;
+                var label = new Label($"{player.first_name} {player.last_name} · {hold.rights_type} · {FormatMoney(hold.amount)}");
+                label.style.flexGrow = 1;
+                row.Add(label);
+
+                int playerId = hold.player_id;
+                var renounce = new Button(() =>
+                {
+                    DatabaseManager.Instance.RenounceCapHold(_myTeam.id, playerId);
+                    Refresh();
+                }) { text = "RENUNCIAR" };
+                renounce.tooltip = "Elimina el cap hold y convierte al jugador en agente libre sin restricciones.";
+                renounce.style.marginLeft = 8;
+                renounce.style.color = new Color(1f, 0.55f, 0.45f);
+                CursorManager.Instance?.RegisterHandCursor(renounce);
+                row.Add(renounce);
+                _capHoldsContainer.Add(row);
+            }
         }
 
         // Exceptions

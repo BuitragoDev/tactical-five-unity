@@ -46,7 +46,12 @@ public static class SeedBaseline
         var rows = (source ?? Enumerable.Empty<T>()).ToList();
         var properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public)
             .Where(p => p.CanRead && p.GetIndexParameters().Length == 0
-                        && !Attribute.IsDefined(p, typeof(IgnoreAttribute)))
+                        && !Attribute.IsDefined(p, typeof(IgnoreAttribute))
+                        // Campos de carrera/agencia libre: no forman parte del seed
+                        // estático, y los saves viejos los estiman al inicializarse.
+                        && !(table == "players" && (p.Name == nameof(PlayerData.years_of_service)
+                            || p.Name == nameof(PlayerData.free_agent_type)
+                            || p.Name == nameof(PlayerData.qualifying_offer_salary))))
             .OrderBy(p => p.Name, StringComparer.Ordinal)
             .ToArray();
 

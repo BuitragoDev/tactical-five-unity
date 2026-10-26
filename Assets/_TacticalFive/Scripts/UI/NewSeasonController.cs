@@ -324,6 +324,7 @@ public class NewSeasonController : UIScreenController
         _reSignCandidates.Clear();
         foreach (var p in playerOptions)
         {
+            bool wasTwoWay = p.is_two_way == 1;
             bool optsIn = DatabaseManager.Instance.DecidePlayerOption(p, teamWinPct, settings);
             if (optsIn)
             {
@@ -332,6 +333,7 @@ public class NewSeasonController : UIScreenController
             }
             else
             {
+                p.years_of_service++;
                 p.contract_years = 0;
                 p.guaranteed_years = 0;
                 if (p.last_team_id == 0) p.last_team_id = _selectedTeamId;
@@ -340,6 +342,11 @@ public class NewSeasonController : UIScreenController
                 p.is_on_ir = 0;
                 p.g_league_assigned = 0;
                 _reSignCandidates.Add(p);
+                if (!wasTwoWay)
+                {
+                    long minimum = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+                    DatabaseManager.Instance.SaveCapHold(p, _selectedTeamId, _season?.id ?? 0, minimum);
+                }
             }
             p.has_player_option = 0;
             DatabaseManager.Instance.UpdatePlayer(p);
@@ -372,8 +379,14 @@ public class NewSeasonController : UIScreenController
             {
                 // B41: el contrato de rookie no decrementa en su primer año (su edad y
                 // progresión las aplica StartNewSeason). Mismo criterio en ambas rutas.
-                if (!RolloverRules.ShouldDecrementContract(p.is_rookie == 1)) continue;
                 int oldTeamId = p.team_id;
+                bool wasTwoWay = p.is_two_way == 1;
+                if (oldTeamId != 0) p.years_of_service++;
+                if (!RolloverRules.ShouldDecrementContract(p.is_rookie == 1))
+                {
+                    DatabaseManager.Instance.UpdatePlayer(p);
+                    continue;
+                }
                 p.contract_years = System.Math.Max(0, p.contract_years - 1);
                 p.guaranteed_years = System.Math.Max(0, p.guaranteed_years - 1);
                 if (p.contract_years <= 0)
@@ -388,6 +401,12 @@ public class NewSeasonController : UIScreenController
                     if (oldTeamId != 0 && p.last_team_id == 0)
                         p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                     p.team_id = 0; // agente libre
+                    if (oldTeamId != 0 && !wasTwoWay)
+                    {
+                        var settings = DatabaseManager.Instance.GetLeagueSettings();
+                        long minSalary = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+                        DatabaseManager.Instance.SaveCapHold(p, oldTeamId, _season?.id ?? 0, minSalary);
+                    }
                 }
                 else
                 {
@@ -777,11 +796,19 @@ public class NewSeasonController : UIScreenController
             }
             else
             {
+                bool wasTwoWay = p.is_two_way == 1;
+                p.years_of_service++;
                 p.contract_years = 0;
                 p.guaranteed_years = 0;
                 p.has_team_option = 0;
                 if (p.last_team_id == 0) p.last_team_id = _selectedTeamId;
                 p.team_id = 0;
+                if (!wasTwoWay)
+                {
+                    var settings = DatabaseManager.Instance.GetLeagueSettings();
+                    long minimum = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+                    DatabaseManager.Instance.SaveCapHold(p, _selectedTeamId, _season?.id ?? 0, minimum);
+                }
             }
             DatabaseManager.Instance.UpdatePlayer(p);
         }

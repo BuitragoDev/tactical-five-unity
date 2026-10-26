@@ -374,12 +374,12 @@ using System.Linq;
             ? new StyleColor(new Color32(192, 57, 43, 255))
             : new StyleColor(new Color32(39, 174, 96, 255));
 
-        long totalPayroll = _players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         payroll.text = $"${totalPayroll / 1_000_000}M";
 
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         long salaryCap = leagueSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long marginVal = salaryCap - _players.Sum(p => p.salary);
+        long marginVal = salaryCap - totalPayroll;
 
         string marginText = marginVal >= 0
             ? $"+${marginVal / 1_000_000}M"
@@ -419,7 +419,7 @@ using System.Linq;
         int avgOverall = _players.Count > 0
             ? (int)_players.Average(p => p.GetCalculatedAverage()) : 0;
         _summaryOverall.text = avgOverall.ToString();
-        long totalPayroll = _players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         _summaryBudget.text = $"${totalPayroll / 1_000_000}M";
 
         // Contador two-way bajo el resumen
@@ -967,7 +967,7 @@ using System.Linq;
 
         // Calcular límites Bird Rights + cap space
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
-        long totalPayroll = _players != null ? _players.Sum(p => p.salary) : 0;
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         _renewMaxSalary = CalculateMaxOfferSalary(_selectedPlayer, leagueSettings, totalPayroll);
 
         // Mostrar formulario, ocultar pending
@@ -1104,7 +1104,7 @@ using System.Linq;
         long tMle = settings.taxpayer_mid_level > 0 ? settings.taxpayer_mid_level : TradeHelper.T_MLE;
         long minSalary = settings.minimum_salary > 0 ? settings.minimum_salary : TradeHelper.MIN_SALARY;
 
-        int exp = Mathf.Max(0, player.age - 22);
+        int exp = Mathf.Max(0, player.years_of_service);
         if (exp <= 6) result.maxByExp = (long)(settings.salary_cap * 0.25);
         else if (exp <= 9) result.maxByExp = (long)(settings.salary_cap * 0.30);
         else result.maxByExp = (long)(settings.salary_cap * 0.35);
@@ -1215,7 +1215,7 @@ using System.Linq;
         var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
         if (leagueSettings == null) return;
 
-        long totalPayroll = _players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         long newTotal = totalPayroll - _selectedPlayer.salary + _renewSalary;
 
         if (newTotal > leagueSettings.luxury_tax)
@@ -1237,7 +1237,7 @@ using System.Linq;
         var settings = DatabaseManager.Instance.GetLeagueSettings();
         if (settings == null) return;
 
-        long totalPayroll = _players.Sum(p => p.salary);
+        long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         var breakdown = GetMaxOfferBreakdown(_selectedPlayer, settings, totalPayroll);
 
         _renewMaxInfo.text = $"Máximo: {FormatMoney(breakdown.finalMax)} — {breakdown.bindingReason}";

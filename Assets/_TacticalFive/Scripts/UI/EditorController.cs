@@ -70,7 +70,7 @@ public class EditorController : UIScreenController
     private TextField _playerDribbling, _playerDefense, _playerRebounding;
     private TextField _playerAthleticism, _playerIq, _playerSteals, _playerBlocks;
     private TextField _playerMorale;
-    private TextField _playerSalary, _playerContract, _playerGuaranteed;
+    private TextField _playerSalary, _playerContract, _playerGuaranteed, _playerServiceYears;
     private TextField _playerRings, _playerFinalsMvps, _playerFinalsPlayed, _playerSeasonMvps;
     private bool _playerTeamOptionOn, _playerPlayerOptionOn, _playerTwoWayOn;
     private VisualElement _playerTeamOptionBox, _playerPlayerOptionBox;
@@ -1208,6 +1208,8 @@ public class EditorController : UIScreenController
         SetDigitsOnly(_playerContract, 1);
         _playerGuaranteed = AddInput(fields, "Años garantizados", p.guaranteed_years.ToString());
         SetDigitsOnly(_playerGuaranteed, 1);
+        _playerServiceYears = AddInput(fields, "Años de servicio", p.years_of_service.ToString());
+        SetDigitsOnly(_playerServiceYears, 0);
         panel.Add(fields);
 
         _playerTeamOptionOn = p.has_team_option == 1;
@@ -1431,6 +1433,8 @@ public class EditorController : UIScreenController
         if (gyr < 0) gyr = 0;
         if (gyr > yrs) gyr = yrs;
         p.guaranteed_years = gyr;
+        int.TryParse(_playerServiceYears.value, out int serviceYears);
+        p.years_of_service = Mathf.Max(0, serviceYears);
         p.has_team_option = _playerTeamOptionOn ? 1 : 0;
         p.has_player_option = _playerPlayerOptionOn ? 1 : 0;
         p.is_two_way = _playerTwoWayOn ? 1 : 0;

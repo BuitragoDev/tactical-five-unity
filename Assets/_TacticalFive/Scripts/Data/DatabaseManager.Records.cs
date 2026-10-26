@@ -3103,6 +3103,7 @@ public partial class DatabaseManager
             retireSeasonLabel = oldSeason.year_end.ToString();
         foreach (var p in allPlayers.Where(p => p.age >= 40))
         {
+            RemoveCapHold(p.id);
             TryInductIntoHallOfFame(p, retireSeasonLabel);
             TryRetireNumber(p, retireSeasonLabel);
             _db.Delete(p);
@@ -3138,12 +3139,17 @@ public partial class DatabaseManager
 
         // Valor de mercado del tope para reajustar el precio pedido al expirar (una vez).
         long rolloverCap = GetLeagueSettings()?.salary_cap ?? TradeHelper.SALARY_CAP;
+        long holdMinimumSalary = GetLeagueSettings()?.minimum_salary ?? TradeHelper.MIN_SALARY;
 
         foreach (var p in remaining)
         {
             // B41: un rookie en su primer año envejece y progresa como cualquier otro;
             // lo único que NO hace es decrementar su contrato de rookie (todavía).
             bool isFirstYearRookie = p.is_rookie == 1;
+            int serviceTeamId = p.team_id;
+            bool wasTwoWay = p.is_two_way == 1;
+            if (serviceTeamId != 0 && p.team_id != newTeamId)
+                p.years_of_service++;
 
             p.age += 1;
 
@@ -3276,9 +3282,15 @@ public partial class DatabaseManager
                 p.guaranteed_years = 0;
                 p.has_team_option = 0;
                 p.has_player_option = 0;
+                p.is_two_way = 0;
+                p.is_on_ir = 0;
+                p.g_league_assigned = 0;
                 if (oldTeamId != 0 && p.last_team_id == 0)
                     p.last_team_id = oldTeamId; // conserva Bird rights/contexto de re-firma al ir a FA
                 p.team_id = 0;
+
+                if (oldTeamId != 0 && !wasTwoWay)
+                    SaveCapHold(p, oldTeamId, oldSeasonId, holdMinimumSalary);
 
                 // El precio pedido no se queda anclado al salario viejo: si está por debajo
                 // de su valor de mercado (p. ej. fichó por el mínimo tras una rescisión), sube.
@@ -3510,7 +3522,7 @@ public partial class DatabaseManager
         foreach (var team in teamsToFill)
         {
             var roster = GetPlayersByTeam(team.id);
-            long payroll = roster.Sum(p => p.salary);
+            long payroll = GetEffectiveTeamPayroll(team.id);
             int rosterCount = GetRosterCount(team.id);
             int need = targetRosterSize - rosterCount;
             if (need <= 0) continue;
@@ -3526,17 +3538,20 @@ public partial class DatabaseManager
                 PlayerData signed = null;
                 foreach (var fa in freeAgents)
                 {
-                    if (fa.position == minPos)
+                    bool maySign = fa.free_agent_type != "RFA" || fa.last_team_id == team.id;
+                    if (maySign && fa.position == minPos)
                     {
                         signed = fa;
                         break;
                     }
                 }
-                if (signed == null && freeAgents.Count > 0)
-                    signed = freeAgents[0];
+                if (signed == null)
+                    signed = freeAgents.FirstOrDefault(fa => fa.free_agent_type != "RFA" || fa.last_team_id == team.id);
 
                 if (signed != null)
                 {
+                    long hold = GetActiveCapHolds(team.id).Where(h => h.player_id == signed.id).Sum(h => h.amount);
+                    payroll = Math.Max(0, payroll - hold);
                     long availableCap = salaryCap - payroll;
                     long faSalary = signed.salary;
 
@@ -3550,6 +3565,9 @@ public partial class DatabaseManager
                     signed.contract_years = 1;
                     signed.guaranteed_years = 1;
                     signed.seasons_with_team = 1;
+                    signed.free_agent_type = "";
+                    signed.qualifying_offer_salary = 0;
+                    RemoveCapHold(signed.id);
                     _db.Update(signed);
                     freeAgents.Remove(signed);
                     payroll += faSalary;

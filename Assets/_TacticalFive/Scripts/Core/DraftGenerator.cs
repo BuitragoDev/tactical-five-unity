@@ -12,6 +12,9 @@ public static class DraftGenerator
         public TeamData Team { get; set; }
         public bool IsUserPick { get; set; }
         public bool IsRound2 { get; set; }
+        // Año del draft (= temporada en la que debuta el rookie). Determina la
+        // escala salarial de RookieScale; 0 usa la temporada base.
+        public int DraftYear { get; set; }
     }
 
     private static readonly string[] Positions = { "PG", "SG", "SF", "PF", "C" };
@@ -260,7 +263,8 @@ public static class DraftGenerator
                 PickNumber = pick + 1,
                 Team = actualTeam,
                 IsUserPick = actualTeam.id == userTeamId,
-                IsRound2 = isRound2
+                IsRound2 = isRound2,
+                DraftYear = season != null ? season.year_end : 0
             });
         }
 
@@ -438,16 +442,9 @@ public static class DraftGenerator
                     && TradeHelper.IsEligibleForTwoWayAge(prospect.age);
         }
 
-        long salary;
-        if (prospect.is_generational)
-            salary = (long)UnityEngine.Random.Range(9000000, 15000001);
-        else if (!isRound2 && slot.PickNumber <= 3)
-            salary = (long)UnityEngine.Random.Range(7000000, 12000001);
-        else if (!isRound2)
-            salary = (long)UnityEngine.Random.Range(3000000, 8000001);
-        else
-            salary = (long)UnityEngine.Random.Range(1500000, 4000001);
-        salary = (salary / 100000) * 100000;
+        // F4-06: el salario sale de la escala por puesto y temporada, no de un
+        // Random.Range por tramo. Un two-way usa el salario fijo de liga.
+        long salary = RookieScale.SalaryFor(slot.PickNumber, slot.DraftYear, asTwoWay);
 
         int nextId = DatabaseManager.Instance.AllocatePlayerId();
 
@@ -487,7 +484,7 @@ public static class DraftGenerator
             injury_days = 0,
             injury_type = "",
             treated = 0,
-            salary = asTwoWay ? (int)TradeHelper.TWO_WAY_SALARY : (int)salary,
+            salary = (int)salary,
             contract_years = asTwoWay ? 2 : 4,
             guaranteed_years = asTwoWay ? 2 : 4,
             is_two_way = asTwoWay ? 1 : 0,

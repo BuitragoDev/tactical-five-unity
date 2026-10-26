@@ -130,6 +130,7 @@
                     <ui:VisualElement class="cap-section">
                         <ui:Label class="cap-section-title" text="JUGADORES QUE EXPIRAN" />
                         <ui:Label name="CapExpiringLabel" class="cap-expiring-label" text="" />
+                        <ui:VisualElement name="CapHoldsContainer" class="cap-holds-container" />
                     </ui:VisualElement>
                     <ui:VisualElement class="cap-section">
                         <ui:Label class="cap-section-title" text="EXCEPCIONES DISPONIBLES" />

@@ -44,6 +44,12 @@ public class PlayerData
     public int recovery_risk { get; set; }
     public int renewal_cooldown_day { get; set; }
     public int seasons_with_team { get; set; } = 1;
+    /// <summary>Temporadas de servicio acumuladas (estimación edad−19 en partidas antiguas).</summary>
+    public int years_of_service { get; set; }
+    /// <summary>"RFA" / "UFA" cuando el jugador expira; vacío con contrato activo.</summary>
+    public string free_agent_type { get; set; } = "";
+    /// <summary>Oferta cualificante simplificada conservada al pasar a agente libre.</summary>
+    public long qualifying_offer_salary { get; set; }
     public int morale { get; set; } = 50;
     public int fisico { get; set; } = 99;
     public int on_trade_block { get; set; }

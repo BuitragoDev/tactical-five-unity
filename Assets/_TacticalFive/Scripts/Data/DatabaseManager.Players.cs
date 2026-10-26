@@ -41,6 +41,7 @@ public partial class DatabaseManager
         p.g_league_assigned = 0;
         p.on_trade_block = 0;
         p.waived_game_day = -1;   // ya tiene equipo: deja de ser un FA del mercado de buyout
+        RemoveCapHold(p.id);
         UpdatePlayer(p);
 
         // Si cambia de equipo, sus hilos narrativos (solo existen del equipo del usuario)
@@ -270,7 +271,81 @@ public partial class DatabaseManager
     public void UpdatePlayer(PlayerData player)
     {
         if (!EnsureDb()) return;
+        if (player.team_id != 0 && player.contract_years > 0)
+        {
+            RemoveCapHold(player.id);
+            player.free_agent_type = "";
+            player.qualifying_offer_salary = 0;
+        }
         _db.Update(player);
+    }
+
+    public List<TeamCapHoldData> GetActiveCapHolds(int teamId)
+    {
+        if (!EnsureDb()) return new List<TeamCapHoldData>();
+        return _db.Table<TeamCapHoldData>()
+            .Where(h => h.team_id == teamId && h.is_active == 1)
+            .ToList()
+            .Where(h =>
+            {
+                var player = GetPlayerById(h.player_id);
+                return player != null && player.team_id == 0;
+            })
+            .ToList();
+    }
+
+    public long GetEffectiveTeamPayroll(int teamId, int replacingPlayerId = 0)
+    {
+        var holds = GetActiveCapHolds(teamId)
+            .Where(h => h.player_id != replacingPlayerId)
+            .ToList();
+        return FreeAgencyRules.EffectivePayroll(GetPlayersByTeam(teamId), holds);
+    }
+
+    public void SaveCapHold(PlayerData player, int teamId, int seasonId, long minimumSalary)
+    {
+        if (!EnsureDb() || player == null || teamId <= 0) return;
+        RemoveCapHold(player.id);
+
+        string type = FreeAgencyRules.TypeForService(player.years_of_service, player.is_two_way == 1);
+        long qualifyingOffer = type == "RFA"
+            ? FreeAgencyRules.QualifyingOffer(player.salary, minimumSalary)
+            : 0;
+        long amount = FreeAgencyRules.CapHold(
+            player.salary, player.years_of_service, player.seasons_with_team,
+            qualifyingOffer, minimumSalary);
+
+        player.free_agent_type = type;
+        player.qualifying_offer_salary = qualifyingOffer;
+        _db.Update(player);
+        _db.Insert(new TeamCapHoldData
+        {
+            team_id = teamId,
+            player_id = player.id,
+            season_id = seasonId,
+            amount = amount,
+            rights_type = type,
+            is_active = 1
+        });
+    }
+
+    public void RemoveCapHold(int playerId)
+    {
+        if (!EnsureDb() || playerId <= 0) return;
+        _db.Execute("DELETE FROM team_cap_holds WHERE player_id = ?", playerId);
+    }
+
+    public void RenounceCapHold(int teamId, int playerId)
+    {
+        if (!EnsureDb() || teamId <= 0 || playerId <= 0) return;
+        var player = GetPlayerById(playerId);
+        if (player != null && player.team_id == 0 && player.last_team_id == teamId)
+        {
+            player.free_agent_type = "UFA";
+            player.qualifying_offer_salary = 0;
+            _db.Update(player);
+        }
+        _db.Execute("DELETE FROM team_cap_holds WHERE team_id = ? AND player_id = ?", teamId, playerId);
     }
 
     /// <summary>
