@@ -354,7 +354,7 @@ public partial class DatabaseManager : MonoBehaviour
             string tmp = TemplateDbPath + ".tmp";
             TryDeleteFile(tmp);
             BuildTemplateFile(tmp);
-            PublishTemplateFile(tmp);
+            PublishTemplateFile(tmp, TemplateDbPath);
             Debug.Log($"[DB] Template database created/refreshed: {TemplateDbPath}");
         }
     }
@@ -381,15 +381,25 @@ public partial class DatabaseManager : MonoBehaviour
     /// Lo usa el reset del Editor, que antes borraba el template antes de construir.
     /// </summary>
     public void RebuildTemplateDb()
+        => RebuildTemplateDb(TemplateDbPath);
+
+    /// <summary>
+    /// Variante para hilos de fondo: recibe la ruta ya resuelta en el hilo principal.
+    /// `Application.persistentDataPath` no se puede consultar fuera del main thread.
+    /// </summary>
+    public void RebuildTemplateDb(string databasePath)
     {
+        if (string.IsNullOrEmpty(databasePath))
+            throw new System.ArgumentException("databasePath vacío", nameof(databasePath));
+
         lock (_templateLock)
         {
-            EnsureTemplateDirectory(TemplateDbPath);
-            string tmp = TemplateDbPath + ".tmp";
+            EnsureTemplateDirectory(databasePath);
+            string tmp = databasePath + ".tmp";
             TryDeleteFile(tmp);
             BuildTemplateFile(tmp);
-            PublishTemplateFile(tmp);
-            Debug.Log($"[DB] Template database rebuilt: {TemplateDbPath}");
+            PublishTemplateFile(tmp, databasePath);
+            Debug.Log($"[DB] Template database rebuilt: {databasePath}");
         }
     }
 
@@ -514,32 +524,32 @@ public partial class DatabaseManager : MonoBehaviour
         }
     }
 
-    private void PublishTemplateFile(string temporaryPath)
+    private void PublishTemplateFile(string temporaryPath, string databasePath)
     {
-        string backupPath = TemplateDbPath + ".bak";
-        string walPath = TemplateDbPath + "-wal";
-        string shmPath = TemplateDbPath + "-shm";
+        string backupPath = databasePath + ".bak";
+        string walPath = databasePath + "-wal";
+        string shmPath = databasePath + "-shm";
         string backupWalPath = backupPath + "-wal";
         string backupShmPath = backupPath + "-shm";
         bool hadWal = File.Exists(walPath);
         bool hadShm = File.Exists(shmPath);
 
-        if (!File.Exists(TemplateDbPath))
+        if (!File.Exists(databasePath))
         {
-            File.Move(temporaryPath, TemplateDbPath);
+            File.Move(temporaryPath, databasePath);
             return;
         }
 
         // Conserva el template previo para diagnóstico/recuperación. La publicación
         // del temporal sobre el destino usa replace atómico en el mismo filesystem.
-        File.Copy(TemplateDbPath, backupPath, true);
+        File.Copy(databasePath, backupPath, true);
         if (hadWal) File.Copy(walPath, backupWalPath, true);
         if (hadShm) File.Copy(shmPath, backupShmPath, true);
         try
         {
             TryDeleteFile(walPath);
             TryDeleteFile(shmPath);
-            File.Replace(temporaryPath, TemplateDbPath, null);
+            File.Replace(temporaryPath, databasePath, null);
         }
         catch
         {

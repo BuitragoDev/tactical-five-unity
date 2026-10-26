@@ -374,11 +374,16 @@ public class EditorController : UIScreenController
         // el seed es inválido, el template que había sigue ahí.
         _templateReady = false;
         string errorMsg = null;
+
+        // Application.persistentDataPath solo se puede consultar en el main thread.
+        // Resolvemos la ruta aquí y el hilo de fondo solo recibe el path ya calculado.
+        string templatePath = DatabaseManager.Instance.TemplateDbPath;
+
         Task.Run(() =>
         {
             try
             {
-                DatabaseManager.Instance.RebuildTemplateDb();
+                DatabaseManager.Instance.RebuildTemplateDb(templatePath);
             }
             catch (System.Exception ex)
             {

@@ -279,6 +279,29 @@ public class SaveSlotInitTests
     }
 
     [Test]
+    public void RebuildTemplateDb_RutaResuelta_NoConsultaPersistentDataPathEnBackground()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, db.LastInitError);
+        db.CloseActiveSlot();
+
+        // Reproduce el reset del Editor: el path se resuelve en el hilo principal
+        // y el rebuild corre en un hilo de fondo sin tocar Application.*.
+        string templatePath = db.TemplateDbPath;
+        System.Exception error = null;
+        var task = System.Threading.Tasks.Task.Run(() =>
+        {
+            try { db.RebuildTemplateDb(templatePath); }
+            catch (System.Exception ex) { error = ex; }
+        });
+
+        Assert.That(task.Wait(System.TimeSpan.FromSeconds(60)), Is.True, "El rebuild no terminó a tiempo.");
+        Assert.That(error, Is.Null, error?.ToString());
+        Assert.That(File.Exists(templatePath + ".bak"), Is.True);
+        Assert.That(File.Exists(templatePath + ".tmp"), Is.False);
+    }
+
+    [Test]
     public void SeedBaseline_Fingerprint_CoincideConElSeedReciénGenerado()
     {
         var db = DatabaseManager.Instance;
