@@ -2779,7 +2779,7 @@ using System.Threading.Tasks;
                     long secondApron = leagueSettings?.repeater_apron > 0 ? leagueSettings.repeater_apron : TradeHelper.SECOND_APRON;
                     long ntMle = leagueSettings?.mid_level > 0 ? leagueSettings.mid_level : TradeHelper.NT_MLE;
                     long tMle = leagueSettings?.taxpayer_mid_level > 0 ? leagueSettings.taxpayer_mid_level : TradeHelper.T_MLE;
-                    long minSalary = leagueSettings?.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
+                    long minSalary = TradeHelper.MinimumSalary(leagueSettings, player.years_of_service);
                     bool offerLegal = true;
                     string illegalReason = "";
 
@@ -2796,6 +2796,11 @@ using System.Threading.Tasks;
                             offerLegal = currentTwoWayCount - existingTwoWay < TradeHelper.MAX_TWO_WAY
                                       && TradeHelper.IsEligibleForTwoWay(player);
                             illegalReason = "ya tienes 2 contratos two-way (o el jugador no es elegible)";
+                        }
+                        else if (offer.offer_salary < minSalary)
+                        {
+                            offerLegal = false;
+                            illegalReason = $"por debajo del mínimo de {player.years_of_service} año(s) de servicio (${minSalary:N0})";
                         }
                         else if (ownRecentFA)
                         {
@@ -2973,7 +2978,7 @@ using System.Threading.Tasks;
                             long apron2FA = lsNegFA.repeater_apron > 0 ? lsNegFA.repeater_apron : TradeHelper.SECOND_APRON;
                             long ntMleFA = lsNegFA.mid_level > 0 ? lsNegFA.mid_level : TradeHelper.NT_MLE;
                             long tMleFA = lsNegFA.taxpayer_mid_level > 0 ? lsNegFA.taxpayer_mid_level : TradeHelper.T_MLE;
-                            long minFA = lsNegFA.minimum_salary > 0 ? lsNegFA.minimum_salary : TradeHelper.MIN_SALARY;
+                            long minFA = TradeHelper.MinimumSalary(lsNegFA, player.years_of_service);
                             bool proFA = _manager.game_mode == "promanager";
 
                             long legalMax = payrollFA <= capFA ? Math.Max(0, capFA - payrollFA)
@@ -2996,6 +3001,13 @@ using System.Threading.Tasks;
             {
                 // RENEWAL (offer_type == 0)
                 hasRenewal = true;
+                if (offer.is_two_way != 1)
+                {
+                    long renewalMinimum = TradeHelper.MinimumSalary(
+                        DatabaseManager.Instance.GetLeagueSettings(), player.years_of_service);
+                    if (offer.offer_salary < renewalMinimum)
+                        accepted = false;
+                }
                 if (accepted)
                 {
                     acceptedCount++;
@@ -5667,19 +5679,20 @@ using System.Threading.Tasks;
         if (waived.Count == 0) return;
 
         var settings = DatabaseManager.Instance.GetLeagueSettings();
-        long minSalary = BuyoutMarketRules.WaivedSalary(settings?.minimum_salary ?? 0);
         var teams = DatabaseManager.Instance.GetAllTeams().Where(t => t.id != _myTeam.id).ToList();
         string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
         foreach (var p in waived)
         {
+            long minSalary = BuyoutMarketRules.WaivedSalary(
+                TradeHelper.MinimumSalary(settings, p.years_of_service));
             var candidates = new List<BuyoutCandidate>();
             foreach (var t in teams)
             {
                 var roster = DatabaseManager.Instance.GetPlayersByTeam(t.id);
                 long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(t.id);
                 bool hasRoom = DatabaseManager.Instance.GetRosterCount(t.id) < TradeHelper.MAX_STANDARD_ROSTER
-                            && TradeHelper.CanAISignExternal(payroll, minSalary, settings);
+                            && TradeHelper.CanAISignExternal(payroll, minSalary, settings, p.years_of_service);
 
                 candidates.Add(new BuyoutCandidate
                 {
@@ -5778,9 +5791,9 @@ using System.Threading.Tasks;
             var team = DatabaseManager.Instance.GetTeamById(p.last_team_id);
             if (team == null) continue;
             if (DatabaseManager.Instance.GetRosterCount(team.id) >= TradeHelper.MAX_STANDARD_ROSTER) continue;
-            if (CalculateTeamRenewalScore(p, team, cap) < 50f) continue;
+            if (CalculateTeamRenewalScore(p, team, cap, settings) < 50f) continue;
 
-            var offer = CalculateAIRenewalOffer(p, team, cap);
+            var offer = CalculateAIRenewalOffer(p, team, cap, settings);
                 long payroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(team.id, p.id);
 
             // Como en las renovaciones: nunca dejar al equipo por encima del 2º apron.
@@ -5897,9 +5910,11 @@ using System.Threading.Tasks;
                 // Salario nuevo: un rescindido firma por el mínimo (mercado de buyout); el
                 // resto, su precio + un pequeño incremento (como el pase general). Antes se
                 // firmaba con el salario viejo y el equipo nuevo heredaba esa nómina.
+                long starMinimum = TradeHelper.MinimumSalary(leagueSettings, star.years_of_service);
                 long newSalary = fromBuyout
-                    ? BuyoutMarketRules.WaivedSalary(leagueSettings?.minimum_salary ?? 0)
+                    ? BuyoutMarketRules.WaivedSalary(starMinimum)
                     : star.salary + 2_000_000;
+                if (newSalary < starMinimum) newSalary = starMinimum;
 
                 int years = fromBuyout ? BuyoutMarketRules.ContractYears
                           : star.age > 35 ? 1 : star.age > 32 ? 2 : star.age > 28 ? 3 : star.age > 25 ? 4 : 5;
@@ -5933,7 +5948,7 @@ using System.Threading.Tasks;
 
                 // La IA ficha con sus excepciones (espacio → MLE → mínimo), no solo con
                 // espacio de tope: antes ninguna estrella por encima del cap podía firmar.
-                if (!matchedRFA && !TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings)) continue;
+                if (!matchedRFA && !TradeHelper.CanAISignExternal(payroll, newSalary, leagueSettings, star.years_of_service)) continue;
 
                 star.team_id = signingTeam.id;
                 star.last_team_id = signingTeam.id;
@@ -6048,10 +6063,10 @@ using System.Threading.Tasks;
 
             foreach (var player in expiringPlayers)
             {
-                float teamScore = CalculateTeamRenewalScore(player, team, cap);
+                float teamScore = CalculateTeamRenewalScore(player, team, cap, leagueSettings);
                 if (teamScore < 50f) continue;
 
-                var offer = CalculateAIRenewalOffer(player, team, cap);
+                var offer = CalculateAIRenewalOffer(player, team, cap, leagueSettings);
 
                 // No renovar si deja al equipo por encima del 2º apron (evita que las
                 // nóminas IA se disparen temporada a temporada).
@@ -6103,7 +6118,8 @@ using System.Threading.Tasks;
         Debug.Log($"[AIRenewals] Done. Renewed: {renewedCount}, Lost: {lostCount}");
     }
 
-    float CalculateTeamRenewalScore(PlayerData player, TeamData team, long cap)
+    float CalculateTeamRenewalScore(PlayerData player, TeamData team, long cap,
+        LeagueSettingsData settings)
     {
         float score = 0f;
 
@@ -6125,7 +6141,7 @@ using System.Threading.Tasks;
         else if (player.age <= 34) score += 5f;
 
         // Salario vs valor estimado (15%)
-        long estimatedValue = EstimateMarketValue(player, cap);
+        long estimatedValue = EstimateMarketValue(player, cap, settings);
         if (player.salary < estimatedValue) score += 15f;
         else if (player.salary <= estimatedValue * 1.2f) score += 8f;
 
@@ -6138,17 +6154,18 @@ using System.Threading.Tasks;
         return Mathf.Clamp(score, 0f, 100f);
     }
 
-    long EstimateMarketValue(PlayerData player, long cap)
+    long EstimateMarketValue(PlayerData player, long cap, LeagueSettingsData settings)
     {
         // Umbrales por OVR en una sola fuente (TradeHelper); por debajo, el salario actual.
         long byOvr = TradeHelper.MarketValueByOvr(player.overall, cap);
         if (byOvr > 0) return byOvr;
-        if (player.overall >= 70) return (long)Mathf.Max(player.salary * 110 / 100, TradeHelper.MIN_SALARY);
-        return (long)Mathf.Max(player.salary * 105 / 100, TradeHelper.MIN_SALARY);
+        long minimum = TradeHelper.MinimumSalary(settings, player.years_of_service);
+        if (player.overall >= 70) return (long)Mathf.Max(player.salary * 110 / 100, minimum);
+        return (long)Mathf.Max(player.salary * 105 / 100, minimum);
     }
 
     (long salary, int years, bool teamOption) CalculateAIRenewalOffer(
-        PlayerData player, TeamData team, long cap)
+        PlayerData player, TeamData team, long cap, LeagueSettingsData settings)
     {
         long maxByExp;
         int experience = player.age - 22;
@@ -6156,8 +6173,9 @@ using System.Threading.Tasks;
         else if (experience <= 9) maxByExp = (long)(cap * 0.30);
         else maxByExp = (long)(cap * 0.35);
 
-        long marketValue = EstimateMarketValue(player, cap);
+        long marketValue = EstimateMarketValue(player, cap, settings);
         long salary = (long)Mathf.Min(maxByExp, marketValue);
+        long minimum = TradeHelper.MinimumSalary(settings, player.years_of_service);
 
         // Muy por debajo de su valor de mercado (p. ej. fichó por el mínimo tras una
         // rescisión): el equipo le renueva a su valor real (para una estrella, su máximo
@@ -6165,7 +6183,7 @@ using System.Threading.Tasks;
         if (marketValue >= player.salary * 3)
         {
             salary = (long)(Mathf.Round(salary / 100_000f) * 100_000);
-            if (salary < TradeHelper.MIN_SALARY) salary = TradeHelper.MIN_SALARY;
+            if (salary < minimum) salary = minimum;
 
             int yearsLow;
             if (player.age <= 25) yearsLow = 5;
@@ -6192,7 +6210,7 @@ using System.Threading.Tasks;
         }
 
         salary = (long)(Mathf.Round(salary / 100_000f) * 100_000);
-        if (salary < TradeHelper.MIN_SALARY) salary = TradeHelper.MIN_SALARY;
+        if (salary < minimum) salary = minimum;
 
         int years;
         if (player.age <= 25) years = 5;
@@ -6616,11 +6634,12 @@ using System.Threading.Tasks;
             if (_aiRng.Next(0, 100) >= chance) continue;
 
             // Los two-way no computan contra el cap (igual que para el usuario).
-            long minSalary = leagueSettings?.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
+            long minSalary = TradeHelper.MinimumSalary(leagueSettings, player.years_of_service);
             long newSalary = signAsTwoWay ? TradeHelper.TwoWaySalary(leagueSettings)
                            : player.waived_game_day >= 0 ? minSalary      // mercado de buyout
                            : player.salary + 2_000_000;
-            if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings))
+            if (!signAsTwoWay && newSalary < minSalary) newSalary = minSalary;
+            if (!signAsTwoWay && !TradeHelper.CanAISignExternal(aiPayroll, newSalary, leagueSettings, player.years_of_service))
                 continue; // no cabe en el cap/excepciones: probar otro candidato
 
             player.team_id = team.id;

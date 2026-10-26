@@ -3138,8 +3138,8 @@ public partial class DatabaseManager
             mpgByPlayer[ss.player_id] = ss.games > 0 ? (int)System.Math.Round(ss.total_minutes / ss.games) : -1;
 
         // Valor de mercado del tope para reajustar el precio pedido al expirar (una vez).
-        long rolloverCap = GetLeagueSettings()?.salary_cap ?? TradeHelper.SALARY_CAP;
-        long holdMinimumSalary = GetLeagueSettings()?.minimum_salary ?? TradeHelper.MIN_SALARY;
+        var holdSettings = GetLeagueSettings();
+        long rolloverCap = holdSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
 
         foreach (var p in remaining)
         {
@@ -3290,7 +3290,8 @@ public partial class DatabaseManager
                 p.team_id = 0;
 
                 if (oldTeamId != 0 && !wasTwoWay)
-                    SaveCapHold(p, oldTeamId, oldSeasonId, holdMinimumSalary);
+                    SaveCapHold(p, oldTeamId, oldSeasonId,
+                        TradeHelper.MinimumSalary(holdSettings, p.years_of_service));
 
                 // El precio pedido no se queda anclado al salario viejo: si está por debajo
                 // de su valor de mercado (p. ej. fichó por el mínimo tras una rescisión), sube.
@@ -3501,7 +3502,6 @@ public partial class DatabaseManager
             .ToList();
 
         var capSettings = GetLeagueSettings();
-        long minSalary = capSettings?.minimum_salary ?? TradeHelper.MIN_SALARY;
         long salaryCap = capSettings?.salary_cap ?? TradeHelper.SALARY_CAP;
 
         // Sort AI teams by average overall rating descending (best teams sign first)
@@ -3555,9 +3555,14 @@ public partial class DatabaseManager
                     long availableCap = salaryCap - payroll;
                     long faSalary = signed.salary;
 
+                    long faMinimum = TradeHelper.MinimumSalary(capSettings, signed.years_of_service);
                     if (faSalary > availableCap)
                     {
-                        faSalary = Math.Max(minSalary, availableCap);
+                        faSalary = Math.Max(faMinimum, availableCap);
+                    }
+                    else if (faSalary < faMinimum)
+                    {
+                        faSalary = faMinimum;
                     }
 
                     signed.salary = faSalary;

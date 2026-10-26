@@ -53,14 +53,9 @@ public partial class DatabaseManager
 
     void SeedLeagueSettings()
     {
-        // F4-07: cap, tax, aprons, MLE y bi-anual salen de la tabla CBA de la
-        // temporada inicial (2026-27). El mínimo sigue siendo el suelo interno
-        // de 2 M hasta F4-08; `CbaTable.ApplyTo` no lo toca.
-        var settings = new LeagueSettingsData
-        {
-            minimum_salary = TradeHelper.MIN_SALARY,
-            is_active = 1
-        };
+        // F4-07/F4-08: cap, tax, aprons, MLE, bi-anual y el mínimo de 0 años
+        // salen de la tabla CBA de la temporada inicial (2026-27).
+        var settings = new LeagueSettingsData { is_active = 1 };
         CbaTable.ApplyTo(settings, CbaTable.CurrentSeasonStartYear);
         _db.Insert(settings);
     }

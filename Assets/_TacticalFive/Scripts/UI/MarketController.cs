@@ -2722,6 +2722,7 @@ public class MarketController : UIScreenController
             long autoSalary = player.salary + 2_000_000;
             _faSalary = autoSalary < _faMaxSalary ? autoSalary : _faMaxSalary;
             _faSalary = (long)(Mathf.Round(_faSalary / 100_000f) * 100_000);
+            _faSalary = System.Math.Min(_faMaxSalary, System.Math.Max(_faSalary, FASalaryFloor()));
         }
         {
             if (player.age > 35) _faYears = 1;
@@ -2783,7 +2784,8 @@ public class MarketController : UIScreenController
         }
         else
         {
-            if (_faSalary < 1_000_000) _faSalary = 1_000_000;
+            long floor = FASalaryFloor();
+            if (_faSalary < floor) _faSalary = floor;
             if (_faYears < 1) _faYears = 1;
             else if (_faYears > 5) _faYears = 5;
             RefreshFASpinners();
@@ -2799,7 +2801,7 @@ public class MarketController : UIScreenController
                     _faWarningText.style.display = DisplayStyle.Flex;
                 }
             }
-            if (_faMaxSalary < 1_000_000)
+            if (_faMaxSalary < floor)
             {
                 if (_faWarningText != null)
                 {
@@ -2871,7 +2873,7 @@ public class MarketController : UIScreenController
         long secondApron = leagueSettings.repeater_apron > 0 ? leagueSettings.repeater_apron : TradeHelper.SECOND_APRON;
         long ntMle = leagueSettings.mid_level > 0 ? leagueSettings.mid_level : TradeHelper.NT_MLE;
         long tMle = leagueSettings.taxpayer_mid_level > 0 ? leagueSettings.taxpayer_mid_level : TradeHelper.T_MLE;
-        long minSalary = leagueSettings.minimum_salary > 0 ? leagueSettings.minimum_salary : TradeHelper.MIN_SALARY;
+        long minSalary = FASalaryFloor();
 
         long totalPayroll = DatabaseManager.Instance.GetEffectiveTeamPayroll(_myTeam.id);
         long newTotal = totalPayroll + _faSalary;
@@ -2974,10 +2976,18 @@ public class MarketController : UIScreenController
 
     // ── FA Spinner helpers ──────────────────────────────────
 
+    long FASalaryFloor()
+    {
+        if (_pendingFAPlayer == null) return TradeHelper.MIN_SALARY;
+        return TradeHelper.MinimumSalary(DatabaseManager.Instance.GetLeagueSettings(),
+            _pendingFAPlayer.years_of_service);
+    }
+
     void StepFASalary(int dir)
     {
+        long floor = FASalaryFloor();
         long val = _faSalary + 500_000 * dir;
-        _faSalary = val < 1_000_000 ? 1_000_000 : (val > _faMaxSalary ? _faMaxSalary : val);
+        _faSalary = val < floor ? floor : (val > _faMaxSalary ? _faMaxSalary : val);
         RefreshFASpinners();
         UpdateFAWarning();
         UpdateFAAcceptScore();
@@ -3003,7 +3013,7 @@ public class MarketController : UIScreenController
         if (_faYearsValue != null)
             _faYearsValue.text = $"{_faYears} año{(_faYears > 1 ? "s" : "")}";
 
-        ToggleFASpinDisabled(_faSalaryDec, _faTwoWayActive || _faSalary <= 1_000_000);
+        ToggleFASpinDisabled(_faSalaryDec, _faTwoWayActive || _faSalary <= FASalaryFloor());
         ToggleFASpinDisabled(_faSalaryInc, _faTwoWayActive || _faSalary >= _faMaxSalary);
         ToggleFASpinDisabled(_faYearsDec, _faTwoWayActive || _faYears <= 1);
         ToggleFASpinDisabled(_faYearsInc, _faTwoWayActive || _faYears >= 5);
@@ -3023,6 +3033,7 @@ public class MarketController : UIScreenController
         {
             _faSalary = _pendingFAPlayer != null ? System.Math.Min(_pendingFAPlayer.salary + 2_000_000, _faMaxSalary) : _faMaxSalary;
             _faSalary = (long)(Mathf.Round(_faSalary / 100_000f) * 100_000);
+            _faSalary = System.Math.Min(_faMaxSalary, System.Math.Max(_faSalary, FASalaryFloor()));
             if (_pendingFAPlayer != null)
             {
                 if (_pendingFAPlayer.age > 35) _faYears = 1;

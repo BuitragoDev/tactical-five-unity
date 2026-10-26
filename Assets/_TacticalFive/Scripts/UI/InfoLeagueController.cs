@@ -94,7 +94,10 @@ public class InfoLeagueController : UIScreenController
             ("MID-LEVEL EXCEPTION (TAXPAYER)", $"{settings.taxpayer_mid_level:N0} $"),
             ("EXCEPCIÓN BI-ANUAL", $"{settings.bi_annual:N0} $"),
             ("SALARIO TWO-WAY", $"{settings.two_way_salary:N0} $"),
-            ("SALARIO MÍNIMO", $"{settings.minimum_salary:N0} $"),
+            ("SALARIO MÍNIMO · 0 AÑOS", $"{TradeHelper.MinimumSalary(settings, 0):N0} $"),
+            ("SALARIO MÍNIMO · 1 AÑO", $"{TradeHelper.MinimumSalary(settings, 1):N0} $"),
+            ("SALARIO MÍNIMO · 2 AÑOS", $"{TradeHelper.MinimumSalary(settings, 2):N0} $"),
+            ("SALARIO MÍNIMO · 3+ AÑOS", $"{TradeHelper.MinimumSalary(settings, 3):N0} $"),
         };
 
         foreach (var row in rows)

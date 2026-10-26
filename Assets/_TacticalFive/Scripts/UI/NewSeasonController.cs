@@ -344,7 +344,7 @@ public class NewSeasonController : UIScreenController
                 _reSignCandidates.Add(p);
                 if (!wasTwoWay)
                 {
-                    long minimum = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+                    long minimum = TradeHelper.MinimumSalary(settings, p.years_of_service);
                     DatabaseManager.Instance.SaveCapHold(p, _selectedTeamId, _season?.id ?? 0, minimum);
                 }
             }
@@ -404,7 +404,7 @@ public class NewSeasonController : UIScreenController
                     if (oldTeamId != 0 && !wasTwoWay)
                     {
                         var settings = DatabaseManager.Instance.GetLeagueSettings();
-                        long minSalary = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+                        long minSalary = TradeHelper.MinimumSalary(settings, p.years_of_service);
                         DatabaseManager.Instance.SaveCapHold(p, oldTeamId, _season?.id ?? 0, minSalary);
                     }
                 }
@@ -806,7 +806,7 @@ public class NewSeasonController : UIScreenController
                 if (!wasTwoWay)
                 {
                     var settings = DatabaseManager.Instance.GetLeagueSettings();
-                    long minimum = settings?.minimum_salary ?? TradeHelper.MIN_SALARY;
+                    long minimum = TradeHelper.MinimumSalary(settings, p.years_of_service);
                     DatabaseManager.Instance.SaveCapHold(p, _selectedTeamId, _season?.id ?? 0, minimum);
                 }
             }

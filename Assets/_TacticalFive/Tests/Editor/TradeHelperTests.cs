@@ -359,6 +359,16 @@ public class TradeHelperTests
     }
 
     [Test]
+    public void CanAISignExternal_RejectsBelowExperienceMinimum()
+    {
+        var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
+        Assert.That(TradeHelper.CanAISignExternal(0, 1_000_000, s), Is.False, "bajo el mínimo de 0 años");
+        Assert.That(TradeHelper.CanAISignExternal(0, 1_357_763, s), Is.True, "el mínimo de 0 años");
+        Assert.That(TradeHelper.CanAISignExternal(0, 2_000_000, s, yearsOfService: 1), Is.False,
+            "bajo el mínimo de 1 año");
+    }
+
+    [Test]
     public void CanAISignExternal_OverCap_AllowsOnlyMLE()
     {
         var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
@@ -370,8 +380,12 @@ public class TradeHelperTests
     public void CanAISignExternal_OverSecondApron_OnlyMinimum()
     {
         var s = Settings(100_000_000, 120_000_000, 130_000_000, 10_000_000, 5_000_000, 2_000_000);
-        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 2_000_000, s), Is.True, "el mínimo sí");
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 1_357_763, s), Is.True, "el mínimo de 0 años sí");
         Assert.That(TradeHelper.CanAISignExternal(135_000_000, 3_000_000, s), Is.False, "por encima del 2º apron solo el mínimo");
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 2_185_116, s, yearsOfService: 1), Is.True,
+            "un jugador de 1 año puede firmar exactamente su mínimo");
+        Assert.That(TradeHelper.CanAISignExternal(135_000_000, 2_000_000, s, yearsOfService: 1), Is.False,
+            "2 M no llega al mínimo de 1 año");
     }
 
     [Test]

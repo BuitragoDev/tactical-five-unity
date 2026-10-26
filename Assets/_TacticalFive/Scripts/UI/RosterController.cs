@@ -906,6 +906,7 @@ using System.Linq;
             long autoSalary = CalculateAutoSalary(_selectedPlayer.salary);
             _renewSalary = autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary;
             _renewSalary = (long)(Mathf.Round(_renewSalary / 100_000f) * 100_000);
+            _renewSalary = System.Math.Min(_renewMaxSalary, System.Math.Max(_renewSalary, RenewSalaryFloor()));
             _renewYears = CalculateAutoYears(_selectedPlayer.age);
         }
         RefreshRenewOptionToggles();
@@ -987,6 +988,7 @@ using System.Linq;
         long autoSalary = CalculateAutoSalary(_selectedPlayer.salary);
         _renewSalary = autoSalary < _renewMaxSalary ? autoSalary : _renewMaxSalary;
         _renewSalary = (long)(Mathf.Round(_renewSalary / 100_000f) * 100_000);
+        _renewSalary = System.Math.Min(_renewMaxSalary, System.Math.Max(_renewSalary, RenewSalaryFloor()));
         _renewYears = CalculateAutoYears(_selectedPlayer.age);
         _teamOptionActive = false;
         _playerOptionActive = false;
@@ -1102,7 +1104,7 @@ using System.Linq;
         long secondApron = settings.repeater_apron > 0 ? settings.repeater_apron : TradeHelper.SECOND_APRON;
         long ntMle = settings.mid_level > 0 ? settings.mid_level : TradeHelper.NT_MLE;
         long tMle = settings.taxpayer_mid_level > 0 ? settings.taxpayer_mid_level : TradeHelper.T_MLE;
-        long minSalary = settings.minimum_salary > 0 ? settings.minimum_salary : TradeHelper.MIN_SALARY;
+        long minSalary = TradeHelper.MinimumSalary(settings, player.years_of_service);
 
         int exp = Mathf.Max(0, player.years_of_service);
         if (exp <= 6) result.maxByExp = (long)(settings.salary_cap * 0.25);
@@ -1283,12 +1285,13 @@ using System.Linq;
         {
             // Suelo de mínimo y tope legal juntos: antes el `else if` dejaba pasar una
             // oferta por encima del máximo cuando el suelo subía el salario (ECO-13).
-            if (!TradeHelper.TryClampOffer(_renewSalary, 1000000, _renewMaxSalary, out long clamped))
+            long renewFloor = RenewSalaryFloor();
+            if (!TradeHelper.TryClampOffer(_renewSalary, renewFloor, _renewMaxSalary, out long clamped))
             {
                 if (_renewWarningText != null)
                 {
                     _renewWarningText.text = $"Tu máximo legal ({FormatMoney(_renewMaxSalary)}) está por debajo del mínimo " +
-                                             $"({FormatMoney(1000000)}): no puedes enviar esta oferta.";
+                                             $"({FormatMoney(renewFloor)}): no puedes enviar esta oferta.";
                     _renewWarningText.style.display = DisplayStyle.Flex;
                 }
                 return;
@@ -1414,10 +1417,18 @@ using System.Linq;
 
     // ── Spinner helpers ─────────────────────────────────────
 
+    long RenewSalaryFloor()
+    {
+        if (_selectedPlayer == null) return TradeHelper.MIN_SALARY;
+        return TradeHelper.MinimumSalary(DatabaseManager.Instance.GetLeagueSettings(),
+            _selectedPlayer.years_of_service);
+    }
+
     void StepRenewSalary(int dir)
     {
+        long floor = RenewSalaryFloor();
         long val = _renewSalary + 500_000 * dir;
-        _renewSalary = val < 1_000_000 ? 1_000_000 : (val > _renewMaxSalary ? _renewMaxSalary : val);
+        _renewSalary = val < floor ? floor : (val > _renewMaxSalary ? _renewMaxSalary : val);
         RefreshRenewSpinners();
         UpdateCapWarning();
         UpdateAcceptScoreDisplay();
@@ -1438,7 +1449,7 @@ using System.Linq;
         if (_renewYearsValue != null)
             _renewYearsValue.text = $"{_renewYears} año{(_renewYears > 1 ? "s" : "")}";
 
-        ToggleRenewSpinDisabled(_renewSalaryDec, _renewTwoWayActive || _renewSalary <= 1_000_000);
+        ToggleRenewSpinDisabled(_renewSalaryDec, _renewTwoWayActive || _renewSalary <= RenewSalaryFloor());
         ToggleRenewSpinDisabled(_renewSalaryInc, _renewTwoWayActive || _renewSalary >= _renewMaxSalary);
         ToggleRenewSpinDisabled(_renewYearsDec, _renewTwoWayActive || _renewYears <= 1);
         ToggleRenewSpinDisabled(_renewYearsInc, _renewTwoWayActive || _renewYears >= 5);
@@ -1670,7 +1681,8 @@ using System.Linq;
         // Mercado de buyout: queda libre con contrato a 0 y su nuevo precio es el mínimo
         // (el equipo que le rescinde sigue pagando el resto como dead money). Se marca la
         // jornada de la rescisión para que la IA le busque equipo de inmediato.
-        long minSalary = DatabaseManager.Instance.GetLeagueSettings()?.minimum_salary ?? TradeHelper.MIN_SALARY;
+        var leagueSettings = DatabaseManager.Instance.GetLeagueSettings();
+        long minSalary = TradeHelper.MinimumSalary(leagueSettings, _selectedPlayer.years_of_service);
         _selectedPlayer.salary = minSalary;
         _selectedPlayer.contract_years = 0;
         _selectedPlayer.guaranteed_years = 0;

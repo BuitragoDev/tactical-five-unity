@@ -96,7 +96,7 @@ public class SaveSlotInitTests
         Assert.That(settings.season_start_year, Is.EqualTo(CbaTable.CurrentSeasonStartYear));
         Assert.That(settings.cba_projected, Is.Zero);
         Assert.That(settings.minimum_salary, Is.EqualTo(TradeHelper.MIN_SALARY),
-            "F4-07 conserva el suelo interno hasta F4-08.");
+            "F4-08 siembra el mínimo oficial de 0 años y las bandas se consultan en CbaTable.");
     }
 
     // ── SAV-03: la segunda partida reutiliza el template ────────────────────

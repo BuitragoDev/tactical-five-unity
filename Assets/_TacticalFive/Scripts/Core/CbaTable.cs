@@ -11,9 +11,9 @@ using System.Collections.Generic;
 /// 5 %. La tabla es la fuente única de cap, tax, aprons y excepciones: ya no se
 /// aplica un +5 % ciego a los valores de la partida en cada rollover.
 ///
-/// El mínimo salarial por experiencia y el repeater tax quedan fuera de esta fase:
-/// <c>minimum_salary</c> conserva el suelo interno de 2 M hasta F4-08 y el impuesto
-/// se calcula con los tramos estándar de <see cref="TradeHelper.CalculateLuxuryTax"/>.
+/// El mínimo se publica por años de servicio (0, 1, 2 y 3+). El repeater tax queda
+/// fuera de esta fase: el impuesto se calcula con los tramos estándar de
+/// <see cref="TradeHelper.CalculateLuxuryTax"/>.
 /// </summary>
 public static class CbaTable
 {
@@ -40,6 +40,9 @@ public static class CbaTable
         public long TaxpayerMle { get; }
         public long BiAnnual { get; }
         public long MinimumSalary { get; }
+        public long MinimumSalary1 { get; }
+        public long MinimumSalary2 { get; }
+        public long MinimumSalary3Plus { get; }
         public long TwoWaySalary { get; }
         /// <summary>true si la cifra está publicada por la NBA; false si es proyección.</summary>
         public bool Verified { get; }
@@ -47,7 +50,8 @@ public static class CbaTable
 
         public Season(int startYear, long salaryCap, long luxuryTax, long firstApron,
             long secondApron, long nonTaxpayerMle, long taxpayerMle, long biAnnual,
-            long minimumSalary, long twoWaySalary, bool verified, string source)
+            long minimumSalary, long minimumSalary1, long minimumSalary2,
+            long minimumSalary3Plus, long twoWaySalary, bool verified, string source)
         {
             StartYear = startYear;
             SalaryCap = salaryCap;
@@ -58,9 +62,24 @@ public static class CbaTable
             TaxpayerMle = taxpayerMle;
             BiAnnual = biAnnual;
             MinimumSalary = minimumSalary;
+            MinimumSalary1 = minimumSalary1;
+            MinimumSalary2 = minimumSalary2;
+            MinimumSalary3Plus = minimumSalary3Plus;
             TwoWaySalary = twoWaySalary;
             Verified = verified;
             Source = source;
+        }
+
+        /// <summary>
+        /// Mínimo legal para un jugador según sus años de servicio. El juego agrupa
+        /// 3 o más años en una sola banda (F4-08); la NBA publica bandas 3–9 y 10+.
+        /// </summary>
+        public long MinimumFor(int yearsOfService)
+        {
+            if (yearsOfService <= 0) return MinimumSalary;
+            if (yearsOfService == 1) return MinimumSalary1;
+            if (yearsOfService == 2) return MinimumSalary2;
+            return MinimumSalary3Plus;
         }
 
         public string Label => $"{StartYear}-{(StartYear + 1) % 100:00}";
@@ -72,17 +91,20 @@ public static class CbaTable
         [2024] = new Season(2024,
             140_588_000, 170_814_000, 178_132_000, 188_931_000,
             12_822_000, 5_168_000, 4_668_000,
-            1_157_153, 578_577, true, "NBA.com (cifras oficiales)"),
+            1_157_153, 1_862_265, 2_087_519, 2_162_606,
+            578_577, true, "NBA.com (cifras oficiales)"),
 
         [2025] = new Season(2025,
             154_647_000, 187_895_000, 195_945_000, 207_824_000,
             14_104_000, 5_685_000, 5_134_000,
-            1_272_870, 636_435, true, "NBA.com (cifras oficiales)"),
+            1_272_870, 2_048_494, 2_296_274, 2_378_870,
+            636_435, true, "NBA.com (cifras oficiales)"),
 
         [2026] = new Season(2026,
             164_961_000, 200_428_000, 209_015_000, 221_686_000,
             15_044_000, 6_064_000, 5_477_000,
-            1_357_763, 678_882, true, "NBA.com (30/06/2026)"),
+            1_357_763, 2_185_116, 2_449_421, 2_537_526,
+            678_882, true, "NBA.com (30/06/2026)"),
 
         // Proyecciones publicadas por RealGM (no son cifras oficiales).
         [2027] = Projected(2027, 176_000_000, 213_000_000, 222_000_000, 236_000_000,
@@ -129,6 +151,9 @@ public static class CbaTable
             Grow(last.TaxpayerMle, years),
             Grow(last.BiAnnual, years),
             Grow(last.MinimumSalary, years),
+            Grow(last.MinimumSalary1, years),
+            Grow(last.MinimumSalary2, years),
+            Grow(last.MinimumSalary3Plus, years),
             Grow(last.TwoWaySalary, years),
             false,
             $"Proyección del juego (+{ProjectionGrowth:P0} anual desde {LastSeasonStartYear}-{(LastSeasonStartYear + 1) % 100:00})");
@@ -138,8 +163,8 @@ public static class CbaTable
     }
 
     /// <summary>
-    /// Copia los topes y excepciones de la temporada en settings. No toca
-    /// <c>minimum_salary</c>: el mínimo por experiencia se implementa en F4-08.
+    /// Copia los topes y excepciones de la temporada en settings. <c>minimum_salary</c>
+    /// guarda el mínimo de 0 años; las bandas 1, 2 y 3+ se consultan en la fila CBA.
     /// </summary>
     public static void ApplyTo(LeagueSettingsData settings, int seasonStartYear)
     {
@@ -152,6 +177,7 @@ public static class CbaTable
         settings.mid_level = season.NonTaxpayerMle;
         settings.taxpayer_mid_level = season.TaxpayerMle;
         settings.bi_annual = season.BiAnnual;
+        settings.minimum_salary = season.MinimumSalary;
         settings.two_way_salary = season.TwoWaySalary;
         settings.season_start_year = season.StartYear;
         settings.cba_projected = season.Verified ? 0 : 1;
@@ -171,13 +197,26 @@ public static class CbaTable
     {
         long minimum = MinimumFromCap(cap);
         return new Season(startYear, cap, tax, firstApron, secondApron,
-            nonTaxpayerMle, taxpayerMle, biAnnual, minimum, TwoWayFromMinimum(minimum),
-            false, "RealGM (proyección NBA)");
+            nonTaxpayerMle, taxpayerMle, biAnnual,
+            minimum, MinimumTierFromZero(minimum, 1),
+            MinimumTierFromZero(minimum, 2), MinimumTierFromZero(minimum, 3),
+            TwoWayFromMinimum(minimum), false, "RealGM (proyección NBA)");
     }
 
     // El mínimo de 0 años y el two-way escalan con el mismo porcentaje que el cap.
     private static long MinimumFromCap(long cap)
         => cap <= 0 ? 0 : (long)Math.Round(cap * 0.008231, MidpointRounding.AwayFromZero);
+
+    // Ratios oficiales de la escala de mínimos (0 años = 1). Se usan solo en las
+    // temporadas proyectadas; las oficiales llevan las cifras exactas en la tabla.
+    private static long MinimumTierFromZero(long minimum, int yearsOfService)
+    {
+        if (minimum <= 0) return 0;
+        double ratio = yearsOfService <= 1 ? 1.6093504
+                     : yearsOfService == 2 ? 1.8040127
+                     : 1.8689023;
+        return (long)Math.Round(minimum * ratio, MidpointRounding.AwayFromZero);
+    }
 
     private static long TwoWayFromMinimum(long minimum)
         => minimum <= 0 ? 0 : (long)Math.Round(minimum / 2.0, MidpointRounding.AwayFromZero);

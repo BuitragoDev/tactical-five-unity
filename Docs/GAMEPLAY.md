@@ -158,7 +158,13 @@ Si un equipo no llega a cinco sanos se simula con los disponibles y, sin ninguno
 
 ## 4. Contracts & salary cap
 
-Constants (2026-27, fallback `TradeHelper.cs`): cap `164,961,000`, luxury `200,428,000`, 1st apron `209,015,000`, 2nd apron `221,686,000`, NT-MLE `15,044,000`, T-MLE `6,064,000`, BAE `5,477,000`, minimum `2,000,000` (suelo interno hasta F4-08), two-way `678,882`. La fuente viva es `CbaTable` + `league_settings`: 2024-25..2026-27 son cifras oficiales de la NBA, 2027-28..2034-35 son proyecciones de RealGM y después se proyecta +5 % anual. No se modela repeater tax.
+Constants (2026-27, fallback `TradeHelper.cs`): cap `164,961,000`, luxury `200,428,000`, 1st apron `209,015,000`, 2nd apron `221,686,000`, NT-MLE `15,044,000`, T-MLE `6,064,000`, BAE `5,477,000`, minimum 0 años `1,357,763`, two-way `678,882`. La fuente viva es `CbaTable` + `league_settings`: 2024-25..2026-27 son cifras oficiales de la NBA, 2027-28..2034-35 son proyecciones de RealGM y después se proyecta +5 % anual. No se modela repeater tax.
+
+### Salario mínimo por experiencia (F4-08)
+- `CbaTable.Season.MinimumFor(years)` publica cuatro bandas: **0, 1, 2 y 3+ años** de servicio. En 2026-27 son `1.357.763`, `2.185.116`, `2.449.421` y `2.537.526` $; las temporadas proyectadas escalan con los ratios oficiales.
+- `TradeHelper.MinimumSalary(settings, years)` es la única puerta de consulta: usa `league_settings.season_start_year` y la fila CBA correspondiente. `minimum_salary` guarda solo el mínimo de 0 años para compatibilidad y UI.
+- Se aplica al **enviar y madurar** ofertas FA/renovaciones, al máximo de un equipo por encima del 2.º apron, a la QO/cap holds, al buyout y a los fichajes de la IA (`CanAISignExternal`). Los contratos two-way y los rookies no usan esta escala.
+- **Contratos legacy:** los firmados bajo el suelo interno anterior de 2 M se conservan (no se reescriben nóminas del usuario); el auditor los cuenta como informativos y el mínimo de su experiencia se exige al renovar. El seed actual tiene 56 contratos de 2 M en esa situación; los 14 que estaban por debajo de 2 M ya se corrigieron en F1-04. El antiguo dato de «9 contratos» del plan estaba desactualizado.
 
 ### Max offer (`RosterController.GetMaxOfferBreakdown`)
 1. `maxByExp`: experience = `max(0, years_of_service)`; ≤6yr → `cap × 25%`, ≤9yr → `cap × 30%`, else `cap × 35%`.
@@ -180,7 +186,7 @@ Proyección de nómina efectiva vs cap/apron/espacio, contratos garantizados/opc
 ### Derechos de agente libre y cap holds (F4-05, simplificados)
 - Service time: `years_of_service` sube una vez por temporada de equipo. Legacy saves se estiman por edad/antigüedad (no es historial CBA oficial; editable desde Editor).
 - Al expirar contrato u opción, 0–3 años de servicio → **RFA**, 4+ → **UFA**. Two-way queda UFA y no crea hold.
-- Oferta cualificante: `max(salario mínimo, salario anterior × 1,25)`. Cap hold RFA = QO; UFA = 120 % del salario anterior, o 150 % si tuvo ≥3 temporadas con el equipo. Se persiste en `team_cap_holds` hasta firmar o renunciar derechos.
+- Oferta cualificante: `max(salario mínimo de su experiencia, salario anterior × 1,25)`. Cap hold RFA = QO; UFA = 120 % del salario anterior, o 150 % si tuvo ≥3 temporadas con el equipo. Se persiste en `team_cap_holds` hasta firmar o renunciar derechos.
 - Market etiqueta el tipo y QO. Si un jugador acepta una oferta externa como RFA, el equipo anterior iguala automáticamente si el jugador tiene 80+ OVR o el salario no supera 150 % de la QO, y su plantilla/capacidad legal permiten sostener el contrato. La decisión de IA y las reglas de QO/holds son una **abstracción de diseño**, no el procedimiento NBA exacto; F4-07 versionará las cifras CBA.
 
 ## 5. Economy
@@ -476,9 +482,9 @@ Los **hilos narrativos** convierten los resultados reales en situaciones con con
 ## Mercado de buyout (rescindidos)
 
 - **Al rescindir** (buyout) un jugador pasa a la agencia libre con **contrato a 0** y su nuevo
-  precio es el **mínimo de liga**: el equipo que le corta sigue pagando el resto como
+  precio es el **mínimo de su experiencia** (`TradeHelper.MinimumSalary`): el equipo que le corta sigue pagando el resto como
   `dead_money` (stretch), igual que en la NBA. Se marca `players.waived_game_day` con la
-  jornada de la rescisión. **Su contrato de rescindido es de mínimo y 1 año**
+  jornada de la rescisión. **Su contrato de rescindido es de ese mínimo y 1 año**
   (`BuyoutMarketRules.ContractYears`), no de varios años: una estrella no puede quedarse
   cobrando el mínimo durante 3 temporadas.
 - **La IA le busca destino de inmediato** (`DashboardController.ProcessBuyoutMarket`, en el

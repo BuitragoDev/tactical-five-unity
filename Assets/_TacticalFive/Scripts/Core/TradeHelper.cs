@@ -13,8 +13,9 @@ public static class TradeHelper
     public const long SECOND_APRON = 221_686_000;
     public const long NT_MLE = 15_044_000;
     public const long T_MLE = 6_064_000;
-    // Suelo interno del seed hasta F4-08 (mínimo por experiencia).
-    public const long MIN_SALARY = 2_000_000;
+    // Fallback del mínimo de 0 años para la temporada inicial (2026-27). El mínimo
+    // depende de los años de servicio: usa MinimumSalary(settings, years).
+    public const long MIN_SALARY = 1_357_763;
     public const int MAX_STANDARD_ROSTER = 15;
     public const long TWO_WAY_SALARY = 678_882;
     public const int MAX_TWO_WAY = 2;
@@ -48,13 +49,27 @@ public static class TradeHelper
             : TWO_WAY_SALARY;
 
     /// <summary>
-    /// Suelo salarial de la partida. Hasta F4-08 sigue siendo el mínimo interno de
-    /// 2 M; la tabla CBA ya guarda el mínimo oficial de 0 años para esa fase.
+    /// Mínimo de 0 años de la partida (compatibilidad). Para ofertas y contratos usa
+    /// <see cref="MinimumSalary(LeagueSettingsData, int)"/> con los años de servicio.
     /// </summary>
     public static long MinimumSalary(LeagueSettingsData settings)
-        => settings != null && settings.minimum_salary > 0
-            ? settings.minimum_salary
-            : MIN_SALARY;
+        => MinimumSalary(settings, 0);
+
+    /// <summary>
+    /// Mínimo legal según años de servicio (0, 1, 2, 3+). La temporada sale de
+    /// <c>league_settings.season_start_year</c>; sin ella se usa la temporada actual.
+    /// El importe nunca depende de un valor escalado a mano en cada llamada.
+    /// </summary>
+    public static long MinimumSalary(LeagueSettingsData settings, int yearsOfService)
+    {
+        int season = settings != null && settings.season_start_year > 0
+            ? settings.season_start_year
+            : CbaTable.CurrentSeasonStartYear;
+        return CbaTable.For(season).MinimumFor(yearsOfService);
+    }
+
+    public static long MinimumSalary(LeagueSettingsData settings, PlayerData player)
+        => MinimumSalary(settings, player != null ? player.years_of_service : 0);
 
     /// <summary>
     /// Ajusta una oferta al mínimo legal y al máximo permitido. Devuelve false si no hay
@@ -292,7 +307,8 @@ public static class TradeHelper
         return 0;
     }
 
-    public static bool CanAISignExternal(long payroll, long newSalary, LeagueSettingsData s)
+    public static bool CanAISignExternal(long payroll, long newSalary, LeagueSettingsData s,
+        int yearsOfService = 0)
     {
         if (s == null) return true;
         long cap = s.salary_cap > 0 ? s.salary_cap : SALARY_CAP;
@@ -300,7 +316,8 @@ public static class TradeHelper
         long secondApron = s.repeater_apron > 0 ? s.repeater_apron : SECOND_APRON;
         long ntMle = s.mid_level > 0 ? s.mid_level : NT_MLE;
         long tMle = s.taxpayer_mid_level > 0 ? s.taxpayer_mid_level : T_MLE;
-        long min = s.minimum_salary > 0 ? s.minimum_salary : MIN_SALARY;
+        long min = MinimumSalary(s, yearsOfService);
+        if (newSalary < min) return false;                                    // suelo por experiencia
 
         if (payroll + newSalary <= cap) return true;                          // espacio de cap
         if (payroll + newSalary > secondApron && newSalary > min) return false; // tope duro del 2º apron

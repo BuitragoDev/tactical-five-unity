@@ -71,6 +71,8 @@ public static class SeedAudit
         public int StandardPlayerCount  { get; set; }
         public int TwoWayPlayerCount    { get; set; }
         public int LowAttributeCount    { get; set; }
+        /// <summary>Contratos asignados anteriores a F4-08 por debajo del mínimo de su experiencia.</summary>
+        public int LegacySalaryCount    { get; set; }
         public readonly List<string> RosterSummaries = new List<string>();
 
         /// <summary>Equipos sembrados fuera de la referencia 14-17. Es un dato de
@@ -140,6 +142,9 @@ public static class SeedAudit
             sb.AppendLine($"Datos auditados: {TeamCount} equipos · {PlayerCount} jugadores · {ProspectCount} prospectos G-League.");
             sb.AppendLine($"Seed NBA: {AssignedPlayerCount} asignados ({StandardPlayerCount} estándar + {TwoWayPlayerCount} two-way) · {FreeAgentCount} agentes libres.");
             sb.AppendLine($"Atributos <{PlayerAttributeScale.LOW_VALUE_INFO_THRESHOLD}: {LowAttributeCount} (válidos; solo informativo).");
+            if (LegacySalaryCount > 0)
+                sb.AppendLine($"Contratos legacy por debajo del mínimo de su experiencia (F4-08): {LegacySalaryCount} " +
+                              "(firmados bajo el suelo interno anterior; se respetan hasta su renovación).");
             sb.AppendLine($"Plantillas fuera del rango activo {MIN_ROSTER_ACTIVE}-{TradeHelper.MAX_ROSTER} o con más de {TradeHelper.MAX_STANDARD_ROSTER} plazas estándar: {RosterOutOfRangeCount} " +
                           "(informativo; el seed de plantillas lo mantiene el usuario).");
             sb.AppendLine($"Resultado: {Errors} errores · {Warnings} avisos · {Findings.Count} hallazgos.");
@@ -198,7 +203,7 @@ public static class SeedAudit
         };
 
         CheckTeams(teams, report);
-        CheckPlayerIntegrity(teams, players, report);
+        CheckPlayerIntegrity(teams, players, settings, report);
         CheckRosters(teams, players, report);
         CheckLeagueSettings(settings, report);
         if (includeGLeague)
@@ -244,10 +249,12 @@ public static class SeedAudit
 
     // ── JUGADORES: INTEGRIDAD ────────────────────────────
 
-    static void CheckPlayerIntegrity(List<TeamData> teams, List<PlayerData> players, Report r)
+    static void CheckPlayerIntegrity(List<TeamData> teams, List<PlayerData> players,
+        LeagueSettingsData settings, Report r)
     {
         var teamIds = new HashSet<int>(teams.Select(t => t.id));
         var seen = new HashSet<int>();
+        long universalMinimum = TradeHelper.MinimumSalary(settings, 0);
 
         foreach (var p in players)
         {
@@ -332,10 +339,20 @@ public static class SeedAudit
                 r.Add("PLAYER-OVR", Error, who,
                     $"overall={p.overall} pero la media de sus 11 atributos (capada por potencial) es {canonical}.");
 
-            // ── Suelo salarial interno (F1-04) ──
-            if (p.salary > 0 && p.salary < TradeHelper.MIN_SALARY && p.is_rookie == 0 && p.is_two_way == 0)
+            // ── Suelo salarial universal (F4-08) ──
+            // Solo los contratos asignados están sujetos al suelo. Los agentes libres
+            // guardan un precio pedido, no un contrato firmado.
+            if (p.team_id != 0 && p.salary > 0 && p.salary < universalMinimum
+                && p.is_rookie == 0 && p.is_two_way == 0)
                 r.Add("PLAYER-SALARY-FLOOR", Error, who,
-                    $"{p.salary:N0} $ por debajo del mínimo interno {TradeHelper.MIN_SALARY:N0} $ sin ser rookie ni two-way.");
+                    $"{p.salary:N0} $ por debajo del mínimo universal {universalMinimum:N0} $ sin ser rookie ni two-way.");
+
+            // Contratos firmados antes de F4-08: se conservan (no se reescriben nóminas
+            // del usuario) pero el mínimo de su experiencia se aplicará al renovar.
+            long applicableMinimum = TradeHelper.MinimumSalary(settings, p.years_of_service);
+            if (p.team_id != 0 && p.salary > 0 && p.salary < applicableMinimum
+                && p.is_rookie == 0 && p.is_two_way == 0)
+                r.LegacySalaryCount++;
         }
     }
 

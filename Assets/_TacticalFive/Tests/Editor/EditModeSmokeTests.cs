@@ -21,7 +21,7 @@ public class EditModeSmokeTests
         Assert.That(TradeHelper.NT_MLE, Is.EqualTo(season.NonTaxpayerMle));
         Assert.That(TradeHelper.T_MLE, Is.EqualTo(season.TaxpayerMle));
         Assert.That(TradeHelper.TWO_WAY_SALARY, Is.EqualTo(season.TwoWaySalary));
-        // F4-08 sustituirá el suelo interno por el mínimo por experiencia.
-        Assert.That(TradeHelper.MIN_SALARY, Is.EqualTo(2_000_000L));
+        Assert.That(TradeHelper.MIN_SALARY, Is.EqualTo(season.MinimumSalary),
+            "El fallback es el mínimo de 0 años de 2026-27.");
     }
 }

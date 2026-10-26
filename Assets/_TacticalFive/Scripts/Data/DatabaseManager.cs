@@ -139,6 +139,15 @@ public partial class DatabaseManager : MonoBehaviour
                 MarkMigrationApplied("service_years_legacy_estimate");
             }
 
+            // F4-08: los agentes libres también necesitan años de servicio para
+            // aplicar el mínimo correcto. La migración anterior solo miraba
+            // jugadores con equipo o último equipo.
+            if (!IsMigrationApplied("service_years_free_agents"))
+            {
+                _db.RunInTransaction(EstimateLegacyServiceYears);
+                MarkMigrationApplied("service_years_free_agents");
+            }
+
             // Las partidas existentes (creadas antes de la G-League) también
             // necesitan sus filiales y prospectos.
             EnsureGLeagueSeeded();
@@ -686,9 +695,9 @@ public partial class DatabaseManager : MonoBehaviour
     void EstimateLegacyServiceYears()
     {
         // Los saves/seed anteriores no guardaban service time. Esta estimación
-        // por edad/antigüedad evita atribuir cero años a toda la plantilla; no
-        // sustituye un historial CBA real.
-        _db.Execute("UPDATE players SET years_of_service = MAX(COALESCE(seasons_with_team, 0), MAX(0, age - 19)) WHERE years_of_service = 0 AND is_rookie = 0 AND (team_id != 0 OR last_team_id != 0)");
+        // por edad/antigüedad evita atribuir cero años a toda la plantilla o a los
+        // agentes libres; no sustituye un historial CBA real.
+        _db.Execute("UPDATE players SET years_of_service = MAX(COALESCE(seasons_with_team, 0), MAX(0, age - 19)) WHERE years_of_service = 0 AND is_rookie = 0");
     }
 
     void RunMigrationsCore()
@@ -1474,6 +1483,29 @@ public partial class DatabaseManager : MonoBehaviour
             catch (System.Exception ex)
             {
                 Debug.LogError($"[DB] Migration error applying CBA table: {ex.Message}");
+            }
+        }
+
+        // F4-08: las partidas creadas antes del mínimo por experiencia guardaban
+        // 2 M como `minimum_salary`. Se sincroniza con el mínimo oficial de 0 años.
+        if (!IsMigrationApplied("minimum_salary_by_experience"))
+        {
+            try
+            {
+                var minSettings = GetLeagueSettings();
+                if (minSettings != null)
+                {
+                    int minYear = minSettings.season_start_year > 0
+                        ? minSettings.season_start_year
+                        : CbaTable.CurrentSeasonStartYear;
+                    minSettings.minimum_salary = CbaTable.For(minYear).MinimumSalary;
+                    _db.Update(minSettings);
+                }
+                MarkMigrationApplied("minimum_salary_by_experience");
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[DB] Migration error applying experience minimum: {ex.Message}");
             }
         }
 

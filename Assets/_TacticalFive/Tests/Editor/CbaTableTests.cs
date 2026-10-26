@@ -18,6 +18,9 @@ public class CbaTableTests
         Assert.That(s2024.TaxpayerMle, Is.EqualTo(5_168_000L));
         Assert.That(s2024.BiAnnual, Is.EqualTo(4_668_000L));
         Assert.That(s2024.MinimumSalary, Is.EqualTo(1_157_153L));
+        Assert.That(s2024.MinimumSalary1, Is.EqualTo(1_862_265L));
+        Assert.That(s2024.MinimumSalary2, Is.EqualTo(2_087_519L));
+        Assert.That(s2024.MinimumSalary3Plus, Is.EqualTo(2_162_606L));
         Assert.That(s2024.TwoWaySalary, Is.EqualTo(578_577L));
         Assert.That(s2024.Verified, Is.True);
 
@@ -30,6 +33,9 @@ public class CbaTableTests
         Assert.That(s2025.TaxpayerMle, Is.EqualTo(5_685_000L));
         Assert.That(s2025.BiAnnual, Is.EqualTo(5_134_000L));
         Assert.That(s2025.MinimumSalary, Is.EqualTo(1_272_870L));
+        Assert.That(s2025.MinimumSalary1, Is.EqualTo(2_048_494L));
+        Assert.That(s2025.MinimumSalary2, Is.EqualTo(2_296_274L));
+        Assert.That(s2025.MinimumSalary3Plus, Is.EqualTo(2_378_870L));
         Assert.That(s2025.TwoWaySalary, Is.EqualTo(636_435L));
         Assert.That(s2025.Verified, Is.True);
 
@@ -42,8 +48,28 @@ public class CbaTableTests
         Assert.That(s2026.TaxpayerMle, Is.EqualTo(6_064_000L));
         Assert.That(s2026.BiAnnual, Is.EqualTo(5_477_000L));
         Assert.That(s2026.MinimumSalary, Is.EqualTo(1_357_763L));
+        Assert.That(s2026.MinimumSalary1, Is.EqualTo(2_185_116L));
+        Assert.That(s2026.MinimumSalary2, Is.EqualTo(2_449_421L));
+        Assert.That(s2026.MinimumSalary3Plus, Is.EqualTo(2_537_526L));
         Assert.That(s2026.TwoWaySalary, Is.EqualTo(678_882L));
         Assert.That(s2026.Verified, Is.True);
+    }
+
+    [Test]
+    public void MinimumFor_UsesExperienceBands()
+    {
+        var s = CbaTable.For(2026);
+        Assert.That(s.MinimumFor(0), Is.EqualTo(1_357_763L));
+        Assert.That(s.MinimumFor(1), Is.EqualTo(2_185_116L));
+        Assert.That(s.MinimumFor(2), Is.EqualTo(2_449_421L));
+        Assert.That(s.MinimumFor(3), Is.EqualTo(2_537_526L));
+        Assert.That(s.MinimumFor(10), Is.EqualTo(2_537_526L), "3+ agrupa a los veteranos");
+
+        var settings = new LeagueSettingsData { season_start_year = 2025 };
+        Assert.That(TradeHelper.MinimumSalary(settings, 0), Is.EqualTo(1_272_870L));
+        Assert.That(TradeHelper.MinimumSalary(settings, 1), Is.EqualTo(2_048_494L));
+        Assert.That(TradeHelper.MinimumSalary(settings, 2), Is.EqualTo(2_296_274L));
+        Assert.That(TradeHelper.MinimumSalary(settings, 4), Is.EqualTo(2_378_870L));
     }
 
     [Test]
@@ -59,7 +85,10 @@ public class CbaTableTests
             Assert.That(s.FirstApron, Is.LessThan(s.SecondApron), $"1er < 2º apron {year}");
             Assert.That(s.NonTaxpayerMle, Is.GreaterThan(s.TaxpayerMle), $"NT-MLE > T-MLE {year}");
             Assert.That(s.TwoWaySalary, Is.GreaterThan(0), $"two-way {year}");
-            Assert.That(s.MinimumSalary, Is.GreaterThan(0), $"mínimo {year}");
+            Assert.That(s.MinimumSalary, Is.GreaterThan(0), $"mínimo 0 años {year}");
+            Assert.That(s.MinimumSalary, Is.LessThan(s.MinimumSalary1), $"mínimo 0 < 1 año {year}");
+            Assert.That(s.MinimumSalary1, Is.LessThan(s.MinimumSalary2), $"mínimo 1 < 2 años {year}");
+            Assert.That(s.MinimumSalary2, Is.LessThan(s.MinimumSalary3Plus), $"mínimo 2 < 3+ años {year}");
             Assert.That(s.SalaryCap, Is.GreaterThanOrEqualTo(previousCap), $"cap no decrece {year}");
             previousCap = s.SalaryCap;
         }
@@ -106,7 +135,7 @@ public class CbaTableTests
     }
 
     [Test]
-    public void ApplyTo_WritesSeasonAndKeepsTheMinimum()
+    public void ApplyTo_WritesSeasonAndTheMinimumOfZeroYears()
     {
         var settings = new LeagueSettingsData
         {
@@ -127,8 +156,7 @@ public class CbaTableTests
         Assert.That(settings.season_start_year, Is.EqualTo(2027));
         Assert.That(settings.cba_projected, Is.EqualTo(1));
         Assert.That(settings.cba_source, Is.Not.Empty);
-        // F4-08: el mínimo por experiencia aún no se aplica.
-        Assert.That(settings.minimum_salary, Is.EqualTo(2_000_000));
+        Assert.That(settings.minimum_salary, Is.EqualTo(s2027.MinimumSalary));
 
         CbaTable.ApplyTo(settings, 2026);
         Assert.That(settings.season_start_year, Is.EqualTo(2026));

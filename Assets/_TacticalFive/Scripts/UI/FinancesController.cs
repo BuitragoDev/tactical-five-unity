@@ -735,12 +735,13 @@ using System.Linq;
         // Exceptions
         long ntMle = settings != null ? settings.mid_level : TradeHelper.NT_MLE;
         long tMle = settings != null ? settings.taxpayer_mid_level : TradeHelper.T_MLE;
-        long minSal = settings != null ? settings.minimum_salary : TradeHelper.MIN_SALARY;
+        long minSal = TradeHelper.MinimumSalary(settings, 0);
+        long minSal3 = TradeHelper.MinimumSalary(settings, 3);
         _capExceptionNtMle.text = _myTeam.first_apron_hard_capped == 1
             ? $"{FormatMoney(ntMle)} (USADA → HARD CAP 1er APRON)"
             : FormatMoney(ntMle);
         _capExceptionTMle.text = FormatMoney(tMle);
-        _capExceptionMin.text = FormatMoney(minSal);
+        _capExceptionMin.text = $"{FormatMoney(minSal)} – {FormatMoney(minSal3)} (según experiencia)";
         _capExceptionApron.text =
             $"{FormatMoney(luxury)} / {FormatMoney(settings != null ? settings.repeater_apron : TradeHelper.SECOND_APRON)}";
     }
