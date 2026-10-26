@@ -1264,8 +1264,11 @@ public class GameSimulatorTests
 
         for (int i = 0; i < 30; i++)
         {
-            smartThrees += GameSimulator.SimulateGame(FakeGame(), smart, away, persistToDb: false).home_team_stats.fg3a;
-            carelessThrees += GameSimulator.SimulateGame(FakeGame(), careless, away, persistToDb: false).home_team_stats.fg3a;
+            // Semilla fija por partido: la comparación no depende del azar global.
+            smartThrees += GameSimulator.SimulateGame(FakeGame(), smart, away,
+                persistToDb: false, random: new SeededRandomSource((ulong)(7000 + i))).home_team_stats.fg3a;
+            carelessThrees += GameSimulator.SimulateGame(FakeGame(), careless, away,
+                persistToDb: false, random: new SeededRandomSource((ulong)(9000 + i))).home_team_stats.fg3a;
         }
 
         TestContext.WriteLine($"Triples intentados: IQ 95 = {smartThrees / 30f:0.0} · IQ 20 = {carelessThrees / 30f:0.0}");

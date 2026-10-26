@@ -38,6 +38,11 @@ public class NewSeasonController : UIScreenController
     // Re-sign candidates (jugadores que declinaron su player option y son FA reciente)
     private List<PlayerData> _reSignCandidates = new();
 
+    // Summer League / camp de desarrollo post-draft
+    private VisualElement _summerLeagueOverlay;
+    private readonly HashSet<int> _summerLeagueSelected = new();
+    private bool _summerLeagueResolved;
+
     private struct PlayerOptionResult
     {
         public string firstName;
@@ -58,6 +63,10 @@ public class NewSeasonController : UIScreenController
         _teamOptionOverlay = new VisualElement();
         _teamOptionOverlay.AddToClassList("ns-roster-overlay");
         _root.Add(_teamOptionOverlay);
+
+        _summerLeagueOverlay = new VisualElement();
+        _summerLeagueOverlay.AddToClassList("ns-roster-overlay");
+        _root.Add(_summerLeagueOverlay);
 
         CursorManager.Instance?.SetDefaultCursor();
     }
@@ -426,7 +435,206 @@ public class NewSeasonController : UIScreenController
             OpenRosterModal(roster.Where(p => p.is_on_ir == 0).ToList());
             return;
         }
-        ExecuteStartSeason();
+        BeginSummerLeagueOrStart();
+    }
+
+    void BeginSummerLeagueOrStart()
+    {
+        if (_summerLeagueResolved
+            || DatabaseManager.Instance.HasSummerLeagueResults(_manager.id, _season.id))
+        {
+            _summerLeagueResolved = true;
+            ExecuteStartSeason();
+            return;
+        }
+        OpenSummerLeagueModal();
+    }
+
+    void OpenSummerLeagueModal()
+    {
+        var candidates = DatabaseManager.Instance.GetPlayersByTeam(_selectedTeamId)
+            .Where(SummerLeagueHelper.IsEligible)
+            .OrderByDescending(p => p.potential)
+            .ThenByDescending(p => p.GetCalculatedAverage())
+            .ToList();
+
+        if (candidates.Count == 0)
+        {
+            _summerLeagueResolved = true;
+            ExecuteStartSeason();
+            return;
+        }
+
+        _summerLeagueSelected.Clear();
+        foreach (var p in SummerLeagueHelper.DefaultSelection(candidates))
+            _summerLeagueSelected.Add(p.id);
+
+        _summerLeagueOverlay.Clear();
+        _summerLeagueOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        _summerLeagueOverlay.Add(box);
+
+        var title = new Label("SUMMER LEAGUE · CAMP DE DESARROLLO");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label($"Ventana post-draft: 3 partidos para rookies y sophomores. " +
+                                 $"Elige hasta {SummerLeagueHelper.MaxRoster} convocados. " +
+                                 "El desarrollo es acotado: como máximo +1 en un atributo y nunca supera el potencial.");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var scroll = new ScrollView(ScrollViewMode.Vertical);
+        scroll.style.maxHeight = 380;
+        scroll.style.marginTop = 8;
+        scroll.style.marginBottom = 8;
+        box.Add(scroll);
+
+        foreach (var p in candidates)
+        {
+            var row = new VisualElement();
+            row.style.flexDirection = FlexDirection.Row;
+            row.style.alignItems = Align.Center;
+            row.style.justifyContent = Justify.SpaceBetween;
+            row.style.paddingTop = 5;
+            row.style.paddingBottom = 5;
+            row.style.borderBottomWidth = 1;
+            row.style.borderBottomColor = new Color(0.22f, 0.24f, 0.30f);
+
+            var info = new Label($"{p.first_name} {p.last_name} · {p.position} · {p.age} años · " +
+                                 $"MED {p.overall} / POT {p.potential}");
+            info.style.color = new Color(0.82f, 0.85f, 0.92f);
+            info.style.fontSize = 14;
+            row.Add(info);
+
+            var toggle = new Button();
+            toggle.AddToClassList("ns-option-btn");
+            toggle.style.minWidth = 120;
+            toggle.text = _summerLeagueSelected.Contains(p.id) ? "CONVOCADO" : "FUERA";
+            toggle.RegisterCallback<ClickEvent>(_ =>
+            {
+                PlayClick();
+                if (_summerLeagueSelected.Contains(p.id))
+                    _summerLeagueSelected.Remove(p.id);
+                else if (_summerLeagueSelected.Count < SummerLeagueHelper.MaxRoster)
+                    _summerLeagueSelected.Add(p.id);
+                toggle.text = _summerLeagueSelected.Contains(p.id) ? "CONVOCADO" : "FUERA";
+            });
+            CursorManager.Instance?.RegisterHandCursor(toggle);
+            row.Add(toggle);
+            scroll.Add(row);
+        }
+
+        var actions = new VisualElement();
+        actions.style.flexDirection = FlexDirection.Row;
+        actions.style.marginTop = 8;
+        box.Add(actions);
+
+        var skip = new Button();
+        skip.AddToClassList("ns-roster-continue");
+        skip.style.backgroundColor = new Color(0.55f, 0.18f, 0.15f);
+        skip.text = "SALTAR CAMP";
+        skip.style.marginRight = 8;
+        skip.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _summerLeagueResolved = true;
+            _summerLeagueOverlay.style.display = DisplayStyle.None;
+            ExecuteStartSeason();
+        });
+        CursorManager.Instance?.RegisterHandCursor(skip);
+        actions.Add(skip);
+
+        var simulate = new Button();
+        simulate.AddToClassList("ns-roster-continue");
+        simulate.text = "SIMULAR SUMMER LEAGUE";
+        simulate.SetEnabled(_summerLeagueSelected.Count > 0);
+        simulate.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            RunSummerLeague(candidates);
+        });
+        CursorManager.Instance?.RegisterHandCursor(simulate);
+        actions.Add(simulate);
+    }
+
+    void RunSummerLeague(List<PlayerData> candidates)
+    {
+        var selected = candidates.Where(p => _summerLeagueSelected.Contains(p.id)).ToList();
+        if (selected.Count == 0) return;
+
+        int seed = (_season?.id ?? 0) * 397 + (_manager?.id ?? 0) * 17 + selected.Count;
+        var results = SummerLeagueHelper.Simulate(selected, seed);
+
+        foreach (var row in results)
+        {
+            var player = selected.FirstOrDefault(p => p.id == row.player_id);
+            if (player == null) continue;
+            bool applied = row.development_gain > 0
+                           && SummerLeagueHelper.ApplyDevelopment(player, row.development_gain);
+            if (!applied) row.development_gain = 0;
+            if (applied) DatabaseManager.Instance.UpdatePlayer(player);
+        }
+
+        DatabaseManager.Instance.SaveSummerLeagueResults(
+            _manager.id, _season.id, _selectedTeamId, results);
+        ShowSummerLeagueSummary(results);
+    }
+
+    void ShowSummerLeagueSummary(List<SummerLeagueStatData> results)
+    {
+        _summerLeagueOverlay.Clear();
+        _summerLeagueOverlay.style.display = DisplayStyle.Flex;
+
+        var box = new VisualElement();
+        box.AddToClassList("ns-roster-box");
+        _summerLeagueOverlay.Add(box);
+
+        var title = new Label("SUMMER LEAGUE COMPLETADA");
+        title.AddToClassList("ns-roster-title");
+        box.Add(title);
+
+        var subtitle = new Label("Resumen del camp. Los jugadores con minutos suficientes pueden ganar +1 en su atributo más bajo.");
+        subtitle.AddToClassList("ns-roster-subtitle");
+        box.Add(subtitle);
+
+        var scroll = new ScrollView(ScrollViewMode.Vertical);
+        scroll.style.maxHeight = 380;
+        scroll.style.marginTop = 8;
+        box.Add(scroll);
+
+        foreach (var row in results.OrderByDescending(r => r.development_gain).ThenByDescending(r => r.points))
+        {
+            var player = DatabaseManager.Instance.GetPlayerById(row.player_id);
+            if (player == null) continue;
+            string gain = row.development_gain > 0 ? " · +1 ATRIBUTO" : "";
+            var line = new Label(
+                $"{player.first_name} {player.last_name} · {row.games} PJ · {row.minutes} min · " +
+                $"{row.points} pts · {row.rebounds} reb · {row.assists} as{gain}");
+            line.style.color = row.development_gain > 0
+                ? new Color(0.45f, 0.88f, 0.55f)
+                : new Color(0.82f, 0.85f, 0.92f);
+            line.style.fontSize = 14;
+            line.style.paddingTop = 4;
+            line.style.paddingBottom = 4;
+            scroll.Add(line);
+        }
+
+        var continueBtn = new Button();
+        continueBtn.AddToClassList("ns-roster-continue");
+        continueBtn.text = "CONTINUAR A LA TEMPORADA";
+        continueBtn.style.marginTop = 10;
+        continueBtn.RegisterCallback<ClickEvent>(_ =>
+        {
+            PlayClick();
+            _summerLeagueResolved = true;
+            _summerLeagueOverlay.style.display = DisplayStyle.None;
+            ExecuteStartSeason();
+        });
+        CursorManager.Instance?.RegisterHandCursor(continueBtn);
+        box.Add(continueBtn);
     }
 
     void ExecuteStartSeason()
@@ -557,7 +765,7 @@ public class NewSeasonController : UIScreenController
             PlayClick();
             _rosterOverlay.style.display = DisplayStyle.None;
             // Las opciones ya se resolvieron antes del control de plantilla (CheckRosterAndStart)
-            ExecuteStartSeason();
+            BeginSummerLeagueOrStart();
         });
         box.Add(_btnRosterContinue);
 

@@ -45,6 +45,12 @@
 - **Knockout:** `CupHelper.AdvanceIfNeeded` se llama tras simular el día dentro de la transacción. Con los 60 partidos jugados crea QF (6 campeones + 1 wildcard por conferencia), luego SF y final como `game_type="cup_playoff"`. No toca `seasons.phase`; los partidos de eliminatoria no cuentan para standings ni récords regulares.
 - **Tables:** `tournament_editions`, `tournament_groups`, `tournament_standings` (`id`, edición, grupo, conferencia, equipo, W/L, puntos, diferencia, rank, campeón/MVP).
 
+### S4c. Summer League (F5-05)
+
+- **Files:** `SummerLeagueHelper.cs`, `SummerLeagueData.cs`, `NewSeasonController.cs` (modal post-draft), `DatabaseManager.Players.cs`.
+- **Flow:** tras el draft y antes de `StartNewSeason`, el jugador elige hasta 12 rookies/sophomores o salta. `SummerLeagueHelper.Simulate` juega 3 scrimmages (stats procedimentales) y `ApplyDevelopment` da como máximo +1 al atributo más bajo si acumuló ≥45 minutos y no está en su potencial.
+- **Persistence:** `summer_league_stats` (manager/season/player, PJ, minutos, puntos, rebotes, asistencias, development_gain). `HasSummerLeagueResults` evita repetir el camp al reintentar el rollover. No toca `seasons.phase`.
+
 ## S5. Playoffs generator
 
 - **Files:** `PlayoffsGenerator.cs` (558 ln).

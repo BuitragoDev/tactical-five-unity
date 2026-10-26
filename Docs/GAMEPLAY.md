@@ -28,6 +28,13 @@
 - **Datos:** `tournament_editions` (edición, estado, campeón, MVP), `tournament_groups` (pertenencia) y `tournament_standings` (W/L, puntos, diferencia, rank). `CupHelper.AdvanceIfNeeded` se ejecuta tras simular el día dentro de la transacción; cuando los 60 partidos de grupo están jugados crea los cuartos, y avanza por rondas hasta el campeón. El MVP sale del mejor `rating` de las estadísticas de la final.
 - **UI:** la pestaña **NBA CUP** de Clasificación muestra los 6 grupos, el campeón y el MVP. El calendario etiqueta los partidos de eliminatoria como `NBA CUP`.
 
+### Summer League y camp de desarrollo (F5-05)
+- **Ventana:** en `NewSeason`, después del draft y antes de `StartNewSeason`, el jugador recibe un camp post-draft. No toca `seasons.phase`.
+- **Convocatoria:** el jugador elige hasta **12** rookies/sophomores elegibles (`is_rookie=1` o edad ≤22 con ≤2 años de servicio), o puede saltar el camp.
+- **Partidos:** 3 scrimmages por convocado; minutos 20–27 por partido. Las estadísticas son procedimentales y se guardan en `summer_league_stats` (PJ, minutos, puntos, rebotes, asistencias).
+- **Desarrollo acotado:** si acumula ≥45 minutos y `overall < potential`, gana **+1** en su atributo más bajo (nunca supera 99 ni el potencial). Se aplica una sola vez y antes del rollover. Si el jugador ya está en su techo, no hay mejora.
+- **Idempotencia:** si ya hay resultados para esa temporada, el camp no se repite tras un fallo/reintento del rollover.
+
 ## 2. Match simulation (core mechanic)
 
 **Script:** `GameSimulator.cs` (~1.370 ln). **Data:** `GameData`, `PlayerData` (11 attributes + `morale` + `fisico`), `LineupData` (rotation). **DTOs:** `PlayerStatSnapshot`, `TeamStats`, `PlayByPlayEvent`, `StatDelta`, `PossessionOutcome`, `PossessionTally`, `PossessionState`, `GameResult`.

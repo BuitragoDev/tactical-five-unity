@@ -75,6 +75,10 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 - `tournament_standings`: `id`, `edition_id`, `group_name`, `conference`, `team_id`, `wins`, `losses`, `points_for`, `points_against`, `point_diff`, `rank`.
 - Los partidos de grupo son `games` regulares con `series_label="cup-group-..."`; los de eliminatoria son `game_type="cup_playoff"` y `series_label="cup-qf-*"`, `"cup-sf-*"`, `"cup-final"`.
 
+### Summer League (F5-05)
+- `summer_league_stats`: `id`, `manager_id`, `season_id`, `player_id`, `team_id`, `games`, `minutes`, `points`, `rebounds`, `assists`, `development_gain`, `created_at`.
+- Una fila por convocado; `development_gain` es 0/1 y el camp no se repite si ya existen filas para `manager_id + season_id`.
+
 **Reglas simplificadas (F4-05, no CBA oficial):** service 0–3 → RFA; 4+ → UFA. QO = `max(salario_mínimo_de_su_experiencia, salario_anterior × 1.25)`. Hold RFA = QO; UFA = 120 % del salario previo o 150 % si `seasons_with_team ≥ 3`. Two-way no genera cap hold. Matching IA por regla de `FreeAgencyRules`; topes/ventanas CBA quedan para F4-07.
 
 ### season_records (`SeasonRecord`)

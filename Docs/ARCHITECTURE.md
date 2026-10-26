@@ -15,7 +15,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 ├─────────────────────────────────────────────────────────────────────────┤
 │  LOGIC LAYER — static utility classes (pure, no state)                  │
 │  GameSimulator · DraftGenerator · ScheduleGenerator · PlayoffsGenerator │
-│  TradeHelper · TravelHelper · CupHelper · QuickNewsGenerator · PlayerPhotoHelper · ObjectiveHelper │
+│  TradeHelper · TravelHelper · CupHelper · SummerLeagueHelper · QuickNewsGenerator · PlayerPhotoHelper · ObjectiveHelper │
 │  MatchupPreview · AdvancedStatsHelper · FogOfWarHelper · HallOfFameHelper│
 │  AchievementService · CustomSlider                                      │
 │  + MonoBehaviour singletons: AudioManager · CursorManager               │
@@ -40,7 +40,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 |---|---|---|
 | **Navigation** | `ScreenManager.cs`, `GameEnums.cs`, `UIScreenController.cs`, `FullScreenUI.cs` | Screen enum, show/hide documents, global selected player / game mode, base controller |
 | **Persistence** | `DatabaseManager.cs` + 9 partials (`DatabaseManager.{Teams,Players,Staff,Manager,Games,Seeding,Records,Achievements,Cup}.cs`), `GameSaveManager.cs`, `SQLite.cs`, `SaveSlotInfo.cs` | Tables, queries, migrations, seeding, slots/template, background-thread execution |
-| **Simulation/calibration** | `GameSimulator.cs`, `MonteCarloRunner.cs`, `MonteCarloCalibration.cs`, `TravelHelper.cs`, `CupHelper.cs` | Possession sim; seeded offline league lab, versioned acceptance profile and markdown report (`MonteCarloLabWindow`, Editor-only); travel distances and rest/fatigue for the schedule; NBA Cup group/knockout flow |
+| **Simulation/calibration** | `GameSimulator.cs`, `MonteCarloRunner.cs`, `MonteCarloCalibration.cs`, `TravelHelper.cs`, `CupHelper.cs`, `SummerLeagueHelper.cs` | Possession sim; seeded offline league lab, versioned acceptance profile and markdown report (`MonteCarloLabWindow`, Editor-only); travel distances and rest/fatigue for the schedule; NBA Cup group/knockout flow |
 | **Season generation** | `ScheduleGenerator.cs`, `PlayoffsGenerator.cs`, `DraftGenerator.cs` | 82-game schedule + All-Star; Play-In/Playoffs; draft lottery + class |
 | **Salary/trades** | `TradeHelper.cs` | Cap constants, trade validation, luxury tax, AI accept evaluation, pick bonus |
 | **Economy** | `FinanceRecord.cs`, `LoanData.cs`, `SponsorData.cs`, `TvChannelData.cs`, `TeamSettingsData.cs` | Budget, ticket/subscription, sponsors, TV, loans, renovations (logic in controllers) |

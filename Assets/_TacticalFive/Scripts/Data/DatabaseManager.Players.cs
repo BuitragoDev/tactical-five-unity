@@ -446,4 +446,31 @@ public partial class DatabaseManager
                   .ToList();
     }
 
+    // ── SUMMER LEAGUE (F5-05) ────────────────────────────
+
+    public bool HasSummerLeagueResults(int managerId, int seasonId)
+        => _db.Table<SummerLeagueStatData>()
+              .Any(s => s.manager_id == managerId && s.season_id == seasonId);
+
+    public List<SummerLeagueStatData> GetSummerLeagueResults(int managerId, int seasonId)
+        => _db.Table<SummerLeagueStatData>()
+              .Where(s => s.manager_id == managerId && s.season_id == seasonId)
+              .OrderByDescending(s => s.development_gain)
+              .ThenByDescending(s => s.minutes)
+              .ToList();
+
+    public void SaveSummerLeagueResults(int managerId, int seasonId, int teamId,
+        List<SummerLeagueStatData> rows)
+    {
+        _db.Execute("DELETE FROM summer_league_stats WHERE manager_id = ? AND season_id = ?",
+            managerId, seasonId);
+        foreach (var row in rows ?? new List<SummerLeagueStatData>())
+        {
+            row.id = 0;
+            row.manager_id = managerId;
+            row.season_id = seasonId;
+            row.team_id = teamId;
+            _db.Insert(row);
+        }
+    }
 }

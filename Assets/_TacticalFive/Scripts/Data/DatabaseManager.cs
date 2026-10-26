@@ -661,6 +661,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<TournamentEditionData>();
         _db.CreateTable<TournamentGroupData>();
         _db.CreateTable<TournamentStandingData>();
+        _db.CreateTable<SummerLeagueStatData>();
         _db.CreateTable<DbMetaData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
@@ -678,6 +679,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_TournamentEditions_Season ON tournament_editions(manager_id, season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_TournamentGroups_Edition ON tournament_groups(edition_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_TournamentStandings_Edition ON tournament_standings(edition_id)");
+        _db.Execute("CREATE INDEX IF NOT EXISTS IX_SummerLeague_Season ON summer_league_stats(manager_id, season_id)");
     }
 
     void RunMigrations()
