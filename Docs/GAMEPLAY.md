@@ -14,7 +14,13 @@
 | `playoff` | 4 rounds, best-of-7, 2-2-1-1-1 | `PlayoffsGenerator.GeneratePlayoffs` / `AdvancePlayoffSeries` |
 | `finished` | Season over | Dashboard phase transition → `EndSeason` → `Draft` → `NewSeason` |
 
-**Calendar facts [F]:** `CreateSeason` and `StartNewSeason` initially persist `Sep 5`; `PreseasonController.OnContinue` moves the date to the first preseason game or `Oct 22`. Regular-season gameplay targets Oct 22–Apr 15 and is **41-41 by construction** (82 games/team, 1.230 total, 2-2 in every division pair). Trade deadline reminder is Feb 1; **Deadline Day modal is Feb 7**; All-Star window Feb 8–14; up to 15 games/day; the scheduler penalizes but does not prohibit back-to-backs; the main scoring path targets ≤5 games/team/week. — `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs`, `ScheduleGenerator.cs`, `DashboardController.cs`
+**Calendar facts [F]:** `CreateSeason` and `StartNewSeason` initially persist `Sep 5`; `PreseasonController.OnContinue` moves the date to the first preseason game or `Oct 22`. Regular-season gameplay targets Oct 22–Apr 15 and is **41-41 by construction** (82 games/team, 1.230 total, 2-2 in every division pair). Trade deadline reminder is Feb 1; **Deadline Day modal is Feb 7**; All-Star window Feb 8–14; up to 15 games/day; the scheduler avoids back-to-backs above 1.500 millas; the main scoring path targets ≤5 games/team/week. — `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs`, `ScheduleGenerator.cs`, `DashboardController.cs`
+
+### Viajes, giras y descanso (F5-03)
+- `TravelHelper` guarda coordenadas aproximadas de las 30 sedes y calcula distancias Haversine. `RestDays(prev, next)` son los días completos entre partidos.
+- El scheduler usa la sede del partido anterior (no solo la ciudad del equipo) y rechaza un back-to-back si el desplazamiento supera **1.500 millas**; además penaliza los viajes largos al elegir día. El test de 30 semillas exige 82/41-41/1.230 y ningún B2B imposible.
+- Antes de simular, el pre-lote resta al `fisico` de la plantilla el coste del viaje: tramo corto 0, medio 1, largo 2 y costa a costa 3; cada día de descanso reduce un punto (tres días lo absorben). El desgaste por minutos sigue siendo el de `GameSimulator`.
+- El Dashboard muestra en el próximo partido la distancia, los días de descanso y, si aplica, el tramo de gira (`GIRA: N partidos fuera`). MatchDay añade la misma información junto al pabellón.
 
 ## 2. Match simulation (core mechanic)
 

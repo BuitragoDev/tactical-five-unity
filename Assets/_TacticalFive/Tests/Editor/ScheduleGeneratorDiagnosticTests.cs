@@ -145,6 +145,85 @@ public class ScheduleGeneratorDiagnosticTests
         foreach (var expected in expectedPairs)
             Assert.That(actualPairs.GetValueOrDefault(expected.Key, 0), Is.EqualTo(expected.Value),
                 $"Cruce {expected.Key.first}-{expected.Key.second}: partidos esperados");
+
+        // F5-03: ningún back-to-back cruza el país sin día de descanso.
+        var teamsById = teams.ToDictionary(t => t.id);
+        foreach (var team in teams)
+        {
+            var teamGames = games
+                .Where(g => g.home_team_id == team.id || g.away_team_id == team.id)
+                .OrderBy(g => g.game_day)
+                .ToList();
+            for (int i = 1; i < teamGames.Count; i++)
+            {
+                var previous = teamGames[i - 1];
+                var current = teamGames[i];
+                int miles = TravelHelper.DistanceMiles(previous.home_team_id, current.home_team_id, teamsById);
+                Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, miles),
+                    Is.False,
+                    $"{team.abbreviation}: back-to-back {previous.game_day}->{current.game_day} de {miles:N0} mi");
+            }
+        }
+    }
+
+    [Test]
+    public void GenerateSchedule_ThirtySeeds_KeepBalanceAndTravelLimits()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, "No se pudo crear el slot temporal: " + db.LastInitError);
+
+        var teams = db.GetAllTeams();
+        var teamsById = teams.ToDictionary(t => t.id);
+        Random.State previousState = Random.state;
+        try
+        {
+            for (int i = 0; i < 30; i++)
+            {
+                var season = new SeasonData
+                {
+                    id = SEASON_ID + 100 + i,
+                    manager_id = MANAGER_ID,
+                    year_start = 2026,
+                    year_end = 2027,
+                    phase = "regular"
+                };
+
+                Random.InitState(DIAGNOSTIC_SEED + i);
+                int generated = ScheduleGenerator.GenerateSchedule(season, teams);
+                Assert.That(generated, Is.EqualTo(1230), $"semilla {i}: 1.230 partidos");
+
+                var games = db.Db.Table<GameData>()
+                    .Where(g => g.season_id == season.id && g.game_type == "regular")
+                    .ToList();
+                Assert.That(games, Has.Count.EqualTo(1230), $"semilla {i}: partidos guardados");
+
+                foreach (var team in teams)
+                {
+                    var teamGames = games
+                        .Where(g => g.home_team_id == team.id || g.away_team_id == team.id)
+                        .OrderBy(g => g.game_day)
+                        .ToList();
+                    Assert.That(teamGames, Has.Count.EqualTo(82), $"semilla {i}: {team.abbreviation} PJ");
+                    Assert.That(teamGames.Count(g => g.home_team_id == team.id), Is.EqualTo(41),
+                        $"semilla {i}: {team.abbreviation} casa");
+                    Assert.That(teamGames.Count(g => g.away_team_id == team.id), Is.EqualTo(41),
+                        $"semilla {i}: {team.abbreviation} fuera");
+
+                    for (int j = 1; j < teamGames.Count; j++)
+                    {
+                        var previous = teamGames[j - 1];
+                        var current = teamGames[j];
+                        int miles = TravelHelper.DistanceMiles(previous.home_team_id, current.home_team_id, teamsById);
+                        Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, miles),
+                            Is.False, $"semilla {i}: {team.abbreviation} B2B {previous.game_day}->{current.game_day} ({miles:N0} mi)");
+                    }
+                }
+            }
+        }
+        finally
+        {
+            Random.state = previousState;
+        }
     }
 
     [Test]

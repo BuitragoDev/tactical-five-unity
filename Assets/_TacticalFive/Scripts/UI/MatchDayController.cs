@@ -448,7 +448,20 @@ public class MatchDayController : UIScreenController
             string attendanceText = attendanceCount > 0
                 ? $" ({attendanceCount:N0} espectadores)"
                 : "";
-            _venueLabel.text = $"{arenaName}{attendanceText}";
+
+            // F5-03: viaje y descanso del equipo del usuario para este partido.
+            string travelText = "";
+            var previous = DatabaseManager.Instance.GetLastPlayedGame(_manager.id, _myTeam.id);
+            if (previous != null && previous.id != myGame.id && previous.game_type != "preseason"
+                && myGame.game_day > previous.game_day)
+            {
+                int restDays = TravelHelper.RestDays(previous.game_day, myGame.game_day);
+                int miles = TravelHelper.DistanceMiles(previous.home_team_id, myGame.home_team_id,
+                    _allTeams.ToDictionary(t => t.id));
+                travelText = $" · {TravelHelper.Describe(miles, restDays)}";
+            }
+
+            _venueLabel.text = $"{arenaName}{attendanceText}{travelText}";
         }
 
         // My team badges

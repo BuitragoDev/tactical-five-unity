@@ -192,6 +192,17 @@ public partial class DatabaseManager
                 .FirstOrDefault();
     }
 
+    /// <summary>Calendario regular de un equipo, ordenado por jornada (F5-03).</summary>
+    public List<GameData> GetTeamSchedule(int managerId, int teamId)
+    {
+        return _db.Table<GameData>()
+                .Where(g => g.manager_id == managerId
+                        && g.game_type == "regular"
+                        && (g.home_team_id == teamId || g.away_team_id == teamId))
+                .OrderBy(g => g.game_day)
+                .ToList();
+    }
+
     public string GetCurrentDateString(int managerId)
     {
         var season = GetActiveSeason(managerId);

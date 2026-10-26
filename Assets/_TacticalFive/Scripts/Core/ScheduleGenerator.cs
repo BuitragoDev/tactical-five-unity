@@ -87,18 +87,24 @@ public static class ScheduleGenerator
         var dayGamesCount   = new Dictionary<int, int>();
         var scheduled       = new List<(int day, int home, int away)>();
         var unplaced        = new List<(int home, int away)>();
+        var teamsById       = teams.ToDictionary(t => t.id);
+        var lastGameDay     = teams.ToDictionary(t => t.id, _ => -1);
+        var lastVenue       = teams.ToDictionary(t => t.id, _ => 0);
+        var venueByTeamDay  = new Dictionary<(int team, int day), int>();
 
         // Cada partido es una entrada individual: no se deduplica por pareja
         // orientada (dos partidos idénticos son dos partidos distintos).
         foreach (var (homePk, awayPk) in matchups)
         {
-            int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount, seasonStart);
+            int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount,
+                seasonStart, teamsById, lastGameDay, lastVenue, venueByTeamDay);
             if (day >= 0)
             {
                 scheduled.Add((day, homePk, awayPk));
                 teamDaySet[homePk].Add(day);
                 teamDaySet[awayPk].Add(day);
                 dayGamesCount[day] = dayGamesCount.GetValueOrDefault(day, 0) + 1;
+                RecordGame(homePk, awayPk, day, lastGameDay, lastVenue, venueByTeamDay);
             }
             else
             {
@@ -118,12 +124,15 @@ public static class ScheduleGenerator
                 if (date.Month == 2 && date.Day >= 8 && date.Day <= 14)
                     continue;
 
-                if (!teamDaySet[homePk].Contains(d) && !teamDaySet[awayPk].Contains(d))
+                if (!teamDaySet[homePk].Contains(d) && !teamDaySet[awayPk].Contains(d)
+                    && !ImpossibleBackToBack(homePk, d, homePk, teamsById, venueByTeamDay)
+                    && !ImpossibleBackToBack(awayPk, d, homePk, teamsById, venueByTeamDay))
                 {
                     scheduled.Add((d, homePk, awayPk));
                     teamDaySet[homePk].Add(d);
                     teamDaySet[awayPk].Add(d);
                     dayGamesCount[d] = dayGamesCount.GetValueOrDefault(d, 0) + 1;
+                    RecordGame(homePk, awayPk, d, lastGameDay, lastVenue, venueByTeamDay);
                     placed = true;
                     break;
                 }
@@ -170,6 +179,23 @@ public static class ScheduleGenerator
                 Debug.LogError($"[Schedule] {t.name}: {finalCount[t.id]} partidos, " +
                                $"{finalHome[t.id]}-{finalAway[t.id]} casa/fuera; se esperaba 82 y 41-41.");
                 invalid = true;
+            }
+
+            var teamGames = scheduled
+                .Where(g => g.home == t.id || g.away == t.id)
+                .OrderBy(g => g.day)
+                .ToList();
+            for (int i = 1; i < teamGames.Count; i++)
+            {
+                var previous = teamGames[i - 1];
+                var current = teamGames[i];
+                int miles = TravelHelper.DistanceMiles(previous.home, current.home, teamsById);
+                if (TravelHelper.IsImpossibleBackToBack(previous.day, current.day, miles))
+                {
+                    Debug.LogError($"[Schedule] {t.name}: back-to-back {previous.day}->{current.day} " +
+                                   $"de {miles:N0} mi; no se guarda el calendario.");
+                    invalid = true;
+                }
             }
         }
         if (invalid)
@@ -282,7 +308,11 @@ public static class ScheduleGenerator
     static int FindDay(int homePk, int awayPk, int totalDays,
         Dictionary<int, HashSet<int>> teamDaySet,
         Dictionary<int, int> dayGamesCount,
-        DateTime seasonStart)
+        DateTime seasonStart,
+        IReadOnlyDictionary<int, TeamData> teamsById,
+        Dictionary<int, int> lastGameDay,
+        Dictionary<int, int> lastVenue,
+        Dictionary<(int team, int day), int> venueByTeamDay)
     {
         int bestDay   = -1;
         int bestScore = -1000;
@@ -298,19 +328,86 @@ public static class ScheduleGenerator
             if (dayGamesCount.GetValueOrDefault(d, 0) >= 15)
                 continue;
 
+            // F5-03: no programar un back-to-back que cruce el país.
+            if (ImpossibleBackToBack(homePk, d, homePk, teamsById, venueByTeamDay)
+                || ImpossibleBackToBack(awayPk, d, homePk, teamsById, venueByTeamDay))
+                continue;
+
             int hWeek = TeamWeekCount(homePk, d, teamDaySet);
             int aWeek = TeamWeekCount(awayPk, d, teamDaySet);
             if (hWeek >= 5 || aWeek >= 5) continue;
 
+            int homeTravel = TravelMiles(homePk, d, homePk, teamsById, lastGameDay, lastVenue);
+            int awayTravel = TravelMiles(awayPk, d, homePk, teamsById, lastGameDay, lastVenue);
+            bool homeB2B = IsBackToBack(homePk, d, lastGameDay);
+            bool awayB2B = IsBackToBack(awayPk, d, lastGameDay);
+
             int score = 100;
-            if (HasB2B(homePk, d, teamDaySet)) score -= 50;
-            if (HasB2B(awayPk, d, teamDaySet)) score -= 50;
+            if (homeB2B) score -= 50;
+            if (awayB2B) score -= 50;
             if (hWeek >= 4 || aWeek >= 4) score -= 30;
             score -= dayGamesCount.GetValueOrDefault(d, 0) * 2;
+            score -= Math.Min(25, homeTravel / 100);
+            score -= Math.Min(25, awayTravel / 100);
+            if (homeB2B) score -= Math.Min(20, homeTravel / 60);
+            if (awayB2B) score -= Math.Min(20, awayTravel / 60);
 
             if (score > bestScore) { bestScore = score; bestDay = d; }
         }
         return bestDay;
+    }
+
+    static void RecordGame(int homePk, int awayPk, int day,
+        Dictionary<int, int> lastGameDay, Dictionary<int, int> lastVenue,
+        Dictionary<(int team, int day), int> venueByTeamDay)
+    {
+        // La sede del partido es siempre el pabellón del local.
+        venueByTeamDay[(homePk, day)] = homePk;
+        venueByTeamDay[(awayPk, day)] = homePk;
+
+        // El calendario se construye fuera de orden: conservar la jornada más
+        // reciente para que la puntuación de viaje use el partido correcto.
+        if (day >= lastGameDay[homePk])
+        {
+            lastGameDay[homePk] = day;
+            lastVenue[homePk] = homePk;
+        }
+        if (day >= lastGameDay[awayPk])
+        {
+            lastGameDay[awayPk] = day;
+            lastVenue[awayPk] = homePk;
+        }
+    }
+
+    static bool IsBackToBack(int teamPk, int day, Dictionary<int, int> lastGameDay)
+        => lastGameDay.TryGetValue(teamPk, out int previous) && previous >= 0 && day == previous + 1;
+
+    static int TravelMiles(int teamPk, int day, int venueTeamId,
+        IReadOnlyDictionary<int, TeamData> teamsById,
+        Dictionary<int, int> lastGameDay, Dictionary<int, int> lastVenue)
+    {
+        if (!lastGameDay.TryGetValue(teamPk, out int previous) || previous < 0) return 0;
+        if (!lastVenue.TryGetValue(teamPk, out int previousVenue) || previousVenue <= 0) return 0;
+        return TravelHelper.DistanceMiles(previousVenue, venueTeamId, teamsById);
+    }
+
+    static bool ImpossibleBackToBack(int teamPk, int day, int venueTeamId,
+        IReadOnlyDictionary<int, TeamData> teamsById,
+        Dictionary<(int team, int day), int> venueByTeamDay)
+    {
+        // El calendario se construye fuera de orden cronológico: hay que mirar
+        // tanto el día anterior como el siguiente ya programados.
+        if (day > 0 && venueByTeamDay.TryGetValue((teamPk, day - 1), out int previousVenue))
+        {
+            int miles = TravelHelper.DistanceMiles(previousVenue, venueTeamId, teamsById);
+            if (TravelHelper.IsImpossibleBackToBack(day - 1, day, miles)) return true;
+        }
+        if (venueByTeamDay.TryGetValue((teamPk, day + 1), out int nextVenue))
+        {
+            int miles = TravelHelper.DistanceMiles(venueTeamId, nextVenue, teamsById);
+            if (TravelHelper.IsImpossibleBackToBack(day, day + 1, miles)) return true;
+        }
+        return false;
     }
 
     static int TeamWeekCount(int teamPk, int dayIdx, Dictionary<int, HashSet<int>> teamDaySet)

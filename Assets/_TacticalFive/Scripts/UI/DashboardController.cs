@@ -990,12 +990,15 @@ using System.Threading.Tasks;
                 var rng = new System.Random();
 
                 var teamsPlayToday = new HashSet<int>();
+                var todayVenueByTeam = new Dictionary<int, int>();
                 if (gameDay > 0)
                 {
                     foreach (var g in conn.Table<GameData>().Where(g => g.game_day == gameDay).ToList())
                     {
                         teamsPlayToday.Add(g.home_team_id);
                         teamsPlayToday.Add(g.away_team_id);
+                        todayVenueByTeam[g.home_team_id] = g.home_team_id;
+                        todayVenueByTeam[g.away_team_id] = g.home_team_id;
                     }
                 }
 
@@ -1008,6 +1011,49 @@ using System.Threading.Tasks;
                 int seasonId = _season?.id ?? 0;
 
                 var allTeams = conn.Table<TeamData>().ToList();
+                var teamsById = allTeams.ToDictionary(t => t.id);
+
+                // F5-03: viaje/descanso desde el último partido jugado. El desgaste
+                // se aplica antes de simular el partido de hoy.
+                var lastGameDayByTeam = new Dictionary<int, int>();
+                var lastVenueByTeam = new Dictionary<int, int>();
+                if (gameDay > 0)
+                {
+                    var previousGames = conn.Table<GameData>()
+                        .Where(g => g.season_id == seasonId
+                                 && g.game_day < gameDay
+                                 && g.is_played == 1
+                                 && (g.game_type == "regular" || g.game_type == "preseason"))
+                        .ToList();
+                    foreach (var g in previousGames)
+                    {
+                        UpdateLastVenue(g.home_team_id, g.game_day, g.home_team_id);
+                        UpdateLastVenue(g.away_team_id, g.game_day, g.home_team_id);
+                    }
+                }
+
+                void UpdateLastVenue(int teamId, int day, int venueId)
+                {
+                    if (!lastGameDayByTeam.TryGetValue(teamId, out int previous) || day >= previous)
+                    {
+                        lastGameDayByTeam[teamId] = day;
+                        lastVenueByTeam[teamId] = venueId;
+                    }
+                }
+
+                var travelFatigueByTeam = new Dictionary<int, int>();
+                foreach (var team in allTeams)
+                {
+                    if (!teamsPlayToday.Contains(team.id)) continue;
+                    if (!todayVenueByTeam.TryGetValue(team.id, out int venue)) continue;
+                    if (!lastGameDayByTeam.TryGetValue(team.id, out int previousDay)) continue;
+                    if (!lastVenueByTeam.TryGetValue(team.id, out int previousVenue)) continue;
+
+                    int restDays = TravelHelper.RestDays(previousDay, gameDay);
+                    int miles = TravelHelper.DistanceMiles(previousVenue, venue, teamsById);
+                    int cost = TravelHelper.FatigueCost(miles, restDays);
+                    if (cost > 0) travelFatigueByTeam[team.id] = cost;
+                }
                 foreach (var team in allTeams)
                 {
                     var players = conn.Table<PlayerData>().Where(p => p.team_id == team.id).ToList();
@@ -1076,6 +1122,15 @@ using System.Threading.Tasks;
                             // temporada sin que los titulares acaben hundidos (antes
                             // +8 dejaba un drenaje neto que hacía caer el acierto).
                             p.fisico = Mathf.Min(99, p.fisico + 10);
+                            conn.Update(p);
+                        }
+                        else if (p.injury_days <= 0
+                                 && travelFatigueByTeam.TryGetValue(team.id, out int travelCost)
+                                 && travelCost > 0)
+                        {
+                            // F5-03: el viaje largo resta físico antes de jugar; el
+                            // desgaste por minutos lo aplica después GameSimulator.
+                            p.fisico = Mathf.Max(0, p.fisico - travelCost);
                             conn.Update(p);
                         }
                     }
@@ -8827,9 +8882,38 @@ using System.Threading.Tasks;
         // Meta
         var nextHomeTeam = _allTeams.Find(t => t.id == next.home_team_id);
 
-        _nextGameArena.text = nextHomeTeam != null
+        string arenaText = nextHomeTeam != null
             ? DatabaseManager.Instance.GetTeamById(nextHomeTeam.id)?.arena ?? ""
             : "";
+
+        // F5-03: el jugador ve el viaje y el descanso desde el último partido.
+        var previous = DatabaseManager.Instance.GetLastPlayedGame(_manager.id, _myTeam.id);
+        if (previous != null && previous.game_type != "preseason"
+            && next.game_day > previous.game_day)
+        {
+            int restDays = TravelHelper.RestDays(previous.game_day, next.game_day);
+            int miles = TravelHelper.DistanceMiles(previous.home_team_id, next.home_team_id,
+                _allTeams.ToDictionary(t => t.id));
+            arenaText += $" · {TravelHelper.Describe(miles, restDays)}";
+        }
+
+        // F5-03: tramo de gira (partidos consecutivos fuera).
+        if (next.away_team_id == _myTeam.id)
+        {
+            var schedule = DatabaseManager.Instance.GetTeamSchedule(_manager.id, _myTeam.id);
+            int index = schedule.FindIndex(g => g.id == next.id);
+            if (index >= 0)
+            {
+                int start = index;
+                while (start > 0 && schedule[start - 1].away_team_id == _myTeam.id) start--;
+                int end = index;
+                while (end + 1 < schedule.Count && schedule[end + 1].away_team_id == _myTeam.id) end++;
+                int tripGames = end - start + 1;
+                if (tripGames > 1) arenaText += $" · GIRA: {tripGames} partidos fuera";
+            }
+        }
+
+        _nextGameArena.text = arenaText;
     }
 
     // ── CLASIFICACIÓN ────────────────────────────────────
