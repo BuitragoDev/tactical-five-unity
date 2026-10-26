@@ -14,7 +14,7 @@
 | `playoff` | 4 rounds, best-of-7, 2-2-1-1-1 | `PlayoffsGenerator.GeneratePlayoffs` / `AdvancePlayoffSeries` |
 | `finished` | Season over | Dashboard phase transition → `EndSeason` → `Draft` → `NewSeason` |
 
-**Calendar facts [F]:** `CreateSeason` and `StartNewSeason` initially persist `Sep 5`; `PreseasonController.OnContinue` moves the date to the first preseason game or `Oct 22`. Regular-season gameplay targets Oct 22–Apr 15. Trade deadline reminder is Feb 1; **Deadline Day modal is Feb 7**; All-Star window Feb 8–14; up to 15 games/day; the scheduler penalizes but does not prohibit back-to-backs; the main scoring path targets ≤5 games/team/week. — `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs`, `ScheduleGenerator.cs`, `DashboardController.cs`
+**Calendar facts [F]:** `CreateSeason` and `StartNewSeason` initially persist `Sep 5`; `PreseasonController.OnContinue` moves the date to the first preseason game or `Oct 22`. Regular-season gameplay targets Oct 22–Apr 15 and is **41-41 by construction** (82 games/team, 1.230 total, 2-2 in every division pair). Trade deadline reminder is Feb 1; **Deadline Day modal is Feb 7**; All-Star window Feb 8–14; up to 15 games/day; the scheduler penalizes but does not prohibit back-to-backs; the main scoring path targets ≤5 games/team/week. — `DatabaseManager.Games.cs`, `DatabaseManager.Records.cs`, `PreseasonController.cs`, `ScheduleGenerator.cs`, `DashboardController.cs`
 
 ## 2. Match simulation (core mechanic)
 

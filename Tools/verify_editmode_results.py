@@ -13,7 +13,7 @@ from project_status import count_tests  # noqa: E402
 REQUIRED_CASES = (
     "SeedAuditorTests.Auditor_NoPasaEnVacio",
     "SaveSlotInitTests.SeedBaseline_Fingerprint_CoincideConElSeedReciénGenerado",
-    "ScheduleGeneratorDiagnosticTests.GenerateSchedule_ReportsReproducibleDiagnosticBaseline",
+    "ScheduleGeneratorDiagnosticTests.GenerateSchedule_MeetsNbaBalanceInvariants",
     "CalendarHelperTests.DateToGameDay_AndGameDayToDate_AreInverse",
     "MonteCarloRunnerTests.Run_TemporadaCompletaDe30Equipos_CuadraElCalendario",
     "MonteCarloRunnerTests.Run_CienTemporadas_CalibraVictoriasParidadOVRYProrrogas",

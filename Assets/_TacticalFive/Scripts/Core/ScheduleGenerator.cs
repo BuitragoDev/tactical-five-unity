@@ -21,42 +21,58 @@ public static class ScheduleGenerator
         foreach (var divDict in new[] { eastDivs, westDivs })
         {
             var divNames = divDict.Keys.OrderBy(k => k).ToList();
-            for (int i = 0; i < divNames.Count; i++)
-            for (int j = i + 1; j < divNames.Count; j++)
-                matchups.AddRange(DivPairGames(divDict[divNames[i]], divDict[divNames[j]]));
 
-            // Partidos dentro de la misma división (4 veces)
+            // Partidos dentro de la misma división: 4 por pareja, 2 en cada campo.
             foreach (var div in divDict.Values)
             {
                 for (int i = 0; i < div.Count; i++)
                 for (int j = i + 1; j < div.Count; j++)
-                    for (int k = 0; k < 4; k++)
-                        matchups.Add(Random.value < 0.5f
-                            ? (div[i].id, div[j].id)
-                            : (div[j].id, div[i].id));
+                {
+                    matchups.Add((div[i].id, div[j].id));
+                    matchups.Add((div[i].id, div[j].id));
+                    matchups.Add((div[j].id, div[i].id));
+                    matchups.Add((div[j].id, div[i].id));
+                }
             }
+
+            // Partidos entre divisiones de la misma conferencia: 3 o 4 por pareja,
+            // con localías equilibradas por construcción.
+            for (int i = 0; i < divNames.Count; i++)
+            for (int j = i + 1; j < divNames.Count; j++)
+                AddDivPairGames(matchups, divDict[divNames[i]], divDict[divNames[j]]);
         }
 
-        // Partidos entre conferencias (2 veces cada cruce)
+        // Partidos entre conferencias: 2 por pareja, uno en cada campo.
         foreach (var t1 in east)
         foreach (var t2 in west)
-            for (int k = 0; k < 2; k++)
-                matchups.Add(Random.value < 0.5f
-                    ? (t1.id, t2.id)
-                    : (t2.id, t1.id));
+        {
+            matchups.Add((t1.id, t2.id));
+            matchups.Add((t2.id, t1.id));
+        }
 
-        // Verificar 82 partidos por equipo
+        // Verificar 82 partidos y 41 localías por equipo.
         var gameCount = new Dictionary<int, int>();
-        foreach (var t in teams) gameCount[t.id] = 0;
+        var homeCount = new Dictionary<int, int>();
+        var awayCount = new Dictionary<int, int>();
+        foreach (var t in teams)
+        {
+            gameCount[t.id] = 0;
+            homeCount[t.id] = 0;
+            awayCount[t.id] = 0;
+        }
         foreach (var (h, a) in matchups)
         {
             gameCount[h]++;
             gameCount[a]++;
+            homeCount[h]++;
+            awayCount[a]++;
         }
         foreach (var t in teams)
         {
             if (gameCount[t.id] != 82)
                 Debug.LogWarning($"[Schedule] {t.name} tiene {gameCount[t.id]} partidos, se esperaban 82");
+            if (homeCount[t.id] != 41 || awayCount[t.id] != 41)
+                Debug.LogWarning($"[Schedule] {t.name} tiene {homeCount[t.id]}-{awayCount[t.id]} en casa/fuera, se esperaba 41-41");
         }
 
         // Distribuir partidos en días
@@ -70,25 +86,32 @@ public static class ScheduleGenerator
         var teamDaySet      = teams.ToDictionary(t => t.id, _ => new HashSet<int>());
         var dayGamesCount   = new Dictionary<int, int>();
         var scheduled       = new List<(int day, int home, int away)>();
-        var scheduledPairs  = new HashSet<(int, int)>();
+        var unplaced        = new List<(int home, int away)>();
 
+        // Cada partido es una entrada individual: no se deduplica por pareja
+        // orientada (dos partidos idénticos son dos partidos distintos).
         foreach (var (homePk, awayPk) in matchups)
         {
             int day = FindDay(homePk, awayPk, totalDays, teamDaySet, dayGamesCount, seasonStart);
             if (day >= 0)
             {
                 scheduled.Add((day, homePk, awayPk));
-                scheduledPairs.Add((homePk, awayPk));
                 teamDaySet[homePk].Add(day);
                 teamDaySet[awayPk].Add(day);
                 dayGamesCount[day] = dayGamesCount.GetValueOrDefault(day, 0) + 1;
             }
+            else
+            {
+                unplaced.Add((homePk, awayPk));
+            }
         }
 
-        // Partidos no programados — forzar en primer día libre
-        var unscheduled = matchups.Where(m => !scheduledPairs.Contains(m)).ToList();
-        foreach (var (homePk, awayPk) in unscheduled)
+        // Partidos que el greedy no pudo colocar: forzar en el primer día libre.
+        // Si aun así no caben, se registran y la generación falla (no se guarda).
+        var stillUnplaced = new List<(int home, int away)>();
+        foreach (var (homePk, awayPk) in unplaced)
         {
+            bool placed = false;
             for (int d = 0; d < totalDays; d++)
             {
                 var date = seasonStart.AddDays(d);
@@ -101,9 +124,58 @@ public static class ScheduleGenerator
                     teamDaySet[homePk].Add(d);
                     teamDaySet[awayPk].Add(d);
                     dayGamesCount[d] = dayGamesCount.GetValueOrDefault(d, 0) + 1;
+                    placed = true;
                     break;
                 }
             }
+            if (!placed) stillUnplaced.Add((homePk, awayPk));
+        }
+
+        if (unplaced.Count > 0)
+        {
+            Debug.LogWarning($"[Schedule] El greedy no pudo colocar {unplaced.Count} partido(s); " +
+                             $"{stillUnplaced.Count} siguen sin día tras el respaldo.");
+        }
+        if (stillUnplaced.Count > 0)
+        {
+            foreach (var (homePk, awayPk) in stillUnplaced.Take(20))
+                Debug.LogError($"[Schedule] Partido sin programar: {homePk} vs {awayPk}");
+            Debug.LogError("[Schedule] Calendario incompleto: no se guardará ni se marcará la temporada como generada.");
+            return -1;
+        }
+
+        // Validación final por construcción: 1.230 partidos, 82 por equipo y 41-41.
+        int expectedGames = teams.Count * 82 / 2;
+        if (scheduled.Count != expectedGames)
+        {
+            Debug.LogError($"[Schedule] Se programaron {scheduled.Count} partidos; se esperaban {expectedGames}.");
+            return -1;
+        }
+
+        var finalCount = teams.ToDictionary(t => t.id, _ => 0);
+        var finalHome = teams.ToDictionary(t => t.id, _ => 0);
+        var finalAway = teams.ToDictionary(t => t.id, _ => 0);
+        foreach (var (_, homePk, awayPk) in scheduled)
+        {
+            finalCount[homePk]++;
+            finalCount[awayPk]++;
+            finalHome[homePk]++;
+            finalAway[awayPk]++;
+        }
+        bool invalid = false;
+        foreach (var t in teams)
+        {
+            if (finalCount[t.id] != 82 || finalHome[t.id] != 41 || finalAway[t.id] != 41)
+            {
+                Debug.LogError($"[Schedule] {t.name}: {finalCount[t.id]} partidos, " +
+                               $"{finalHome[t.id]}-{finalAway[t.id]} casa/fuera; se esperaba 82 y 41-41.");
+                invalid = true;
+            }
+        }
+        if (invalid)
+        {
+            Debug.LogError("[Schedule] Calendario inválido: no se guarda ni se marca la temporada como generada.");
+            return -1;
         }
 
         // Crear objetos GameData y guardar en BD
@@ -164,21 +236,47 @@ public static class ScheduleGenerator
         return games.Count;
     }
 
-    static List<(int, int)> DivPairGames(List<TeamData> teamsA, List<TeamData> teamsB)
+    /// <summary>
+    /// Cruces entre dos divisiones de la misma conferencia: 3 o 4 partidos por pareja.
+    /// Los de 4 se reparten 2-2; los de 3 se orientan para que cada equipo sume
+    /// exactamente 9 localías en el cruce (18 partidos), sin depender del azar.
+    /// </summary>
+    static void AddDivPairGames(List<(int home, int away)> matchups,
+        List<TeamData> teamsA, List<TeamData> teamsB)
     {
-        var result = new List<(int, int)>();
-        int n = teamsA.Count;
+        int n = Math.Min(teamsA.Count, teamsB.Count);
+        if (n <= 0) return;
+
         for (int i = 0; i < teamsA.Count; i++)
         for (int j = 0; j < teamsB.Count; j++)
         {
+            int a = teamsA[i].id;
+            int b = teamsB[j].id;
             int offset = ((j - i) % n + n) % n;
-            int count  = offset < 3 ? 4 : 3;
-            for (int k = 0; k < count; k++)
-                result.Add(Random.value < 0.5f
-                    ? (teamsA[i].id, teamsB[j].id)
-                    : (teamsB[j].id, teamsA[i].id));
+
+            if (offset < n - 2)
+            {
+                // 4 partidos: dos en cada campo.
+                matchups.Add((a, b));
+                matchups.Add((a, b));
+                matchups.Add((b, a));
+                matchups.Add((b, a));
+            }
+            else if (offset == n - 2)
+            {
+                // 3 partidos: A recibe dos en casa y B uno.
+                matchups.Add((a, b));
+                matchups.Add((a, b));
+                matchups.Add((b, a));
+            }
+            else
+            {
+                // 3 partidos: B recibe dos en casa y A uno.
+                matchups.Add((a, b));
+                matchups.Add((b, a));
+                matchups.Add((b, a));
+            }
         }
-        return result;
     }
 
     static int FindDay(int homePk, int awayPk, int totalDays,

@@ -4,14 +4,16 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 using Random = UnityEngine.Random;
 
 /// <summary>
-/// F0-02 · Línea base diagnóstica del calendario NBA.
-/// Ejecuta el generador real contra un slot temporal y reporta sus invariantes; no
-/// convierte desviaciones de localía/partidos en fallos ni modifica el generador.
+/// F0-02/F5-01 · Invariantes del calendario NBA.
+/// Ejecuta el generador real contra un slot temporal y exige 82 partidos por equipo,
+/// 41 localías/41 visitas, 1.230 partidos y 2-2 en cada pareja divisional.
 /// </summary>
 public class ScheduleGeneratorDiagnosticTests
 {
@@ -56,7 +58,7 @@ public class ScheduleGeneratorDiagnosticTests
             ?.SetValue(null, db);
 
     [Test]
-    public void GenerateSchedule_ReportsReproducibleDiagnosticBaseline()
+    public void GenerateSchedule_MeetsNbaBalanceInvariants()
     {
         var db = DatabaseManager.Instance;
         Assert.That(db.InitSaveSlot(1), Is.True, "No se pudo crear el slot temporal: " + db.LastInitError);
@@ -95,6 +97,90 @@ public class ScheduleGeneratorDiagnosticTests
         Assert.That(games, Is.Not.Empty, "El generador no guardó partidos regulares para la temporada sintética.");
 
         TestContext.WriteLine(BuildReport(teams, games, generated));
+
+        // F5-01: invariantes exigentes (ya no es un informe diagnóstico).
+        Assert.That(generated, Is.EqualTo(1230), "La NBA regular tiene 1.230 partidos.");
+        Assert.That(games, Has.Count.EqualTo(1230), "El calendario guardado debe tener 1.230 partidos.");
+
+        var gameCount = teams.ToDictionary(t => t.id, _ => 0);
+        var homeCount = teams.ToDictionary(t => t.id, _ => 0);
+        var awayCount = teams.ToDictionary(t => t.id, _ => 0);
+        foreach (var game in games)
+        {
+            gameCount[game.home_team_id]++;
+            gameCount[game.away_team_id]++;
+            homeCount[game.home_team_id]++;
+            awayCount[game.away_team_id]++;
+        }
+
+        foreach (var team in teams)
+        {
+            Assert.That(gameCount[team.id], Is.EqualTo(82), $"{team.abbreviation}: 82 partidos");
+            Assert.That(homeCount[team.id], Is.EqualTo(41), $"{team.abbreviation}: 41 en casa");
+            Assert.That(awayCount[team.id], Is.EqualTo(41), $"{team.abbreviation}: 41 fuera");
+        }
+
+        // Cada pareja divisional se reparte 2-2.
+        foreach (var division in teams.GroupBy(t => new { t.conference, t.division }))
+        {
+            var clubs = division.OrderBy(t => t.id).ToList();
+            for (int i = 0; i < clubs.Count; i++)
+            for (int j = i + 1; j < clubs.Count; j++)
+            {
+                int aHome = games.Count(g => g.home_team_id == clubs[i].id && g.away_team_id == clubs[j].id);
+                int bHome = games.Count(g => g.home_team_id == clubs[j].id && g.away_team_id == clubs[i].id);
+                Assert.That(aHome, Is.EqualTo(2), $"{clubs[i].abbreviation}-{clubs[j].abbreviation}: 2 en casa para el primero");
+                Assert.That(bHome, Is.EqualTo(2), $"{clubs[i].abbreviation}-{clubs[j].abbreviation}: 2 en casa para el segundo");
+            }
+        }
+
+        // El reparto de cruces (2, 3 o 4) también queda cerrado.
+        var expectedPairs = BuildExpectedPairs(teams);
+        var actualPairs = new Dictionary<(int first, int second), int>();
+        foreach (var game in games)
+        {
+            var key = PairKey(game.home_team_id, game.away_team_id);
+            actualPairs[key] = actualPairs.TryGetValue(key, out int count) ? count + 1 : 1;
+        }
+        foreach (var expected in expectedPairs)
+            Assert.That(actualPairs.GetValueOrDefault(expected.Key, 0), Is.EqualTo(expected.Value),
+                $"Cruce {expected.Key.first}-{expected.Key.second}: partidos esperados");
+    }
+
+    [Test]
+    public void GenerateSchedule_IncompleteLeague_FailsBeforeSaving()
+    {
+        var db = DatabaseManager.Instance;
+        Assert.That(db.InitSaveSlot(1), Is.True, "No se pudo crear el slot temporal: " + db.LastInitError);
+
+        var teams = db.GetAllTeams();
+        teams.RemoveAt(0); // liga incompleta: no puede cumplir 1.230/82
+        var season = new SeasonData
+        {
+            id = SEASON_ID + 1,
+            manager_id = MANAGER_ID,
+            year_start = 2026,
+            year_end = 2027,
+            phase = "regular"
+        };
+
+        LogAssert.Expect(LogType.Error, new Regex(@"\[Schedule\] Se programaron \d+ partidos; se esperaban \d+\."));
+
+        Random.State previousState = Random.state;
+        int generated;
+        try
+        {
+            Random.InitState(DIAGNOSTIC_SEED);
+            generated = ScheduleGenerator.GenerateSchedule(season, teams);
+        }
+        finally
+        {
+            Random.state = previousState;
+        }
+
+        Assert.That(generated, Is.EqualTo(-1), "Un calendario incompleto debe fallar, no guardarse.");
+        Assert.That(db.Db.Table<GameData>().Count(g => g.season_id == season.id), Is.Zero,
+            "No debe quedar ningún partido guardado de una generación fallida.");
     }
 
     static string BuildReport(List<TeamData> teams, List<GameData> games, int generated)
@@ -150,7 +236,7 @@ public class ScheduleGeneratorDiagnosticTests
         sb.AppendLine($"Parejas: {expectedPairs.Count} esperadas · {shortPairs.Count} incompletas ({missingGames} partidos faltantes) · {excessPairs.Count} con partidos de más ({excessGames}).");
         AppendPairExamples(sb, "Cruces incompletos", shortPairs, actualPairs, teamById);
         AppendPairExamples(sb, "Cruces con exceso", excessPairs, actualPairs, teamById);
-        sb.AppendLine("Nota: informe diagnóstico, no una aserción de balance. No se modificó ScheduleGenerator.");
+        sb.AppendLine("Nota: el informe se publica como contexto; las invariantes de F5-01 se exigen con asserts.");
         return sb.ToString();
     }
 

@@ -35,7 +35,7 @@
 ## S4. Schedule generator
 
 - **Files:** `ScheduleGenerator.cs` (219 ln).
-- **Behavior:** `GenerateSchedule(season, teams)` builds 82 games/team: same division 4 games each pair; intra-conference cross-division `count = offset<3 ? 4 : 3`; inter-conference 2 games. Assigns days (max 15 games/day, `FindDay` scoring −100 for back-to-back candidates, −30 if ≥4 games/week, −2×games/day; ≤5 games/week), All-Star window Feb 8–14 excluded, All-Star game Saturday of 2nd week of Feb (`home_team_id=-1`, `away_team_id=-2`, `game_type="allstar"`). Season Oct 22 → Apr 15. Saves via `SaveRegularSeasonGames` (transaction).
+- **Behavior:** `GenerateSchedule(season, teams)` builds 82 games/team and 1.230 total with **41 home / 41 away**: same division 2+2; intra-conference cross-division 3 or 4 games with deterministic 9-9 home balance per division pairing (`AddDivPairGames`); inter-conference 1+1. Assigns days (max 15 games/day, `FindDay` scoring −100 for back-to-back candidates, −30 if ≥4 games/week, −2×games/day; ≤5 games/week), All-Star window Feb 8–14 excluded, All-Star game Saturday of 2nd week of Feb (`home_team_id=-1`, `away_team_id=-2`, `game_type="allstar"`). Season Oct 22 → Apr 15. Each matchup is tracked individually; unplaced games are logged and retried, and the method returns `-1` without saving if the final 1.230/82/41-41 validation fails. Saves via `SaveRegularSeasonGames` (transaction).
 - **Called by:** `PreseasonController` when `season.generated == 0` (then `phase="regular"`).
 
 ## S5. Playoffs generator
