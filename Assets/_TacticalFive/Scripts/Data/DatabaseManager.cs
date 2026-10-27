@@ -2085,6 +2085,13 @@ public partial class DatabaseManager : MonoBehaviour
         return _db.Table<HallOfFameData>().ToList();
     }
 
+    /// <summary>Valida las relaciones declaradas en <see cref="ReferentialIntegrity"/>.</summary>
+    public List<ReferentialIntegrity.Orphan> ValidateReferentialIntegrity()
+    {
+        if (!EnsureDb()) return new List<ReferentialIntegrity.Orphan>();
+        return ReferentialIntegrity.Validate(_db);
+    }
+
     public bool EnsureDb()
     {
         if (_db == null)

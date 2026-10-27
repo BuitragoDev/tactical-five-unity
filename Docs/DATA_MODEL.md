@@ -25,6 +25,10 @@
 
 Se validan con `DatabaseIndexPlanTests` (`EXPLAIN QUERY PLAN`) sobre una base temporal con forma de 10 temporadas.
 
+### Integridad referencial (F8-08)
+
+`ReferentialIntegrity.Rules` declara las relaciones que SQLite no impone por FK (el esquema legado no usa `PRAGMA foreign_keys`). `ReferentialIntegrity.Validate` recorre las tablas existentes con `LEFT JOIN` y devuelve los huérfanos; `DatabaseManager.ValidateReferentialIntegrity()` es la entrada pública. Las reglas admiten centinelas: `team_id=0` (FA), `player_id=-1/0` (leyendas/filas legacy), partidos G-League/All-Star y tablas ausentes en bases parciales. Las tablas nuevas deben añadirse a esta lista.
+
 ## 2. Relational overview
 
 ```

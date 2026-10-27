@@ -225,6 +225,14 @@
 - **FastSim:** sigue siendo el bucle externo; reutiliza el mismo pipeline con `fastSim:true`.
 - **Tests:** `GameDayPipelineTests` cubre orden, suborden y parada por aborto.
 
+## S23. Integridad referencial (F8-08)
+
+- **Files:** `ReferentialIntegrity.cs`, `DatabaseManager.ValidateReferentialIntegrity()`.
+- **Modelo:** reglas declarativas `childTable.childColumn → parentTable.parentColumn` con `allowZero`, `allowNegative`, `childWhere` para centinelas y G-League/All-Star. Se validan con `LEFT JOIN` sobre las tablas existentes; las tablas ausentes se omiten.
+- **Cobertura:** equipos/jugadores, partidos, stats, finanzas, ofertas, drafts, lineup, mensajes, premios, ciudad, torneos y G-League.
+- **Borrado:** `GameSaveManager.DeleteSave` elimina DB, metadata y assets del scope; no se continúa si un lote de fondo no terminó.
+- **Tests:** `ReferentialIntegrityTests` (slot sembrado sin huérfanos, detección de huérfano y borrado sin residuos).
+
 ---
 
 ## Open questions

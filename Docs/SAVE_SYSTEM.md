@@ -54,6 +54,7 @@ All under `Application.persistentDataPath`:
 - `SaveSlotInfo` is written whenever game state changes at key points: `PreseasonController.OnContinue` (first commit), `DashboardController.ProcessGameDayRoutine` (every day advance), `LoadGameController`. `GameSaveManager.DeleteSave` also writes.
 
 ### Delete
+- **F8-08:** `DeleteSave` cierra el slot (solo si `CloseActiveSlot` pudo esperar al lote de fondo), borra `save_{n}.db`, elimina su entrada de `saves.json` y limpia fotos/imágenes del scope. `ReferentialIntegrity.Validate` permite auditar que un slot cargado no tenga relaciones huérfanas.
 `GameSaveManager.DeleteSave(slot)` → deletes `save_{n}.db`, its `PlayerPhotos/{n}/` folder, and removes the slot from `saves.json`.
 
 ### Editor

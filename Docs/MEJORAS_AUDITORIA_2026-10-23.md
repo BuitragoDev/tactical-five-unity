@@ -27,10 +27,10 @@
 | **5** | Calendario y competiciones | 5 | 5 |
 | **6** | Histórico y estadísticas | 4 | 4 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 6 |
-| **8** | Arquitectura y rendimiento | 8 | 7 |
+| **8** | Arquitectura y rendimiento | 8 | 8 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **59** |
+| | **TOTAL** | **70** | **60** |
 
 ### Grafo de dependencias
 
@@ -580,10 +580,12 @@ flowchart LR
   - *Implementación:* `WaitForBackgroundBatch` devuelve `BackgroundBatchWaitResult` (`NoBatch`, `Completed`, `Faulted`, `TimedOut`) y expone `LastBackgroundBatchError`. `InitSaveSlot` aborta con `LastInitError` si el lote no termina; `CloseActiveSlot` devuelve `false` y `GameSaveManager.DeleteSave` no borra el archivo mientras siga escribiéndose. `RunInBackground*` no arranca una segunda conexión: devuelve una tarea fallida con `BackgroundBatchBusyException`, que los llamadores ya esperan en sus `try/catch`.
   - *Pruebas:* `BackgroundBatchTimeoutTests` cubre timeout, tarea completada, fallo con error y la no apertura de un segundo escritor.
 
-- [ ] **F8-08 · Integridad referencial y borrados en cascada explícitos**
+- [x] **F8-08 · Integridad referencial y borrados en cascada explícitos**
   - *Ref:* `DB-01` · *Esfuerzo:* L · *Depende:* F8-06
   - *Criterio:* tablas nuevas con FK o con validador equivalente; borrado de partida/slot deja 0 huérfanos verificables; test de integridad que recorre las relaciones declaradas.
   - *Punto de partida:* 0 FK y 0 `PRAGMA foreign_keys`.
+  - *Implementación:* `ReferentialIntegrity` declara las relaciones entre tablas (equipos, jugadores, partidos, stats, finanzas, ofertas, draft, lineup, mensajes, premios, ciudad, torneos y G-League) y las valida con `LEFT JOIN`; `DatabaseManager.ValidateReferentialIntegrity()` expone el resultado. Las reglas admiten los valores centinela (`team_id=0`, leyendas `-1`, partidos G-League/All-Star) y omiten tablas no presentes en una base parcial. `GameSaveManager.DeleteSave` elimina el `.db`, el metadata y los artefactos del scope sin dejar el slot visible. No se añadieron FKs físicas al esquema legado (SQLite-net no las genera y romperían el clonado); el validador es la vía equivalente.
+  - *Pruebas:* `ReferentialIntegrityTests` (slot sembrado sin huérfanos, detección de jugador con equipo inexistente y borrado de slot sin DB/metadata residual) + suite completa.
 
 **Puerta de salida F8:** `DashboardController` por debajo de ~3.000 líneas, día y economía con tests propios, y un día de 15 partidos medido antes/después.
 
@@ -708,6 +710,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F8 | `F8-08` | — | Validador `ReferentialIntegrity` para las relaciones declaradas + `ValidateReferentialIntegrity`; reglas para centinelas (`team_id=0`, leyendas, G-League/All-Star). Test de slot sembrado sin huérfanos, detección de huérfano y borrado de slot sin DB/metadata. **575/575 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-07` | — | `WaitForBackgroundBatch` devuelve `NoBatch/Completed/Faulted/TimedOut`; `InitSaveSlot` aborta con error visible y `CloseActiveSlot`/borrado no continúan si el lote sigue escribiendo. Los `RunInBackground*` devuelven tarea fallida en vez de abrir una segunda conexión. Tests de timeout/fallo. **572/572 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-06` | — | Migraciones obligatorias con `DatabaseMigrationException`, rollback atómico y `PRAGMA user_version` solo tras éxito. Nueva `schema_migration_attempts` (`ok`/`failed`) y `LastMigrationError`; los `catch` que ocultaban fallos ahora bloquean la apertura con mensaje. Test de fallo forzado. **568/568 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-05` | — | 14 índices compuestos en `QueryIndexDefinitions` para día, standings, stats, finanzas, ofertas, draft, lineup, premios y cap holds. Test con base temporal de 10 temporadas y `EXPLAIN QUERY PLAN`. **567/567 EditMode**; build Linux correcto. |
