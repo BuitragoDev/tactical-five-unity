@@ -9,7 +9,7 @@
 - **No `FOREIGN KEY` constraints anywhere** [F]. Relations are by convention via `*_id` columns. Referential integrity is the app's responsibility.
 - Dates: most are `TEXT` (`"yyyy-MM-dd"`, `"yyyy-MM-dd HH:mm:ss"`), manually formatted. `storeDateTimeAsTicks = true` is set but unused for game data.
 - `PlayerData.id` is **manual, not autoincrement** (seed IDs 1..~600 stable across cloned slots). `TeamData.id` is currently marked `[AutoIncrement]` in `TeamData.cs`; seed data usually supplies stable IDs, but the model does not enforce a manual-ID contract for teams. Other tables autoincrement.
-- **Schema versioning [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`, `DatabaseManager.cs:41,290-291`). Column-based additive migrations still use `PRAGMA table_info`; data migrations use `IsMigrationApplied`/`MarkMigrationApplied`.
+- **Schema versioning [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`). Column-based additive migrations still use `PRAGMA table_info`; data migrations use `IsMigrationApplied`/`MarkMigrationApplied`. **F8-06:** `schema_migration_attempts` registra cada intento (`ok`/`failed` + error + fecha); un fallo obligatorio lanza `DatabaseMigrationException`, revierte todo el bloque y no avanza `user_version`.
 
 ### Índices compuestos (F8-05)
 
@@ -251,7 +251,7 @@ Conocimiento persistente de scouting (fog-of-war). `team_id`, `player_id`, `scou
 Índice compuesto **`UNIQUE(manager_id, type)`** (`IX_Achievements_Manager_Type`, definido con `[Indexed(Name, Order, Unique)]`): un desbloqueo por logro y por manager. Escritura idempotente vía `INSERT OR IGNORE` (`DatabaseManager.UnlockAchievement`). *Histórico: el índice nació UNIQUE solo sobre `manager_id`, lo que impedía desbloquear más de un logro por partida; `DatabaseManager.CreateTables` ejecuta `DROP INDEX IF EXISTS` antes de `CreateTable` para regenerar el índice compuesto correcto.* Catálogo de 28 tipos en `AchievementCatalog.All`; la pantalla hace `BackfillCareer` silencioso al abrir para partidas ya avanzadas.
 
 ### schema_migrations (internal)
-`name` (TEXT PK), `applied_at` (TEXT). Creada en `RunMigrations`; registra migraciones one-time por slot.
+`name` (TEXT PK), `applied_at` (TEXT). Creada en `RunMigrations`; registra migraciones one-time por slot. `schema_migration_attempts` (`id`, `name`, `status` `ok`/`failed`, `error`, `attempted_at`) conserva el resultado de cada intento, incluidos los fallos que bloquean la apertura.
 
 ### db_meta (`DbMetaData`, internal)
 `key` (TEXT PK), `value` (TEXT). Guarda `seed_fingerprint` en el template y se clona a cada slot para trazabilidad. La huella cubre las filas persistidas de `teams`, `players` y `league_settings` (orden estable por id, SHA-256); las ediciones válidas del Editor se conservan y no se comparan con el contenido canónico.

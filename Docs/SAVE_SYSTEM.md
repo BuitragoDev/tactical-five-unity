@@ -66,7 +66,8 @@ All under `Application.persistentDataPath`:
 
 ## 5. Versioning & migrations
 
-- **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2` (`DatabaseManager.cs:41,290-291`). The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state). The current code assigns `PRAGMA user_version = 2` unconditionally rather than branching on prior versions; functional migration state is therefore carried mainly by named migrations and column checks.
+- **`schema_migrations` table + `PRAGMA user_version`** [F]: `SCHEMA_VERSION = 2`. The `schema_migrations` table (`name` PK, `applied_at`) stores one-time data migrations **inside the DB** (per-slot: deleting the slot resets state). **F8-06:** `RunMigrations()` ejecuta todo en una transacción y solo aplica `PRAGMA user_version = 2` al terminar con éxito; los fallos de una migración obligatoria lanzan `DatabaseMigrationException`, revierten el bloque y bloquean la apertura del slot con `LastInitError`/`LastMigrationError`.
+- **Registro de intentos:** `schema_migration_attempts` (`name`, `status` `ok`/`failed`, `error`, `attempted_at`) conserva cada intento; `schema_migrations` sigue siendo la marca de las aplicadas. `MarkMigrationApplied` registra el intento correcto y `RunMigrations` registra el fallo fuera de la transacción revertida.
 - **Additive column migrations stay idempotent:** `PRAGMA table_info({table})` → missing column → `ALTER TABLE ... ADD COLUMN` (full list in `DATA_MODEL.md §5`).
 - **One-time data migrations keyed by name in `schema_migrations`:** `overall_recalc`, `overall_recalc_v2`, `draft_picks_reset`, `draft_picks_multiyear` (see `EVENTS.md §4`).
 - **Backfill on column add:** some additive migrations also run an `UPDATE` right after `ADD COLUMN` (e.g. `players.last_team_id = team_id` for players on a roster).

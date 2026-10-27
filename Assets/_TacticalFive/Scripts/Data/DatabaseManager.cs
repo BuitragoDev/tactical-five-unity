@@ -73,6 +73,9 @@ public partial class DatabaseManager : MonoBehaviour
     /// </summary>
     public string LastInitError { get; private set; }
 
+    /// <summary>Último error de migración; se mantiene separado para diagnóstico.</summary>
+    public string LastMigrationError { get; private set; }
+
     private string DbPath => GameSaveManager.GetSaveDbPath(_activeSaveSlot);
 
     private const int SCHEMA_VERSION = 2;
@@ -97,6 +100,7 @@ public partial class DatabaseManager : MonoBehaviour
     public bool InitSaveSlot(int slotNumber)
     {
         LastInitError = null;
+        LastMigrationError = null;
         try
         {
             // No cambiar de conexión/partida mientras un lote de fondo sigue escribiendo:
@@ -697,6 +701,7 @@ public partial class DatabaseManager : MonoBehaviour
         _db.CreateTable<CityProjectData>();
         _db.CreateTable<CityEventData>();
         _db.CreateTable<DbMetaData>();
+        _db.CreateTable<SchemaMigrationAttemptData>();
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_PlayerId ON gleague_season_stats(player_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeagueStats_SeasonId ON gleague_season_stats(season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_GLeaguePlayers_TeamId ON gleague_players(gleague_team_id)");
@@ -722,10 +727,40 @@ public partial class DatabaseManager : MonoBehaviour
 
     void RunMigrations()
     {
-        // Atómico: si una migración lanza, no queda un esquema a medias. La versión
-        // se marca solo tras aplicar todas correctamente.
-        _db.RunInTransaction(() => RunMigrationsCore());
-        _db.Execute("PRAGMA user_version = " + SCHEMA_VERSION);
+        LastMigrationError = null;
+        try
+        {
+            // Atómico: una migración obligatoria que falle revierte todo el bloque.
+            _db.RunInTransaction(() => RunMigrationsCore());
+            _db.Execute("PRAGMA user_version = " + SCHEMA_VERSION);
+            RecordMigrationAttempt("run_migrations", "ok", null);
+        }
+        catch (System.Exception ex)
+        {
+            string name = (ex as DatabaseMigrationException)?.MigrationName ?? "run_migrations";
+            LastMigrationError = ex.Message;
+            try { if (_db.IsInTransaction) _db.Rollback(); } catch { }
+            RecordMigrationAttempt(name, "failed", ex.Message);
+            throw;
+        }
+    }
+
+    void RecordMigrationAttempt(string name, string status, string error)
+    {
+        try
+        {
+            _db.Insert(new SchemaMigrationAttemptData
+            {
+                name = name,
+                status = status,
+                error = error,
+                attempted_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
+            });
+        }
+        catch (System.Exception logEx)
+        {
+            Debug.LogError($"[DB] No se pudo registrar el intento de migración {name}: {logEx.Message}");
+        }
     }
 
     /// <summary>Añade una columna solo si no existe (idempotente y segura por columna).</summary>
@@ -927,7 +962,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogWarning($"[DB] Migration: secondary_position data migration failed: {ex.Message}");
+            throw new DatabaseMigrationException("players_secondary_position", ex);
         }
 
         // Add guaranteed_years/has_team_option/has_player_option to players if missing
@@ -984,7 +1019,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for trade_offers: {ex.Message}");
+            throw new DatabaseMigrationException("trade_offers_multifield", ex);
         }
 
         // Add draft_year to draft_picks (multi-year future picks)
@@ -999,7 +1034,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for draft_picks.draft_year: {ex.Message}");
+            throw new DatabaseMigrationException("draft_picks_draft_year", ex);
         }
 
         // Reset draft_picks: clear any legacy picks (seeded by overall at
@@ -1035,7 +1070,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error resetting draft_picks: {ex.Message}");
+                throw new DatabaseMigrationException("draft_picks_reset", ex);
             }
         }
 
@@ -1070,7 +1105,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error for draft_picks_multiyear: {ex.Message}");
+                throw new DatabaseMigrationException("draft_picks_multiyear", ex);
             }
         }
 
@@ -1086,7 +1121,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for seasons: {ex.Message}");
+            throw new DatabaseMigrationException("seasons_columns", ex);
         }
 
         // Add pick_id to trades
@@ -1101,7 +1136,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for trades.pick_id: {ex.Message}");
+            throw new DatabaseMigrationException("trades_pick_id", ex);
         }
 
         // Add first_apron_hard_capped to teams
@@ -1116,7 +1151,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for first_apron_hard_capped: {ex.Message}");
+            throw new DatabaseMigrationException("teams_first_apron_hard_capped", ex);
         }
 
         // Add career stat columns to managers
@@ -1159,7 +1194,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for manager career columns: {ex.Message}");
+            throw new DatabaseMigrationException("managers_career_columns", ex);
         }
 
         // Add fisico to players if missing
@@ -1174,7 +1209,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for fisico: {ex.Message}");
+            throw new DatabaseMigrationException("players_fisico", ex);
         }
 
         // Storylines: columnas nuevas (sujeto, resolución, resumen y cooldown)
@@ -1211,7 +1246,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for on_trade_block: {ex.Message}");
+            throw new DatabaseMigrationException("players_on_trade_block", ex);
         }
 
         // Los jugadores con rol "Último recurso" pero media digna (74+) reciben su rol por
@@ -1261,7 +1296,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for historical_player_stats.player_id: {ex.Message}");
+            throw new DatabaseMigrationException("historical_player_stats_player_id", ex);
         }
 
         if (!IsMigrationApplied("historical_stats_keyed_by_player_id"))
@@ -1331,7 +1366,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for rings: {ex.Message}");
+            throw new DatabaseMigrationException("players_rings", ex);
         }
 
         // Add finals_mvps to players if missing (Bill Russell Finals MVP awards won)
@@ -1346,7 +1381,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for finals_mvps: {ex.Message}");
+            throw new DatabaseMigrationException("players_finals_mvps", ex);
         }
 
         // Add finals_played to players if missing (finals games played by the player)
@@ -1361,7 +1396,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for finals_played: {ex.Message}");
+            throw new DatabaseMigrationException("players_finals_played", ex);
         }
 
         // Add season_mvps to players if missing (regular season MVP awards won)
@@ -1376,7 +1411,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for season_mvps: {ex.Message}");
+            throw new DatabaseMigrationException("players_season_mvps", ex);
         }
 
         // Create player_season_stats table if missing (for career history across seasons)
@@ -1425,7 +1460,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for player_season_stats: {ex.Message}");
+            throw new DatabaseMigrationException("player_season_stats_table", ex);
         }
 
         // F6-01: backfill de los splits para filas archivadas mientras sus
@@ -1441,7 +1476,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error backfilling shooting splits: {ex.Message}");
+                throw new DatabaseMigrationException("player_season_stats_shooting_splits", ex);
             }
         }
 
@@ -1459,7 +1494,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error cleaning player_season_stats: {ex.Message}");
+                throw new DatabaseMigrationException("player_season_stats_cleanup", ex);
             }
         }
 
@@ -1482,7 +1517,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for monthly_awards: {ex.Message}");
+            throw new DatabaseMigrationException("monthly_awards_table", ex);
         }
 
         // Add taxpayer_mid_level to league_settings if missing
@@ -1498,7 +1533,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for taxpayer_mid_level: {ex.Message}");
+            throw new DatabaseMigrationException("league_settings_taxpayer_mid_level", ex);
         }
 
         // Add two_way_salary to league_settings if missing
@@ -1514,7 +1549,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for two_way_salary: {ex.Message}");
+            throw new DatabaseMigrationException("league_settings_two_way_salary", ex);
         }
 
         // F4-07: temporada y procedencia de las cifras CBA en league_settings.
@@ -1539,7 +1574,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for league_settings CBA columns: {ex.Message}");
+            throw new DatabaseMigrationException("league_settings_cba_columns", ex);
         }
 
         // F4-07: sincroniza una partida existente con la fila CBA de su temporada
@@ -1566,7 +1601,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error applying CBA table: {ex.Message}");
+                throw new DatabaseMigrationException("cba_table_by_season", ex);
             }
         }
 
@@ -1589,7 +1624,7 @@ public partial class DatabaseManager : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debug.LogError($"[DB] Migration error applying experience minimum: {ex.Message}");
+                throw new DatabaseMigrationException("minimum_salary_by_experience", ex);
             }
         }
 
@@ -1615,7 +1650,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for is_on_ir/is_two_way/g_league_assigned: {ex.Message}");
+            throw new DatabaseMigrationException("players_ir_two_way_gleague", ex);
         }
 
         // Add is_two_way to offers if missing
@@ -1630,7 +1665,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for offers.is_two_way: {ex.Message}");
+            throw new DatabaseMigrationException("offers_is_two_way", ex);
         }
 
         // Add photo to gleague_players if missing
@@ -1645,7 +1680,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for gleague_players.photo: {ex.Message}");
+            throw new DatabaseMigrationException("gleague_players_photo", ex);
         }
 
         // employees.nationality
@@ -1660,7 +1695,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for employees.nationality: {ex.Message}");
+            throw new DatabaseMigrationException("employees_nationality", ex);
         }
 
         // scouted_players (conocimiento persistente de ojeadores)
@@ -1677,7 +1712,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for scouted_players: {ex.Message}");
+            throw new DatabaseMigrationException("scouted_players_table", ex);
         }
 
         // Backfill: migrar ojeos ya completados de la tabla `scouts` a `scouted_players`
@@ -1690,7 +1725,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error backfilling scouted_players: {ex.Message}");
+            throw new DatabaseMigrationException("scouted_players_backfill", ex);
         }
 
         // Add gleague_team_id to gleague_season_stats if missing
@@ -1705,7 +1740,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for gleague_season_stats.gleague_team_id: {ex.Message}");
+            throw new DatabaseMigrationException("gleague_season_stats_team_id", ex);
         }
 
         // season_attendance_summary (resumen de asistencia por temporada)
@@ -1723,7 +1758,7 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for season_attendance_summary: {ex.Message}");
+            throw new DatabaseMigrationException("season_attendance_summary", ex);
         }
 
         // messages.category + news_type (noticias explícitas)
@@ -1743,34 +1778,20 @@ public partial class DatabaseManager : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            Debug.LogError($"[DB] Migration error for messages.category/news_type: {ex.Message}");
+            throw new DatabaseMigrationException("messages_category_news_type", ex);
         }
     }
 
     public bool IsMigrationApplied(string name)
     {
-        try
-        {
-            return _db.ExecuteScalar<int>("SELECT COUNT(*) FROM schema_migrations WHERE name = ?", name) > 0;
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[DB] IsMigrationApplied({name}) error: {ex.Message}");
-            return false;
-        }
+        return _db.ExecuteScalar<int>("SELECT COUNT(*) FROM schema_migrations WHERE name = ?", name) > 0;
     }
 
     public void MarkMigrationApplied(string name)
     {
-        try
-        {
-            _db.Execute("INSERT OR IGNORE INTO schema_migrations (name, applied_at) VALUES (?, ?)",
-                name, System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[DB] MarkMigrationApplied({name}) error: {ex.Message}");
-        }
+        _db.Execute("INSERT OR IGNORE INTO schema_migrations (name, applied_at) VALUES (?, ?)",
+            name, System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+        RecordMigrationAttempt(name, "ok", null);
     }
 
     /// <summary>

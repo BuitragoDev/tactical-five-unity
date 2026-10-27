@@ -27,10 +27,10 @@
 | **5** | Calendario y competiciones | 5 | 5 |
 | **6** | Histórico y estadísticas | 4 | 4 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 6 |
-| **8** | Arquitectura y rendimiento | 8 | 5 |
+| **8** | Arquitectura y rendimiento | 8 | 6 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **57** |
+| | **TOTAL** | **70** | **58** |
 
 ### Grafo de dependencias
 
@@ -566,10 +566,12 @@ flowchart LR
   - *Implementación:* `DatabaseManager.QueryIndexDefinitions` centraliza 14 índices compuestos y `CreateTables` los aplica de forma idempotente. Cubren `games` (standings por manager/season/tipo/played/día y día pendiente), `player_game_stats` (equipo+partido), `player_season_stats` (season+equipo y jugador+season), `finance_records` (equipo/season/tipo/día), `offers` y `trade_offers` pendientes, `draft_picks` (equipo actual/año), `team_lineup`, `season_records`, `monthly_awards` y `team_cap_holds`. `DatabaseIndexPlanTests` construye una base temporal con forma de 10 temporadas (12.300 partidos) y verifica con `EXPLAIN QUERY PLAN` que las consultas de día/standings, agregados, finanzas, ofertas y rollover usan el índice esperado.
   - *Pruebas:* `DatabaseIndexPlanTests` (3 casos) + suite completa.
 
-- [ ] **F8-06 · Migraciones que no oculten fallos**
+- [x] **F8-06 · Migraciones que no oculten fallos**
   - *Ref:* `DB-03` · *Esfuerzo:* M · *Depende:* F8-05
   - *Criterio:* cada migración registra su resultado; `user_version` solo avanza si las obligatorias han ido bien; un fallo bloqueante impide abrir la partida con mensaje claro en vez de dejarla a medias.
   - *Punto de partida:* `DatabaseManager.cs:518–523, 1130–1157, 1200–1269`.
+  - *Implementación:* `RunMigrations()` envuelve el bloque atómico y solo ejecuta `PRAGMA user_version = 2` si `RunMigrationsCore()` termina. Los `catch` de migraciones que antes se limitaban a `Debug.LogError`/`LogWarning` ahora lanzan `DatabaseMigrationException` con el nombre de la migración, revierten la transacción y dejan `LastMigrationError` + `LastInitError` con un mensaje claro. `schema_migration_attempts` registra cada intento (`ok`/`failed`, error y fecha); `schema_migrations` sigue siendo la marca de las aplicadas. `DatabaseMigrationFailureTests` fuerza un fallo de esquema y verifica que `user_version` no avanza y que el intento fallido queda registrado.
+  - *Pruebas:* `DatabaseMigrationFailureTests` + suite completa.
 
 - [ ] **F8-07 · Timeout de lotes de fondo explícito**
   - *Ref:* `ARC-02` · *Esfuerzo:* S · *Depende:* —
@@ -704,6 +706,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F8 | `F8-06` | — | Migraciones obligatorias con `DatabaseMigrationException`, rollback atómico y `PRAGMA user_version` solo tras éxito. Nueva `schema_migration_attempts` (`ok`/`failed`) y `LastMigrationError`; los `catch` que ocultaban fallos ahora bloquean la apertura con mensaje. Test de fallo forzado. **568/568 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-05` | — | 14 índices compuestos en `QueryIndexDefinitions` para día, standings, stats, finanzas, ofertas, draft, lineup, premios y cap holds. Test con base temporal de 10 temporadas y `EXPLAIN QUERY PLAN`. **567/567 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-04` | — | `DatabaseManager.Records.cs` dividido por dominio en `.Rollover`, `.Awards`, `.History` y `.Progression`; el archivo principal de Records baja a 1.166 líneas sin cambiar firmas públicas. Suite completa en verde. **564/564 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-03` | — | Pipeline del día explícito en `GameDayPipeline`; `ProcessGameDayRoutine` queda como orquestador y el pre-lote, lineup, previa, transacción simulación/bookkeeping, transiciones, calendario y post-día son pasos nombrados con aborto controlado por `_dayAborted`. Tests de orden y de parada del runner. **564/564 EditMode**; build Linux correcto. |
