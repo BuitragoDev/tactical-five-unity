@@ -187,6 +187,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 | `Scripts/Data/GameSaveManager.cs` | Slots, `template.db`, `saves.json` |
 | `Scripts/GameSimulator.cs` | Motor de partidos (por posesión) |
 | `Scripts/Core/TradeHelper.cs` | Salary cap, aprons, luxury tax, valoración IA |
+| `Scripts/Core/TeamEconomyService.cs` | Asistencia, taquilla, patrocinio/TV de partido, nómina, luxury tax y abonos (F8-01) |
 | `Scripts/UI/DashboardController.cs` | El hub: día, sim, traspasos IA, economía, modales |
 | `Scripts/UI/RosterController.cs` | Plantilla, renovaciones, buyouts, trade block |
 | `Scripts/UI/MarketController.cs` | Traspasos, FA, S&T, deadline |

@@ -7,7 +7,7 @@
 
 | Pieza | Ruta | Responsabilidad |
 |---|---|---|
-| Tabla española | `Assets/_TacticalFive/Resources/Localization/es.json` | `key` → texto español. 2.118 entradas en el snapshot de F7-06. |
+| Tabla española | `Assets/_TacticalFive/Resources/Localization/es.json` | `key` → texto español. 2.120 entradas en el snapshot actual. |
 | Runtime | `Assets/_TacticalFive/Scripts/Core/LocalizationService.cs` | Carga la tabla del idioma (`TF_Language`), resuelve tokens y formatea plantillas. |
 | Tokens UXML | `text="{loc:clave}"`, `placeholder="{loc:clave}"` | Los UXML no contienen texto visible directo. |
 | C# estático | `LocalizationService.T("clave")` | Sustituye `text = "..."` y `new Label("...")` estáticos de `Scripts/UI`. |

@@ -45,7 +45,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Season generation** | `ScheduleGenerator.cs`, `PlayoffsGenerator.cs`, `DraftGenerator.cs` | 82-game schedule + All-Star; Play-In/Playoffs; draft lottery + class |
 | **Salary/trades** | `TradeHelper.cs` | Cap constants, trade validation, luxury tax, AI accept evaluation, pick bonus |
 | **City layer (F7-05)** | `CityCatalog.cs`, `CityService.cs`, `CityData.cs` | Catálogo puro y lógica persistente de proyectos/eventos de TheCity; efectos acotados sobre asistencia, físico, confianza y moral |
-| **Economy** | `FinanceRecord.cs`, `LoanData.cs`, `SponsorData.cs`, `TvChannelData.cs`, `TeamSettingsData.cs` | Budget, ticket/subscription, sponsors, TV, loans, renovations (logic in controllers) |
+| **Economy** | `TeamEconomyService.cs`, `FinanceRecord.cs`, `LoanData.cs`, `SponsorData.cs`, `TvChannelData.cs`, `TeamSettingsData.cs` | Asistencia, taquilla, patrocinio/TV de partido, nómina, luxury tax y abonos en un servicio; presupuesto, loans y renovaciones (UI en controllers) |
 | **Personnel** | `EmployeeData.cs`, `ScoutData.cs`, `CoachRankingData.cs` | Staff hiring/firing, scouting, coaching rankings |
 | **Soft stats** | `PlayerPersonalityData.cs`, `PlayerRelationshipData.cs`, `TrainingData.cs`, `LineupData.cs` | Personalities, relationships, training, rotations |
 | **Legacy/history** | `HallOfFameData`/`HallOfFameSeeder`/`HallOfFameHelper`, `RetiredNumberData` + 2 seeders, `PalmaresSeeder`, `TeamRecordSeeder`, `HistoricalPlayerStatsSeeder`, `GmAchievementData` | HOF, retired numbers, palmarés, records, achievements |

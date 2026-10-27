@@ -27,10 +27,10 @@
 | **5** | Calendario y competiciones | 5 | 5 |
 | **6** | Histórico y estadísticas | 4 | 4 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 6 |
-| **8** | Arquitectura y rendimiento | 8 | 0 |
+| **8** | Arquitectura y rendimiento | 8 | 1 |
 | **9** | Proceso y documentación | 2 | 0 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **52** |
+| | **TOTAL** | **70** | **53** |
 
 ### Grafo de dependencias
 
@@ -531,10 +531,12 @@ flowchart LR
 **Objetivo:** que el código permita cambiar una regla sin tocar cinco sitios, y que una carrera larga siga siendo rápida.
 **Depende de F3:** refactorizar sin tests de comportamiento es adivinar.
 
-- [ ] **F8-01 · Extraer la economía del `DashboardController`**
+- [x] **F8-01 · Extraer la economía del `DashboardController`**
   - *Ref:* `ARC-01` · *Esfuerzo:* L · *Depende:* F3-07
   - *Criterio:* nómina mensual, abonos, patrocinio, TV, luxury tax y asistencia viven en un servicio con tests; el controller solo llama y pinta.
   - *Punto de partida:* `DashboardController.cs:7763+`, `8288–8473`.
+  - *Implementación:* nueva `TeamEconomyService` (static) con reglas puras y persistencia: `CalculateAttendance`, `ProcessGameFinances` (taquilla + patrocinio/TV), `ProcessMonthlyPayroll` (jugadores + empleados + luxury tax) y `ProcessSubscriptionRevenue`. `DashboardController` pasa a llamar a `TeamEconomyService.*` en los cuatro puntos de entrada; se eliminaron del controller ~430 líneas de economía y sus helpers (`TeamRecord`, racha, factor de objetivo, multiplicador de pabellón y procesos mensuales). La sincronización de `_myTeam.budget` se conserva dentro del servicio cuando el equipo coincide. Los títulos de mensajes existentes se mantienen.
+  - *Pruebas:* `TeamEconomyServiceTests` (calendario de pagos, reparto mensual, multiplicador de pabellón, taquilla, ventana/demanda de abonos y guard de asistencia sin aforo) + suite completa.
 
 - [ ] **F8-02 · Extraer el mercado IA**
   - *Ref:* `ARC-01` · *Esfuerzo:* L · *Depende:* F4-01, F8-01
@@ -694,6 +696,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F8 | `F8-01` | — | Economía extraída a `TeamEconomyService`: asistencia, taquilla, patrocinio/TV de partido, nómina de jugadores/empleados, luxury tax y abonos. `DashboardController` pierde ~430 líneas y solo orquesta; tests de reglas puras en `TeamEconomyServiceTests`. **558/558 EditMode**; build Linux correcto. |
 | 2026-10-27 | F7 | `F7-06` | — | Localización ligera: `LocalizationService` + `Resources/Localization/es.json` (2.118 entradas); tokens `{loc:...}` en UXML y `LocalizationService.T` en C#; placeholders/tooltips resueltos en `UIScreenController.OnEnable`. Extractor `Tools/localization_extract.py` y tests `LocalizationTests`; español base y fallback por tabla. **549/549 EditMode**; build Linux correcto. |
 | 2026-10-27 | F7 | `F7-05` | — | `TheCity` pasa a centro de mando: pulso de ciudad, hotspots con estado e inspector por edificio; proyectos persistentes (`city_projects`) y eventos con decisiones (`city_events`). Proyectos: entorno/asistencia, centro de rendimiento/recuperación, programa de afición y centro de medios; eventos con coste/confianza/moral/físico acotados. `CityCatalog` + `CityService`; integración en asistencia, descanso y ciclo diario. Tests `CityCatalogTests` y `CityUiTests`. **538/538 EditMode**; build Linux correcto. |
 | 2026-10-27 | F7 | `F7-04` | `1e8af182` | `CustomScrollbar` único (`Bind<T>` idempotente, thumb dinámico, `Reset`/`Refresh`). Eliminadas las implementaciones locales de Cartera, GLeague, Historial, Injured, Buscador, Palmares, Messages y Market; borrado `ScrollBarBinder`. `ScrollView` nativo justificado en pantallas acotadas; tablas grandes con paginación o scroll propio. Tests de idempotencia. **532/532 EditMode**. |

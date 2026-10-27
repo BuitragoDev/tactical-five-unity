@@ -1758,6 +1758,14 @@
       "value": "No hay datos estadísticos disponibles todavía.\nJuega partidos para ver estadísticas."
     },
     {
+      "key": "ui.code.team_economy_service.campana_de_abonos_cerrada",
+      "value": "Campaña de abonos cerrada"
+    },
+    {
+      "key": "ui.code.team_economy_service.pago_de_nominas",
+      "value": "Pago de nóminas"
+    },
+    {
       "key": "ui.code.the_city_controller.completado",
       "value": "COMPLETADO · "
     },

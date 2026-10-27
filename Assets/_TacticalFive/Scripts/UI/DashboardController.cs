@@ -1539,7 +1539,7 @@ using System.Threading.Tasks;
                             homePlan: PlanFor(elimGame.home_team_id), awayPlan: PlanFor(elimGame.away_team_id),
                             homeCoachBonus: CoachBonusFor(elimGame.home_team_id), awayCoachBonus: CoachBonusFor(elimGame.away_team_id));
                         DatabaseManager.Instance.UpdateGame(elimGame);
-                        ProcessGameFinances(elimGame, elimResult);
+                        TeamEconomyService.ProcessGameFinances(elimGame, _manager, _myTeam, _season);
                         UpdatePlayersMoraleAfterGame(elimResult.home_stats, elimGame.home_team_id, elimGame.home_score > elimGame.away_score);
                         UpdatePlayersMoraleAfterGame(elimResult.away_stats, elimGame.away_team_id, elimGame.away_score > elimGame.home_score);
                     }
@@ -1766,8 +1766,8 @@ using System.Threading.Tasks;
 
         UpdateManagerStats(gameDay);
 
-        ProcessMonthlyPayroll(gameDay);
-        ProcessSubscriptionRevenue(gameDay);
+        TeamEconomyService.ProcessMonthlyPayroll(gameDay, _manager, _myTeam, _season);
+        TeamEconomyService.ProcessSubscriptionRevenue(gameDay, _manager, _myTeam, _season);
 
         if (_season.phase == "finished")
         {
@@ -2029,7 +2029,7 @@ using System.Threading.Tasks;
         }
 
         if (game.game_type != "allstar")
-            ProcessGameFinances(game, result);
+            TeamEconomyService.ProcessGameFinances(game, _manager, _myTeam, _season);
 
         ProcessGameInjuries(result, game.game_date);
 
@@ -6359,21 +6359,6 @@ using System.Threading.Tasks;
         }
     }
 
-    float GetArenaTicketMultiplier()
-    {
-        var staff = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-        var pabellon = staff.FirstOrDefault(e => e.position == "PABELLON");
-        return pabellon?.reputation switch
-        {
-            5 => 1.20f,
-            4 => 1.15f,
-            3 => 1.10f,
-            2 => 1.06f,
-            1 => 1.03f,
-            _ => 1.0f
-        };
-    }
-
     string GetWeakestPosition(List<PlayerData> roster)
     {
         if (roster == null || roster.Count == 0) return null;
@@ -8030,131 +8015,6 @@ using System.Threading.Tasks;
         };
     }
 
-    /// <summary>Ganados y jugados de un equipo desde la lista de partidos de la liga.</summary>
-    static (int wins, int played) TeamRecord(List<GameData> allGames, int teamId)
-    {
-        int wins = 0, played = 0;
-        foreach (var g in allGames)
-        {
-            if (g.home_team_id == teamId)
-            {
-                played++;
-                if (g.home_score > g.away_score) wins++;
-            }
-            else if (g.away_team_id == teamId)
-            {
-                played++;
-                if (g.away_score > g.home_score) wins++;
-            }
-        }
-        return (wins, played);
-    }
-
-    /// <summary>Racha reciente del equipo (últimos 10 partidos) como factor 0.85-1.10.</summary>
-    float GetAttendanceStreakFactor(List<GameData> allGames, int teamId)
-    {
-        var last10 = allGames
-            .Where(g => g.home_team_id == teamId || g.away_team_id == teamId)
-            .OrderByDescending(g => g.game_day).ThenByDescending(g => g.id)
-            .Take(10).ToList();
-        if (last10.Count == 0) return 1.0f;
-        int wins = last10.Count(g =>
-            (g.home_team_id == teamId && g.home_score > g.away_score) ||
-            (g.away_team_id == teamId && g.away_score > g.home_score));
-        float recent = (float)wins / last10.Count;
-        return Mathf.Clamp(0.85f + recent * 0.25f, 0.85f, 1.10f);
-    }
-
-    /// <summary>
-    /// Asistencia (E3): demanda elástica según mercado, rival, racha y precio; el precio de
-    /// referencia depende del mercado y la reputación, y su exceso castiga la ocupación.
-    /// </summary>
-    int CalculateAttendance(GameData game, TeamData homeTeam)
-    {
-        if (homeTeam == null || homeTeam.capacity <= 0) return 0;
-
-        bool myTeamIsHome = game.home_team_id == _myTeam.id;
-
-        var allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
-        var (homeWins, homePlayed) = TeamRecord(allGames, homeTeam.id);
-        float homeWinPct = homePlayed > 0 ? (float)homeWins / homePlayed : 0.5f;
-
-        var rival = DatabaseManager.Instance.GetTeamById(
-            game.home_team_id == homeTeam.id ? game.away_team_id : game.home_team_id);
-        var (rivalWins, rivalPlayed) = TeamRecord(allGames, rival != null ? rival.id : 0);
-        float rivalWinPct = rivalPlayed > 0 ? (float)rivalWins / rivalPlayed : 0.5f;
-
-        float objectiveFactor = GetObjectiveComplianceFactor(homeTeam, allGames);
-        float streakFactor = GetAttendanceStreakFactor(allGames, homeTeam.id);
-
-        int ticketPrice = 50;
-        var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
-        if (finSettings != null) ticketPrice = (int)finSettings.ticket_price;
-
-        int attendance = MarketEconomy.EstimateHomeAttendance(
-            homeTeam.capacity,
-            homeWinPct,
-            rivalWinPct,
-            rival != null ? rival.reputation : 3,
-            homeTeam.market_size,
-            homeTeam.reputation,
-            objectiveFactor,
-            streakFactor,
-            _manager.fan_confidence / 100f,
-            myTeamIsHome,
-            ticketPrice,
-            UnityEngine.Random.value,
-            UnityEngine.Random.value);
-
-        // F7-05: el entorno del pabellón mejora la asistencia de los partidos del usuario.
-        if (myTeamIsHome && _season != null)
-        {
-            int level = DatabaseManager.Instance.GetCityProjectLevel(
-                _manager.id, _season.id, CityCatalog.ProjectArena);
-            attendance = Mathf.RoundToInt(attendance * CityCatalog.AttendanceMultiplier(level));
-        }
-
-        return Mathf.Clamp(attendance, 0, homeTeam.capacity);
-    }
-
-    float GetObjectiveComplianceFactor(TeamData homeTeam, List<GameData> teamGames)
-    {
-        if (string.IsNullOrEmpty(homeTeam.objective)) return 1.0f;
-        if (homeTeam.objective == "Zona tranquila") return 1.0f;
-
-        int targetPos = 0;
-        if (homeTeam.objective == "Campeonato") targetPos = 1;
-        else if (homeTeam.objective == "Playoffs") targetPos = 6;
-        else if (homeTeam.objective == "Play-In") targetPos = 10;
-        else return 1.0f;
-
-        var allTeams = DatabaseManager.Instance.GetAllTeams();
-        var conferenceTeams = allTeams.Where(t => t.conference == homeTeam.conference).ToList();
-
-        var ranked = conferenceTeams.Select(t =>
-        {
-            var tGames = teamGames.Where(g => g.home_team_id == t.id || g.away_team_id == t.id).ToList();
-            int w = tGames.Count(g =>
-                (g.home_team_id == t.id && g.home_score > g.away_score) ||
-                (g.away_team_id == t.id && g.away_score > g.home_score));
-            int l = tGames.Count - w;
-            return new { Team = t, Wins = w, Losses = l, Pct = tGames.Count > 0 ? (float)w / tGames.Count : 0f };
-        })
-        .OrderByDescending(x => x.Pct)
-        .ThenBy(x => x.Losses)
-        .ThenByDescending(x => x.Wins)
-        .ToList();
-
-        int currentPos = ranked.FindIndex(x => x.Team.id == homeTeam.id) + 1;
-        if (currentPos <= 0) return 1.0f;
-
-        int gap = currentPos - targetPos;
-        if (gap <= 0) return 1.0f;
-
-        // 1 pos off → 0.90, 5 pos off → 0.50, 10+ pos off → 0.30
-        return Mathf.Clamp(1.0f - gap * 0.06f, 0.30f, 1.0f);
-    }
-
     void UpdatePlayersMoraleAfterGame(List<GameSimulator.PlayerStatSnapshot> stats, int teamId, bool teamWon)
     {
         // Get last 10 games for this team to calculate win%
@@ -8306,95 +8166,6 @@ using System.Threading.Tasks;
         DatabaseManager.Instance.SaveManager(_manager);
     }
 
-    void ProcessGameFinances(GameData game, GameSimulator.GameResult result)
-    {
-        if (_season == null) return;
-
-        // Only process for home team
-        var homeTeam = DatabaseManager.Instance.GetTeamById(game.home_team_id);
-        if (homeTeam == null) return;
-
-        var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
-        const int defaultTicketPrice = 50;
-        int ticketPrice = finSettings != null ? (int)finSettings.ticket_price : defaultTicketPrice;
-
-        int attendance = CalculateAttendance(game, homeTeam);
-        float ticketMultiplier = homeTeam.id == _myTeam.id ? GetArenaTicketMultiplier() : 1.0f;
-        long ticketRevenue = (long)(attendance * ticketPrice * ticketMultiplier);
-
-        // Always save attendance, even if financial settings are missing
-        DatabaseManager.Instance.SaveGameAttendance(new GameAttendanceData
-        {
-            game_id = game.id,
-            attendance = attendance,
-            ticket_price = ticketPrice,
-            revenue = ticketRevenue
-        });
-
-        if (ticketRevenue > 0)
-        {
-            homeTeam.budget += ticketRevenue;
-            DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
-            SyncMyTeamBudget(homeTeam);
-
-            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-            {
-                team_id = homeTeam.id,
-                season_id = _season.id,
-                record_type = FinanceRecord.TYPE_TICKET,
-                game_day = game.game_day,
-                amount = ticketRevenue
-            });
-        }
-
-        // Skip sponsor/TV processing if settings aren't configured
-        if (finSettings == null) return;
-
-        // Sponsor home game income (E3: escala con la fama y el mercado del equipo)
-        if (finSettings.sponsor_id > 0 && finSettings.sponsor_years_remaining > 0)
-        {
-            var sponsor = DatabaseManager.Instance.GetSponsorById(finSettings.sponsor_id);
-            if (sponsor != null)
-            {
-                long sponsorIncome = ContractMarket.SponsorHomeGameIncome(
-                    sponsor.home_game_income, homeTeam.reputation, homeTeam.market_size);
-                homeTeam.budget += sponsorIncome;
-                DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
-                SyncMyTeamBudget(homeTeam);
-                DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-                {
-                    team_id = homeTeam.id,
-                    season_id = _season.id,
-                    record_type = FinanceRecord.TYPE_SPONSORSHIP,
-                    game_day = game.game_day,
-                    amount = sponsorIncome
-                });
-            }
-        }
-
-        // TV home game income (E3: escala con la fama y el mercado del equipo)
-        if (finSettings.tv_channel_id > 0 && finSettings.tv_years_remaining > 0)
-        {
-            var tv = DatabaseManager.Instance.GetTVChannelById(finSettings.tv_channel_id);
-            if (tv != null)
-            {
-                long tvIncome = ContractMarket.SponsorHomeGameIncome(
-                    tv.home_game_income, homeTeam.reputation, homeTeam.market_size);
-                homeTeam.budget += tvIncome;
-                DatabaseManager.Instance.UpdateTeamBudget(homeTeam.id, homeTeam.budget);
-                SyncMyTeamBudget(homeTeam);
-                DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-                {
-                    team_id = homeTeam.id,
-                    season_id = _season.id,
-                    record_type = FinanceRecord.TYPE_TV,
-                    game_day = game.game_day,
-                    amount = tvIncome
-                });
-            }
-        }
-    }
-
     void CreateGameResultMessage(GameData game, GameSimulator.GameResult result)
     {
         bool isHome = game.home_team_id == _myTeam.id;
@@ -8410,14 +8181,14 @@ using System.Threading.Tasks;
         var homeTeam = DatabaseManager.Instance.GetTeamById(game.home_team_id);
         string arenaName = homeTeam?.arena ?? "Pabellón";
 
-        // Read saved attendance from database (calculated by ProcessGameFinances)
+        // Read saved attendance from database (calculated by TeamEconomyService.ProcessGameFinances)
         var attendanceData = DatabaseManager.Instance.GetGameAttendance(game.id);
         int attendance = attendanceData?.attendance ?? 0;
 
         // Fallback: calculate if missing (e.g., older saves or preseason games)
         if (attendance == 0 && homeTeam != null)
         {
-            attendance = CalculateAttendance(game, homeTeam);
+            attendance = TeamEconomyService.CalculateAttendance(game, homeTeam, _manager, _season);
         }
 
         // MVP of my team (most points)
@@ -8602,203 +8373,6 @@ using System.Threading.Tasks;
             category = NewsCategory.LIGA,
             news_type = NewsType.PREMIOS_MES
         });
-    }
-
-    void ProcessMonthlyPayroll(int gameDay)
-    {
-        if (_myTeam == null || _season == null || _manager == null) return;
-
-        // Nómina mensual: 12 plazos de `salario/12` repartidos cada 15 días de la
-        // temporada (~181 días). Antes eran 7 pagos al año, así que solo se cobraba
-        // ~58% de la nómina y los presupuestos divergían al alza.
-        int[] payrollDays = { 1, 16, 31, 46, 61, 76, 91, 106, 121, 136, 151, 166 };
-        if (!payrollDays.Contains(gameDay)) return;
-
-        foreach (var team in DatabaseManager.Instance.GetAllTeams())
-        {
-            ProcessTeamPlayerPayroll(team, gameDay);
-            ProcessTeamLuxuryTax(team, gameDay);
-        }
-
-        ProcessEmployeePayroll(gameDay);
-    }
-
-    void ProcessTeamPlayerPayroll(TeamData team, int gameDay)
-    {
-        var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-
-        // Player monthly salaries (only if not already paid this cycle)
-        var existingPayroll = DatabaseManager.Instance.GetFinanceRecord(team.id, _season.id, FinanceRecord.TYPE_SALARIES, gameDay);
-        if (existingPayroll != null) return;
-
-        long monthlyPayroll = players.Sum(p => p.salary) / 12;
-
-        team.budget -= monthlyPayroll;
-        DatabaseManager.Instance.UpdateTeamBudget(team.id, team.budget);
-        SyncMyTeamBudget(team);
-
-        DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-        {
-            team_id = team.id,
-            season_id = _season.id,
-            record_type = FinanceRecord.TYPE_SALARIES,
-            game_day = gameDay,
-            amount = monthlyPayroll
-        });
-
-        if (team.id != _myTeam.id) return;
-
-        // Payroll message (solo para el equipo del usuario)
-        try
-        {
-            string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            var gameDate = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1);
-            string monthName = gameDate.ToString("MMMM", new System.Globalization.CultureInfo("es-ES"));
-            monthName = char.ToUpper(monthName[0]) + monthName.Substring(1);
-
-            var msg = new MessageData
-            {
-                manager_id = _manager.id,
-                sender_type = 1,
-                sender_id = 0,
-                title = "Pago de n\u00f3minas",
-                body = NewsTexts.Nomina(_myTeam.name, monthlyPayroll, 0),
-                game_day = gameDay,
-                game_date = gameDate.ToString("yyyy-MM-dd"),
-                created_at = now,
-                date_sent = now,
-                is_read = 0,
-                category = NewsCategory.CLUB,
-                news_type = NewsType.NOMINA
-            };
-            DatabaseManager.Instance.AddMessage(msg);
-        }
-        catch (System.Exception ex)
-        {
-            Debug.LogError($"[Payroll] Error creating message: {ex.Message}\n{ex.StackTrace}");
-        }
-    }
-
-    void ProcessEmployeePayroll(int gameDay)
-    {
-        // Employee monthly salaries (solo el equipo del usuario; no hay empleados IA)
-        var existingEmployeePayroll = DatabaseManager.Instance.GetFinanceRecord(
-            _myTeam.id, _season.id, FinanceRecord.TYPE_EMPLOYEE_SALARY, gameDay);
-        if (existingEmployeePayroll != null) return;
-
-        var employees = DatabaseManager.Instance.GetEmployeesByTeam(_myTeam.id);
-        long monthlyEmployeePayroll = employees.Sum(e => e.salary) / 12;
-
-        if (monthlyEmployeePayroll > 0)
-        {
-            _myTeam.budget -= monthlyEmployeePayroll;
-            DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
-
-            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-            {
-                team_id = _myTeam.id,
-                season_id = _season.id,
-                record_type = FinanceRecord.TYPE_EMPLOYEE_SALARY,
-                game_day = gameDay,
-                amount = monthlyEmployeePayroll
-            });
-        }
-    }
-
-    void ProcessTeamLuxuryTax(TeamData team, int gameDay)
-    {
-        var existingTax = DatabaseManager.Instance.GetFinanceRecord(team.id, _season.id, FinanceRecord.TYPE_TAX, gameDay);
-        if (existingTax != null) return;
-
-        var leagueSett = DatabaseManager.Instance.GetLeagueSettings();
-        long taxThreshold = leagueSett?.luxury_tax ?? TradeHelper.LUXURY_TAX;
-        var players = DatabaseManager.Instance.GetPlayersByTeam(team.id);
-        long annualTax = TradeHelper.CalculateLuxuryTax(players.Sum(p => p.salary), taxThreshold);
-        if (annualTax > 0)
-        {
-            long monthlyTax = annualTax / 12;
-            team.budget -= monthlyTax;
-            DatabaseManager.Instance.UpdateTeamBudget(team.id, team.budget);
-            SyncMyTeamBudget(team);
-
-            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-            {
-                team_id = team.id,
-                season_id = _season.id,
-                record_type = FinanceRecord.TYPE_TAX,
-                game_day = gameDay,
-                // Positivo como el resto de gastos: GetTotalExpenses suma los importes
-                // y con signo negativo el balance salía inflado.
-                amount = monthlyTax,
-                created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
-            });
-        }
-    }
-
-    void ProcessSubscriptionRevenue(int gameDay)
-    {
-        // Process around game day 11 (Nov 1)
-        if (gameDay < 10 || gameDay > 12) return;
-
-        var existing = DatabaseManager.Instance.GetFinanceRecord(_myTeam.id, _season.id, FinanceRecord.TYPE_SUBSCRIPTION, 0);
-        if (existing != null) return;
-
-        var finSettings = DatabaseManager.Instance.GetTeamSettings(_myTeam.id);
-        if (finSettings == null) return;
-
-        // Early season performance
-        var earlyGames = DatabaseManager.Instance.GetStandingsGames(_manager.id)
-            .Where(g => (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id) && g.game_day <= 4)
-            .ToList();
-        int wins = earlyGames.Count(g =>
-            (g.home_team_id == _myTeam.id && g.home_score > g.away_score) ||
-            (g.away_team_id == _myTeam.id && g.away_score > g.home_score));
-
-        float performanceMult = 1.0f + (wins * 0.05f);
-        // Reputation: 1 star -> 0.70, 5 stars -> 1.30
-        float reputationMult = 0.7f + (_myTeam.reputation / 5f) * 0.6f;
-        float randomFactor = 0.85f + UnityEngine.Random.value * 0.30f;
-
-        float baseRatio = 0.5f;
-        float priceFactor = (2000 - finSettings.subscription_price) / 10000f;
-        // E3: un gran mercado vende más abonos (0.9x - 1.15x).
-        float marketMult = 0.90f + MarketEconomy.MarketNormalized(_myTeam.market_size) * 0.25f;
-        int numSubscribers = (int)(_myTeam.capacity * (baseRatio + priceFactor) * performanceMult * reputationMult * marketMult * randomFactor);
-        numSubscribers = (int)Mathf.Clamp(numSubscribers, 0, _myTeam.capacity);
-
-        long subAmount = numSubscribers * finSettings.subscription_price;
-
-        if (subAmount > 0)
-        {
-            _myTeam.budget += subAmount;
-            DatabaseManager.Instance.UpdateTeamBudget(_myTeam.id, _myTeam.budget);
-
-            DatabaseManager.Instance.AddFinanceRecord(new FinanceRecord
-            {
-                team_id = _myTeam.id,
-                season_id = _season.id,
-                record_type = FinanceRecord.TYPE_SUBSCRIPTION,
-                game_day = gameDay,
-                amount = subAmount
-            });
-
-            string now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            DatabaseManager.Instance.AddMessage(new MessageData
-            {
-                manager_id = _manager.id,
-                sender_type = 1,
-                sender_id = 0,
-                title = "Campaña de abonos cerrada",
-                body = NewsTexts.Abonos(_myTeam.name, numSubscribers, subAmount),
-                game_day = gameDay,
-                game_date = System.DateTime.Parse(_season.year_start + "-10-22").AddDays(gameDay - 1).ToString("yyyy-MM-dd"),
-                created_at = now,
-                date_sent = now,
-                is_read = 0,
-                category = NewsCategory.CLUB,
-                news_type = NewsType.ABONOS
-            });
-        }
     }
 
     // ── ÚLTIMO PARTIDO ───────────────────────────────────
