@@ -24,6 +24,7 @@ TacticalFivePanelSettings.asset (PanelSettings)
 
 - **GlobalVariables.uss** defines `--bg-primary rgb(11,16,23)`, `--bg-secondary`, `--bg-card`, `--bg-modal`, borders, text colors, accents (`--accent-blue/gold/green`), button variables.
 - **F7-01/F7-02:** no se usa `rgba()` en USS/UXML. Los colores translúcidos se han compuesto a `rgb()` opaco sobre el fondo oscuro del bloque (base `rgb(18,21,28)`) o se resuelven con `opacity`. Las mayúsculas usan `text-transform: uppercase` (nunca `-unity-text-transform` ni `text-transform: upper`); `-unity-text-align` se mantiene. `UiStyleTests` falla si reaparece cualquiera.
+- **F7-03 · Resoluciones:** `TacticalFivePanelSettings` usa `ScaleWithScreenSize`, referencia **1920×1080**, `MatchWidthOrHeight` y `match=0.5`. El modal fijo más grande es **1700×675 px de referencia**; con el escalado se queda en 1133×450 a 1280×720, 1209×480 a 1366×768, 1700×675 a 1920×1080, 2267×900 a 2560×1440 y 2626×1043 a ultrawide 3440×1440. Todos caben. Las clases de modal tienen además `max-width/max-height: 100%` como red de seguridad. `UiStyleTests.Modals_FitTheMinimumViewport` verifica la matriz.
 - **Typography.uss** sizes 10px→80px; **Utilities.uss** flexbox/spacing helpers.
 - **Per-screen USS** overrides; fonts `BarlowCondensed-*` and `Saira_Condensed-*` referenced via `url("project://database/Assets/_TacticalFive/Art/Fonts/...")` with TMP SDF counterparts under `Art/Fonts/*.asset`.
 

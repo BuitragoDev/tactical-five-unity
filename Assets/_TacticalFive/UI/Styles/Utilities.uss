@@ -75,3 +75,29 @@
 .rounded-8 {
     border-radius: 8px;
 }
+/* F7-03: ningún modal debe exceder el viewport de referencia. */
+.modal-box,
+.trade-modal-box,
+.fired-modal-box,
+.ns-roster-box,
+.ns-option-box,
+.editor-modal-box,
+.market-fa-modal-box,
+.market-trade-modal-box,
+.offer-result-modal-box,
+.renew-modal-box,
+.recovery-modal-box,
+.load-mgmt-modal-box,
+.match-modal-box,
+.training-modal-box,
+.dismiss-modal-box,
+.hire-modal-box,
+.injured-modal-box,
+.injury-modal-box,
+.empty-modal-box,
+.fastsim-modal-box,
+.deadline-modal-box,
+.lottery-box {
+    max-width: 100%;
+    max-height: 100%;
+}

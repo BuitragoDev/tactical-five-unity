@@ -492,10 +492,12 @@ flowchart LR
   - *Implementación:* se sustituyeron las **229** declaraciones `-unity-text-transform` por `text-transform: uppercase` y se normalizaron las 226 `text-transform: upper` existentes. Se decidió **no tocar `-unity-text-align`**: es la propiedad soportada por UI Toolkit para alineación. `UiStyleTests` comprueba que no vuelva `-unity-text-transform` ni `text-transform: upper`.
   - *Pruebas:* `UiStyleTests.UiStyles_UseStandardTextTransform` + suite completa.
 
-- [ ] **F7-03 · Pruebas multi-resolución y tamaños mínimos**
+- [x] **F7-03 · Pruebas multi-resolución y tamaños mínimos**
   - *Ref:* `UX-02` · *Esfuerzo:* M · *Depende:* —
   - *Criterio:* revisadas 1280×720, 1366×768, 1920×1080, 2560×1440 y ultrawide; documentado qué pantallas rompen y corregidas con mínimos y escalado; los modales nunca exceden el viewport.
   - *Punto de partida:* `ProjectSettings.asset:45–47`; anchos fijos como `TheCity.uss:34–54`.
+  - *Implementación:* `TacticalFivePanelSettings` ya usa `ScaleWithScreenSize` (1920×1080, `MatchWidthOrHeight`, `match=0.5`), así que la UI se adapta por escala uniforme. El modal fijo mayor es 1700×675 de referencia; a 1280×720 queda en 1133×450 y a ultrawide 3440×1440 en 2626×1043. Se añadió `max-width/max-height: 100%` a las clases de modal como red de seguridad. No se encontró ninguna pantalla que rompa con esos anchos.
+  - *Pruebas:* `UiStyleTests.PanelSettings_UseResponsiveScaling` y `UiStyleTests.Modals_FitTheMinimumViewport` (matriz 1280×720, 1366×768, 1920×1080, 2560×1440 y 3440×1440).
 
 - [ ] **F7-04 · Una sola abstracción de scroll**
   - *Ref:* `UX-05` · *Esfuerzo:* M · *Depende:* F7-03
@@ -684,6 +686,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F7 | `F7-03` | pendiente | Verificado `ScaleWithScreenSize` (1920×1080, match 0.5). Modal máximo 1700×675 de referencia: 1133×450 a 1280×720, 1209×480 a 1366×768, 2267×900 a 2560×1440 y 2626×1043 en ultrawide 3440×1440. Añadido `max-width/max-height: 100%` a modales y tests de matriz. **530/530 EditMode**. |
 | 2026-10-27 | F7 | `F7-02` | `f9f1a0f3` | 229 `-unity-text-transform` migradas a `text-transform: uppercase` y 226 `text-transform: upper` normalizadas. `-unity-text-align` se mantiene (propiedad soportada por UI Toolkit). Test `UiStyleTests` para evitar regresiones. **528/528 EditMode**. |
 | 2026-10-27 | F7 | `F7-01` | `1f862b83` | Eliminadas las 801 apariciones de `rgba()` en USS/UXML: colores opacos compuestos sobre el fondo del bloque o la base `rgb(18,21,28)`. Test `UiStyleTests` impide reintroducirlo. **527/527 EditMode**; build Linux correcto. |
 | 2026-10-26 | F6 | `F6-04` | `19f6ccf5` | `HistoricalStatsRules.BuildAdoptionPlan` centraliza la adopción de filas huérfanas (`player_id=0`) por nombre único; la migración ya no decide fila a fila y nunca adopta homónimos. Test con nombre único + dos homónimos + fila poseída. **526/526 EditMode**. |
