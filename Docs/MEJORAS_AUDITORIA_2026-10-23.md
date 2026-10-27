@@ -28,9 +28,9 @@
 | **6** | Histórico y estadísticas | 4 | 4 |
 | **7** | UX/UI, resoluciones e idioma | 6 | 6 |
 | **8** | Arquitectura y rendimiento | 8 | 8 |
-| **9** | Proceso y documentación | 2 | 0 |
+| **9** | Proceso y documentación | 2 | 1 |
 | **NF** | Apuestas de producto (sin fecha) | 4 | 0 |
-| | **TOTAL** | **70** | **60** |
+| | **TOTAL** | **70** | **61** |
 
 ### Grafo de dependencias
 
@@ -595,10 +595,12 @@ flowchart LR
 
 **Objetivo:** que este documento no se quede obsoleto como los anteriores.
 
-- [ ] **F9-01 · Sincronizar la base de conocimiento con el estado real**
+- [x] **F9-01 · Sincronizar la base de conocimiento con el estado real**
   - *Ref:* `ARC-04` · *Esfuerzo:* S · *Depende:* F0-05
   - *Criterio:* `AGENTS.md`, `PROJECT_OVERVIEW.md`, `MEMORY.md`, `SKILLS.md`, `DATA_MODEL.md` y `AUDITORIA_FINAL.md` reflejan HEAD, número de tests, número de pantallas y features realmente incluidas; ninguna cifra contradice el código.
   - *Punto de partida:* `AGENTS.md:6` (HEAD `81d9e4f`), `PROJECT_OVERVIEW.md:5` (`8460d21`), auditoría previa con 290 tests frente a 334.
+  - *Implementación:* se eliminaron los snapshots de HEAD/tests/pantallas de los documentos vivos y se enlazó `Tools/project_status.py` como fuente canónica. Actualizados: 23 sistemas, `UIScreenController` 609 ln, 64 modelos de tabla, 16 partials de `DatabaseManager`, 50 carpetas de pantalla (49 pantallas + LegalNotice huérfano), `PlayoffsGenerator` 569 ln, `StartNewSeason` en `.Rollover`, pipeline F8-03 y features F8. `AUDITORIA_FINAL.md` queda marcado como histórico con enlace a la base viva. `PROJECT_OVERVIEW` ya no presenta el delta de `8460d21` como actual.
+  - *Pruebas:* `python3 Tools/project_status.py` (575 tests, 49 pantallas, HEAD/rama actuales) + revisión de cifras contra `find`/`wc` y suite completa.
 
 - [ ] **F9-02 · Ritual de cierre de fase**
   - *Ref:* proceso · *Esfuerzo:* S · *Depende:* —
@@ -710,6 +712,7 @@ Recogido de las invariantes del proyecto y de los errores que esta auditoría ha
 | 2026-10-26 | F4 | `F4-04` | `d5aad586` | Separación de 15 plazas estándar, 2 contratos two-way e IR. `GetRosterCount` excluye two-way e IR; contratos two-way persisten en traspasos y se validan por separado; fichajes pendientes, renovaciones, recuperación IR y rollover respetan cada cupo. La simulación sigue incluyendo two-way elegibles. D4 resuelta: conservar máximo 2. Pipeline local: build Linux + **471/471 EditMode**. |
 | 2026-10-26 | F4 | `F4-05` | `46f4bba8` | Service time, derechos RFA/UFA simplificados, QO, tabla `team_cap_holds`, nómina efectiva (cap holds + contratos estándar; two-way excluidos), matching IA, renuncia desde Finanzas y proyección cap sheet. Estimación legacy editable en Editor; baseline seed excluye campos de carrera no estáticos. Build Linux + **482/482 EditMode**. |
 | 2026-10-26 | F4 | `F4-06` | `46f4bba8` | `RookieScale` sustituye el salario aleatorio del draft por una tabla determinista por pick y temporada (base 2025-26, crecimiento por el cap de `CbaTable`): primera ronda 1–30, segunda 31–60 cercana al mínimo y two-way por temporada. `DraftPickSlot.DraftYear` fija la temporada del debut; desaparece el plus salarial de generacionales (conserva OVR/potencial). Tests de monotonía, determinismo, crecimiento, clamp y redondeo. Build Linux + **490/490 EditMode**. |
+| 2026-10-27 | F9 | `F9-01` | — | Base de conocimiento sincronizada: 23 sistemas, 609 ln de `UIScreenController`, 64 modelos, 16 partials, 50 carpetas de pantalla, 569 ln de `PlayoffsGenerator`. Documentos vivos enlazan `project_status.py`; `AUDITORIA_FINAL` queda como histórico y `PROJECT_OVERVIEW` retira el delta como actual. **575/575 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-08` | — | Validador `ReferentialIntegrity` para las relaciones declaradas + `ValidateReferentialIntegrity`; reglas para centinelas (`team_id=0`, leyendas, G-League/All-Star). Test de slot sembrado sin huérfanos, detección de huérfano y borrado de slot sin DB/metadata. **575/575 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-07` | — | `WaitForBackgroundBatch` devuelve `NoBatch/Completed/Faulted/TimedOut`; `InitSaveSlot` aborta con error visible y `CloseActiveSlot`/borrado no continúan si el lote sigue escribiendo. Los `RunInBackground*` devuelven tarea fallida en vez de abrir una segunda conexión. Tests de timeout/fallo. **572/572 EditMode**; build Linux correcto. |
 | 2026-10-27 | F8 | `F8-06` | — | Migraciones obligatorias con `DatabaseMigrationException`, rollback atómico y `PRAGMA user_version` solo tras éxito. Nueva `schema_migration_attempts` (`ok`/`failed`) y `LastMigrationError`; los `catch` que ocultaban fallos ahora bloquean la apertura con mensaje. Test de fallo forzado. **568/568 EditMode**; build Linux correcto. |

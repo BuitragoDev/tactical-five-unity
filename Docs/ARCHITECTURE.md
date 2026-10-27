@@ -22,7 +22,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 ├─────────────────────────────────────────────────────────────────────────┤
 │  DATA LAYER — SQLite (sqlite-net)                                       │
 │  DatabaseManager (singleton, partial classes ×16) · GameSaveManager      │
-│  ~45 table model classes (SQLite attributes) · seeders · migrations     │
+│  64 table model classes (SQLite attributes) · seeders · migrations     │
 │  background threads (Task.Run + WAL + AsyncLocal ambient connection)    │
 └─────────────────────────────────────────────────────────────────────────┘
 ```

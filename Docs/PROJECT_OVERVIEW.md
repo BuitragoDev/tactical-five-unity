@@ -2,7 +2,7 @@
 
 > **Purpose of this document:** entry point to the whole project. Read this first, then follow the reading order at the bottom.
 
-**Snapshot analizado:** Unity 6, editor build with a single scene. The code snapshot was HEAD `8460d21` (2026-09-27, rama `auditoria-final`); it is not necessarily the current checkout. The current game/editor versions, branch, HEAD, EditMode cases and screens are calculated with `python3 Tools/project_status.py` (`Docs/PROJECT_STATUS.md`). Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
+**Estado actual:** versión, rama, HEAD, casos EditMode y pantallas se calculan con `python3 Tools/project_status.py` (`Docs/PROJECT_STATUS.md`). El análisis funcional de este documento parte del snapshot `8460d21` (2026-09-27, rama `auditoria-final`) y se mantiene actualizado por secciones; no es un snapshot estático. Esta documentación distingue hechos observados `[F]`, deducciones `[D]` e hipótesis `[H]`.
 
 **Product:** *Tactical Five* — a single-player NBA-management simulation game, entirely in Spanish, played with mouse/keyboard on desktop (target resolution 1920×1080). It is a "GM mode" (no playable basketball): the player manages a franchise season by season, simulating games and making roster/financial decisions.
 
@@ -35,16 +35,16 @@ Defined in `GameEnums.cs` (`GameMode`): `None`, `Manager`, `ProManager`, `Editor
 Select team → Preseason (schedule generated) → Regular season (82 games/team)
   → Play-In → Playoffs → End of season (awards, HOF, retired numbers) → Draft → New Season → [loop]
 ```
-Implemented by: `SelectTeamController`, `PreseasonController`, `DashboardController`, `EndSeasonController`, `NewSeasonController`, `StartNewSeason()` (`DatabaseManager.Records.cs:2568`), `DraftGenerator`, `PlayoffsGenerator`, `ScheduleGenerator`.
+Implemented by: `SelectTeamController`, `PreseasonController`, `DashboardController`, `EndSeasonController`, `NewSeasonController`, `StartNewSeason()` (`DatabaseManager.Rollover.cs`), `DraftGenerator`, `PlayoffsGenerator`, `ScheduleGenerator`.
 
 ### 3.2 Game-day loop (micro)
-User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()` (coroutine, `DashboardController.cs:752`):
+User clicks "avanzar día" in `DashboardController` → `ProcessGameDayRoutine()` (coroutine, `DashboardController.cs`; pipeline F8-03):
 1. **Pre-batch (background threads):** recover injuries/fatigue (`RunInBackground`, +8 `fisico`/day solo en días sin partido), process scouts+training+renovations, AI market (`ProcessAIMarket` via `RunInBackgroundAsync`). Modals interrupt here: load management (back-to-back rest), empty starters, injured starters.
 2. Load today's games, simulate each with `GameSimulator.SimulateGame` inside the intended atomic main-thread transaction (the normal path is single frame; `GameResultCache.Clear()` at day start).
 3. Post-simulation: chemistry, quick news, achievements, phase transitions (regular→playin→playoff→finished), manager stats, monthly payroll + subscription revenue, season-end block (archive stats, awards, achievement `EvaluateSeasonEnd`), advance date.
 4. Deadline-day modal (Feb 7), monthly awards (1st of Dec–Apr), budget/objective-fired checks, `SaveSlotInfo` refresh.
 
-**Simulación rápida:** desde `CalendarController` el jugador elige una fecha y confirma; se navega al Dashboard, que ejecuta `FastSimRoutine` (`DashboardController.cs:1324`): hace un bucle de `ProcessGameDayRoutine(fastSim: true)` hasta alcanzar la fecha objetivo o el fin de temporada. En modo `fastSim` el spinner del header gira continuo y el botón **DETENER SIMULACIÓN** queda activo (cursor hand); la parada se aplica al terminar el día en curso. Quinteto incompleto/lesionados muestran el modal de quinteto (auto-fix reanuda con `_fastSimSkipPreBatch`; manual lleva a Quinteto; tope de 3 auto-fixes). **Pausa por ofertas:** al final de cada día la sim se detiene si hay ofertas maduradas (modal IR A QUINTETO / SEGUIR SIMULANDO) o traspasos entrantes (`ShowNextPendingTradeOffer`); el día ya está commiteado y no se duplica al reanudar. Al terminar (salvo DETENER/aceptar traspaso) se muestra un resumen simplificado "SIMULACIÓN COMPLETADA".
+**Simulación rápida:** desde `CalendarController` el jugador elige una fecha y confirma; se navega al Dashboard, que ejecuta `FastSimRoutine` (`DashboardController.cs`): hace un bucle de `ProcessGameDayRoutine(fastSim: true)` hasta alcanzar la fecha objetivo o el fin de temporada. En modo `fastSim` el spinner del header gira continuo y el botón **DETENER SIMULACIÓN** queda activo (cursor hand); la parada se aplica al terminar el día en curso. Quinteto incompleto/lesionados muestran el modal de quinteto (auto-fix reanuda con `_fastSimSkipPreBatch`; manual lleva a Quinteto; tope de 3 auto-fixes). **Pausa por ofertas:** al final de cada día la sim se detiene si hay ofertas maduradas (modal IR A QUINTETO / SEGUIR SIMULANDO) o traspasos entrantes (`ShowNextPendingTradeOffer`); el día ya está commiteado y no se duplica al reanudar. Al terminar (salvo DETENER/aceptar traspaso) se muestra un resumen simplificado "SIMULACIÓN COMPLETADA".
 
 ## 4. Technical architecture in one paragraph
 
@@ -62,14 +62,14 @@ Assets/_TacticalFive/
                GameEnums, TradeHelper, MonteCarloRunner, DraftGenerator, PlayoffsGenerator, ScheduleGenerator,
                AchievementCatalog, AchievementService, GmAchievementType
     Data/      DatabaseManager (partials ×16), GameSaveManager, SQLite, Constants,
-               LeagueSettings, SaveSlotInfo + ~45 table model classes + seeders
+               LeagueSettings, SaveSlotInfo + 64 table model classes + seeders
     Stats/     AdvancedStatsHelper, FogOfWarHelper, HallOfFameHelper, MatchupPreview
     UI/        screen controllers + CustomSlider (all inherit UIScreenController in Core)
     (root)     GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper, ObjectiveHelper
   Scenes/      MainMenu.unity  (the only scene)
   UI/
     Resources/ TacticalFivePanelSettings.asset, TacticalFiveTheme.tss, UI/Core/{Header, Sidebar}
-    Screens/   48 folders (one per screen: UXML + USS + LegalNotice huérfano) — note LegalNotice/ folder is orphaned CSS
+    Screens/   50 folders (49 pantallas + LegalNotice huérfano: UXML + USS) — note LegalNotice/ folder is orphaned CSS
     Styles/    GlobalVariables.uss, Typography.uss, Utilities.uss
   Art/Resources/ Audios, Flags, Icons, PlayerPhotos (602 + 100 defaults), Teams/{Logos,Jerseys},
                  Patrocinadores, Televisiones, Arenas
@@ -113,6 +113,7 @@ Docs/  .agent/            this knowledge base (keep in sync)
 - **Features landed in the 2026-09 audit branch (`auditoria-final`):** rotation binding (`team_lineup.rotation_minutes`), G-League as a full league (30 affiliates + playoffs), play-by-play/pronóstico ya existentes, narrativa v2, plan de partido, staff con esquemas, progresión por edad/potencial, scouting con riesgo, negociación de agente, DPOY/6º hombre en `season_records`, export/import de partidas.
 - **Recent features landed before that (previous doc snapshot `50b1a86`):** play-by-play overlay, S&T of own FA (Bird rights), contract options TO/PO with re-sign, trade deadline event, AI GM strategy, GM achievements (28), PlayerProfile screen, advanced analytics (eFG%/TS%/EFI/48), fog-of-war in ratings, async DB (background WAL threads), load management, trade block, Hall of Fame, retired numbers (Dorsales screen), season quintets (Quintos), matchup preview, protected picks + swaps, position-based athletic decline + mentoring, `UIScreenController` base, `DatabaseManager` partial split, `schema_migrations` versioning, atomic game-day transaction, IR (reserva de lesionados), two-way contracts, G-League (liga de desarrollo ligera).
 - **Fase 7 (UX/UI):** UI sin `rgba()`, `text-transform` estándar, escalado verificado 1280×720→ultrawide, scroll unificado (`CustomScrollbar`), `TheCity` como centro de mando con proyectos/eventos y **localización por claves** (`LocalizationService` + `Resources/Localization/es.json` + `{loc:clave}` en UXML).
+- **Fase 8 (arquitectura/rendimiento):** `TeamEconomyService`, `AiMarketService`, `GameDayPipeline`; `DatabaseManager.Records` dividido en 16 partials; índices compuestos auditados con `EXPLAIN QUERY PLAN`; migraciones bloqueantes con `schema_migration_attempts`; timeout de lotes de fondo; `ReferentialIntegrity` para huérfanos.
 - **Resolved debt:** duplicate `CursorManager` fixed (single instance now), `SettingsController`/`SQLiteAsync.cs` deleted, dead `GameScreen.Settings` removed, `GetTopPlayersByStat` real SQL aggregation, B8 (sync DB) closed for heavy batches. See `TODO_TECHNICAL_DEBT.md`.
 
 ---
@@ -137,7 +138,7 @@ Game-facing terms are Spanish. A mapping is in `.agent/GLOSSARY.md`.
 - Whether `template.db` is meant to ship with the build or be regenerated at first run (Editor flow suggests dev-tool). [D]
 - Whether `GameMode.Editor` (dead) will be revived or removed.
 
-## Current audit delta (HEAD 8460d21, 2026-09-27)
+## Historical audit delta (HEAD 8460d21, 2026-09-27)
 
 - `[F]` The Input System package and `InputSystem_Actions.inputactions` exist, but scripts use legacy `UnityEngine.Input`; no `InputAction`, `PlayerInput` or `InputSystemUIInputModule` use was found.
 - `[F]` Static analysis found no prefabs, gameplay ScriptableObjects, Addressables, Animator controllers, animation clips or Timeline usage. The active product is a database-backed UI application, not a 3D gameplay scene.

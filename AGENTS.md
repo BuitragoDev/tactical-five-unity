@@ -29,7 +29,7 @@
 | `Docs/THIRD_PARTY_ASSETS.md` | Inventario de origen, licencias y atribuciones; pendientes de verificar | Añades o distribuyes assets/dependencias |
 | `Docs/ARCHITECTURE.md` | Módulos, singletons, ciclo de vida, dependencias (Mermaid) | Tareas que cruzan sistemas |
 | `Docs/GAMEPLAY.md` | **Todas las mecánicas con fórmulas exactas** | Tocas simulación, economía, contratos, moral, draft |
-| `Docs/SYSTEMS.md` | 21 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
+| `Docs/SYSTEMS.md` | 23 sistemas: responsabilidad, archivos, métodos clave, riesgos | Necesitas una API de `DatabaseManager` o un sistema completo |
 | `Docs/UI_TOOLKIT.md` | Tema/UXML/USS, patrón de controller, inventario de pantallas y árbol de navegación | Trabajas en UI |
 | `Docs/LOCALIZATION.md` | Tabla `es.json`, tokens `{loc:clave}`, `LocalizationService.T`, extractor y convenciones | Añades/cambias texto de UI o preparas otro idioma |
 | `Docs/CUSTOM_SCROLLBAR.md` | **Barra de scroll propia** (viewport + content + track/thumb) — el `ScrollView` de Unity no es fiable con el tema actual | Necesitas una lista larga con scroll arrastrable |
@@ -71,7 +71,7 @@
 | **Toda la persistencia es SQLite** vía `DatabaseManager.Instance` (sqlite-net incluido; `DatabaseManager` dividido en **16 partial classes** por dominio (incluye `.Awards`, `.History`, `.Rollover` y `.Progression` desde F8-04)) | Nunca abras tu propia conexión. Todo acceso pasa por `DatabaseManager`. |
 | **Sin prefabs y sin ScriptableObjects de juego.** Contenido = seeders + tablas SQLite; vistas = UXML+USS | Para nueva entidad → tabla+seeder; para vista nueva → UXML+USS. |
 | **Sin event bus** (ni `Action`/`UnityEvent` entre sistemas). Comunicación: mensajes DB (`MessageData`), estado estático (`GameResultCache`, `ScreenManager.*`, cola de toasts de `AchievementService`), `PlayerPrefs` (solo settings), callbacks UI | No inventes un sistema de eventos. Sigue los canales existentes. |
-| **Todos los controllers heredan `UIScreenController`** (base en `Scripts/Core/UIScreenController.cs`, 575 ln): fullscreen, inyección Header/Sidebar, navegación, cursores, modal de configuración, `RefreshHeader` | Nuevas pantallas: hereda la base y sobreescribe solo lo que difiera. |
+| **Todos los controllers heredan `UIScreenController`** (base en `Scripts/Core/UIScreenController.cs`, 609 ln): fullscreen, inyección Header/Sidebar, navegación, cursores, modal de configuración, `RefreshHeader` | Nuevas pantallas: hereda la base y sobreescribe solo lo que difiera. |
 | **Media de equipo** = media de los `overall` canónicos de todos sus jugadores asignados (`team_id`) | Es descriptiva, no un objetivo fijo de 85; no normalices todos los equipos a la misma media. |
 | **Estrellas por equipo** | Rol Estrella desde OVR 90, evaluado por jugador (`PlayerRoleRules`); no hay máximo de estrellas por franquicia. No alteres ratings para imponer unicidad. |
 | **Escala de atributos** | Rango legal 1–99; atributos bajos pueden ser intencionales. El suelo 30 de generación y el 25 de scouting son límites de proceso, no el mínimo legal. |

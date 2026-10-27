@@ -29,7 +29,7 @@ A single-player **NBA management sim** ("Tactical Five", version and exact Unity
 ```
 Assets/_TacticalFive/
   Scripts/Core/     navigation, audio, cursor, base UIScreenController, generators, trade rules, enums, achievements, stats helpers
-  Scripts/Data/     DatabaseManager (16 partials), GameSaveManager, ~45 table models, seeders, Constants, DatabaseRows
+  Scripts/Data/     DatabaseManager (16 partials), GameSaveManager, 64 table models, seeders, Constants, DatabaseRows
   Scripts/UI/       screen controllers + CustomSlider
   Scripts/(root)    GameSimulator, GameResultCache, QuickNewsGenerator, PlayerPhotoHelper
   Scenes/           MainMenu.unity
@@ -57,7 +57,8 @@ Docs/  .agent/            ← this knowledge base (keep it in sync!)
 - No namespaces; global classes.
 - All DB code in `DatabaseManager`; all UI wiring in the controller's `OnEnable`.
 - `UnityEngine.Random` for game randomness on the main thread; `System.Random` (thread-static) for background/threaded work.
-- AI GM decisions are strategy-aware: `TeamStrategy { Rebuild, Balanced, Contend }` computed per team each trade cycle (`DashboardController.GetTeamStrategy`/`BuildTeamStrategyCache`), drives cooldowns, densities, `TryFindAITrade`, `TrySellVeteran`, `PickTradeTarget`/`BuildOfferPackage` and star FA signings.
+- AI GM decisions are strategy-aware: `TeamStrategy { Rebuild, Balanced, Contend }` computed per team each trade cycle (`DashboardController.GetTeamStrategy`/`BuildTeamStrategyCache`, injected into `AiMarketService`), drives cooldowns, densities, trades, fire sales, S&T and star signings.
+- F8 architecture: `TeamEconomyService` (economy), `AiMarketService` (AI market), `GameDayPipeline` (day order), `DatabaseManager.QueryIndexDefinitions`, blocking migrations + `schema_migration_attempts`, `BackgroundBatchWaitResult`, and `ReferentialIntegrity`.
 - Money: `$"{value:N0}"`; dates as `"yyyy-MM-dd"` strings.
 - Logos via `Resources.LoadAll<Sprite>("Teams/Logos/{size}x{size}")` → dictionary.
 - Modals: overlay+box elements, `DisplayStyle.Flex/None`.

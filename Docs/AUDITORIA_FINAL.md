@@ -4,6 +4,7 @@
 > Cada hallazgo tiene su propia ficha con estado marcable (`[ ]` pendiente → `[x]` hecho).
 > Úsalo como checklist maestro: marca `[x]` al terminar, y anota en la **§12 Bitácora** la fecha/commit.
 > **Alcance histórico:** los commits, conteos y métricas de las secciones/bitácoras describen sus snapshots fechados. Para versión, rama, HEAD, número actual de tests y pantallas ejecuta `python3 Tools/project_status.py` (`Docs/PROJECT_STATUS.md`).
+> **Estado actual:** este documento conserva el análisis del snapshot auditado; los cambios posteriores (F1–F9) están en `Docs/MEJORAS_AUDITORIA_2026-10-23.md` y en la base de conocimiento viva.
 >
 > - **Auditoría realizada sobre:** `main` @ `d565623e` (post-merge de `minutos-ui`).
 > - **Rama de trabajo de la auditoría:** `auditoria-final`.
