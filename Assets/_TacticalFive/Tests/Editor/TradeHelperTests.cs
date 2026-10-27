@@ -120,19 +120,19 @@ public class TradeHelperTests
     {
         var b = new List<PlayerData> { Player(10_000_000), Player(10_000_000), Player(10_000_000) };
         var errors = TradeHelper.ValidateTrade(new List<PlayerData>(), b, 15, 15, "Bulls", 100_000_000L, "Lakers", 100_000_000L);
-        Assert.That(errors, Has.Some.Contains("máximo 15"));
+        Assert.That(errors, Has.Some.Contains("máximo 16"));
     }
 
     [Test]
     public void ValidateTrade_AcceptingTwoForOne_AtMaxRoster_ReportsError()
     {
-        // Revalidación al aceptar una oferta IA estando en el máximo de plantilla:
-        // un 2x1 dejaría al equipo que acepta con 18 jugadores.
+        // Revalidación al aceptar una oferta IA estando en el máximo de plazas estándar:
+        // un 2x1 dejaría al equipo que acepta con 17 plazas estándar (máximo 16).
         var aiSent = new List<PlayerData> { Player(10_000_000), Player(8_000_000) };
         var ourSent = new List<PlayerData> { Player(10_000_000) };
-        var errors = TradeHelper.ValidateTrade(aiSent, ourSent, 12, 15, "Nosotros", 100_000_000L, "IA", 100_000_000L,
+        var errors = TradeHelper.ValidateTrade(aiSent, ourSent, 12, 16, "Nosotros", 100_000_000L, "IA", 100_000_000L,
             teamBTwoWayCount: 2);
-        Assert.That(errors, Has.Some.Contains("máximo 15"));
+        Assert.That(errors, Has.Some.Contains("máximo 16"));
     }
 
     [Test]
@@ -335,7 +335,7 @@ public class TradeHelperTests
             false, false, TradeHelper.FIRST_APRON, TradeHelper.SECOND_APRON, TradeHelper.LUXURY_TAX, signA);
         // Sin error de roster (el FA no resta del equipo que firma).
         Assert.That(errors, Does.Not.Contain("mínimo 10"));
-        Assert.That(errors, Does.Not.Contain("máximo 17"));
+        Assert.That(errors, Does.Not.Contain("máximo 16"));
     }
 
     // ── Fase 3: modelo de cap para la IA (ECO-06) ────────────────

@@ -56,9 +56,9 @@ Al no extender `UnityDefaultRuntimeTheme`, los elementos internos del `ScrollVie
 > **Excepciones justificadas:** se mantiene el `ScrollView` nativo en pantallas con
 > contenido **acotado** que no necesita thumb arrastrable: Training (panel derecho),
 > InfoLeague (reglas), GLeague/Standings (máx. 30 equipos), Calendar (máx. 15 partidos),
-> Roster/Detail (17 jugadores), Dashboard/Messages, Cartera/TeamList (30 equipos),
+> Roster/Detail (18 jugadores), Dashboard/Messages, Cartera/TeamList (30 equipos),
 > GameResults/MatchDay (boxscore de 2 equipos), Editor (formularios) y NewSeason (modales
-> de plantilla ≤17). Las tablas grandes de datos usan paginación (Stats/Buscador) o el
+> de plantilla ≤18). Las tablas grandes de datos usan paginación (Stats/Buscador) o el
 > scroll propio; no se identificó ninguna lista que exija virtualización por miles de filas.
 
 ---

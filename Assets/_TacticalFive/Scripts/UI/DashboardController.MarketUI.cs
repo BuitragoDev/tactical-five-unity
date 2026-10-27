@@ -239,7 +239,7 @@ public partial class DashboardController
             // ── Revalidación obligatoria antes de mutar ──
             // La oferta se generó cuando la plantilla/nómina eran otras; entre medias
             // el jugador pudo fichar/cortar. Sin revalidar se pueden crear plantillas
-            // >17 o traspasos que incumplen el salary matching / apron.
+            // >16 estándar / >2 two-way o traspasos que incumplen el salary matching / apron.
             {
                 var errorsChk = ValidatePendingTradeOffer(offer, ourPlayers, theirPlayers, ourSATFAs);
 

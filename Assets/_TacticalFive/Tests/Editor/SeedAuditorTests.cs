@@ -198,7 +198,7 @@ public class SeedAuditorTests
         var report = SeedAudit.Run(teams, players, null, null, null);
 
         Assert.That(report.ByRule("ROSTER-SIZE"), Is.Empty, "12 activos no debe generar un hallazgo.");
-        Assert.That(report.RosterOutOfRangeCount, Is.EqualTo(1), "Debe informarse el equipo fuera de 14-17.");
+        Assert.That(report.RosterOutOfRangeCount, Is.EqualTo(1), "Debe informarse el equipo fuera de 14-18.");
         Assert.That(report.RosterOutOfRange.Single(), Does.StartWith("AAA"), "El dato debe identificar al equipo.");
     }
 
@@ -215,16 +215,29 @@ public class SeedAuditorTests
     }
 
     [Test]
-    public void PlazasEstandarPorEncimaDe15_SeInformanAunqueElTotalSea17()
+    public void PlazasEstandarPorEncimaDe16_SeInformanAunqueElTotalSea18()
     {
         var teams = new List<TeamData> { SyntheticTeam(1, "CCC") };
-        var players = Enumerable.Range(1, 17).Select(i => SyntheticPlayer(i, 1)).ToList();
-        players[16].is_two_way = 1;
+        var players = Enumerable.Range(1, 18).Select(i => SyntheticPlayer(i, 1)).ToList();
+        players[17].is_two_way = 1;
 
         var report = SeedAudit.Run(teams, players, null, null, null);
 
         Assert.That(report.RosterOutOfRangeCount, Is.EqualTo(1));
-        Assert.That(report.RosterOutOfRange.Single(), Does.Contain("16/15 estándar"));
+        Assert.That(report.RosterOutOfRange.Single(), Does.Contain("17/16 estándar"));
+    }
+
+    [Test]
+    public void PlantillaDieciseisEstandarDosTwoWay_EsValida()
+    {
+        var teams = new List<TeamData> { SyntheticTeam(1, "DDD") };
+        var players = Enumerable.Range(1, 18).Select(i => SyntheticPlayer(i, 1)).ToList();
+        players[16].is_two_way = 1;
+        players[17].is_two_way = 1;
+
+        var report = SeedAudit.Run(teams, players, null, null, null);
+
+        Assert.That(report.RosterOutOfRangeCount, Is.Zero);
     }
 
     static TeamData SyntheticTeam(int id, string abbreviation) => new TeamData

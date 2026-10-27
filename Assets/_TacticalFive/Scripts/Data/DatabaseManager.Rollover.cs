@@ -465,10 +465,10 @@ public partial class DatabaseManager
         // 5a. Ciclo de vida G-League (envejecimiento, retiro, progresión, re-seeding)
         AdvanceGLeagueLifecycle();
 
-        // 5b. Trim AI teams to max 17
+        // 5b. Trim AI teams to max 16 estándar + 2 two-way (18 activos)
         TrimRostersToMaxSize(TradeHelper.MAX_STANDARD_ROSTER, newTeamId);
 
-        // 6. Fill rosters to 15 for all teams (except the user's new team)
+        // 6. Fill standard rosters to 16 for all teams (except the user's new team)
         var allTeams = GetAllTeams();
         var freeAgents = _db.Table<PlayerData>()
             .Where(p => p.team_id == 0 && p.age < 40)
@@ -491,7 +491,7 @@ public partial class DatabaseManager
             .Select(x => x.team)
             .ToList();
 
-        const int targetRosterSize = 15;
+        const int targetRosterSize = 16;
 
         foreach (var team in teamsToFill)
         {

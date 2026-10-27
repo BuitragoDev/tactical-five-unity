@@ -1151,7 +1151,7 @@ public sealed class AiMarketService
 
         foreach (var player in candidates)
         {
-            // Al completar las 15 plazas estándar, la IA solo puede usar plazas two-way.
+            // Al completar las 16 plazas estándar, la IA solo puede usar plazas two-way.
             bool signAsTwoWay = rosterCount >= TradeHelper.MAX_STANDARD_ROSTER;
             if (signAsTwoWay)
             {

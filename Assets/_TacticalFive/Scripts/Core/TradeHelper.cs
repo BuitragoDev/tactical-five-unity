@@ -16,7 +16,7 @@ public static class TradeHelper
     // Fallback del mínimo de 0 años para la temporada inicial (2026-27). El mínimo
     // depende de los años de servicio: usa MinimumSalary(settings, years).
     public const long MIN_SALARY = 1_357_763;
-    public const int MAX_STANDARD_ROSTER = 15;
+    public const int MAX_STANDARD_ROSTER = 16;
     public const long TWO_WAY_SALARY = 678_882;
     public const int MAX_TWO_WAY = 2;
     // Límite combinado de referencia; las validaciones usan cada cupo por separado.

@@ -377,7 +377,7 @@ public class NewSeasonController : UIScreenController
     {
         // Decrementar contratos de la plantilla seleccionada para que los jugadores
         // en último año de contrato no renovados pasen a agentes libres ANTES del
-        // control de plantilla (>17). Misma semántica que StartNewSeason.
+        // control de plantilla (>16 estándar o >2 two-way; 18 activos). Misma semántica que StartNewSeason.
         // Si ya se aplicó (reintento tras fallo del rollover) se omite: la marca
         // "pre" cubre opciones + decremento y evita descontar dos veces.
         bool preApplied = _season != null && DatabaseManager.Instance.IsRolloverPreApplied(_season.id, "pre");

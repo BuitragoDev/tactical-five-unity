@@ -75,7 +75,7 @@ public static class SeedAudit
         public int LegacySalaryCount    { get; set; }
         public readonly List<string> RosterSummaries = new List<string>();
 
-        /// <summary>Equipos sembrados fuera de la referencia 14-17. Es un dato de
+        /// <summary>Equipos sembrados fuera de la referencia 14-18. Es un dato de
         /// diagnóstico: el seed de plantillas lo mantiene el usuario a mano.</summary>
         public int RosterOutOfRangeCount { get; set; }
         public readonly List<string> RosterOutOfRange = new List<string>();
@@ -95,7 +95,7 @@ public static class SeedAudit
 
         /// <summary>
         /// Bloquea el uso de una plantilla cuando incumple invariantes del juego. Los
-        /// desvíos meramente informativos (p. ej. tamaños 14-17) no son hallazgos y no
+        /// desvíos meramente informativos (p. ej. tamaños 14-18) no son hallazgos y no
         /// impiden crear una partida.
         /// </summary>
         public void ThrowIfInvalid(string source)
@@ -382,7 +382,7 @@ public static class SeedAudit
                                   (irCount > 0 ? $", {irCount} IR" : ""));
 
             // El tamaño de plantilla NO se impone: el seed de plantillas lo mantiene el
-            // usuario a mano y 14-17 es solo la referencia de juego. Se publica como dato
+            // usuario a mano y 14-18 es solo la referencia de juego. Se publica como dato
             // (RosterOutOfRange) para que el desvío no pase desapercibido.
             if (activeCount < MIN_ROSTER_ACTIVE || activeCount > TradeHelper.MAX_ROSTER
                 || standardCount > TradeHelper.MAX_STANDARD_ROSTER)
