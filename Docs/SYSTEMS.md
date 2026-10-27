@@ -12,6 +12,7 @@
 - **Async:** `_ambientDb` AsyncLocal connection + WAL + `Task.Run` (see `ARCHITECTURE.md §7`). Thread-static `System.Random` (`Rng`) for background work.
 - **Lifecycle:** `Awake` = singleton + `DontDestroyOnLoad`; `OnDestroy` closes connection. No DB work until a slot is initialized.
 - **Schema versioning [F]:** `schema_migrations` table + `PRAGMA user_version = 2` (`DatabaseManager.cs:286`); migrations run via `IsMigrationApplied`/`MarkMigrationApplied` plus `PRAGMA table_info` column checks.
+- **Índices F8-05:** `DatabaseManager.QueryIndexDefinitions` declara 14 índices compuestos idempotentes para consultas del día/standings, agregados de jugador, finanzas, ofertas, draft, lineup, premios y cap holds. `DatabaseIndexPlanTests` valida los planes con `EXPLAIN QUERY PLAN` sobre una base temporal de 10 temporadas.
 - **Risks:** `Seeding.cs` (1.506 ln) es el partial más grande; heavy UI code does multiple sequential queries per refresh (GC + main-thread blocking in places). See `TODO_TECHNICAL_DEBT.md`.
 
 ## S2. Save system

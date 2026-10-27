@@ -11,6 +11,20 @@
 - `PlayerData.id` is **manual, not autoincrement** (seed IDs 1..~600 stable across cloned slots). `TeamData.id` is currently marked `[AutoIncrement]` in `TeamData.cs`; seed data usually supplies stable IDs, but the model does not enforce a manual-ID contract for teams. Other tables autoincrement.
 - **Schema versioning [F]:** `schema_migrations` table (`name` PK, `applied_at`) + `PRAGMA user_version = 2` (`SCHEMA_VERSION = 2`, `DatabaseManager.cs:41,290-291`). Column-based additive migrations still use `PRAGMA table_info`; data migrations use `IsMigrationApplied`/`MarkMigrationApplied`.
 
+### Índices compuestos (F8-05)
+
+`DatabaseManager.QueryIndexDefinitions` aplica índices idempotentes en `CreateTables`:
+
+- `games(manager_id, season_id, game_type, is_played, game_day, id)` y `games(manager_id, game_day, is_played)`.
+- `player_game_stats(team_id, game_id)`.
+- `player_season_stats(season_id, team_id)` y `(player_id, season_id)`.
+- `finance_records(team_id, season_id, record_type, game_day)`.
+- `offers(manager_id, processed, day_sent)` y `trade_offers(manager_id, processed)`.
+- `draft_picks(current_team_id, draft_year)` y `(draft_year)`.
+- `team_lineup(team_id)`, `season_records(season_id)`, `monthly_awards(season_id)` y `team_cap_holds(team_id, season_id, is_active)`.
+
+Se validan con `DatabaseIndexPlanTests` (`EXPLAIN QUERY PLAN`) sobre una base temporal con forma de 10 temporadas.
+
 ## 2. Relational overview
 
 ```

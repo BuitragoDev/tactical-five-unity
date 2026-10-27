@@ -10,6 +10,28 @@ using System.Threading.Tasks;
 
 public partial class DatabaseManager : MonoBehaviour
 {
+    /// <summary>
+    /// Índices compuestos de F8-05. Se declaran aquí para poder auditarlos con
+    /// `EXPLAIN QUERY PLAN` sin depender del orden de llamadas de CreateTables.
+    /// </summary>
+    public static readonly string[] QueryIndexDefinitions =
+    {
+        "CREATE INDEX IF NOT EXISTS IX_Games_Manager_Season_Type_Played_Day ON games(manager_id, season_id, game_type, is_played, game_day, id)",
+        "CREATE INDEX IF NOT EXISTS IX_Games_Manager_Day_Played ON games(manager_id, game_day, is_played)",
+        "CREATE INDEX IF NOT EXISTS IX_PlayerGameStats_Team_Game ON player_game_stats(team_id, game_id)",
+        "CREATE INDEX IF NOT EXISTS IX_PlayerSeasonStats_Season_Team ON player_season_stats(season_id, team_id)",
+        "CREATE INDEX IF NOT EXISTS IX_PlayerSeasonStats_Player_Season ON player_season_stats(player_id, season_id)",
+        "CREATE INDEX IF NOT EXISTS IX_FinanceRecords_Team_Season_Type_Day ON finance_records(team_id, season_id, record_type, game_day)",
+        "CREATE INDEX IF NOT EXISTS IX_Offers_Manager_Processed_Day ON offers(manager_id, processed, day_sent)",
+        "CREATE INDEX IF NOT EXISTS IX_TradeOffers_Manager_Processed ON trade_offers(manager_id, processed)",
+        "CREATE INDEX IF NOT EXISTS IX_DraftPicks_CurrentTeam_Year ON draft_picks(current_team_id, draft_year)",
+        "CREATE INDEX IF NOT EXISTS IX_DraftPicks_DraftYear ON draft_picks(draft_year)",
+        "CREATE INDEX IF NOT EXISTS IX_Lineup_Team ON team_lineup(team_id)",
+        "CREATE INDEX IF NOT EXISTS IX_SeasonRecords_Season ON season_records(season_id)",
+        "CREATE INDEX IF NOT EXISTS IX_MonthlyAwards_Season ON monthly_awards(season_id)",
+        "CREATE INDEX IF NOT EXISTS IX_TeamCapHolds_Team_Season_Active ON team_cap_holds(team_id, season_id, is_active)"
+    };
+
     public static DatabaseManager Instance { get; private set; }
 
     private SQLiteConnection _dbField;
@@ -694,6 +716,8 @@ public partial class DatabaseManager : MonoBehaviour
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_SummerLeague_Season ON summer_league_stats(manager_id, season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_CityProjects_Season ON city_projects(manager_id, season_id)");
         _db.Execute("CREATE INDEX IF NOT EXISTS IX_CityEvents_Season ON city_events(manager_id, season_id)");
+        foreach (var indexSql in QueryIndexDefinitions)
+            _db.Execute(indexSql);
     }
 
     void RunMigrations()
