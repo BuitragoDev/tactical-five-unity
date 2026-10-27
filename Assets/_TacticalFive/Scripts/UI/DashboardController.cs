@@ -145,6 +145,18 @@ using System.Threading.Tasks;
     /// </summary>
     private int _preBatchGameDay = int.MinValue;
     private int _preBatchSeasonId = -1;
+    private bool _dayAborted;
+
+    private sealed class GameDayRunState
+    {
+        public int gameDay;
+        public bool fastSim;
+        public bool effectiveSkipPreBatch;
+        public bool navigateToPreGame;
+        public List<GameData> gamesToday;
+        public bool myTeamPlays;
+        public bool hasAllStar;
+    }
     private int _fastSimAutoFixAttempts;
     private bool _fastSimRunning;
     private bool _fastSimStopRequested;
@@ -965,21 +977,43 @@ using System.Threading.Tasks;
         if (gameDay == 0)
         {
             Debug.Log("[Dashboard] No hay más partidos programados.");
-            // Red de seguridad: si no quedan partidos pero la fase no es terminal,
-            // avanzar/cerrar la temporada en lugar de dejar la partida bloqueada.
             TryEscapeStuckPhase();
             if (!fastSim) HideLoading();
             yield break;
         }
 
-        var db = DatabaseManager.Instance.Db;
-
         // En una simulación rápida reanudada tras el modal de alineación, el
         // pre-lote del día ya se commiteó antes del aborto; se evita re-ejecutarlo.
         bool effectiveSkipPreBatch = skipPreBatch || (fastSim && _fastSimSkipPreBatch);
         _fastSimSkipPreBatch = false;
+        _dayAborted = false;
 
-        if (!effectiveSkipPreBatch)
+        var state = new GameDayRunState
+        {
+            gameDay = gameDay,
+            fastSim = fastSim,
+            effectiveSkipPreBatch = effectiveSkipPreBatch,
+            navigateToPreGame = navigateToPreGame
+        };
+
+        var steps = new List<GameDayPipeline.Step>
+        {
+            new GameDayPipeline.Step(GameDayStep.PreBatch, () => RunPreBatch(state)),
+            new GameDayPipeline.Step(GameDayStep.LineupValidation, () => RunLineupValidation(state)),
+            new GameDayPipeline.Step(GameDayStep.PreGameGate, () => RunPreGameGate(state)),
+            new GameDayPipeline.Step(GameDayStep.SimulationBookkeeping, () => RunSimulationBookkeeping(state)),
+            new GameDayPipeline.Step(GameDayStep.PostDay, () => RunPostDay(state))
+        };
+
+        yield return GameDayPipeline.Run(steps,
+            step => Debug.Log($"[GameDay] step={step} gameDay={state.gameDay}"),
+            () => _dayAborted);
+    }
+
+    IEnumerator RunPreBatch(GameDayRunState st)
+    {
+        var db = DatabaseManager.Instance.Db;
+        if (!st.effectiveSkipPreBatch)
         {
             // F7-05: bonus de recuperación del centro de rendimiento de la ciudad.
             int cityRecovery = 0;
@@ -998,9 +1032,9 @@ using System.Threading.Tasks;
 
                 var teamsPlayToday = new HashSet<int>();
                 var todayVenueByTeam = new Dictionary<int, int>();
-                if (gameDay > 0)
+                if (st.gameDay > 0)
                 {
-                    foreach (var g in conn.Table<GameData>().Where(g => g.game_day == gameDay).ToList())
+                    foreach (var g in conn.Table<GameData>().Where(g => g.game_day == st.gameDay).ToList())
                     {
                         teamsPlayToday.Add(g.home_team_id);
                         teamsPlayToday.Add(g.away_team_id);
@@ -1024,11 +1058,11 @@ using System.Threading.Tasks;
                 // se aplica antes de simular el partido de hoy.
                 var lastGameDayByTeam = new Dictionary<int, int>();
                 var lastVenueByTeam = new Dictionary<int, int>();
-                if (gameDay > 0)
+                if (st.gameDay > 0)
                 {
                     var previousGames = conn.Table<GameData>()
                         .Where(g => g.season_id == seasonId
-                                 && g.game_day < gameDay
+                                 && g.game_day < st.gameDay
                                  && g.is_played == 1
                                  && (g.game_type == "regular" || g.game_type == "preseason"))
                         .ToList();
@@ -1056,7 +1090,7 @@ using System.Threading.Tasks;
                     if (!lastGameDayByTeam.TryGetValue(team.id, out int previousDay)) continue;
                     if (!lastVenueByTeam.TryGetValue(team.id, out int previousVenue)) continue;
 
-                    int restDays = TravelHelper.RestDays(previousDay, gameDay);
+                    int restDays = TravelHelper.RestDays(previousDay, st.gameDay);
                     int kilometers = TravelHelper.DistanceKilometers(previousVenue, venue, teamsById);
                     int cost = TravelHelper.FatigueCost(kilometers, restDays);
                     if (cost > 0) travelFatigueByTeam[team.id] = cost;
@@ -1090,7 +1124,7 @@ using System.Threading.Tasks;
                                     severity = InjuryCatalog.SeverityLabel(sev),
                                     days = episodeDays,
                                     season_id = seasonId,
-                                    game_day = gameDay,
+                                    game_day = st.gameDay,
                                     date = today,
                                     outcome = "recuperado",
                                     treated = p.treated
@@ -1201,7 +1235,7 @@ using System.Threading.Tasks;
                             sender_id = 0,
                             title = $"Recuperado: {first} {last}",
                             body = NewsTexts.Recuperacion($"{first} {last}", "lesión muscular", 0),
-                            game_day = gameDay,
+                            game_day = st.gameDay,
                             game_date = _season?.current_date ?? "",
                             created_at = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                             date_sent = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -1228,16 +1262,17 @@ using System.Threading.Tasks;
             catch (System.Exception ex)
             {
                 _pendingRecoveredIds.Clear();
-                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
-                yield break;
+                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, st.fastSim);
+                _dayAborted = true;
+            yield break;
             }
-            if (fastSim) yield return null;
+            if (st.fastSim) yield return null;
 
             // Paso 2: scouts, entrenamiento y renovaciones
         // B38: la fase de simulación + bookkeeping es síncrona y se ejecuta dentro de una
         // única transacción en un solo frame (sin yields entre BeginTransaction y Commit).
         // El respiro de la UI en simulación rápida se da AQUÍ, antes de abrirla.
-        if (fastSim) yield return null;
+        if (st.fastSim) yield return null;
 
         db.BeginTransaction();
             try
@@ -1253,14 +1288,15 @@ using System.Threading.Tasks;
             {
                 db.Rollback();
                 _pendingRecoveredIds.Clear();
-                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
-                yield break;
+                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, st.fastSim);
+                _dayAborted = true;
+            yield break;
             }
-            if (fastSim) yield return null;
+            if (st.fastSim) yield return null;
 
             // Paso 3: traspasos AI, fichajes estrella y psicólogo (hilo de fondo)
             var aiTask = DatabaseManager.Instance.RunInBackgroundAsync(() =>
-                ProcessAIMarket(gameDay));
+                ProcessAIMarket(st.gameDay));
 
             while (!aiTask.IsCompleted)
                 yield return null;
@@ -1272,29 +1308,37 @@ using System.Threading.Tasks;
             catch (System.Exception ex)
             {
                 _pendingRecoveredIds.Clear();
-                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, fastSim);
-                yield break;
+                HandleDayError("Error en el lote pre-partido", "ERROR AL PROCESAR EL DÍA", "Ha ocurrido un error al procesar el día.", ex, st.fastSim);
+                _dayAborted = true;
+            yield break;
             }
         }
 
         // El pre-lote de este día queda commiteado: si más adelante se vuelve a simular
         // el MISMO día (pantalla de previa → IR AL PARTIDO) no debe repetirse.
-        if (!effectiveSkipPreBatch)
+        if (!st.effectiveSkipPreBatch)
         {
-            _preBatchGameDay = gameDay;
+            _preBatchGameDay = st.gameDay;
             _preBatchSeasonId = _season?.id ?? -1;
         }
 
         // Si hay jugadores recuperados y estamos en fast-sim, interrumpir
         // para mostrar el modal (mismo patrón que lesionados/vacíos).
-        if (fastSim && _pendingRecoveredIds.Count > 0)
+        if (st.fastSim && _pendingRecoveredIds.Count > 0)
         {
             _fastSimAborted = true;
             _fastSimAbortRecovered = true;
+            _dayAborted = true;
             yield break;
         }
 
-        var gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, gameDay);
+
+    }
+
+    IEnumerator RunLineupValidation(GameDayRunState st)
+    {
+        st.gamesToday = DatabaseManager.Instance.GetGamesByGameDay(_manager.id, st.gameDay);
+        var gamesToday = st.gamesToday;
 
         // Los partidos G-League comparten game_day con la NBA pero nunca
         // disparan modales de convocatoria ni navegación de mi equipo: los ids
@@ -1302,6 +1346,8 @@ using System.Threading.Tasks;
         bool myTeamPlays = gamesToday.Any(g =>
             !IsGLeagueGame(g) && (g.home_team_id == _myTeam.id || g.away_team_id == _myTeam.id));
         bool hasAllStar = gamesToday.Any(g => g.game_type == "allstar");
+        st.myTeamPlays = myTeamPlays;
+        st.hasAllStar = hasAllStar;
 
         if (myTeamPlays)
         {
@@ -1317,11 +1363,12 @@ using System.Threading.Tasks;
             var injured = GetInjuredActiveLineupPlayers();
             if (injured.Count > 0)
             {
-                if (fastSim)
+                if (st.fastSim)
                 {
                     _fastSimAborted = true;
                     _fastSimAbortInjured = injured;
-                    yield break;
+                    _dayAborted = true;
+            yield break;
                 }
                 _injuredModalResolved = false;
                 _injuredModalGoToQuinteto = false;
@@ -1331,21 +1378,23 @@ using System.Threading.Tasks;
                 {
                     HideLoading();
                     ScreenManager.Instance.GoTo(GameScreen.Quinteto);
-                    yield break;
+                    _dayAborted = true;
+            yield break;
                 }
             }
 
             // Check for tired players (load management) — skipped on fast‑sim re‑entry
-            if (!effectiveSkipPreBatch && PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1)
+            if (!st.effectiveSkipPreBatch && PlayerPrefs.GetInt("TF_LoadMgmt_Enabled", 0) == 1)
             {
-                _loadMgmtIsB2B = IsMyTeamBackToBack(gameDay);
+                _loadMgmtIsB2B = IsMyTeamBackToBack(st.gameDay);
                 _loadMgmtTiredPlayers = GetTiredActivePlayers();
                 if (_loadMgmtIsB2B || _loadMgmtTiredPlayers.Count > 0)
                 {
-                    if (fastSim)
+                    if (st.fastSim)
                     {
                         _fastSimAborted = true;
-                        yield break;
+                        _dayAborted = true;
+            yield break;
                     }
                     _loadMgmtModalResolved = false;
                     _loadMgmtModalGoToQuinteto = false;
@@ -1357,7 +1406,8 @@ using System.Threading.Tasks;
                     {
                         HideLoading();
                         ScreenManager.Instance.GoTo(GameScreen.Quinteto);
-                        yield break;
+                        _dayAborted = true;
+            yield break;
                     }
                 }
             }
@@ -1366,11 +1416,12 @@ using System.Threading.Tasks;
             var emptySlots = GetEmptyStarterSlots();
             if (emptySlots.Count > 0)
             {
-                if (fastSim)
+                if (st.fastSim)
                 {
                     _fastSimAborted = true;
                     _fastSimAbortEmptySlots = emptySlots;
-                    yield break;
+                    _dayAborted = true;
+            yield break;
                 }
                 _emptyLineupModalResolved = false;
                 _emptyLineupGoToQuinteto = false;
@@ -1380,7 +1431,8 @@ using System.Threading.Tasks;
                 {
                     HideLoading();
                     ScreenManager.Instance.GoTo(GameScreen.Quinteto);
-                    yield break;
+                    _dayAborted = true;
+            yield break;
                 }
             }
 
@@ -1390,11 +1442,12 @@ using System.Threading.Tasks;
             var rotStatus = GetRotationStatus();
             if (!rotStatus.IsComplete)
             {
-                if (fastSim)
+                if (st.fastSim)
                 {
                     _fastSimAborted = true;
                     _fastSimAbortRotation = true;
-                    yield break;
+                    _dayAborted = true;
+            yield break;
                 }
                 _rotationModalResolved = false;
                 _rotationModalGoToRotation = false;
@@ -1404,41 +1457,55 @@ using System.Threading.Tasks;
                 {
                     HideLoading();
                     ScreenManager.Instance.GoTo(GameScreen.Rotation);
-                    yield break;
+                    _dayAborted = true;
+            yield break;
                 }
             }
         }
 
+
+    }
+
+    IEnumerator RunPreGameGate(GameDayRunState st)
+    {
         // ── PreGame: navegar ANTES de simular ──
-        if (navigateToPreGame && myTeamPlays)
+        if (st.navigateToPreGame && st.myTeamPlays)
         {
             Refresh();
             GameSaveManager.UpdateSlotFromDatabase(DatabaseManager.Instance.ActiveSaveSlot);
             HideLoading();
-            Debug.Log($"[Dashboard] Día {gameDay} — pre-lote listo → PreGame (sin simular)");
+            Debug.Log($"[Dashboard] Día {st.gameDay} — pre-lote listo → PreGame (sin simular)");
             ScreenManager.Instance.GoTo(GameScreen.PreGame);
+            _dayAborted = true;
             yield break;
         }
 
+
+    }
+
+    IEnumerator RunSimulationBookkeeping(GameDayRunState st)
+    {
+        var db = DatabaseManager.Instance.Db;
         db.BeginTransaction();
         try
         {
             // SIM-08: limpieza INCONDICIONAL. En un día sin partidos previos que crea
-            // clasificatorios, `gamesToday` se leyó vacío y quedaban resultados del día
+            // clasificatorios, `st.gamesToday` se leyó vacío y quedaban resultados del día
             // anterior mezclados en el cache.
             GameResultCache.Clear();
-            if (gamesToday.Count > 0)
-                GameResultCache.LastGameDay = gameDay;
+            if (st.gamesToday.Count > 0)
+                GameResultCache.LastGameDay = st.gameDay;
         }
         catch (System.Exception ex)
         {
             db.Rollback();
             GameResultCache.Clear();
-            HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
+            HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, st.fastSim);
+            _dayAborted = true;
             yield break;
         }
 
-        foreach (var game in gamesToday)
+        foreach (var game in st.gamesToday)
         {
             try
             {
@@ -1448,42 +1515,44 @@ using System.Threading.Tasks;
             {
                 db.Rollback();
                 GameResultCache.Clear();
-                HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
-                yield break;
+                HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, st.fastSim);
+                _dayAborted = true;
+            yield break;
             }
         }
 
         // Recalculate team chemistry for all teams involved today
-        foreach (var game in gamesToday)
+        foreach (var game in st.gamesToday)
         {
             try
             {
-                int chem = DatabaseManager.Instance.CalculateTeamChemistry(game.home_team_id, gameDay);
+                int chem = DatabaseManager.Instance.CalculateTeamChemistry(game.home_team_id, st.gameDay);
                 DatabaseManager.Instance.UpdateTeamChemistry(game.home_team_id, chem);
-                chem = DatabaseManager.Instance.CalculateTeamChemistry(game.away_team_id, gameDay);
+                chem = DatabaseManager.Instance.CalculateTeamChemistry(game.away_team_id, st.gameDay);
                 DatabaseManager.Instance.UpdateTeamChemistry(game.away_team_id, chem);
             }
             catch (System.Exception ex)
             {
                 db.Rollback();
                 GameResultCache.Clear();
-                HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, fastSim);
-                yield break;
+                HandleDayError("Error simulando el día", "ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.", ex, st.fastSim);
+                _dayAborted = true;
+            yield break;
             }
         }
 
         try
         {
-            var nbaGamesToday = gamesToday.Where(g => !IsGLeagueGame(g)).ToList();
+            var nbaGamesToday = st.gamesToday.Where(g => !IsGLeagueGame(g)).ToList();
             if (nbaGamesToday.Count > 0)
             {
-                QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, gameDay, _season?.current_date ?? "");
+                QuickNewsGenerator.Generate(_manager, _myTeam, _season, nbaGamesToday, st.gameDay, _season?.current_date ?? "");
 
                 // Hitos de legado (E1): antes de los hilos, para que la narrativa los vea.
-                MilestoneService.EvaluateDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
+                MilestoneService.EvaluateDay(_manager, _myTeam, _season, st.gameDay, _season?.current_date ?? "");
 
                 // Motor de narrativa: abre/escala/cierra hilos (rachas) con noticias y efectos.
-                StorylineService.ProcessDay(_manager, _myTeam, _season, gameDay, _season?.current_date ?? "");
+                StorylineService.ProcessDay(_manager, _myTeam, _season, st.gameDay, _season?.current_date ?? "");
 
                 AchievementService.EvaluateGameDay(_manager.id, _myTeam.id, _season.id);
             }
@@ -1498,7 +1567,84 @@ using System.Threading.Tasks;
             Debug.LogError($"[Cup] Error avanzando la NBA Cup: {ex.Message}");
         }
 
-        // ── Phase transitions ──
+        RunPhaseTransitions(st.gameDay);
+
+        // ── G-League postseason (competición paralela; no toca seasons.phase) ──
+        try
+        {
+            GLeaguePostSeason.AdvanceIfNeeded(_manager.id, _season, _myTeam?.id ?? 0);
+        }
+        catch (System.Exception exGl)
+        {
+            Debug.LogError($"[Dashboard] Error en postseason G-League: {exGl.Message}\n{exGl.StackTrace}");
+        }
+
+        // ── F7-05: proyectos y eventos de ciudad ──
+        try
+        {
+            CityService.Advance(_manager, _myTeam, _season, st.gameDay);
+        }
+        catch (System.Exception exCity)
+        {
+            Debug.LogError($"[Dashboard] Error en la capa de ciudad: {exCity.Message}\n{exCity.StackTrace}");
+        }
+
+        UpdateManagerStats(st.gameDay);
+
+        TeamEconomyService.ProcessMonthlyPayroll(st.gameDay, _manager, _myTeam, _season);
+        TeamEconomyService.ProcessSubscriptionRevenue(st.gameDay, _manager, _myTeam, _season);
+
+        if (_season.phase == "finished")
+        {
+            DatabaseManager.Instance.UpdateHistoricalPlayerStatsFromSeason(_season.id, _manager.id);
+            DatabaseManager.Instance.SaveSeasonEndRecords(_season.id, _manager.id);
+            AssignSeasonPoints();
+            AchievementService.EvaluateSeasonEnd(_manager.id, _myTeam.id, _season.id);
+        }
+
+        RunCalendarAndAwards(st.gameDay);
+            DatabaseManager.Instance.UpdateSeason(_season);
+            db.Commit();
+
+            // El día queda cerrado: el siguiente día necesita su propio pre-lote.
+            _preBatchGameDay = int.MinValue;
+            _preBatchSeasonId = -1;
+        }
+        catch (System.Exception ex)
+        {
+            db.Rollback();
+            _showDeadlineWeekModal = false;
+            GameResultCache.Clear();
+            Debug.LogError($"[GameDay] Error simulando el día, revertido: {ex.Message}\n{ex.StackTrace}");
+            if (st.fastSim)
+            {
+                _fastSimAborted = true;
+                _dayAborted = true;
+            yield break;
+            }
+            HideLoading();
+            ShowOfferResultModal("ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.\n\n" + ex.Message, -1);
+            _dayAborted = true;
+            yield break;
+        }
+        finally
+        {
+            // Red de seguridad: si la corrutina se aborta a mitad (StopAllCoroutines al
+            // salir de la pantalla) Unity ejecuta este finally. Sin él, la transacción
+            // quedaría abierta y bloquearía todas las escrituras de la sesión.
+            if (db.IsInTransaction)
+            {
+                try { db.Rollback(); } catch { }
+                GameResultCache.Clear();
+                Debug.LogWarning("[GameDay] Día abortado a mitad de transacción: revertido.");
+            }
+        }
+
+
+    }
+
+    void RunPhaseTransitions(int gameDay)
+    {
         if (_season.phase == "regular" || _season.phase == "preseason")
         {
             bool allRegularPlayed = !DatabaseManager.Instance.Db.Table<GameData>()
@@ -1744,39 +1890,10 @@ using System.Threading.Tasks;
             }
         }
 
-        // ── G-League postseason (competición paralela; no toca seasons.phase) ──
-        try
-        {
-            GLeaguePostSeason.AdvanceIfNeeded(_manager.id, _season, _myTeam?.id ?? 0);
-        }
-        catch (System.Exception exGl)
-        {
-            Debug.LogError($"[Dashboard] Error en postseason G-League: {exGl.Message}\n{exGl.StackTrace}");
-        }
+    }
 
-        // ── F7-05: proyectos y eventos de ciudad ──
-        try
-        {
-            CityService.Advance(_manager, _myTeam, _season, gameDay);
-        }
-        catch (System.Exception exCity)
-        {
-            Debug.LogError($"[Dashboard] Error en la capa de ciudad: {exCity.Message}\n{exCity.StackTrace}");
-        }
-
-        UpdateManagerStats(gameDay);
-
-        TeamEconomyService.ProcessMonthlyPayroll(gameDay, _manager, _myTeam, _season);
-        TeamEconomyService.ProcessSubscriptionRevenue(gameDay, _manager, _myTeam, _season);
-
-        if (_season.phase == "finished")
-        {
-            DatabaseManager.Instance.UpdateHistoricalPlayerStatsFromSeason(_season.id, _manager.id);
-            DatabaseManager.Instance.SaveSeasonEndRecords(_season.id, _manager.id);
-            AssignSeasonPoints();
-            AchievementService.EvaluateSeasonEnd(_manager.id, _myTeam.id, _season.id);
-        }
-
+    void RunCalendarAndAwards(int gameDay)
+    {
         _season.current_game_day = gameDay;
         if (!string.IsNullOrEmpty(_season.current_date))
         {
@@ -1830,52 +1947,21 @@ using System.Threading.Tasks;
                 EvaluateMonthlyAwards(newDate);
             }
         }
-            DatabaseManager.Instance.UpdateSeason(_season);
-            db.Commit();
+    }
 
-            // El día queda cerrado: el siguiente día necesita su propio pre-lote.
-            _preBatchGameDay = int.MinValue;
-            _preBatchSeasonId = -1;
-        }
-        catch (System.Exception ex)
-        {
-            db.Rollback();
-            _showDeadlineWeekModal = false;
-            GameResultCache.Clear();
-            Debug.LogError($"[GameDay] Error simulando el día, revertido: {ex.Message}\n{ex.StackTrace}");
-            if (fastSim)
-            {
-                _fastSimAborted = true;
-                yield break;
-            }
-            HideLoading();
-            ShowOfferResultModal("ERROR AL SIMULAR EL DÍA", "Ha ocurrido un error al simular el día.\n\n" + ex.Message, -1);
-            yield break;
-        }
-        finally
-        {
-            // Red de seguridad: si la corrutina se aborta a mitad (StopAllCoroutines al
-            // salir de la pantalla) Unity ejecuta este finally. Sin él, la transacción
-            // quedaría abierta y bloquearía todas las escrituras de la sesión.
-            if (db.IsInTransaction)
-            {
-                try { db.Rollback(); } catch { }
-                GameResultCache.Clear();
-                Debug.LogWarning("[GameDay] Día abortado a mitad de transacción: revertido.");
-            }
-        }
-
+    IEnumerator RunPostDay(GameDayRunState st)
+    {
         _allGames = DatabaseManager.Instance.GetStandingsGames(_manager.id);
         _teamRecordCache = null;
 
         if (_showDeadlineWeekModal)
         {
             _showDeadlineWeekModal = false;
-            ShowTradeDeadlineModal(fastSim);
+            ShowTradeDeadlineModal(st.fastSim);
             yield return new WaitUntil(() => _firedOverlay.style.display == DisplayStyle.None);
         }
 
-        if (fastSim)
+        if (st.fastSim)
         {
             // En modo simulación rápida no se navega ni se refresca por día:
             // el refresh se hace al final. Si hay ofertas maduradas o propuestas
@@ -1887,8 +1973,10 @@ using System.Threading.Tasks;
             {
                 _fastSimAborted = true;
                 _fastSimAbortOffers = true;
-                yield break;
+                _dayAborted = true;
+            yield break;
             }
+            _dayAborted = true;
             yield break;
         }
 
@@ -1898,36 +1986,37 @@ using System.Threading.Tasks;
 
         HideLoading();
 
-        if (gamesToday.Count == 0)
+        if (st.gamesToday.Count == 0)
         {
             ShowPendingRecoveryModal();
             ShowPendingIRReleaseModal();
             ProcessMaturedOffers();
-            Debug.Log($"[Dashboard] Día {gameDay} — sin partidos, continúa en Dashboard");
+            Debug.Log($"[Dashboard] Día {st.gameDay} — sin partidos, continúa en Dashboard");
         }
-        else if (myTeamPlays || hasAllStar)
+        else if (st.myTeamPlays || st.hasAllStar)
         {
-            if (hasAllStar)
+            if (st.hasAllStar)
             {
-                Debug.Log($"[Dashboard] Día {gameDay} — All-Star Game → MatchDay");
+                Debug.Log($"[Dashboard] Día {st.gameDay} — All-Star Game → MatchDay");
                 ScreenManager.Instance.GoTo(GameScreen.MatchDay);
             }
-            else if (navigateToPreGame)
+            else if (st.navigateToPreGame)
             {
-                Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → PreGame");
+                Debug.Log($"[Dashboard] Día {st.gameDay} — mi equipo juega → PreGame");
                 ScreenManager.Instance.GoTo(GameScreen.PreGame);
             }
             else
             {
-                Debug.Log($"[Dashboard] Día {gameDay} — mi equipo juega → MatchDay");
+                Debug.Log($"[Dashboard] Día {st.gameDay} — mi equipo juega → MatchDay");
                 ScreenManager.Instance.GoTo(GameScreen.MatchDay);
             }
         }
         else
         {
-            Debug.Log($"[Dashboard] Día {gameDay} — {gamesToday.Count} partidos → GameResults");
+            Debug.Log($"[Dashboard] Día {st.gameDay} — {st.gamesToday.Count} partidos → GameResults");
             ScreenManager.Instance.GoTo(GameScreen.GameResults);
         }
+
     }
 
     void ProcessSingleGame(GameData game)

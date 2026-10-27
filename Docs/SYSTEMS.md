@@ -214,6 +214,15 @@
 - **Añadir idioma:** crear `Resources/Localization/{code}.json` con las mismas claves y llamar a `SetLanguage(code)` desde el control de ajustes que se implemente. No hace falta tocar controllers.
 - **Invariante:** `LocalizationTests` falla si hay un `text="..."`/`new Label("...")` estático sin clave o un token sin entrada. El extractor `--check` es la validación de mantenimiento.
 
+## S22. Pipeline del día (F8-03)
+
+- **Files:** `GameDayPipeline.cs`, `DashboardController.ProcessGameDayRoutine` + pasos `RunPreBatch`, `RunLineupValidation`, `RunPreGameGate`, `RunSimulationBookkeeping`, `RunPhaseTransitions`, `RunCalendarAndAwards`, `RunPostDay`.
+- **Orden:** `PreBatch → LineupValidation → PreGameGate → SimulationBookkeeping → PostDay`; dentro de la transacción: `Simulation → Bookkeeping → PhaseTransitions → Calendar`.
+- **Abortos:** `_dayAborted` lo activa cualquier modal/navegación/error; `GameDayPipeline.Run` comprueba el flag después de cada paso y detiene el día.
+- **Transacción:** `RunSimulationBookkeeping` mantiene simulación + bookkeeping + transiciones + calendario en un solo bloque sin `yield return`; `RunPreBatch` conserva su propia transacción para scouts/entrenamiento/renovaciones.
+- **FastSim:** sigue siendo el bucle externo; reutiliza el mismo pipeline con `fastSim:true`.
+- **Tests:** `GameDayPipelineTests` cubre orden, suborden y parada por aborto.
+
 ---
 
 ## Open questions

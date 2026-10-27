@@ -189,6 +189,7 @@ Método `SeedX()` en `DatabaseManager` con guard de tabla-vacía en `SeedStaticD
 | `Scripts/Core/TradeHelper.cs` | Salary cap, aprons, luxury tax, valoración IA |
 | `Scripts/Core/TeamEconomyService.cs` | Asistencia, taquilla, patrocinio/TV de partido, nómina, luxury tax y abonos (F8-01) |
 | `Scripts/Core/AiMarketService.cs` | Mercado IA: traspasos, buyout, FA, S&T, estrellas y renovaciones (F8-02) |
+| `Scripts/Core/GameDayPipeline.cs` | Orden explícito de pasos/subpasos del día y runner con aborto (F8-03) |
 | `Scripts/UI/DashboardController.cs` | El hub: día, sim, traspasos IA, economía, modales |
 | `Scripts/UI/RosterController.cs` | Plantilla, renovaciones, buyouts, trade block |
 | `Scripts/UI/MarketController.cs` | Traspasos, FA, S&T, deadline |
