@@ -24,6 +24,7 @@
 | **Cartera** | "Wallet" screen (player/contracts) | `CarteraController` |
 | **Traspaso** | Trade | `TradeData`/`MarketController` |
 | **Palmarés / Palmares** | Honors history | `PalmaresController` |
+| **TheCity / Ciudad** | Centro de mando de la franquicia: pulso, inspector por edificio, proyectos y eventos | `TheCityController`, `CityCatalog`, `CityService`, `city_projects`/`city_events` |
 | **Premios** | Awards (MVP, ROY, …) | `PremiosController`, `awards_records` |
 | **Récords** | Records | `RecordsController` |
 | **Pabellón** | Arena | `ArenaController`; also staff position `"PABELLON"` |

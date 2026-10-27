@@ -68,4 +68,8 @@ public static class NewsType
     public const string PREMIOS_MES = "premios_mes";
     public const string QUEJA = "queja";
     public const string PREOCUPACION = "preocupacion";
+
+    // ── CIUDAD (F7-05) ──
+    public const string PROYECTO_CIUDAD = "proyecto_ciudad";
+    public const string EVENTO_CIUDAD = "evento_ciudad";
 }

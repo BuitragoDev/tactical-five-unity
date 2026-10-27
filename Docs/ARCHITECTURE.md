@@ -43,6 +43,7 @@ Tactical Five is a **data-driven, single-scene, UI-Toolkit-first** management ga
 | **Simulation/calibration** | `GameSimulator.cs`, `MonteCarloRunner.cs`, `MonteCarloCalibration.cs`, `TravelHelper.cs`, `CupHelper.cs`, `SummerLeagueHelper.cs` | Possession sim; seeded offline league lab, versioned acceptance profile and markdown report (`MonteCarloLabWindow`, Editor-only); travel distances and rest/fatigue for the schedule; NBA Cup group/knockout flow |
 | **Season generation** | `ScheduleGenerator.cs`, `PlayoffsGenerator.cs`, `DraftGenerator.cs` | 82-game schedule + All-Star; Play-In/Playoffs; draft lottery + class |
 | **Salary/trades** | `TradeHelper.cs` | Cap constants, trade validation, luxury tax, AI accept evaluation, pick bonus |
+| **City layer (F7-05)** | `CityCatalog.cs`, `CityService.cs`, `CityData.cs` | Catálogo puro y lógica persistente de proyectos/eventos de TheCity; efectos acotados sobre asistencia, físico, confianza y moral |
 | **Economy** | `FinanceRecord.cs`, `LoanData.cs`, `SponsorData.cs`, `TvChannelData.cs`, `TeamSettingsData.cs` | Budget, ticket/subscription, sponsors, TV, loans, renovations (logic in controllers) |
 | **Personnel** | `EmployeeData.cs`, `ScoutData.cs`, `CoachRankingData.cs` | Staff hiring/firing, scouting, coaching rankings |
 | **Soft stats** | `PlayerPersonalityData.cs`, `PlayerRelationshipData.cs`, `TrainingData.cs`, `LineupData.cs` | Personalities, relationships, training, rotations |

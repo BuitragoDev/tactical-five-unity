@@ -194,6 +194,15 @@
 - **Invariante clave:** los GameData GL guardan ids de filial codificados `+GAME_TEAM_ID_OFFSET (1000)`; descodificar con `DecodeGlTeamId`. Los prospectos usan ids de simulación `+PROSPECT_ID_OFFSET (500000)`.
 - **Conteos:** `GetRosterCount` (excluye IR y two-way) se usa para plazas estándar en Market, Dashboard, NewSeason y Records. El máximo two-way se comprueba por separado; el roster de partido puede sumar ambas categorías.
 
+## S20. Ciudad / TheCity (F7-05)
+
+- **Files:** `CityCatalog.cs` (catálogo puro: proyectos, costes, niveles, eventos y resúmenes de efecto), `CityService.cs` (inicio/completado de proyectos, generación/resolución de eventos y aplicación de efectos), `CityData.cs` (`city_projects`, `city_events`), `TheCityController.cs` + `TheCity.uxml/.uss` (pulso, hotspots, inspector y pestañas), `DatabaseManager.Teams.cs` (CRUD de ciudad).
+- **Decisión:** TheCity es un **centro de mando**, no una economía paralela. Los accesos profundos siguen en sus pantallas; la capa nueva solo aporta proyectos y eventos con efectos acotados.
+- **Proyectos:** `entorno_pabellon` (+4 % asistencia en casa por nivel), `centro_rendimiento` (+2 físico en días de descanso por nivel), `programa_aficion` (confianza al completar) y `centro_medios` (confianza + moral). Se pagan con `teams.budget`, duran 8–12 días y una fila por nivel en `city_projects`.
+- **Eventos:** queja vecinal, campaña de abonados, visita escolar, ola de calor y rueda de prensa. Como máximo uno pendiente por temporada; `CityService.MaybeGenerateEvent` solo genera en el ciclo diario (día múltiplo de 6 y 45 % de probabilidad) y no después de `finished`.
+- **Integración:** `DashboardController.CalculateAttendance` aplica el multiplicador del entorno; el pre-lote suma el bonus de recuperación solo al equipo del usuario; `CityService.Advance` corre dentro de la transacción del día. Los avisos usan `MessageData` (`NewsType.PROYECTO_CIUDAD`/`EVENTO_CIUDAD`).
+- **Invariante:** no dupliques estas reglas en controllers ni añadas ingresos/gastos de ciudad fuera de `teams.budget`. Los tests `CityCatalogTests` y `CityUiTests` cubren catálogo y carga UI.
+
 ---
 
 ## Open questions

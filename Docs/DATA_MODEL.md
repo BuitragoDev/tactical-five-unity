@@ -79,6 +79,11 @@ players 1──1 hof_players (player_id)            teams 1──N retired_numbe
 - `summer_league_stats`: `id`, `manager_id`, `season_id`, `player_id`, `team_id`, `games`, `minutes`, `points`, `rebounds`, `assists`, `development_gain`, `created_at`.
 - Una fila por convocado; `development_gain` es 0/1 y el camp no se repite si ya existen filas para `manager_id + season_id`.
 
+### Ciudad (F7-05)
+- `city_projects`: `id`, `manager_id`, `season_id`, `team_id`, `project_key` (`entorno_pabellon`|`centro_rendimiento`|`programa_aficion`|`centro_medios`), `level`, `status` (`active`|`completed`), `started_day`, `completion_day`, `cost`, `created_at`. Una fila por nivel iniciado; `GetCityProjectLevel` cuenta solo las completadas y el nivel pasivo se consulta por temporada.
+- `city_events`: `id`, `manager_id`, `season_id`, `event_key` (`queja_vecinal`|`campana_abonados`|`visita_escolar`|`ola_calor`|`rueda_prensa`), `status` (`pending`|`resolved`), `game_day`, `created_at`, `resolved_day`, `choice_index`. Solo se muestra el evento pendiente de la temporada activa.
+- Efectos acotados: asistencia en casa (+4 %/nivel), físico en descanso (+2/nivel), confianza de la afición y moral/físico del vestuario. No crean economía paralela; los costes salen de `teams.budget` y los avisos usan `messages` (`NewsType.PROYECTO_CIUDAD`/`EVENTO_CIUDAD`).
+
 **Reglas simplificadas (F4-05, no CBA oficial):** service 0–3 → RFA; 4+ → UFA. QO = `max(salario_mínimo_de_su_experiencia, salario_anterior × 1.25)`. Hold RFA = QO; UFA = 120 % del salario previo o 150 % si `seasons_with_team ≥ 3`. Two-way no genera cap hold. Matching IA por regla de `FreeAgencyRules`; topes/ventanas CBA quedan para F4-07.
 
 ### season_records (`SeasonRecord`)

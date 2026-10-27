@@ -981,6 +981,13 @@ using System.Threading.Tasks;
 
         if (!effectiveSkipPreBatch)
         {
+            // F7-05: bonus de recuperación del centro de rendimiento de la ciudad.
+            int cityRecovery = 0;
+            if (_manager != null && _season != null && _myTeam != null)
+                cityRecovery = CityCatalog.RecoveryBonus(
+                    DatabaseManager.Instance.GetCityProjectLevel(
+                        _manager.id, _season.id, CityCatalog.ProjectPerformance));
+
             // Paso 1: lesiones y recuperaciones (background)
             var recoveryTask = DatabaseManager.Instance.RunInBackground(conn =>
             {
@@ -1121,7 +1128,9 @@ using System.Threading.Tasks;
                             // +10 en día de descanso: compensa el desgaste de la
                             // temporada sin que los titulares acaben hundidos (antes
                             // +8 dejaba un drenaje neto que hacía caer el acierto).
-                            p.fisico = Mathf.Min(99, p.fisico + 10);
+                            // F7-05: el centro de rendimiento añade 2 por nivel.
+                            int restRecovery = 10 + (p.team_id == _myTeam.id ? cityRecovery : 0);
+                            p.fisico = Mathf.Min(99, p.fisico + restRecovery);
                             conn.Update(p);
                         }
                         else if (p.injury_days <= 0
@@ -1743,6 +1752,16 @@ using System.Threading.Tasks;
         catch (System.Exception exGl)
         {
             Debug.LogError($"[Dashboard] Error en postseason G-League: {exGl.Message}\n{exGl.StackTrace}");
+        }
+
+        // ── F7-05: proyectos y eventos de ciudad ──
+        try
+        {
+            CityService.Advance(_manager, _myTeam, _season, gameDay);
+        }
+        catch (System.Exception exCity)
+        {
+            Debug.LogError($"[Dashboard] Error en la capa de ciudad: {exCity.Message}\n{exCity.StackTrace}");
         }
 
         UpdateManagerStats(gameDay);
@@ -8072,7 +8091,7 @@ using System.Threading.Tasks;
         var finSettings = DatabaseManager.Instance.GetTeamSettings(homeTeam.id);
         if (finSettings != null) ticketPrice = (int)finSettings.ticket_price;
 
-        return MarketEconomy.EstimateHomeAttendance(
+        int attendance = MarketEconomy.EstimateHomeAttendance(
             homeTeam.capacity,
             homeWinPct,
             rivalWinPct,
@@ -8086,6 +8105,16 @@ using System.Threading.Tasks;
             ticketPrice,
             UnityEngine.Random.value,
             UnityEngine.Random.value);
+
+        // F7-05: el entorno del pabellón mejora la asistencia de los partidos del usuario.
+        if (myTeamIsHome && _season != null)
+        {
+            int level = DatabaseManager.Instance.GetCityProjectLevel(
+                _manager.id, _season.id, CityCatalog.ProjectArena);
+            attendance = Mathf.RoundToInt(attendance * CityCatalog.AttendanceMultiplier(level));
+        }
+
+        return Mathf.Clamp(attendance, 0, homeTeam.capacity);
     }
 
     float GetObjectiveComplianceFactor(TeamData homeTeam, List<GameData> teamGames)

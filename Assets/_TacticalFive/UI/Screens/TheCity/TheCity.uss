@@ -1,5 +1,6 @@
 /* ══════════════════════════════════════════
    THE CITY — TheCity.uss
+   Hub vivo + capa ligera de proyectos/eventos (F7-05)
    ══════════════════════════════════════════ */
 
 .thecity-root {
@@ -16,16 +17,107 @@
     flex-grow: 1;
     min-width: 0;
     min-height: 0;
-    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/TheCity/city_map.png");
-    -unity-background-scale-mode: scale-and-crop;
+    background-color: rgb(15, 17, 23);
 }
 
 .thecity-content {
     flex-direction: column;
     flex-grow: 1;
-    position: relative;
-    padding: 0;
+    padding: 12px 20px 16px 20px;
     min-height: 0;
+    overflow: hidden;
+}
+
+/* ══ PULSO DE LA CIUDAD ══ */
+
+.city-pulse-row {
+    flex-direction: row;
+    height: 68px;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.city-pulse-brand {
+    width: 190px;
+    flex-shrink: 0;
+    justify-content: center;
+    padding: 0 12px;
+    margin-right: 8px;
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    background-color: rgb(18, 21, 28);
+    border-radius: 6px;
+}
+
+.city-pulse-kicker {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 18px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 2px;
+}
+
+.city-pulse-team {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(179, 190, 214);
+    margin-top: 2px;
+}
+
+.city-pulse-card {
+    flex-grow: 1;
+    flex-basis: 0;
+    justify-content: center;
+    padding: 6px 12px;
+    margin-right: 8px;
+    min-width: 0;
+    border-width: 1px;
+    border-color: rgb(48, 55, 68);
+    background-color: rgb(18, 21, 28);
+    border-radius: 6px;
+}
+
+.city-pulse-card--alert {
+    border-color: rgb(120, 95, 30);
+}
+
+.city-pulse-label {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 12px;
+    color: rgb(120, 132, 155);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.city-pulse-value {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/BarlowCondensed-Bold.ttf");
+    font-size: 24px;
+    color: rgb(255, 255, 255);
+    margin-top: 1px;
+    white-space: normal;
+}
+
+.city-pulse-value--small {
+    font-size: 14px;
+    color: rgb(212, 160, 23);
+}
+
+/* ══ MAPA + INSPECTOR ══ */
+
+.city-workspace {
+    flex-direction: row;
+    flex-grow: 1;
+    min-height: 0;
+}
+
+.city-map {
+    flex-grow: 1;
+    min-width: 0;
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 8px;
+    background-image: url("project://database/Assets/_TacticalFive/Art/Resources/TheCity/city_map.png");
+    -unity-background-scale-mode: scale-and-crop;
+    position: relative;
     overflow: hidden;
 }
 
@@ -33,22 +125,22 @@
 
 .city-hotspot {
     position: absolute;
-    width: 210px;
-    height: 58px;
+    width: 200px;
+    height: 86px;
     align-items: center;
 }
 
 .city-bubble {
-    width: 210px;
-    min-height: 46px;
-    padding: 10px 14px;
+    width: 200px;
+    min-height: 42px;
+    padding: 8px 12px;
     color: rgb(232, 238, 248);
     background-color: rgb(17, 24, 34);
     border-width: 1px;
     border-color: rgb(212, 160, 23);
-    border-radius: 23px;
+    border-radius: 21px;
     -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
-    font-size: 18px;
+    font-size: 16px;
     letter-spacing: 1px;
     -unity-text-align: middle-center;
     cursor: pointer;
@@ -64,8 +156,8 @@
     position: absolute;
     width: 14px;
     height: 14px;
-    bottom: 0px;
-    left: 98px;
+    bottom: 30px;
+    left: 93px;
     background-color: rgb(17, 24, 34);
     border-right-width: 1px;
     border-bottom-width: 1px;
@@ -74,13 +166,301 @@
     rotate: 45deg;
 }
 
+.city-status {
+    width: 200px;
+    margin-top: 12px;
+    padding: 1px 8px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 12px;
+    color: rgb(212, 160, 23);
+    background-color: rgb(13, 15, 20);
+    border-width: 1px;
+    border-color: rgb(70, 62, 40);
+    border-radius: 9px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+}
+
 /* Posiciones iniciales, referidas al edificio de la imagen de fondo. */
-.city-hotspot--hospital { left: 10%; top: 9%; }
-.city-hotspot--arena { left: 50%; top: 5%; }
-.city-hotspot--training { right: 8%; top: 12%; }
-.city-hotspot--league { left: 60%; top: 31%; }
-.city-hotspot--personnel { left: 18%; top: 37%; }
-.city-hotspot--bank { left: 39%; top: 48%; }
-.city-hotspot--newspaper { left: 7%; top: 59%; }
-.city-hotspot--statistics { left: 28%; top: 66%; }
-.city-hotspot--museum { left: 65%; top: 63%; }
+.city-hotspot--hospital { left: 9%; top: 8%; }
+.city-hotspot--arena { left: 49%; top: 4%; }
+.city-hotspot--training { right: 7%; top: 11%; }
+.city-hotspot--league { left: 60%; top: 30%; }
+.city-hotspot--personnel { left: 17%; top: 34%; }
+.city-hotspot--bank { left: 38%; top: 45%; }
+.city-hotspot--newspaper { left: 6%; top: 56%; }
+.city-hotspot--statistics { left: 27%; top: 63%; }
+.city-hotspot--museum { left: 64%; top: 60%; }
+
+/* ══ INSPECTOR ══ */
+
+.city-inspector {
+    width: 420px;
+    min-width: 360px;
+    max-width: 460px;
+    margin-left: 12px;
+    padding: 14px;
+    flex-direction: column;
+    background-color: rgb(18, 21, 28);
+    border-width: 1px;
+    border-color: rgb(120, 95, 30);
+    border-radius: 8px;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.city-inspector-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 25px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+}
+
+.city-inspector-subtitle {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(212, 160, 23);
+    margin-top: 2px;
+    margin-bottom: 10px;
+    white-space: normal;
+}
+
+.city-tabs {
+    flex-direction: row;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+}
+
+.city-tab {
+    flex-grow: 1;
+    flex-basis: 0;
+    margin-right: 4px;
+    padding: 7px 4px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    letter-spacing: 1px;
+    color: rgb(150, 160, 180);
+    background-color: rgb(23, 27, 35);
+    border-width: 1px;
+    border-color: rgb(48, 55, 68);
+    border-radius: 4px;
+    -unity-text-align: middle-center;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.city-tab:hover {
+    color: rgb(255, 255, 255);
+    border-color: rgb(120, 95, 30);
+}
+.city-tab--active {
+    color: rgb(212, 160, 23);
+    border-color: rgb(212, 160, 23);
+    background-color: rgb(33, 32, 28);
+}
+
+.city-inspector-body {
+    flex-grow: 1;
+    min-height: 0;
+    overflow: hidden;
+    flex-direction: column;
+}
+
+.city-section-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(212, 160, 23);
+    letter-spacing: 1px;
+    margin-top: 10px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+}
+
+.city-info-row {
+    flex-direction: row;
+    margin-bottom: 4px;
+}
+
+.city-info-label {
+    width: 105px;
+    flex-shrink: 0;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(120, 132, 155);
+}
+
+.city-info-value {
+    flex-grow: 1;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(232, 238, 248);
+    white-space: normal;
+}
+
+.city-description {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    margin-top: 4px;
+}
+
+.city-action {
+    width: 100%;
+    margin-top: 8px;
+    padding: 9px 12px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    letter-spacing: 1px;
+    color: rgb(100, 200, 140);
+    background-color: rgb(20, 36, 35);
+    border-width: 1px;
+    border-color: rgb(39, 174, 96);
+    border-radius: 6px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+.city-action:hover {
+    background-color: rgb(23, 59, 45);
+}
+.city-action--ghost {
+    color: rgb(212, 160, 23);
+    background-color: rgb(33, 32, 28);
+    border-color: rgb(120, 95, 30);
+}
+.city-action--ghost:hover {
+    background-color: rgb(44, 40, 28);
+}
+.city-action--danger {
+    color: rgb(230, 120, 100);
+    background-color: rgb(35, 25, 30);
+    border-color: rgb(192, 57, 43);
+}
+.city-action--danger:hover {
+    background-color: rgb(62, 30, 32);
+}
+.city-action--disabled {
+    opacity: 0.55;
+}
+
+.city-project-card {
+    flex-direction: column;
+    padding: 9px 10px;
+    margin-bottom: 8px;
+    background-color: rgb(23, 27, 35);
+    border-width: 1px;
+    border-color: rgb(48, 55, 68);
+    border-radius: 5px;
+}
+
+.city-project-head {
+    flex-direction: row;
+    align-items: center;
+}
+
+.city-project-name {
+    flex-grow: 1;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 14px;
+    color: rgb(255, 255, 255);
+    white-space: normal;
+}
+
+.city-project-level {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(212, 160, 23);
+    margin-left: 6px;
+}
+
+.city-project-desc {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    margin-top: 2px;
+}
+
+.city-project-status {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 12px;
+    color: rgb(130, 145, 170);
+    margin-top: 4px;
+    white-space: normal;
+}
+
+.city-event-card {
+    flex-direction: column;
+    padding: 10px;
+    background-color: rgb(33, 32, 28);
+    border-width: 1px;
+    border-color: rgb(212, 160, 23);
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.city-event-title {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 15px;
+    color: rgb(255, 255, 255);
+    letter-spacing: 1px;
+    white-space: normal;
+}
+
+.city-event-desc {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 13px;
+    color: rgb(179, 190, 214);
+    white-space: normal;
+    margin-top: 3px;
+}
+
+.city-choice {
+    width: 100%;
+    margin-top: 7px;
+    padding: 8px 10px;
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(232, 238, 248);
+    background-color: rgb(23, 27, 35);
+    border-width: 1px;
+    border-color: rgb(70, 78, 92);
+    border-radius: 5px;
+    -unity-text-align: middle-center;
+    white-space: normal;
+    cursor: pointer;
+}
+.city-choice:hover {
+    border-color: rgb(212, 160, 23);
+    color: rgb(212, 160, 23);
+}
+.city-choice--disabled {
+    opacity: 0.55;
+}
+
+.city-choice-effect {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 11px;
+    color: rgb(130, 145, 170);
+    margin-top: 1px;
+    white-space: normal;
+    -unity-text-align: middle-center;
+}
+
+.city-notice {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Bold.ttf");
+    font-size: 13px;
+    color: rgb(100, 200, 140);
+    min-height: 18px;
+    margin-top: 6px;
+    white-space: normal;
+}
+
+.city-empty {
+    -unity-font: url("project://database/Assets/_TacticalFive/Art/Fonts/Saira_Condensed-Regular.ttf");
+    font-size: 14px;
+    color: rgb(130, 145, 170);
+    white-space: normal;
+    margin-top: 8px;
+}

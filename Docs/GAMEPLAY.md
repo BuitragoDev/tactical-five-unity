@@ -276,6 +276,9 @@ Win: +4 home / +2 away (+1 if margin ≤5 or ≥20). Loss: −3 home / −2 away
 ### Injuries & fatigue
 Fatigue lowers performance (`FisicoPenalty`) and raises injury risk; injured players skip sims; recovery +8/day on rest days with inbox messages; psychologist (staff) affects morale.
 
+### Ciudad: proyectos y eventos (F7-05)
+TheCity aporta una capa ligera de gestión, no una economía paralela. Los proyectos se pagan desde `teams.budget`, tardan 8–12 días y tienen niveles: **entorno del pabellón** (+4 % de asistencia en casa por nivel), **centro de rendimiento** (+2 físico en días de descanso por nivel), **programa de afición** (confianza al completar) y **centro de medios** (confianza + moral del vestuario). Los eventos (queja vecinal, campaña de abonados, visita escolar, ola de calor, rueda de prensa) aparecen como máximo uno pendiente, se generan en el ciclo diario con una oportunidad cada 6 días y ofrecen dos decisiones con coste/confianza/moral/físico acotados. Todo se persiste en `city_projects`/`city_events`; los avisos van por `MessageData` y los efectos se aplican en la transacción del día (`CityService.Advance`).
+
 ## 9. League AI
 
 - `ProcessAITransfers` (cycle every ≥10 game days, **3-5 game days during deadline week Feb 1-8**; transfer window Sep 1–Feb 8): AI teams fill weak spots — <12 players sign FA; otherwise attempt an AI trade (max 3 per cycle). Each team has a **strategy** (`TeamStrategy`: Contend / Balanced / Rebuild via `GetTeamStrategy`): Contend (top 4 conference or 2+ stars OVR≥85) denser (0.45, 6-day cooldown), hunts upgrades up to OVR 90 including a future pick, protects young (age<26, OVR≥82); Rebuild (bottom 4 or young without stars) sells veterans ≥30 for young/picks (`TrySellVeteran`), 8-day cooldown; Balanced 15-day cooldown. Offers to the player strategy-aware (`PickTradeTarget`/`BuildOfferPackage`). Deadline contenders offer extra picks; titles prefixed `[DEADLINE]`.

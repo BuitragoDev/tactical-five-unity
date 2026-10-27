@@ -220,4 +220,36 @@ public partial class DatabaseManager
         return all.GetRange(0, Mathf.Min(count, all.Count));
     }
 
+    // ── CITY / THE CITY (F7-05) ──────────────────────────
+
+    public List<CityProjectData> GetCityProjects(int managerId, int seasonId)
+        => _db.Table<CityProjectData>()
+              .Where(p => p.manager_id == managerId && p.season_id == seasonId)
+              .OrderBy(p => p.id)
+              .ToList();
+
+    public CityProjectData GetActiveCityProject(int managerId, int seasonId, string projectKey)
+        => _db.Table<CityProjectData>()
+              .Where(p => p.manager_id == managerId && p.season_id == seasonId
+                       && p.project_key == projectKey && p.status == "active")
+              .FirstOrDefault();
+
+    public int GetCityProjectLevel(int managerId, int seasonId, string projectKey)
+        => _db.Table<CityProjectData>()
+              .Count(p => p.manager_id == managerId && p.season_id == seasonId
+                       && p.project_key == projectKey && p.status == "completed");
+
+    public void InsertCityProject(CityProjectData project) => _db.Insert(project);
+    public void UpdateCityProject(CityProjectData project) => _db.Update(project);
+
+    public CityEventData GetPendingCityEvent(int managerId, int seasonId)
+        => _db.Table<CityEventData>()
+              .Where(e => e.manager_id == managerId && e.season_id == seasonId
+                       && e.status == "pending")
+              .OrderBy(e => e.id)
+              .FirstOrDefault();
+
+    public void InsertCityEvent(CityEventData cityEvent) => _db.Insert(cityEvent);
+    public void UpdateCityEvent(CityEventData cityEvent) => _db.Update(cityEvent);
+
 }

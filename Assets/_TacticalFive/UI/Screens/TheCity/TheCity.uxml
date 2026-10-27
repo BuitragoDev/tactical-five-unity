@@ -17,44 +17,95 @@
 
             <!-- CITY CONTENT -->
             <ui:VisualElement class="thecity-content">
-                <ui:VisualElement class="city-hotspot city-hotspot--hospital">
-                    <ui:Button name="CityHospital" class="city-bubble" text="CENTRO MÉDICO" />
-                    <ui:VisualElement class="city-bubble-tail" />
+                <ui:VisualElement class="city-pulse-row">
+                    <ui:VisualElement class="city-pulse-brand">
+                        <ui:Label class="city-pulse-kicker" text="PULSO DE LA CIUDAD" />
+                        <ui:Label name="CityPulseTeam" class="city-pulse-team" text="" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="city-pulse-card">
+                        <ui:Label class="city-pulse-label" text="PRESUPUESTO" />
+                        <ui:Label name="CityPulseBudget" class="city-pulse-value" text="—" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="city-pulse-card">
+                        <ui:Label class="city-pulse-label" text="AFICIÓN" />
+                        <ui:Label name="CityPulseFan" class="city-pulse-value" text="—" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="city-pulse-card">
+                        <ui:Label class="city-pulse-label" text="OBJETIVO" />
+                        <ui:Label name="CityPulseObjective" class="city-pulse-value city-pulse-value--small" text="—" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="city-pulse-card">
+                        <ui:Label class="city-pulse-label" text="PRÓXIMO PARTIDO" />
+                        <ui:Label name="CityPulseNextGame" class="city-pulse-value city-pulse-value--small" text="—" />
+                    </ui:VisualElement>
+                    <ui:VisualElement class="city-pulse-card city-pulse-card--alert">
+                        <ui:Label class="city-pulse-label" text="CIUDAD" />
+                        <ui:Label name="CityPulseNotice" class="city-pulse-value city-pulse-value--small" text="Sin avisos" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--arena">
-                    <ui:Button name="CityArena" class="city-bubble" text="PABELLÓN" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--training">
-                    <ui:Button name="CityTraining" class="city-bubble" text="ENTRENAMIENTO" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--league">
-                    <ui:Button name="CityLeague" class="city-bubble" text="OFICINA DE LA LIGA" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--personnel">
-                    <ui:Button name="CityPersonnel" class="city-bubble" text="OFICINA DE PERSONAL" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--bank">
-                    <ui:Button name="CityBank" class="city-bubble" text="BANCO" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--newspaper">
-                    <ui:Button name="CityNewspaper" class="city-bubble" text="NOTICIAS" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--statistics">
-                    <ui:Button name="CityStatistics" class="city-bubble" text="ESTADÍSTICAS" />
-                    <ui:VisualElement class="city-bubble-tail" />
-                </ui:VisualElement>
-                <ui:VisualElement class="city-hotspot city-hotspot--museum">
-                    <ui:Button name="CityMuseum" class="city-bubble" text="MUSEO" />
-                    <ui:VisualElement class="city-bubble-tail" />
+
+                <ui:VisualElement class="city-workspace">
+                    <ui:VisualElement class="city-map">
+                        <ui:VisualElement class="city-hotspot city-hotspot--hospital">
+                            <ui:Button name="CityHospital" class="city-bubble" text="CENTRO MÉDICO" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityHospitalStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--arena">
+                            <ui:Button name="CityArena" class="city-bubble" text="PABELLÓN" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityArenaStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--training">
+                            <ui:Button name="CityTraining" class="city-bubble" text="ENTRENAMIENTO" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityTrainingStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--league">
+                            <ui:Button name="CityLeague" class="city-bubble" text="OFICINA DE LA LIGA" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityLeagueStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--personnel">
+                            <ui:Button name="CityPersonnel" class="city-bubble" text="OFICINA DE PERSONAL" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityPersonnelStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--bank">
+                            <ui:Button name="CityBank" class="city-bubble" text="BANCO" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityBankStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--newspaper">
+                            <ui:Button name="CityNewspaper" class="city-bubble" text="NOTICIAS" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityNewspaperStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--statistics">
+                            <ui:Button name="CityStatistics" class="city-bubble" text="ESTADÍSTICAS" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityStatisticsStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                        <ui:VisualElement class="city-hotspot city-hotspot--museum">
+                            <ui:Button name="CityMuseum" class="city-bubble" text="MUSEO" />
+                            <ui:VisualElement class="city-bubble-tail" />
+                            <ui:Label name="CityMuseumStatus" class="city-status" text="" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="city-inspector">
+                        <ui:Label name="CityInspectorTitle" class="city-inspector-title" text="LA CIUDAD" />
+                        <ui:Label name="CityInspectorSubtitle" class="city-inspector-subtitle" text="" />
+                        <ui:VisualElement class="city-tabs">
+                            <ui:Button name="CityTabBuilding" class="city-tab city-tab--active" text="EDIFICIO" />
+                            <ui:Button name="CityTabProjects" class="city-tab" text="PROYECTOS" />
+                            <ui:Button name="CityTabEvents" class="city-tab" text="EVENTOS" />
+                        </ui:VisualElement>
+                        <ui:VisualElement name="CityInspectorBody" class="city-inspector-body" />
+                        <ui:Label name="CityNotice" class="city-notice" text="" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
             </ui:VisualElement>
-
         </ui:VisualElement>
 
     </ui:VisualElement>
