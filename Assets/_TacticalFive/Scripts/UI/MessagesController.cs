@@ -892,138 +892,15 @@ public class MessagesController : UIScreenController
 
     // ── ScrollBar (blue) ──
 
-    class ScrollBar : IScrollBarHandle
-    {
-        public VisualElement Viewport, Content, Track, Thumb;
-        public float ScrollY;
-        public bool Dragging;
-        public float StartPointerY, StartScrollY;
-    }
+    class ScrollBar : CustomScrollbar.Handle { }
 
     ScrollBar BindScrollBar(VisualElement viewport, VisualElement content,
-                            VisualElement track, VisualElement thumb)
-    {
-        if (viewport == null || content == null || track == null || thumb == null) return null;
-
-        // Ya enlazada en esta visita (el viewport persiste): no registrar los
-        // handlers otra vez, que se acumulaban al reconstruir la lista.
-        if (ScrollBarBinder.TryGet<ScrollBar>(viewport, out var bound)) return bound;
+                                VisualElement track, VisualElement thumb)
+        => CustomScrollbar.Bind<ScrollBar>(viewport, content, track, thumb);
 
 
-        viewport.style.overflow = Overflow.Hidden;
-        viewport.style.flexDirection = FlexDirection.Column;
 
-        var bar = new ScrollBar
-        {
-            Viewport = viewport,
-            Content = content,
-            Track = track,
-            Thumb = thumb
-        };
 
-        viewport.RegisterCallback<WheelEvent>(evt =>
-        {
-            float max = GetScrollMax(bar);
-            if (max <= 0f) return;
-            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
-            ApplyScroll(bar);
-            evt.StopPropagation();
-        });
 
-        thumb.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            bar.Dragging = true;
-            bar.StartPointerY = evt.position.y;
-            bar.StartScrollY = bar.ScrollY;
-            thumb.CapturePointer(evt.pointerId);
-            evt.StopPropagation();
-        });
 
-        thumb.RegisterCallback<PointerMoveEvent>(evt =>
-        {
-            if (!bar.Dragging) return;
-            float max = GetScrollMax(bar);
-            float travel = track.layout.height - thumb.layout.height;
-            if (max <= 0f || travel <= 0f) return;
-            float delta = evt.position.y - bar.StartPointerY;
-            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
-            ApplyScroll(bar);
-            evt.StopPropagation();
-        });
-
-        thumb.RegisterCallback<PointerUpEvent>(evt =>
-        {
-            if (bar.Dragging)
-            {
-                bar.Dragging = false;
-                thumb.ReleasePointer(evt.pointerId);
-            }
-            evt.StopPropagation();
-        });
-
-        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
-
-        track.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            if (bar.Dragging) return;
-            float max = GetScrollMax(bar);
-            if (max <= 0f) return;
-            float page = viewport.layout.height;
-            float y = evt.localPosition.y;
-            float thumbTop = thumb.layout.y;
-            float thumbBottom = thumbTop + thumb.layout.height;
-            float target = y < thumbTop ? bar.ScrollY - page
-                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
-            bar.ScrollY = Mathf.Clamp(target, 0f, max);
-            ApplyScroll(bar);
-            evt.StopPropagation();
-        });
-
-        CursorManager.Instance?.RegisterHandCursor(thumb);
-        CursorManager.Instance?.RegisterHandCursor(track);
-
-        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
-        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
-
-        ApplyScroll(bar);
-        ScrollBarBinder.Remember(viewport, bar);
-        return bar;
-    }
-
-    static float GetScrollMax(ScrollBar bar)
-    {
-        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
-        float contentHeight = bar.Content.layout.height;
-        float viewportHeight = bar.Viewport.layout.height;
-        return Mathf.Max(0f, contentHeight - viewportHeight);
-    }
-
-    void ClampAndApply(ScrollBar bar)
-    {
-        if (bar == null) return;
-        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
-        ApplyScroll(bar);
-    }
-
-    void ApplyScroll(ScrollBar bar)
-    {
-        if (bar == null || bar.Content == null) return;
-
-        bar.Content.style.top = -bar.ScrollY;
-
-        float trackHeight = bar.Track.layout.height;
-        float contentHeight = bar.Content.layout.height;
-        float viewportHeight = bar.Viewport.layout.height;
-        if (trackHeight <= 0f || contentHeight <= 0f) return;
-
-        float max = Mathf.Max(0f, contentHeight - viewportHeight);
-        float thumbHeight = max <= 0f ? trackHeight : Mathf.Max(36f, trackHeight * viewportHeight / contentHeight);
-        thumbHeight = Mathf.Min(thumbHeight, trackHeight);
-
-        float travel = trackHeight - thumbHeight;
-        float t = max <= 0f ? 0f : Mathf.Clamp01(bar.ScrollY / max);
-
-        bar.Thumb.style.height = thumbHeight;
-        bar.Thumb.style.top = travel * t;
-    }
 }

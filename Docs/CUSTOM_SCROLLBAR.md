@@ -45,18 +45,21 @@ Al no extender `UnityDefaultRuntimeTheme`, los elementos internos del `ScrollVie
 | `position: absolute` sobre el scroller interno | Rompe la geometría: el thumb se queda fijo arriba |
 | Parchear los internos por USS (`.unity-scroll-view__content-viewport { overflow: hidden }`) | **Necesario pero no suficiente por sí solo**; sigue dependiendo del comportamiento interno |
 
-> Los demás listados del juego (`Messages`, `Trajectory`, `Cartera`, `Stats`, `GLeague`,
-> picks del Market) usan `ScrollView` de Unity con parches parciales de
-> `.unity-scroll-view__*`. Funcionan porque son listas cortas o con paginación.
-> **Para listas largas con barra arrastrable, usar el patrón de este documento.**
-
-> **Helper reutilizable `[F]`:** existe `CustomScrollbar` (`Scripts/Core/CustomScrollbar.cs`)
-> con `Bind(viewport, content, track, thumb)` (devuelve un `Handle`) y `Reset(handle)`,
-> que encapsula la rueda, el arrastre del thumb, el clic en la pista y el recálculo por
-> geometría (variante de `Stats`: thumb de 40px fijo). Lo usan `StatsController` y las dos
-> listas del Editor (`EditorController`), enlazándose **una sola vez** y llamando a
-> `CustomScrollbar.Reset(...)` al reconstruir/filtrar la lista. El modal de traspasos de
-> `Market` mantiene su variante propia con thumb de altura dinámica (mín. 36px).
+> **Una sola abstracción `[F]` (F7-04):** todos los listados con barra propia usan
+> `CustomScrollbar` (`Scripts/Core/CustomScrollbar.cs`). `Bind`/`Bind<T>` es idempotente
+> por viewport (no acumula handlers al reconstruir), el thumb tiene altura dinámica
+> (mín. 36px) y `Reset`/`Refresh` son la única forma de volver al inicio o reajustar tras
+> un cambio de layout. Lo usan Stats, Market, Cartera, GLeague, Historial, Injured,
+> Buscador, Palmares, Messages, Editor, Trajectory, SelectTeam, Quinteto, Preseason y
+> Hilos. Las variantes locales de `BindScrollBar` y `ScrollBarBinder` se eliminaron.
+>
+> **Excepciones justificadas:** se mantiene el `ScrollView` nativo en pantallas con
+> contenido **acotado** que no necesita thumb arrastrable: Training (panel derecho),
+> InfoLeague (reglas), GLeague/Standings (máx. 30 equipos), Calendar (máx. 15 partidos),
+> Roster/Detail (17 jugadores), Dashboard/Messages, Cartera/TeamList (30 equipos),
+> GameResults/MatchDay (boxscore de 2 equipos), Editor (formularios) y NewSeason (modales
+> de plantilla ≤17). Las tablas grandes de datos usan paginación (Stats/Buscador) o el
+> scroll propio; no se identificó ninguna lista que exija virtualización por miles de filas.
 
 ---
 

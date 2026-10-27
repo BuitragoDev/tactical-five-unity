@@ -142,17 +142,7 @@ public class MarketController : UIScreenController
     private TradeScrollbar _myPicksBar;
     private TradeScrollbar _otherPicksBar;
 
-    class TradeScrollbar
-    {
-        public VisualElement Viewport;
-        public VisualElement Content;
-        public VisualElement Track;
-        public VisualElement Thumb;
-        public float ScrollY;
-        public bool Dragging;
-        public float StartPointerY;
-        public float StartScrollY;
-    }
+    class TradeScrollbar : CustomScrollbar.Handle { }
 
     // NBA salary thresholds (use TradeHelper constants as source of truth)
 
@@ -319,140 +309,29 @@ public class MarketController : UIScreenController
 
     TradeScrollbar BindTradeScrollbar(VisualElement viewport, VisualElement content,
                                       VisualElement track, VisualElement thumb)
-    {
-        if (viewport == null || content == null || track == null || thumb == null) return null;
+        => CustomScrollbar.Bind<TradeScrollbar>(viewport, content, track, thumb);
 
-        var bar = new TradeScrollbar
-        {
-            Viewport = viewport,
-            Content = content,
-            Track = track,
-            Thumb = thumb
-        };
 
-        // Rueda del ratón sobre la lista
-        viewport.RegisterCallback<WheelEvent>(evt =>
-        {
-            float max = GetScrollMax(bar);
-            if (max <= 0f) return;
-            bar.ScrollY = Mathf.Clamp(bar.ScrollY + evt.delta.y * 30f, 0f, max);
-            ApplyScroll(bar);
-            evt.StopPropagation();
-        });
 
-        // Arrastre del thumb
-        thumb.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            bar.Dragging = true;
-            bar.StartPointerY = evt.position.y;
-            bar.StartScrollY = bar.ScrollY;
-            thumb.CapturePointer(evt.pointerId);
-            evt.StopPropagation();
-        });
 
-        thumb.RegisterCallback<PointerMoveEvent>(evt =>
-        {
-            if (!bar.Dragging) return;
-            float max = GetScrollMax(bar);
-            float travel = track.layout.height - thumb.layout.height;
-            if (max <= 0f || travel <= 0f) return;
-            float delta = evt.position.y - bar.StartPointerY;
-            bar.ScrollY = Mathf.Clamp(bar.StartScrollY + delta / travel * max, 0f, max);
-            ApplyScroll(bar);
-            evt.StopPropagation();
-        });
 
-        thumb.RegisterCallback<PointerUpEvent>(evt =>
-        {
-            if (bar.Dragging)
-            {
-                bar.Dragging = false;
-                thumb.ReleasePointer(evt.pointerId);
-            }
-            evt.StopPropagation();
-        });
 
-        thumb.RegisterCallback<PointerCaptureOutEvent>(_ => bar.Dragging = false);
-
-        // Clic en la pista: salto de página
-        track.RegisterCallback<PointerDownEvent>(evt =>
-        {
-            if (bar.Dragging) return;
-            float max = GetScrollMax(bar);
-            if (max <= 0f) return;
-            float page = viewport.layout.height;
-            float y = evt.localPosition.y;
-            float thumbTop = thumb.layout.y;
-            float thumbBottom = thumbTop + thumb.layout.height;
-            float target = y < thumbTop ? bar.ScrollY - page
-                         : (y > thumbBottom ? bar.ScrollY + page : bar.ScrollY);
-            bar.ScrollY = Mathf.Clamp(target, 0f, max);
-            ApplyScroll(bar);
-            evt.StopPropagation();
-        });
-
-        CursorManager.Instance?.RegisterHandCursor(thumb);
-        CursorManager.Instance?.RegisterHandCursor(track);
-
-        content.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
-        viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
-
-        ApplyScroll(bar);
-        return bar;
-    }
-
-    static float GetScrollMax(TradeScrollbar bar)
-    {
-        if (bar == null || bar.Content == null || bar.Viewport == null) return 0f;
-        float contentHeight = bar.Content.layout.height;
-        float viewportHeight = bar.Viewport.layout.height;
-        return Mathf.Max(0f, contentHeight - viewportHeight);
-    }
-
-    void ClampAndApply(TradeScrollbar bar)
-    {
-        if (bar == null) return;
-        bar.ScrollY = Mathf.Clamp(bar.ScrollY, 0f, GetScrollMax(bar));
-        ApplyScroll(bar);
-    }
-
-    void ApplyScroll(TradeScrollbar bar)
-    {
-        if (bar == null || bar.Content == null) return;
-
-        bar.Content.style.top = -bar.ScrollY;
-
-        float trackHeight = bar.Track.layout.height;
-        float contentHeight = bar.Content.layout.height;
-        float viewportHeight = bar.Viewport.layout.height;
-        if (trackHeight <= 0f || contentHeight <= 0f) return;
-
-        float max = Mathf.Max(0f, contentHeight - viewportHeight);
-        float thumbHeight = max <= 0f ? trackHeight : Mathf.Max(36f, trackHeight * viewportHeight / contentHeight);
-        thumbHeight = Mathf.Min(thumbHeight, trackHeight);
-
-        float travel = trackHeight - thumbHeight;
-        float t = max <= 0f ? 0f : Mathf.Clamp01(bar.ScrollY / max);
-
-        bar.Thumb.style.height = thumbHeight;
-        bar.Thumb.style.top = travel * t;
-    }
 
     void ResetTradeScrollbars()
     {
-        if (_myBar != null) { _myBar.ScrollY = 0f; ApplyScroll(_myBar); }
-        if (_otherBar != null) { _otherBar.ScrollY = 0f; ApplyScroll(_otherBar); }
-        if (_myPicksBar != null) { _myPicksBar.ScrollY = 0f; ApplyScroll(_myPicksBar); }
-        if (_otherPicksBar != null) { _otherPicksBar.ScrollY = 0f; ApplyScroll(_otherPicksBar); }
+        CustomScrollbar.Reset(_myBar);
+        CustomScrollbar.Reset(_otherBar);
+        CustomScrollbar.Reset(_myPicksBar);
+        CustomScrollbar.Reset(_otherPicksBar);
     }
 
     void SyncAllTradeScrollbars()
     {
         if (_tradePanels == null || _tradePanels.resolvedStyle.display == DisplayStyle.None) return;
-        ClampAndApply(_myBar);
-        ClampAndApply(_otherBar);
-        ClampAndApply(_myPicksBar);
-        ClampAndApply(_otherPicksBar);
+        CustomScrollbar.Refresh(_myBar);
+        CustomScrollbar.Refresh(_otherBar);
+        CustomScrollbar.Refresh(_myPicksBar);
+        CustomScrollbar.Refresh(_otherPicksBar);
     }
 
     void Update()
@@ -1009,8 +888,8 @@ public class MarketController : UIScreenController
         if (isMyTeam && _ownSATFAs.Count > 0)
             BuildOwnSASection();
 
-        if (isMyTeam && _myBar != null) { _myBar.ScrollY = 0f; ApplyScroll(_myBar); }
-        if (!isMyTeam && _otherBar != null) { _otherBar.ScrollY = 0f; ApplyScroll(_otherBar); }
+        if (isMyTeam && _myBar != null) { _myBar.ScrollY = 0f; CustomScrollbar.Reset(_myBar); }
+        if (!isMyTeam && _otherBar != null) { _otherBar.ScrollY = 0f; CustomScrollbar.Reset(_otherBar); }
     }
 
     void BuildTradeTable()
@@ -2565,7 +2444,7 @@ public class MarketController : UIScreenController
                 BuildFARow(player, pendingSet);
         }
 
-        if (_faScrollBar != null) { _faScrollBar.ScrollY = 0f; ApplyScroll(_faScrollBar); }
+        CustomScrollbar.Reset(_faScrollBar);
         BindFAScrollbar();
     }
 

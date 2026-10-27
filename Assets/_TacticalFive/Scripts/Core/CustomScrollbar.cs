@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -21,15 +22,29 @@ public static class CustomScrollbar
         public float StartScrollY;
     }
 
+    private static readonly ConditionalWeakTable<VisualElement, Handle> _bound = new();
+
     public static Handle Bind(VisualElement viewport, VisualElement content,
                               VisualElement track, VisualElement thumb)
+        => Bind<Handle>(viewport, content, track, thumb);
+
+    /// <summary>
+    /// Variante genérica para que cada controlador conserve su tipo de barra (si lo
+    /// necesita) sin duplicar la lógica. Es idempotente dentro de la misma visita:
+    /// si el viewport ya tiene una barra de este tipo, devuelve la existente.
+    /// </summary>
+    public static T Bind<T>(VisualElement viewport, VisualElement content,
+                            VisualElement track, VisualElement thumb)
+        where T : Handle, new()
     {
         if (viewport == null || content == null || track == null || thumb == null) return null;
+        if (_bound.TryGetValue(viewport, out var existing) && existing is T typed)
+            return typed;
 
         viewport.style.overflow = Overflow.Hidden;
         viewport.style.flexDirection = FlexDirection.Column;
 
-        var bar = new Handle
+        var bar = new T
         {
             Viewport = viewport,
             Content = content,
@@ -102,6 +117,8 @@ public static class CustomScrollbar
         viewport.RegisterCallback<GeometryChangedEvent>(_ => ClampAndApply(bar));
 
         Apply(bar);
+        _bound.Remove(viewport);
+        _bound.Add(viewport, bar);
         return bar;
     }
 
@@ -112,6 +129,9 @@ public static class CustomScrollbar
         bar.ScrollY = 0f;
         Apply(bar);
     }
+
+    /// <summary>Reajusta el thumb tras un cambio de layout (p. ej. un panel oculto que se muestra).</summary>
+    public static void Refresh(Handle bar) => ClampAndApply(bar);
 
     static float GetScrollMax(Handle bar)
     {
@@ -138,8 +158,14 @@ public static class CustomScrollbar
         if (trackHeight <= 0f || contentHeight <= 0f) return;
 
         float max = Mathf.Max(0f, contentHeight - viewportHeight);
+        float thumbHeight = max <= 0f
+            ? trackHeight
+            : Mathf.Max(36f, trackHeight * viewportHeight / contentHeight);
+        thumbHeight = Mathf.Min(thumbHeight, trackHeight);
+        float travel = trackHeight - thumbHeight;
         float ratio = max > 0f ? bar.ScrollY / max : 0f;
-        float thumbMax = trackHeight - bar.Thumb.layout.height;
-        bar.Thumb.style.top = ratio * thumbMax;
+
+        bar.Thumb.style.height = thumbHeight;
+        bar.Thumb.style.top = ratio * travel;
     }
 }
