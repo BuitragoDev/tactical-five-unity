@@ -189,11 +189,11 @@ public static class ScheduleGenerator
             {
                 var previous = teamGames[i - 1];
                 var current = teamGames[i];
-                int miles = TravelHelper.DistanceMiles(previous.home, current.home, teamsById);
-                if (TravelHelper.IsImpossibleBackToBack(previous.day, current.day, miles))
+                int kilometers = TravelHelper.DistanceKilometers(previous.home, current.home, teamsById);
+                if (TravelHelper.IsImpossibleBackToBack(previous.day, current.day, kilometers))
                 {
                     Debug.LogError($"[Schedule] {t.name}: back-to-back {previous.day}->{current.day} " +
-                                   $"de {miles:N0} mi; no se guarda el calendario.");
+                                   $"de {kilometers:N0} km; no se guarda el calendario.");
                     invalid = true;
                 }
             }
@@ -393,7 +393,7 @@ public static class ScheduleGenerator
     {
         if (!lastGameDay.TryGetValue(teamPk, out int previous) || previous < 0) return 0;
         if (!lastVenue.TryGetValue(teamPk, out int previousVenue) || previousVenue <= 0) return 0;
-        return TravelHelper.DistanceMiles(previousVenue, venueTeamId, teamsById);
+        return TravelHelper.DistanceKilometers(previousVenue, venueTeamId, teamsById);
     }
 
     static bool ImpossibleBackToBack(int teamPk, int day, int venueTeamId,
@@ -404,13 +404,13 @@ public static class ScheduleGenerator
         // tanto el día anterior como el siguiente ya programados.
         if (day > 0 && venueByTeamDay.TryGetValue((teamPk, day - 1), out int previousVenue))
         {
-            int miles = TravelHelper.DistanceMiles(previousVenue, venueTeamId, teamsById);
-            if (TravelHelper.IsImpossibleBackToBack(day - 1, day, miles)) return true;
+            int kilometers = TravelHelper.DistanceKilometers(previousVenue, venueTeamId, teamsById);
+            if (TravelHelper.IsImpossibleBackToBack(day - 1, day, kilometers)) return true;
         }
         if (venueByTeamDay.TryGetValue((teamPk, day + 1), out int nextVenue))
         {
-            int miles = TravelHelper.DistanceMiles(venueTeamId, nextVenue, teamsById);
-            if (TravelHelper.IsImpossibleBackToBack(day, day + 1, miles)) return true;
+            int kilometers = TravelHelper.DistanceKilometers(venueTeamId, nextVenue, teamsById);
+            if (TravelHelper.IsImpossibleBackToBack(day, day + 1, kilometers)) return true;
         }
         return false;
     }

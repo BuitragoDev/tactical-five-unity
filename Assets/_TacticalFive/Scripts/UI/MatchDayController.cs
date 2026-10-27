@@ -456,9 +456,9 @@ public class MatchDayController : UIScreenController
                 && myGame.game_day > previous.game_day)
             {
                 int restDays = TravelHelper.RestDays(previous.game_day, myGame.game_day);
-                int miles = TravelHelper.DistanceMiles(previous.home_team_id, myGame.home_team_id,
+                int kilometers = TravelHelper.DistanceKilometers(previous.home_team_id, myGame.home_team_id,
                     _allTeams.ToDictionary(t => t.id));
-                travelText = $" · {TravelHelper.Describe(miles, restDays)}";
+                travelText = $" · {TravelHelper.Describe(kilometers, restDays)}";
             }
 
             _venueLabel.text = $"{arenaName}{attendanceText}{travelText}";

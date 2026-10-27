@@ -172,10 +172,10 @@ public class ScheduleGeneratorDiagnosticTests
             {
                 var previous = teamGames[i - 1];
                 var current = teamGames[i];
-                int miles = TravelHelper.DistanceMiles(previous.home_team_id, current.home_team_id, teamsById);
-                Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, miles),
+                int kilometers = TravelHelper.DistanceKilometers(previous.home_team_id, current.home_team_id, teamsById);
+                Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, kilometers),
                     Is.False,
-                    $"{team.abbreviation}: back-to-back {previous.game_day}->{current.game_day} de {miles:N0} mi");
+                    $"{team.abbreviation}: back-to-back {previous.game_day}->{current.game_day} de {kilometers:N0} km");
             }
         }
     }
@@ -227,9 +227,9 @@ public class ScheduleGeneratorDiagnosticTests
                     {
                         var previous = teamGames[j - 1];
                         var current = teamGames[j];
-                        int miles = TravelHelper.DistanceMiles(previous.home_team_id, current.home_team_id, teamsById);
-                        Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, miles),
-                            Is.False, $"semilla {i}: {team.abbreviation} B2B {previous.game_day}->{current.game_day} ({miles:N0} mi)");
+                        int kilometers = TravelHelper.DistanceKilometers(previous.home_team_id, current.home_team_id, teamsById);
+                        Assert.That(TravelHelper.IsImpossibleBackToBack(previous.game_day, current.game_day, kilometers),
+                            Is.False, $"semilla {i}: {team.abbreviation} B2B {previous.game_day}->{current.game_day} ({kilometers:N0} km)");
                     }
                 }
             }

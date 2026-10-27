@@ -7,14 +7,14 @@ using System.Collections.Generic;
 /// Las coordenadas son aproximadas por ciudad y se usan solo para ordenar el
 /// calendario y estimar el desgaste de viaje; no son datos de scouting ni de
 /// simulación de partido. Un back-to-back se considera imposible si cruza más de
-/// <see cref="MaxBackToBackMiles"/> millas sin un día de descanso.
+/// <see cref="MaxBackToBackKilometers"/> kilómetros sin un día de descanso.
 /// </summary>
 public static class TravelHelper
 {
-    public const int MaxBackToBackMiles = 1500;
-    public const int ShortTripMiles = 250;
-    public const int MediumTripMiles = 750;
-    public const int LongTripMiles = 1500;
+    public const int MaxBackToBackKilometers = 2400;
+    public const int ShortTripKilometers = 400;
+    public const int MediumTripKilometers = 1200;
+    public const int LongTripKilometers = 2400;
 
     // Ciudad / pabellón aproximado de cada franquicia (latitud, longitud).
     static readonly Dictionary<string, (double lat, double lon)> Coordinates =
@@ -63,31 +63,31 @@ public static class TravelHelper
         return true;
     }
 
-    /// <summary>Distancia en millas entre las sedes de dos equipos (0 si falta el dato).</summary>
-    public static int DistanceMiles(TeamData a, TeamData b)
+    /// <summary>Distancia en kilómetros entre las sedes de dos equipos (0 si falta el dato).</summary>
+    public static int DistanceKilometers(TeamData a, TeamData b)
     {
         if (a == null || b == null || a.id == b.id) return 0;
         if (!TryCoordinates(a, out double lat1, out double lon1)
             || !TryCoordinates(b, out double lat2, out double lon2))
             return 0;
 
-        const double earthRadiusMiles = 3958.8;
+        const double earthRadiusKilometers = 6371.0088;
         double dLat = ToRadians(lat2 - lat1);
         double dLon = ToRadians(lon2 - lon1);
         double h = Math.Sin(dLat / 2) * Math.Sin(dLat / 2)
                  + Math.Cos(ToRadians(lat1)) * Math.Cos(ToRadians(lat2))
                  * Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
         double c = 2 * Math.Atan2(Math.Sqrt(h), Math.Sqrt(1 - h));
-        return (int)Math.Round(earthRadiusMiles * c);
+        return (int)Math.Round(earthRadiusKilometers * c);
     }
 
-    public static int DistanceMiles(int teamIdA, int teamIdB,
+    public static int DistanceKilometers(int teamIdA, int teamIdB,
         IReadOnlyDictionary<int, TeamData> teamsById)
     {
         if (teamsById == null || !teamsById.TryGetValue(teamIdA, out var a)
             || !teamsById.TryGetValue(teamIdB, out var b))
             return 0;
-        return DistanceMiles(a, b);
+        return DistanceKilometers(a, b);
     }
 
     /// <summary>Días completos de descanso entre dos jornadas consecutivas.</summary>
@@ -98,20 +98,20 @@ public static class TravelHelper
     /// Un back-to-back es imposible si no hay día de descanso y el desplazamiento
     /// supera el umbral. El scheduler evita programarlo.
     /// </summary>
-    public static bool IsImpossibleBackToBack(int previousGameDay, int nextGameDay, int miles)
+    public static bool IsImpossibleBackToBack(int previousGameDay, int nextGameDay, int kilometers)
         => previousGameDay >= 0
         && nextGameDay == previousGameDay + 1
-        && miles > MaxBackToBackMiles;
+        && kilometers > MaxBackToBackKilometers;
 
     /// <summary>
     /// Desgaste de viaje (0-3 puntos de físico). Los tramos cortos no penalizan;
     /// cada día de descanso reduce un punto y dos días lo absorben casi por completo.
     /// </summary>
-    public static int FatigueCost(int miles, int restDays)
+    public static int FatigueCost(int kilometers, int restDays)
     {
-        int tier = miles >= LongTripMiles ? 3
-                 : miles >= MediumTripMiles ? 2
-                 : miles >= ShortTripMiles ? 1
+        int tier = kilometers >= LongTripKilometers ? 3
+                 : kilometers >= MediumTripKilometers ? 2
+                 : kilometers >= ShortTripKilometers ? 1
                  : 0;
         if (tier == 0) return 0;
         int rest = Math.Max(0, Math.Min(3, restDays));
@@ -119,18 +119,18 @@ public static class TravelHelper
     }
 
     /// <summary>Texto corto para la UI (distancia y descanso).</summary>
-    public static string Describe(int miles, int restDays)
+    public static string Describe(int kilometers, int restDays)
     {
         string rest = restDays == 1 ? "1 día de descanso" : $"{restDays} días de descanso";
-        return miles > 0 ? $"{miles:N0} mi · {rest}" : rest;
+        return kilometers > 0 ? $"{kilometers:N0} km · {rest}" : rest;
     }
 
     /// <summary>Distancia del equipo a la sede del partido (0 si juega en casa o no hay sede).</summary>
-    public static int GameTravelMiles(int teamId, int homeTeamId,
+    public static int GameTravelKilometers(int teamId, int homeTeamId,
         IReadOnlyDictionary<int, TeamData> teamsById)
     {
         if (teamId == homeTeamId) return 0;
-        return DistanceMiles(teamId, homeTeamId, teamsById);
+        return DistanceKilometers(teamId, homeTeamId, teamsById);
     }
 
     static double ToRadians(double degrees) => degrees * Math.PI / 180.0;
