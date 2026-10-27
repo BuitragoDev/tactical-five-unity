@@ -65,17 +65,18 @@ public sealed class MonteCarloCalibrationFailure
 }
 
 /// <summary>
-/// Perfil versionado a la temporada NBA 2024-25. v2 añade las distribuciones por equipo
-/// y bandas min–max requeridas por F3-04. Las bandas son umbrales de ingeniería
-/// (referencia ± tolerancia declarada), no intervalos de confianza ni la afirmación de
-/// que el motor actual ya está calibrado.
+/// Perfil versionado a la temporada NBA 2024-25. v3 mantiene las bandas ofensivas y de
+/// victorias de v2 y sustituye la puerta de lesiones por una de jugabilidad: 12–18
+/// lesiones nuevas por equipo-temporada, disponibilidad para premios y un máximo de
+/// partidos con parte médico. Las bandas son umbrales de ingeniería (referencia ±
+/// tolerancia declarada), no intervalos de confianza.
 /// </summary>
 public static class MonteCarloCalibrationProfile
 {
-    public const string VERSION = "NBA-2024-25-v2";
+    public const string VERSION = "NBA-2024-25-v3";
     public const string TEAM_STATS_SOURCE = "Basketball-Reference, NBA League Averages — Per Game, 2024-25";
     public const string WINS_SOURCE = "Basketball-Reference, NBA 2024-25 Standings (30 equipos)";
-    public const string INJURY_SOURCE = "RotoWire (datos BBall Index), The Most Injured NBA Teams in 2024-25";
+    public const string INJURY_SOURCE = "Diseño del juego: disponibilidad para premios (65 partidos) y 12–18 lesiones nuevas por equipo-temporada";
 
     static readonly MonteCarloCalibrationTarget[] _targets =
     {
@@ -122,13 +123,19 @@ public static class MonteCarloCalibrationProfile
             teamSeasonP50Reference: 40.5, teamSeasonP50Tolerance: 5.0,
             teamSeasonP95Reference: 62.65, teamSeasonP95Tolerance: 5.0),
 
-        // La fuente publica partidos de jugadores perdidos (man-games lost), que coincide
-        // con el contador de ausencias en el día de partido del runner, no con días calendario.
-        new(MonteCarloMetric.PlayerGamesMissed, 396.97, 70.0, INJURY_SOURCE,
-            "partidos-jugador perdidos por equipo-temporada",
-            teamSeasonP5Reference: 280.0, teamSeasonP5Tolerance: 40.0,
-            teamSeasonP50Reference: 379.0, teamSeasonP50Tolerance: 50.0,
-            teamSeasonP95Reference: 514.05, teamSeasonP95Tolerance: 40.0)
+        // Puerta de jugabilidad (calibración de lesiones): no se copia el volumen bruto de la NBA
+        // (273–536 man-games con plantillas de 17–20), porque el juego usa 15 jugadores y
+        // exige 65 partidos para premios. Se prioriza que la rotación llegue a los premios.
+        new(MonteCarloMetric.PlayerGamesMissed, 45.0, 20.0, INJURY_SOURCE,
+            "partidos-jugador perdidos por equipo-temporada"),
+        new(MonteCarloMetric.InjuryEvents, 15.0, 3.0, INJURY_SOURCE,
+            "lesiones nuevas por equipo-temporada"),
+        new(MonteCarloMetric.Players65Games, 11.0, 1.5, INJURY_SOURCE,
+            "jugadores con ≥65 partidos por equipo-temporada (incluye DNPs)"),
+        new(MonteCarloMetric.Rotation65Rate, 72.0, 10.0, INJURY_SOURCE,
+            "porcentaje de jugadores con ≥20 partidos que alcanzan 65"),
+        new(MonteCarloMetric.GamesWithInjuryRate, 17.0, 5.0, INJURY_SOURCE,
+            "porcentaje de partidos del equipo con al menos una lesión nueva")
     };
 
     public static IReadOnlyList<MonteCarloCalibrationTarget> Targets => Array.AsReadOnly(_targets);

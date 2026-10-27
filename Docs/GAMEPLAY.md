@@ -107,15 +107,15 @@ Los once atributos del jugador llegan al `PlayerStatSnapshot` y mueven una métr
 - **Medición del impacto** (20 partidos, plantillas con atributos elite): de los jugadores con ≥ 20 minutos, 177 quedan por debajo del antiguo mínimo de asistencias, 127 de rebotes, 163 de robos y 61 de tapones; la distribución de líderes se valida en la Fase 3 sin pisos.
 
 ### Resultados y paridad F3-05
-- `MonteCarloOutcomeGate` valida en 100 temporadas completas (123.000 partidos) victorias medias, dispersión de victorias, mínimos/máximos por temporada, correlación OVR↔victorias y tasa de prórrogas contra la referencia NBA 2024-25. Resultado con semilla `20261024`: **41,00** victorias/equipo-temporada; desviación **14,02**; mínimo medio **15,80**; máximo medio **67,09**; correlación **0,928**; OT **5,11 %** (6.286/123.000). Todas las bandas de F3-05 pasan.
-- Para aislar la calibración del motor, el banco usa una liga sintética propia de 15 jugadores: `SYNTHETIC_BASE_OVR=72.08` y `SYNTHETIC_OVR_SPREAD=10.6` (rango de bases 72,08–82,68). La distribución es propia del laboratorio; **no cambia ratings, seed ni franquicias del juego**.
+- `MonteCarloOutcomeGate` valida en 100 temporadas completas (123.000 partidos) victorias medias, dispersión de victorias, mínimos/máximos por temporada, correlación OVR↔victorias y tasa de prórrogas contra la referencia NBA 2024-25. Resultado con semilla `20261024`: **41,00** victorias/equipo-temporada; desviación **14,11**; mínimo medio **15,66**; máximo medio **68,68**; correlación **0,943**; OT **5,11 %** (6.287/123.000). Todas las bandas de F3-05 pasan.
+- Para aislar la calibración del motor, el banco usa una liga sintética propia de 15 jugadores: `SYNTHETIC_BASE_OVR=72.08` y `SYNTHETIC_OVR_SPREAD=9.5` (rango de bases 72,08–81,58). La distribución es propia del laboratorio; **no cambia ratings, seed ni franquicias del juego**.
 
 ### Lesiones y disponibilidad F3-06
-- El riesgo base pasa de 0,8 % a **20 % por jugador a 36 minutos**, conservando el escalado por exposición, físico bajo y recaída: 5 min ≈ 2,78 %, 20 min ≈ 11,11 %, 44 min ≈ 24,44 % (físico normal y sin recaída). No es una probabilidad plana: quien no juega mantiene riesgo 0.
+- El riesgo base queda en **2,2 % por jugador a 36 minutos**, conservando el escalado por exposición, físico bajo y recaída: 5 min ≈ 0,31 %, 20 min ≈ 1,22 %, 44 min ≈ 2,69 % (físico normal y sin recaída). No es una probabilidad plana: quien no juega mantiene riesgo 0. La base anterior (20 %) generaba ~109 lesiones nuevas por equipo y temporada y dejaba a la mayoría por debajo de 65 partidos.
 - `CheckInjuries` sigue aplicando la lesión postpartido, pero `InjuryHelper.CanSustainMatchInjury` evita asignar una nueva si deja menos de **cinco jugadores sanos** en la convocatoria que el simulador usará. Las plantillas cortas preexistentes (1–4) y las incomparecencias siguen manejándose como antes.
-- Aceptación de 100 temporadas / 123.000 partidos, semilla `20261024`: **392,65** partidos-jugador perdidos por equipo-temporada; P5/P50/P95 = **299/391/490**, dentro de las bandas declaradas (media 326,97–466,97; P5 240–320; P50 329–429; P95 474,05–554,05). El mínimo observado fue **5 jugadores sanos**.
-- Duración observada frente a la media ponderada del catálogo: leve **2,57/2,57 días** (137.968 episodios), moderada **9,60/9,59** (150.200), grave **29,69/29,78** (32.789) y crítica **122,39/123,60** (3.329); todos los rangos muestreados quedan dentro de `InjuryCatalog`.
-- Con lesiones activas, F3-04, F3-05 y F3-06 pasan juntos: victorias 41,00; SD 14,52; mín. 17,10; máx. 68,26; r=0,957; OT 5,01 %. No se modifica el seed real.
+- Aceptación de 100 temporadas / 123.000 partidos, semilla `20261024`: **50,36** partidos-jugador perdidos por equipo-temporada; **14,03** lesiones nuevas por equipo y temporada; **10,81/15** jugadores con ≥65 partidos (**72,39 %** de la rotación con ≥20 partidos); **15,78 %** de los partidos del equipo con una lesión nueva. El mínimo observado fue **8 jugadores sanos**.
+- Duración observada frente a la media ponderada del catálogo: leve **2,57/2,57 días** (17.816 episodios), moderada **9,62/9,59** (19.605), grave **29,81/29,78** (4.242) y crítica **130,86/123,60** (428); todos los rangos muestreados quedan dentro de `InjuryCatalog`.
+- Con lesiones activas, F3-04, F3-05 y F3-06 pasan juntos: victorias 41,00; SD 14,11; mín. 15,66; máx. 68,68; r=0,943; OT 5,11 %. No se modifica el seed real.
 
 ### Persistencia del partido en lote (F2-09)
 - **Un partido = unas pocas escrituras.** Las filas de `player_game_stats` se acumulan y se insertan con `DatabaseManager.SavePlayerGameStatsBatch`; los cambios de fatiga/lesión se aplican **en memoria** sobre los `PlayerData` ya cargados y se escriben con `UpdatePlayersBatch`. Antes, cada jugador costaba un `GetPlayerById` + `UpdatePlayer` (físico), otra lectura en el chequeo de lesiones y un `Insert` por fila, todos en autocommit.
@@ -136,7 +136,7 @@ Los once atributos del jugador llegan al `PlayerStatSnapshot` y mueven una métr
 - Incomparecencia (F2-06): el `GameData` se persiste con `is_played=1` y el marcador 0–20, pero **sin filas** de `player_game_stats`, fatiga ni lesiones (no se jugó).
 - Records checked (`CheckAndUpdateRecords`; skipped for All-Star).
 - Fatigue: `fisico -= round(minutes*0.30)` (×1.5 on true back-to-back via `game_day-1` check), floor 0; recovered +8/day **only on rest days** (days the team has no game).
-- Injuries: probabilidad por partido según la **exposición** (`InjuryHelper.MatchRiskPerGame`): base 0,20 a 36 minutos y proporcional por debajo (5 min ≈ 2,78 %, 20 min ≈ 11,11 %, 44 min ≈ 24,44 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y + riesgo de recaída si viene de un alta forzada; 0 minutos ⇒ 0. El sorteo es **postpartido** (no altera minutos ni resultado) y respeta cinco sanos mínimos al asignar lesiones. 27 tipos ponderados (`InjuryCatalog`, ver "Lesiones y parte médico").
+- Injuries: probabilidad por partido según la **exposición** (`InjuryHelper.MatchRiskPerGame`): base 0,022 a 36 minutos y proporcional por debajo (5 min ≈ 0,31 %, 20 min ≈ 1,22 %, 44 min ≈ 2,69 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y + riesgo de recaída si viene de un alta forzada; 0 minutos ⇒ 0. El sorteo es **postpartido** (no altera minutos ni resultado) y respeta cinco sanos mínimos al asignar lesiones. 27 tipos ponderados (`InjuryCatalog`, ver "Lesiones y parte médico").
 
 ### Play-by-play en vivo (Vista de Partido)
 - Toggle **Vista de Partido** en los modales de Configuración: `Directa` (0) o `Play-by-play` (1), persistido en `PlayerPrefs TF_SimMode` (`UIScreenController.GetSimMode()`). Solo aplica al flujo día a día (no fast sim).
@@ -344,8 +344,8 @@ TheCity aporta una capa ligera de gestión, no una economía paralela. Los proye
   **gravedad** (`Leve`/`Moderada`/`Grave`/`Crítica`) y `relapseRisk`. El simulador sortea con
   `InjuryCatalog.Pick(roll)` y los días con `InjuryHelper.RollDays`.
 - **Riesgo por partido (`InjuryHelper.MatchRiskPerGame(minutos, físico, riesgo), F2-07/F3-06`):**
-  base **0,20 a 36 minutos** de exposición y proporcional al resto (5 min ≈ 2,78 %, 20 min ≈ 11,11 %,
-  44 min ≈ 24,44 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y **+ `RelapseChancePerGame`** si el jugador
+  base **0,022 a 36 minutos** de exposición y proporcional al resto (5 min ≈ 0,31 %, 20 min ≈ 1,22 %,
+  44 min ≈ 2,69 %), ×`1 + (30−fisico)*0.15` si `fisico < 30` y **+ `RelapseChancePerGame`** si el jugador
   viene de un alta forzada (`recovery_risk > 0`), con tope 1. **0 minutos ⇒ 0 lesiones.** El sorteo es
   **postpartido**: no altera minutos, rotación ni resultado, y la noticia de la bandeja lo dice
   («la lesión se ha detectado al término del último encuentro»). `CanSustainMatchInjury` impide que

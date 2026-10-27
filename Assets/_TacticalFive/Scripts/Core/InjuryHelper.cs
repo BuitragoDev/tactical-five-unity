@@ -71,8 +71,13 @@ public static class InjuryHelper
     /// <summary>Minutos de exposición con los que se mantiene la probabilidad base.</summary>
     public const int INJURY_REFERENCE_MINUTES = 36;
 
-    /// <summary>Probabilidad base de lesión en un partido a plena exposición (36 min).</summary>
-    public const float INJURY_BASE_PER_GAME = 0.20f;
+    /// <summary>
+    /// Probabilidad base de lesión en un partido a plena exposición (36 min).
+    /// Calibrada para 12–18 lesiones nuevas por equipo y temporada: con 240 minutos
+    /// repartidos, 0,022 produce ~14 episodios/equipo/temporada y deja a la mayoría
+    /// de la rotación por encima de los 65 partidos que exigen los premios.
+    /// </summary>
+    public const float INJURY_BASE_PER_GAME = 0.022f;
 
     /// <summary>El simulador protege una convocatoria mínima de cinco jugadores sanos.</summary>
     public const int MIN_HEALTHY_PLAYERS = 5;

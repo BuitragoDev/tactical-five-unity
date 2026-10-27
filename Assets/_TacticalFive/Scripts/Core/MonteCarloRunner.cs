@@ -18,6 +18,10 @@ public enum MonteCarloMetric
     Wins,
     PlayerDaysOut,
     PlayerGamesMissed,
+    InjuryEvents,
+    Players65Games,
+    Rotation65Rate,
+    GamesWithInjuryRate,
     FieldGoalsMade,
     FieldGoalAttempts,
     ThreePointAttempts,
@@ -51,8 +55,9 @@ public sealed class MonteCarloConfig
     /// <summary>OVR medio del equipo más débil de la liga sintética (F3-05).</summary>
     public const double SYNTHETIC_BASE_OVR = 72.08;
     /// <summary>Diferencia de OVR entre el peor y el mejor equipo sintético. Calibrada
-    /// para que victorias y puntos por equipo reproduzcan la paridad de la NBA 2024-25.</summary>
-    public const double SYNTHETIC_OVR_SPREAD = 10.6;
+    /// para que victorias y puntos por equipo reproduzcan la paridad de la NBA 2024-25.
+    /// Calibración de lesiones: 9,5 mantiene la cola alta de puntos dentro del perfil con menos lesiones.</summary>
+    public const double SYNTHETIC_OVR_SPREAD = 9.5;
 }
 
 /// <summary>Resultado estadístico de una ejecución de laboratorio.</summary>
@@ -185,6 +190,10 @@ public sealed class MonteCarloReport
         MonteCarloMetric.Wins => "Victorias",
         MonteCarloMetric.PlayerDaysOut => "Días-jugador de baja",
         MonteCarloMetric.PlayerGamesMissed => "Partidos-jugador perdidos por lesión",
+        MonteCarloMetric.InjuryEvents => "Lesiones nuevas",
+        MonteCarloMetric.Players65Games => "Jugadores con ≥65 partidos",
+        MonteCarloMetric.Rotation65Rate => "Rotación con ≥65 partidos (%)",
+        MonteCarloMetric.GamesWithInjuryRate => "Partidos del equipo con lesión nueva (%)",
         MonteCarloMetric.FieldGoalsMade => "Canastas de campo",
         MonteCarloMetric.FieldGoalAttempts => "Tiros de campo intentados",
         MonteCarloMetric.ThreePointAttempts => "Triples intentados",
@@ -209,6 +218,10 @@ public sealed class MonteCarloReport
         MonteCarloMetric.Wins => "equipo-temporada",
         MonteCarloMetric.PlayerDaysOut => "equipo-temporada (días-jugador realmente indisponibles)",
         MonteCarloMetric.PlayerGamesMissed => "equipo-temporada (partidos de roster perdidos)",
+        MonteCarloMetric.InjuryEvents => "equipo-temporada (episodios nuevos)",
+        MonteCarloMetric.Players65Games => "equipo-temporada (jugadores de 15)",
+        MonteCarloMetric.Rotation65Rate => "equipo-temporada (%)",
+        MonteCarloMetric.GamesWithInjuryRate => "equipo-temporada (%)",
         MonteCarloMetric.FieldGoalsMade or MonteCarloMetric.FieldGoalAttempts
             or MonteCarloMetric.ThreePointAttempts or MonteCarloMetric.OffensiveRebounds
             or MonteCarloMetric.DefensiveRebounds or MonteCarloMetric.Blocks => "equipo-partido",
@@ -304,6 +317,9 @@ public static class MonteCarloRunner
         public int wins;
         public int playerDaysOut;
         public int playerGamesMissed;
+        public int injuryEvents;
+        public int gamesWithInjury;
+        public readonly Dictionary<int, int> gamesPlayedByPlayer = new();
         public TeamSeasonTotals seasonTotals = new();
     }
 
@@ -473,6 +489,24 @@ public static class MonteCarloRunner
                         random: random,
                         simulatePlayerStateWhenNotPersisting: true);
 
+                    // Disponibilidad para premios: son los partidos con minutos reales,
+                    // el mismo criterio que player_game_stats (minutes > 0).
+                    foreach (var ps in result.home_stats)
+                        if (ps.minutes > 0)
+                            home.gamesPlayedByPlayer[ps.player_id] =
+                                home.gamesPlayedByPlayer.TryGetValue(ps.player_id, out int hp) ? hp + 1 : 1;
+                    foreach (var ps in result.away_stats)
+                        if (ps.minutes > 0)
+                            away.gamesPlayedByPlayer[ps.player_id] =
+                                away.gamesPlayedByPlayer.TryGetValue(ps.player_id, out int ap) ? ap + 1 : 1;
+
+                    int homeInjuries = result.injuries.Count(i => home.players.Any(p => p.id == i.player_id));
+                    int awayInjuries = result.injuries.Count(i => away.players.Any(p => p.id == i.player_id));
+                    home.injuryEvents += homeInjuries;
+                    away.injuryEvents += awayInjuries;
+                    if (homeInjuries > 0) home.gamesWithInjury++;
+                    if (awayInjuries > 0) away.gamesWithInjury++;
+
                     foreach (var injury in result.injuries)
                     {
                         var definition = InjuryCatalog.ByName(injury.type);
@@ -522,6 +556,10 @@ public static class MonteCarloRunner
                 samples[MonteCarloMetric.Wins].Add(team.wins);
                 samples[MonteCarloMetric.PlayerDaysOut].Add(team.playerDaysOut);
                 samples[MonteCarloMetric.PlayerGamesMissed].Add(team.playerGamesMissed);
+                samples[MonteCarloMetric.InjuryEvents].Add(team.injuryEvents);
+                samples[MonteCarloMetric.Players65Games].Add(CountPlayers65(team));
+                samples[MonteCarloMetric.Rotation65Rate].Add(Rotation65Rate(team));
+                samples[MonteCarloMetric.GamesWithInjuryRate].Add(GamesWithInjuryRate(team));
                 foreach (var (metric, values) in perTeamSamples[team.id])
                     values.Add(TeamSeasonValue(team, metric));
                 foreach (MonteCarloMetric metric in Enum.GetValues(typeof(MonteCarloMetric)))
@@ -533,6 +571,10 @@ public static class MonteCarloRunner
                         MonteCarloMetric.Wins => team.wins,
                         MonteCarloMetric.PlayerDaysOut => team.playerDaysOut,
                         MonteCarloMetric.PlayerGamesMissed => team.playerGamesMissed,
+                        MonteCarloMetric.InjuryEvents => team.injuryEvents,
+                        MonteCarloMetric.Players65Games => CountPlayers65(team),
+                        MonteCarloMetric.Rotation65Rate => Rotation65Rate(team),
+                        MonteCarloMetric.GamesWithInjuryRate => GamesWithInjuryRate(team),
                         _ => team.seasonTotals.Value(metric)
                     };
                     teamSeasonSamples[metric].Add(value);
@@ -615,8 +657,28 @@ public static class MonteCarloRunner
         MonteCarloMetric.Wins => team.wins,
         MonteCarloMetric.PlayerDaysOut => team.playerDaysOut,
         MonteCarloMetric.PlayerGamesMissed => team.playerGamesMissed,
+        MonteCarloMetric.InjuryEvents => team.injuryEvents,
+        MonteCarloMetric.Players65Games => CountPlayers65(team),
+        MonteCarloMetric.Rotation65Rate => Rotation65Rate(team),
+        MonteCarloMetric.GamesWithInjuryRate => GamesWithInjuryRate(team),
         _ => team.seasonTotals.Value(metric)
     };
+
+    static int CountPlayers65(TeamState team)
+        => team.gamesPlayedByPlayer.Values.Count(games => games >= 65);
+
+    static double Rotation65Rate(TeamState team)
+    {
+        int rotationPlayers = team.gamesPlayedByPlayer.Values.Count(games => games >= 20);
+        if (rotationPlayers == 0) return 0;
+        int qualified = team.gamesPlayedByPlayer.Values.Count(games => games >= 65);
+        return 100.0 * qualified / rotationPlayers;
+    }
+
+    static double GamesWithInjuryRate(TeamState team)
+        => team.seasonTotals.games > 0
+            ? 100.0 * team.gamesWithInjury / team.seasonTotals.games
+            : 0;
 
     static double PopulationStandardDeviation(IEnumerable<double> values)
     {

@@ -183,7 +183,7 @@ public class InjuryHelperTests
     [Test]
     public void MatchRiskPerGame_IsProportionalToExposure()
     {
-        // F3-06: 36 minutos = probabilidad base calibrada (20 %).
+        // calibración de lesiones: 36 minutos = probabilidad base calibrada (~2,2 %).
         Assert.That(InjuryHelper.MatchRiskPerGame(36, 90, 0),
             Is.EqualTo(InjuryHelper.INJURY_BASE_PER_GAME).Within(1e-6f));
         Assert.That(InjuryHelper.MatchRiskPerGame(18, 90, 0),
@@ -199,6 +199,18 @@ public class InjuryHelperTests
         Assert.That(r20, Is.LessThan(r36));
         Assert.That(r36, Is.LessThan(r44));
         Assert.That(r44, Is.GreaterThan(r5 * 8f), "40 minutos arriesgan mucho más que 5");
+    }
+
+    [Test]
+    public void MatchRiskPerGame_TeamSeasonEvents_StayInGameplayBand()
+    {
+        // 240 minutos de equipo × 82 partidos: la base debe producir 12–18 lesiones
+        // nuevas por equipo-temporada, no el volumen de lesiones de una plantilla NBA
+        // de 17–20 jugadores. Es la puerta de jugabilidad de la calibración de lesiones.
+        double events = 240.0 / InjuryHelper.INJURY_REFERENCE_MINUTES
+            * InjuryHelper.INJURY_BASE_PER_GAME * 82.0;
+        Assert.That(events, Is.InRange(12.0, 18.0),
+            $"La base {InjuryHelper.INJURY_BASE_PER_GAME:P2} produce {events:F1} lesiones/equipo-temporada");
     }
 
     [Test]

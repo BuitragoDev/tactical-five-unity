@@ -30,8 +30,8 @@ string markdown = report.ToMarkdown();
 ## Metodología y unidades
 
 - Cada equipo tiene una plantilla sintética estable de **15 jugadores**, ratings derivados
-  de sus 11 atributos mediante `PlayerRating`. La base OVR va de **72,08 a 82,68** con
-  `SYNTHETIC_BASE_OVR=72.08` y `SYNTHETIC_OVR_SPREAD=10.6`; la curva concentra más equipos
+  de sus 11 atributos mediante `PlayerRating`. La base OVR va de **72,08 a 81,58** con
+  `SYNTHETIC_BASE_OVR=72.08` y `SYNTHETIC_OVR_SPREAD=9.5`; la curva concentra más equipos
   en el centro-bajo. La distribución se calibró para aproximar las bandas NBA de puntos,
   victorias y lesiones, no para clonar el seed. **No son los rosters reales ni se modifican
   los ratings del juego.**
@@ -61,16 +61,17 @@ string markdown = report.ToMarkdown();
 
 ## Perfil de aceptación F3-03
 
-Perfil versionado **`NBA-2024-25-v2`** (v2 incorpora distribuciones por equipo y rangos
-individuales de F3-04; conserva las referencias de 2024-25). Para estadísticas de partido, el valor central es
+Perfil versionado **`NBA-2024-25-v3`** (v3 conserva las referencias NBA 2024-25 de
+ofensiva y victorias, y sustituye el volumen bruto de lesiones por una puerta de
+jugabilidad: 12–18 lesiones nuevas por equipo-temporada y disponibilidad para los 65 partidos). Para estadísticas de partido, el valor central es
 el promedio de liga 2024-25 de Basketball-Reference; el intervalo aceptado es ese valor
 ± la tolerancia absoluta declarada. En porcentajes la tolerancia son puntos porcentuales.
 No es un intervalo de confianza. Para las seis métricas ofensivas F3-04 se comparan,
 además, P5/P50/P95 de las medias equipo-temporada y el promedio de cada equipo contra el
-rango observado de la temporada (con tolerancia). Victorias y bajas también comparan
-P5/P50/P95 de las 30 muestras equipo-temporada con la misma interpolación lineal.
+rango observado de la temporada (con tolerancia). Victorias comparan además
+P5/P50/P95 de las 30 muestras equipo-temporada; las métricas de lesiones usan solo la media.
 
-| Métrica | Referencia 2024-25 | Tolerancia | Banda de media | Fuente/grano |
+| Métrica | Referencia / objetivo | Tolerancia | Banda de media | Fuente/grano |
 |---|---:|---:|---:|---|
 | Ritmo | 98,8 | ±1,5 | 97,3–100,3 | Basketball-Reference, posesiones/equipo-partido |
 | Puntos | 113,8 | ±3,5 | 110,3–117,3 | Basketball-Reference, puntos/equipo-partido |
@@ -82,7 +83,11 @@ P5/P50/P95 de las 30 muestras equipo-temporada con la misma interpolación linea
 | Rebotes | 44,1 | ±3,0 | 41,1–47,1 | Basketball-Reference, equipo-partido |
 | Faltas | 18,6 | ±2,0 | 16,6–20,6 | Basketball-Reference, faltas personales/equipo-partido |
 | Victorias | 41,0 | ±1,0 | 40,0–42,0 | Basketball-Reference, 30 equipos × 82 partidos; además P5 18,45 ±5 y P95 62,65 ±5 |
-| Partidos-jugador perdidos por lesión | 396,97 | ±70 | 326,97–466,97 | RotoWire/BBall Index, 30 equipos; además P5 280 ±40 y P95 514,05 ±40 |
+| Partidos-jugador perdidos por lesión | 45,0 | ±20,0 | 25,0–65,0 | Diseño del juego: disponibilidad para premios |
+| Lesiones nuevas por equipo-temporada | 15,0 | ±3,0 | 12,0–18,0 | Diseño del juego: ritmo de parte médico |
+| Jugadores con ≥65 partidos | 11,0 | ±1,5 | 9,5–12,5 | Diseño del juego: 65 partidos para premios |
+| Rotación con ≥65 partidos | 72,0 % | ±10,0 pp | 62,0–82,0 % | Diseño del juego: jugadores con ≥20 partidos |
+| Partidos del equipo con lesión nueva | 17,0 % | ±5,0 pp | 12,0–22,0 % | Diseño del juego: frecuencia percibida |
 
 Bandas del perfil para las **medias de equipo-temporada** de las métricas ofensivas
 (referencias P5/P50/P95 de los 30 equipos 2024-25, interpolación lineal):
@@ -153,11 +158,11 @@ ensancharon tolerancias. Con semilla `20261024`, 100 temporadas produjeron:
 | Métrica | Resultado | Banda | Estado |
 |---|---:|---:|---|
 | Victorias/equipo-temporada | 41,00 | 40,50–41,50 | OK |
-| Desviación típica de victorias | 14,02 | 9,13–17,13 | OK |
-| Mínimo de victorias medio | 15,80 | 8–22 | OK |
-| Máximo de victorias medio | 67,09 | 62–75 | OK |
-| Correlación Pearson OVR↔victorias | 0,928 | 0,60–0,98 | OK |
-| Partidos con OT | 5,11 % (6.286/123.000) | 3,38–6,38 % | OK |
+| Desviación típica de victorias | 14,11 | 9,13–17,13 | OK |
+| Mínimo de victorias medio | 15,66 | 8–22 | OK |
+| Máximo de victorias medio | 68,68 | 62–75 | OK |
+| Correlación Pearson OVR↔victorias | 0,943 | 0,60–0,98 | OK |
+| Partidos con OT | 5,11 % (6.287/123.000) | 3,38–6,38 % | OK |
 
 La tasa de OT necesitó una fase final acotada en el 4.º cuarto (`GameSimulator.SimQuarter`):
 cuando el **marcador acumulado** está a 1–6 puntos, se alternan hasta tres posesiones desde
@@ -167,42 +172,46 @@ directo de motor verifica que los partidos que llegan a OT estaban empatados al 
 el reglamento. El volumen de libres no se incrementa artificialmente.
 
 La compresión sintética de OVR (base 73,36, spread 8,6, media aproximada conservada en
-76,8) fue el primer ajuste de F3-05. F3-06 amplió la dispersión y el roster sintético a
-15 jugadores (`72.08`, `10.6`) para medir disponibilidad contra los mismos 30 rosters NBA;
-el gate ofensivo y el de resultados siguen aprobados con esa población. El reporte de
-F3-06 abajo contiene el resultado vigente conjunto.
+76,8) fue el primer ajuste de F3-05. La calibración de lesiones de 2026-10-27 fija el
+roster sintético en 15 jugadores (`72.08`, `9.5`) para que la cola alta de puntos siga
+dentro de la referencia NBA con menos bajas. El gate ofensivo y el de resultados siguen
+aprobados con esa población.
 
-## Calibración F3-06: lesiones y disponibilidad
+## Calibración de lesiones y disponibilidad (2026-10-27)
 
 `PlayerGamesMissed` cuenta los jugadores lesionados que faltan a cada partido (una ausencia
-por jugador-partido), no la duración teórica de la lesión. El gate de `NBA-2024-25-v2`
-compara la media **326,97–466,97** partidos-jugador por equipo-temporada y los percentiles
-P5/P50/P95 con bandas fijadas en la tabla del perfil. `PlayerDaysOut` sigue siendo
-informativo porque la referencia publica partidos, no días calendario.
+por jugador-partido), no la duración teórica de la lesión. El perfil `NBA-2024-25-v3`
+sustituye la banda NBA de man-games (396,97 ±70) por una puerta de jugabilidad:
+**45 ±20** partidos-jugador perdidos, **15 ±3** lesiones nuevas por equipo-temporada,
+**11 ±1,5** jugadores de 15 con ≥65 partidos, **72 ±10 %** de la rotación con ≥20 partidos
+que alcanza 65 y **17 ±5 %** de partidos del equipo con una lesión nueva. `PlayerDaysOut`
+sigue siendo informativo.
 
-La tasa base de `InjuryHelper.MatchRiskPerGame` es **0,20 a 36 min**; la probabilidad sigue
+La tasa base de `InjuryHelper.MatchRiskPerGame` es **0,022 a 36 min**; la probabilidad sigue
 siendo proporcional a la exposición, con ajuste por físico bajo y recaída. Al aplicar un
 episodio postpartido, `CanSustainMatchInjury` no permite que la convocatoria caiga debajo
-de cinco sanos. El reporte registra además la menor convocatoria sana observada y las
-duraciones por gravedad.
+de cinco sanos. El reporte registra además la menor convocatoria sana observada, el número
+de apariciones con minutos >0 y las duraciones por gravedad.
 
 Semilla `20261024`, 100 temporadas / 123.000 partidos:
 
 | Métrica | Resultado | Banda | Estado |
 |---|---:|---:|---|
-| Partidos-jugador perdidos, media | 392,65 | 326,97–466,97 | OK |
-| P5 por equipo-temporada | 299 | 240–320 | OK |
-| P50 por equipo-temporada | 391 | 329–429 | OK |
-| P95 por equipo-temporada | 490 | 474,05–554,05 | OK |
-| Mínimo de jugadores sanos | 5 | ≥5 | OK |
+| Partidos-jugador perdidos, media | 50,36 | 25,00–65,00 | OK |
+| Lesiones nuevas por equipo-temporada | 14,03 | 12,00–18,00 | OK |
+| Jugadores con ≥65 partidos | 10,81/15 | 9,50–12,50 | OK |
+| Rotación con ≥65 partidos | 72,39 % | 62,00–82,00 % | OK |
+| Partidos con lesión nueva | 15,78 % | 12,00–22,00 % | OK |
+| Mínimo de jugadores sanos | 8 | ≥5 | OK |
 
 | Gravedad | Episodios | Media observada | Media catálogo ponderada | Rango del catálogo |
 |---|---:|---:|---:|---:|
-| Leve | 137.968 | 2,57 días | 2,57 días | 1–7 |
-| Moderada | 150.200 | 9,60 días | 9,59 días | 3–21 |
-| Grave | 32.789 | 29,69 días | 29,78 días | 14–75 |
-| Crítica | 3.329 | 122,39 días | 123,60 días | 42–300 |
+| Leve | 17.816 | 2,57 días | 2,57 días | 1–7 |
+| Moderada | 19.605 | 9,62 días | 9,59 días | 3–21 |
+| Grave | 4.242 | 29,81 días | 29,78 días | 14–75 |
+| Crítica | 428 | 130,86 días | 123,60 días | 42–300 |
 
 En la misma ejecución pasan todos los gates anteriores: F3-04 ofensivo y global, F3-05
-(W=41,00; SD=14,52; mínimos=17,10; máximos=68,26; r=0,957; OT=5,01 %) y F3-06. Las
-tolerancias del perfil no se ampliaron.
+(W=41,00; SD=14,11; mínimos=15,66; máximos=68,68; r=0,943; OT=5,11 %). Las tolerancias
+del perfil no se ampliaron; la única banda sustituida es la de lesiones, por una decisión
+explícita de jugabilidad (65 partidos para premios).

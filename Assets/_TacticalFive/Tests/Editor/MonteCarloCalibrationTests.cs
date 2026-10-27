@@ -38,12 +38,16 @@ public class MonteCarloCalibrationTests
     [Test]
     public void Perfil2024_25_CubreLasMetricasConUnidadComparableYFuente()
     {
-        Assert.That(MonteCarloCalibrationProfile.VERSION, Is.EqualTo("NBA-2024-25-v2"));
-        Assert.That(MonteCarloCalibrationProfile.Targets.Count, Is.EqualTo(11));
+        Assert.That(MonteCarloCalibrationProfile.VERSION, Is.EqualTo("NBA-2024-25-v3"));
+        Assert.That(MonteCarloCalibrationProfile.Targets.Count, Is.EqualTo(15));
         Assert.That(MonteCarloCalibrationProfile.Targets.All(t => !string.IsNullOrWhiteSpace(t.source)), Is.True);
         Assert.That(MonteCarloCalibrationProfile.Targets.All(t => t.meanTolerance > 0), Is.True);
         Assert.That(MonteCarloCalibrationProfile.Targets.Any(t => t.metric == MonteCarloMetric.PlayerGamesMissed),
-            Is.True, "la métrica de lesiones se compara en partidos-jugador perdidos, unidad de la fuente");
+            Is.True, "la disponibilidad se mide en partidos-jugador perdidos");
+        Assert.That(MonteCarloCalibrationProfile.Targets.Any(t => t.metric == MonteCarloMetric.InjuryEvents),
+            Is.True, "la frecuencia de lesiones es una puerta propia");
+        Assert.That(MonteCarloCalibrationProfile.Targets.Any(t => t.metric == MonteCarloMetric.Players65Games),
+            Is.True, "la disponibilidad para premios es una puerta propia");
     }
 
     [Test]

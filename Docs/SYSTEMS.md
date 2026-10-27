@@ -145,7 +145,7 @@
 
 - **Files:** `InjuryCatalog` (27 types, weights 60→1, days 1→300), `InjuryHelper`, `GameSimulator.CheckInjuries` (postgame), daily recovery batch (background thread).
 - **Fatigue:** `fisico` (default 99) reduced `round(minutes*0.30)` per game (×1.5 on real back-to-back), recovered +8/day **only on rest days** (teams without a game that day; background batch reads `game_day == current_game_day`).
-- **Injury risk (F3-06):** base 0.20 per player at 36 minutes, proportional to exposure; ×`(1+(30−fisico)*0.15)` when `fisico<30`, plus relapse risk. Zero minutes means zero chance. A new postgame injury cannot leave the simulated roster below five healthy players; injured players are excluded from play, and the recovery/news flow records the episode.
+- **Injury risk (F3-06):** base 0.022 per player at 36 minutes, proportional to exposure; ×`(1+(30−fisico)*0.15)` when `fisico<30`, plus relapse risk. Zero minutes means zero chance. A new postgame injury cannot leave the simulated roster below five healthy players; injured players are excluded from play, and the recovery/news flow records the episode.
 - **Load management:** `TF_LoadMgmt_Enabled` + back-to-back detection → modal to rest up to 2 tired players (`DashboardController.Modals.cs`, `ShowLoadManagementModal`).
 
 ## S13. News & messages

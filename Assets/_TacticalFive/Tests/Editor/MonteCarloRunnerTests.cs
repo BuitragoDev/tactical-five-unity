@@ -22,6 +22,10 @@ public class MonteCarloRunnerTests
         Assert.That(report.metrics[MonteCarloMetric.Wins].samples, Is.EqualTo(8));
         Assert.That(report.metrics[MonteCarloMetric.PlayerDaysOut].samples, Is.EqualTo(8));
         Assert.That(report.metrics[MonteCarloMetric.PlayerGamesMissed].samples, Is.EqualTo(8));
+        Assert.That(report.metrics[MonteCarloMetric.InjuryEvents].samples, Is.EqualTo(8));
+        Assert.That(report.metrics[MonteCarloMetric.Players65Games].samples, Is.EqualTo(8));
+        Assert.That(report.metrics[MonteCarloMetric.Rotation65Rate].samples, Is.EqualTo(8));
+        Assert.That(report.metrics[MonteCarloMetric.GamesWithInjuryRate].samples, Is.EqualTo(8));
         Assert.That(report.teamSeasonMetrics[MonteCarloMetric.Points].samples, Is.EqualTo(8));
         Assert.That(report.teamSeasonMetrics[MonteCarloMetric.ThreePointPercent].samples, Is.EqualTo(8));
         Assert.That(report.metrics.ContainsKey(MonteCarloMetric.FieldGoalPercent), Is.True);
@@ -102,6 +106,14 @@ public class MonteCarloRunnerTests
         TestContext.WriteLine($"Bajas por equipo-temporada: media={gamesMissed.mean:F2}, "
             + $"P5={gamesMissed.p5:F2}, P50={gamesMissed.p50:F2}, P95={gamesMissed.p95:F2}; "
             + $"mínimo roster sano={report.minimumHealthyPlayers}");
+        var injuryEvents = report.teamSeasonMetrics[MonteCarloMetric.InjuryEvents];
+        var players65 = report.teamSeasonMetrics[MonteCarloMetric.Players65Games];
+        var rotation65 = report.teamSeasonMetrics[MonteCarloMetric.Rotation65Rate];
+        var injuryGameRate = report.teamSeasonMetrics[MonteCarloMetric.GamesWithInjuryRate];
+        TestContext.WriteLine($"Lesiones: {injuryEvents.mean:F2}/equipo-temporada; "
+            + $"jugadores con ≥65 partidos={players65.mean:F2}/15; "
+            + $"rotación con ≥65={rotation65.mean:F2}%; "
+            + $"partidos con lesión nueva={injuryGameRate.mean:F2}%");
         TestContext.WriteLine($"Mínimo roster sano={report.minimumHealthyPlayers}; "
             + string.Join(" · ", report.injuryDurations.OrderBy(kv => kv.Key)
                 .Select(kv => $"{InjuryCatalog.SeverityLabel(kv.Key)} {kv.Value.events} episodios, "
@@ -136,7 +148,7 @@ public class MonteCarloRunnerTests
 
         var calibrationFailures = MonteCarloCalibrationGate.Evaluate(report);
         Assert.That(calibrationFailures, Is.Empty,
-            "F3-04/F3-06: calibración ofensiva y partidos-jugador perdidos deben quedar dentro del perfil. "
+            "F3-04/B47: calibración ofensiva y disponibilidad por lesiones deben quedar dentro del perfil. "
             + string.Join("; ", calibrationFailures));
     }
 }
